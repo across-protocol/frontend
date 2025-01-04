@@ -4,13 +4,15 @@ import {
   getGasMarkup,
   getLogger,
   getMaxFeePerGas,
+  getProvider,
   getRelayerFeeCalculatorQueries,
   handleErrorCondition,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import { L2Provider } from "@eth-optimism/sdk/dist/interfaces/l2-provider";
 
 import mainnetChains from "../src/data/chains_1.json";
 import {
@@ -51,26 +53,46 @@ const handler = async (
       })
     );
     const gasCosts = await Promise.all(
-      Object.entries(chainIdsWithToken).map(([chainId, tokenAddress], i) => {
-        const depositArgs = {
-          amount: ethers.BigNumber.from(100),
-          inputToken: sdk.constants.ZERO_ADDRESS,
-          outputToken: tokenAddress,
-          recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-          originChainId: 0, // Shouldn't matter for simulation
-          destinationChainId: Number(chainId),
-        };
-        const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
-          Number(chainId)
-        );
-        return relayerFeeCalculatorQueries.getGasCosts(
-          buildDepositForSimulation(depositArgs),
-          undefined,
-          {
-            gasPrice: gasPrices[i].maxFeePerGas,
+      Object.entries(chainIdsWithToken).map(
+        async ([chainId, tokenAddress], i) => {
+          const depositArgs = {
+            amount: ethers.BigNumber.from(100),
+            inputToken: sdk.constants.ZERO_ADDRESS,
+            outputToken: tokenAddress,
+            recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+            originChainId: 0, // Shouldn't matter for simulation
+            destinationChainId: Number(chainId),
+          };
+          const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+            Number(chainId)
+          );
+          const { nativeGasCost, tokenGasCost } =
+            await relayerFeeCalculatorQueries.getGasCosts(
+              buildDepositForSimulation(depositArgs),
+              undefined,
+              {
+                gasPrice: gasPrices[i].maxFeePerGas,
+              }
+            );
+          let opStackL1GasCost: ethers.BigNumber | undefined = undefined;
+          if (sdk.utils.chainIsOPStack(Number(chainId))) {
+            const provider = relayerFeeCalculatorQueries.provider;
+            const unsignedTx = await sdk.utils.populateV3Relay(
+              relayerFeeCalculatorQueries.spokePool,
+              buildDepositForSimulation(depositArgs),
+              relayerFeeCalculatorQueries.simulatedRelayerAddress
+            );
+            opStackL1GasCost = await (
+              provider as L2Provider<providers.Provider>
+            ).estimateL1GasCost(unsignedTx);
           }
-        );
-      })
+          return {
+            nativeGasCost,
+            tokenGasCost,
+            opStackL1GasCost,
+          };
+        }
+      )
     );
     const responseJson = {
       tokenSymbol,
@@ -90,6 +112,7 @@ const handler = async (
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
             tokenGasCost: gasCosts[i].tokenGasCost.toString(),
+            opStackL1GasCost: gasCosts[i]?.opStackL1GasCost?.toString(),
           },
         ])
       ),
