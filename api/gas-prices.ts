@@ -77,9 +77,9 @@ const handler = async (
         chainId,
         {
           gasPrice: gasPrices[i].toString(),
-          baseFeeMultiplier: getGasMarkup(chainId).div(
-            sdk.utils.fixedPointAdjustment
-          ),
+          baseFeeMultiplier: getGasMarkup(chainId)
+            .div(sdk.utils.fixedPointAdjustment)
+            .toNumber(),
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
           tokenGasCost: gasCosts[i].tokenGasCost.toString(),
         },
