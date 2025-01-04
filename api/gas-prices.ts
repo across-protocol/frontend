@@ -72,6 +72,7 @@ const handler = async (
       })
     );
     const responseJson = {
+      tokenSymbol,
       ...Object.fromEntries(
         Object.entries(chainIdsWithToken).map(([chainId], i) => [
           chainId,
@@ -88,7 +89,6 @@ const handler = async (
           },
         ])
       ),
-      tokenSymbol,
     };
 
     logger.debug({
