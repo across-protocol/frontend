@@ -291,7 +291,7 @@ export function encodeSwapAndBridgeWithAuthCalldata(args: {
   validBefore: number;
   nonce: string;
   receiveWithAuthSignature: string;
-  depositDataSignature: string;
+  swapAndDepositDataSignature: string;
 }) {
   return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
     "swapAndBridgeWithAuthorization",
@@ -302,7 +302,7 @@ export function encodeSwapAndBridgeWithAuthCalldata(args: {
       args.validBefore,
       args.nonce,
       args.receiveWithAuthSignature,
-      args.depositDataSignature,
+      args.swapAndDepositDataSignature,
     ]
   );
 }

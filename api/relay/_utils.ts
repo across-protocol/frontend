@@ -14,7 +14,7 @@ import {
 } from "../_spoke-pool-periphery";
 import { RelayRequest } from "./_types";
 import { redisCache } from "../_cache";
-import { getTransferWithAuthTypedData } from "../_transfer-with-auth";
+import { getReceiveWithAuthTypedData } from "../_transfer-with-auth";
 
 export const GAS_SPONSOR_ADDRESS =
   process.env.GAS_SPONSOR_ADDRESS ??
@@ -138,8 +138,8 @@ export async function verifySignatures({
   let getDepositTypedDataPromise: ReturnType<
     typeof getDepositTypedData | typeof getSwapAndDepositTypedData
   >;
-  let getTransferWithAuthTypedDataPromise:
-    | ReturnType<typeof getTransferWithAuthTypedData>
+  let getReceiveWithAuthTypedDataPromise:
+    | ReturnType<typeof getReceiveWithAuthTypedData>
     | undefined;
 
   if (methodName === "depositWithPermit") {
@@ -185,7 +185,7 @@ export async function verifySignatures({
       depositData,
     } = args;
     signatureOwner = _signatureOwner;
-    getTransferWithAuthTypedDataPromise = getTransferWithAuthTypedData({
+    getReceiveWithAuthTypedDataPromise = getReceiveWithAuthTypedData({
       tokenAddress: depositData.baseDepositData.inputToken,
       chainId,
       ownerAddress: signatureOwner,
@@ -208,7 +208,7 @@ export async function verifySignatures({
       swapAndDepositData,
     } = args;
     signatureOwner = _signatureOwner;
-    getTransferWithAuthTypedDataPromise = getTransferWithAuthTypedData({
+    getReceiveWithAuthTypedDataPromise = getReceiveWithAuthTypedData({
       tokenAddress: swapAndDepositData.swapToken,
       chainId,
       ownerAddress: signatureOwner,
@@ -260,9 +260,9 @@ export async function verifySignatures({
         param: "signatures.deposit",
       });
     }
-  } else if (getTransferWithAuthTypedDataPromise) {
+  } else if (getReceiveWithAuthTypedDataPromise) {
     const [authTypedData, depositTypedData] = await Promise.all([
-      getTransferWithAuthTypedDataPromise,
+      getReceiveWithAuthTypedDataPromise,
       getDepositTypedDataPromise,
     ]);
 
@@ -335,7 +335,7 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       validBefore: Number(request.methodNameAndArgs.args.validBefore),
       nonce: request.methodNameAndArgs.args.nonce,
       receiveWithAuthSignature: request.signatures.permit,
-      depositDataSignature: request.signatures.deposit,
+      swapAndDepositDataSignature: request.signatures.deposit,
     });
   }
   // TODO: Add cases for `withPermit2`

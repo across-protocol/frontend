@@ -23,9 +23,9 @@ async function swapWithAuth() {
 
     // sign permit + deposit
     const permitSig = await wallet._signTypedData(
-      swapQuote.eip712.transferWithAuthorization.domain,
-      swapQuote.eip712.transferWithAuthorization.types,
-      swapQuote.eip712.transferWithAuthorization.message
+      swapQuote.eip712.receiveWithAuthorization.domain,
+      swapQuote.eip712.receiveWithAuthorization.types,
+      swapQuote.eip712.receiveWithAuthorization.message
     );
     console.log("Signed permit:", permitSig);
 

@@ -3,7 +3,7 @@ import {
   DepositEntryPointContract,
   OriginSwapEntryPointContract,
 } from "../../_dexes/types";
-import { getTransferWithAuthTypedData } from "../../_transfer-with-auth";
+import { getReceiveWithAuthTypedData } from "../../_transfer-with-auth";
 import {
   getDepositTypedData,
   getSwapAndDepositTypedData,
@@ -138,7 +138,7 @@ export async function buildAuthTxPayload({
   }
 
   const [authTypedData, depositTypedData] = await Promise.all([
-    getTransferWithAuthTypedData({
+    getReceiveWithAuthTypedData({
       tokenAddress:
         originSwapQuote?.tokenIn.address || bridgeQuote.inputToken.address,
       chainId: originChainId,
@@ -154,7 +154,7 @@ export async function buildAuthTxPayload({
 
   return {
     eip712: {
-      transferWithAuthorization: authTypedData.eip712,
+      receiveWithAuthorization: authTypedData.eip712,
       deposit: depositTypedData.eip712,
     },
 

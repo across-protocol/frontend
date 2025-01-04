@@ -25,7 +25,7 @@ export function hashDomainSeparator(params: {
   );
 }
 
-export async function getTransferWithAuthTypedData(params: {
+export async function getReceiveWithAuthTypedData(params: {
   tokenAddress: string;
   chainId: number;
   ownerAddress: string;
@@ -95,7 +95,7 @@ export async function getTransferWithAuthTypedData(params: {
     domainSeparator,
     eip712: {
       types: {
-        TransferWithAuthorization: [
+        ReceiveWithAuthorization: [
           { name: "from", type: "address" },
           { name: "to", type: "address" },
           { name: "value", type: "uint256" },
@@ -110,7 +110,7 @@ export async function getTransferWithAuthTypedData(params: {
         chainId: params.chainId,
         verifyingContract: params.tokenAddress,
       },
-      primaryType: "TransferWithAuthorization",
+      primaryType: "ReceiveWithAuthorization",
       message: {
         from: params.ownerAddress,
         to: params.spenderAddress,
