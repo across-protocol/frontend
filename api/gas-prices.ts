@@ -4,13 +4,12 @@ import {
   getGasMarkup,
   getLogger,
   getMaxFeePerGas,
-  getProvider,
   getRelayerFeeCalculatorQueries,
   handleErrorCondition,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
-import { ethers, providers } from "ethers";
+import { ethers, providers, VoidSigner } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { L2Provider } from "@eth-optimism/sdk/dist/interfaces/l2-provider";
 
@@ -47,6 +46,7 @@ const handler = async (
         })
         .filter(([, tokenAddress]) => tokenAddress !== undefined)
     );
+    // @dev getMaxFeePerGas will return the gas price after including the baseFeeMultiplier.
     const gasPrices = await Promise.all(
       Object.keys(chainIdsWithToken).map((chainId) => {
         return getMaxFeePerGas(Number(chainId));
@@ -63,25 +63,39 @@ const handler = async (
             originChainId: 0, // Shouldn't matter for simulation
             destinationChainId: Number(chainId),
           };
+          const deposit = buildDepositForSimulation(depositArgs);
           const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
             Number(chainId)
           );
           const { nativeGasCost, tokenGasCost } =
             await relayerFeeCalculatorQueries.getGasCosts(
-              buildDepositForSimulation(depositArgs),
-              undefined,
+              deposit,
+              relayerFeeCalculatorQueries.simulatedRelayerAddress,
               {
+                // @dev Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
+                // the scaled gas price,
+                // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
                 gasPrice: gasPrices[i].maxFeePerGas,
               }
             );
+          // OPStack chains factor in the L1 gas cost of including the L2 transaction in an L1 rollup batch
+          // into the total gas cost of the L2 transaction.
           let opStackL1GasCost: ethers.BigNumber | undefined = undefined;
           if (sdk.utils.chainIsOPStack(Number(chainId))) {
             const provider = relayerFeeCalculatorQueries.provider;
-            const unsignedTx = await sdk.utils.populateV3Relay(
+            const _unsignedTx = await sdk.utils.populateV3Relay(
               relayerFeeCalculatorQueries.spokePool,
-              buildDepositForSimulation(depositArgs),
+              deposit,
               relayerFeeCalculatorQueries.simulatedRelayerAddress
             );
+            const voidSigner = new VoidSigner(
+              relayerFeeCalculatorQueries.simulatedRelayerAddress,
+              relayerFeeCalculatorQueries.provider
+            );
+            const unsignedTx = await voidSigner.populateTransaction({
+              ..._unsignedTx,
+              gasLimit: nativeGasCost, // prevents additional gas estimation call
+            });
             opStackL1GasCost = await (
               provider as L2Provider<providers.Provider>
             ).estimateL1GasCost(unsignedTx);
