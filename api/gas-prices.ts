@@ -77,8 +77,13 @@ const handler = async (
         chainId,
         {
           gasPrice: gasPrices[i].maxFeePerGas.toString(),
-          priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
-          baseFeeMultiplier: getGasMarkup(chainId).toString(),
+          gasPriceComponents: {
+            maxFeePerGas: gasPrices[i].maxFeePerGas
+              .sub(gasPrices[i].maxPriorityFeePerGas)
+              .toString(),
+            priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
+            baseFeeMultiplier: ethers.utils.formatEther(getGasMarkup(chainId)),
+          },
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
           tokenGasCost: gasCosts[i].tokenGasCost.toString(),
         },
