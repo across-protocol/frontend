@@ -124,7 +124,10 @@ const handler = async (
                 .toString(),
               priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
               baseFeeMultiplier: ethers.utils.formatEther(
-                getGasMarkup(chainId)
+                getGasMarkup(chainId).baseFeeMarkup
+              ),
+              priorityFeeMultiplier: ethers.utils.formatEther(
+                getGasMarkup(chainId).priorityFeeMarkup
               ),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),

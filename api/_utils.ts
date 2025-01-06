@@ -85,14 +85,19 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  GAS_MARKUP,
+  GAS_MARKUP, // To be deprecated and replaced by BASE_FEE_MARKUP and PRIORITY_FEE_MARKUP
+  BASE_FEE_MARKUP,
+  PRIORITY_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
 } = process.env;
 
-export const gasMarkup: {
+export const baseFeeMarkup: {
   [chainId: string]: number;
-} = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
+} = JSON.parse(BASE_FEE_MARKUP || GAS_MARKUP || "{}");
+export const priorityFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
@@ -588,21 +593,47 @@ export const getHubPoolClient = () => {
   );
 };
 
-export const getGasMarkup = (chainId: string | number): BigNumber => {
-  // If GAS_MARKUP is defined for chain, then use it.
-  if (typeof gasMarkup[chainId] === "number") {
-    return utils.parseEther((1 + gasMarkup[chainId]).toString());
+export const getGasMarkup = (
+  chainId: string | number
+): { baseFeeMarkup: BigNumber; priorityFeeMarkup: BigNumber } => {
+  let _baseFeeMarkup: BigNumber | undefined;
+  let _priorityFeeMarkup: BigNumber | undefined;
+  if (typeof baseFeeMarkup[chainId] === "number") {
+    _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
+  }
+  if (typeof priorityFeeMarkup[chainId] === "number") {
+    _priorityFeeMarkup = utils.parseEther(
+      (1 + priorityFeeMarkup[chainId]).toString()
+    );
   }
 
   // Otherwise, use default gas markup (or optimism's for OP stack).
-  return utils.parseEther(
-    (
-      1 +
-      (sdk.utils.chainIsOPStack(Number(chainId))
-        ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-        : DEFAULT_GAS_MARKUP)
-    ).toString()
-  );
+  if (_baseFeeMarkup === undefined) {
+    _baseFeeMarkup = utils.parseEther(
+      (
+        1 +
+        (sdk.utils.chainIsOPStack(Number(chainId))
+          ? baseFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+          : DEFAULT_GAS_MARKUP)
+      ).toString()
+    );
+  }
+  if (_priorityFeeMarkup === undefined) {
+    _priorityFeeMarkup = utils.parseEther(
+      (
+        1 +
+        (sdk.utils.chainIsOPStack(Number(chainId))
+          ? priorityFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+          : DEFAULT_GAS_MARKUP)
+      ).toString()
+    );
+  }
+
+  // Otherwise, use default gas markup (or optimism's for OP stack).
+  return {
+    baseFeeMarkup: _baseFeeMarkup,
+    priorityFeeMarkup: _priorityFeeMarkup,
+  };
 };
 
 /**
@@ -1973,9 +2004,14 @@ export function latestGasPriceCache(chainId: number) {
 export function getMaxFeePerGas(
   chainId: number
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  const {
+    baseFeeMarkup: baseFeeMultiplier,
+    priorityFeeMarkup: priorityFeeMultiplier,
+  } = getGasMarkup(chainId);
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
-    baseFeeMultiplier: getGasMarkup(chainId),
+    baseFeeMultiplier,
+    priorityFeeMultiplier,
   });
 }
 
