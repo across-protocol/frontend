@@ -26,7 +26,7 @@ export async function getPermitTypedData(params: {
   deadline: number;
   eip712DomainVersion?: number;
 }) {
-  const { domainSeparator, eip712DomainVersion, nonce } =
+  const { name, domainSeparator, eip712DomainVersion, nonce } =
     await getPermitArgsFromContract(params);
 
   return {
@@ -117,13 +117,13 @@ export async function getPermitArgsFromContract(params: {
     throw new PermitNotSupportedError(params.tokenAddress, error);
   }
 
-  const name = nameResult.value;
+  const name: string = nameResult.value;
   const versionFromContract =
     versionFromContractResult.status === "fulfilled"
       ? versionFromContractResult.value
       : undefined;
-  const nonce = nonceResult.value;
-  const domainSeparator = domainSeparatorResult.value;
+  const nonce: BigNumberish = nonceResult.value;
+  const domainSeparator: string = domainSeparatorResult.value;
 
   const eip712DomainVersion = [1, 2, "1", "2"].includes(versionFromContract)
     ? Number(versionFromContract)
@@ -149,6 +149,7 @@ export async function getPermitArgsFromContract(params: {
   }
 
   return {
+    name,
     domainSeparator,
     eip712DomainVersion,
     nonce,

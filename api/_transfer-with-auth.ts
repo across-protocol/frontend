@@ -55,7 +55,7 @@ export async function getReceiveWithAuthTypedData(params: {
   validAfter?: number;
   eip712DomainVersion?: number;
 }) {
-  const { domainSeparator, eip712DomainVersion } =
+  const { name, domainSeparator, eip712DomainVersion } =
     await getReceiveWithAuthArgsFromContract(params);
 
   return {
@@ -126,12 +126,12 @@ export async function getReceiveWithAuthArgsFromContract(params: {
     throw new TransferWithAuthNotSupportedError(params.tokenAddress, error);
   }
 
-  const name = nameResult.value;
+  const name: string = nameResult.value;
   const versionFromContract =
     versionFromContractResult.status === "fulfilled"
       ? versionFromContractResult.value
       : undefined;
-  const domainSeparator = domainSeparatorResult.value;
+  const domainSeparator: string = domainSeparatorResult.value;
 
   const eip712DomainVersion = [1, 2, "1", "2"].includes(versionFromContract)
     ? Number(versionFromContract)
@@ -149,6 +149,7 @@ export async function getReceiveWithAuthArgsFromContract(params: {
   }
 
   return {
+    name,
     domainSeparator,
     eip712DomainVersion,
   };
