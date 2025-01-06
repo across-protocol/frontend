@@ -136,9 +136,11 @@ const handler = async (
               priorityFeeMultiplier: ethers.utils.formatEther(
                 getGasMarkup(chainId).priorityFeeMarkup
               ),
-              opStackL1GasCostMultiplier: ethers.utils.formatEther(
-                getGasMarkup(chainId).baseFeeMarkup
-              ),
+              opStackL1GasCostMultiplier: sdk.utils.chainIsOPStack(
+                Number(chainId)
+              )
+                ? ethers.utils.formatEther(getGasMarkup(chainId).baseFeeMarkup)
+                : undefined,
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
             tokenGasCost: gasCosts[i].tokenGasCost.toString(),
