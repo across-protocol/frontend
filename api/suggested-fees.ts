@@ -5,6 +5,7 @@ import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
+  CHAIN_IDs,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -274,15 +275,30 @@ const handler = async (
         ));
     }
 
+    // TODO: Remove after campaign is complete
+    /**
+     * Override estimated fill time for ZK Sync deposits.
+     * @todo Remove after campaign is complete
+     * @see Change in {@link ./limits.ts}
+     */
+    const estimatedTimingOverride =
+      computedOriginChainId === CHAIN_IDs.MAINNET &&
+      destinationChainId === CHAIN_IDs.ZK_SYNC &&
+      amount.gte(limits.maxDepositShortDelay)
+        ? 9600
+        : undefined;
+
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(maxDepositInstant)
-        ? resolveRebalanceTiming(String(destinationChainId))
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec:
+        estimatedTimingOverride ??
+        (amount.gte(maxDepositInstant)
+          ? resolveRebalanceTiming(String(destinationChainId))
+          : resolveTiming(
+              String(computedOriginChainId),
+              String(destinationChainId),
+              inputToken.symbol,
+              amountInUsd
+            )),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
