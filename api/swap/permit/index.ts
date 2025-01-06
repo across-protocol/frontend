@@ -21,7 +21,7 @@ export const PermitSwapQueryParamsSchema = type({
 
 export type PermitSwapQueryParams = Infer<typeof PermitSwapQueryParamsSchema>;
 
-const DEFAULT_PERMIT_DEADLINE =
+export const DEFAULT_PERMIT_DEADLINE =
   Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365; // 1 year
 
 // For permit-based flows, we have to use the `SpokePoolPeriphery` as an entry point
