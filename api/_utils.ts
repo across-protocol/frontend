@@ -1823,7 +1823,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
-  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+  return minBN(bufferMultiplier, multiplierCap);
 }
 
 export function getChainInputTokenMaxBalanceInUsd(
