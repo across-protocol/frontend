@@ -70,6 +70,9 @@ const handler = async (
           const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
             Number(chainId)
           );
+          const opStackL1GasCostMultiplier = getGasMarkup(
+            Number(chainId)
+          ).baseFeeMarkup;
           const { nativeGasCost, tokenGasCost } =
             await relayerFeeCalculatorQueries.getGasCosts(
               deposit,
@@ -79,6 +82,7 @@ const handler = async (
                 // the scaled gas price,
                 // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
                 gasPrice: gasPrices[i].maxFeePerGas,
+                opStackL1GasCostMultiplier,
               }
             );
           // OPStack chains factor in the L1 gas cost of including the L2 transaction in an L1 rollup batch
@@ -102,6 +106,9 @@ const handler = async (
             opStackL1GasCost = await (
               provider as L2Provider<providers.Provider>
             ).estimateL1GasCost(unsignedTx);
+            opStackL1GasCost = opStackL1GasCostMultiplier
+              .mul(opStackL1GasCost)
+              .div(sdk.utils.fixedPointAdjustment);
           }
           return {
             nativeGasCost,
@@ -128,6 +135,9 @@ const handler = async (
               ),
               priorityFeeMultiplier: ethers.utils.formatEther(
                 getGasMarkup(chainId).priorityFeeMarkup
+              ),
+              opStackL1GasCostMultiplier: ethers.utils.formatEther(
+                getGasMarkup(chainId).baseFeeMarkup
               ),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),

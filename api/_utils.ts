@@ -711,7 +711,8 @@ export const getRelayerFeeDetails = async (
   tokenPrice: number,
   relayerAddress: string,
   gasPrice: sdk.utils.BigNumberish,
-  gasUnits?: sdk.utils.BigNumberish
+  gasUnits?: sdk.utils.BigNumberish,
+  tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const {
     inputToken,
@@ -740,7 +741,8 @@ export const getRelayerFeeDetails = async (
     relayerAddress,
     tokenPrice,
     gasPrice,
-    gasUnits
+    gasUnits,
+    tokenGasCost
   );
 };
 
@@ -1970,15 +1972,32 @@ export function getCachedFillGasUsage(
     );
     // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
     // we'll compute the gas price separately.
-    const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
+    const gasCosts = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
-      overrides?.relayerAddress
+      overrides?.relayerAddress,
+      {
+        // Scale the op stack L1 gas cost component by the base fee multiplier.
+        // Consider adding a new environment variable OP_STACK_L1_GAS_COST_MARKUPif we want finer-grained control.
+        opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
+          .baseFeeMarkup,
+      }
     );
-    return nativeGasCost;
+    return {
+      nativeGasCost: gasCosts.nativeGasCost,
+      tokenGasCost: gasCosts.tokenGasCost,
+    };
   };
 
-  return getCachedValue(cacheKey, ttl, fetchFn, (bnFromCache) =>
-    BigNumber.from(bnFromCache)
+  return getCachedValue(
+    cacheKey,
+    ttl,
+    fetchFn,
+    (gasCosts: { nativeGasCost: BigNumber; tokenGasCost: BigNumber }) => {
+      return {
+        nativeGasCost: BigNumber.from(gasCosts.nativeGasCost),
+        tokenGasCost: BigNumber.from(gasCosts.tokenGasCost),
+      };
+    }
   );
 }
 
