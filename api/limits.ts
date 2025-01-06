@@ -273,7 +273,10 @@ const handler = async (
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
-      liquidReserves = maxBN(liquidReserves.sub(lpCushion), ethers.BigNumber.from(0)) ;
+      liquidReserves = maxBN(
+        liquidReserves.sub(lpCushion),
+        ethers.BigNumber.from(0)
+      );
 
       maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
