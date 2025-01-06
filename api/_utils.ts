@@ -659,12 +659,13 @@ export const getRelayerFeeCalculatorQueries = (
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
  * @param recipientAddress The address that will receive the transferred funds
- * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @param message An optional message to include in the transfer
- * @param relayerAddress An optional relayer address to use for the transfer
- * @param gasUnits An optional gas unit to use for the transfer
- * @param gasPrice An optional gas price to use for the transfer
- * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
+ * @param tokenPrice Price of input token in gas token units, used by SDK to compute gas fee percentages.
+ * @param relayerAddress Relayer address that SDK will use to simulate the fill transaction for gas cost estimation if
+ * the gasUnits is not defined.
+ * @param gasPrice Gas price that SDK will use to compute gas fee percentages.
+ * @param [gasUnits] An optional gas cost to use for the transfer. If not provided, the SDK will recompute this.
+ * @returns Relayer fee components for a fill of the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
   deposit: {
@@ -676,10 +677,10 @@ export const getRelayerFeeDetails = async (
     recipientAddress: string;
     message?: string;
   },
-  tokenPrice?: number,
-  relayerAddress?: string,
-  gasUnits?: sdk.utils.BigNumberish,
-  gasPrice?: sdk.utils.BigNumberish
+  tokenPrice: number,
+  relayerAddress: string,
+  gasPrice: sdk.utils.BigNumberish,
+  gasUnits?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const {
     inputToken,

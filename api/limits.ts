@@ -193,10 +193,8 @@ const handler = async (
         depositArgs,
         tokenPriceNative,
         relayer,
-        gasUnits,
-        // !!gas price should be defined and passed into getRelayerFeeDetails so we don't recompute using default
-        // settings in the GasPriceOracle
-        gasPrice
+        gasPrice,
+        gasUnits
       ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
