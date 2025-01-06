@@ -169,7 +169,7 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
-export async function fetchSwapQuote(slug: "approval" | "permit") {
+export async function fetchSwapQuote<T>(slug: "approval" | "permit" | "auth") {
   const filterString = process.argv[2];
   const testCases = [...MIN_OUTPUT_CASES, ...EXACT_OUTPUT_CASES];
   const filteredTestCases = filterTestCases(testCases, filterString);
@@ -180,6 +180,6 @@ export async function fetchSwapQuote(slug: "approval" | "permit") {
       params: testCase.params,
     });
     console.log(JSON.stringify(response.data, null, 2));
-    return response.data;
+    return response.data as T;
   }
 }

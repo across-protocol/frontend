@@ -2,14 +2,14 @@ import { Wallet } from "ethers";
 
 import { getProvider } from "../../api/_utils";
 import { fetchSwapQuote, SWAP_API_BASE_URL } from "./_swap-utils";
-import { buildPermitTxPayload } from "../../api/swap/permit/_utils";
+import { buildAuthTxPayload } from "../../api/swap/auth/_utils";
 import axios from "axios";
 
-type PermitPayload = Awaited<ReturnType<typeof buildPermitTxPayload>>;
+type AuthPayload = Awaited<ReturnType<typeof buildAuthTxPayload>>;
 
-async function swapWithPermit() {
-  console.log("Swapping with permit...");
-  const swapQuote = await fetchSwapQuote<PermitPayload>("permit");
+async function swapWithAuth() {
+  console.log("Swapping with auth...");
+  const swapQuote = await fetchSwapQuote<AuthPayload>("auth");
 
   if (!swapQuote) {
     console.log("No Quote");
@@ -23,9 +23,9 @@ async function swapWithPermit() {
 
     // sign permit + deposit
     const permitSig = await wallet._signTypedData(
-      swapQuote.eip712.permit.domain,
-      swapQuote.eip712.permit.types,
-      swapQuote.eip712.permit.message
+      swapQuote.eip712.receiveWithAuthorization.domain,
+      swapQuote.eip712.receiveWithAuthorization.types,
+      swapQuote.eip712.receiveWithAuthorization.message
     );
     console.log("Signed permit:", permitSig);
 
@@ -59,7 +59,7 @@ async function swapWithPermit() {
   }
 }
 
-swapWithPermit()
+swapWithAuth()
   .then(() => console.log("Done"))
   .catch((e) => {
     console.error(e);

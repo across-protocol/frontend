@@ -1,17 +1,20 @@
 import { assert, Infer, type } from "superstruct";
 import { utils } from "ethers";
 
-import { hexString, positiveIntStr, validAddress } from "../_utils";
+import { bytes32, hexString, positiveIntStr, validAddress } from "../_utils";
 import { getPermitTypedData } from "../_permit";
 import { InvalidParamError } from "../_errors";
 import {
+  encodeDepositWithAuthCalldata,
   encodeDepositWithPermitCalldata,
+  encodeSwapAndBridgeWithAuthCalldata,
   encodeSwapAndBridgeWithPermitCalldata,
   getDepositTypedData,
   getSwapAndDepositTypedData,
 } from "../_spoke-pool-periphery";
 import { RelayRequest } from "./_types";
 import { redisCache } from "../_cache";
+import { getReceiveWithAuthTypedData } from "../_transfer-with-auth";
 
 export const GAS_SPONSOR_ADDRESS =
   process.env.GAS_SPONSOR_ADDRESS ??
@@ -47,13 +50,15 @@ const SwapAndDepositDataSchema = type({
   routerCalldata: hexString(),
 });
 
+const DepositDataSchema = type({
+  submissionFees: SubmissionFeesSchema,
+  baseDepositData: BaseDepositDataSchema,
+  inputAmount: positiveIntStr(),
+});
+
 export const DepositWithPermitArgsSchema = type({
   signatureOwner: validAddress(),
-  depositData: type({
-    submissionFees: SubmissionFeesSchema,
-    baseDepositData: BaseDepositDataSchema,
-    inputAmount: positiveIntStr(),
-  }),
+  depositData: DepositDataSchema,
   deadline: positiveIntStr(),
 });
 
@@ -63,12 +68,33 @@ export const SwapAndDepositWithPermitArgsSchema = type({
   deadline: positiveIntStr(),
 });
 
+export const DepositWithAuthArgsSchema = type({
+  signatureOwner: validAddress(),
+  depositData: DepositDataSchema,
+  validAfter: positiveIntStr(),
+  validBefore: positiveIntStr(),
+  nonce: bytes32(),
+});
+
+export const SwapAndDepositWithAuthArgsSchema = type({
+  signatureOwner: validAddress(),
+  swapAndDepositData: SwapAndDepositDataSchema,
+  validAfter: positiveIntStr(),
+  validBefore: positiveIntStr(),
+  nonce: bytes32(),
+});
+
 export const allowedMethodNames = [
   "depositWithPermit",
   "swapAndBridgeWithPermit",
-];
+  "depositWithAuthorization",
+  "swapAndBridgeWithAuthorization",
+] as const;
 
-export function validateMethodArgs(methodName: string, args: any) {
+export function validateMethodArgs(
+  methodName: (typeof allowedMethodNames)[number],
+  args: any
+) {
   if (methodName === "depositWithPermit") {
     assert(args, DepositWithPermitArgsSchema);
     return {
@@ -79,6 +105,18 @@ export function validateMethodArgs(methodName: string, args: any) {
     assert(args, SwapAndDepositWithPermitArgsSchema);
     return {
       args: args as Infer<typeof SwapAndDepositWithPermitArgsSchema>,
+      methodName,
+    } as const;
+  } else if (methodName === "depositWithAuthorization") {
+    assert(args, DepositWithAuthArgsSchema);
+    return {
+      args: args as Infer<typeof DepositWithAuthArgsSchema>,
+      methodName,
+    } as const;
+  } else if (methodName === "swapAndBridgeWithAuthorization") {
+    assert(args, SwapAndDepositWithAuthArgsSchema);
+    return {
+      args: args as Infer<typeof SwapAndDepositWithAuthArgsSchema>,
       methodName,
     } as const;
   }
@@ -94,10 +132,15 @@ export async function verifySignatures({
   const { methodName, args } = methodNameAndArgs;
 
   let signatureOwner: string;
-  let getPermitTypedDataPromise: ReturnType<typeof getPermitTypedData>;
+  let getPermitTypedDataPromise:
+    | ReturnType<typeof getPermitTypedData>
+    | undefined;
   let getDepositTypedDataPromise: ReturnType<
     typeof getDepositTypedData | typeof getSwapAndDepositTypedData
   >;
+  let getReceiveWithAuthTypedDataPromise:
+    | ReturnType<typeof getReceiveWithAuthTypedData>
+    | undefined;
 
   if (methodName === "depositWithPermit") {
     const { signatureOwner: _signatureOwner, deadline, depositData } = args;
@@ -133,41 +176,123 @@ export async function verifySignatures({
       chainId,
       swapAndDepositData,
     });
+  } else if (methodName === "depositWithAuthorization") {
+    const {
+      signatureOwner: _signatureOwner,
+      validAfter,
+      validBefore,
+      nonce,
+      depositData,
+    } = args;
+    signatureOwner = _signatureOwner;
+    getReceiveWithAuthTypedDataPromise = getReceiveWithAuthTypedData({
+      tokenAddress: depositData.baseDepositData.inputToken,
+      chainId,
+      ownerAddress: signatureOwner,
+      spenderAddress: to, // SpokePoolV3Periphery address
+      value: depositData.inputAmount,
+      validAfter: Number(validAfter),
+      validBefore: Number(validBefore),
+      nonce,
+    });
+    getDepositTypedDataPromise = getDepositTypedData({
+      chainId,
+      depositData,
+    });
+  } else if (methodName === "swapAndBridgeWithAuthorization") {
+    const {
+      signatureOwner: _signatureOwner,
+      validAfter,
+      validBefore,
+      nonce,
+      swapAndDepositData,
+    } = args;
+    signatureOwner = _signatureOwner;
+    getReceiveWithAuthTypedDataPromise = getReceiveWithAuthTypedData({
+      tokenAddress: swapAndDepositData.swapToken,
+      chainId,
+      ownerAddress: signatureOwner,
+      spenderAddress: to, // SpokePoolV3Periphery address
+      value: swapAndDepositData.swapTokenAmount,
+      validAfter: Number(validAfter),
+      validBefore: Number(validBefore),
+      nonce,
+    });
+    getDepositTypedDataPromise = getSwapAndDepositTypedData({
+      chainId,
+      swapAndDepositData,
+    });
   } else {
     throw new Error(
       `Can not verify signatures for invalid method name: ${methodName}`
     );
   }
 
-  const [permitTypedData, depositTypedData] = await Promise.all([
-    getPermitTypedDataPromise,
-    getDepositTypedDataPromise,
-  ]);
+  if (getPermitTypedDataPromise) {
+    const [permitTypedData, depositTypedData] = await Promise.all([
+      getPermitTypedDataPromise,
+      getDepositTypedDataPromise,
+    ]);
 
-  const recoveredPermitSignerAddress = utils.verifyTypedData(
-    permitTypedData.eip712.domain,
-    permitTypedData.eip712.types,
-    permitTypedData.eip712.message,
-    signatures.permit
-  );
-  if (recoveredPermitSignerAddress !== signatureOwner) {
-    throw new InvalidParamError({
-      message: "Invalid permit signature",
-      param: "signatures.permit",
-    });
-  }
+    const recoveredPermitSignerAddress = utils.verifyTypedData(
+      permitTypedData.eip712.domain,
+      permitTypedData.eip712.types,
+      permitTypedData.eip712.message,
+      signatures.permit
+    );
 
-  const recoveredDepositSignerAddress = utils.verifyTypedData(
-    depositTypedData.eip712.domain,
-    depositTypedData.eip712.types,
-    depositTypedData.eip712.message,
-    signatures.deposit
-  );
-  if (recoveredDepositSignerAddress !== signatureOwner) {
-    throw new InvalidParamError({
-      message: "Invalid deposit signature",
-      param: "signatures.deposit",
-    });
+    if (recoveredPermitSignerAddress !== signatureOwner) {
+      throw new InvalidParamError({
+        message: "Invalid permit signature",
+        param: "signatures.permit",
+      });
+    }
+
+    const recoveredDepositSignerAddress = utils.verifyTypedData(
+      depositTypedData.eip712.domain,
+      depositTypedData.eip712.types,
+      depositTypedData.eip712.message,
+      signatures.deposit
+    );
+    if (recoveredDepositSignerAddress !== signatureOwner) {
+      throw new InvalidParamError({
+        message: "Invalid deposit signature",
+        param: "signatures.deposit",
+      });
+    }
+  } else if (getReceiveWithAuthTypedDataPromise) {
+    const [authTypedData, depositTypedData] = await Promise.all([
+      getReceiveWithAuthTypedDataPromise,
+      getDepositTypedDataPromise,
+    ]);
+
+    const recoveredAuthSignerAddress = utils.verifyTypedData(
+      authTypedData.eip712.domain,
+      authTypedData.eip712.types,
+      authTypedData.eip712.message,
+      signatures.permit
+    );
+
+    if (recoveredAuthSignerAddress !== signatureOwner) {
+      throw new InvalidParamError({
+        message: "Invalid Authorization signature",
+        param: "signatures.permit",
+      });
+    }
+
+    const recoveredDepositSignerAddress = utils.verifyTypedData(
+      depositTypedData.eip712.domain,
+      depositTypedData.eip712.types,
+      depositTypedData.eip712.message,
+      signatures.deposit
+    );
+
+    if (recoveredDepositSignerAddress !== signatureOwner) {
+      throw new InvalidParamError({
+        message: "Invalid deposit signature",
+        param: "signatures.deposit",
+      });
+    }
   }
 }
 
@@ -190,12 +315,33 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       swapAndDepositDataSignature: request.signatures.deposit,
       permitSignature: request.signatures.permit,
     });
+  } else if (
+    request.methodNameAndArgs.methodName === "depositWithAuthorization"
+  ) {
+    encodedCalldata = encodeDepositWithAuthCalldata({
+      ...request.methodNameAndArgs.args,
+      validAfter: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validBefore),
+      nonce: request.methodNameAndArgs.args.nonce,
+      receiveWithAuthSignature: request.signatures.permit,
+      depositDataSignature: request.signatures.deposit,
+    });
+  } else if (
+    request.methodNameAndArgs.methodName === "swapAndBridgeWithAuthorization"
+  ) {
+    encodedCalldata = encodeSwapAndBridgeWithAuthCalldata({
+      ...request.methodNameAndArgs.args,
+      validAfter: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validBefore),
+      nonce: request.methodNameAndArgs.args.nonce,
+      receiveWithAuthSignature: request.signatures.permit,
+      swapAndDepositDataSignature: request.signatures.deposit,
+    });
   }
-  // TODO: Add cases for `withAuth` and `withPermit2`
+  // TODO: Add cases for `withPermit2`
   else {
     throw new Error(`Can not encode calldata for relay request`);
   }
-
   return encodedCalldata;
 }
 

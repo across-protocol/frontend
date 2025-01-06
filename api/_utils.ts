@@ -34,6 +34,7 @@ import {
   Infer,
   integer,
   min,
+  size,
   string,
   Struct,
 } from "superstruct";
@@ -1509,6 +1510,10 @@ export function hexString() {
   });
 }
 
+export function bytes32() {
+  return size(hexString(), 66); // inclusive of "0x"
+}
+
 /**
  * Returns the cushion for a given token symbol and route. If no route is specified, the cushion for the token symbol
  * @param symbol The token symbol
@@ -2250,14 +2255,16 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
  * const res = await axios.get(`${base_url}?${queryString}`)
  * ```
  */
-
 export function buildSearchParams(
-  params: Record<string, number | string | Array<number | string>>
+  params: Record<
+    string,
+    number | string | boolean | Array<number | string | boolean>
+  >
 ): string {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value = params[key];
-    if (!value) continue;
+    if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
       value.forEach((val) => searchParams.append(key, String(val)));
     } else {

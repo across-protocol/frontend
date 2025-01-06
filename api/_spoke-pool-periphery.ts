@@ -260,3 +260,49 @@ export function encodeSwapAndBridgeWithPermitCalldata(args: {
     ]
   );
 }
+
+export function encodeDepositWithAuthCalldata(args: {
+  signatureOwner: string;
+  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
+  validAfter: number;
+  validBefore: number;
+  nonce: string;
+  receiveWithAuthSignature: string;
+  depositDataSignature: string;
+}) {
+  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
+    "depositWithAuthorization",
+    [
+      args.signatureOwner,
+      args.depositData,
+      args.validAfter,
+      args.validBefore,
+      args.nonce,
+      args.receiveWithAuthSignature,
+      args.depositDataSignature,
+    ]
+  );
+}
+
+export function encodeSwapAndBridgeWithAuthCalldata(args: {
+  signatureOwner: string;
+  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
+  validAfter: number;
+  validBefore: number;
+  nonce: string;
+  receiveWithAuthSignature: string;
+  swapAndDepositDataSignature: string;
+}) {
+  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
+    "swapAndBridgeWithAuthorization",
+    [
+      args.signatureOwner,
+      args.swapAndDepositData,
+      args.validAfter,
+      args.validBefore,
+      args.nonce,
+      args.receiveWithAuthSignature,
+      args.swapAndDepositDataSignature,
+    ]
+  );
+}
