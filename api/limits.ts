@@ -164,7 +164,7 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits, gasPrice] =
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasCosts, gasPrice] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -193,8 +193,9 @@ const handler = async (
         depositArgs,
         tokenPriceNative,
         relayer,
-        gasUnits,
-        gasPrice
+        gasPrice,
+        gasCosts?.nativeGasCost,
+        gasCosts?.tokenGasCost
       ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
