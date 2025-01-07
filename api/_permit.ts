@@ -2,6 +2,7 @@ import { BigNumberish, ethers } from "ethers";
 
 import { getProvider } from "./_utils";
 import { ERC20_PERMIT_ABI } from "./_abis";
+import { hashDomainSeparator } from "./_eip712";
 
 export class PermitNotSupportedError extends Error {
   constructor(tokenAddress: string, cause?: Error) {
@@ -129,20 +130,12 @@ export async function getPermitArgsFromContract(params: {
     ? Number(versionFromContract)
     : params.eip712DomainVersion || 1;
 
-  const domainSeparatorHash = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-      [
-        ethers.utils.id(
-          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        ),
-        ethers.utils.id(name),
-        ethers.utils.id(eip712DomainVersion.toString()),
-        params.chainId,
-        params.tokenAddress,
-      ]
-    )
-  );
+  const domainSeparatorHash = hashDomainSeparator({
+    name,
+    version: eip712DomainVersion,
+    chainId: params.chainId,
+    verifyingContract: params.tokenAddress,
+  });
 
   if (domainSeparator !== domainSeparatorHash) {
     throw new PermitDomainSeparatorMismatchError(params.tokenAddress);
