@@ -327,7 +327,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     type: crossSwap.type,
   };
   // 2.1. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await profiler.measureAsync(
+  const indicativeOriginSwapQuote = await profiler.measureAsync(
     originStrategy.fetchFn(
       {
         ...originSwap,
@@ -342,12 +342,12 @@ export async function getCrossSwapQuotesForOutputA2B(
   );
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  let adjOriginSwapQuote = await profiler.measureAsync(
+  let originSwapQuote = await profiler.measureAsync(
     originStrategy.fetchFn(
       {
         ...originSwap,
         amount: addMarkupToAmount(
-          originSwapQuote.maximumAmountIn,
+          indicativeOriginSwapQuote.maximumAmountIn,
           indicativeQuoteBuffer
         ).toString(),
       },
@@ -355,10 +355,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     ),
     "getOriginSwapQuote"
   );
-  assertMinOutputAmount(
-    adjOriginSwapQuote.minAmountOut,
-    bridgeQuote.inputAmount
-  );
+  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
 
   return {
     crossSwap,
