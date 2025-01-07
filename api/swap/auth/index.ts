@@ -1,5 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { assert, Infer, optional, type } from "superstruct";
+import { BigNumber } from "ethers";
 
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition, positiveIntStr } from "../../_utils";
@@ -7,7 +8,7 @@ import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
-  stringifyBigNumProps,
+  buildBaseSwapResponseJson,
 } from "../_utils";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
@@ -15,6 +16,7 @@ import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { buildAuthTxPayload } from "./_utils";
 import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
 import * as sdk from "@across-protocol/sdk";
+import { getBalance } from "../../_erc20";
 
 export const authSwapQueryParamsSchema = type({
   authDeadline: optional(positiveIntStr()),
@@ -76,6 +78,7 @@ const handler = async (
       recipient,
       depositor,
       slippageTolerance,
+      refundToken,
     } = await handleBaseSwapQueryParams(restQuery);
 
     const crossSwapQuotes = await getCrossSwapQuotes(
@@ -106,7 +109,25 @@ const handler = async (
       },
     });
 
-    const responseJson = stringifyBigNumProps(crossSwapTxForAuth);
+    const balance = await getBalance({
+      chainId: inputToken.chainId,
+      tokenAddress: inputToken.address,
+      owner: crossSwapQuotes.crossSwap.depositor,
+    });
+
+    const responseJson = buildBaseSwapResponseJson({
+      inputTokenAddress: inputToken.address,
+      originChainId: inputToken.chainId,
+      permitSwapTx: crossSwapTxForAuth,
+      inputAmount: amount,
+      bridgeQuote: crossSwapQuotes.bridgeQuote,
+      originSwapQuote: crossSwapQuotes.originSwapQuote,
+      destinationSwapQuote: crossSwapQuotes.destinationSwapQuote,
+      refundToken,
+      balance,
+      // Allowance does not matter for auth-based flows
+      allowance: BigNumber.from(0),
+    });
 
     logger.debug({
       at: "Swap/auth",

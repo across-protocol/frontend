@@ -22,6 +22,8 @@ import {
 } from "../_dexes/types";
 import { AMOUNT_TYPE } from "../_dexes/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
+import { AuthTxPayload } from "./auth/_utils";
+import { PermitTxPayload } from "./permit/_utils";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -110,6 +112,8 @@ export async function handleBaseSwapQueryParams(
     }),
   ]);
 
+  const refundToken = refundOnOrigin ? inputToken : outputToken;
+
   return {
     inputToken,
     outputToken,
@@ -124,6 +128,7 @@ export async function handleBaseSwapQueryParams(
     recipient,
     depositor,
     slippageTolerance,
+    refundToken,
   };
 }
 
@@ -261,4 +266,113 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
       return [key, val];
     })
   ) as T;
+}
+
+export function buildBaseSwapResponseJson(params: {
+  inputTokenAddress: string;
+  originChainId: number;
+  inputAmount: BigNumber;
+  allowance: BigNumber;
+  balance: BigNumber;
+  approvalTxns?: {
+    to: string;
+    data: string;
+  }[];
+  originSwapQuote?: SwapQuote;
+  bridgeQuote: CrossSwapQuotes["bridgeQuote"];
+  destinationSwapQuote?: SwapQuote;
+  refundToken: Token;
+  approvalSwapTx?: {
+    from: string;
+    to: string;
+    data: string;
+    value?: BigNumber;
+    gas?: BigNumber;
+    gasPrice: BigNumber;
+  };
+  permitSwapTx?: AuthTxPayload | PermitTxPayload;
+}) {
+  return stringifyBigNumProps({
+    checks: {
+      allowance: params.approvalSwapTx
+        ? {
+            token: params.inputTokenAddress,
+            spender: params.approvalSwapTx.to,
+            actual: params.allowance,
+            expected: params.inputAmount,
+          }
+        : // TODO: Handle permit2 required allowance
+          {
+            token: params.inputTokenAddress,
+            spender: constants.AddressZero,
+            actual: 0,
+            expected: 0,
+          },
+      balance: {
+        token: params.inputTokenAddress,
+        actual: params.balance,
+        expected: params.inputAmount,
+      },
+    },
+    approvalTxns: params.approvalTxns,
+    steps: {
+      originSwap: params.originSwapQuote
+        ? {
+            tokenIn: params.originSwapQuote.tokenIn,
+            tokenOut: params.originSwapQuote.tokenOut,
+            inputAmount: params.originSwapQuote.expectedAmountIn,
+            outputAmount: params.originSwapQuote.expectedAmountOut,
+            minOutputAmount: params.originSwapQuote.minAmountOut,
+            maxInputAmount: params.originSwapQuote.maximumAmountIn,
+          }
+        : undefined,
+      bridge: {
+        inputAmount: params.bridgeQuote.inputAmount,
+        outputAmount: params.bridgeQuote.outputAmount,
+        tokenIn: params.bridgeQuote.inputToken,
+        tokenOut: params.bridgeQuote.outputToken,
+      },
+      destinationSwap: params.destinationSwapQuote
+        ? {
+            tokenIn: params.destinationSwapQuote.tokenIn,
+            tokenOut: params.destinationSwapQuote.tokenOut,
+            inputAmount: params.destinationSwapQuote.expectedAmountIn,
+            maxInputAmount: params.destinationSwapQuote.maximumAmountIn,
+            outputAmount: params.destinationSwapQuote.expectedAmountOut,
+            minOutputAmount: params.destinationSwapQuote.minAmountOut,
+          }
+        : undefined,
+    },
+    refundToken:
+      params.refundToken.symbol === "ETH"
+        ? {
+            ...params.refundToken,
+            symbol: "WETH",
+          }
+        : params.refundToken,
+    inputAmount:
+      params.originSwapQuote?.expectedAmountIn ??
+      params.bridgeQuote.inputAmount,
+    expectedOutputAmount:
+      params.destinationSwapQuote?.expectedAmountOut ??
+      params.bridgeQuote.outputAmount,
+    minOutputAmount:
+      params.destinationSwapQuote?.minAmountOut ??
+      params.bridgeQuote.outputAmount,
+    expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
+    swapTx: params.approvalSwapTx
+      ? {
+          simulationSuccess: !!params.approvalSwapTx.gas,
+          chainId: params.originChainId,
+          to: params.approvalSwapTx.to,
+          data: params.approvalSwapTx.data,
+          value: params.approvalSwapTx.value,
+          gas: params.approvalSwapTx.gas,
+          gasPrice: params.approvalSwapTx.gasPrice,
+        }
+      : params.permitSwapTx
+        ? params.permitSwapTx.swapTx
+        : undefined,
+    eip712: params.permitSwapTx?.eip712,
+  });
 }

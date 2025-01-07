@@ -7,9 +7,14 @@ async function swapWithAllowance() {
   console.log("Swapping with allowance...");
   const swapQuote = await fetchSwapQuote("approval");
 
+  if (!swapQuote || !swapQuote.swapTx || !("data" in swapQuote.swapTx)) {
+    console.log("No swap quote with tx data for approval");
+    return;
+  }
+
   if (process.env.DEV_WALLET_PK) {
     const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
-      getProvider(swapQuote.params.originChainId)
+      getProvider(swapQuote.swapTx.chainId)
     );
 
     if (swapQuote.approvalTxns) {

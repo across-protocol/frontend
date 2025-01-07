@@ -1,4 +1,5 @@
 import { VercelResponse } from "@vercel/node";
+import { BigNumber } from "ethers";
 import { assert, Infer, optional, type } from "superstruct";
 
 import { TypedVercelRequest } from "../../_types";
@@ -7,13 +8,14 @@ import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
-  stringifyBigNumProps,
+  buildBaseSwapResponseJson,
 } from "../_utils";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
 import { buildPermitTxPayload } from "./_utils";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
+import { getBalance } from "../../_erc20";
 
 export const PermitSwapQueryParamsSchema = type({
   permitDeadline: optional(positiveIntStr()),
@@ -71,6 +73,7 @@ const handler = async (
       recipient,
       depositor,
       slippageTolerance,
+      refundToken,
     } = await handleBaseSwapQueryParams(restQuery);
 
     const crossSwapQuotes = await getCrossSwapQuotes(
@@ -100,7 +103,25 @@ const handler = async (
       },
     });
 
-    const responseJson = stringifyBigNumProps(crossSwapTxForPermit);
+    const balance = await getBalance({
+      chainId: inputToken.chainId,
+      tokenAddress: inputToken.address,
+      owner: crossSwapQuotes.crossSwap.depositor,
+    });
+
+    const responseJson = buildBaseSwapResponseJson({
+      inputTokenAddress: inputToken.address,
+      originChainId: inputToken.chainId,
+      permitSwapTx: crossSwapTxForPermit,
+      inputAmount: amount,
+      bridgeQuote: crossSwapQuotes.bridgeQuote,
+      originSwapQuote: crossSwapQuotes.originSwapQuote,
+      destinationSwapQuote: crossSwapQuotes.destinationSwapQuote,
+      refundToken,
+      balance,
+      // Allowance does not matter for permit-based flows
+      allowance: BigNumber.from(0),
+    });
 
     logger.debug({
       at: "Swap/permit",

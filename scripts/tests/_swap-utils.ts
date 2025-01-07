@@ -2,7 +2,14 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { ethers } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
+
+import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
+
 dotenv.config();
+
+export type BaseSwapResponse = Awaited<
+  ReturnType<typeof buildBaseSwapResponseJson>
+>;
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
 
@@ -169,7 +176,7 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
-export async function fetchSwapQuote<T>(slug: "approval" | "permit" | "auth") {
+export async function fetchSwapQuote(slug?: "approval" | "permit" | "auth") {
   const filterString = process.argv[2];
   const testCases = [...MIN_OUTPUT_CASES, ...EXACT_OUTPUT_CASES];
   const filteredTestCases = filterTestCases(testCases, filterString);
@@ -180,6 +187,6 @@ export async function fetchSwapQuote<T>(slug: "approval" | "permit" | "auth") {
       params: testCase.params,
     });
     console.log(JSON.stringify(response.data, null, 2));
-    return response.data as T;
+    return response.data as BaseSwapResponse;
   }
 }

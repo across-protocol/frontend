@@ -15,6 +15,8 @@ import {
 import { BigNumberish, BytesLike, utils } from "ethers";
 import { SpokePoolV3PeripheryInterface } from "../../_typechain/SpokePoolV3Periphery";
 
+export type AuthTxPayload = Awaited<ReturnType<typeof buildAuthTxPayload>>;
+
 export async function buildAuthTxPayload({
   crossSwapQuotes,
   authDeadline,
@@ -154,10 +156,9 @@ export async function buildAuthTxPayload({
 
   return {
     eip712: {
-      receiveWithAuthorization: authTypedData.eip712,
+      permit: authTypedData.eip712,
       deposit: depositTypedData.eip712,
     },
-
     swapTx: {
       chainId: originChainId,
       to: entryPointContract.address,
