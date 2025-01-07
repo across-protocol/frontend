@@ -1,4 +1,5 @@
 import { VercelResponse } from "@vercel/node";
+import axios from "axios";
 
 import { TypedVercelRequest } from "../_types";
 import {
@@ -9,13 +10,12 @@ import {
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
 import { getPermitArgsFromContract } from "../_permit";
 import { getReceiveWithAuthArgsFromContract } from "../_transfer-with-auth";
-import axios from "axios";
 
 type SwapFlowType = "permit" | "transfer-with-auth" | "approval";
 
 function makeSwapHandler(path: string) {
   return (params: unknown) =>
-    axios.get(`${resolveVercelEndpoint()}/${path}`, { params });
+    axios.get(`${resolveVercelEndpoint(true)}/api/swap/${path}`, { params });
 }
 const swapFlowTypeToHandler = {
   permit: makeSwapHandler("permit"),
@@ -62,9 +62,9 @@ export default async function handler(
     }
 
     const handler = swapFlowTypeToHandler[swapFlowType];
-    const responseJson = await handler(request.query);
+    const { data } = await handler(request.query);
     const enrichedResponseJson = {
-      ...responseJson,
+      ...data,
       swapFlowType,
     };
 

@@ -14,6 +14,7 @@ import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
   getApprovalTxns,
+  buildBaseSwapResponseJson,
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
@@ -56,6 +57,7 @@ const handler = async (
       recipient,
       depositor,
       slippageTolerance,
+      refundToken,
     } = await handleBaseSwapQueryParams(request.query);
 
     const crossSwapQuotes = await getCrossSwapQuotes(
@@ -134,81 +136,23 @@ const handler = async (
       });
     }
 
-    const refundToken = crossSwap.refundOnOrigin
-      ? bridgeQuote.inputToken
-      : bridgeQuote.outputToken;
-
-    const responseJson = {
-      // fees: crossSwapQuotes.fees,
-      checks: {
-        allowance: {
-          token: inputTokenAddress,
-          spender: crossSwapTx.to,
-          actual: allowance.toString(),
-          expected: inputAmount.toString(),
-        },
-        balance: {
-          token: inputTokenAddress,
-          actual: balance.toString(),
-          expected: inputAmount.toString(),
-        },
+    const responseJson = buildBaseSwapResponseJson({
+      originChainId,
+      inputTokenAddress,
+      inputAmount,
+      approvalSwapTx: {
+        ...crossSwapTx,
+        gas: originTxGas,
+        gasPrice: originTxGasPrice,
       },
+      allowance,
+      balance,
       approvalTxns,
-      steps: {
-        originSwap: originSwapQuote
-          ? {
-              tokenIn: originSwapQuote.tokenIn,
-              tokenOut: originSwapQuote.tokenOut,
-              inputAmount: originSwapQuote.expectedAmountIn.toString(),
-              outputAmount: originSwapQuote.expectedAmountOut.toString(),
-              minOutputAmount: originSwapQuote.minAmountOut.toString(),
-              maxInputAmount: originSwapQuote.maximumAmountIn.toString(),
-            }
-          : undefined,
-        bridge: {
-          inputAmount: bridgeQuote.inputAmount.toString(),
-          outputAmount: bridgeQuote.outputAmount.toString(),
-          tokenIn: bridgeQuote.inputToken,
-          tokenOut: bridgeQuote.outputToken,
-        },
-        destinationSwap: destinationSwapQuote
-          ? {
-              tokenIn: destinationSwapQuote.tokenIn,
-              tokenOut: destinationSwapQuote.tokenOut,
-              inputAmount: destinationSwapQuote.expectedAmountIn.toString(),
-              maxInputAmount: destinationSwapQuote.maximumAmountIn.toString(),
-              outputAmount: destinationSwapQuote.expectedAmountOut.toString(),
-              minOutputAmount: destinationSwapQuote.minAmountOut.toString(),
-            }
-          : undefined,
-      },
-      swapTx: {
-        simulationSuccess: !!originTxGas,
-        chainId: originChainId,
-        to: crossSwapTx.to,
-        data: crossSwapTx.data,
-        value: crossSwapTx.value?.toString(),
-        gas: originTxGas?.toString(),
-        gasPrice: originTxGasPrice?.toString(),
-      },
-      refundToken:
-        refundToken.symbol === "ETH"
-          ? {
-              ...refundToken,
-              symbol: "WETH",
-            }
-          : refundToken,
-      inputAmount:
-        originSwapQuote?.expectedAmountIn.toString() ??
-        bridgeQuote.inputAmount.toString(),
-      expectedOutputAmount:
-        destinationSwapQuote?.expectedAmountOut.toString() ??
-        bridgeQuote.outputAmount.toString(),
-      minOutputAmount:
-        destinationSwapQuote?.minAmountOut.toString() ??
-        bridgeQuote.outputAmount.toString(),
-      expectedFillTime: bridgeQuote.suggestedFees.estimatedFillTimeSec,
-    };
+      originSwapQuote,
+      bridgeQuote,
+      destinationSwapQuote,
+      refundToken,
+    });
     mark.stop();
     logger.debug({
       at: "Swap/approval",

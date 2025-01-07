@@ -144,7 +144,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
   return {
     from: crossSwapQuotes.crossSwap.depositor,
     to: toAddress,
-    data: integratorId ? tagIntegratorId(integratorId, tx.data!) : tx.data,
+    data: integratorId ? tagIntegratorId(integratorId, tx.data!) : tx.data!,
     value: tx.value,
   };
 }

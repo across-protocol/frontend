@@ -16,6 +16,8 @@ import {
 } from "../../_dexes/utils";
 import { SpokePoolV3PeripheryInterface } from "../../_typechain/SpokePoolV3Periphery";
 
+export type PermitTxPayload = Awaited<ReturnType<typeof buildPermitTxPayload>>;
+
 export async function buildPermitTxPayload({
   crossSwapQuotes,
   permitDeadline,
