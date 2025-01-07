@@ -1,21 +1,14 @@
 import { BigNumber } from "ethers";
 import { writeFileSync } from "fs";
+import { getCachedLimits, buildSearchParams } from "../api/_utils";
+import assert from "assert";
+import dotenv from "dotenv";
 
-type Limits = {
-  minDeposit: string;
-  maxDeposit: string;
-  maxDepositInstant: string;
-  maxDepositShortDelay: string;
-  recommendedDepositInstant: string;
-  relayerFeeDetails: {
-    relayFeeTotal: string;
-    relayFeePercent: string;
-    gasFeeTotal: string;
-    gasFeePercent: string;
-    capitalFeeTotal: string;
-    capitalFeePercent: string;
-  };
-};
+dotenv.config({
+  path: [".env.local", ".env"],
+});
+
+type Limits = Awaited<ReturnType<typeof getCachedLimits>>;
 
 type Route = {
   originChainId: number;
@@ -26,76 +19,84 @@ type Route = {
   destinationTokenSymbol: string;
 };
 
-function buildSearchParams(
-  params: Record<string, number | string | Array<number | string>>
-): string {
-  const searchParams = new URLSearchParams();
-  for (const key in params) {
-    const value = params[key];
-    if (!value) continue;
-    if (Array.isArray(value)) {
-      value.forEach((val) => searchParams.append(key, String(val)));
-    } else {
-      searchParams.append(key, String(value));
-    }
-  }
-  return searchParams.toString();
-}
-
-const BATCH_SIZE = 5;
-
-function chunkArray<T>(array: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
-
 // use this script to compare gas prices for relayers between 2 environments
 async function compareGasPrices() {
   const PROD_URL = "https://app.across.to";
-  const TEST_URL = "https://app-frontend-v3-git-gas-markup-fee-uma.vercel.app";
+  const TEST_URL = process.env.TEST_URL_GAS_PRICE;
+
+  assert(
+    TEST_URL,
+    'No Test URL defined. Please add "TEST_URL_GAS_PRICE" to .env file'
+  );
 
   const routes = (await fetch(`${PROD_URL}/api/available-routes`).then((res) =>
     res.json()
   )) as Array<Route>;
 
-  // Extract all unique destination tokens
-  const uniqueDestinationTokens = Array.from(
-    new Set(routes.map((route) => route.destinationTokenSymbol))
-  );
+  const chainTokenMap = (() => {
+    const chainTokenMap = new Map<number, Set<string>>();
+    routes.forEach((route) => {
+      if (!chainTokenMap.has(route.destinationChainId)) {
+        chainTokenMap.set(
+          route.destinationChainId,
+          new Set([route.destinationTokenSymbol])
+        );
+      } else {
+        const tokens = chainTokenMap.get(route.destinationChainId)!;
+        chainTokenMap.set(
+          route.destinationChainId,
+          tokens.add(route.destinationTokenSymbol)
+        );
+      }
+    });
+    return chainTokenMap;
+  })();
 
-  // Break the tokens into batches of 5
-  const tokenBatches = chunkArray(uniqueDestinationTokens, BATCH_SIZE);
+  console.log("Batching requests by chainId => ", chainTokenMap);
+  console.log("Please wait...");
 
-  const getLimits = async (baseUrl: string, tokenBatch: string[]) => {
+  // gas prices are cached per-chain, so we want to batch requests by chainId for more accurate results
+  const getLimitsByChainId = async (
+    baseUrl: string,
+    chainId: number,
+    tokenBatch: string[]
+  ) => {
     return Promise.all(
-      routes
-        .filter((route) => tokenBatch.includes(route.destinationTokenSymbol))
-        .map(
-          async ({
-            destinationChainId,
-            originToken,
-            destinationToken,
+      tokenBatch.map(async (tokenSymbol) => {
+        const route = routes.find(
+          (r) =>
+            r.destinationChainId === chainId &&
+            r.destinationTokenSymbol === tokenSymbol
+        );
+        // shoudn't be possible
+        if (!route) {
+          throw new Error(
+            `Route not found for chainId: ${chainId}, token: ${tokenSymbol}`
+          );
+        }
+
+        const {
+          originToken,
+          destinationToken,
+          originChainId,
+          destinationChainId,
+        } = route;
+
+        const limits = (await fetch(
+          `${baseUrl}/api/limits?${buildSearchParams({
+            inputToken: originToken,
+            outputToken: destinationToken,
             originChainId,
-            destinationTokenSymbol,
-          }) => {
-            const limits = (await fetch(
-              `${baseUrl}/api/limits?${buildSearchParams({
-                inputToken: originToken,
-                outputToken: destinationToken,
-                originChainId,
-                destinationChainId,
-              })}`
-            ).then((res) => res.json())) as Limits;
-            return {
-              destinationChainId,
-              gasFeeTotal: BigNumber.from(limits.relayerFeeDetails.gasFeeTotal),
-              token: destinationTokenSymbol,
-            };
-          }
-        )
+            destinationChainId,
+          })}`
+        ).then((res) => res.json())) as Limits;
+
+        return {
+          destinationChainId,
+          gasFeeTotal: BigNumber.from(limits.relayerFeeDetails.gasFeeTotal),
+          token: tokenSymbol,
+        };
+      })
     );
   };
 
@@ -106,8 +107,13 @@ async function compareGasPrices() {
       gasFeeTotal: BigNumber;
     }> = [];
 
-    for (const batch of tokenBatches) {
-      const batchResults = await getLimits(baseUrl, batch);
+    for (const [chainId, tokens] of chainTokenMap.entries()) {
+      const tokenBatch = Array.from(tokens);
+      const batchResults = await getLimitsByChainId(
+        baseUrl,
+        chainId,
+        tokenBatch
+      );
       allResults.push(...batchResults);
     }
 
