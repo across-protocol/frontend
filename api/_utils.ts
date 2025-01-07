@@ -39,8 +39,6 @@ import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import rpcProvidersJson from "../src/data/rpc-providers.json";
 
-process.env["any-file.env"]
-
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
   MINIMAL_BALANCER_V2_VAULT_ABI,
