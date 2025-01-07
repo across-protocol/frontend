@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
+import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional, string } from "superstruct";
 
@@ -359,13 +359,18 @@ const handler = async (
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
 
-    const maximumDeposit = getMaxDeposit(
-      liquidReserves,
-      bufferedMaxDepositShortDelay,
-      limitsBufferMultiplier,
-      chainHasMaxBoundary,
-      routeInvolvesLiteChain
-    );
+    // FIXME: Remove after campaign is complete
+    const maximumDeposit =
+      destinationChainId === CHAIN_IDs.ZK_SYNC &&
+      computedOriginChainId === CHAIN_IDs.MAINNET
+        ? liquidReserves
+        : getMaxDeposit(
+            liquidReserves,
+            bufferedMaxDepositShortDelay,
+            limitsBufferMultiplier,
+            chainHasMaxBoundary,
+            routeInvolvesLiteChain
+          );
 
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
