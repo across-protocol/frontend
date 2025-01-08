@@ -5,7 +5,7 @@
 
  FILE_REMOTE="projects/across/frontend/outputs/output.env"
  FILE_PATH="output.env"
- GH_REPO="UMAprotocol/git-env"
+ GH_REPO="umaprotocol/git-env"
 
  if [ -n "${GH_TOKEN}" ]; then
      echo "Getting env files from config repo..."
