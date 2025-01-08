@@ -9,6 +9,7 @@ import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
   buildBaseSwapResponseJson,
+  calculateCrossSwapFees,
 } from "../_utils";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
@@ -92,6 +93,7 @@ const handler = async (
       },
       quoteFetchStrategies
     );
+
     // Build tx for permit
     const crossSwapTxForPermit = await buildPermitTxPayload({
       crossSwapQuotes,
@@ -103,11 +105,14 @@ const handler = async (
       },
     });
 
-    const balance = await getBalance({
-      chainId: inputToken.chainId,
-      tokenAddress: inputToken.address,
-      owner: crossSwapQuotes.crossSwap.depositor,
-    });
+    const [balance, fees] = await Promise.all([
+      getBalance({
+        chainId: inputToken.chainId,
+        tokenAddress: inputToken.address,
+        owner: crossSwapQuotes.crossSwap.depositor,
+      }),
+      calculateCrossSwapFees(crossSwapQuotes),
+    ]);
 
     const responseJson = buildBaseSwapResponseJson({
       inputTokenAddress: inputToken.address,
@@ -121,6 +126,7 @@ const handler = async (
       balance,
       // Allowance does not matter for permit-based flows
       allowance: BigNumber.from(0),
+      fees,
     });
 
     logger.debug({

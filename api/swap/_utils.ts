@@ -114,11 +114,7 @@ export async function handleBaseSwapQueryParams(
 
   const refundToken = refundOnOrigin ? inputToken : outputToken;
 
-  // 3. Calculate fees based for full route
-  const fees = await calculateCrossSwapFees(crossSwapQuotes);
-
   return {
-    fees,
     inputToken,
     outputToken,
     amount,
@@ -295,6 +291,7 @@ export function buildBaseSwapResponseJson(params: {
     gasPrice: BigNumber;
   };
   permitSwapTx?: AuthTxPayload | PermitTxPayload;
+  fees: CrossSwapFees;
 }) {
   return stringifyBigNumProps({
     checks: {
@@ -328,6 +325,7 @@ export function buildBaseSwapResponseJson(params: {
             outputAmount: params.originSwapQuote.expectedAmountOut,
             minOutputAmount: params.originSwapQuote.minAmountOut,
             maxInputAmount: params.originSwapQuote.maximumAmountIn,
+            fees: params.fees.originSwapFees,
           }
         : undefined,
       bridge: {
@@ -335,6 +333,7 @@ export function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
+        fees: params.fees.bridgeFees,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -344,6 +343,7 @@ export function buildBaseSwapResponseJson(params: {
             maxInputAmount: params.destinationSwapQuote.maximumAmountIn,
             outputAmount: params.destinationSwapQuote.expectedAmountOut,
             minOutputAmount: params.destinationSwapQuote.minAmountOut,
+            fees: params.fees.destinationSwapFees,
           }
         : undefined,
     },
