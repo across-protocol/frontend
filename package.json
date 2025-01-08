@@ -54,7 +54,6 @@
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
-    "dev:api": "vercel dev --listen 127.0.0.1:3000",
     "build": "yarn prebuild-env && yarn prebuild && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
     "prebuild": "tsx scripts/pre-build.ts",
     "prebuild-env": "./scripts/pre-build-env.sh && source output.env",
