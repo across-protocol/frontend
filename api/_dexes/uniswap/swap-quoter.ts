@@ -22,7 +22,7 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "@across-protocol/sdk";
 
 import { Swap } from "../types";
-import { getSwapAndBridgeAddress } from "../utils";
+import { getSwapAndBridgeAddress } from "../../_swap-and-bridge";
 import { getProdToken } from "./utils";
 import { callViaMulticall3, getProvider } from "../../_utils";
 

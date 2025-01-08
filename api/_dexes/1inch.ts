@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { Swap, OriginSwapQuoteAndCalldata } from "./types";
-import { getSwapAndBridgeAddress } from "./utils";
+import { getSwapAndBridgeAddress } from "../_swap-and-bridge";
 
 export async function get1inchQuoteForOriginSwapExactInput(
   swap: Omit<Swap, "recipient">

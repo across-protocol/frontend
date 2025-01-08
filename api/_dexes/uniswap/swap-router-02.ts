@@ -1,24 +1,28 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
 import { CHAIN_IDs } from "@across-protocol/constants";
 
-import { getLogger } from "../../_utils";
-import { OriginSwapEntryPointContract, Swap, SwapQuote } from "../types";
-import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
+  getLogger,
+  getSpokePoolAddress,
   addMarkupToAmount,
-  floatToPercent,
-  UniswapQuoteFetchStrategy,
-} from "./utils";
+} from "../../_utils";
+import { Swap, SwapQuote } from "../types";
+import {
+  getSpokePoolPeripheryAddress,
+  getSpokePoolPeripheryProxyAddress,
+} from "../../_spoke-pool-periphery";
+import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
+import { floatToPercent, UniswapQuoteFetchStrategy } from "./utils";
 import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./trading-api";
 import { RouterTradeAdapter } from "./adapter";
-import { getUniversalSwapAndBridgeAddress } from "../utils";
+import { buildCacheKey, makeCacheGetterAndSetter } from "../../_cache";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -34,20 +38,51 @@ export const SWAP_ROUTER_02_ADDRESS = {
 };
 
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName: OriginSwapEntryPointContract["name"]
+  originSwapEntryPointContractName:
+    | "SpokePoolPeriphery"
+    | "SpokePoolPeripheryProxy"
+    | "UniversalSwapAndBridge"
 ): UniswapQuoteFetchStrategy {
-  const getRouterAddress = (chainId: number) => SWAP_ROUTER_02_ADDRESS[chainId];
-  const getOriginSwapEntryPoint = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+  const getRouter = (chainId: number) => {
+    return {
+      address: SWAP_ROUTER_02_ADDRESS[chainId],
+      name: "UniswapV3SwapRouter02",
+    };
+  };
+  const getOriginEntryPoints = (chainId: number) => {
+    if (originSwapEntryPointContractName === "SpokePoolPeripheryProxy") {
       return {
-        name: "SpokePoolPeriphery",
-        address: getSpokePoolPeripheryAddress("uniswap-swapRouter02", chainId),
+        swapAndBridge: {
+          name: "SpokePoolPeripheryProxy",
+          address: getSpokePoolPeripheryProxyAddress(chainId),
+        },
+        deposit: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
+      } as const;
+    } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+      return {
+        swapAndBridge: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
+        deposit: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
       } as const;
     } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
       return {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
-        dex: "uniswap",
+        swapAndBridge: {
+          name: "UniversalSwapAndBridge",
+          address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
+          dex: "uniswap",
+        },
+        deposit: {
+          name: "SpokePool",
+          address: getSpokePoolAddress(chainId),
+        },
       } as const;
     }
     throw new Error(
@@ -94,17 +129,39 @@ export function getSwapRouter02Strategy(
         swapTx,
       };
     } else {
-      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
+      const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
+        swap,
         tradeType
-      );
+      ).get();
+      const inputAmount =
+        tradeType === TradeType.EXACT_INPUT
+          ? swap.amount
+          : ethers.utils.parseUnits(
+              (
+                Number(
+                  ethers.utils.formatUnits(swap.amount, swap.tokenOut.decimals)
+                ) * indicativeQuotePricePerTokenOut
+              ).toFixed(swap.tokenIn.decimals),
+              swap.tokenIn.decimals
+            );
+      const outputAmount =
+        tradeType === TradeType.EXACT_INPUT
+          ? ethers.utils.parseUnits(
+              (
+                Number(
+                  ethers.utils.formatUnits(swap.amount, swap.tokenIn.decimals)
+                ) / indicativeQuotePricePerTokenOut
+              ).toFixed(swap.tokenOut.decimals),
+              swap.tokenOut.decimals
+            )
+          : swap.amount;
 
-      const expectedAmountIn = BigNumber.from(input.amount);
+      const expectedAmountIn = BigNumber.from(inputAmount);
       const maxAmountIn =
         tradeType === TradeType.EXACT_INPUT
           ? expectedAmountIn
           : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
-      const expectedAmountOut = BigNumber.from(output.amount);
+      const expectedAmountOut = BigNumber.from(outputAmount);
       const minAmountOut =
         tradeType === TradeType.EXACT_OUTPUT
           ? expectedAmountOut
@@ -119,9 +176,9 @@ export function getSwapRouter02Strategy(
         expectedAmountIn,
         slippageTolerance: swap.slippageTolerance,
         swapTx: {
-          to: "0x",
-          data: "0x",
-          value: "0x",
+          to: "0x0",
+          data: "0x0",
+          value: "0x0",
         },
       };
     }
@@ -144,8 +201,8 @@ export function getSwapRouter02Strategy(
   };
 
   return {
-    getRouterAddress,
-    getOriginSwapEntryPoint,
+    getRouter,
+    getOriginEntryPoints,
     fetchFn,
   };
 }
@@ -175,4 +232,31 @@ export function buildSwapRouterSwapTx(
     value,
     to: SWAP_ROUTER_02_ADDRESS[swap.chainId],
   };
+}
+
+export function indicativeQuotePriceCache(swap: Swap, tradeType: TradeType) {
+  // TODO: Add price buckets based on USD value, e.g. 100, 1000, 10000
+  const cacheKey = buildCacheKey(
+    "uniswap-indicative-quote",
+    tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
+    swap.chainId,
+    swap.tokenIn.symbol,
+    swap.tokenOut.symbol
+  );
+  const ttl = 60;
+  const fetchFn = async () => {
+    const quote = await getUniswapClassicIndicativeQuoteFromApi(
+      { ...swap, swapper: swap.recipient },
+      tradeType
+    );
+    const pricePerTokenOut =
+      Number(
+        ethers.utils.formatUnits(quote.input.amount, swap.tokenIn.decimals)
+      ) /
+      Number(
+        ethers.utils.formatUnits(quote.output.amount, swap.tokenOut.decimals)
+      );
+    return pricePerTokenOut;
+  };
+  return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
 }

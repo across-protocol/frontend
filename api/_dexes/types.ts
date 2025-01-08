@@ -1,6 +1,8 @@
 import { BigNumber } from "ethers";
+import { TradeType } from "@uniswap/sdk-core";
+
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType } from "./cross-swap";
+import { AmountType, CrossSwapType } from "./utils";
 
 export type { AmountType, CrossSwapType };
 
@@ -75,14 +77,18 @@ export type CrossSwapQuotes = {
     suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
   };
   destinationSwapQuote?: SwapQuote;
-  originSwapQuote?: SwapQuote & {
-    entryPointContract: OriginSwapEntryPointContract;
+  originSwapQuote?: SwapQuote;
+  contracts: {
+    depositEntryPoint: DepositEntryPointContract;
+    originRouter?: RouterContract;
+    destinationRouter?: RouterContract;
+    originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
 };
 
 export type OriginSwapEntryPointContract =
   | {
-      name: "SpokePoolPeriphery";
+      name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
       address: string;
     }
   | {
@@ -90,14 +96,53 @@ export type OriginSwapEntryPointContract =
       address: string;
       dex: SupportedDex;
     };
+export type DepositEntryPointContract = {
+  name: "SpokePoolPeriphery" | "SpokePool";
+  address: string;
+};
+export type RouterContract = {
+  name: string;
+  address: string;
+};
 
 export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
   fees: CrossSwapFees;
 };
 
-// { currency => amount }
 export type CrossSwapFees = {
   bridgeFees: Record<string, number>;
   originSwapFees?: Record<string, number>;
   destinationSwapFees?: Record<string, number>;
 };
+
+export type QuoteFetchStrategy = {
+  getRouter: (chainId: number) => {
+    address: string;
+    name: string;
+  };
+  getOriginEntryPoints: (chainId: number) => {
+    swapAndBridge:
+      | {
+          name: "UniversalSwapAndBridge";
+          address: string;
+          dex: "uniswap" | "1inch";
+        }
+      | {
+          name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
+          address: string;
+        };
+    deposit: {
+      name: "SpokePoolPeriphery" | "SpokePool";
+      address: string;
+    };
+  };
+  fetchFn: QuoteFetchFn;
+};
+
+export type QuoteFetchFn = (
+  swap: Swap,
+  tradeType: TradeType,
+  opts?: Partial<{
+    useIndicativeQuote: boolean;
+  }>
+) => Promise<SwapQuote>;

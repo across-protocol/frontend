@@ -34,6 +34,7 @@ import {
   Infer,
   integer,
   min,
+  size,
   string,
   Struct,
 } from "superstruct";
@@ -85,7 +86,6 @@ import {
 } from "./_errors";
 import { Token } from "./_dexes/types";
 import { CoingeckoQueryParams } from "./coingecko";
-import { addMarkupToAmount } from "./_dexes/uniswap/utils";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -203,8 +203,8 @@ export const getLogger = (): LoggingUtility => {
  * Resolves the current vercel endpoint dynamically
  * @returns A valid URL of the current endpoint in vercel
  */
-export const resolveVercelEndpoint = () => {
-  if (process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
+export const resolveVercelEndpoint = (omitOverride = false) => {
+  if (!omitOverride && process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
     return process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE;
   }
   const url = process.env.VERCEL_URL ?? "across.to";
@@ -905,7 +905,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     outputToken: params.outputToken.address,
     originChainId: params.inputToken.chainId,
     destinationChainId: params.outputToken.chainId,
-    skipAmountLimit: false,
+    skipAmountLimit: true,
     recipient: params.recipient,
     message: params.message,
   };
@@ -1485,7 +1485,7 @@ export function validAddressOrENS() {
 
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
-    return Number.isInteger(Number(value)) && Number(value) > 0;
+    return Number.isInteger(Number(value)) && Number(value) >= 0;
   });
 }
 
@@ -1499,6 +1499,16 @@ export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
   });
+}
+
+export function hexString() {
+  return define<string>("hexString", (value) => {
+    return utils.isHexString(value);
+  });
+}
+
+export function bytes32() {
+  return size(hexString(), 66); // inclusive of "0x"
 }
 
 /**
@@ -2248,14 +2258,16 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
  * const res = await axios.get(`${base_url}?${queryString}`)
  * ```
  */
-
 export function buildSearchParams(
-  params: Record<string, number | string | Array<number | string>>
+  params: Record<
+    string,
+    number | string | boolean | Array<number | string | boolean>
+  >
 ): string {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value = params[key];
-    if (!value) continue;
+    if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
       value.forEach((val) => searchParams.append(key, String(val)));
     } else {
@@ -2387,4 +2399,10 @@ export function getSpokePoolVerifier(chainId: number) {
 
   const address = ENABLED_ROUTES.spokePoolVerifier.address;
   return SpokePoolVerifier__factory.connect(address, getProvider(chainId));
+}
+
+export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
+  return amount
+    .mul(ethers.utils.parseEther((1 + Number(markup)).toString()))
+    .div(sdk.utils.fixedPointAdjustment);
 }

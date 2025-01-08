@@ -126,21 +126,26 @@ const enabledRoutes = {
       },
     },
     spokePoolPeripheryAddresses: {
-      "uniswap-swapRouter02": {
-        [CHAIN_IDs.POLYGON]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.OPTIMISM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.ARBITRUM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.BASE]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.ZK_SYNC]: "0xB007dFe9A6b70e1AB5BD5E97C22e47C5e0c0B8D8",
-        [CHAIN_IDs.WORLD_CHAIN]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.BLAST]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.ZORA]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-        [CHAIN_IDs.MAINNET]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
-      },
-      "uniswap-universalRouter": {
-        [CHAIN_IDs.OPTIMISM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
-        [CHAIN_IDs.ARBITRUM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
-      },
+      [CHAIN_IDs.ARBITRUM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BASE]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BLAST]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.MAINNET]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.OPTIMISM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.POLYGON]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.WORLD_CHAIN]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.ZK_SYNC]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
+      [CHAIN_IDs.ZORA]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+    },
+    spokePoolPeripheryProxyAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BASE]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BLAST]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.MAINNET]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.OPTIMISM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.POLYGON]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.WORLD_CHAIN]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.ZK_SYNC]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
+      [CHAIN_IDs.ZORA]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
     },
     routes: transformChainConfigs(enabledMainnetChainConfigs),
   },
@@ -172,9 +177,8 @@ const enabledRoutes = {
     universalSwapAndBridgeAddresses: {
       uniswap: {},
     },
-    spokePoolPeripheryAddresses: {
-      "uniswap-universalRouter": {},
-    },
+    spokePoolPeripheryAddresses: {},
+    spokePoolPeripheryProxyAddresses: {},
     routes: transformChainConfigs(enabledSepoliaChainConfigs),
   },
 } as const;
@@ -406,11 +410,11 @@ async function generateRoutes(hubPoolChainId = 1) {
         Record<string, string>
       >
     ),
-    spokePoolPeripheryAddresses: checksumAddressesOfNestedMap(
-      config.spokePoolPeripheryAddresses as Record<
-        string,
-        Record<string, string>
-      >
+    spokePoolPeripheryAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryAddresses as Record<string, string>
+    ),
+    spokePoolPeripheryProxyAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryProxyAddresses as Record<string, string>
     ),
     routes: config.routes.flatMap((route) =>
       transformBridgeRoute(route, config.hubPoolChain)
@@ -665,19 +669,20 @@ function getBridgedUsdcSymbol(chainId: number) {
   }
 }
 
+function checksumAddressOfMap(map: Record<string, string>) {
+  return Object.entries(map).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: utils.getAddress(value) }),
+    {}
+  );
+}
+
 function checksumAddressesOfNestedMap(
   nestedMap: Record<string, Record<string, string>>
 ) {
   return Object.entries(nestedMap).reduce(
     (acc, [key, value]) => ({
       ...acc,
-      [key]: Object.entries(value).reduce(
-        (acc, [chainId, address]) => ({
-          ...acc,
-          [chainId]: utils.getAddress(address as string),
-        }),
-        {}
-      ),
+      [key]: checksumAddressOfMap(value),
     }),
     {}
   );

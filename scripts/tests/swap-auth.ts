@@ -1,14 +1,14 @@
 import { Wallet } from "ethers";
 
 import { getProvider } from "../../api/_utils";
-import { fetchSwapQuote, signAndWaitAllowanceFlow } from "./_swap-utils";
+import { fetchSwapQuote, signAndWaitPermitFlow } from "./_swap-utils";
 
-async function swapWithAllowance() {
-  console.log("Swapping with allowance...");
-  const swapQuote = await fetchSwapQuote("approval");
+async function swapWithAuth() {
+  console.log("Swapping with auth...");
+  const swapQuote = await fetchSwapQuote("auth");
 
-  if (!swapQuote || !swapQuote.swapTx || !("data" in swapQuote.swapTx)) {
-    console.log("No swap quote with tx data for approval");
+  if (!swapQuote || !swapQuote.swapTx || !swapQuote.eip712) {
+    console.log("No swap quote with EIP712 data for auth");
     return;
   }
 
@@ -17,11 +17,11 @@ async function swapWithAllowance() {
       getProvider(swapQuote.swapTx.chainId)
     );
 
-    await signAndWaitAllowanceFlow({ wallet, swapResponse: swapQuote });
+    await signAndWaitPermitFlow({ wallet, swapResponse: swapQuote });
   }
 }
 
-swapWithAllowance()
+swapWithAuth()
   .then(() => console.log("Done"))
   .catch((e) => {
     console.error(e);
