@@ -990,6 +990,18 @@
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
     {
+      "fromChain": 1,
+      "toChain": 42161,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
+    },
+    {
       "fromChain": 10,
       "toChain": 1,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -1936,6 +1948,18 @@
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
     {
+      "fromChain": 10,
+      "toChain": 42161,
+      "fromTokenAddress": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
+    },
+    {
       "fromChain": 137,
       "toChain": 1,
       "fromTokenAddress": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
@@ -2704,6 +2728,18 @@
       "toTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 42161,
+      "fromTokenAddress": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
     },
     {
       "fromChain": 42161,
@@ -3641,6 +3677,18 @@
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
     {
+      "fromChain": 42161,
+      "toChain": 42161,
+      "fromTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
+    },
+    {
       "fromChain": 324,
       "toChain": 1,
       "fromTokenAddress": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
@@ -5069,6 +5117,18 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 8453,
+      "toChain": 42161,
+      "fromTokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
     },
     {
       "fromChain": 59144,
@@ -8358,6 +8418,18 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 534352,
+      "toChain": 42161,
+      "fromTokenAddress": "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "externalProjectId": "hyper-liquid"
     },
     {
       "fromChain": 690,

@@ -17,6 +17,7 @@ import { getAllChains } from "../utils";
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
+import { externConfigs } from "constants/chains/configs";
 
 type Props = {
   selectedRoute: Route;
@@ -34,7 +35,13 @@ export function ChainSelector({
   onSelectChain,
 }: Props) {
   const isFrom = fromOrTo === "from";
-  const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+  const {
+    fromChain,
+    toChain,
+    fromTokenSymbol,
+    toTokenSymbol,
+    externalProjectId,
+  } = selectedRoute;
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
 
   const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
@@ -80,7 +87,14 @@ export function ChainSelector({
     <Selector<number>
       elements={sortOrder.map((chain) => ({
         value: chain.chainId,
-        element: <ChainInfoElement chain={chain} />,
+        element: (
+          <ChainInfoElement
+            chain={chain}
+            externalProjectId={
+              fromOrTo === "to" ? externalProjectId : undefined
+            }
+          />
+        ),
         suffix:
           isConnected && isFrom ? (
             <Text size="lg" color="grey-400">
@@ -121,14 +135,19 @@ export function ChainSelector({
 
 function ChainInfoElement({
   chain,
+  externalProjectId,
   superText,
 }: {
   chain: ChainInfo;
+  externalProjectId?: string;
   superText?: string;
 }) {
+  const externalProject = externalProjectId
+    ? externConfigs[externalProjectId]
+    : null;
   return (
     <ChainIconTextWrapper>
-      <ChainIcon src={chain.logoURI} />
+      <ChainIcon src={externalProject?.logoURI ?? chain.logoURI} />
       <ChainIconSuperTextWrapper>
         {superText && (
           <Text size="sm" color="grey-400">
@@ -136,7 +155,9 @@ function ChainInfoElement({
           </Text>
         )}
         <Text size="lg" color="white-100">
-          {capitalizeFirstLetter(chain.fullName ?? chain.name)}
+          {capitalizeFirstLetter(
+            externalProject?.name ?? chain.fullName ?? chain.name
+          )}
         </Text>
       </ChainIconSuperTextWrapper>
     </ChainIconTextWrapper>

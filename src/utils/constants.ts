@@ -294,6 +294,7 @@ const RouteSS = superstruct.object({
   toTokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
+  externalProjectId: superstruct.optional(superstruct.string()),
 });
 const RoutesSS = superstruct.array(RouteSS);
 const SwapRouteSS = superstruct.assign(
