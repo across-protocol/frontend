@@ -85,7 +85,6 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  GAS_MARKUP, // To be deprecated and replaced by BASE_FEE_MARKUP and PRIORITY_FEE_MARKUP
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
   VERCEL_ENV,
@@ -94,7 +93,7 @@ const {
 
 export const baseFeeMarkup: {
   [chainId: string]: number;
-} = JSON.parse(BASE_FEE_MARKUP || GAS_MARKUP || "{}");
+} = JSON.parse(BASE_FEE_MARKUP || "{}");
 export const priorityFeeMarkup: {
   [chainId: string]: number;
 } = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
