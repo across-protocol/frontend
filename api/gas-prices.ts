@@ -145,7 +145,7 @@ const handler = async (
       );
     };
     const responseJson = {
-      "0-reference": {
+      reference: {
         tokenSymbol,
         gasPrice:
           "maxFeePerGas * baseFeeMultiplier + priorityFee * priorityFeeMultiplier",
