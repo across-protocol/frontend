@@ -125,8 +125,8 @@ export function useBridgeAction(
         // 4. We must construct a payload to send to HL's Bridge2 contract
         // 5. The user must sign this signature
 
-        // For now let's assume a 0.05% loss in the amount
-        const amount = frozenDepositArgs.amount.mul(9995).div(10000);
+        // For now let's assume a 2% loss in the amount
+        const amount = frozenDepositArgs.amount.mul(98).div(100);
 
         // Build the payload
         const hyperLiquidPayload = await generateHyperLiquidPayload(
