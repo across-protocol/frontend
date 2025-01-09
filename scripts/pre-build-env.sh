@@ -10,8 +10,6 @@
      echo "Getting env files from config repo..."
      curl -o ${FILE_PATH} "https://${GH_TOKEN}@${GIT_ENV_REPO}/${FILE_REMOTE}"
      echo "Updated data at ${FILE_PATH}"
-     echo $GIT_ENV_EXPORTED
-     echo "Done!"
  else
      echo "No env exported"
  fi
