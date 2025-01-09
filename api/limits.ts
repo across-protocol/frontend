@@ -181,6 +181,13 @@ const handler = async (
         latestGasPriceCache(destinationChainId).get(),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
+    let tokenGasCost = gasCosts?.nativeGasCost;
+    if (tokenGasCost !== undefined) {
+      tokenGasCost = tokenGasCost.mul(gasPrice);
+      if (gasCosts?.opStackL1GasCost) {
+        tokenGasCost = tokenGasCost.add(gasCosts.opStackL1GasCost);
+      }
+    }
 
     const [
       relayerFeeDetails,
@@ -195,7 +202,7 @@ const handler = async (
         relayer,
         gasPrice,
         gasCosts?.nativeGasCost,
-        gasCosts?.tokenGasCost
+        tokenGasCost
       ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,

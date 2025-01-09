@@ -1982,6 +1982,7 @@ export function getCachedFillGasUsage(
       }
     );
     return {
+      opStackL1GasCost: gasCosts.opStackL1GasCost,
       nativeGasCost: gasCosts.nativeGasCost,
       tokenGasCost: gasCosts.tokenGasCost,
     };
@@ -1991,10 +1992,17 @@ export function getCachedFillGasUsage(
     cacheKey,
     ttl,
     fetchFn,
-    (gasCosts: { nativeGasCost: BigNumber; tokenGasCost: BigNumber }) => {
+    (gasCosts: {
+      nativeGasCost: BigNumber;
+      tokenGasCost: BigNumber;
+      opStackL1GasCost: BigNumber | undefined;
+    }) => {
       return {
         nativeGasCost: BigNumber.from(gasCosts.nativeGasCost),
         tokenGasCost: BigNumber.from(gasCosts.tokenGasCost),
+        opStackL1GasCost: gasCosts.opStackL1GasCost
+          ? BigNumber.from(gasCosts.opStackL1GasCost)
+          : undefined,
       };
     }
   );
