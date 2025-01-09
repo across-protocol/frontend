@@ -6,8 +6,6 @@ import {
   getMaxFeePerGas,
   getRelayerFeeCalculatorQueries,
   handleErrorCondition,
-  originChainBaseFeeMarkup,
-  priorityFeeMarkup,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
