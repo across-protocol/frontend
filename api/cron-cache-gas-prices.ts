@@ -53,29 +53,31 @@ const handler = async (
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
     const gasPricePromises = mainnetChains.map((originChain) => {
-      mainnetChains.map(async (destinationChain) => {
-        if (originChain.chainId === destinationChain.chainId) {
-          return;
-        }
-        const secondsPerUpdateForChain =
-          updateIntervalsSecPerChain[
-            destinationChain.chainId as keyof typeof updateIntervalsSecPerChain
-          ] || updateIntervalsSecPerChain.default;
-        const cache = latestGasPriceCache(
-          destinationChain.chainId,
-          originChain.chainId
-        );
-
-        while (true) {
-          const diff = Date.now() - functionStart;
-          // Stop after `maxDurationSec` seconds
-          if (diff >= maxDurationSec * 1000) {
-            break;
+      return Promise.all(
+        mainnetChains.map(async (destinationChain) => {
+          if (originChain.chainId === destinationChain.chainId) {
+            return;
           }
-          await cache.set();
-          await utils.delay(secondsPerUpdateForChain);
-        }
-      });
+          const secondsPerUpdateForChain =
+            updateIntervalsSecPerChain[
+              destinationChain.chainId as keyof typeof updateIntervalsSecPerChain
+            ] || updateIntervalsSecPerChain.default;
+          const cache = latestGasPriceCache(
+            destinationChain.chainId,
+            originChain.chainId
+          );
+
+          while (true) {
+            const diff = Date.now() - functionStart;
+            // Stop after `maxDurationSec` seconds
+            if (diff >= maxDurationSec * 1000) {
+              break;
+            }
+            await cache.set();
+            await utils.delay(secondsPerUpdateForChain);
+          }
+        })
+      );
     });
     await Promise.all(gasPricePromises);
 
