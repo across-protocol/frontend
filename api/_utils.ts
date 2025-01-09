@@ -2034,7 +2034,7 @@ export function getMaxFeePerGas(
   console.log(
     "getMaxFeePerGas",
     baseFeeMultiplier.toString(),
-    priorityFeeMarkup.toString()
+    priorityFeeMultiplier.toString()
   );
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
