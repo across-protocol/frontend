@@ -164,7 +164,7 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasCosts, gasPrice] =
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -172,31 +172,22 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        isMessageDefined
-          ? undefined
-          : getCachedFillGasUsage(depositArgs, {
-              relayerAddress: relayer,
-            }),
         latestGasPriceCache(destinationChainId, computedOriginChainId).get(),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
-      relayerFeeDetails,
+      gasCosts,
       multicallOutput,
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(
-        depositArgs,
-        tokenPriceNative,
-        relayer,
-        gasPrice,
-        gasCosts?.nativeGasCost,
-        gasCosts?.tokenGasCost
-      ),
+      isMessageDefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        : getCachedFillGasUsage(depositArgs, gasPrice, {
+            relayerAddress: relayer,
+          }),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
@@ -226,6 +217,16 @@ const handler = async (
         )
       ),
     ]);
+    // This call should not make any additional RPC queries if gasCosts is defined--for any deposit
+    // with an empty message.
+    const relayerFeeDetails = await getRelayerFeeDetails(
+      depositArgs,
+      tokenPriceNative,
+      relayer,
+      gasPrice,
+      gasCosts?.nativeGasCost,
+      gasCosts?.tokenGasCost
+    );
     logger.debug({
       at: "Limits",
       message: "Relayer fee details from SDK",
