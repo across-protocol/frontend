@@ -181,7 +181,7 @@ const handler = async (
         latestGasPriceCache(destinationChainId).get(),
       ]);
     console.log(
-      `Got gasPrice: ${gasPrice.toString} and gasCosts ${gasCosts?.nativeGasCost.toString()}`
+      `Got gasPrice: ${gasPrice.toString()} and gasCosts ${gasCosts?.nativeGasCost.toString()}`
     );
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
     let tokenGasCost = gasCosts?.nativeGasCost;
