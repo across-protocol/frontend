@@ -236,7 +236,7 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
+  fillDeadline ??= await getFillDeadline(spokePool, destinationChainId);
 
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
@@ -350,7 +350,7 @@ export async function sendSwapAndBridgeTx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
+  fillDeadline ??= await getFillDeadline(spokePool, destinationChainId);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
@@ -424,11 +424,21 @@ export async function getSpokePoolAndVerifier({
   };
 }
 
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const fillDeadlineBuffer = Number(
-    process.env.FILL_DEADLINE_BUFFER_SECONDS ??
-      DEFAULT_FILL_DEADLINE_BUFFER_SECONDS
-  );
+function getFillDeadlineBuffer(chainId: number) {
+  const bufferFromEnv = (
+    JSON.parse(process.env.FILL_DEADLINE_BUFFER_SECONDS || "{}") as Record<
+      string,
+      string
+    >
+  )?.[chainId.toString()];
+  return Number(bufferFromEnv ?? DEFAULT_FILL_DEADLINE_BUFFER_SECONDS);
+}
+
+async function getFillDeadline(
+  spokePool: SpokePool,
+  chainId: number
+): Promise<number> {
+  const fillDeadlineBuffer = getFillDeadlineBuffer(chainId);
   const currentTime = await spokePool.callStatic.getCurrentTime();
   return Number(currentTime) + fillDeadlineBuffer;
 }
