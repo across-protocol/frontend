@@ -87,6 +87,7 @@ const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
+  OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
 } = process.env;
@@ -97,6 +98,9 @@ export const baseFeeMarkup: {
 export const priorityFeeMarkup: {
   [chainId: string]: number;
 } = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
+export const opStackL1DataFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
@@ -594,15 +598,25 @@ export const getHubPoolClient = () => {
 
 export const getGasMarkup = (
   chainId: string | number
-): { baseFeeMarkup: BigNumber; priorityFeeMarkup: BigNumber } => {
+): {
+  baseFeeMarkup: BigNumber;
+  priorityFeeMarkup: BigNumber;
+  opStackL1DataFeeMarkup: BigNumber;
+} => {
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
+  let _opStackL1DataFeeMarkup: BigNumber | undefined;
   if (typeof baseFeeMarkup[chainId] === "number") {
     _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
   }
   if (typeof priorityFeeMarkup[chainId] === "number") {
     _priorityFeeMarkup = utils.parseEther(
       (1 + priorityFeeMarkup[chainId]).toString()
+    );
+  }
+  if (typeof opStackL1DataFeeMarkup[chainId] === "number") {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (1 + opStackL1DataFeeMarkup[chainId]).toString()
     );
   }
 
@@ -627,11 +641,21 @@ export const getGasMarkup = (
       ).toString()
     );
   }
+  if (_opStackL1DataFeeMarkup === undefined) {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (
+        1 +
+        (sdk.utils.chainIsOPStack(Number(chainId))
+          ? opStackL1DataFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+          : DEFAULT_GAS_MARKUP)
+      ).toString()
+    );
+  }
 
-  // Otherwise, use default gas markup (or optimism's for OP stack).
   return {
     baseFeeMarkup: _baseFeeMarkup,
     priorityFeeMarkup: _priorityFeeMarkup,
+    opStackL1DataFeeMarkup: _opStackL1DataFeeMarkup,
   };
 };
 
@@ -1977,10 +2001,8 @@ export function getCachedFillGasUsage(
       overrides?.relayerAddress,
       {
         gasPrice,
-        // Scale the op stack L1 gas cost component by the base fee multiplier.
-        // Consider adding a new environment variable OP_STACK_L1_GAS_COST_MARKUP if we want finer-grained control.
         opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
-          .baseFeeMarkup,
+          .opStackL1DataFeeMarkup,
       }
     );
     return {

@@ -72,7 +72,7 @@ const handler = async (
           );
           const opStackL1GasCostMultiplier = getGasMarkup(
             Number(chainId)
-          ).baseFeeMarkup;
+          ).opStackL1DataFeeMarkup;
           const { nativeGasCost, tokenGasCost } =
             await relayerFeeCalculatorQueries.getGasCosts(
               deposit,
