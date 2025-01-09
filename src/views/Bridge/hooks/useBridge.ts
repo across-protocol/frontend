@@ -61,6 +61,7 @@ export function useBridge() {
 
   const { error: amountValidationError, warn: amountValidationWarning } =
     validateBridgeAmount(
+      selectedRoute,
       parsedAmount,
       quotedFees,
       maxBalance,

@@ -13,6 +13,7 @@ import {
   nonEthChains,
   GetBridgeFeesResult,
   chainEndpointToId,
+  parseUnits,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -94,6 +95,7 @@ export function getReceiveTokenSymbol(
 }
 
 export function validateBridgeAmount(
+  selectedRoute: SelectedRoute,
   parsedAmountInput?: BigNumber,
   quoteFees?: GetBridgeFeesResult,
   currentBalance?: BigNumber,
@@ -124,7 +126,12 @@ export function validateBridgeAmount(
     };
   }
 
-  if (quoteFees?.isAmountTooLow) {
+  if (
+    quoteFees?.isAmountTooLow ||
+    // HyperLiquid has a minimum deposit amount of 5 USDC
+    (selectedRoute.externalProjectId === "hyper-liquid" &&
+      parsedAmountInput.lt(parseUnits("5", 6)))
+  ) {
     return {
       error: AmountInputError.AMOUNT_TOO_LOW,
     };
@@ -441,6 +448,8 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
         overrides?.toChain
     ) || undefined;
 
+  const externalProjectId = params.get("externalProjectId") || undefined;
+
   const inputTokenSymbol =
     params.get("inputTokenSymbol") ??
     params.get("inputToken") ??
@@ -459,6 +468,7 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     toChain,
     inputTokenSymbol,
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
+    externalProjectId,
   };
 
   const route =
