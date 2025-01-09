@@ -1984,7 +1984,6 @@ export function getCachedFillGasUsage(
     return {
       opStackL1GasCost: gasCosts.opStackL1GasCost,
       nativeGasCost: gasCosts.nativeGasCost,
-      tokenGasCost: gasCosts.tokenGasCost,
     };
   };
 
@@ -1994,12 +1993,10 @@ export function getCachedFillGasUsage(
     fetchFn,
     (gasCosts: {
       nativeGasCost: BigNumber;
-      tokenGasCost: BigNumber;
       opStackL1GasCost: BigNumber | undefined;
     }) => {
       return {
         nativeGasCost: BigNumber.from(gasCosts.nativeGasCost),
-        tokenGasCost: BigNumber.from(gasCosts.tokenGasCost),
         opStackL1GasCost: gasCosts.opStackL1GasCost
           ? BigNumber.from(gasCosts.opStackL1GasCost)
           : undefined,
@@ -2034,6 +2031,11 @@ export function getMaxFeePerGas(
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
   } = getGasMarkup(chainId);
+  console.log(
+    "getMaxFeePerGas",
+    baseFeeMultiplier.toString(),
+    priorityFeeMarkup.toString()
+  );
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
     baseFeeMultiplier,
