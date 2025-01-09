@@ -2032,7 +2032,7 @@ export function getMaxFeePerGas(
     priorityFeeMarkup: priorityFeeMultiplier,
   } = getGasMarkup(chainId);
   console.log(
-    "getMaxFeePerGas",
+    "fresh query getGasPriceEstimate",
     baseFeeMultiplier.toString(),
     priorityFeeMultiplier.toString()
   );
