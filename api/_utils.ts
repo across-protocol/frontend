@@ -2061,8 +2061,8 @@ export function latestGasPriceCache(
   return makeCacheGetterAndSetter(
     buildInternalCacheKey(
       "latestGasPriceCache",
-      destinationChainId,
-      originChainId
+      originChainId,
+      destinationChainId
     ),
     ttlPerChain[destinationChainId] || ttlPerChain.default,
     async () =>
