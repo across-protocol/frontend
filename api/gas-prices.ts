@@ -21,7 +21,6 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { assert, Infer, object, optional, string } from "superstruct";
-import { isDefined } from "utils";
 
 const chains = mainnetChains;
 
@@ -153,7 +152,7 @@ const handler = async (
                       return [originChainId, ethers.utils.formatEther(markup)];
                     }
                   })
-                  .filter(isDefined)
+                  .filter((x) => x !== undefined)
               ),
               originChainPriorityFeeMarkups: Object.fromEntries(
                 Object.keys(chainIdsWithToken)
@@ -164,7 +163,7 @@ const handler = async (
                       return [originChainId, ethers.utils.formatEther(markup)];
                     }
                   })
-                  .filter(isDefined)
+                  .filter((x) => x !== undefined)
               ),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
