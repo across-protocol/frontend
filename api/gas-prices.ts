@@ -119,7 +119,7 @@ const handler = async (
       )
     );
     const getOriginChainFeeMarkups = (destinationChainId: number) => {
-      return Object.fromEntries(
+      const dictionary = Object.fromEntries(
         Object.keys(chainIdsWithToken)
           .map((originChainId) => {
             const markup = getGasMarkup(destinationChainId, originChainId);
@@ -143,6 +143,10 @@ const handler = async (
           })
           .filter((x) => x !== undefined)
       );
+      if (!Object.keys(dictionary).length) {
+        return undefined;
+      }
+      return dictionary;
     };
     const responseJson = {
       reference: {
