@@ -18,7 +18,7 @@ import {
 } from "./remote-configs/utils";
 
 dotenv.config({
-  path: [".env.local", ".env.production", ".env", ".output.env"],
+  path: [".env.local", ".env.production", ".env", "./.output.env"],
 });
 
 const remoteConfigs = {
