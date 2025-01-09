@@ -733,7 +733,7 @@ export const getRelayerFeeDetails = async (
   },
   tokenPrice: number,
   relayerAddress: string,
-  gasPrice: sdk.utils.BigNumberish,
+  gasPrice?: sdk.utils.BigNumberish,
   gasUnits?: sdk.utils.BigNumberish,
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
@@ -1972,9 +1972,8 @@ export function isContractCache(chainId: number, address: string) {
 
 export function getCachedFillGasUsage(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
-  gasPrice: BigNumber,
+  gasPrice?: BigNumber,
   overrides?: Partial<{
-    spokePoolAddress: string;
     relayerAddress: string;
   }>
 ) {

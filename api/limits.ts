@@ -172,7 +172,11 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        latestGasPriceCache(destinationChainId).get(),
+        // If Linea, then we will defer gas price estimation to the SDK in getCachedFillGasUsage because
+        // the priority fee depends upon the fill transaction calldata.
+        destinationChainId === CHAIN_IDs.LINEA
+          ? undefined
+          : latestGasPriceCache(destinationChainId).get(),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
