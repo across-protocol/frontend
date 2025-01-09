@@ -6,6 +6,8 @@ import {
   getMaxFeePerGas,
   getRelayerFeeCalculatorQueries,
   handleErrorCondition,
+  originChainBaseFeeMarkup,
+  priorityFeeMarkup,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
@@ -19,6 +21,7 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { assert, Infer, object, optional, string } from "superstruct";
+import { isDefined } from "utils";
 
 const chains = mainnetChains;
 
@@ -141,6 +144,28 @@ const handler = async (
               )
                 ? ethers.utils.formatEther(getGasMarkup(chainId).baseFeeMarkup)
                 : undefined,
+              originChainBaseFeeMarkups: Object.fromEntries(
+                Object.keys(chainIdsWithToken)
+                  .map((originChainId) => {
+                    const routeKey = `${originChainId}-${chainId}`;
+                    const markup = originChainBaseFeeMarkup[routeKey];
+                    if (markup) {
+                      return [originChainId, ethers.utils.formatEther(markup)];
+                    }
+                  })
+                  .filter(isDefined)
+              ),
+              originChainPriorityFeeMarkups: Object.fromEntries(
+                Object.keys(chainIdsWithToken)
+                  .map((originChainId) => {
+                    const routeKey = `${originChainId}-${chainId}`;
+                    const markup = priorityFeeMarkup[routeKey];
+                    if (markup) {
+                      return [originChainId, ethers.utils.formatEther(markup)];
+                    }
+                  })
+                  .filter(isDefined)
+              ),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
             tokenGasCost: gasCosts[i].tokenGasCost.toString(),

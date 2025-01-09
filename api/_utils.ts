@@ -105,10 +105,10 @@ export const priorityFeeMarkup: {
 // chains have higher re-org rates so fillers are expected to wait longer before filling the deposits and therefore,
 // a higher buffer should be applied on the estimated gas price to allow for more volatility.
 export const originChainBaseFeeMarkup: {
-  [chainId: string]: number;
+  [route: string]: number;
 } = JSON.parse(ORIGIN_BASE_FEE_MARKUP || "{}");
 export const originChainPriorityFeeMarkup: {
-  [chainId: string]: number;
+  [route: string]: number;
 } = JSON.parse(ORIGIN_PRIORITY_FEE_MARKUP || "{}");
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
@@ -647,20 +647,19 @@ export const getGasMarkup = (
 
   // Finally, apply any origin chain markup if it exists.
   if (originChainId) {
-    if (originChainBaseFeeMarkup[originChainId]) {
+    const routeKey = `${originChainId}-${destinationChainId}`;
+    if (originChainBaseFeeMarkup[routeKey]) {
       _baseFeeMarkup = _baseFeeMarkup
         .mul(
-          utils.parseEther(
-            (1 + originChainBaseFeeMarkup[originChainId]).toString()
-          )
+          utils.parseEther((1 + originChainBaseFeeMarkup[routeKey]).toString())
         )
         .div(sdk.utils.fixedPointAdjustment);
     }
-    if (originChainPriorityFeeMarkup[originChainId]) {
+    if (originChainPriorityFeeMarkup[routeKey]) {
       _priorityFeeMarkup = _priorityFeeMarkup
         .mul(
           utils.parseEther(
-            (1 + originChainPriorityFeeMarkup[originChainId]).toString()
+            (1 + originChainPriorityFeeMarkup[routeKey]).toString()
           )
         )
         .div(sdk.utils.fixedPointAdjustment);
