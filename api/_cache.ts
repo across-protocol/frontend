@@ -84,10 +84,12 @@ export async function getCachedValue<T>(
 ): Promise<T> {
   const cachedValue = await redisCache.get<T>(key);
   if (cachedValue) {
+    console.log(`Cache hit for key: ${key}: ${cachedValue.toString()}`);
     return parser ? parser(cachedValue) : cachedValue;
   }
 
   const value = await fetcher();
+  console.log(`Cache miss for key: ${key}: ${value}`);
   await redisCache.set(key, value, ttl);
   return value;
 }
