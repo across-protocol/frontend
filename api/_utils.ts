@@ -608,7 +608,12 @@ export const getHubPoolClient = () => {
 export const getGasMarkup = (
   destinationChainId: string | number,
   originChainId?: string | number
-): { baseFeeMarkup: BigNumber; priorityFeeMarkup: BigNumber } => {
+): {
+  baseFeeMarkup: BigNumber;
+  priorityFeeMarkup: BigNumber;
+  originChainBaseFeeMarkup?: BigNumber;
+  originChainPriorityFeeMarkup?: BigNumber;
+} => {
   // First, get the markup for the destination chain.
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
@@ -646,22 +651,24 @@ export const getGasMarkup = (
   }
 
   // Finally, apply any origin chain markup if it exists.
+  let _originChainBaseFeeMarkup: BigNumber | undefined;
+  let _originChainPriorityFeeMarkup: BigNumber | undefined;
   if (originChainId) {
     const routeKey = `${originChainId}-${destinationChainId}`;
     if (typeof originChainBaseFeeMarkup[routeKey] === "number") {
+      _originChainBaseFeeMarkup = utils.parseEther(
+        (1 + originChainBaseFeeMarkup[routeKey]).toString()
+      );
       _baseFeeMarkup = _baseFeeMarkup
-        .mul(
-          utils.parseEther((1 + originChainBaseFeeMarkup[routeKey]).toString())
-        )
+        .mul(_originChainBaseFeeMarkup)
         .div(sdk.utils.fixedPointAdjustment);
     }
     if (typeof originChainPriorityFeeMarkup[routeKey] === "number") {
+      _originChainPriorityFeeMarkup = utils.parseEther(
+        (1 + originChainPriorityFeeMarkup[routeKey]).toString()
+      );
       _priorityFeeMarkup = _priorityFeeMarkup
-        .mul(
-          utils.parseEther(
-            (1 + originChainPriorityFeeMarkup[routeKey]).toString()
-          )
-        )
+        .mul(_originChainPriorityFeeMarkup)
         .div(sdk.utils.fixedPointAdjustment);
     }
   }
@@ -670,6 +677,8 @@ export const getGasMarkup = (
   return {
     baseFeeMarkup: _baseFeeMarkup,
     priorityFeeMarkup: _priorityFeeMarkup,
+    originChainBaseFeeMarkup: _originChainBaseFeeMarkup,
+    originChainPriorityFeeMarkup: _originChainPriorityFeeMarkup,
   };
 };
 

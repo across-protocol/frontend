@@ -146,10 +146,14 @@ const handler = async (
               originChainBaseFeeMarkups: Object.fromEntries(
                 Object.keys(chainIdsWithToken)
                   .map((originChainId) => {
-                    const routeKey = `${originChainId}-${chainId}`;
-                    const markup = originChainBaseFeeMarkup[routeKey];
-                    if (typeof markup === "number") {
-                      return [originChainId, ethers.utils.formatEther(markup)];
+                    const markup = getGasMarkup(chainId, originChainId);
+                    if (markup.originChainBaseFeeMarkup) {
+                      return [
+                        originChainId,
+                        ethers.utils.formatEther(
+                          markup.originChainBaseFeeMarkup
+                        ),
+                      ];
                     }
                   })
                   .filter((x) => x !== undefined)
@@ -157,10 +161,14 @@ const handler = async (
               originChainPriorityFeeMarkups: Object.fromEntries(
                 Object.keys(chainIdsWithToken)
                   .map((originChainId) => {
-                    const routeKey = `${originChainId}-${chainId}`;
-                    const markup = priorityFeeMarkup[routeKey];
-                    if (typeof markup === "number") {
-                      return [originChainId, ethers.utils.formatEther(markup)];
+                    const markup = getGasMarkup(chainId, originChainId);
+                    if (markup.originChainPriorityFeeMarkup) {
+                      return [
+                        originChainId,
+                        ethers.utils.formatEther(
+                          markup.originChainPriorityFeeMarkup
+                        ),
+                      ];
                     }
                   })
                   .filter((x) => x !== undefined)
