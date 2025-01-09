@@ -118,8 +118,48 @@ const handler = async (
         }
       )
     );
+    const getOriginChainFeeMarkups = (destinationChainId: number) => {
+      const dictionary = Object.fromEntries(
+        Object.keys(chainIdsWithToken)
+          .map((originChainId) => {
+            const markup = getGasMarkup(destinationChainId, originChainId);
+            const originChainBaseFeeMarkup = markup.originChainBaseFeeMarkup
+              ? ethers.utils.formatEther(markup.originChainBaseFeeMarkup)
+              : undefined;
+            const originChainPriorityFeeMarkup =
+              markup.originChainPriorityFeeMarkup
+                ? ethers.utils.formatEther(markup.originChainPriorityFeeMarkup)
+                : undefined;
+            if (!originChainBaseFeeMarkup && !originChainPriorityFeeMarkup) {
+              return undefined;
+            }
+            return [
+              `${originChainId}-${destinationChainId}`,
+              {
+                baseFeeMarkup: originChainBaseFeeMarkup,
+                priorityFeeMarkup: originChainPriorityFeeMarkup,
+              },
+            ];
+          })
+          .filter((x) => x !== undefined)
+      );
+      if (!Object.keys(dictionary).length) {
+        return undefined;
+      }
+      return dictionary;
+    };
     const responseJson = {
-      tokenSymbol,
+      reference: {
+        tokenSymbol,
+        gasPrice:
+          "maxFeePerGas * baseFeeMultiplier + priorityFee * priorityFeeMultiplier",
+        maxFeePerGas: "estimated maximum base fee",
+        maxPriorityFeePerGas: "estimated maximum tip",
+        opStackL1GasCostMultiplier:
+          "L1 data fee added to all OPStack transactions",
+        originChainFeeMarkups:
+          "Additional multiplier applied to base fee and/or priority fee for certain originChain-destChain routes. NOT applied in this calculation.",
+      },
       ...Object.fromEntries(
         Object.keys(chainIdsWithToken).map((chainId, i) => [
           chainId,
@@ -141,6 +181,7 @@ const handler = async (
               )
                 ? ethers.utils.formatEther(getGasMarkup(chainId).baseFeeMarkup)
                 : undefined,
+              originChainFeeMarkups: getOriginChainFeeMarkups(Number(chainId)),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
             tokenGasCost: gasCosts[i].tokenGasCost.toString(),
