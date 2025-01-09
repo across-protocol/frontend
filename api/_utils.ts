@@ -612,7 +612,7 @@ export const getGasMarkup = (
   // First, get the markup for the destination chain.
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
-  if (typeof baseFeeMarkup[chainId] === "number") {
+  if (typeof baseFeeMarkup[destinationChainId] === "number") {
     _baseFeeMarkup = utils.parseEther(
       (1 + baseFeeMarkup[destinationChainId]).toString()
     );
