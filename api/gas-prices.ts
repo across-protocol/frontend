@@ -145,7 +145,17 @@ const handler = async (
       );
     };
     const responseJson = {
-      tokenSymbol,
+      "0-reference": {
+        tokenSymbol,
+        gasPrice:
+          "maxFeePerGas * baseFeeMultiplier + priorityFee * priorityFeeMultiplier",
+        maxFeePerGas: "estimated maximum base fee",
+        maxPriorityFeePerGas: "estimated maximum tip",
+        opStackL1GasCostMultiplier:
+          "L1 data fee added to all OPStack transactions",
+        originChainFeeMarkups:
+          "Additional multiplier applied to base fee and/or priority fee for certain originChain-destChain routes. NOT applied in this calculation.",
+      },
       ...Object.fromEntries(
         Object.keys(chainIdsWithToken).map((chainId, i) => [
           chainId,
