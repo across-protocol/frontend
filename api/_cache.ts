@@ -85,7 +85,9 @@ export async function getCachedValue<T>(
   const cachedValue = await redisCache.get<T>(key);
   if (cachedValue) {
     if (key.includes("latestGasPriceCache")) {
-      console.log(`Cache hit for key: ${key}: ${cachedValue}`);
+      console.log(
+        `Cache hit for key: ${key}: ${parser ? parser(cachedValue) : cachedValue}`
+      );
     }
     return parser ? parser(cachedValue) : cachedValue;
   }

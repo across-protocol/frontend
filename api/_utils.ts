@@ -2012,7 +2012,10 @@ export function latestGasPriceCache(chainId: number) {
   };
 
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
+    buildInternalCacheKey(
+      `${process.env.CACHE_PREFIX ? process.env.CACHE_PREFIX + "-" : ""}latestGasPriceCache`,
+      chainId
+    ),
     ttlPerChain[chainId] || ttlPerChain.default,
     async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
