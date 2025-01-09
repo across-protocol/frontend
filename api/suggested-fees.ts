@@ -39,6 +39,7 @@ import {
   AmountTooHighError,
   AmountTooLowError,
 } from "./_errors";
+import { getFillDeadline } from "./_fill-deadline";
 
 const { BigNumber } = ethers;
 
@@ -187,6 +188,7 @@ const handler = async (
       [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPriceUsd,
       limits,
+      fillDeadline,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, "usd"),
@@ -203,6 +205,7 @@ const handler = async (
         depositWithMessage ? relayer : undefined,
         depositWithMessage ? message : undefined
       ),
+      getFillDeadline(destinationChainId),
     ]);
     const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
       limits;
@@ -341,6 +344,7 @@ const handler = async (
         maxDepositShortDelay: limits.maxDepositShortDelay,
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
+      fillDeadline: fillDeadline.toString(),
     };
 
     logger.debug({
