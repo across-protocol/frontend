@@ -231,6 +231,9 @@ function transformChainConfigs(
     }
 
     for (const externalProject of enabledExternalProjects) {
+      if (externalProject.intermediaryChain === fromChainId) {
+        continue;
+      }
       const associatedChain = enabledChainConfigs.find(
         (config) => config.chainId === externalProject.intermediaryChain
       );

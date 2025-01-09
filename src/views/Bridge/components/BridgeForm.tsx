@@ -47,8 +47,8 @@ export type BridgeFormProps = {
   onClickMaxBalance: VoidHandler;
   onSelectInputToken: (token: string) => void;
   onSelectOutputToken: (token: string) => void;
-  onSelectFromChain: (chainId: number) => void;
-  onSelectToChain: (chainId: number) => void;
+  onSelectFromChain: (chainId: number, externalProjectId?: string) => void;
+  onSelectToChain: (chainId: number, externalProjectId?: string) => void;
   onClickQuickSwap: VoidHandler;
   onClickChainSwitch: VoidHandler;
   onClickActionButton: VoidHandler;

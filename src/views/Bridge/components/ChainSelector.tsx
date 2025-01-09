@@ -17,13 +17,12 @@ import { getAllChains } from "../utils";
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
-import { externConfigs } from "constants/chains/configs";
 
 type Props = {
   selectedRoute: Route;
   fromOrTo: "from" | "to";
   toAddress?: string;
-  onSelectChain: (chainId: number) => void;
+  onSelectChain: (chainId: number, externalProjectId?: string) => void;
 };
 
 const allChains = getAllChains();
@@ -35,13 +34,8 @@ export function ChainSelector({
   onSelectChain,
 }: Props) {
   const isFrom = fromOrTo === "from";
-  const {
-    fromChain,
-    toChain,
-    fromTokenSymbol,
-    toTokenSymbol,
-    externalProjectId,
-  } = selectedRoute;
+  const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
 
   const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
@@ -63,6 +57,7 @@ export function ChainSelector({
       return chains;
     } else {
       return chains
+        .filter((c) => !c.projectId)
         .map((c) => ({
           ...c,
           disabled: c.balance.eq(0),
@@ -84,17 +79,13 @@ export function ChainSelector({
   }, [balances, isConnected, isFrom]);
 
   return (
-    <Selector<number>
+    <Selector<{ chainId: number; externalProjectId?: string }>
       elements={sortOrder.map((chain) => ({
-        value: chain.chainId,
-        element: (
-          <ChainInfoElement
-            chain={chain}
-            externalProjectId={
-              fromOrTo === "to" ? externalProjectId : undefined
-            }
-          />
-        ),
+        value: {
+          chainId: chain.chainId,
+          externalProjectId: chain.projectId,
+        },
+        element: <ChainInfoElement chain={chain} />,
         suffix:
           isConnected && isFrom ? (
             <Text size="lg" color="grey-400">
@@ -114,8 +105,13 @@ export function ChainSelector({
           />
         ) : undefined
       }
-      selectedValue={isFrom ? fromChain : toChain}
-      setSelectedValue={onSelectChain}
+      selectedValue={{
+        chainId: isFrom ? fromChain : toChain,
+        externalProjectId: isFrom ? undefined : selectedRoute.externalProjectId,
+      }}
+      setSelectedValue={(val) =>
+        onSelectChain(val.chainId, val.externalProjectId)
+      }
       title={
         <TitleWrapper>
           <Text size="md" color="grey-400">
@@ -138,16 +134,18 @@ function ChainInfoElement({
   externalProjectId,
   superText,
 }: {
-  chain: ChainInfo;
+  chain: Pick<ChainInfo, "chainId" | "name" | "fullName" | "logoURI">;
   externalProjectId?: string;
   superText?: string;
 }) {
-  const externalProject = externalProjectId
-    ? externConfigs[externalProjectId]
-    : null;
+  // const externalProject = externalProjectId
+  //   ? externConfigs[externalProjectId]
+  //   : null;
+  externalProjectId;
+
   return (
     <ChainIconTextWrapper>
-      <ChainIcon src={externalProject?.logoURI ?? chain.logoURI} />
+      <ChainIcon src={chain.logoURI} />
       <ChainIconSuperTextWrapper>
         {superText && (
           <Text size="sm" color="grey-400">
@@ -155,9 +153,7 @@ function ChainInfoElement({
           </Text>
         )}
         <Text size="lg" color="white-100">
-          {capitalizeFirstLetter(
-            externalProject?.name ?? chain.fullName ?? chain.name
-          )}
+          {capitalizeFirstLetter(chain.fullName ?? chain.name)}
         </Text>
       </ChainIconSuperTextWrapper>
     </ChainIconTextWrapper>

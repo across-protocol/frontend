@@ -3677,18 +3677,6 @@
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
     {
-      "fromChain": 42161,
-      "toChain": 42161,
-      "fromTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-      "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
-      "fromTokenSymbol": "USDC",
-      "toTokenSymbol": "USDC",
-      "isNative": false,
-      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
-    },
-    {
       "fromChain": 324,
       "toChain": 1,
       "fromTokenAddress": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
