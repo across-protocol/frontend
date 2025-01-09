@@ -87,16 +87,29 @@ const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
+  ORIGIN_BASE_FEE_MARKUP,
+  ORIGIN_PRIORITY_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
 } = process.env;
 
+// Markup applied to base fee and priority fee based on the destination chain of a fill.
 export const baseFeeMarkup: {
   [chainId: string]: number;
 } = JSON.parse(BASE_FEE_MARKUP || "{}");
 export const priorityFeeMarkup: {
   [chainId: string]: number;
 } = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
+// Markup applied to base fee and priority fee based on the origin chain of a fill. Should be set based on the expected
+// time it would take for a filler to wait until the deposit is far enough behind HEAD to fill it. For example, some
+// chains have higher re-org rates so fillers are expected to wait longer before filling the deposits and therefore,
+// a higher buffer should be applied on the estimated gas price to allow for more volatility.
+export const originChainBaseFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(ORIGIN_BASE_FEE_MARKUP || "{}");
+export const originChainPriorityFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(ORIGIN_PRIORITY_FEE_MARKUP || "{}");
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
@@ -593,16 +606,20 @@ export const getHubPoolClient = () => {
 };
 
 export const getGasMarkup = (
-  chainId: string | number
+  destinationChainId: string | number,
+  originChainId?: string | number
 ): { baseFeeMarkup: BigNumber; priorityFeeMarkup: BigNumber } => {
+  // First, get the markup for the destination chain.
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
-  if (typeof baseFeeMarkup[chainId] === "number") {
-    _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
+  if (baseFeeMarkup[destinationChainId]) {
+    _baseFeeMarkup = utils.parseEther(
+      (1 + baseFeeMarkup[destinationChainId]).toString()
+    );
   }
-  if (typeof priorityFeeMarkup[chainId] === "number") {
+  if (priorityFeeMarkup[destinationChainId]) {
     _priorityFeeMarkup = utils.parseEther(
-      (1 + priorityFeeMarkup[chainId]).toString()
+      (1 + priorityFeeMarkup[destinationChainId]).toString()
     );
   }
 
@@ -611,7 +628,7 @@ export const getGasMarkup = (
     _baseFeeMarkup = utils.parseEther(
       (
         1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
+        (sdk.utils.chainIsOPStack(Number(destinationChainId))
           ? baseFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
           : DEFAULT_GAS_MARKUP)
       ).toString()
@@ -621,11 +638,33 @@ export const getGasMarkup = (
     _priorityFeeMarkup = utils.parseEther(
       (
         1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
+        (sdk.utils.chainIsOPStack(Number(destinationChainId))
           ? priorityFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
           : DEFAULT_GAS_MARKUP)
       ).toString()
     );
+  }
+
+  // Finally, apply any origin chain markup if it exists.
+  if (originChainId) {
+    if (originChainBaseFeeMarkup[originChainId]) {
+      _baseFeeMarkup = _baseFeeMarkup
+        .mul(
+          utils.parseEther(
+            (1 + originChainBaseFeeMarkup[originChainId]).toString()
+          )
+        )
+        .div(sdk.utils.fixedPointAdjustment);
+    }
+    if (originChainPriorityFeeMarkup[originChainId]) {
+      _priorityFeeMarkup = _priorityFeeMarkup
+        .mul(
+          utils.parseEther(
+            (1 + originChainPriorityFeeMarkup[originChainId]).toString()
+          )
+        )
+        .div(sdk.utils.fixedPointAdjustment);
+    }
   }
 
   // Otherwise, use default gas markup (or optimism's for OP stack).
@@ -1977,8 +2016,10 @@ export function getCachedFillGasUsage(
       {
         // Scale the op stack L1 gas cost component by the base fee multiplier.
         // Consider adding a new environment variable OP_STACK_L1_GAS_COST_MARKUP if we want finer-grained control.
-        opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
-          .baseFeeMarkup,
+        opStackL1GasCostMultiplier: getGasMarkup(
+          deposit.destinationChainId,
+          deposit.originChainId
+        ).baseFeeMarkup,
       }
     );
     return {
@@ -2000,37 +2041,50 @@ export function getCachedFillGasUsage(
   );
 }
 
-export function latestGasPriceCache(chainId: number) {
+export function latestGasPriceCache(
+  destinationChainId: number,
+  originChainId: number
+) {
   const ttlPerChain = {
     default: 30,
     [CHAIN_IDs.ARBITRUM]: 15,
   };
 
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
-    async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
+    buildInternalCacheKey(
+      "latestGasPriceCache",
+      destinationChainId,
+      originChainId
+    ),
+    ttlPerChain[destinationChainId] || ttlPerChain.default,
+    async () =>
+      (await getMaxFeePerGas(destinationChainId, originChainId)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
 
 /**
  * Resolve the current gas price for a given chain
- * @param chainId The chain ID to resolve the gas price for
+ * @param destinationChainId The chain ID to resolve the gas price for
+ * @param originChainId
  * @returns The gas price in the native currency of the chain
  */
 export function getMaxFeePerGas(
-  chainId: number
+  destinationChainId: number,
+  originChainId?: number
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
   const {
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
-  } = getGasMarkup(chainId);
-  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
-    chainId,
-    baseFeeMultiplier,
-    priorityFeeMultiplier,
-  });
+  } = getGasMarkup(destinationChainId, originChainId);
+  return sdk.gasPriceOracle.getGasPriceEstimate(
+    getProvider(destinationChainId),
+    {
+      chainId: destinationChainId,
+      baseFeeMultiplier,
+      priorityFeeMultiplier,
+    }
+  );
 }
 
 /**

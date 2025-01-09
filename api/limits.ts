@@ -178,7 +178,7 @@ const handler = async (
           : getCachedFillGasUsage(depositArgs, {
               relayerAddress: relayer,
             }),
-        latestGasPriceCache(destinationChainId).get(),
+        latestGasPriceCache(destinationChainId, computedOriginChainId).get(),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
