@@ -1948,6 +1948,7 @@ export function isContractCache(chainId: number, address: string) {
 
 export function getCachedFillGasUsage(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
+  gasPrice: BigNumber,
   overrides?: Partial<{
     spokePoolAddress: string;
     relayerAddress: string;
@@ -1975,6 +1976,7 @@ export function getCachedFillGasUsage(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress,
       {
+        gasPrice,
         // Scale the op stack L1 gas cost component by the base fee multiplier.
         // Consider adding a new environment variable OP_STACK_L1_GAS_COST_MARKUP if we want finer-grained control.
         opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
