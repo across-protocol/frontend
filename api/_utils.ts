@@ -2000,8 +2000,11 @@ export function getCachedFillGasUsage(
       overrides?.relayerAddress,
       {
         gasPrice,
-        opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
-          .opStackL1DataFeeMarkup,
+        opStackL1GasCostMultiplier: sdk.utils.chainIsOPStack(
+          deposit.destinationChainId
+        )
+          ? getGasMarkup(deposit.destinationChainId).opStackL1DataFeeMarkup
+          : undefined,
       }
     );
     return {

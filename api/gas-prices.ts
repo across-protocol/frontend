@@ -15,6 +15,7 @@ import { L2Provider } from "@eth-optimism/sdk/dist/interfaces/l2-provider";
 
 import mainnetChains from "../src/data/chains_1.json";
 import {
+  CHAIN_IDs,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
@@ -73,7 +74,7 @@ const handler = async (
           const opStackL1GasCostMultiplier = getGasMarkup(
             Number(chainId)
           ).opStackL1DataFeeMarkup;
-          const { nativeGasCost, tokenGasCost } =
+          const { nativeGasCost, tokenGasCost, opStackL1GasCost } =
             await relayerFeeCalculatorQueries.getGasCosts(
               deposit,
               relayerFeeCalculatorQueries.simulatedRelayerAddress,
@@ -81,35 +82,13 @@ const handler = async (
                 // Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
                 // the scaled gas price,
                 // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
-                gasPrice: gasPrices[i].maxFeePerGas,
+                gasPrice:
+                  Number(chainId) === CHAIN_IDs.LINEA
+                    ? undefined
+                    : gasPrices[i].maxFeePerGas,
                 opStackL1GasCostMultiplier,
               }
             );
-          // OPStack chains factor in the L1 gas cost of including the L2 transaction in an L1 rollup batch
-          // into the total gas cost of the L2 transaction.
-          let opStackL1GasCost: ethers.BigNumber | undefined = undefined;
-          if (sdk.utils.chainIsOPStack(Number(chainId))) {
-            const provider = relayerFeeCalculatorQueries.provider;
-            const _unsignedTx = await sdk.utils.populateV3Relay(
-              relayerFeeCalculatorQueries.spokePool,
-              deposit,
-              relayerFeeCalculatorQueries.simulatedRelayerAddress
-            );
-            const voidSigner = new VoidSigner(
-              relayerFeeCalculatorQueries.simulatedRelayerAddress,
-              relayerFeeCalculatorQueries.provider
-            );
-            const unsignedTx = await voidSigner.populateTransaction({
-              ..._unsignedTx,
-              gasLimit: nativeGasCost, // prevents additional gas estimation call
-            });
-            opStackL1GasCost = await (
-              provider as L2Provider<providers.Provider>
-            ).estimateL1GasCost(unsignedTx);
-            opStackL1GasCost = opStackL1GasCostMultiplier
-              .mul(opStackL1GasCost)
-              .div(sdk.utils.fixedPointAdjustment);
-          }
           return {
             nativeGasCost,
             tokenGasCost,
