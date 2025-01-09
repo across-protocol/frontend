@@ -148,7 +148,7 @@ const handler = async (
                   .map((originChainId) => {
                     const routeKey = `${originChainId}-${chainId}`;
                     const markup = originChainBaseFeeMarkup[routeKey];
-                    if (markup) {
+                    if (typeof markup === "number") {
                       return [originChainId, ethers.utils.formatEther(markup)];
                     }
                   })
@@ -159,7 +159,7 @@ const handler = async (
                   .map((originChainId) => {
                     const routeKey = `${originChainId}-${chainId}`;
                     const markup = priorityFeeMarkup[routeKey];
-                    if (markup) {
+                    if (typeof markup === "number") {
                       return [originChainId, ethers.utils.formatEther(markup)];
                     }
                   })

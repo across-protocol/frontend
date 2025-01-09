@@ -612,12 +612,12 @@ export const getGasMarkup = (
   // First, get the markup for the destination chain.
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
-  if (baseFeeMarkup[destinationChainId]) {
+  if (typeof baseFeeMarkup[chainId] === "number") {
     _baseFeeMarkup = utils.parseEther(
       (1 + baseFeeMarkup[destinationChainId]).toString()
     );
   }
-  if (priorityFeeMarkup[destinationChainId]) {
+  if (typeof priorityFeeMarkup[destinationChainId] === "number") {
     _priorityFeeMarkup = utils.parseEther(
       (1 + priorityFeeMarkup[destinationChainId]).toString()
     );
@@ -648,14 +648,14 @@ export const getGasMarkup = (
   // Finally, apply any origin chain markup if it exists.
   if (originChainId) {
     const routeKey = `${originChainId}-${destinationChainId}`;
-    if (originChainBaseFeeMarkup[routeKey]) {
+    if (typeof originChainBaseFeeMarkup[routeKey] === "number") {
       _baseFeeMarkup = _baseFeeMarkup
         .mul(
           utils.parseEther((1 + originChainBaseFeeMarkup[routeKey]).toString())
         )
         .div(sdk.utils.fixedPointAdjustment);
     }
-    if (originChainPriorityFeeMarkup[routeKey]) {
+    if (typeof originChainPriorityFeeMarkup[routeKey] === "number") {
       _priorityFeeMarkup = _priorityFeeMarkup
         .mul(
           utils.parseEther(
