@@ -120,6 +120,32 @@ const handler = async (
         }
       )
     );
+    const getOriginChainFeeMarkups = (destinationChainId: number) => {
+      return Object.fromEntries(
+        Object.keys(chainIdsWithToken)
+          .map((originChainId) => {
+            const markup = getGasMarkup(destinationChainId, originChainId);
+            const originChainBaseFeeMarkup = markup.originChainBaseFeeMarkup
+              ? ethers.utils.formatEther(markup.originChainBaseFeeMarkup)
+              : undefined;
+            const originChainPriorityFeeMarkup =
+              markup.originChainPriorityFeeMarkup
+                ? ethers.utils.formatEther(markup.originChainPriorityFeeMarkup)
+                : undefined;
+            if (!originChainBaseFeeMarkup && !originChainPriorityFeeMarkup) {
+              return undefined;
+            }
+            return [
+              `${originChainId}-${destinationChainId}`,
+              {
+                baseFeeMarkup: originChainBaseFeeMarkup,
+                priorityFeeMarkup: originChainPriorityFeeMarkup,
+              },
+            ];
+          })
+          .filter((x) => x !== undefined)
+      );
+    };
     const responseJson = {
       tokenSymbol,
       ...Object.fromEntries(
@@ -143,36 +169,7 @@ const handler = async (
               )
                 ? ethers.utils.formatEther(getGasMarkup(chainId).baseFeeMarkup)
                 : undefined,
-              originChainBaseFeeMarkups: Object.fromEntries(
-                Object.keys(chainIdsWithToken)
-                  .map((originChainId) => {
-                    const markup = getGasMarkup(chainId, originChainId);
-                    if (markup.originChainBaseFeeMarkup) {
-                      return [
-                        originChainId,
-                        ethers.utils.formatEther(
-                          markup.originChainBaseFeeMarkup
-                        ),
-                      ];
-                    }
-                  })
-                  .filter((x) => x !== undefined)
-              ),
-              originChainPriorityFeeMarkups: Object.fromEntries(
-                Object.keys(chainIdsWithToken)
-                  .map((originChainId) => {
-                    const markup = getGasMarkup(chainId, originChainId);
-                    if (markup.originChainPriorityFeeMarkup) {
-                      return [
-                        originChainId,
-                        ethers.utils.formatEther(
-                          markup.originChainPriorityFeeMarkup
-                        ),
-                      ];
-                    }
-                  })
-                  .filter((x) => x !== undefined)
-              ),
+              originChainFeeMarkups: getOriginChainFeeMarkups(Number(chainId)),
             },
             nativeGasCost: gasCosts[i].nativeGasCost.toString(),
             tokenGasCost: gasCosts[i].tokenGasCost.toString(),
