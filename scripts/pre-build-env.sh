@@ -12,7 +12,6 @@
      echo "Updated data at ${FILE_PATH}"
      echo "exporting.."
      source /tmp/output.env
-     
      echo $GIT_ENV_EXPORTED
  else
      echo "No env exported"
