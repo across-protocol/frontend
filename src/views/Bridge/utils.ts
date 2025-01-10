@@ -351,23 +351,46 @@ export function getAvailableOutputTokens(
     );
 }
 
-export function getAllChains() {
-  return enabledRoutes
-    .map((route) => getChainInfo(route.fromChain))
-    .filter(
-      (chain, index, self) =>
-        index ===
-        self.findIndex((fromChain) => fromChain.chainId === chain.chainId)
-    )
-    .sort((a, b) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
+export const ChainType = {
+  FROM: "from",
+  TO: "to",
+  ALL: "all",
+} as const;
+
+export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
+
+export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  let chainIds: number[] = [];
+
+  switch (chainType) {
+    case ChainType.FROM:
+      chainIds = enabledRoutes.map((route) => route.fromChain);
+      break;
+    case ChainType.TO:
+      chainIds = enabledRoutes.map((route) => route.toChain);
+      break;
+    case ChainType.ALL:
+    default:
+      chainIds = enabledRoutes.flatMap((route) => [
+        route.fromChain,
+        route.toChain,
+      ]);
+      break;
+  }
+
+  const uniqueChainIds = Array.from(new Set(chainIds));
+
+  const uniqueChains = uniqueChainIds.map((chainId) => getChainInfo(chainId));
+
+  return uniqueChains.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
 }
 
 export function getRouteFromUrl(overrides?: RouteFilter) {
