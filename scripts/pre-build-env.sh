@@ -16,7 +16,6 @@
     #     -L https://raw.githubusercontent.com/${GIT_ENV_REPO}/${FILE_REMOTE}
     #  echo "Updated data at ${FILE_PATH}"
      echo "exporting.."
-     cat ${FILE_PATH}
      source ${FILE_PATH}
      echo $GIT_ENV_EXPORTED
  else
