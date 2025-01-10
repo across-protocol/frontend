@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.testnet.lens.dev",
   blockTimeSeconds: 1,
-  tokens: [],
+  tokens: ["GRASS", "WETH"],
   enableCCTP: false,
 } as ChainConfig;
