@@ -2001,6 +2001,7 @@ export function getCachedFillGasUsage(
       overrides?.relayerAddress,
       {
         gasPrice,
+        // We want the fee multipliers if the gasPrice is undefined:
         baseFeeMultiplier: markups.baseFeeMarkup,
         priorityFeeMultiplier: markups.priorityFeeMarkup,
         opStackL1GasCostMultiplier: sdk.utils.chainIsOPStack(
