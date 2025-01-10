@@ -1995,11 +1995,14 @@ export function getCachedFillGasUsage(
     );
     // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
     // we'll compute the gas price separately.
+    const markups = getGasMarkup(deposit.destinationChainId);
     const gasCosts = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress,
       {
         gasPrice,
+        baseFeeMultiplier: markups.baseFeeMarkup,
+        priorityFeeMultiplier: markups.priorityFeeMarkup,
         opStackL1GasCostMultiplier: sdk.utils.chainIsOPStack(
           deposit.destinationChainId
         )
