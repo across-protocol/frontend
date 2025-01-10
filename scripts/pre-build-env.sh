@@ -4,7 +4,7 @@
   set -o nounset
 
  FILE_REMOTE="projects/across/frontend/outputs/output.env"
- FILE_PATH="output.env"
+ FILE_PATH="/tmp/output.env"
 
  if [ -n "${GH_TOKEN}" ]; then
      echo "Getting env files from config repo..."
