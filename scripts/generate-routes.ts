@@ -57,6 +57,7 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.POLYGON_AMOY,
   chainConfigs.BLAST_SEPOLIA,
   chainConfigs.LISK_SEPOLIA,
+  chainConfigs.LENS_SEPOLIA,
 ];
 
 const enabledRoutes = {

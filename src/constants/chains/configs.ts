@@ -40,6 +40,11 @@ import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
 import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
 
+import lensSepoliaLogo from "assets/chain-logos/lens-sepolia.svg";
+import lensSepoliaGrayscaleLogo from "assets/chain-logos/lens-sepolia-grayscale.svg";
+import { ReactComponent as lensSepoliaLogoSvg } from "assets/chain-logos/lens-sepolia.svg";
+import { ReactComponent as lensSepoliaGrayscaleLogoSvg } from "assets/chain-logos/lens-sepolia-grayscale.svg";
+
 import lineaLogo from "assets/chain-logos/linea.svg";
 import lineaGrayscaleLogo from "assets/chain-logos/linea-grayscale.svg";
 import { ReactComponent as lineaLogoSvg } from "assets/chain-logos/linea.svg";
@@ -251,6 +256,23 @@ export const ink = {
   constructExplorerLink: (txHash: string) => `${ink.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_57073_PROVIDER_URL,
+  pollingInterval: 1000,
+};
+
+export const lensSepolia = {
+  name: "Lens Sepolia",
+  fullName: "Lens sepolia",
+  chainId: 37111,
+  logoURI: lensSepoliaLogo,
+  grayscaleLogoURI: lensSepoliaGrayscaleLogo,
+  logoSvg: lensSepoliaLogoSvg,
+  grayscaleLogoSvg: lensSepoliaGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.testnet.lens.dev",
+  explorerUrl: "https://block-explorer.testnet.lens.dev",
+  constructExplorerLink: (txHash: string) =>
+    `${lensSepolia.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "GRASS",
+  customRpcUrl: process.env.REACT_APP_CHAIN_37111_PROVIDER_URL,
   pollingInterval: 1000,
 };
 
@@ -532,6 +554,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   ink,
+  lensSepolia,
   linea,
   lisk,
   liskSepolia,
