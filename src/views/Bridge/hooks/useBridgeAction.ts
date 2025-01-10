@@ -27,6 +27,7 @@ import {
   getToken,
   acrossPlusMulticallHandler,
   hyperLiquidBridge2Address,
+  externalProjectNameToId,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -216,7 +217,10 @@ export function useBridgeAction(
           generateTransferSubmitted(
             frozenQuoteForAnalytics,
             referrer,
-            frozenInitialQuoteTime
+            frozenInitialQuoteTime,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });
@@ -287,7 +291,10 @@ export function useBridgeAction(
             frozenQuoteForAnalytics,
             referrer,
             timeSubmitted,
-            tx.hash
+            tx.hash,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });

@@ -6,6 +6,7 @@ import {
   trackTokenChanged,
   trackQuickSwap,
   similarTokensMap,
+  externalProjectNameToId,
 } from "utils";
 import { useAmplitude, useConnection } from "hooks";
 
@@ -43,7 +44,11 @@ export function useSelectRoute() {
     addToAmpliQueue(() => {
       trackTokenChanged(selectedRoute.fromTokenSymbol, true);
       trackFromChainChanged(selectedRoute.fromChain, true);
-      trackToChainChanged(selectedRoute.toChain, true);
+      trackToChainChanged(
+        selectedRoute.toChain,
+        externalProjectNameToId(selectedRoute.externalProjectId),
+        true
+      );
     });
     setIsDefaultRouteTracked(true);
   }, [selectedRoute, addToAmpliQueue, isDefaultRouteTracked]);
@@ -280,7 +285,10 @@ export function useSelectRoute() {
       setSelectedRoute(route);
 
       addToAmpliQueue(() => {
-        trackToChainChanged(route.toChain);
+        trackToChainChanged(
+          route.toChain,
+          externalProjectNameToId(route.externalProjectId)
+        );
       });
     },
     [selectedRoute, addToAmpliQueue]
@@ -315,7 +323,10 @@ export function useSelectRoute() {
 
       addToAmpliQueue(() => {
         trackFromChainChanged(route.fromChain);
-        trackToChainChanged(route.toChain);
+        trackToChainChanged(
+          route.toChain,
+          externalProjectNameToId(route.externalProjectId)
+        );
         trackQuickSwap("bridgeForm");
       });
     }
