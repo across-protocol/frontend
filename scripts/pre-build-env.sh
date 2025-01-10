@@ -11,7 +11,9 @@
      curl -o ${FILE_PATH} "https://${GH_TOKEN}@${GIT_ENV_REPO}/${FILE_REMOTE}"
      echo "Updated data at ${FILE_PATH}"
      echo "exporting.."
+     cat /tmp/output.env
      source /tmp/output.env
+
      echo $GIT_ENV_EXPORTED
  else
      echo "No env exported"
