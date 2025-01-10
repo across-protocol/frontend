@@ -4,16 +4,15 @@
   set -o nounset
 
  FILE_REMOTE="projects/across/frontend/outputs/output.env"
- FILE_PATH="/tmp/output.env"
+ FILE_PATH="src/output.env"
 
  if [ -n "${GH_TOKEN}" ]; then
      echo "Getting env files from config repo..."
      curl -o ${FILE_PATH} "https://${GH_TOKEN}@${GIT_ENV_REPO}/${FILE_REMOTE}"
      echo "Updated data at ${FILE_PATH}"
      echo "exporting.."
-     cat /tmp/output.env
-     source /tmp/output.env
-
+     cat ${FILE_PATH}
+     source ${FILE_PATH}
      echo $GIT_ENV_EXPORTED
  else
      echo "No env exported"
