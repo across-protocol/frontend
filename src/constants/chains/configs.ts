@@ -529,8 +529,8 @@ export const zora = {
 };
 
 export const hyperLiquid = {
-  name: "Hyper Liquid",
-  fullName: "Hyper liquid",
+  name: "Hyperliquid",
+  fullName: "Hyperliquid",
   projectId: "hyper-liquid",
   logoURI: hyperLiquidLogo,
   grayscaleLogoURI: hyperLiquidGrayscaleLogo,

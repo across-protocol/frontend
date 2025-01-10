@@ -2,7 +2,7 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { ExternalProjectConfig } from "../types";
 
 export default {
-  name: "Hyper Liquid",
+  name: "Hyperliquid",
   projectId: "hyper-liquid",
   explorer: "https://arbiscan.io",
   logoPath: "./assets/logo.svg",
