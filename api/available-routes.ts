@@ -1,5 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { object, Infer, optional, string } from "superstruct";
+import dotenv from "dotenv";
 import {
   validAddress,
   positiveIntStr,
@@ -13,6 +14,10 @@ const AvailableRoutesQueryParamsSchema = object({
   originChainId: optional(positiveIntStr()),
   originTokenSymbol: optional(string()),
   destinationTokenSymbol: optional(string()),
+});
+
+dotenv.config({
+  path: [".env.local", ".env.production", ".env", "src/output.env"],
 });
 
 type AvailableRoutesQueryParams = Infer<
