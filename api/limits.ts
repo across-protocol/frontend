@@ -401,9 +401,9 @@ const handler = async (
       message: "Response data",
       responseJson,
     });
-    // Respond with a 200 status code and 10 seconds of cache with
-    // 45 seconds of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 10, 45);
+    // Respond with a 200 status code and 1 second of cache time with
+    // 59s to keep serving the stale data while recomputing the cached value.
+    sendResponse(response, responseJson, 200, 1, 59);
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }

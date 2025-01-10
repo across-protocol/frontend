@@ -1979,7 +1979,6 @@ export function getCachedFillGasUsage(
 ) {
   const ttlPerChain = {
     default: 10,
-    [CHAIN_IDs.ARBITRUM]: 10,
   };
 
   const cacheKey = buildInternalCacheKey(
@@ -1987,7 +1986,7 @@ export function getCachedFillGasUsage(
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
+  const ttl = ttlPerChain.default;
   const fetchFn = async () => {
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
@@ -2032,13 +2031,12 @@ export function getCachedFillGasUsage(
 
 export function latestGasPriceCache(chainId: number) {
   const ttlPerChain = {
-    default: 30,
-    [CHAIN_IDs.ARBITRUM]: 15,
+    default: 10,
   };
 
   return makeCacheGetterAndSetter(
     buildInternalCacheKey("latestGasPriceCache", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
+    ttlPerChain.default,
     async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
