@@ -1,9 +1,4 @@
-<svg
-  id="path-to-animate"
-  xmlns="http://www.w3.org/2000/svg"
-  fill="none"
-  viewBox="0 0 3234 3234"
->
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 3234 3234">
   <mask
     id="a"
     width="100%"
@@ -32,7 +27,6 @@
     </g>
     <g filter="url(#h)">
       <circle
-        id="path-to-animate"
         cx="1947.5"
         cy="1165.5"
         r="2637.5"
