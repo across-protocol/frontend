@@ -1,6 +1,8 @@
 import { Deposit } from "hooks/useDeposits";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "ethers";
+import { compareAddressesSimple } from "./sdk";
+import { hyperLiquidBridge2Address } from "./constants";
 
 export function isHyperLiquidBoundDeposit(deposit: Deposit) {
   if (deposit.destinationChainId !== CHAIN_IDs.ARBITRUM || !deposit.message) {
@@ -22,9 +24,9 @@ export function isHyperLiquidBoundDeposit(deposit: Deposit) {
     }
 
     // Check if second call is to HyperLiquid Bridge2 contract
-    return (
-      decoded[0].calls[1].target.toLowerCase() ===
-      "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7".toLowerCase()
+    return compareAddressesSimple(
+      decoded[0].calls[1].target,
+      hyperLiquidBridge2Address
     );
   } catch {
     return false;

@@ -25,6 +25,8 @@ import {
   sendSwapAndBridgeTx,
   compareAddressesSimple,
   getToken,
+  acrossPlusMulticallHandler,
+  hyperLiquidBridge2Address,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -163,7 +165,7 @@ export function useBridgeAction(
                   value: 0,
                 },
                 {
-                  target: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7", // Bridge2 contract
+                  target: hyperLiquidBridge2Address,
                   callData: hyperLiquidPayload,
                   value: 0,
                 },
@@ -271,7 +273,7 @@ export function useBridgeAction(
                   fillDeadline: frozenFeeQuote.fillDeadline,
                   message: externalPayload,
                   toAddress: externalProjectIsHyperLiquid
-                    ? "0x924a9f036260DdD5808007E1AA95f08eD08aA569" // Default multicall handler
+                    ? acrossPlusMulticallHandler[frozenRoute.toChain]
                     : frozenDepositArgs.toAddress,
                 },
                 spokePool,
@@ -472,7 +474,7 @@ export async function generateHyperLiquidPayload(
 
   const permitValue = {
     owner: source,
-    spender: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7", // Bridge2 contract address
+    spender: hyperLiquidBridge2Address,
     value: amount,
     nonce: await usdcContract.nonces(source),
     deadline,

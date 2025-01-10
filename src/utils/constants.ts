@@ -551,3 +551,10 @@ export const defaultSwapSlippage = Number(
 
 export const indexerApiBaseUrl =
   process.env.REACT_APP_INDEXER_BASE_URL || undefined;
+
+export const hyperLiquidBridge2Address =
+  "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
+
+export const acrossPlusMulticallHandler: Record<number, string> = {
+  [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
+};
