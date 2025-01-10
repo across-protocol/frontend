@@ -8,7 +8,7 @@
 
  if [ -n "${GH_TOKEN}" ]; then
      echo "Getting env files from config repo..."
-     curl -o ${FILE_PATH} "https://${GIT_ENV_URL}"
+     curl -o ${FILE_PATH} "${GIT_ENV_URL}"
     #  curl -H 'Authorization: token ${GH_TOKEN}' \
     #     -o ${FILE_PATH} \
     #     -H 'Accept: application/vnd.github.v3.raw' \
