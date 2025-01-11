@@ -9,9 +9,8 @@ import {
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
-import { ethers, providers, VoidSigner } from "ethers";
+import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
-import { L2Provider } from "@eth-optimism/sdk/dist/interfaces/l2-provider";
 
 import mainnetChains from "../src/data/chains_1.json";
 import {

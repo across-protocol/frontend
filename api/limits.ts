@@ -32,7 +32,6 @@ import {
   getCachedLatestBlock,
   parsableBigNumberString,
   validateDepositMessage,
-  getCachedFillGasUsage,
   latestGasPriceCache,
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
@@ -180,7 +179,9 @@ const handler = async (
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-      latestGasPriceCache(depositArgs, { relayerAddress: relayer }).get(),
+      latestGasPriceCache(destinationChainId, depositArgs, {
+        relayerAddress: relayer,
+      }).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),

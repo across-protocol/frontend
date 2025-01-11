@@ -10,6 +10,8 @@ import { UnauthorizedError } from "./_errors";
 
 import mainnetChains from "../src/data/chains_1.json";
 import { utils } from "@across-protocol/sdk";
+import { CHAIN_IDs } from "./_constants";
+import { BigNumber } from "ethers";
 
 const updateIntervalsSecPerChain = {
   default: 10,
@@ -52,23 +54,27 @@ const handler = async (
     // But we want to update gas prices more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
-    const gasPricePromises = mainnetChains.map(async (chain) => {
-      const secondsPerUpdateForChain =
-        updateIntervalsSecPerChain[
-          chain.chainId as keyof typeof updateIntervalsSecPerChain
-        ] || updateIntervalsSecPerChain.default;
-      const cache = latestGasPriceCache(chain.chainId);
+    const gasPricePromises = mainnetChains
+      .filter((chain) => CHAIN_IDs.LINEA !== chain.chainId)
+      .map(async (chain) => {
+        const secondsPerUpdateForChain =
+          updateIntervalsSecPerChain[
+            chain.chainId as keyof typeof updateIntervalsSecPerChain
+          ] || updateIntervalsSecPerChain.default;
+        // The deposit args don't matter for any chain besides Linea, which is why we filter it out
+        // above, because gas price on Linea is dependent on the fill transaction args.
+        const cache = latestGasPriceCache(chain.chainId);
 
-      while (true) {
-        const diff = Date.now() - functionStart;
-        // Stop after `maxDurationSec` seconds
-        if (diff >= maxDurationSec * 1000) {
-          break;
+        while (true) {
+          const diff = Date.now() - functionStart;
+          // Stop after `maxDurationSec` seconds
+          if (diff >= maxDurationSec * 1000) {
+            break;
+          }
+          await cache.set();
+          await utils.delay(secondsPerUpdateForChain);
         }
-        await cache.set();
-        await utils.delay(secondsPerUpdateForChain);
-      }
-    });
+      });
     await Promise.all(gasPricePromises);
 
     logger.debug({

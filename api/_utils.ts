@@ -2079,7 +2079,8 @@ export function getCachedOpStackL1DataFee(
 }
 
 export function latestGasPriceCache(
-  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
     relayerAddress: string;
   }>
@@ -2088,37 +2089,39 @@ export function latestGasPriceCache(
     default: 5,
   };
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", deposit.destinationChainId),
+    buildInternalCacheKey("latestGasPriceCache", chainId),
     ttlPerChain.default,
-    async () => (await getMaxFeePerGas(deposit, overrides)).maxFeePerGas,
+    async () =>
+      (await getMaxFeePerGas(chainId, deposit, overrides)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
 
 export async function getMaxFeePerGas(
-  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
     relayerAddress: string;
   }>
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
-  const { destinationChainId } = deposit;
+  if (deposit && deposit.destinationChainId !== chainId) {
+    throw new Error(
+      "Chain ID must match the destination chain ID of the deposit"
+    );
+  }
   const {
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
-  } = getGasMarkup(destinationChainId);
-  const unsignedFillTxn = await getUnsignedFillTxnFromDeposit(
-    deposit,
-    overrides?.relayerAddress
-  );
-  return sdk.gasPriceOracle.getGasPriceEstimate(
-    getProvider(destinationChainId),
-    {
-      chainId: destinationChainId,
-      unsignedTx: unsignedFillTxn,
-      baseFeeMultiplier,
-      priorityFeeMultiplier,
-    }
-  );
+  } = getGasMarkup(chainId);
+  const unsignedFillTxn = deposit
+    ? await getUnsignedFillTxnFromDeposit(deposit, overrides?.relayerAddress)
+    : undefined;
+  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
+    chainId,
+    unsignedTx: unsignedFillTxn,
+    baseFeeMultiplier,
+    priorityFeeMultiplier,
+  });
 }
 
 /**
