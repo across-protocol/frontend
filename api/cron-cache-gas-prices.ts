@@ -33,7 +33,7 @@ const updateIntervalsSecPerChain = {
 
 // Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost
 const updateL1DataFeeIntervalsSecPerChain = {
-  default: 12,
+  default: 10,
 };
 
 const maxDurationSec = 60;
