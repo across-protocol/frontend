@@ -34,8 +34,11 @@ import {
   validateDepositMessage,
   getCachedFillGasUsage,
   latestGasPriceCache,
+  getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
+import { bnZero } from "utils";
 
 const LimitsQueryParamsSchema = object({
   token: optional(validAddress()),
@@ -164,34 +167,43 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
-      await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
-          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
-        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // If Linea, then we will defer gas price estimation to the SDK in getCachedFillGasUsage because
-        // the priority fee depends upon the fill transaction calldata.
-        destinationChainId === CHAIN_IDs.LINEA
-          ? undefined
-          : latestGasPriceCache(destinationChainId).get(),
-      ]);
+    const [
+      tokenPriceNative,
+      _tokenPriceUsd,
+      latestBlock,
+      gasPrice,
+      nativeGasCost,
+    ] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token.address,
+        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+      ),
+      getCachedTokenPrice(l1Token.address, "usd"),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+      // If Linea, then we will defer gas price estimation to the SDK in getCachedFillGasUsage because
+      // the priority fee depends upon the fill transaction calldata.
+      destinationChainId === CHAIN_IDs.LINEA
+        ? undefined
+        : latestGasPriceCache(destinationChainId).get(),
+      isMessageDefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),
+    ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
-      gasCosts,
+      opStackL1GasCost,
       multicallOutput,
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      isMessageDefined
-        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedFillGasUsage(depositArgs, gasPrice, {
+      nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
+        ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
             relayerAddress: relayer,
-          }),
+          })
+        : undefined,
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
@@ -221,15 +233,19 @@ const handler = async (
         )
       ),
     ]);
-    // This call should not make any additional RPC queries if gasCosts is defined--for any deposit
-    // with an empty message.
+    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+    // and tokenGasCost.
+    const tokenGasCost =
+      nativeGasCost && gasPrice
+        ? nativeGasCost.mul(gasPrice).add(opStackL1GasCost ?? bnZero)
+        : undefined;
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
       tokenPriceNative,
       relayer,
       gasPrice,
-      gasCosts?.nativeGasCost,
-      gasCosts?.tokenGasCost
+      nativeGasCost,
+      tokenGasCost
     );
     logger.debug({
       at: "Limits",
