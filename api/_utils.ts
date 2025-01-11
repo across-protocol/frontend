@@ -1977,16 +1977,15 @@ export function getCachedNativeGasCost(
   }>
 ) {
   // We can use a long TTL since we are fetching only the native gas cost which should rarely change.
+  // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
-    default: 60,
+    default: 120,
   };
-
   const cacheKey = buildInternalCacheKey(
     "nativeGasCost",
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain.default;
   const fetchFn = async () => {
     const relayerAddress =
       overrides?.relayerAddress ??
@@ -2007,9 +2006,14 @@ export function getCachedNativeGasCost(
     return voidSigner.estimateGas(unsignedFillTxn);
   };
 
-  return getCachedValue(cacheKey, ttl, fetchFn, (nativeGasCostFromCache) => {
-    return BigNumber.from(nativeGasCostFromCache);
-  });
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (nativeGasCostFromCache) => {
+      return BigNumber.from(nativeGasCostFromCache);
+    }
+  );
 }
 
 export function getCachedOpStackL1DataFee(
@@ -2019,11 +2023,13 @@ export function getCachedOpStackL1DataFee(
     relayerAddress: string;
   }>
 ) {
-  // This should roughly be the length of 1 block on Ethereum mainnet which is how often the L1 data fee should
+  // This should be longer than the length of 1 block on Ethereum mainnet which is how often the L1 data fee should
   // change since its based on the L1 base fee. However, this L1 data fee is mostly affected by the L1 base fee which
   // should only change by 12.5% at most per block.
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
   const ttlPerChain = {
-    default: 12,
+    default: 30,
   };
 
   const cacheKey = buildInternalCacheKey(
@@ -2032,7 +2038,6 @@ export function getCachedOpStackL1DataFee(
     deposit.outputToken // This should technically differ based on the output token since the L2 calldata
     // size affects the L1 data fee and this calldata can differ based on the output token.
   );
-  const ttl = ttlPerChain.default;
   const fetchFn = async () => {
     // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
     // we'll compute the gas price separately.
@@ -2058,9 +2063,14 @@ export function getCachedOpStackL1DataFee(
     return opStackL1GasCost;
   };
 
-  return getCachedValue(cacheKey, ttl, fetchFn, (l1DataFeeFromCache) => {
-    return BigNumber.from(l1DataFeeFromCache);
-  });
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (l1DataFeeFromCache) => {
+      return BigNumber.from(l1DataFeeFromCache);
+    }
+  );
 }
 
 export function latestGasPriceCache(
@@ -2070,8 +2080,10 @@ export function latestGasPriceCache(
     relayerAddress: string;
   }>
 ) {
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
   const ttlPerChain = {
-    default: 5,
+    default: 30,
   };
   return makeCacheGetterAndSetter(
     // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.
@@ -2083,9 +2095,13 @@ export function latestGasPriceCache(
       chainId
     ),
     ttlPerChain.default,
-    async () =>
-      (await getMaxFeePerGas(chainId, deposit, overrides)).maxFeePerGas,
-    (bnFromCache) => BigNumber.from(bnFromCache)
+    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
+      return {
+        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
+        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
+      };
+    }
   );
 }
 
