@@ -93,10 +93,7 @@ const handler = async (
       chainId: number,
       outputTokenAddress?: string
     ): Promise<void> => {
-      const secondsPerUpdateForChain =
-        updateIntervalsSecPerChain[
-          chainId as keyof typeof updateIntervalsSecPerChain
-        ] || updateIntervalsSecPerChain.default;
+      const secondsPerUpdateForChain = updateIntervalsSecPerChain.default;
       const cache = latestGasPriceCache(
         chainId,
         outputTokenAddress
@@ -126,7 +123,7 @@ const handler = async (
     const updateL1DataFeePromise = async (
       chainId: number,
       outputTokenAddress: string
-    ) => {
+    ): Promise<void> => {
       const secondsPerUpdate = updateL1DataFeeIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
       const gasCostCache = getCachedNativeGasCost(depositArgs);
@@ -146,6 +143,9 @@ const handler = async (
       }
     };
 
+    const lineaDestinationRoutes = availableRoutes.filter(
+      ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
+    );
     // The minimum interval for Vercel Serverless Functions cron jobs is 1 minute.
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
@@ -153,27 +153,31 @@ const handler = async (
     await Promise.all([
       // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token,
       // so we compute one gas price per output token for Linea
-      mainnetChains
-        .filter((chain) => chain.chainId !== CHAIN_IDs.LINEA)
-        .map((chain) => updateGasPricePromise(chain.chainId)),
-      availableRoutes
-        .filter(
-          ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
+      Promise.all(
+        mainnetChains
+          .filter((chain) => chain.chainId !== CHAIN_IDs.LINEA)
+          .map((chain) => updateGasPricePromise(chain.chainId))
+      ),
+      Promise.all(
+        lineaDestinationRoutes.map(({ destinationToken }) =>
+          updateGasPricePromise(CHAIN_IDs.LINEA, destinationToken)
         )
-        .map(({ destinationToken }) => {
-          updateGasPricePromise(CHAIN_IDs.LINEA, destinationToken);
-        }),
-      mainnetChains.map((chain) => {
-        const routesToChain = availableRoutes.filter(
-          ({ destinationChainId }) => destinationChainId === chain.chainId
-        );
-        const outputTokensForChain = routesToChain.map(
-          ({ destinationToken }) => destinationToken
-        );
-        outputTokensForChain.map((outputToken) =>
-          updateL1DataFeePromise(chain.chainId, outputToken)
-        );
-      }),
+      ),
+      Promise.all(
+        mainnetChains.map((chain) => {
+          const routesToChain = availableRoutes.filter(
+            ({ destinationChainId }) => destinationChainId === chain.chainId
+          );
+          const outputTokensForChain = routesToChain.map(
+            ({ destinationToken }) => destinationToken
+          );
+          return Promise.all(
+            outputTokensForChain.map((outputToken) =>
+              updateL1DataFeePromise(chain.chainId, outputToken)
+            )
+          );
+        })
+      ),
     ]);
 
     logger.debug({
