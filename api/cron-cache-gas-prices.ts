@@ -31,7 +31,8 @@ const updateIntervalsSecPerChain = {
   default: 5,
 };
 
-// Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost
+// Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost.
+// Set lower than the L1 block time so we can try to get as up to date L1 data fees based on L1 base fees as possible.
 const updateL1DataFeeIntervalsSecPerChain = {
   default: 10,
 };
