@@ -178,9 +178,15 @@ const handler = async (
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-      latestGasPriceCache(destinationChainId, depositArgs, {
-        relayerAddress: relayer,
-      }).get(),
+      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+      // because only Linea's priority fee depends on the destination chain call data.
+      latestGasPriceCache(
+        destinationChainId,
+        CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
+        {
+          relayerAddress: relayer,
+        }
+      ).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),
