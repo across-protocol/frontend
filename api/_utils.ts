@@ -2022,11 +2022,13 @@ export function getCachedOpStackL1DataFee(
     relayerAddress: string;
   }>
 ) {
-  // This should roughly be the length of 1 block on Ethereum mainnet which is how often the L1 data fee should
+  // This should roughly be longer than the length of 1 block on Ethereum mainnet which is how often the L1 data fee should
   // change since its based on the L1 base fee. However, this L1 data fee is mostly affected by the L1 base fee which
   // should only change by 12.5% at most per block.
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
   const ttlPerChain = {
-    default: 12,
+    default: 24,
   };
 
   const cacheKey = buildInternalCacheKey(
@@ -2077,6 +2079,8 @@ export function latestGasPriceCache(
     relayerAddress: string;
   }>
 ) {
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
   const ttlPerChain = {
     default: 10,
     [CHAIN_IDs.MAINNET]: 24,

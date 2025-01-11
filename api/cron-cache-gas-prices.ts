@@ -26,15 +26,15 @@ type Route = {
   destinationTokenSymbol: string;
 };
 
-// Set slightly lower than TTL in latestGasPriceCache
+// Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
   default: 5,
   1: 12,
 };
 
-// Set slightly lower than TTL in getCachedOpStackL1DataFee.
+// Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost
 const updateL1DataFeeIntervalsSecPerChain = {
-  default: 10,
+  default: 12,
 };
 
 const maxDurationSec = 60;
@@ -128,8 +128,7 @@ const handler = async (
       chainId: number,
       outputTokenAddress: string
     ) => {
-      const secondsPerUpdateForChain =
-        updateL1DataFeeIntervalsSecPerChain.default;
+      const secondsPerUpdate = updateL1DataFeeIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
       const gasCostCache = getCachedNativeGasCost(depositArgs);
 
@@ -142,7 +141,7 @@ const handler = async (
         const gasCost = await gasCostCache.get();
         const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
         await cache.set();
-        await utils.delay(secondsPerUpdateForChain);
+        await utils.delay(secondsPerUpdate);
       }
     };
 
@@ -153,6 +152,9 @@ const handler = async (
     const gasPricePromises = mainnetChains.map(async (chain) => {
       // For each chain:
       //    - update the destination gas price for the chain
+      if (chain.chainId !== CHAIN_IDs.LINEA) {
+        updateGasPricePromise(chain.chainId);
+      }
       //  For each output token on that chain:
       //    - update the simulated gas costs for the token
       const routesToChain = availableRoutes.filter(
@@ -173,8 +175,6 @@ const handler = async (
             updateGasPricePromise(chain.chainId, outputToken)
           )
         );
-      } else {
-        updateGasPricePromise(chain.chainId);
       }
     });
     await Promise.all(gasPricePromises);
