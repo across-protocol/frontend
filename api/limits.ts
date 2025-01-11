@@ -189,7 +189,9 @@ const handler = async (
       ).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),
+        : getCachedNativeGasCost(depositArgs, {
+            relayerAddress: relayer,
+          }).get(),
     ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -204,7 +206,7 @@ const handler = async (
         ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
           getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
             relayerAddress: relayer,
-          })
+          }).get()
         : undefined,
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,

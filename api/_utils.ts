@@ -1980,13 +1980,11 @@ export function getCachedNativeGasCost(
   const ttlPerChain = {
     default: 60,
   };
-
   const cacheKey = buildInternalCacheKey(
     "nativeGasCost",
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain.default;
   const fetchFn = async () => {
     const relayerAddress =
       overrides?.relayerAddress ??
@@ -2007,9 +2005,14 @@ export function getCachedNativeGasCost(
     return voidSigner.estimateGas(unsignedFillTxn);
   };
 
-  return getCachedValue(cacheKey, ttl, fetchFn, (nativeGasCostFromCache) => {
-    return BigNumber.from(nativeGasCostFromCache);
-  });
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (nativeGasCostFromCache) => {
+      return BigNumber.from(nativeGasCostFromCache);
+    }
+  );
 }
 
 export function getCachedOpStackL1DataFee(
@@ -2032,7 +2035,6 @@ export function getCachedOpStackL1DataFee(
     deposit.outputToken // This should technically differ based on the output token since the L2 calldata
     // size affects the L1 data fee and this calldata can differ based on the output token.
   );
-  const ttl = ttlPerChain.default;
   const fetchFn = async () => {
     // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
     // we'll compute the gas price separately.
@@ -2058,9 +2060,14 @@ export function getCachedOpStackL1DataFee(
     return opStackL1GasCost;
   };
 
-  return getCachedValue(cacheKey, ttl, fetchFn, (l1DataFeeFromCache) => {
-    return BigNumber.from(l1DataFeeFromCache);
-  });
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (l1DataFeeFromCache) => {
+      return BigNumber.from(l1DataFeeFromCache);
+    }
+  );
 }
 
 export function latestGasPriceCache(
@@ -2071,7 +2078,8 @@ export function latestGasPriceCache(
   }>
 ) {
   const ttlPerChain = {
-    default: 5,
+    default: 10,
+    [CHAIN_IDs.MAINNET]: 24,
   };
   return makeCacheGetterAndSetter(
     // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.

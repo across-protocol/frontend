@@ -63,7 +63,7 @@ const handler = async (
           tokenAddress
         );
         return Promise.all([
-          getCachedNativeGasCost(depositArgs),
+          getCachedNativeGasCost(depositArgs).get(),
           latestGasPriceCache(
             Number(chainId),
             CHAIN_IDs.LINEA === Number(chainId) ? depositArgs : undefined
@@ -82,7 +82,7 @@ const handler = async (
           );
           const [nativeGasCost, gasPrice] = gasData[i];
           const opStackL1GasCost = sdk.utils.chainIsOPStack(Number(chainId))
-            ? await getCachedOpStackL1DataFee(depositArgs, nativeGasCost)
+            ? await getCachedOpStackL1DataFee(depositArgs, nativeGasCost).get()
             : undefined;
           const tokenGasCost = nativeGasCost
             .mul(gasPrice.maxFeePerGas)
