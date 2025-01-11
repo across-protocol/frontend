@@ -29,7 +29,6 @@ type Route = {
 // Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
   default: 5,
-  1: 12,
 };
 
 // Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost
