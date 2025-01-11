@@ -54,6 +54,8 @@ const handler = async (
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
     const gasPricePromises = mainnetChains
+      // @dev Remove Linea from this cron cache job because Linea's gas price is dependent on the
+      // calldata of the transaction to be submitted on Linea.
       .filter((chain) => CHAIN_IDs.LINEA !== chain.chainId)
       .map(async (chain) => {
         const secondsPerUpdateForChain =
