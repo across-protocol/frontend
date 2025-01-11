@@ -169,7 +169,7 @@ const handler = async (
       tokenPriceNative,
       _tokenPriceUsd,
       latestBlock,
-      gasPrice,
+      { maxFeePerGas: gasPrice },
       nativeGasCost,
     ] = await Promise.all([
       getCachedTokenPrice(

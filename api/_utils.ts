@@ -2083,9 +2083,13 @@ export function latestGasPriceCache(
       chainId
     ),
     ttlPerChain.default,
-    async () =>
-      (await getMaxFeePerGas(chainId, deposit, overrides)).maxFeePerGas,
-    (bnFromCache) => BigNumber.from(bnFromCache)
+    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
+      return {
+        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
+        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
+      };
+    }
   );
 }
 
