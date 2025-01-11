@@ -1970,25 +1970,6 @@ export function isContractCache(chainId: number, address: string) {
   );
 }
 
-function getUnsignedFillTxnFromDeposit(
-  deposit: Parameters<typeof buildDepositForSimulation>[0],
-  _relayerAddress?: string
-): Promise<ethers.PopulatedTransaction> {
-  const relayerAddress =
-    _relayerAddress ?? sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
-  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
-    deposit.destinationChainId,
-    {
-      relayerAddress,
-    }
-  );
-  return sdk.utils.populateV3Relay(
-    relayerFeeCalculatorQueries.spokePool,
-    buildDepositForSimulation(deposit),
-    relayerAddress
-  );
-}
-
 export function getCachedNativeGasCost(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
@@ -2014,10 +1995,11 @@ export function getCachedNativeGasCost(
       deposit.destinationChainId,
       overrides
     );
-    const unsignedFillTxn = await getUnsignedFillTxnFromDeposit(
-      deposit,
-      relayerAddress
-    );
+    const unsignedFillTxn =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        relayerAddress
+      );
     const voidSigner = new ethers.VoidSigner(
       relayerAddress,
       relayerFeeCalculatorQueries.provider
@@ -2059,17 +2041,20 @@ export function getCachedOpStackL1DataFee(
       deposit.destinationChainId,
       overrides
     );
-    const { opStackL1GasCost } = await relayerFeeCalculatorQueries.getGasCosts(
-      buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      {
-        gasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
-        gasPrice: 1, // We pass in a gas price here so that the SDK doesn't recompute the gas price but we don't
-        // use any results from the SDK dependent on this value so it doesn't matter what it is. The OP
-        // Stack L1 data fee is unaffected by this gas price.
-        opStackL1GasCostMultiplier: opStackL1DataFeeMarkup,
-      }
-    );
+    const unsignedTx =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      );
+    const opStackL1GasCost =
+      await relayerFeeCalculatorQueries.getOpStackL1DataFee(
+        unsignedTx,
+        overrides?.relayerAddress,
+        {
+          opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
+          opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
+        }
+      );
     return opStackL1GasCost;
   };
 
@@ -2120,8 +2105,15 @@ export async function getMaxFeePerGas(
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
   } = getGasMarkup(chainId);
+  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+    chainId,
+    overrides
+  );
   const unsignedFillTxn = deposit
-    ? await getUnsignedFillTxnFromDeposit(deposit, overrides?.relayerAddress)
+    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      )
     : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
