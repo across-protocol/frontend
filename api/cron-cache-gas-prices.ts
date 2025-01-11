@@ -143,7 +143,6 @@ const handler = async (
           const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
           await cache.set();
         }
-        console.log(`updateL1DataFeePromise: updated gas price for ${chainId}`);
         await utils.delay(secondsPerUpdate);
       }
     };
@@ -152,31 +151,31 @@ const handler = async (
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
-    const gasPricePromises = mainnetChains.map(async (chain) => {
-      // For each chain:
-      //    - update the destination gas price for the chain
-      if (chain.chainId !== CHAIN_IDs.LINEA) {
-        updateGasPricePromise(chain.chainId);
-      }
-      // //  For each output token on that chain:
-      // //    - update the simulated gas costs for the token
-      // const routesToChain = availableRoutes.filter(
-      //   ({ destinationChainId }) => destinationChainId === chain.chainId
-      // );
-      // const outputTokensForChain = routesToChain.map(
-      //   ({ destinationToken }) => destinationToken
-      // );
-      // outputTokensForChain.map((outputToken) =>
-      //   updateL1DataFeePromise(chain.chainId, outputToken)
-      // );
-      // // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token
-      // if (chain.chainId === CHAIN_IDs.LINEA) {
-      //   outputTokensForChain.map((outputToken) =>
-      //     updateGasPricePromise(chain.chainId, outputToken)
-      //   );
-      // }
-    });
-    await Promise.all(gasPricePromises);
+    await Promise.all([
+      // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token,
+      // so we compute one gas price per output token for Linea
+      mainnetChains
+        .filter((chain) => chain.chainId !== CHAIN_IDs.LINEA)
+        .map((chain) => updateGasPricePromise(chain.chainId)),
+      availableRoutes
+        .filter(
+          ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
+        )
+        .map(({ destinationToken }) => {
+          updateGasPricePromise(CHAIN_IDs.LINEA, destinationToken);
+        }),
+      mainnetChains.map((chain) => {
+        const routesToChain = availableRoutes.filter(
+          ({ destinationChainId }) => destinationChainId === chain.chainId
+        );
+        const outputTokensForChain = routesToChain.map(
+          ({ destinationToken }) => destinationToken
+        );
+        outputTokensForChain.map((outputToken) =>
+          updateL1DataFeePromise(chain.chainId, outputToken)
+        );
+      }),
+    ]);
 
     logger.debug({
       at: "CronCacheGasPrices",
