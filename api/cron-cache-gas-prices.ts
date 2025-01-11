@@ -163,17 +163,13 @@ const handler = async (
       const outputTokensForChain = routesToChain.map(
         ({ destinationToken }) => destinationToken
       );
-      Promise.all(
-        outputTokensForChain.map((outputToken) =>
-          updateL1DataFeePromise(chain.chainId, outputToken)
-        )
+      outputTokensForChain.map((outputToken) =>
+        updateL1DataFeePromise(chain.chainId, outputToken)
       );
       // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token
       if (chain.chainId === CHAIN_IDs.LINEA) {
-        Promise.all(
-          outputTokensForChain.map((outputToken) =>
-            updateGasPricePromise(chain.chainId, outputToken)
-          )
+        outputTokensForChain.map((outputToken) =>
+          updateGasPricePromise(chain.chainId, outputToken)
         );
       }
     });
