@@ -157,23 +157,23 @@ const handler = async (
       if (chain.chainId !== CHAIN_IDs.LINEA) {
         updateGasPricePromise(chain.chainId);
       }
-      //  For each output token on that chain:
-      //    - update the simulated gas costs for the token
-      const routesToChain = availableRoutes.filter(
-        ({ destinationChainId }) => destinationChainId === chain.chainId
-      );
-      const outputTokensForChain = routesToChain.map(
-        ({ destinationToken }) => destinationToken
-      );
-      outputTokensForChain.map((outputToken) =>
-        updateL1DataFeePromise(chain.chainId, outputToken)
-      );
-      // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token
-      if (chain.chainId === CHAIN_IDs.LINEA) {
-        outputTokensForChain.map((outputToken) =>
-          updateGasPricePromise(chain.chainId, outputToken)
-        );
-      }
+      // //  For each output token on that chain:
+      // //    - update the simulated gas costs for the token
+      // const routesToChain = availableRoutes.filter(
+      //   ({ destinationChainId }) => destinationChainId === chain.chainId
+      // );
+      // const outputTokensForChain = routesToChain.map(
+      //   ({ destinationToken }) => destinationToken
+      // );
+      // outputTokensForChain.map((outputToken) =>
+      //   updateL1DataFeePromise(chain.chainId, outputToken)
+      // );
+      // // @dev Linea gas prices are dependent on the L2 calldata to be submitted so compute one gas price for each output token
+      // if (chain.chainId === CHAIN_IDs.LINEA) {
+      //   outputTokensForChain.map((outputToken) =>
+      //     updateGasPricePromise(chain.chainId, outputToken)
+      //   );
+      // }
     });
     await Promise.all(gasPricePromises);
 
