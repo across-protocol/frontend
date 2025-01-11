@@ -93,7 +93,7 @@ const handler = async (
     const updateGasPricePromise = async (
       chainId: number,
       outputTokenAddress?: string
-    ) => {
+    ): Promise<void> => {
       const secondsPerUpdateForChain =
         updateIntervalsSecPerChain[
           chainId as keyof typeof updateIntervalsSecPerChain
@@ -143,6 +143,7 @@ const handler = async (
           const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
           await cache.set();
         }
+        console.log(`updateL1DataFeePromise: updated gas price for ${chainId}`);
         await utils.delay(secondsPerUpdate);
       }
     };
