@@ -2089,7 +2089,14 @@ export function latestGasPriceCache(
     default: 5,
   };
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
+    // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.
+    // Therefore, we technically should cache a different gas price per different types of deposit so we add
+    // an additional outputToken to the cache key to distinguish between gas prices dependent on deposit args
+    // for different output tokens, which should be the main factor affecting the fill gas cost.
+    buildInternalCacheKey(
+      `latestGasPriceCache${deposit ? `-${deposit.outputToken}` : ""}`,
+      chainId
+    ),
     ttlPerChain.default,
     async () =>
       (await getMaxFeePerGas(chainId, deposit, overrides)).maxFeePerGas,

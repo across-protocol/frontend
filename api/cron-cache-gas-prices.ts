@@ -11,7 +11,6 @@ import { UnauthorizedError } from "./_errors";
 import mainnetChains from "../src/data/chains_1.json";
 import { utils } from "@across-protocol/sdk";
 import { CHAIN_IDs } from "./_constants";
-import { BigNumber } from "ethers";
 
 const updateIntervalsSecPerChain = {
   default: 10,
