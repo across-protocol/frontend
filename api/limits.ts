@@ -32,8 +32,9 @@ import {
   getCachedLatestBlock,
   parsableBigNumberString,
   validateDepositMessage,
-  getCachedFillGasUsage,
   latestGasPriceCache,
+  getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
@@ -164,39 +165,47 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasCosts, gasPrice] =
-      await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
-          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
-        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        isMessageDefined
-          ? undefined
-          : getCachedFillGasUsage(depositArgs, {
-              relayerAddress: relayer,
-            }),
-        latestGasPriceCache(destinationChainId).get(),
-      ]);
+    const [
+      tokenPriceNative,
+      _tokenPriceUsd,
+      latestBlock,
+      gasPrice,
+      nativeGasCost,
+    ] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token.address,
+        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+      ),
+      getCachedTokenPrice(l1Token.address, "usd"),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+      // because only Linea's priority fee depends on the destination chain call data.
+      latestGasPriceCache(
+        destinationChainId,
+        CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
+        {
+          relayerAddress: relayer,
+        }
+      ).get(),
+      isMessageDefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),
+    ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
-      relayerFeeDetails,
+      opStackL1GasCost,
       multicallOutput,
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(
-        depositArgs,
-        tokenPriceNative,
-        relayer,
-        gasPrice,
-        gasCosts?.nativeGasCost,
-        gasCosts?.tokenGasCost
-      ),
+      nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
+        ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
+            relayerAddress: relayer,
+          })
+        : undefined,
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
@@ -226,6 +235,22 @@ const handler = async (
         )
       ),
     ]);
+    const tokenGasCost =
+      nativeGasCost && gasPrice
+        ? nativeGasCost
+            .mul(gasPrice)
+            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
+        : undefined;
+    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+    // and tokenGasCost.
+    const relayerFeeDetails = await getRelayerFeeDetails(
+      depositArgs,
+      tokenPriceNative,
+      relayer,
+      gasPrice,
+      nativeGasCost,
+      tokenGasCost
+    );
     logger.debug({
       at: "Limits",
       message: "Relayer fee details from SDK",
@@ -396,9 +421,9 @@ const handler = async (
       message: "Response data",
       responseJson,
     });
-    // Respond with a 200 status code and 10 seconds of cache with
-    // 45 seconds of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 10, 45);
+    // Respond with a 200 status code and 1 second of cache time with
+    // 59s to keep serving the stale data while recomputing the cached value.
+    sendResponse(response, responseJson, 200, 1, 59);
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }
