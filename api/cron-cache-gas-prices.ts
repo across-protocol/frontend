@@ -139,8 +139,10 @@ const handler = async (
           break;
         }
         const gasCost = await gasCostCache.get();
-        const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
-        await cache.set();
+        if (utils.chainIsOPStack(chainId)) {
+          const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
+          await cache.set();
+        }
         await utils.delay(secondsPerUpdate);
       }
     };
