@@ -235,14 +235,14 @@ const handler = async (
         )
       ),
     ]);
-    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
-    // and tokenGasCost.
     const tokenGasCost =
       nativeGasCost && gasPrice
         ? nativeGasCost
             .mul(gasPrice)
             .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
         : undefined;
+    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+    // and tokenGasCost.
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
       tokenPriceNative,
