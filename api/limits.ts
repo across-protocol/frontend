@@ -37,7 +37,6 @@ import {
   getCachedOpStackL1DataFee,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
-import { bnZero } from "utils";
 
 const LimitsQueryParamsSchema = object({
   token: optional(validAddress()),
@@ -234,7 +233,9 @@ const handler = async (
     // and tokenGasCost.
     const tokenGasCost =
       nativeGasCost && gasPrice
-        ? nativeGasCost.mul(gasPrice).add(opStackL1GasCost ?? bnZero)
+        ? nativeGasCost
+            .mul(gasPrice)
+            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
         : undefined;
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
