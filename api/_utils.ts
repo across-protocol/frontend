@@ -1970,6 +1970,25 @@ export function isContractCache(chainId: number, address: string) {
   );
 }
 
+function getUnsignedFillTxnFromDeposit(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  _relayerAddress?: string
+): Promise<ethers.PopulatedTransaction> {
+  const relayerAddress =
+    _relayerAddress ?? sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+    deposit.destinationChainId,
+    {
+      relayerAddress,
+    }
+  );
+  return sdk.utils.populateV3Relay(
+    relayerFeeCalculatorQueries.spokePool,
+    buildDepositForSimulation(deposit),
+    relayerAddress
+  );
+}
+
 export function getCachedNativeGasCost(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
@@ -1995,9 +2014,8 @@ export function getCachedNativeGasCost(
       deposit.destinationChainId,
       overrides
     );
-    const unsignedFillTxn = await sdk.utils.populateV3Relay(
-      relayerFeeCalculatorQueries.spokePool,
-      buildDepositForSimulation(deposit),
+    const unsignedFillTxn = await getUnsignedFillTxnFromDeposit(
+      deposit,
       relayerAddress
     );
     const voidSigner = new ethers.VoidSigner(
@@ -2060,36 +2078,47 @@ export function getCachedOpStackL1DataFee(
   });
 }
 
-export function latestGasPriceCache(chainId: number) {
+export function latestGasPriceCache(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
   const ttlPerChain = {
     default: 5,
   };
-
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
+    buildInternalCacheKey("latestGasPriceCache", deposit.destinationChainId),
     ttlPerChain.default,
-    async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
+    async () => (await getMaxFeePerGas(deposit, overrides)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
 
-/**
- * Resolve the current gas price for a given chain
- * @param chainId The chain ID to resolve the gas price for
- * @returns The gas price in the native currency of the chain
- */
-export function getMaxFeePerGas(
-  chainId: number
+export async function getMaxFeePerGas(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  const { destinationChainId } = deposit;
   const {
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
-  } = getGasMarkup(chainId);
-  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
-    chainId,
-    baseFeeMultiplier,
-    priorityFeeMultiplier,
-  });
+  } = getGasMarkup(destinationChainId);
+  const unsignedFillTxn = await getUnsignedFillTxnFromDeposit(
+    deposit,
+    overrides?.relayerAddress
+  );
+  return sdk.gasPriceOracle.getGasPriceEstimate(
+    getProvider(destinationChainId),
+    {
+      chainId: destinationChainId,
+      unsignedTx: unsignedFillTxn,
+      baseFeeMultiplier,
+      priorityFeeMultiplier,
+    }
+  );
 }
 
 /**

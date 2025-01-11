@@ -180,11 +180,7 @@ const handler = async (
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-      // If Linea, then we will defer gas price estimation to the SDK in getCachedFillGasUsage because
-      // the priority fee depends upon the fill transaction calldata.
-      destinationChainId === CHAIN_IDs.LINEA
-        ? undefined
-        : latestGasPriceCache(destinationChainId).get(),
+      latestGasPriceCache(depositArgs, { relayerAddress: relayer }).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         : getCachedNativeGasCost(depositArgs, { relayerAddress: relayer }),
