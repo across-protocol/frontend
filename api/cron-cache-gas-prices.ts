@@ -165,14 +165,14 @@ const handler = async (
         )
       ),
       Promise.all(
-        mainnetChains.map((chain) => {
+        mainnetChains.map(async (chain) => {
           const routesToChain = availableRoutes.filter(
             ({ destinationChainId }) => destinationChainId === chain.chainId
           );
           const outputTokensForChain = routesToChain.map(
             ({ destinationToken }) => destinationToken
           );
-          return Promise.all(
+          await Promise.all(
             outputTokensForChain.map((outputToken) =>
               updateL1DataFeePromise(chain.chainId, outputToken)
             )
