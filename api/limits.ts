@@ -417,6 +417,14 @@ const handler = async (
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
       },
+      gasFeeDetails: tokenGasCost
+        ? {
+            nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
+            opStackL1GasCost: opStackL1GasCost?.toString(),
+            gasPrice: gasPrice.toString(),
+            tokenGasCost: tokenGasCost.toString(),
+          }
+        : undefined,
     };
     logger.debug({
       at: "Limits",

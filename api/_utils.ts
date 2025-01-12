@@ -1979,7 +1979,7 @@ export function getCachedNativeGasCost(
   // We can use a long TTL since we are fetching only the native gas cost which should rarely change.
   // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
-    default: 60,
+    default: 120,
   };
   const cacheKey = buildInternalCacheKey(
     "nativeGasCost",
