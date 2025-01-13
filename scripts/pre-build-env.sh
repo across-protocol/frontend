@@ -3,21 +3,18 @@
   set -o errexit
   set -o nounset
 
- FILE_REMOTE="projects/across/frontend/outputs/output.env"
- FILE_PATH="src/output_api.env"
+ BASE_URL="https://raw.githubusercontent.com/${GIT_ENV_REPO}/master/"
 
  if [ -n "${GH_TOKEN}" ]; then
-     echo "Getting env files from config repo..."
-     curl -o ${FILE_PATH} "${GIT_ENV_URL}"
-    #  curl -H 'Authorization: token ${GH_TOKEN}' \
-    #     -o ${FILE_PATH} \
-    #     -H 'Accept: application/vnd.github.v3.raw' \
-    #     -O \
-    #     -L https://raw.githubusercontent.com/${GIT_ENV_REPO}/${FILE_REMOTE}
-    #  echo "Updated data at ${FILE_PATH}"
-     echo "exporting.."
-     #source ${FILE_PATH}
-     #echo $GIT_ENV_EXPORTED
+    
+    files=(output.env output_api.env)
+    
+    for file in "${files[@]}"; do
+        echo "Downloading $file..."
+        curl -H "Authorization: token ${GH_TOKEN}" -L "${BASE_URL}${file}" -o "src/$file"
+    done
+    echo "All files downloaded."
+
  else
-     echo "No env exported"
+    echo "No env exported"
  fi
