@@ -275,6 +275,18 @@ function transformChainConfigs(
           ];
         }
 
+        if (
+          tokenSymbol === "WGRASS" &&
+          toChainConfig.tokens.includes("GRASS")
+        ) {
+          return [
+            {
+              inputTokenSymbol: "WGRASS",
+              outputTokenSymbol: "GRASS",
+            },
+          ];
+        }
+
         // Handle WETH Polygon & other non-eth chains
         if (
           tokenSymbol === "WETH" &&

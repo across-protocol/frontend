@@ -1534,6 +1534,17 @@
     },
     {
       "fromChain": 37111,
+      "toChain": 11155111,
+      "fromTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+      "toTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+      "fromSpokeAddress": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
+      "fromTokenSymbol": "WGRASS",
+      "toTokenSymbol": "GRASS",
+      "isNative": false,
+      "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
+    },
+    {
+      "fromChain": 37111,
       "toChain": 84532,
       "fromTokenAddress": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
       "toTokenAddress": "0x4200000000000000000000000000000000000006",

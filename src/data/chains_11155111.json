@@ -419,6 +419,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "WGRASS",
+        "name": "Wrapped Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgrass.svg"
       }
     ],
     "outputTokens": [
