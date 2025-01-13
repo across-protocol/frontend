@@ -168,7 +168,7 @@ const handler = async (
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
-          sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId].toLowerCase() ??
+          sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
             sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
