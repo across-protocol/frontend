@@ -304,20 +304,6 @@ function transformChainConfigs(
         return tokenSymbol;
       });
 
-      if (
-        chainConfig.tokens.includes("WGRASS") &&
-        toChainConfig.tokens.includes("GRASS")
-      ) {
-        // Add route from WGRASS to GRASS
-        tokens.push({
-          inputTokenSymbol: "WGRASS",
-          outputTokenSymbol: "GRASS",
-        });
-
-        // Add route from WGRASS to WGRASS
-        tokens.push("WGRASS");
-      }
-
       // Handle USDC swap tokens
       const usdcSwapTokens = chainConfig.enableCCTP
         ? getUsdcSwapTokens(fromChainId, toChainId)
@@ -349,8 +335,6 @@ function transformChainConfigs(
       toChains,
     });
   }
-
-  console.log(JSON.stringify(transformedChainConfigs, undefined, 2));
 
   return transformedChainConfigs;
 }
