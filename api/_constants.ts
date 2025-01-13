@@ -98,6 +98,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
     decimals: 18,
   },
+  GRASS: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
 };
 
 defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
