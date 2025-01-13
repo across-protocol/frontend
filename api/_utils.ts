@@ -166,8 +166,8 @@ export const getLogger = (): LoggingUtility => {
 
     let logLevel =
       LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? defaultLogLevel
-        : (LOG_LEVEL as keyof typeof LogLevels);
+        ? (LOG_LEVEL as keyof typeof LogLevels)
+        : defaultLogLevel;
 
     logger = {
       debug: (...args) => {
