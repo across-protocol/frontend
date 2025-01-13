@@ -240,8 +240,30 @@
       "fromTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
       "toTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
       "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
-      "fromTokenSymbol": "GRASS",
+      "fromTokenSymbol": "WGRASS",
+      "toTokenSymbol": "WGRASS",
+      "isNative": false,
+      "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 37111,
+      "fromTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+      "toTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "WGRASS",
       "toTokenSymbol": "GRASS",
+      "isNative": false,
+      "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 37111,
+      "fromTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+      "toTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "WGRASS",
+      "toTokenSymbol": "WGRASS",
       "isNative": false,
       "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
     },
@@ -1509,17 +1531,6 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
-    },
-    {
-      "fromChain": 37111,
-      "toChain": 11155111,
-      "fromTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
-      "toTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
-      "fromSpokeAddress": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
-      "fromTokenSymbol": "GRASS",
-      "toTokenSymbol": "GRASS",
-      "isNative": false,
-      "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
     },
     {
       "fromChain": 37111,
@@ -1531,6 +1542,17 @@
       "toTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 37111,
+      "toChain": 11155111,
+      "fromTokenAddress": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+      "toTokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+      "fromSpokeAddress": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
+      "fromTokenSymbol": "WGRASS",
+      "toTokenSymbol": "WGRASS",
+      "isNative": false,
+      "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
     },
     {
       "fromChain": 37111,
