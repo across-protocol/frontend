@@ -165,9 +165,9 @@ export const getLogger = (): LoggingUtility => {
     const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
 
     let logLevel =
-      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? defaultLogLevel
-        : (LOG_LEVEL as keyof typeof LogLevels);
+      LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
+        ? (LOG_LEVEL as keyof typeof LogLevels)
+        : defaultLogLevel;
 
     logger = {
       debug: (...args) => {
@@ -538,19 +538,6 @@ export const getHubPool = (provider: providers.Provider) => {
 };
 
 /**
- * Resolves an Infura provider given the name of the ETH network
- * @param nameOrChainId The name of an ethereum network
- * @returns A valid Ethers RPC provider
- */
-export const infuraProvider = (nameOrChainId: providers.Networkish) => {
-  const url = new ethers.providers.InfuraProvider(
-    nameOrChainId,
-    REACT_APP_PUBLIC_INFURA_ID
-  ).connection.url;
-  return new ethers.providers.StaticJsonRpcProvider(url);
-};
-
-/**
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
  */
@@ -906,7 +893,7 @@ export const getProvider = (
     } else if (override) {
       providerCache[cacheKey] = override;
     } else {
-      providerCache[cacheKey] = infuraProvider(_chainId);
+      throw new Error(`No provider URL set for chain: ${chainId}`);
     }
   }
   return providerCache[cacheKey];
@@ -925,9 +912,10 @@ function getProviderFromConfigJson(
   const urls = getRpcUrlsFromConfigJson(chainId);
 
   if (urls.length === 0) {
-    console.warn(
-      `No provider URL found for chainId ${chainId} in rpc-providers.json`
-    );
+    getLogger().warn({
+      at: "getProviderFromConfigJson",
+      message: `No provider URL found for chainId ${chainId} in rpc-providers.json`,
+    });
     return undefined;
   }
 
