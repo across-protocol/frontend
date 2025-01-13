@@ -12,6 +12,7 @@ import {
   nonEthChains,
   GetBridgeFeesResult,
   chainEndpointToId,
+  chainIsLens,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -86,6 +87,14 @@ export function getReceiveTokenSymbol(
     !isReceiverContract
   ) {
     return "ETH";
+  }
+
+  if (inputTokenSymbol === "GRASS" && chainIsLens(destinationChainId)) {
+    return isReceiverContract ? "WGRASS" : "GRASS";
+  }
+
+  if (inputTokenSymbol === "WGRASS") {
+    return "GRASS";
   }
 
   return outputTokenSymbol;
