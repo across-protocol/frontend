@@ -165,7 +165,7 @@ export const getLogger = (): LoggingUtility => {
     const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
 
     let logLevel =
-      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
+      LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
         ? (LOG_LEVEL as keyof typeof LogLevels)
         : defaultLogLevel;
 
