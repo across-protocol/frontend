@@ -108,10 +108,17 @@ const handler = async (
       }
     };
 
-    const getOutputTokensToChain = (chainId: number) =>
+    const getOutputTokensToChain = (chainId: number) => {
+      const destinationTokens = new Set<string>();
       availableRoutes
         .filter(({ destinationChainId }) => destinationChainId === chainId)
-        .map(({ destinationToken }) => destinationToken);
+        .forEach(({ destinationToken }) => {
+          if (!destinationTokens.has(destinationToken)) {
+            destinationTokens.add(destinationToken);
+          }
+        });
+      return Array.from(destinationTokens);
+    };
 
     const cacheUpdatePromise = Promise.all(
       mainnetChains.map(async (chain) => {
