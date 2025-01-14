@@ -376,7 +376,7 @@ export async function getCrossSwapQuotesForOutputA2A(
   strategies: QuoteFetchStrategies
 ) {
   const preferredBridgeTokens = PREFERRED_BRIDGE_TOKENS;
-  const bridgeRoutesLimit = 1;
+  const bridgeRoutesLimit = 3;
 
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
@@ -409,7 +409,7 @@ export async function getCrossSwapQuotesForOutputA2A(
     );
   }
 
-  const crossSwapQuotes = await Promise.all(
+  const crossSwapQuotesResults = await Promise.allSettled(
     bridgeRoutesToCompare.map((bridgeRoute) =>
       getCrossSwapQuotesForOutputByRouteA2A(
         crossSwap,
@@ -419,6 +419,16 @@ export async function getCrossSwapQuotesForOutputA2A(
       )
     )
   );
+
+  const crossSwapQuotes = crossSwapQuotesResults
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (crossSwapQuotes.length === 0) {
+    throw new Error(
+      `Failed to get quote for ${originSwapChainId} ${crossSwap.inputToken.symbol} -> ${destinationSwapChainId} ${crossSwap.outputToken.symbol}`
+    );
+  }
 
   // Compare quotes by lowest input amount
   const bestCrossSwapQuote = crossSwapQuotes.reduce((prev, curr) =>

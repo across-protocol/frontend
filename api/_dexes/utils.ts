@@ -50,7 +50,7 @@ export const CROSS_SWAP_TYPE = {
   ANY_TO_ANY: "anyToAny",
 } as const;
 
-export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
+export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC", "USDT", "DAI"];
 
 export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
   // This will be our default strategy until the periphery contract is audited
