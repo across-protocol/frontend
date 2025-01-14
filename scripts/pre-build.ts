@@ -10,11 +10,13 @@ import {
   fetchExclusiveRelayersDynamicWeights,
   fetchExclusiveRelayersFixedWeights,
   fetchExclusivityConfig,
+  fetchGitEnvConfig,
   getRemoteConfigCommitHash,
   getBqReaderRemoteBaseUrl,
   remoteConfigTypes,
   getAcrossConfigsRemoteBaseUrl,
   getRelayerConfigsRemoteBaseUrl,
+  getGitEnvConfigsRemoteBaseUrl,
 } from "./remote-configs/utils";
 
 dotenv.config({
@@ -100,6 +102,16 @@ const remoteConfigs = {
         getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVITY_STRATEGY)
       ),
     localFilePath: "src/data/exclusivity-strategy.json",
+  },
+  [remoteConfigTypes.GIT_ENV_CONFIGS]: {
+    fetchFn: () =>
+      fetchGitEnvConfig(
+        // Using invalid URL will cause the fetch to fail and fallback to the local file for now.
+        getGitEnvConfigsRemoteBaseUrl(),
+        "projects/across/frontend/outputs/output.env",
+        getRemoteConfigCommitHash(remoteConfigTypes.GIT_ENV_CONFIGS)
+      ),
+    localFilePath: "src/data/output.env",
   },
 };
 
