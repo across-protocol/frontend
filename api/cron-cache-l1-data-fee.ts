@@ -100,19 +100,17 @@ const handler = async (
           break;
         }
         const gasCost = await gasCostCache.get();
-        if (utils.chainIsOPStack(chainId)) {
-          const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
-          try {
-            await cache.set();
-          } catch (err) {
-            logger.warn({
-              at: "CronCacheL1DataFee#updateL1DataFeePromise",
-              message: `Failed to set l1 data fee cache for chain ${chainId}`,
-              depositArgs,
-              gasCost,
-              error: err,
-            });
-          }
+        const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
+        try {
+          await cache.set();
+        } catch (err) {
+          logger.warn({
+            at: "CronCacheL1DataFee#updateL1DataFeePromise",
+            message: `Failed to set l1 data fee cache for chain ${chainId}`,
+            depositArgs,
+            gasCost,
+            error: err,
+          });
         }
         await utils.delay(secondsPerUpdate);
       }
@@ -124,13 +122,15 @@ const handler = async (
         .map(({ destinationToken }) => destinationToken);
 
     const cacheUpdatePromise = Promise.all(
-      mainnetChains.map(async (chain) => {
-        await Promise.all(
-          getOutputTokensToChain(chain.chainId).map((outputToken) =>
-            updateL1DataFeePromise(chain.chainId, outputToken)
-          )
-        );
-      })
+      mainnetChains
+        .filter((chain) => utils.chainIsOPStack(chain.chainId))
+        .map(async (chain) => {
+          await Promise.all(
+            getOutputTokensToChain(chain.chainId).map((outputToken) =>
+              updateL1DataFeePromise(chain.chainId, outputToken)
+            )
+          );
+        })
     );
     // There are many routes and therefore many promises to wait to resolve so we force the
     // function to stop after `maxDurationSec` seconds.
