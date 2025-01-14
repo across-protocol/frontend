@@ -1885,7 +1885,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
-  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+  return minBN(bufferMultiplier, multiplierCap);
 }
 
 export function getChainInputTokenMaxBalanceInUsd(
@@ -2023,13 +2023,12 @@ export function getCachedOpStackL1DataFee(
     relayerAddress: string;
   }>
 ) {
-  // This should be longer than the length of 1 block on Ethereum mainnet which is how often the L1 data fee should
-  // change since its based on the L1 base fee. However, this L1 data fee is mostly affected by the L1 base fee which
-  // should only change by 12.5% at most per block.
+  // The L1 data fee should change after each Ethereum block since its based on the L1 base fee.
+  // However, the L1 base fee should only change by 12.5% at most per block.
   // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
   // more frequently.
   const ttlPerChain = {
-    default: 30,
+    default: 60,
   };
 
   const cacheKey = buildInternalCacheKey(

@@ -301,8 +301,10 @@ const handler = async (
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
-      liquidReserves = liquidReserves.sub(lpCushion);
-      if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
+      liquidReserves = maxBN(
+        liquidReserves.sub(lpCushion),
+        ethers.BigNumber.from(0)
+      );
 
       maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
@@ -417,6 +419,14 @@ const handler = async (
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
       },
+      gasFeeDetails: tokenGasCost
+        ? {
+            nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
+            opStackL1GasCost: opStackL1GasCost?.toString(),
+            gasPrice: gasPrice.toString(),
+            tokenGasCost: tokenGasCost.toString(),
+          }
+        : undefined,
     };
     logger.debug({
       at: "Limits",

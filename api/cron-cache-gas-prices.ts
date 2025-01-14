@@ -31,9 +31,16 @@ const updateIntervalsSecPerChain = {
   default: 5,
 };
 
-// Set lower than TTL in getCachedOpStackL1DataFee and getCachedNativeGasCost
+// Set lower than TTL in getCachedOpStackL1DataFee
+// Set lower than the L1 block time so we can try to get as up to date L1 data fees based on L1 base fees as possible.
 const updateL1DataFeeIntervalsSecPerChain = {
   default: 10,
+};
+
+// Set lower than TTL in getCachedNativeGasCost. This should rarely change so we should just make sure
+// we keep this cache warm.
+const updateNativeGasCostIntervalsSecPerChain = {
+  default: 30,
 };
 
 const maxDurationSec = 60;
@@ -113,10 +120,9 @@ const handler = async (
     };
 
     /**
-     * @notice Updates the L1 data fee and L2 gas cost caches every `updateL1DataFeeIntervalsSecPerChain` seconds
+     * @notice Updates the L1 data fee gas cost cache every `updateL1DataFeeIntervalsSecPerChain` seconds
      * up to `maxDurationSec` seconds.
-     * @dev This function will also update the L2 gas costs because this value is required to get the L1 data fee.
-     * @param chainId Chain to estimate gas price for
+     * @param chainId Chain to estimate l1 data fee for
      * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
      * gas costs for.
      */
@@ -143,6 +149,32 @@ const handler = async (
       }
     };
 
+    /**
+     * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
+     * up to `maxDurationSec` seconds.
+     * @param chainId Chain to estimate gas cost for
+     * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
+     * gas costs for.
+     */
+    const updateNativeGasCostPromise = async (
+      chainId: number,
+      outputTokenAddress: string
+    ): Promise<void> => {
+      const secondsPerUpdate = updateNativeGasCostIntervalsSecPerChain.default;
+      const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
+      const cache = getCachedNativeGasCost(depositArgs);
+
+      while (true) {
+        const diff = Date.now() - functionStart;
+        // Stop after `maxDurationSec` seconds
+        if (diff >= maxDurationSec * 1000) {
+          break;
+        }
+        await cache.set();
+        await utils.delay(secondsPerUpdate);
+      }
+    };
+
     const lineaDestinationRoutes = availableRoutes.filter(
       ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
     );
@@ -164,18 +196,25 @@ const handler = async (
         )
       ),
       Promise.all(
-        mainnetChains.map((chain) => {
+        mainnetChains.map(async (chain) => {
           const routesToChain = availableRoutes.filter(
             ({ destinationChainId }) => destinationChainId === chain.chainId
           );
           const outputTokensForChain = routesToChain.map(
             ({ destinationToken }) => destinationToken
           );
-          return Promise.all(
-            outputTokensForChain.map((outputToken) =>
-              updateL1DataFeePromise(chain.chainId, outputToken)
-            )
-          );
+          await Promise.all([
+            Promise.all(
+              outputTokensForChain.map((outputToken) =>
+                updateNativeGasCostPromise(chain.chainId, outputToken)
+              )
+            ),
+            Promise.all(
+              outputTokensForChain.map((outputToken) =>
+                updateL1DataFeePromise(chain.chainId, outputToken)
+              )
+            ),
+          ]);
         })
       ),
     ]);
