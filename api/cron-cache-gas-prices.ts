@@ -134,8 +134,7 @@ const handler = async (
       message: "Finished",
       updateCounts,
     });
-    response.status(200);
-    response.send("OK");
+    response.status(200).json({ updateCounts });
   } catch (error: unknown) {
     return handleErrorCondition(
       "cron-cache-gas-prices",
