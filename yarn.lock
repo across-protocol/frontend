@@ -17,11 +17,6 @@
     hardhat "^2.9.3"
 
 "@across-protocol/constants@^3.1.27":
-  version "3.1.27"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.27.tgz#6c7b2b277d83ae1024c1de6faf474192391af0bd"
-  integrity sha512-3YEK2ERB2FVdDdrkFk5YeuRu/oIAHTIeu6YfT39SfZjIPyltP0ReFlDfZQ8c+rFiHurwyK39kjZF70VxRRREYw==
-
-"@across-protocol/constants@^3.1.27":
   version "3.1.28"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.28.tgz#0540f5a44b085b0951a853898afe174ea113db3a"
   integrity sha512-rnI1pQgkJ6+hPIQNomsi8eQreVfWKfFn9i9Z39U0fAnoXodZklW0eqj5N0cXlEfahp5j2u1RCs7s6fQ9megCdw==
@@ -60,38 +55,6 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/contracts@^3.0.20":
-  version "3.0.20"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.0.20.tgz#5a70782093d21a96b2e955b7ed725bea7af6e804"
-  integrity sha512-ufyO+MrbY7+0TDm/1cDl9iAeR4P8jt0AM1F9wiCBHVIYtj1wMD4eNm7G5Am3u8p1ruMjRhi6dJEVQcRF2O+LUg==
-  dependencies:
-    "@across-protocol/constants" "^3.1.27"
-    "@coral-xyz/anchor" "^0.30.1"
-    "@defi-wonderland/smock" "^2.3.4"
-    "@eth-optimism/contracts" "^0.5.40"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.6"
-    "@openzeppelin/contracts-upgradeable" "4.9.6"
-    "@scroll-tech/contracts" "^0.1.0"
-    "@solana-developers/helpers" "^2.4.0"
-    "@solana/spl-token" "^0.4.6"
-    "@solana/web3.js" "^1.31.0"
-    "@types/yargs" "^17.0.33"
-    "@uma/common" "^2.37.3"
-    "@uma/contracts-node" "^0.4.17"
-    "@uma/core" "^2.61.0"
-    axios "^1.7.4"
-    bs58 "^6.0.0"
-    prettier-plugin-rust "^0.1.9"
-    yargs "^17.7.2"
-    zksync-web3 "^0.14.3"
-
-"@across-protocol/sdk@^3.4.9":
-  version "3.4.9"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.4.9.tgz#9e23a9d678e09c97f5b3c60b811ef7d5291d82a4"
-  integrity sha512-o6WRvjwPgdicpCL8v32Ldp6sPBVC2EObhLn8fSTPn7F/3N7bI0A/8IEAHw3HzSCvMSgRXXcBNObJyZRE5PBMVQ==
 "@across-protocol/contracts@^3.0.20":
   version "3.0.20"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.0.20.tgz#5a70782093d21a96b2e955b7ed725bea7af6e804"
