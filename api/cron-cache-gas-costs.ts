@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { TypedVercelRequest } from "./_types";
+import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getCachedNativeGasCost,
@@ -14,15 +14,6 @@ import { utils, constants } from "@across-protocol/sdk";
 import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import axios from "axios";
 import { ethers } from "ethers";
-
-type Route = {
-  originChainId: number;
-  originToken: string;
-  destinationChainId: number;
-  destinationToken: string;
-  originTokenSymbol: string;
-  destinationTokenSymbol: string;
-};
 
 // Set lower than TTL in getCachedNativeGasCost. This should rarely change so we should just make sure
 // we keep this cache warm.
@@ -72,10 +63,12 @@ const handler = async (
 
     const availableRoutes = (
       await axios(`${resolveVercelEndpoint()}/api/available-routes`)
-    ).data as Array<Route>;
+    ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started
     const functionStart = Date.now();
+
+    const updateCounts: Record<number, Record<string, number>> = {};
 
     /**
      * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
@@ -88,6 +81,8 @@ const handler = async (
       chainId: number,
       outputTokenAddress: string
     ): Promise<void> => {
+      updateCounts[chainId] ??= {};
+      updateCounts[chainId][outputTokenAddress] ??= 0;
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
       const cache = getCachedNativeGasCost(depositArgs);
@@ -100,6 +95,7 @@ const handler = async (
         }
         try {
           await cache.set();
+          updateCounts[chainId][outputTokenAddress]++;
         } catch (err) {
           logger.warn({
             at: "CronCacheGasCosts#updateNativeGasCostPromise",
@@ -133,6 +129,7 @@ const handler = async (
     logger.debug({
       at: "CronCacheGasCosts",
       message: "Finished",
+      updateCounts,
     });
     response.status(200);
     response.send("OK");

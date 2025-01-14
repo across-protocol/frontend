@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { TypedVercelRequest } from "./_types";
+import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getLogger,
@@ -14,15 +14,6 @@ import { utils, constants } from "@across-protocol/sdk";
 import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import axios from "axios";
 import { ethers } from "ethers";
-
-type Route = {
-  originChainId: number;
-  originToken: string;
-  destinationChainId: number;
-  destinationToken: string;
-  originTokenSymbol: string;
-  destinationTokenSymbol: string;
-};
 
 // Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
@@ -71,10 +62,12 @@ const handler = async (
 
     const availableRoutes = (
       await axios(`${resolveVercelEndpoint()}/api/available-routes`)
-    ).data as Array<Route>;
+    ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started
     const functionStart = Date.now();
+
+    const updateCounts: Record<number, number> = {};
 
     /**
      * @notice Updates the gas price cache every `updateIntervalsSecPerChain` seconds up to `maxDurationSec` seconds.
@@ -86,6 +79,7 @@ const handler = async (
       chainId: number,
       outputTokenAddress?: string
     ): Promise<void> => {
+      updateCounts[chainId] ??= 0;
       const secondsPerUpdateForChain = updateIntervalsSecPerChain.default;
       const depositArgs = outputTokenAddress
         ? getDepositArgsForChainId(chainId, outputTokenAddress)
@@ -100,6 +94,7 @@ const handler = async (
         }
         try {
           await cache.set();
+          updateCounts[chainId]++;
         } catch (err) {
           logger.warn({
             at: "CronCacheGasPrices#updateGasPricePromise",
@@ -137,6 +132,7 @@ const handler = async (
     logger.debug({
       at: "CronCacheGasPrices",
       message: "Finished",
+      updateCounts,
     });
     response.status(200);
     response.send("OK");

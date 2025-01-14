@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { TypedVercelRequest } from "./_types";
+import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getCachedNativeGasCost,
@@ -15,15 +15,6 @@ import { utils, constants } from "@across-protocol/sdk";
 import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import axios from "axios";
 import { ethers } from "ethers";
-
-type Route = {
-  originChainId: number;
-  originToken: string;
-  destinationChainId: number;
-  destinationToken: string;
-  originTokenSymbol: string;
-  destinationTokenSymbol: string;
-};
 
 // Set lower than TTL in getCachedOpStackL1DataFee
 // Set lower than the L1 block time so we can try to get as up to date L1 data fees based on L1 base fees as possible.
@@ -73,10 +64,12 @@ const handler = async (
 
     const availableRoutes = (
       await axios(`${resolveVercelEndpoint()}/api/available-routes`)
-    ).data as Array<Route>;
+    ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started
     const functionStart = Date.now();
+
+    const updateCounts: Record<number, Record<string, number>> = {};
 
     /**
      * @notice Updates the L1 data fee gas cost cache every `updateL1DataFeeIntervalsSecPerChain` seconds
@@ -89,6 +82,8 @@ const handler = async (
       chainId: number,
       outputTokenAddress: string
     ): Promise<void> => {
+      updateCounts[chainId] ??= {};
+      updateCounts[chainId][outputTokenAddress] ??= 0;
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
       const gasCostCache = getCachedNativeGasCost(depositArgs);
@@ -103,6 +98,7 @@ const handler = async (
         const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
         try {
           await cache.set();
+          updateCounts[chainId][outputTokenAddress]++;
         } catch (err) {
           logger.warn({
             at: "CronCacheL1DataFee#updateL1DataFeePromise",
@@ -139,6 +135,7 @@ const handler = async (
     logger.debug({
       at: "CronCacheL1DataFee",
       message: "Finished",
+      updateCounts,
     });
     response.status(200);
     response.send("OK");
