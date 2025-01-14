@@ -3,6 +3,7 @@ import { TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
   getLogger,
   handleErrorCondition,
   resolveVercelEndpoint,
@@ -24,10 +25,10 @@ type Route = {
   destinationTokenSymbol: string;
 };
 
-// Set lower than TTL in getCachedNativeGasCost. This should rarely change so we should just make sure
-// we keep this cache warm.
+// Set lower than TTL in getCachedOpStackL1DataFee
+// Set lower than the L1 block time so we can try to get as up to date L1 data fees based on L1 base fees as possible.
 const updateIntervalsSecPerChain = {
-  default: 30,
+  default: 10,
 };
 
 const maxDurationSec = 60;
@@ -49,7 +50,7 @@ const handler = async (
 ) => {
   const logger = getLogger();
   logger.debug({
-    at: "CronCacheGasCosts",
+    at: "CronCacheL1DataFee",
     message: "Starting cron job...",
   });
   try {
@@ -64,7 +65,7 @@ const handler = async (
     // Skip cron job on testnet
     if (HUB_POOL_CHAIN_ID !== 1) {
       logger.info({
-        at: "CronCacheGasCosts",
+        at: "CronCacheL1DataFee",
         message: "Skipping cron job on testnet",
       });
       return;
@@ -78,19 +79,19 @@ const handler = async (
     const functionStart = Date.now();
 
     /**
-     * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
+     * @notice Updates the L1 data fee gas cost cache every `updateL1DataFeeIntervalsSecPerChain` seconds
      * up to `maxDurationSec` seconds.
-     * @param chainId Chain to estimate gas cost for
+     * @param chainId Chain to estimate l1 data fee for
      * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
      * gas costs for.
      */
-    const updateNativeGasCostPromise = async (
+    const updateL1DataFeePromise = async (
       chainId: number,
       outputTokenAddress: string
     ): Promise<void> => {
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
-      const cache = getCachedNativeGasCost(depositArgs);
+      const gasCostCache = getCachedNativeGasCost(depositArgs);
 
       while (true) {
         const diff = Date.now() - functionStart;
@@ -98,15 +99,20 @@ const handler = async (
         if (diff >= maxDurationSec * 1000) {
           break;
         }
-        try {
-          await cache.set();
-        } catch (err) {
-          logger.warn({
-            at: "CronCacheGasCosts#updateNativeGasCostPromise",
-            message: `Failed to set native gas cost cache for chain ${chainId}`,
-            depositArgs,
-            error: err,
-          });
+        const gasCost = await gasCostCache.get();
+        if (utils.chainIsOPStack(chainId)) {
+          const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
+          try {
+            await cache.set();
+          } catch (err) {
+            logger.warn({
+              at: "CronCacheL1DataFee#updateL1DataFeePromise",
+              message: `Failed to set l1 data fee cache for chain ${chainId}`,
+              depositArgs,
+              gasCost,
+              error: err,
+            });
+          }
         }
         await utils.delay(secondsPerUpdate);
       }
@@ -121,7 +127,7 @@ const handler = async (
       mainnetChains.map(async (chain) => {
         await Promise.all(
           getOutputTokensToChain(chain.chainId).map((outputToken) =>
-            updateNativeGasCostPromise(chain.chainId, outputToken)
+            updateL1DataFeePromise(chain.chainId, outputToken)
           )
         );
       })
@@ -131,14 +137,14 @@ const handler = async (
     await Promise.race([cacheUpdatePromise, utils.delay(maxDurationSec)]);
 
     logger.debug({
-      at: "CronCacheGasCosts",
+      at: "CronCacheL1DataFee",
       message: "Finished",
     });
     response.status(200);
     response.send("OK");
   } catch (error: unknown) {
     return handleErrorCondition(
-      "cron-cache-gas-costs",
+      "cron-cache-l1-data-fee",
       response,
       logger,
       error
