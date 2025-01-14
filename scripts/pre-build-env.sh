@@ -3,7 +3,7 @@
   set -o errexit
   set -o nounset
 
- BASE_URL="https://raw.githubusercontent.com/${GIT_ENV_REPO}/master/"
+ BASE_URL="${GIT_ENV_REPO}/across/frontend/outputs/"
 
  if [ -n "${GH_TOKEN}" ]; then
     
