@@ -267,6 +267,7 @@ export function handleErrorCondition(
     at: endpoint,
     code: acrossApiError.code,
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
+    cause: acrossApiError.cause,
   });
 
   return response.status(acrossApiError.status).json(acrossApiError);
