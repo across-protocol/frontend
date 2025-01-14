@@ -29,7 +29,6 @@ const updateIntervalsSecPerChain = {
   default: 5,
 };
 
-// Force the cache update promises to stop 1s before the Vercel serverless function times out.
 const maxDurationSec = 60;
 
 const getDepositArgsForChainId = (chainId: number, tokenAddress: string) => {
