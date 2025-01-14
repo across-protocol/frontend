@@ -10,6 +10,7 @@ import {
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
 import { getPermitArgsFromContract } from "../_permit";
 import { getReceiveWithAuthArgsFromContract } from "../_transfer-with-auth";
+import { handleApprovalSwap } from "./approval/_service";
 
 type SwapFlowType = "permit" | "transfer-with-auth" | "approval";
 
@@ -18,9 +19,9 @@ function makeSwapHandler(path: string) {
     axios.get(`${resolveVercelEndpoint(true)}/api/swap/${path}`, { params });
 }
 const swapFlowTypeToHandler = {
-  permit: makeSwapHandler("permit"),
-  "transfer-with-auth": makeSwapHandler("auth"),
-  approval: makeSwapHandler("approval"),
+  // permit: permitHandler,
+  // "transfer-with-auth": authHandler,
+  approval: handleApprovalSwap,
 };
 
 export default async function handler(
@@ -53,18 +54,19 @@ export default async function handler(
         getReceiveWithAuthArgsFromContract(args),
       ]);
 
-    if (permitArgsResult.status === "fulfilled") {
-      swapFlowType = "permit";
-    } else if (transferWithAuthArgsResult.status === "fulfilled") {
-      swapFlowType = "transfer-with-auth";
-    } else {
-      swapFlowType = "approval";
-    }
+    // if (permitArgsResult.status === "fulfilled") {
+    //   swapFlowType = "permit";
+    // } else if (transferWithAuthArgsResult.status === "fulfilled") {
+    //   swapFlowType = "transfer-with-auth";
+    // } else {
+    //   swapFlowType = "approval";
+    // }
+    swapFlowType = "approval";
 
     const handler = swapFlowTypeToHandler[swapFlowType];
-    const { data } = await handler(request.query);
+    const responseJson = await handler(request.query);
     const enrichedResponseJson = {
-      ...data,
+      ...responseJson,
       swapFlowType,
     };
 
