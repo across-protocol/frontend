@@ -1,9 +1,7 @@
 import { VercelResponse } from "@vercel/node";
-import { TypedVercelRequest } from "./_types";
+import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
-  getCachedNativeGasCost,
-  getCachedOpStackL1DataFee,
   getLogger,
   handleErrorCondition,
   latestGasPriceCache,
@@ -17,30 +15,9 @@ import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import axios from "axios";
 import { ethers } from "ethers";
 
-type Route = {
-  originChainId: number;
-  originToken: string;
-  destinationChainId: number;
-  destinationToken: string;
-  originTokenSymbol: string;
-  destinationTokenSymbol: string;
-};
-
 // Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
   default: 5,
-};
-
-// Set lower than TTL in getCachedOpStackL1DataFee
-// Set lower than the L1 block time so we can try to get as up to date L1 data fees based on L1 base fees as possible.
-const updateL1DataFeeIntervalsSecPerChain = {
-  default: 10,
-};
-
-// Set lower than TTL in getCachedNativeGasCost. This should rarely change so we should just make sure
-// we keep this cache warm.
-const updateNativeGasCostIntervalsSecPerChain = {
-  default: 30,
 };
 
 const maxDurationSec = 60;
@@ -85,10 +62,12 @@ const handler = async (
 
     const availableRoutes = (
       await axios(`${resolveVercelEndpoint()}/api/available-routes`)
-    ).data as Array<Route>;
+    ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started
     const functionStart = Date.now();
+
+    const updateCounts: Record<number, number> = {};
 
     /**
      * @notice Updates the gas price cache every `updateIntervalsSecPerChain` seconds up to `maxDurationSec` seconds.
@@ -100,13 +79,12 @@ const handler = async (
       chainId: number,
       outputTokenAddress?: string
     ): Promise<void> => {
+      updateCounts[chainId] ??= 0;
       const secondsPerUpdateForChain = updateIntervalsSecPerChain.default;
-      const cache = latestGasPriceCache(
-        chainId,
-        outputTokenAddress
-          ? getDepositArgsForChainId(chainId, outputTokenAddress)
-          : undefined
-      );
+      const depositArgs = outputTokenAddress
+        ? getDepositArgsForChainId(chainId, outputTokenAddress)
+        : undefined;
+      const cache = latestGasPriceCache(chainId, depositArgs);
 
       while (true) {
         const diff = Date.now() - functionStart;
@@ -114,70 +92,30 @@ const handler = async (
         if (diff >= maxDurationSec * 1000) {
           break;
         }
-        await cache.set();
+        try {
+          await cache.set();
+          updateCounts[chainId]++;
+        } catch (err) {
+          logger.warn({
+            at: "CronCacheGasPrices#updateGasPricePromise",
+            message: `Failed to set gas price cache for chain ${chainId}`,
+            depositArgs,
+            error: err,
+          });
+        }
         await utils.delay(secondsPerUpdateForChain);
       }
     };
 
-    /**
-     * @notice Updates the L1 data fee gas cost cache every `updateL1DataFeeIntervalsSecPerChain` seconds
-     * up to `maxDurationSec` seconds.
-     * @param chainId Chain to estimate l1 data fee for
-     * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
-     * gas costs for.
-     */
-    const updateL1DataFeePromise = async (
-      chainId: number,
-      outputTokenAddress: string
-    ): Promise<void> => {
-      const secondsPerUpdate = updateL1DataFeeIntervalsSecPerChain.default;
-      const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
-      const gasCostCache = getCachedNativeGasCost(depositArgs);
-
-      while (true) {
-        const diff = Date.now() - functionStart;
-        // Stop after `maxDurationSec` seconds
-        if (diff >= maxDurationSec * 1000) {
-          break;
-        }
-        const gasCost = await gasCostCache.get();
-        if (utils.chainIsOPStack(chainId)) {
-          const cache = getCachedOpStackL1DataFee(depositArgs, gasCost);
-          await cache.set();
-        }
-        await utils.delay(secondsPerUpdate);
-      }
+    const lineaDestinationRoutes = () => {
+      const routes = new Set<string>();
+      availableRoutes
+        .filter(
+          ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
+        )
+        .forEach(({ destinationToken }) => routes.add(destinationToken));
+      return Array.from(routes);
     };
-
-    /**
-     * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
-     * up to `maxDurationSec` seconds.
-     * @param chainId Chain to estimate gas cost for
-     * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
-     * gas costs for.
-     */
-    const updateNativeGasCostPromise = async (
-      chainId: number,
-      outputTokenAddress: string
-    ): Promise<void> => {
-      const secondsPerUpdate = updateNativeGasCostIntervalsSecPerChain.default;
-      const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
-      const cache = getCachedNativeGasCost(depositArgs);
-
-      while (true) {
-        const diff = Date.now() - functionStart;
-        // Stop after `maxDurationSec` seconds
-        if (diff >= maxDurationSec * 1000) {
-          break;
-        }
-        await cache.set();
-        await utils.delay(secondsPerUpdate);
-      }
-    };
-
-    const lineaDestinationRoutes = availableRoutes.filter(
-      ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
-    );
     // The minimum interval for Vercel Serverless Functions cron jobs is 1 minute.
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
@@ -191,40 +129,18 @@ const handler = async (
           .map((chain) => updateGasPricePromise(chain.chainId))
       ),
       Promise.all(
-        lineaDestinationRoutes.map(({ destinationToken }) =>
+        lineaDestinationRoutes().map((destinationToken) =>
           updateGasPricePromise(CHAIN_IDs.LINEA, destinationToken)
         )
-      ),
-      Promise.all(
-        mainnetChains.map(async (chain) => {
-          const routesToChain = availableRoutes.filter(
-            ({ destinationChainId }) => destinationChainId === chain.chainId
-          );
-          const outputTokensForChain = routesToChain.map(
-            ({ destinationToken }) => destinationToken
-          );
-          await Promise.all([
-            Promise.all(
-              outputTokensForChain.map((outputToken) =>
-                updateNativeGasCostPromise(chain.chainId, outputToken)
-              )
-            ),
-            Promise.all(
-              outputTokensForChain.map((outputToken) =>
-                updateL1DataFeePromise(chain.chainId, outputToken)
-              )
-            ),
-          ]);
-        })
       ),
     ]);
 
     logger.debug({
       at: "CronCacheGasPrices",
       message: "Finished",
+      updateCounts,
     });
-    response.status(200);
-    response.send("OK");
+    response.status(200).json({ updateCounts });
   } catch (error: unknown) {
     return handleErrorCondition(
       "cron-cache-gas-prices",
