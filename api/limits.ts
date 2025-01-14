@@ -32,8 +32,9 @@ import {
   getCachedLatestBlock,
   parsableBigNumberString,
   validateDepositMessage,
-  getCachedFillGasUsage,
   latestGasPriceCache,
+  getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
@@ -164,35 +165,50 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
-      await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
-          sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
-            sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
-        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // If Linea, then we will defer gas price estimation to the SDK in getCachedFillGasUsage because
-        // the priority fee depends upon the fill transaction calldata.
-        destinationChainId === CHAIN_IDs.LINEA
-          ? undefined
-          : latestGasPriceCache(destinationChainId).get(),
-      ]);
+    const [
+      tokenPriceNative,
+      _tokenPriceUsd,
+      latestBlock,
+      { maxFeePerGas: gasPrice },
+      nativeGasCost,
+    ] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token.address,
+        sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+      ),
+      getCachedTokenPrice(l1Token.address, "usd"),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+      // because only Linea's priority fee depends on the destination chain call data.
+      latestGasPriceCache(
+        destinationChainId,
+        CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
+        {
+          relayerAddress: relayer,
+        }
+      ).get(),
+      isMessageDefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        : getCachedNativeGasCost(depositArgs, {
+            relayerAddress: relayer,
+          }).get(),
+    ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
-      gasCosts,
+      opStackL1GasCost,
       multicallOutput,
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      isMessageDefined
-        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedFillGasUsage(depositArgs, gasPrice, {
+      nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
+        ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
             relayerAddress: relayer,
-          }),
+          }).get()
+        : undefined,
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
@@ -222,15 +238,21 @@ const handler = async (
         )
       ),
     ]);
-    // This call should not make any additional RPC queries if gasCosts is defined--for any deposit
-    // with an empty message.
+    const tokenGasCost =
+      nativeGasCost && gasPrice
+        ? nativeGasCost
+            .mul(gasPrice)
+            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
+        : undefined;
+    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+    // and tokenGasCost.
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
       tokenPriceNative,
       relayer,
       gasPrice,
-      gasCosts?.nativeGasCost,
-      gasCosts?.tokenGasCost
+      nativeGasCost,
+      tokenGasCost
     );
     logger.debug({
       at: "Limits",
@@ -280,8 +302,10 @@ const handler = async (
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
-      liquidReserves = liquidReserves.sub(lpCushion);
-      if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
+      liquidReserves = maxBN(
+        liquidReserves.sub(lpCushion),
+        ethers.BigNumber.from(0)
+      );
 
       maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
@@ -396,15 +420,23 @@ const handler = async (
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
       },
+      gasFeeDetails: tokenGasCost
+        ? {
+            nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
+            opStackL1GasCost: opStackL1GasCost?.toString(),
+            gasPrice: gasPrice.toString(),
+            tokenGasCost: tokenGasCost.toString(),
+          }
+        : undefined,
     };
     logger.debug({
       at: "Limits",
       message: "Response data",
       responseJson,
     });
-    // Respond with a 200 status code and 10 seconds of cache with
-    // 45 seconds of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 10, 45);
+    // Respond with a 200 status code and 1 second of cache time with
+    // 59s to keep serving the stale data while recomputing the cached value.
+    sendResponse(response, responseJson, 200, 1, 59);
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }

@@ -1873,7 +1873,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
-  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+  return minBN(bufferMultiplier, multiplierCap);
 }
 
 export function getChainInputTokenMaxBalanceInUsd(
@@ -1958,94 +1958,169 @@ export function isContractCache(chainId: number, address: string) {
   );
 }
 
-export function getCachedFillGasUsage(
+export function getCachedNativeGasCost(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
-  gasPrice?: BigNumber,
   overrides?: Partial<{
     relayerAddress: string;
   }>
 ) {
+  // We can use a long TTL since we are fetching only the native gas cost which should rarely change.
+  // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
-    default: 10,
-    [CHAIN_IDs.ARBITRUM]: 10,
+    default: 120,
   };
-
   const cacheKey = buildInternalCacheKey(
-    "fillGasUsage",
+    "nativeGasCost",
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
   const fetchFn = async () => {
+    const relayerAddress =
+      overrides?.relayerAddress ??
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
       overrides
     );
-    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
-    // we'll compute the gas price separately.
-    const markups = getGasMarkup(deposit.destinationChainId);
-    const gasCosts = await relayerFeeCalculatorQueries.getGasCosts(
-      buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      {
-        gasPrice,
-        // We want the fee multipliers if the gasPrice is undefined:
-        baseFeeMultiplier: markups.baseFeeMarkup,
-        priorityFeeMultiplier: markups.priorityFeeMarkup,
-        opStackL1GasCostMultiplier: sdk.utils.chainIsOPStack(
-          deposit.destinationChainId
-        )
-          ? getGasMarkup(deposit.destinationChainId).opStackL1DataFeeMarkup
-          : undefined,
-      }
+    const unsignedFillTxn =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        relayerAddress
+      );
+    const voidSigner = new ethers.VoidSigner(
+      relayerAddress,
+      relayerFeeCalculatorQueries.provider
     );
-    return {
-      nativeGasCost: gasCosts.nativeGasCost,
-      tokenGasCost: gasCosts.tokenGasCost,
-    };
+    return voidSigner.estimateGas(unsignedFillTxn);
   };
 
-  return getCachedValue(
+  return makeCacheGetterAndSetter(
     cacheKey,
-    ttl,
+    ttlPerChain.default,
     fetchFn,
-    (gasCosts: { nativeGasCost: BigNumber; tokenGasCost: BigNumber }) => {
+    (nativeGasCostFromCache) => {
+      return BigNumber.from(nativeGasCostFromCache);
+    }
+  );
+}
+
+export function getCachedOpStackL1DataFee(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  nativeGasCost: BigNumber,
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // The L1 data fee should change after each Ethereum block since its based on the L1 base fee.
+  // However, the L1 base fee should only change by 12.5% at most per block.
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 60,
+  };
+
+  const cacheKey = buildInternalCacheKey(
+    "opStackL1DataFee",
+    deposit.destinationChainId,
+    deposit.outputToken // This should technically differ based on the output token since the L2 calldata
+    // size affects the L1 data fee and this calldata can differ based on the output token.
+  );
+  const fetchFn = async () => {
+    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
+    // we'll compute the gas price separately.
+    const { opStackL1DataFeeMarkup } = getGasMarkup(deposit.destinationChainId);
+    const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+      deposit.destinationChainId,
+      overrides
+    );
+    const unsignedTx =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      );
+    const opStackL1GasCost =
+      await relayerFeeCalculatorQueries.getOpStackL1DataFee(
+        unsignedTx,
+        overrides?.relayerAddress,
+        {
+          opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
+          opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
+        }
+      );
+    return opStackL1GasCost;
+  };
+
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (l1DataFeeFromCache) => {
+      return BigNumber.from(l1DataFeeFromCache);
+    }
+  );
+}
+
+export function latestGasPriceCache(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 30,
+  };
+  return makeCacheGetterAndSetter(
+    // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.
+    // Therefore, we technically should cache a different gas price per different types of deposit so we add
+    // an additional outputToken to the cache key to distinguish between gas prices dependent on deposit args
+    // for different output tokens, which should be the main factor affecting the fill gas cost.
+    buildInternalCacheKey(
+      `latestGasPriceCache${deposit ? `-${deposit.outputToken}` : ""}`,
+      chainId
+    ),
+    ttlPerChain.default,
+    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
       return {
-        nativeGasCost: BigNumber.from(gasCosts.nativeGasCost),
-        tokenGasCost: BigNumber.from(gasCosts.tokenGasCost),
+        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
+        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
       };
     }
   );
 }
 
-export function latestGasPriceCache(chainId: number) {
-  const ttlPerChain = {
-    default: 30,
-    [CHAIN_IDs.ARBITRUM]: 15,
-  };
-
-  return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
-    async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
-    (bnFromCache) => BigNumber.from(bnFromCache)
-  );
-}
-
-/**
- * Resolve the current gas price for a given chain
- * @param chainId The chain ID to resolve the gas price for
- * @returns The gas price in the native currency of the chain
- */
-export function getMaxFeePerGas(
-  chainId: number
+export async function getMaxFeePerGas(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  if (deposit && deposit.destinationChainId !== chainId) {
+    throw new Error(
+      "Chain ID must match the destination chain ID of the deposit"
+    );
+  }
   const {
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
   } = getGasMarkup(chainId);
+  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+    chainId,
+    overrides
+  );
+  const unsignedFillTxn = deposit
+    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      )
+    : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
+    unsignedTx: unsignedFillTxn,
     baseFeeMultiplier,
     priorityFeeMultiplier,
   });

@@ -1,17 +1,16 @@
 import { VercelResponse } from "@vercel/node";
 import {
-  buildDepositForSimulation,
+  getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
   getGasMarkup,
   getLogger,
-  getMaxFeePerGas,
-  getRelayerFeeCalculatorQueries,
   handleErrorCondition,
+  latestGasPriceCache,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
-import { ethers, providers, VoidSigner } from "ethers";
+import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
-import { L2Provider } from "@eth-optimism/sdk/dist/interfaces/l2-provider";
 
 import mainnetChains from "../src/data/chains_1.json";
 import {
@@ -28,6 +27,16 @@ const QueryParamsSchema = object({
 });
 type QueryParams = Infer<typeof QueryParamsSchema>;
 
+const getDepositArgsForChainId = (chainId: number, tokenAddress: string) => {
+  return {
+    amount: ethers.BigNumber.from(100),
+    inputToken: sdk.constants.ZERO_ADDRESS,
+    outputToken: tokenAddress,
+    recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+    originChainId: 0, // Shouldn't matter for simulation
+    destinationChainId: Number(chainId),
+  };
+};
 const handler = async (
   { query }: TypedVercelRequest<QueryParams>,
   response: VercelResponse
@@ -47,56 +56,41 @@ const handler = async (
         })
         .filter(([, tokenAddress]) => tokenAddress !== undefined)
     );
-    // getMaxFeePerGas will return the gas price after including the baseFeeMultiplier.
-    const gasPrices = await Promise.all(
-      Object.keys(chainIdsWithToken).map((chainId) => {
-        return getMaxFeePerGas(Number(chainId));
+    const gasData = await Promise.all(
+      Object.entries(chainIdsWithToken).map(([chainId, tokenAddress]) => {
+        const depositArgs = getDepositArgsForChainId(
+          Number(chainId),
+          tokenAddress
+        );
+        return Promise.all([
+          getCachedNativeGasCost(depositArgs).get(),
+          latestGasPriceCache(
+            Number(chainId),
+            CHAIN_IDs.LINEA === Number(chainId) ? depositArgs : undefined
+          ).get(),
+        ]);
       })
     );
+    // We query the following gas costs after gas prices because token gas costs and op stack l1 gas costs
+    // depend on the gas price and native gas unit results.
     const gasCosts = await Promise.all(
       Object.entries(chainIdsWithToken).map(
         async ([chainId, tokenAddress], i) => {
-          // This is a dummy deposit used to pass into buildDepositForSimulation() to build a fill transaction
-          // that we can simulate without reversion. The only parameter that matters is that the destinationChainId
-          // is set to the spoke pool's chain ID we'll be simulating the fill call on.
-          const depositArgs = {
-            amount: ethers.BigNumber.from(100),
-            inputToken: sdk.constants.ZERO_ADDRESS,
-            outputToken: tokenAddress,
-            recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-            originChainId: 0, // Shouldn't matter for simulation
-            destinationChainId: Number(chainId),
-          };
-          const deposit = buildDepositForSimulation(depositArgs);
-          const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
-            Number(chainId)
+          const depositArgs = getDepositArgsForChainId(
+            Number(chainId),
+            tokenAddress
           );
-          const { baseFeeMarkup, priorityFeeMarkup, opStackL1DataFeeMarkup } =
-            getGasMarkup(Number(chainId));
-          const { nativeGasCost, tokenGasCost, opStackL1GasCost, gasPrice } =
-            await relayerFeeCalculatorQueries.getGasCosts(
-              deposit,
-              relayerFeeCalculatorQueries.simulatedRelayerAddress,
-              {
-                // Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
-                // the scaled gas price,
-                // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
-                // Except for Linea, where the gas price is dependent on the unsignedTx produced from the deposit,
-                // so let the SDK compute its gas price here.
-                gasPrice:
-                  Number(chainId) === CHAIN_IDs.LINEA
-                    ? undefined
-                    : gasPrices[i].maxFeePerGas,
-                opStackL1GasCostMultiplier: opStackL1DataFeeMarkup,
-                baseFeeMultiplier: baseFeeMarkup,
-                priorityFeeMultiplier: priorityFeeMarkup,
-              }
-            );
+          const [nativeGasCost, gasPrice] = gasData[i];
+          const opStackL1GasCost = sdk.utils.chainIsOPStack(Number(chainId))
+            ? await getCachedOpStackL1DataFee(depositArgs, nativeGasCost).get()
+            : undefined;
+          const tokenGasCost = nativeGasCost
+            .mul(gasPrice.maxFeePerGas)
+            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"));
           return {
             nativeGasCost,
             tokenGasCost,
             opStackL1GasCost,
-            gasPrice,
           };
         }
       )
@@ -107,23 +101,12 @@ const handler = async (
         Object.keys(chainIdsWithToken).map((chainId, i) => [
           chainId,
           {
-            gasPrice:
-              Number(chainId) === CHAIN_IDs.LINEA
-                ? gasCosts[i].gasPrice.toString()
-                : gasPrices[i].maxFeePerGas.toString(),
+            gasPrice: gasData[i][1].maxFeePerGas.toString(),
             gasPriceComponents: {
-              // Linea hardcodes base fee at 7 wei so we can always back it out fromthe gasPrice returned by the
-              // getGasCosts method.
-              maxFeePerGas:
-                Number(chainId) === CHAIN_IDs.LINEA
-                  ? gasCosts[i].gasPrice.sub(7).toString()
-                  : gasPrices[i].maxFeePerGas
-                      .sub(gasPrices[i].maxPriorityFeePerGas)
-                      .toString(),
-              priorityFeePerGas:
-                Number(chainId) === CHAIN_IDs.LINEA
-                  ? "7"
-                  : gasPrices[i].maxPriorityFeePerGas.toString(),
+              maxFeePerGas: gasData[i][1].maxFeePerGas
+                .sub(gasData[i][1].maxPriorityFeePerGas)
+                .toString(),
+              priorityFeePerGas: gasData[i][1].maxPriorityFeePerGas.toString(),
               baseFeeMultiplier: ethers.utils.formatEther(
                 getGasMarkup(chainId).baseFeeMarkup
               ),

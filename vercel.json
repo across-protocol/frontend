@@ -25,7 +25,7 @@
   "rewrites": [
     {
       "source": "/api/deposit/status",
-      "destination": "https://public.api.across.to/deposit/status"
+      "destination": "https://indexer.across.to/deposit/status"
     }
   ],
   "redirects": [
