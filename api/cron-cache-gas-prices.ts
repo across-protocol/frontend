@@ -107,9 +107,15 @@ const handler = async (
       }
     };
 
-    const lineaDestinationRoutes = availableRoutes.filter(
-      ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
-    );
+    const lineaDestinationRoutes = () => {
+      const routes = new Set<string>();
+      availableRoutes
+        .filter(
+          ({ destinationChainId }) => destinationChainId === CHAIN_IDs.LINEA
+        )
+        .forEach(({ destinationToken }) => routes.add(destinationToken));
+      return Array.from(routes);
+    };
     // The minimum interval for Vercel Serverless Functions cron jobs is 1 minute.
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
@@ -123,7 +129,7 @@ const handler = async (
           .map((chain) => updateGasPricePromise(chain.chainId))
       ),
       Promise.all(
-        lineaDestinationRoutes.map(({ destinationToken }) =>
+        lineaDestinationRoutes().map((destinationToken) =>
           updateGasPricePromise(CHAIN_IDs.LINEA, destinationToken)
         )
       ),
