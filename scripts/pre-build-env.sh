@@ -12,6 +12,7 @@
     for file in "${files[@]}"; do
         echo "Downloading $file..."
         curl -H "Authorization: token ${GH_TOKEN}" -L "${BASE_URL}${file}" -o "src/$file"
+        cat src/${file}
     done
     echo "All files downloaded."
 
