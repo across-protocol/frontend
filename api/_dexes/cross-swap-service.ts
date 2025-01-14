@@ -15,6 +15,7 @@ import {
   buildMinOutputBridgeTokenMessage,
   getCrossSwapType,
   getQuoteFetchStrategy,
+  NoQuoteFoundError,
   PREFERRED_BRIDGE_TOKENS,
   QuoteFetchStrategies,
 } from "./utils";
@@ -376,7 +377,7 @@ export async function getCrossSwapQuotesForOutputA2A(
   strategies: QuoteFetchStrategies
 ) {
   const preferredBridgeTokens = PREFERRED_BRIDGE_TOKENS;
-  const bridgeRoutesLimit = 3;
+  const bridgeRoutesToCompareChunkSize = 2;
 
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
@@ -399,46 +400,59 @@ export async function getCrossSwapQuotesForOutputA2A(
   const preferredBridgeRoutes = allBridgeRoutes.filter(({ toTokenSymbol }) =>
     preferredBridgeTokens.includes(toTokenSymbol)
   );
-  const bridgeRoutesToCompare = (
-    preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes
-  ).slice(0, bridgeRoutesLimit);
+  const bridgeRoutes =
+    preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes;
 
-  if (bridgeRoutesToCompare.length === 0) {
-    throw new Error(
-      `No bridge routes to compare for ${originSwapChainId} -> ${destinationSwapChainId}`
+  let chunkStart = 0;
+  while (chunkStart < bridgeRoutes.length) {
+    const bridgeRoutesToCompare = bridgeRoutes.slice(
+      chunkStart,
+      chunkStart + bridgeRoutesToCompareChunkSize
     );
-  }
 
-  const crossSwapQuotesResults = await Promise.allSettled(
-    bridgeRoutesToCompare.map((bridgeRoute) =>
-      getCrossSwapQuotesForOutputByRouteA2A(
-        crossSwap,
-        bridgeRoute,
-        originStrategy,
-        destinationStrategy
+    if (bridgeRoutesToCompare.length === 0) {
+      throw new Error(
+        `No bridge routes to compare for ${originSwapChainId} -> ${destinationSwapChainId}`
+      );
+    }
+
+    const crossSwapQuotesResults = await Promise.allSettled(
+      bridgeRoutesToCompare.map((bridgeRoute) =>
+        getCrossSwapQuotesForOutputByRouteA2A(
+          crossSwap,
+          bridgeRoute,
+          originStrategy,
+          destinationStrategy
+        )
       )
-    )
-  );
-
-  const crossSwapQuotes = crossSwapQuotesResults
-    .filter((result) => result.status === "fulfilled")
-    .map((result) => result.value);
-
-  if (crossSwapQuotes.length === 0) {
-    throw new Error(
-      `Failed to get quote for ${originSwapChainId} ${crossSwap.inputToken.symbol} -> ${destinationSwapChainId} ${crossSwap.outputToken.symbol}`
     );
+
+    const crossSwapQuotes = crossSwapQuotesResults
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value);
+
+    if (crossSwapQuotes.length === 0) {
+      chunkStart += bridgeRoutesToCompareChunkSize;
+      continue;
+    }
+
+    // Compare quotes by lowest input amount
+    const bestCrossSwapQuote = crossSwapQuotes.reduce((prev, curr) =>
+      prev.originSwapQuote!.maximumAmountIn.lt(
+        curr.originSwapQuote!.maximumAmountIn
+      )
+        ? prev
+        : curr
+    );
+    return bestCrossSwapQuote;
   }
 
-  // Compare quotes by lowest input amount
-  const bestCrossSwapQuote = crossSwapQuotes.reduce((prev, curr) =>
-    prev.originSwapQuote!.maximumAmountIn.lt(
-      curr.originSwapQuote!.maximumAmountIn
-    )
-      ? prev
-      : curr
-  );
-  return bestCrossSwapQuote;
+  throw new NoQuoteFoundError({
+    originSwapChainId,
+    inputTokenSymbol: crossSwap.inputToken.symbol,
+    destinationSwapChainId,
+    outputTokenSymbol: crossSwap.outputToken.symbol,
+  });
 }
 
 export async function getCrossSwapQuotesForOutputByRouteA2A(
