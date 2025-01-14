@@ -37,7 +37,6 @@ const updateNativeGasCostIntervalsSecPerChain = {
   default: 30,
 };
 
-// Force the cache update promises to stop 1s before the Vercel serverless function times out.
 const maxDurationSec = 60;
 
 const getDepositArgsForChainId = (chainId: number, tokenAddress: string) => {
@@ -164,7 +163,7 @@ const handler = async (
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
-    const cacheUpdatePromises = Promise.all([
+    await Promise.all([
       Promise.all(
         mainnetChains.map(async (chain) => {
           const routesToChain = availableRoutes.filter(
@@ -188,7 +187,6 @@ const handler = async (
         })
       ),
     ]);
-    await Promise.race([cacheUpdatePromises, utils.delay(maxDurationSec)]);
 
     logger.debug({
       at: "CronCacheGasPrices",
