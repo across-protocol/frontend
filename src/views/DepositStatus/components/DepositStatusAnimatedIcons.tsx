@@ -3,6 +3,7 @@ import { DepositStatus } from "../types";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckStarPending } from "assets/icons/check-star-ring-opaque-pending.svg";
 import { ReactComponent as CheckStarCompleted } from "assets/icons/check-star-ring-opaque-completed.svg";
+import { externConfigs } from "constants/chains/configs";
 
 const BlurLoadingAnimation = () => (
   <AnimatedBlurLoader>
@@ -15,15 +16,19 @@ type DepositStatusAnimatedIconsParams = {
   status: DepositStatus;
   fromChainId: number;
   toChainId: number;
+  externalProjectId?: string;
 };
 
 const DepositStatusAnimatedIcons = ({
   status,
   fromChainId,
   toChainId,
+  externalProjectId,
 }: DepositStatusAnimatedIconsParams) => {
   const GrayscaleLogoFromChain = getChainInfo(fromChainId).grayscaleLogoSvg;
-  const GrayscaleLogoToChain = getChainInfo(toChainId).grayscaleLogoSvg;
+  const GrayscaleLogoToChain = externalProjectId
+    ? externConfigs[externalProjectId].grayscaleLogoSvg
+    : getChainInfo(toChainId).grayscaleLogoSvg;
 
   return (
     <>

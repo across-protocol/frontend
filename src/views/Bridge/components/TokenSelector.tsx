@@ -39,7 +39,14 @@ export function TokenSelector({
   receiveTokenSymbol,
 }: Props) {
   const isInputTokenSelector = inputOrOutputToken === "input";
-  const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+  const {
+    fromChain,
+    toChain,
+    fromTokenSymbol,
+    toTokenSymbol,
+    externalProjectId,
+  } = selectedRoute;
+
   const selectedToken = getToken(
     isInputTokenSelector
       ? selectedRoute.type === "swap"
@@ -59,8 +66,13 @@ export function TokenSelector({
     }
   > = useMemo(() => {
     const availableTokens = isInputTokenSelector
-      ? getAvailableInputTokens(fromChain, toChain)
-      : getAvailableOutputTokens(fromChain, toChain, fromTokenSymbol);
+      ? getAvailableInputTokens(fromChain, toChain, externalProjectId)
+      : getAvailableOutputTokens(
+          fromChain,
+          toChain,
+          fromTokenSymbol,
+          externalProjectId
+        );
     const orderedAvailableTokens = tokenList.filter((orderedToken) =>
       availableTokens.find(
         (availableToken) => availableToken.symbol === orderedToken.symbol
@@ -79,7 +91,13 @@ export function TokenSelector({
             .map((t) => ({ ...t, disabled: true }))
         : []),
     ];
-  }, [fromChain, toChain, fromTokenSymbol, isInputTokenSelector]);
+  }, [
+    fromChain,
+    toChain,
+    fromTokenSymbol,
+    isInputTokenSelector,
+    externalProjectId,
+  ]);
 
   const { balances } = useBalancesBySymbols({
     tokenSymbols: orderedTokens.filter((t) => !t.disabled).map((t) => t.symbol),
