@@ -210,7 +210,7 @@ const handler = async (
         : undefined,
       callViaMulticall3(provider, multiCalls, {
         // blockTag: latestBlock.number,
-        blockTag: 21622164, // temp override before malformed config
+        blockTag: 21622160, // temp override before malformed config
       }),
       Promise.all(
         fullRelayers.map((relayer) =>
