@@ -172,15 +172,11 @@ const handler = async (
           ({ destinationToken }) => destinationToken
         );
         return Promise.all([
-          Promise.all(
-            outputTokensForChain.map((outputToken) =>
-              updateNativeGasCostPromise(chain.chainId, outputToken)
-            )
+          ...outputTokensForChain.map((outputToken) =>
+            updateNativeGasCostPromise(chain.chainId, outputToken)
           ),
-          Promise.all(
-            outputTokensForChain.map((outputToken) =>
-              updateL1DataFeePromise(chain.chainId, outputToken)
-            )
+          ...outputTokensForChain.map((outputToken) =>
+            updateL1DataFeePromise(chain.chainId, outputToken)
           ),
         ]);
       }),
