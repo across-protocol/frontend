@@ -17,7 +17,7 @@ const AvailableRoutesQueryParamsSchema = object({
 });
 
 dotenv.config({
-  path: ["../src/output_api.env"],
+  path: "../src/output_api.env",
 });
 
 type AvailableRoutesQueryParams = Infer<
