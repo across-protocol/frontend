@@ -171,7 +171,7 @@ const handler = async (
         const outputTokensForChain = routesToChain.map(
           ({ destinationToken }) => destinationToken
         );
-        return Promise.all([
+        await Promise.all([
           ...outputTokensForChain.map((outputToken) =>
             updateNativeGasCostPromise(chain.chainId, outputToken)
           ),
