@@ -19,6 +19,7 @@ export { default as POLYGON_AMOY } from "./polygon-amoy";
 export { default as REDSTONE } from "./redstone";
 export { default as SCROLL } from "./scroll";
 export { default as SEPOLIA } from "./sepolia";
+export { default as SONEIUM } from "./soneium";
 export { default as WORLD_CHAIN } from "./world-chain";
 export { default as ZK_SYNC } from "./zk-sync";
 export { default as ZORA } from "./zora";

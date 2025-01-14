@@ -1564,5 +1564,31 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       }
     ]
+  },
+  {
+    "chainId": 1868,
+    "name": "Cher",
+    "publicRpcUrl": "https://rpc.soneium.org",
+    "explorerUrl": "",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/soneium/assets/logo.svg",
+    "spokePool": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    "spokePoolBlock": 1709997,
+    "inputTokens": [],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      }
+    ]
   }
 ]

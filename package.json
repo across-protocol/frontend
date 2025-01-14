@@ -4,10 +4,10 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants": "^3.1.24",
-    "@across-protocol/contracts": "^3.0.19",
+    "@across-protocol/constants": "^3.1.28",
+    "@across-protocol/contracts": "^3.0.23",
     "@across-protocol/contracts-v3.0.6": "npm:@across-protocol/contracts@3.0.6",
-    "@across-protocol/sdk": "^3.4.10",
+    "@across-protocol/sdk": "^3.4.11",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.13.0",

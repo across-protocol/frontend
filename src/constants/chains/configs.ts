@@ -105,6 +105,11 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import cherLogo from "assets/chain-logos/soneium.svg";
+import cherGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
+import { ReactComponent as cherLogoSvg } from "assets/chain-logos/soneium.svg";
+import { ReactComponent as cherGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
+
 import worldChainLogo from "assets/chain-logos/world-chain.svg";
 import worldChainGrayscaleLogo from "assets/chain-logos/world-chain-grayscale.svg";
 import { ReactComponent as worldChainLogoSvg } from "assets/chain-logos/world-chain.svg";
@@ -473,6 +478,22 @@ export const sepolia = {
   pollingInterval: 15000,
 };
 
+export const cher = {
+  name: "Cher",
+  fullName: "Cher",
+  chainId: 1868,
+  logoURI: cherLogo,
+  grayscaleLogoURI: cherGrayscaleLogo,
+  logoSvg: cherLogoSvg,
+  grayscaleLogoSvg: cherGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.soneium.org",
+  explorerUrl: "",
+  constructExplorerLink: (txHash: string) => `${cher.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_1868_PROVIDER_URL,
+  pollingInterval: 15000,
+};
+
 export const worldChain = {
   name: "World Chain",
   fullName: "World Chain",
@@ -545,6 +566,7 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  cher,
   worldChain,
   zkSync,
   zora,
