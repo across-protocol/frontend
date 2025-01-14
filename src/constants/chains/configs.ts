@@ -491,7 +491,7 @@ export const cher = {
   constructExplorerLink: (txHash: string) => `${cher.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1868_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const worldChain = {
