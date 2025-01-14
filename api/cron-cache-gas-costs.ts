@@ -169,20 +169,24 @@ const handler = async (
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
     const cacheUpdatePromise = Promise.all([
-      mainnetChains.map(async (chain) => {
-        await Promise.all(
-          getOutputTokensToChain(chain.chainId).map((outputToken) =>
-            updateNativeGasCostPromise(chain.chainId, outputToken)
-          )
-        );
-      }),
-      mainnetChains.map(async (chain) => {
-        await Promise.all(
-          getOutputTokensToChain(chain.chainId).map((outputToken) =>
-            updateL1DataFeePromise(chain.chainId, outputToken)
-          )
-        );
-      }),
+      Promise.all(
+        mainnetChains.map(async (chain) => {
+          await Promise.all(
+            getOutputTokensToChain(chain.chainId).map((outputToken) =>
+              updateNativeGasCostPromise(chain.chainId, outputToken)
+            )
+          );
+        })
+      ),
+      Promise.all(
+        mainnetChains.map(async (chain) => {
+          await Promise.all(
+            getOutputTokensToChain(chain.chainId).map((outputToken) =>
+              updateL1DataFeePromise(chain.chainId, outputToken)
+            )
+          );
+        })
+      ),
     ]);
     // There are many routes and therefore many promises to wait to resolve so we force the
     // function to stop after `maxDurationSec` seconds.
