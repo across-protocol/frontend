@@ -159,32 +159,34 @@ const handler = async (
       }
     };
 
+    const getOutputTokensToChain = (chainId: number) =>
+      availableRoutes
+        .filter(({ destinationChainId }) => destinationChainId === chainId)
+        .map(({ destinationToken }) => destinationToken);
+
     // The minimum interval for Vercel Serverless Functions cron jobs is 1 minute.
     // But we want to update gas data more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
-    await Promise.all(
+    const cacheUpdatePromise = Promise.all([
       mainnetChains.map(async (chain) => {
-        const routesToChain = availableRoutes.filter(
-          ({ destinationChainId }) => destinationChainId === chain.chainId
+        await Promise.all(
+          getOutputTokensToChain(chain.chainId).map((outputToken) =>
+            updateNativeGasCostPromise(chain.chainId, outputToken)
+          )
         );
-        const outputTokensForChain = routesToChain.map(
-          ({ destinationToken }) => destinationToken
+      }),
+      mainnetChains.map(async (chain) => {
+        await Promise.all(
+          getOutputTokensToChain(chain.chainId).map((outputToken) =>
+            updateL1DataFeePromise(chain.chainId, outputToken)
+          )
         );
-        await Promise.all([
-          Promise.all(
-            outputTokensForChain.map((outputToken) =>
-              updateNativeGasCostPromise(chain.chainId, outputToken)
-            )
-          ),
-          Promise.all(
-            outputTokensForChain.map((outputToken) =>
-              updateL1DataFeePromise(chain.chainId, outputToken)
-            )
-          ),
-        ]);
-      })
-    );
+      }),
+    ]);
+    // There are many routes and therefore many promises to wait to resolve so we force the
+    // function to stop after `maxDurationSec` seconds.
+    await Promise.race([cacheUpdatePromise, utils.delay(maxDurationSec)]);
 
     logger.debug({
       at: "CronCacheGasPrices",
