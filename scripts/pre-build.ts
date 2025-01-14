@@ -18,7 +18,7 @@ import {
 } from "./remote-configs/utils";
 
 dotenv.config({
-  path: [".env.local", ".env.production", ".env"],
+  path: [".env.local", ".env.production", ".env", "output.env"],
 });
 
 const remoteConfigs = {
@@ -105,6 +105,7 @@ const remoteConfigs = {
 
 (async () => {
   console.log("Running pre-build script to fetch remote config files...");
+  console.log(process.env.GIT_ENV_EXPORTED);
 
   try {
     for (const [configType, { fetchFn, localFilePath }] of Object.entries(
