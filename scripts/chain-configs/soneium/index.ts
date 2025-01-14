@@ -4,7 +4,7 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.CHER;
+const chainId = CHAIN_IDs.SONEIUM;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
