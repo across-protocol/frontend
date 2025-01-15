@@ -50,7 +50,7 @@ export const CROSS_SWAP_TYPE = {
   ANY_TO_ANY: "anyToAny",
 } as const;
 
-export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
+export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC", "USDT", "DAI"];
 
 export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
   // This will be our default strategy until the periphery contract is audited
@@ -413,6 +413,19 @@ export function assertMinOutputAmount(
     throw new Error(
       `Swap quote output amount ${amountOut.toString()} ` +
         `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+    );
+  }
+}
+
+export class NoQuoteFoundError extends Error {
+  constructor(params: {
+    originSwapChainId: number;
+    inputTokenSymbol: string;
+    destinationSwapChainId: number;
+    outputTokenSymbol: string;
+  }) {
+    super(
+      `No quote found for ${params.originSwapChainId} ${params.inputTokenSymbol} -> ${params.destinationSwapChainId} ${params.outputTokenSymbol}`
     );
   }
 }
