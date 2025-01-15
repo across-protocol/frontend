@@ -487,7 +487,7 @@ export const soneium = {
   logoSvg: soneiumLogoSvg,
   grayscaleLogoSvg: soneiumGrayscaleLogoSvg,
   rpcUrl: "https://rpc.soneium.org",
-  explorerUrl: "",
+  explorerUrl: "https://soneium.blockscout.com",
   constructExplorerLink: (txHash: string) =>
     `${soneium.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
