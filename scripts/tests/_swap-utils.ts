@@ -269,7 +269,6 @@ export async function signAndWaitAllowanceFlow(params: {
       data: params.swapResponse.swapTx.data,
       value: params.swapResponse.swapTx.value,
       gasLimit: params.swapResponse.swapTx.gas,
-      gasPrice: params.swapResponse.swapTx.gasPrice,
     });
     console.log("Tx hash: ", tx.hash);
     await tx.wait();

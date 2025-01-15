@@ -84,7 +84,12 @@ export async function handleApprovalSwap(
     balance.gte(inputAmount);
 
   let originTxGas: BigNumber | undefined;
-  let originTxGasPrice: BigNumber | undefined;
+  let originTxGasPrice:
+    | {
+        maxFeePerGas: BigNumber;
+        maxPriorityFeePerGas: BigNumber;
+      }
+    | undefined;
   if (isSwapTxEstimationPossible) {
     const provider = getProvider(originChainId);
     [originTxGas, originTxGasPrice] = await Promise.all([
@@ -122,7 +127,8 @@ export async function handleApprovalSwap(
     approvalSwapTx: {
       ...crossSwapTx,
       gas: originTxGas,
-      gasPrice: originTxGasPrice,
+      maxFeePerGas: originTxGasPrice?.maxFeePerGas,
+      maxPriorityFeePerGas: originTxGasPrice?.maxPriorityFeePerGas,
     },
     allowance,
     balance,
