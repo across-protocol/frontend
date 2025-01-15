@@ -46,6 +46,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.WORLD_CHAIN,
   chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
+  chainConfigs.SONEIUM,
 ];
 
 const enabledSepoliaChainConfigs = [
