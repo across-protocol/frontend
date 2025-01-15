@@ -17,6 +17,7 @@ import {
   generalMaintenanceMessage,
   stringValueInArray,
   getConfig,
+  chainEndpointToId,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
 import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
@@ -186,6 +187,18 @@ const Routes: React.FC = () => {
               pathname: "/bridge",
               search: location.search,
             }}
+          />
+          {Object.entries(chainEndpointToId).map(([chainName, chainId]) => (
+            <Route
+              key={chainId}
+              exact
+              path={`/${chainName}`}
+              render={() => <Send preferredChainId={chainId} />}
+            />
+          ))}
+          <Route
+            path="*"
+            render={() => <NotFound custom404Message="page not found" />}
           />
         </Switch>
       </Suspense>

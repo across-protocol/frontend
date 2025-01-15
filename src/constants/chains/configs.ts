@@ -35,6 +35,16 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import inkLogo from "assets/chain-logos/ink.svg";
+import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
+import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
+import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
+
+import lensSepoliaLogo from "assets/chain-logos/lens-sepolia.svg";
+import lensSepoliaGrayscaleLogo from "assets/chain-logos/lens-sepolia-grayscale.svg";
+import { ReactComponent as lensSepoliaLogoSvg } from "assets/chain-logos/lens-sepolia.svg";
+import { ReactComponent as lensSepoliaGrayscaleLogoSvg } from "assets/chain-logos/lens-sepolia-grayscale.svg";
+
 import lineaLogo from "assets/chain-logos/linea.svg";
 import lineaGrayscaleLogo from "assets/chain-logos/linea-grayscale.svg";
 import { ReactComponent as lineaLogoSvg } from "assets/chain-logos/linea.svg";
@@ -99,6 +109,11 @@ import sepoliaLogo from "assets/chain-logos/sepolia.svg";
 import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
+
+import soneiumLogo from "assets/chain-logos/soneium.svg";
+import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
+import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
+import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
 import worldChainLogo from "assets/chain-logos/world-chain.svg";
 import worldChainGrayscaleLogo from "assets/chain-logos/world-chain-grayscale.svg";
@@ -231,6 +246,39 @@ export const blastSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
   pollingInterval: 2000,
+};
+
+export const ink = {
+  name: "Ink",
+  fullName: "Ink",
+  chainId: 57073,
+  logoURI: inkLogo,
+  grayscaleLogoURI: inkGrayscaleLogo,
+  logoSvg: inkLogoSvg,
+  grayscaleLogoSvg: inkGrayscaleLogoSvg,
+  rpcUrl: "https://rpc-gel.inkonchain.com",
+  explorerUrl: "https://explorer.inkonchain.com",
+  constructExplorerLink: (txHash: string) => `${ink.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_57073_PROVIDER_URL,
+  pollingInterval: 1000,
+};
+
+export const lensSepolia = {
+  name: "Lens Sepolia",
+  fullName: "Lens sepolia",
+  chainId: 37111,
+  logoURI: lensSepoliaLogo,
+  grayscaleLogoURI: lensSepoliaGrayscaleLogo,
+  logoSvg: lensSepoliaLogoSvg,
+  grayscaleLogoSvg: lensSepoliaGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.testnet.lens.dev",
+  explorerUrl: "https://block-explorer.testnet.lens.dev",
+  constructExplorerLink: (txHash: string) =>
+    `${lensSepolia.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "GRASS",
+  customRpcUrl: process.env.REACT_APP_CHAIN_37111_PROVIDER_URL,
+  pollingInterval: 1000,
 };
 
 export const linea = {
@@ -452,6 +500,23 @@ export const sepolia = {
   pollingInterval: 15000,
 };
 
+export const soneium = {
+  name: "soneium",
+  fullName: "soneium",
+  chainId: 1868,
+  logoURI: soneiumLogo,
+  grayscaleLogoURI: soneiumGrayscaleLogo,
+  logoSvg: soneiumLogoSvg,
+  grayscaleLogoSvg: soneiumGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.soneium.org",
+  explorerUrl: "https://soneium.blockscout.com",
+  constructExplorerLink: (txHash: string) =>
+    `${soneium.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_1868_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const worldChain = {
   name: "World Chain",
   fullName: "World Chain",
@@ -510,6 +575,8 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  ink,
+  lensSepolia,
   linea,
   lisk,
   liskSepolia,
@@ -523,6 +590,7 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  soneium,
   worldChain,
   zkSync,
   zora,

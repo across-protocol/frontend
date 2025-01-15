@@ -34,7 +34,7 @@ export function useDepositStatus(deposit: Deposit) {
       DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
     ) > pendingStateTimeUntilDelayed &&
     limits
-      ? BigNumber.from(deposit.amount).gt(limits?.maxDepositInstant)
+      ? BigNumber.from(deposit.amount).gt(limits?.maxDepositShortDelay)
       : false;
 
   const isExpired = deposit.fillDeadline

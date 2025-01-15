@@ -25,6 +25,8 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.ZORA,
   CHAIN_IDs.WORLD_CHAIN,
   CHAIN_IDs.ALEPH_ZERO,
+  CHAIN_IDs.INK,
+  CHAIN_IDs.SONEIUM,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,
@@ -34,6 +36,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.POLYGON_AMOY,
   CHAIN_IDs.BLAST_SEPOLIA,
   CHAIN_IDs.LISK_SEPOLIA,
+  CHAIN_IDs.LENS_SEPOLIA,
 ];
 
 export const chainInfoList: ChainInfoList = orderedEnabledChainIds.map(

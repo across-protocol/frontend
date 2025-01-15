@@ -14,13 +14,17 @@ import {
   WalletWrapper,
 } from "./Wallet.styles";
 import Web3Subscribe from "./Web3Subscribe";
+import { useEnsQuery } from "hooks/useEns";
 
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, ensName, isConnected, chainId, connect } = useConnection();
+  const { account, isConnected, chainId, connect } = useConnection();
+  const {
+    data: { ensName },
+  } = useEnsQuery(account);
 
   if (account && !isSupportedChainId(chainId)) {
     return (

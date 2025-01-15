@@ -98,6 +98,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
     decimals: 18,
   },
+  GRASS: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
 };
 
 defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
@@ -202,3 +208,5 @@ export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
 export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
+
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2.5 * 60 * 60; // 2.5 hours
