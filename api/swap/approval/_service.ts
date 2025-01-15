@@ -20,7 +20,7 @@ const quoteFetchStrategies: QuoteFetchStrategies = {
 };
 
 export async function handleApprovalSwap(
-  query: TypedVercelRequest<BaseSwapQueryParams>["query"]
+  request: TypedVercelRequest<BaseSwapQueryParams>
 ) {
   const {
     integratorId,
@@ -37,7 +37,7 @@ export async function handleApprovalSwap(
     depositor,
     slippageTolerance,
     refundToken,
-  } = await handleBaseSwapQueryParams(query);
+  } = await handleBaseSwapQueryParams(request.query);
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {

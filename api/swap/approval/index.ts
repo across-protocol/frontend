@@ -22,7 +22,7 @@ const handler = async (
     });
     const mark = profiler.start("e2e endpoint runtime");
 
-    const responseJson = await handleApprovalSwap(request.query);
+    const responseJson = await handleApprovalSwap(request);
 
     mark.stop();
     logger.debug({

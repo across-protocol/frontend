@@ -1,26 +1,19 @@
 import { VercelResponse } from "@vercel/node";
-import axios from "axios";
 
 import { TypedVercelRequest } from "../_types";
-import {
-  getLogger,
-  handleErrorCondition,
-  resolveVercelEndpoint,
-} from "../_utils";
+import { getLogger, handleErrorCondition } from "../_utils";
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
 import { getPermitArgsFromContract } from "../_permit";
 import { getReceiveWithAuthArgsFromContract } from "../_transfer-with-auth";
 import { handleApprovalSwap } from "./approval/_service";
+import { handlePermitSwap } from "./permit/_service";
+import { handleAuthSwap } from "./auth/_service";
 
 type SwapFlowType = "permit" | "transfer-with-auth" | "approval";
 
-function makeSwapHandler(path: string) {
-  return (params: unknown) =>
-    axios.get(`${resolveVercelEndpoint(true)}/api/swap/${path}`, { params });
-}
 const swapFlowTypeToHandler = {
-  // permit: permitHandler,
-  // "transfer-with-auth": authHandler,
+  permit: handlePermitSwap,
+  "transfer-with-auth": handleAuthSwap,
   approval: handleApprovalSwap,
 };
 
@@ -54,17 +47,16 @@ export default async function handler(
         getReceiveWithAuthArgsFromContract(args),
       ]);
 
-    // if (permitArgsResult.status === "fulfilled") {
-    //   swapFlowType = "permit";
-    // } else if (transferWithAuthArgsResult.status === "fulfilled") {
-    //   swapFlowType = "transfer-with-auth";
-    // } else {
-    //   swapFlowType = "approval";
-    // }
-    swapFlowType = "approval";
+    if (permitArgsResult.status === "fulfilled") {
+      swapFlowType = "permit";
+    } else if (transferWithAuthArgsResult.status === "fulfilled") {
+      swapFlowType = "transfer-with-auth";
+    } else {
+      swapFlowType = "approval";
+    }
 
-    const handler = swapFlowTypeToHandler[swapFlowType];
-    const responseJson = await handler(request.query);
+    const handler = swapFlowTypeToHandler[swapFlowType as SwapFlowType];
+    const responseJson = await handler(request);
     const enrichedResponseJson = {
       ...responseJson,
       swapFlowType,
