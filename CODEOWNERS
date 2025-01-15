@@ -7,7 +7,7 @@
 
 # These owners will be the default owners for everything in
 # the repo unless a later match takes precedence.
-*       @mrice32 @nicholaspai @dohaki @james-a-morris
+*       @mrice32 @nicholaspai @dohaki @james-a-morris @gsteenkamp89
 
 # Serverless api
 /api/ @mrice32 @nicholaspai @dohaki @james-a-morris @pxrl
