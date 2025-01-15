@@ -15,6 +15,7 @@ import {
   BaseSwapQueryParams,
   getApprovalTxns,
   buildBaseSwapResponseJson,
+  calculateCrossSwapFees,
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
@@ -77,10 +78,10 @@ const handler = async (
       quoteFetchStrategies
     );
 
-    const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
-      crossSwapQuotes,
-      integratorId
-    );
+    const [crossSwapTx, fees] = await Promise.all([
+      buildCrossSwapTxForAllowanceHolder(crossSwapQuotes, integratorId),
+      calculateCrossSwapFees(crossSwapQuotes),
+    ]);
 
     const { originSwapQuote, bridgeQuote, destinationSwapQuote, crossSwap } =
       crossSwapQuotes;
@@ -140,6 +141,7 @@ const handler = async (
       originChainId,
       inputTokenAddress,
       inputAmount,
+      fees,
       approvalSwapTx: {
         ...crossSwapTx,
         gas: originTxGas,

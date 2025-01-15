@@ -166,18 +166,18 @@ async function calculateSwapFee(
 ): Promise<Record<string, number>> {
   const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
   const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
-    getCachedTokenPrice(
-      tokenIn.address,
+    getCachedTokenPrice({
+      tokenAddress: tokenIn.address,
       baseCurrency,
-      undefined,
-      tokenIn.chainId
-    ),
-    getCachedTokenPrice(
-      tokenOut.address,
+      chainId: tokenIn.chainId,
+      findById: "true",
+    }),
+    getCachedTokenPrice({
+      tokenAddress: tokenOut.address,
       baseCurrency,
-      undefined,
-      tokenOut.chainId
-    ),
+      chainId: tokenOut.chainId,
+      findById: "true",
+    }),
   ]);
 
   const normalizedIn =
@@ -196,12 +196,12 @@ async function calculateBridgeFee(
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { inputToken, suggestedFees } = bridgeQuote;
-  const inputTokenPriceBase = await getCachedTokenPrice(
-    inputToken.address,
+  const inputTokenPriceBase = await getCachedTokenPrice({
+    tokenAddress: inputToken.address,
     baseCurrency,
-    undefined,
-    inputToken.chainId
-  );
+    chainId: inputToken.chainId,
+    findById: "true",
+  });
   const normalizedFee =
     parseFloat(
       utils.formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
@@ -291,6 +291,7 @@ export function buildBaseSwapResponseJson(params: {
     gasPrice: BigNumber;
   };
   permitSwapTx?: AuthTxPayload | PermitTxPayload;
+  fees: CrossSwapFees;
 }) {
   return stringifyBigNumProps({
     checks: {
@@ -324,6 +325,7 @@ export function buildBaseSwapResponseJson(params: {
             outputAmount: params.originSwapQuote.expectedAmountOut,
             minOutputAmount: params.originSwapQuote.minAmountOut,
             maxInputAmount: params.originSwapQuote.maximumAmountIn,
+            fees: params.fees.originSwapFees,
           }
         : undefined,
       bridge: {
@@ -331,6 +333,7 @@ export function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
+        fees: params.fees.bridgeFees,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -340,6 +343,7 @@ export function buildBaseSwapResponseJson(params: {
             maxInputAmount: params.destinationSwapQuote.maximumAmountIn,
             outputAmount: params.destinationSwapQuote.expectedAmountOut,
             minOutputAmount: params.destinationSwapQuote.minAmountOut,
+            fees: params.fees.destinationSwapFees,
           }
         : undefined,
     },
