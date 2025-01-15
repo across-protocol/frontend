@@ -15,23 +15,15 @@ const AvailableRoutesQueryParamsSchema = object({
   destinationTokenSymbol: optional(string()),
 });
 
-dotenv.config({
-  path: "./output_api.env",
-});
-
-
 let envPath = path.join(process.cwd(), 'output_api.env');
 let envFile = fs.readFileSync(envPath, "utf-8");
+dotenv.populate(process.env, dotenv.parse(envFile));
 
 type AvailableRoutesQueryParams = Infer<
   typeof AvailableRoutesQueryParamsSchema
 >;
 
 const handler = async (_: any, response: VercelResponse) => {
-  if (envFile === "") {
-    response.status(500).json({ error: "ERROR NO ENV FOUND" });
-    return;
-  }
   response.status(200).json({
     test: process.env.GIT_ENV_EXPORTED,
   });
