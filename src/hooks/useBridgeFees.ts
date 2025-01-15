@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
  * @param toChainId The chain Id of the receiving chain, its timestamp will be used to calculate the fees.
  * @param inputTokenSymbol - The input token symbol to check bridge fees for.
  * @param outputTokenSymbol - The output token symbol to check bridge fees for.
+ * @param recipientAddress - The recipient address for the bridged tokens.
  * @returns The bridge fees for the given amount and token symbol and the UseQueryResult object.
  */
 export function useBridgeFees(
