@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ChainId, getProvider } from "utils";
+import { ChainId, getProvider, isDefined } from "utils";
 
-export function useEnsQuery(address: string) {
-  return useQuery({
-    queryKey: ["ens", address],
+export function useEnsQuery(address?: string) {
+  const result = useQuery({
+    queryKey: ["ens", address] as [string, string],
     queryFn: async ({ queryKey }) => {
       const [, addressToQuery] = queryKey;
       const provider = getProvider(ChainId.MAINNET);
@@ -15,5 +15,15 @@ export function useEnsQuery(address: string) {
       return { ensName, avatar };
     },
     staleTime: Infinity,
+    enabled: isDefined(address),
   });
+
+  const resolvedData = isDefined(result.data)
+    ? result.data
+    : { ensName: null, avatar: null };
+
+  return {
+    ...result,
+    data: resolvedData,
+  };
 }

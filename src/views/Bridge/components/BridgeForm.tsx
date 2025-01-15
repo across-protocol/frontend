@@ -347,6 +347,7 @@ const RowWrapper = styled.div`
 const FillTimeRowWrapper = styled(RowWrapper)`
   position: relative;
   @media ${QUERIESV2.sm.andDown} {
+    gap: 0px;
     flex-direction: row;
     align-items: center;
   }
@@ -359,7 +360,11 @@ const AmountRowWrapper = styled(RowWrapper)`
 const QuickSwapWrapperMobile = styled.div`
   display: none;
 
+  background-color: ${COLORS["black-700"]};
+  padding-right: 12px;
+
   @media ${QUERIESV2.sm.andDown} {
+    z-index: 1;
     display: flex;
     flex-direction: row;
     align-items: center;

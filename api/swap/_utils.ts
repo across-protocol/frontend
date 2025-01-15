@@ -288,7 +288,8 @@ export function buildBaseSwapResponseJson(params: {
     data: string;
     value?: BigNumber;
     gas?: BigNumber;
-    gasPrice: BigNumber;
+    maxFeePerGas?: BigNumber;
+    maxPriorityFeePerGas?: BigNumber;
   };
   permitSwapTx?: AuthTxPayload | PermitTxPayload;
 }) {
@@ -368,7 +369,8 @@ export function buildBaseSwapResponseJson(params: {
           data: params.approvalSwapTx.data,
           value: params.approvalSwapTx.value,
           gas: params.approvalSwapTx.gas,
-          gasPrice: params.approvalSwapTx.gasPrice,
+          maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
+          maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
         }
       : params.permitSwapTx
         ? params.permitSwapTx.swapTx

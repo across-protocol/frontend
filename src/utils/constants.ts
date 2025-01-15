@@ -122,8 +122,10 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.OPTIMISM,
       ChainId.MODE,
       ChainId.BASE,
+      ChainId.INK,
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
+      ChainId.SONEIUM,
     ],
   },
   "arb-rebates": {
@@ -228,6 +230,12 @@ export function getChainInfo(chainId: number): ChainInfo {
 
   return chainInfo;
 }
+
+export const chainEndpointToId = Object.fromEntries(
+  chainInfoList.map((chain) => {
+    return [chain.name.toLowerCase().replaceAll(" ", ""), chain.chainId];
+  }, [])
+);
 
 // For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
 export const nonEthChains = [
@@ -431,6 +439,7 @@ export const COLORS = {
   "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
+  "teal-0": "var(--color-interface-teal-0)",
   "teal-5": "var(--color-interface-teal-5)",
   "teal-15": "var(--color-interface-teal-15)",
   "black-700": "var(--color-neutrals-black-700)",
@@ -441,6 +450,7 @@ export const COLORS = {
   "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
+  "grey-650": "var(--color-neutrals-grey-650)",
   "light-100": "var(--color-neutrals-light-100)",
   "light-200": "var(--color-neutrals-light-200)",
   "light-300": "var(--color-neutrals-light-300)",

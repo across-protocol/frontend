@@ -167,6 +167,7 @@ export function useBridgeAction(
             // Disabling until we update the contract.
             exclusiveRelayer: constants.AddressZero,
             exclusivityDeadline: 0,
+            fillDeadline: frozenFeeQuote.fillDeadline,
           },
           networkMismatchHandler
         );
@@ -191,6 +192,7 @@ export function useBridgeAction(
                   ...frozenDepositArgs,
                   inputTokenAddress: frozenRoute.fromTokenAddress,
                   outputTokenAddress: frozenRoute.toTokenAddress,
+                  fillDeadline: frozenFeeQuote.fillDeadline,
                 },
                 spokePool,
                 networkMismatchHandler

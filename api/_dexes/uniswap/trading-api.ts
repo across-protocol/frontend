@@ -1,5 +1,5 @@
 import { TradeType } from "@uniswap/sdk-core";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { Swap } from "../types";
 import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
@@ -76,38 +76,49 @@ export async function getUniswapClassicQuoteFromApi(
 
 export async function getUniswapClassicIndicativeQuoteFromApi(
   swap: UniswapParamForApi,
-  tradeType: TradeType
+  tradeType: TradeType,
+  useFallback: boolean = true
 ) {
-  const response = await axios.post<{
-    requestId: string;
-    input: {
-      amount: string;
-      chainId: number;
-      token: string;
-    };
-    output: {
-      amount: string;
-      chainId: number;
-      token: string;
-    };
-  }>(
-    `${UNISWAP_TRADING_API_BASE_URL}/indicative_quote`,
-    {
-      type:
-        tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
-      amount: swap.amount,
-      tokenInChainId: swap.tokenIn.chainId,
-      tokenOutChainId: swap.tokenOut.chainId,
-      tokenIn: swap.tokenIn.address,
-      tokenOut: swap.tokenOut.address,
-    },
-    {
-      headers: {
-        "x-api-key": UNISWAP_API_KEY,
+  try {
+    const response = await axios.post<{
+      requestId: string;
+      input: {
+        amount: string;
+        chainId: number;
+        token: string;
+      };
+      output: {
+        amount: string;
+        chainId: number;
+        token: string;
+      };
+    }>(
+      `${UNISWAP_TRADING_API_BASE_URL}/indicative_quote`,
+      {
+        type:
+          tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
+        amount: swap.amount,
+        tokenInChainId: swap.tokenIn.chainId,
+        tokenOutChainId: swap.tokenOut.chainId,
+        tokenIn: swap.tokenIn.address,
+        tokenOut: swap.tokenOut.address,
       },
+      {
+        headers: {
+          "x-api-key": UNISWAP_API_KEY,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      if (useFallback) {
+        const { quote } = await getUniswapClassicQuoteFromApi(swap, tradeType);
+        return quote;
+      }
     }
-  );
-  return response.data;
+    throw error;
+  }
 }
 
 export async function getUniswapClassicCalldataFromApi(

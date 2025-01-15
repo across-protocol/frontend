@@ -103,10 +103,7 @@ paths:
           description: >
             Calldata passed to the `recipient` if `recipient` is a contract
             address.  This calldata is passed to the recipient via the
-            recipient's handleAcrossMessage() public function. The length of
-            this value is constrained by the API to ~4096 chars minus the length
-            of the full URL.
-
+            recipient's handleAcrossMessage() public function.
 
             _Example:_ 0xABC123
           schema:

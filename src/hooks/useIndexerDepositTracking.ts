@@ -9,6 +9,7 @@ import { indexerApiBaseUrl, isDefined } from "utils";
  */
 export function useIndexerDepositsTracking(
   deposits: {
+    depositTxnHash?: string;
     originChainId?: number;
     depositId?: number;
   }[]
@@ -17,12 +18,13 @@ export function useIndexerDepositsTracking(
     queries: deposits.map((deposit) => ({
       queryKey: [
         "indexer_deposit_tracking",
+        deposit.depositTxnHash,
         deposit.originChainId,
         deposit.depositId,
-      ] as [string, number, number],
+      ] as [string, string, number, number],
       enabled:
-        isDefined(deposit.originChainId) &&
-        isDefined(deposit.depositId) &&
+        ((isDefined(deposit.originChainId) && isDefined(deposit.depositId)) ||
+          isDefined(deposit.depositTxnHash)) &&
         isDefined(indexerApiBaseUrl),
       queryFn: async (): Promise<BigNumber | undefined> => {
         try {
@@ -32,6 +34,7 @@ export function useIndexerDepositsTracking(
               params: {
                 originChainId: deposit.originChainId,
                 depositId: deposit.depositId,
+                depositTxHash: deposit.depositTxnHash,
               },
             }
           );
@@ -48,28 +51,4 @@ export function useIndexerDepositsTracking(
     depositStatus: query.data ?? undefined,
     ...query,
   }));
-}
-
-/**
- * A hook used to track a single deposit status via the indexer API
- * @param originChainId The chain ID of the deposit's origin
- * @param depositId The deposit ID
- */
-export function useIndexerDepositTracking(
-  originChainId?: number,
-  depositId?: number
-) {
-  const [singleDeposit] = useIndexerDepositsTracking(
-    isDefined(originChainId) && isDefined(depositId)
-      ? [{ originChainId, depositId }]
-      : []
-  );
-
-  return (
-    singleDeposit ?? {
-      depositStatus: undefined,
-      isLoading: false,
-      isError: false,
-    }
-  );
 }

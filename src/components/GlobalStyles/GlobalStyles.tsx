@@ -55,6 +55,7 @@ const variables = css`
     --color-interface-aqua-15: #6cf9d826;
 
     --color-interface-teal: #44d2ff;
+    --color-interface-teal-0: #44d2ff00;
     --color-interface-teal-5: #44d2ff0d;
     --color-interface-teal-15: #44d2ff26;
 
@@ -70,6 +71,7 @@ const variables = css`
 
     --color-neutrals-grey-500: #4c4e57;
     --color-neutrals-grey-600: #3e4047;
+    --color-neutrals-grey-650: #393a40;
 
     --color-neutrals-light-100: #ffffff;
     --color-neutrals-light-200: #e0f3ff;
