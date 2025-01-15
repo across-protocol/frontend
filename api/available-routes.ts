@@ -30,6 +30,7 @@ type AvailableRoutesQueryParams = Infer<
 const handler = async (_: any, response: VercelResponse) => {
   if (envFile === "") {
     response.status(500).json({ error: "ERROR NO ENV FOUND" });
+    return;
   }
   response.status(200).json({
     test: process.env.GIT_ENV_EXPORTED,
