@@ -83,7 +83,6 @@ type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
-  REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,

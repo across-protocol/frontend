@@ -72,7 +72,7 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances, isConnected, isFrom]);
+  }, [allChains, balances, isConnected, isFrom]);
 
   return (
     <Selector<number>
