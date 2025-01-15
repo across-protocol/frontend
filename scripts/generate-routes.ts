@@ -58,6 +58,7 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.POLYGON_AMOY,
   chainConfigs.BLAST_SEPOLIA,
   chainConfigs.LISK_SEPOLIA,
+  chainConfigs.LENS_SEPOLIA,
 ];
 
 const enabledRoutes = {
@@ -318,6 +319,18 @@ function transformChainConfigs(
             {
               inputTokenSymbol: "DAI",
               outputTokenSymbol: "USDB",
+            },
+          ];
+        }
+
+        if (
+          tokenSymbol === "WGRASS" &&
+          toChainConfig.tokens.includes("GRASS")
+        ) {
+          return [
+            {
+              inputTokenSymbol: "WGRASS",
+              outputTokenSymbol: "GRASS",
             },
           ];
         }

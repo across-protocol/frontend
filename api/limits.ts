@@ -3,7 +3,7 @@ import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
-import { object, assert, Infer, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 
 import {
   ENABLED_ROUTES,
@@ -38,7 +38,7 @@ import {
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
-const LimitsQueryParamsSchema = object({
+const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
   inputToken: optional(validAddress()),
   outputToken: optional(validAddress()),
@@ -174,7 +174,8 @@ const handler = async (
     ] = await Promise.all([
       getCachedTokenPrice(
         l1Token.address,
-        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),
