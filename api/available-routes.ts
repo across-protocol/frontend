@@ -21,7 +21,7 @@ dotenv.config({
 
 
 let envPath = path.join(process.cwd(), 'output_api.env');
-let envFile = fs.readFileSync(envPath);
+let envFile = fs.readFileSync(envPath, "utf-8");
 
 type AvailableRoutesQueryParams = Infer<
   typeof AvailableRoutesQueryParamsSchema
