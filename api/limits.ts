@@ -174,7 +174,8 @@ const handler = async (
     ] = await Promise.all([
       getCachedTokenPrice(
         l1Token.address,
-        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),

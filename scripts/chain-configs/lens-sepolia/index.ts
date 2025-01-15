@@ -4,20 +4,20 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.SEPOLIA;
+const chainId = CHAIN_IDs.LENS_SEPOLIA;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  logoPath: "../mainnet/assets/logo.svg",
-  grayscaleLogoPath: "../mainnet/assets/grayscale-logo.svg",
+  logoPath: "./assets/logo.svg",
+  grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
     address: getDeployedAddress("SpokePool", chainId),
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://gateway.tenderly.co/public/sepolia",
-  tokens: ["WETH", "ETH", "USDC", "GRASS"],
+  publicRpcUrl: "https://rpc.testnet.lens.dev",
+  blockTimeSeconds: 1,
+  tokens: ["GRASS", "WETH", "WGRASS"],
   enableCCTP: false,
-  swapTokens: [],
 } as ChainConfig;
