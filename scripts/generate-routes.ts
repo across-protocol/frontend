@@ -45,6 +45,8 @@ const enabledMainnetChainConfigs = [
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
   chainConfigs.ALEPH_ZERO,
+  chainConfigs.INK,
+  chainConfigs.SONEIUM,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -89,6 +91,7 @@ const enabledRoutes = {
         CHAIN_IDs.SCROLL,
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
+        CHAIN_IDs.INK,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps

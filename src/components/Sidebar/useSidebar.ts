@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { usePrevious, useConnection } from "hooks";
+import { useEnsQuery } from "hooks/useEns";
 type SidebarWrapperClasses = "open" | "closed" | "transition";
 
 const sidebarNavigationLinks = [
@@ -61,8 +62,12 @@ const sidebarAboutLinks = [
 ];
 
 export default function useSidebar(openSidebar: boolean) {
-  const { account, ensName, isConnected, chainId } = useConnection();
+  const { account, isConnected, chainId } = useConnection();
   const location = useLocation();
+
+  const {
+    data: { ensName },
+  } = useEnsQuery(account);
 
   const [isAboutAccordionOpen, setIsAboutAccordionOpen] = useState(false);
 
