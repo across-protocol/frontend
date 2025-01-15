@@ -64,3 +64,8 @@ stats.*
 /blob-report/
 /playwright/.cache/
 .cache-synpress
+
+# ENV
+output_api.env
+output.env
+output.log
