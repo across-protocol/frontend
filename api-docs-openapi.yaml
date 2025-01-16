@@ -533,6 +533,7 @@ components:
           type: string
           description: >
             The recommended deadline (UNIX timestamp in seconds) for the relayer to fill the deposit. After this destination chain timestamp, the fill will revert on the destination chain.
+          example: "1737033609"
         limits:
           $ref: "#/components/schemas/TransferLimits"
     TransferLimits:
