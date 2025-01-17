@@ -90,19 +90,6 @@ const {
   VERCEL_ENV,
   LOG_LEVEL,
 } = process.env;
-
-export const baseFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(BASE_FEE_MARKUP || "{}");
-export const priorityFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
-export const opStackL1DataFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
-// Default to no markup.
-export const DEFAULT_GAS_MARKUP = 0;
-
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
   | 1
@@ -582,6 +569,27 @@ export const getHubPoolClient = () => {
   );
 };
 
+export const baseFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(BASE_FEE_MARKUP || "{}");
+export const priorityFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
+export const opStackL1DataFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
+
+// Conservative values bsaed on existing configurations:
+// - base fee gets marked up 1.5x because most chains have a theoretically volatile base fee but practically little
+// volume so the base fee doesn't move much.
+// - priority fee gets marked up 1.0x because new chains don't have enough volume to move priority
+// fees much.
+// - op stack l1 data fee gets marked up 1.0x because the op stack l1 data fee is based on ethereum
+// base fee.
+export const DEFAULT_BASE_FEE_MARKUP = 0.5;
+export const DEFAULT_PRIORITY_FEE_MARKUP = 0;
+export const DEFAULT_OP_L1_DATA_FEE_MARKUP = 1;
+
 export const getGasMarkup = (
   chainId: string | number
 ): {
@@ -606,35 +614,18 @@ export const getGasMarkup = (
     );
   }
 
-  // Otherwise, use default gas markup (or optimism's for OP stack).
+  // Otherwise, use default gas markup.
   if (_baseFeeMarkup === undefined) {
-    _baseFeeMarkup = utils.parseEther(
-      (
-        1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
-          ? baseFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-          : DEFAULT_GAS_MARKUP)
-      ).toString()
-    );
+    _baseFeeMarkup = utils.parseEther((1 + DEFAULT_BASE_FEE_MARKUP).toString());
   }
   if (_priorityFeeMarkup === undefined) {
     _priorityFeeMarkup = utils.parseEther(
-      (
-        1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
-          ? priorityFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-          : DEFAULT_GAS_MARKUP)
-      ).toString()
+      (1 + DEFAULT_PRIORITY_FEE_MARKUP).toString()
     );
   }
   if (_opStackL1DataFeeMarkup === undefined) {
     _opStackL1DataFeeMarkup = utils.parseEther(
-      (
-        1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
-          ? opStackL1DataFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-          : DEFAULT_GAS_MARKUP)
-      ).toString()
+      (1 + DEFAULT_OP_L1_DATA_FEE_MARKUP).toString()
     );
   }
 
