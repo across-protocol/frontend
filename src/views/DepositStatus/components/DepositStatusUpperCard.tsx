@@ -22,6 +22,7 @@ type Props = {
   depositTxHash: string;
   fromChainId: number;
   toChainId: number;
+  externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
   fromBridgePagePayload?: FromBridgePagePayload;
@@ -31,9 +32,10 @@ export function DepositStatusUpperCard({
   depositTxHash,
   fromChainId,
   toChainId,
-  fromBridgePagePayload,
+  externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
+  fromBridgePagePayload,
 }: Props) {
   const { depositQuery, fillQuery } = useDepositTracking(
     depositTxHash,
@@ -94,6 +96,7 @@ export function DepositStatusUpperCard({
         status={status}
         toChainId={toChainId}
         fromChainId={fromChainId}
+        externalProjectId={externalProjectId}
       />
       {status === "filled" ? (
         <AnimatedTopWrapperTitleWrapper>

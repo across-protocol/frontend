@@ -203,7 +203,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -219,7 +219,9 @@ export interface ConnectWalletButtonClickedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -246,7 +248,7 @@ export interface CtaButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -262,7 +264,9 @@ export interface CtaButtonClickedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -320,7 +324,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -336,7 +340,9 @@ export interface DisconnectWalletButtonClickedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -385,7 +391,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -401,7 +407,9 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -558,7 +566,7 @@ export interface PageViewedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -574,7 +582,9 @@ export interface PageViewedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   path: string;
   /**
    * Address of referee, null if no referral used
@@ -616,7 +626,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
    */
   page:
     | "splashPage"
@@ -632,7 +642,9 @@ export interface QuickSwapButtonClickedProperties {
     | "marketingBridgePage"
     | "marketingAcrossPlusPage"
     | "marketingSettlementPage"
-    | "depositStatusPage";
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -671,6 +683,12 @@ export interface ToChainSelectedProperties {
    * Whether or not this event is the default value loaded when an event is rendered.
    */
   default?: boolean;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | hyper-liquid |
+   */
+  externalProjectId?: "hyper-liquid";
   /**
    * Id of the toChain
    */
@@ -1118,6 +1136,12 @@ export interface TransferSignedProperties {
    */
   expectedFillTimeInMinutesUpperBound?: number;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | hyper-liquid |
+   */
+  externalProjectId?: "hyper-liquid";
+  /**
    * From amount in the bridge token, in decimals
    */
   fromAmount: string;
@@ -1294,6 +1318,12 @@ export interface TransferSubmittedProperties {
    * | Type | number |
    */
   expectedFillTimeInMinutesUpperBound?: number;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | hyper-liquid |
+   */
+  externalProjectId?: "hyper-liquid";
   /**
    * From amount in the bridge token, in decimals
    */

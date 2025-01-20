@@ -22,7 +22,7 @@ type Props = {
   selectedRoute: Route;
   fromOrTo: "from" | "to";
   toAddress?: string;
-  onSelectChain: (chainId: number) => void;
+  onSelectChain: (chainId: number, externalProjectId?: string) => void;
 };
 
 export function ChainSelector({
@@ -33,6 +33,7 @@ export function ChainSelector({
 }: Props) {
   const isFrom = fromOrTo === "from";
   const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
   const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
   const allChains = getSupportedChains(fromOrTo);
@@ -54,6 +55,7 @@ export function ChainSelector({
       return chains;
     } else {
       return chains
+        .filter((c) => !c.projectId)
         .map((c) => ({
           ...c,
           disabled: c.balance.eq(0),
@@ -75,9 +77,12 @@ export function ChainSelector({
   }, [allChains, balances, isConnected, isFrom]);
 
   return (
-    <Selector<number>
+    <Selector<{ chainId: number; externalProjectId?: string }>
       elements={sortOrder.map((chain) => ({
-        value: chain.chainId,
+        value: {
+          chainId: chain.chainId,
+          externalProjectId: chain.projectId,
+        },
         element: <ChainInfoElement chain={chain} />,
         suffix:
           isConnected && isFrom ? (
@@ -98,8 +103,13 @@ export function ChainSelector({
           />
         ) : undefined
       }
-      selectedValue={isFrom ? fromChain : toChain}
-      setSelectedValue={onSelectChain}
+      selectedValue={{
+        chainId: isFrom ? fromChain : toChain,
+        externalProjectId: isFrom ? undefined : selectedRoute.externalProjectId,
+      }}
+      setSelectedValue={(val) =>
+        onSelectChain(val.chainId, val.externalProjectId)
+      }
       title={
         <TitleWrapper>
           <Text size="md" color="grey-400">
@@ -119,11 +129,18 @@ export function ChainSelector({
 
 function ChainInfoElement({
   chain,
+  externalProjectId,
   superText,
 }: {
-  chain: ChainInfo;
+  chain: Pick<ChainInfo, "chainId" | "name" | "fullName" | "logoURI">;
+  externalProjectId?: string;
   superText?: string;
 }) {
+  // const externalProject = externalProjectId
+  //   ? externConfigs[externalProjectId]
+  //   : null;
+  externalProjectId;
+
   return (
     <ChainIconTextWrapper>
       <ChainIcon src={chain.logoURI} />

@@ -20,6 +20,7 @@ import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 type Props = {
   fromChainId: number;
   toChainId: number;
+  externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol: string;
   fromBridgePagePayload?: FromBridgePagePayload;
@@ -28,6 +29,7 @@ type Props = {
 export function DepositStatusLowerCard({
   fromChainId,
   toChainId,
+  externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
   fromBridgePagePayload,
@@ -103,6 +105,7 @@ export function DepositStatusLowerCard({
               toChainId,
               inputTokenSymbol: baseToken.symbol,
               outputTokenSymbol,
+              externalProjectId,
             })
           )
         }
