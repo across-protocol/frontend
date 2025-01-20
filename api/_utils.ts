@@ -83,23 +83,13 @@ type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
-  REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
+  OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
 } = process.env;
-
-export const baseFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(BASE_FEE_MARKUP || "{}");
-export const priorityFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
-// Default to no markup.
-export const DEFAULT_GAS_MARKUP = 0;
-
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
   | 1
@@ -161,9 +151,9 @@ export const getLogger = (): LoggingUtility => {
     const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
 
     let logLevel =
-      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? defaultLogLevel
-        : (LOG_LEVEL as keyof typeof LogLevels);
+      LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
+        ? (LOG_LEVEL as keyof typeof LogLevels)
+        : defaultLogLevel;
 
     logger = {
       debug: (...args) => {
@@ -534,19 +524,6 @@ export const getHubPool = (provider: providers.Provider) => {
 };
 
 /**
- * Resolves an Infura provider given the name of the ETH network
- * @param nameOrChainId The name of an ethereum network
- * @returns A valid Ethers RPC provider
- */
-export const infuraProvider = (nameOrChainId: providers.Networkish) => {
-  const url = new ethers.providers.InfuraProvider(
-    nameOrChainId,
-    REACT_APP_PUBLIC_INFURA_ID
-  ).connection.url;
-  return new ethers.providers.StaticJsonRpcProvider(url);
-};
-
-/**
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
  */
@@ -592,11 +569,37 @@ export const getHubPoolClient = () => {
   );
 };
 
+export const baseFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(BASE_FEE_MARKUP || "{}");
+export const priorityFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
+export const opStackL1DataFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
+
+// Conservative values bsaed on existing configurations:
+// - base fee gets marked up 1.5x because most chains have a theoretically volatile base fee but practically little
+// volume so the base fee doesn't move much.
+// - priority fee gets marked up 1.0x because new chains don't have enough volume to move priority
+// fees much.
+// - op stack l1 data fee gets marked up 1.0x because the op stack l1 data fee is based on ethereum
+// base fee.
+export const DEFAULT_BASE_FEE_MARKUP = 0.5;
+export const DEFAULT_PRIORITY_FEE_MARKUP = 0;
+export const DEFAULT_OP_L1_DATA_FEE_MARKUP = 1;
+
 export const getGasMarkup = (
   chainId: string | number
-): { baseFeeMarkup: BigNumber; priorityFeeMarkup: BigNumber } => {
+): {
+  baseFeeMarkup: BigNumber;
+  priorityFeeMarkup: BigNumber;
+  opStackL1DataFeeMarkup: BigNumber;
+} => {
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
+  let _opStackL1DataFeeMarkup: BigNumber | undefined;
   if (typeof baseFeeMarkup[chainId] === "number") {
     _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
   }
@@ -605,33 +608,31 @@ export const getGasMarkup = (
       (1 + priorityFeeMarkup[chainId]).toString()
     );
   }
-
-  // Otherwise, use default gas markup (or optimism's for OP stack).
-  if (_baseFeeMarkup === undefined) {
-    _baseFeeMarkup = utils.parseEther(
-      (
-        1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
-          ? baseFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-          : DEFAULT_GAS_MARKUP)
-      ).toString()
+  if (typeof opStackL1DataFeeMarkup[chainId] === "number") {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (1 + opStackL1DataFeeMarkup[chainId]).toString()
     );
+  }
+
+  // Otherwise, use default gas markup.
+  if (_baseFeeMarkup === undefined) {
+    _baseFeeMarkup = utils.parseEther((1 + DEFAULT_BASE_FEE_MARKUP).toString());
   }
   if (_priorityFeeMarkup === undefined) {
     _priorityFeeMarkup = utils.parseEther(
-      (
-        1 +
-        (sdk.utils.chainIsOPStack(Number(chainId))
-          ? priorityFeeMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-          : DEFAULT_GAS_MARKUP)
-      ).toString()
+      (1 + DEFAULT_PRIORITY_FEE_MARKUP).toString()
+    );
+  }
+  if (_opStackL1DataFeeMarkup === undefined) {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (1 + DEFAULT_OP_L1_DATA_FEE_MARKUP).toString()
     );
   }
 
-  // Otherwise, use default gas markup (or optimism's for OP stack).
   return {
     baseFeeMarkup: _baseFeeMarkup,
     priorityFeeMarkup: _priorityFeeMarkup,
+    opStackL1DataFeeMarkup: _opStackL1DataFeeMarkup,
   };
 };
 
@@ -709,7 +710,7 @@ export const getRelayerFeeDetails = async (
   },
   tokenPrice: number,
   relayerAddress: string,
-  gasPrice: sdk.utils.BigNumberish,
+  gasPrice?: sdk.utils.BigNumberish,
   gasUnits?: sdk.utils.BigNumberish,
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
@@ -882,7 +883,7 @@ export const getProvider = (
     } else if (override) {
       providerCache[cacheKey] = override;
     } else {
-      providerCache[cacheKey] = infuraProvider(_chainId);
+      throw new Error(`No provider URL set for chain: ${chainId}`);
     }
   }
   return providerCache[cacheKey];
@@ -901,9 +902,10 @@ function getProviderFromConfigJson(
   const urls = getRpcUrlsFromConfigJson(chainId);
 
   if (urls.length === 0) {
-    console.warn(
-      `No provider URL found for chainId ${chainId} in rpc-providers.json`
-    );
+    getLogger().warn({
+      at: "getProviderFromConfigJson",
+      message: `No provider URL found for chainId ${chainId} in rpc-providers.json`,
+    });
     return undefined;
   }
 
@@ -1861,7 +1863,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
-  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+  return minBN(bufferMultiplier, multiplierCap);
 }
 
 export function getChainInputTokenMaxBalanceInUsd(
@@ -1946,88 +1948,169 @@ export function isContractCache(chainId: number, address: string) {
   );
 }
 
-export function getCachedFillGasUsage(
+export function getCachedNativeGasCost(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
-    spokePoolAddress: string;
     relayerAddress: string;
   }>
 ) {
+  // We can use a long TTL since we are fetching only the native gas cost which should rarely change.
+  // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
-    default: 10,
-    [CHAIN_IDs.ARBITRUM]: 10,
+    default: 120,
   };
-
   const cacheKey = buildInternalCacheKey(
-    "fillGasUsage",
+    "nativeGasCost",
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
   const fetchFn = async () => {
+    const relayerAddress =
+      overrides?.relayerAddress ??
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
       overrides
     );
-    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
-    // we'll compute the gas price separately.
-    const gasCosts = await relayerFeeCalculatorQueries.getGasCosts(
-      buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      {
-        // Scale the op stack L1 gas cost component by the base fee multiplier.
-        // Consider adding a new environment variable OP_STACK_L1_GAS_COST_MARKUP if we want finer-grained control.
-        opStackL1GasCostMultiplier: getGasMarkup(deposit.destinationChainId)
-          .baseFeeMarkup,
-      }
+    const unsignedFillTxn =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        relayerAddress
+      );
+    const voidSigner = new ethers.VoidSigner(
+      relayerAddress,
+      relayerFeeCalculatorQueries.provider
     );
-    return {
-      nativeGasCost: gasCosts.nativeGasCost,
-      tokenGasCost: gasCosts.tokenGasCost,
-    };
+    return voidSigner.estimateGas(unsignedFillTxn);
   };
 
-  return getCachedValue(
+  return makeCacheGetterAndSetter(
     cacheKey,
-    ttl,
+    ttlPerChain.default,
     fetchFn,
-    (gasCosts: { nativeGasCost: BigNumber; tokenGasCost: BigNumber }) => {
+    (nativeGasCostFromCache) => {
+      return BigNumber.from(nativeGasCostFromCache);
+    }
+  );
+}
+
+export function getCachedOpStackL1DataFee(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  nativeGasCost: BigNumber,
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // The L1 data fee should change after each Ethereum block since its based on the L1 base fee.
+  // However, the L1 base fee should only change by 12.5% at most per block.
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 60,
+  };
+
+  const cacheKey = buildInternalCacheKey(
+    "opStackL1DataFee",
+    deposit.destinationChainId,
+    deposit.outputToken // This should technically differ based on the output token since the L2 calldata
+    // size affects the L1 data fee and this calldata can differ based on the output token.
+  );
+  const fetchFn = async () => {
+    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
+    // we'll compute the gas price separately.
+    const { opStackL1DataFeeMarkup } = getGasMarkup(deposit.destinationChainId);
+    const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+      deposit.destinationChainId,
+      overrides
+    );
+    const unsignedTx =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      );
+    const opStackL1GasCost =
+      await relayerFeeCalculatorQueries.getOpStackL1DataFee(
+        unsignedTx,
+        overrides?.relayerAddress,
+        {
+          opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
+          opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
+        }
+      );
+    return opStackL1GasCost;
+  };
+
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (l1DataFeeFromCache) => {
+      return BigNumber.from(l1DataFeeFromCache);
+    }
+  );
+}
+
+export function latestGasPriceCache(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 30,
+  };
+  return makeCacheGetterAndSetter(
+    // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.
+    // Therefore, we technically should cache a different gas price per different types of deposit so we add
+    // an additional outputToken to the cache key to distinguish between gas prices dependent on deposit args
+    // for different output tokens, which should be the main factor affecting the fill gas cost.
+    buildInternalCacheKey(
+      `latestGasPriceCache${deposit ? `-${deposit.outputToken}` : ""}`,
+      chainId
+    ),
+    ttlPerChain.default,
+    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
       return {
-        nativeGasCost: BigNumber.from(gasCosts.nativeGasCost),
-        tokenGasCost: BigNumber.from(gasCosts.tokenGasCost),
+        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
+        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
       };
     }
   );
 }
 
-export function latestGasPriceCache(chainId: number) {
-  const ttlPerChain = {
-    default: 30,
-    [CHAIN_IDs.ARBITRUM]: 15,
-  };
-
-  return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
-    async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
-    (bnFromCache) => BigNumber.from(bnFromCache)
-  );
-}
-
-/**
- * Resolve the current gas price for a given chain
- * @param chainId The chain ID to resolve the gas price for
- * @returns The gas price in the native currency of the chain
- */
-export function getMaxFeePerGas(
-  chainId: number
+export async function getMaxFeePerGas(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
 ): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  if (deposit && deposit.destinationChainId !== chainId) {
+    throw new Error(
+      "Chain ID must match the destination chain ID of the deposit"
+    );
+  }
   const {
     baseFeeMarkup: baseFeeMultiplier,
     priorityFeeMarkup: priorityFeeMultiplier,
   } = getGasMarkup(chainId);
+  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+    chainId,
+    overrides
+  );
+  const unsignedFillTxn = deposit
+    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      )
+    : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
+    unsignedTx: unsignedFillTxn,
     baseFeeMultiplier,
     priorityFeeMultiplier,
   });

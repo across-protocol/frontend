@@ -125,6 +125,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.INK,
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
+      ChainId.SONEIUM,
     ],
   },
   "arb-rebates": {
@@ -241,6 +242,7 @@ export const nonEthChains = [
   ChainId.POLYGON,
   ChainId.POLYGON_AMOY,
   ChainId.ALEPH_ZERO,
+  ChainId.LENS_SEPOLIA,
 ];
 
 export const tokenTable = Object.fromEntries(

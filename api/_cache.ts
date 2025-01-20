@@ -73,7 +73,10 @@ export function buildCacheKey(
 }
 
 export function buildInternalCacheKey(...args: (string | number)[]): string {
-  return buildCacheKey("QUOTES_API", ...args);
+  return buildCacheKey(
+    `${process.env.CACHE_PREFIX ? process.env.CACHE_PREFIX + "-" : ""}QUOTES_API`,
+    ...args
+  );
 }
 
 export async function getCachedValue<T>(

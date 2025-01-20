@@ -13,10 +13,10 @@ import {
   shortenAddress,
 } from "utils";
 
-import { getAllChains } from "../utils";
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
+import { getSupportedChains } from "../utils";
 
 type Props = {
   selectedRoute: Route;
@@ -24,8 +24,6 @@ type Props = {
   toAddress?: string;
   onSelectChain: (chainId: number, externalProjectId?: string) => void;
 };
-
-const allChains = getAllChains();
 
 export function ChainSelector({
   selectedRoute,
@@ -37,8 +35,8 @@ export function ChainSelector({
   const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
 
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
-
   const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
+  const allChains = getSupportedChains(fromOrTo);
 
   const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
@@ -76,7 +74,7 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances, isConnected, isFrom]);
+  }, [allChains, balances, isConnected, isFrom]);
 
   return (
     <Selector<{ chainId: number; externalProjectId?: string }>

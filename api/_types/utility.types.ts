@@ -21,3 +21,12 @@ export type TokenInfo = {
   name: string;
   addresses: Record<number, string>;
 };
+
+export type DepositRoute = {
+  originChainId: number;
+  originToken: string;
+  destinationChainId: number;
+  destinationToken: string;
+  originTokenSymbol: string;
+  destinationTokenSymbol: string;
+};

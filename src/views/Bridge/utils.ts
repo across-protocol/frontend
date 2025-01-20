@@ -14,6 +14,7 @@ import {
   GetBridgeFeesResult,
   chainEndpointToId,
   parseUnits,
+  chainIsLens,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -89,6 +90,14 @@ export function getReceiveTokenSymbol(
     !isReceiverContract
   ) {
     return "ETH";
+  }
+
+  if (inputTokenSymbol === "GRASS" && chainIsLens(destinationChainId)) {
+    return isReceiverContract ? "WGRASS" : "GRASS";
+  }
+
+  if (inputTokenSymbol === "WGRASS") {
+    return "GRASS";
   }
 
   return outputTokenSymbol;
@@ -371,58 +380,61 @@ export function getAvailableOutputTokens(
     );
 }
 
-export function getAllChains() {
-  return enabledRoutes
-    .map((route) =>
-      route.externalProjectId
-        ? {
-            ...externConfigs[route.externalProjectId],
-            chainId: externConfigs[route.externalProjectId].intermediaryChain,
-          }
-        : { ...getChainInfo(route.fromChain), projectId: undefined }
-    )
-    .filter(
-      (chain, index, self) =>
-        index ===
-        self.findIndex(
-          (fromChain) =>
-            fromChain.chainId === chain.chainId && fromChain.name === chain.name
-        )
-    )
-    .sort((a, b) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
-}
+export const ChainType = {
+  FROM: "from",
+  TO: "to",
+  ALL: "all",
+} as const;
 
-export function getOriginChains() {
-  return enabledRoutes
-    .filter(
-      (route, index, self) =>
-        index ===
-        self.findIndex(
-          (r) =>
-            r.fromChain === route.fromChain && r.externalProjectId === undefined // HL is destination-only
+export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
+
+export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  let chainIds: number[] = [];
+
+  switch (chainType) {
+    case ChainType.FROM:
+      chainIds = enabledRoutes.map((route) => route.fromChain);
+      break;
+    case ChainType.TO:
+      chainIds = enabledRoutes.map((route) => route.toChain);
+      break;
+    case ChainType.ALL:
+    default:
+      chainIds = enabledRoutes.flatMap((route) => [
+        route.fromChain,
+        route.toChain,
+      ]);
+      break;
+  }
+
+  const uniqueChainIds = Array.from(new Set(chainIds));
+
+  const uniqueChains = uniqueChainIds.flatMap((chainId) => {
+    return [
+      { ...getChainInfo(chainId), projectId: undefined },
+      ...Object.values(externConfigs)
+        .filter(
+          ({ intermediaryChain, projectId }) =>
+            chainType !== "from" &&
+            intermediaryChain === chainId &&
+            enabledRoutes.some((route) => route.externalProjectId === projectId)
         )
-    )
-    .map((route) =>
-      route.externalProjectId
-        ? {
-            ...externConfigs[route.externalProjectId],
-            chainId: externConfigs[route.externalProjectId].intermediaryChain,
-          }
-        : { ...getChainInfo(route.fromChain), projectId: undefined }
-    )
-    .sort((a, b) => {
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
-    });
+        .map((extern) => ({
+          ...extern,
+          chainId: extern.intermediaryChain,
+        })),
+    ];
+  });
+
+  return uniqueChains.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
 }
 
 export function getRouteFromUrl(overrides?: RouteFilter) {
