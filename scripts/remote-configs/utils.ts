@@ -29,6 +29,7 @@ export const remoteConfigTypes = {
   EXCLUSIVE_RELAYERS_FIXED_WEIGHTS: "EXCLUSIVE_RELAYER_WEIGHTS",
   EXCLUSIVITY_STRATEGY: "EXCLUSIVITY_STRATEGY",
   RPC_PROVIDERS: "RPC_PROVIDERS",
+  GIT_ENV_CONFIGS: "GIT_ENV_CONFIGS",
 } as const;
 
 export type RemoteConfig =
@@ -115,6 +116,12 @@ export const fetchExclusivityConfig = makeFetchRemoteConfig(
     ),
   }),
   exclusivityStrategyFallbackData
+);
+
+export const fetchGitEnvConfig = makeFetchRemoteConfig(
+  type({
+    default: string(),
+  }),
 );
 
 function makeFetchRemoteConfig<T>(schema: Struct<T>, fallbackData?: T) {
@@ -206,5 +213,12 @@ export function getAcrossConfigsRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "ACROSS_CONFIGS",
     `https://${GITHUB_HOST}/UMAprotocol/across-configs`
+  );
+}
+
+export function getGitEnvConfigsRemoteBaseUrl() {
+  return getRemoteConfigBaseUrl(
+    "GIT_ENV_CONFIGS",
+    `https://${GITHUB_HOST}/UMAprotocol/git-env`
   );
 }
