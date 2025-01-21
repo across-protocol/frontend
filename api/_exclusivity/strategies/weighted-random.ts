@@ -26,7 +26,7 @@ function getStrategyConfig(relayers: string[]): CandidateRelayer[] {
   return relayers.map((address) => {
     const { fixedWeight, dynamicWeight } = config[
       address as keyof typeof config
-    ] ?? { fixedWeight: 1.0, dynamicWeight: 0.1 };
+    ] ?? { fixedWeight: 0.0, dynamicWeight: 0.0 };
     return { address, fixedWeight, dynamicWeight };
   });
 }
