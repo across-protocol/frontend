@@ -7,13 +7,10 @@
 
  if [ -n "${GH_TOKEN}" ]; then
     
-    files=(output.env output_api.env)
+    files=(output_vercel_build.env output_vercel_api.env)
     
     for file in "${files[@]}"; do
-        echo "Downloading $file..."
         curl -H "Authorization: token ${GH_TOKEN}" -L "${BASE_URL}${file}" -o "./${file}"
-        cp ./${file} ./api/${file}
-        cat ./${file}
     done
     echo "All files downloaded."
 
