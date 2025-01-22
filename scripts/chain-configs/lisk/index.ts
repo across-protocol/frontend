@@ -17,7 +17,7 @@ export default {
   chainId,
   blockTimeSeconds: 2,
   publicRpcUrl: "https://rpc.api.lisk.com",
-  tokens: ["WETH", "ETH", "USDT", "LSK"],
+  tokens: ["WETH", "ETH", "USDT", "LSK", "WBTC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

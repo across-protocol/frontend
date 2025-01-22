@@ -36,7 +36,7 @@ const getBalanceBySymbol = async (params: {
     chainIdToQuery,
     tokenSymbolToQuery
   );
-  if (!tokenInfo) {
+  if (!tokenInfo || !tokenInfo.addresses?.[chainIdToQuery]) {
     return undefined;
   }
   if (tokenInfo.isNative) {
@@ -45,7 +45,7 @@ const getBalanceBySymbol = async (params: {
     return getBalance(
       chainIdToQuery,
       accountToQuery,
-      tokenInfo.address,
+      tokenInfo.addresses?.[chainIdToQuery],
       "latest",
       provider
     );
@@ -178,7 +178,7 @@ export function useBalanceBySymbolPerChain({
       >
     >((chainId) => ({
       queryKey: balanceQueryKey(account, chainId, tokenSymbol),
-      queryFn: ({ queryKey }) => {
+      queryFn: async ({ queryKey }) => {
         const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
         if (
           tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
@@ -186,12 +186,14 @@ export function useBalanceBySymbolPerChain({
         ) {
           return Promise.resolve(BigNumber.from(0));
         }
-        return getBalanceBySymbol({
-          config,
-          chainIdToQuery,
-          tokenSymbolToQuery,
-          accountToQuery,
-        });
+        return (
+          (await getBalanceBySymbol({
+            config,
+            chainIdToQuery,
+            tokenSymbolToQuery,
+            accountToQuery,
+          })) ?? Promise.resolve(BigNumber.from(0))
+        );
       },
       enabled: Boolean(account && tokenSymbol),
       refetchInterval: 10_000,

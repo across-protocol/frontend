@@ -210,11 +210,14 @@ export function handleErrorCondition(
     const { type, path } = error;
     // Sanitize the error message that will be sent to client
     const message = `Invalid parameter at path '${path}'. Expected type '${type}'`;
-    acrossApiError = new InputError({
-      message,
-      code: AcrossErrorCode.INVALID_PARAM,
-      param: path.join("."),
-    });
+    acrossApiError = new InputError(
+      {
+        message,
+        code: AcrossErrorCode.INVALID_PARAM,
+        param: path.join("."),
+      },
+      { cause: error }
+    );
   }
   // Handle axios errors
   else if (error instanceof AxiosError) {
@@ -267,6 +270,7 @@ export function handleErrorCondition(
     at: endpoint,
     code: acrossApiError.code,
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
+    cause: acrossApiError.cause,
   });
 
   return response.status(acrossApiError.status).json(acrossApiError);

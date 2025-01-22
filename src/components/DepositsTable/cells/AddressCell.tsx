@@ -5,6 +5,7 @@ import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
 import { shortenAddress } from "utils";
+import { useEnsQuery } from "hooks/useEns";
 
 type Props = {
   deposit: Deposit;
@@ -12,13 +13,20 @@ type Props = {
 };
 
 export function AddressCell({ deposit, width }: Props) {
+  const {
+    data: { ensName: recipientEns },
+  } = useEnsQuery(deposit.recipientAddr);
+  const {
+    data: { ensName: depositorEns },
+  } = useEnsQuery(deposit.depositorAddr);
+
   return (
     <StyledAddressCell width={width}>
       <Text color="light-200">
-        → {shortenAddress(deposit.recipientAddr, "...", 4)}
+        → {recipientEns ?? shortenAddress(deposit.recipientAddr, "...", 4)}
       </Text>
       <Text size="sm" color="grey-400">
-        {shortenAddress(deposit.depositorAddr, "...", 4)}
+        {depositorEns ?? shortenAddress(deposit.depositorAddr, "...", 4)}
       </Text>
     </StyledAddressCell>
   );

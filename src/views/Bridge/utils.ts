@@ -1,4 +1,3 @@
-import { CHAIN_IDs } from "@across-protocol/constants";
 import { BigNumber } from "ethers";
 import {
   Route,
@@ -12,6 +11,8 @@ import {
   interchangeableTokensMap,
   nonEthChains,
   GetBridgeFeesResult,
+  chainEndpointToId,
+  chainIsLens,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -88,6 +89,14 @@ export function getReceiveTokenSymbol(
     return "ETH";
   }
 
+  if (inputTokenSymbol === "GRASS" && chainIsLens(destinationChainId)) {
+    return isReceiverContract ? "WGRASS" : "GRASS";
+  }
+
+  if (inputTokenSymbol === "WGRASS") {
+    return "GRASS";
+  }
+
   return outputTokenSymbol;
 }
 
@@ -146,14 +155,11 @@ const defaultRouteFilter = {
 };
 
 export function getInitialRoute(filter: RouteFilter = {}) {
-  const routeFromQueryParams = getRouteFromQueryParams(filter);
+  const routeFromUrl = getRouteFromUrl(filter);
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
       filter.inputTokenSymbol ??
-      (filter?.fromChain === CHAIN_IDs.ALEPH_ZERO ||
-      filter?.fromChain === CHAIN_IDs.POLYGON
-        ? "WETH"
-        : "ETH"),
+      (nonEthChains.includes(filter?.fromChain ?? -1) ? "WETH" : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
     toChain: filter.toChain,
   });
@@ -161,7 +167,7 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return routeFromQueryParams ?? routeFromFilter ?? defaultRoute;
+  return routeFromUrl ?? routeFromFilter ?? defaultRoute;
 }
 
 export function findEnabledRoute(
@@ -354,27 +360,53 @@ export function getAvailableOutputTokens(
     );
 }
 
-export function getAllChains() {
-  return enabledRoutes
-    .map((route) => getChainInfo(route.fromChain))
-    .filter(
-      (chain, index, self) =>
-        index ===
-        self.findIndex((fromChain) => fromChain.chainId === chain.chainId)
-    )
-    .sort((a, b) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
+export const ChainType = {
+  FROM: "from",
+  TO: "to",
+  ALL: "all",
+} as const;
+
+export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
+
+export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  let chainIds: number[] = [];
+
+  switch (chainType) {
+    case ChainType.FROM:
+      chainIds = enabledRoutes.map((route) => route.fromChain);
+      break;
+    case ChainType.TO:
+      chainIds = enabledRoutes.map((route) => route.toChain);
+      break;
+    case ChainType.ALL:
+    default:
+      chainIds = enabledRoutes.flatMap((route) => [
+        route.fromChain,
+        route.toChain,
+      ]);
+      break;
+  }
+
+  const uniqueChainIds = Array.from(new Set(chainIds));
+
+  const uniqueChains = uniqueChainIds.map((chainId) => getChainInfo(chainId));
+
+  return uniqueChains.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
 }
 
-export function getRouteFromQueryParams(overrides?: RouteFilter) {
+export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
+
+  const preferredToChainId =
+    chainEndpointToId[window.location.pathname.substring(1)];
 
   const fromChain =
     Number(
@@ -386,7 +418,8 @@ export function getRouteFromQueryParams(overrides?: RouteFilter) {
 
   const toChain =
     Number(
-      params.get("to") ??
+      preferredToChainId ??
+        params.get("to") ??
         params.get("toChain") ??
         params.get("destinationChainId") ??
         overrides?.toChain

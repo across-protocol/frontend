@@ -28,6 +28,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ],
     "outputTokens": [
@@ -51,6 +58,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ]
   },
@@ -380,6 +394,61 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 37111,
+    "name": "Lens Sepolia",
+    "publicRpcUrl": "https://rpc.testnet.lens.dev",
+    "explorerUrl": "https://block-explorer.testnet.lens.dev",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens-sepolia/assets/logo.svg",
+    "spokePool": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
+    "spokePoolBlock": 156275,
+    "inputTokens": [
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "WGRASS",
+        "name": "Wrapped Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgrass.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ]
   }

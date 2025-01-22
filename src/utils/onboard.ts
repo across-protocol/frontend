@@ -11,6 +11,8 @@ import {
   providerUrlsTable,
 } from "utils";
 import logo from "assets/token-logos/acx.svg";
+import metamaskSDK from "@web3-onboard/metamask";
+import phantomModule from "@web3-onboard/phantom";
 
 const injected = injectedModule();
 const gnosis = gnosisModule();
@@ -22,10 +24,28 @@ const coinbase = coinbaseModule({
   supportedWalletType: "all",
 });
 
+const metamaskSDKWallet = metamaskSDK({
+  options: {
+    extensionOnly: false,
+    dappMetadata: {
+      name: "Across Bridge",
+    },
+  },
+});
+
+const phantom = phantomModule();
+
 export function onboardInit() {
   return init({
     apiKey: onboardApiKey,
-    wallets: [injected, coinbase, walletConnect, gnosis],
+    wallets: [
+      injected,
+      coinbase,
+      walletConnect,
+      gnosis,
+      metamaskSDKWallet,
+      phantom,
+    ],
 
     chains: chainInfoList.map((chainInfo) => ({
       id: chainInfo.chainId,

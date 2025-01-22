@@ -5,6 +5,7 @@ import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
+  CHAIN_IDs,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -38,6 +39,7 @@ import {
   AmountTooHighError,
   AmountTooLowError,
 } from "./_errors";
+import { getFillDeadline } from "./_fill-deadline";
 
 const { BigNumber } = ethers;
 
@@ -186,6 +188,7 @@ const handler = async (
       [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPriceUsd,
       limits,
+      fillDeadline,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, "usd"),
@@ -202,6 +205,7 @@ const handler = async (
         depositWithMessage ? relayer : undefined,
         depositWithMessage ? message : undefined
       ),
+      getFillDeadline(destinationChainId),
     ]);
     const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
       limits;
@@ -274,15 +278,30 @@ const handler = async (
         ));
     }
 
+    // TODO: Remove after campaign is complete
+    /**
+     * Override estimated fill time for ZK Sync deposits.
+     * @todo Remove after campaign is complete
+     * @see Change in {@link ./limits.ts}
+     */
+    const estimatedTimingOverride =
+      computedOriginChainId === CHAIN_IDs.MAINNET &&
+      destinationChainId === CHAIN_IDs.ZK_SYNC &&
+      amount.gte(limits.maxDepositShortDelay)
+        ? 9600
+        : undefined;
+
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(maxDepositInstant)
-        ? resolveRebalanceTiming(String(destinationChainId))
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec:
+        estimatedTimingOverride ??
+        (amount.gte(maxDepositInstant)
+          ? resolveRebalanceTiming(String(destinationChainId))
+          : resolveTiming(
+              String(computedOriginChainId),
+              String(destinationChainId),
+              inputToken.symbol,
+              amountInUsd
+            )),
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
@@ -318,6 +337,7 @@ const handler = async (
         maxDepositShortDelay: limits.maxDepositShortDelay,
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
+      fillDeadline: fillDeadline.toString(),
     };
 
     logger.debug({

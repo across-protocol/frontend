@@ -8,8 +8,14 @@ import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
-import { Text, CardWrapper } from "components";
-import { getChainInfo, COLORS, getBridgeUrlWithQueryParams } from "utils";
+import { Text } from "components";
+import {
+  getChainInfo,
+  COLORS,
+  getBridgeUrlWithQueryParams,
+  isDefined,
+  formatUSD,
+} from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
 
@@ -27,6 +33,8 @@ type Props = {
   toChainId: number;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
+  amountSent?: string;
+  netFee?: string;
 };
 
 export function DepositTimesCard({
@@ -40,6 +48,8 @@ export function DepositTimesCard({
   toChainId,
   inputTokenSymbol,
   outputTokenSymbol,
+  amountSent,
+  netFee,
 }: Props) {
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
@@ -50,7 +60,7 @@ export function DepositTimesCard({
   return (
     <CardWrapper>
       <Row>
-        <Text>Deposit time</Text>
+        <Text color="grey-400">Deposit time</Text>
         {isDepositing ? (
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
@@ -97,7 +107,7 @@ export function DepositTimesCard({
         )}
       </Row>
       <Row>
-        <Text>Fill time</Text>
+        <Text color="grey-400">Fill time</Text>
         {isDepositing || status === "deposit-reverted" ? (
           <Text>-</Text>
         ) : (
@@ -117,21 +127,20 @@ export function DepositTimesCard({
           />
         )}
       </Row>
+      {(netFee || amountSent) && <Divider />}
+      {isDefined(netFee) && (
+        <Row>
+          <Text color="grey-400">Net fee</Text>
+          <Text color="grey-400">${formatUSD(netFee)}</Text>
+        </Row>
+      )}
+      {isDefined(amountSent) && (
+        <Row>
+          <Text color="grey-400">Amount sent</Text>
+          <Text color="grey-400">${formatUSD(amountSent)}</Text>
+        </Row>
+      )}
       <Divider />
-      <Row>
-        <Text>Total time</Text>
-        {!isFilled ? (
-          <Text>-</Text>
-        ) : (
-          <ElapsedTime
-            elapsedSeconds={
-              (depositTxElapsedSeconds || 0) + (fillTxElapsedSeconds || 0)
-            }
-            isCompleted
-            StatusIcon={<CheckIcon />}
-          />
-        )}
-      </Row>
       <TransactionsPageLinkWrapper
         href="/transactions"
         target="_blank"
@@ -147,7 +156,7 @@ export function DepositTimesCard({
           });
         }}
       >
-        <Text>
+        <Text color="grey-400">
           View on{" "}
           <Text color="white" as="span">
             Transactions page
@@ -194,7 +203,7 @@ const Row = styled.div`
 const Divider = styled.div`
   width: 100%;
   height: 1px;
-  background: ${COLORS["grey-600"]};
+  background: ${COLORS["grey-400-5"]};
 `;
 
 const DateWrapper = styled.div`
@@ -210,9 +219,6 @@ const TransactionsPageLinkWrapper = styled.a`
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid ${COLORS["grey-500"]};
-  border-radius: 8px;
-  padding: 16px;
   text-decoration: none;
 `;
 
@@ -245,4 +251,19 @@ const TryAgainButton = styled(Link)`
   }
 
   text-decoration: none;
+`;
+
+const CardWrapper = styled.div`
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+
+  border-radius: 16px;
+  border: 1px solid ${COLORS["grey-600"]};
+  background: ${COLORS["black-800"]};
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
 `;

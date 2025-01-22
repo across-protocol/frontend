@@ -31,6 +31,7 @@ export type BridgeFees = {
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
   exclusivityDeadline: number;
+  fillDeadline: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -76,6 +77,7 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    fillDeadline,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -102,6 +104,7 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    fillDeadline,
   };
 }
 
@@ -149,7 +152,7 @@ export type AcrossDepositArgs = {
 export type AcrossDepositV3Args = AcrossDepositArgs & {
   inputTokenAddress: string;
   outputTokenAddress: string;
-  fillDeadline?: number;
+  fillDeadline: number;
   exclusivityDeadline?: number;
   exclusiveRelayer?: string;
 };
@@ -235,7 +238,6 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
 
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
@@ -349,7 +351,6 @@ export async function sendSwapAndBridgeTx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
@@ -421,17 +422,6 @@ export async function getSpokePoolAndVerifier({
     spokePoolVerifier,
     shouldUseSpokePoolVerifier,
   };
-}
-
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 async function _tagRefAndSignTx(
