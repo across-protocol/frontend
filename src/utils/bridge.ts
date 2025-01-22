@@ -65,11 +65,8 @@ export async function getBridgeFeesWithExternalProjectId(
 
   if (externalProjectId === "hyper-liquid") {
     const arbitrumProvider = getProvider(CHAIN_IDs.ARBITRUM);
-
     const wallet = ethers.Wallet.createRandom();
-
     const signer = new ethers.Wallet(wallet.privateKey, arbitrumProvider);
-
     const recipient = await signer.getAddress();
 
     // Build the payload
