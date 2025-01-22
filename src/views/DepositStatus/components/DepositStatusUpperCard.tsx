@@ -6,7 +6,7 @@ import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text, Badge } from "components";
 
-import { COLORS, NoV3FundsDepositedLogError, getChainInfo } from "utils";
+import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -76,7 +76,7 @@ export function DepositStatusUpperCard({
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
-  if (depositQuery.error instanceof NoV3FundsDepositedLogError) {
+  if (depositQuery.error instanceof NoFundsDepositedLogError) {
     return (
       <Wrapper>
         <TopWrapperTitleWrapper>
