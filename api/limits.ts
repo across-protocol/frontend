@@ -4,6 +4,7 @@ import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
+import { getEnvs } from "./_env";
 
 import {
   ENABLED_ROUTES,
@@ -68,7 +69,7 @@ const handler = async (
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
       // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
-    } = process.env;
+    } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS

@@ -34,8 +34,6 @@ import {
   Struct,
 } from "superstruct";
 
-import { getEnvs } from "./_env";
-
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import rpcProvidersJson from "../src/data/rpc-providers.json";
@@ -77,11 +75,7 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
-
-export { InputError, handleErrorCondition } from "./_errors";
-
-type LoggingUtility = sdk.relayFeeCalculator.Logger;
-type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
+import { getEnvs } from "./_env";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -91,7 +85,18 @@ const {
   OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
+  REACT_APP_DISABLED_CHAINS,
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
+  VERCEL_URL,
 } = getEnvs();
+
+
+export { InputError, handleErrorCondition } from "./_errors";
+
+type LoggingUtility = sdk.relayFeeCalculator.Logger;
+type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
+
 
 export const baseFeeMarkup: {
   [chainId: string]: number;
@@ -117,7 +122,7 @@ export const DISABLED_ROUTE_TOKENS = (
 // temporarily without having to redeploy the app or change core config
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
 export const DISABLED_CHAINS = (
-  process.env.REACT_APP_DISABLED_CHAINS || ""
+  REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
 
 // This is an array of chainIds that should be disabled. In contrast to the
@@ -125,11 +130,11 @@ export const DISABLED_CHAINS = (
 // only for the `/available-routes` endpoint and DOES NOT affect the
 // `ENABLED_ROUTES` object.
 export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 const _ENABLED_ROUTES =
@@ -198,8 +203,8 @@ export const getLogger = (): LoggingUtility => {
  * @returns A valid URL of the current endpoint in vercel
  */
 export const resolveVercelEndpoint = () => {
-  const url = process.env.VERCEL_URL ?? "across.to";
-  const env = process.env.VERCEL_ENV ?? "development";
+  const url = VERCEL_URL ?? "across.to";
+  const env = VERCEL_ENV ?? "development";
   switch (env) {
     case "preview":
     case "production":

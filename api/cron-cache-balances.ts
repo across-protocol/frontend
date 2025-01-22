@@ -13,6 +13,8 @@ import { UnauthorizedError } from "./_errors";
 
 import mainnetChains from "../src/data/chains_1.json";
 
+import { getEnvs } from "./_env";
+
 const handler = async (
   request: TypedVercelRequest<Record<string, never>>,
   response: VercelResponse
@@ -34,7 +36,7 @@ const handler = async (
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-    } = process.env;
+    } = getEnvs();
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []

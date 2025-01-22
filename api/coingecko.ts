@@ -24,11 +24,13 @@ import { InvalidParamError } from "./_errors";
 import { coingecko } from "@across-protocol/sdk";
 
 const { Coingecko } = coingecko;
+
+import { getEnvs } from "./_env";
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
   BALANCER_V2_TOKENS,
-} = process.env;
+} = getEnvs();
 
 const CoingeckoQueryParamsSchema = object({
   l1Token: optional(validAddress()),

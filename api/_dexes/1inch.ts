@@ -2,6 +2,12 @@ import axios from "axios";
 
 import { AcrossSwap, SwapQuoteAndCalldata } from "./types";
 import { getSwapAndBridgeAddress } from "./utils";
+import { getEnvs } from "../_env";
+
+const {
+  ONEINCH_API_KEY,
+} = getEnvs();
+
 
 export async function get1inchQuoteAndCalldata(
   swap: AcrossSwap
@@ -12,7 +18,7 @@ export async function get1inchQuoteAndCalldata(
   );
   const apiBaseUrl = `https://api.1inch.dev/swap/v6.0/${swap.swapToken.chainId}`;
   const apiHeaders = {
-    Authorization: `Bearer ${process.env.ONEINCH_API_KEY}`,
+    Authorization: `Bearer ${ONEINCH_API_KEY}`,
     accept: "application/json",
   };
 
