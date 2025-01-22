@@ -9,7 +9,7 @@ const {
   UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_READ_ONLY_TOKEN,
-} = getEnv();
+} = getEnvs();
 const isRedisCacheEnabled =
   (KV_REST_API_URL && (KV_REST_API_TOKEN || KV_REST_API_READ_ONLY_TOKEN)) ||
   (UPSTASH_REDIS_REST_URL &&
