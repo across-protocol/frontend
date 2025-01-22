@@ -25,7 +25,7 @@ type AvailableRoutesQueryParams = Infer<
 
 const handler = async (_: any, response: VercelResponse) => {
   response.status(200).json({
-    test: process.env.REACT_APP_HUBPOOL_CHAINID,
+    test: process.env.GIT_ENV_EXPORTED,
   });
   return;
 };
