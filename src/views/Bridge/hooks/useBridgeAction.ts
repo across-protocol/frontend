@@ -28,6 +28,7 @@ import {
   hyperLiquidBridge2Address,
   externalProjectNameToId,
   generateHyperLiquidPayload,
+  fixedPointAdjustment,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -127,11 +128,12 @@ export function useBridgeAction(
         // 4. We must construct a payload to send to HL's Bridge2 contract
         // 5. The user must sign this signature
 
-        // Estimated fee for this HL deposit. Sum of the fees plus a 2 unit buffer
-        const estimatedFee = frozenFeeQuote.relayerCapitalFee.total
-          .add(frozenFeeQuote.lpFee.total)
-          .add(frozenFeeQuote.relayerGasFee.total);
-        const amount = frozenDepositArgs.amount.sub(estimatedFee).sub(2);
+        // Subtract the relayer fee pct just like we do for our output token amount
+        const amount = frozenDepositArgs.amount.sub(
+          frozenDepositArgs.amount
+            .mul(frozenDepositArgs.relayerFeePct)
+            .div(fixedPointAdjustment)
+        );
 
         // Build the payload
         const hyperLiquidPayload = await generateHyperLiquidPayload(

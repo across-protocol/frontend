@@ -56,9 +56,6 @@ export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
 };
 
-/**
- *
- */
 export async function getBridgeFeesWithExternalProjectId(
   externalProjectId: string,
   args: GetBridgeFeesArgs
