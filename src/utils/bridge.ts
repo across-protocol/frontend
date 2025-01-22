@@ -1,17 +1,25 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers, BigNumber, utils } from "ethers";
 import {
+  acrossPlusMulticallHandler,
   ChainId,
   fixedPointAdjustment,
+  getToken,
+  hyperLiquidBridge2Address,
   referrerDelimiterHex,
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import { getConfig, isContractDeployedToAddress } from "utils";
+import {
+  generateHyperLiquidPayload,
+  getConfig,
+  isContractDeployedToAddress,
+} from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
 import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
 import { SpokePool, SpokePoolVerifier } from "./typechain";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -41,11 +49,74 @@ type GetBridgeFeesArgs = {
   fromChainId: ChainId;
   toChainId: ChainId;
   recipientAddress?: string;
+  message?: string;
 };
 
 export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
 };
+
+export async function getBridgeFeesWithExternalProjectId(
+  externalProjectId: string,
+  args: GetBridgeFeesArgs
+) {
+  let message = undefined;
+  let recipientAddress = args.recipientAddress;
+
+  if (externalProjectId === "hyper-liquid") {
+    const arbitrumProvider = getProvider(CHAIN_IDs.ARBITRUM);
+    const wallet = ethers.Wallet.createRandom();
+    const signer = new ethers.Wallet(wallet.privateKey, arbitrumProvider);
+    const recipient = await signer.getAddress();
+
+    // Build the payload
+    const hyperLiquidPayload = await generateHyperLiquidPayload(
+      signer,
+      recipient,
+      args.amount
+    );
+    // Create a txn calldata for transfering amount to recipient
+    const erc20Interface = new utils.Interface([
+      "function transfer(address to, uint256 amount) returns (bool)",
+    ]);
+
+    const transferCalldata = erc20Interface.encodeFunctionData("transfer", [
+      recipient,
+      args.amount,
+    ]);
+
+    // Encode Instructions struct directly
+    message = utils.defaultAbiCoder.encode(
+      [
+        "tuple(tuple(address target, bytes callData, uint256 value)[] calls, address fallbackRecipient)",
+      ],
+      [
+        {
+          calls: [
+            {
+              target: getToken("USDC").addresses![CHAIN_IDs.ARBITRUM],
+              callData: transferCalldata,
+              value: 0,
+            },
+            {
+              target: hyperLiquidBridge2Address,
+              callData: hyperLiquidPayload,
+              value: 0,
+            },
+          ],
+          fallbackRecipient: args.recipientAddress!,
+        },
+      ]
+    );
+    recipientAddress = acrossPlusMulticallHandler[args.toChainId];
+  }
+
+  return getBridgeFees({
+    ...args,
+    recipientAddress,
+    message,
+  });
+}
 
 /**
  *
@@ -63,6 +134,7 @@ export async function getBridgeFees({
   fromChainId,
   toChainId,
   recipientAddress,
+  message,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const timeBeforeRequests = Date.now();
   const {
@@ -84,7 +156,8 @@ export async function getBridgeFees({
     getConfig().getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
     toChainId,
     fromChainId,
-    recipientAddress
+    recipientAddress,
+    message
   );
   const timeAfterRequests = Date.now();
 

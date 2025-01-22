@@ -67,7 +67,8 @@ export type SuggestedApiFeeType = (
   outputToken: string,
   toChainid: ChainId,
   fromChainid: ChainId,
-  recipientAddress?: string
+  recipientAddress?: string,
+  message?: string
 ) => Promise<SuggestedApiFeeReturnType>;
 
 export type RetrieveLinkedWalletType = (

@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, constants, providers, Signer, utils } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -23,11 +23,12 @@ import {
   sendSpokePoolVerifierDepositTx,
   sendDepositV3Tx,
   sendSwapAndBridgeTx,
-  compareAddressesSimple,
   getToken,
   acrossPlusMulticallHandler,
   hyperLiquidBridge2Address,
   externalProjectNameToId,
+  generateHyperLiquidPayload,
+  fixedPointAdjustment,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -35,7 +36,6 @@ import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { CHAIN_IDs } from "@across-protocol/constants";
-import { Contract } from "ethers";
 
 const config = getConfig();
 
@@ -128,13 +128,12 @@ export function useBridgeAction(
         // 4. We must construct a payload to send to HL's Bridge2 contract
         // 5. The user must sign this signature
 
-        // Estimated fee for this HL deposit. Sum of the relayer capital fee,
-        // the lp fee, and 2x the relayer gas fee.
-        const estimatedFee = frozenFeeQuote.relayerCapitalFee.total
-          .add(frozenFeeQuote.lpFee.total)
-          .add(frozenFeeQuote.relayerGasFee.total.mul(2));
-
-        const amount = frozenDepositArgs.amount.sub(estimatedFee);
+        // Subtract the relayer fee pct just like we do for our output token amount
+        const amount = frozenDepositArgs.amount.sub(
+          frozenDepositArgs.amount
+            .mul(frozenDepositArgs.relayerFeePct)
+            .div(fixedPointAdjustment)
+        );
 
         // Build the payload
         const hyperLiquidPayload = await generateHyperLiquidPayload(
@@ -430,78 +429,4 @@ function getButtonLabel(args: {
     return "Switch network and confirm transaction";
   }
   return "Confirm transaction";
-}
-
-/**
- * Creates a payload that will be ingested by Bridge2/batchedDepositWithPermit of a single deposit
- */
-export async function generateHyperLiquidPayload(
-  signer: Signer,
-  recipient: string,
-  amount: BigNumber
-) {
-  const source = await signer.getAddress();
-
-  if (!compareAddressesSimple(source, recipient)) {
-    throw new Error("Source and recipient must be the same");
-  }
-
-  const timestamp = Date.now();
-  const deadline = Math.floor(timestamp / 1000) + 3600;
-
-  // Create USDC contract interface
-  const usdcInterface = new utils.Interface([
-    "function nonces(address owner) view returns (uint256)",
-    "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
-  ]);
-
-  const usdcContract = new Contract(
-    getToken("USDC").addresses![CHAIN_IDs.ARBITRUM],
-    usdcInterface,
-    signer
-  );
-
-  // USDC permit signature with verified domain parameters
-  const usdcDomain = {
-    name: "USD Coin",
-    version: "2",
-    chainId: CHAIN_IDs.ARBITRUM,
-    verifyingContract: getToken("USDC").addresses![CHAIN_IDs.ARBITRUM]!,
-  };
-
-  const permitTypes = {
-    Permit: [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "nonce", type: "uint256" },
-      { name: "deadline", type: "uint256" },
-    ],
-  };
-
-  const permitValue = {
-    owner: source,
-    spender: hyperLiquidBridge2Address,
-    value: amount,
-    nonce: await usdcContract.nonces(source),
-    deadline,
-  };
-
-  const permitSignature = await (
-    signer as providers.JsonRpcSigner
-  )._signTypedData(usdcDomain, permitTypes, permitValue);
-  const { r, s, v } = utils.splitSignature(permitSignature);
-
-  const deposit = {
-    user: source,
-    usd: amount,
-    deadline,
-    signature: { r: BigNumber.from(r), s: BigNumber.from(s), v },
-  };
-
-  const iface = new utils.Interface([
-    "function batchedDepositWithPermit(tuple(address user, uint64 usd, uint64 deadline, tuple(uint256 r, uint256 s, uint8 v) signature)[] deposits)",
-  ]);
-
-  return iface.encodeFunctionData("batchedDepositWithPermit", [[deposit]]);
 }
