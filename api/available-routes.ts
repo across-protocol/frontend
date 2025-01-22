@@ -3,8 +3,11 @@ import { object, Infer, optional, string } from "superstruct";
 import dotenv from "dotenv";
 import { validAddress, positiveIntStr } from "./_utils";
 import { TypedVercelRequest } from "./_types";
-import fs from "fs";
-import path from "path";
+import { getEnvs } from "./_env";
+
+const {
+  GIT_ENV_EXPORTED,
+} = getEnvs();
 
 const AvailableRoutesQueryParamsSchema = object({
   originToken: optional(validAddress()),
@@ -28,7 +31,7 @@ type AvailableRoutesQueryParams = Infer<
 
 const handler = async (_: any, response: VercelResponse) => {
   response.status(200).json({
-    test: process.env.GIT_ENV_EXPORTED,
+    test: GIT_ENV_EXPORTED,
   });
   return;
 };
