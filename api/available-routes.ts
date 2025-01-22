@@ -15,9 +15,12 @@ const AvailableRoutesQueryParamsSchema = object({
   destinationTokenSymbol: optional(string()),
 });
 
-let envPath = path.join(process.cwd(), 'output_vercel_api.env');
+let envPath = path.join(process.cwd(), "output_vercel_api.env");
 let envFile = fs.readFileSync(envPath, "utf-8");
-dotenv.populate(process.env, dotenv.parse(envFile));
+dotenv.populate(
+  process.env as dotenv.DotenvPopulateInput,
+  dotenv.parse(envFile)
+);
 
 type AvailableRoutesQueryParams = Infer<
   typeof AvailableRoutesQueryParamsSchema
