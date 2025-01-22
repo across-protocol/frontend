@@ -10,23 +10,26 @@ import {
   positiveIntStr,
   boolStr,
   getSpokePool,
-  tagReferrer,
   validAddressOrENS,
   tagDomain,
 } from "./_utils";
 import { InvalidParamError } from "./_errors";
+import { getFillDeadline } from "./_fill-deadline";
 
 const BuildDepositTxQueryParamsSchema = type({
-  amount: parsableBigNumberString(),
-  token: validAddress(),
+  inputAmount: parsableBigNumberString(),
+  outputAmount: parsableBigNumberString(),
+  inputToken: validAddress(),
+  outputToken: validAddress(),
   destinationChainId: positiveIntStr(),
   originChainId: positiveIntStr(),
+  depositor: validAddress(),
   recipient: validAddress(),
-  relayerFeePct: parsableBigNumberString(),
   quoteTimestamp: positiveIntStr(),
+  fillDeadline: optional(positiveIntStr()),
+  exclusiveRelayer: optional(validAddressOrENS()),
+  exclusivityParameter: optional(positiveIntStr()),
   message: optional(string()),
-  maxCount: optional(boolStr()),
-  referrer: optional(validAddressOrENS()),
   isNative: optional(boolStr()),
   // A 4-byte hex string representing the domain identifier.
   // Optional: will be appended to the data field of the transaction.
@@ -49,29 +52,36 @@ const handler = async (
     assert(query, BuildDepositTxQueryParamsSchema);
 
     let {
-      amount: amountInput,
-      token,
+      inputAmount: _inputAmount,
+      outputAmount: _outputAmount,
+      inputToken,
+      outputToken,
       destinationChainId: destinationChainIdInput,
       originChainId: originChainIdInput,
       recipient,
-      relayerFeePct: relayerFeePctInput,
+      depositor,
       // Note, that the value of `quoteTimestamp` query param needs to be taken directly as returned by the
       // `GET /api/suggested-fees` endpoint. This is why we don't floor the timestamp value here.
       quoteTimestamp,
+      fillDeadline: _fillDeadline,
+      exclusiveRelayer = ethers.constants.AddressZero,
+      exclusivityParameter = "0",
       message = "0x",
-      maxCount = ethers.constants.MaxUint256.toString(),
-      referrer,
       isNative: isNativeBoolStr,
       domainIdentifier,
     } = query;
 
     recipient = ethers.utils.getAddress(recipient);
-    token = ethers.utils.getAddress(token);
+    depositor = ethers.utils.getAddress(depositor);
+    inputToken = ethers.utils.getAddress(inputToken);
+    outputToken = ethers.utils.getAddress(outputToken);
+    const inputAmount = ethers.BigNumber.from(_inputAmount);
+    const outputAmount = ethers.BigNumber.from(_outputAmount);
     const destinationChainId = parseInt(destinationChainIdInput);
     const originChainId = parseInt(originChainIdInput);
-    const amount = ethers.BigNumber.from(amountInput);
-    const relayerFeePct = ethers.BigNumber.from(relayerFeePctInput);
     const isNative = isNativeBoolStr === "true";
+    const fillDeadline =
+      _fillDeadline ?? (await getFillDeadline(destinationChainId));
 
     if (originChainId === destinationChainId) {
       throw new InvalidParamError({
@@ -81,21 +91,22 @@ const handler = async (
 
     const spokePool = getSpokePool(originChainId);
 
-    const value = isNative ? amount : ethers.constants.Zero;
+    const value = isNative ? inputAmount : ethers.constants.Zero;
     const tx = await spokePool.populateTransaction.deposit(
+      depositor,
       recipient,
-      token,
-      amount,
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount,
       destinationChainId,
-      relayerFeePct,
+      exclusiveRelayer,
       quoteTimestamp,
+      fillDeadline,
+      exclusivityParameter,
       message,
-      maxCount,
       { value }
     );
-
-    // do not tag a referrer if data is not provided as a hex string.
-    tx.data = referrer ? await tagReferrer(tx.data!, referrer) : tx.data;
 
     // Tag the domain identifier to the data field of the transaction.
     tx.data = domainIdentifier
