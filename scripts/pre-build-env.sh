@@ -3,7 +3,7 @@
   set -o errexit
   set -o nounset
 
- BASE_URL="${GIT_ENV_REPO}/across/frontend/outputs/"
+ BASE_URL="${GIT_ENV_REPO}/${GIT_ENV_PROJECT}/outputs/"
 
  if [ -n "${GH_TOKEN}" ]; then
     
