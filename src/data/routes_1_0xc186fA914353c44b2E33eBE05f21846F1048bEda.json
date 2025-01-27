@@ -1032,7 +1032,7 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
+      "externalProjectId": "hyperliquid"
     },
     {
       "fromChain": 10,
@@ -2023,7 +2023,7 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
+      "externalProjectId": "hyperliquid"
     },
     {
       "fromChain": 137,
@@ -2827,7 +2827,7 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
+      "externalProjectId": "hyperliquid"
     },
     {
       "fromChain": 42161,
@@ -5303,7 +5303,7 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
+      "externalProjectId": "hyperliquid"
     },
     {
       "fromChain": 59144,
@@ -8747,7 +8747,7 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyper-liquid"
+      "externalProjectId": "hyperliquid"
     },
     {
       "fromChain": 690,

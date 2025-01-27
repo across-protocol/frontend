@@ -110,7 +110,7 @@ export function useBridgeAction(
       }
 
       const externalProjectIsHyperLiquid =
-        frozenRoute.externalProjectId === "hyper-liquid";
+        frozenRoute.externalProjectId === "hyperliquid";
 
       let externalPayload: string | undefined;
 

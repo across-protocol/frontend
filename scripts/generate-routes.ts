@@ -31,7 +31,7 @@ type ToToken = ToChain["tokens"][number];
 type SwapToken = ToChain["swapTokens"][number];
 type ValidTokenSymbol = string;
 
-const enabledMainnetExternalProjects = [externConfigs.HYPER_LIQUID];
+const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 
 const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,

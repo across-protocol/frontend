@@ -164,7 +164,7 @@ export function trackToChainChanged(
 export function externalProjectNameToId(
   projectName?: string
 ): ExternalProjectId | undefined {
-  return projectName === "hyper-liquid" ? "hyper-liquid" : undefined;
+  return projectName === "hyperliquid" ? "hyper-liquid" : undefined;
 }
 
 export function trackQuickSwap(

@@ -130,10 +130,10 @@ import zoraGrayscaleLogo from "assets/chain-logos/zora-grayscale.svg";
 import { ReactComponent as zoraLogoSvg } from "assets/chain-logos/zora.svg";
 import { ReactComponent as zoraGrayscaleLogoSvg } from "assets/chain-logos/zora-grayscale.svg";
 
-import hyperLiquidLogo from "assets/extern-logos/hyper-liquid.svg";
-import hyperLiquidGrayscaleLogo from "assets/extern-logos/hyper-liquid-grayscale.svg";
-import { ReactComponent as hyperLiquidLogoSvg } from "assets/extern-logos/hyper-liquid.svg";
-import { ReactComponent as hyperLiquidGrayscaleLogoSvg } from "assets/extern-logos/hyper-liquid-grayscale.svg";
+import hyperliquidLogo from "assets/extern-logos/hyperliquid.svg";
+import hyperliquidGrayscaleLogo from "assets/extern-logos/hyperliquid-grayscale.svg";
+import { ReactComponent as hyperliquidLogoSvg } from "assets/extern-logos/hyperliquid.svg";
+import { ReactComponent as hyperliquidGrayscaleLogoSvg } from "assets/extern-logos/hyperliquid-grayscale.svg";
 
 export const alephZero = {
   name: "Aleph Zero",
@@ -572,14 +572,14 @@ export const zora = {
   pollingInterval: 2000,
 };
 
-export const hyperLiquid = {
+export const hyperliquid = {
   name: "Hyperliquid",
   fullName: "Hyperliquid",
-  projectId: "hyper-liquid",
-  logoURI: hyperLiquidLogo,
-  grayscaleLogoURI: hyperLiquidGrayscaleLogo,
-  logoSvg: hyperLiquidLogoSvg,
-  grayscaleLogoSvg: hyperLiquidGrayscaleLogoSvg,
+  projectId: "hyperliquid",
+  logoURI: hyperliquidLogo,
+  grayscaleLogoURI: hyperliquidGrayscaleLogo,
+  logoSvg: hyperliquidLogoSvg,
+  grayscaleLogoSvg: hyperliquidGrayscaleLogoSvg,
   explorerUrl: "https://arbiscan.io",
   rpcUrl: "https://arbitrum.publicnode.com",
   intermediaryChain: 42161,
@@ -620,10 +620,10 @@ export const chainConfigs = [
   {} as Record<number, typeof alephZero>
 );
 
-export const externConfigs = [hyperLiquid].reduce(
+export const externConfigs = [hyperliquid].reduce(
   (acc, extern) => {
     acc[extern.projectId] = extern;
     return acc;
   },
-  {} as Record<string, typeof hyperLiquid>
+  {} as Record<string, typeof hyperliquid>
 );

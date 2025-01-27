@@ -219,7 +219,7 @@ const BridgeForm = ({
           />
         </TokenSelectorWrapper>
       </RowWrapper>
-      {toAccount && selectedRoute.externalProjectId !== "hyper-liquid" && (
+      {toAccount && selectedRoute.externalProjectId !== "hyperliquid" && (
         <RowWrapper>
           <RecipientRow
             onClickChangeToAddress={onClickChangeToAddress}

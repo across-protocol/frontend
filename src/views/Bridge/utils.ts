@@ -138,7 +138,7 @@ export function validateBridgeAmount(
   if (
     quoteFees?.isAmountTooLow ||
     // HyperLiquid has a minimum deposit amount of 5 USDC
-    (selectedRoute.externalProjectId === "hyper-liquid" &&
+    (selectedRoute.externalProjectId === "hyperliquid" &&
       parsedAmountInput.lt(parseUnits("5.05", 6)))
   ) {
     return {

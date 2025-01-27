@@ -19,7 +19,7 @@ export function RouteCell({ deposit, width }: Props) {
   const sourceChain = getChainInfo(deposit.sourceChainId);
   const destinationChain: Pick<ChainInfo, "name" | "logoURI"> =
     isHyperLiquidDeposit
-      ? externConfigs["hyper-liquid"]
+      ? externConfigs["hyperliquid"]
       : getChainInfo(deposit.destinationChainId);
 
   return (

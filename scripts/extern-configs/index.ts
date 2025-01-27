@@ -1,1 +1,1 @@
-export { default as HYPER_LIQUID } from "./hyper-liquid";
+export { default as HYPERLIQUID } from "./hyperliquid";
