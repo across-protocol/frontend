@@ -105,8 +105,8 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
 
   const disableInputs =
     stakingPoolQuery.isLoading ||
-    addLiquidityMutation.isLoading ||
-    removeLiquidityMutation.isLoading;
+    addLiquidityMutation.isPending ||
+    removeLiquidityMutation.isPending;
 
   const disableAction = Boolean(
     disableInputs ||
@@ -161,10 +161,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           >
             <Text color="dark-grey" weight={500}>
               {action === "add"
-                ? addLiquidityMutation.isLoading
+                ? addLiquidityMutation.isPending
                   ? "Adding liquidity..."
                   : "Add liquidity"
-                : removeLiquidityMutation.isLoading
+                : removeLiquidityMutation.isPending
                   ? "Removing liquidity..."
                   : "Remove liquidity"}
             </Text>

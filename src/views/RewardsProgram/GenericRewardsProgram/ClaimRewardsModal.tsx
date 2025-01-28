@@ -25,7 +25,7 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
   const disableButton =
     unclaimedProofsQuery.isLoading ||
     BigNumber.from(unclaimedProofsQuery.data?.claimableAmount ?? 0).isZero() ||
-    claimMutation.isLoading;
+    claimMutation.isPending;
 
   return (
     <Modal
@@ -68,7 +68,7 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
           }
           disabled={disableButton}
         >
-          {claimMutation.isLoading ? "Claiming..." : "Claim rewards"}
+          {claimMutation.isPending ? "Claiming..." : "Claim rewards"}
         </Button>
       </ClaimableBoxInnerWrapper>
       <AddToWalletWrapper>
