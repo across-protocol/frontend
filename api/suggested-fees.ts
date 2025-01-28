@@ -258,7 +258,10 @@ const handler = async (
 
     let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
     let exclusivityDeadline = 0;
-    if (depositMethod === "depositExclusive") {
+    if (
+      depositMethod === "depositExclusive" &&
+      ![CHAIN_IDs.MAINNET, CHAIN_IDs.POLYGON].includes(originChainId)
+    ) {
       ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
         await selectExclusiveRelayer(
           computedOriginChainId,
