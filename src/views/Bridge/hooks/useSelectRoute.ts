@@ -231,10 +231,14 @@ export function useSelectRoute() {
             toChain: toChainId,
             externalProjectId,
           })
-        : findNextBestRoute(["toChain"], {
-            toChain: toChainId,
-            externalProjectId: undefined,
-          });
+        : findNextBestRoute(
+            [
+              "fromChain",
+              "toChain",
+              isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+            ],
+            filterBy
+          );
 
       // If no route found, fall back to previous logic
       if (!route) {
