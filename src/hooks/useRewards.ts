@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   rewardsApiUrl,
   rewardsQueryKey,
@@ -39,7 +39,7 @@ export function useRewards(
     },
     enabled: enabledQuery,
     refetchInterval: defaultRefetchInterval,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }
 

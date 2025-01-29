@@ -253,16 +253,16 @@ export function useBridgeAction(
   const buttonDisabled =
     !usedTransferQuote ||
     (isConnected && dataLoading) ||
-    buttonActionHandler.isLoading;
+    buttonActionHandler.isPending;
   return {
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
-    isButtonActionLoading: buttonActionHandler.isLoading,
+    isButtonActionLoading: buttonActionHandler.isPending,
     didActionError: buttonActionHandler.isError,
     buttonLabel: getButtonLabel({
       isConnected,
       isDataLoading: dataLoading,
-      isMutating: buttonActionHandler.isLoading,
+      isMutating: buttonActionHandler.isPending,
       isWrongNetwork,
     }),
     buttonDisabled,

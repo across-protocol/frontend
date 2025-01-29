@@ -33,6 +33,12 @@ export const NAV_LINKS = [
     url: "https://twitter.com/AcrossProtocol",
     icon: StyledTwitterIcon,
   },
+  {
+    key: "terms_of_service",
+    name: "Terms of Service",
+    url: "https://across.to/terms-of-service",
+    icon: undefined,
+  },
 ];
 
 const Footer = () => {

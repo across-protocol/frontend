@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   rewardsApiUrl,
@@ -117,7 +117,7 @@ export function useDeposits(
         skipOldUnprofitable: true,
       });
     },
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     refetchInterval: defaultRefetchInterval,
   });
 }
@@ -203,7 +203,7 @@ export function useUserDeposits(
         pagination,
       };
     },
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     refetchInterval: defaultRefetchInterval,
     enabled: Boolean(userAddress),
   });
