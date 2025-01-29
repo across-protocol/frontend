@@ -42,27 +42,33 @@ export async function selectExclusiveRelayer(
   );
 
   if (name === "none") {
-    return { exclusiveRelayer, exclusivityPeriod };
+    return {
+      exclusiveRelayer: "0x07aE8551Be970cB1cCa11Dd7a11F47Ae82e70E67",
+      exclusivityPeriod: 600,
+    };
   }
 
-  const exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
-  const relayers = await getEligibleRelayers(
-    originChainId,
-    destinationChainId,
-    outputToken.address,
-    outputAmount,
-    outputAmountUsd,
-    relayerFeePct,
-    exclusivityPeriodSec
-  );
+  // const exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
+  // const relayers = await getEligibleRelayers(
+  //   originChainId,
+  //   destinationChainId,
+  //   outputToken.address,
+  //   outputAmount,
+  //   outputAmountUsd,
+  //   relayerFeePct,
+  //   exclusivityPeriodSec
+  // );
 
-  if (relayers.length > 0) {
-    exclusiveRelayer = selectorFn(relayers);
-    exclusivityPeriod =
-      exclusiveRelayer === ZERO_ADDRESS ? 0 : exclusivityPeriodSec;
-  }
+  // if (relayers.length > 0) {
+  //   exclusiveRelayer = selectorFn(relayers);
+  //   exclusivityPeriod =
+  //     exclusiveRelayer === ZERO_ADDRESS ? 0 : exclusivityPeriodSec;
+  // }
 
-  return { exclusiveRelayer, exclusivityPeriod };
+  return {
+    exclusiveRelayer: "0x07aE8551Be970cB1cCa11Dd7a11F47Ae82e70E67",
+    exclusivityPeriod: 600,
+  };
 }
 
 /**
