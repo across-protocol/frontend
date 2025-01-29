@@ -207,6 +207,7 @@ export function useBridgeAction(
           allowedContractAddress: config.getSpokePoolAddress(
             frozenRoute.fromChain
           ),
+          enforceCorrectNetwork: frozenRoute.externalProjectId !== undefined,
         });
       }
 
