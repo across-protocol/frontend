@@ -129,18 +129,11 @@ export function ChainSelector({
 
 function ChainInfoElement({
   chain,
-  externalProjectId,
   superText,
 }: {
   chain: Pick<ChainInfo, "chainId" | "name" | "fullName" | "logoURI">;
-  externalProjectId?: string;
   superText?: string;
 }) {
-  // const externalProject = externalProjectId
-  //   ? externConfigs[externalProjectId]
-  //   : null;
-  externalProjectId;
-
   return (
     <ChainIconTextWrapper>
       <ChainIcon src={chain.logoURI} />
