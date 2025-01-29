@@ -547,7 +547,7 @@ export const getHubPool = (provider: providers.Provider) => {
 export const overrideProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const url = process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
+  const url = getEnvs()[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
   if (url) {
     return new ethers.providers.StaticJsonRpcProvider(url);
   } else {
@@ -1331,7 +1331,7 @@ export function getLpCushion(
       `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
       `REACT_APP_LP_CUSHION_${symbol}`,
     ]
-      .map((key) => process.env[key])
+      .map((key) => getEnvs()[key])
       .find((value) => value !== undefined) ?? "0"
   );
 }
@@ -1874,7 +1874,7 @@ export function isSwapRouteEnabled({
 export function getLimitsBufferMultiplier(symbol: string) {
   const limitsBufferMultipliers: Record<string, string> = process.env
     .LIMITS_BUFFER_MULTIPLIERS
-    ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
+    ? JSON.parse(getEnvs().LIMITS_BUFFER_MULTIPLIERS)
     : {};
   const bufferMultiplier = ethers.utils.parseEther(
     limitsBufferMultipliers[symbol] || "0.8"

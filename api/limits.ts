@@ -127,7 +127,7 @@ const handler = async (
       amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
     );
     let minDepositUsdForDestinationChainId = Number(
-      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+      getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );
     if (isNaN(minDepositUsdForDestinationChainId)) {
       minDepositUsdForDestinationChainId = 0;
