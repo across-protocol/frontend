@@ -89,14 +89,14 @@ const {
   REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
   VERCEL_URL,
+  LIMITS_BUFFER_MULTIPLIERS,
+  CHAIN_USD_MAX_BALANCES,
 } = getEnvs();
-
 
 export { InputError, handleErrorCondition } from "./_errors";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
-
 
 export const baseFeeMarkup: {
   [chainId: string]: number;
@@ -121,9 +121,7 @@ export const DISABLED_ROUTE_TOKENS = (
 // the ENABLED_ROUTES object below. This is useful for disabling a chainId
 // temporarily without having to redeploy the app or change core config
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
-export const DISABLED_CHAINS = (
-  REACT_APP_DISABLED_CHAINS || ""
-).split(",");
+export const DISABLED_CHAINS = (REACT_APP_DISABLED_CHAINS || "").split(",");
 
 // This is an array of chainIds that should be disabled. In contrast to the
 // above constant `DISABLED_CHAINS`, this constant is used to disable chains
@@ -1872,10 +1870,8 @@ export function isSwapRouteEnabled({
 }
 
 export function getLimitsBufferMultiplier(symbol: string) {
-  const limitsBufferMultipliers: Record<string, string> = process.env
-    .LIMITS_BUFFER_MULTIPLIERS
-    ? JSON.parse(getEnvs().LIMITS_BUFFER_MULTIPLIERS)
-    : {};
+  const limitsBufferMultipliers: Record<string, string> =
+    LIMITS_BUFFER_MULTIPLIERS ? JSON.parse(LIMITS_BUFFER_MULTIPLIERS) : {};
   const bufferMultiplier = ethers.utils.parseEther(
     limitsBufferMultipliers[symbol] || "0.8"
   );
@@ -1888,10 +1884,10 @@ export function getChainInputTokenMaxBalanceInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxBalances: Record<string, Record<string, string>> = process.env
-    .CHAIN_USD_MAX_BALANCES
-    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
-    : {};
+  const maxBalances: Record<
+    string,
+    Record<string, string>
+  > = CHAIN_USD_MAX_BALANCES ? JSON.parse(CHAIN_USD_MAX_BALANCES) : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
     : undefined;
