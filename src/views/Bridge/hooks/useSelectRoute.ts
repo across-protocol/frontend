@@ -227,9 +227,10 @@ export function useSelectRoute() {
 
       // Try to find route with exact match first
       let route = externalProjectId
-        ? findNextBestRoute(["toChain", "externalProjectId"], {
+        ? findNextBestRoute(["fromChain", "toChain", "externalProjectId"], {
             toChain: toChainId,
             externalProjectId,
+            fromChain: selectedRoute.fromChain,
           })
         : findNextBestRoute(
             [
