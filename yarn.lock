@@ -78,10 +78,10 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/contracts@^3.1.0-beta.3":
-  version "3.1.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.1.0-beta.3.tgz#f8d7bd7c6748bd71ac20a8f8f93367b966f1c7d2"
-  integrity sha512-IRtLn9paX+nYhwzz5P3x/JWycTKbCur7CM7iVqFPcZwW8ZrmugDjKcolH5rzkIOP3OwYKKS67Rh2fHTq9O9q8g==
+"@across-protocol/contracts@^3.1.0-beta.4":
+  version "3.1.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.1.0-beta.4.tgz#770ae74481a7bb6c021c093f5c04be77b2d188dd"
+  integrity sha512-pU5aaFLwUy26UegP+sAOMjMBFdCH9U/s+/f/Ckde3wCMwv+GfPBCYgLf7gPaAZJ+CdbKlwJr1KuawcU+3mpbRw==
   dependencies:
     "@across-protocol/constants" "^3.1.27"
     "@coral-xyz/anchor" "^0.30.1"
@@ -106,10 +106,10 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^3.4.12":
-  version "3.4.12"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.4.12.tgz#2944f41d51a2cd889a4d1882435149a32e5441c8"
-  integrity sha512-Bc4hpvl0CysisOLk+WQLbSUwhRhJ/NPyHwocA/Qo5ERne+zmN8P8dsmVQLgsIxay3Nu+VLVcNLoSKWewiom46w==
+"@across-protocol/sdk@^3.4.15":
+  version "3.4.15"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.4.15.tgz#76888e2230956a696cfa06982253196f50a7a20f"
+  integrity sha512-0ICm525mIBr+H7XrjY9M7Jo59P8Xvmu//85t0TZrcJlrn/qrDRetyst2nAFTb4CRZlJafJFKtvIieuClAqjTEg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.30"
@@ -23376,7 +23376,7 @@ wrap-ansi@^7.0.0:
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
 
-wrap-ansi@^8.0.1, wrap-ansi@^8.1.0:
+wrap-ansi@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-8.1.0.tgz#56dc22368ee570face1b49819975d9b9a5ead214"
   integrity sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==

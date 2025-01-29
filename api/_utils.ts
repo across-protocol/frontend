@@ -771,7 +771,7 @@ export const buildDepositForSimulation = (depositArgs: {
     outputAmount: sdk.utils.isMessageEmpty(message)
       ? safeOutputAmount
       : sdk.utils.toBN(amount),
-    depositId: sdk.utils.bnUint32Max.toNumber(),
+    depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
     destinationChainId,
