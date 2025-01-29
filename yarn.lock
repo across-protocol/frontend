@@ -7958,7 +7958,7 @@
     joi "17.9.1"
     viem "2.12.0"
 
-"@web3-onboard/core@^2.21.2", "@web3-onboard/core@^2.24.0":
+"@web3-onboard/core@2.24.0", "@web3-onboard/core@^2.24.0":
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/@web3-onboard/core/-/core-2.24.0.tgz#e31f202b557c51c05f9a8a298552e3143d152017"
   integrity sha512-aFfao9ln5DMW9QSTzXHP4ymuFoJslBs3TrYR+z+5B6/lPMK1CUSe5wmPeFVaqTXs4gIGkyWByuznb9LUq/Vong==
@@ -8007,13 +8007,13 @@
   dependencies:
     "@web3-onboard/common" "^2.4.1"
 
-"@web3-onboard/react@^2.8.13":
-  version "2.8.13"
-  resolved "https://registry.yarnpkg.com/@web3-onboard/react/-/react-2.8.13.tgz#c58fae9ba73f343aaa4483d57b6b27b1b14d1851"
-  integrity sha512-RhdnbVNWxYrMFOwxZKRKV3ys7SKymdHa2cHsyzcVEQlHzZVhZVlKB6KWzvk6umcyuT4DF9W4edzd1clJwCmazg==
+"@web3-onboard/react@^2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@web3-onboard/react/-/react-2.11.0.tgz#1805df2087f7fac81a5575fa97793d32204f86fd"
+  integrity sha512-aKwkVX3Xt0FshAerq1j15FYZnanEfrcNRl7SjziH8Zh/v82chixBqdPOKG7uh4lYKutIY7OAuyubPPRr/J7mzw==
   dependencies:
-    "@web3-onboard/common" "^2.3.3"
-    "@web3-onboard/core" "^2.21.2"
+    "@web3-onboard/common" "^2.4.1"
+    "@web3-onboard/core" "2.24.0"
     use-sync-external-store "1.0.0"
 
 "@web3-onboard/walletconnect@^2.4.6":
