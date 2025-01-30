@@ -231,6 +231,10 @@ export function useSelectRoute() {
             toChain: toChainId,
             externalProjectId,
             fromChain: selectedRoute.fromChain,
+          }) ||
+          findNextBestRoute(["toChain", "externalProjectId"], {
+            toChain: toChainId,
+            externalProjectId,
           })
         : findNextBestRoute(
             [
