@@ -85,7 +85,11 @@ const Selector = <ElementValue,>({
         <ElementRowWrapper enableScroll={elements.length > 6}>
           {elements.map((element, idx) => (
             <ElementRow
-              key={String(element.value)}
+              key={
+                typeof element.value === "object"
+                  ? JSON.stringify(element.value)
+                  : String(element.value)
+              }
               onClick={() => {
                 if (element.disabled && !allowSelectDisabled) {
                   return;

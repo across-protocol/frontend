@@ -78,7 +78,9 @@ const handler = async (
             route.fromTokenSymbol.toUpperCase()) &&
         (!destinationTokenSymbol ||
           destinationTokenSymbol.toUpperCase() ===
-            route.toTokenSymbol.toUpperCase()),
+            route.toTokenSymbol.toUpperCase()) &&
+        (route as { externalProjectId?: string }).externalProjectId ===
+          undefined,
       // Create a mapping of enabled routes to a route with the destination token resolved.
       (route) => ({
         originChainId: route.fromChain,

@@ -17,7 +17,8 @@ export async function suggestedFeesApiCall(
   outputToken: string,
   toChainid: ChainId,
   fromChainid: ChainId,
-  recipientAddress?: string
+  recipientAddress?: string,
+  message?: string
 ): Promise<SuggestedApiFeeReturnType> {
   const response = await axios.get(`${vercelApiBaseUrl}/api/suggested-fees`, {
     params: {
@@ -29,6 +30,7 @@ export async function suggestedFeesApiCall(
       amount: amount.toString(),
       skipAmountLimit: true,
       depositMethod: "depositExclusive",
+      message,
     },
   });
   const result = response.data;
