@@ -32,7 +32,7 @@ import {
   similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
-import { externConfigs } from "constants/chains/configs";
+import { externConfigs } from "../constants/chains/configs";
 
 export type {
   TokenInfo,
