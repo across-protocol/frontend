@@ -1518,7 +1518,7 @@
       "fromSpokeAddress": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
       "fromTokenSymbol": "GRASS",
       "toTokenSymbol": "GRASS",
-      "isNative": false,
+      "isNative": true,
       "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
     },
     {
