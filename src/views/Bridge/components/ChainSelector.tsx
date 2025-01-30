@@ -17,6 +17,7 @@ import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 import { getSupportedChains } from "../utils";
+import { externConfigs } from "constants/chains/configs";
 
 type Props = {
   selectedRoute: Route;
@@ -36,53 +37,26 @@ export function ChainSelector({
 
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
   const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
-  const allChains = getSupportedChains(fromOrTo);
+
+  // Get supported chains and filter based on external projects
+  const availableChains = filterAvailableChains(fromOrTo, selectedRoute);
 
   const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
-    chainIds: allChains.map((c) => c.chainId),
+    chainIds: availableChains.map((c) => c.chainId),
     account,
   });
 
-  const sortOrder = useMemo(() => {
-    const chains = allChains.map((c) => ({
-      ...c,
-      balance: balances?.[c.chainId] ?? BigNumber.from(0),
-      disabled: false,
-    }));
-    if (!balances || !isConnected || !isFrom) {
-      return chains;
-    } else {
-      return chains
-        .filter((c) => !c.projectId)
-        .map((c) => ({
-          ...c,
-          disabled: c.balance.eq(0),
-        }))
-        .sort((a, b) => {
-          const aBalance = a.balance;
-          const bBalance = b.balance;
-          if (aBalance === undefined && bBalance === undefined) {
-            return 0;
-          } else if (aBalance === undefined) {
-            return 1;
-          } else if (bBalance === undefined) {
-            return -1;
-          } else {
-            return aBalance.lt(bBalance) ? 1 : -1;
-          }
-        });
-    }
-  }, [allChains, balances, isConnected, isFrom]);
+  const sortedChains = useMemo(
+    () => sortChains(availableChains, balances, isConnected, isFrom),
+    [availableChains, balances, isConnected, isFrom]
+  );
 
   return (
     <Selector<{ chainId: number; externalProjectId?: string }>
-      elements={sortOrder.map((chain) => ({
-        value: {
-          chainId: chain.chainId,
-          externalProjectId: chain.projectId,
-        },
+      elements={sortedChains.map((chain) => ({
+        value: { chainId: chain.chainId, externalProjectId: chain.projectId },
         element: <ChainInfoElement chain={chain} />,
         suffix:
           isConnected && isFrom ? (
@@ -149,6 +123,53 @@ function ChainInfoElement({
       </ChainIconSuperTextWrapper>
     </ChainIconTextWrapper>
   );
+}
+
+/**
+ * Filters supported chains based on external project constraints
+ */
+function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
+  const isFrom = fromOrTo === "from";
+  let chains = getSupportedChains(fromOrTo);
+  const { externalProjectId, fromChain } = selectedRoute;
+
+  if (externalProjectId && isFrom) {
+    const { intermediaryChain } = externConfigs[externalProjectId];
+    chains = chains.filter((r) => r.chainId !== intermediaryChain);
+  }
+
+  if (!isFrom) {
+    chains = chains.filter(({ projectId }) => {
+      if (!projectId) return true;
+      const { intermediaryChain } = externConfigs[projectId];
+      return fromChain !== intermediaryChain;
+    });
+  }
+
+  return chains;
+}
+
+/**
+ * Sorts chains based on balance and availability
+ */
+function sortChains(
+  chains: ReturnType<typeof getSupportedChains>,
+  balances: Record<number, BigNumber>,
+  isConnected: boolean,
+  isFrom: boolean
+) {
+  return chains
+    .map((c) => ({
+      ...c,
+      balance: balances?.[c.chainId] ?? BigNumber.from(0),
+      disabled: !isConnected || !isFrom ? false : balances?.[c.chainId]?.eq(0),
+    }))
+    .sort((a, b) => {
+      if (!isConnected || !isFrom) return 0;
+      if (a.balance === undefined) return 1;
+      if (b.balance === undefined) return -1;
+      return a.balance.lt(b.balance) ? 1 : -1;
+    });
 }
 
 export default ChainSelector;
