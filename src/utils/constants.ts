@@ -32,6 +32,7 @@ import {
   similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
+import { externConfigs } from "constants/chains/configs";
 
 export type {
   TokenInfo,
@@ -233,7 +234,16 @@ export function getChainInfo(chainId: number): ChainInfo {
 
 export const chainEndpointToId = Object.fromEntries(
   chainInfoList.map((chain) => {
-    return [chain.name.toLowerCase().replaceAll(" ", ""), chain.chainId];
+    const projects = Object.values(externConfigs).filter(
+      ({ intermediaryChain }) => intermediaryChain === chain.chainId
+    );
+    return [
+      chain.name.toLowerCase().replaceAll(" ", ""),
+      {
+        chainId: chain.chainId,
+        associatedProjectIds: projects.map(({ projectId }) => projectId),
+      },
+    ];
   }, [])
 );
 

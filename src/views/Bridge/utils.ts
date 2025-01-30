@@ -15,6 +15,7 @@ import {
   chainEndpointToId,
   parseUnits,
   chainIsLens,
+  isDefined,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -443,31 +444,43 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
   const preferredToChainId =
     chainEndpointToId[window.location.pathname.substring(1)];
 
+  const preferredExternalProject =
+    externConfigs[window.location.pathname.substring(1)];
+
   const fromChain =
     Number(
       params.get("from") ??
         params.get("fromChain") ??
         params.get("originChainId") ??
-        overrides?.fromChain
+        // If an external project is defined, we need to ignore the overrided fromChain
+        // only if the from chain is an intermediary chain of the project
+        (isDefined(preferredExternalProject)
+          ? preferredExternalProject.intermediaryChain === overrides?.fromChain
+            ? undefined
+            : overrides?.fromChain
+          : overrides?.fromChain)
     ) || undefined;
 
-  const toChain =
-    Number(
-      preferredToChainId ??
-        params.get("to") ??
-        params.get("toChain") ??
-        params.get("destinationChainId") ??
-        overrides?.toChain
-    ) || undefined;
+  const toChain = isDefined(preferredExternalProject)
+    ? preferredExternalProject.intermediaryChain
+    : Number(
+        preferredToChainId ??
+          params.get("to") ??
+          params.get("toChain") ??
+          params.get("destinationChainId") ??
+          overrides?.toChain
+      ) || undefined;
 
-  const externalProjectId = params.get("externalProjectId") || undefined;
+  const externalProjectId =
+    preferredExternalProject?.projectId ||
+    params.get("externalProjectId") ||
+    undefined;
 
   const inputTokenSymbol =
     params.get("inputTokenSymbol") ??
     params.get("inputToken") ??
     params.get("token") ??
     overrides?.inputTokenSymbol;
-  undefined;
 
   const outputTokenSymbol =
     params.get("outputTokenSymbol") ??
