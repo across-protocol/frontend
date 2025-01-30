@@ -8,6 +8,7 @@ import {
 } from "utils";
 import { PrimaryButton, Text } from "components";
 import { useHistory } from "react-router-dom";
+import { useAvailableRemainingRewards } from "hooks/useAvailableRemainingRewards";
 
 type ReferralCTAProps = {
   program: rewardProgramTypes;
@@ -16,10 +17,11 @@ type ReferralCTAProps = {
 
 const RewardsProgramCTA = ({ program, toChain }: ReferralCTAProps) => {
   const { push: navigate } = useHistory();
+  const { areTokensAvailable } = useAvailableRemainingRewards(program);
 
   const rewardProgram = rewardPrograms[program];
 
-  if (!rewardProgram) {
+  if (!rewardProgram || !areTokensAvailable) {
     return null;
   }
 
