@@ -342,7 +342,10 @@ export class ConfigClient {
         address:
           token.addresses?.[chainId || constants.hubPoolChainId] ||
           token.mainnetAddress!,
-        isNative: token.symbol === "ETH",
+        isNative: chainId
+          ? constants.chainInfoTable[chainId].nativeCurrencySymbol ===
+            token.symbol
+          : token.symbol === "ETH",
       };
     });
   }

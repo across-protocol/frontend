@@ -276,6 +276,7 @@ function transformChainConfigs(
           ];
         }
 
+        // Handle WGRASS -> GRASS
         if (
           tokenSymbol === "WGRASS" &&
           toChainConfig.tokens.includes("GRASS")
@@ -563,6 +564,11 @@ function transformToRoute(
     throw new Error("Mismatching L1 addresses");
   }
 
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+  const isNative = inputTokenSymbol === fromChain.nativeToken;
+
   return {
     fromChain: route.fromChain,
     toChain: toChain.chainId,
@@ -571,7 +577,7 @@ function transformToRoute(
     fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
     fromTokenSymbol: inputTokenSymbol,
     toTokenSymbol: outputTokenSymbol,
-    isNative: inputTokenSymbol === TOKEN_SYMBOLS_MAP.ETH.symbol,
+    isNative,
     l1TokenAddress: inputToken.l1TokenAddress,
   };
 }
