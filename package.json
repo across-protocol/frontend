@@ -42,7 +42,7 @@
     "numeral": "^2.0.6",
     "react": "v18",
     "react-dom": "v18",
-    "react-feather": "^2.0.9",
+    "react-feather": "^2.0.10",
     "react-pro-sidebar": "^1.1.0-alpha.1",
     "react-router-dom": "v5",
     "react-tooltip": "^5.18.0",
