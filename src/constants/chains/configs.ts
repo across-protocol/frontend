@@ -1253,7 +1253,7 @@ export const chains_viem = [
   zora_viem,
 ] as const;
 
-  export const externConfigs = [hyperliquid].reduce(
+export const externConfigs = [hyperliquid].reduce(
   (acc, extern) => {
     acc[extern.projectId] = extern;
     return acc;
