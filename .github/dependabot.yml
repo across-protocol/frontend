@@ -20,3 +20,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Packages that need manual upgrades or should be pinned to a specific version
+      - dependency-name: "@across-protocol/sdk"
+      - dependency-name: "@across-protocol/contracts"
+      - dependency-name: "@across-protocol/constants"
+      - dependency-name: "@balancer-labs/sdk"
