@@ -3,9 +3,10 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
 import { Deposit } from "hooks/useDeposits";
-import { getChainInfo } from "utils";
+import { ChainInfo, getChainInfo, isHyperLiquidBoundDeposit } from "utils";
 
 import { BaseCell } from "./BaseCell";
+import { externConfigs } from "constants/chains/configs";
 
 type Props = {
   deposit: Deposit;
@@ -13,8 +14,13 @@ type Props = {
 };
 
 export function RouteCell({ deposit, width }: Props) {
+  const isHyperLiquidDeposit = isHyperLiquidBoundDeposit(deposit);
+
   const sourceChain = getChainInfo(deposit.sourceChainId);
-  const destinationChain = getChainInfo(deposit.destinationChainId);
+  const destinationChain: Pick<ChainInfo, "name" | "logoURI"> =
+    isHyperLiquidDeposit
+      ? externConfigs["hyperliquid"]
+      : getChainInfo(deposit.destinationChainId);
 
   return (
     <StyledRouteCell width={width}>

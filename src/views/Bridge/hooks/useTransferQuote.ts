@@ -51,6 +51,7 @@ export function useTransferQuote(
     selectedRoute.toChain,
     selectedRoute.fromTokenSymbol,
     selectedRoute.toTokenSymbol,
+    selectedRoute.externalProjectId,
     toAddress
   );
   const limitsQuery = useBridgeLimits(

@@ -1,3 +1,4 @@
+import { externConfigs } from "constants/chains/configs";
 import { BigNumber } from "ethers";
 import {
   Route,
@@ -12,7 +13,9 @@ import {
   nonEthChains,
   GetBridgeFeesResult,
   chainEndpointToId,
+  parseUnits,
   chainIsLens,
+  isDefined,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -30,6 +33,7 @@ type RouteFilter = Partial<{
   outputTokenSymbol: string;
   fromChain: number;
   toChain: number;
+  externalProjectId: string;
 }>;
 
 export enum AmountInputError {
@@ -101,6 +105,7 @@ export function getReceiveTokenSymbol(
 }
 
 export function validateBridgeAmount(
+  selectedRoute: SelectedRoute,
   parsedAmountInput?: BigNumber,
   quoteFees?: GetBridgeFeesResult,
   currentBalance?: BigNumber,
@@ -131,7 +136,12 @@ export function validateBridgeAmount(
     };
   }
 
-  if (quoteFees?.isAmountTooLow) {
+  if (
+    quoteFees?.isAmountTooLow ||
+    // HyperLiquid has a minimum deposit amount of 5 USDC
+    (selectedRoute.externalProjectId === "hyperliquid" &&
+      parsedAmountInput.lt(parseUnits("5.05", 6)))
+  ) {
     return {
       error: AmountInputError.AMOUNT_TOO_LOW,
     };
@@ -179,6 +189,7 @@ export function findEnabledRoute(
     swapTokenSymbol,
     fromChain,
     toChain,
+    externalProjectId,
   } = filter;
 
   const commonRouteFilter = (route: Route | SwapRoute) =>
@@ -189,7 +200,10 @@ export function findEnabledRoute(
       ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
       : true) &&
     (fromChain ? route.fromChain === fromChain : true) &&
-    (toChain ? route.toChain === toChain : true);
+    (toChain ? route.toChain === toChain : true) &&
+    (externalProjectId !== undefined
+      ? route.externalProjectId === externalProjectId
+      : true);
 
   if (swapTokenSymbol) {
     const swapRoute = swapRoutes.find(
@@ -225,7 +239,8 @@ export type PriorityFilterKey =
   | "swapTokenSymbol"
   | "outputTokenSymbol"
   | "fromChain"
-  | "toChain";
+  | "toChain"
+  | "externalProjectId";
 /**
  * Returns the next best matching route based on the given priority keys and filter.
  * @param priorityFilterKeys Set of filter keys to use if no route is found based on `filter`.
@@ -279,6 +294,7 @@ export function findNextBestRoute(
       "outputTokenSymbol",
       "fromChain",
       "toChain",
+      "externalProjectId",
     ] as const;
     const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
       priorityFilterKeys.includes(key)
@@ -319,20 +335,23 @@ export function getAllTokens() {
 
 export function getAvailableInputTokens(
   selectedFromChain: number,
-  selectedToChain: number
+  selectedToChain: number,
+  externalProjectId?: string
 ) {
   const routeTokens = enabledRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain
+        route.toChain === selectedToChain &&
+        route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.fromTokenSymbol));
   const swapTokens = swapRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain
+        route.toChain === selectedToChain &&
+        route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.swapTokenSymbol));
   return [...routeTokens, ...swapTokens].filter(
@@ -344,14 +363,16 @@ export function getAvailableInputTokens(
 export function getAvailableOutputTokens(
   selectedFromChain: number,
   selectedToChain: number,
-  selectedInputTokenSymbol: string
+  selectedInputTokenSymbol: string,
+  externalProjectId?: string
 ) {
   return enabledRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
         route.toChain === selectedToChain &&
-        route.fromTokenSymbol === selectedInputTokenSymbol
+        route.fromTokenSymbol === selectedInputTokenSymbol &&
+        route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.toTokenSymbol))
     .filter(
@@ -389,7 +410,22 @@ export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
 
   const uniqueChainIds = Array.from(new Set(chainIds));
 
-  const uniqueChains = uniqueChainIds.map((chainId) => getChainInfo(chainId));
+  const uniqueChains = uniqueChainIds.flatMap((chainId) => {
+    return [
+      { ...getChainInfo(chainId), projectId: undefined },
+      ...Object.values(externConfigs)
+        .filter(
+          ({ intermediaryChain, projectId }) =>
+            chainType !== "from" &&
+            intermediaryChain === chainId &&
+            enabledRoutes.some((route) => route.externalProjectId === projectId)
+        )
+        .map((extern) => ({
+          ...extern,
+          chainId: extern.intermediaryChain,
+        })),
+    ];
+  });
 
   return uniqueChains.sort((a, b) => {
     if (a.name < b.name) {
@@ -408,29 +444,43 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
   const preferredToChainId =
     chainEndpointToId[window.location.pathname.substring(1)];
 
+  const preferredExternalProject =
+    externConfigs[window.location.pathname.substring(1)];
+
   const fromChain =
     Number(
       params.get("from") ??
         params.get("fromChain") ??
         params.get("originChainId") ??
-        overrides?.fromChain
+        // If an external project is defined, we need to ignore the overrided fromChain
+        // only if the from chain is an intermediary chain of the project
+        (isDefined(preferredExternalProject)
+          ? preferredExternalProject.intermediaryChain === overrides?.fromChain
+            ? undefined
+            : overrides?.fromChain
+          : overrides?.fromChain)
     ) || undefined;
 
-  const toChain =
-    Number(
-      preferredToChainId ??
-        params.get("to") ??
-        params.get("toChain") ??
-        params.get("destinationChainId") ??
-        overrides?.toChain
-    ) || undefined;
+  const toChain = isDefined(preferredExternalProject)
+    ? preferredExternalProject.intermediaryChain
+    : Number(
+        preferredToChainId ??
+          params.get("to") ??
+          params.get("toChain") ??
+          params.get("destinationChainId") ??
+          overrides?.toChain
+      ) || undefined;
+
+  const externalProjectId =
+    preferredExternalProject?.projectId ||
+    params.get("externalProjectId") ||
+    undefined;
 
   const inputTokenSymbol =
     params.get("inputTokenSymbol") ??
     params.get("inputToken") ??
     params.get("token") ??
     overrides?.inputTokenSymbol;
-  undefined;
 
   const outputTokenSymbol =
     params.get("outputTokenSymbol") ??
@@ -443,6 +493,7 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     toChain,
     inputTokenSymbol,
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
+    externalProjectId,
   };
 
   const route =

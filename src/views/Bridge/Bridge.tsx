@@ -40,7 +40,6 @@ const Bridge = () => {
     handleSetNewSlippage,
     isQuoteLoading,
   } = useBridge();
-
   return (
     <>
       {toAccount && (

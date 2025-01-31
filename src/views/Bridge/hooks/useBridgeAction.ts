@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, constants, providers } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -23,12 +23,19 @@ import {
   sendSpokePoolVerifierDepositTx,
   sendDepositV3Tx,
   sendSwapAndBridgeTx,
+  getToken,
+  acrossPlusMulticallHandler,
+  hyperLiquidBridge2Address,
+  externalProjectNameToId,
+  generateHyperLiquidPayload,
+  fixedPointAdjustment,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
 import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 const config = getConfig();
 
@@ -61,6 +68,10 @@ export function useBridgeAction(
   const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
     selectedRoute.fromChain
   );
+
+  const { isWrongNetworkHandler: isWrongNetworkHandlerHyperLiquid } =
+    useIsWrongNetwork(CHAIN_IDs.ARBITRUM);
+
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
@@ -98,6 +109,73 @@ export function useBridgeAction(
         throw new Error("Missing required data for bridge action");
       }
 
+      const externalProjectIsHyperLiquid =
+        frozenRoute.externalProjectId === "hyperliquid";
+
+      let externalPayload: string | undefined;
+
+      if (externalProjectIsHyperLiquid) {
+        await isWrongNetworkHandlerHyperLiquid();
+
+        // External Project Inclusion Considerations:
+        //
+        // HyperLiquid:
+        // We need to set up our crosschain message to the hyperliquid bridge with
+        // the following considerations:
+        // 1. Our recipient address is the default multicall handler
+        // 2. The recipient and the signer must be the same address
+        // 3. We will first transfer funds to the true recipient EoA
+        // 4. We must construct a payload to send to HL's Bridge2 contract
+        // 5. The user must sign this signature
+
+        // Subtract the relayer fee pct just like we do for our output token amount
+        const amount = frozenDepositArgs.amount.sub(
+          frozenDepositArgs.amount
+            .mul(frozenDepositArgs.relayerFeePct)
+            .div(fixedPointAdjustment)
+        );
+
+        // Build the payload
+        const hyperLiquidPayload = await generateHyperLiquidPayload(
+          signer,
+          frozenDepositArgs.toAddress,
+          amount
+        );
+        // Create a txn calldata for transfering amount to recipient
+        const erc20Interface = new utils.Interface([
+          "function transfer(address to, uint256 amount) returns (bool)",
+        ]);
+
+        const transferCalldata = erc20Interface.encodeFunctionData("transfer", [
+          frozenDepositArgs.toAddress,
+          amount,
+        ]);
+
+        // Encode Instructions struct directly
+        externalPayload = utils.defaultAbiCoder.encode(
+          [
+            "tuple(tuple(address target, bytes callData, uint256 value)[] calls, address fallbackRecipient)",
+          ],
+          [
+            {
+              calls: [
+                {
+                  target: getToken("USDC").addresses![CHAIN_IDs.ARBITRUM],
+                  callData: transferCalldata,
+                  value: 0,
+                },
+                {
+                  target: hyperLiquidBridge2Address,
+                  callData: hyperLiquidPayload,
+                  value: 0,
+                },
+              ],
+              fallbackRecipient: frozenDepositArgs.toAddress,
+            },
+          ]
+        );
+      }
+
       await isWrongNetworkHandler();
 
       // If swap route then we need to approve the swap token for the `SwapAndBridge`
@@ -129,6 +207,7 @@ export function useBridgeAction(
           allowedContractAddress: config.getSpokePoolAddress(
             frozenRoute.fromChain
           ),
+          enforceCorrectNetwork: frozenRoute.externalProjectId !== undefined,
         });
       }
 
@@ -138,7 +217,10 @@ export function useBridgeAction(
           generateTransferSubmitted(
             frozenQuoteForAnalytics,
             referrer,
-            frozenInitialQuoteTime
+            frozenInitialQuoteTime,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });
@@ -193,6 +275,10 @@ export function useBridgeAction(
                   inputTokenAddress: frozenRoute.fromTokenAddress,
                   outputTokenAddress: frozenRoute.toTokenAddress,
                   fillDeadline: frozenFeeQuote.fillDeadline,
+                  message: externalPayload,
+                  toAddress: externalProjectIsHyperLiquid
+                    ? acrossPlusMulticallHandler[frozenRoute.toChain]
+                    : frozenDepositArgs.toAddress,
                 },
                 spokePool,
                 networkMismatchHandler
@@ -205,7 +291,10 @@ export function useBridgeAction(
             frozenQuoteForAnalytics,
             referrer,
             timeSubmitted,
-            tx.hash
+            tx.hash,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });
@@ -237,6 +326,9 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
+        ...(externalProjectIsHyperLiquid
+          ? { externalProjectId: frozenRoute.externalProjectId }
+          : {}),
       });
       if (existingIntegrator) {
         statusPageSearchParams.set("integrator", existingIntegrator);
@@ -283,6 +375,7 @@ type DepositArgs = {
   exclusiveRelayer: string;
   exclusivityDeadline: number;
   integratorId: string;
+  externalProjectId?: string;
 };
 function getDepositArgs(
   selectedRoute: SelectedRoute,
@@ -317,6 +410,7 @@ function getDepositArgs(
     exclusiveRelayer: quotedFees.exclusiveRelayer,
     exclusivityDeadline: quotedFees.exclusivityDeadline,
     integratorId,
+    externalProjectId: selectedRoute.externalProjectId,
   };
 }
 

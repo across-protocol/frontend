@@ -17,7 +17,8 @@ export async function suggestedFeesMockedApiCall(
   _outputToken: string,
   _toChainid: ChainId,
   _fromChainid: ChainId,
-  _recipientAddress?: string
+  _recipientAddress?: string,
+  _message?: string
 ): Promise<SuggestedApiFeeReturnType> {
   const token = getTokenByAddress(_inputToken);
   const decimals = token?.decimals ?? 18;

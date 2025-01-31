@@ -131,6 +131,11 @@ import zoraGrayscaleLogo from "assets/chain-logos/zora-grayscale.svg";
 import { ReactComponent as zoraLogoSvg } from "assets/chain-logos/zora.svg";
 import { ReactComponent as zoraGrayscaleLogoSvg } from "assets/chain-logos/zora-grayscale.svg";
 
+import hyperliquidLogo from "assets/extern-logos/hyperliquid.svg";
+import hyperliquidGrayscaleLogo from "assets/extern-logos/hyperliquid-grayscale.svg";
+import { ReactComponent as hyperliquidLogoSvg } from "assets/extern-logos/hyperliquid.svg";
+import { ReactComponent as hyperliquidGrayscaleLogoSvg } from "assets/extern-logos/hyperliquid-grayscale.svg";
+
 export const alephZero = {
   name: "Aleph Zero",
   fullName: "Aleph Zero",
@@ -1171,6 +1176,19 @@ export const zora_viem = defineChain({
   },
 });
 
+export const hyperliquid = {
+  name: "Hyperliquid",
+  fullName: "Hyperliquid",
+  projectId: "hyperliquid",
+  logoURI: hyperliquidLogo,
+  grayscaleLogoURI: hyperliquidGrayscaleLogo,
+  logoSvg: hyperliquidLogoSvg,
+  grayscaleLogoSvg: hyperliquidGrayscaleLogoSvg,
+  explorerUrl: "https://arbiscan.io",
+  rpcUrl: "https://arbitrum.publicnode.com",
+  intermediaryChain: 42161,
+};
+
 export const chainConfigs = [
   alephZero,
   arbitrum,
@@ -1234,3 +1252,11 @@ export const chains_viem = [
   zkSync_viem,
   zora_viem,
 ] as const;
+
+  export const externConfigs = [hyperliquid].reduce(
+  (acc, extern) => {
+    acc[extern.projectId] = extern;
+    return acc;
+  },
+  {} as Record<string, typeof hyperliquid>
+);
