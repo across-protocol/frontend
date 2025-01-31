@@ -104,7 +104,7 @@ export async function getBridgeFeesWithExternalProjectId(
               value: 0,
             },
           ],
-          fallbackRecipient: args.recipientAddress!,
+          fallbackRecipient: recipient,
         },
       ]
     );
