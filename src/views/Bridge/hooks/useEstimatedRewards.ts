@@ -1,4 +1,5 @@
 import { BigNumber, utils as ethersUtils } from "ethers";
+import { useAvailableRemainingRewards } from "hooks/useAvailableRemainingRewards";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
@@ -66,8 +67,12 @@ export function useEstimatedRewards(
       yesterdaysDate
     );
 
+  const { areRewardTokensAvailable } =
+    useAvailableRemainingRewards(rewardProgramName);
+
   const depositReward = useMemo(() => {
     if (
+      !areRewardTokensAvailable ||
       availableRewardPercentage === undefined ||
       rewardToken === undefined ||
       bridgeFee === undefined ||
@@ -103,6 +108,7 @@ export function useEstimatedRewards(
       rewardAsRewardToken: totalRewardInRewardToken,
     };
   }, [
+    areRewardTokensAvailable,
     availableRewardPercentage,
     bridgeFee,
     convertL1ToBaseCurrency,

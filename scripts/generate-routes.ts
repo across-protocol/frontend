@@ -6,6 +6,8 @@ import { writeFileSync } from "fs";
 import * as prettier from "prettier";
 import path from "path";
 import * as chainConfigs from "./chain-configs";
+import * as externConfigs from "./extern-configs";
+import assert from "assert";
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
   switch (tokenSymbol) {
@@ -28,6 +30,8 @@ type ToChain = Route["toChains"][number];
 type ToToken = ToChain["tokens"][number];
 type SwapToken = ToChain["swapTokens"][number];
 type ValidTokenSymbol = string;
+
+const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 
 const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
@@ -109,7 +113,10 @@ const enabledRoutes = {
         // [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
       },
     },
-    routes: transformChainConfigs(enabledMainnetChainConfigs),
+    routes: transformChainConfigs(
+      enabledMainnetChainConfigs,
+      enabledMainnetExternalProjects
+    ),
   },
   [CHAIN_IDs.SEPOLIA]: {
     hubPoolChain: CHAIN_IDs.SEPOLIA,
@@ -136,18 +143,21 @@ const enabledRoutes = {
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
-    routes: transformChainConfigs(enabledSepoliaChainConfigs),
+    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
 
 function transformChainConfigs(
-  enabledChainConfigs: typeof enabledMainnetChainConfigs
+  enabledChainConfigs: typeof enabledMainnetChainConfigs,
+  enabledExternalProjects: typeof enabledMainnetExternalProjects
 ) {
   const transformedChainConfigs: {
     fromChain: number;
     fromSpokeAddress: string;
+    externalProjectId?: string;
     toChains: {
       chainId: number;
+      externalProjectId?: string;
       tokens: (
         | string
         | {
@@ -276,6 +286,7 @@ function transformChainConfigs(
           ];
         }
 
+        // Handle WGRASS -> GRASS
         if (
           tokenSymbol === "WGRASS" &&
           toChainConfig.tokens.includes("GRASS")
@@ -342,6 +353,47 @@ function transformChainConfigs(
       toChains.push(toChain);
     }
 
+    for (const externalProject of enabledExternalProjects) {
+      if (externalProject.intermediaryChain === fromChainId) {
+        continue;
+      }
+      const associatedChain = enabledChainConfigs.find(
+        (config) => config.chainId === externalProject.intermediaryChain
+      );
+      assert(associatedChain, "Associated chain not found");
+
+      let associatedRoutes = processTokenRoutes(
+        chainConfig,
+        { ...associatedChain, enableCCTP: false },
+        externalProject.tokens
+      );
+
+      const externalProjectId = externalProject.projectId;
+
+      // Handle USDC swap tokens
+      const usdcSwapTokens = [];
+
+      const toChain = {
+        chainId: externalProject.intermediaryChain,
+        externalProjectId,
+        tokens: associatedRoutes,
+        swapTokens: usdcSwapTokens.filter(
+          ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
+            associatedRoutes.some((token) =>
+              typeof token === "string"
+                ? token === acrossInputTokenSymbol
+                : token.inputTokenSymbol === acrossInputTokenSymbol
+            ) &&
+            associatedRoutes.some((token) =>
+              typeof token === "string"
+                ? token === acrossOutputTokenSymbol
+                : token.outputTokenSymbol === acrossOutputTokenSymbol
+            )
+        ),
+      };
+      toChains.push(toChain);
+    }
+
     transformedChainConfigs.push({
       fromChain: fromChainId,
       fromSpokeAddress,
@@ -350,6 +402,126 @@ function transformChainConfigs(
   }
 
   return transformedChainConfigs;
+}
+
+function processTokenRoutes(
+  fromConfig: typeof chainConfigs.MAINNET,
+  toConfig: typeof chainConfigs.MAINNET,
+  tokensToProcess?: string[]
+) {
+  const toChainId = toConfig.chainId;
+  const tokens = tokensToProcess ?? fromConfig.tokens;
+  return tokens.flatMap((token) => {
+    const tokenSymbol = typeof token === "string" ? token : token.symbol;
+
+    // If the fromConfig does not support the token, return an empty array
+    if (!fromConfig.tokens.includes(tokenSymbol)) {
+      return [];
+    }
+
+    // Handle native USDC -> bridged USDC routes
+    if (tokenSymbol === "USDC") {
+      if (toConfig.enableCCTP) {
+        return [
+          "USDC",
+          {
+            inputTokenSymbol: "USDC",
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      } else if (
+        toConfig.tokens.find(
+          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+        )
+      ) {
+        return [
+          {
+            inputTokenSymbol: "USDC",
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      }
+    }
+
+    // Handle bridged USDC -> native/bridged USDC routes
+    if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
+      if (toConfig.enableCCTP) {
+        return [
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: "USDC",
+          },
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      } else if (toConfig.tokens.includes("USDC")) {
+        return [
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: "USDC",
+          },
+        ];
+      } else if (
+        toConfig.tokens.find(
+          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+        )
+      ) {
+        return [
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      }
+    }
+
+    // Handle USDB -> DAI
+    if (tokenSymbol === "USDB" && toConfig.tokens.includes("DAI")) {
+      return [
+        {
+          inputTokenSymbol: "USDB",
+          outputTokenSymbol: "DAI",
+        },
+      ];
+    }
+    if (tokenSymbol === "DAI" && toConfig.tokens.includes("USDB")) {
+      return [
+        {
+          inputTokenSymbol: "DAI",
+          outputTokenSymbol: "USDB",
+        },
+      ];
+    }
+
+    // Handle WETH Polygon & other non-eth chains
+    if (
+      tokenSymbol === "WETH" &&
+      !toConfig.tokens.includes("ETH") &&
+      fromConfig.tokens.includes("ETH")
+    ) {
+      return ["WETH", "ETH"];
+    }
+
+    const chainIds = typeof token === "string" ? [toChainId] : token.chainIds;
+
+    const toToken = toConfig.tokens.find((token) =>
+      typeof token === "string"
+        ? token === tokenSymbol
+        : token.symbol === tokenSymbol
+    );
+    if (
+      !toToken ||
+      (typeof toToken === "object" &&
+        !toToken.chainIds.includes(fromConfig.chainId)) ||
+      !chainIds.includes(toChainId)
+    ) {
+      return [];
+    }
+
+    return tokenSymbol;
+  });
 }
 
 async function generateRoutes(hubPoolChainId = 1) {
@@ -563,6 +735,11 @@ function transformToRoute(
     throw new Error("Mismatching L1 addresses");
   }
 
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+  const isNative = inputTokenSymbol === fromChain.nativeToken;
+
   return {
     fromChain: route.fromChain,
     toChain: toChain.chainId,
@@ -571,8 +748,9 @@ function transformToRoute(
     fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
     fromTokenSymbol: inputTokenSymbol,
     toTokenSymbol: outputTokenSymbol,
-    isNative: inputTokenSymbol === TOKEN_SYMBOLS_MAP.ETH.symbol,
+    isNative,
     l1TokenAddress: inputToken.l1TokenAddress,
+    externalProjectId: toChain.externalProjectId,
   };
 }
 

@@ -49,11 +49,11 @@ export function useStakeFormLogic(
     amount &&
     isAmountValid &&
     isNumberEthersParseable(amount)
-      ? deriveNewStakingValues(
+      ? (deriveNewStakingValues(
           poolData,
           poolData.lpTokenParser(amount),
           stakingAction
-        ) ?? poolData
+        ) ?? poolData)
       : poolData;
 
   const maximumValue =

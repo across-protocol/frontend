@@ -47,7 +47,9 @@
     "react-router-dom": "v5",
     "react-tooltip": "^5.18.0",
     "superstruct": "^0.15.4",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "viem": "2.x",
+    "wagmi": "^2.14.9"
   },
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
@@ -132,7 +134,7 @@
     "@types/react-dom": "v18",
     "@types/react-router-dom": "5.3.3",
     "@vercel/node": "^5.0.2",
-    "@vitejs/plugin-react": "^4.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "axios-mock-adapter": "^1.21.2",
     "chalk": "^5.3.0",
     "chromatic": "^11.25.1",
@@ -148,7 +150,7 @@
     "jest-transform-stub": "^2.0.0",
     "lint-staged": "^13.0.3",
     "patch-package": "^7.0.0",
-    "prettier": "3.3.2",
+    "prettier": "^3.4.2",
     "rollup-plugin-visualizer": "^5.12.0",
     "storybook": "^7.5.3",
     "ts-jest": "^29.1.1",

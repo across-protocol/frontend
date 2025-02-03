@@ -188,14 +188,24 @@ const Routes: React.FC = () => {
               search: location.search,
             }}
           />
-          {Object.entries(chainEndpointToId).map(([chainName, chainId]) => (
-            <Route
-              key={chainId}
-              exact
-              path={`/${chainName}`}
-              render={() => <Send preferredChainId={chainId} />}
-            />
-          ))}
+          {Object.entries(chainEndpointToId).flatMap(
+            ([chainName, { chainId, associatedProjectIds }]) => [
+              <Route
+                key={chainId}
+                exact
+                path={`/${chainName}`}
+                render={() => <Send />}
+              />,
+              associatedProjectIds.map((projectId) => (
+                <Route
+                  key={`${chainId}:${projectId}`}
+                  exact
+                  path={`/${projectId}`}
+                  render={() => <Send />}
+                />
+              )),
+            ]
+          )}
           <Route
             path="*"
             render={() => <NotFound custom404Message="page not found" />}

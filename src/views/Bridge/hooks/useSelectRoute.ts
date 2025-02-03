@@ -6,6 +6,7 @@ import {
   trackTokenChanged,
   trackQuickSwap,
   similarTokensMap,
+  externalProjectNameToId,
 } from "utils";
 import { useAmplitude, useConnection } from "hooks";
 
@@ -43,7 +44,11 @@ export function useSelectRoute() {
     addToAmpliQueue(() => {
       trackTokenChanged(selectedRoute.fromTokenSymbol, true);
       trackFromChainChanged(selectedRoute.fromChain, true);
-      trackToChainChanged(selectedRoute.toChain, true);
+      trackToChainChanged(
+        selectedRoute.toChain,
+        externalProjectNameToId(selectedRoute.externalProjectId),
+        true
+      );
     });
     setIsDefaultRouteTracked(true);
   }, [selectedRoute, addToAmpliQueue, isDefaultRouteTracked]);
@@ -118,7 +123,7 @@ export function useSelectRoute() {
   );
 
   const handleSelectFromChain = useCallback(
-    (fromChainId: number) => {
+    (fromChainId: number, _externalProjectId?: string) => {
       const isSwap = selectedRoute.type === "swap";
       const filterBy = {
         inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
@@ -129,11 +134,14 @@ export function useSelectRoute() {
         ),
         fromChain: fromChainId,
         toChain: selectedRoute.toChain,
+        externalProjectId: selectedRoute.externalProjectId,
       };
+
       const similarTokenSymbols =
         similarTokensMap[
           isSwap ? selectedRoute.swapTokenSymbol : selectedRoute.fromTokenSymbol
         ] || [];
+
       const findNextBestRouteBySimilarToken = (
         priorityFilterKeys: PriorityFilterKey[]
       ) => {
@@ -147,7 +155,24 @@ export function useSelectRoute() {
           }
         }
       };
+
       const route =
+        // First try with external project ID if it exists
+        (filterBy.externalProjectId &&
+          (findNextBestRoute(
+            [
+              "fromChain",
+              "toChain",
+              "externalProjectId",
+              isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+            ],
+            filterBy
+          ) ||
+            findNextBestRoute(
+              ["fromChain", "toChain", "externalProjectId"],
+              filterBy
+            ))) ||
+        // Then try without external project ID constraints
         findNextBestRoute(
           [
             "fromChain",
@@ -165,6 +190,7 @@ export function useSelectRoute() {
         findNextBestRoute(["fromChain", "toChain"], {
           ...filterBy,
           outputTokenSymbol: undefined,
+          externalProjectId: undefined,
         }) ||
         findNextBestRoute(["fromChain"], {
           fromChain: fromChainId,
@@ -185,7 +211,7 @@ export function useSelectRoute() {
   );
 
   const handleSelectToChain = useCallback(
-    (toChainId: number) => {
+    (toChainId: number, externalProjectId?: string) => {
       const isSwap = selectedRoute.type === "swap";
       const filterBy = {
         inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
@@ -196,34 +222,82 @@ export function useSelectRoute() {
         ),
         fromChain: selectedRoute.fromChain,
         toChain: toChainId,
+        externalProjectId,
       };
-      const route =
-        findNextBestRoute(
-          [
-            "fromChain",
-            "toChain",
-            isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
-          ],
-          filterBy
-        ) ||
-        findNextBestRoute(["fromChain", "toChain"], filterBy) ||
-        findNextBestRoute(["fromChain", "toChain"], {
-          ...filterBy,
-          outputTokenSymbol: undefined,
-        }) ||
-        findNextBestRoute(["fromChain"], {
-          toChain: toChainId,
-        }) ||
-        findNextBestRoute(
-          ["toChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
-          filterBy
-        ) ||
-        initialRoute;
+
+      // Try to find route with exact match first
+      let route = externalProjectId
+        ? findNextBestRoute(["fromChain", "toChain", "externalProjectId"], {
+            toChain: toChainId,
+            externalProjectId,
+            fromChain: selectedRoute.fromChain,
+          }) ||
+          findNextBestRoute(["toChain", "externalProjectId"], {
+            toChain: toChainId,
+            externalProjectId,
+          })
+        : findNextBestRoute(
+            [
+              "fromChain",
+              "toChain",
+              isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+            ],
+            filterBy
+          );
+
+      // If no route found, fall back to previous logic
+      if (!route) {
+        route =
+          findNextBestRoute(
+            [
+              "fromChain",
+              "toChain",
+              "externalProjectId",
+              isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+            ],
+            filterBy
+          ) ||
+          findNextBestRoute(
+            ["fromChain", "toChain", "externalProjectId"],
+            filterBy
+          ) ||
+          (externalProjectId &&
+            findNextBestRoute(["fromChain", "toChain", "externalProjectId"], {
+              fromChain: selectedRoute.fromChain,
+              toChain: toChainId,
+              externalProjectId,
+            })) ||
+          (externalProjectId === undefined &&
+            (findNextBestRoute(
+              [
+                "fromChain",
+                "toChain",
+                isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+              ],
+              { ...filterBy, externalProjectId: undefined }
+            ) ||
+              findNextBestRoute(["fromChain", "toChain"], {
+                ...filterBy,
+                outputTokenSymbol: undefined,
+                externalProjectId: undefined,
+              }))) ||
+          findNextBestRoute(["fromChain"], {
+            toChain: toChainId,
+          }) ||
+          findNextBestRoute(
+            ["toChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
+            filterBy
+          ) ||
+          initialRoute;
+      }
 
       setSelectedRoute(route);
 
       addToAmpliQueue(() => {
-        trackToChainChanged(route.toChain);
+        trackToChainChanged(
+          route.toChain,
+          externalProjectNameToId(route.externalProjectId)
+        );
       });
     },
     [selectedRoute, addToAmpliQueue]
@@ -258,7 +332,10 @@ export function useSelectRoute() {
 
       addToAmpliQueue(() => {
         trackFromChainChanged(route.fromChain);
-        trackToChainChanged(route.toChain);
+        trackToChainChanged(
+          route.toChain,
+          externalProjectNameToId(route.externalProjectId)
+        );
         trackQuickSwap("bridgeForm");
       });
     }
