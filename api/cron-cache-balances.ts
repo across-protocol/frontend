@@ -15,9 +15,7 @@ import mainnetChains from "../src/data/chains_1.json";
 
 import { getEnvs } from "./_env";
 
-const {
-  CRON_SECRET,
-} = getEnvs();
+const { CRON_SECRET } = getEnvs();
 
 const handler = async (
   request: TypedVercelRequest<Record<string, never>>,
@@ -30,10 +28,7 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !CRON_SECRET ||
-      authHeader !== `Bearer ${CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 

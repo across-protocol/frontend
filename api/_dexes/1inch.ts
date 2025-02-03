@@ -4,10 +4,7 @@ import { AcrossSwap, SwapQuoteAndCalldata } from "./types";
 import { getSwapAndBridgeAddress } from "./utils";
 import { getEnvs } from "../_env";
 
-const {
-  ONEINCH_API_KEY,
-} = getEnvs();
-
+const { ONEINCH_API_KEY } = getEnvs();
 
 export async function get1inchQuoteAndCalldata(
   swap: AcrossSwap

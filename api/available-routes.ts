@@ -5,9 +5,7 @@ import { validAddress, positiveIntStr } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 import { getEnvs } from "./_env";
 
-const {
-  GIT_ENV_EXPORTED,
-} = getEnvs();
+const { GIT_ENV_EXPORTED } = getEnvs();
 
 const AvailableRoutesQueryParamsSchema = object({
   originToken: optional(validAddress()),
