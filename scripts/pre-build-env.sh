@@ -1,7 +1,6 @@
 #!/bin/bash
 
   set -o errexit
-  set -o nounset
 
  BASE_URL="${GIT_ENV_REPO}/${GIT_ENV_PROJECT}/outputs/"
 

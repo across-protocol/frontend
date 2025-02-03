@@ -98,15 +98,6 @@ export { InputError, handleErrorCondition } from "./_errors";
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
-export const baseFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(BASE_FEE_MARKUP || "{}");
-export const priorityFeeMarkup: {
-  [chainId: string]: number;
-} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
-// Default to no markup.
-export const DEFAULT_GAS_MARKUP = 0;
-
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
   | 1
