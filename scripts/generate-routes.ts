@@ -51,6 +51,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
   chainConfigs.SONEIUM,
+  chainConfigs.DOCTOR_WHO,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -97,6 +98,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.DOCTOR_WHO,
       ],
     },
     swapAndBridgeAddresses: {
