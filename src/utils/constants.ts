@@ -127,6 +127,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
       ChainId.SONEIUM,
+      ChainId.DOCTOR_WHO,
     ],
   },
   "arb-rebates": {
