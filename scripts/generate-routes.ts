@@ -330,16 +330,26 @@ function processTokenRoutes(
     // Handle bridged USDC -> native/bridged USDC routes
     if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
       if (toConfig.enableCCTP) {
-        return [
-          {
-            inputTokenSymbol: tokenSymbol,
-            outputTokenSymbol: "USDC",
-          },
-          {
-            inputTokenSymbol: tokenSymbol,
-            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-          },
-        ];
+        // Some chains only have native CCTP USDC
+        if (hasBridgedUsdc(toConfig.chainId)) {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+            },
+          ];
+        } else {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+          ];
+        }
       } else if (toConfig.tokens.includes("USDC")) {
         return [
           {
