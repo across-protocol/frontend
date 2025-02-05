@@ -3,6 +3,7 @@ import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getLogger,
+  getVercelHeaders,
   handleErrorCondition,
   latestGasPriceCache,
   resolveVercelEndpoint,
@@ -61,7 +62,9 @@ const handler = async (
     }
 
     const availableRoutes = (
-      await axios(`${resolveVercelEndpoint()}/api/available-routes`)
+      await axios(`${resolveVercelEndpoint()}/api/available-routes`, {
+        headers: getVercelHeaders(),
+      })
     ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started
