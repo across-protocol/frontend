@@ -226,7 +226,7 @@ const handler = async (
 
     const parsedL1TokenConfig =
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
-        String(rawL1TokenConfig)
+        String(rawL1TokenConfig).replace("'", "")
       );
     const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
