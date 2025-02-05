@@ -208,9 +208,10 @@ function transformChainConfigs(
       const tokens = processTokenRoutes(chainConfig, toChainConfig);
 
       // Handle USDC swap tokens
-      const usdcSwapTokens = chainConfig.enableCCTP
-        ? getUsdcSwapTokens(fromChainId, toChainId)
-        : [];
+      const usdcSwapTokens =
+        chainConfig.enableCCTP && hasBridgedUsdc(fromChainId)
+          ? getUsdcSwapTokens(fromChainId, toChainId)
+          : [];
 
       const toChain = {
         chainId: toChainId,
