@@ -22,6 +22,7 @@ gas-price-comparison.csv
 .env.production.local
 .env*.local
 .env.e2e
+*.env
 src/data/fill-times-preset.json
 src/data/exclusive-relayer-configs.json
 src/data/exclusive-relayer-weights.json
