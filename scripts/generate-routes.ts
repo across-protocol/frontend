@@ -685,18 +685,28 @@ function getTokenBySymbol(
 
 function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
   const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
-  return [
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-    },
-  ];
+  if (hasBridgedUsdc(toChainId)) {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+      },
+    ];
+  } else {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+    ];
+  }
 }
 
 function getBridgedUsdcSymbol(chainId: number) {
