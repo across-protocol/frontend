@@ -266,7 +266,7 @@ export async function sendSpokePoolVerifierDepositTx(
     tokenAddress,
     amount,
     destinationChainId,
-    relayerFeePct,
+    ethers.BigNumber.from("0"),
     quoteTimestamp,
     message,
     maxCount,
