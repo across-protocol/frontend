@@ -207,128 +207,7 @@ function transformChainConfigs(
         throw new Error(`No config found for chain ${toChainId}`);
       }
 
-      const tokens = chainConfig.tokens.flatMap((token) => {
-        const tokenSymbol = typeof token === "string" ? token : token.symbol;
-
-        // Handle native USDC -> bridged USDC routes
-        if (tokenSymbol === "USDC") {
-          if (toChainConfig.enableCCTP) {
-            return [
-              "USDC",
-              {
-                inputTokenSymbol: "USDC",
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          } else if (
-            toChainConfig.tokens.find(
-              (token) =>
-                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-            )
-          ) {
-            return [
-              {
-                inputTokenSymbol: "USDC",
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          }
-        }
-
-        // Handle bridged USDC -> native/bridged USDC routes
-        if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
-          if (toChainConfig.enableCCTP) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDC",
-              },
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          } else if (toChainConfig.tokens.includes("USDC")) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDC",
-              },
-            ];
-          } else if (
-            toChainConfig.tokens.find(
-              (token) =>
-                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-            )
-          ) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          }
-        }
-
-        // Handle USDB -> DAI
-        if (tokenSymbol === "USDB" && toChainConfig.tokens.includes("DAI")) {
-          return [
-            {
-              inputTokenSymbol: "USDB",
-              outputTokenSymbol: "DAI",
-            },
-          ];
-        }
-        if (tokenSymbol === "DAI" && toChainConfig.tokens.includes("USDB")) {
-          return [
-            {
-              inputTokenSymbol: "DAI",
-              outputTokenSymbol: "USDB",
-            },
-          ];
-        }
-
-        // Handle WGRASS -> GRASS
-        if (
-          tokenSymbol === "WGRASS" &&
-          toChainConfig.tokens.includes("GRASS")
-        ) {
-          return [
-            {
-              inputTokenSymbol: "WGRASS",
-              outputTokenSymbol: "GRASS",
-            },
-          ];
-        }
-
-        // Handle WETH Polygon & other non-eth chains
-        if (
-          tokenSymbol === "WETH" &&
-          !toChainConfig.tokens.includes("ETH") &&
-          chainConfig.tokens.includes("ETH")
-        ) {
-          return ["WETH", "ETH"];
-        }
-
-        const chainIds =
-          typeof token === "string" ? [toChainId] : token.chainIds;
-
-        const toToken = toChainConfig.tokens.find((token) =>
-          typeof token === "string"
-            ? token === tokenSymbol
-            : token.symbol === tokenSymbol
-        );
-        if (
-          !toToken ||
-          (typeof toToken === "object" &&
-            !toToken.chainIds.includes(fromChainId)) ||
-          !chainIds.includes(toChainId)
-        ) {
-          return [];
-        }
-
-        return tokenSymbol;
-      });
+      const tokens = processTokenRoutes(chainConfig, toChainConfig);
 
       // Handle USDC swap tokens
       const usdcSwapTokens = chainConfig.enableCCTP
@@ -424,13 +303,18 @@ function processTokenRoutes(
     // Handle native USDC -> bridged USDC routes
     if (tokenSymbol === "USDC") {
       if (toConfig.enableCCTP) {
-        return [
-          "USDC",
-          {
-            inputTokenSymbol: "USDC",
-            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-          },
-        ];
+        // Some chains only have native CCTP USDC
+        if (hasBridgedUsdc(toConfig.chainId)) {
+          return [
+            "USDC",
+            {
+              inputTokenSymbol: "USDC",
+              outputTokenSymbol: getBridgedUsdcSymbol(toConfig.chainId),
+            },
+          ];
+        } else {
+          return ["USDC"];
+        }
       } else if (
         toConfig.tokens.find(
           (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
@@ -816,6 +700,14 @@ function getBridgedUsdcSymbol(chainId: number) {
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
+}
+
+function hasBridgedUsdc(chainId: number) {
+  const bridgedUsdcSymbol = getBridgedUsdcSymbol(chainId);
+  const token =
+    TOKEN_SYMBOLS_MAP[bridgedUsdcSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+      .addresses[chainId];
+  return !!token;
 }
 
 generateRoutes(Number(process.argv[2]));
