@@ -360,7 +360,8 @@ function processTokenRoutes(
       } else if (
         toConfig.tokens.find(
           (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-        )
+        ) &&
+        hasBridgedUsdc(toChainId)
       ) {
         return [
           {
