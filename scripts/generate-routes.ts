@@ -208,9 +208,10 @@ function transformChainConfigs(
       const tokens = processTokenRoutes(chainConfig, toChainConfig);
 
       // Handle USDC swap tokens
-      const usdcSwapTokens = chainConfig.enableCCTP
-        ? getUsdcSwapTokens(fromChainId, toChainId)
-        : [];
+      const usdcSwapTokens =
+        chainConfig.enableCCTP && hasBridgedUsdc(fromChainId)
+          ? getUsdcSwapTokens(fromChainId, toChainId)
+          : [];
 
       const toChain = {
         chainId: toChainId,
@@ -330,16 +331,26 @@ function processTokenRoutes(
     // Handle bridged USDC -> native/bridged USDC routes
     if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
       if (toConfig.enableCCTP) {
-        return [
-          {
-            inputTokenSymbol: tokenSymbol,
-            outputTokenSymbol: "USDC",
-          },
-          {
-            inputTokenSymbol: tokenSymbol,
-            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-          },
-        ];
+        // Some chains only have native CCTP USDC
+        if (hasBridgedUsdc(toConfig.chainId)) {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+            },
+          ];
+        } else {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+          ];
+        }
       } else if (toConfig.tokens.includes("USDC")) {
         return [
           {
@@ -350,7 +361,8 @@ function processTokenRoutes(
       } else if (
         toConfig.tokens.find(
           (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-        )
+        ) &&
+        hasBridgedUsdc(toChainId)
       ) {
         return [
           {
@@ -674,18 +686,28 @@ function getTokenBySymbol(
 
 function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
   const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
-  return [
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-    },
-  ];
+  if (hasBridgedUsdc(toChainId)) {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+      },
+    ];
+  } else {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+    ];
+  }
 }
 
 function getBridgedUsdcSymbol(chainId: number) {
