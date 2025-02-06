@@ -98,7 +98,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        CHAIN_IDs.DOCTOR_WHO,
+        // CHAIN_IDs.DOCTOR_WHO,
       ],
     },
     swapAndBridgeAddresses: {
