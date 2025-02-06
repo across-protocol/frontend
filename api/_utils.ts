@@ -199,10 +199,9 @@ export const resolveVercelEndpoint = () => {
 };
 
 export const getVercelHeaders = (): AxiosRequestHeaders | undefined => {
-  const env = process.env.VERCEL_ENV ?? "development";
-  if (env === "preview") {
+  if (process.env.VERCEL_PROTECTION_BYPASS_KEY) {
     return {
-      "x-vercel-protection-bypass": process.env.VERCEL_PROTECTION_BYPASS_KEY!,
+      "x-vercel-protection-bypass": process.env.VERCEL_PROTECTION_BYPASS_KEY,
     };
   }
 };
