@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 import {
   getLogger,
   applyMapFilter,
@@ -12,7 +12,7 @@ import {
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
-const AvailableRoutesQueryParamsSchema = object({
+const AvailableRoutesQueryParamsSchema = type({
   originToken: optional(validAddress()),
   destinationToken: optional(validAddress()),
   destinationChainId: optional(positiveIntStr()),

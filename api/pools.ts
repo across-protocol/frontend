@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, enums, optional } from "superstruct";
+import { type, assert, Infer, enums, optional } from "superstruct";
 
 import { TypedVercelRequest } from "./_types";
 
@@ -10,7 +10,7 @@ import {
   getPoolState,
 } from "./_utils";
 
-const PoolsQueryParamsSchema = object({
+const PoolsQueryParamsSchema = type({
   token: validAddress(),
   externalPoolProvider: optional(enums(["balancer"])),
   user: optional(validAddress()),

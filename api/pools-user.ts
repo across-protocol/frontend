@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer } from "superstruct";
+import { type, assert, Infer } from "superstruct";
 
 import { TypedVercelRequest } from "./_types";
 
@@ -10,7 +10,7 @@ import {
   getPoolStateForUser,
 } from "./_utils";
 
-const PoolsUserQueryParamsSchema = object({
+const PoolsUserQueryParamsSchema = type({
   token: validAddress(),
   user: validAddress(),
 });
