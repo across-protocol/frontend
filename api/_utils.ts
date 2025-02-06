@@ -783,6 +783,9 @@ export const buildDepositForSimulation = (depositArgs: {
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
+    messageHash: sdk.utils.getMessageHash(
+      message ?? sdk.constants.EMPTY_MESSAGE
+    ),
     fromLiteChain: false, // FIXME
     toLiteChain: false, // FIXME
   };
