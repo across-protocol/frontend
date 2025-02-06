@@ -1616,13 +1616,6 @@
     "spokePoolBlock": 7915488,
     "inputTokens": [
       {
-        "address": "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
         "address": "0x4200000000000000000000000000000000000006",
         "symbol": "ETH",
         "name": "Ether",
@@ -1651,13 +1644,6 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      },
-      {
-        "address": "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   }

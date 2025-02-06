@@ -18,6 +18,7 @@ export default {
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
   blockTimeSeconds: 1,
-  tokens: ["USDC", "ETH", "WETH"],
-  enableCCTP: true,
+  // TODO: re-enable USDC/CCTP after launch
+  tokens: ["ETH", "WETH"],
+  enableCCTP: false,
 } as ChainConfig;
