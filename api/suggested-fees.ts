@@ -26,7 +26,6 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
-  getCurrentTime,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -260,7 +259,10 @@ const handler = async (
     let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
     let exclusivityDeadline = 0;
     // Temporarily disable exclusivity, to be resumed based on timestamp.
-    if (depositMethod === "depositExclusive" && getCurrentTime() < 1738965797) {
+    if (
+      depositMethod === "depositExclusive" &&
+      sdk.utils.getCurrentTime() < 1738965797
+    ) {
       ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
         await selectExclusiveRelayer(
           computedOriginChainId,
