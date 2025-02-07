@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG } from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import { object, assert, Infer, string } from "superstruct";
+import { assert, Infer, string, type } from "superstruct";
 
 import {
   HUB_POOL_CHAIN_ID,
@@ -17,7 +17,7 @@ import {
 } from "./_utils";
 import { InvalidParamError } from "./_errors";
 
-const LiquidReservesQueryParamsSchema = object({
+const LiquidReservesQueryParamsSchema = type({
   l1Tokens: string(),
 });
 

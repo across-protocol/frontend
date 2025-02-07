@@ -13,7 +13,7 @@ import {
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import axios from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import {
   BigNumber,
   BigNumberish,
@@ -199,6 +199,14 @@ export const resolveVercelEndpoint = () => {
     case "development":
     default:
       return `http://127.0.0.1:3000`;
+  }
+};
+
+export const getVercelHeaders = (): AxiosRequestHeaders | undefined => {
+  if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+    return {
+      "x-vercel-protection-bypass": process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+    };
   }
 };
 
@@ -811,6 +819,7 @@ export const getCachedTokenPrice = async (
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
         params: { l1Token, baseCurrency, date: historicalDateISO },
+        headers: getVercelHeaders(),
       })
     ).data.price
   );
@@ -859,6 +868,7 @@ export const getCachedLimits = async (
         recipient,
         relayer,
       },
+      headers: getVercelHeaders(),
     })
   ).data;
 };
@@ -1165,7 +1175,10 @@ export const getCachedTokenBalances = async (
       chainId,
       addresses,
       tokenAddresses,
-    })}`
+    })}`,
+    {
+      headers: getVercelHeaders(),
+    }
   );
 
   return response.data;

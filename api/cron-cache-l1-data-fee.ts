@@ -5,6 +5,7 @@ import {
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
   getLogger,
+  getVercelHeaders,
   handleErrorCondition,
   resolveVercelEndpoint,
 } from "./_utils";
@@ -63,7 +64,9 @@ const handler = async (
     }
 
     const availableRoutes = (
-      await axios(`${resolveVercelEndpoint()}/api/available-routes`)
+      await axios(`${resolveVercelEndpoint()}/api/available-routes`, {
+        headers: getVercelHeaders(),
+      })
     ).data as Array<DepositRoute>;
 
     // This marks the timestamp when the function started

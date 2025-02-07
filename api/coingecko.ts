@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { object, Infer, optional, string, pattern } from "superstruct";
+import { Infer, optional, string, pattern, type } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -30,7 +30,7 @@ const {
   BALANCER_V2_TOKENS,
 } = process.env;
 
-const CoingeckoQueryParamsSchema = object({
+const CoingeckoQueryParamsSchema = type({
   l1Token: optional(validAddress()),
   tokenAddress: optional(validAddress()),
   chainId: optional(positiveInt),

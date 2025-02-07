@@ -18,11 +18,11 @@ import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
-import { assert, Infer, object, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 
 const chains = mainnetChains;
 
-const QueryParamsSchema = object({
+const QueryParamsSchema = type({
   symbol: optional(string()),
 });
 type QueryParams = Infer<typeof QueryParamsSchema>;
