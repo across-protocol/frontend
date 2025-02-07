@@ -28,7 +28,7 @@ export function getUpdateV3DepositTypedData(
   return {
     types: {
       UpdateDepositDetails: [
-        { name: "depositId", type: "uint32" },
+        { name: "depositId", type: "uint256" },
         { name: "originChainId", type: "uint256" },
         { name: "updatedOutputAmount", type: "uint256" },
         { name: "updatedRecipient", type: "address" },
@@ -42,7 +42,7 @@ export function getUpdateV3DepositTypedData(
       chainId: originChainId,
     },
     message: {
-      depositId: depositId,
+      depositId: BigNumber.from(depositId),
       originChainId: originChainId,
       updatedOutputAmount: updatedOutputAmount,
       updatedRecipient: updatedRecipient,

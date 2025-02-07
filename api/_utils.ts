@@ -13,7 +13,7 @@ import {
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import axios from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import {
   BigNumber,
   BigNumberish,
@@ -89,7 +89,11 @@ const {
   OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
+  REACT_APP_ENABLE_V6,
 } = process.env;
+
+export const ENABLE_V6 = REACT_APP_ENABLE_V6 === "true";
+
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
   | 1
@@ -195,6 +199,14 @@ export const resolveVercelEndpoint = () => {
     case "development":
     default:
       return `http://127.0.0.1:3000`;
+  }
+};
+
+export const getVercelHeaders = (): AxiosRequestHeaders | undefined => {
+  if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+    return {
+      "x-vercel-protection-bypass": process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+    };
   }
 };
 
@@ -771,7 +783,7 @@ export const buildDepositForSimulation = (depositArgs: {
     outputAmount: sdk.utils.isMessageEmpty(message)
       ? safeOutputAmount
       : sdk.utils.toBN(amount),
-    depositId: sdk.utils.bnUint32Max.toNumber(),
+    depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
     destinationChainId,
@@ -783,6 +795,9 @@ export const buildDepositForSimulation = (depositArgs: {
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
+    messageHash: sdk.utils.getMessageHash(
+      message ?? sdk.constants.EMPTY_MESSAGE
+    ),
     fromLiteChain: false, // FIXME
     toLiteChain: false, // FIXME
   };
@@ -804,6 +819,7 @@ export const getCachedTokenPrice = async (
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
         params: { l1Token, baseCurrency, date: historicalDateISO },
+        headers: getVercelHeaders(),
       })
     ).data.price
   );
@@ -852,6 +868,7 @@ export const getCachedLimits = async (
         recipient,
         relayer,
       },
+      headers: getVercelHeaders(),
     })
   ).data;
 };
@@ -1158,7 +1175,10 @@ export const getCachedTokenBalances = async (
       chainId,
       addresses,
       tokenAddresses,
-    })}`
+    })}`,
+    {
+      headers: getVercelHeaders(),
+    }
   );
 
   return response.data;

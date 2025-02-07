@@ -1,13 +1,18 @@
 import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
-import { getCachedTokenBalances } from "../_utils";
+import {
+  getCachedTokenBalances,
+  getCachedLatestBlock,
+  ENABLE_V6,
+} from "../_utils";
 import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
 import { ExclusiveRelayer } from "./types";
 
 type BigNumber = ethers.BigNumber;
 const { parseUnits } = ethers.utils;
-const { ZERO_ADDRESS } = sdk.constants;
+const { ZERO_ADDRESS, CHAIN_IDs } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
+const REORG_CHAINS = [CHAIN_IDs.MAINNET, CHAIN_IDs.POLYGON, CHAIN_IDs.SCROLL];
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -45,7 +50,7 @@ export async function selectExclusiveRelayer(
     return { exclusiveRelayer, exclusivityPeriod };
   }
 
-  const exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
+  let exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
@@ -57,6 +62,12 @@ export async function selectExclusiveRelayer(
   );
 
   if (relayers.length > 0) {
+    // Only get the latest block if we are doing an exclusive relay and on a chain which re-orgs.
+    if (REORG_CHAINS.includes(originChainId) && ENABLE_V6) {
+      const currentBlock = await getCachedLatestBlock(originChainId);
+      exclusivityPeriodSec += currentBlock.timestamp;
+    }
+
     exclusiveRelayer = selectorFn(relayers);
     exclusivityPeriod =
       exclusiveRelayer === ZERO_ADDRESS ? 0 : exclusivityPeriodSec;
