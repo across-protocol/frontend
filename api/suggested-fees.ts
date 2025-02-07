@@ -261,7 +261,7 @@ const handler = async (
     // Temporarily disable exclusivity, to be resumed based on timestamp.
     if (
       depositMethod === "depositExclusive" &&
-      sdk.utils.getCurrentTime() >1738965797
+      sdk.utils.getCurrentTime() > 1738965797
     ) {
       ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
         await selectExclusiveRelayer(
