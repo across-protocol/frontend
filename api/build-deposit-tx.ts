@@ -92,7 +92,7 @@ const handler = async (
     const spokePool = getSpokePool(originChainId);
 
     const value = isNative ? inputAmount : ethers.constants.Zero;
-    const tx = await spokePool.populateTransaction.deposit(
+    const tx = await spokePool.populateTransaction.depositV3(
       depositor,
       recipient,
       inputToken,
