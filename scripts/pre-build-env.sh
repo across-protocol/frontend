@@ -12,7 +12,6 @@
         curl -H "Authorization: token ${GH_TOKEN}" -L "${BASE_URL}${file}" -o "./${file}"
     done
     echo "All files downloaded."
-
  else
     echo "No env exported"
  fi
