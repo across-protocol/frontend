@@ -46,10 +46,10 @@
     axios "^1.6.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/contracts@3.0.26-beta.1":
-  version "3.0.26-beta.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.0.26-beta.1.tgz#4885c84e9d1780e44238c35c570d5489d16aaab3"
-  integrity sha512-PY67GrA2TZioninrDHD1Kz/YU+MjqSgQ2omzXx8onkHIIRic5hZqBuicRcECY+3zrJyFwHI80srA05NJhyHH1A==
+"@across-protocol/contracts@4.0.0", "@across-protocol/contracts@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.0.0.tgz#d263f23ae37e0e71b66d9f3c760ffe6d2af9dccd"
+  integrity sha512-T6hmHc7x5E/RGslV8f0Ufs6hwLdDJ3ll3cXvfvqTsUkptS8QUyUGkdqrjIn5K1tydioDYDcQkIaCYBDoyq/9vQ==
   dependencies:
     "@across-protocol/constants" "^3.1.32"
     "@coral-xyz/anchor" "^0.30.1"
@@ -84,14 +84,14 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.0.1.tgz#b817d77851359daa5fa36a38b9657c334d911ecb"
-  integrity sha512-zbdaSiwfbTCDcoemDaw8PpwUw063bst/ONMyVY9nM7Yi7IFGkag5A3uqpuk2KhY/MP0sR7cyxwJl2yx6ZWyUng==
+"@across-protocol/sdk@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.1.0.tgz#8a7af0203c59b65e2a022457ea205d6e39a5fc25"
+  integrity sha512-kzqao1TJdOQjFB2Q1hkCQ3dIv6B+rz4nUidbuSAucMO08AsXRxijX9x4V+MBG/OzSVBuIbZ2L45U0TRjEu5AXw==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.32"
-    "@across-protocol/contracts" "3.0.26-beta.1"
+    "@across-protocol/contracts" "4.0.0"
     "@eth-optimism/sdk" "^3.3.1"
     "@ethersproject/bignumber" "^5.7.0"
     "@pinata/sdk" "^2.1.0"

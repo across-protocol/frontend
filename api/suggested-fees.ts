@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string, enums } from "superstruct";
+import { type, assert, Infer, optional, string } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
@@ -57,7 +57,6 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
-  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -91,7 +90,6 @@ const handler = async (
       recipient,
       relayer,
       message,
-      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -277,27 +275,23 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
-    let exclusivityDeadline = 0;
-    if (depositMethod === "depositExclusive") {
-      ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
-        await selectExclusiveRelayer(
-          computedOriginChainId,
-          destinationChainId,
-          outputToken,
-          amount.sub(totalRelayFee),
-          amountInUsd,
-          BigNumber.from(relayerFeeDetails.capitalFeePercent),
-          amount.gte(maxDepositInstant)
-            ? resolveRebalanceTiming(String(destinationChainId))
-            : resolveExclusivityTiming(
-                String(computedOriginChainId),
-                String(destinationChainId),
-                inputToken.symbol,
-                amountInUsd
-              )
-        ));
-    }
+    const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
+      await selectExclusiveRelayer(
+        computedOriginChainId,
+        destinationChainId,
+        outputToken,
+        amount.sub(totalRelayFee),
+        amountInUsd,
+        BigNumber.from(relayerFeeDetails.capitalFeePercent),
+        amount.gte(maxDepositInstant)
+          ? resolveRebalanceTiming(String(destinationChainId))
+          : resolveExclusivityTiming(
+              String(computedOriginChainId),
+              String(destinationChainId),
+              inputToken.symbol,
+              amountInUsd
+            )
+      );
 
     // TODO: Remove after campaign is complete
     /**

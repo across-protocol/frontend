@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { type, assert, Infer } from "superstruct";
+import { assert, Infer, type } from "superstruct";
 
 import { TypedVercelRequest } from "./_types";
 

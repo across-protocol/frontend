@@ -18,7 +18,7 @@ import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
-import { assert, Infer, type, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 
 const chains = mainnetChains;
 

@@ -89,7 +89,11 @@ const {
   OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
+  REACT_APP_ENABLE_V6,
 } = process.env;
+
+export const ENABLE_V6 = REACT_APP_ENABLE_V6 === "true";
+
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
   | 1
@@ -794,6 +798,9 @@ export const buildDepositForSimulation = (depositArgs: {
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
+    messageHash: sdk.utils.getMessageHash(
+      message ?? sdk.constants.EMPTY_MESSAGE
+    ),
     fromLiteChain: false, // FIXME
     toLiteChain: false, // FIXME
   };
@@ -865,6 +872,7 @@ export const getCachedLimits = async (
         recipient,
         relayer,
       },
+      headers: getVercelHeaders(),
     })
   ).data;
 };
