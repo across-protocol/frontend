@@ -121,9 +121,7 @@ export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
 ).split(",");
 
 // Chains that require special role to be accessed.
-export const OPT_IN_CHAINS = (process.env.REACT_APP_OPT_IN_CHAINS || "").split(
-  ","
-);
+export const OPT_IN_CHAINS = (process.env.OPT_IN_CHAINS || "").split(",");
 
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1

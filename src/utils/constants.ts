@@ -539,9 +539,9 @@ export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
-export const optInChainIds = (process.env.REACT_APP_OPT_IN_CHAINS || "").split(
-  ","
-);
+export const disabledChainIdsForUI = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_UI || ""
+).split(",");
 
 export const disabledTokensForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
