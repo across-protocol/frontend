@@ -872,7 +872,6 @@ export const getCachedLimits = async (
         recipient,
         relayer,
       },
-      headers: getVercelHeaders(),
     })
   ).data;
 };
