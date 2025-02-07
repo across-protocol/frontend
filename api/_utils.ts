@@ -124,6 +124,9 @@ export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
+// Chains that require special role to be accessed.
+export const OPT_IN_CHAINS = (process.env.OPT_IN_CHAINS || "").split(",");
+
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
@@ -858,6 +861,7 @@ export const getCachedLimits = async (
 }> => {
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
+      headers: getVercelHeaders(),
       params: {
         inputToken,
         outputToken,
@@ -868,7 +872,6 @@ export const getCachedLimits = async (
         recipient,
         relayer,
       },
-      headers: getVercelHeaders(),
     })
   ).data;
 };

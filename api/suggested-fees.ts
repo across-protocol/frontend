@@ -26,6 +26,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
+  OPT_IN_CHAINS,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -40,6 +41,7 @@ import {
   AmountTooLowError,
 } from "./_errors";
 import { getFillDeadline } from "./_fill-deadline";
+import { parseRole, Role } from "./_auth";
 
 const { BigNumber } = ethers;
 
@@ -60,18 +62,20 @@ const SuggestedFeesQueryParamsSchema = type({
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
+  request: TypedVercelRequest<SuggestedFeesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
-    query,
+    query: request.query,
   });
   try {
+    const { query } = request;
     const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
 
+    const role = parseRole(request);
     const provider = getProvider(HUB_POOL_CHAIN_ID, {
       useSpeedProvider: true,
     });
@@ -103,6 +107,23 @@ const handler = async (
       ? ethers.utils.getAddress(recipient)
       : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     const depositWithMessage = sdk.utils.isDefined(message);
+
+    // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
+    const isDestinationOptInChain = OPT_IN_CHAINS.includes(
+      String(destinationChainId)
+    );
+    const isOriginOptInChain = OPT_IN_CHAINS.includes(
+      String(computedOriginChainId)
+    );
+    if (
+      role !== Role.OPT_IN_CHAINS &&
+      (isDestinationOptInChain || isOriginOptInChain)
+    ) {
+      throw new InvalidParamError({
+        message: "Unsupported chain",
+        param: isDestinationOptInChain ? "destinationChainId" : "originChainId",
+      });
+    }
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 

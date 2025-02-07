@@ -103,6 +103,7 @@ export class ConfigClient {
           [
             ...constants.disabledChainIds,
             ...constants.disabledChainIdsForAvailableRoutes,
+            ...constants.disabledChainIdsForUI,
           ].includes(chainId.toString())
         ) &&
         !constants.disabledTokensForAvailableRoutes.some(

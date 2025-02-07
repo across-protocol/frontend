@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG } from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import { assert, Infer, string, type } from "superstruct";
+import { type, assert, Infer, string } from "superstruct";
 
 import {
   HUB_POOL_CHAIN_ID,

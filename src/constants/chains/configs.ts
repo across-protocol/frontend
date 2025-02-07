@@ -36,6 +36,11 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import doctorWhoLogo from "assets/chain-logos/doctor-who.svg";
+import doctorWhoGrayscaleLogo from "assets/chain-logos/doctor-who-grayscale.svg";
+import { ReactComponent as doctorWhoLogoSvg } from "assets/chain-logos/doctor-who.svg";
+import { ReactComponent as doctorWhoGrayscaleLogoSvg } from "assets/chain-logos/doctor-who-grayscale.svg";
+
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
@@ -412,6 +417,47 @@ export const blastSepolia_viem = defineChain({
     default: {
       name: blastSepolia.name + " Explorer",
       url: blastSepolia.explorerUrl,
+    },
+  },
+});
+
+export const doctorWho = {
+  name: "Doctor Who",
+  fullName: "Doctor who",
+  chainId: 130,
+  logoURI: doctorWhoLogo,
+  grayscaleLogoURI: doctorWhoGrayscaleLogo,
+  logoSvg: doctorWhoLogoSvg,
+  grayscaleLogoSvg: doctorWhoGrayscaleLogoSvg,
+  rpcUrl: "https://e9e9da47.doctor_who.org/",
+  explorerUrl: "https://doctor_who-d7a86fxp.blockscout.com",
+  constructExplorerLink: (txHash: string) =>
+    `${doctorWho.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
+  pollingInterval: 1000,
+};
+
+export const doctorWho_viem = defineChain({
+  id: doctorWho.chainId,
+  name: doctorWho.name,
+  nativeCurrency: {
+    name: doctorWho.nativeCurrencySymbol,
+    symbol: doctorWho.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        doctorWho.rpcUrl,
+        doctorWho.customRpcUrl ? doctorWho.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: doctorWho.name + " Explorer",
+      url: doctorWho.explorerUrl,
     },
   },
 });
@@ -1197,6 +1243,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  doctorWho,
   ink,
   lensSepolia,
   linea,
@@ -1232,6 +1279,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
+  doctorWho_viem,
   ink_viem,
   lensSepolia_viem,
   linea_viem,
