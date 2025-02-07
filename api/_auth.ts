@@ -7,8 +7,8 @@ export const Role = {
 
 export function parseRole(req: TypedVercelRequest<unknown>) {
   const xVercelProtectionBypass =
-    req.headers["x-vercel-protection-bypass"] ||
-    req.query["x-vercel-protection-bypass"];
+    req.headers?.["x-vercel-protection-bypass"] ||
+    req.query?.["x-vercel-protection-bypass"];
   if (
     xVercelProtectionBypass &&
     xVercelProtectionBypass === process.env.VERCEL_AUTOMATION_BYPASS_SECRET
