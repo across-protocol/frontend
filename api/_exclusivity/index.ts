@@ -59,7 +59,7 @@ export async function selectExclusiveRelayer(
 
   if (relayers.length > 0) {
     // Only get the latest block if we are doing an exclusive relay and on a chain which re-orgs.
-    if (REORG_CHAINS.includes(originChainId)) {
+    if (REORG_CHAINS.includes(originChainId) && process.env.ENABLE_V6) {
       const currentBlock = await getCachedLatestBlock(originChainId);
       exclusivityPeriodSec += currentBlock.timestamp;
     }
