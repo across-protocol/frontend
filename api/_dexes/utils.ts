@@ -193,7 +193,7 @@ export function buildMinOutputBridgeTokenMessage(
 export function getFallbackRecipient(crossSwap: CrossSwap) {
   return crossSwap.refundOnOrigin
     ? constants.AddressZero
-    : crossSwap.refundAddress ?? crossSwap.depositor;
+    : (crossSwap.refundAddress ?? crossSwap.depositor);
 }
 
 export async function extractDepositDataStruct(
