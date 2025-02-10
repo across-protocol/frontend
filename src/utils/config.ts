@@ -103,6 +103,7 @@ export class ConfigClient {
           [
             ...constants.disabledChainIds,
             ...constants.disabledChainIdsForAvailableRoutes,
+            ...constants.disabledChainIdsForUI,
           ].includes(chainId.toString())
         ) &&
         !constants.disabledTokensForAvailableRoutes.some(
@@ -342,7 +343,10 @@ export class ConfigClient {
         address:
           token.addresses?.[chainId || constants.hubPoolChainId] ||
           token.mainnetAddress!,
-        isNative: token.symbol === "ETH",
+        isNative: chainId
+          ? constants.chainInfoTable[chainId].nativeCurrencySymbol ===
+            token.symbol
+          : token.symbol === "ETH",
       };
     });
   }

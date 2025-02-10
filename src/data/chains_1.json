@@ -573,13 +573,6 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
       },
       {
-        "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
-      },
-      {
         "address": "0xCF934E2402A5e072928a39a956964eb8F2B5B79C",
         "symbol": "POOL",
         "name": "PoolTogether",
@@ -650,13 +643,6 @@
         "name": "Across Protocol Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
-      },
-      {
-        "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       },
       {
         "address": "0xCF934E2402A5e072928a39a956964eb8F2B5B79C",
@@ -1617,6 +1603,47 @@
         "name": "USD Coin (bridged)",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 130,
+    "name": "Doctor Who",
+    "publicRpcUrl": "https://e9e9da47.doctor_who.org/",
+    "explorerUrl": "https://doctor_who-d7a86fxp.blockscout.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/doctor-who/assets/logo.svg",
+    "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "spokePoolBlock": 7915488,
+    "inputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       }
     ]
   }

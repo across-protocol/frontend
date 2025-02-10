@@ -87,7 +87,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     ? BigNumber.from(transfer.depositRelayerFeePct).gte(suggestedRelayerFeePct)
     : false;
   const isConfirmDisabled =
-    !relayFeeInput || !!inputError || speedUp.isLoading || isWrongNetwork;
+    !relayFeeInput || !!inputError || speedUp.isPending || isWrongNetwork;
 
   return (
     <Overlay isOpen={isOpen} onDismiss={onClose}>
@@ -137,7 +137,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
                   })
                 }
               >
-                {speedUp.isLoading ? "Confirming..." : "Confirm"}
+                {speedUp.isPending ? "Confirming..." : "Confirm"}
               </ConfirmButton>
             </ButtonsRow>
           </>

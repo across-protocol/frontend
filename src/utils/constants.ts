@@ -32,6 +32,7 @@ import {
   similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
+import { externConfigs } from "../constants/chains/configs";
 
 export type {
   TokenInfo,
@@ -233,7 +234,16 @@ export function getChainInfo(chainId: number): ChainInfo {
 
 export const chainEndpointToId = Object.fromEntries(
   chainInfoList.map((chain) => {
-    return [chain.name.toLowerCase().replaceAll(" ", ""), chain.chainId];
+    const projects = Object.values(externConfigs).filter(
+      ({ intermediaryChain }) => intermediaryChain === chain.chainId
+    );
+    return [
+      chain.name.toLowerCase().replaceAll(" ", ""),
+      {
+        chainId: chain.chainId,
+        associatedProjectIds: projects.map(({ projectId }) => projectId),
+      },
+    ];
   }, [])
 );
 
@@ -296,6 +306,7 @@ const RouteSS = superstruct.object({
   toTokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
+  externalProjectId: superstruct.optional(superstruct.string()),
 });
 const RoutesSS = superstruct.array(RouteSS);
 const SwapRouteSS = superstruct.assign(
@@ -528,6 +539,10 @@ export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
+export const disabledChainIdsForUI = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_UI || ""
+).split(",");
+
 export const disabledTokensForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
@@ -552,3 +567,10 @@ export const defaultSwapSlippage = Number(
 
 export const indexerApiBaseUrl =
   process.env.REACT_APP_INDEXER_BASE_URL || undefined;
+
+export const hyperLiquidBridge2Address =
+  "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
+
+export const acrossPlusMulticallHandler: Record<number, string> = {
+  [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
+};

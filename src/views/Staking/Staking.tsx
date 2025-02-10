@@ -33,7 +33,7 @@ const Staking = () => {
             logoURIs={poolLogoURIs}
             isDataLoading={stakingPoolQuery.isLoading}
             isMutating={
-              stakeActionMutation.isLoading || unstakeActionMutation.isLoading
+              stakeActionMutation.isPending || unstakeActionMutation.isPending
             }
             isWrongNetwork={isWrongNetwork}
             switchNetwork={isWrongNetworkHandler}
@@ -47,7 +47,7 @@ const Staking = () => {
             poolData={poolData}
             isConnected={isConnected}
             claimActionHandler={claimActionMutation.mutateAsync}
-            isMutating={claimActionMutation.isLoading}
+            isMutating={claimActionMutation.isPending}
             isWrongNetwork={isWrongNetwork}
             switchNetwork={isWrongNetworkHandler}
           />

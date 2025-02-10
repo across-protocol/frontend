@@ -10,7 +10,18 @@ const fillTimeOverrides: {
       [symbol: string]: number;
     };
   };
-} = {};
+} = {
+  "1": {
+    "10": {
+      SNX: 2 * 60 * 60, // 2 hours
+    },
+  },
+  "10": {
+    "1": {
+      SNX: 2 * 60 * 60, // 2 hours
+    },
+  },
+};
 
 const rebalanceTimeOverrides: {
   [dstId: string]: number;

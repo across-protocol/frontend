@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 import {
   getLogger,
   applyMapFilter,
@@ -9,10 +9,13 @@ import {
   handleErrorCondition,
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
+  OPT_IN_CHAINS,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { Role } from "./_auth";
+import { parseRole } from "./_auth";
 
-const AvailableRoutesQueryParamsSchema = object({
+const AvailableRoutesQueryParamsSchema = type({
   originToken: optional(validAddress()),
   destinationToken: optional(validAddress()),
   destinationChainId: optional(positiveIntStr()),
@@ -26,16 +29,19 @@ type AvailableRoutesQueryParams = Infer<
 >;
 
 const handler = async (
-  { query }: TypedVercelRequest<AvailableRoutesQueryParams>,
+  request: TypedVercelRequest<AvailableRoutesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   logger.debug({
     at: "Routes",
     message: "Query data",
-    query,
+    query: request.query,
   });
   try {
+    const role = parseRole(request);
+
+    const { query } = request;
     assert(query, AvailableRoutesQueryParamsSchema);
 
     const {
@@ -46,6 +52,11 @@ const handler = async (
       originTokenSymbol,
       destinationTokenSymbol,
     } = query;
+
+    const disabledChains = [
+      ...DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+      ...(role === Role.OPT_IN_CHAINS ? [] : OPT_IN_CHAINS),
+    ];
 
     const enabledRoutes = applyMapFilter(
       ENABLED_ROUTES.routes,
@@ -60,7 +71,7 @@ const handler = async (
         isNative: boolean;
       }) =>
         ![route.originChainId, route.destinationChainId].some((chainId) =>
-          DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
+          disabledChains.includes(String(chainId))
         ) &&
         !DISABLED_TOKENS_FOR_AVAILABLE_ROUTES.some(
           (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
@@ -78,7 +89,9 @@ const handler = async (
             route.fromTokenSymbol.toUpperCase()) &&
         (!destinationTokenSymbol ||
           destinationTokenSymbol.toUpperCase() ===
-            route.toTokenSymbol.toUpperCase()),
+            route.toTokenSymbol.toUpperCase()) &&
+        (route as { externalProjectId?: string }).externalProjectId ===
+          undefined,
       // Create a mapping of enabled routes to a route with the destination token resolved.
       (route) => ({
         originChainId: route.fromChain,

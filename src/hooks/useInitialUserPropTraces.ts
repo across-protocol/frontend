@@ -36,7 +36,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       }
 
       // Ensures that balances are loaded before setting the initial user props
-      if (account && walletBalanceTraceQuery.status === "loading") {
+      if (account && walletBalanceTraceQuery.status === "pending") {
         return;
       }
 
