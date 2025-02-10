@@ -12,6 +12,7 @@ import {
   getFillByDepositTxHash,
   NoFundsDepositedLogError,
   getChainInfo,
+  toAddressSafe,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -72,7 +73,8 @@ export function useDepositTracking(
       addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
     }
 
-    if (account !== data.parsedDepositLog.args.depositor) {
+    const depositor = toAddressSafe(data.parsedDepositLog.args.depositor);
+    if (account !== depositor) {
       return;
     }
 
