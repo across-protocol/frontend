@@ -11,7 +11,6 @@ import { EmptyTable } from "./EmptyTable";
 import { usePersonalTransactions } from "../hooks/usePersonalTransactions";
 import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
-import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -32,14 +31,6 @@ export function PersonalTransactions({ statusFilter }: Props) {
   const { isConnected, connect } = useConnection();
   const history = useHistory();
   const queryClient = useQueryClient();
-
-  // FIXME: remove after tracking is complete
-  void useIndexerDepositsTracking(
-    deposits.map((d) => ({
-      depositId: d.depositId,
-      originChainId: d.sourceChainId,
-    }))
-  );
 
   if (!isConnected) {
     return (
