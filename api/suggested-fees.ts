@@ -317,6 +317,13 @@ const handler = async (
               inputToken.symbol,
               amountInUsd
             )),
+      capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
+      relayGasFeePct: relayerFeeDetails.gasFeePercent,
+      relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
+      relayFeePct: totalRelayFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
+      relayFeeTotal: totalRelayFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
+      lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
