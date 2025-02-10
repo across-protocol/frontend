@@ -1,5 +1,6 @@
 import { BigNumber, providers } from "ethers";
 import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
+import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
@@ -12,7 +13,10 @@ export { mapAsync } from "@across-protocol/sdk/dist/esm/utils/ArrayUtils";
 export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
 export { isBridgedUsdc } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
 export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
-export { compareAddressesSimple } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+export {
+  compareAddressesSimple,
+  toAddress,
+} from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   getNativeTokenSymbol,
   chainIsLens,
@@ -59,4 +63,12 @@ export async function getBlockForTimestamp(
   const { number: blockNumberForTimestamp } =
     await blockFinder.getBlockForTimestamp(timestamp);
   return blockNumberForTimestamp;
+}
+
+export function toAddressSafe(address: string) {
+  try {
+    return _toAddress(address);
+  } catch (e) {
+    return address;
+  }
 }
