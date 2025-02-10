@@ -5,7 +5,7 @@ import { validAddress, positiveIntStr } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 import { getEnvs } from "./_env";
 
-const { TEST_ENV_JS } = getEnvs();
+const { TEST_ENV_JS, GIT_ENV_EXPORTED } = getEnvs();
 
 const AvailableRoutesQueryParamsSchema = object({
   originToken: optional(validAddress()),
@@ -23,6 +23,7 @@ type AvailableRoutesQueryParams = Infer<
 const handler = async (_: any, response: VercelResponse) => {
   response.status(200).json({
     test: TEST_ENV_JS,
+    test2: GIT_ENV_EXPORTED,
   });
   return;
 };
