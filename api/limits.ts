@@ -35,6 +35,7 @@ import {
   latestGasPriceCache,
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
+  getLimitCap,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
@@ -402,16 +403,29 @@ const handler = async (
             routeInvolvesLiteChain
           );
 
+    const limitCap = getLimitCap(
+      l1Token.symbol,
+      l1Token.decimals,
+      destinationChainId
+    );
+
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: minBN(
         maximumDeposit,
+        limitCap,
         maxBN(minDeposit, minDepositFloor)
       ).toString(),
-      maxDeposit: maximumDeposit.toString(),
-      maxDepositInstant: bufferedMaxDepositInstant.toString(),
-      maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
-      recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
+      maxDeposit: minBN(maximumDeposit, limitCap).toString(),
+      maxDepositInstant: minBN(bufferedMaxDepositInstant, limitCap).toString(),
+      maxDepositShortDelay: minBN(
+        bufferedMaxDepositShortDelay,
+        limitCap
+      ).toString(),
+      recommendedDepositInstant: minBN(
+        bufferedRecommendedDepositInstant,
+        limitCap
+      ).toString(),
       relayerFeeDetails: {
         relayFeeTotal: relayerFeeDetails.relayFeeTotal,
         relayFeePercent: relayerFeeDetails.relayFeePercent,
