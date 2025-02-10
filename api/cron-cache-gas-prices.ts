@@ -17,9 +17,7 @@ import { ethers } from "ethers";
 
 import { getEnvs } from "./_env";
 
-const {
-  CRON_SECRET,
-} = getEnvs();
+const { CRON_SECRET } = getEnvs();
 
 // Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
@@ -50,10 +48,7 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !CRON_SECRET ||
-      authHeader !== `Bearer ${CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 

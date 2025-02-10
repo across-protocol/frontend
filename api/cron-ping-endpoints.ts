@@ -10,9 +10,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 
 import { getEnvs } from "./_env";
 
-const {
-  CRON_SECRET,
-} = getEnvs();
+const { CRON_SECRET } = getEnvs();
 
 const endpoints = [
   {
@@ -90,10 +88,7 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !CRON_SECRET ||
-      authHeader !== `Bearer ${CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 
