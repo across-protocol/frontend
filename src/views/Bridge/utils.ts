@@ -464,7 +464,7 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
   const toChain = isDefined(preferredExternalProject)
     ? preferredExternalProject.intermediaryChain
     : Number(
-        preferredToChain.chainId ??
+        preferredToChain?.chainId ??
           params.get("to") ??
           params.get("toChain") ??
           params.get("destinationChainId") ??
