@@ -309,7 +309,7 @@ const handler = async (
     const responseJson = {
       estimatedFillTimeSec:
         estimatedTimingOverride ??
-        (amount.gte(maxDepositInstant)
+        (amount.gt(maxDepositInstant)
           ? resolveRebalanceTiming(String(destinationChainId))
           : resolveTiming(
               String(computedOriginChainId),
