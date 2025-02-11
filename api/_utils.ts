@@ -1339,6 +1339,28 @@ export function getLpCushion(
   );
 }
 
+/**
+ * Returns the limit cap for a given token and toChainId.
+ * @param symbol The token symbol
+ * @param decimals The token decimals
+ * @param toChainId The destination chain ID
+ * @returns The cap in wei
+ */
+export function getLimitCap(
+  symbol: string,
+  decimals: number,
+  toChainId: number
+) {
+  const cap =
+    [`LIMIT_CAP_${symbol}_${toChainId}`, `LIMIT_CAP_${symbol}`]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ?? undefined;
+
+  if (cap === undefined) return sdk.utils.bnUint256Max;
+
+  return ethers.utils.parseUnits(cap, decimals);
+}
+
 export async function tagReferrer(
   dataHex: string,
   referrerAddressOrENS: string
