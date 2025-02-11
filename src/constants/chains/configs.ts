@@ -36,10 +36,10 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
-import doctorWhoLogo from "assets/chain-logos/doctor-who.svg";
-import doctorWhoGrayscaleLogo from "assets/chain-logos/doctor-who-grayscale.svg";
-import { ReactComponent as doctorWhoLogoSvg } from "assets/chain-logos/doctor-who.svg";
-import { ReactComponent as doctorWhoGrayscaleLogoSvg } from "assets/chain-logos/doctor-who-grayscale.svg";
+import unichainLogo from "assets/chain-logos/doctor-who.svg";
+import unichainGrayscaleLogo from "assets/chain-logos/doctor-who-grayscale.svg";
+import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/doctor-who.svg";
+import { ReactComponent as unichainGrayscaleLogoSvg } from "assets/chain-logos/doctor-who-grayscale.svg";
 
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
@@ -421,43 +421,43 @@ export const blastSepolia_viem = defineChain({
   },
 });
 
-export const doctorWho = {
-  name: "Doctor Who",
-  fullName: "Doctor who",
+export const unichain = {
+  name: "Unichain",
+  fullName: "Unichain",
   chainId: 130,
-  logoURI: doctorWhoLogo,
-  grayscaleLogoURI: doctorWhoGrayscaleLogo,
-  logoSvg: doctorWhoLogoSvg,
-  grayscaleLogoSvg: doctorWhoGrayscaleLogoSvg,
-  rpcUrl: "https://e9e9da47.doctor_who.org/",
-  explorerUrl: "https://doctor_who-d7a86fxp.blockscout.com",
+  logoURI: unichainLogo,
+  grayscaleLogoURI: unichainGrayscaleLogo,
+  logoSvg: unichainLogoSvg,
+  grayscaleLogoSvg: unichainGrayscaleLogoSvg,
+  rpcUrl: "https://e9e9da47.unichain.org",
+  explorerUrl: "https://uniscan.xyz",
   constructExplorerLink: (txHash: string) =>
-    `${doctorWho.explorerUrl}/tx/${txHash}`,
+    `${unichain.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
   pollingInterval: 1000,
 };
 
-export const doctorWho_viem = defineChain({
-  id: doctorWho.chainId,
-  name: doctorWho.name,
+export const unichain_viem = defineChain({
+  id: unichain.chainId,
+  name: unichain.name,
   nativeCurrency: {
-    name: doctorWho.nativeCurrencySymbol,
-    symbol: doctorWho.nativeCurrencySymbol,
+    name: unichain.nativeCurrencySymbol,
+    symbol: unichain.nativeCurrencySymbol,
     decimals: 18,
   },
   rpcUrls: {
     default: {
       http: [
-        doctorWho.rpcUrl,
-        doctorWho.customRpcUrl ? doctorWho.customRpcUrl : [],
+        unichain.rpcUrl,
+        unichain.customRpcUrl ? unichain.customRpcUrl : [],
       ].flat(),
     },
   },
   blockExplorers: {
     default: {
-      name: doctorWho.name + " Explorer",
-      url: doctorWho.explorerUrl,
+      name: unichain.name + " Explorer",
+      url: unichain.explorerUrl,
     },
   },
 });
@@ -1243,7 +1243,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
-  doctorWho,
+  unichain,
   ink,
   lensSepolia,
   linea,
@@ -1279,7 +1279,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
-  doctorWho_viem,
+  unichain_viem,
   ink_viem,
   lensSepolia_viem,
   linea_viem,
