@@ -177,23 +177,60 @@ const handler = async (
         l1Token.address,
         sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-      ),
-      getCachedTokenPrice(l1Token.address, "usd"),
-      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
-      // because only Linea's priority fee depends on the destination chain call data.
+      ).catch((error) => {
+        logger.error({
+          at: "Limits",
+          message: "Error fetching token price native",
+          error,
+        });
+        throw error;
+      }),
+      getCachedTokenPrice(l1Token.address, "usd").catch((error) => {
+        logger.error({
+          at: "Limits",
+          message: "Error fetching token price USD",
+          error,
+        });
+        throw error;
+      }),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID).catch((error) => {
+        logger.error({
+          at: "Limits",
+          message: "Error fetching latest block",
+          error,
+        });
+        throw error;
+      }),
       latestGasPriceCache(
         destinationChainId,
         CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
         {
           relayerAddress: relayer,
         }
-      ).get(),
+      )
+        .get()
+        .catch((error) => {
+          logger.error({
+            at: "Limits",
+            message: "Error fetching gas price",
+            error,
+          });
+          throw error;
+        }),
       isMessageDefined
-        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        ? undefined
         : getCachedNativeGasCost(depositArgs, {
             relayerAddress: relayer,
-          }).get(),
+          })
+            .get()
+            .catch((error) => {
+              logger.error({
+                at: "Limits",
+                message: "Error fetching native gas cost",
+                error,
+              });
+              throw error;
+            }),
     ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
