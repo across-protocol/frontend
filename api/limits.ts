@@ -63,6 +63,11 @@ const handler = async (
     message: "Query data",
     query,
   });
+  logger.debug({
+    at: "Limits",
+    message: "Checking CoinGecko API key",
+    hasKey: !!getEnvs().REACT_APP_COINGECKO_PRO_API_KEY,
+  });
   try {
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
@@ -177,60 +182,23 @@ const handler = async (
         l1Token.address,
         sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-      ).catch((error) => {
-        logger.error({
-          at: "Limits",
-          message: "Error fetching token price native",
-          error,
-        });
-        throw error;
-      }),
-      getCachedTokenPrice(l1Token.address, "usd").catch((error) => {
-        logger.error({
-          at: "Limits",
-          message: "Error fetching token price USD",
-          error,
-        });
-        throw error;
-      }),
-      getCachedLatestBlock(HUB_POOL_CHAIN_ID).catch((error) => {
-        logger.error({
-          at: "Limits",
-          message: "Error fetching latest block",
-          error,
-        });
-        throw error;
-      }),
+      ),
+      getCachedTokenPrice(l1Token.address, "usd"),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+      // because only Linea's priority fee depends on the destination chain call data.
       latestGasPriceCache(
         destinationChainId,
         CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
         {
           relayerAddress: relayer,
         }
-      )
-        .get()
-        .catch((error) => {
-          logger.error({
-            at: "Limits",
-            message: "Error fetching gas price",
-            error,
-          });
-          throw error;
-        }),
+      ).get(),
       isMessageDefined
-        ? undefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         : getCachedNativeGasCost(depositArgs, {
             relayerAddress: relayer,
-          })
-            .get()
-            .catch((error) => {
-              logger.error({
-                at: "Limits",
-                message: "Error fetching native gas cost",
-                error,
-              });
-              throw error;
-            }),
+          }).get(),
     ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
