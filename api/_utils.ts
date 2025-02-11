@@ -80,6 +80,7 @@ import { getEnvs } from "./_env";
 const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_COINGECKO_PRO_API_KEY,
+  REACT_APP_GIT_ENV_EXPORTED,
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
   OP_STACK_L1_DATA_FEE_MARKUP,
@@ -826,6 +827,7 @@ export const getCachedTokenPrice = async (
     logger.error({
       at: "getCachedTokenPrice",
       message: "CoinGecko API error",
+      Environment: { envValue: REACT_APP_GIT_ENV_EXPORTED },
       error: {
         message: error.message,
         status: error.response?.status,
