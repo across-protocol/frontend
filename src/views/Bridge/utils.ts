@@ -441,7 +441,7 @@ export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
 export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
 
-  const preferredToChainId =
+  const preferredToChain =
     chainEndpointToId[window.location.pathname.substring(1)];
 
   const preferredExternalProject =
@@ -464,7 +464,7 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
   const toChain = isDefined(preferredExternalProject)
     ? preferredExternalProject.intermediaryChain
     : Number(
-        preferredToChainId ??
+        preferredToChain.chainId ??
           params.get("to") ??
           params.get("toChain") ??
           params.get("destinationChainId") ??
