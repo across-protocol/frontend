@@ -429,7 +429,7 @@ export const unichain = {
   grayscaleLogoURI: unichainGrayscaleLogo,
   logoSvg: unichainLogoSvg,
   grayscaleLogoSvg: unichainGrayscaleLogoSvg,
-  rpcUrl: "https://e9e9da47.unichain.org",
+  rpcUrl: "https://mainnet.unichain.org",
   explorerUrl: "https://uniscan.xyz",
   constructExplorerLink: (txHash: string) =>
     `${unichain.explorerUrl}/tx/${txHash}`,
