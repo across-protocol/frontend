@@ -828,6 +828,9 @@ export const getCachedTokenPrice = async (
       at: "getCachedTokenPrice",
       message: "CoinGecko API error",
       Environment: { envValue: REACT_APP_GIT_ENV_EXPORTED },
+      Environment2: {
+        envValue: REACT_APP_COINGECKO_PRO_API_KEY?.substring(0, 4),
+      },
       error: {
         message: error.message,
         status: error.response?.status,
