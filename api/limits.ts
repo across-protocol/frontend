@@ -63,11 +63,6 @@ const handler = async (
     message: "Query data",
     query,
   });
-  logger.debug({
-    at: "Limits",
-    message: "Checking CoinGecko API key",
-    hasKey: !!getEnvs().REACT_APP_COINGECKO_PRO_API_KEY,
-  });
   try {
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
