@@ -807,45 +807,13 @@ export const getCachedTokenPrice = async (
   baseCurrency: string = "eth",
   historicalDateISO?: string
 ): Promise<number> => {
-  const logger = getLogger();
-  try {
-    const url = `${resolveVercelEndpoint()}/api/coingecko`;
-    const params = { l1Token, baseCurrency, date: historicalDateISO };
-
-    logger.debug({
-      at: "getCachedTokenPrice",
-      message: "Making CoinGecko request",
-      url,
-      params,
-      hasApiKey: !!getEnvs().REACT_APP_COINGECKO_PRO_API_KEY,
-    });
-
-    const response = await axios(`${url}`, { params });
-
-    return Number(response.data.price);
-  } catch (error: any) {
-    logger.error({
-      at: "getCachedTokenPrice",
-      message: "CoinGecko API error",
-      test: "getEnvs().REACT_APP_GIT_ENV_EXPORTED",
-      error: {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        config: {
-          url: error.config?.url,
-          params: error.config?.params,
-          headers: {
-            // Only log non-sensitive headers
-            accept: error.config?.headers?.accept,
-            "content-type": error.config?.headers?.["content-type"],
-          },
-        },
-      },
-    });
-    throw error;
-  }
+  return Number(
+    (
+      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+        params: { l1Token, baseCurrency, date: historicalDateISO },
+      })
+    ).data.price
+  );
 };
 
 /**
