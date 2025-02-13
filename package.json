@@ -57,6 +57,7 @@
     "dev:api": "vercel dev --listen 127.0.0.1:3000",
     "build": "yarn prebuild && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
     "prebuild": "tsx scripts/pre-build.ts",
+    "prebuild-env": "./scripts/pre-build-env.sh",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
