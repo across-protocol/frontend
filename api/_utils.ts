@@ -2201,3 +2201,35 @@ export function paramToArray<T extends undefined | string | string[]>(
   if (!param) return;
   return Array.isArray(param) ? param : [param];
 }
+
+export function parseL1TokenConfigSafe(jsonString: string) {
+  try {
+    return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+      jsonString
+    );
+  } catch (error) {
+    getLogger().error({
+      at: "parseL1TokenConfigSafe",
+      message: "Error parsing L1 token config",
+      error,
+      jsonString,
+    });
+    return null;
+  }
+}
+
+export function getL1TokenConfigCache(l1TokenAddress: string) {
+  l1TokenAddress = utils.getAddress(l1TokenAddress);
+  const cacheKey = buildInternalCacheKey("l1TokenConfig", l1TokenAddress);
+  const fetchFn = async () => {
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      ENABLED_ROUTES.acrossConfigStoreAddress,
+      getProvider(HUB_POOL_CHAIN_ID)
+    );
+    const l1TokenConfig =
+      await configStoreClient.getL1TokenConfig(l1TokenAddress);
+    return l1TokenConfig;
+  };
+  const ttl = 60 * 60 * 24 * 30; // 30 days
+  return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
+}
