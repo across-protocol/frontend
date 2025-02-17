@@ -32,7 +32,7 @@ async function resolveCurrentDispensedOpRewards() {
   }>(`${rewardsApiUrl}/rewards/op-rebates/stats`);
   const opToken = getToken("OP");
   const existingTokens = BigNumber.from(data.totalTokenAmount);
-  const tokenCeiling = parseUnits("750000", opToken.decimals); // 750K tokens
+  const tokenCeiling = parseUnits("749000", opToken.decimals); // 749K tokens
 
   return {
     totalTokensDispensed: existingTokens,
