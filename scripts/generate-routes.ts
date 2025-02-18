@@ -51,7 +51,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
   chainConfigs.SONEIUM,
-  chainConfigs.DOCTOR_WHO,
+  chainConfigs.UNICHAIN,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -64,6 +64,7 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.BLAST_SEPOLIA,
   chainConfigs.LISK_SEPOLIA,
   chainConfigs.LENS_SEPOLIA,
+  chainConfigs.UNICHAIN_SEPOLIA,
 ];
 
 const enabledRoutes = {
@@ -98,7 +99,6 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        // CHAIN_IDs.DOCTOR_WHO,
       ],
     },
     swapAndBridgeAddresses: {
@@ -389,6 +389,15 @@ function processTokenRoutes(
         {
           inputTokenSymbol: "DAI",
           outputTokenSymbol: "USDB",
+        },
+      ];
+    }
+
+    if (tokenSymbol === "WGRASS" && toConfig.tokens.includes("GRASS")) {
+      return [
+        {
+          inputTokenSymbol: "WGRASS",
+          outputTokenSymbol: "GRASS",
         },
       ];
     }

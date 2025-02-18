@@ -36,11 +36,6 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
-import unichainLogo from "assets/chain-logos/doctor-who.svg";
-import unichainGrayscaleLogo from "assets/chain-logos/doctor-who-grayscale.svg";
-import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/doctor-who.svg";
-import { ReactComponent as unichainGrayscaleLogoSvg } from "assets/chain-logos/doctor-who-grayscale.svg";
-
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
@@ -120,6 +115,16 @@ import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
+
+import unichainLogo from "assets/chain-logos/unichain.svg";
+import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
+import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/unichain.svg";
+import { ReactComponent as unichainGrayscaleLogoSvg } from "assets/chain-logos/unichain-grayscale.svg";
+
+import unichainSepoliaLogo from "assets/chain-logos/unichain-sepolia.svg";
+import unichainSepoliaGrayscaleLogo from "assets/chain-logos/unichain-sepolia-grayscale.svg";
+import { ReactComponent as unichainSepoliaLogoSvg } from "assets/chain-logos/unichain-sepolia.svg";
+import { ReactComponent as unichainSepoliaGrayscaleLogoSvg } from "assets/chain-logos/unichain-sepolia-grayscale.svg";
 
 import worldChainLogo from "assets/chain-logos/world-chain.svg";
 import worldChainGrayscaleLogo from "assets/chain-logos/world-chain-grayscale.svg";
@@ -417,47 +422,6 @@ export const blastSepolia_viem = defineChain({
     default: {
       name: blastSepolia.name + " Explorer",
       url: blastSepolia.explorerUrl,
-    },
-  },
-});
-
-export const unichain = {
-  name: "Unichain",
-  fullName: "Unichain",
-  chainId: 130,
-  logoURI: unichainLogo,
-  grayscaleLogoURI: unichainGrayscaleLogo,
-  logoSvg: unichainLogoSvg,
-  grayscaleLogoSvg: unichainGrayscaleLogoSvg,
-  rpcUrl: "https://mainnet.unichain.org",
-  explorerUrl: "https://uniscan.xyz",
-  constructExplorerLink: (txHash: string) =>
-    `${unichain.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
-  pollingInterval: 1000,
-};
-
-export const unichain_viem = defineChain({
-  id: unichain.chainId,
-  name: unichain.name,
-  nativeCurrency: {
-    name: unichain.nativeCurrencySymbol,
-    symbol: unichain.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        unichain.rpcUrl,
-        unichain.customRpcUrl ? unichain.customRpcUrl : [],
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: unichain.name + " Explorer",
-      url: unichain.explorerUrl,
     },
   },
 });
@@ -1103,6 +1067,88 @@ export const soneium_viem = defineChain({
   },
 });
 
+export const unichain = {
+  name: "Unichain",
+  fullName: "Unichain",
+  chainId: 130,
+  logoURI: unichainLogo,
+  grayscaleLogoURI: unichainGrayscaleLogo,
+  logoSvg: unichainLogoSvg,
+  grayscaleLogoSvg: unichainGrayscaleLogoSvg,
+  rpcUrl: "https://mainnet.unichain.org",
+  explorerUrl: "https://uniscan.xyz",
+  constructExplorerLink: (txHash: string) =>
+    `${unichain.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
+  pollingInterval: 1000,
+};
+
+export const unichain_viem = defineChain({
+  id: unichain.chainId,
+  name: unichain.name,
+  nativeCurrency: {
+    name: unichain.nativeCurrencySymbol,
+    symbol: unichain.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        unichain.rpcUrl,
+        unichain.customRpcUrl ? unichain.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: unichain.name + " Explorer",
+      url: unichain.explorerUrl,
+    },
+  },
+});
+
+export const unichainSepolia = {
+  name: "Unichain Sepolia",
+  fullName: "Unichain sepolia",
+  chainId: 1301,
+  logoURI: unichainSepoliaLogo,
+  grayscaleLogoURI: unichainSepoliaGrayscaleLogo,
+  logoSvg: unichainSepoliaLogoSvg,
+  grayscaleLogoSvg: unichainSepoliaGrayscaleLogoSvg,
+  rpcUrl: "https://sepolia.unichain.org",
+  explorerUrl: "https://sepolia.uniscan.xyz",
+  constructExplorerLink: (txHash: string) =>
+    `${unichainSepolia.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_1301_PROVIDER_URL,
+  pollingInterval: 1000,
+};
+
+export const unichainSepolia_viem = defineChain({
+  id: unichainSepolia.chainId,
+  name: unichainSepolia.name,
+  nativeCurrency: {
+    name: unichainSepolia.nativeCurrencySymbol,
+    symbol: unichainSepolia.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        unichainSepolia.rpcUrl,
+        unichainSepolia.customRpcUrl ? unichainSepolia.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: unichainSepolia.name + " Explorer",
+      url: unichainSepolia.explorerUrl,
+    },
+  },
+});
+
 export const worldChain = {
   name: "World Chain",
   fullName: "World Chain",
@@ -1243,7 +1289,6 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
-  unichain,
   ink,
   lensSepolia,
   linea,
@@ -1260,6 +1305,8 @@ export const chainConfigs = [
   scroll,
   sepolia,
   soneium,
+  unichain,
+  unichainSepolia,
   worldChain,
   zkSync,
   zora,
@@ -1279,7 +1326,6 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
-  unichain_viem,
   ink_viem,
   lensSepolia_viem,
   linea_viem,
@@ -1296,6 +1342,8 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
+  unichain_viem,
+  unichainSepolia_viem,
   worldChain_viem,
   zkSync_viem,
   zora_viem,
