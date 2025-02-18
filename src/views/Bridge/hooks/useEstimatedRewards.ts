@@ -40,12 +40,17 @@ export function useEstimatedRewards(
     rewardProgram = undefined;
   }
 
-  const rewardToken = rewardProgram
-    ? getToken(rewardProgram.rewardTokenSymbol)
-    : undefined;
-  const availableRewardPercentage = rewardProgram
-    ? parseUnits(String(rewardProgram.highestPct), 18)
-    : undefined;
+  const { areRewardTokensAvailable } =
+    useAvailableRemainingRewards(rewardProgramName);
+
+  const rewardToken =
+    rewardProgram && areRewardTokensAvailable
+      ? getToken(rewardProgram.rewardTokenSymbol)
+      : undefined;
+  const availableRewardPercentage =
+    rewardProgram && areRewardTokensAvailable
+      ? parseUnits(String(rewardProgram.highestPct), 18)
+      : undefined;
 
   // Rewards are handled in the previous day so we need to convert the current UTC date to the previous day
   // As a note: if the current time is before 03:00 UTC, we need to actually go back two days because the
@@ -67,12 +72,8 @@ export function useEstimatedRewards(
       yesterdaysDate
     );
 
-  const { areRewardTokensAvailable } =
-    useAvailableRemainingRewards(rewardProgramName);
-
   const depositReward = useMemo(() => {
     if (
-      !areRewardTokensAvailable ||
       availableRewardPercentage === undefined ||
       rewardToken === undefined ||
       bridgeFee === undefined ||
@@ -108,7 +109,6 @@ export function useEstimatedRewards(
       rewardAsRewardToken: totalRewardInRewardToken,
     };
   }, [
-    areRewardTokensAvailable,
     availableRewardPercentage,
     bridgeFee,
     convertL1ToBaseCurrency,
