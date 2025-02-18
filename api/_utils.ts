@@ -2204,10 +2204,9 @@ export function paramToArray<T extends undefined | string | string[]>(
 
 export function parseL1TokenConfigSafe(jsonString: string) {
   try {
-    return null;
-    // return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
-    //   jsonString
-    // );
+    return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+      jsonString
+    );
   } catch (error) {
     getLogger().error({
       at: "parseL1TokenConfigSafe",
