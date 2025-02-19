@@ -69,9 +69,12 @@ export function useBridgeFees(
     retry: (_, error) => {
       if (
         error instanceof AxiosError &&
-        error.response?.data.includes(
-          "Amount exceeds max. deposit limit for short delay"
-        )
+        (error.response?.data?.message?.includes(
+          "doesn't have enough funds to support this deposit"
+        ) ||
+          error.response?.data.includes(
+            "Amount exceeds max. deposit limit for short delay"
+          ))
       ) {
         return false;
       }
