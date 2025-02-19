@@ -43,16 +43,24 @@ const handler = async (
     const l1TokenAddresses = mainnetChain.inputTokens.map(
       (token) => token.address
     );
-
-    for (const l1TokenAddress of l1TokenAddresses) {
-      const l1TokenConfigCache = getL1TokenConfigCache(l1TokenAddress);
-
-      logger.info({
-        at: "CronCacheL1TokenConfigs",
-        message: `Caching L1 token config for ${l1TokenAddress}`,
-      });
-      await l1TokenConfigCache.set();
-    }
+    const setL1TokenConfigTasks = l1TokenAddresses.map((l1TokenAddress) => {
+      try {
+        const l1TokenConfigCache = getL1TokenConfigCache(l1TokenAddress);
+        logger.info({
+          at: "CronCacheL1TokenConfigs",
+          message: `Caching L1 token config for ${l1TokenAddress}`,
+        });
+        return l1TokenConfigCache.set();
+      } catch (e) {
+        logger.error({
+          at: "CronCacheL1TokenConfigs",
+          message: `Error caching L1 token config for ${l1TokenAddress}`,
+          error: e,
+        });
+        throw e;
+      }
+    });
+    await Promise.all(setL1TokenConfigTasks);
 
     logger.debug({
       at: "CronCacheL1TokenConfigs",
