@@ -20,6 +20,10 @@
     {
       "path": "/api/cron-ping-endpoints",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-cache-l1-token-configs",
+      "schedule": "0 * * * *"
     }
   ],
   "functions": {
