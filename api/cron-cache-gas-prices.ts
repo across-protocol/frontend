@@ -16,6 +16,10 @@ import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import axios from "axios";
 import { ethers } from "ethers";
 
+import { getEnvs } from "./_env";
+
+const { CRON_SECRET } = getEnvs();
+
 // Set lower than TTL in latestGasPriceCache
 const updateIntervalsSecPerChain = {
   default: 5,
@@ -45,10 +49,7 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !process.env.CRON_SECRET ||
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 

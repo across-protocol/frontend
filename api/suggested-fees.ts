@@ -42,6 +42,7 @@ import {
 } from "./_errors";
 import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
+import { getEnvs } from "./_env";
 
 const { BigNumber } = ethers;
 
@@ -73,7 +74,7 @@ const handler = async (
   });
   try {
     const { query } = request;
-    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
+    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 
     const role = parseRole(request);
     const provider = getProvider(HUB_POOL_CHAIN_ID, {

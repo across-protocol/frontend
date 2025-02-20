@@ -2,6 +2,10 @@ import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
 import { TypedVercelRequest } from "./_types";
 
+import { getEnvs } from "./_env";
+
+const { CRON_SECRET } = getEnvs();
+
 import {
   HUB_POOL_CHAIN_ID,
   getBatchBalanceViaMulticall3,
@@ -24,17 +28,14 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !process.env.CRON_SECRET ||
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-    } = process.env;
+    } = getEnvs();
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []

@@ -38,6 +38,7 @@ import {
   getLimitCap,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
+import { getEnvs } from "./_env";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -69,7 +70,7 @@ const handler = async (
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
       // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
-    } = process.env;
+    } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
@@ -127,7 +128,7 @@ const handler = async (
       amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
     );
     let minDepositUsdForDestinationChainId = Number(
-      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+      getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );
     if (isNaN(minDepositUsdForDestinationChainId)) {
       minDepositUsdForDestinationChainId = 0;

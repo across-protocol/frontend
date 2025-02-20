@@ -1,4 +1,7 @@
 import { TypedVercelRequest } from "./_types";
+import { getEnvs } from "./_env";
+
+const { VERCEL_AUTOMATION_BYPASS_SECRET } = getEnvs();
 
 export const Role = {
   // Requests with this role will be allowed to access opt-in chains
@@ -11,7 +14,7 @@ export function parseRole(req: TypedVercelRequest<unknown>) {
     req.query?.["x-vercel-protection-bypass"];
   if (
     xVercelProtectionBypass &&
-    xVercelProtectionBypass === process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+    xVercelProtectionBypass === VERCEL_AUTOMATION_BYPASS_SECRET
   ) {
     return "opt-in-chains";
   }
