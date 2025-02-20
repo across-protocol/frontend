@@ -246,6 +246,39 @@
       "l1TokenAddress": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df"
     },
     {
+      "fromChain": 11155111,
+      "toChain": 1301,
+      "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 1301,
+      "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 1301,
+      "fromTokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "toTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
       "fromChain": 84532,
       "toChain": 11155111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -453,6 +486,39 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 84532,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 84532,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 84532,
+      "toChain": 1301,
+      "fromTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "toTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
     },
     {
       "fromChain": 421614,
@@ -675,6 +741,39 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
+      "fromChain": 421614,
+      "toChain": 1301,
+      "fromTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 421614,
+      "toChain": 1301,
+      "fromTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 421614,
+      "toChain": 1301,
+      "fromTokenAddress": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+      "toTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
       "fromChain": 11155420,
       "toChain": 11155111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -895,6 +994,39 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
+      "fromChain": 11155420,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 11155420,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 11155420,
+      "toChain": 1301,
+      "fromTokenAddress": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+      "toTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
       "fromChain": 919,
       "toChain": 11155111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -1071,6 +1203,28 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
+      "fromChain": 919,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 919,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
       "fromChain": 80002,
       "toChain": 11155111,
       "fromTokenAddress": "0x52eF3d68BaB452a294342DC3e5f464d7f610f72E",
@@ -1159,6 +1313,17 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
+      "fromChain": 80002,
+      "toChain": 1301,
+      "fromTokenAddress": "0x52eF3d68BaB452a294342DC3e5f464d7f610f72E",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0xd08baaE74D6d2eAb1F3320B2E1a53eeb391ce8e5",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
       "fromChain": 168587773,
       "toChain": 11155111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000023",
@@ -1335,6 +1500,28 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
+      "fromChain": 168587773,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000023",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x5545092553Cf5Bf786e87a87192E902D50D8f022",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 168587773,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000023",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x5545092553Cf5Bf786e87a87192E902D50D8f022",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
       "fromChain": 4202,
       "toChain": 11155111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -1504,6 +1691,28 @@
       "toChain": 37111,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+      "fromSpokeAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 4202,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 4202,
+      "toChain": 1301,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
       "fromSpokeAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
       "fromTokenSymbol": "ETH",
       "toTokenSymbol": "ETH",
@@ -1619,6 +1828,270 @@
       "toTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 37111,
+      "toChain": 1301,
+      "fromTokenAddress": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "toTokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 84532,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 84532,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 84532,
+      "fromTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "toTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 84532,
+      "fromTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "toTokenAddress": "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDbC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 421614,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 421614,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 421614,
+      "fromTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "toTokenAddress": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155420,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155420,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 11155420,
+      "fromTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "toTokenAddress": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 919,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 919,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 80002,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x52eF3d68BaB452a294342DC3e5f464d7f610f72E",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 80002,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x52eF3d68BaB452a294342DC3e5f464d7f610f72E",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 168587773,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000023",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 168587773,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000023",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 4202,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 4202,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 37111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 1301,
+      "toChain": 37111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+      "fromSpokeAddress": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+      "fromTokenSymbol": "ETH",
+      "toTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     }
   ],
   "swapRoutes": [
@@ -1655,6 +2128,20 @@
       "toChain": 11155420,
       "fromTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
       "toTokenAddress": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "swapTokenAddress": "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
+      "swapTokenSymbol": "USDbC",
+      "swapTokenL1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 84532,
+      "toChain": 1301,
+      "fromTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "toTokenAddress": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
       "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
       "fromTokenSymbol": "USDC",
       "toTokenSymbol": "USDC",

@@ -1608,10 +1608,10 @@
   },
   {
     "chainId": 130,
-    "name": "Doctor Who",
-    "publicRpcUrl": "https://e9e9da47.doctor_who.org/",
-    "explorerUrl": "https://doctor_who-d7a86fxp.blockscout.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/doctor-who/assets/logo.svg",
+    "name": "Unichain",
+    "publicRpcUrl": "https://mainnet.unichain.org",
+    "explorerUrl": "https://uniscan.xyz",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/unichain/assets/logo.svg",
     "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
     "spokePoolBlock": 7915488,
     "inputTokens": [

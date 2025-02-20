@@ -4,13 +4,11 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.DOCTOR_WHO;
+const chainId = CHAIN_IDs.UNICHAIN;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  name: "Unichain",
-  blockExplorer: "https://uniscan.xyz",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -18,7 +16,7 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://e9e9da47.unichain.org",
+  publicRpcUrl: "https://mainnet.unichain.org",
   blockTimeSeconds: 1,
   tokens: ["ETH", "WETH", "USDC"],
   enableCCTP: true,
