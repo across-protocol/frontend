@@ -1,4 +1,3 @@
-import { WalletState } from "@web3-onboard/core";
 import { BigNumber, utils } from "ethers";
 import { Identify } from "@amplitude/analytics-browser";
 
@@ -102,37 +101,27 @@ export function trackConnectWalletButtonClicked(
   });
 }
 
-export function trackIfWalletSelected(
-  walletStates: WalletState[],
-  previousConnection?: string | null
-) {
-  // Only track if user explicitly selected a wallet in the web3-onboard modal
-  if (walletStates.length > 0 && !previousConnection) {
+export function trackIfWalletSelected(walletType: string) {
+  // Only track if user explicitly selected a wallet in the sidebar
+  if (walletType) {
     return ampli.walletSelected({
       page: getPageValue(),
       action: "onClick",
       element: "web3OnboardModal",
-      walletType: walletStates[0].label,
+      walletType,
     });
   }
 }
 
 export function trackWalletConnectTransactionCompleted(
-  connectedWallet: WalletState | null,
-  previousConnection?: string | null
+  connectedWallet: string,
+  walletType: string
 ) {
-  if (!connectedWallet) {
-    return ampli.walletConnectTransactionCompleted({
-      isReconnect: false,
-      succeeded: false,
-    });
-  }
-
   return ampli.walletConnectTransactionCompleted({
-    isReconnect: Boolean(previousConnection),
+    isReconnect: false,
     succeeded: true,
-    walletAddress: utils.getAddress(connectedWallet.accounts[0].address),
-    walletType: connectedWallet.label,
+    walletAddress: connectedWallet,
+    walletType,
   });
 }
 
@@ -210,21 +199,20 @@ export function setUserId(walletAddress?: string) {
   ampli.client?.setUserId(walletAddress);
 }
 
-export function identifyUserWallet(connectedWallet: WalletState | null) {
-  if (!connectedWallet) {
+export function identifyUserWallet(
+  connectedAddress: string,
+  walletType: string
+) {
+  if (!connectedAddress || !walletType) {
     return;
   }
 
-  const connectedWalletAddress = utils.getAddress(
-    connectedWallet.accounts[0].address
-  );
-
-  ampli.client?.setUserId(connectedWalletAddress);
+  ampli.client?.setUserId(connectedAddress);
 
   const identifyObj = new Identify();
-  identifyObj.postInsert("AllWalletAddressesConnected", connectedWalletAddress);
-  identifyObj.set("WalletAddress", connectedWalletAddress);
-  identifyObj.set("WalletType", connectedWallet.label);
+  identifyObj.postInsert("AllWalletAddressesConnected", connectedAddress);
+  identifyObj.set("WalletAddress", connectedAddress);
+  identifyObj.set("WalletType", walletType);
   return ampli.client?.identify(identifyObj);
 }
 
