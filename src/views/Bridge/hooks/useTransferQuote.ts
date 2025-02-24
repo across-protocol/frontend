@@ -74,6 +74,7 @@ export function useTransferQuote(
       amount.toString(),
       swapSlippage,
       toAddress,
+      selectedRoute.externalProjectId,
     ],
     enabled: Boolean(
       feesQuery.fees &&
