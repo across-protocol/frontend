@@ -21,10 +21,7 @@ export default defineWalletSetup(MM_PASSWORD, async (context, walletPage) => {
   await page.goto(E2E_DAPP_URL);
 
   // Connect via wallet sidebar
-  await page
-    .getByRole("banner")
-    .locator(page.getByRole("button", { name: "Connect" }))
-    .click();
+  await page.getByTestId("wallet-connect-button").click();
   await page.getByTestId("sidebar-menu-item-MetaMask").click();
 
   await metamask.connectToDapp(["Account 1"]);
