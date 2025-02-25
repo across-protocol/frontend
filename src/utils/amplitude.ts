@@ -115,10 +115,11 @@ export function trackIfWalletSelected(walletType: string) {
 
 export function trackWalletConnectTransactionCompleted(
   connectedWallet: string,
-  walletType: string
+  walletType: string,
+  isReconnect?: boolean
 ) {
   return ampli.walletConnectTransactionCompleted({
-    isReconnect: false,
+    isReconnect,
     succeeded: true,
     walletAddress: connectedWallet,
     walletType,

@@ -11,7 +11,11 @@ import coinbaseIcon from "assets/wallet-logos/coinbase.svg";
 import walletConnectIcon from "assets/wallet-logos/wallet-connect.svg";
 import safeIcon from "assets/wallet-logos/safe.svg";
 import injectedIcon from "assets/wallet-logos/injected.svg";
-import { trackIfWalletSelected } from "utils";
+import {
+  trackIfWalletSelected,
+  trackWalletConnectTransactionCompleted,
+} from "utils";
+
 const connectorNameToIcon = {
   MetaMask: metaMaskIcon,
   "Coinbase Wallet": coinbaseIcon,
@@ -49,7 +53,12 @@ function WalletItem({ connector }: { connector: Connector }) {
       await connectAsync(
         { connector },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
+            trackWalletConnectTransactionCompleted(
+              data.accounts[0],
+              connector.name,
+              false
+            );
             trackIfWalletSelected(connector.name);
             closeSidebar();
           },

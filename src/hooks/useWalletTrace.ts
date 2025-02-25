@@ -56,7 +56,7 @@ export function useWalletChangeTrace() {
     }
 
     addToAmpliQueue(() => {
-      trackWalletConnectTransactionCompleted(account, connector.name);
+      trackWalletConnectTransactionCompleted(account, connector.name, true);
     });
 
     setPrevTrackedWallet(account);
