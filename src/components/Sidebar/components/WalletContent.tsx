@@ -59,11 +59,6 @@ function WalletItem({ connector }: { connector: Connector }) {
     [closeSidebar, connectAsync]
   );
 
-  if (connector.name === "Injected") {
-    console.log(connector);
-  }
-  1;
-
   return (
     <SidebarItem.MenuItem
       key={connector.id}
