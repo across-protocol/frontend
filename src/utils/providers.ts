@@ -2,7 +2,8 @@ import { ethers } from "ethers";
 import { hubPoolChainId, ChainId, getChainInfo } from "./constants";
 
 function getProviderUrl(chainId: number): string {
-  const resolvedRpcUrl = getChainInfo(chainId)?.rpcUrl;
+  const resolvedRpcUrl =
+    getChainInfo(chainId)?.customRpcUrl || getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {
     return resolvedRpcUrl;
   } else {
