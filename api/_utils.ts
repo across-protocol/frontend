@@ -547,12 +547,12 @@ export const getHubPool = (provider: providers.Provider) => {
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
  */
-export const overrideProvider = (
+export const getPublicProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const url = getEnvs()[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
-  if (url) {
-    return new ethers.providers.StaticJsonRpcProvider(url);
+  const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
+  if (chain) {
+    return new ethers.providers.StaticJsonRpcProvider(chain.publicRPC);
   } else {
     return undefined;
   }
@@ -899,14 +899,12 @@ export const getProvider = (
   if (!providerCache[cacheKey]) {
     // Resolves provider from urls set in rpc-providers.json.
     const providerFromConfigJson = getProviderFromConfigJson(chainId, opts);
-    // Resolves provider from urls set via environment variables.
-    // Note that this is legacy and should be removed in the future.
-    const override = overrideProvider(chainId);
+    const publicProvider = getPublicProvider(chainId);
 
     if (providerFromConfigJson) {
       providerCache[cacheKey] = providerFromConfigJson;
-    } else if (override) {
-      providerCache[cacheKey] = override;
+    } else if (publicProvider) {
+      providerCache[cacheKey] = publicProvider;
     } else {
       throw new Error(`No provider URL set for chain: ${chainId}`);
     }

@@ -1,19 +1,8 @@
-import { ethers, providers } from "ethers";
-import { hubPoolChainId, ChainId, infuraId, getChainInfo } from "./constants";
-
-function getInfuraProviderUrl(chainId: number): string | undefined {
-  try {
-    return new providers.InfuraProvider(chainId, infuraId).connection.url;
-  } catch (e) {
-    return undefined;
-  }
-}
+import { ethers } from "ethers";
+import { hubPoolChainId, ChainId, getChainInfo } from "./constants";
 
 function getProviderUrl(chainId: number): string {
-  const resolvedRpcUrl =
-    getChainInfo(chainId)?.customRpcUrl ||
-    getInfuraProviderUrl(chainId) ||
-    getChainInfo(chainId)?.rpcUrl;
+  const resolvedRpcUrl = getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {
     return resolvedRpcUrl;
   } else {
