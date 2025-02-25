@@ -20,9 +20,12 @@ export default defineWalletSetup(MM_PASSWORD, async (context, walletPage) => {
   // Go to a locally hosted MetaMask Test Dapp.
   await page.goto(E2E_DAPP_URL);
 
-  // Connect via wallet sidebar
-  await page.getByTestId("wallet-connect-button").click();
-  await page.getByTestId("sidebar-menu-item-MetaMask").click();
+  // Connect via wallet
+  await page
+    .getByRole("banner")
+    .locator(page.getByRole("button", { name: "Connect" }))
+    .click();
+  await page.getByText("MetaMask").click();
 
   await metamask.connectToDapp(["Account 1"]);
 });
