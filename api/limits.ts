@@ -413,6 +413,7 @@ const handler = async (
     logger.debug({
       at: "Limits",
       message: "Limits",
+      relayerAddresses: [...fullRelayers, ...transferRestrictedRelayers],
       maximumDeposit: maximumDeposit.toString(),
       minDeposit: minBN(
         maximumDeposit,
