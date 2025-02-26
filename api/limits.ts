@@ -410,6 +410,19 @@ const handler = async (
       destinationChainId
     );
 
+    logger.debug({
+      at: "Limits",
+      message: "Limits",
+      maximumDeposit: maximumDeposit.toString(),
+      limitCap: limitCap.toString(),
+      minDeposit: minBN(
+        maximumDeposit,
+        limitCap,
+        maxBN(minDeposit, minDepositFloor)
+      ).toString(),
+      minDepositFloor: minDepositFloor.toString(),
+    });
+
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: minBN(
