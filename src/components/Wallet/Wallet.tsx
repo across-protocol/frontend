@@ -1,7 +1,10 @@
-import { FC } from "react";
-
 import { useConnection } from "hooks";
-import { shortenAddress, isSupportedChainId, SHOW_ACX_NAV_TOKEN } from "utils";
+import {
+  shortenAddress,
+  isSupportedChainId,
+  SHOW_ACX_NAV_TOKEN,
+  getChainInfo,
+} from "utils";
 
 import {
   ConnectButton,
@@ -9,22 +12,29 @@ import {
   BalanceButton,
   Logo,
   BalanceWallet,
-  Account,
   Separator,
   WalletWrapper,
+  ConnectedAccountChainLogoContainer,
+  ConnectedAccountContainer,
 } from "./Wallet.styles";
 import Web3Subscribe from "./Web3Subscribe";
 import { useEnsQuery } from "hooks/useEns";
+import { useSidebarContext } from "hooks/useSidebarContext";
+import { Text } from "components/Text";
 
-interface Props {
-  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const Wallet: FC<Props> = ({ setOpenSidebar }) => {
+const Wallet = () => {
   const { account, isConnected, chainId, connect } = useConnection();
   const {
     data: { ensName },
   } = useEnsQuery(account);
+  const { openSidebar } = useSidebarContext();
+
+  const chainInfo = isSupportedChainId(chainId)
+    ? getChainInfo(chainId)
+    : {
+        name: "Unsupported Network",
+        logoURI: "",
+      };
 
   if (account && !isSupportedChainId(chainId)) {
     return (
@@ -50,7 +60,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   return (
     <WalletWrapper>
       <Web3Subscribe />
-      <BalanceButton onClick={() => setOpenSidebar(true)} data-cy="acx-balance">
+      <BalanceButton onClick={() => openSidebar()} data-cy="acx-balance">
         {SHOW_ACX_NAV_TOKEN && (
           <>
             <Logo />
@@ -60,13 +70,35 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
         {account && (
           <>
             {SHOW_ACX_NAV_TOKEN && <Separator />}
-            <Account data-cy="wallet-address">
-              {ensName ?? shortenAddress(account, "..", 4)}
-            </Account>
+            <ConnectedAccount
+              chainLogoUrl={chainInfo.logoURI}
+              chainName={chainInfo.name}
+              address={account}
+              ensName={ensName}
+            />
           </>
         )}
       </BalanceButton>
     </WalletWrapper>
   );
 };
+
+const ConnectedAccount = (props: {
+  chainLogoUrl: string;
+  chainName: string;
+  address: string;
+  ensName?: string | null;
+}) => {
+  return (
+    <ConnectedAccountContainer>
+      <ConnectedAccountChainLogoContainer>
+        <img src={props.chainLogoUrl} alt={props.chainName} />
+      </ConnectedAccountChainLogoContainer>
+      <Text data-cy="wallet-address" color="grey-400" weight={500}>
+        {props.ensName ?? shortenAddress(props.address, "...", 4)}
+      </Text>
+    </ConnectedAccountContainer>
+  );
+};
+
 export default Wallet;
