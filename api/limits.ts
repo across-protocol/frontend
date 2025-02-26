@@ -410,29 +410,6 @@ const handler = async (
       destinationChainId
     );
 
-    logger.debug({
-      at: "Limits",
-      message: "Limits",
-      relayerAddresses: [...fullRelayers, ...transferRestrictedRelayers],
-      maximumDeposit: maximumDeposit.toString(),
-      minDeposit: minBN(
-        maximumDeposit,
-        limitCap,
-        maxBN(minDeposit, minDepositFloor)
-      ).toString(),
-      bufferedMaxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
-      limitsBufferMultiplier: limitsBufferMultiplier.toString(),
-      chainHasMaxBoundary,
-      chainAvailableInputTokenAmountForDeposits:
-        chainAvailableInputTokenAmountForDeposits?.toString(),
-      chainInputTokenMaxDeposit: chainInputTokenMaxDeposit?.toString(),
-      chainInputTokenMaxBalanceInUsd:
-        chainInputTokenMaxBalanceInUsd?.toString(),
-      chainInputTokenMaxDepositInUsd:
-        chainInputTokenMaxDepositInUsd?.toString(),
-      chainMaxBoundary: chainMaxBoundary.toString(),
-    });
-
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: minBN(
