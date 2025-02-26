@@ -414,13 +414,22 @@ const handler = async (
       at: "Limits",
       message: "Limits",
       maximumDeposit: maximumDeposit.toString(),
-      limitCap: limitCap.toString(),
       minDeposit: minBN(
         maximumDeposit,
         limitCap,
         maxBN(minDeposit, minDepositFloor)
       ).toString(),
-      minDepositFloor: minDepositFloor.toString(),
+      bufferedMaxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
+      limitsBufferMultiplier: limitsBufferMultiplier.toString(),
+      chainHasMaxBoundary,
+      chainAvailableInputTokenAmountForDeposits:
+        chainAvailableInputTokenAmountForDeposits?.toString(),
+      chainInputTokenMaxDeposit: chainInputTokenMaxDeposit?.toString(),
+      chainInputTokenMaxBalanceInUsd:
+        chainInputTokenMaxBalanceInUsd?.toString(),
+      chainInputTokenMaxDepositInUsd:
+        chainInputTokenMaxDepositInUsd?.toString(),
+      chainMaxBoundary: chainMaxBoundary.toString(),
     });
 
     const responseJson = {
