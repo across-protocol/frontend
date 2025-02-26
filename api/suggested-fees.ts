@@ -27,6 +27,8 @@ import {
   getCachedLimits,
   getCachedLatestBlock,
   OPT_IN_CHAINS,
+  parseL1TokenConfigSafe,
+  getL1TokenConfigCache,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -244,14 +246,16 @@ const handler = async (
       });
     }
 
-    const parsedL1TokenConfig =
-      sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
-        String(rawL1TokenConfig)
-      );
+    const parsedL1TokenConfig = parseL1TokenConfigSafe(
+      String(rawL1TokenConfig)
+    );
+    const validL1TokenConfig =
+      parsedL1TokenConfig ||
+      (await getL1TokenConfigCache(l1Token.address).get());
     const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
-      parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
-      parsedL1TokenConfig.rateModel;
+      validL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
+      validL1TokenConfig.rateModel;
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
