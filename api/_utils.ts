@@ -82,6 +82,7 @@ type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 import { getEnvs } from "./_env";
+import { isEvmAddress, isSvmAddress } from "./_address";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1289,9 +1290,22 @@ export function parsableBigNumberString() {
   });
 }
 
+export function validEvmAddress() {
+  return define<string>("validEvmAddress", (value) =>
+    isEvmAddress(value as string)
+  );
+}
+
+export function validSvmAddress() {
+  return define<string>("validSvmAddress", (value) =>
+    isSvmAddress(value as string)
+  );
+}
+
 export function validAddress() {
-  return define<string>("validAddress", (value) =>
-    utils.isAddress(value as string)
+  return define<string>(
+    "validAddress",
+    (value) => isEvmAddress(value as string) || isSvmAddress(value as string)
   );
 }
 

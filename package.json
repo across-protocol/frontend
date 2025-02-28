@@ -20,6 +20,7 @@
     "@safe-global/safe-apps-provider": "^0.18.0",
     "@safe-global/safe-apps-sdk": "^8.1.0",
     "@sentry/react": "^7.37.2",
+    "@solana/kit": "^2.1.0",
     "@tanstack/react-query": "v5",
     "@tanstack/react-query-devtools": "v5",
     "@uniswap/sdk-core": "^4.2.0",
