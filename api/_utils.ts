@@ -91,6 +91,8 @@ export const { Profiler } = sdk.utils;
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
+import { getEnvs } from "./_env";
+
 const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_COINGECKO_PRO_API_KEY,
@@ -99,7 +101,15 @@ const {
   OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
-} = process.env;
+  REACT_APP_DISABLED_CHAINS,
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
+  VERCEL_URL,
+  LIMITS_BUFFER_MULTIPLIERS,
+  CHAIN_USD_MAX_BALANCES,
+  CHAIN_USD_MAX_DEPOSITS,
+  VERCEL_AUTOMATION_BYPASS_SECRET,
+} = getEnvs();
 
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
@@ -108,31 +118,29 @@ export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
 
 // Tokens that should be disabled in the routes
 export const DISABLED_ROUTE_TOKENS = (
-  process.env.DISABLED_ROUTE_TOKENS || ""
+  getEnvs().DISABLED_ROUTE_TOKENS || ""
 ).split(",");
 
 // This is an array of chainIds that should be disabled. This array overrides
 // the ENABLED_ROUTES object below. This is useful for disabling a chainId
 // temporarily without having to redeploy the app or change core config
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
-export const DISABLED_CHAINS = (
-  process.env.REACT_APP_DISABLED_CHAINS || ""
-).split(",");
+export const DISABLED_CHAINS = (REACT_APP_DISABLED_CHAINS || "").split(",");
 
 // This is an array of chainIds that should be disabled. In contrast to the
 // above constant `DISABLED_CHAINS`, this constant is used to disable chains
 // only for the `/available-routes` endpoint and DOES NOT affect the
 // `ENABLED_ROUTES` object.
 export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 // Chains that require special role to be accessed.
-export const OPT_IN_CHAINS = (process.env.OPT_IN_CHAINS || "").split(",");
+export const OPT_IN_CHAINS = (getEnvs().OPT_IN_CHAINS || "").split(",");
 
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
@@ -216,9 +224,9 @@ export const resolveVercelEndpoint = (omitOverride = false) => {
 };
 
 export const getVercelHeaders = (): AxiosRequestHeaders | undefined => {
-  if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+  if (VERCEL_AUTOMATION_BYPASS_SECRET) {
     return {
-      "x-vercel-protection-bypass": process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+      "x-vercel-protection-bypass": VERCEL_AUTOMATION_BYPASS_SECRET,
     };
   }
 };
@@ -563,7 +571,7 @@ export const getHubPool = (provider: providers.Provider) => {
 export const overrideProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const url = process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
+  const url = getEnvs()[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
   if (url) {
     return new ethers.providers.StaticJsonRpcProvider(url);
   } else {
@@ -1592,9 +1600,31 @@ export function getLpCushion(
       `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
       `REACT_APP_LP_CUSHION_${symbol}`,
     ]
-      .map((key) => process.env[key])
+      .map((key) => getEnvs()[key])
       .find((value) => value !== undefined) ?? "0"
   );
+}
+
+/**
+ * Returns the limit cap for a given token and toChainId.
+ * @param symbol The token symbol
+ * @param decimals The token decimals
+ * @param toChainId The destination chain ID
+ * @returns The cap in wei
+ */
+export function getLimitCap(
+  symbol: string,
+  decimals: number,
+  toChainId: number
+) {
+  const cap =
+    [`LIMIT_CAP_${symbol}_${toChainId}`, `LIMIT_CAP_${symbol}`]
+      .map((key) => getEnvs()[key])
+      .find((value) => value !== undefined) ?? undefined;
+
+  if (cap === undefined) return sdk.utils.bnUint256Max;
+
+  return ethers.utils.parseUnits(cap, decimals);
 }
 
 export async function tagReferrer(
@@ -2133,10 +2163,8 @@ export function isSwapRouteEnabled({
 }
 
 export function getLimitsBufferMultiplier(symbol: string) {
-  const limitsBufferMultipliers: Record<string, string> = process.env
-    .LIMITS_BUFFER_MULTIPLIERS
-    ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
-    : {};
+  const limitsBufferMultipliers: Record<string, string> =
+    LIMITS_BUFFER_MULTIPLIERS ? JSON.parse(LIMITS_BUFFER_MULTIPLIERS) : {};
   const bufferMultiplier = ethers.utils.parseEther(
     limitsBufferMultipliers[symbol] || "0.8"
   );
@@ -2149,10 +2177,10 @@ export function getChainInputTokenMaxBalanceInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxBalances: Record<string, Record<string, string>> = process.env
-    .CHAIN_USD_MAX_BALANCES
-    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
-    : {};
+  const maxBalances: Record<
+    string,
+    Record<string, string>
+  > = CHAIN_USD_MAX_BALANCES ? JSON.parse(CHAIN_USD_MAX_BALANCES) : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
     : undefined;
@@ -2164,10 +2192,10 @@ export function getChainInputTokenMaxDepositInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxDeposits: Record<string, Record<string, string>> = process.env
-    .CHAIN_USD_MAX_DEPOSITS
-    ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
-    : {};
+  const maxDeposits: Record<
+    string,
+    Record<string, string>
+  > = CHAIN_USD_MAX_DEPOSITS ? JSON.parse(CHAIN_USD_MAX_DEPOSITS) : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
@@ -2544,6 +2572,22 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
   }
 }
 
+export function getL1TokenConfigCache(l1TokenAddress: string) {
+  l1TokenAddress = utils.getAddress(l1TokenAddress);
+  const cacheKey = buildInternalCacheKey("l1TokenConfig", l1TokenAddress);
+  const fetchFn = async () => {
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      ENABLED_ROUTES.acrossConfigStoreAddress,
+      getProvider(HUB_POOL_CHAIN_ID)
+    );
+    const l1TokenConfig =
+      await configStoreClient.getL1TokenConfig(l1TokenAddress);
+    return l1TokenConfig;
+  };
+  const ttl = 60 * 60 * 24 * 30; // 30 days
+  return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
+}
+
 export function getSpokePoolVerifier(chainId: number) {
   const isSpokePoolVerifierDeployed = (
     ENABLED_ROUTES.spokePoolVerifier.enabledChains as number[]
@@ -2561,4 +2605,20 @@ export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
   return amount
     .mul(ethers.utils.parseEther((1 + Number(markup)).toString()))
     .div(sdk.utils.fixedPointAdjustment);
+}
+
+export function parseL1TokenConfigSafe(jsonString: string) {
+  try {
+    return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+      jsonString
+    );
+  } catch (error) {
+    getLogger().error({
+      at: "parseL1TokenConfigSafe",
+      message: "Error parsing L1 token config",
+      error,
+      jsonString,
+    });
+    return null;
+  }
 }

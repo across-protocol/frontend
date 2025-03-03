@@ -8,6 +8,10 @@ import { HUB_POOL_CHAIN_ID, getLogger, handleErrorCondition } from "./_utils";
 import { UnauthorizedError } from "./_errors";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 
+import { getEnvs } from "./_env";
+
+const { CRON_SECRET } = getEnvs();
+
 const endpoints = [
   {
     url: "https://preview.across.to/api/swap/allowance",
@@ -84,10 +88,7 @@ const handler = async (
   });
   try {
     const authHeader = request.headers?.["authorization"];
-    if (
-      !process.env.CRON_SECRET ||
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
       throw new UnauthorizedError();
     }
 

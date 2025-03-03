@@ -4,7 +4,7 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.DOCTOR_WHO;
+const chainId = CHAIN_IDs.UNICHAIN;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
@@ -16,9 +16,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: chainInfoBase.publicRPC,
+  publicRpcUrl: "https://mainnet.unichain.org",
   blockTimeSeconds: 1,
-  // TODO: re-enable USDC/CCTP after launch
-  tokens: ["ETH", "WETH"],
-  enableCCTP: false,
+  tokens: ["ETH", "WETH", "USDC"],
+  enableCCTP: true,
 } as ChainConfig;

@@ -30,6 +30,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       },
       {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
         "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
         "symbol": "GRASS",
         "name": "Grass",
@@ -58,6 +65,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       },
       {
         "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
@@ -97,6 +111,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       }
     ],
     "outputTokens": [
@@ -127,6 +148,13 @@
         "name": "USD Coin (bridged)",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       }
     ]
   },
@@ -214,6 +242,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       }
     ],
     "outputTokens": [
@@ -237,6 +272,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       }
     ]
   },
@@ -449,6 +491,61 @@
         "name": "Grass",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 1301,
+    "name": "Unichain Sepolia",
+    "publicRpcUrl": "https://sepolia.unichain.org",
+    "explorerUrl": "https://sepolia.uniscan.xyz",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/unichain-sepolia/assets/logo.svg",
+    "spokePool": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+    "spokePoolBlock": 12593713,
+    "inputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   }

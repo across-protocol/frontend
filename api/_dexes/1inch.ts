@@ -2,6 +2,9 @@ import axios from "axios";
 
 import { Swap, OriginSwapQuoteAndCalldata } from "./types";
 import { getSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getEnvs } from "../_env";
+
+const { ONEINCH_API_KEY } = getEnvs();
 
 export async function get1inchQuoteForOriginSwapExactInput(
   swap: Omit<Swap, "recipient">
@@ -9,7 +12,7 @@ export async function get1inchQuoteForOriginSwapExactInput(
   const swapAndBridgeAddress = getSwapAndBridgeAddress("1inch", swap.chainId);
   const apiBaseUrl = `https://api.1inch.dev/swap/v6.0/${swap.chainId}`;
   const apiHeaders = {
-    Authorization: `Bearer ${process.env.ONEINCH_API_KEY}`,
+    Authorization: `Bearer ${ONEINCH_API_KEY}`,
     accept: "application/json",
   };
 
