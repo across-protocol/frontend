@@ -158,7 +158,7 @@ const MenuItemContainer = styled.div<{ disabled?: boolean }>`
 
   &:hover {
     background-color: ${({ disabled }) =>
-      disabled ? "transparent" : COLORS["grey-600"]};
+      disabled ? "transparent" : "#2b2b2f"};
   }
 
   a {

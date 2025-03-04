@@ -16,6 +16,10 @@ const sidebarRootStyles = {
   borderLeftWidth: "0px !important",
   [`.${sidebarClasses.container}`]: {
     background: "#202024",
+    scrollbarWidth: "none",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
   },
   [`.${sidebarClasses.backdrop}`]: {
     background: "#202024",
