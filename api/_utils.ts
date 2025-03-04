@@ -32,6 +32,7 @@ import {
   min,
   string,
   Struct,
+  union,
 } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -1291,23 +1292,26 @@ export function parsableBigNumberString() {
 }
 
 export function validEvmAddress() {
-  return define<string>("validEvmAddress", (value) =>
-    isEvmAddress(value as string)
-  );
+  return define<string>("validEvmAddress", (value) => {
+    try {
+      return isEvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function validSvmAddress() {
-  return define<string>("validSvmAddress", (value) =>
-    isSvmAddress(value as string)
-  );
+  return define<string>("validSvmAddress", (value) => {
+    try {
+      return isSvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
 }
 
-export function validAddress() {
-  return define<string>(
-    "validAddress",
-    (value) => isEvmAddress(value as string) || isSvmAddress(value as string)
-  );
-}
+export const validAddress = () => union([validEvmAddress(), validSvmAddress()]);
 
 export function validAddressOrENS() {
   return define<string>("validAddressOrENS", (value) => {
