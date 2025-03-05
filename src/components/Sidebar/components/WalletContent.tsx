@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { Connector, useConnect } from "wagmi";
+import { Connector, useAccount, useConnect } from "wagmi";
+import { useWallet } from "@solana/wallet-adapter-react";
 import styled from "@emotion/styled";
 
 import { useSidebarContext } from "hooks/useSidebarContext";
@@ -15,6 +16,7 @@ import {
   trackIfWalletSelected,
   trackWalletConnectTransactionCompleted,
 } from "utils";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 
 const connectorNameToIcon = {
   MetaMask: metaMaskIcon,
@@ -25,28 +27,20 @@ const connectorNameToIcon = {
 };
 
 export function WalletContent() {
-  const { connectors, isPending } = useConnect();
-
+  const { connected: isSolanaConnected } = useWallet();
+  const { isConnected: isEvmConnected } = useAccount();
   return (
     <>
-      <SidebarItem.Header
-        title={isPending ? "Connecting..." : "Connect Wallet"}
-      />
-      <WalletTypeSeparator>
-        <Text color="light-300" size="sm">
-          EVM
-        </Text>
-      </WalletTypeSeparator>
-      {connectors.map((connector) => (
-        <WalletItem key={connector.id} connector={connector} />
-      ))}
+      <SidebarItem.Header title={"Connect Wallet"} />
+      {!isEvmConnected && <EVMWalletContent />}
+      {!isSolanaConnected && <SVMWalletContent />}
     </>
   );
 }
 
-function WalletItem({ connector }: { connector: Connector }) {
+function EVMWalletContent() {
+  const { connectors, isPending, connectAsync } = useConnect();
   const { closeSidebar } = useSidebarContext();
-  const { isPending, connectAsync } = useConnect();
 
   const handleClickEvmConnector = useCallback(
     async (connector: Connector) => {
@@ -69,22 +63,91 @@ function WalletItem({ connector }: { connector: Connector }) {
   );
 
   return (
+    <>
+      <WalletTypeSeparator>
+        <Text color="light-300" size="sm">
+          EVM
+        </Text>
+      </WalletTypeSeparator>
+      {connectors.map((connector) => (
+        <WalletItem
+          key={connector.id}
+          label={connector.name}
+          iconUrl={connector.icon || ""}
+          onClick={() => handleClickEvmConnector(connector)}
+          isPending={isPending}
+        />
+      ))}
+    </>
+  );
+}
+
+function SVMWalletContent() {
+  const { wallets, select, connecting, disconnect, connected } = useWallet();
+  const { closeSidebar } = useSidebarContext();
+
+  const handleClickSvmWallet = useCallback(
+    async (walletAdapter: WalletAdapter) => {
+      try {
+        if (connected) {
+          await disconnect();
+        }
+        select(walletAdapter.name);
+        walletAdapter.once("connect", () => {
+          closeSidebar();
+        });
+      } catch (e) {
+        console.error("Error connecting to Solana wallet", e);
+      }
+    },
+    [select, connected, disconnect, closeSidebar]
+  );
+
+  return (
+    <>
+      <WalletTypeSeparator>
+        <Text color="light-300" size="sm">
+          SVM
+        </Text>
+      </WalletTypeSeparator>
+      {wallets.map((wallet) => (
+        <WalletItem
+          key={wallet.adapter.name}
+          label={wallet.adapter.name}
+          iconUrl={wallet.adapter.icon}
+          onClick={() => handleClickSvmWallet(wallet.adapter)}
+          isPending={connecting}
+        />
+      ))}
+    </>
+  );
+}
+
+function WalletItem({
+  label,
+  iconUrl,
+  onClick,
+  isPending,
+}: {
+  label: string;
+  iconUrl: string;
+  onClick: () => void;
+  isPending: boolean;
+}) {
+  return (
     <SidebarItem.MenuItem
-      key={connector.id}
-      dataCy={connector.name}
-      onClick={() => handleClickEvmConnector(connector)}
-      label={connector.name}
+      dataCy={label}
+      onClick={onClick}
+      label={label}
       disabled={isPending}
-      leftIcon={<WalletItemIcon connector={connector} />}
+      leftIcon={<WalletItemIcon name={label} iconUrl={iconUrl} />}
     />
   );
 }
 
-function WalletItemIcon({ connector }: { connector: Connector }) {
-  const { icon: connectorIcon, name } = connector;
+function WalletItemIcon({ name, iconUrl }: { name: string; iconUrl: string }) {
   const icon =
-    connectorIcon ||
-    connectorNameToIcon[name as keyof typeof connectorNameToIcon];
+    iconUrl || connectorNameToIcon[name as keyof typeof connectorNameToIcon];
   return icon ? (
     <WalletIcon src={icon} alt={name} />
   ) : (

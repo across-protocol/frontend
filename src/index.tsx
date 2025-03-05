@@ -8,7 +8,6 @@ import {
   MutationCache,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { WagmiProvider } from "wagmi";
 
 import App from "./App";
 import "./onboard-override.css";
@@ -18,7 +17,7 @@ import { AmpliProvider } from "hooks/useAmplitude";
 import { SidebarProvider } from "providers/SidebarProvider";
 import { enableReactQueryDevTools } from "utils";
 import Sentry from "utils/sentry";
-import { wagmiConfig } from "wagmi.config";
+import { WalletProvider } from "providers/wallet/WalletProvider";
 
 const client = new QueryClient({
   queryCache: new QueryCache({
@@ -50,7 +49,7 @@ root.render(
   <React.StrictMode>
     <GlobalStyles />
     <ErrorBoundary>
-      <WagmiProvider config={wagmiConfig}>
+      <WalletProvider>
         <QueryClientProvider client={client}>
           <AmpliProvider>
             <ErrorProvider>
@@ -63,7 +62,7 @@ root.render(
             {enableReactQueryDevTools && <ReactQueryDevtools />}
           </AmpliProvider>
         </QueryClientProvider>
-      </WagmiProvider>
+      </WalletProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );
