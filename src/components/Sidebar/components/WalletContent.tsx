@@ -27,27 +27,27 @@ const connectorNameToIcon = {
 };
 
 export function WalletContent() {
-  const { connected: isSolanaConnected } = useWallet();
-  const { isConnected: isEvmConnected } = useAccount();
   return (
     <>
       <SidebarItem.Header title={"Connect Wallet"} />
-      {!isEvmConnected && <EVMWalletContent />}
-      {!isSolanaConnected && <SVMWalletContent />}
+      <EVMWalletContent />
+      <SVMWalletContent />
     </>
   );
 }
 
 function EVMWalletContent() {
-  const { connectors, isPending, connectAsync } = useConnect();
+  const { connectors, isPending, connect } = useConnect();
   const { closeSidebar } = useSidebarContext();
+  const { isConnected: isEvmConnected } = useAccount();
 
   const handleClickEvmConnector = useCallback(
-    async (connector: Connector) => {
-      await connectAsync(
+    (connector: Connector) => {
+      connect(
         { connector },
         {
           onSuccess: (data) => {
+            console.log("onSuccess", data);
             trackWalletConnectTransactionCompleted(
               data.accounts[0],
               connector.name,
@@ -59,8 +59,12 @@ function EVMWalletContent() {
         }
       );
     },
-    [closeSidebar, connectAsync]
+    [closeSidebar, connect]
   );
+
+  if (isEvmConnected) {
+    return null;
+  }
 
   return (
     <>
@@ -85,6 +89,7 @@ function EVMWalletContent() {
 function SVMWalletContent() {
   const { wallets, select, connecting, disconnect, connected } = useWallet();
   const { closeSidebar } = useSidebarContext();
+  const { connected: isSolanaConnected } = useWallet();
 
   const handleClickSvmWallet = useCallback(
     async (walletAdapter: WalletAdapter) => {
@@ -102,6 +107,10 @@ function SVMWalletContent() {
     },
     [select, connected, disconnect, closeSidebar]
   );
+
+  if (isSolanaConnected) {
+    return null;
+  }
 
   return (
     <>
