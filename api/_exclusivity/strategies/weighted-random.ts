@@ -12,6 +12,7 @@ export function weightedRandom(relayers: string[]): string {
 
   // Select the relayer with the highest effective weight.
   const { relayer: exclusiveRelayer } = relayerWeights
+    .filter(({ effectiveWeight }) => effectiveWeight > 0.0)
     .slice(1)
     .reduce(
       (acc, relayer) =>
