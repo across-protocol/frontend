@@ -5271,6 +5271,18 @@
     "@solana/rpc-spec" "2.1.0"
     "@solana/rpc-types" "2.1.0"
 
+"@solana/accounts@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@solana/accounts/-/accounts-2.1.0.tgz#23fa5ba20dd7af9bfb84abc638096378b62c7276"
+  integrity sha512-1JOBiLFeIeHmGx7k1b23UWF9vM1HAh9GBMCzr5rBPrGSBs+QUgxBJ3+yrRg+UPEOSELubqo7qoOVFUKYsb1nXw==
+  dependencies:
+    "@solana/addresses" "2.1.0"
+    "@solana/codecs-core" "2.1.0"
+    "@solana/codecs-strings" "2.1.0"
+    "@solana/errors" "2.1.0"
+    "@solana/rpc-spec" "2.1.0"
+    "@solana/rpc-types" "2.1.0"
+
 "@solana/addresses@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@solana/addresses/-/addresses-2.0.0.tgz#d1b01a38e0b48d7e4fea223821655a0c2b903c28"
