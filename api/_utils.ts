@@ -32,6 +32,7 @@ import {
   min,
   string,
   Struct,
+  union,
 } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -82,6 +83,7 @@ type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 import { getEnvs } from "./_env";
+import { isEvmAddress, isSvmAddress } from "./_address";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1289,11 +1291,27 @@ export function parsableBigNumberString() {
   });
 }
 
-export function validAddress() {
-  return define<string>("validAddress", (value) =>
-    utils.isAddress(value as string)
-  );
+export function validEvmAddress() {
+  return define<string>("validEvmAddress", (value) => {
+    try {
+      return isEvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
 }
+
+export function validSvmAddress() {
+  return define<string>("validSvmAddress", (value) => {
+    try {
+      return isSvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
+}
+
+export const validAddress = () => union([validEvmAddress(), validSvmAddress()]);
 
 export function validAddressOrENS() {
   return define<string>("validAddressOrENS", (value) => {
