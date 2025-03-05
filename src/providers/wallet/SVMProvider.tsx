@@ -3,14 +3,11 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import {
-  LedgerWalletAdapter,
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  WalletConnectWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+import { LedgerWalletAdapter } from "@solana/wallet-adapter-ledger";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
+import { WalletConnectWalletAdapter } from "@solana/wallet-adapter-walletconnect";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { UnsafeBurnerWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 
 import { ChainId, hubPoolChainId } from "utils";
@@ -21,7 +18,6 @@ const network =
     : WalletAdapterNetwork.Devnet;
 const endpoint = clusterApiUrl(network);
 const wallets = [
-  new UnsafeBurnerWalletAdapter(),
   new PhantomWalletAdapter(),
   new SolflareWalletAdapter(),
   new LedgerWalletAdapter(),

@@ -18,11 +18,6 @@ export default defineConfig({
     rollupOptions: {
       maxParallelFileOps: 100,
       plugins: [rollupNodePolyFill()],
-      external: [
-        "@solana/wallet-adapter-base",
-        "@solana/wallet-adapter-wallets",
-        "@solana/web3.js",
-      ],
     },
   },
   plugins: [
@@ -49,6 +44,8 @@ export default defineConfig({
       "rxjs",
       "rxjs/operators",
       "@across-protocol/contracts",
+      "@solana/wallet-adapter-base",
+      "@solana/web3.js",
     ],
     esbuildOptions: {
       define: {
