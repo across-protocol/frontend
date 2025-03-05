@@ -4,15 +4,16 @@ import { CandidateRelayer } from "../types";
 
 export function weightedRandom(relayers: string[]): string {
   const random = randomBytes(relayers.length);
-  const relayerWeights = getStrategyConfig(relayers).map((relayer, idx) => {
-    const { dynamicWeight, fixedWeight, address } = relayer;
-    const effectiveWeight = (dynamicWeight + fixedWeight) * random[idx];
-    return { relayer: address, effectiveWeight };
-  });
+  const relayerWeights = getStrategyConfig(relayers)
+    .map((relayer, idx) => {
+      const { dynamicWeight, fixedWeight, address } = relayer;
+      const effectiveWeight = (dynamicWeight + fixedWeight) * random[idx];
+      return { relayer: address, effectiveWeight };
+    })
+    .filter(({ effectiveWeight }) => effectiveWeight > 0.0);
 
   // Select the relayer with the highest effective weight.
   const { relayer: exclusiveRelayer } = relayerWeights
-    .filter(({ effectiveWeight }) => effectiveWeight > 0.0)
     .slice(1)
     .reduce(
       (acc, relayer) =>
