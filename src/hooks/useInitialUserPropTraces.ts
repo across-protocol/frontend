@@ -16,7 +16,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
   >();
   const [didApplicationLoad, setDidApplicationLoad] = useState(false);
 
-  const { didAttemptAutoSelect, wallet, account, chainId } = useConnection();
+  const { connector, account, chainId } = useConnection();
   const walletBalanceTraceQuery = useWalletBalanceTrace();
 
   // Re-triggers the initial user props when the account changes
@@ -31,7 +31,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
   useEffect(() => {
     (async () => {
       // Ensures that we only set the initial user props once
-      if (!isAmpliLoaded || !didAttemptAutoSelect || areInitialUserPropsSet) {
+      if (!isAmpliLoaded || areInitialUserPropsSet) {
         return;
       }
 
@@ -40,11 +40,11 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
         return;
       }
 
-      if (wallet && account && chainId) {
+      if (connector && account && chainId) {
         setUserId(account);
 
         await Promise.all([
-          identifyUserWallet(wallet)?.promise,
+          identifyUserWallet(account, connector.name)?.promise,
           identifyWalletChainId(chainId).promise,
         ]);
       }
@@ -57,12 +57,11 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
     })();
   }, [
     isAmpliLoaded,
-    didAttemptAutoSelect,
     areInitialUserPropsSet,
     account,
     prevTrackedAccount,
     chainId,
-    wallet,
+    connector,
     walletBalanceTraceQuery.status,
     walletBalanceTraceQuery.failureCount,
   ]);

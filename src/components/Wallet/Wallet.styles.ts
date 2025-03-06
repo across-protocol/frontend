@@ -64,19 +64,18 @@ export const UnsupportedNetwork = styled.div`
 `;
 
 export const BalanceButton = styled.button`
-  height: 40px;
-  padding: 0 16px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   font-size: 16px;
   line-height: 20px;
   color: #9daab2;
-  font-weight: 500;
   border: 1px solid #4d4f56;
   border-radius: 12px;
   background-color: transparent;
   outline: none;
   cursor: pointer;
+  gap: 12px;
 
   :hover {
     color: #e0f3ff;
@@ -125,7 +124,28 @@ export const Logo = styled(AcrossLogo)`
   }
 `;
 
-export const Account = styled.div`
-  font: inherit;
-  /* border: 1px solid var(--color-gray); */
+export const ConnectedAccountChainLogoContainer = styled.div`
+  display: flex;
+  width: 24px;
+  height: 24px;
+  padding: 4.5px;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 6px;
+  border: 0.75px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+export const ConnectedAccountContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 `;

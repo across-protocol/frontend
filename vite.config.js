@@ -43,7 +43,6 @@ export default defineConfig({
   optimizeDeps: {
     disabled: false,
     include: [
-      "@web3-onboard/common",
       "@walletconnect/ethereum-provider",
       "rxjs",
       "rxjs/operators",
