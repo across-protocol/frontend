@@ -27,6 +27,8 @@ import {
   getCachedLimits,
   getCachedLatestBlock,
   OPT_IN_CHAINS,
+  parseL1TokenConfigSafe,
+  getL1TokenConfigCache,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -42,6 +44,7 @@ import {
 } from "./_errors";
 import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
+import { getEnvs } from "./_env";
 
 const { BigNumber } = ethers;
 
@@ -73,7 +76,7 @@ const handler = async (
   });
   try {
     const { query } = request;
-    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
+    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 
     const role = parseRole(request);
     const provider = getProvider(HUB_POOL_CHAIN_ID, {
@@ -243,14 +246,16 @@ const handler = async (
       });
     }
 
-    const parsedL1TokenConfig =
-      sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
-        String(rawL1TokenConfig)
-      );
+    const parsedL1TokenConfig = parseL1TokenConfigSafe(
+      String(rawL1TokenConfig)
+    );
+    const validL1TokenConfig =
+      parsedL1TokenConfig ||
+      (await getL1TokenConfigCache(l1Token.address).get());
     const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
-      parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
-      parsedL1TokenConfig.rateModel;
+      validL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
+      validL1TokenConfig.rateModel;
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,

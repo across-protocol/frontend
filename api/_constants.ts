@@ -1,6 +1,13 @@
 import { ethers } from "ethers";
 import { relayFeeCalculator, utils } from "@across-protocol/sdk";
 import * as constants from "@across-protocol/constants";
+import { getEnvs } from "./_env";
+
+const {
+  RELAYER_ADDRESS_OVERRIDES,
+  GRAPH_API_KEY,
+  RELAYER_FEE_CAPITAL_COST_OVERRIDES,
+} = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
@@ -104,6 +111,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
     decimals: 18,
   },
+  XYZ: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
 };
 
 defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
@@ -128,15 +141,15 @@ export const defaultRelayerAddressOverride: {
       chains?: { [chainId: string]: string };
     };
   };
-} = JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDES || "{}");
+} = JSON.parse(RELAYER_ADDRESS_OVERRIDES || "{}");
 
-export const graphAPIKey = process.env.GRAPH_API_KEY;
+export const graphAPIKey = GRAPH_API_KEY;
 
 const relayerFeeCapitalCostOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
-> = process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES
-  ? JSON.parse(process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES)
+> = RELAYER_FEE_CAPITAL_COST_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_OVERRIDES)
   : {};
 
 export const relayerFeeCapitalCostConfig: {

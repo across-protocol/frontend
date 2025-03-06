@@ -8,6 +8,7 @@ import {
   MutationCache,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { WagmiProvider } from "wagmi";
 
 import App from "./App";
 import "./onboard-override.css";
