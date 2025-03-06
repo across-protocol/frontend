@@ -15,6 +15,7 @@ gas-price-comparison.csv
 
 # misc
 .DS_Store
+*.env
 .env
 .env.local
 .env.development.local

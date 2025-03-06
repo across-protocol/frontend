@@ -60,6 +60,17 @@
     },
     {
       "fromChain": 11155111,
+      "toChain": 84532,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
+    },
+    {
+      "fromChain": 11155111,
       "toChain": 421614,
       "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       "toTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
@@ -123,6 +134,17 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 11155420,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
     },
     {
       "fromChain": 11155111,
@@ -313,6 +335,17 @@
     },
     {
       "fromChain": 84532,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
+    },
+    {
+      "fromChain": 84532,
       "toChain": 421614,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
@@ -379,6 +412,17 @@
     },
     {
       "fromChain": 84532,
+      "toChain": 11155420,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
+    },
+    {
+      "fromChain": 84532,
       "toChain": 919,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -808,6 +852,17 @@
     },
     {
       "fromChain": 11155420,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
+    },
+    {
+      "fromChain": 11155420,
       "toChain": 84532,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -849,6 +904,17 @@
       "toTokenSymbol": "USDbC",
       "isNative": false,
       "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 11155420,
+      "toChain": 84532,
+      "fromTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "toTokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "XYZ",
+      "toTokenSymbol": "XYZ",
+      "isNative": false,
+      "l1TokenAddress": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9"
     },
     {
       "fromChain": 11155420,
