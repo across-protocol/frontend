@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import config from "../../../src/data/exclusive-relayer-weights.json";
 import { CandidateRelayer } from "../types";
+import { constants } from "@across-protocol/sdk";
 
 export function weightedRandom(relayers: string[]): string {
   const random = randomBytes(relayers.length);
@@ -13,13 +14,14 @@ export function weightedRandom(relayers: string[]): string {
     .filter(({ effectiveWeight }) => effectiveWeight > 0.0);
 
   // Select the relayer with the highest effective weight.
-  const { relayer: exclusiveRelayer } = relayerWeights
-    .slice(1)
-    .reduce(
-      (acc, relayer) =>
-        relayer.effectiveWeight > acc.effectiveWeight ? relayer : acc,
-      relayerWeights[0]
-    );
+  const { relayer: exclusiveRelayer } = relayerWeights.slice(1).reduce(
+    (acc, relayer) =>
+      relayer.effectiveWeight > acc.effectiveWeight ? relayer : acc,
+    relayerWeights[0] ?? {
+      relayer: constants.ZERO_ADDRESS,
+      effectiveWeight: 0.0,
+    }
+  );
 
   return exclusiveRelayer;
 }
