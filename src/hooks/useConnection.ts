@@ -1,38 +1,81 @@
-import { ethers } from "ethers";
+import { useCallback } from "react";
+import { useAccount, useDisconnect, useSwitchChain } from "wagmi";
 
-import { useOnboard } from "hooks/useOnboard";
-import { useIsContractAddress } from "hooks/useIsContractAddress";
+import { useIsContractAddress } from "./useIsContractAddress";
+import { useSidebarContext } from "./useSidebarContext";
+import { useEnsQuery } from "./useEns";
+import { useEthersProvider, useEthersSigner } from "./useConnectionEVM";
+
+import {
+  trackConnectWalletButtonClicked,
+  trackDisconnectWalletButtonClicked,
+} from "utils";
+import {
+  ampli,
+  ConnectWalletButtonClickedProperties,
+  DisconnectWalletButtonClickedProperties,
+} from "ampli";
 
 export function useConnection() {
-  const {
-    provider,
-    signer,
-    isConnected,
-    connect,
-    disconnect,
-    account,
-    chainId,
-    wallet,
-    error,
-    setChain,
-    didAttemptAutoSelect,
-  } = useOnboard();
+  const { openSidebar } = useSidebarContext();
 
-  const isContractAddress = useIsContractAddress(account?.address, chainId);
+  const { isConnected, address, chainId = 0, connector } = useAccount();
+  const { disconnect: _disconnect } = useDisconnect();
+  const { switchChainAsync } = useSwitchChain();
+  const provider = useEthersProvider({ chainId });
+  const signer = useEthersSigner({ chainId });
+
+  const { data: ensName } = useEnsQuery(address);
+
+  const connect = useCallback(
+    (options?: {
+      trackSection?: ConnectWalletButtonClickedProperties["section"];
+    }) => {
+      openSidebar("connect-wallet");
+
+      if (options?.trackSection) {
+        trackConnectWalletButtonClicked(options.trackSection);
+      }
+    },
+    [openSidebar]
+  );
+
+  const disconnect = useCallback(
+    (
+      options?: Parameters<typeof _disconnect>[0] & {
+        trackSection?: DisconnectWalletButtonClickedProperties["section"];
+      }
+    ) => {
+      if (options?.trackSection) {
+        trackDisconnectWalletButtonClicked(options.trackSection);
+      }
+      _disconnect({ connector, ...options });
+      ampli.client?.setUserId(undefined);
+    },
+    [connector, _disconnect]
+  );
+
+  const setChain = useCallback(
+    async (chainId: number) => {
+      const didSwitchChain = await switchChainAsync({ chainId });
+      return didSwitchChain;
+    },
+    [switchChainAsync]
+  );
+
+  const isContractAddress = useIsContractAddress(address, chainId);
 
   return {
-    account: account ? ethers.utils.getAddress(account.address) : undefined,
-    ensName: account?.ens?.name,
+    account: address,
+    ensName,
     chainId,
     provider,
     signer,
     isConnected,
     connect,
     disconnect,
-    error,
-    wallet,
+    connector,
     setChain,
     isContractAddress,
-    didAttemptAutoSelect,
   };
 }
