@@ -67,6 +67,7 @@ export const BalanceButton = styled.button`
   padding: 8px 12px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   font-size: 16px;
   line-height: 20px;
   color: #9daab2;
@@ -106,7 +107,6 @@ export const BalanceWallet = styled.div`
 export const Separator = styled.div`
   height: 16px;
   width: 1px;
-  margin-right: 12px;
   background-color: #4d4f56;
 
   @media (max-width: 428px) {
@@ -128,7 +128,7 @@ export const ConnectedAccountChainLogoContainer = styled.div`
   display: flex;
   width: 24px;
   height: 24px;
-  padding: 4.5px;
+  padding: 4px;
   justify-content: center;
   align-items: center;
 
@@ -138,8 +138,8 @@ export const ConnectedAccountChainLogoContainer = styled.div`
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
 
   img {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 `;
 

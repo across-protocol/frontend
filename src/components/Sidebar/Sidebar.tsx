@@ -4,7 +4,7 @@ import { useSidebarContext } from "hooks/useSidebarContext";
 import { NavigationContent } from "./components/NavigationContent";
 import { WalletContent } from "./components/WalletContent";
 
-const sidebarWidth = "450px";
+const sidebarWidth = "484px";
 
 const sidebarRootStyles = {
   zIndex: "3000 !important",

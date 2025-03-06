@@ -25,7 +25,8 @@ export default defineWalletSetup(MM_PASSWORD, async (context, walletPage) => {
     .getByRole("banner")
     .locator(page.getByRole("button", { name: "Connect" }))
     .click();
-  await page.getByText("MetaMask").click();
+
+  await page.getByText("MetaMask").first().click();
 
   await metamask.connectToDapp(["Account 1"]);
 });
