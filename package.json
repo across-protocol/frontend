@@ -24,7 +24,7 @@
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
-    "@solana/web3.js": "1",
+    "@solana/web3.js": "^1.98.0",
     "@solana/kit": "^2.1.0",
     "@tanstack/react-query": "v5",
     "@tanstack/react-query-devtools": "v5",

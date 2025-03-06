@@ -6432,7 +6432,7 @@
     "@solana/transaction-messages" "2.0.0"
     "@solana/transactions" "2.0.0"
 
-"@solana/web3.js@1", "@solana/web3.js@^1.31.0", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.68.0", "@solana/web3.js@^1.95.2":
+"@solana/web3.js@^1.31.0", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.68.0", "@solana/web3.js@^1.95.2", "@solana/web3.js@^1.98.0":
   version "1.98.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.98.0.tgz#21ecfe8198c10831df6f0cfde7f68370d0405917"
   integrity sha512-nz3Q5OeyGFpFCR+erX2f6JPt3sKhzhYcSycBCSPkWjzSVDh/Rr1FqTVMRe58FKO16/ivTUcuJjeS5MyBvpkbzA==
