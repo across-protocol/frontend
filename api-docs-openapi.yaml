@@ -371,12 +371,14 @@ paths:
                 properties:
                   fillStatus:
                     type: string
-                    enum: ["filled", "pending", "expired"]
+                    enum: ["filled", "pending", "expired", "refunded", "slowFillReqested"]
                     description: >
                       The status of the deposit.
                        * filled: Deposits with this status have been filled on the destination chain and the recipient should have received funds. A FilledV3Relay event was emitted on the destination chain SpokePool.
                        * pending: Deposit has not been filled yet.
                        * expired: Deposit has expired and will not be filled. Expired deposits will be refunded to the `depositor` on the `originChainId` in the next batch of repayments.
+                       * refunded: Deposit has expired and the depositor has been successfully refunded on the originChain. 
+                       * slowFillRequested: Deposit has been made but no relayer has filled the intent, therefore Across' relayer fills the user’s intent without requiring another relayer to front the capital. It's important that the input token and output token are the same asset here.
                   fillTxHash:
                     type: string
                     description: >
