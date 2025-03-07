@@ -38,6 +38,7 @@ function MenuItem(props: {
   onClick?: () => void;
   disabled?: boolean;
   dataCy?: string;
+  secondaryLabel?: string;
 }) {
   return (
     <MenuItemContainer
@@ -50,6 +51,11 @@ function MenuItem(props: {
         <Text color="light-300">{props.label}</Text>
       </LeftIconContainer>
       {props.rightIcon && props.rightIcon}
+      {props.secondaryLabel && (
+        <SecondaryLabel id="secondary-label">
+          {props.secondaryLabel}
+        </SecondaryLabel>
+      )}
     </MenuItemContainer>
   );
 }
@@ -145,6 +151,11 @@ const HeaderContentContainer = styled.div`
   flex-direction: column;
 `;
 
+const SecondaryLabel = styled.span`
+  margin-left: auto;
+  opacity: 0.5;
+`;
+
 const MenuItemContainer = styled.div<{ disabled?: boolean }>`
   display: flex;
   justify-content: space-between;
@@ -159,6 +170,10 @@ const MenuItemContainer = styled.div<{ disabled?: boolean }>`
   &:hover {
     background-color: ${({ disabled }) =>
       disabled ? "transparent" : "#2b2b2f"};
+
+    span#secondary-label {
+      opacity: 1;
+    }
   }
 
   a {

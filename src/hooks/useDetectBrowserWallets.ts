@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+// Based on https://eips.ethereum.org/EIPS/eip-6963
 type EIP6963ProviderDetail = {
   info: {
     uuid: string;
@@ -10,9 +11,6 @@ type EIP6963ProviderDetail = {
   provider: unknown; // not sure the exact type here
 };
 
-/**
- * Custom event type for announcing a wallet provider.
- */
 type EIP6963AnnounceProviderEvent = CustomEvent & {
   type: "eip6963:announceProvider";
   detail: EIP6963ProviderDetail;
@@ -22,17 +20,12 @@ export function useDetectBrowserWallets(): string[] {
   const [walletNames, setWalletNames] = useState<string[]>([]);
 
   const handleAnnounce = (event: EIP6963AnnounceProviderEvent) => {
-    console.log(event);
     const providerDetail = event.detail;
     const walletName = providerDetail?.info?.name?.toLowerCase();
-    console.log(`Detected: ${walletName}`);
+
     if (walletName) {
       setWalletNames((prevNames) => {
-        // Avoid duplicates based on wallet name
-        if (prevNames.includes(walletName)) {
-          return prevNames;
-        }
-        return [...prevNames, walletName];
+        return Array.from(new Set(prevNames).add(walletName));
       });
     }
   };

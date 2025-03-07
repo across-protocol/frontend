@@ -17,6 +17,7 @@ const sidebarRootStyles = {
   [`.${sidebarClasses.container}`]: {
     background: "#202024",
     scrollbarWidth: "none",
+    borderRadius: "20px 0 0 20px",
     "&::-webkit-scrollbar": {
       display: "none",
     },
