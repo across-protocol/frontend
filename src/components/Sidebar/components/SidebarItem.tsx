@@ -153,6 +153,7 @@ const HeaderContentContainer = styled.div`
 
 const SecondaryLabel = styled.span`
   margin-left: auto;
+  font-size: 14px;
   opacity: 0.5;
 `;
 
