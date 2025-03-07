@@ -17,6 +17,8 @@ import {
   trackWalletConnectTransactionCompleted,
 } from "utils";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
+import { useLatestWallets } from "hooks/useLatestSvmWallet";
+import { useDetectBrowserWallets } from "hooks/useDetectBrowserWallets";
 
 const connectorNameToIcon = {
   MetaMask: metaMaskIcon,
@@ -38,9 +40,10 @@ export function WalletContent() {
 
 function EVMWalletContent() {
   const { connectors, isPending, connect } = useConnect();
+  const installedWallets = useDetectBrowserWallets();
   const { closeSidebar } = useSidebarContext();
   const { isConnected: isEvmConnected } = useAccount();
-
+  const { evm: latestWalletName } = useLatestWallets();
   const handleClickEvmConnector = useCallback(
     (connector: Connector) => {
       connect(
@@ -73,15 +76,23 @@ function EVMWalletContent() {
           EVM
         </Text>
       </WalletTypeSeparator>
-      {connectors.map((connector) => (
-        <WalletItem
-          key={connector.id}
-          label={connector.name}
-          iconUrl={connector.icon || ""}
-          onClick={() => handleClickEvmConnector(connector)}
-          isPending={isPending}
-        />
-      ))}
+      {[...connectors]
+        // show most recent first
+        .sort((c) => (c.name.toLowerCase() === latestWalletName ? -1 : 1))
+        .map((connector) => (
+          <WalletItem
+            key={connector.id}
+            label={connector.name}
+            iconUrl={connector.icon || ""}
+            onClick={() => handleClickEvmConnector(connector)}
+            isPending={isPending}
+            secondaryLabel={
+              installedWallets?.includes(connector.name.toLowerCase())
+                ? "Installed"
+                : undefined
+            }
+          />
+        ))}
     </>
   );
 }
@@ -90,6 +101,8 @@ function SVMWalletContent() {
   const { wallets, select, connecting, disconnect, connected } = useWallet();
   const { closeSidebar } = useSidebarContext();
   const { connected: isSolanaConnected } = useWallet();
+  const installedWallets = useDetectBrowserWallets();
+  const { svm: latestWalletName } = useLatestWallets();
 
   const handleClickSvmWallet = useCallback(
     async (walletAdapter: WalletAdapter) => {
@@ -119,15 +132,25 @@ function SVMWalletContent() {
           SVM
         </Text>
       </WalletTypeSeparator>
-      {wallets.map((wallet) => (
-        <WalletItem
-          key={wallet.adapter.name}
-          label={wallet.adapter.name}
-          iconUrl={wallet.adapter.icon}
-          onClick={() => handleClickSvmWallet(wallet.adapter)}
-          isPending={connecting}
-        />
-      ))}
+      {wallets
+        // show most recent first
+        .sort((w) =>
+          w.adapter.name.toLowerCase() === latestWalletName ? -1 : 1
+        )
+        .map((wallet) => (
+          <WalletItem
+            key={wallet.adapter.name}
+            label={wallet.adapter.name}
+            iconUrl={wallet.adapter.icon}
+            onClick={() => handleClickSvmWallet(wallet.adapter)}
+            isPending={connecting}
+            secondaryLabel={
+              installedWallets?.includes(wallet.adapter.name.toLowerCase())
+                ? "Installed"
+                : undefined
+            }
+          />
+        ))}
     </>
   );
 }
@@ -137,11 +160,13 @@ function WalletItem({
   iconUrl,
   onClick,
   isPending,
+  secondaryLabel,
 }: {
   label: string;
   iconUrl: string;
   onClick: () => void;
   isPending: boolean;
+  secondaryLabel?: string;
 }) {
   return (
     <SidebarItem.MenuItem
@@ -149,6 +174,7 @@ function WalletItem({
       onClick={onClick}
       label={label}
       disabled={isPending}
+      secondaryLabel={secondaryLabel}
       leftIcon={<WalletItemIcon name={label} iconUrl={iconUrl} />}
     />
   );

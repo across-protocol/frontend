@@ -3,6 +3,7 @@ import { Sidebar as ReactProSidebar, sidebarClasses } from "react-pro-sidebar";
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { NavigationContent } from "./components/NavigationContent";
 import { WalletContent } from "./components/WalletContent";
+import { COLORS } from "utils";
 
 const sidebarWidth = "484px";
 
@@ -17,6 +18,8 @@ const sidebarRootStyles = {
   [`.${sidebarClasses.container}`]: {
     background: "#202024",
     scrollbarWidth: "none",
+    borderRadius: "20px 0 0 20px",
+    border: `1px solid ${COLORS["grey-400-15"]}`,
     "&::-webkit-scrollbar": {
       display: "none",
     },
