@@ -16,6 +16,7 @@ import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
+import { useSidebarContext } from "hooks/useSidebarContext";
 
 const LINKS = !enableMigration
   ? [
@@ -27,21 +28,16 @@ const LINKS = !enableMigration
   : [];
 
 interface Props {
-  openSidebar: boolean;
-  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   transparentHeader?: boolean;
 }
 
-const Header: React.FC<Props> = ({
-  openSidebar,
-  setOpenSidebar,
-  transparentHeader,
-}) => {
+const Header: React.FC<Props> = ({ transparentHeader }) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
+  const { isOpen, openSidebar, closeSidebar } = useSidebarContext();
 
   const toggleMenu = () => {
-    setOpenSidebar((prevValue) => !prevValue);
+    isOpen ? closeSidebar() : openSidebar();
   };
 
   return (
@@ -77,8 +73,8 @@ const Header: React.FC<Props> = ({
       </Navigation>
       <Spacing />
       <WalletWrapper>
-        <Wallet setOpenSidebar={setOpenSidebar} />
-        <MobileNavigation animate={openSidebar ? "open" : "closed"}>
+        <Wallet />
+        <MobileNavigation animate={isOpen ? "open" : "closed"}>
           <MenuToggle toggle={toggleMenu} />
         </MobileNavigation>
       </WalletWrapper>

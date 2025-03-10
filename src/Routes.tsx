@@ -63,7 +63,6 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [openSidebar, setOpenSidebar] = useState(false);
   const [enableACXBanner, setEnableACXBanner] = useState(true);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
@@ -82,8 +81,6 @@ function useRoutes() {
   }, [location.pathname, history]);
 
   return {
-    openSidebar,
-    setOpenSidebar,
     provider,
     error,
     removeError,
@@ -99,8 +96,6 @@ function useRoutes() {
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
   const {
-    openSidebar,
-    setOpenSidebar,
     error,
     removeError,
     location,
@@ -140,12 +135,8 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-      <Header
-        openSidebar={openSidebar}
-        setOpenSidebar={setOpenSidebar}
-        transparentHeader={isAirdrop || isHomepage}
-      />
-      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      <Header transparentHeader={isAirdrop || isHomepage} />
+      <Sidebar />
       <ScrollToTop />
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>

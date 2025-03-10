@@ -21,11 +21,9 @@ export function useIsWrongNetwork(baseChain?: number) {
   }, [checkWrongNetworkHandler]);
 
   const isWrongNetworkHandler = async () => {
-    const didSetChain = await setChain({
-      chainId: `0x${correctChainId.toString(16)}`,
-    });
+    const chain = await setChain(correctChainId);
 
-    if (!didSetChain) {
+    if (chain.id !== correctChainId) {
       throw new Error(
         `Wrong network. Please switch to network ${chainInfoTable[correctChainId]?.name}`
       );
