@@ -13,9 +13,10 @@ import {
   validateChainAndTokenParams,
   isSwapRouteEnabled,
 } from "./_utils";
-import { getUniswapQuoteAndCalldata } from "./_dexes/uniswap";
-import { get1inchQuoteAndCalldata } from "./_dexes/1inch";
+import { getUniswapQuoteWithSwapQuoter } from "./_dexes/uniswap/swap-quoter";
+import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
+import { AMOUNT_TYPE } from "./_dexes/utils";
 
 const SwapQuoteQueryParamsSchema = type({
   swapToken: validAddress(),
@@ -97,18 +98,20 @@ const handler = async (
     }
 
     const swap = {
-      swapToken,
-      acrossInputToken: {
+      chainId: originChainId,
+      tokenIn: swapToken,
+      tokenOut: {
         ...acrossInputToken,
         chainId: originChainId,
       },
-      swapTokenAmount,
-      slippage: parseFloat(swapSlippage),
-    };
+      amount: swapTokenAmount,
+      slippageTolerance: parseFloat(swapSlippage),
+      type: AMOUNT_TYPE.EXACT_INPUT,
+    } as const;
 
     const quoteResults = await Promise.allSettled([
-      getUniswapQuoteAndCalldata(swap),
-      get1inchQuoteAndCalldata(swap),
+      getUniswapQuoteWithSwapQuoter(swap),
+      get1inchQuoteForOriginSwapExactInput(swap),
     ]);
 
     const settledResults = quoteResults.flatMap((result) =>
