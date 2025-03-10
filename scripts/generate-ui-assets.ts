@@ -65,7 +65,7 @@ async function generateUiAssets() {
         explorerUrl: "${chainConfig.blockExplorer}",
         constructExplorerLink: (txHash: string) => \`\${${chainVarName}.explorerUrl}/tx/\${txHash}\`,
         nativeCurrencySymbol: "${chainConfig.nativeToken}",
-        customRpcUrl: process.env.REACT_APP_CHAIN_${chainId}_PROVIDER_URL,
+        customRpcUrl: process.env.REACT_APP_CHAIN_${chainId}_CUSTOM_RPC_URL,
         pollingInterval: ${(chainConfig.blockTimeSeconds || 15) * 1000},
       };
     `);
