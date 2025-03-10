@@ -38,7 +38,7 @@ export function useDetectBrowserWallets(): string[] {
     );
 
     // ask wallets to announce themselves
-    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    window.dispatchEvent(new CustomEvent("eip6963:requestProvider"));
 
     // Cleanup
     return () => {

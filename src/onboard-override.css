@@ -1,8 +1,0 @@
-/* Override root variables to style the Onboard modal */
-:root {
-  --w3o-background-color: #2e2e34;
-  --w3o-foreground-color: #34353b;
-  --w3o-text-color: #e0f3ff;
-  --w3o-border-color: #3b3d43;
-  --w3o-font-family: Barlow;
-}
