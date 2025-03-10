@@ -1,46 +1,87 @@
 import styled from "@emotion/styled";
 
 import { getChainInfo, isSupportedChainId, shortenAddress } from "utils";
-import { useConnection } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { ReactComponent as LogoutIcon } from "assets/icons/logout.svg";
-
+import solanaLogo from "assets/wallet-logos/solana.svg";
 import { SidebarItem } from "./SidebarItem";
 import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
 
 export function AccountContent() {
-  const { connect, disconnect, account, isConnected, chainId, connector } =
-    useConnection();
+  const evmConnection = useConnectionEVM();
+  const svmConnection = useConnectionSVM();
 
-  const chainInfo = isSupportedChainId(chainId)
-    ? getChainInfo(chainId)
+  const evmChainInfo = isSupportedChainId(evmConnection.chainId)
+    ? getChainInfo(evmConnection.chainId)
     : {
         name: "Unsupported Network",
         logoURI: "",
       };
 
-  return (
-    <SidebarItem.Header title="Account">
-      {isConnected && account ? (
-        <ConnectedAccount
-          address={account}
-          chainName={chainInfo.name}
-          chainLogoUrl={chainInfo.logoURI}
-          onClickDisconnect={() =>
-            disconnect({ connector, trackSection: "mobileNavSidebar" })
-          }
-        />
-      ) : (
+  const noWalletConnected =
+    !evmConnection.isConnected && !svmConnection.isConnected;
+
+  const content = noWalletConnected ? (
+    <ConnectButton
+      onClick={() => {
+        evmConnection.connect({ trackSection: "mobileNavSidebar" });
+      }}
+    >
+      Connect Wallet
+    </ConnectButton>
+  ) : (
+    <>
+      <ConnectedAccountsContainer>
+        {evmConnection.isConnected && evmConnection.account && (
+          <ConnectedAccount
+            address={evmConnection.account}
+            chainName={evmChainInfo.name}
+            chainLogoUrl={evmChainInfo.logoURI}
+            onClickDisconnect={() =>
+              evmConnection.disconnect({
+                connector: evmConnection.connector,
+                trackSection: "mobileNavSidebar",
+              })
+            }
+          />
+        )}
+        {svmConnection.isConnected && svmConnection.account && (
+          <ConnectedAccount
+            address={svmConnection.account.toBase58()}
+            chainName={"Solana"}
+            chainLogoUrl={solanaLogo}
+            onClickDisconnect={() =>
+              svmConnection.disconnect({
+                trackSection: "mobileNavSidebar",
+              })
+            }
+          />
+        )}
+      </ConnectedAccountsContainer>
+      {!evmConnection.isConnected && svmConnection.isConnected && (
         <ConnectButton
           onClick={() => {
-            connect({ trackSection: "mobileNavSidebar" });
+            svmConnection.connect({ trackSection: "mobileNavSidebar" });
           }}
         >
-          Connect Wallet
+          Connect EVM Wallet
         </ConnectButton>
       )}
-    </SidebarItem.Header>
+      {evmConnection.isConnected && !svmConnection.isConnected && (
+        <ConnectButton
+          onClick={() => {
+            svmConnection.connect({ trackSection: "mobileNavSidebar" });
+          }}
+        >
+          Connect Solana Wallet
+        </ConnectButton>
+      )}
+    </>
   );
+
+  return <SidebarItem.Header title="Account">{content}</SidebarItem.Header>;
 }
 
 function ConnectedAccount(props: {
@@ -90,8 +131,19 @@ const DisconnectButton = styled.div`
   }
 `;
 
+const ConnectedAccountsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  @media (max-width: 428px) {
+    flex-direction: column;
+  }
+`;
+
 const ConnectedAccountContainer = styled.div`
   display: flex;
+  flex: 1;
   height: 64px;
   padding: 12px;
   justify-content: space-between;

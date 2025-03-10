@@ -1,55 +1,45 @@
-import { useConnection } from "hooks";
-import {
-  shortenAddress,
-  isSupportedChainId,
-  SHOW_ACX_NAV_TOKEN,
-  getChainInfo,
-} from "utils";
+import { shortenAddress, isSupportedChainId, getChainInfo } from "utils";
+
+import solanaLogo from "assets/wallet-logos/solana.svg";
+import Web3Subscribe from "./Web3Subscribe";
+import { Text } from "components/Text";
+
+import { useEnsQuery } from "hooks/useEns";
+import { useSidebarContext } from "hooks/useSidebarContext";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 import {
   ConnectButton,
-  UnsupportedNetwork,
   BalanceButton,
-  Logo,
-  BalanceWallet,
   Separator,
   WalletWrapper,
   ConnectedAccountChainLogoContainer,
   ConnectedAccountContainer,
 } from "./Wallet.styles";
-import Web3Subscribe from "./Web3Subscribe";
-import { useEnsQuery } from "hooks/useEns";
-import { useSidebarContext } from "hooks/useSidebarContext";
-import { Text } from "components/Text";
 
 const Wallet = () => {
-  const { account, isConnected, chainId, connect } = useConnection();
+  const evmConnection = useConnectionEVM();
+  const svmConnection = useConnectionSVM();
+
   const {
     data: { ensName },
-  } = useEnsQuery(account);
+  } = useEnsQuery(evmConnection.account);
   const { openSidebar } = useSidebarContext();
 
-  const chainInfo = isSupportedChainId(chainId)
-    ? getChainInfo(chainId)
+  const evmChainInfo = isSupportedChainId(evmConnection.chainId)
+    ? getChainInfo(evmConnection.chainId)
     : {
         name: "Unsupported Network",
         logoURI: "",
       };
 
-  if (account && !isSupportedChainId(chainId)) {
-    return (
-      <UnsupportedNetwork data-cy="unsupported-network">
-        Unsupported network. Please change networks.
-      </UnsupportedNetwork>
-    );
-  }
-
-  if (!isConnected) {
+  if (!evmConnection.isConnected && svmConnection.state !== "connected") {
     return (
       <ConnectButton
         data-cy="wallet-connect-button"
         onClick={() => {
-          connect({ trackSection: "navbar" });
+          evmConnection.connect({ trackSection: "navbar" });
         }}
       >
         Connect
@@ -61,22 +51,23 @@ const Wallet = () => {
     <WalletWrapper>
       <Web3Subscribe />
       <BalanceButton onClick={() => openSidebar()} data-cy="acx-balance">
-        {SHOW_ACX_NAV_TOKEN && (
-          <>
-            <Logo />
-            <BalanceWallet>0 ACX</BalanceWallet>
-          </>
+        {evmConnection.account && (
+          <ConnectedAccount
+            chainLogoUrl={evmChainInfo.logoURI}
+            chainName={evmChainInfo.name}
+            address={evmConnection.account}
+            ensName={ensName}
+          />
         )}
-        {account && (
-          <>
-            {SHOW_ACX_NAV_TOKEN && <Separator />}
-            <ConnectedAccount
-              chainLogoUrl={chainInfo.logoURI}
-              chainName={chainInfo.name}
-              address={account}
-              ensName={ensName}
-            />
-          </>
+        {evmConnection.isConnected && svmConnection.isConnected && (
+          <Separator />
+        )}
+        {svmConnection.account && (
+          <ConnectedAccount
+            chainLogoUrl={solanaLogo}
+            chainName="Solana"
+            address={svmConnection.account.toBase58()}
+          />
         )}
       </BalanceButton>
     </WalletWrapper>
