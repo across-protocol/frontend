@@ -548,5 +548,30 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
+  },
+  {
+    "chainId": 133268194659241,
+    "publicRpcUrl": "https://api.devnet.solana.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana-devnet/assets/logo.svg",
+    "spokePool": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
+    "spokePoolBlock": 356313770,
+    "inputTokens": [
+      {
+        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ]
   }
 ]
