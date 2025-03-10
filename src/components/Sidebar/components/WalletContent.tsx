@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Connector, useAccount, useConnect } from "wagmi";
+import { Connector, useAccount } from "wagmi";
 import { useWallet } from "@solana/wallet-adapter-react";
 import styled from "@emotion/styled";
 
@@ -17,6 +17,8 @@ import {
   trackWalletConnectTransactionCompleted,
 } from "utils";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
+import { useConnectSorted } from "hooks/useConnectSorted";
+import { useWalletsSorted } from "hooks/useWalletSorted";
 
 const connectorNameToIcon = {
   MetaMask: metaMaskIcon,
@@ -37,7 +39,7 @@ export function WalletContent() {
 }
 
 function EVMWalletContent() {
-  const { connectors, isPending, connect } = useConnect();
+  const { sortedConnectors, isPending, connect } = useConnectSorted();
   const { closeSidebar } = useSidebarContext();
   const { isConnected: isEvmConnected } = useAccount();
 
@@ -73,13 +75,14 @@ function EVMWalletContent() {
           EVM
         </Text>
       </WalletTypeSeparator>
-      {connectors.map((connector) => (
+      {sortedConnectors.map((connector) => (
         <WalletItem
           key={connector.id}
           label={connector.name}
           iconUrl={connector.icon || ""}
           onClick={() => handleClickEvmConnector(connector)}
           isPending={isPending}
+          secondaryLabel={connector?.installed ? "Installed" : undefined}
         />
       ))}
     </>
@@ -87,7 +90,8 @@ function EVMWalletContent() {
 }
 
 function SVMWalletContent() {
-  const { wallets, select, connecting, disconnect, connected } = useWallet();
+  const { sortedWallets, select, connecting, disconnect, connected } =
+    useWalletsSorted();
   const { closeSidebar } = useSidebarContext();
   const { connected: isSolanaConnected } = useWallet();
 
@@ -119,13 +123,14 @@ function SVMWalletContent() {
           SVM
         </Text>
       </WalletTypeSeparator>
-      {wallets.map((wallet) => (
+      {sortedWallets.map((wallet) => (
         <WalletItem
           key={wallet.adapter.name}
           label={wallet.adapter.name}
           iconUrl={wallet.adapter.icon}
           onClick={() => handleClickSvmWallet(wallet.adapter)}
           isPending={connecting}
+          secondaryLabel={wallet.installed ? "Installed" : undefined}
         />
       ))}
     </>
@@ -137,11 +142,13 @@ function WalletItem({
   iconUrl,
   onClick,
   isPending,
+  secondaryLabel,
 }: {
   label: string;
   iconUrl: string;
   onClick: () => void;
   isPending: boolean;
+  secondaryLabel?: string;
 }) {
   return (
     <SidebarItem.MenuItem
@@ -149,6 +156,7 @@ function WalletItem({
       onClick={onClick}
       label={label}
       disabled={isPending}
+      secondaryLabel={secondaryLabel}
       leftIcon={<WalletItemIcon name={label} iconUrl={iconUrl} />}
     />
   );

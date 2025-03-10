@@ -10,7 +10,6 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import App from "./App";
-import "./onboard-override.css";
 import { ErrorProvider } from "hooks";
 import { ToastProvider } from "components/Toast/useToast";
 import { AmpliProvider } from "hooks/useAmplitude";
