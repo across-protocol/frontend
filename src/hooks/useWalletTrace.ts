@@ -1,12 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { utils } from "ethers";
 
-import {
-  trackWalletConnectTransactionCompleted,
-  chainInfoTable,
-  CACHED_WALLET_KEY,
-} from "utils";
+import { trackWalletConnectTransactionCompleted, chainInfoTable } from "utils";
 import { ampli } from "ampli";
 import { useConnection, useAmplitude } from "hooks";
 
@@ -49,24 +44,21 @@ export function useWalletChangeTrace() {
   >();
   const { addToAmpliQueue } = useAmplitude();
 
-  const { wallet } = useConnection();
+  const { connector, account } = useConnection();
 
   useEffect(() => {
-    if (!wallet || !wallet.accounts.length) {
+    if (!connector || !account) {
       return;
     }
 
-    const connectedWalletAddress = utils.getAddress(wallet.accounts[0].address);
-
-    if (prevTrackedWallet === connectedWalletAddress) {
+    if (prevTrackedWallet === account) {
       return;
     }
 
-    const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
     addToAmpliQueue(() => {
-      trackWalletConnectTransactionCompleted(wallet, previousConnection);
+      trackWalletConnectTransactionCompleted(account, connector.name, true);
     });
 
-    setPrevTrackedWallet(connectedWalletAddress);
-  }, [wallet, wallet?.accounts.length]);
+    setPrevTrackedWallet(account);
+  }, [account, connector]);
 }

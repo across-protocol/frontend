@@ -18,9 +18,6 @@ export default defineConfig({
     rollupOptions: {
       maxParallelFileOps: 100,
       plugins: [rollupNodePolyFill()],
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
     },
   },
   plugins: [
@@ -43,11 +40,12 @@ export default defineConfig({
   optimizeDeps: {
     disabled: false,
     include: [
-      "@web3-onboard/common",
       "@walletconnect/ethereum-provider",
       "rxjs",
       "rxjs/operators",
       "@across-protocol/contracts",
+      "@solana/wallet-adapter-base",
+      "@solana/web3.js",
     ],
     esbuildOptions: {
       define: {

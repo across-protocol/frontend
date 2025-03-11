@@ -21,7 +21,7 @@ const getBalanceBySymbol = async (params: {
   chainIdToQuery?: ChainId;
   tokenSymbolToQuery?: string;
   config: ConfigClient;
-  provider?: providers.JsonRpcProvider;
+  provider?: providers.JsonRpcProvider | providers.FallbackProvider;
 }) => {
   const {
     accountToQuery,
