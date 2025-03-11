@@ -58,7 +58,6 @@ import {
   MULTICALL3_ADDRESS_OVERRIDES,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
-  defaultRelayerAddressOverride,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
@@ -75,6 +74,10 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
+import {
+  defaultRelayerAddressOverride,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -1826,27 +1829,6 @@ export async function getBalancerV2TokenPrice(
   );
 
   return Number((totalValue / floatTotalSupply).toFixed(18));
-}
-
-/**
- * Returns the EOA that will serve as the default relayer address
- * @param destinationChainId The destination chain that a bridge operation will transfer to
- * @param symbol A valid token symbol
- * @returns A valid EOA address
- */
-export function getDefaultRelayerAddress(
-  destinationChainId: number,
-  symbol?: string
-) {
-  const symbolOverride = symbol
-    ? defaultRelayerAddressOverride?.symbols?.[symbol]
-    : undefined;
-  return (
-    symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
-    symbolOverride?.defaultAddr ?? // Specific Symbol override
-    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
-    sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
-  );
 }
 
 /**

@@ -20,7 +20,6 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
-  getDefaultRelayerAddress,
   getHubPool,
   callViaMulticall3,
   validateChainAndTokenParams,
@@ -45,7 +44,7 @@ import {
 import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
-
+import { getDefaultRelayerAddress } from "./_relayer-address";
 const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
