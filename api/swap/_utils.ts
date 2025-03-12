@@ -22,6 +22,8 @@ import {
 } from "../_dexes/types";
 import { AMOUNT_TYPE } from "../_dexes/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
+import { AuthTxPayload } from "./_auth/_utils";
+import { PermitTxPayload } from "./_permit/_utils";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -289,7 +291,7 @@ export function buildBaseSwapResponseJson(params: {
     maxFeePerGas?: BigNumber;
     maxPriorityFeePerGas?: BigNumber;
   };
-  permitSwapTx?: any; // TODO: Add type
+  permitSwapTx?: AuthTxPayload | PermitTxPayload;
 }) {
   return stringifyBigNumProps({
     checks: {
