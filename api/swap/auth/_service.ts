@@ -14,7 +14,7 @@ import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { buildAuthTxPayload } from "./_utils";
-import { GAS_SPONSOR_ADDRESS } from "../../_relay/_utils";
+import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
 import { getBalance } from "../../_erc20";
 
 export const AuthSwapQueryParamsSchema = type({
