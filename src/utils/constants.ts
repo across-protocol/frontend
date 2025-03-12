@@ -226,6 +226,7 @@ export function getChainInfo(chainId: number): ChainInfo {
       pollingInterval: defaultBlockPollingInterval,
       rpcUrl: "https://rpc.com",
       customRpcUrl: "https://rpc.com",
+      ecosystem: "evm",
     };
   }
 
