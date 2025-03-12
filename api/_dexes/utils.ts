@@ -24,7 +24,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
 } from "../_utils";
-import { GAS_SPONSOR_ADDRESS } from "../relay/_utils";
+import { GAS_SPONSOR_ADDRESS } from "../_relay/_utils";
 import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
 import { TransferType } from "../_spoke-pool-periphery";
 export type CrossSwapType =
