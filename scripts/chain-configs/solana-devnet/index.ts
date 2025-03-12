@@ -9,6 +9,8 @@ const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
+  name: "Solana Devnet",
+  nativeToken: "SOL",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -20,4 +22,5 @@ export default {
   blockTimeSeconds: 0.5,
   tokens: ["USDC"],
   enableCCTP: true,
+  ecosystem: "svm" as const,
 } as ChainConfig;

@@ -1,4 +1,8 @@
-export type ChainConfig = {
+import { PUBLIC_NETWORKS } from "@across-protocol/constants";
+
+type BaseChainConfig = (typeof PUBLIC_NETWORKS)[number];
+
+export type ChainConfig = BaseChainConfig & {
   name: string;
   fullName?: string;
   nativeToken: string;

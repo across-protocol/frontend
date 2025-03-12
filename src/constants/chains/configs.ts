@@ -111,6 +111,11 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import solanaDevnetLogo from "assets/chain-logos/solana-devnet.svg";
+import solanaDevnetGrayscaleLogo from "assets/chain-logos/solana-devnet-grayscale.svg";
+import { ReactComponent as solanaDevnetLogoSvg } from "assets/chain-logos/solana-devnet.svg";
+import { ReactComponent as solanaDevnetGrayscaleLogoSvg } from "assets/chain-logos/solana-devnet-grayscale.svg";
+
 import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
@@ -161,6 +166,7 @@ export const alephZero = {
   nativeCurrencySymbol: "AZERO",
   customRpcUrl: process.env.REACT_APP_CHAIN_41455_PROVIDER_URL,
   pollingInterval: 6000,
+  ecosystem: "evm",
 };
 
 export const alephZero_viem = defineChain({
@@ -202,6 +208,7 @@ export const arbitrum = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
   pollingInterval: 1000,
+  ecosystem: "evm",
 };
 
 export const arbitrum_viem = defineChain({
@@ -243,6 +250,7 @@ export const arbitrumSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_421614_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const arbitrumSepolia_viem = defineChain({
@@ -283,6 +291,7 @@ export const base = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const base_viem = defineChain({
@@ -321,6 +330,7 @@ export const baseSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const baseSepolia_viem = defineChain({
@@ -362,6 +372,7 @@ export const blast = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_81457_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const blast_viem = defineChain({
@@ -400,6 +411,7 @@ export const blastSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const blastSepolia_viem = defineChain({
@@ -440,6 +452,7 @@ export const ink = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_57073_PROVIDER_URL,
   pollingInterval: 1000,
+  ecosystem: "evm",
 };
 
 export const ink_viem = defineChain({
@@ -478,6 +491,7 @@ export const lensSepolia = {
   nativeCurrencySymbol: "GRASS",
   customRpcUrl: process.env.REACT_APP_CHAIN_37111_PROVIDER_URL,
   pollingInterval: 1000,
+  ecosystem: "evm",
 };
 
 export const lensSepolia_viem = defineChain({
@@ -519,6 +533,7 @@ export const linea = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const linea_viem = defineChain({
@@ -556,6 +571,7 @@ export const lisk = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1135_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const lisk_viem = defineChain({
@@ -594,6 +610,7 @@ export const liskSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_4202_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const liskSepolia_viem = defineChain({
@@ -635,6 +652,7 @@ export const ethereum = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
   pollingInterval: 12000,
+  ecosystem: "evm",
 };
 
 export const ethereum_viem = defineChain({
@@ -675,6 +693,7 @@ export const mode = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const mode_viem = defineChain({
@@ -713,6 +732,7 @@ export const modeSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const modeSepolia_viem = defineChain({
@@ -754,6 +774,7 @@ export const optimism = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const optimism_viem = defineChain({
@@ -795,6 +816,7 @@ export const optimismSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const optimismSepolia_viem = defineChain({
@@ -836,6 +858,7 @@ export const polygon = {
   nativeCurrencySymbol: "MATIC",
   customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
   pollingInterval: 5000,
+  ecosystem: "evm",
 };
 
 export const polygon_viem = defineChain({
@@ -877,6 +900,7 @@ export const polygonAmoy = {
   nativeCurrencySymbol: "MATIC",
   customRpcUrl: process.env.REACT_APP_CHAIN_80002_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const polygonAmoy_viem = defineChain({
@@ -918,6 +942,7 @@ export const redstone = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_690_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const redstone_viem = defineChain({
@@ -959,6 +984,7 @@ export const scroll = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_534352_PROVIDER_URL,
   pollingInterval: 3000,
+  ecosystem: "evm",
 };
 
 export const scroll_viem = defineChain({
@@ -1000,6 +1026,7 @@ export const sepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
   pollingInterval: 15000,
+  ecosystem: "evm",
 };
 
 export const sepolia_viem = defineChain({
@@ -1026,6 +1053,24 @@ export const sepolia_viem = defineChain({
   },
 });
 
+export const solanaDevnet = {
+  name: "Solana Devnet",
+  fullName: "Solana devnet",
+  chainId: 133268194659241,
+  logoURI: solanaDevnetLogo,
+  grayscaleLogoURI: solanaDevnetGrayscaleLogo,
+  logoSvg: solanaDevnetLogoSvg,
+  grayscaleLogoSvg: solanaDevnetGrayscaleLogoSvg,
+  rpcUrl: "https://api.devnet.solana.com",
+  explorerUrl: "https://explorer.solana.com/?cluster=devnet",
+  constructExplorerLink: (txHash: string) =>
+    `${solanaDevnet.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "SOL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_133268194659241_PROVIDER_URL,
+  pollingInterval: 500,
+  ecosystem: "svm",
+};
+
 export const soneium = {
   name: "Soneium",
   fullName: "Soneium",
@@ -1041,6 +1086,7 @@ export const soneium = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1868_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const soneium_viem = defineChain({
@@ -1082,6 +1128,7 @@ export const unichain = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
   pollingInterval: 1000,
+  ecosystem: "evm",
 };
 
 export const unichain_viem = defineChain({
@@ -1123,6 +1170,7 @@ export const unichainSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1301_PROVIDER_URL,
   pollingInterval: 1000,
+  ecosystem: "evm",
 };
 
 export const unichainSepolia_viem = defineChain({
@@ -1164,6 +1212,7 @@ export const worldChain = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_480_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const worldChain_viem = defineChain({
@@ -1205,6 +1254,7 @@ export const zkSync = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const zkSync_viem = defineChain({
@@ -1245,6 +1295,7 @@ export const zora = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_7777777_PROVIDER_URL,
   pollingInterval: 2000,
+  ecosystem: "evm",
 };
 
 export const zora_viem = defineChain({
@@ -1304,6 +1355,7 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  solanaDevnet,
   soneium,
   unichain,
   unichainSepolia,

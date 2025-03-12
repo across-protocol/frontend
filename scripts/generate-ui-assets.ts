@@ -1,6 +1,7 @@
 import { writeFileSync, copyFileSync } from "fs";
 import * as prettier from "prettier";
 import { camelCase, capitalize } from "lodash-es";
+import { ChainFamily } from "@across-protocol/constants";
 
 import * as chainConfigs from "./chain-configs";
 import * as externConfigs from "./extern-configs";
@@ -21,7 +22,7 @@ async function generateUiAssets() {
   const externVarNames: string[] = [];
 
   for (const [chainKey, chainConfig] of Object.entries(chainConfigs)) {
-    const { chainId, logoPath, grayscaleLogoPath, name, fullName } =
+    const { chainId, logoPath, grayscaleLogoPath, name, fullName, family } =
       chainConfig;
 
     // Copy logos into assets directory
@@ -67,35 +68,38 @@ async function generateUiAssets() {
         nativeCurrencySymbol: "${chainConfig.nativeToken}",
         customRpcUrl: process.env.REACT_APP_CHAIN_${chainId}_PROVIDER_URL,
         pollingInterval: ${(chainConfig.blockTimeSeconds || 15) * 1000},
+        ecosystem: ${family === ChainFamily.SVM ? '"svm"' : '"evm"'},
       };
     `);
-    chainsFileContent.push(`
-      export const ${chainVarName}_viem = defineChain({
-        id: ${chainVarName}.chainId,
-        name: ${chainVarName}.name,
-        nativeCurrency: {
-          name: ${chainVarName}.nativeCurrencySymbol,
-          symbol: ${chainVarName}.nativeCurrencySymbol,
-          decimals: 18,
-        },
-        rpcUrls: {
-          default: {
-            http: [
-              ${chainVarName}.rpcUrl,
-              ${chainVarName}.customRpcUrl ? ${chainVarName}.customRpcUrl : [],
-            ].flat(),
-          },
-        },
-        blockExplorers: {
-          default: {
-            name: ${chainVarName}.name + " Explorer",
-            url: ${chainVarName}.explorerUrl,
-          },
-        },
-      });
-    `);
     chainVarNames.push(chainVarName);
-    chainViemVarNames.push(chainVarName + "_viem");
+    if (family !== ChainFamily.SVM) {
+      chainsFileContent.push(`
+        export const ${chainVarName}_viem = defineChain({
+          id: ${chainVarName}.chainId,
+          name: ${chainVarName}.name,
+          nativeCurrency: {
+            name: ${chainVarName}.nativeCurrencySymbol,
+            symbol: ${chainVarName}.nativeCurrencySymbol,
+            decimals: 18,
+          },
+          rpcUrls: {
+            default: {
+              http: [
+                ${chainVarName}.rpcUrl,
+                ${chainVarName}.customRpcUrl ? ${chainVarName}.customRpcUrl : [],
+              ].flat(),
+            },
+          },
+          blockExplorers: {
+            default: {
+              name: ${chainVarName}.name + " Explorer",
+              url: ${chainVarName}.explorerUrl,
+            },
+          },
+        });
+      `);
+      chainViemVarNames.push(chainVarName + "_viem");
+    }
   }
 
   // Process external project configs
