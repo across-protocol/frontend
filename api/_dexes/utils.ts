@@ -24,6 +24,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
 } from "../_utils";
+import { GAS_SPONSOR_ADDRESS } from "../relay/_utils";
 import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
 import { TransferType } from "../_spoke-pool-periphery";
 export type CrossSwapType =
@@ -236,7 +237,7 @@ export async function extractDepositDataStruct(
     baseDepositData,
     submissionFees: submissionFees || {
       amount: "0",
-      recipient: constants.AddressZero,
+      recipient: GAS_SPONSOR_ADDRESS,
     },
   };
 }
