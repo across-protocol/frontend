@@ -11,7 +11,10 @@ import {
   latestBalanceCache,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
-import { getFullRelayers } from "./_relayer-address";
+import {
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 import mainnetChains from "../src/data/chains_1.json";
 
 const { CRON_SECRET } = getEnvs();
@@ -48,9 +51,14 @@ const handler = async (
         ]
       );
       await Promise.allSettled(
-        fullRelayers.map(async (relayer) => {
+        chain.inputTokens.map(async (token) => {
+          const transferRestrictedRelayers = getTransferRestrictedRelayers(
+            chain.chainId,
+            token.symbol
+          );
+          const allRelayers = [...fullRelayers, ...transferRestrictedRelayers];
           const results = await Promise.allSettled(
-            chain.outputTokens.map((token) => {
+            allRelayers.map(async (relayer) => {
               return latestBalanceCache({
                 chainId: chain.chainId,
                 address: relayer,
@@ -66,7 +74,7 @@ const handler = async (
           logger.debug({
             at: `CronCacheBalances`,
             chain: chain.chainId,
-            relayer,
+            inputToken: token.symbol,
             message: `success: ${success.length}, fails: ${fail.length}`,
           });
         })

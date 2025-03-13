@@ -74,10 +74,6 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
-import {
-  defaultRelayerAddressOverride,
-  getTransferRestrictedRelayers,
-} from "./_relayer-address";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
