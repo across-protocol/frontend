@@ -98,6 +98,49 @@ export function getCrossSwapType(params: {
   return CROSS_SWAP_TYPE.ANY_TO_ANY;
 }
 
+export function buildExactInputBridgeTokenMessage(
+  crossSwap: CrossSwap,
+  outputAmount: BigNumber
+) {
+  const transferActions = crossSwap.isOutputNative
+    ? // WETH unwrap to ETH
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(outputAmount),
+          value: "0",
+        },
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: outputAmount.toString(),
+        },
+      ]
+    : // ERC-20 token transfer
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeTransferCalldata(crossSwap.recipient, outputAmount),
+          value: "0",
+        },
+      ];
+  return buildMulticallHandlerMessage({
+    fallbackRecipient: getFallbackRecipient(crossSwap),
+    actions: [
+      ...transferActions,
+      // drain remaining bridgeable output tokens from MultiCallHandler contract
+      {
+        target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.recipient
+        ),
+        value: "0",
+      },
+    ],
+  });
+}
+
 /**
  * This builds a cross-chain message for a (any/bridgeable)-to-bridgeable cross swap
  * with a specific amount of output tokens that the recipient will receive. Excess

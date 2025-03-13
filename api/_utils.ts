@@ -102,7 +102,6 @@ const {
   REACT_APP_DISABLED_CHAINS,
   REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
-  VERCEL_URL,
   LIMITS_BUFFER_MULTIPLIERS,
   CHAIN_USD_MAX_BALANCES,
   CHAIN_USD_MAX_DEPOSITS,
@@ -954,6 +953,35 @@ export async function getSuggestedFees(params: {
       params,
     })
   ).data;
+}
+
+export async function getBridgeQuoteForExactInput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  exactInputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const quote = await getSuggestedFees({
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: true,
+    recipient: params.recipient,
+    message: params.message,
+    amount: params.exactInputAmount.toString(),
+  });
+
+  return {
+    inputAmount: params.exactInputAmount,
+    outputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    minOutputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    suggestedFees: quote,
+    message: params.message,
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
+  };
 }
 
 export async function getBridgeQuoteForMinOutput(params: {
