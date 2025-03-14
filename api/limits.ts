@@ -12,7 +12,6 @@ import {
   ConvertDecimals,
   getCachedTokenBalance,
   getCachedTokenPrice,
-  getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
   getChainInputTokenMaxBalanceInUsd,
@@ -39,6 +38,11 @@ import {
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 import { getEnvs } from "./_env";
+import {
+  getDefaultRelayerAddress,
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -66,25 +70,10 @@ const handler = async (
   });
   try {
     const {
-      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
       // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
     } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-
-    const fullRelayers = !REACT_APP_FULL_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
-    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
-          (relayer) => {
-            return ethers.utils.getAddress(relayer);
-          }
-        );
 
     assert(query, LimitsQueryParamsSchema);
 
@@ -95,6 +84,12 @@ const handler = async (
       inputToken,
       outputToken,
     } = validateChainAndTokenParams(query);
+
+    const fullRelayers = getFullRelayers();
+    const transferRestrictedRelayers = getTransferRestrictedRelayers(
+      destinationChainId,
+      l1Token.symbol
+    );
 
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.

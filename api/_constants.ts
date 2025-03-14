@@ -3,11 +3,7 @@ import { relayFeeCalculator, utils } from "@across-protocol/sdk";
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
 
-const {
-  RELAYER_ADDRESS_OVERRIDES,
-  GRAPH_API_KEY,
-  RELAYER_FEE_CAPITAL_COST_OVERRIDES,
-} = getEnvs();
+const { GRAPH_API_KEY, RELAYER_FEE_CAPITAL_COST_OVERRIDES } = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
@@ -132,16 +128,6 @@ defaultRelayerFeeCapitalCostConfig["USDB"] = {
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
 };
-
-export const defaultRelayerAddressOverride: {
-  defaultAddr?: string;
-  symbols?: {
-    [symbol: string]: {
-      defaultAddr?: string;
-      chains?: { [chainId: string]: string };
-    };
-  };
-} = JSON.parse(RELAYER_ADDRESS_OVERRIDES || "{}");
 
 export const graphAPIKey = GRAPH_API_KEY;
 
