@@ -253,6 +253,8 @@ export const nonEthChains = [
   ChainId.POLYGON_AMOY,
   ChainId.ALEPH_ZERO,
   ChainId.LENS_SEPOLIA,
+  ChainId.SOLANA_DEVNET,
+  ChainId.SOLANA,
 ];
 
 export const tokenTable = Object.fromEntries(
