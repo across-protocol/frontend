@@ -393,9 +393,12 @@ export function buildDestinationSwapCrossChainMessage({
       },
     ];
   }
-  // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
+  // If output token is an ERC-20 token and amount type is MIN_OUTPUT or EXACT_INPUT, we need
   // to transfer all realized output tokens to the recipient.
-  else if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
+  else if (
+    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT ||
+    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
+  ) {
     transferActions = [
       {
         target: getMultiCallHandlerAddress(destinationSwapChainId),
