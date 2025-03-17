@@ -74,6 +74,15 @@ export class AcrossApiError extends Error {
   }
 }
 
+export class TokenNotFoundError extends AcrossApiError {
+  constructor(args: { address: string; chainId: number; opts?: ErrorOptions }) {
+    super({
+      message: `Unable to find tokenDetails for address: ${args.address}, on chain with id: ${args.chainId}`,
+      status: HttpErrorToStatusCode.NOT_FOUND,
+    });
+  }
+}
+
 export class UnauthorizedError extends AcrossApiError {
   constructor(args?: { message: string }, opts?: ErrorOptions) {
     super(
@@ -235,7 +244,7 @@ export function handleErrorCondition(
         { cause: error }
       );
     } else {
-      const message = `Upstream http request to ${error.request?.url} failed with ${error.status} ${error.message}`;
+      const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
       acrossApiError = new AcrossApiError(
         {
           message,
