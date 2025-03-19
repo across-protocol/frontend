@@ -18,12 +18,12 @@ import {
 } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
-import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "@across-protocol/sdk";
 
+import { CHAIN_IDs } from "../../_constants";
 import { Swap } from "../types";
 import { getSwapAndBridgeAddress } from "../../_swap-and-bridge";
-import { getProdToken } from "./utils";
+import { getProdToken } from "./utils/tokens";
 import { callViaMulticall3, getProvider } from "../../_utils";
 
 // https://docs.uniswap.org/contracts/v3/reference/deployments/

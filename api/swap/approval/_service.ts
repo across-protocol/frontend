@@ -16,7 +16,7 @@ import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: getSwapRouter02Strategy("UniversalSwapAndBridge"),
+  default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
 };
 
 export async function handleApprovalSwap(

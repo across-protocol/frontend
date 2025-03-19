@@ -4,7 +4,7 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { SwapRouter } from "@uniswap/universal-router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
-import { Swap, SwapQuote } from "../types";
+import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
 import {
   getSpokePoolPeripheryAddress,
   getSpokePoolPeripheryProxyAddress,
@@ -13,9 +13,9 @@ import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
-} from "./trading-api";
-import { UniswapQuoteFetchStrategy, floatToPercent } from "./utils";
-import { RouterTradeAdapter } from "./adapter";
+} from "./utils/trading-api";
+import { floatToPercent } from "./utils/conversion";
+import { RouterTradeAdapter } from "./utils/adapter";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -30,7 +30,7 @@ export const UNIVERSAL_ROUTER_ADDRESS = {
   [CHAIN_IDs.ZK_SYNC]: "0x28731BCC616B5f51dD52CF2e4dF0E78dD1136C06",
 };
 
-export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
+export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     return {
       address: UNIVERSAL_ROUTER_ADDRESS[chainId],
