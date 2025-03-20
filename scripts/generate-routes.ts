@@ -52,6 +52,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
+  chainConfigs.LENS,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -99,6 +100,8 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        // TODO: add when deployed
+        // CHAIN_IDs.LENS,
       ],
     },
     swapAndBridgeAddresses: {
