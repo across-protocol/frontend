@@ -9,6 +9,20 @@ import * as chainConfigs from "./chain-configs";
 import * as externConfigs from "./extern-configs";
 import assert from "assert";
 
+export const nonEthChains = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.POLYGON_AMOY,
+  CHAIN_IDs.ALEPH_ZERO,
+  CHAIN_IDs.LENS,
+  CHAIN_IDs.LENS_SEPOLIA,
+  CHAIN_IDs.SOLANA_DEVNET,
+  CHAIN_IDs.SOLANA,
+];
+
+export function isNonEthChain(chainId: number): boolean {
+  return nonEthChains.includes(chainId);
+}
+
 function getTokenSymbolForLogo(tokenSymbol: string): string {
   switch (tokenSymbol) {
     case "USDC.e":
@@ -408,6 +422,7 @@ function processTokenRoutes(
     if (
       tokenSymbol === "WETH" &&
       !toConfig.tokens.includes("ETH") &&
+      toConfig.tokens.includes("WETH") &&
       fromConfig.tokens.includes("ETH")
     ) {
       return ["WETH", "ETH"];

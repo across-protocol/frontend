@@ -1646,5 +1646,32 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
+  },
+  {
+    "chainId": 232,
+    "name": "Lens",
+    "publicRpcUrl": "https://api.lens.matterhosted.dev",
+    "explorerUrl": "https://block-explorer.testnet.lens.dev",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens-sepolia/assets/logo.svg",
+    "spokePool": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+    "spokePoolBlock": 193290,
+    "inputTokens": [
+      {
+        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ]
   }
 ]
