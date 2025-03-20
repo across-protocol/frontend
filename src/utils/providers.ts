@@ -11,6 +11,7 @@ function getProviderUrl(chainId: number): string {
   }
 }
 
+// TODO: add auth headers for client side requests
 export const providersTable: Record<
   number,
   ethers.providers.StaticJsonRpcProvider
