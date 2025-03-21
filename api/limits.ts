@@ -43,7 +43,6 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
-import { compareAddressesSimple } from "utils";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -398,7 +397,7 @@ const handler = async (
     if (
       (destinationChainId === CHAIN_IDs.ZK_SYNC &&
         computedOriginChainId === CHAIN_IDs.MAINNET) ||
-      compareAddressesSimple(inputToken.symbol, "POOL")
+      inputToken.symbol.toUpperCase() === "POOL"
     ) {
       maximumDeposit = liquidReserves;
     }
