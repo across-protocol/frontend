@@ -68,7 +68,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
 ];
-3;
+
 const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
