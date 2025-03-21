@@ -371,7 +371,7 @@ paths:
                 properties:
                   fillStatus:
                     type: string
-                    enum: ["filled", "pending", "expired", "refunded", "slowFillReqested"]
+                    enum: ["filled", "pending", "expired", "refunded", "slowFillRequested"]
                     description: >
                       The status of the deposit.
                        * filled: Deposits with this status have been filled on the destination chain and the recipient should have received funds. A FilledV3Relay event was emitted on the destination chain SpokePool.
