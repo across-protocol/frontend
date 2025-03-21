@@ -25,7 +25,7 @@ import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
-  tradeType: optional(enums(["minOutput", "exactOutput"])),
+  tradeType: optional(enums(["minOutput", "exactOutput", "exactInput"])),
   inputToken: validAddress(),
   outputToken: validAddress(),
   originChainId: positiveIntStr(),
