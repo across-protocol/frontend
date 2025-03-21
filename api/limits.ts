@@ -43,6 +43,7 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+import { compareAddressesSimple } from "utils";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -386,18 +387,21 @@ const handler = async (
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
 
-    // FIXME: Remove after campaign is complete
-    const maximumDeposit =
-      destinationChainId === CHAIN_IDs.ZK_SYNC &&
-      computedOriginChainId === CHAIN_IDs.MAINNET
-        ? liquidReserves
-        : getMaxDeposit(
-            liquidReserves,
-            bufferedMaxDepositShortDelay,
-            limitsBufferMultiplier,
-            chainHasMaxBoundary,
-            routeInvolvesLiteChain
-          );
+    let maximumDeposit = getMaxDeposit(
+      liquidReserves,
+      bufferedMaxDepositShortDelay,
+      limitsBufferMultiplier,
+      chainHasMaxBoundary,
+      routeInvolvesLiteChain
+    );
+
+    if (
+      (destinationChainId === CHAIN_IDs.ZK_SYNC &&
+        computedOriginChainId === CHAIN_IDs.MAINNET) ||
+      compareAddressesSimple(inputToken.symbol, "POOL")
+    ) {
+      maximumDeposit = liquidReserves;
+    }
 
     const limitCap = getLimitCap(
       l1Token.symbol,
