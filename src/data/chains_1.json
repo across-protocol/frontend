@@ -91,6 +91,13 @@
         "name": "Lisk",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
+      },
+      {
+        "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/gho.svg"
       }
     ],
     "outputTokens": [
@@ -177,6 +184,13 @@
         "name": "Lisk",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
+      },
+      {
+        "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/gho.svg"
       }
     ]
   },
@@ -1657,6 +1671,13 @@
     "spokePoolBlock": 193290,
     "inputTokens": [
       {
+        "address": "0x000000000000000000000000000000000000800A",
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/gho.svg"
+      },
+      {
         "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
         "symbol": "USDC",
         "name": "USD Coin",
@@ -1671,6 +1692,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x000000000000000000000000000000000000800A",
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/gho.svg"
       }
     ]
   }

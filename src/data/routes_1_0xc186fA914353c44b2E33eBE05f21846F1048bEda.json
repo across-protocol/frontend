@@ -1046,6 +1046,17 @@
     },
     {
       "fromChain": 1,
+      "toChain": 232,
+      "fromTokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+      "toTokenAddress": "0x000000000000000000000000000000000000800A",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "GHO",
+      "toTokenSymbol": "GHO",
+      "isNative": false,
+      "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
+    },
+    {
+      "fromChain": 1,
       "toChain": 42161,
       "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -12174,6 +12185,17 @@
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "externalProjectId": "hyperliquid"
+    },
+    {
+      "fromChain": 232,
+      "toChain": 1,
+      "fromTokenAddress": "0x000000000000000000000000000000000000800A",
+      "toTokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+      "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+      "fromTokenSymbol": "GHO",
+      "toTokenSymbol": "GHO",
+      "isNative": true,
+      "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
     },
     {
       "fromChain": 232,
