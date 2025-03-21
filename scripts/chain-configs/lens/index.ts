@@ -9,8 +9,8 @@ const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  logoPath: "../lens-sepolia/assets/logo.svg",
-  grayscaleLogoPath: "../lens-sepolia/assets/grayscale-logo.svg",
+  logoPath: "./assets/logo.svg",
+  grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
     address: getDeployedAddress("SpokePool", chainId),
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
