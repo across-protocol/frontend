@@ -60,7 +60,7 @@
     "build": "yarn prebuild && yarn prebuild-env && yarn load-env && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
     "prebuild": "tsx scripts/pre-build.ts",
     "prebuild-env": "./scripts/pre-build-env.sh",
-    "load-env": "file='./output_vercel_build.env' && [ -f $file ] && . $file; echo $GIT_ENV_EXPORTED; env | cut -d= -f1",
+    "load-env": "file='./output_vercel_build.env' && [ -f $file ] && mv $file .env && . $file; echo $GIT_ENV_EXPORTED",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
