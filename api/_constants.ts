@@ -7,6 +7,7 @@ const { GRAPH_API_KEY, RELAYER_FEE_CAPITAL_COST_OVERRIDES } = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+export const CHAINS = constants.PUBLIC_NETWORKS;
 
 export const maxRelayFeePct = 0.25;
 

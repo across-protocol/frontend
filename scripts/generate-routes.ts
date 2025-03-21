@@ -33,7 +33,7 @@ type ValidTokenSymbol = string;
 
 const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 
-const enabledMainnetChainConfigs = [
+export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
   chainConfigs.POLYGON,
@@ -54,7 +54,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.UNICHAIN,
 ];
 
-const enabledSepoliaChainConfigs = [
+export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
   chainConfigs.ARBITRUM_SEPOLIA,
@@ -133,6 +133,10 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
         [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
         [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
+      },
+      gho: {
+        [CHAIN_IDs.MAINNET]: "0x0000000000000000000000000000000000000000",
+        232: "0x0000000000000000000000000000000000000000",
       },
     },
     spokePoolPeripheryAddresses: {

@@ -86,7 +86,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
         expectedAmountOut,
         expectedAmountIn,
         slippageTolerance: quote.slippage,
-        swapTx,
+        swapTxns: [swapTx],
       };
     } else {
       const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
@@ -113,11 +113,13 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
         expectedAmountOut,
         expectedAmountIn,
         slippageTolerance: swap.slippageTolerance,
-        swapTx: {
-          to: "0x",
-          data: "0x",
-          value: "0x",
-        },
+        swapTxns: [
+          {
+            to: "0x",
+            data: "0x",
+            value: "0x",
+          },
+        ],
       };
     }
 

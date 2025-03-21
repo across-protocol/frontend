@@ -1,9 +1,14 @@
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { ethers, Wallet } from "ethers";
+import { Wallet } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
+import {
+  MIN_OUTPUT_CASES,
+  EXACT_OUTPUT_CASES,
+  EXACT_INPUT_CASES,
+  LENS_CASES,
+} from "./_swap-cases";
 
 dotenv.config();
 
@@ -12,219 +17,6 @@ export type BaseSwapResponse = Awaited<
 >;
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
-
-export const depositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
-export const originChainId = CHAIN_IDs.OPTIMISM;
-export const destinationChainId = CHAIN_IDs.ARBITRUM;
-export const anyDestinationOutputTokens = {
-  [CHAIN_IDs.ARBITRUM]: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE
-};
-export const MIN_OUTPUT_CASES = [
-  // B2B - only bridge
-  {
-    labels: ["B2B", "MIN_OUTPUT", "USDC - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["B2B", "MIN_OUTPUT", "Native ETH - Native ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "minOutput",
-      inputToken: ethers.constants.AddressZero,
-      originChainId,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId,
-      depositor,
-    },
-  },
-  // B2A - destination swap
-  {
-    labels: ["B2A", "MIN_OUTPUT", "USDC - APE"],
-    params: {
-      amount: ethers.utils.parseUnits("3", 18).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: anyDestinationOutputTokens[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  // A2B - origin swap
-  {
-    labels: ["A2B", "MIN_OUTPUT", "bridged USDC - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
-      inputToken:
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["A2B", "MIN_OUTPUT", "USDC - WETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["A2B", "MIN_OUTPUT", "WETH - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[originChainId],
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["A2B", "MIN_OUTPUT", "USDC - Native ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["A2B", "MIN_OUTPUT", "Native ETH - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("3", 6).toString(),
-      tradeType: "minOutput",
-      inputToken: ethers.constants.AddressZero,
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  // A2A - origin swap and destination swap
-  {
-    labels: ["A2A", "MIN_OUTPUT", "bridged USDC - APE"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 18).toString(),
-      tradeType: "minOutput",
-      inputToken:
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
-      originChainId,
-      outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
-      destinationChainId,
-      depositor,
-    },
-  },
-];
-export const EXACT_OUTPUT_CASES = MIN_OUTPUT_CASES.map((testCase) => ({
-  labels: testCase.labels.map((label) => label.replace("MIN", "EXACT")),
-  params: {
-    ...testCase.params,
-    tradeType: "exactOutput",
-  },
-}));
-
-export const EXACT_INPUT_CASES = [
-  // B2B - only bridge
-  {
-    labels: ["B2B", "EXACT_INPUT", "USDC - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["B2B", "EXACT_INPUT", "Native ETH - Native ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "exactInput",
-      inputToken: ethers.constants.AddressZero,
-      originChainId,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId,
-      depositor,
-    },
-  },
-  // B2A - destination swap
-  {
-    labels: ["B2A", "EXACT_INPUT", "USDC - APE"],
-    params: {
-      amount: ethers.utils.parseUnits("3", 6).toString(),
-      tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: anyDestinationOutputTokens[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  // A2B - origin swap
-  {
-    labels: ["A2B", "EXACT_INPUT", "USDC - Native ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("3", 6).toString(),
-      tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-      originChainId,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId,
-      depositor,
-    },
-  },
-  {
-    labels: ["A2B", "EXACT_INPUT", "Native ETH - USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "exactInput",
-      inputToken: ethers.constants.AddressZero,
-      originChainId,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-      destinationChainId,
-      depositor,
-    },
-  },
-  // A2A - origin swap and destination swap
-  {
-    labels: ["A2A", "EXACT_INPUT", "bridged USDC - APE"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "exactInput",
-      inputToken:
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
-      originChainId,
-      outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
-      destinationChainId,
-      depositor,
-    },
-  },
-];
 
 export function filterTestCases(
   testCases: {
@@ -251,6 +43,7 @@ export async function fetchSwapQuote(slug?: "approval" | "permit" | "auth") {
     ...MIN_OUTPUT_CASES,
     ...EXACT_OUTPUT_CASES,
     ...EXACT_INPUT_CASES,
+    ...LENS_CASES,
   ];
   const filteredTestCases = filterTestCases(testCases, filterString);
   for (const testCase of filteredTestCases) {
