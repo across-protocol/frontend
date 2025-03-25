@@ -1207,6 +1207,16 @@ export function getRpcUrlsFromConfigJson(chainId: number) {
   return urls;
 }
 
+/**
+ * Generates a relevant SpokePool given the input chain ID
+ * @param _chainId A valid chain Id that corresponds to an available AcrossV2 Spoke Pool
+ * @returns The corresponding SpokePool for the given `_chainId`
+ */
+export const getSpokePool = (_chainId: number): SpokePool => {
+  const spokePoolAddress = getSpokePoolAddress(_chainId);
+  return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
+};
+
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     default:
