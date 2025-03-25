@@ -298,6 +298,11 @@ export async function extractSwapAndDepositDataStruct(
       "Can not extract 'SwapAndDepositDataStruct' without originSwapQuote and originRouter"
     );
   }
+  if (originSwapQuote.swapTxns.length !== 1) {
+    throw new Error(
+      "Can not extract 'SwapAndDepositDataStruct' without a single swap transaction"
+    );
+  }
 
   const { baseDepositData, submissionFees: _submissionFees } =
     await extractDepositDataStruct(crossSwapQuotes, submissionFees);
@@ -307,7 +312,7 @@ export async function extractSwapAndDepositDataStruct(
     swapToken: originSwapQuote.tokenIn.address,
     swapTokenAmount: originSwapQuote.maximumAmountIn,
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-    routerCalldata: originSwapQuote.swapTx.data,
+    routerCalldata: originSwapQuote.swapTxns[0].data,
     exchange: originRouter.address,
     transferType:
       originRouter.name === "UniswapV3UniversalRouter"
@@ -346,10 +351,10 @@ export function buildDestinationSwapCrossChainMessage({
   routerAddress: string;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
-  const isIndicativeQuote =
-    destinationSwapQuote.swapTx.to === "0x0" &&
-    destinationSwapQuote.swapTx.data === "0x0" &&
-    destinationSwapQuote.swapTx.value === "0x0";
+  const isIndicativeQuote = destinationSwapQuote.swapTxns.every(
+    (swapTxn) =>
+      swapTxn.to === "0x0" && swapTxn.data === "0x0" && swapTxn.value === "0x0"
+  );
 
   let transferActions: {
     target: string;
@@ -413,13 +418,11 @@ export function buildDestinationSwapCrossChainMessage({
 
   const swapActions = isIndicativeQuote
     ? []
-    : [
-        {
-          target: destinationSwapQuote.swapTx.to,
-          callData: destinationSwapQuote.swapTx.data,
-          value: destinationSwapQuote.swapTx.value,
-        },
-      ];
+    : destinationSwapQuote.swapTxns.map((swapTxn) => ({
+        target: swapTxn.to,
+        callData: swapTxn.data,
+        value: swapTxn.value,
+      }));
 
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
