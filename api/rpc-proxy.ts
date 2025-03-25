@@ -55,8 +55,6 @@ const handler = async (
     const origin = headers.origin;
 
     if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
-      console.log(resolveVercelEndpoint(), " does not include ", origin);
-
       throw new UnauthorizedError({
         message: "Origin not allowed",
       });
