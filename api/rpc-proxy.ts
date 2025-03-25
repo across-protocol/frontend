@@ -47,7 +47,7 @@ const handler = async (
 
     logger.debug({
       at: "rpc-proxy",
-      message: "Incoming RPC",
+      message: "Incoming RPC proxy request",
       chainId,
       requestBody: body,
     });
@@ -72,8 +72,8 @@ const handler = async (
     }).then((res) => res.json());
 
     logger.debug({
-      at: "rpc/lens-mainnet",
-      message: "Incoming RPC",
+      at: "rpc-proxy",
+      message: "Successful RPC proxy response",
       response: data,
     });
 
