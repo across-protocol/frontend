@@ -6,7 +6,6 @@ import {
   ENABLED_ROUTES,
   resolveVercelEndpoint,
 } from "../../api/_utils";
-import { JsonRpcError } from "@across-protocol/sdk/dist/types/providers";
 import { providers } from "ethers";
 
 describe("_utils", () => {
@@ -262,17 +261,14 @@ describe("_utils", () => {
 
     test("RPC proxy works", async () => {
       const provider = new providers.JsonRpcProvider({
-        url: `${resolveVercelEndpoint()}/api/rpc-proxy?chainId=232`,
+        url: `${resolveVercelEndpoint()}/api/rpc-proxy?chainId=${CHAIN_IDs.LENS}`,
         headers: {
           Origin: resolveVercelEndpoint(),
         },
       });
 
       const blockNumber = await provider.getBlockNumber();
-
-      console.log("blockNumber", blockNumber);
       expect(blockNumber).toBeDefined();
-      // expect(typeof blockNumber).toBe("number");
     });
   });
 });
