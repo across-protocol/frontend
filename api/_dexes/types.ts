@@ -56,11 +56,11 @@ export type SwapQuote = {
   expectedAmountOut: BigNumber;
   expectedAmountIn: BigNumber;
   slippageTolerance: number;
-  swapTx: {
+  swapTxns: {
     to: string;
     data: string;
     value: string;
-  };
+  }[];
   tokenIn: Token;
   tokenOut: Token;
 };
