@@ -547,10 +547,6 @@ export const disabledTokensForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
-export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
-  .split(",")
-  .map((address) => address.toLowerCase());
-
 // Pre-computed gas expenditure for deposits used for estimations
 export const gasExpenditureDeposit = BigNumber.from(90_000);
 
