@@ -106,6 +106,7 @@ const {
   CHAIN_USD_MAX_BALANCES,
   CHAIN_USD_MAX_DEPOSITS,
   VERCEL_AUTOMATION_BYPASS_SECRET,
+  RPC_HEADERS,
 } = getEnvs();
 
 // Don't permit HUB_POOL_CHAIN_ID=0
@@ -1193,6 +1194,17 @@ export function getRpcUrlsFromConfigJson(chainId: number) {
   }
 
   return urls;
+}
+
+export function getProviderHeaders(
+  chainId: number | string
+): Record<string, string> | undefined {
+  const rpcHeaders = JSON.parse(RPC_HEADERS ?? "{}") as Record<
+    string,
+    Record<string, string>
+  >;
+
+  return rpcHeaders?.[String(chainId)];
 }
 
 /**
