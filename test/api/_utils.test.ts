@@ -4,7 +4,10 @@ import {
   getRouteDetails,
   validateChainAndTokenParams,
   ENABLED_ROUTES,
+  resolveVercelEndpoint,
 } from "../../api/_utils";
+import { JsonRpcError } from "@across-protocol/sdk/dist/types/providers";
+import { providers } from "ethers";
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -255,6 +258,21 @@ describe("_utils", () => {
             resolvedOriginChainId: route.fromChain,
           });
         });
+    });
+
+    test("RPC proxy works", async () => {
+      const provider = new providers.JsonRpcProvider({
+        url: `${resolveVercelEndpoint()}/api/rpc-proxy?chainId=232`,
+        headers: {
+          Origin: resolveVercelEndpoint(),
+        },
+      });
+
+      const blockNumber = await provider.getBlockNumber();
+
+      console.log("blockNumber", blockNumber);
+      expect(blockNumber).toBeDefined();
+      // expect(typeof blockNumber).toBe("number");
     });
   });
 });
