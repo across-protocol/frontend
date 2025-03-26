@@ -91,6 +91,13 @@
         "name": "Lisk",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
+      },
+      {
+        "address": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
+        "symbol": "WGHO",
+        "name": "Wrapped GHO Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       }
     ],
     "outputTokens": [
@@ -177,6 +184,13 @@
         "name": "Lisk",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
+      },
+      {
+        "address": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
+        "symbol": "WGHO",
+        "name": "Wrapped GHO Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       }
     ]
   },
@@ -1657,6 +1671,13 @@
     "spokePoolBlock": 193290,
     "inputTokens": [
       {
+        "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
+        "symbol": "WGHO",
+        "name": "Wrapped GHO Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      },
+      {
         "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
         "symbol": "USDC",
         "name": "USD Coin",
@@ -1692,6 +1713,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
+        "symbol": "WGHO",
+        "name": "Wrapped GHO Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       }
     ]
   }

@@ -33,7 +33,7 @@ export default {
     "SNX",
     "POOL",
     "LSK",
-    "GHO",
+    "WGHO",
   ],
   enableCCTP: false,
   swapTokens: [],

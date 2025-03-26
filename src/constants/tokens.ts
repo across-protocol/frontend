@@ -89,4 +89,5 @@ export const orderedTokenLogos = {
   WGRASS: unknownLogo,
   XYZ: unknownLogo,
   GHO: unknownLogo,
+  WGHO: unknownLogo,
 };
