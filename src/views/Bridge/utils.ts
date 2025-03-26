@@ -10,12 +10,12 @@ import {
   hubPoolChainId,
   isProductionBuild,
   interchangeableTokensMap,
-  nonEthChains,
   GetBridgeFeesResult,
   chainEndpointToId,
   parseUnits,
   chainIsLens,
   isDefined,
+  isNonEthChain,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -76,7 +76,7 @@ export function getReceiveTokenSymbol(
   outputTokenSymbol: string,
   isReceiverContract: boolean
 ) {
-  const isDestinationChainWethOnly = nonEthChains.includes(destinationChainId);
+  const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
 
   if (
     inputTokenSymbol === "ETH" &&
@@ -169,7 +169,7 @@ export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
       filter.inputTokenSymbol ??
-      (nonEthChains.includes(filter?.fromChain ?? -1) ? "WETH" : "ETH"),
+      (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
     toChain: filter.toChain,
   });

@@ -1,10 +1,14 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
+import {
+  CHAIN_IDs,
+  PUBLIC_NETWORKS,
+  TOKEN_SYMBOLS_MAP,
+} from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
-import { isBridgedUsdc } from "./sdk";
+import { isBridgedUsdc, isDefined } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -248,13 +252,15 @@ export const chainEndpointToId = Object.fromEntries(
 );
 
 // For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
-export const nonEthChains = [
-  ChainId.POLYGON,
-  ChainId.POLYGON_AMOY,
-  ChainId.ALEPH_ZERO,
-  ChainId.LENS_SEPOLIA,
-  ChainId.LENS,
-];
+export const nonEthChains = Object.entries(PUBLIC_NETWORKS)
+  .filter(([_, chain]) => {
+    chain.nativeToken !== "ETH";
+  })
+  .map(([chainId]) => Number(chainId));
+
+export function isNonEthChain(chainId: number | undefined | null): boolean {
+  return isDefined(chainId) ? nonEthChains.includes(chainId) : false;
+}
 
 export const tokenTable = Object.fromEntries(
   tokenList.map((token) => {
