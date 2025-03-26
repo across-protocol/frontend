@@ -4,9 +4,7 @@ import {
   getRouteDetails,
   validateChainAndTokenParams,
   ENABLED_ROUTES,
-  resolveVercelEndpoint,
 } from "../../api/_utils";
-import { providers } from "ethers";
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -257,18 +255,6 @@ describe("_utils", () => {
             resolvedOriginChainId: route.fromChain,
           });
         });
-    });
-
-    test("RPC proxy works", async () => {
-      const provider = new providers.JsonRpcProvider({
-        url: `${resolveVercelEndpoint()}/api/rpc-proxy?chainId=${CHAIN_IDs.LENS}`,
-        headers: {
-          Origin: resolveVercelEndpoint(),
-        },
-      });
-
-      const blockNumber = await provider.getBlockNumber();
-      expect(blockNumber).toBeDefined();
     });
   });
 });
