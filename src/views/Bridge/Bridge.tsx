@@ -29,6 +29,7 @@ const Bridge = () => {
     parsedAmountInput,
     estimatedTimeString,
     swapQuote,
+    universalSwapQuote,
     toAccount,
     setCustomToAddress,
     handleChangeAmountInput,
@@ -82,6 +83,7 @@ const Bridge = () => {
             balance={balance}
             isQuoteLoading={isQuoteLoading}
             swapQuote={swapQuote}
+            universalSwapQuote={universalSwapQuote}
           />
         </Wrapper>
       </LayoutV2>

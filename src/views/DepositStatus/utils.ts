@@ -18,17 +18,17 @@ export function convertForDepositQuery(
     fromBridgePagePayload;
   const { depositId, depositor, recipient, message, inputAmount } =
     data.parsedDepositLog.args;
-  const inputToken = config.getTokenInfoByAddress(
+  const inputToken = config.getTokenInfoBySymbol(
     selectedRoute.fromChain,
-    selectedRoute.fromTokenAddress
+    selectedRoute.fromTokenSymbol
   );
-  const outputToken = config.getTokenInfoByAddress(
+  const outputToken = config.getTokenInfoBySymbol(
     selectedRoute.toChain,
-    selectedRoute.toTokenAddress
+    selectedRoute.toTokenSymbol
   );
-  const swapToken = config.getTokenInfoByAddressSafe(
+  const swapToken = config.getTokenInfoBySymbolSafe(
     selectedRoute.fromChain,
-    selectedRoute.type === "swap" ? selectedRoute.swapTokenAddress : ""
+    selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
   );
 
   return {
@@ -82,17 +82,17 @@ export function convertForFillQuery(
     fromBridgePagePayload;
   const { depositId, depositor, recipient, message, inputAmount } =
     data.depositByTxHash.parsedDepositLog.args;
-  const inputToken = config.getTokenInfoByAddress(
+  const inputToken = config.getTokenInfoBySymbol(
     selectedRoute.fromChain,
-    selectedRoute.fromTokenAddress
+    selectedRoute.fromTokenSymbol
   );
-  const outputToken = config.getTokenInfoByAddress(
+  const outputToken = config.getTokenInfoBySymbol(
     selectedRoute.toChain,
-    selectedRoute.toTokenAddress
+    selectedRoute.toTokenSymbol
   );
-  const swapToken = config.getTokenInfoByAddressSafe(
+  const swapToken = config.getTokenInfoBySymbolSafe(
     selectedRoute.fromChain,
-    selectedRoute.type === "swap" ? selectedRoute.swapTokenAddress : ""
+    selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
   );
 
   return {

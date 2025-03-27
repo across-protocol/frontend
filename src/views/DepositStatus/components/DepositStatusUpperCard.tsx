@@ -46,8 +46,10 @@ export function DepositStatusUpperCard({
 
   const { estimatedRewards, amountAsBaseCurrency } =
     useResolveFromBridgePagePayload(
+      fromChainId,
       toChainId,
       inputTokenSymbol,
+      outputTokenSymbol || inputTokenSymbol,
       fromBridgePagePayload
     );
 

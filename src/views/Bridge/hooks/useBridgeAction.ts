@@ -36,6 +36,7 @@ import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { CHAIN_IDs } from "@across-protocol/constants";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 const config = getConfig();
 
@@ -45,9 +46,8 @@ export type FromBridgePagePayload = {
   recipient: string;
   referrer: string;
   tokenPrice: string;
-  swapQuote?: Omit<SwapQuoteApiResponse, "minExpectedInputTokenAmount"> & {
-    minExpectedInputTokenAmount: string;
-  };
+  swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
   selectedRoute: SelectedRoute;
   quote: GetBridgeFeesResult;
   quotedLimits: BridgeLimitInterface;
@@ -87,12 +87,16 @@ export function useBridgeAction(
         getDepositArgs(selectedRoute, usedTransferQuote, referrer, integratorId)
       );
       const frozenSwapQuote = cloneDeep(usedTransferQuote?.quotedSwap);
+      const frozenUniversalSwapQuote = cloneDeep(
+        usedTransferQuote?.quotedUniversalSwap
+      );
       const frozenFeeQuote = cloneDeep(usedTransferQuote?.quotedFees);
       const frozenLimits = cloneDeep(usedTransferQuote?.quotedLimits);
       const frozenTokenPrice = cloneDeep(usedTransferQuote?.quotePriceUSD);
       const frozenAccount = cloneDeep(account);
       const frozenRoute = cloneDeep(selectedRoute);
       const isSwapRoute = frozenRoute.type === "swap";
+      const isUniversalSwapRoute = frozenRoute.type === "universal-swap";
 
       if (
         !frozenDepositArgs ||
@@ -104,7 +108,8 @@ export function useBridgeAction(
         !frozenTokenPrice ||
         !frozenLimits ||
         // If swap route, we need also the swap quote
-        (isSwapRoute && !frozenSwapQuote)
+        (isSwapRoute && !frozenSwapQuote) ||
+        (isUniversalSwapRoute && !frozenUniversalSwapQuote)
       ) {
         throw new Error("Missing required data for bridge action");
       }
@@ -178,9 +183,27 @@ export function useBridgeAction(
 
       await isWrongNetworkHandler();
 
+      // If universal swap route then we need to approve the universal swap token for the `SwapAndBridge`
+      if (
+        isUniversalSwapRoute &&
+        frozenUniversalSwapQuote?.approvalTxns &&
+        frozenUniversalSwapQuote.approvalTxns.length > 0
+      ) {
+        if (!frozenUniversalSwapQuote) {
+          throw new Error(
+            "Missing universal swap quote for universal swap route"
+          );
+        }
+
+        // Some ERC-20 tokens require multiple approvals
+        for (const approvalTxn of frozenUniversalSwapQuote.approvalTxns) {
+          const approvalTx = await signer.sendTransaction(approvalTxn);
+          await approvalTx.wait();
+        }
+      }
       // If swap route then we need to approve the swap token for the `SwapAndBridge`
       // contract instead of the `SpokePool` contract.
-      if (isSwapRoute && frozenRoute.swapTokenSymbol !== "ETH") {
+      else if (isSwapRoute && frozenRoute.swapTokenSymbol !== "ETH") {
         if (!frozenSwapQuote) {
           throw new Error("Missing swap quote for swap route");
         }
@@ -235,7 +258,19 @@ export function useBridgeAction(
 
       let tx: providers.TransactionResponse;
 
-      if (isSwapRoute) {
+      if (isUniversalSwapRoute) {
+        if (!frozenUniversalSwapQuote) {
+          throw new Error(
+            "Missing universal swap quote for universal swap route"
+          );
+        }
+
+        tx = await signer.sendTransaction({
+          to: frozenUniversalSwapQuote.swapTx.to,
+          data: frozenUniversalSwapQuote.swapTx.data,
+          value: frozenUniversalSwapQuote.swapTx.value,
+        });
+      } else if (isSwapRoute) {
         tx = await sendSwapAndBridgeTx(
           signer,
           {
@@ -304,13 +339,8 @@ export function useBridgeAction(
         timeSigned: Date.now(),
         recipient: frozenDepositArgs.toAddress,
         referrer,
-        swapQuote: frozenSwapQuote
-          ? {
-              ...frozenSwapQuote,
-              minExpectedInputTokenAmount:
-                frozenSwapQuote?.minExpectedInputTokenAmount.toString(),
-            }
-          : undefined,
+        swapQuote: frozenSwapQuote,
+        universalSwapQuote: frozenUniversalSwapQuote,
         selectedRoute: frozenRoute,
         quote: frozenFeeQuote,
         quotedLimits: frozenLimits,

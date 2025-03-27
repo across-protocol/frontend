@@ -27,7 +27,7 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
         !swapTokenSymbol ||
         !isSwapRoute(originChainId, destinationChainId, swapTokenSymbol)
       ) {
-        return undefined;
+        throw new Error("Invalid swap route");
       }
 
       const swapToken = config.getTokenInfoBySymbol(
@@ -49,7 +49,7 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
         !acrossOutputToken ||
         BigNumber.from(swapTokenAmount).lte(0)
       ) {
-        return undefined;
+        throw new Error("Invalid swap route query");
       }
 
       return getApiEndpoint().swapQuote({

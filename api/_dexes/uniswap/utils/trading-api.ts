@@ -33,7 +33,7 @@ export type UniswapParamForApi = Omit<Swap, "type" | "slippageTolerance"> & {
 
 export const UNISWAP_TRADING_API_BASE_URL =
   process.env.UNISWAP_TRADING_API_BASE_URL ||
-  "https://trading-api-labs.interface.gateway.uniswap.org/v1";
+  "https://trade-api.gateway.uniswap.org/v1";
 
 export const UNISWAP_API_KEY =
   process.env.UNISWAP_API_KEY || "JoyCGj29tT4pymvhaGciK4r1aIPvqW6W53xT1fwo";

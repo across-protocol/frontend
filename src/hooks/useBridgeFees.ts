@@ -7,6 +7,7 @@ import {
   getBridgeFeesWithExternalProjectId,
 } from "utils";
 import { AxiosError } from "axios";
+import { UniversalSwapQuote } from "./useUniversalSwapQuote";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
@@ -26,12 +27,22 @@ export function useBridgeFees(
   inputTokenSymbol: string,
   outputTokenSymbol: string,
   externalProjectId?: string,
-  recipientAddress?: string
+  recipientAddress?: string,
+  isUniversalSwap?: boolean,
+  universalSwapQuote?: UniversalSwapQuote
 ) {
+  const didUniversalSwapLoad = isUniversalSwap && !!universalSwapQuote;
+  const bridgeInputTokenSymbol = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenIn.symbol
+    : inputTokenSymbol;
+  const bridgeOutputTokenSymbol = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenOut.symbol
+    : outputTokenSymbol;
+
   const queryKey = bridgeFeesQueryKey(
     amount,
-    inputTokenSymbol,
-    outputTokenSymbol,
+    bridgeInputTokenSymbol,
+    bridgeOutputTokenSymbol,
     fromChainId,
     toChainId,
     externalProjectId,

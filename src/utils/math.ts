@@ -118,12 +118,3 @@ export function getLpCushion(
   if (lpCushionMap[key]) return lpCushionMap[key];
   return lpCushionMap[symbol] ?? "0";
 }
-
-export function isBigNumberish(value: unknown): value is BigNumberish {
-  try {
-    BigNumber.from(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}

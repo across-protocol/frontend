@@ -16,15 +16,21 @@ import EstimatedTable from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
 import TokenFee from "./TokenFee";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
-import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
+import {
+  AmountInputError,
+  calcFeesForEstimatedTable,
+  getTokensForFeesCalc,
+} from "../utils";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 export type Props = {
   isQuoteLoading: boolean;
   fromChainId: number;
   toChainId: number;
   isSwap: boolean;
+  isUniversalSwap: boolean;
   gasFee?: BigNumber;
   capitalFee?: BigNumber;
   lpFee?: BigNumber;
@@ -32,6 +38,7 @@ export type Props = {
   outputToken: TokenInfo;
   swapToken?: TokenInfo;
   swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
   parsedAmount?: BigNumber;
   currentSwapSlippage?: number;
   onSetNewSlippage?: (slippage: number) => void;
@@ -45,25 +52,43 @@ export type Props = {
 export function FeesCollapsible(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const baseToken = props.swapToken || props.inputToken;
-  const { bridgeFee, outputAmount, swapFee } =
-    calcFeesForEstimatedTable(props) || {};
+  const { inputToken, outputToken, bridgeToken } = getTokensForFeesCalc(props);
+
+  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
+    useTokenConversion(inputToken.symbol, "usd");
+  const {
+    convertTokenToBaseCurrency: convertBridgeTokenToUsd,
+    convertBaseCurrencyToToken: convertUsdToBridgeToken,
+  } = useTokenConversion(bridgeToken.symbol, "usd");
+  const {
+    convertTokenToBaseCurrency: convertOutputTokenToUsd,
+    convertBaseCurrencyToToken: convertUsdToOutputToken,
+  } = useTokenConversion(outputToken.symbol, "usd");
+
+  const {
+    bridgeFeeUsd,
+    gasFeeUsd,
+    outputAmountUsd,
+    swapFeeUsd,
+    parsedAmountUsd,
+  } =
+    calcFeesForEstimatedTable({
+      ...props,
+      convertInputTokenToUsd,
+      convertBridgeTokenToUsd,
+      convertOutputTokenToUsd,
+    }) || {};
+  const outputAmount = convertUsdToOutputToken(outputAmountUsd);
 
   const estimatedRewards = useEstimatedRewards(
-    baseToken,
+    bridgeToken,
     props.toChainId,
-    props.isSwap,
-    props.parsedAmount,
-    props.gasFee,
-    bridgeFee,
-    swapFee
+    props.isSwap || props.isUniversalSwap,
+    convertUsdToBridgeToken(parsedAmountUsd),
+    convertUsdToBridgeToken(gasFeeUsd),
+    convertUsdToBridgeToken(bridgeFeeUsd),
+    convertUsdToBridgeToken(swapFeeUsd)
   );
-
-  const { convertTokenToBaseCurrency } = useTokenConversion(
-    props.outputToken.symbol,
-    "usd"
-  );
-  const outputAmountInUSD = convertTokenToBaseCurrency(outputAmount);
 
   const doesAmountExceedMaxDeposit =
     props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
@@ -92,16 +117,16 @@ export function FeesCollapsible(props: Props) {
                 <>
                   <TokenFeeWrapper>
                     <TokenFee
-                      token={props.outputToken}
+                      token={outputToken}
                       amount={outputAmount}
                       tokenFirst
                       tokenChainId={props.toChainId}
                       textColor="light-200"
                       showTokenLinkOnHover
                     />
-                    {outputAmountInUSD && (
+                    {outputAmountUsd && (
                       <HiddenMobileText size="md" color="grey-400">
-                        (${formatUSD(outputAmountInUSD)})
+                        (${formatUSD(outputAmountUsd)})
                       </HiddenMobileText>
                     )}
                     {estimatedRewards.rewardToken &&
@@ -159,9 +184,9 @@ export function FeesCollapsible(props: Props) {
               textColor="light-200"
               showTokenLinkOnHover
             />
-            {outputAmountInUSD && (
+            {outputAmountUsd && (
               <HiddenMobileText size="md" color="grey-400">
-                (${formatUSD(outputAmountInUSD)})
+                (${formatUSD(outputAmountUsd)})
               </HiddenMobileText>
             )}
             {estimatedRewards.rewardToken && estimatedRewards.reward && (
@@ -196,7 +221,7 @@ export function FeesCollapsible(props: Props) {
           </Text>
         )}
         <CollapsedIconsWrapper>
-          {props.isSwap ? <SwapIcon /> : null}
+          {props.isSwap || props.isUniversalSwap ? <SwapIcon /> : null}
           <ChevronUp />
         </CollapsedIconsWrapper>
       </ExpandedFeesTopRow>

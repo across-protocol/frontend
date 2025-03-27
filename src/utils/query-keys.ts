@@ -62,7 +62,13 @@ export function bridgeLimitsQueryKey(
   fromChainId?: ChainId,
   toChainId?: ChainId
 ) {
-  return ["bridgeLimits", inputToken, outputToken, fromChainId, toChainId];
+  return [
+    "bridgeLimits",
+    inputToken,
+    outputToken,
+    fromChainId,
+    toChainId,
+  ] as const;
 }
 
 /**
@@ -145,4 +151,22 @@ export type SwapQuoteQueryKeyParams = {
 };
 export function swapQuoteQueryKey(params: SwapQuoteQueryKeyParams) {
   return ["swap-quote", params] as const;
+}
+
+export type UniversalSwapQuoteQueryKeyParams = {
+  enabled?: boolean;
+  amount: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
+  originChainId: number;
+  destinationChainId: number;
+  tradeType: "minOutput" | "exactOutput" | "exactInput";
+  slippageTolerance: number;
+  depositorAddress?: string;
+  recipientAddress?: string;
+};
+export function universalSwapQuoteQueryKey(
+  params: UniversalSwapQuoteQueryKeyParams
+) {
+  return ["universal-swap-quote", params] as const;
 }

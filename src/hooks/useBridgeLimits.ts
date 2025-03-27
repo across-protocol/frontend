@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
+import { UniversalSwapQuote } from "./useUniversalSwapQuote";
 
 export interface BridgeLimits {
   minDeposit: BigNumber;
@@ -24,31 +25,57 @@ export function useBridgeLimits(
   inputTokenSymbol?: string,
   outputTokenSymbol?: string,
   fromChainId?: ChainId,
-  toChainId?: ChainId
+  toChainId?: ChainId,
+  isUniversalSwap?: boolean,
+  universalSwapQuote?: UniversalSwapQuote
 ) {
   const enabled = !!(
     inputTokenSymbol &&
     outputTokenSymbol &&
     fromChainId &&
+    toChainId &&
+    (isUniversalSwap ? !!universalSwapQuote : true)
+  );
+  const didUniversalSwapLoad = isUniversalSwap && !!universalSwapQuote;
+  const bridgeInputTokenSymbol = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenIn.symbol
+    : inputTokenSymbol;
+  const bridgeOutputTokenSymbol = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenOut.symbol
+    : outputTokenSymbol;
+  const queryKey = bridgeLimitsQueryKey(
+    bridgeInputTokenSymbol,
+    bridgeOutputTokenSymbol,
+    fromChainId,
     toChainId
   );
   const { data: limits, ...delegated } = useQuery({
-    queryKey: bridgeLimitsQueryKey(
-      inputTokenSymbol,
-      outputTokenSymbol,
-      fromChainId,
-      toChainId
-    ),
-    queryFn: () => {
-      if (!enabled) {
-        return undefined;
+    queryKey,
+    queryFn: ({ queryKey }) => {
+      const [
+        ,
+        inputTokenSymbolToQuery,
+        outputTokenSymbolToQuery,
+        fromChainIdToQuery,
+        toChainIdToQuery,
+      ] = queryKey;
+
+      if (
+        !inputTokenSymbolToQuery ||
+        !outputTokenSymbolToQuery ||
+        !fromChainIdToQuery ||
+        !toChainIdToQuery
+      ) {
+        throw new Error("Bridge limits query not enabled");
       }
 
       return getApiEndpoint().limits(
-        config.getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
-        config.getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
-        fromChainId,
-        toChainId
+        config.getTokenInfoBySymbol(fromChainIdToQuery, inputTokenSymbolToQuery)
+          .address,
+        config.getTokenInfoBySymbol(toChainIdToQuery, outputTokenSymbolToQuery)
+          .address,
+        fromChainIdToQuery,
+        toChainIdToQuery
       );
     },
     enabled,

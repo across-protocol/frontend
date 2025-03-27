@@ -187,7 +187,7 @@ async function fetchViaTradingApi(
       expectedAmountOut,
       expectedAmountIn,
       slippageTolerance: quote.slippage,
-      swapTx,
+      swapTxns: [swapTx],
     };
   } else {
     const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
@@ -278,11 +278,13 @@ function buildIndicativeQuote(
     expectedAmountOut,
     expectedAmountIn,
     slippageTolerance: swap.slippageTolerance,
-    swapTx: {
-      to: "0x0",
-      data: "0x0",
-      value: "0x0",
-    },
+    swapTxns: [
+      {
+        to: "0x0",
+        data: "0x0",
+        value: "0x0",
+      },
+    ],
   };
 
   return swapQuote;
