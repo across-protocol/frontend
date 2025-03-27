@@ -80,12 +80,6 @@ export function useResolveFromBridgePagePayload(
   const lpFee = convertUsdToBridgeToken(lpFeeUsd);
   const capitalFee = convertUsdToBridgeToken(capitalFeeUsd);
 
-  console.log({
-    lpFee,
-    lpFeeUsd,
-    _lpFee,
-  });
-
   const estimatedRewards = useEstimatedRewards(
     bridgeToken,
     toChainId,
