@@ -76,7 +76,12 @@ const handler = async (
 export default handler;
 
 function authenticate({ query }: TypedVercelRequest<RpcProxyQueryParams>) {
-  if (!query.authToken || query.authToken !== RPC_PROXY_AUTH_TOKEN) {
+  if (!query.authToken) {
+    throw new UnauthorizedError({
+      message: `Not Allowed: You must provide a valid auth token`,
+    });
+  }
+  if (query.authToken !== RPC_PROXY_AUTH_TOKEN) {
     throw new UnauthorizedError({
       message: `Not Allowed: Invalid auth token ${query.authToken}`,
     });
