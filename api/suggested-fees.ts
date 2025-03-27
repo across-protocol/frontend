@@ -366,7 +366,7 @@ const handler = async (
       fillDeadline: fillDeadline.toString(),
     };
 
-    logger.debug({
+    logger.info({
       at: "SuggestedFees",
       message: "Response data",
       responseJson,
