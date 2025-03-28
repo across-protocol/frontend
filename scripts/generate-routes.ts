@@ -466,6 +466,20 @@ function processTokenRoutes(
       ];
     }
 
+    // Lens special case
+    if (
+      tokenSymbol === "GHO" &&
+      fromConfig.chainId === CHAIN_IDs.LENS &&
+      toConfig.tokens.includes("WGHO")
+    ) {
+      return [
+        {
+          inputTokenSymbol: "GHO",
+          outputTokenSymbol: "WGHO",
+        },
+      ];
+    }
+
     // Handle WETH Polygon & other non-eth chains
     if (
       tokenSymbol === "WETH" &&
@@ -674,12 +688,12 @@ function transformSwapRoute(route: Route, hubPoolChainId: number) {
           swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
         };
       } catch (e) {
-        if (e instanceof Error) {
-          throw new Error(
-            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
-          );
-        }
-        throw e;
+        throw new Error(
+          `Failed to transform swap route ${route.fromChain}->${toChain.chainId}`,
+          {
+            cause: e,
+          }
+        );
       }
     });
   });
@@ -692,7 +706,7 @@ function transformToRoute(
   outputTokenSymbol: ValidTokenSymbol,
   hubPoolChainId: number
 ) {
-  const inputToken = getTokenBySymbol(
+  let inputToken = getTokenBySymbol(
     inputTokenSymbol,
     route.fromChain,
     hubPoolChainId
@@ -702,15 +716,22 @@ function transformToRoute(
     toChain.chainId,
     hubPoolChainId
   );
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+
+  if (fromChain.chainId === CHAIN_IDs.LENS && inputTokenSymbol === "GHO") {
+    inputToken = getTokenBySymbol("WGHO", route.fromChain, hubPoolChainId);
+  }
 
   if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
     throw new Error("Mismatching L1 addresses");
   }
 
-  const fromChain = Object.values(chainConfigs).find(
-    (config) => config.chainId === route.fromChain
-  )!;
-  const isNative = inputTokenSymbol === fromChain.nativeToken;
+  const isNative =
+    fromChain.chainId === CHAIN_IDs.LENS
+      ? inputTokenSymbol === "GHO"
+      : inputTokenSymbol === fromChain.nativeToken;
 
   return {
     fromChain: route.fromChain,

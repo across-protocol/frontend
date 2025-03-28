@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
   blockTimeSeconds: 1,
-  tokens: ["WGHO", "USDC", "WETH"],
+  tokens: ["WGHO", "GHO", "WETH"],
   enableCCTP: false,
 } as ChainConfig;
