@@ -1,7 +1,7 @@
 import { TradeType } from "@uniswap/sdk-core";
 import axios, { AxiosError } from "axios";
 
-import { Swap } from "../types";
+import { Swap } from "../../types";
 import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 
 export type UniswapClassicQuoteFromApi = {
