@@ -713,10 +713,7 @@ function transformToRoute(
     throw new Error("Mismatching L1 addresses");
   }
 
-  const isNative =
-    fromChain.chainId === CHAIN_IDs.LENS
-      ? inputTokenSymbol === "GHO"
-      : inputTokenSymbol === fromChain.nativeToken;
+  const isNative = inputTokenSymbol === fromChain.nativeToken;
 
   return {
     fromChain: route.fromChain,
