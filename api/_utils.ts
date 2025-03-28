@@ -1181,17 +1181,6 @@ function getProviderFromConfigJson(
   );
 }
 
-function getProviderHeaders(
-  chainId: number | string
-): Record<string, string> | undefined {
-  const rpcHeaders = JSON.parse(RPC_HEADERS ?? "{}") as Record<
-    string,
-    Record<string, string>
-  >;
-
-  return rpcHeaders?.[String(chainId)];
-}
-
 export function getRpcUrlsFromConfigJson(chainId: number) {
   const urls: string[] = [];
 
