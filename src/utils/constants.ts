@@ -253,9 +253,7 @@ export const chainEndpointToId = Object.fromEntries(
 
 // For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
 export const nonEthChains = Object.entries(PUBLIC_NETWORKS)
-  .filter(([_, chain]) => {
-    chain.nativeToken !== "ETH";
-  })
+  .filter(([_, chain]) => chain.nativeToken !== "ETH")
   .map(([chainId]) => Number(chainId));
 
 export function isNonEthChain(chainId: number | undefined | null): boolean {
