@@ -1,5 +1,9 @@
 import { ethers } from "ethers";
-import { relayFeeCalculator, utils } from "@across-protocol/sdk";
+import {
+  relayFeeCalculator,
+  utils,
+  constants as sdkConstants,
+} from "@across-protocol/sdk";
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
 
@@ -164,7 +168,11 @@ export const BLOCK_TAG_LAG = -1;
 // we've decided to keep this list small for now.
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 // Note: this is a small set of currencies that the API will derive from the base currencies by using USD as an intermediary.
-export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["azero", "matic"]);
+export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
+  "azero",
+  "matic",
+  "gho",
+]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
 ]);
@@ -209,3 +217,8 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
 export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hours
+
+export const CUSTOM_GAS_TOKENS = {
+  ...sdkConstants.CUSTOM_GAS_TOKENS,
+  [CHAIN_IDs.LENS]: "GHO",
+};
