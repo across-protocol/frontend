@@ -1,8 +1,4 @@
-import {
-  CHAIN_IDs,
-  PUBLIC_NETWORKS,
-  TOKEN_SYMBOLS_MAP,
-} from "@across-protocol/constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
 
 import { utils } from "ethers";
@@ -12,17 +8,6 @@ import path from "path";
 import * as chainConfigs from "./chain-configs";
 import * as externConfigs from "./extern-configs";
 import assert from "assert";
-import { isDefined } from "@across-protocol/sdk/dist/cjs/utils/TypeGuards";
-
-export const nonEthChains = Object.entries(PUBLIC_NETWORKS)
-  .filter(([_, chain]) => {
-    chain.nativeToken !== "ETH";
-  })
-  .map(([chainId]) => Number(chainId));
-
-export function isNonEthChain(chainId: number | undefined | null): boolean {
-  return isDefined(chainId) ? nonEthChains.includes(chainId) : false;
-}
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
   switch (tokenSymbol) {
