@@ -18,6 +18,7 @@ export type Swap = {
   tokenIn: Token;
   tokenOut: Token;
   amount: string;
+  depositor?: string;
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
@@ -39,7 +40,7 @@ export type CrossSwap = {
   isOutputNative?: boolean;
 };
 
-export type SupportedDex = "1inch" | "uniswap";
+export type SupportedDex = "1inch" | "uniswap" | "gho";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -56,11 +57,11 @@ export type SwapQuote = {
   expectedAmountOut: BigNumber;
   expectedAmountIn: BigNumber;
   slippageTolerance: number;
-  swapTx: {
+  swapTxns: {
     to: string;
     data: string;
     value: string;
-  };
+  }[];
   tokenIn: Token;
   tokenOut: Token;
 };
@@ -125,7 +126,7 @@ export type QuoteFetchStrategy = {
       | {
           name: "UniversalSwapAndBridge";
           address: string;
-          dex: "uniswap" | "1inch";
+          dex: "uniswap" | "1inch" | "gho";
         }
       | {
           name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";

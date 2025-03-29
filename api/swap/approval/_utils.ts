@@ -53,10 +53,15 @@ export async function buildCrossSwapTxForAllowanceHolder(
         originSwapEntryPoint.dex,
         originChainId
       );
+      if (originSwapQuote.swapTxns.length !== 1) {
+        throw new Error(
+          "Expected exactly 1 swap transaction for origin swap via `UniversalSwapAndBridge`"
+        );
+      }
       tx = await universalSwapAndBridge.populateTransaction.swapAndBridge(
         originSwapQuote.tokenIn.address,
         originSwapQuote.tokenOut.address,
-        originSwapQuote.swapTx.data,
+        originSwapQuote.swapTxns[0].data,
         originSwapQuote.maximumAmountIn,
         originSwapQuote.minAmountOut,
         {

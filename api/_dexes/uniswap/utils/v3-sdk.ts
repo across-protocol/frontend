@@ -72,11 +72,13 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
       swap.tokenIn.decimals
     ),
     slippageTolerance: swap.slippageTolerance,
-    swapTx: {
-      to: route.methodParameters.to,
-      data: route.methodParameters.calldata,
-      value: route.methodParameters.value,
-    },
+    swapTxns: [
+      {
+        to: route.methodParameters.to,
+        data: route.methodParameters.calldata,
+        value: route.methodParameters.value,
+      },
+    ],
   };
 
   return swapQuote;
