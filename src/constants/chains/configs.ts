@@ -150,7 +150,7 @@ import hyperliquidLogo from "assets/extern-logos/hyperliquid.svg";
 import hyperliquidGrayscaleLogo from "assets/extern-logos/hyperliquid-grayscale.svg";
 import { ReactComponent as hyperliquidLogoSvg } from "assets/extern-logos/hyperliquid.svg";
 import { ReactComponent as hyperliquidGrayscaleLogoSvg } from "assets/extern-logos/hyperliquid-grayscale.svg";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "../../utils";
 
 export const alephZero = {
   name: "Aleph Zero",
