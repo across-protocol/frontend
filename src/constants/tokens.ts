@@ -15,7 +15,7 @@ import snxLogo from "assets/token-logos/snx.svg";
 import pooltogetherLogo from "assets/token-logos/pool.svg";
 import lskLogo from "assets/token-logos/lsk.svg";
 import usdbLogo from "assets/token-logos/usdb.svg";
-// TODO: Replace with actual GRASS/XYZ logo once known
+import ghoLogo from "assets/token-logos/gho.svg";
 import unknownLogo from "assets/icons/question-circle.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
@@ -88,4 +88,6 @@ export const orderedTokenLogos = {
   GRASS: unknownLogo,
   WGRASS: unknownLogo,
   XYZ: unknownLogo,
+  GHO: ghoLogo,
+  WGHO: ghoLogo,
 };

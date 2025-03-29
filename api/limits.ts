@@ -1,7 +1,11 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
+import {
+  CHAIN_IDs,
+  CUSTOM_GAS_TOKENS,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+} from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
 
@@ -171,7 +175,7 @@ const handler = async (
     ] = await Promise.all([
       getCachedTokenPrice(
         l1Token.address,
-        sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+        CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
