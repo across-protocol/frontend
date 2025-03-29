@@ -1,5 +1,10 @@
 import { ethers } from "ethers";
-import { hubPoolChainId, ChainId, getChainInfo } from "./constants";
+import {
+  hubPoolChainId,
+  ChainId,
+  getChainInfo,
+  vercelApiBaseUrl,
+} from "./constants";
 
 function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
@@ -9,6 +14,10 @@ function getProviderUrl(chainId: number): string {
   } else {
     throw new Error(`No provider URL found for chainId ${chainId}`);
   }
+}
+
+export function getProxyRpcUrl(chainId: number): string {
+  return `${vercelApiBaseUrl}/api/rpc-proxy?chainId=${chainId}`;
 }
 
 export const providersTable: Record<
