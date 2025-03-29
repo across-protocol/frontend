@@ -81,6 +81,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
     decimals: 18,
   },
+  GHO: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
   POOL: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
@@ -127,6 +133,9 @@ defaultRelayerFeeCapitalCostConfig["USDzC"] = {
 };
 defaultRelayerFeeCapitalCostConfig["USDB"] = {
   ...defaultRelayerFeeCapitalCostConfig["DAI"],
+};
+defaultRelayerFeeCapitalCostConfig["WGHO"] = {
+  ...defaultRelayerFeeCapitalCostConfig["GHO"],
 };
 
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
