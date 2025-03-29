@@ -1,16 +1,15 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
-
 import { ChainConfig } from "../types";
 
-const chainId = CHAIN_IDs.MAINNET;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
+
+const chainId = CHAIN_IDs.LENS;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  name: "Ethereum",
-  fullName: "Ethereum Mainnet",
+  nativeToken: "GHO",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -18,23 +17,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  blockTimeSeconds: 12,
-  publicRpcUrl: "https://mainnet.gateway.tenderly.co",
-  tokens: [
-    "WETH",
-    "ETH",
-    "USDC",
-    "WBTC",
-    "UMA",
-    "DAI",
-    "BAL",
-    "ACX",
-    "USDT",
-    "SNX",
-    "POOL",
-    "LSK",
-    "WGHO",
-  ],
+  publicRpcUrl: chainInfoBase.publicRPC,
+  blockTimeSeconds: 1,
+  tokens: ["WGHO", "GHO", "WETH"],
   enableCCTP: false,
-  swapTokens: [],
 } as ChainConfig;

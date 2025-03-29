@@ -52,6 +52,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
+  chainConfigs.LENS,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -99,6 +100,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.LENS,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
@@ -449,10 +451,25 @@ function processTokenRoutes(
       ];
     }
 
+    // Lens special case
+    if (
+      tokenSymbol === "GHO" &&
+      fromConfig.chainId === CHAIN_IDs.LENS &&
+      toConfig.tokens.includes("WGHO")
+    ) {
+      return [
+        {
+          inputTokenSymbol: "GHO",
+          outputTokenSymbol: "WGHO",
+        },
+      ];
+    }
+
     // Handle WETH Polygon & other non-eth chains
     if (
       tokenSymbol === "WETH" &&
       !toConfig.tokens.includes("ETH") &&
+      toConfig.tokens.includes("WETH") &&
       fromConfig.tokens.includes("ETH")
     ) {
       return ["WETH", "ETH"];
@@ -656,12 +673,12 @@ function transformSwapRoute(route: Route, hubPoolChainId: number) {
           swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
         };
       } catch (e) {
-        if (e instanceof Error) {
-          throw new Error(
-            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
-          );
-        }
-        throw e;
+        throw new Error(
+          `Failed to transform swap route ${route.fromChain}->${toChain.chainId}`,
+          {
+            cause: e,
+          }
+        );
       }
     });
   });
@@ -674,7 +691,7 @@ function transformToRoute(
   outputTokenSymbol: ValidTokenSymbol,
   hubPoolChainId: number
 ) {
-  const inputToken = getTokenBySymbol(
+  let inputToken = getTokenBySymbol(
     inputTokenSymbol,
     route.fromChain,
     hubPoolChainId
@@ -684,14 +701,18 @@ function transformToRoute(
     toChain.chainId,
     hubPoolChainId
   );
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+
+  if (fromChain.chainId === CHAIN_IDs.LENS && inputTokenSymbol === "GHO") {
+    inputToken = getTokenBySymbol("WGHO", route.fromChain, hubPoolChainId);
+  }
 
   if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
     throw new Error("Mismatching L1 addresses");
   }
 
-  const fromChain = Object.values(chainConfigs).find(
-    (config) => config.chainId === route.fromChain
-  )!;
   const isNative = inputTokenSymbol === fromChain.nativeToken;
 
   return {

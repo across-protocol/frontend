@@ -52,6 +52,7 @@ import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
+  CUSTOM_GAS_TOKENS,
   DEFAULT_LITE_CHAIN_USD_MAX_BALANCE,
   DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT,
   DEFI_LLAMA_POOL_LOOKUP,
@@ -571,7 +572,11 @@ export const getPublicProvider = (
 ): providers.StaticJsonRpcProvider | undefined => {
   const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
   if (chain) {
-    return new ethers.providers.StaticJsonRpcProvider(chain.publicRPC);
+    const headers = getProviderHeaders(chainId);
+    return new ethers.providers.StaticJsonRpcProvider({
+      url: chain.publicRPC,
+      headers,
+    });
   } else {
     return undefined;
   }
@@ -710,14 +715,44 @@ export const getRelayerFeeCalculatorQueries = (
     relayerAddress: string;
   }> = {}
 ) => {
+  const baseArgs = {
+    chainId: destinationChainId,
+    provider: getProvider(destinationChainId, { useSpeedProvider: true }),
+    symbolMapping: TOKEN_SYMBOLS_MAP,
+    spokePoolAddress:
+      overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    simulatedRelayerAddress:
+      overrides.relayerAddress ||
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
+    logger: getLogger(),
+  };
+
+  const customGasTokenSymbol = CUSTOM_GAS_TOKENS[destinationChainId];
+  if (customGasTokenSymbol) {
+    return new sdk.relayFeeCalculator.CustomGasTokenQueries({
+      queryBaseArgs: [
+        baseArgs.provider,
+        baseArgs.symbolMapping,
+        baseArgs.spokePoolAddress,
+        baseArgs.simulatedRelayerAddress,
+        baseArgs.logger,
+        baseArgs.coingeckoProApiKey,
+        undefined,
+        "usd",
+      ],
+      customGasTokenSymbol,
+    });
+  }
+
   return sdk.relayFeeCalculator.QueryBase__factory.create(
-    destinationChainId,
-    getProvider(destinationChainId, { useSpeedProvider: true }),
-    undefined,
-    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    overrides.relayerAddress,
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger()
+    baseArgs.chainId,
+    baseArgs.provider,
+    baseArgs.symbolMapping,
+    baseArgs.spokePoolAddress,
+    baseArgs.simulatedRelayerAddress,
+    baseArgs.coingeckoProApiKey,
+    baseArgs.logger
   );
 };
 
@@ -1144,6 +1179,7 @@ function getProviderFromConfigJson(
 ) {
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
+  const headers = getProviderHeaders(chainId);
 
   if (urls.length === 0) {
     getLogger().warn({
@@ -1155,7 +1191,7 @@ function getProviderFromConfigJson(
 
   if (!opts.useSpeedProvider) {
     return new sdk.providers.RetryProvider(
-      urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
       chainId,
       1, // quorum can be 1 in the context of the API
       3, // retries
@@ -1167,7 +1203,7 @@ function getProviderFromConfigJson(
   }
 
   return new sdk.providers.SpeedProvider(
-    urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
     chainId,
     3, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
