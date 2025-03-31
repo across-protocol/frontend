@@ -21,6 +21,7 @@ export { default as REDSTONE } from "./redstone";
 export { default as SCROLL } from "./scroll";
 export { default as SEPOLIA } from "./sepolia";
 export { default as SONEIUM } from "./soneium";
+export { default as TATARA } from "./tatara";
 export { default as UNICHAIN } from "./unichain";
 export { default as UNICHAIN_SEPOLIA } from "./unichain-sepolia";
 export { default as WORLD_CHAIN } from "./world-chain";
