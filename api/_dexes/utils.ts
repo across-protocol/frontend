@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { utils } from "@across-protocol/sdk";
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import {
@@ -26,14 +27,33 @@ import {
 } from "../_utils";
 import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
 import { TransferType } from "../_spoke-pool-periphery";
+
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
+/**
+ * Describes which quote fetch strategy to use for a given chain,
+ *
+ * @example
+ * {
+ *   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+ *   [CHAIN_IDs.MAINNET]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+ * }
+ */
 export type QuoteFetchStrategies = Partial<{
   default: QuoteFetchStrategy;
-  [chainId: number]: QuoteFetchStrategy;
+  chains: {
+    [chainId: number]: QuoteFetchStrategy;
+  };
+  swapPairs: {
+    [chainId: number]: {
+      [tokenInSymbol: string]: {
+        [tokenOutSymbol: string]: QuoteFetchStrategy;
+      };
+    };
+  };
 }>;
 
 export const AMOUNT_TYPE = {
@@ -49,11 +69,34 @@ export const CROSS_SWAP_TYPE = {
   ANY_TO_ANY: "anyToAny",
 } as const;
 
-export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC", "USDT", "DAI"];
+export const PREFERRED_BRIDGE_TOKENS: {
+  default: string[];
+  [fromChainId: number]: {
+    [toChainId: number]: string[];
+  };
+} = {
+  default: ["WETH", "USDC", "USDT", "DAI"],
+  [CHAIN_IDs.MAINNET]: {
+    [232]: ["WGHO", "WETH"],
+  },
+  [232]: {
+    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH"],
+  },
+};
 
 export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
   // This will be our default strategy until the periphery contract is audited
   getSwapRouter02Strategy("UniversalSwapAndBridge");
+
+export function getPreferredBridgeTokens(
+  fromChainId: number,
+  toChainId: number
+) {
+  return (
+    PREFERRED_BRIDGE_TOKENS[fromChainId]?.[toChainId] ??
+    PREFERRED_BRIDGE_TOKENS.default
+  );
+}
 
 export function getCrossSwapType(params: {
   inputToken: string;
@@ -61,6 +104,7 @@ export function getCrossSwapType(params: {
   outputToken: string;
   destinationChainId: number;
   isInputNative: boolean;
+  isOutputNative: boolean;
 }): CrossSwapType {
   if (
     isRouteEnabled(
@@ -73,10 +117,21 @@ export function getCrossSwapType(params: {
     return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   }
 
+  const inputBridgeable = isInputTokenBridgeable(
+    params.inputToken,
+    params.originChainId,
+    params.destinationChainId
+  );
+  const outputBridgeable = isOutputTokenBridgeable(
+    params.outputToken,
+    params.originChainId,
+    params.destinationChainId
+  );
+
   // Prefer destination swap if input token is native because legacy
   // `UniversalSwapAndBridge` does not support native tokens as input.
   if (params.isInputNative) {
-    if (isInputTokenBridgeable(params.inputToken, params.originChainId)) {
+    if (inputBridgeable) {
       return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
     }
     // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
@@ -87,11 +142,11 @@ export function getCrossSwapType(params: {
     );
   }
 
-  if (isOutputTokenBridgeable(params.outputToken, params.destinationChainId)) {
+  if (outputBridgeable) {
     return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
   }
 
-  if (isInputTokenBridgeable(params.inputToken, params.originChainId)) {
+  if (inputBridgeable) {
     return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
   }
 
@@ -298,6 +353,11 @@ export async function extractSwapAndDepositDataStruct(
       "Can not extract 'SwapAndDepositDataStruct' without originSwapQuote and originRouter"
     );
   }
+  if (originSwapQuote.swapTxns.length !== 1) {
+    throw new Error(
+      "Can not extract 'SwapAndDepositDataStruct' without a single swap transaction"
+    );
+  }
 
   const { baseDepositData, submissionFees: _submissionFees } =
     await extractDepositDataStruct(crossSwapQuotes, submissionFees);
@@ -307,7 +367,7 @@ export async function extractSwapAndDepositDataStruct(
     swapToken: originSwapQuote.tokenIn.address,
     swapTokenAmount: originSwapQuote.maximumAmountIn,
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-    routerCalldata: originSwapQuote.swapTx.data,
+    routerCalldata: originSwapQuote.swapTxns[0].data,
     exchange: originRouter.address,
     transferType:
       originRouter.name === "UniswapV3UniversalRouter"
@@ -329,9 +389,15 @@ async function getFillDeadline(spokePool: SpokePool): Promise<number> {
 
 export function getQuoteFetchStrategy(
   chainId: number,
+  tokenInSymbol: string,
+  tokenOutSymbol: string,
   strategies: QuoteFetchStrategies
 ) {
-  return strategies[chainId] ?? strategies.default ?? defaultQuoteFetchStrategy;
+  return (
+    strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
+    strategies.chains?.[chainId] ??
+    defaultQuoteFetchStrategy
+  );
 }
 
 export function buildDestinationSwapCrossChainMessage({
@@ -346,10 +412,10 @@ export function buildDestinationSwapCrossChainMessage({
   routerAddress: string;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
-  const isIndicativeQuote =
-    destinationSwapQuote.swapTx.to === "0x0" &&
-    destinationSwapQuote.swapTx.data === "0x0" &&
-    destinationSwapQuote.swapTx.value === "0x0";
+  const isIndicativeQuote = destinationSwapQuote.swapTxns.every(
+    (swapTxn) =>
+      swapTxn.to === "0x0" && swapTxn.data === "0x0" && swapTxn.value === "0x0"
+  );
 
   let transferActions: {
     target: string;
@@ -413,13 +479,11 @@ export function buildDestinationSwapCrossChainMessage({
 
   const swapActions = isIndicativeQuote
     ? []
-    : [
-        {
-          target: destinationSwapQuote.swapTx.to,
-          callData: destinationSwapQuote.swapTx.data,
-          value: destinationSwapQuote.swapTx.value,
-        },
-      ];
+    : destinationSwapQuote.swapTxns.map((swapTxn) => ({
+        target: swapTxn.to,
+        callData: swapTxn.data,
+        value: swapTxn.value,
+      }));
 
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),

@@ -33,7 +33,7 @@ type ValidTokenSymbol = string;
 
 const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 
-const enabledMainnetChainConfigs = [
+export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
   chainConfigs.POLYGON,
@@ -55,7 +55,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.LENS,
 ];
 
-const enabledSepoliaChainConfigs = [
+export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
   chainConfigs.ARBITRUM_SEPOLIA,
@@ -130,11 +130,16 @@ const enabledRoutes = {
         [CHAIN_IDs.ARBITRUM]: "0x2414A759d4EFF700Ad81e257Ab5187d07eCeEbAb",
         [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
         [CHAIN_IDs.BLAST]: "0x57EE47829369e2EF62fBb423648bec70d0366204",
+        [CHAIN_IDs.LENS]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
         [CHAIN_IDs.MAINNET]: "0x0e84f089B0923EfeA51C6dF91581BFBa66A3484A",
         [CHAIN_IDs.OPTIMISM]: "0x04989eaF03547E6583f9d9e42aeD11D2b78A808b",
         [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
         [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
         [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
+      },
+      gho: {
+        [CHAIN_IDs.MAINNET]: "0x18d0915ADA0d5969db64CA44A42dB1b51D8421aa",
+        [CHAIN_IDs.LENS]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
       },
     },
     spokePoolPeripheryAddresses: {
