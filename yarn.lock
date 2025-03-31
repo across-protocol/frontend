@@ -26,10 +26,10 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.38.tgz#63f4d9b86576b0003655152c51293dd1c7ab6a1f"
   integrity sha512-/85ACwpu4oxAADOah8VP3esxU3FVb+RieMCINgn4oUf4Rq9cC1LSJm157hy5cc4CBUaySV312MP1iM1d8ysljA==
 
-"@across-protocol/constants@^3.1.42":
-  version "3.1.42"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.42.tgz#348eaed084878f0abd71e9983027932916d1f934"
-  integrity sha512-2/KD8ulhBBS4LXPQbV/rPZ+98npKA/2mpDtKYJZnCCncqItBisXzh8C//V9WSrmKYoY687+frWYfizV/6R8g2Q==
+"@across-protocol/constants@^3.1.46":
+  version "3.1.46"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.46.tgz#9f567eecd47eaa5035460193c49307f413623167"
+  integrity sha512-EHwFVLlSfwIOOQsqnL53UUPtjw9GUN1Y7PDEXUDttPxuqcc/IRDSp7xBnYgn7OWhrEg3404SzBKmc2A1l3Sqhw==
 
 "@across-protocol/constants@^3.1.9":
   version "3.1.30"
@@ -5692,6 +5692,7 @@
     "@solana/transaction-messages" "2.0.0"
 
 "@solana/web3-v2.js@npm:@solana/web3.js@2", "@solana/web3.js@^2.0.0":
+  name "@solana/web3-v2.js"
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-2.0.0.tgz#192918343982e1964269b3adb2567532c1e12c89"
   integrity sha512-x+ZRB2/r5tVK/xw8QRbAfgPcX51G9f2ifEyAQ/J5npOO+6+MPeeCjtr5UxHNDAYs9Ypo0PN+YJATCO4vhzQJGg==
