@@ -15,13 +15,17 @@ import { assert, Infer, optional, string, type } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import { getEnvs } from "./_env";
 
-const ALLOWED_ORIGINS = [resolveVercelEndpoint()];
+const { RPC_PROXY_AUTH_TOKEN, VERCEL_URL, VERCEL_BRANCH_URL } = getEnvs();
+
+const ALLOWED_ORIGINS = [
+  resolveVercelEndpoint(),
+  `https://${VERCEL_URL}`,
+  `https://${VERCEL_BRANCH_URL}`,
+];
 
 const PROTECTED_RPC_MAP: Record<number, string> = {
   [CHAIN_IDs.LENS]: "https://api.lens.matterhosted.dev",
 };
-
-const { RPC_PROXY_AUTH_TOKEN } = getEnvs();
 
 const RpcProxyQueryParamsSchema = type({
   chainId: positiveIntStr(),
