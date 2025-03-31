@@ -20,12 +20,19 @@ import { getGhoStrategy } from "../../_dexes/gho/strategy";
 const quoteFetchStrategies: QuoteFetchStrategies = {
   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
   chains: {
-    232: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+    [CHAIN_IDs.LENS]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
   },
-  tokens: {
+  swapPairs: {
     [CHAIN_IDs.MAINNET]: {
-      GHO: getGhoStrategy(),
-      WGHO: getGhoStrategy(),
+      GHO: {
+        WGHO: getGhoStrategy(),
+      },
+      WGHO: {
+        GHO: getGhoStrategy(),
+        USDC: getGhoStrategy(),
+        USDT: getGhoStrategy(),
+        DAI: getGhoStrategy(),
+      },
     },
   },
 };

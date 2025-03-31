@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { utils } from "@across-protocol/sdk";
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import {
@@ -26,7 +27,7 @@ import {
 } from "../_utils";
 import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
 import { TransferType } from "../_spoke-pool-periphery";
-import { CHAIN_IDs } from "@across-protocol/constants";
+
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
 
@@ -46,9 +47,11 @@ export type QuoteFetchStrategies = Partial<{
   chains: {
     [chainId: number]: QuoteFetchStrategy;
   };
-  tokens: {
+  swapPairs: {
     [chainId: number]: {
-      [tokenSymbol: string]: QuoteFetchStrategy;
+      [tokenInSymbol: string]: {
+        [tokenOutSymbol: string]: QuoteFetchStrategy;
+      };
     };
   };
 }>;
@@ -74,10 +77,10 @@ export const PREFERRED_BRIDGE_TOKENS: {
 } = {
   default: ["WETH", "USDC", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
-    [232]: ["WGHO"],
+    [232]: ["WGHO", "WETH"],
   },
   [232]: {
-    [CHAIN_IDs.MAINNET]: ["WGHO"],
+    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH"],
   },
 };
 
@@ -101,6 +104,7 @@ export function getCrossSwapType(params: {
   outputToken: string;
   destinationChainId: number;
   isInputNative: boolean;
+  isOutputNative: boolean;
 }): CrossSwapType {
   if (
     isRouteEnabled(
@@ -111,26 +115,6 @@ export function getCrossSwapType(params: {
     )
   ) {
     return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
-  }
-
-  // Enforce Lens GHO edge cases:
-  // - L1 GHO -> Lens WGHO => any-to-bridgeable, i.e. origin swap (GHO->WGHO) + bridge
-  // - Lens WGHO -> L1 GHO => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO)
-  if (
-    params.originChainId === CHAIN_IDs.MAINNET &&
-    params.destinationChainId === 232 &&
-    params.inputToken === "GHO" &&
-    params.outputToken === "WGHO"
-  ) {
-    return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
-  }
-  if (
-    params.originChainId === 232 &&
-    params.destinationChainId === CHAIN_IDs.MAINNET &&
-    params.inputToken === "WGHO" &&
-    params.outputToken === "GHO"
-  ) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -405,11 +389,12 @@ async function getFillDeadline(spokePool: SpokePool): Promise<number> {
 
 export function getQuoteFetchStrategy(
   chainId: number,
-  tokenSymbol: string,
+  tokenInSymbol: string,
+  tokenOutSymbol: string,
   strategies: QuoteFetchStrategies
 ) {
   return (
-    strategies.tokens?.[chainId]?.[tokenSymbol] ??
+    strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
     defaultQuoteFetchStrategy
   );

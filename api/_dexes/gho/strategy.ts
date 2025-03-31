@@ -5,15 +5,9 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
 import { getSpokePoolAddress } from "../../_utils";
 import { QuoteFetchStrategy, Swap } from "../types";
-import { getWghoContract } from "./utils/wgho";
+import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
-
-const WGHO_ADDRESS = {
-  [CHAIN_IDs.MAINNET]: "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-  // LENS Mainnet
-  232: "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
-};
 
 /**
  * Returns a swap quote fetch strategy for handling GHO swaps. GHO
@@ -50,7 +44,7 @@ export function getGhoStrategy(): QuoteFetchStrategy {
       useIndicativeQuote: false,
     }
   ) => {
-    const { tokenIn, tokenOut, amount, chainId, depositor, recipient } = swap;
+    const { tokenIn, tokenOut, amount, chainId, recipient } = swap;
 
     // Only support:
     // - L1 GHO -> L1 WGHO
@@ -63,10 +57,6 @@ export function getGhoStrategy(): QuoteFetchStrategy {
       throw new Error(
         `Unsupported input token (${tokenIn.symbol}) or chain (${chainId}) for GHO/WGHO swaps`
       );
-    }
-
-    if (!depositor) {
-      throw new Error("'depositor' is required for GHO/WGHO swaps");
     }
 
     const wgho = getWghoContract(chainId);
@@ -82,7 +72,7 @@ export function getGhoStrategy(): QuoteFetchStrategy {
     // - L1 WGHO -> L1 Stable : encode `withdrawTo` + swap via `SwapRouter02`
     const swapTx1Calldata =
       tokenIn.symbol === "GHO"
-        ? wgho.interface.encodeFunctionData("depositFor", [depositor, amount])
+        ? wgho.interface.encodeFunctionData("depositFor", [recipient, amount])
         : wgho.interface.encodeFunctionData("withdrawTo", [recipient, amount]);
     swapTxns.push({
       data: swapTx1Calldata,

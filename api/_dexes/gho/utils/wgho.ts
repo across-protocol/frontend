@@ -1,11 +1,10 @@
 import { ethers } from "ethers";
-import { CHAIN_IDs } from "../../../_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
 import { getProvider } from "../../../_utils";
 
 export const WGHO_ADDRESS = {
-  [CHAIN_IDs.MAINNET]: "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-  // LENS Mainnet
-  232: "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
+  [CHAIN_IDs.MAINNET]: TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.MAINNET],
+  [CHAIN_IDs.LENS]: TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.LENS],
 };
 
 const WGHO_ABI = [

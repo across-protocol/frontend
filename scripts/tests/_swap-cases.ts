@@ -225,11 +225,42 @@ export const LENS_CASES = [
         .parseUnits("1", TOKEN_SYMBOLS_MAP.GHO.decimals)
         .toString(),
       tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[1],
-      originChainId: 1,
-      outputToken: TOKEN_SYMBOLS_MAP.WGHO.addresses[232],
-      destinationChainId: 232,
+      inputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
+      originChainId: CHAIN_IDs.MAINNET,
+      outputToken: TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.LENS],
+      destinationChainId: CHAIN_IDs.LENS,
       depositor,
+    },
+  },
+  // L1 GHO -> Lens GHO => any-to-bridgeable, i.e. origin swap (GHO->WGHO) + bridge and unwrap
+  {
+    labels: ["LENS", "L1 GHO - Lens GHO"],
+    params: {
+      amount: ethers.utils
+        .parseUnits("0.01", TOKEN_SYMBOLS_MAP.GHO.decimals)
+        .toString(),
+      tradeType: "exactInput",
+      inputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
+      originChainId: CHAIN_IDs.MAINNET,
+      outputToken: ethers.constants.AddressZero, // Indicates native input token on Lens,
+      destinationChainId: CHAIN_IDs.LENS,
+      depositor,
+    },
+  },
+  // L1 USDC -> Lens GHO => any-to-bridgeable, i.e. origin swap (USDC->WGHO) + bridge and unwrap
+  {
+    labels: ["LENS", "L1 USDC - Lens GHO"],
+    params: {
+      amount: ethers.utils
+        .parseUnits("0.01", TOKEN_SYMBOLS_MAP.USDC.decimals)
+        .toString(),
+      tradeType: "exactInput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+      originChainId: CHAIN_IDs.MAINNET,
+      outputToken: ethers.constants.AddressZero, // Indicates native input token on Lens,
+      destinationChainId: CHAIN_IDs.LENS,
+      depositor,
+      recipient: "0x52A79C01f10e6Ea89dED5c3f42F3a0EC362ed090",
     },
   },
   // Lens WGHO -> L1 GHO => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO)
@@ -240,10 +271,40 @@ export const LENS_CASES = [
         .parseUnits("1", TOKEN_SYMBOLS_MAP.WGHO.decimals)
         .toString(),
       tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.WGHO.addresses[232],
-      originChainId: 232,
-      outputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[1],
-      destinationChainId: 1,
+      inputToken: TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.LENS],
+      originChainId: CHAIN_IDs.LENS,
+      outputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
+      destinationChainId: CHAIN_IDs.MAINNET,
+      depositor,
+    },
+  },
+  // Lens GHO -> L1 GHO => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO)
+  {
+    labels: ["LENS", "Lens GHO - L1 GHO"],
+    params: {
+      amount: ethers.utils
+        .parseUnits("1", TOKEN_SYMBOLS_MAP.WGHO.decimals)
+        .toString(),
+      tradeType: "exactInput",
+      inputToken: ethers.constants.AddressZero, // Indicates native input token on Lens
+      originChainId: CHAIN_IDs.LENS,
+      outputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
+      destinationChainId: CHAIN_IDs.MAINNET,
+      depositor,
+    },
+  },
+  // Lens GHO -> L1 USDC => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO->USDC)
+  {
+    labels: ["LENS", "Lens GHO - L1 USDC"],
+    params: {
+      amount: ethers.utils
+        .parseUnits("2", TOKEN_SYMBOLS_MAP.WGHO.decimals)
+        .toString(),
+      tradeType: "exactInput",
+      inputToken: ethers.constants.AddressZero, // Indicates native input token on Lens
+      originChainId: CHAIN_IDs.LENS,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+      destinationChainId: CHAIN_IDs.MAINNET,
       depositor,
     },
   },
@@ -255,10 +316,10 @@ export const LENS_CASES = [
         .parseUnits("1", TOKEN_SYMBOLS_MAP.USDC.decimals)
         .toString(),
       tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[10],
-      originChainId: 10,
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+      originChainId: CHAIN_IDs.OPTIMISM,
       outputToken: ethers.constants.AddressZero, // Indicates native output token GHO on Lens
-      destinationChainId: 232,
+      destinationChainId: CHAIN_IDs.LENS,
       depositor,
     },
   },
@@ -270,10 +331,10 @@ export const LENS_CASES = [
         .parseUnits("1", TOKEN_SYMBOLS_MAP.DAI.decimals)
         .toString(),
       tradeType: "exactInput",
-      inputToken: TOKEN_SYMBOLS_MAP.DAI.addresses[10],
-      originChainId: 10,
+      inputToken: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.OPTIMISM],
+      originChainId: CHAIN_IDs.OPTIMISM,
       outputToken: ethers.constants.AddressZero, // Indicates native output token GHO on Lens
-      destinationChainId: 232,
+      destinationChainId: CHAIN_IDs.LENS,
       depositor,
     },
   },
@@ -286,9 +347,24 @@ export const LENS_CASES = [
         .toString(),
       tradeType: "exactInput",
       inputToken: ethers.constants.AddressZero, // Indicates native input token on Lens
-      originChainId: 232,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[1],
-      destinationChainId: 1,
+      originChainId: CHAIN_IDs.LENS,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+      destinationChainId: CHAIN_IDs.MAINNET,
+      depositor,
+    },
+  },
+  // Lens GHO -> Optimism USDC => bridgeable-to-any, i.e. origin swap () + destination swap (WGHO->GHO->USDC)
+  {
+    labels: ["LENS", "Lens GHO - Optimism USDC"],
+    params: {
+      amount: ethers.utils
+        .parseUnits("1", TOKEN_SYMBOLS_MAP.GHO.decimals)
+        .toString(),
+      tradeType: "exactInput",
+      inputToken: ethers.constants.AddressZero, // Indicates native input token on Lens
+      originChainId: CHAIN_IDs.LENS,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+      destinationChainId: CHAIN_IDs.OPTIMISM,
       depositor,
     },
   },

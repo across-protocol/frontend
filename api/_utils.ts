@@ -389,7 +389,8 @@ export function getChainInfo(chainId: number) {
 
 export function getWrappedNativeTokenAddress(chainId: number) {
   const chainInfo = getChainInfo(chainId);
-  const wrappedNativeTokenSymbol = `W${chainInfo.nativeToken}`;
+  const wrappedNativeTokenSymbol =
+    chainId === CHAIN_IDs.LENS ? "WGHO" : `W${chainInfo.nativeToken}`;
   const wrappedNativeToken =
     TOKEN_SYMBOLS_MAP[
       wrappedNativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
