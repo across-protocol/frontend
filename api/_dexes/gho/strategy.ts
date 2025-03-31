@@ -10,8 +10,7 @@ import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
 
 /**
- * Returns a swap quote fetch strategy for handling GHO swaps. GHO
- * @returns
+ * Returns a swap quote fetch strategy for handling GHO/WGHO swaps.
  */
 export function getGhoStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
