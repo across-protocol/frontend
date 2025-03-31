@@ -30,27 +30,28 @@ const enabledSwapRoutes: {
       },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [CHAIN_IDs.MAINNET],
-        enabledOutputTokens: ["WGHO", "GHO"],
+        enabledOutputTokens: ["WGHO", "GHO", "USDC", "USDT", "DAI"],
       },
     },
-    [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-      all: {
-        enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["GHO"],
-      },
-    },
-    [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
-      all: {
-        enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["GHO"],
-      },
-    },
-    [TOKEN_SYMBOLS_MAP.DAI.symbol]: {
-      all: {
-        enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["GHO"],
-      },
-    },
+    // TODO: Enable if Uniswap SDK supports Lens
+    // [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+    //   all: {
+    //     enabledDestinationChains: [CHAIN_IDs.LENS],
+    //     enabledOutputTokens: ["GHO"],
+    //   },
+    // },
+    // [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
+    //   all: {
+    //     enabledDestinationChains: [CHAIN_IDs.LENS],
+    //     enabledOutputTokens: ["GHO"],
+    //   },
+    // },
+    // [TOKEN_SYMBOLS_MAP.DAI.symbol]: {
+    //   all: {
+    //     enabledDestinationChains: [CHAIN_IDs.LENS],
+    //     enabledOutputTokens: ["GHO"],
+    //   },
+    // },
   },
   [CHAIN_IDs.SEPOLIA]: {},
 } as const;
