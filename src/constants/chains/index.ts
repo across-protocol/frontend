@@ -19,6 +19,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.LINEA,
   CHAIN_IDs.MODE,
   CHAIN_IDs.BLAST,
+  CHAIN_IDs.LENS,
   CHAIN_IDs.LISK,
   CHAIN_IDs.REDSTONE,
   CHAIN_IDs.SCROLL,

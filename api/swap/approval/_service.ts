@@ -13,10 +13,28 @@ import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { TypedVercelRequest } from "../../_types";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
+import { CHAIN_IDs } from "../../_constants";
+import { getGhoStrategy } from "../../_dexes/gho/strategy";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+  chains: {
+    [CHAIN_IDs.LENS]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+  },
+  swapPairs: {
+    [CHAIN_IDs.MAINNET]: {
+      GHO: {
+        WGHO: getGhoStrategy(),
+      },
+      WGHO: {
+        GHO: getGhoStrategy(),
+        USDC: getGhoStrategy(),
+        USDT: getGhoStrategy(),
+        DAI: getGhoStrategy(),
+      },
+    },
+  },
 };
 
 export async function handleApprovalSwap(
