@@ -40,7 +40,7 @@ export type CrossSwap = {
   isOutputNative?: boolean;
 };
 
-export type SupportedDex = "1inch" | "uniswap" | "gho";
+export type SupportedDex = "1inch" | "uniswap" | "gho" | "gho-multicall3";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -126,7 +126,7 @@ export type QuoteFetchStrategy = {
       | {
           name: "UniversalSwapAndBridge";
           address: string;
-          dex: "uniswap" | "1inch" | "gho";
+          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3";
         }
       | {
           name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";

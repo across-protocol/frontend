@@ -141,6 +141,9 @@ const enabledRoutes = {
         [CHAIN_IDs.MAINNET]: "0x18d0915ADA0d5969db64CA44A42dB1b51D8421aa",
         [CHAIN_IDs.LENS]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
       },
+      "gho-multicall3": {
+        [CHAIN_IDs.MAINNET]: "0x9736F26C6311701A984A53A0b555f8A20225173A",
+      },
     },
     spokePoolPeripheryAddresses: {
       [CHAIN_IDs.ARBITRUM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",

@@ -12,7 +12,7 @@ import { encodeApproveCalldata } from "../../_multicall-handler";
 /**
  * Returns a swap quote fetch strategy for handling GHO/WGHO swaps.
  */
-export function getGhoStrategy(): QuoteFetchStrategy {
+export function getWrappedGhoStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     return {
       address: WGHO_ADDRESS[chainId],
