@@ -52,7 +52,7 @@ export type Props = {
 export function FeesCollapsible(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { inputToken, outputToken, bridgeToken } = getTokensForFeesCalc(props);
+  const { inputToken, bridgeToken } = getTokensForFeesCalc(props);
 
   const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
     useTokenConversion(inputToken.symbol, "usd");
@@ -63,7 +63,7 @@ export function FeesCollapsible(props: Props) {
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
-  } = useTokenConversion(outputToken.symbol, "usd");
+  } = useTokenConversion(props.outputToken.symbol, "usd");
 
   const {
     bridgeFeeUsd,
@@ -117,7 +117,7 @@ export function FeesCollapsible(props: Props) {
                 <>
                   <TokenFeeWrapper>
                     <TokenFee
-                      token={outputToken}
+                      token={props.outputToken}
                       amount={outputAmount}
                       tokenFirst
                       tokenChainId={props.toChainId}
