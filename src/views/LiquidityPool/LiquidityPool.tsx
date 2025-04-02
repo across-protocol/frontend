@@ -117,6 +117,7 @@ export default function LiquidityPool() {
               }}
               pools={liquidityPools.map((pool) => ({
                 tokenSymbol: pool.l1TokenSymbol,
+                displaySymbol: pool.l1TokenDisplaySymbol,
                 tokenLogoURI: pool.l1TokenLogoURI,
                 poolSize: BigNumber.from(pool.totalPoolSize),
               }))}

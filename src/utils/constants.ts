@@ -87,11 +87,20 @@ export const tokenList = [
       return [];
     }
 
-    // Override `displaySymbol` for WGHO to LGHO
-    const displaySymbol = symbol === "WGHO" ? "LGHO" : symbol;
+    let name = tokenInfo.name;
+    let displaySymbol = symbol;
+    // Override for GHO and WGHO until reflected in the constants
+    if (symbol === "GHO") {
+      name = "GHO Stablecoin";
+      displaySymbol = "GHO";
+    } else if (symbol === "WGHO") {
+      name = "Lens Wrapped GHO";
+      displaySymbol = "LGHO";
+    }
 
     return {
       ...tokenInfo,
+      name,
       displaySymbol,
       logoURI,
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
