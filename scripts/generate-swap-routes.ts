@@ -39,25 +39,24 @@ const enabledSwapRoutes: {
         enabledOutputTokens: ["GHO"],
       },
     },
-    // TODO: Enable if Uniswap SDK supports Lens
-    // [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-    //   all: {
-    //     enabledDestinationChains: [CHAIN_IDs.LENS],
-    //     enabledOutputTokens: ["GHO"],
-    //   },
-    // },
-    // [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
-    //   all: {
-    //     enabledDestinationChains: [CHAIN_IDs.LENS],
-    //     enabledOutputTokens: ["GHO"],
-    //   },
-    // },
-    // [TOKEN_SYMBOLS_MAP.DAI.symbol]: {
-    //   all: {
-    //     enabledDestinationChains: [CHAIN_IDs.LENS],
-    //     enabledOutputTokens: ["GHO"],
-    //   },
-    // },
+    [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP.DAI.symbol]: {
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
   },
   [CHAIN_IDs.SEPOLIA]: {},
 } as const;

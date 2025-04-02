@@ -1475,7 +1475,7 @@ export function getMulticall3(
   chainId: number,
   signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
-  const address = sdk.utils.getMulticallAddress(chainId);
+  const address = getMulticall3Address(chainId);
 
   // no multicall on this chain
   if (!address) {
@@ -1487,6 +1487,17 @@ export function getMulticall3(
     MINIMAL_MULTICALL3_ABI,
     signerOrProvider
   ) as Multicall3;
+}
+
+export function getMulticall3Address(chainId: number): string | undefined {
+  const addressOverride = MULTICALL3_ADDRESS_OVERRIDES[chainId];
+  const addressFromSdk = sdk.utils.getMulticallAddress(chainId);
+
+  if (addressOverride) {
+    return addressOverride;
+  }
+
+  return addressFromSdk;
 }
 
 /**
@@ -2095,7 +2106,7 @@ export async function callViaMulticall3(
 ): Promise<ethers.utils.Result[]> {
   const chainId = provider.network.chainId;
   const multicall3 = new ethers.Contract(
-    MULTICALL3_ADDRESS_OVERRIDES[chainId] ?? MULTICALL3_ADDRESS,
+    getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
     provider
   );

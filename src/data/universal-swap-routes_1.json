@@ -82,5 +82,41 @@
     "l1TokenAddress": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
     "type": "universal-swap",
     "isNative": false
+  },
+  {
+    "fromChain": 1,
+    "toChain": 232,
+    "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 1,
+    "toChain": 232,
+    "fromTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDT",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+    "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 1,
+    "toChain": 232,
+    "fromTokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "DAI",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+    "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "type": "universal-swap",
+    "isNative": false
   }
 ]

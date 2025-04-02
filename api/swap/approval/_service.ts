@@ -14,7 +14,8 @@ import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { TypedVercelRequest } from "../../_types";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { CHAIN_IDs } from "../../_constants";
-import { getGhoStrategy } from "../../_dexes/gho/strategy";
+import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
+import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
@@ -25,13 +26,22 @@ const quoteFetchStrategies: QuoteFetchStrategies = {
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {
       GHO: {
-        WGHO: getGhoStrategy(),
+        WGHO: getWrappedGhoStrategy(),
       },
       WGHO: {
-        GHO: getGhoStrategy(),
-        USDC: getGhoStrategy(),
-        USDT: getGhoStrategy(),
-        DAI: getGhoStrategy(),
+        GHO: getWrappedGhoStrategy(),
+        USDC: getWrappedGhoStrategy(),
+        USDT: getWrappedGhoStrategy(),
+        DAI: getWrappedGhoStrategy(),
+      },
+      USDC: {
+        WGHO: getWghoMulticallStrategy(),
+      },
+      USDT: {
+        WGHO: getWghoMulticallStrategy(),
+      },
+      DAI: {
+        WGHO: getWghoMulticallStrategy(),
       },
     },
   },
