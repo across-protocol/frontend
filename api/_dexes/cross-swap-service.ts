@@ -1,4 +1,5 @@
 import { TradeType } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 
 import {
   getBridgeQuoteForMinOutput,
@@ -29,6 +30,7 @@ import {
   buildDestinationSwapCrossChainMessage,
   assertMinOutputAmount,
 } from "./utils";
+import { AmountTooLowError } from "../_errors";
 
 const indicativeQuoteBuffer = 0.005; // 0.5% buffer for indicative quotes
 
@@ -204,6 +206,14 @@ export async function getCrossSwapQuotesForExactInputB2A(
       routerAddress: destinationRouter.address,
     }),
   });
+
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Bridge amount is too low to cover bridge fees: ` +
+        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, crossSwap.inputToken.decimals)}`,
+    });
+  }
 
   // 3. Get destination swap quote with correct amount
   const destinationSwapQuote = await destinationStrategy.fetchFn(
