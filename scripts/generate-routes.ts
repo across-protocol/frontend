@@ -136,6 +136,7 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
         [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
         [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
+        [CHAIN_IDs.ZK_SYNC]: "0xdB82479e3903869fbF8B308162E332FED771D51B",
       },
       gho: {
         [CHAIN_IDs.MAINNET]: "0x18d0915ADA0d5969db64CA44A42dB1b51D8421aa",
@@ -452,20 +453,6 @@ function processTokenRoutes(
         {
           inputTokenSymbol: "WGRASS",
           outputTokenSymbol: "GRASS",
-        },
-      ];
-    }
-
-    // Lens special case
-    if (
-      tokenSymbol === "GHO" &&
-      fromConfig.chainId === CHAIN_IDs.LENS &&
-      toConfig.tokens.includes("WGHO")
-    ) {
-      return [
-        {
-          inputTokenSymbol: "GHO",
-          outputTokenSymbol: "WGHO",
         },
       ];
     }
