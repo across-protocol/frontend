@@ -26,6 +26,7 @@ import {
   POOL_FACTORY_CONTRACT_ADDRESS,
   QUOTER_CONTRACT_ADDRESS,
   SWAP_ROUTER_02_ADDRESS,
+  POOL_ADDRESS,
 } from "./addresses";
 
 type SwapParam = Omit<Swap, "type">;
@@ -234,13 +235,20 @@ async function getPoolInfo({ tokenIn, tokenOut }: SwapParam): Promise<{
   tick: number;
 }> {
   const provider = getProvider(tokenIn.chainId);
-  const poolContract = new ethers.Contract(
+  const sortedTokenSymbols = [tokenIn.symbol, tokenOut.symbol].sort();
+  const poolKey = `${sortedTokenSymbols[0]}_${sortedTokenSymbols[1]}`;
+  const poolAddress =
+    POOL_ADDRESS[tokenIn.chainId][
+      poolKey as keyof (typeof POOL_ADDRESS)[number]
+    ] ??
     computePoolAddress({
       factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS[tokenIn.chainId],
       tokenA: new Token(tokenIn.chainId, tokenIn.address, tokenIn.decimals),
       tokenB: new Token(tokenOut.chainId, tokenOut.address, tokenOut.decimals),
-      fee: FeeAmount.LOW,
-    }),
+      fee: FeeAmount.LOWEST,
+    });
+  const poolContract = new ethers.Contract(
+    poolAddress,
     IUniswapV3PoolABI.abi,
     provider
   );
