@@ -82,13 +82,8 @@ export function getReceiveTokenSymbol(
   destinationChainId: number,
   inputTokenSymbol: string,
   outputTokenSymbol: string,
-  isReceiverContract: boolean,
-  isUniversalSwap: boolean
+  isReceiverContract: boolean
 ) {
-  if (isUniversalSwap) {
-    return outputTokenSymbol;
-  }
-
   const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
 
   if (

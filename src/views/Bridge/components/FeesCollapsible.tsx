@@ -80,10 +80,15 @@ export function FeesCollapsible(props: Props) {
     }) || {};
   const outputAmount = convertUsdToOutputToken(outputAmountUsd);
 
+  const isSwap =
+    props.isSwap ||
+    (props.isUniversalSwap &&
+      Object.values(props.universalSwapQuote?.steps || {}).length > 1);
+
   const estimatedRewards = useEstimatedRewards(
     bridgeToken,
     props.toChainId,
-    props.isSwap || props.isUniversalSwap,
+    isSwap,
     convertUsdToBridgeToken(parsedAmountUsd),
     convertUsdToBridgeToken(gasFeeUsd),
     convertUsdToBridgeToken(bridgeFeeUsd),
@@ -163,7 +168,7 @@ export function FeesCollapsible(props: Props) {
             </CollapsedFeesAmountsWrapper>
           )}
           <CollapsedIconsWrapper>
-            {props.isSwap ? <SwapIcon /> : null}
+            {isSwap ? <SwapIcon /> : null}
             <ChevronDown />
           </CollapsedIconsWrapper>
         </CollapsedFeesReceiveWrapper>
@@ -221,7 +226,7 @@ export function FeesCollapsible(props: Props) {
           </Text>
         )}
         <CollapsedIconsWrapper>
-          {props.isSwap || props.isUniversalSwap ? <SwapIcon /> : null}
+          {isSwap ? <SwapIcon /> : null}
           <ChevronUp />
         </CollapsedIconsWrapper>
       </ExpandedFeesTopRow>

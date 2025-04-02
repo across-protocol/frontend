@@ -34,9 +34,10 @@ export function useResolveFromBridgePagePayload(
   const swapToken = isSwap
     ? getToken(selectedRoute.swapTokenSymbol)
     : undefined;
-  const { inputToken, outputToken, bridgeToken } = getTokensForFeesCalc({
+  const outputToken = getToken(outputTokenSymbol);
+  const { inputToken, bridgeToken } = getTokensForFeesCalc({
     inputToken: getToken(inputTokenSymbol),
-    outputToken: getToken(outputTokenSymbol),
+    outputToken,
     isUniversalSwap: !!universalSwapQuote,
     universalSwapQuote,
     fromChainId: fromChainId,

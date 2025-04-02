@@ -78,8 +78,7 @@ export function DepositStatusLowerCard({
             toChainId,
             inputTokenSymbol,
             outputToken.symbol,
-            isReceiverContract,
-            isUniversalSwap
+            isReceiverContract
           )
         )}
         parsedAmount={BigNumber.from(depositArgs.initialAmount)}
