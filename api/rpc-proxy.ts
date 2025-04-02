@@ -19,6 +19,7 @@ const { RPC_PROXY_AUTH_TOKEN, VERCEL_URL, VERCEL_BRANCH_URL } = getEnvs();
 
 const ALLOWED_ORIGINS = [
   resolveVercelEndpoint(),
+  "http://localhost:3000",
   `https://${VERCEL_URL}`,
   `https://${VERCEL_BRANCH_URL}`,
 ];
@@ -102,6 +103,7 @@ function authenticate({
     }
     // if not then we may allow access for same origin requests (from our frontend)
   } else if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+    console.error(`Origin ${origin} not allowed`);
     throw new UnauthorizedError({
       message: "Origin not allowed",
     });
