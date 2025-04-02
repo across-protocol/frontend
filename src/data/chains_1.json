@@ -1665,7 +1665,7 @@
     "chainId": 232,
     "name": "Lens",
     "publicRpcUrl": "https://api.lens.matterhosted.dev",
-    "explorerUrl": "https://block-explorer.testnet.lens.dev",
+    "explorerUrl": "https://explorer.lens.xyz",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens/assets/logo.svg",
     "spokePool": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
     "spokePoolBlock": 193290,
@@ -1676,13 +1676,6 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
-      },
-      {
-        "address": "0x000000000000000000000000000000000000800A",
-        "symbol": "GHO",
-        "name": "Gho Token",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/gho.svg"
       },
       {
         "address": "0xE5ecd226b3032910CEaa43ba92EE8232f8237553",

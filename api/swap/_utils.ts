@@ -330,6 +330,12 @@ export function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
+        fees: {
+          totalRelay: params.bridgeQuote.suggestedFees.totalRelayFee,
+          relayerCapital: params.bridgeQuote.suggestedFees.relayerCapitalFee,
+          relayerGas: params.bridgeQuote.suggestedFees.relayerGasFee,
+          lp: params.bridgeQuote.suggestedFees.lpFee,
+        },
       },
       destinationSwap: params.destinationSwapQuote
         ? {

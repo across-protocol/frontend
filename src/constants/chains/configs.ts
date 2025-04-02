@@ -478,7 +478,7 @@ export const lens = {
   logoSvg: lensLogoSvg,
   grayscaleLogoSvg: lensGrayscaleLogoSvg,
   rpcUrl: getProxyRpcUrl(232),
-  explorerUrl: "https://block-explorer.testnet.lens.dev",
+  explorerUrl: "https://explorer.lens.xyz",
   constructExplorerLink: (txHash: string) => `${lens.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "GHO",
   customRpcUrl: process.env.REACT_APP_CHAIN_232_CUSTOM_RPC_URL,

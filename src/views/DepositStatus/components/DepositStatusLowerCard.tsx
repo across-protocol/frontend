@@ -46,16 +46,21 @@ export function DepositStatusLowerCard({
     swapQuote,
     quote,
     estimatedRewards,
-    baseToken,
+    inputToken,
+    outputToken,
+    bridgeToken,
+    isUniversalSwap,
+    universalSwapQuote,
   } = useResolveFromBridgePagePayload(
+    fromChainId,
     toChainId,
     inputTokenSymbol,
+    outputTokenSymbol,
     fromBridgePagePayload
   );
 
   const history = useHistory();
   const isReceiverContract = useIsContractAddress(recipient);
-  const outputTokenInfo = getToken(outputTokenSymbol);
   const programName = chainIdToRewardsProgramName[toChainId];
 
   const FeesTable =
@@ -72,7 +77,7 @@ export function DepositStatusLowerCard({
           getReceiveTokenSymbol(
             toChainId,
             inputTokenSymbol,
-            outputTokenInfo.symbol,
+            outputToken.symbol,
             isReceiverContract
           )
         )}
@@ -82,6 +87,8 @@ export function DepositStatusLowerCard({
         swapToken={swapToken}
         isQuoteLoading={false}
         estimatedFillTimeSec={quote?.estimatedFillTimeSec}
+        universalSwapQuote={universalSwapQuote}
+        isUniversalSwap={isUniversalSwap}
         {...estimatedRewards}
       />
     ) : null;
@@ -90,7 +97,7 @@ export function DepositStatusLowerCard({
     <>
       <BuildOnAcrossCard />
       <EarnByLpAndStakingCard
-        l1TokenAddress={baseToken.mainnetAddress!}
+        l1TokenAddress={bridgeToken.mainnetAddress!}
         bridgeTokenSymbol={inputTokenSymbol}
       />
       {programName && (
@@ -103,7 +110,7 @@ export function DepositStatusLowerCard({
             getBridgeUrlWithQueryParams({
               fromChainId,
               toChainId,
-              inputTokenSymbol: baseToken.symbol,
+              inputTokenSymbol: inputToken.symbol,
               outputTokenSymbol,
               externalProjectId,
             })
