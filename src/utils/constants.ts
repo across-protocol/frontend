@@ -87,9 +87,12 @@ export const tokenList = [
       return [];
     }
 
+    // Override `displaySymbol` for WGHO to LGHO
+    const displaySymbol = symbol === "WGHO" ? "LGHO" : symbol;
+
     return {
       ...tokenInfo,
-      displaySymbol: symbol,
+      displaySymbol,
       logoURI,
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
         ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
@@ -561,6 +564,24 @@ export const disabledBridgeTokens = String(
 )
   .split(",")
   .map((symbol) => symbol.toUpperCase());
+
+// Format: "<fromChainId>:<toChainId>:<fromTokenSymbol>:<toTokenSymbol>"
+export const disabledBridgeRoutes = String(
+  process.env.REACT_APP_DISABLED_BRIDGE_ROUTES || ""
+)
+  // Lens: disable WGHO routes
+  .concat(",1:232:WGHO:WGHO,232:1:WGHO:WGHO")
+  .split(",")
+  .map((route) => {
+    const [fromChainId, toChainId, fromTokenSymbol, toTokenSymbol] =
+      route.split(":");
+    return {
+      fromChainId: Number(fromChainId),
+      toChainId: Number(toChainId),
+      fromTokenSymbol,
+      toTokenSymbol,
+    };
+  });
 
 export const disabledChainIds = (
   process.env.REACT_APP_DISABLED_CHAINS || ""

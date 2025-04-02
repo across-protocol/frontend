@@ -26,11 +26,17 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.GHO.symbol]: {
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["WGHO", "GHO"],
+        enabledOutputTokens: ["GHO"],
       },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [CHAIN_IDs.MAINNET],
         enabledOutputTokens: ["WGHO", "GHO", "USDC", "USDT", "DAI"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP.WGHO.symbol]: {
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
       },
     },
     // TODO: Enable if Uniswap SDK supports Lens

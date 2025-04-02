@@ -12488,17 +12488,6 @@
     {
       "fromChain": 232,
       "toChain": 1,
-      "fromTokenAddress": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
-      "toTokenAddress": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-      "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
-      "fromTokenSymbol": "GHO",
-      "toTokenSymbol": "WGHO",
-      "isNative": true,
-      "l1TokenAddress": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a"
-    },
-    {
-      "fromChain": 232,
-      "toChain": 1,
       "fromTokenAddress": "0xE5ecd226b3032910CEaa43ba92EE8232f8237553",
       "toTokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",

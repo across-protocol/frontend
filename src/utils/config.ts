@@ -100,6 +100,13 @@ export class ConfigClient {
   getEnabledRoutes(): constants.Routes {
     return this.routes.filter(
       (route) =>
+        !constants.disabledBridgeRoutes.some(
+          (disabledRoute) =>
+            disabledRoute.fromChainId === route.fromChain &&
+            disabledRoute.toChainId === route.toChain &&
+            disabledRoute.fromTokenSymbol === route.fromTokenSymbol &&
+            disabledRoute.toTokenSymbol === route.toTokenSymbol
+        ) &&
         !this.disabledTokens.includes(route.fromTokenSymbol) &&
         ![route.fromChain, route.toChain].some((chainId) =>
           [

@@ -457,20 +457,6 @@ function processTokenRoutes(
       ];
     }
 
-    // Lens special case
-    if (
-      tokenSymbol === "GHO" &&
-      fromConfig.chainId === CHAIN_IDs.LENS &&
-      toConfig.tokens.includes("WGHO")
-    ) {
-      return [
-        {
-          inputTokenSymbol: "GHO",
-          outputTokenSymbol: "WGHO",
-        },
-      ];
-    }
-
     // Handle WETH Polygon & other non-eth chains
     if (
       tokenSymbol === "WETH" &&
