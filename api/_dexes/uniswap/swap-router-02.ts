@@ -22,9 +22,12 @@ import {
 import { RouterTradeAdapter } from "./utils/adapter";
 import { buildCacheKey, makeCacheGetterAndSetter } from "../../_cache";
 import { SWAP_ROUTER_02_ADDRESS } from "./utils/addresses";
-import { getUniswapQuoteWithSwapRouter02FromSdk } from "./utils/v3-sdk";
+import {
+  getUniswapQuoteWithSwapQuoterFromSdk,
+  getUniswapQuoteWithSwapRouter02FromSdk,
+} from "./utils/v3-sdk";
 
-type QuoteSource = "trading-api" | "sdk";
+type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
 export function getSwapRouter02Strategy(
   originSwapEntryPointContractName:
@@ -93,8 +96,8 @@ export function getSwapRouter02Strategy(
 
     if (quoteSource === "trading-api") {
       swapQuote = await fetchViaTradingApi(swap, tradeType, opts);
-    } else if (quoteSource === "sdk") {
-      swapQuote = await fetchViaSdk(swap, tradeType, opts);
+    } else if (["sdk-swap-quoter", "sdk-alpha-router"].includes(quoteSource)) {
+      swapQuote = await fetchViaSdk(swap, tradeType, opts, quoteSource);
     } else {
       throw new Error(`Cannot fetch quote from unknown source: ${quoteSource}`);
     }
@@ -131,14 +134,15 @@ async function fetchViaSdk(
     useIndicativeQuote: boolean;
   }> = {
     useIndicativeQuote: false,
-  }
+  },
+  quoteSource: QuoteSource = "sdk-alpha-router"
 ) {
   let swapQuote: SwapQuote;
   if (opts.useIndicativeQuote) {
     const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
       swap,
       tradeType,
-      "sdk"
+      quoteSource
     ).get();
     swapQuote = buildIndicativeQuote(
       swap,
@@ -146,7 +150,11 @@ async function fetchViaSdk(
       indicativeQuotePricePerTokenOut
     );
   } else {
-    swapQuote = await getUniswapQuoteWithSwapRouter02FromSdk(swap, tradeType);
+    if (quoteSource === "sdk-swap-quoter") {
+      swapQuote = await getUniswapQuoteWithSwapQuoterFromSdk(swap, tradeType);
+    } else {
+      swapQuote = await getUniswapQuoteWithSwapRouter02FromSdk(swap, tradeType);
+    }
   }
   return swapQuote;
 }
@@ -314,8 +322,15 @@ function indicativeQuotePriceCache(
       );
       inputAmount = BigNumber.from(quote.input.amount);
       outputAmount = BigNumber.from(quote.output.amount);
-    } else if (quoteSource === "sdk") {
+    } else if (quoteSource === "sdk-alpha-router") {
       const swapQuote = await getUniswapQuoteWithSwapRouter02FromSdk(
+        swap,
+        tradeType
+      );
+      inputAmount = swapQuote.expectedAmountIn;
+      outputAmount = swapQuote.expectedAmountOut;
+    } else if (quoteSource === "sdk-swap-quoter") {
+      const swapQuote = await getUniswapQuoteWithSwapQuoterFromSdk(
         swap,
         tradeType
       );
