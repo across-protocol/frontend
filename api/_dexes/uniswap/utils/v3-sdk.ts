@@ -34,7 +34,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
   swap: SwapParam,
   tradeType: TradeType
 ): Promise<SwapQuote> {
-  const { options } = getSwapRouter02AndOptions(swap);
+  const options = getOptions(swap);
 
   const poolInfo = await getPoolInfo(swap);
   const tokenA = new Token(
@@ -195,16 +195,24 @@ function getSwapRouter02AndOptions(params: {
   slippageTolerance: number;
 }) {
   const router = getSwapRouter02(params.chainId);
+  const options = getOptions(params);
+  return {
+    router,
+    options,
+  };
+}
+
+function getOptions(params: {
+  recipient: string;
+  slippageTolerance: number;
+}): SwapOptionsSwapRouter02 {
   const options: SwapOptionsSwapRouter02 = {
     recipient: params.recipient,
     deadline: utils.getCurrentTime() + 30 * 60, // 30 minutes from now
     type: SwapType.SWAP_ROUTER_02,
     slippageTolerance: floatToPercent(params.slippageTolerance),
   };
-  return {
-    router,
-    options,
-  };
+  return options;
 }
 
 const swapRouterCache = new Map<number, AlphaRouter>();
