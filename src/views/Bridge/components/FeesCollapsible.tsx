@@ -83,7 +83,10 @@ export function FeesCollapsible(props: Props) {
   const isSwap =
     props.isSwap ||
     (props.isUniversalSwap &&
-      Object.values(props.universalSwapQuote?.steps || {}).length > 1);
+      Boolean(
+        props.universalSwapQuote?.steps.originSwap ||
+          props.universalSwapQuote?.steps.destinationSwap
+      ));
 
   const estimatedRewards = useEstimatedRewards(
     bridgeToken,

@@ -64,7 +64,10 @@ const EstimatedTable = ({
   const showSwapFeeRow =
     ((isSwap && swapQuote && swapToken) ||
       (isUniversalSwap &&
-        Object.values(universalSwapQuote?.steps || {}).length > 1)) &&
+        Boolean(
+          universalSwapQuote?.steps.originSwap ||
+            universalSwapQuote?.steps.destinationSwap
+        ))) &&
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
