@@ -42,6 +42,13 @@
         "name": "Grass",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ],
     "outputTokens": [
@@ -79,6 +86,13 @@
         "name": "Grass",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   },
@@ -546,6 +560,54 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 129399,
+    "name": "Katana Tatara",
+    "publicRpcUrl": "https://rpc.tatara.katanarpc.com/9X4vKN4mUg5mpH8M2QQdZNVc6U9AZFeeC",
+    "explorerUrl": "https://explorer.tatara.katana.network",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/tatara/assets/logo.svg",
+    "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "spokePoolBlock": 2929205,
+    "inputTokens": [
+      {
+        "address": "0x7A8ed27F4C30512326878652d20fC85727401854",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x7A8ed27F4C30512326878652d20fC85727401854",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   }

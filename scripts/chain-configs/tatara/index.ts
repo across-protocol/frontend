@@ -19,6 +19,6 @@ export default {
   publicRpcUrl:
     "https://rpc.tatara.katanarpc.com/9X4vKN4mUg5mpH8M2QQdZNVc6U9AZFeeC",
   blockTimeSeconds: 1,
-  tokens: ["TATARA-USDC", "TATARA-WETH"],
+  tokens: ["TATARA-USDC", "WETH"],
   enableCCTP: false,
 } as ChainConfig;
