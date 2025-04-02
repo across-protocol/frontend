@@ -1073,8 +1073,8 @@ export const soneium_viem = defineChain({
 });
 
 export const katanaTatara = {
-  name: "Katana Tatara",
-  fullName: "Katana tatara",
+  name: "Tatara",
+  fullName: "Tatara",
   chainId: 129399,
   logoURI: katanaTataraLogo,
   grayscaleLogoURI: katanaTataraGrayscaleLogo,
