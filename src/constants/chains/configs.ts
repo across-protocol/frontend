@@ -1080,7 +1080,7 @@ export const katanaTatara = {
   grayscaleLogoURI: katanaTataraGrayscaleLogo,
   logoSvg: katanaTataraLogoSvg,
   grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.tatara.katanarpc.com/9X4vKN4mUg5mpH8M2QQdZNVc6U9AZFeeC",
+  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
   explorerUrl: "https://explorer.tatara.katana.network",
   constructExplorerLink: (txHash: string) =>
     `${katanaTatara.explorerUrl}/tx/${txHash}`,
