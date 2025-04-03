@@ -594,14 +594,14 @@
   {
     "chainId": 129399,
     "name": "Tatara",
-    "publicRpcUrl": "https://rpc.tatara.katanarpc.com/9X4vKN4mUg5mpH8M2QQdZNVc6U9AZFeeC",
+    "publicRpcUrl": "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
     "explorerUrl": "https://explorer.tatara.katana.network",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/tatara/assets/logo.svg",
     "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
     "spokePoolBlock": 2929205,
     "inputTokens": [
       {
-        "address": "0x7A8ed27F4C30512326878652d20fC85727401854",
+        "address": "0x102E14ffF48170F2e5b6d0e30259fCD4eE5E28aE",
         "symbol": "TATARA-USDC",
         "name": "Tatara USDC",
         "decimals": 6,
@@ -631,7 +631,7 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       },
       {
-        "address": "0x7A8ed27F4C30512326878652d20fC85727401854",
+        "address": "0x102E14ffF48170F2e5b6d0e30259fCD4eE5E28aE",
         "symbol": "TATARA-USDC",
         "name": "Tatara USDC",
         "decimals": 6,
