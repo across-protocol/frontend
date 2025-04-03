@@ -256,7 +256,9 @@ export function useBridgeAction(
         });
       };
 
-      let tx: providers.TransactionResponse;
+      let tx: {
+        hash: string;
+      };
 
       if (isUniversalSwapRoute) {
         if (!frozenUniversalSwapQuote) {
@@ -264,12 +266,15 @@ export function useBridgeAction(
             "Missing universal swap quote for universal swap route"
           );
         }
-
-        tx = await signer.sendTransaction({
+        const txHash = await signer.sendUncheckedTransaction({
           to: frozenUniversalSwapQuote.swapTx.to,
           data: frozenUniversalSwapQuote.swapTx.data,
           value: frozenUniversalSwapQuote.swapTx.value,
+          gasLimit: frozenUniversalSwapQuote.swapTx.gas,
         });
+        tx = {
+          hash: txHash,
+        };
       } else if (isSwapRoute) {
         tx = await sendSwapAndBridgeTx(
           signer,
