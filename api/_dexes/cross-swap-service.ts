@@ -109,6 +109,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
     recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+    message: buildExactInputBridgeTokenMessage(crossSwap, crossSwap.amount),
   });
   bridgeQuote.message = buildExactInputBridgeTokenMessage(
     crossSwap,
@@ -732,6 +733,10 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     outputToken: bridgeableOutputToken,
     exactInputAmount: originSwapQuote.minAmountOut,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+    message: buildExactInputBridgeTokenMessage(
+      crossSwap,
+      originSwapQuote.minAmountOut
+    ),
   });
 
   // 3. Get destination swap quote for bridgeable output token -> any token
