@@ -37,18 +37,18 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       },
       {
-        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
-        "symbol": "GRASS",
-        "name": "Grass",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
-      },
-      {
         "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
         "symbol": "TATARA-USDC",
         "name": "Tatara USDC",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ],
     "outputTokens": [
@@ -81,18 +81,18 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
       },
       {
-        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
-        "symbol": "GRASS",
-        "name": "Grass",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
-      },
-      {
         "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
         "symbol": "TATARA-USDC",
         "name": "Tatara USDC",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ]
   },
@@ -132,6 +132,13 @@
         "name": "XYZ Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x3c95BB5f49F3643558aa8F699403564A652FBeB0",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ],
     "outputTokens": [
@@ -169,6 +176,13 @@
         "name": "XYZ Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x3c95BB5f49F3643558aa8F699403564A652FBeB0",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   },
@@ -352,6 +366,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x8B0180f2101c8260d49339abfEe87927412494B4",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ],
     "outputTokens": [
@@ -368,6 +389,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x8B0180f2101c8260d49339abfEe87927412494B4",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   },
