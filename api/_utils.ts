@@ -759,8 +759,6 @@ export const getRelayerFeeCalculatorQueries = (
         baseArgs.simulatedRelayerAddress,
         baseArgs.logger,
         baseArgs.coingeckoProApiKey,
-        undefined,
-        "usd",
       ],
       customGasTokenSymbol,
     });
