@@ -91,7 +91,7 @@ export const tokenList = [
     let displaySymbol = symbol;
     // Override for GHO and WGHO until reflected in the constants
     if (symbol === "GHO") {
-      name = "GHO Stablecoin";
+      name = "GHO Token";
       displaySymbol = "GHO";
     } else if (symbol === "WGHO") {
       name = "Lens Wrapped GHO";

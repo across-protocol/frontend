@@ -13,6 +13,7 @@ type Props = {
   selectedToken: {
     l1TokenAddress: string;
     symbol: string;
+    displaySymbol?: string;
     logoURI: string;
   };
   selectedPoolAction: "add" | "remove";
@@ -91,7 +92,7 @@ export function EarnByStakingInfoBox({
               </Text>
             )}
             <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
-              {selectedToken.symbol}-LP
+              {selectedToken.displaySymbol || selectedToken.symbol}-LP
             </Text>
             <img
               src={selectedToken.logoURI}
