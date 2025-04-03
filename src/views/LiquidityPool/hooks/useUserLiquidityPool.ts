@@ -32,7 +32,7 @@ async function fetchUserLiquidityPool(
     return;
   }
 
-  const { logoURI, symbol, l1TokenAddress, decimals } =
+  const { logoURI, symbol, displaySymbol, l1TokenAddress, decimals } =
     config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
 
   const [l1Balance, poolStateOfUser] = await Promise.all([
@@ -45,6 +45,7 @@ async function fetchUserLiquidityPool(
     ...poolStateOfUser,
     l1TokenLogoURI: logoURI,
     l1TokenSymbol: symbol,
+    l1TokenDisplaySymbol: displaySymbol,
     l1TokenDecimals: decimals,
     l1TokenAddress,
     l1Balance,
