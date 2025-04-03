@@ -124,6 +124,18 @@ defaultRelayerFeeCapitalCostConfig["USDzC"] = {
 defaultRelayerFeeCapitalCostConfig["USDB"] = {
   ...defaultRelayerFeeCapitalCostConfig["DAI"],
 };
+defaultRelayerFeeCapitalCostConfig["TATARA-USDC"] = {
+  ...defaultRelayerFeeCapitalCostConfig["USDC"],
+};
+defaultRelayerFeeCapitalCostConfig["TATARA-USDT"] = {
+  ...defaultRelayerFeeCapitalCostConfig["USDC"],
+};
+defaultRelayerFeeCapitalCostConfig["TATARA-USDS"] = {
+  ...defaultRelayerFeeCapitalCostConfig["USDC"],
+};
+defaultRelayerFeeCapitalCostConfig["TATARA-WBTC"] = {
+  ...defaultRelayerFeeCapitalCostConfig["WBTC"],
+};
 
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
@@ -167,6 +179,7 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["azero", "matic"]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
+  ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE

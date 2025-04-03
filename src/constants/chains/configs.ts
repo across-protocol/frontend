@@ -116,6 +116,11 @@ import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
+import katanaTataraLogo from "assets/chain-logos/tatara.svg";
+import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
+
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
 import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/unichain.svg";
@@ -1067,6 +1072,47 @@ export const soneium_viem = defineChain({
   },
 });
 
+export const katanaTatara = {
+  name: "Tatara",
+  fullName: "Tatara",
+  chainId: 129399,
+  logoURI: katanaTataraLogo,
+  grayscaleLogoURI: katanaTataraGrayscaleLogo,
+  logoSvg: katanaTataraLogoSvg,
+  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
+  explorerUrl: "https://explorer.tatara.katana.network",
+  constructExplorerLink: (txHash: string) =>
+    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const katanaTatara_viem = defineChain({
+  id: katanaTatara.chainId,
+  name: katanaTatara.name,
+  nativeCurrency: {
+    name: katanaTatara.nativeCurrencySymbol,
+    symbol: katanaTatara.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        katanaTatara.rpcUrl,
+        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: katanaTatara.name + " Explorer",
+      url: katanaTatara.explorerUrl,
+    },
+  },
+});
+
 export const unichain = {
   name: "Unichain",
   fullName: "Unichain",
@@ -1305,6 +1351,7 @@ export const chainConfigs = [
   scroll,
   sepolia,
   soneium,
+  katanaTatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1342,6 +1389,7 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
+  katanaTatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,

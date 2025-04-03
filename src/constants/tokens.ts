@@ -88,4 +88,8 @@ export const orderedTokenLogos = {
   GRASS: unknownLogo,
   WGRASS: unknownLogo,
   XYZ: unknownLogo,
+  "TATARA-USDC": usdcLogo,
+  "TATARA-USDS": unknownLogo,
+  "TATARA-USDT": usdtLogo,
+  "TATARA-WBTC": wbtcLogo,
 };
