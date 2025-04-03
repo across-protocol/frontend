@@ -1,5 +1,5 @@
 import { ERC20__factory } from "@across-protocol/contracts";
-import { constants } from "ethers";
+import { BigNumber, constants } from "ethers";
 
 import { callViaMulticall3, getProvider } from "./_utils";
 
@@ -27,7 +27,7 @@ export async function getBalanceAndAllowance(params: {
   tokenAddress: string;
   owner: string;
   spender: string;
-}) {
+}): Promise<{ balance: BigNumber; allowance: BigNumber }> {
   const provider = getProvider(params.chainId);
 
   if (params.tokenAddress === constants.AddressZero) {
