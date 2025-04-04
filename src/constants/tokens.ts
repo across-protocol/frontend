@@ -90,4 +90,8 @@ export const orderedTokenLogos = {
   XYZ: unknownLogo,
   GHO: ghoLogo,
   WGHO: ghoLogo,
+  "TATARA-USDC": usdcLogo,
+  "TATARA-USDS": unknownLogo,
+  "TATARA-USDT": usdtLogo,
+  "TATARA-WBTC": wbtcLogo,
 };
