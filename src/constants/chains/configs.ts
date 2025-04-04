@@ -155,7 +155,6 @@ import hyperliquidLogo from "assets/extern-logos/hyperliquid.svg";
 import hyperliquidGrayscaleLogo from "assets/extern-logos/hyperliquid-grayscale.svg";
 import { ReactComponent as hyperliquidLogoSvg } from "assets/extern-logos/hyperliquid.svg";
 import { ReactComponent as hyperliquidGrayscaleLogoSvg } from "assets/extern-logos/hyperliquid-grayscale.svg";
-import { getProxyRpcUrl } from "./utils";
 
 export const alephZero = {
   name: "Aleph Zero",
@@ -482,7 +481,7 @@ export const lens = {
   grayscaleLogoURI: lensGrayscaleLogo,
   logoSvg: lensLogoSvg,
   grayscaleLogoSvg: lensGrayscaleLogoSvg,
-  rpcUrl: getProxyRpcUrl(232),
+  rpcUrl: "https://api.lens.matterhosted.dev",
   explorerUrl: "https://explorer.lens.xyz",
   constructExplorerLink: (txHash: string) => `${lens.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "GHO",
