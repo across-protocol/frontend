@@ -191,7 +191,10 @@ export async function getCrossSwapQuotesForExactInputB2A(
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
     },
-    TradeType.EXACT_INPUT
+    TradeType.EXACT_INPUT,
+    {
+      useIndicativeQuote: true,
+    }
   );
 
   // 2. Get bridge quote for bridgeable input token -> any token with exact input amount.
@@ -727,19 +730,42 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     TradeType.EXACT_INPUT
   );
 
-  // 2. Get bridge quote for bridgeable input token -> bridgeable output token
+  // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+  //    with exact input amount set to `originSwapQuote.minAmountOut`.
+  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
+    {
+      ...destinationSwap,
+      amount: originSwapQuote.minAmountOut.toString(),
+    },
+    TradeType.EXACT_INPUT,
+    {
+      useIndicativeQuote: true,
+    }
+  );
+
+  // 3. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForExactInput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
     exactInputAmount: originSwapQuote.minAmountOut,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildExactInputBridgeTokenMessage(
+    message: buildDestinationSwapCrossChainMessage({
       crossSwap,
-      originSwapQuote.minAmountOut
-    ),
+      destinationSwapQuote: indicativeDestinationSwapQuote,
+      bridgeableOutputToken,
+      routerAddress: destinationRouter.address,
+    }),
   });
 
-  // 3. Get destination swap quote for bridgeable output token -> any token
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Bridge amount is too low to cover bridge fees: ` +
+        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, bridgeQuote.inputToken.decimals)}`,
+    });
+  }
+
+  // 4. Get destination swap quote for bridgeable output token -> any token
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
@@ -748,7 +774,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     TradeType.EXACT_INPUT
   );
 
-  // 4. Build bridge quote message for destination swap
+  // 5. Build bridge quote message for destination swap
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,

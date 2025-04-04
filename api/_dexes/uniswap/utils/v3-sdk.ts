@@ -4,12 +4,12 @@ import {
   SwapOptionsSwapRouter02,
   SwapType,
 } from "@uniswap/smart-order-router";
+import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import {
   computePoolAddress,
   FeeAmount,
   SwapQuoter,
   Route,
-  SwapRouter,
   Trade,
   Pool,
 } from "@uniswap/v3-sdk";
@@ -51,7 +51,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
   const pool = new Pool(
     tokenA,
     tokenB,
-    FeeAmount.LOW,
+    poolInfo.fee,
     poolInfo.sqrtPriceX96.toString(),
     poolInfo.liquidity.toString(),
     poolInfo.tick
@@ -73,7 +73,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
     tradeType,
   });
 
-  const methodParameters = SwapRouter.swapCallParameters(
+  const methodParameters = SwapRouter02.swapCallParameters(
     [uncheckedTrade],
     options
   );
@@ -235,17 +235,19 @@ async function getPoolInfo({ tokenIn, tokenOut }: SwapParam): Promise<{
   tick: number;
 }> {
   const provider = getProvider(tokenIn.chainId);
-  const sortedTokenSymbols = [tokenIn.symbol, tokenOut.symbol].sort();
+  const symbolIn = tokenIn.symbol === "ETH" ? "WETH" : tokenIn.symbol;
+  const symbolOut = tokenOut.symbol === "ETH" ? "WETH" : tokenOut.symbol;
+  const sortedTokenSymbols = [symbolIn, symbolOut].sort();
   const poolKey = `${sortedTokenSymbols[0]}_${sortedTokenSymbols[1]}`;
   const poolAddress =
-    POOL_ADDRESS[tokenIn.chainId][
+    POOL_ADDRESS[tokenIn.chainId]?.[
       poolKey as keyof (typeof POOL_ADDRESS)[number]
     ] ??
     computePoolAddress({
       factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS[tokenIn.chainId],
       tokenA: new Token(tokenIn.chainId, tokenIn.address, tokenIn.decimals),
       tokenB: new Token(tokenOut.chainId, tokenOut.address, tokenOut.decimals),
-      fee: FeeAmount.LOWEST,
+      fee: FeeAmount.LOW,
     });
   const poolContract = new ethers.Contract(
     poolAddress,
@@ -270,11 +272,11 @@ async function getPoolInfo({ tokenIn, tokenOut }: SwapParam): Promise<{
     );
 
   return {
-    token0,
-    token1,
-    fee,
-    tickSpacing,
-    liquidity,
+    token0: token0[0],
+    token1: token1[0],
+    fee: fee[0],
+    tickSpacing: tickSpacing[0],
+    liquidity: liquidity[0],
     sqrtPriceX96: slot0[0],
     tick: slot0[1],
   } as unknown as {

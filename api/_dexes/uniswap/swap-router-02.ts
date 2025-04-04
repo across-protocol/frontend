@@ -258,10 +258,11 @@ function buildIndicativeQuote(
   const outputAmount =
     tradeType === TradeType.EXACT_INPUT
       ? ethers.utils.parseUnits(
-          (
-            Number(
-              ethers.utils.formatUnits(swap.amount, swap.tokenIn.decimals)
-            ) / indicativeQuotePricePerTokenOut
+          (indicativeQuotePricePerTokenOut === 0
+            ? 0
+            : Number(
+                ethers.utils.formatUnits(swap.amount, swap.tokenIn.decimals)
+              ) / indicativeQuotePricePerTokenOut
           ).toFixed(swap.tokenOut.decimals),
           swap.tokenOut.decimals
         )
@@ -342,9 +343,18 @@ function indicativeQuotePriceCache(
       );
     }
 
-    const pricePerTokenOut =
-      Number(ethers.utils.formatUnits(inputAmount, swap.tokenIn.decimals)) /
-      Number(ethers.utils.formatUnits(outputAmount, swap.tokenOut.decimals));
+    const inputAmountFormatted = Number(
+      ethers.utils.formatUnits(inputAmount, swap.tokenIn.decimals)
+    );
+    const outputAmountFormatted = Number(
+      ethers.utils.formatUnits(outputAmount, swap.tokenOut.decimals)
+    );
+
+    if (outputAmountFormatted === 0) {
+      return 0;
+    }
+
+    const pricePerTokenOut = inputAmountFormatted / outputAmountFormatted;
     return pricePerTokenOut;
   };
   return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
