@@ -191,10 +191,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
     },
-    TradeType.EXACT_INPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_INPUT
   );
 
   // 2. Get bridge quote for bridgeable input token -> any token with exact input amount.
@@ -737,10 +734,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       ...destinationSwap,
       amount: originSwapQuote.minAmountOut.toString(),
     },
-    TradeType.EXACT_INPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_INPUT
   );
 
   // 3. Get bridge quote for bridgeable input token -> bridgeable output token
