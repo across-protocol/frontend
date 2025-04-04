@@ -47,7 +47,7 @@ export function PoolSelector({
               <PoolIcon src={p.tokenLogoURI} />
               <Text size="md" color="white-100">
                 {p.tokenDisplaySymbol?.toUpperCase() ||
-                  p.tokenSymbol.toUpperCase()}
+                  p.tokenSymbol.toUpperCase()}{" "}
                 Pool
               </Text>
             </PoolIconTextWrapper>
