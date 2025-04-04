@@ -1,5 +1,5 @@
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import { useCallback } from "react";
 import {
   fixedPointAdjustment,
@@ -31,7 +31,7 @@ export function useTokenConversion(
   );
 
   const convertTokenToBaseCurrency = useCallback(
-    (amount?: BigNumber) => {
+    (amount?: BigNumberish) => {
       const price = query.data?.price;
       if (!isDefined(price) || !isDefined(amount)) {
         return undefined;
@@ -42,8 +42,32 @@ export function useTokenConversion(
     },
     [l1Token, token, query.data?.price]
   );
+
+  const convertBaseCurrencyToToken = useCallback(
+    (amount?: BigNumberish) => {
+      const price = query.data?.price;
+      if (!isDefined(price) || !isDefined(amount)) {
+        return undefined;
+      }
+      const decimals = token?.decimals ?? getTokenByAddress(l1Token)?.decimals;
+      const exchangeRate = convertTokenToBaseCurrency(
+        ethers.utils.parseUnits("1", decimals)
+      );
+
+      if (!isDefined(exchangeRate)) {
+        return undefined;
+      }
+
+      return BigNumber.from(amount)
+        .mul(ethers.utils.parseUnits("1", decimals))
+        .div(exchangeRate);
+    },
+    [query.data?.price, token, l1Token, convertTokenToBaseCurrency]
+  );
+
   return {
     convertTokenToBaseCurrency,
+    convertBaseCurrencyToToken,
     baseCurrency,
   };
 }

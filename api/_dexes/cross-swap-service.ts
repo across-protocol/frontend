@@ -1,4 +1,5 @@
 import { TradeType } from "@uniswap/sdk-core";
+import { utils } from "ethers";
 
 import {
   getBridgeQuoteForMinOutput,
@@ -10,15 +11,15 @@ import {
   addMarkupToAmount,
   getBridgeQuoteForExactInput,
 } from "../_utils";
-import { CrossSwap, CrossSwapQuotes, QuoteFetchStrategy } from "./types";
+import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
   getCrossSwapType,
+  getPreferredBridgeTokens,
   getQuoteFetchStrategy,
   NoQuoteFoundError,
-  PREFERRED_BRIDGE_TOKENS,
   QuoteFetchStrategies,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
@@ -29,6 +30,7 @@ import {
   buildDestinationSwapCrossChainMessage,
   assertMinOutputAmount,
 } from "./utils";
+import { AmountTooLowError } from "../_errors";
 
 const indicativeQuoteBuffer = 0.005; // 0.5% buffer for indicative quotes
 
@@ -81,6 +83,7 @@ function getCrossSwapQuoteForAmountType(
     outputToken: crossSwap.outputToken.address,
     destinationChainId: crossSwap.outputToken.chainId,
     isInputNative: Boolean(crossSwap.isInputNative),
+    isOutputNative: Boolean(crossSwap.isOutputNative),
   });
 
   const handler = typeToHandler[crossSwapType];
@@ -97,6 +100,8 @@ export async function getCrossSwapQuotesForExactInputB2B(
 ) {
   const originStrategy = getQuoteFetchStrategy(
     crossSwap.inputToken.chainId,
+    crossSwap.inputToken.symbol,
+    crossSwap.inputToken.symbol,
     strategies
   );
   const bridgeQuote = await getBridgeQuoteForExactInput({
@@ -104,6 +109,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
     recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+    message: buildExactInputBridgeTokenMessage(crossSwap, crossSwap.amount),
   });
   bridgeQuote.message = buildExactInputBridgeTokenMessage(
     crossSwap,
@@ -129,6 +135,8 @@ export async function getCrossSwapQuotesForOutputB2B(
 ) {
   const originStrategy = getQuoteFetchStrategy(
     crossSwap.inputToken.chainId,
+    crossSwap.inputToken.symbol,
+    crossSwap.inputToken.symbol,
     strategies
   );
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -176,15 +184,39 @@ export async function getCrossSwapQuotesForExactInputB2A(
     destinationStrategy,
   } = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
-  // 1. Get bridge quote for bridgeable input token -> any token with exact input amount.
+  // 1. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+  //    with exact input amount set to `crossSwap.amount`.
+  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
+    {
+      ...destinationSwap,
+      amount: crossSwap.amount.toString(),
+    },
+    TradeType.EXACT_INPUT
+  );
+
+  // 2. Get bridge quote for bridgeable input token -> any token with exact input amount.
   const bridgeQuote = await getBridgeQuoteForExactInput({
     inputToken: crossSwap.inputToken,
     outputToken: bridgeableOutputToken,
     exactInputAmount: crossSwap.amount,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote: indicativeDestinationSwapQuote,
+      bridgeableOutputToken,
+      routerAddress: destinationRouter.address,
+    }),
   });
 
-  // 2. Get destination swap quote
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Bridge amount is too low to cover bridge fees: ` +
+        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, crossSwap.inputToken.decimals)}`,
+    });
+  }
+
+  // 3. Get destination swap quote with correct amount
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
@@ -193,7 +225,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
     TradeType.EXACT_INPUT
   );
 
-  // 3. Build bridge quote message for destination swap
+  // 4. Build bridge quote message for destination swap
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
@@ -309,10 +341,8 @@ function _prepCrossSwapQuotesRetrievalB2A(
 ) {
   const originStrategy = getQuoteFetchStrategy(
     crossSwap.inputToken.chainId,
-    strategies
-  );
-  const destinationStrategy = getQuoteFetchStrategy(
-    crossSwap.outputToken.chainId,
+    crossSwap.inputToken.symbol,
+    crossSwap.inputToken.symbol,
     strategies
   );
   const originSwapChainId = crossSwap.inputToken.chainId;
@@ -355,6 +385,12 @@ function _prepCrossSwapQuotesRetrievalB2A(
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
+  const destinationStrategy = getQuoteFetchStrategy(
+    destinationSwap.chainId,
+    destinationSwap.tokenIn.symbol,
+    destinationSwap.tokenOut.symbol,
+    strategies
+  );
   const originRouter = originStrategy.getRouter(originSwapChainId);
   const destinationRouter = destinationStrategy.getRouter(
     destinationSwapChainId
@@ -466,6 +502,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     originStrategy.fetchFn(
       {
         ...originSwap,
+        depositor: crossSwap.depositor,
         amount: bridgeQuote.inputAmount.toString(),
       },
       TradeType.EXACT_OUTPUT,
@@ -481,6 +518,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     originStrategy.fetchFn(
       {
         ...originSwap,
+        depositor: crossSwap.depositor,
         amount: addMarkupToAmount(
           indicativeOriginSwapQuote.maximumAmountIn,
           indicativeQuoteBuffer
@@ -511,7 +549,6 @@ function _prepCrossSwapQuotesRetrievalA2B(
   strategies: QuoteFetchStrategies
 ) {
   const originSwapChainId = crossSwap.inputToken.chainId;
-  const originStrategy = getQuoteFetchStrategy(originSwapChainId, strategies);
   const destinationChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByOutputTokenAndOriginChain(
     crossSwap.outputToken.address,
@@ -542,6 +579,12 @@ function _prepCrossSwapQuotesRetrievalA2B(
     symbol: _bridgeableInputToken.symbol,
     chainId: bridgeRoute.fromChain,
   };
+  const originStrategy = getQuoteFetchStrategy(
+    originSwapChainId,
+    crossSwap.inputToken.symbol,
+    bridgeableInputToken.symbol,
+    strategies
+  );
 
   const originSwapEntryPoint =
     originStrategy.getOriginEntryPoints(originSwapChainId).swapAndBridge;
@@ -568,7 +611,10 @@ export async function getCrossSwapQuotesA2A(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ) {
-  const preferredBridgeTokens = PREFERRED_BRIDGE_TOKENS;
+  const preferredBridgeTokens = getPreferredBridgeTokens(
+    crossSwap.inputToken.chainId,
+    crossSwap.outputToken.chainId
+  );
   const bridgeRoutesToCompareChunkSize = 2;
   const fetchQuoteForRoute =
     crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
@@ -577,11 +623,6 @@ export async function getCrossSwapQuotesA2A(
 
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
-  const originStrategy = getQuoteFetchStrategy(originSwapChainId, strategies);
-  const destinationStrategy = getQuoteFetchStrategy(
-    destinationSwapChainId,
-    strategies
-  );
   const allBridgeRoutes = getRoutesByChainIds(
     originSwapChainId,
     destinationSwapChainId
@@ -614,12 +655,7 @@ export async function getCrossSwapQuotesA2A(
 
     const crossSwapQuotesResults = await Promise.allSettled(
       bridgeRoutesToCompare.map((bridgeRoute) =>
-        fetchQuoteForRoute(
-          crossSwap,
-          bridgeRoute,
-          originStrategy,
-          destinationStrategy
-        )
+        fetchQuoteForRoute(crossSwap, bridgeRoute, strategies)
       )
     );
 
@@ -665,8 +701,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     toTokenAddress: string;
     toChain: number;
   },
-  originStrategy: QuoteFetchStrategy,
-  destinationStrategy: QuoteFetchStrategy
+  strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
   const {
     originSwap,
@@ -678,31 +713,53 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     bridgeableOutputToken,
     destinationSwapChainId,
     originSwapEntryPoint,
-  } = _prepCrossSwapQuotesRetrievalA2A(
-    crossSwap,
-    bridgeRoute,
     originStrategy,
-    destinationStrategy
-  );
+    destinationStrategy,
+  } = _prepCrossSwapQuotesRetrievalA2A(crossSwap, bridgeRoute, strategies);
 
   // 1. Get origin swap quote for any input token -> bridgeable input token
   const originSwapQuote = await originStrategy.fetchFn(
     {
       ...originSwap,
+      depositor: crossSwap.depositor,
       amount: crossSwap.amount.toString(),
     },
     TradeType.EXACT_INPUT
   );
 
-  // 2. Get bridge quote for bridgeable input token -> bridgeable output token
+  // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+  //    with exact input amount set to `originSwapQuote.minAmountOut`.
+  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
+    {
+      ...destinationSwap,
+      amount: originSwapQuote.minAmountOut.toString(),
+    },
+    TradeType.EXACT_INPUT
+  );
+
+  // 3. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForExactInput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
     exactInputAmount: originSwapQuote.minAmountOut,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote: indicativeDestinationSwapQuote,
+      bridgeableOutputToken,
+      routerAddress: destinationRouter.address,
+    }),
   });
 
-  // 3. Get destination swap quote for bridgeable output token -> any token
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Bridge amount is too low to cover bridge fees: ` +
+        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, bridgeQuote.inputToken.decimals)}`,
+    });
+  }
+
+  // 4. Get destination swap quote for bridgeable output token -> any token
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
@@ -711,7 +768,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     TradeType.EXACT_INPUT
   );
 
-  // 4. Build bridge quote message for destination swap
+  // 5. Build bridge quote message for destination swap
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
@@ -741,8 +798,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     toTokenAddress: string;
     toChain: number;
   },
-  originStrategy: QuoteFetchStrategy,
-  destinationStrategy: QuoteFetchStrategy
+  strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
   const profiler = new Profiler({
     at: "api/_dexes/cross-swap-service#getCrossSwapQuotesForOutputByRouteA2A",
@@ -758,12 +814,9 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     bridgeableOutputToken,
     destinationSwapChainId,
     originSwapEntryPoint,
-  } = _prepCrossSwapQuotesRetrievalA2A(
-    crossSwap,
-    bridgeRoute,
     originStrategy,
-    destinationStrategy
-  );
+    destinationStrategy,
+  } = _prepCrossSwapQuotesRetrievalA2A(crossSwap, bridgeRoute, strategies);
 
   // Fetch INDICATIVE quotes sequentially:
   // 1. Destination swap quote for bridgeable output token -> any token
@@ -805,6 +858,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     originStrategy.fetchFn(
       {
         ...originSwap,
+        depositor: crossSwap.depositor,
         amount: addMarkupToAmount(
           indicativeBridgeQuote.inputAmount,
           indicativeQuoteBuffer
@@ -844,6 +898,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         originStrategy.fetchFn(
           {
             ...originSwap,
+            depositor: crossSwap.depositor,
             amount: addMarkupToAmount(
               indicativeOriginSwapQuote.maximumAmountIn,
               indicativeQuoteBuffer
@@ -890,8 +945,7 @@ function _prepCrossSwapQuotesRetrievalA2A(
     toTokenAddress: string;
     toChain: number;
   },
-  originStrategy: QuoteFetchStrategy,
-  destinationStrategy: QuoteFetchStrategy
+  strategies: QuoteFetchStrategies
 ) {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
@@ -929,6 +983,18 @@ function _prepCrossSwapQuotesRetrievalA2A(
     symbol: _bridgeableOutputToken.symbol,
     chainId: bridgeRoute.toChain,
   };
+  const originStrategy = getQuoteFetchStrategy(
+    originSwapChainId,
+    crossSwap.inputToken.symbol,
+    bridgeableInputToken.symbol,
+    strategies
+  );
+  const destinationStrategy = getQuoteFetchStrategy(
+    destinationSwapChainId,
+    bridgeableOutputToken.symbol,
+    crossSwap.outputToken.symbol,
+    strategies
+  );
   const multiCallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId
   );

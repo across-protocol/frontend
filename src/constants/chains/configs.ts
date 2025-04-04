@@ -41,6 +41,11 @@ import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
 import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
 
+import lensLogo from "assets/chain-logos/lens.svg";
+import lensGrayscaleLogo from "assets/chain-logos/lens-grayscale.svg";
+import { ReactComponent as lensLogoSvg } from "assets/chain-logos/lens.svg";
+import { ReactComponent as lensGrayscaleLogoSvg } from "assets/chain-logos/lens-grayscale.svg";
+
 import lensSepoliaLogo from "assets/chain-logos/lens-sepolia.svg";
 import lensSepoliaGrayscaleLogo from "assets/chain-logos/lens-sepolia-grayscale.svg";
 import { ReactComponent as lensSepoliaLogoSvg } from "assets/chain-logos/lens-sepolia.svg";
@@ -464,6 +469,43 @@ export const ink_viem = defineChain({
     default: {
       name: ink.name + " Explorer",
       url: ink.explorerUrl,
+    },
+  },
+});
+
+export const lens = {
+  name: "Lens",
+  fullName: "Lens",
+  chainId: 232,
+  logoURI: lensLogo,
+  grayscaleLogoURI: lensGrayscaleLogo,
+  logoSvg: lensLogoSvg,
+  grayscaleLogoSvg: lensGrayscaleLogoSvg,
+  rpcUrl: "https://api.lens.matterhosted.dev",
+  explorerUrl: "https://explorer.lens.xyz",
+  constructExplorerLink: (txHash: string) => `${lens.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "GHO",
+  customRpcUrl: process.env.REACT_APP_CHAIN_232_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const lens_viem = defineChain({
+  id: lens.chainId,
+  name: lens.name,
+  nativeCurrency: {
+    name: lens.nativeCurrencySymbol,
+    symbol: lens.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [lens.rpcUrl, lens.customRpcUrl ? lens.customRpcUrl : []].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: lens.name + " Explorer",
+      url: lens.explorerUrl,
     },
   },
 });
@@ -1336,6 +1378,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   ink,
+  lens,
   lensSepolia,
   linea,
   lisk,
@@ -1374,6 +1417,7 @@ export const chains_viem = [
   blast_viem,
   blastSepolia_viem,
   ink_viem,
+  lens_viem,
   lensSepolia_viem,
   linea_viem,
   lisk_viem,
