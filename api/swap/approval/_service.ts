@@ -145,6 +145,7 @@ export async function handleApprovalSwap(
   const approvalAmount = constants.MaxUint256;
   if (allowance.lt(inputAmount)) {
     approvalTxns = getApprovalTxns({
+      allowance,
       token: crossSwap.inputToken,
       spender: crossSwapTx.to,
       amount: approvalAmount,

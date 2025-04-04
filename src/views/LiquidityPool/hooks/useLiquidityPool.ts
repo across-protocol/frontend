@@ -41,13 +41,14 @@ async function fetchPool(tokenSymbol?: string) {
   if (!tokenSymbol) {
     return;
   }
-  const { logoURI, symbol, decimals, l1TokenAddress } =
+  const { logoURI, symbol, displaySymbol, decimals, l1TokenAddress } =
     config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
   const pool = await getApiEndpoint().pools(l1TokenAddress);
   return {
     ...pool,
     l1TokenLogoURI: logoURI,
     l1TokenSymbol: symbol,
+    l1TokenDisplaySymbol: displaySymbol,
     l1TokenDecimals: decimals,
     l1TokenAddress,
   };

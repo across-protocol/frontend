@@ -131,6 +131,7 @@ export async function handleBaseSwapQueryParams(
 }
 
 export function getApprovalTxns(params: {
+  allowance: BigNumber;
   token: Token;
   spender: string;
   amount: BigNumber;
@@ -143,7 +144,7 @@ export function getApprovalTxns(params: {
   // USDT has a different approval flow when changing an already approve amount.
   // We need to set the allowance to 0 first.
   // See https://etherscan.io/address/0xdac17f958d2ee523a2206206994597c13d831ec7#code#L201
-  if (params.token.symbol === "USDT") {
+  if (params.token.symbol === "USDT" && params.allowance.gt(0)) {
     approvalTxns.push({
       chainId: params.token.chainId,
       to: params.token.address,
