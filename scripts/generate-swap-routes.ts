@@ -12,11 +12,12 @@ const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
-        enabledDestinationChains: number[];
+        disabledOriginChains: number[];
+        enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
       [originChainId: number]: {
-        enabledDestinationChains: number[];
+        enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
     };
@@ -43,6 +44,24 @@ const enabledSwapRoutes: {
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
+      },
+      [CHAIN_IDs.LENS]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.OPTIMISM,
+          CHAIN_IDs.POLYGON,
+          CHAIN_IDs.ARBITRUM,
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["USDC"],
+      },
+      all: {
+        disabledOriginChains: [
+          CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
+        ],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["USDC"],
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
@@ -75,16 +94,28 @@ async function generateSwapRoutes(hubPoolChainId = 1) {
     for (const [originChainId, config] of Object.entries(
       configPerOriginChain
     )) {
-      const { enabledDestinationChains, enabledOutputTokens } = config;
+      const {
+        enabledDestinationChains,
+        enabledOutputTokens,
+        disabledOriginChains = [],
+      } = {
+        ...config,
+        disabledOriginChains:
+          originChainId === "all" ? (config as any).disabledOriginChains : [],
+      };
 
       const originChains =
         originChainId === "all"
-          ? enabledChains
+          ? enabledChains.filter(
+              (chain) => !disabledOriginChains.includes(chain.chainId)
+            )
           : enabledChains.filter(
               (chain) => Number(originChainId) === chain.chainId
             );
       const destinationChains = enabledChains.filter((chain) =>
-        enabledDestinationChains.includes(chain.chainId)
+        enabledDestinationChains === "all"
+          ? true
+          : enabledDestinationChains.includes(chain.chainId)
       );
 
       for (const originChain of originChains) {
