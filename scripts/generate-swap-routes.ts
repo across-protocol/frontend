@@ -41,6 +41,10 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [
           CHAIN_IDs.MAINNET,
@@ -57,7 +61,7 @@ const enabledSwapRoutes: {
           CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["USDC", "GHO"],
+        enabledOutputTokens: ["USDC"],
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
