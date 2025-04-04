@@ -62,12 +62,15 @@ export function EarnByStakingInfoBox({
                 {hasStaked ? " on staked " : " by staking "}
                 {showDashIfLoading(
                   <Text color={textColor} as="span">
-                    {selectedToken.symbol}-LP
+                    {selectedToken.displaySymbol || selectedToken.symbol}-LP
                   </Text>
                 )}
               </Text>
             ) : (
-              <Text>Staking is not enabled for {selectedToken.symbol}-LP</Text>
+              <Text>
+                Staking is not enabled for{" "}
+                {selectedToken.displaySymbol || selectedToken.symbol}-LP
+              </Text>
             )
           )}
         </TextContainer>
