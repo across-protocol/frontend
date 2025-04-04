@@ -21,7 +21,10 @@ import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 const quoteFetchStrategies: QuoteFetchStrategies = {
   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
   chains: {
-    [CHAIN_IDs.LENS]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+    [CHAIN_IDs.LENS]: getSwapRouter02Strategy(
+      "UniversalSwapAndBridge",
+      "sdk-swap-quoter"
+    ),
   },
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {
