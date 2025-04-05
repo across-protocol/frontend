@@ -48,13 +48,13 @@ const enabledSwapRoutes: {
           CHAIN_IDs.POLYGON,
           CHAIN_IDs.ARBITRUM,
           CHAIN_IDs.BASE,
-          CHAIN_IDs.UNICHAIN,
         ],
         enabledOutputTokens: ["USDC"],
       },
       all: {
         disabledOriginChains: [
           CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
+          CHAIN_IDs.UNICHAIN,
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["USDC", "GHO"],
