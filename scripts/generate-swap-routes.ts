@@ -48,6 +48,7 @@ const enabledSwapRoutes: {
           CHAIN_IDs.POLYGON,
           CHAIN_IDs.ARBITRUM,
           CHAIN_IDs.BASE,
+          CHAIN_IDs.UNICHAIN,
         ],
         enabledOutputTokens: ["USDC"],
       },
