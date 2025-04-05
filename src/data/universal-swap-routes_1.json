@@ -264,30 +264,6 @@
     "isNative": false
   },
   {
-    "fromChain": 130,
-    "toChain": 232,
-    "fromTokenAddress": "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-    "toTokenAddress": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
-    "fromTokenSymbol": "USDC",
-    "toTokenSymbol": "USDC",
-    "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "type": "universal-swap",
-    "isNative": false
-  },
-  {
-    "fromChain": 130,
-    "toChain": 232,
-    "fromTokenAddress": "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-    "toTokenAddress": "0x0000000000000000000000000000000000000000",
-    "fromTokenSymbol": "USDC",
-    "toTokenSymbol": "GHO",
-    "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "type": "universal-swap",
-    "isNative": false
-  },
-  {
     "fromChain": 1,
     "toChain": 232,
     "fromTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",

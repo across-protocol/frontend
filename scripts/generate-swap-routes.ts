@@ -54,6 +54,7 @@ const enabledSwapRoutes: {
       all: {
         disabledOriginChains: [
           CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
+          CHAIN_IDs.UNICHAIN,
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["USDC", "GHO"],
