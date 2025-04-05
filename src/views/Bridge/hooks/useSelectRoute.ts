@@ -60,7 +60,8 @@ export function useSelectRoute() {
         toChain: selectedRoute.toChain,
         outputTokenSymbol: getOutputTokenSymbol(
           inputOrSwapTokenSymbol,
-          selectedRoute.toTokenAddress
+          selectedRoute.toTokenAddress,
+          selectedRoute.toChain
         ),
       };
       const route =
@@ -130,7 +131,8 @@ export function useSelectRoute() {
         swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
         outputTokenSymbol: getOutputTokenSymbol(
           selectedRoute.fromTokenSymbol,
-          selectedRoute.toTokenSymbol
+          selectedRoute.toTokenSymbol,
+          selectedRoute.toChain
         ),
         fromChain: fromChainId,
         toChain: selectedRoute.toChain,
@@ -218,7 +220,8 @@ export function useSelectRoute() {
         swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
         outputTokenSymbol: getOutputTokenSymbol(
           selectedRoute.fromTokenSymbol,
-          selectedRoute.toTokenSymbol
+          selectedRoute.toTokenSymbol,
+          selectedRoute.toChain
         ),
         fromChain: selectedRoute.fromChain,
         toChain: toChainId,

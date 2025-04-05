@@ -21,6 +21,7 @@ import {
   isNonEthChain,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 export type SelectedRoute =
   | (Route & {
@@ -686,8 +687,14 @@ function calcUniversalSwapFeeUsd(params: {
 
 export function getOutputTokenSymbol(
   inputTokenSymbol: string,
-  outputTokenSymbol: string
+  outputTokenSymbol: string,
+  toChain?: number
 ) {
+  // Special case for USDC to Lens
+  if (inputTokenSymbol === "USDC" && toChain === CHAIN_IDs.LENS) {
+    return "GHO";
+  }
+
   return inputTokenSymbol === "ETH"
     ? "ETH"
     : inputTokenSymbol === "WETH"
