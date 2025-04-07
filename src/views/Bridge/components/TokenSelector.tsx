@@ -22,6 +22,7 @@ import {
   getTokenExplorerLinkSafe,
   SelectedRoute,
 } from "../utils";
+import { formatUnits } from "ethers/lib/utils";
 
 type Props = {
   selectedRoute: SelectedRoute;
@@ -111,9 +112,15 @@ export function TokenSelector({
         ...token,
         balance: balances?.[i] ? balances[i] : BigNumber.from(0),
       }))
-      .sort((a, b) =>
-        b.balance.lt(a.balance) ? -1 : b.balance.gt(a.balance) ? 1 : 0
-      );
+      .sort((a, b) => {
+        return Number(formatUnits(b.balance, b.decimals)) <
+          Number(formatUnits(a.balance, a.decimals))
+          ? -1
+          : Number(formatUnits(b.balance, b.decimals)) >
+              Number(formatUnits(a.balance, a.decimals))
+            ? 1
+            : 0;
+      });
   }, [orderedTokens, balances]);
 
   return (
