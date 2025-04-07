@@ -87,7 +87,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
       const depositor = await signer.getAddress();
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
-      const txResponse = await spokePool.speedUpV3Deposit(
+      const txResponse = await spokePool.speedUpDeposit(
         depositor,
         BigNumber.from(transfer.depositId),
         updatedOutputAmount,
