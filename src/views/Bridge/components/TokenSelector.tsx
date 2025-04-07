@@ -105,9 +105,18 @@ export function TokenSelector({
     account,
   });
 
+  const sortedTokensWithBalance = useMemo(() => {
+    return orderedTokens
+      .map((token, i) => ({
+        ...token,
+        balance: balances?.[i] ? balances[i] : BigNumber.from(0),
+      }))
+      .sort((a, b) => b.balance.sub(a.balance).toNumber());
+  }, [orderedTokens, balances]);
+
   return (
     <Selector
-      elements={orderedTokens.map((t, i) => ({
+      elements={sortedTokensWithBalance.map((t) => ({
         value: t.symbol,
         disabled: t.disabled,
         disabledTooltip: {
@@ -149,15 +158,11 @@ export function TokenSelector({
             </ElementTextWrapper>
           </CoinIconTextWrapper>
         ),
-        suffix:
-          balances && balances[i]?.gt(0) ? (
-            <Text size="lg" color="grey-400">
-              {formatUnitsWithMaxFractions(
-                balances[i] ?? BigNumber.from(0),
-                t.decimals
-              )}
-            </Text>
-          ) : undefined,
+        suffix: t.balance.gt(0) ? (
+          <Text size="lg" color="grey-400">
+            {formatUnitsWithMaxFractions(t.balance, t.decimals)}
+          </Text>
+        ) : undefined,
       }))}
       displayElement={
         <CoinIconTextWrapper>
