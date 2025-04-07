@@ -111,7 +111,7 @@ export function TokenSelector({
         ...token,
         balance: balances?.[i] ? balances[i] : BigNumber.from(0),
       }))
-      .sort((a, b) => b.balance.sub(a.balance).toNumber());
+      .sort((a, b) => (b.balance.lt(a.balance) ? -1 : b.balance.gt(a.balance) ? 1 : 0));
   }, [orderedTokens, balances]);
 
   return (
