@@ -1,10 +1,14 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
+import {
+  CHAIN_IDs,
+  PUBLIC_NETWORKS,
+  TOKEN_SYMBOLS_MAP,
+} from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
-import { isBridgedUsdc } from "./sdk";
+import { isBridgedUsdc, isDefined } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -13,6 +17,7 @@ import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import { Deposit } from "hooks/useDeposits";
 
@@ -78,12 +83,25 @@ export const tokenList = [
       TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
 
     if (!tokenInfo) {
+      console.warn("No token info found for symbol: " + symbol);
       return [];
+    }
+
+    let name = tokenInfo.name;
+    let displaySymbol = symbol;
+    // Override for GHO and WGHO until reflected in the constants
+    if (symbol === "GHO") {
+      name = "GHO Token";
+      displaySymbol = "GHO";
+    } else if (symbol === "WGHO") {
+      name = "Lens Wrapped GHO";
+      displaySymbol = "LGHO";
     }
 
     return {
       ...tokenInfo,
-      displaySymbol: symbol,
+      name,
+      displaySymbol,
       logoURI,
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
         ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
@@ -248,14 +266,13 @@ export const chainEndpointToId = Object.fromEntries(
 );
 
 // For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
-export const nonEthChains = [
-  ChainId.POLYGON,
-  ChainId.POLYGON_AMOY,
-  ChainId.ALEPH_ZERO,
-  ChainId.LENS_SEPOLIA,
-  ChainId.SOLANA_DEVNET,
-  ChainId.SOLANA,
-];
+export const nonEthChains = Object.entries(PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.nativeToken !== "ETH")
+  .map(([chainId]) => Number(chainId));
+
+export function isNonEthChain(chainId: number | undefined | null): boolean {
+  return isDefined(chainId) ? nonEthChains.includes(chainId) : false;
+}
 
 export const tokenTable = Object.fromEntries(
   tokenList.map((token) => {
@@ -320,6 +337,13 @@ const SwapRouteSS = superstruct.assign(
   })
 );
 const SwapRoutesSS = superstruct.array(SwapRouteSS);
+const UniversalSwapRouteSS = superstruct.assign(
+  RouteSS,
+  superstruct.object({
+    type: superstruct.string(),
+  })
+);
+const UniversalSwapRoutesSS = superstruct.array(UniversalSwapRouteSS);
 const PoolSS = superstruct.object({
   tokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
@@ -336,6 +360,7 @@ const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
   swapRoutes: SwapRoutesSS,
+  universalSwapRoutes: UniversalSwapRoutesSS,
   pools: PoolsSS,
   spokePoolVerifier: SpokePoolVerifierSS,
   hubPoolWethAddress: superstruct.string(),
@@ -353,17 +378,33 @@ export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
 export type SwapRoute = superstruct.Infer<typeof SwapRouteSS>;
 export type SwapRoutes = superstruct.Infer<typeof SwapRoutesSS>;
+export type UniversalSwapRoute = superstruct.Infer<typeof UniversalSwapRouteSS>;
+export type UniversalSwapRoutes = superstruct.Infer<
+  typeof UniversalSwapRoutesSS
+>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
 export type SpokePoolVerifier = superstruct.Infer<typeof SpokePoolVerifierSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.MAINNET) {
-    superstruct.assert(MainnetRoutes, RouteConfigSS);
-    return MainnetRoutes;
+    superstruct.assert(
+      {
+        ...MainnetRoutes,
+        universalSwapRoutes: MainnetUniversalSwapRoutes,
+      },
+      RouteConfigSS
+    );
+    return {
+      ...MainnetRoutes,
+      universalSwapRoutes: MainnetUniversalSwapRoutes,
+    };
   }
   if (chainId === ChainId.SEPOLIA) {
     superstruct.assert(SepoliaRoutes, RouteConfigSS);
-    return SepoliaRoutes;
+    return {
+      ...SepoliaRoutes,
+      universalSwapRoutes: [],
+    };
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
@@ -533,6 +574,24 @@ export const disabledBridgeTokens = String(
   .split(",")
   .map((symbol) => symbol.toUpperCase());
 
+// Format: "<fromChainId>:<toChainId>:<fromTokenSymbol>:<toTokenSymbol>"
+export const disabledBridgeRoutes = String(
+  process.env.REACT_APP_DISABLED_BRIDGE_ROUTES || ""
+)
+  // Lens: disable WGHO routes
+  .concat(",1:232:WGHO:WGHO,232:1:WGHO:WGHO")
+  .split(",")
+  .map((route) => {
+    const [fromChainId, toChainId, fromTokenSymbol, toTokenSymbol] =
+      route.split(":");
+    return {
+      fromChainId: Number(fromChainId),
+      toChainId: Number(toChainId),
+      fromTokenSymbol,
+      toTokenSymbol,
+    };
+  });
+
 export const disabledChainIds = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
@@ -548,10 +607,6 @@ export const disabledChainIdsForUI = (
 export const disabledTokensForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
-
-export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
-  .split(",")
-  .map((address) => address.toLowerCase());
 
 // Pre-computed gas expenditure for deposits used for estimations
 export const gasExpenditureDeposit = BigNumber.from(90_000);

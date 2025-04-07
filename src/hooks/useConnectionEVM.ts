@@ -22,6 +22,7 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
+import { useDisallowList } from "hooks/useDisallowList";
 
 export function useConnectionEVM() {
   const { openSidebar } = useSidebarContext();
@@ -31,6 +32,7 @@ export function useConnectionEVM() {
   const { switchChainAsync } = useSwitchChain();
   const provider = useEthersProvider({ chainId });
   const signer = useEthersSigner({ chainId });
+  const { isBlocked } = useDisallowList(address);
 
   const { data: ensName } = useEnsQuery(address);
 
@@ -84,6 +86,7 @@ export function useConnectionEVM() {
     connector,
     setChain,
     isContractAddress,
+    isBlocked,
   };
 }
 

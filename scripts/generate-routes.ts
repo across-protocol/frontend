@@ -57,7 +57,7 @@ type ValidTokenSymbol = string;
 
 const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 
-const enabledMainnetChainConfigs = [
+export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
   chainConfigs.POLYGON,
@@ -76,9 +76,10 @@ const enabledMainnetChainConfigs = [
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
+  chainConfigs.LENS,
 ];
 
-const enabledSepoliaChainConfigs = [
+export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
   chainConfigs.ARBITRUM_SEPOLIA,
@@ -90,6 +91,7 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.LENS_SEPOLIA,
   chainConfigs.UNICHAIN_SEPOLIA,
   chainConfigs.SOLANA_DEVNET,
+  chainConfigs.TATARA,
 ];
 
 const enabledRoutes = {
@@ -124,8 +126,10 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.LENS,
       ],
     },
+    // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
     swapAndBridgeAddresses: {
       "1inch": {
         [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
@@ -137,8 +141,58 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
         [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
         [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-        // [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
       },
+    },
+    // Addresses of `UniversalSwapAndBridge` contracts from deployment:
+    // https://github.com/across-protocol/contracts/pull/731/commits/6bdbfd38f50b616ac25e49687cbac6fb6bcb543b
+    universalSwapAndBridgeAddresses: {
+      "1inch": {
+        [CHAIN_IDs.ARBITRUM]: "0x81C7601ac0c5825e89F967f9222B977CCD78aD77",
+        [CHAIN_IDs.BASE]: "0x98285D11B9F7aFec2d475805E5255f26B4490167",
+        [CHAIN_IDs.OPTIMISM]: "0x7631eA29479Ee265241F13FB48555A2C886d3Bf8",
+        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
+      },
+      uniswap: {
+        [CHAIN_IDs.ARBITRUM]: "0x2414A759d4EFF700Ad81e257Ab5187d07eCeEbAb",
+        [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
+        [CHAIN_IDs.BLAST]: "0x57EE47829369e2EF62fBb423648bec70d0366204",
+        [CHAIN_IDs.LENS]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
+        [CHAIN_IDs.MAINNET]: "0x0e84f089B0923EfeA51C6dF91581BFBa66A3484A",
+        [CHAIN_IDs.OPTIMISM]: "0x04989eaF03547E6583f9d9e42aeD11D2b78A808b",
+        [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
+        [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
+        [CHAIN_IDs.ZK_SYNC]: "0xdB82479e3903869fbF8B308162E332FED771D51B",
+      },
+      gho: {
+        [CHAIN_IDs.MAINNET]: "0x18d0915ADA0d5969db64CA44A42dB1b51D8421aa",
+        [CHAIN_IDs.LENS]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
+      },
+      "gho-multicall3": {
+        [CHAIN_IDs.MAINNET]: "0x9736F26C6311701A984A53A0b555f8A20225173A",
+      },
+    },
+    spokePoolPeripheryAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BASE]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BLAST]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.MAINNET]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.OPTIMISM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.POLYGON]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.WORLD_CHAIN]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.ZK_SYNC]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
+      [CHAIN_IDs.ZORA]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+    },
+    spokePoolPeripheryProxyAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BASE]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BLAST]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.MAINNET]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.OPTIMISM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.POLYGON]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.WORLD_CHAIN]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.ZK_SYNC]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
+      [CHAIN_IDs.ZORA]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
@@ -170,6 +224,11 @@ const enabledRoutes = {
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
+    universalSwapAndBridgeAddresses: {
+      uniswap: {},
+    },
+    spokePoolPeripheryAddresses: {},
+    spokePoolPeripheryProxyAddresses: {},
     routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
@@ -475,20 +534,20 @@ async function generateRoutes(hubPoolChainId = 1) {
     ),
     merkleDistributorAddress: checksumAddress(config.merkleDistributorAddress),
     claimAndStakeAddress: checksumAddress(config.claimAndStakeAddress),
-    swapAndBridgeAddresses: Object.entries(
-      config.swapAndBridgeAddresses
-    ).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: Object.entries(value).reduce(
-          (acc, [chainId, address]) => ({
-            ...acc,
-            [chainId]: checksumAddress(address as string),
-          }),
-          {}
-        ),
-      }),
-      {}
+    swapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.swapAndBridgeAddresses as Record<string, Record<string, string>>
+    ),
+    universalSwapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.universalSwapAndBridgeAddresses as Record<
+        string,
+        Record<string, string>
+      >
+    ),
+    spokePoolPeripheryAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryAddresses as Record<string, string>
+    ),
+    spokePoolPeripheryProxyAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryProxyAddresses as Record<string, string>
     ),
     routes: config.routes.flatMap((route) =>
       transformBridgeRoute(route, config.hubPoolChain)
@@ -635,12 +694,12 @@ function transformSwapRoute(route: Route, hubPoolChainId: number) {
           swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
         };
       } catch (e) {
-        if (e instanceof Error) {
-          throw new Error(
-            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
-          );
-        }
-        throw e;
+        throw new Error(
+          `Failed to transform swap route ${route.fromChain}->${toChain.chainId}`,
+          {
+            cause: e,
+          }
+        );
       }
     });
   });
@@ -653,7 +712,7 @@ function transformToRoute(
   outputTokenSymbol: ValidTokenSymbol,
   hubPoolChainId: number
 ) {
-  const inputToken = getTokenBySymbol(
+  let inputToken = getTokenBySymbol(
     inputTokenSymbol,
     route.fromChain,
     hubPoolChainId
@@ -663,14 +722,18 @@ function transformToRoute(
     toChain.chainId,
     hubPoolChainId
   );
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+
+  if (fromChain.chainId === CHAIN_IDs.LENS && inputTokenSymbol === "GHO") {
+    inputToken = getTokenBySymbol("WGHO", route.fromChain, hubPoolChainId);
+  }
 
   if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
     throw new Error("Mismatching L1 addresses");
   }
 
-  const fromChain = Object.values(chainConfigs).find(
-    (config) => config.chainId === route.fromChain
-  )!;
   const isNative = inputTokenSymbol === fromChain.nativeToken;
 
   return {
@@ -757,6 +820,25 @@ function getBridgedUsdcSymbol(chainId: number) {
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
+}
+
+function checksumAddressOfMap(map: Record<string, string>) {
+  return Object.entries(map).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: checksumAddress(value) }),
+    {}
+  );
+}
+
+function checksumAddressesOfNestedMap(
+  nestedMap: Record<string, Record<string, string>>
+) {
+  return Object.entries(nestedMap).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: checksumAddressOfMap(value),
+    }),
+    {}
+  );
 }
 
 function hasBridgedUsdc(chainId: number) {

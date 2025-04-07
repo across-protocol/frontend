@@ -12,6 +12,7 @@ import { useUserLiquidityPool } from "../hooks/useUserLiquidityPool";
 type PoolInfo = {
   tokenSymbol: string;
   tokenLogoURI: string;
+  tokenDisplaySymbol?: string;
   poolSize: BigNumber;
 };
 
@@ -45,7 +46,9 @@ export function PoolSelector({
             <PoolIconTextWrapper>
               <PoolIcon src={p.tokenLogoURI} />
               <Text size="md" color="white-100">
-                {p.tokenSymbol.toUpperCase()} Pool
+                {p.tokenDisplaySymbol?.toUpperCase() ||
+                  p.tokenSymbol.toUpperCase()}{" "}
+                Pool
               </Text>
             </PoolIconTextWrapper>
           ),

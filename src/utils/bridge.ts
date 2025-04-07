@@ -353,9 +353,7 @@ export async function sendSwapAndBridgeTx(
     isNative,
     referrer,
     fillDeadline,
-    inputTokenAddress,
     outputTokenAddress,
-    swapTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     swapQuote,
@@ -397,20 +395,6 @@ export async function sendSwapAndBridgeTx(
   if (swapAndBridge.address !== swapQuote.swapAndBridgeAddress) {
     throw new Error(
       `Mismatch between the SwapAndBridge address provided by the API and the one configured in the app`
-    );
-  }
-
-  const [_swapTokenAddress, _acrossInputTokenAddress] = await Promise.all([
-    swapAndBridge.SWAP_TOKEN(),
-    swapAndBridge.ACROSS_INPUT_TOKEN(),
-  ]);
-
-  if (
-    swapTokenAddress.toLowerCase() !== _swapTokenAddress.toLowerCase() ||
-    inputTokenAddress.toLowerCase() !== _acrossInputTokenAddress.toLowerCase()
-  ) {
-    throw new Error(
-      `Mismatch between the SwapAndBridge contract's swap token and input token addresses`
     );
   }
 

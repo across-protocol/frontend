@@ -10,7 +10,7 @@ import { retrieveLimits } from "./retrieveLimits";
 import { poolsApiCall } from "./pools";
 import { swapQuoteApiCall } from "./swap-quote";
 import { poolsUserApiCall } from "./pools-user";
-
+import { swapApprovalApiCall } from "./swap-approval";
 export const prodEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoApiCall,
   suggestedFees: suggestedFeesApiCall,
@@ -27,4 +27,5 @@ export const prodEndpoints: ServerlessAPIEndpoints = {
   pools: poolsApiCall,
   poolsUser: poolsUserApiCall,
   swapQuote: swapQuoteApiCall,
+  swapApproval: swapApprovalApiCall,
 };

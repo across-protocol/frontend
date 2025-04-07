@@ -1,24 +1,23 @@
-import { ethers, providers } from "ethers";
-import { hubPoolChainId, ChainId, infuraId, getChainInfo } from "./constants";
-
-function getInfuraProviderUrl(chainId: number): string | undefined {
-  try {
-    return new providers.InfuraProvider(chainId, infuraId).connection.url;
-  } catch (e) {
-    return undefined;
-  }
-}
+import { ethers } from "ethers";
+import {
+  hubPoolChainId,
+  ChainId,
+  getChainInfo,
+  vercelApiBaseUrl,
+} from "./constants";
 
 function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
-    getChainInfo(chainId)?.customRpcUrl ||
-    getInfuraProviderUrl(chainId) ||
-    getChainInfo(chainId)?.rpcUrl;
+    getChainInfo(chainId)?.customRpcUrl || getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {
     return resolvedRpcUrl;
   } else {
     throw new Error(`No provider URL found for chainId ${chainId}`);
   }
+}
+
+export function getProxyRpcUrl(chainId: number): string {
+  return `${vercelApiBaseUrl}/api/rpc-proxy?chainId=${chainId}`;
 }
 
 export const providersTable: Record<

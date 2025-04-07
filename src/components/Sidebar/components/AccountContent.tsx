@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useEffect } from "react";
 
 import { getChainInfo, isSupportedChainId, shortenAddress } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
@@ -22,6 +23,15 @@ export function AccountContent() {
 
   const noWalletConnected =
     !evmConnection.isConnected && !svmConnection.isConnected;
+
+  useEffect(() => {
+    if (evmConnection.isConnected && evmConnection.isBlocked) {
+      evmConnection.disconnect({
+        connector: evmConnection.connector,
+        trackSection: "mobileNavSidebar",
+      });
+    }
+  }, [evmConnection]);
 
   const content = noWalletConnected ? (
     <ConnectButton

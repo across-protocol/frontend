@@ -41,6 +41,11 @@ import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
 import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
 
+import lensLogo from "assets/chain-logos/lens.svg";
+import lensGrayscaleLogo from "assets/chain-logos/lens-grayscale.svg";
+import { ReactComponent as lensLogoSvg } from "assets/chain-logos/lens.svg";
+import { ReactComponent as lensGrayscaleLogoSvg } from "assets/chain-logos/lens-grayscale.svg";
+
 import lensSepoliaLogo from "assets/chain-logos/lens-sepolia.svg";
 import lensSepoliaGrayscaleLogo from "assets/chain-logos/lens-sepolia-grayscale.svg";
 import { ReactComponent as lensSepoliaLogoSvg } from "assets/chain-logos/lens-sepolia.svg";
@@ -116,6 +121,11 @@ import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
+import katanaTataraLogo from "assets/chain-logos/tatara.svg";
+import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
+
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
 import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/unichain.svg";
@@ -159,7 +169,7 @@ export const alephZero = {
   constructExplorerLink: (txHash: string) =>
     `${alephZero.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "AZERO",
-  customRpcUrl: process.env.REACT_APP_CHAIN_41455_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_41455_CUSTOM_RPC_URL,
   pollingInterval: 6000,
 };
 
@@ -200,7 +210,7 @@ export const arbitrum = {
   constructExplorerLink: (txHash: string) =>
     `${arbitrum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_42161_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
@@ -241,7 +251,7 @@ export const arbitrumSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${arbitrumSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_421614_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_421614_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -281,7 +291,7 @@ export const base = {
   explorerUrl: "https://basescan.org",
   constructExplorerLink: (txHash: string) => `${base.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_8453_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -319,7 +329,7 @@ export const baseSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${baseSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_84532_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -360,7 +370,7 @@ export const blast = {
   constructExplorerLink: (txHash: string) =>
     `${blast.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_81457_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_81457_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -398,7 +408,7 @@ export const blastSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${blastSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_168587773_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -438,7 +448,7 @@ export const ink = {
   explorerUrl: "https://explorer.inkonchain.com",
   constructExplorerLink: (txHash: string) => `${ink.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_57073_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_57073_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
@@ -463,6 +473,43 @@ export const ink_viem = defineChain({
   },
 });
 
+export const lens = {
+  name: "Lens",
+  fullName: "Lens",
+  chainId: 232,
+  logoURI: lensLogo,
+  grayscaleLogoURI: lensGrayscaleLogo,
+  logoSvg: lensLogoSvg,
+  grayscaleLogoSvg: lensGrayscaleLogoSvg,
+  rpcUrl: "https://api.lens.matterhosted.dev",
+  explorerUrl: "https://explorer.lens.xyz",
+  constructExplorerLink: (txHash: string) => `${lens.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "GHO",
+  customRpcUrl: process.env.REACT_APP_CHAIN_232_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const lens_viem = defineChain({
+  id: lens.chainId,
+  name: lens.name,
+  nativeCurrency: {
+    name: lens.nativeCurrencySymbol,
+    symbol: lens.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [lens.rpcUrl, lens.customRpcUrl ? lens.customRpcUrl : []].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: lens.name + " Explorer",
+      url: lens.explorerUrl,
+    },
+  },
+});
+
 export const lensSepolia = {
   name: "Lens Sepolia",
   fullName: "Lens sepolia",
@@ -476,7 +523,7 @@ export const lensSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${lensSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "GRASS",
-  customRpcUrl: process.env.REACT_APP_CHAIN_37111_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_37111_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
@@ -517,7 +564,7 @@ export const linea = {
   constructExplorerLink: (txHash: string) =>
     `${linea.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_59144_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -554,7 +601,7 @@ export const lisk = {
   explorerUrl: "https://blockscout.lisk.com",
   constructExplorerLink: (txHash: string) => `${lisk.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_1135_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_1135_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -592,7 +639,7 @@ export const liskSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${liskSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_4202_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_4202_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -633,7 +680,7 @@ export const ethereum = {
   constructExplorerLink: (txHash: string) =>
     `${ethereum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_1_CUSTOM_RPC_URL,
   pollingInterval: 12000,
 };
 
@@ -673,7 +720,7 @@ export const mode = {
   explorerUrl: "https://explorer.mode.network",
   constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_34443_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -711,7 +758,7 @@ export const modeSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${modeSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_919_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -752,7 +799,7 @@ export const optimism = {
   constructExplorerLink: (txHash: string) =>
     `${optimism.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_10_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -793,7 +840,7 @@ export const optimismSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${optimismSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_11155420_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -834,7 +881,7 @@ export const polygon = {
   constructExplorerLink: (txHash: string) =>
     `${polygon.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MATIC",
-  customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_137_CUSTOM_RPC_URL,
   pollingInterval: 5000,
 };
 
@@ -875,7 +922,7 @@ export const polygonAmoy = {
   constructExplorerLink: (txHash: string) =>
     `${polygonAmoy.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MATIC",
-  customRpcUrl: process.env.REACT_APP_CHAIN_80002_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_80002_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -916,7 +963,7 @@ export const redstone = {
   constructExplorerLink: (txHash: string) =>
     `${redstone.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_690_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_690_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -957,7 +1004,7 @@ export const scroll = {
   constructExplorerLink: (txHash: string) =>
     `${scroll.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_534352_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_534352_CUSTOM_RPC_URL,
   pollingInterval: 3000,
 };
 
@@ -998,7 +1045,7 @@ export const sepolia = {
   constructExplorerLink: (txHash: string) =>
     `${sepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_11155111_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
@@ -1039,7 +1086,7 @@ export const soneium = {
   constructExplorerLink: (txHash: string) =>
     `${soneium.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_1868_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_1868_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -1067,6 +1114,47 @@ export const soneium_viem = defineChain({
   },
 });
 
+export const katanaTatara = {
+  name: "Tatara",
+  fullName: "Tatara",
+  chainId: 129399,
+  logoURI: katanaTataraLogo,
+  grayscaleLogoURI: katanaTataraGrayscaleLogo,
+  logoSvg: katanaTataraLogoSvg,
+  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
+  explorerUrl: "https://explorer.tatara.katana.network",
+  constructExplorerLink: (txHash: string) =>
+    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const katanaTatara_viem = defineChain({
+  id: katanaTatara.chainId,
+  name: katanaTatara.name,
+  nativeCurrency: {
+    name: katanaTatara.nativeCurrencySymbol,
+    symbol: katanaTatara.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        katanaTatara.rpcUrl,
+        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: katanaTatara.name + " Explorer",
+      url: katanaTatara.explorerUrl,
+    },
+  },
+});
+
 export const unichain = {
   name: "Unichain",
   fullName: "Unichain",
@@ -1080,7 +1168,7 @@ export const unichain = {
   constructExplorerLink: (txHash: string) =>
     `${unichain.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_130_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_130_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
@@ -1121,7 +1209,7 @@ export const unichainSepolia = {
   constructExplorerLink: (txHash: string) =>
     `${unichainSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_1301_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_1301_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
@@ -1162,7 +1250,7 @@ export const worldChain = {
   constructExplorerLink: (txHash: string) =>
     `${worldChain.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_480_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_480_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -1203,7 +1291,7 @@ export const zkSync = {
   constructExplorerLink: (txHash: string) =>
     `${zkSync.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_324_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -1243,7 +1331,7 @@ export const zora = {
   explorerUrl: "https://zorascan.xyz",
   constructExplorerLink: (txHash: string) => `${zora.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_7777777_PROVIDER_URL,
+  customRpcUrl: process.env.REACT_APP_CHAIN_7777777_CUSTOM_RPC_URL,
   pollingInterval: 2000,
 };
 
@@ -1290,6 +1378,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   ink,
+  lens,
   lensSepolia,
   linea,
   lisk,
@@ -1305,6 +1394,7 @@ export const chainConfigs = [
   scroll,
   sepolia,
   soneium,
+  katanaTatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1327,6 +1417,7 @@ export const chains_viem = [
   blast_viem,
   blastSepolia_viem,
   ink_viem,
+  lens_viem,
   lensSepolia_viem,
   linea_viem,
   lisk_viem,
@@ -1342,6 +1433,7 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
+  katanaTatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,

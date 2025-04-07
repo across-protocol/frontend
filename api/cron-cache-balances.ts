@@ -1,11 +1,8 @@
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
+
 import { TypedVercelRequest } from "./_types";
-
 import { getEnvs } from "./_env";
-
-const { CRON_SECRET } = getEnvs();
-
 import {
   HUB_POOL_CHAIN_ID,
   getBatchBalanceViaMulticall3,
@@ -14,8 +11,13 @@ import {
   latestBalanceCache,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
-
+import {
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 import mainnetChains from "../src/data/chains_1.json";
+
+const { CRON_SECRET } = getEnvs();
 
 const handler = async (
   request: TypedVercelRequest<Record<string, never>>,
@@ -32,43 +34,31 @@ const handler = async (
       throw new UnauthorizedError();
     }
 
-    const {
-      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-    } = getEnvs();
-
-    const fullRelayers = !REACT_APP_FULL_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
-    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
-          (relayer) => {
-            return ethers.utils.getAddress(relayer);
-          }
-        );
+    const fullRelayers = getFullRelayers();
 
     // Skip cron job on testnet
     if (HUB_POOL_CHAIN_ID !== 1) {
       return;
     }
 
-    const allRelayers = [...fullRelayers, ...transferRestrictedRelayers];
     for (const chain of mainnetChains) {
       const batchResult = await getBatchBalanceViaMulticall3(
         chain.chainId,
-        allRelayers,
+        fullRelayers,
         [
           ethers.constants.AddressZero,
           ...chain.outputTokens.map((token) => token.address),
         ]
       );
       await Promise.allSettled(
-        allRelayers.map(async (relayer) => {
+        chain.inputTokens.map(async (token) => {
+          const transferRestrictedRelayers = getTransferRestrictedRelayers(
+            chain.chainId,
+            token.symbol
+          );
+          const allRelayers = [...fullRelayers, ...transferRestrictedRelayers];
           const results = await Promise.allSettled(
-            chain.outputTokens.map((token) => {
+            allRelayers.map(async (relayer) => {
               return latestBalanceCache({
                 chainId: chain.chainId,
                 address: relayer,
@@ -84,7 +74,7 @@ const handler = async (
           logger.debug({
             at: `CronCacheBalances`,
             chain: chain.chainId,
-            relayer,
+            inputToken: token.symbol,
             message: `success: ${success.length}, fails: ${fail.length}`,
           });
         })

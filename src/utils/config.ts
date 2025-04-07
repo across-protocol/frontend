@@ -50,6 +50,7 @@ export class ConfigClient {
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
   public swapRoutes: constants.SwapRoutes = [];
+  public universalSwapRoutes: constants.UniversalSwapRoutes = [];
   public pools: constants.Pools = [];
   constructor(
     private config: constants.RouteConfig,
@@ -85,6 +86,7 @@ export class ConfigClient {
       );
     });
     this.swapRoutes = this.config.swapRoutes;
+    this.universalSwapRoutes = this.config.universalSwapRoutes;
     this.pools = this.config.pools;
     this.enabledChainsSpokePoolVerifier = new Set(
       this.config.spokePoolVerifier.enabledChains || []
@@ -98,6 +100,13 @@ export class ConfigClient {
   getEnabledRoutes(): constants.Routes {
     return this.routes.filter(
       (route) =>
+        !constants.disabledBridgeRoutes.some(
+          (disabledRoute) =>
+            disabledRoute.fromChainId === route.fromChain &&
+            disabledRoute.toChainId === route.toChain &&
+            disabledRoute.fromTokenSymbol === route.fromTokenSymbol &&
+            disabledRoute.toTokenSymbol === route.toTokenSymbol
+        ) &&
         !this.disabledTokens.includes(route.fromTokenSymbol) &&
         ![route.fromChain, route.toChain].some((chainId) =>
           [
@@ -113,6 +122,9 @@ export class ConfigClient {
   }
   getSwapRoutes(): constants.SwapRoutes {
     return this.swapRoutes;
+  }
+  getUniversalSwapRoutes(): constants.UniversalSwapRoutes {
+    return this.universalSwapRoutes;
   }
   getRoutes(): constants.Routes {
     return this.routes;
@@ -287,6 +299,17 @@ export class ConfigClient {
       })
     );
     return filter(this.getSwapRoutes(), cleanQuery);
+  }
+  filterUniversalSwapRoutes(
+    query: Partial<constants.UniversalSwapRoute>
+  ): constants.UniversalSwapRoutes {
+    const cleanQuery: Partial<constants.UniversalSwapRoute> =
+      Object.fromEntries(
+        Object.entries(query).filter((entry) => {
+          return entry[1] !== undefined;
+        })
+      );
+    return filter(this.getUniversalSwapRoutes(), cleanQuery);
   }
   filterPools(query: Partial<constants.Pool>): constants.Pools {
     const cleanQuery: Partial<constants.Pool> = Object.fromEntries(
