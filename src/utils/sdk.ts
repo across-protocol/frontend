@@ -14,6 +14,7 @@ export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
 export { isBridgedUsdc } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
 export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
+  toBytes32,
   compareAddressesSimple,
   toAddress,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
