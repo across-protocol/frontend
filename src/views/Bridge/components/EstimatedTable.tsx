@@ -12,6 +12,8 @@ import {
   COLORS,
   formatUSD,
   formatWeiPct,
+  getChainInfo,
+  getToken,
   isBridgedUsdc,
   QUERIESV2,
   TokenInfo,
@@ -20,7 +22,7 @@ import {
 import TokenFee from "./TokenFee";
 import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
-import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
+import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 
@@ -28,9 +30,6 @@ export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
 
 const EstimatedTable = ({
   toChainId,
-  gasFee,
-  capitalFee,
-  lpFee,
   inputToken,
   referralRewardAsBaseCurrency,
   gasFeeAsBaseCurrency,
@@ -42,13 +41,16 @@ const EstimatedTable = ({
   hasDepositReward,
   rewardToken,
   isSwap,
-  parsedAmount,
+  isUniversalSwap,
   currentSwapSlippage,
   swapQuote,
   swapToken,
+  outputToken,
+  universalSwapQuote,
   onSetNewSlippage,
   isQuoteLoading,
   validationError,
+  fromChainId,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
@@ -56,30 +58,21 @@ const EstimatedTable = ({
     validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
     validationError === AmountInputError.PAUSED_DEPOSITS;
 
-  const { swapFee } = doesAmountExceedMaxDeposit
-    ? {
-        swapFee: undefined,
-      }
-    : calcFeesForEstimatedTable({
-        gasFee,
-        capitalFee,
-        lpFee,
-        isSwap,
-        parsedAmount,
-        swapQuote,
-      }) || {};
-
   const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
 
   const showLoadingSkeleton = isQuoteLoading && !doesAmountExceedMaxDeposit;
+  const showSwapFeeRow =
+    ((isSwap && swapQuote && swapToken) ||
+      (isUniversalSwap &&
+        Boolean(
+          universalSwapQuote?.steps.originSwap ||
+            universalSwapQuote?.steps.destinationSwap
+        ))) &&
+    swapFeeAsBaseCurrency &&
+    !doesAmountExceedMaxDeposit;
 
   const nestedFeesRowElements = [
-    isSwap &&
-    swapQuote &&
-    swapToken &&
-    swapFee &&
-    swapFeeAsBaseCurrency &&
-    !doesAmountExceedMaxDeposit ? (
+    showSwapFeeRow ? (
       <>
         <ToolTipWrapper>
           <SwapFeeRowLabelWrapper>
@@ -88,51 +81,17 @@ const EstimatedTable = ({
               Swap fee
             </Text>
           </SwapFeeRowLabelWrapper>
-          <Tooltip
-            tooltipId="swap-fee-info"
-            title="Swap fee"
-            maxWidth={420}
-            body={
-              <SwapFeeTooltipBody>
-                <Text size="sm" color="grey-400">
-                  This bridge transaction requires you to perform a token swap
-                  on the origin chain which incurs a swap fee.
-                </Text>
-                <Text size="sm" color="grey-400">
-                  You can change the swap slippage in the <SettingsIcon /> to
-                  the right.
-                </Text>
-                <Divider />
-                <SwapRouteWrapper>
-                  <Text size="sm" color="grey-400">
-                    Swapping
-                  </Text>
-                  <Text size="sm" color="white">
-                    {swapToken.displaySymbol || swapToken.symbol}
-                  </Text>
-                  <TokenSymbol src={swapToken.logoURI} />
-                  <Text size="sm" color="grey-400">
-                    for
-                  </Text>
-                  <Text size="sm" color="white">
-                    {inputToken.displaySymbol || inputToken.symbol}
-                  </Text>
-                  <TokenSymbol src={inputToken.logoURI} />
-                  <Text size="sm" color="grey-400">
-                    on
-                  </Text>
-                  <Text size="sm" color="white" casing="capitalize">
-                    {swapQuote.dex}
-                  </Text>
-                </SwapRouteWrapper>
-              </SwapFeeTooltipBody>
-            }
-            placement="bottom-start"
-          >
-            <InfoIconWrapper>
-              <InfoIcon />
-            </InfoIconWrapper>
-          </Tooltip>
+          <SwapFeeTooltip
+            swapToken={swapToken}
+            swapQuote={swapQuote}
+            universalSwapQuote={universalSwapQuote}
+            isUniversalSwap={isUniversalSwap}
+            isSwap={isSwap}
+            inputToken={inputToken}
+            fromChainId={fromChainId}
+            toChainId={toChainId}
+            outputToken={outputToken}
+          />
         </ToolTipWrapper>
         <SwapSlippageSettings
           onClick={() => {
@@ -388,6 +347,247 @@ export function TotalReceive({
   );
 }
 
+function SwapFeeTooltip(
+  props: Pick<
+    EstimatedTableProps,
+    | "swapToken"
+    | "swapQuote"
+    | "universalSwapQuote"
+    | "isUniversalSwap"
+    | "isSwap"
+    | "inputToken"
+    | "fromChainId"
+    | "toChainId"
+    | "outputToken"
+  >
+) {
+  const {
+    swapToken,
+    swapQuote,
+    universalSwapQuote,
+    isUniversalSwap,
+    isSwap,
+    inputToken,
+    fromChainId,
+    toChainId,
+    outputToken,
+  } = props;
+
+  const isOriginOnlySwap =
+    (isSwap && swapQuote) ||
+    (isUniversalSwap &&
+      universalSwapQuote?.steps.originSwap &&
+      !universalSwapQuote?.steps.destinationSwap);
+  const isDestinationOnlySwap =
+    isUniversalSwap &&
+    universalSwapQuote?.steps.destinationSwap &&
+    !universalSwapQuote?.steps.originSwap;
+  const isOriginAndDestinationSwap =
+    isUniversalSwap &&
+    universalSwapQuote?.steps.originSwap &&
+    universalSwapQuote?.steps.destinationSwap;
+
+  const swapFeeText = `This bridge transaction requires you to perform a token swap on the ${
+    isOriginOnlySwap
+      ? "origin"
+      : isDestinationOnlySwap
+        ? "destination"
+        : "origin and destination"
+  } chain which incurs a swap fee.`;
+
+  const swapRoute = isOriginOnlySwap ? (
+    <OriginOrDestinationSwapRoute
+      chainId={fromChainId}
+      inputToken={
+        swapToken ||
+        getToken(
+          universalSwapQuote?.steps.originSwap?.tokenIn.symbol ||
+            inputToken.symbol
+        )
+      }
+      outputToken={outputToken}
+    />
+  ) : isDestinationOnlySwap ? (
+    <OriginOrDestinationSwapRoute
+      chainId={toChainId}
+      inputToken={getToken(
+        universalSwapQuote?.steps.destinationSwap?.tokenIn.symbol ||
+          inputToken.symbol
+      )}
+      outputToken={outputToken}
+    />
+  ) : isOriginAndDestinationSwap ? (
+    <OriginAndDestinationSwapRouteText
+      inputToken={inputToken}
+      outputToken={outputToken}
+      bridgeToken={getToken(
+        universalSwapQuote?.steps.bridge.tokenIn.symbol || inputToken.symbol
+      )}
+      originChainId={fromChainId}
+      destinationChainId={toChainId}
+    />
+  ) : null;
+
+  return (
+    <Tooltip
+      tooltipId="swap-fee-info"
+      title="Swap fee"
+      maxWidth={420}
+      body={
+        <SwapFeeTooltipBody>
+          <Text size="sm" color="grey-400">
+            {swapFeeText}
+          </Text>
+          <Text size="sm" color="grey-400">
+            You can change the swap slippage in the <SettingsIcon /> to the
+            right.
+          </Text>
+          <Divider />
+          {swapRoute}
+        </SwapFeeTooltipBody>
+      }
+      placement="bottom-start"
+    >
+      <InfoIconWrapper>
+        <InfoIcon />
+      </InfoIconWrapper>
+    </Tooltip>
+  );
+}
+
+function OriginOrDestinationSwapRoute({
+  chainId,
+  inputToken,
+  outputToken,
+  dex,
+}: {
+  chainId: number;
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
+  dex?: string;
+}) {
+  const chainInfo = getChainInfo(chainId);
+  return (
+    <SwapRouteWrapper>
+      <Text size="sm" color="grey-400">
+        Swapping
+      </Text>
+      <Text size="sm" color="white">
+        {inputToken.displaySymbol || inputToken.symbol}
+      </Text>
+      <TokenSymbol src={inputToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        for
+      </Text>
+      <Text size="sm" color="white">
+        {outputToken.displaySymbol || outputToken.symbol}
+      </Text>
+      <TokenSymbol src={outputToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        on
+      </Text>
+      <Text size="sm" color="white" casing="capitalize">
+        {chainInfo.name}
+      </Text>
+      {dex && (
+        <>
+          <Text size="sm" color="grey-400">
+            with
+          </Text>
+          <Text size="sm" color="white" casing="capitalize">
+            {dex}
+          </Text>
+        </>
+      )}
+    </SwapRouteWrapper>
+  );
+}
+
+function OriginAndDestinationSwapRouteText({
+  inputToken,
+  outputToken,
+  bridgeToken,
+  originChainId,
+  destinationChainId,
+  originDex,
+  destinationDex,
+}: {
+  inputToken: TokenInfo;
+  bridgeToken: TokenInfo;
+  outputToken: TokenInfo;
+  originChainId: number;
+  destinationChainId: number;
+  originDex?: string;
+  destinationDex?: string;
+}) {
+  const originChainInfo = getChainInfo(originChainId);
+  const destinationChainInfo = getChainInfo(destinationChainId);
+  return (
+    <SwapRouteWrapper>
+      <Text size="sm" color="grey-400">
+        Swapping
+      </Text>
+      <Text size="sm" color="white">
+        {inputToken.displaySymbol || inputToken.symbol}
+      </Text>
+      <TokenSymbol src={inputToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        for
+      </Text>
+      <Text size="sm" color="white">
+        {bridgeToken.displaySymbol || bridgeToken.symbol}
+      </Text>
+      <TokenSymbol src={bridgeToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        on
+      </Text>
+      <Text size="sm" color="white" casing="capitalize">
+        {originChainInfo.name}
+      </Text>
+      {originDex && (
+        <>
+          <Text size="sm" color="grey-400">
+            with
+          </Text>
+          <Text size="sm" color="white" casing="capitalize">
+            {originDex}
+          </Text>
+        </>
+      )}
+      <Text size="sm" color="grey-400">
+        and
+      </Text>
+      <Text size="sm" color="white">
+        {bridgeToken.displaySymbol || bridgeToken.symbol}
+      </Text>
+      <TokenSymbol src={bridgeToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        for
+      </Text>
+      <Text size="sm" color="white">
+        {outputToken.displaySymbol || outputToken.symbol}
+      </Text>
+      <TokenSymbol src={outputToken.logoURI} />
+      <Text size="sm" color="grey-400">
+        on
+      </Text>
+      <Text size="sm" color="white" casing="capitalize">
+        {destinationChainInfo.name}
+      </Text>
+      {destinationDex && (
+        <>
+          <Text size="sm" color="grey-400">
+            with
+          </Text>
+          <Text size="sm" color="white" casing="capitalize">
+            {destinationDex}
+          </Text>
+        </>
+      )}
+    </SwapRouteWrapper>
+  );
+}
+
 export default EstimatedTable;
 
 const Wrapper = styled.div`
@@ -541,7 +741,8 @@ const SwapRouteWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  flex-wrap: wrap;
 `;
 
 const RewardRebateWrapper = styled.div`

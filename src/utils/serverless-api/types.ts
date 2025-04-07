@@ -5,6 +5,7 @@ import { CoingeckoApiCall } from "./prod/coingecko";
 import { PoolsApiCall } from "./prod/pools";
 import { SwapQuoteApiCall } from "./prod/swap-quote";
 import { PoolsUserApiCall } from "./prod/pools-user";
+import { SwapApprovalApiCall } from "./prod/swap-approval";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -22,6 +23,7 @@ export type ServerlessAPIEndpoints = {
   pools: PoolsApiCall;
   poolsUser: PoolsUserApiCall;
   swapQuote: SwapQuoteApiCall;
+  swapApproval: SwapApprovalApiCall;
 };
 
 export type RewardsApiFunction =

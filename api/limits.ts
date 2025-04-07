@@ -1,7 +1,11 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { CHAIN_IDs, DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
+import {
+  CHAIN_IDs,
+  CUSTOM_GAS_TOKENS,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+} from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
 
@@ -12,7 +16,6 @@ import {
   ConvertDecimals,
   getCachedTokenBalance,
   getCachedTokenPrice,
-  getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
   getChainInputTokenMaxBalanceInUsd,
@@ -39,6 +42,11 @@ import {
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 import { getEnvs } from "./_env";
+import {
+  getDefaultRelayerAddress,
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -66,25 +74,10 @@ const handler = async (
   });
   try {
     const {
-      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
       // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
     } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-
-    const fullRelayers = !REACT_APP_FULL_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
-    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
-          (relayer) => {
-            return ethers.utils.getAddress(relayer);
-          }
-        );
 
     assert(query, LimitsQueryParamsSchema);
 
@@ -95,6 +88,12 @@ const handler = async (
       inputToken,
       outputToken,
     } = validateChainAndTokenParams(query);
+
+    const fullRelayers = getFullRelayers();
+    const transferRestrictedRelayers = getTransferRestrictedRelayers(
+      destinationChainId,
+      l1Token.symbol
+    );
 
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
@@ -176,7 +175,7 @@ const handler = async (
     ] = await Promise.all([
       getCachedTokenPrice(
         l1Token.address,
-        sdk.constants.CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+        CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
@@ -391,18 +390,21 @@ const handler = async (
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
 
-    // FIXME: Remove after campaign is complete
-    const maximumDeposit =
-      destinationChainId === CHAIN_IDs.ZK_SYNC &&
-      computedOriginChainId === CHAIN_IDs.MAINNET
-        ? liquidReserves
-        : getMaxDeposit(
-            liquidReserves,
-            bufferedMaxDepositShortDelay,
-            limitsBufferMultiplier,
-            chainHasMaxBoundary,
-            routeInvolvesLiteChain
-          );
+    let maximumDeposit = getMaxDeposit(
+      liquidReserves,
+      bufferedMaxDepositShortDelay,
+      limitsBufferMultiplier,
+      chainHasMaxBoundary,
+      routeInvolvesLiteChain
+    );
+
+    if (
+      (destinationChainId === CHAIN_IDs.ZK_SYNC &&
+        computedOriginChainId === CHAIN_IDs.MAINNET) ||
+      inputToken.symbol.toUpperCase() === "POOL"
+    ) {
+      maximumDeposit = liquidReserves;
+    }
 
     const limitCap = getLimitCap(
       l1Token.symbol,

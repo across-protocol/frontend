@@ -13,10 +13,41 @@ import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { TypedVercelRequest } from "../../_types";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
+import { CHAIN_IDs } from "../../_constants";
+import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
+import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: getSwapRouter02Strategy("UniversalSwapAndBridge"),
+  default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+  chains: {
+    [CHAIN_IDs.LENS]: getSwapRouter02Strategy(
+      "UniversalSwapAndBridge",
+      "sdk-swap-quoter"
+    ),
+  },
+  swapPairs: {
+    [CHAIN_IDs.MAINNET]: {
+      GHO: {
+        WGHO: getWrappedGhoStrategy(),
+      },
+      WGHO: {
+        GHO: getWrappedGhoStrategy(),
+        USDC: getWrappedGhoStrategy(),
+        USDT: getWrappedGhoStrategy(),
+        DAI: getWrappedGhoStrategy(),
+      },
+      USDC: {
+        WGHO: getWghoMulticallStrategy(),
+      },
+      USDT: {
+        WGHO: getWghoMulticallStrategy(),
+      },
+      DAI: {
+        WGHO: getWghoMulticallStrategy(),
+      },
+    },
+  },
 };
 
 export async function handleApprovalSwap(
@@ -114,6 +145,7 @@ export async function handleApprovalSwap(
   const approvalAmount = constants.MaxUint256;
   if (allowance.lt(inputAmount)) {
     approvalTxns = getApprovalTxns({
+      allowance,
       token: crossSwap.inputToken,
       spender: crossSwapTx.to,
       amount: approvalAmount,

@@ -41,6 +41,11 @@ import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
 import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
 
+import lensLogo from "assets/chain-logos/lens.svg";
+import lensGrayscaleLogo from "assets/chain-logos/lens-grayscale.svg";
+import { ReactComponent as lensLogoSvg } from "assets/chain-logos/lens.svg";
+import { ReactComponent as lensGrayscaleLogoSvg } from "assets/chain-logos/lens-grayscale.svg";
+
 import lensSepoliaLogo from "assets/chain-logos/lens-sepolia.svg";
 import lensSepoliaGrayscaleLogo from "assets/chain-logos/lens-sepolia-grayscale.svg";
 import { ReactComponent as lensSepoliaLogoSvg } from "assets/chain-logos/lens-sepolia.svg";
@@ -115,6 +120,11 @@ import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
+
+import katanaTataraLogo from "assets/chain-logos/tatara.svg";
+import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
 
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
@@ -459,6 +469,43 @@ export const ink_viem = defineChain({
     default: {
       name: ink.name + " Explorer",
       url: ink.explorerUrl,
+    },
+  },
+});
+
+export const lens = {
+  name: "Lens",
+  fullName: "Lens",
+  chainId: 232,
+  logoURI: lensLogo,
+  grayscaleLogoURI: lensGrayscaleLogo,
+  logoSvg: lensLogoSvg,
+  grayscaleLogoSvg: lensGrayscaleLogoSvg,
+  rpcUrl: "https://api.lens.matterhosted.dev",
+  explorerUrl: "https://explorer.lens.xyz",
+  constructExplorerLink: (txHash: string) => `${lens.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "GHO",
+  customRpcUrl: process.env.REACT_APP_CHAIN_232_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const lens_viem = defineChain({
+  id: lens.chainId,
+  name: lens.name,
+  nativeCurrency: {
+    name: lens.nativeCurrencySymbol,
+    symbol: lens.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [lens.rpcUrl, lens.customRpcUrl ? lens.customRpcUrl : []].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: lens.name + " Explorer",
+      url: lens.explorerUrl,
     },
   },
 });
@@ -1067,6 +1114,47 @@ export const soneium_viem = defineChain({
   },
 });
 
+export const katanaTatara = {
+  name: "Tatara",
+  fullName: "Tatara",
+  chainId: 129399,
+  logoURI: katanaTataraLogo,
+  grayscaleLogoURI: katanaTataraGrayscaleLogo,
+  logoSvg: katanaTataraLogoSvg,
+  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
+  explorerUrl: "https://explorer.tatara.katana.network",
+  constructExplorerLink: (txHash: string) =>
+    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const katanaTatara_viem = defineChain({
+  id: katanaTatara.chainId,
+  name: katanaTatara.name,
+  nativeCurrency: {
+    name: katanaTatara.nativeCurrencySymbol,
+    symbol: katanaTatara.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        katanaTatara.rpcUrl,
+        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: katanaTatara.name + " Explorer",
+      url: katanaTatara.explorerUrl,
+    },
+  },
+});
+
 export const unichain = {
   name: "Unichain",
   fullName: "Unichain",
@@ -1290,6 +1378,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   ink,
+  lens,
   lensSepolia,
   linea,
   lisk,
@@ -1305,6 +1394,7 @@ export const chainConfigs = [
   scroll,
   sepolia,
   soneium,
+  katanaTatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1327,6 +1417,7 @@ export const chains_viem = [
   blast_viem,
   blastSepolia_viem,
   ink_viem,
+  lens_viem,
   lensSepolia_viem,
   linea_viem,
   lisk_viem,
@@ -1342,6 +1433,7 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
+  katanaTatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,

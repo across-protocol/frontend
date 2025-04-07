@@ -37,7 +37,6 @@ import {
   string,
   Struct,
 } from "superstruct";
-
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import rpcProvidersJson from "../src/data/rpc-providers.json";
@@ -53,6 +52,8 @@ import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
+  CHAINS,
+  CUSTOM_GAS_TOKENS,
   DEFAULT_LITE_CHAIN_USD_MAX_BALANCE,
   DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT,
   DEFI_LLAMA_POOL_LOOKUP,
@@ -62,7 +63,6 @@ import {
   MULTICALL3_ADDRESS_OVERRIDES,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
-  defaultRelayerAddressOverride,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
@@ -104,11 +104,11 @@ const {
   REACT_APP_DISABLED_CHAINS,
   REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
-  VERCEL_URL,
   LIMITS_BUFFER_MULTIPLIERS,
   CHAIN_USD_MAX_BALANCES,
   CHAIN_USD_MAX_DEPOSITS,
   VERCEL_AUTOMATION_BYPASS_SECRET,
+  RPC_HEADERS,
 } = getEnvs();
 
 // Don't permit HUB_POOL_CHAIN_ID=0
@@ -378,12 +378,32 @@ function getStaticIsContract(chainId: number, address: string) {
   return !!deployedAcrossContract;
 }
 
-export function getWrappedNativeTokenAddress(chainId: number) {
-  if (chainId === CHAIN_IDs.POLYGON || chainId === CHAIN_IDs.POLYGON_AMOY) {
-    return TOKEN_SYMBOLS_MAP.WMATIC.addresses[chainId];
+export function getChainInfo(chainId: number) {
+  const chainInfo = CHAINS[chainId];
+  if (!chainInfo) {
+    throw new Error(`Cannot get chain info for chain ${chainId}`);
   }
 
-  return TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
+  return chainInfo;
+}
+
+export function getWrappedNativeTokenAddress(chainId: number) {
+  const chainInfo = getChainInfo(chainId);
+  const wrappedNativeTokenSymbol =
+    chainId === CHAIN_IDs.LENS ? "WGHO" : `W${chainInfo.nativeToken}`;
+  const wrappedNativeToken =
+    TOKEN_SYMBOLS_MAP[
+      wrappedNativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+    ];
+  const wrappedNativeTokenAddress = wrappedNativeToken?.addresses[chainId];
+
+  if (!wrappedNativeTokenAddress) {
+    throw new Error(
+      `Cannot get wrapped native token for chain ${chainId} and symbol ${wrappedNativeTokenSymbol}`
+    );
+  }
+
+  return wrappedNativeTokenAddress;
 }
 
 /**
@@ -573,7 +593,11 @@ export const getPublicProvider = (
 ): providers.StaticJsonRpcProvider | undefined => {
   const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
   if (chain) {
-    return new ethers.providers.StaticJsonRpcProvider(chain.publicRPC);
+    const headers = getProviderHeaders(chainId);
+    return new ethers.providers.StaticJsonRpcProvider({
+      url: chain.publicRPC,
+      headers,
+    });
   } else {
     return undefined;
   }
@@ -712,14 +736,44 @@ export const getRelayerFeeCalculatorQueries = (
     relayerAddress: string;
   }> = {}
 ) => {
+  const baseArgs = {
+    chainId: destinationChainId,
+    provider: getProvider(destinationChainId, { useSpeedProvider: true }),
+    symbolMapping: TOKEN_SYMBOLS_MAP,
+    spokePoolAddress:
+      overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    simulatedRelayerAddress:
+      overrides.relayerAddress ||
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
+    logger: getLogger(),
+  };
+
+  const customGasTokenSymbol = CUSTOM_GAS_TOKENS[destinationChainId];
+  if (customGasTokenSymbol) {
+    return new sdk.relayFeeCalculator.CustomGasTokenQueries({
+      queryBaseArgs: [
+        baseArgs.provider,
+        baseArgs.symbolMapping,
+        baseArgs.spokePoolAddress,
+        baseArgs.simulatedRelayerAddress,
+        baseArgs.logger,
+        baseArgs.coingeckoProApiKey,
+        undefined,
+        "usd",
+      ],
+      customGasTokenSymbol,
+    });
+  }
+
   return sdk.relayFeeCalculator.QueryBase__factory.create(
-    destinationChainId,
-    getProvider(destinationChainId, { useSpeedProvider: true }),
-    undefined,
-    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    overrides.relayerAddress,
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger()
+    baseArgs.chainId,
+    baseArgs.provider,
+    baseArgs.symbolMapping,
+    baseArgs.spokePoolAddress,
+    baseArgs.simulatedRelayerAddress,
+    baseArgs.coingeckoProApiKey,
+    baseArgs.logger
   );
 };
 
@@ -958,6 +1012,35 @@ export async function getSuggestedFees(params: {
   ).data;
 }
 
+export async function getBridgeQuoteForExactInput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  exactInputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const quote = await getSuggestedFees({
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: true,
+    recipient: params.recipient,
+    message: params.message,
+    amount: params.exactInputAmount.toString(),
+  });
+
+  return {
+    inputAmount: params.exactInputAmount,
+    outputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    minOutputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    suggestedFees: quote,
+    message: params.message,
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
+  };
+}
+
 export async function getBridgeQuoteForMinOutput(params: {
   inputToken: Token;
   outputToken: Token;
@@ -1117,6 +1200,7 @@ function getProviderFromConfigJson(
 ) {
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
+  const headers = getProviderHeaders(chainId);
 
   if (urls.length === 0) {
     getLogger().warn({
@@ -1128,7 +1212,7 @@ function getProviderFromConfigJson(
 
   if (!opts.useSpeedProvider) {
     return new sdk.providers.RetryProvider(
-      urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
       chainId,
       1, // quorum can be 1 in the context of the API
       3, // retries
@@ -1140,7 +1224,7 @@ function getProviderFromConfigJson(
   }
 
   return new sdk.providers.SpeedProvider(
-    urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
     chainId,
     3, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
@@ -1167,6 +1251,17 @@ export function getRpcUrlsFromConfigJson(chainId: number) {
   }
 
   return urls;
+}
+
+export function getProviderHeaders(
+  chainId: number | string
+): Record<string, string> | undefined {
+  const rpcHeaders = JSON.parse(RPC_HEADERS ?? "{}") as Record<
+    string,
+    Record<string, string>
+  >;
+
+  return rpcHeaders?.[String(chainId)];
 }
 
 /**
@@ -1212,21 +1307,25 @@ export const isRouteEnabled = (
 
 export function isInputTokenBridgeable(
   inputTokenAddress: string,
-  originChainId: number
+  originChainId: number,
+  destinationChainId: number
 ) {
   return ENABLED_ROUTES.routes.some(
-    ({ fromTokenAddress, fromChain }) =>
+    ({ fromTokenAddress, fromChain, toChain }) =>
       originChainId === fromChain &&
+      destinationChainId === toChain &&
       inputTokenAddress.toLowerCase() === fromTokenAddress.toLowerCase()
   );
 }
 
 export function isOutputTokenBridgeable(
   outputTokenAddress: string,
+  originChainId: number,
   destinationChainId: number
 ) {
   return ENABLED_ROUTES.routes.some(
-    ({ toTokenAddress, toChain }) =>
+    ({ toTokenAddress, fromChain, toChain }) =>
+      originChainId === fromChain &&
       destinationChainId === toChain &&
       toTokenAddress.toLowerCase() === outputTokenAddress.toLowerCase()
   );
@@ -1376,7 +1475,7 @@ export function getMulticall3(
   chainId: number,
   signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
-  const address = sdk.utils.getMulticallAddress(chainId);
+  const address = getMulticall3Address(chainId);
 
   // no multicall on this chain
   if (!address) {
@@ -1388,6 +1487,17 @@ export function getMulticall3(
     MINIMAL_MULTICALL3_ABI,
     signerOrProvider
   ) as Multicall3;
+}
+
+export function getMulticall3Address(chainId: number): string | undefined {
+  const addressOverride = MULTICALL3_ADDRESS_OVERRIDES[chainId];
+  const addressFromSdk = sdk.utils.getMulticallAddress(chainId);
+
+  if (addressOverride) {
+    return addressOverride;
+  }
+
+  return addressFromSdk;
 }
 
 /**
@@ -1996,7 +2106,7 @@ export async function callViaMulticall3(
 ): Promise<ethers.utils.Result[]> {
   const chainId = provider.network.chainId;
   const multicall3 = new ethers.Contract(
-    MULTICALL3_ADDRESS_OVERRIDES[chainId] ?? MULTICALL3_ADDRESS,
+    getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
     provider
   );
@@ -2084,27 +2194,6 @@ export async function getBalancerV2TokenPrice(
   );
 
   return Number((totalValue / floatTotalSupply).toFixed(18));
-}
-
-/**
- * Returns the EOA that will serve as the default relayer address
- * @param destinationChainId The destination chain that a bridge operation will transfer to
- * @param symbol A valid token symbol
- * @returns A valid EOA address
- */
-export function getDefaultRelayerAddress(
-  destinationChainId: number,
-  symbol?: string
-) {
-  const symbolOverride = symbol
-    ? defaultRelayerAddressOverride?.symbols?.[symbol]
-    : undefined;
-  return (
-    symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
-    symbolOverride?.defaultAddr ?? // Specific Symbol override
-    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
-    sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
-  );
 }
 
 /**
@@ -2197,7 +2286,13 @@ export function getChainInputTokenMaxDepositInUsd(
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
-  return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+
+  return (
+    maxDeposits[chainId.toString()]?.[symbol] ?? // specific chain => specific token
+    maxDeposits["*"]?.[symbol] ?? // all chains for specific token
+    maxDeposits["*"]?.["*"] ?? // all tokens for all chains
+    defaultValue // default
+  );
 }
 
 export function getCachedLatestBlock(chainId: number) {

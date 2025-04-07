@@ -78,7 +78,7 @@ export default function LiquidityPool() {
     }
     return `${formatUnitsWithMaxFractions(amount, selectedToken.decimals, {
       xl: 3,
-    })} ${selectedToken.symbol}`;
+    })} ${selectedToken.displaySymbol || selectedToken.symbol}`;
   };
 
   const showValueOrDash = repeatableTernaryBuilder(!arePoolsLoading, "-");
@@ -117,6 +117,7 @@ export default function LiquidityPool() {
               }}
               pools={liquidityPools.map((pool) => ({
                 tokenSymbol: pool.l1TokenSymbol,
+                tokenDisplaySymbol: pool.l1TokenDisplaySymbol,
                 tokenLogoURI: pool.l1TokenLogoURI,
                 poolSize: BigNumber.from(pool.totalPoolSize),
               }))}

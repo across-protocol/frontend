@@ -35,6 +35,7 @@ import { ToAccount } from "../hooks/useToAccount";
 import { BridgeLimits, useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { Tooltip } from "components/Tooltip";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -60,7 +61,7 @@ export type BridgeFormProps = {
   estimatedTimeString?: string;
   balance?: BigNumber;
   swapQuote?: SwapQuoteApiResponse;
-
+  universalSwapQuote?: UniversalSwapQuote;
   isConnected: boolean;
   isWrongChain: boolean;
   buttonLabel: string;
@@ -97,6 +98,7 @@ const BridgeForm = ({
   estimatedTimeString,
   balance,
   swapQuote,
+  universalSwapQuote,
 
   isConnected,
   buttonLabel,
@@ -260,12 +262,14 @@ const BridgeForm = ({
         fromChainId={selectedRoute.fromChain}
         toChainId={selectedRoute.toChain}
         isSwap={selectedRoute.type === "swap"}
+        isUniversalSwap={selectedRoute.type === "universal-swap"}
         quotedLimits={limits}
         gasFee={fees?.relayerGasFee.total}
         capitalFee={fees?.relayerCapitalFee.total}
         lpFee={fees?.lpFee.total}
         parsedAmount={parsedAmountInput}
         swapQuote={swapQuote}
+        universalSwapQuote={universalSwapQuote}
         inputToken={getToken(selectedRoute.fromTokenSymbol)}
         outputToken={getToken(receiveTokenSymbol)}
         swapToken={
