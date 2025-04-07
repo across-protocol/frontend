@@ -1,3 +1,4 @@
+import axios from "axios";
 import { externConfigs } from "constants/chains/configs";
 import { BigNumber, BigNumberish } from "ethers";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
@@ -50,6 +51,7 @@ export enum AmountInputError {
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
   PRICE_IMPACT_TOO_HIGH = "priceImpactTooHigh",
+  SWAP_QUOTE_UNAVAILABLE = "swapQuoteUnavailable",
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
@@ -112,14 +114,24 @@ export function getReceiveTokenSymbol(
   return outputTokenSymbol;
 }
 
-export function validateBridgeAmount(
-  selectedRoute: SelectedRoute,
-  parsedAmountInput?: BigNumber,
-  quoteFees?: GetBridgeFeesResult,
-  currentBalance?: BigNumber,
-  maxDeposit?: BigNumber,
-  amountToBridgeAfterSwap?: BigNumber
-) {
+export function validateBridgeAmount(params: {
+  selectedRoute: SelectedRoute;
+  parsedAmountInput?: BigNumber;
+  quoteFees?: GetBridgeFeesResult;
+  currentBalance?: BigNumber;
+  maxDeposit?: BigNumber;
+  amountToBridgeAfterSwap?: BigNumber;
+  universalSwapQuoteError?: Error;
+}) {
+  const {
+    selectedRoute,
+    parsedAmountInput,
+    quoteFees,
+    currentBalance,
+    maxDeposit,
+    amountToBridgeAfterSwap,
+  } = params;
+
   if (!parsedAmountInput || !amountToBridgeAfterSwap) {
     return {
       error: AmountInputError.INVALID,
@@ -159,6 +171,25 @@ export function validateBridgeAmount(
     return {
       error: AmountInputError.INVALID,
     };
+  }
+
+  if (
+    params.universalSwapQuoteError &&
+    axios.isAxiosError(params.universalSwapQuoteError)
+  ) {
+    const responseData = params.universalSwapQuoteError.response?.data as {
+      code?: string;
+    };
+    if (responseData?.code === "SWAP_QUOTE_UNAVAILABLE") {
+      return {
+        error: AmountInputError.SWAP_QUOTE_UNAVAILABLE,
+      };
+    }
+    if (responseData?.code === "AMOUNT_TOO_LOW") {
+      return {
+        error: AmountInputError.AMOUNT_TOO_LOW,
+      };
+    }
   }
 
   return {

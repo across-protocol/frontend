@@ -39,6 +39,7 @@ export const AcrossErrorCode = {
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
   UPSTREAM_HTTP_ERROR: "UPSTREAM_HTTP_ERROR",
+  SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
 } as const;
 
 export class AcrossApiError extends Error {
@@ -201,6 +202,18 @@ export class AmountTooHighError extends InputError {
   }
 }
 
+export class SwapQuoteUnavailableError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+        status: HttpErrorToStatusCode.SERVICE_UNAVAILABLE,
+      },
+      opts
+    );
+  }
+}
 /**
  * Handles the recurring case of error handling
  * @param endpoint A string numeric to indicate to the logging utility where this error occurs
