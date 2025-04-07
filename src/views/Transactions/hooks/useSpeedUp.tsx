@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 
 import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
@@ -86,9 +86,14 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
       );
 
       const depositor = await signer.getAddress();
+      // Scale the depositor address to 32 bytes
+      const paddedDepositor = ethers.utils.hexZeroPad(
+        ethers.utils.hexlify(depositor),
+        32
+      );
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
       const txResponse = await spokePool.speedUpDeposit(
-        depositor,
+        paddedDepositor,
         BigNumber.from(transfer.depositId),
         updatedOutputAmount,
         newRecipient,
