@@ -8,7 +8,7 @@ dotenv.config({
 });
 
 const remoteFileName = "output_vercel.env";
-const saveTo = ".env.production";
+const saveTo = ".env";
 
 async function main() {
   const GIT_ENV_REPO = process.env.GIT_ENV_REPO;

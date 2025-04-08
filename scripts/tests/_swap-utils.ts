@@ -11,7 +11,7 @@ import {
 } from "./_swap-cases";
 
 dotenv.config({
-  path: [".env.local", ".env.production", ".env"],
+  path: [".env.local", ".env"],
 });
 
 export type BaseSwapResponse = Awaited<
