@@ -8,7 +8,7 @@ import {
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
-import { isBridgedUsdc, isDefined } from "./sdk";
+import { isBridgedUsdc, isDefined, isStablecoin } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -103,6 +103,7 @@ export const tokenList = [
       name,
       displaySymbol,
       logoURI,
+      isStable: isStablecoin(tokenInfo.symbol),
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
         ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
         : tokenInfo.addresses[hubPoolChainId],

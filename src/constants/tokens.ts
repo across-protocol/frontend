@@ -31,6 +31,8 @@ export type TokenInfo = {
   // optional display symbol for tokens that have a different symbol on the frontend
   displaySymbol?: string;
   addresses?: Record<number, string>;
+  // optional, if this is a stable coin
+  isStable?: boolean;
 };
 export type TokenInfoList = TokenInfo[];
 
