@@ -7,7 +7,8 @@ dotenv.config({
   path: [".env.local", ".env"],
 });
 
-const fileName = "output_vercel.env";
+const remoteFileName = "output_vercel.env";
+const saveTo = ".env.production";
 
 async function main() {
   const GIT_ENV_REPO = process.env.GIT_ENV_REPO;
@@ -22,20 +23,21 @@ async function main() {
     const baseUrl = `${GIT_ENV_REPO}/${GIT_ENV_PROJECT}/outputs/`;
     const ghToken = GH_TOKEN;
 
-    const response = await fetch(`${baseUrl}${fileName}`, {
+    const response = await fetch(`${baseUrl}${remoteFileName}`, {
       headers: {
         Authorization: `token ${ghToken}`,
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to download ${fileName}: ${response.statusText}`);
+      throw new Error(
+        `Failed to download ${remoteFileName}: ${response.statusText}`
+      );
     }
 
     const content = await response.text();
 
-    fs.writeFileSync(`./${fileName}`, content);
-    fs.appendFileSync(".env", content);
+    fs.writeFileSync(`./${saveTo}`, content);
 
     console.log("All files downloaded.");
   } catch (error) {

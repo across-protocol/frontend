@@ -10,7 +10,9 @@ import {
   LENS_CASES,
 } from "./_swap-cases";
 
-dotenv.config();
+dotenv.config({
+  path: [".env.local", ".env.production", ".env"],
+});
 
 export type BaseSwapResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
