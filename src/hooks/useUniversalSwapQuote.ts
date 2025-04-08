@@ -81,18 +81,25 @@ export function useUniversalSwapQuote(
         slippageTolerance,
       });
     },
-    refetchInterval: 5_000,
-    retry: (_, error) => {
-      if (axios.isAxiosError(error)) {
-        const responseData = error.response?.data as { code?: string };
-        if (
-          responseData?.code === "AMOUNT_TOO_LOW" ||
-          responseData?.code === "SWAP_QUOTE_UNAVAILABLE"
-        ) {
-          return false;
-        }
+    refetchInterval: (query) => {
+      if (query.state.error && !shouldRetry(query.state.error)) {
+        return false;
       }
-      return true;
+      return 5_000;
     },
+    retry: (_, error) => shouldRetry(error),
   });
+}
+
+function shouldRetry(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as { code?: string };
+    if (
+      responseData?.code === "AMOUNT_TOO_LOW" ||
+      responseData?.code === "SWAP_QUOTE_UNAVAILABLE"
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
