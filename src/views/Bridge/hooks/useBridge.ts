@@ -76,18 +76,20 @@ export function useBridge() {
     !transferQuote;
 
   const { error: amountValidationError, warn: amountValidationWarning } =
-    validateBridgeAmount(
+    validateBridgeAmount({
       selectedRoute,
-      parsedAmount,
-      quotedFees,
-      maxBalance,
-      limitsQuery.limits?.maxDeposit,
-      selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
-        ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
-        : selectedRoute.type === "universal-swap" && quotedUniversalSwap
-          ? quotedUniversalSwap?.steps.bridge.inputAmount
-          : parsedAmount
-    );
+      parsedAmountInput: parsedAmount,
+      quoteFees: quotedFees,
+      currentBalance: maxBalance,
+      maxDeposit: limitsQuery.limits?.maxDeposit,
+      amountToBridgeAfterSwap:
+        selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
+          ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
+          : selectedRoute.type === "universal-swap" && quotedUniversalSwap
+            ? quotedUniversalSwap?.steps.bridge.inputAmount
+            : parsedAmount,
+      universalSwapQuoteError: universalSwapQuoteQuery.error ?? undefined,
+    });
   const isAmountValid = !amountValidationError;
 
   const {

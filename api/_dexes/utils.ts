@@ -554,16 +554,3 @@ export function assertMinOutputAmount(
     );
   }
 }
-
-export class NoQuoteFoundError extends Error {
-  constructor(params: {
-    originSwapChainId: number;
-    inputTokenSymbol: string;
-    destinationSwapChainId: number;
-    outputTokenSymbol: string;
-  }) {
-    super(
-      `No quote found for ${params.originSwapChainId} ${params.inputTokenSymbol} -> ${params.destinationSwapChainId} ${params.outputTokenSymbol}`
-    );
-  }
-}
