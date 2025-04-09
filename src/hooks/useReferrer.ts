@@ -49,7 +49,7 @@ export default function useReferrer() {
 
   // Return the integratorId as a hex string with a 0x prefix if not already present.
   // Default to Across if no integrator_id is provided or if the integrator_id is invalid.
-  let integratorId = "0x0000"; // Default to Across
+  let integratorId = "0x007f"; // Default to Across
   if (integrator_id) {
     const integrator_modified = integrator_id?.includes("0x")
       ? integrator_id
