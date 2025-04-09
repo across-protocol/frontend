@@ -111,10 +111,6 @@ export function getReceiveTokenSymbol(
     return isReceiverContract ? "WGRASS" : "GRASS";
   }
 
-  if (destinationChainId === CHAIN_IDs.LENS && isStablecoin(inputTokenSymbol)) {
-    return "GHO";
-  }
-
   if (inputTokenSymbol === "WGRASS") {
     return "GRASS";
   }
@@ -210,6 +206,22 @@ const defaultRouteFilter = {
   fromChain: hubPoolChainId,
   inputTokenSymbol: "ETH",
 };
+
+// for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
+export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
+  if (
+    route.toChain === CHAIN_IDs.LENS &&
+    isStablecoin(route.fromTokenSymbol) &&
+    route.toTokenSymbol !== "GHO"
+  ) {
+    return {
+      ...route,
+      toTokenSymbol: "GHO",
+    };
+  }
+
+  return route;
+}
 
 export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromUrl = getRouteFromUrl(filter);
