@@ -1,13 +1,9 @@
 import path from "path";
-import fs from "fs";
 import dotenv from "dotenv";
 
-let envPath = path.join(process.cwd(), "output_vercel.env");
-let envFile = fs.readFileSync(envPath, "utf-8");
-dotenv.populate(
-  process.env as dotenv.DotenvPopulateInput,
-  dotenv.parse(envFile)
-);
+dotenv.config({
+  path: [".env.local", ".env"].map((file) => path.join(process.cwd(), file)),
+});
 
 export const getEnvs = () => {
   return process.env;
