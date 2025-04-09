@@ -10,7 +10,10 @@ export {
 } from "@across-protocol/sdk/dist/esm/utils/BigNumberUtils";
 export { mapAsync } from "@across-protocol/sdk/dist/esm/utils/ArrayUtils";
 export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
-export { isBridgedUsdc } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
+export {
+  isBridgedUsdc,
+  isStablecoin,
+} from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
 export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
   toBytes32,

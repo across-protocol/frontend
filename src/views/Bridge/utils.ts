@@ -1,3 +1,4 @@
+import { CHAIN_IDs } from "@across-protocol/constants";
 import axios from "axios";
 import { externConfigs } from "constants/chains/configs";
 import { BigNumber, BigNumberish } from "ethers";
@@ -15,11 +16,11 @@ import {
   GetBridgeFeesResult,
   chainEndpointToId,
   parseUnits,
-  chainIsLens,
   isDefined,
   UniversalSwapRoute,
   TokenInfo,
   isNonEthChain,
+  isStablecoin,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -103,7 +104,10 @@ export function getReceiveTokenSymbol(
     return "ETH";
   }
 
-  if (inputTokenSymbol === "GRASS" && chainIsLens(destinationChainId)) {
+  if (
+    destinationChainId === CHAIN_IDs.LENS_SEPOLIA &&
+    inputTokenSymbol === "GRASS"
+  ) {
     return isReceiverContract ? "WGRASS" : "GRASS";
   }
 
@@ -202,6 +206,22 @@ const defaultRouteFilter = {
   fromChain: hubPoolChainId,
   inputTokenSymbol: "ETH",
 };
+
+// for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
+export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
+  if (
+    route.toChain === CHAIN_IDs.LENS &&
+    isStablecoin(route.fromTokenSymbol) &&
+    route.toTokenSymbol !== "GHO"
+  ) {
+    return {
+      ...route,
+      toTokenSymbol: "GHO",
+    };
+  }
+
+  return route;
+}
 
 export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromUrl = getRouteFromUrl(filter);
