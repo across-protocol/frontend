@@ -14,6 +14,9 @@ import { useSwapQuoteQuery } from "hooks/useSwapQuote";
 import { SelectedRoute } from "../utils";
 import { useUniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
+const DEFAULT_UNIVERSAL_SWAP_QUOTE_EOA =
+  "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
+
 export type TransferQuote = ReturnType<
   typeof useTransferQuote
 >["transferQuoteQuery"]["data"];
@@ -49,8 +52,8 @@ export function useTransferQuote(
     destinationChainId: selectedRoute.toChain,
     tradeType: "exactInput",
     slippageTolerance: swapSlippage,
-    depositorAddress: fromAddress,
-    recipientAddress: toAddress,
+    depositorAddress: fromAddress ?? DEFAULT_UNIVERSAL_SWAP_QUOTE_EOA,
+    recipientAddress: toAddress ?? DEFAULT_UNIVERSAL_SWAP_QUOTE_EOA,
   });
   const amountToBridgeAfterSwap = getBridgeAmountAfterSwap({
     amount,
