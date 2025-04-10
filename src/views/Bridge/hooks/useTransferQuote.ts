@@ -15,7 +15,7 @@ import { SelectedRoute } from "../utils";
 import { useUniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 const DEFAULT_UNIVERSAL_SWAP_QUOTE_EOA =
-  "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+  "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
 
 export type TransferQuote = ReturnType<
   typeof useTransferQuote
