@@ -401,7 +401,13 @@ export function getRoutes(chainId: ChainId): RouteConfig {
     };
   }
   if (chainId === ChainId.SEPOLIA) {
-    superstruct.assert(SepoliaRoutes, RouteConfigSS);
+    superstruct.assert(
+      {
+        ...SepoliaRoutes,
+        universalSwapRoutes: [],
+      },
+      RouteConfigSS
+    );
     return {
       ...SepoliaRoutes,
       universalSwapRoutes: [],
