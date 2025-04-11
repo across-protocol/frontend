@@ -1,5 +1,6 @@
 import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
@@ -11,7 +12,7 @@ import { EmptyTable } from "./EmptyTable";
 import { usePersonalTransactions } from "../hooks/usePersonalTransactions";
 import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
-import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
+import { Deposit, IndexerDeposit } from "hooks/useDeposits";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -33,12 +34,9 @@ export function PersonalTransactions({ statusFilter }: Props) {
   const history = useHistory();
   const queryClient = useQueryClient();
 
-  // FIXME: remove after tracking is complete
-  void useIndexerDepositsTracking(
-    deposits.map((d) => ({
-      depositId: d.depositId,
-      originChainId: d.sourceChainId,
-    }))
+  const convertedDeposits = useMemo(
+    () => deposits.map((deposit) => convertIndexerDepositToDeposit(deposit)),
+    [deposits]
   );
 
   if (!isConnected) {
@@ -111,15 +109,89 @@ export function PersonalTransactions({ statusFilter }: Props) {
       <PaginatedDepositsTable
         currentPage={currentPage}
         currentPageSize={pageSize}
-        deposits={deposits}
+        deposits={convertedDeposits}
         totalCount={totalDeposits}
         onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
         initialPageSize={pageSize}
         onClickSpeedUp={setDepositToSpeedUp}
         filterKey={`personal-${statusFilter}`}
-        disabledColumns={["bridgeFee"]}
+        disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
+        displayPageNumbers={false}
       />
     </>
   );
+}
+
+function convertIndexerDepositToDeposit(
+  indexerDeposit: IndexerDeposit
+): Deposit {
+  return {
+    depositId: indexerDeposit.depositId,
+    depositTime:
+      new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000,
+    status: indexerDeposit.status === "unfilled" ? "pending" : "filled",
+    filled: "0",
+    sourceChainId: indexerDeposit.originChainId,
+    destinationChainId: indexerDeposit.destinationChainId,
+    assetAddr: indexerDeposit.inputToken,
+    depositorAddr: indexerDeposit.depositor,
+    recipientAddr: indexerDeposit.recipient,
+    message: indexerDeposit.message,
+    amount: indexerDeposit.inputAmount,
+    depositTxHash: indexerDeposit.depositTransactionHash,
+    fillTxs: indexerDeposit.fillTransactionHash
+      ? [indexerDeposit.fillTransactionHash]
+      : [],
+    speedUps: indexerDeposit.speedups,
+    depositRelayerFeePct: "0",
+    initialRelayerFeePct: "0",
+    suggestedRelayerFeePct: "0",
+    fillTime: new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000,
+    fillDeadline: indexerDeposit.fillDeadline,
+    rewards: undefined,
+    feeBreakdown: indexerDeposit.bridgeFeeUsd
+      ? {
+          // lp fee
+          lpFeeUsd: "0",
+          lpFeePct: "0", // wei pct
+          lpFeeAmount: "0",
+          // relayer fee
+          relayCapitalFeeUsd: "0",
+          relayCapitalFeePct: "0", // wei pct
+          relayCapitalFeeAmount: "0",
+          relayGasFeeUsd: indexerDeposit.fillGasFeeUsd,
+          relayGasFeePct: "0", // wei pct
+          relayGasFeeAmount: "0",
+          // total = lp fee + relayer fee
+          totalBridgeFeeUsd: indexerDeposit.bridgeFeeUsd,
+          totalBridgeFeePct: "0", // wei pct
+          totalBridgeFeeAmount: "0",
+          // swap fee
+          swapFeeUsd: indexerDeposit.swapFeeUsd,
+          swapFeePct: "0", // wei pct
+          swapFeeAmount: "0",
+        }
+      : undefined,
+    token: {
+      address: indexerDeposit.inputToken,
+      symbol: undefined,
+      name: undefined,
+      decimals: undefined,
+    },
+    outputToken: {
+      address: indexerDeposit.outputToken,
+      symbol: undefined,
+      name: undefined,
+      decimals: undefined,
+    },
+    swapToken: {
+      address: indexerDeposit.swapToken,
+      symbol: undefined,
+      name: undefined,
+      decimals: undefined,
+    },
+    swapTokenAmount: indexerDeposit.swapTokenAmount,
+    swapTokenAddress: indexerDeposit.swapToken,
+  };
 }

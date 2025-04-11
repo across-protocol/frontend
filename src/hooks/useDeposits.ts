@@ -2,10 +2,10 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
-  rewardsApiUrl,
   depositsQueryKey,
   userDepositsQueryKey,
   defaultRefetchInterval,
+  indexerApiBaseUrl,
 } from "utils";
 import {
   getLocalDepositEntries,
@@ -23,7 +23,7 @@ export type SpeedUpDepositTx = {
 };
 
 export type Deposit = {
-  depositId: number;
+  depositId: string;
   depositTime: number;
   status: DepositStatus;
   filled: string;
@@ -71,21 +71,21 @@ export type Deposit = {
   };
   token?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   outputToken?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   swapToken?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   swapTokenAmount?: string;
   swapTokenAddress?: string;
@@ -101,6 +101,48 @@ export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
 };
+
+export type IndexerDeposit = {
+  id: number;
+  relayHash: string;
+  depositId: string;
+  originChainId: number;
+  destinationChainId: number;
+  depositor: string;
+  recipient: string;
+  inputToken: string;
+  inputAmount: string;
+  outputToken: string;
+  outputAmount: string;
+  message: string;
+  messageHash: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: string;
+  fillDeadline: string;
+  quoteTimestamp: string;
+  depositTransactionHash: string;
+  depositBlockNumber: number;
+  depositBlockTimestamp: string;
+  status: "unfilled" | "filled";
+  depositRefundTxHash: string;
+  swapTokenPriceUsd: string;
+  swapFeeUsd: string;
+  bridgeFeeUsd: string;
+  inputPriceUsd: string;
+  outputPriceUsd: string;
+  fillGasFee: string;
+  fillGasFeeUsd: string;
+  fillGasTokenPriceUsd: string;
+  swapTransactionHash: string;
+  swapToken: string;
+  swapTokenAmount: string;
+  relayer: string;
+  fillBlockTimestamp: string;
+  fillTransactionHash: string;
+  speedups: any[];
+};
+
+export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
   status: DepositStatusFilter,
@@ -155,14 +197,14 @@ export function useUserDeposits(
                 deposit.recipientAddr === userAddress)
         )
         .map(({ deposit }) => deposit);
-      const { deposits, pagination } = await getDeposits({
+      const deposits = await getDeposits({
         address: userAddress,
         status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       });
       const indexedDepositTxHashes = new Set(
-        deposits.map((d) => d.depositTxHash)
+        deposits.map((d) => d.depositTransactionHash)
       );
 
       // If the Scraper API is still a few blocks behind and didn't index
@@ -176,9 +218,9 @@ export function useUserDeposits(
             return !indexedDepositTxHashes.has(localUserDeposit.depositTxHash);
           } else if (localUserDeposit.status === "filled") {
             const indexedDeposit = deposits.find(
-              (d) => d.depositTxHash === localUserDeposit.depositTxHash
+              (d) => d.depositTransactionHash === localUserDeposit.depositTxHash
             );
-            return !indexedDeposit || indexedDeposit.status === "pending";
+            return !indexedDeposit || indexedDeposit.status === "unfilled";
           }
         }
       );
@@ -186,9 +228,10 @@ export function useUserDeposits(
         localDepositsToShow.map((d) => d.depositTxHash)
       );
       const indexedDepositsToShow = deposits.filter(
-        (deposit) => !localDepositsToShowTxHashes.has(deposit.depositTxHash)
+        (deposit) =>
+          !localDepositsToShowTxHashes.has(deposit.depositTransactionHash)
       );
-      const mergedDeposits = [...localDepositsToShow, ...indexedDepositsToShow];
+      const mergedDeposits = [...indexedDepositsToShow];
 
       // Remove local deposits that are in sync with the Scraper
       const localUserDepositsToRemove = localUserDeposits
@@ -200,7 +243,6 @@ export function useUserDeposits(
 
       return {
         deposits: mergedDeposits,
-        pagination,
       };
     },
     placeholderData: keepPreviousData,
@@ -218,17 +260,15 @@ async function getDeposits(
     offset: number;
   }> = {}
 ) {
-  const { data } = await axios.get<GetDepositsResponse>(
-    `${rewardsApiUrl}/deposits/tx-page`,
+  const { data } = await axios.get<GetIndexerDepositsResponse>(
+    `${indexerApiBaseUrl}/deposits`,
     {
       params: {
-        status: params.status,
-        skipOldUnprofitable: params.skipOldUnprofitable,
+        status: params.status === "pending" ? "unfilled" : params.status,
         limit: params.limit,
-        offset: params.offset,
-        depositorOrRecipientAddress: params.address,
-        orderBy: "status",
-        include: ["token"],
+        skip: params.offset,
+        depositor: params.address,
+        // orderBy: "status",
       },
     }
   );
