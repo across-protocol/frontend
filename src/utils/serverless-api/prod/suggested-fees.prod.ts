@@ -2,6 +2,7 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { ChainId, vercelApiBaseUrl } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
+import { getCurrentTime } from "utils/sdk";
 
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint
@@ -20,6 +21,18 @@ export async function suggestedFeesApiCall(
   recipientAddress?: string,
   message?: string
 ): Promise<SuggestedApiFeeReturnType> {
+  if ([ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(fromChainid)) {
+    return mockSuggestedFeesForSVM(
+      amount,
+      inputToken,
+      outputToken,
+      toChainid,
+      fromChainid,
+      recipientAddress,
+      message
+    );
+  }
+
   const response = await axios.get(`${vercelApiBaseUrl}/api/suggested-fees`, {
     params: {
       inputToken,
@@ -91,5 +104,49 @@ export async function suggestedFeesApiCall(
     exclusiveRelayer,
     exclusivityDeadline,
     fillDeadline: result.fillDeadline,
+  };
+}
+
+async function mockSuggestedFeesForSVM(
+  amount: ethers.BigNumber,
+  inputToken: string,
+  outputToken: string,
+  toChainid: ChainId,
+  fromChainid: ChainId,
+  recipientAddress?: string,
+  message?: string
+) {
+  const zeroBN = BigNumber.from(0);
+
+  return {
+    totalRelayFee: {
+      pct: zeroBN,
+      total: zeroBN,
+    },
+    relayerCapitalFee: {
+      pct: zeroBN,
+      total: zeroBN,
+    },
+    relayerGasFee: {
+      pct: zeroBN,
+      total: zeroBN,
+    },
+    lpFee: {
+      pct: zeroBN,
+      total: zeroBN,
+    },
+    isAmountTooLow: false,
+    quoteTimestamp: BigNumber.from(getCurrentTime() - 15),
+    quoteBlock: BigNumber.from(100),
+    limits: {
+      maxDeposit: amount.mul(3),
+      maxDepositInstant: amount.mul(2),
+      maxDepositShortDelay: amount,
+      minDeposit: zeroBN,
+    },
+    estimatedFillTimeSec: 10,
+    exclusiveRelayer: ethers.constants.AddressZero,
+    exclusivityDeadline: 0,
+    fillDeadline: getCurrentTime() + 4 * 60 * 60,
   };
 }
