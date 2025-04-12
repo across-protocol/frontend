@@ -41,6 +41,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.LENS_SEPOLIA,
   CHAIN_IDs.UNICHAIN_SEPOLIA,
   CHAIN_IDs.TATARA,
+  CHAIN_IDs.SOLANA_DEVNET,
 ];
 
 export const chainInfoList: ChainInfoList = orderedEnabledChainIds.map(
@@ -49,6 +50,7 @@ export const chainInfoList: ChainInfoList = orderedEnabledChainIds.map(
 
 export const chainInfoTable: ChainInfoTable = Object.fromEntries(
   chainInfoList.map((chain) => {
+    console.log(chain.chainId, chain);
     return [chain.chainId, chain];
   }, [])
 );
