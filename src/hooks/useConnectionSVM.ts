@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 
 import { useSidebarContext } from "./useSidebarContext";
 import {
@@ -30,6 +30,7 @@ export function useConnectionSVM() {
     select,
     wallet,
   } = useWallet();
+  const { connection } = useConnection();
 
   let state: WalletState;
   if (connecting) {
@@ -76,5 +77,7 @@ export function useConnectionSVM() {
     connect,
     disconnect,
     isConnected: connected,
+    wallet,
+    provider: connection,
   };
 }
