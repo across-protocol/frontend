@@ -5,6 +5,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { EVMBridgeActionStrategy } from "./strategies/evm";
 import { SVMBridgeActionStrategy } from "./strategies/svm";
+import { getEcosystem } from "utils";
 
 function useBridgeActionEVM() {
   const connectionEVM = useConnectionEVM();
@@ -20,7 +21,6 @@ function useBridgeActionSVM() {
 }
 
 export function useBridgeAction(
-  bridgeActionType: "svm" | "evm",
   isQuoteUpdating: boolean,
   selectedRoute: SelectedRoute,
   usedTransferQuote: TransferQuote
@@ -28,7 +28,7 @@ export function useBridgeAction(
   const evmHook = useBridgeActionEVM();
   const svmHook = useBridgeActionSVM();
 
-  return bridgeActionType === "evm"
+  return getEcosystem(selectedRoute.fromChain) === "evm"
     ? evmHook(isQuoteUpdating, selectedRoute, usedTransferQuote)
     : svmHook(isQuoteUpdating, selectedRoute, usedTransferQuote);
 }

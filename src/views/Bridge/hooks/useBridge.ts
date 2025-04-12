@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import { ampli } from "ampli";
-import { defaultSwapSlippage, bnZero, ChainId } from "utils";
+import { defaultSwapSlippage, bnZero } from "utils";
 
 import { useBridgeAction } from "./useBridgeAction_new";
 import { useToAccount } from "./useToAccount";
@@ -65,10 +65,6 @@ export function useBridge() {
     quotedUniversalSwap,
   } = usedTransferQuote || {};
 
-  const isSvm = [ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(
-    selectedRoute.fromChain
-  );
-
   const isQuoteUpdating =
     shouldUpdateQuote &&
     (transferQuoteQuery.isLoading ||
@@ -101,7 +97,6 @@ export function useBridge() {
   } = useIsWrongNetwork(selectedRoute.fromChain);
 
   const bridgeAction = useBridgeAction(
-    isSvm ? "svm" : "evm",
     isQuoteUpdating,
     selectedRoute,
     isAmountValid ? usedTransferQuote : undefined
