@@ -50,6 +50,7 @@ export const chainInfoList: ChainInfoList = orderedEnabledChainIds.map(
 
 export const chainInfoTable: ChainInfoTable = Object.fromEntries(
   chainInfoList.map((chain) => {
+    console.log(chain.chainId, chain);
     return [chain.chainId, chain];
   }, [])
 );
