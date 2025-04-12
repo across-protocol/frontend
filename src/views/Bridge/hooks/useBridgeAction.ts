@@ -294,27 +294,28 @@ export function useBridgeAction(
           frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
+        const depositArgs = {
+          ...frozenDepositArgs,
+          inputTokenAddress: frozenRoute.fromTokenAddress,
+          outputTokenAddress: frozenRoute.toTokenAddress,
+          fillDeadline: frozenFeeQuote.fillDeadline,
+          message: externalPayload,
+          toAddress: externalProjectIsHyperLiquid
+            ? acrossPlusMulticallHandler[frozenRoute.toChain]
+            : frozenDepositArgs.toAddress,
+        };
         tx =
           shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
-                frozenDepositArgs,
+                depositArgs,
                 spokePool,
                 spokePoolVerifier,
                 networkMismatchHandler
               )
             : await sendDepositV3Tx(
                 signer,
-                {
-                  ...frozenDepositArgs,
-                  inputTokenAddress: frozenRoute.fromTokenAddress,
-                  outputTokenAddress: frozenRoute.toTokenAddress,
-                  fillDeadline: frozenFeeQuote.fillDeadline,
-                  message: externalPayload,
-                  toAddress: externalProjectIsHyperLiquid
-                    ? acrossPlusMulticallHandler[frozenRoute.toChain]
-                    : frozenDepositArgs.toAddress,
-                },
+                depositArgs,
                 spokePool,
                 networkMismatchHandler
               );
