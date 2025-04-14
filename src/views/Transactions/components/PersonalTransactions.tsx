@@ -130,7 +130,8 @@ function convertIndexerDepositToDeposit(
     depositId: indexerDeposit.depositId,
     depositTime:
       new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000,
-    status: indexerDeposit.status === "unfilled" ? "pending" : "filled",
+    status:
+      indexerDeposit.status === "unfilled" ? "pending" : indexerDeposit.status,
     filled: "0",
     sourceChainId: indexerDeposit.originChainId,
     destinationChainId: indexerDeposit.destinationChainId,
@@ -193,5 +194,6 @@ function convertIndexerDepositToDeposit(
     },
     swapTokenAmount: indexerDeposit.swapTokenAmount,
     swapTokenAddress: indexerDeposit.swapToken,
+    depositRefundTxHash: indexerDeposit.depositRefundTxHash,
   };
 }

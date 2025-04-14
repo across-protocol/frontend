@@ -198,11 +198,10 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = (
-  String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-    .toLowerCase()
-    .split(",") as (keyof typeof rewardPrograms)[]
-).filter((v) => v);
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  "op-rebates",
+  "arb-rebates",
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 

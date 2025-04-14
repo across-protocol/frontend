@@ -13,7 +13,7 @@ import {
 } from "../utils/local-deposits";
 import { DepositStatusFilter } from "views/Transactions/types";
 
-export type DepositStatus = "pending" | "filled";
+export type DepositStatus = "pending" | "filled" | "refunded" | "expired";
 
 export type SpeedUpDepositTx = {
   hash: string;
@@ -89,6 +89,7 @@ export type Deposit = {
   };
   swapTokenAmount?: string;
   swapTokenAddress?: string;
+  depositRefundTxHash?: string;
 };
 
 export type Pagination = {

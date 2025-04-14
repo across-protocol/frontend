@@ -32,6 +32,19 @@ export function TxCell({ deposit, width }: Props) {
     ) : (
       <FillTxDropdownMenu deposit={deposit} />
     );
+  const refundTxRow = deposit.depositRefundTxHash ? (
+    <DepositTxWrapper>
+      <Text color="grey-400">Refund:</Text>
+      <ExplorerLink
+        chainId={deposit.sourceChainId}
+        txHash={deposit.depositRefundTxHash}
+      >
+        <Text color="light-200">
+          {shortenString(deposit.depositRefundTxHash, "..", 4)}
+        </Text>
+      </ExplorerLink>
+    </DepositTxWrapper>
+  ) : null;
 
   return (
     <StyledTxCell width={width}>
@@ -47,6 +60,7 @@ export function TxCell({ deposit, width }: Props) {
         </ExplorerLink>
       </DepositTxWrapper>
       {fillTxRow}
+      {refundTxRow}
     </StyledTxCell>
   );
 }
