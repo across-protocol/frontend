@@ -10,10 +10,6 @@ import { Deposit } from "hooks/useDeposits";
 import { BaseCell } from "./BaseCell";
 import {
   COLORS,
-  fixedPointAdjustment,
-  formatUnitsWithMaxFractions,
-  formatWeiPct,
-  getConfig,
   isBigNumberish,
   formatMaxFracDigits,
   getRewardToken,
