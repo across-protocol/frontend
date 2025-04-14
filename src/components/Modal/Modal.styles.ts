@@ -88,8 +88,10 @@ type ModalWrapperType = {
   bottomYOffset?: number;
   padding: "normal" | "thin";
 };
+
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
-  max-height: ${({ height }) => height ?? 400}px;
+  max-height: ${({ height }) =>
+    height ? `min(calc(100svh - 64px), ${height}px)` : "calc(100svh - 64px)"};
   max-width: ${({ width }) => width ?? 800}px;
 
   height: fit-content;

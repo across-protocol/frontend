@@ -168,6 +168,10 @@ export function TokenSelector({
           </Text>
         </CoinIconTextWrapper>
       }
+      modalProps={{
+        height: 400,
+        bottomYOffset: 16,
+      }}
       selectedValue={tokenToDisplay.symbol}
       title="Select a token"
       setSelectedValue={(v) => onSelectToken(v)}
