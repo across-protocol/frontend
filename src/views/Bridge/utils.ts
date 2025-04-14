@@ -236,7 +236,9 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return routeFromUrl ?? routeFromFilter ?? defaultRoute;
+  return getTokenDefaultsForRoute(
+    routeFromUrl ?? routeFromFilter ?? defaultRoute
+  );
 }
 
 export function findEnabledRoute(
