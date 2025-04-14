@@ -47,7 +47,7 @@ If a `SpokePoolVerifier` contract is deployed to the new chain, add the chain to
 ```diff
     // ...
     spokePoolVerifier: {
-      address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
+      address: "0x630b76C7cA96164a5aCbC1105f8BA8B739C82570",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
