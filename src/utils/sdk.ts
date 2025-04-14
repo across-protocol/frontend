@@ -27,7 +27,7 @@ export {
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 
 export function getUpdateV3DepositTypedData(
-  depositId: number,
+  depositId: string,
   originChainId: number,
   updatedOutputAmount: BigNumber,
   updatedRecipient: string,
