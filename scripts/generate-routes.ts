@@ -110,7 +110,7 @@ const enabledRoutes = {
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
     pools: [],
     spokePoolVerifier: {
-      address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
+      address: "0x630b76C7cA96164a5aCbC1105f8BA8B739C82570",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
@@ -126,7 +126,6 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        CHAIN_IDs.LENS,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
