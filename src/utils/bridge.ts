@@ -276,7 +276,7 @@ export async function sendSpokePoolVerifierDepositTx(
     inputAmount,
     outputAmount,
     destinationChainId,
-    exclusiveRelayer,
+    toBytes32(exclusiveRelayer),
     quoteTimestamp,
     fillDeadline,
     exclusivityDeadline,
