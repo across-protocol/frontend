@@ -876,7 +876,7 @@ export const polygon = {
   grayscaleLogoURI: polygonGrayscaleLogo,
   logoSvg: polygonLogoSvg,
   grayscaleLogoSvg: polygonGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.ankr.com/polygon",
+  rpcUrl: "https://polygon.drpc.org",
   explorerUrl: "https://polygonscan.com",
   constructExplorerLink: (txHash: string) =>
     `${polygon.explorerUrl}/tx/${txHash}`,

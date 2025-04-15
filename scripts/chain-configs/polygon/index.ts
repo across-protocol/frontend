@@ -17,7 +17,7 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://rpc.ankr.com/polygon",
+  publicRpcUrl: "https://polygon.drpc.org",
   tokens: ["DAI", "UMA", "WETH", "USDC", "WBTC", "BAL", "ACX", "USDT", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 5,
