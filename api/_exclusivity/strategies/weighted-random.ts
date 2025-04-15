@@ -18,7 +18,7 @@ export function weightedRandom(relayers: string[]): string {
     (acc, relayer) =>
       relayer.effectiveWeight > acc.effectiveWeight ? relayer : acc,
     relayerWeights[0] ?? {
-      relayer: constants.ZERO_ADDRESS,
+      relayer: constants.ZERO_BYTES,
       effectiveWeight: 0.0,
     }
   );

@@ -34,7 +34,7 @@ export async function selectExclusiveRelayer(
   relayerFeePct: BigNumber,
   estimatedFillTimeSec: number
 ): Promise<ExclusiveRelayer> {
-  let exclusiveRelayer = ZERO_ADDRESS;
+  let exclusiveRelayer = sdk.ZERO_BYTES;
   let exclusivityPeriod = 0;
 
   const { name, selectorFn } = getStrategy(
