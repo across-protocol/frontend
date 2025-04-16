@@ -15,7 +15,10 @@ export {
   isBridgedUsdc,
   isStablecoin,
 } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
-export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
+export {
+  BRIDGED_USDC_SYMBOLS,
+  ZERO_ADDRESS,
+} from "@across-protocol/sdk/dist/esm/constants";
 export {
   toBytes32,
   compareAddressesSimple,
@@ -25,6 +28,10 @@ export {
   getNativeTokenSymbol,
   chainIsLens,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+export {
+  getMulticall3,
+  getMulticallAddress,
+} from "@across-protocol/sdk/dist/esm/utils/Multicall";
 
 export function getUpdateV3DepositTypedData(
   depositId: number,

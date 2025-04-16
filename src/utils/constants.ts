@@ -638,3 +638,9 @@ export const hyperLiquidBridge2Address =
 export const acrossPlusMulticallHandler: Record<number, string> = {
   [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
 };
+
+export const MULTICALL3_ADDRESS_OVERRIDES = {
+  [CHAIN_IDs.ALEPH_ZERO]: "0x3CA11702f7c0F28e0b4e03C31F7492969862C569",
+  [CHAIN_IDs.LENS]: "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+  [CHAIN_IDs.ZK_SYNC]: "0xF9cda624FBC7e059355ce98a31693d299FACd963",
+};
