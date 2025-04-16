@@ -49,11 +49,6 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
     Number(deposit.feeBreakdown?.relayGasFeeUsd || 0);
   const swapFeeUsd = Number(deposit.feeBreakdown?.swapFeeUsd || 0);
-  const swapFeeAmount = BigNumber.from(
-    isBigNumberish(deposit.feeBreakdown?.swapFeeAmount)
-      ? deposit.feeBreakdown?.swapFeeAmount || 0
-      : 0
-  );
 
   return (
     <>
@@ -78,7 +73,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 </Text>
               </FeeBreakdownRow>
               <Divider />
-              {swapFeeUsd > 0 && swapFeeAmount.gt(0) && (
+              {swapFeeUsd > 0 && (
                 <FeeBreakdownRow>
                   <Text size="sm" color="grey-400">
                     Swap fee
