@@ -196,14 +196,14 @@ export const balanceBatcher = new BalanceBatcher(getBatchBalanceViaMulticall3);
  */
 export function useBalance({
   chainId,
-  tokenAddress,
-  walletAddress,
+  token,
+  address,
   blockTag,
   options,
 }: {
   chainId: number;
-  tokenAddress: string;
-  walletAddress: string;
+  token: string;
+  address: string;
   blockTag?: providers.BlockTag;
   options?: Partial<
     Omit<Parameters<typeof useQuery>[0], "queryKey" | "queryFn">
@@ -213,15 +213,15 @@ export function useBalance({
     queryKey: [
       "balance",
       chainId,
-      tokenAddress,
-      walletAddress,
+      token,
+      address,
       blockTag ?? "latest",
     ] as const,
     queryFn: () =>
       balanceBatcher.queueBalanceCall(
         chainId,
-        tokenAddress,
-        walletAddress,
+        token,
+        address,
         blockTag ?? "latest"
       ),
     ...options,
