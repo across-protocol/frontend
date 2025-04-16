@@ -12,7 +12,7 @@ import {
   getToken,
   tokenList,
 } from "utils";
-import { useBalancesBySymbols, useConnection } from "hooks";
+import { useBalancesBySymbols } from "hooks/useBalance_new";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 import {
@@ -58,8 +58,6 @@ export function TokenSelector({
     ? getToken(receiveTokenSymbol)
     : selectedToken;
 
-  const { account } = useConnection();
-
   const orderedTokens: Array<
     TokenInfo & {
       disabled?: boolean;
@@ -102,7 +100,6 @@ export function TokenSelector({
   const { balances } = useBalancesBySymbols({
     tokenSymbols: orderedTokens.filter((t) => !t.disabled).map((t) => t.symbol),
     chainId: isInputTokenSelector ? fromChain : toChain,
-    account,
   });
 
   return (
