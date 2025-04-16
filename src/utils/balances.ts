@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export type MultiCallResult = {
   blockNumber: providers.BlockTag;
+  // { [walletAddress]: { [tokenAddress]: balanceString } }
   balances: Record<string, Record<string, string>>;
 };
 
@@ -125,11 +126,11 @@ export class BalanceBatcher {
 
   /**
    * Queues an individual balance request. All requests for the same chain
-   * (and assumed same blockTag) within 10 ms are batched together.
+   * (and assumed same blockTag) within batchInterval (ms) are batched together.
    *
-   * @param chainId The blockchain chain ID.
-   * @param token The ERC20 token address.
-   * @param address The wallet address.
+   * @param chainId The chain ID.
+   * @param token The ERC20 token address or zero address for native balance
+   * @param address The address we want to fetch the balance for
    * @param blockTag The block tag (defaults to "latest").
    * @returns A Promise resolving to the token balance as a string.
    */
