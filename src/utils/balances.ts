@@ -111,15 +111,21 @@ interface BatchRequest {
   timer?: NodeJS.Timeout;
 }
 
-const BATCH_INTERVAL = 100;
+const DEFAULT_BATCH_INTERVAL = 100;
 
-class BalanceBatcher {
-  // Holds active batch requests keyed by chainId.
+export type BalanceBatcherFetchFn = typeof getBatchBalanceViaMulticall3;
+
+export class BalanceBatcher {
   private batchQueue: Record<number, BatchRequest> = {};
+
+  constructor(
+    readonly fetcher: BalanceBatcherFetchFn,
+    readonly batchInterval = DEFAULT_BATCH_INTERVAL
+  ) {}
 
   /**
    * Queues an individual balance request. All requests for the same chain
-   * (and same blockTag) within 10ms are batched together.
+   * (and assumed same blockTag) within 10 ms are batched together.
    *
    * @param chainId The blockchain chain ID.
    * @param token The ERC20 token address.
@@ -127,14 +133,14 @@ class BalanceBatcher {
    * @param blockTag The block tag (defaults to "latest").
    * @returns A Promise resolving to the token balance as a string.
    */
-  public queueBalanceCall(
+  public async queueBalanceCall(
     chainId: number,
     token: string,
     address: string,
     blockTag: providers.BlockTag = "latest"
   ): Promise<string> {
     return new Promise((resolve, reject) => {
-      // If there isn't an active batch for this chain, create a new batch.
+      //  Create active batch for this chain
       if (!this.batchQueue[chainId]) {
         this.batchQueue[chainId] = {
           chainId,
@@ -143,39 +149,33 @@ class BalanceBatcher {
           aggregatedAddresses: new Set([address]),
           requests: [{ token, address, resolve, reject }],
         };
-        // Start a timer to collect additional requests within a 10ms window.
+
         this.batchQueue[chainId].timer = setTimeout(async () => {
           const currentBatch = this.batchQueue[chainId];
-          // Remove the batch from the queue.
           delete this.batchQueue[chainId];
 
-          // Convert aggregate sets to arrays.
           const tokensArray = Array.from(currentBatch.aggregatedTokens);
           const addressesArray = Array.from(currentBatch.aggregatedAddresses);
 
           try {
-            // Fire off the batched multicall request.
-            const result: MultiCallResult = await getBatchBalanceViaMulticall3(
+            const result: MultiCallResult = await this.fetcher(
               chainId,
               addressesArray,
               tokensArray,
               currentBatch.blockTag
             );
-            // Resolve each individual request with its corresponding balance.
+
             currentBatch.requests.forEach(({ token, address, resolve }) => {
-              // Note: The result structure is { [walletAddress]: { [tokenAddress]: balanceString } }.
               const balance = result.balances[address]?.[token] || "0";
               resolve(balance);
             });
           } catch (error) {
-            // Reject every individual request on error.
             currentBatch.requests.forEach(({ reject }) => reject(error));
           }
-        }, BATCH_INTERVAL);
+        }, this.batchInterval);
       } else {
-        // If an active batch exists for the chain, merge this request into it.
+        // batch already exists for this interval, just add another
         const existingBatch = this.batchQueue[chainId];
-        // This example assumes blockTag is the same for all batched requests.
         existingBatch.aggregatedTokens.add(token);
         existingBatch.aggregatedAddresses.add(address);
         existingBatch.requests.push({ token, address, resolve, reject });
@@ -185,7 +185,7 @@ class BalanceBatcher {
 }
 
 // Do something with this singleton
-export const balanceBatcher = new BalanceBatcher();
+export const balanceBatcher = new BalanceBatcher(getBatchBalanceViaMulticall3);
 
 /**
  * @param chainId The blockchain chain ID.
