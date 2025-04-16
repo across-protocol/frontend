@@ -16,11 +16,12 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
       ? selectedRoute.swapTokenSymbol
       : selectedRoute.fromTokenSymbol;
 
+  const { account, signer } = useConnection();
+
   const { balance } = useBalanceBySymbol(
     balanceTokenSymbol,
     selectedRoute.fromChain
   );
-  const { account, signer } = useConnection();
 
   return useQuery({
     queryKey: [

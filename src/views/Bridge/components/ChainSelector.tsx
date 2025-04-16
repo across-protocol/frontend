@@ -13,7 +13,8 @@ import {
   shortenAddress,
 } from "utils";
 
-import { useBalanceBySymbolPerChain, useConnection } from "hooks";
+import { useConnection } from "hooks";
+import { useBalanceBySymbolPerChain } from "hooks/useBalance_new";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 import { getSupportedChains } from "../utils";
@@ -41,11 +42,10 @@ export function ChainSelector({
   // Get supported chains and filter based on external projects
   const availableChains = filterAvailableChains(fromOrTo, selectedRoute);
 
-  const { account, isConnected } = useConnection();
+  const { isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: availableChains.map((c) => c.chainId),
-    account,
   });
 
   const sortedChains = useMemo(
