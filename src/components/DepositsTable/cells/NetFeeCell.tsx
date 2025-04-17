@@ -1,19 +1,13 @@
 import styled from "@emotion/styled";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { BigNumber } from "ethers";
 
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import {
-  COLORS,
-  isBigNumberish,
-  formatMaxFracDigits,
-  getRewardToken,
-} from "utils";
+import { COLORS, formatMaxFracDigits, getRewardToken } from "utils";
 
 type Props = {
   deposit: Deposit;
@@ -23,20 +17,12 @@ type Props = {
 export function NetFeeCell({ deposit, width }: Props) {
   const feeCellValue =
     !deposit.feeBreakdown || Object.keys(deposit.feeBreakdown).length === 0 ? (
-      <FeeWithoutBreakdown />
+      <Text color="light-200">-</Text>
     ) : (
       <FeeWithBreakdown deposit={deposit} />
     );
 
   return <StyledFeeCell width={width}>{feeCellValue}</StyledFeeCell>;
-}
-
-function FeeWithoutBreakdown() {
-  return (
-    <>
-      <Text color="light-200">-</Text>
-    </>
-  );
 }
 
 function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
