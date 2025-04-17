@@ -24,7 +24,7 @@ export const Wrapper = styled.div<WrapperType>`
   justify-content: center;
 
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
 
   z-index: 99998;
 
