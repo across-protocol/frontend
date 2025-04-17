@@ -169,7 +169,7 @@ export function TokenSelector({
         </CoinIconTextWrapper>
       }
       modalProps={{
-        height: 400,
+        height: 700,
         bottomYOffset: 16,
       }}
       selectedValue={tokenToDisplay.symbol}
