@@ -13,6 +13,7 @@ import {
   generateHyperLiquidPayload,
   getConfig,
   isContractDeployedToAddress,
+  toBytes32,
 } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
@@ -207,7 +208,7 @@ export const getConfirmationDepositTime = (
   };
 };
 
-export type AcrossDepositArgs = {
+export type AcrossDepositV3Args = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
@@ -220,9 +221,6 @@ export type AcrossDepositArgs = {
   referrer?: string;
   isNative: boolean;
   integratorId: string;
-};
-
-export type AcrossDepositV3Args = AcrossDepositArgs & {
   inputTokenAddress: string;
   outputTokenAddress: string;
   fillDeadline: number;
@@ -237,16 +235,14 @@ type NetworkMismatchHandler = (
 /**
  * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
+ * @param depositArgs - An object containing the {@link AcrossDepositV3Args arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendSpokePoolVerifierDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
-    tokenAddress,
     amount,
-    maxCount = ethers.constants.MaxUint256,
     toAddress: recipient,
     toChain: destinationChainId,
     relayerFeePct,
@@ -254,23 +250,38 @@ export async function sendSpokePoolVerifierDepositTx(
     message = "0x",
     isNative,
     referrer,
+    fillDeadline,
+    inputTokenAddress,
+    exclusiveRelayer = ethers.constants.AddressZero,
+    exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositArgs,
+  }: AcrossDepositV3Args,
   spokePool: SpokePool,
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
+  if (!isNative) {
+    throw new Error(
+      "SpokePoolVerifier should only be used for native deposits"
+    );
+  }
+  const inputAmount = amount;
+  const outputAmount = inputAmount.sub(
+    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+  );
   const tx = await spokePoolVerifier.populateTransaction.deposit(
     spokePool.address,
-    recipient,
-    tokenAddress,
-    amount,
+    toBytes32(recipient),
+    toBytes32(inputTokenAddress),
+    inputAmount,
+    outputAmount,
     destinationChainId,
-    relayerFeePct,
+    toBytes32(exclusiveRelayer),
     quoteTimestamp,
+    fillDeadline,
+    exclusivityDeadline,
     message,
-    maxCount,
-    { value: isNative ? amount : ethers.constants.Zero }
+    { value: inputAmount }
   );
 
   return _tagRefAndSignTx(

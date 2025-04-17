@@ -5,9 +5,6 @@ import {
   SpokePool,
   SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
-// NOTE: We are still on v3.0.6 of verifier deployments until audit went through. Because the interface changed, we need to use the old factory.
-// export { SpokePoolVerifier__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
-import { SpokePoolVerifier__factory } from "@across-protocol/contracts-v3.0.6/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import {
@@ -2679,19 +2676,6 @@ export function getL1TokenConfigCache(l1TokenAddress: string) {
   };
   const ttl = 60 * 60 * 24 * 30; // 30 days
   return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
-}
-
-export function getSpokePoolVerifier(chainId: number) {
-  const isSpokePoolVerifierDeployed = (
-    ENABLED_ROUTES.spokePoolVerifier.enabledChains as number[]
-  ).includes(chainId);
-
-  if (!isSpokePoolVerifierDeployed) {
-    return undefined;
-  }
-
-  const address = ENABLED_ROUTES.spokePoolVerifier.address;
-  return SpokePoolVerifier__factory.connect(address, getProvider(chainId));
 }
 
 export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
