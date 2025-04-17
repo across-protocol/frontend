@@ -69,8 +69,8 @@ const Selector = <ElementValue,>({
           desktop: "top",
           mobile: "bottom",
         }}
-        topYOffset={isMobile ? 16 : 112}
-        bottomYOffset={isMobile ? 16 : 112}
+        topYOffset={isMobile ? undefined : 112}
+        bottomYOffset={isMobile ? 16 : undefined}
         exitOnOutsideClick
         title={
           typeof title === "string" ? (
