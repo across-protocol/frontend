@@ -37,12 +37,12 @@ export function DepositStatusUpperCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
-  const { depositQuery, fillQuery } = useDepositTracking(
+  const { depositQuery, fillQuery } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload
-  );
+    fromBridgePagePayload,
+  });
 
   const { estimatedRewards, amountAsBaseCurrency } =
     useResolveFromBridgePagePayload(

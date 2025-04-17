@@ -1,15 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BigNumber } from "ethers";
-
 import { useAmplitude, useConnection } from "hooks";
 import {
   generateDepositConfirmed,
   getToken,
   recordTransferUserProperties,
   wait,
-  getDepositByTxHash,
-  getFillByDepositTxHash,
   NoFundsDepositedLogError,
   getChainInfo,
   toAddressSafe,
@@ -20,16 +17,30 @@ import {
   removeLocalDeposits,
 } from "utils/local-deposits";
 import { ampli } from "ampli";
-
-import { convertForDepositQuery, convertForFillQuery } from "../utils";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
-export function useDepositTracking(
-  depositTxHash: string,
-  fromChainId: number,
-  toChainId: number,
-  fromBridgePagePayload?: FromBridgePagePayload
-) {
+import { chainIsSvm } from "utils";
+import { DepositTrackingStrategyEVM } from "./useDepositTracking_new/strategies/evm";
+
+export function useDepositTracking({
+  depositTxHash,
+  fromChainId,
+  toChainId,
+  fromBridgePagePayload,
+}: {
+  depositTxHash: string;
+  fromChainId: number;
+  toChainId: number;
+  fromBridgePagePayload?: FromBridgePagePayload;
+}) {
+  const strategy = useMemo(
+    () =>
+      chainIsSvm(fromChainId)
+        ? new DepositTrackingStrategyEVM()
+        : new DepositTrackingStrategyEVM(),
+    [fromChainId]
+  );
+
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
   const { addToAmpliQueue } = useAmplitude();
@@ -42,7 +53,7 @@ export function useDepositTracking(
       await wait(1_000);
 
       try {
-        const deposit = await getDepositByTxHash(depositTxHash, fromChainId);
+        const deposit = await strategy.getDeposit(depositTxHash, fromChainId);
         return deposit;
       } catch (e) {
         // If the error NoFundsDepositedLogError is thrown, this implies that the used
@@ -70,7 +81,9 @@ export function useDepositTracking(
     if (!localDepositByTxHash) {
       // Optimistically add deposit to local storage for instant visibility on the
       // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-      addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
+      addLocalDeposit(
+        strategy.convertForDepositQuery(data, fromBridgePagePayload)
+      );
     }
 
     const depositor = toAddressSafe(data.parsedDepositLog.args.depositor);
@@ -96,6 +109,7 @@ export function useDepositTracking(
     fromBridgePagePayload,
     account,
     depositTxHash,
+    strategy,
   ]);
 
   const fillQuery = useQuery({
@@ -112,7 +126,7 @@ export function useDepositTracking(
         );
       }
 
-      return getFillByDepositTxHash(
+      return strategy.getFill(
         depositTxHash,
         fromChainId,
         toChainId,
@@ -137,7 +151,9 @@ export function useDepositTracking(
 
     // Optimistically add deposit to local storage for instant visibility on the
     // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-    addLocalDeposit(convertForFillQuery(fillQuery.data, fromBridgePagePayload));
+    addLocalDeposit(
+      strategy.convertForFillQuery(fillQuery.data, fromBridgePagePayload)
+    );
 
     const { quoteForAnalytics, depositArgs, tokenPrice } =
       fromBridgePagePayload;
@@ -151,7 +167,7 @@ export function useDepositTracking(
       Number(quoteForAnalytics.toChainId),
       quoteForAnalytics.fromChainName
     );
-  }, [fillQuery.data, depositTxHash, fromBridgePagePayload]);
+  }, [fillQuery.data, depositTxHash, fromBridgePagePayload, strategy]);
 
   return { depositQuery, fillQuery };
 }

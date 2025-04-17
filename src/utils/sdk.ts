@@ -24,6 +24,8 @@ export {
 export {
   getNativeTokenSymbol,
   chainIsLens,
+  chainIsSvm,
+  chainIsEvm,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 
 export function getUpdateV3DepositTypedData(
