@@ -18,6 +18,8 @@ const validationErrorTextMap: Record<AmountInputError, string> = {
     "The amount you are trying to bridge is too low.",
   [AmountInputError.PRICE_IMPACT_TOO_HIGH]:
     "Price impact is too high. Check back later when liquidity is restored.",
+  [AmountInputError.SWAP_QUOTE_UNAVAILABLE]:
+    "Swap quote temporarily unavailable. Please try again later.",
 };
 
 type Props = {

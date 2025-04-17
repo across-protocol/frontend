@@ -1,3 +1,5 @@
+import { CHAIN_IDs } from "@across-protocol/constants";
+import axios from "axios";
 import { externConfigs } from "constants/chains/configs";
 import { BigNumber, BigNumberish } from "ethers";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
@@ -14,11 +16,11 @@ import {
   GetBridgeFeesResult,
   chainEndpointToId,
   parseUnits,
-  chainIsLens,
   isDefined,
   UniversalSwapRoute,
   TokenInfo,
   isNonEthChain,
+  isStablecoin,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -50,6 +52,7 @@ export enum AmountInputError {
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
   PRICE_IMPACT_TOO_HIGH = "priceImpactTooHigh",
+  SWAP_QUOTE_UNAVAILABLE = "swapQuoteUnavailable",
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
@@ -101,7 +104,10 @@ export function getReceiveTokenSymbol(
     return "ETH";
   }
 
-  if (inputTokenSymbol === "GRASS" && chainIsLens(destinationChainId)) {
+  if (
+    destinationChainId === CHAIN_IDs.LENS_SEPOLIA &&
+    inputTokenSymbol === "GRASS"
+  ) {
     return isReceiverContract ? "WGRASS" : "GRASS";
   }
 
@@ -112,14 +118,24 @@ export function getReceiveTokenSymbol(
   return outputTokenSymbol;
 }
 
-export function validateBridgeAmount(
-  selectedRoute: SelectedRoute,
-  parsedAmountInput?: BigNumber,
-  quoteFees?: GetBridgeFeesResult,
-  currentBalance?: BigNumber,
-  maxDeposit?: BigNumber,
-  amountToBridgeAfterSwap?: BigNumber
-) {
+export function validateBridgeAmount(params: {
+  selectedRoute: SelectedRoute;
+  parsedAmountInput?: BigNumber;
+  quoteFees?: GetBridgeFeesResult;
+  currentBalance?: BigNumber;
+  maxDeposit?: BigNumber;
+  amountToBridgeAfterSwap?: BigNumber;
+  universalSwapQuoteError?: Error;
+}) {
+  const {
+    selectedRoute,
+    parsedAmountInput,
+    quoteFees,
+    currentBalance,
+    maxDeposit,
+    amountToBridgeAfterSwap,
+  } = params;
+
   if (!parsedAmountInput || !amountToBridgeAfterSwap) {
     return {
       error: AmountInputError.INVALID,
@@ -161,6 +177,25 @@ export function validateBridgeAmount(
     };
   }
 
+  if (
+    params.universalSwapQuoteError &&
+    axios.isAxiosError(params.universalSwapQuoteError)
+  ) {
+    const responseData = params.universalSwapQuoteError.response?.data as {
+      code?: string;
+    };
+    if (responseData?.code === "SWAP_QUOTE_UNAVAILABLE") {
+      return {
+        error: AmountInputError.SWAP_QUOTE_UNAVAILABLE,
+      };
+    }
+    if (responseData?.code === "AMOUNT_TOO_LOW") {
+      return {
+        error: AmountInputError.AMOUNT_TOO_LOW,
+      };
+    }
+  }
+
   return {
     warn: undefined,
     error: undefined,
@@ -171,6 +206,22 @@ const defaultRouteFilter = {
   fromChain: hubPoolChainId,
   inputTokenSymbol: "ETH",
 };
+
+// for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
+export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
+  if (
+    route.toChain === CHAIN_IDs.LENS &&
+    isStablecoin(route.fromTokenSymbol) &&
+    route.toTokenSymbol !== "GHO"
+  ) {
+    return {
+      ...route,
+      toTokenSymbol: "GHO",
+    };
+  }
+
+  return route;
+}
 
 export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromUrl = getRouteFromUrl(filter);
@@ -185,7 +236,9 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return routeFromUrl ?? routeFromFilter ?? defaultRoute;
+  return getTokenDefaultsForRoute(
+    routeFromUrl ?? routeFromFilter ?? defaultRoute
+  );
 }
 
 export function findEnabledRoute(

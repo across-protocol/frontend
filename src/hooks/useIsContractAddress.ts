@@ -1,23 +1,22 @@
-import { useState, useEffect } from "react";
-
+import { useQuery } from "@tanstack/react-query";
 import { getCode, noContractCode } from "utils";
 
 export function useIsContractAddress(address?: string, chainId = 1) {
-  const [isContractAddress, setIsContractAddress] = useState(false);
+  const result = useQuery({
+    queryKey: ["isContractAddress", address, chainId],
+    queryFn: async () => {
+      if (!address || !chainId) return false;
+      const code = await getCode(address, chainId);
+      return code !== noContractCode;
+    },
+    enabled: Boolean(address && chainId),
+    // we don't expect this change for a given address, cache heavily
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
-  useEffect(() => {
-    if (address && chainId) {
-      getCode(address, chainId)
-        .then((res) => {
-          setIsContractAddress(res !== noContractCode);
-        })
-        .catch((err) => {
-          console.log("err in getCode call", err);
-        });
-    } else {
-      setIsContractAddress(false);
-    }
-  }, [address, chainId]);
-
-  return isContractAddress;
+  return result.data ?? false;
 }
