@@ -32,7 +32,7 @@ export function convertForDepositQuery(
   );
 
   return {
-    depositId: Number(depositId),
+    depositId,
     depositTime: data.depositTimestamp || Math.floor(Date.now() / 1000),
     status: "pending" as const,
     filled: "0",
@@ -96,7 +96,7 @@ export function convertForFillQuery(
   );
 
   return {
-    depositId: Number(depositId),
+    depositId,
     depositTime:
       data.depositByTxHash.depositTimestamp || Math.floor(Date.now() / 1000),
     status: "filled" as const,

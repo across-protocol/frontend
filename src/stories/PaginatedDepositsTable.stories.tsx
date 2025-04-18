@@ -6,7 +6,7 @@ import { Deposit } from "../hooks/useDeposits";
 
 const mockedDeposits: Deposit[] = [
   {
-    depositId: 1180880,
+    depositId: "1180880",
     depositTime: 1698275877,
     status: "pending",
     filled: "0",
@@ -27,7 +27,7 @@ const mockedDeposits: Deposit[] = [
   },
   // Fee too low, i.e. unprofitable
   {
-    depositId: 1144678,
+    depositId: "1144678",
     depositTime: 1696447947,
     status: "pending",
     filled: "0",
@@ -48,7 +48,7 @@ const mockedDeposits: Deposit[] = [
   },
   // Finalized with fill time
   {
-    depositId: 1205910,
+    depositId: "1205910",
     depositTime: 1698998623,
     fillTime: 1698998623 + 99,
     status: "filled",
@@ -72,7 +72,7 @@ const mockedDeposits: Deposit[] = [
   },
   // Finalized without fill time
   {
-    depositId: 1199308,
+    depositId: "1199308",
     depositTime: 1698831959,
     status: "filled",
     filled: "12000000",
@@ -110,7 +110,7 @@ const mockedDeposits: Deposit[] = [
     },
   },
   {
-    depositId: 1199309,
+    depositId: "1199309",
     depositTime: 1698831959,
     status: "filled",
     filled: "12000000",

@@ -11,6 +11,7 @@ type Props = DepositsTableProps & {
   totalCount: number;
   initialPageSize?: number;
   pageSizes?: number[];
+  displayPageNumbers?: boolean;
 };
 
 const DEFAULT_PAGE_SIZES = [10, 25, 50];
@@ -22,6 +23,7 @@ export function PaginatedDepositsTable({
   onPageSizeChange,
   totalCount,
   pageSizes = DEFAULT_PAGE_SIZES,
+  displayPageNumbers = true,
   ...depositsTableProps
 }: Props) {
   const paginateValues = paginate({
@@ -36,6 +38,7 @@ export function PaginatedDepositsTable({
       <DepositsTable {...depositsTableProps} />
       <PaginationWrapper>
         <Pagination
+          displayPageNumbers={displayPageNumbers}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
           pageList={paginateValues.pageList}

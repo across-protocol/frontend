@@ -19,8 +19,12 @@ type Props = {
 };
 
 export function StatusCell({ deposit, width }: Props) {
-  if (deposit.status === "pending") {
+  if (deposit.status === "pending" || deposit.status === "expired") {
     return <PendingStatusCell deposit={deposit} width={width} />;
+  }
+
+  if (deposit.status === "refunded") {
+    return <RefundedStatusCell deposit={deposit} width={width} />;
   }
 
   return <FilledStatusCell deposit={deposit} width={width} />;
@@ -101,6 +105,14 @@ function PendingStatusCell({ width, deposit }: Props) {
             <StyledInfoIcon />
           </Tooltip>
         ))}
+    </StyledPendingStatusCell>
+  );
+}
+
+function RefundedStatusCell({ width }: Props) {
+  return (
+    <StyledPendingStatusCell width={width}>
+      <Text color={"light-200"}>Refunded</Text>
     </StyledPendingStatusCell>
   );
 }
