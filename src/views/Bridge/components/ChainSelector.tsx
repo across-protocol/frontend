@@ -97,6 +97,10 @@ export function ChainSelector({
       }
       allowSelectDisabled={!isFrom}
       data-cy={`${fromOrTo}-chain-select`}
+      modalProps={{
+        height: 700,
+        bottomYOffset: 16,
+      }}
     />
   );
 }
