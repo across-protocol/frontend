@@ -35,7 +35,7 @@ export type Deposit = {
   message: string;
   amount: string;
   depositTxHash: string;
-  fillTxs: string[];
+  fillTx: string;
   speedUps: SpeedUpDepositTx[];
   depositRelayerFeePct: string;
   initialRelayerFeePct?: string;

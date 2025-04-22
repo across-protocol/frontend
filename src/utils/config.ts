@@ -22,6 +22,7 @@ import {
   SwapAndBridge__factory,
 } from "utils/typechain";
 import { SupportedDex } from "./serverless-api/prod/swap-quote";
+import { PublicKey } from "@solana/web3.js";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -136,6 +137,10 @@ export class ConfigClient {
     const address = this.spokeAddresses[chainId];
     assert(address, "Spoke pool not supported on chain: " + chainId);
     return address;
+  }
+  getSpokePoolProgramId(chainId: constants.ChainId): PublicKey {
+    const address = this.getSpokePoolAddress(chainId);
+    return new PublicKey(address);
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
