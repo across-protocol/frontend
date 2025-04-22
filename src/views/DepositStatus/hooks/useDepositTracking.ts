@@ -8,11 +8,8 @@ import {
   getToken,
   recordTransferUserProperties,
   wait,
-  getDepositByTxHash,
-  getFillByDepositTxHash,
-  NoFundsDepositedLogError,
   getChainInfo,
-  toAddressSafe,
+  chainIsSvm,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -20,21 +17,57 @@ import {
   removeLocalDeposits,
 } from "utils/local-deposits";
 import { ampli } from "ampli";
+import { createChainStrategies } from "utils/deposit-strategies";
 
-import { convertForDepositQuery, convertForFillQuery } from "../utils";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import {
+  DepositStatus,
+  FillInfo,
+  FillStatus,
+} from "./useDepositTracking_new/types";
 
-export function useDepositTracking(
-  depositTxHash: string,
-  fromChainId: number,
-  toChainId: number,
-  fromBridgePagePayload?: FromBridgePagePayload
-) {
+/**
+ * Hook to track deposit and fill status across EVM and SVM chains
+ * @param params Object containing:
+ * - depositTxHash: Transaction hash or signature
+ * - fromChainId: Origin chain ID
+ * - toChainId: Destination chain ID
+ * - fromBridgePagePayload: Optional bridge page payload
+ * @returns Deposit and fill query results and status
+ */
+export function useDepositTracking({
+  depositTxHash,
+  fromChainId,
+  toChainId,
+  fromBridgePagePayload,
+}: {
+  depositTxHash: string;
+  fromChainId: number;
+  toChainId: number;
+  fromBridgePagePayload?: FromBridgePagePayload;
+}) {
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
+  const [depositStatus, setDepositStatus] = useState<DepositStatus>({
+    isLoading: true,
+    isSuccess: false,
+    isError: false,
+  });
+  const [fillStatus, setFillStatus] = useState<FillStatus>({
+    isLoading: false,
+    isSuccess: false,
+    isError: false,
+  });
 
   const { addToAmpliQueue } = useAmplitude();
   const { account } = useConnection();
 
+  // Create appropriate strategy for the source chain
+  const { depositStrategy, fillStrategy } = createChainStrategies(
+    fromChainId,
+    toChainId
+  );
+
+  // Query for deposit information
   const depositQuery = useQuery({
     queryKey: ["deposit", depositTxHash, fromChainId, account],
     queryFn: async () => {
@@ -42,15 +75,11 @@ export function useDepositTracking(
       await wait(1_000);
 
       try {
-        const deposit = await getDepositByTxHash(depositTxHash, fromChainId);
-        return deposit;
+        // Use the strategy to get deposit information
+        return depositStrategy.getDeposit(depositTxHash);
       } catch (e) {
-        // If the error NoFundsDepositedLogError is thrown, this implies that the used
-        // tx hash is valid and mined but the origin is not a SpokePool contract. So we
-        // should not retry the query and throw the error.
-        if (e instanceof NoFundsDepositedLogError) {
-          setShouldRetryDepositQuery(false);
-        }
+        // Don't retry if the deposit doesn't exist or is invalid
+        setShouldRetryDepositQuery(false);
         throw e;
       }
     },
@@ -59,32 +88,69 @@ export function useDepositTracking(
     retryDelay: getRetryDelay(fromChainId),
   });
 
+  // Update deposit status when depositQuery changes
   useEffect(() => {
-    const data = depositQuery.data;
+    if (depositQuery.isLoading) {
+      setDepositStatus({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+      });
+    } else if (depositQuery.isError) {
+      setDepositStatus({
+        isLoading: false,
+        isSuccess: false,
+        isError: true,
+      });
+    } else if (depositQuery.data) {
+      setDepositStatus({
+        isLoading: false,
+        isSuccess: true,
+        isError: false,
+        timestamp: depositQuery.data.depositTimestamp,
+      });
+    }
+  }, [depositQuery.isLoading, depositQuery.isError, depositQuery.data]);
 
-    if (!fromBridgePagePayload || !data || !data.parsedDepositLog) {
+  // Track deposit in Amplitude and add to local storage
+  useEffect(() => {
+    const depositInfo = depositQuery.data;
+
+    if (
+      !fromBridgePagePayload ||
+      !depositInfo ||
+      depositInfo.status === "depositing"
+    ) {
       return;
     }
 
+    // Check if deposit is already in local storage
     const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
     if (!localDepositByTxHash) {
-      // Optimistically add deposit to local storage for instant visibility on the
-      // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-      addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
+      // Optimistically add deposit to local storage for instant visibility
+      // Use the strategy-specific conversion method
+
+      const localDeposit = depositStrategy.convertForDepositQuery(
+        depositInfo,
+        fromBridgePagePayload
+      );
+      addLocalDeposit(localDeposit);
     }
 
-    const depositor = toAddressSafe(data.parsedDepositLog.args.depositor);
-    if (account !== depositor) {
+    // Check if the deposit is from the current user
+    const isFromCurrentUser = depositInfo.depositLog.args.depositor === account;
+    if (!isFromCurrentUser) {
       return;
     }
 
+    // Track deposit in Amplitude
     addToAmpliQueue(() => {
       ampli.transferDepositCompleted(
         generateDepositConfirmed(
           fromBridgePagePayload.quoteForAnalytics,
           fromBridgePagePayload.referrer,
           fromBridgePagePayload.timeSigned,
-          data.depositTxReceipt.transactionHash,
+          depositInfo.depositTxHash,
           true,
           data.depositTimestamp,
           fromBridgePagePayload.selectedRoute.fromTokenAddress,
@@ -98,8 +164,10 @@ export function useDepositTracking(
     fromBridgePagePayload,
     account,
     depositTxHash,
+    depositStrategy,
   ]);
 
+  // Query for fill information
   const fillQuery = useQuery({
     queryKey: [
       "fill-by-deposit-tx-hash",
@@ -108,18 +176,14 @@ export function useDepositTracking(
       toChainId,
     ],
     queryFn: async () => {
-      if (!depositQuery.data) {
-        throw new Error(
-          `Could not fetch deposit by tx hash ${depositTxHash} on chain ${fromChainId}`
-        );
+      const depositInfo = depositQuery.data;
+
+      if (!depositInfo || depositInfo.status === "depositing") {
+        return;
       }
 
-      return getFillByDepositTxHash(
-        depositTxHash,
-        fromChainId,
-        toChainId,
-        depositQuery.data
-      );
+      // Use the strategy to get fill information, passing the destination chain ID
+      return fillStrategy.getFill(depositInfo, toChainId);
     },
     staleTime: Infinity,
     retry: true,
@@ -127,20 +191,54 @@ export function useDepositTracking(
     enabled: !!depositQuery.data,
   });
 
+  // Update fill status when fillQuery changes
   useEffect(() => {
-    if (!fromBridgePagePayload || !fillQuery.data) {
+    if (fillQuery.isLoading) {
+      setFillStatus({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+      });
+    } else if (fillQuery.isError) {
+      setFillStatus({
+        isLoading: false,
+        isSuccess: false,
+        isError: true,
+      });
+    } else if (fillQuery.data) {
+      setFillStatus({
+        isLoading: false,
+        isSuccess: true,
+        isError: false,
+        timestamp: fillQuery.data.fillTxTimestamp,
+      });
+    }
+  }, [fillQuery.isLoading, fillQuery.isError, fillQuery.data]);
+
+  // Track fill in local storage
+  useEffect(() => {
+    const fillInfo = fillQuery.data as FillInfo;
+
+    if (!fromBridgePagePayload || !fillInfo || fillInfo.status === "filling") {
       return;
     }
 
+    // Remove existing deposit and add updated one with fill information
     const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+
     if (localDepositByTxHash) {
       removeLocalDeposits([depositTxHash]);
     }
 
-    // Optimistically add deposit to local storage for instant visibility on the
-    // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-    addLocalDeposit(convertForFillQuery(fillQuery.data, fromBridgePagePayload));
+    // Add to local storage with fill information
+    // Use the strategy-specific conversion method
+    const localDeposit = fillStrategy.convertForFillQuery(
+      fillInfo,
+      fromBridgePagePayload
+    );
+    addLocalDeposit(localDeposit);
 
+    // Record transfer properties
     const { quoteForAnalytics, depositArgs, tokenPrice } =
       fromBridgePagePayload;
 
@@ -153,9 +251,17 @@ export function useDepositTracking(
       Number(quoteForAnalytics.toChainId),
       quoteForAnalytics.fromChainName
     );
-  }, [fillQuery.data, depositTxHash, fromBridgePagePayload]);
+  }, [fillQuery.data, depositTxHash, fromBridgePagePayload, fillStrategy]);
 
-  return { depositQuery, fillQuery };
+  return {
+    depositQuery,
+    fillQuery,
+    depositStatus,
+    fillStatus,
+    // Return the origin and destination chain types for convenience
+    isFromSVM: chainIsSvm(fromChainId),
+    isToSVM: chainIsSvm(toChainId),
+  };
 }
 
 function getRetryDelay(chainId: number) {
