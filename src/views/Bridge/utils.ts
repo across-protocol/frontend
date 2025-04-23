@@ -230,7 +230,7 @@ export function getInitialRoute(filter: RouteFilter = {}) {
       filter.inputTokenSymbol ??
       (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
-    toChain: filter.toChain || hubPoolChainId,
+    toChain: filter.toChain,
   });
   const defaultRoute = findEnabledRoute(defaultRouteFilter) ?? {
     ...enabledRoutes[0],
@@ -585,6 +585,10 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
     externalProjectId,
   };
+
+  if (Object.values(filter).every((value) => !value)) {
+    return undefined;
+  }
 
   const route =
     findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||
