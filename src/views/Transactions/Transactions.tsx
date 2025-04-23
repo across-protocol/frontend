@@ -9,7 +9,12 @@ import { DepositStatusFilter } from "./types";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
 
-const statusFilterOptions: DepositStatusFilter[] = ["all", "pending", "filled"];
+const statusFilterOptions: DepositStatusFilter[] = [
+  "all",
+  "pending",
+  "filled",
+  "refunded",
+];
 
 export function Transactions() {
   const [activeTab, setActiveTab] = useState<"personal" | "all">("personal");

@@ -50,12 +50,18 @@ function usePaginatedUserDeposits(
     currentPage * pageSize,
     account
   );
+  const end = depositsQuery.data
+    ? depositsQuery.data!.deposits.length < pageSize
+    : false;
+  const numberOfDeposits = depositsQuery.data?.deposits.length || 0;
+  const totalDeposits = numberOfDeposits + currentPage * pageSize;
+  // const end = depositsQuery.data ? depositsQuery.data!.deposits.length < pageSize : false;
 
   return {
     currentPage,
     setCurrentPage,
     depositsQuery,
     deposits: depositsQuery.data?.deposits || [],
-    totalDeposits: depositsQuery.data?.pagination?.total || 0,
+    totalDeposits: end ? totalDeposits : totalDeposits + 1,
   };
 }

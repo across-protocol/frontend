@@ -74,6 +74,7 @@ interface Props {
   hideStart: boolean;
   hideEnd: boolean;
   lastPage: number;
+  displayPageNumbers?: boolean;
 }
 
 export const Pagination = ({
@@ -89,6 +90,7 @@ export const Pagination = ({
   currentPage,
   pageSize,
   pageSizes,
+  displayPageNumbers = true,
 }: Props) => {
   const pageSelectorEnabled = lastPage !== 0;
   return (
@@ -100,37 +102,39 @@ export const Pagination = ({
       />
       {pageSelectorEnabled && (
         <PaginationElements>
-          <PageNumbersWrapper>
-            <>
-              {!hideStart && (
-                <>
-                  <ElementWrapper onClick={() => onPageChange(0)}>
-                    <Text>1</Text>
-                  </ElementWrapper>
-                  &nbsp; ... &nbsp;
-                </>
-              )}
-              {pageList.map((page, index) => {
-                return (
-                  <ElementWrapper
-                    active={index === activeIndex}
-                    key={page}
-                    onClick={() => onPageChange(page)}
-                  >
-                    <Text>{page + 1}</Text>
-                  </ElementWrapper>
-                );
-              })}
-              {!hideEnd && (
-                <>
-                  <PagesPlaceholder>...</PagesPlaceholder>
-                  <ElementWrapper onClick={() => onPageChange(lastPage)}>
-                    <Text>{lastPage + 1}</Text>
-                  </ElementWrapper>
-                </>
-              )}
-            </>
-          </PageNumbersWrapper>
+          {displayPageNumbers && (
+            <PageNumbersWrapper>
+              <>
+                {!hideStart && (
+                  <>
+                    <ElementWrapper onClick={() => onPageChange(0)}>
+                      <Text>1</Text>
+                    </ElementWrapper>
+                    &nbsp; ... &nbsp;
+                  </>
+                )}
+                {pageList.map((page, index) => {
+                  return (
+                    <ElementWrapper
+                      active={index === activeIndex}
+                      key={page}
+                      onClick={() => onPageChange(page)}
+                    >
+                      <Text>{page + 1}</Text>
+                    </ElementWrapper>
+                  );
+                })}
+                {!hideEnd && (
+                  <>
+                    <PagesPlaceholder>...</PagesPlaceholder>
+                    <ElementWrapper onClick={() => onPageChange(lastPage)}>
+                      <Text>{lastPage + 1}</Text>
+                    </ElementWrapper>
+                  </>
+                )}
+              </>
+            </PageNumbersWrapper>
+          )}
           <PrevNextWrapper>
             <NextElement
               disabled={disableBack}

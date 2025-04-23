@@ -198,11 +198,10 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = (
-  String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-    .toLowerCase()
-    .split(",") as (keyof typeof rewardPrograms)[]
-).filter((v) => v);
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  "op-rebates",
+  "arb-rebates",
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
@@ -630,7 +629,7 @@ export const defaultSwapSlippage = Number(
 );
 
 export const indexerApiBaseUrl =
-  process.env.REACT_APP_INDEXER_BASE_URL || undefined;
+  process.env.REACT_APP_INDEXER_BASE_URL || "https://indexer.api.across.to";
 
 export const hyperLiquidBridge2Address =
   "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
