@@ -235,6 +235,7 @@ export const validateChainAndTokenParams = (
     outputToken: string;
     originChainId: string;
     destinationChainId: string;
+    allowUnmatchedDecimals: string;
   }>
 ) => {
   let {
@@ -243,6 +244,7 @@ export const validateChainAndTokenParams = (
     outputToken: outputTokenAddress,
     originChainId,
     destinationChainId: _destinationChainId,
+    allowUnmatchedDecimals,
   } = queryParams;
 
   if (!_destinationChainId) {
@@ -295,12 +297,25 @@ export const validateChainAndTokenParams = (
     });
   }
 
+  if (
+    allowUnmatchedDecimals !== "true" &&
+    inputToken.decimals !== outputToken.decimals
+  ) {
+    throw new InvalidParamError({
+      message:
+        `Decimals of input and output tokens do not match. ` +
+        `Set allowUnmatchedDecimals=true to allow this.`,
+      param: "allowUnmatchedDecimals",
+    });
+  }
+
   return {
     l1Token,
     inputToken,
     outputToken,
     destinationChainId,
     resolvedOriginChainId,
+    allowUnmatchedDecimals: allowUnmatchedDecimals === "true",
   };
 };
 
@@ -2061,13 +2076,13 @@ export async function fetchStakingPool(
 export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
   // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
   // returns: string with toDecimals in smallest unit
-  return (amount: BigNumber): string => {
+  return (amount: BigNumber) => {
     amount = BigNumber.from(amount);
-    if (amount.isZero()) return amount.toString();
+    if (amount.isZero()) return amount;
     const diff = fromDecimals - toDecimals;
-    if (diff === 0) return amount.toString();
-    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff)).toString();
-    return amount.mul(BigNumber.from("10").pow(-1 * diff)).toString();
+    if (diff === 0) return amount;
+    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff));
+    return amount.mul(BigNumber.from("10").pow(-1 * diff));
   };
 };
 

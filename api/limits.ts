@@ -39,6 +39,7 @@ import {
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
   getLimitCap,
+  boolStr,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 import { getEnvs } from "./_env";
@@ -58,6 +59,7 @@ const LimitsQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  allowUnmatchedDecimals: optional(boolStr()),
 });
 
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
@@ -124,7 +126,7 @@ const handler = async (
       );
     }
     const amount = BigNumber.from(
-      amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
+      amountInput ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
     );
     let minDepositUsdForDestinationChainId = Number(
       getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
@@ -200,9 +202,9 @@ const handler = async (
     const [
       opStackL1GasCost,
       multicallOutput,
-      fullRelayerBalances,
-      transferRestrictedBalances,
-      fullRelayerMainnetBalances,
+      _fullRelayerBalances,
+      _transferRestrictedBalances,
+      _fullRelayerMainnetBalances,
     ] = await Promise.all([
       nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
         ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
@@ -261,7 +263,7 @@ const handler = async (
       relayerFeeDetails,
     });
 
-    let { liquidReserves } = multicallOutput[1];
+    const { _liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
@@ -270,6 +272,23 @@ const handler = async (
       liteChainIds.includes(destinationChainId);
     const routeInvolvesLiteChain =
       originChainIsLiteChain || destinationChainIsLiteChain;
+
+    // Base every amount on the input token decimals.
+    let liquidReserves = ConvertDecimals(
+      l1Token.decimals,
+      inputToken.decimals
+    )(_liquidReserves);
+    const fullRelayerBalances = _fullRelayerBalances.map((balance) =>
+      ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
+    );
+    const fullRelayerMainnetBalances = _fullRelayerMainnetBalances.map(
+      (balance) =>
+        ConvertDecimals(l1Token.decimals, inputToken.decimals)(balance)
+    );
+    const transferRestrictedBalances = _transferRestrictedBalances.map(
+      (balance) =>
+        ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
+    );
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
@@ -283,7 +302,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             minDepositUsdForDestinationChainId.toString(),
-            l1Token.decimals
+            inputToken.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
@@ -299,10 +318,14 @@ const handler = async (
     ); // balances on destination chain + mainnet
 
     if (!routeInvolvesLiteChain) {
-      const lpCushion = ethers.utils.parseUnits(
+      const _lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
+      const lpCushion = ConvertDecimals(
+        l1Token.decimals,
+        inputToken.decimals
+      )(_lpCushion);
       liquidReserves = maxBN(
         liquidReserves.sub(lpCushion),
         ethers.BigNumber.from(0)
@@ -407,8 +430,8 @@ const handler = async (
     }
 
     const limitCap = getLimitCap(
-      l1Token.symbol,
-      l1Token.decimals,
+      inputToken.symbol,
+      inputToken.decimals,
       destinationChainId
     );
 

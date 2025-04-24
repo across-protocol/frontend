@@ -28,6 +28,7 @@ import {
   OPT_IN_CHAINS,
   parseL1TokenConfigSafe,
   getL1TokenConfigCache,
+  ConvertDecimals,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -279,6 +280,11 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
+    const outputAmount = ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(amount.sub(totalRelayFee));
+
     const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
       await selectExclusiveRelayer(
         computedOriginChainId,
@@ -364,6 +370,7 @@ const handler = async (
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
       fillDeadline: fillDeadline.toString(),
+      outputAmount: outputAmount.toString(),
     };
 
     logger.info({
