@@ -586,6 +586,10 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     externalProjectId,
   };
 
+  if (Object.values(filter).every((value) => !value)) {
+    return undefined;
+  }
+
   const route =
     findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||
     findNextBestRoute(["fromChain", "swapTokenSymbol"], {
