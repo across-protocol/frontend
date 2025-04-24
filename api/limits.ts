@@ -263,7 +263,7 @@ const handler = async (
       relayerFeeDetails,
     });
 
-    const { _liquidReserves } = multicallOutput[1];
+    const { liquidReserves: _liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
