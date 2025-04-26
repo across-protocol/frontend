@@ -1,10 +1,14 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
+import {
+  CHAIN_IDs,
+  PUBLIC_NETWORKS,
+  TOKEN_SYMBOLS_MAP,
+} from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
-import { isBridgedUsdc } from "./sdk";
+import { isBridgedUsdc, isDefined, isStablecoin } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -13,6 +17,7 @@ import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import { Deposit } from "hooks/useDeposits";
 
@@ -32,6 +37,7 @@ import {
   similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
+import { externConfigs } from "../constants/chains/configs";
 
 export type {
   TokenInfo,
@@ -77,13 +83,27 @@ export const tokenList = [
       TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
 
     if (!tokenInfo) {
+      console.warn("No token info found for symbol: " + symbol);
       return [];
+    }
+
+    let name = tokenInfo.name;
+    let displaySymbol = symbol;
+    // Override for GHO and WGHO until reflected in the constants
+    if (symbol === "GHO") {
+      name = "GHO Token";
+      displaySymbol = "GHO";
+    } else if (symbol === "WGHO") {
+      name = "Lens Wrapped GHO";
+      displaySymbol = "LGHO";
     }
 
     return {
       ...tokenInfo,
-      displaySymbol: symbol,
+      name,
+      displaySymbol,
       logoURI,
+      isStable: isStablecoin(tokenInfo.symbol),
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
         ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
         : tokenInfo.addresses[hubPoolChainId],
@@ -122,8 +142,10 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.OPTIMISM,
       ChainId.MODE,
       ChainId.BASE,
+      ChainId.INK,
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
+      ChainId.SONEIUM,
     ],
   },
   "arb-rebates": {
@@ -176,11 +198,10 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = (
-  String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-    .toLowerCase()
-    .split(",") as (keyof typeof rewardPrograms)[]
-).filter((v) => v);
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  "op-rebates",
+  "arb-rebates",
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
@@ -229,6 +250,30 @@ export function getChainInfo(chainId: number): ChainInfo {
   return chainInfo;
 }
 
+export const chainEndpointToId = Object.fromEntries(
+  chainInfoList.map((chain) => {
+    const projects = Object.values(externConfigs).filter(
+      ({ intermediaryChain }) => intermediaryChain === chain.chainId
+    );
+    return [
+      chain.name.toLowerCase().replaceAll(" ", ""),
+      {
+        chainId: chain.chainId,
+        associatedProjectIds: projects.map(({ projectId }) => projectId),
+      },
+    ];
+  }, [])
+);
+
+// For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
+export const nonEthChains = Object.entries(PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.nativeToken !== "ETH")
+  .map(([chainId]) => Number(chainId));
+
+export function isNonEthChain(chainId: number | undefined | null): boolean {
+  return isDefined(chainId) ? nonEthChains.includes(chainId) : false;
+}
+
 export const tokenTable = Object.fromEntries(
   tokenList.map((token) => {
     return [token.symbol.toUpperCase(), token];
@@ -261,8 +306,10 @@ export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
  * @returns The token info for the token with the given address
  */
 export const getTokenByAddress = (address: string): TokenInfo => {
-  const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
-    Object.values(token.addresses).includes(address)
+  const token = Object.values(tokenTable).find(
+    (token) =>
+      Object.values(token?.addresses ?? {}).includes(address) ||
+      token?.mainnetAddress === address
   );
   assert(token, "No token found for address: " + address);
   return getToken(token.symbol);
@@ -278,6 +325,7 @@ const RouteSS = superstruct.object({
   toTokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
+  externalProjectId: superstruct.optional(superstruct.string()),
 });
 const RoutesSS = superstruct.array(RouteSS);
 const SwapRouteSS = superstruct.assign(
@@ -289,6 +337,13 @@ const SwapRouteSS = superstruct.assign(
   })
 );
 const SwapRoutesSS = superstruct.array(SwapRouteSS);
+const UniversalSwapRouteSS = superstruct.assign(
+  RouteSS,
+  superstruct.object({
+    type: superstruct.string(),
+  })
+);
+const UniversalSwapRoutesSS = superstruct.array(UniversalSwapRouteSS);
 const PoolSS = superstruct.object({
   tokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
@@ -305,6 +360,7 @@ const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
   swapRoutes: SwapRoutesSS,
+  universalSwapRoutes: UniversalSwapRoutesSS,
   pools: PoolsSS,
   spokePoolVerifier: SpokePoolVerifierSS,
   hubPoolWethAddress: superstruct.string(),
@@ -322,17 +378,39 @@ export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
 export type SwapRoute = superstruct.Infer<typeof SwapRouteSS>;
 export type SwapRoutes = superstruct.Infer<typeof SwapRoutesSS>;
+export type UniversalSwapRoute = superstruct.Infer<typeof UniversalSwapRouteSS>;
+export type UniversalSwapRoutes = superstruct.Infer<
+  typeof UniversalSwapRoutesSS
+>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
 export type SpokePoolVerifier = superstruct.Infer<typeof SpokePoolVerifierSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.MAINNET) {
-    superstruct.assert(MainnetRoutes, RouteConfigSS);
-    return MainnetRoutes;
+    superstruct.assert(
+      {
+        ...MainnetRoutes,
+        universalSwapRoutes: MainnetUniversalSwapRoutes,
+      },
+      RouteConfigSS
+    );
+    return {
+      ...MainnetRoutes,
+      universalSwapRoutes: MainnetUniversalSwapRoutes,
+    };
   }
   if (chainId === ChainId.SEPOLIA) {
-    superstruct.assert(SepoliaRoutes, RouteConfigSS);
-    return SepoliaRoutes;
+    superstruct.assert(
+      {
+        ...SepoliaRoutes,
+        universalSwapRoutes: [],
+      },
+      RouteConfigSS
+    );
+    return {
+      ...SepoliaRoutes,
+      universalSwapRoutes: [],
+    };
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
@@ -422,6 +500,7 @@ export const COLORS = {
   "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
+  "teal-0": "var(--color-interface-teal-0)",
   "teal-5": "var(--color-interface-teal-5)",
   "teal-15": "var(--color-interface-teal-15)",
   "black-700": "var(--color-neutrals-black-700)",
@@ -432,6 +511,7 @@ export const COLORS = {
   "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
+  "grey-650": "var(--color-neutrals-grey-650)",
   "light-100": "var(--color-neutrals-light-100)",
   "light-200": "var(--color-neutrals-light-200)",
   "light-300": "var(--color-neutrals-light-300)",
@@ -500,6 +580,24 @@ export const disabledBridgeTokens = String(
   .split(",")
   .map((symbol) => symbol.toUpperCase());
 
+// Format: "<fromChainId>:<toChainId>:<fromTokenSymbol>:<toTokenSymbol>"
+export const disabledBridgeRoutes = String(
+  process.env.REACT_APP_DISABLED_BRIDGE_ROUTES || ""
+)
+  // Lens: disable WGHO routes
+  .concat(",1:232:WGHO:WGHO,232:1:WGHO:WGHO")
+  .split(",")
+  .map((route) => {
+    const [fromChainId, toChainId, fromTokenSymbol, toTokenSymbol] =
+      route.split(":");
+    return {
+      fromChainId: Number(fromChainId),
+      toChainId: Number(toChainId),
+      fromTokenSymbol,
+      toTokenSymbol,
+    };
+  });
+
 export const disabledChainIds = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
@@ -508,13 +606,13 @@ export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
+export const disabledChainIdsForUI = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_UI || ""
+).split(",");
+
 export const disabledTokensForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
-
-export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
-  .split(",")
-  .map((address) => address.toLowerCase());
 
 // Pre-computed gas expenditure for deposits used for estimations
 export const gasExpenditureDeposit = BigNumber.from(90_000);
@@ -529,6 +627,16 @@ export const vercelApiBaseUrl =
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
+
+export const indexerApiBaseUrl =
+  process.env.REACT_APP_INDEXER_BASE_URL || "https://indexer.api.across.to";
+
+export const hyperLiquidBridge2Address =
+  "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
+
+export const acrossPlusMulticallHandler: Record<number, string> = {
+  [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
+};
 
 // List of addresses that have special manual rebalancing rights in the FE
 export const manualRebalancerAddresses = String(

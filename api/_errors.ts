@@ -39,6 +39,7 @@ export const AcrossErrorCode = {
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
   UPSTREAM_HTTP_ERROR: "UPSTREAM_HTTP_ERROR",
+  SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
 } as const;
 
 export class AcrossApiError extends Error {
@@ -71,6 +72,18 @@ export class AcrossApiError extends Error {
       message: this.message,
       param: this.param,
     };
+  }
+}
+
+export class TokenNotFoundError extends AcrossApiError {
+  constructor(args: { address: string; chainId: number; opts?: ErrorOptions }) {
+    super(
+      {
+        message: `Unable to find tokenDetails for address: ${args.address}, on chain with id: ${args.chainId}`,
+        status: HttpErrorToStatusCode.NOT_FOUND,
+      },
+      args.opts
+    );
   }
 }
 
@@ -189,6 +202,18 @@ export class AmountTooHighError extends InputError {
   }
 }
 
+export class SwapQuoteUnavailableError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+        status: HttpErrorToStatusCode.SERVICE_UNAVAILABLE,
+      },
+      opts
+    );
+  }
+}
 /**
  * Handles the recurring case of error handling
  * @param endpoint A string numeric to indicate to the logging utility where this error occurs
@@ -210,11 +235,14 @@ export function handleErrorCondition(
     const { type, path } = error;
     // Sanitize the error message that will be sent to client
     const message = `Invalid parameter at path '${path}'. Expected type '${type}'`;
-    acrossApiError = new InputError({
-      message,
-      code: AcrossErrorCode.INVALID_PARAM,
-      param: path.join("."),
-    });
+    acrossApiError = new InputError(
+      {
+        message,
+        code: AcrossErrorCode.INVALID_PARAM,
+        param: path.join("."),
+      },
+      { cause: error }
+    );
   }
   // Handle axios errors
   else if (error instanceof AxiosError) {
@@ -232,7 +260,7 @@ export function handleErrorCondition(
         { cause: error }
       );
     } else {
-      const message = `Upstream http request to ${error.request?.url} failed with ${error.status} ${error.message}`;
+      const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
       acrossApiError = new AcrossApiError(
         {
           message,
@@ -267,6 +295,7 @@ export function handleErrorCondition(
     at: endpoint,
     code: acrossApiError.code,
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
+    cause: acrossApiError.cause,
   });
 
   return response.status(acrossApiError.status).json(acrossApiError);

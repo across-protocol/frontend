@@ -23,11 +23,13 @@ const Bridge = () => {
     fees,
     balance,
     amountValidationError,
+    amountValidationWarning,
     userAmountInput,
     swapSlippage,
     parsedAmountInput,
     estimatedTimeString,
     swapQuote,
+    universalSwapQuote,
     toAccount,
     setCustomToAddress,
     handleChangeAmountInput,
@@ -39,7 +41,6 @@ const Bridge = () => {
     handleSetNewSlippage,
     isQuoteLoading,
   } = useBridge();
-
   return (
     <>
       {toAccount && (
@@ -78,9 +79,11 @@ const Bridge = () => {
             buttonLabel={buttonLabel}
             isBridgeDisabled={isBridgeDisabled}
             validationError={amountValidationError}
+            validationWarning={amountValidationWarning}
             balance={balance}
             isQuoteLoading={isQuoteLoading}
             swapQuote={swapQuote}
+            universalSwapQuote={universalSwapQuote}
           />
         </Wrapper>
       </LayoutV2>

@@ -31,6 +31,8 @@ export function balanceQueryKey(
  * @param amount  The amount to check bridge fees for.
  * @param fromChainId The origin chain of this bridge action
  * @param toChainId The destination chain of this bridge action
+ * @param externalProjectId The external project id to check bridge fees for.
+ * @param recipientAddress The recipient address to check bridge fees for.
  * @returns An array of query keys for @tanstack/react-query `useQuery` hook.
  */
 export function bridgeFeesQueryKey(
@@ -38,7 +40,9 @@ export function bridgeFeesQueryKey(
   inputToken: string,
   outputToken: string,
   fromChainId: ChainId,
-  toChainId: ChainId
+  toChainId: ChainId,
+  externalProjectId?: string,
+  recipientAddress?: string
 ) {
   return [
     "bridgeFees",
@@ -47,6 +51,8 @@ export function bridgeFeesQueryKey(
     amount.toString(),
     fromChainId,
     toChainId,
+    externalProjectId,
+    recipientAddress,
   ] as const;
 }
 
@@ -56,7 +62,13 @@ export function bridgeLimitsQueryKey(
   fromChainId?: ChainId,
   toChainId?: ChainId
 ) {
-  return ["bridgeLimits", inputToken, outputToken, fromChainId, toChainId];
+  return [
+    "bridgeLimits",
+    inputToken,
+    outputToken,
+    fromChainId,
+    toChainId,
+  ] as const;
 }
 
 /**
@@ -139,4 +151,22 @@ export type SwapQuoteQueryKeyParams = {
 };
 export function swapQuoteQueryKey(params: SwapQuoteQueryKeyParams) {
   return ["swap-quote", params] as const;
+}
+
+export type UniversalSwapQuoteQueryKeyParams = {
+  enabled?: boolean;
+  amount: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
+  originChainId: number;
+  destinationChainId: number;
+  tradeType: "minOutput" | "exactOutput" | "exactInput";
+  slippageTolerance: number;
+  depositorAddress?: string;
+  recipientAddress?: string;
+};
+export function universalSwapQuoteQueryKey(
+  params: UniversalSwapQuoteQueryKeyParams
+) {
+  return ["universal-swap-quote", params] as const;
 }

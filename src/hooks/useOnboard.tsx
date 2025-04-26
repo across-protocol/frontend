@@ -15,7 +15,6 @@ import {
   trackDisconnectWalletButtonClicked,
   CACHED_WALLET_KEY,
   identifyUserWallet,
-  walletBlacklist,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -35,6 +34,7 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
+import { useDisallowList } from "./useDisallowList";
 
 export type SetChainOptions = {
   chainId: string;
@@ -93,16 +93,15 @@ export function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
-  useEffect(() => {
-    if (
-      wallet?.accounts.some((account) =>
-        walletBlacklist.includes(account.address.toLowerCase())
-      )
-    ) {
-      disconnect(wallet);
-      return;
-    }
+  const { isBlocked } = useDisallowList(account?.address);
 
+  useEffect(() => {
+    if (wallet && isBlocked) {
+      disconnect(wallet);
+    }
+  }, [wallet, disconnect, isBlocked]);
+
+  useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
     } else {

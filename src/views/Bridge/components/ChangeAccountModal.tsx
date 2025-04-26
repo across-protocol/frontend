@@ -1,12 +1,13 @@
 import styled from "@emotion/styled";
 import { Modal, Text } from "components";
 import { useEffect, useState } from "react";
-import { QUERIESV2, walletBlacklist } from "utils";
+import { QUERIESV2 } from "utils";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { UnstyledButton } from "components/Button";
 import { ethers } from "ethers";
 import { ampli } from "ampli";
 import { useAmplitude } from "hooks";
+import { useDisallowList } from "hooks/useDisallowList";
 
 type ChangeAccountModalProps = {
   displayModal: boolean;
@@ -24,6 +25,8 @@ const ChangeAccountModal = ({
   const [userInput, setUserInput] = useState(currentAccount);
   const [validInput, setValidInput] = useState(false);
 
+  const { isBlocked, isLoading } = useDisallowList(userInput);
+
   const { addToAmpliQueue } = useAmplitude();
 
   useEffect(() => {
@@ -33,12 +36,16 @@ const ChangeAccountModal = ({
   }, [currentAccount, displayModal]);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     setValidInput(
       ethers.utils.isAddress(userInput) &&
         userInput !== currentAccount &&
-        !walletBlacklist.includes(userInput.toLowerCase())
+        !isBlocked
     );
-  }, [currentAccount, userInput]);
+  }, [currentAccount, userInput, isBlocked, isLoading]);
 
   const onSaveHandler = () => {
     if (validInput || userInput === "") {

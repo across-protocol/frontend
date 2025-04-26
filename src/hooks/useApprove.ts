@@ -7,6 +7,7 @@ import {
   MAX_APPROVAL_AMOUNT,
   waitOnTransaction,
   getConfig,
+  ChainId,
 } from "utils";
 import { ERC20__factory } from "utils/typechain";
 import { useIsWrongNetwork } from "hooks";
@@ -36,10 +37,15 @@ export function useApprove(requiredChainId = hubPoolChainId) {
       }
     }
 
-    const tokenInfo = config.getTokenInfoBySymbol(
+    let tokenInfo = config.getTokenInfoBySymbol(
       requiredChainId,
       args.erc20Symbol
     );
+
+    // Special case for Lens GHO
+    if (requiredChainId === ChainId.LENS && args.erc20Symbol === "GHO") {
+      tokenInfo = config.getTokenInfoBySymbol(requiredChainId, "WGHO");
+    }
 
     const erc20 = ERC20__factory.connect(tokenInfo.address, signer);
     const allowance = await erc20.allowance(

@@ -1,5 +1,6 @@
 import { createClient, VercelKV } from "@vercel/kv";
 import { interfaces } from "@across-protocol/sdk";
+import { getEnvs } from "./_env";
 
 const {
   KV_REST_API_READ_ONLY_TOKEN,
@@ -8,7 +9,9 @@ const {
   UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_READ_ONLY_TOKEN,
-} = process.env;
+  CACHE_PREFIX,
+} = getEnvs();
+
 const isRedisCacheEnabled =
   (KV_REST_API_URL && (KV_REST_API_TOKEN || KV_REST_API_READ_ONLY_TOKEN)) ||
   (UPSTASH_REDIS_REST_URL &&
@@ -61,6 +64,13 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
       throw error;
     }
   }
+
+  async del(key: string) {
+    if (!this.client) {
+      return;
+    }
+    await this.client.del(key);
+  }
 }
 
 export const redisCache = new RedisCache();
@@ -73,7 +83,10 @@ export function buildCacheKey(
 }
 
 export function buildInternalCacheKey(...args: (string | number)[]): string {
-  return buildCacheKey("QUOTES_API", ...args);
+  return buildCacheKey(
+    `${CACHE_PREFIX ? CACHE_PREFIX + "-" : ""}QUOTES_API`,
+    ...args
+  );
 }
 
 export async function getCachedValue<T>(

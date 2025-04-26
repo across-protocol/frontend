@@ -64,6 +64,8 @@ export const pageLookup: Record<
     ),
 };
 
+export type ExternalProjectId = "hyper-liquid";
+
 export function getPageValue() {
   // Resolve the sanitized pathname
   const path = getSanitizedPathname();
@@ -144,14 +146,25 @@ export function trackFromChainChanged(chainId: ChainId, isDefault?: boolean) {
   });
 }
 
-export function trackToChainChanged(chainId: ChainId, isDefault?: boolean) {
+export function trackToChainChanged(
+  chainId: ChainId,
+  externalProjectId?: ExternalProjectId,
+  isDefault?: boolean
+) {
   if (Number.isNaN(chainId)) return Promise.resolve();
   const chain = getChainInfo(chainId);
   return ampli.toChainSelected({
     toChainId: chain.chainId.toString(),
     chainName: chain.name,
+    externalProjectId,
     default: isDefault,
   });
+}
+
+export function externalProjectNameToId(
+  projectName?: string
+): ExternalProjectId | undefined {
+  return projectName === "hyperliquid" ? "hyper-liquid" : undefined;
 }
 
 export function trackQuickSwap(
@@ -341,7 +354,8 @@ export function generateTransferQuote(
 export function generateTransferSubmitted(
   quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
-  initialQuoteTime: number
+  initialQuoteTime: number,
+  externalProjectId?: string
 ): TransferSubmittedProperties {
   const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
     quote.tokenSymbol,
@@ -357,6 +371,7 @@ export function generateTransferSubmitted(
     ),
     transferTimestamp: String(Date.now()),
     toTokenAddress: toAddress,
+    externalProjectId: externalProjectNameToId(externalProjectId),
   };
 }
 
@@ -365,7 +380,8 @@ export function generateTransferSigned(
   quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
   initialSubmissionTime: number,
-  txHash: string
+  txHash: string,
+  externalProjectId?: string
 ): TransferSignedProperties {
   const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
     quote.tokenSymbol,
@@ -381,6 +397,7 @@ export function generateTransferSigned(
     ),
     toTokenAddress: toAddress,
     transactionHash: txHash,
+    externalProjectId: externalProjectNameToId(externalProjectId),
   };
 }
 

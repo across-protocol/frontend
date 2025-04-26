@@ -1,9 +1,13 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
+import {
+  CHAIN_IDs,
+  CUSTOM_GAS_TOKENS,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+} from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
-import { object, assert, Infer, optional, string } from "superstruct";
+import { assert, Infer, optional, string, type } from "superstruct";
 
 import {
   ENABLED_ROUTES,
@@ -12,7 +16,6 @@ import {
   ConvertDecimals,
   getCachedTokenBalance,
   getCachedTokenPrice,
-  getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
   getChainInputTokenMaxBalanceInUsd,
@@ -32,12 +35,20 @@ import {
   getCachedLatestBlock,
   parsableBigNumberString,
   validateDepositMessage,
-  getCachedFillGasUsage,
   latestGasPriceCache,
+  getCachedNativeGasCost,
+  getCachedOpStackL1DataFee,
+  getLimitCap,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
+import { getEnvs } from "./_env";
+import {
+  getDefaultRelayerAddress,
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "./_relayer-address";
 
-const LimitsQueryParamsSchema = object({
+const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
   inputToken: optional(validAddress()),
   outputToken: optional(validAddress()),
@@ -63,25 +74,10 @@ const handler = async (
   });
   try {
     const {
-      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
       // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
-    } = process.env;
+    } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-
-    const fullRelayers = !REACT_APP_FULL_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
-    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
-      ? []
-      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
-          (relayer) => {
-            return ethers.utils.getAddress(relayer);
-          }
-        );
 
     assert(query, LimitsQueryParamsSchema);
 
@@ -92,6 +88,12 @@ const handler = async (
       inputToken,
       outputToken,
     } = validateChainAndTokenParams(query);
+
+    const fullRelayers = getFullRelayers();
+    const transferRestrictedRelayers = getTransferRestrictedRelayers(
+      destinationChainId,
+      l1Token.symbol
+    );
 
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
@@ -125,7 +127,7 @@ const handler = async (
       amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
     );
     let minDepositUsdForDestinationChainId = Number(
-      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+      getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );
     if (isNaN(minDepositUsdForDestinationChainId)) {
       minDepositUsdForDestinationChainId = 0;
@@ -164,38 +166,50 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits, gasPrice] =
-      await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
+    const [
+      tokenPriceNative,
+      _tokenPriceUsd,
+      latestBlock,
+      { maxFeePerGas: gasPrice },
+      nativeGasCost,
+    ] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token.address,
+        CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
-        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        isMessageDefined
-          ? undefined
-          : getCachedFillGasUsage(depositArgs, {
-              relayerAddress: relayer,
-            }),
-        latestGasPriceCache(destinationChainId).get(),
-      ]);
+      ),
+      getCachedTokenPrice(l1Token.address, "usd"),
+      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+      // because only Linea's priority fee depends on the destination chain call data.
+      latestGasPriceCache(
+        destinationChainId,
+        CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
+        {
+          relayerAddress: relayer,
+        }
+      ).get(),
+      isMessageDefined
+        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        : getCachedNativeGasCost(depositArgs, {
+            relayerAddress: relayer,
+          }).get(),
+    ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
-      relayerFeeDetails,
+      opStackL1GasCost,
       multicallOutput,
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(
-        depositArgs,
-        tokenPriceNative,
-        relayer,
-        gasUnits,
-        gasPrice
-      ),
+      nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
+        ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
+            relayerAddress: relayer,
+          }).get()
+        : undefined,
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
@@ -225,6 +239,22 @@ const handler = async (
         )
       ),
     ]);
+    const tokenGasCost =
+      nativeGasCost && gasPrice
+        ? nativeGasCost
+            .mul(gasPrice)
+            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
+        : undefined;
+    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+    // and tokenGasCost.
+    const relayerFeeDetails = await getRelayerFeeDetails(
+      depositArgs,
+      tokenPriceNative,
+      relayer,
+      gasPrice,
+      nativeGasCost,
+      tokenGasCost
+    );
     logger.debug({
       at: "Limits",
       message: "Relayer fee details from SDK",
@@ -273,8 +303,10 @@ const handler = async (
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
-      liquidReserves = liquidReserves.sub(lpCushion);
-      if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
+      liquidReserves = maxBN(
+        liquidReserves.sub(lpCushion),
+        ethers.BigNumber.from(0)
+      );
 
       maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
@@ -358,19 +390,45 @@ const handler = async (
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
 
+    let maximumDeposit = getMaxDeposit(
+      liquidReserves,
+      bufferedMaxDepositShortDelay,
+      limitsBufferMultiplier,
+      chainHasMaxBoundary,
+      routeInvolvesLiteChain
+    );
+
+    if (
+      (destinationChainId === CHAIN_IDs.ZK_SYNC &&
+        computedOriginChainId === CHAIN_IDs.MAINNET) ||
+      inputToken.symbol.toUpperCase() === "POOL"
+    ) {
+      maximumDeposit = liquidReserves;
+    }
+
+    const limitCap = getLimitCap(
+      l1Token.symbol,
+      l1Token.decimals,
+      destinationChainId
+    );
+
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
-      minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
-      maxDeposit: getMaxDeposit(
-        liquidReserves,
-        bufferedMaxDepositShortDelay,
-        limitsBufferMultiplier,
-        chainHasMaxBoundary,
-        routeInvolvesLiteChain
+      minDeposit: minBN(
+        maximumDeposit,
+        limitCap,
+        maxBN(minDeposit, minDepositFloor)
       ).toString(),
-      maxDepositInstant: bufferedMaxDepositInstant.toString(),
-      maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
-      recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
+      maxDeposit: minBN(maximumDeposit, limitCap).toString(),
+      maxDepositInstant: minBN(bufferedMaxDepositInstant, limitCap).toString(),
+      maxDepositShortDelay: minBN(
+        bufferedMaxDepositShortDelay,
+        limitCap
+      ).toString(),
+      recommendedDepositInstant: minBN(
+        bufferedRecommendedDepositInstant,
+        limitCap
+      ).toString(),
       relayerFeeDetails: {
         relayFeeTotal: relayerFeeDetails.relayFeeTotal,
         relayFeePercent: relayerFeeDetails.relayFeePercent,
@@ -379,15 +437,23 @@ const handler = async (
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
       },
+      gasFeeDetails: tokenGasCost
+        ? {
+            nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
+            opStackL1GasCost: opStackL1GasCost?.toString(),
+            gasPrice: gasPrice.toString(),
+            tokenGasCost: tokenGasCost.toString(),
+          }
+        : undefined,
     };
     logger.debug({
       at: "Limits",
       message: "Response data",
       responseJson,
     });
-    // Respond with a 200 status code and 10 seconds of cache with
-    // 45 seconds of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 10, 45);
+    // Respond with a 200 status code and 1 second of cache time with
+    // 59s to keep serving the stale data while recomputing the cached value.
+    sendResponse(response, responseJson, 200, 1, 59);
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }

@@ -1,7 +1,9 @@
-import { BigNumber } from "ethers";
-
+import { CHAIN_IDs } from "@across-protocol/constants";
+import axios from "axios";
+import { externConfigs } from "constants/chains/configs";
+import { BigNumber, BigNumberish } from "ethers";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 import {
-  ChainId,
   Route,
   SwapRoute,
   fixedPointAdjustment,
@@ -11,6 +13,14 @@ import {
   hubPoolChainId,
   isProductionBuild,
   interchangeableTokensMap,
+  GetBridgeFeesResult,
+  chainEndpointToId,
+  parseUnits,
+  isDefined,
+  UniversalSwapRoute,
+  TokenInfo,
+  isNonEthChain,
+  isStablecoin,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -20,6 +30,9 @@ export type SelectedRoute =
     })
   | (SwapRoute & {
       type: "swap";
+    })
+  | (UniversalSwapRoute & {
+      type: "universal-swap";
     });
 
 type RouteFilter = Partial<{
@@ -28,6 +41,8 @@ type RouteFilter = Partial<{
   outputTokenSymbol: string;
   fromChain: number;
   toChain: number;
+  externalProjectId: string;
+  type: "bridge" | "swap" | "universal-swap";
 }>;
 
 export enum AmountInputError {
@@ -36,10 +51,13 @@ export enum AmountInputError {
   INSUFFICIENT_LIQUIDITY = "insufficientLiquidity",
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
+  PRICE_IMPACT_TOO_HIGH = "priceImpactTooHigh",
+  SWAP_QUOTE_UNAVAILABLE = "swapQuoteUnavailable",
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
 const swapRoutes = config.getSwapRoutes();
+const universalSwapRoutes = config.getUniversalSwapRoutes();
 
 export function areTokensInterchangeable(
   tokenSymbol1: string,
@@ -69,33 +87,55 @@ export function getReceiveTokenSymbol(
   outputTokenSymbol: string,
   isReceiverContract: boolean
 ) {
-  const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
+  const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
 
   if (
     inputTokenSymbol === "ETH" &&
-    (isDestinationChainPolygon || isReceiverContract)
+    (isDestinationChainWethOnly || isReceiverContract)
   ) {
     return "WETH";
   }
 
   if (
     inputTokenSymbol === "WETH" &&
-    !isDestinationChainPolygon &&
+    !isDestinationChainWethOnly &&
     !isReceiverContract
   ) {
     return "ETH";
   }
 
+  if (
+    destinationChainId === CHAIN_IDs.LENS_SEPOLIA &&
+    inputTokenSymbol === "GRASS"
+  ) {
+    return isReceiverContract ? "WGRASS" : "GRASS";
+  }
+
+  if (inputTokenSymbol === "WGRASS") {
+    return "GRASS";
+  }
+
   return outputTokenSymbol;
 }
 
-export function validateBridgeAmount(
-  parsedAmountInput?: BigNumber,
-  isAmountTooLow?: boolean,
-  currentBalance?: BigNumber,
-  maxDeposit?: BigNumber,
-  amountToBridgeAfterSwap?: BigNumber
-) {
+export function validateBridgeAmount(params: {
+  selectedRoute: SelectedRoute;
+  parsedAmountInput?: BigNumber;
+  quoteFees?: GetBridgeFeesResult;
+  currentBalance?: BigNumber;
+  maxDeposit?: BigNumber;
+  amountToBridgeAfterSwap?: BigNumber;
+  universalSwapQuoteError?: Error;
+}) {
+  const {
+    selectedRoute,
+    parsedAmountInput,
+    quoteFees,
+    currentBalance,
+    maxDeposit,
+    amountToBridgeAfterSwap,
+  } = params;
+
   if (!parsedAmountInput || !amountToBridgeAfterSwap) {
     return {
       error: AmountInputError.INVALID,
@@ -120,7 +160,12 @@ export function validateBridgeAmount(
     };
   }
 
-  if (isAmountTooLow) {
+  if (
+    quoteFees?.isAmountTooLow ||
+    // HyperLiquid has a minimum deposit amount of 5 USDC
+    (selectedRoute.externalProjectId === "hyperliquid" &&
+      parsedAmountInput.lt(parseUnits("5.05", 6)))
+  ) {
     return {
       error: AmountInputError.AMOUNT_TOO_LOW,
     };
@@ -132,7 +177,27 @@ export function validateBridgeAmount(
     };
   }
 
+  if (
+    params.universalSwapQuoteError &&
+    axios.isAxiosError(params.universalSwapQuoteError)
+  ) {
+    const responseData = params.universalSwapQuoteError.response?.data as {
+      code?: string;
+    };
+    if (responseData?.code === "SWAP_QUOTE_UNAVAILABLE") {
+      return {
+        error: AmountInputError.SWAP_QUOTE_UNAVAILABLE,
+      };
+    }
+    if (responseData?.code === "AMOUNT_TOO_LOW") {
+      return {
+        error: AmountInputError.AMOUNT_TOO_LOW,
+      };
+    }
+  }
+
   return {
+    warn: undefined,
     error: undefined,
   };
 }
@@ -142,11 +207,28 @@ const defaultRouteFilter = {
   inputTokenSymbol: "ETH",
 };
 
+// for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
+export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
+  if (
+    route.toChain === CHAIN_IDs.LENS &&
+    isStablecoin(route.fromTokenSymbol) &&
+    route.toTokenSymbol !== "GHO"
+  ) {
+    return {
+      ...route,
+      toTokenSymbol: "GHO",
+    };
+  }
+
+  return route;
+}
+
 export function getInitialRoute(filter: RouteFilter = {}) {
-  const routeFromQueryParams = getRouteFromQueryParams(filter);
+  const routeFromUrl = getRouteFromUrl(filter);
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
-      filter.inputTokenSymbol ?? (filter?.fromChain === 137 ? "WETH" : "ETH"),
+      filter.inputTokenSymbol ??
+      (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
     toChain: filter.toChain,
   });
@@ -154,7 +236,9 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return routeFromQueryParams ?? routeFromFilter ?? defaultRoute;
+  return getTokenDefaultsForRoute(
+    routeFromUrl ?? routeFromFilter ?? defaultRoute
+  );
 }
 
 export function findEnabledRoute(
@@ -166,6 +250,7 @@ export function findEnabledRoute(
     swapTokenSymbol,
     fromChain,
     toChain,
+    externalProjectId,
   } = filter;
 
   const commonRouteFilter = (route: Route | SwapRoute) =>
@@ -176,7 +261,10 @@ export function findEnabledRoute(
       ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
       : true) &&
     (fromChain ? route.fromChain === fromChain : true) &&
-    (toChain ? route.toChain === toChain : true);
+    (toChain ? route.toChain === toChain : true) &&
+    (externalProjectId !== undefined
+      ? route.externalProjectId === externalProjectId
+      : true);
 
   if (swapTokenSymbol) {
     const swapRoute = swapRoutes.find(
@@ -194,6 +282,14 @@ export function findEnabledRoute(
       };
     }
   } else {
+    const universalSwapRoute = universalSwapRoutes.find((route) =>
+      commonRouteFilter(route)
+    );
+
+    if (universalSwapRoute) {
+      return { ...universalSwapRoute, type: "universal-swap" };
+    }
+
     const route = enabledRoutes.find((route) => commonRouteFilter(route));
 
     if (route) {
@@ -212,7 +308,8 @@ export type PriorityFilterKey =
   | "swapTokenSymbol"
   | "outputTokenSymbol"
   | "fromChain"
-  | "toChain";
+  | "toChain"
+  | "externalProjectId";
 /**
  * Returns the next best matching route based on the given priority keys and filter.
  * @param priorityFilterKeys Set of filter keys to use if no route is found based on `filter`.
@@ -266,6 +363,7 @@ export function findNextBestRoute(
       "outputTokenSymbol",
       "fromChain",
       "toChain",
+      "externalProjectId",
     ] as const;
     const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
       priorityFilterKeys.includes(key)
@@ -298,7 +396,10 @@ export function getAllTokens() {
     getToken(route.fromTokenSymbol)
   );
   const swapTokens = swapRoutes.map((route) => getToken(route.swapTokenSymbol));
-  return [...routeTokens, ...swapTokens].filter(
+  const universalSwapTokens = universalSwapRoutes.map((route) =>
+    getToken(route.fromTokenSymbol)
+  );
+  return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(
     (token, index, self) =>
       index === self.findIndex((t) => t.symbol === token.symbol)
   );
@@ -306,23 +407,34 @@ export function getAllTokens() {
 
 export function getAvailableInputTokens(
   selectedFromChain: number,
-  selectedToChain: number
+  selectedToChain: number,
+  externalProjectId?: string
 ) {
   const routeTokens = enabledRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain
+        route.toChain === selectedToChain &&
+        route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.fromTokenSymbol));
   const swapTokens = swapRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain
+        route.toChain === selectedToChain &&
+        route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.swapTokenSymbol));
-  return [...routeTokens, ...swapTokens].filter(
+  const universalSwapTokens = universalSwapRoutes
+    .filter(
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain &&
+        route.externalProjectId === externalProjectId
+    )
+    .map((route) => getToken(route.fromTokenSymbol));
+  return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(
     (token, index, self) =>
       index === self.findIndex((t) => t.symbol === token.symbol)
   );
@@ -331,66 +443,134 @@ export function getAvailableInputTokens(
 export function getAvailableOutputTokens(
   selectedFromChain: number,
   selectedToChain: number,
-  selectedInputTokenSymbol: string
+  selectedInputTokenSymbol: string,
+  externalProjectId?: string
 ) {
-  return enabledRoutes
+  const routeTokens = enabledRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
         route.toChain === selectedToChain &&
-        route.fromTokenSymbol === selectedInputTokenSymbol
+        route.fromTokenSymbol === selectedInputTokenSymbol &&
+        route.externalProjectId === externalProjectId
     )
-    .map((route) => getToken(route.toTokenSymbol))
+    .map((route) => getToken(route.toTokenSymbol));
+  const universalSwapTokens = universalSwapRoutes
     .filter(
-      (token, index, self) =>
-        index === self.findIndex((t) => t.symbol === token.symbol)
-    );
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain &&
+        route.fromTokenSymbol === selectedInputTokenSymbol &&
+        route.externalProjectId === externalProjectId
+    )
+    .map((route) => getToken(route.toTokenSymbol));
+
+  return [...routeTokens, ...universalSwapTokens].filter(
+    (token, index, self) =>
+      index === self.findIndex((t) => t.symbol === token.symbol)
+  );
 }
 
-export function getAllChains() {
-  return enabledRoutes
-    .map((route) => getChainInfo(route.fromChain))
-    .filter(
-      (chain, index, self) =>
-        index ===
-        self.findIndex((fromChain) => fromChain.chainId === chain.chainId)
-    )
-    .sort((a, b) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
+export const ChainType = {
+  FROM: "from",
+  TO: "to",
+  ALL: "all",
+} as const;
+
+export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
+
+export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  let chainIds: number[] = [];
+
+  switch (chainType) {
+    case ChainType.FROM:
+      chainIds = enabledRoutes.map((route) => route.fromChain);
+      break;
+    case ChainType.TO:
+      chainIds = enabledRoutes.map((route) => route.toChain);
+      break;
+    case ChainType.ALL:
+    default:
+      chainIds = enabledRoutes.flatMap((route) => [
+        route.fromChain,
+        route.toChain,
+      ]);
+      break;
+  }
+
+  const uniqueChainIds = Array.from(new Set(chainIds));
+
+  const uniqueChains = uniqueChainIds.flatMap((chainId) => {
+    return [
+      { ...getChainInfo(chainId), projectId: undefined },
+      ...Object.values(externConfigs)
+        .filter(
+          ({ intermediaryChain, projectId }) =>
+            chainType !== "from" &&
+            intermediaryChain === chainId &&
+            enabledRoutes.some((route) => route.externalProjectId === projectId)
+        )
+        .map((extern) => ({
+          ...extern,
+          chainId: extern.intermediaryChain,
+        })),
+    ];
+  });
+
+  return uniqueChains.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
 }
 
-export function getRouteFromQueryParams(overrides?: RouteFilter) {
+export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
+
+  const preferredToChain =
+    chainEndpointToId[window.location.pathname.substring(1)];
+
+  const preferredExternalProject =
+    externConfigs[window.location.pathname.substring(1)];
 
   const fromChain =
     Number(
       params.get("from") ??
         params.get("fromChain") ??
         params.get("originChainId") ??
-        overrides?.fromChain
+        // If an external project is defined, we need to ignore the overrided fromChain
+        // only if the from chain is an intermediary chain of the project
+        (isDefined(preferredExternalProject)
+          ? preferredExternalProject.intermediaryChain === overrides?.fromChain
+            ? undefined
+            : overrides?.fromChain
+          : overrides?.fromChain)
     ) || undefined;
 
-  const toChain =
-    Number(
-      params.get("to") ??
-        params.get("toChain") ??
-        params.get("destinationChainId") ??
-        overrides?.toChain
-    ) || undefined;
+  const toChain = isDefined(preferredExternalProject)
+    ? preferredExternalProject.intermediaryChain
+    : Number(
+        preferredToChain?.chainId ??
+          params.get("to") ??
+          params.get("toChain") ??
+          params.get("destinationChainId") ??
+          overrides?.toChain
+      ) || undefined;
+
+  const externalProjectId =
+    preferredExternalProject?.projectId ||
+    params.get("externalProjectId") ||
+    undefined;
 
   const inputTokenSymbol =
     params.get("inputTokenSymbol") ??
     params.get("inputToken") ??
     params.get("token") ??
     overrides?.inputTokenSymbol;
-  undefined;
 
   const outputTokenSymbol =
     params.get("outputTokenSymbol") ??
@@ -403,7 +583,12 @@ export function getRouteFromQueryParams(overrides?: RouteFilter) {
     toChain,
     inputTokenSymbol,
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
+    externalProjectId,
   };
+
+  if (Object.values(filter).every((value) => !value)) {
+    return undefined;
+  }
 
   const route =
     findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||
@@ -434,44 +619,126 @@ export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
 }
 
 export function calcFeesForEstimatedTable(params: {
-  capitalFee?: BigNumber;
-  lpFee?: BigNumber;
-  gasFee?: BigNumber;
+  capitalFee?: BigNumberish;
+  lpFee?: BigNumberish;
+  gasFee?: BigNumberish;
   isSwap: boolean;
-  parsedAmount?: BigNumber;
+  isUniversalSwap: boolean;
+  parsedAmount?: BigNumberish;
   swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
+  convertInputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertOutputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
 }) {
   if (
     !params.capitalFee ||
     !params.lpFee ||
     !params.gasFee ||
     !params.parsedAmount ||
-    (params.isSwap && !params.swapQuote)
+    (params.isSwap && !params.swapQuote) ||
+    (params.isUniversalSwap && !params.universalSwapQuote)
   ) {
     return;
   }
 
+  const parsedAmount = BigNumber.from(params.parsedAmount || 0);
+  const capitalFee = BigNumber.from(
+    params.universalSwapQuote
+      ? params.universalSwapQuote.steps.bridge.fees.relayerCapital.total
+      : params.capitalFee || 0
+  );
+  const lpFee = BigNumber.from(
+    params.universalSwapQuote
+      ? params.universalSwapQuote.steps.bridge.fees.lp.total
+      : params.lpFee || 0
+  );
+  const gasFee = BigNumber.from(
+    params.universalSwapQuote
+      ? params.universalSwapQuote.steps.bridge.fees.totalRelay.total
+      : params.gasFee || 0
+  );
   // We display the sum of capital + lp fee as "bridge fee" in `EstimatedTable`.
-  const bridgeFee = params.capitalFee.add(params.lpFee);
-  const totalRelayFee = params.gasFee.add(bridgeFee);
-  const swapFee =
+  const bridgeFee = capitalFee.add(lpFee);
+
+  const parsedAmountUsd =
+    params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
+  const gasFeeUsd = params.convertBridgeTokenToUsd(gasFee) || BigNumber.from(0);
+  const bridgeFeeUsd =
+    params.convertBridgeTokenToUsd(bridgeFee) || BigNumber.from(0);
+  const capitalFeeUsd =
+    params.convertBridgeTokenToUsd(capitalFee) || BigNumber.from(0);
+  const lpFeeUsd = params.convertBridgeTokenToUsd(lpFee) || BigNumber.from(0);
+  const totalRelayFeeUsd = gasFeeUsd.add(bridgeFeeUsd);
+  const swapFeeUsd =
     params.isSwap && params.swapQuote
-      ? params.parsedAmount.sub(params.swapQuote.minExpectedInputTokenAmount)
-      : BigNumber.from(0);
-  const totalFee = totalRelayFee.add(swapFee);
-  const outputAmount = params.parsedAmount.sub(totalFee);
+      ? calcSwapFeeUsd(params)
+      : params.isUniversalSwap && params.universalSwapQuote
+        ? calcUniversalSwapFeeUsd(params)
+        : BigNumber.from(0);
+  const totalFeeUsd = totalRelayFeeUsd.add(swapFeeUsd);
+  const outputAmountUsd = parsedAmountUsd.sub(totalFeeUsd);
 
   return {
-    gasFee: params.gasFee,
-    lpFee: params.lpFee,
-    capitalFee: params.capitalFee,
-    bridgeFee,
-    totalRelayFee,
-    swapFee,
-    totalFee,
-    outputAmount,
-    swapQuote: params.swapQuote,
+    parsedAmountUsd,
+    gasFeeUsd,
+    bridgeFeeUsd,
+    capitalFeeUsd,
+    lpFeeUsd,
+    totalRelayFeeUsd,
+    swapFeeUsd,
+    totalFeeUsd,
+    outputAmountUsd,
   };
+}
+
+function calcSwapFeeUsd(params: {
+  parsedAmount?: BigNumberish;
+  swapQuote?: SwapQuoteApiResponse;
+  convertInputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+}) {
+  if (!params.swapQuote || !params.parsedAmount) {
+    return BigNumber.from(0);
+  }
+  const parsedInputAmountUsd =
+    params.convertInputTokenToUsd(BigNumber.from(params.parsedAmount)) ||
+    BigNumber.from(0);
+  const swapFeeUsd = parsedInputAmountUsd.sub(
+    params.convertBridgeTokenToUsd(
+      BigNumber.from(params.swapQuote.minExpectedInputTokenAmount)
+    ) || BigNumber.from(0)
+  );
+  return swapFeeUsd;
+}
+
+function calcUniversalSwapFeeUsd(params: {
+  parsedAmount?: BigNumberish;
+  universalSwapQuote?: UniversalSwapQuote;
+  convertInputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertOutputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+}) {
+  if (!params.universalSwapQuote || !params.parsedAmount) {
+    return BigNumber.from(0);
+  }
+  const parsedAmount = BigNumber.from(params.parsedAmount || 0);
+  const { steps } = params.universalSwapQuote;
+  const parsedInputAmountUsd =
+    params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
+  const originSwapFeeUsd = parsedInputAmountUsd.sub(
+    params.convertBridgeTokenToUsd(steps.bridge.inputAmount) ||
+      BigNumber.from(0)
+  );
+  const destinationSwapFeeUsd = (
+    params.convertBridgeTokenToUsd(steps.bridge.outputAmount) ||
+    BigNumber.from(0)
+  ).sub(
+    params.convertOutputTokenToUsd(
+      steps.destinationSwap?.outputAmount || steps.bridge.outputAmount
+    ) || BigNumber.from(0)
+  );
+  return originSwapFeeUsd.add(destinationSwapFeeUsd);
 }
 
 export function getOutputTokenSymbol(
@@ -495,4 +762,36 @@ export function calcSwapPriceImpact(
         .mul(fixedPointAdjustment)
         .div(amountInput)
     : BigNumber.from(0);
+}
+
+export function getTokensForFeesCalc(params: {
+  swapToken?: TokenInfo;
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
+  isUniversalSwap: boolean;
+  universalSwapQuote?: UniversalSwapQuote;
+  fromChainId: number;
+  toChainId: number;
+}) {
+  const inputToken = params.swapToken || params.inputToken;
+  const bridgeToken =
+    params.isUniversalSwap && params.universalSwapQuote
+      ? config.getTokenInfoBySymbol(
+          params.fromChainId,
+          params.universalSwapQuote.steps.bridge.tokenIn.symbol
+        )
+      : inputToken;
+  const outputToken =
+    params.isUniversalSwap && params.universalSwapQuote
+      ? config.getTokenInfoBySymbol(
+          params.toChainId,
+          params.universalSwapQuote.steps.destinationSwap?.tokenOut.symbol ||
+            params.universalSwapQuote.steps.bridge.tokenOut.symbol
+        )
+      : params.outputToken;
+  return {
+    inputToken,
+    outputToken,
+    bridgeToken,
+  };
 }

@@ -1,4 +1,5 @@
 import { BigNumber, utils as ethersUtils } from "ethers";
+import { useAvailableRemainingRewards } from "hooks/useAvailableRemainingRewards";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
@@ -39,12 +40,17 @@ export function useEstimatedRewards(
     rewardProgram = undefined;
   }
 
-  const rewardToken = rewardProgram
-    ? getToken(rewardProgram.rewardTokenSymbol)
-    : undefined;
-  const availableRewardPercentage = rewardProgram
-    ? parseUnits(String(rewardProgram.highestPct), 18)
-    : undefined;
+  const { areRewardTokensAvailable } =
+    useAvailableRemainingRewards(rewardProgramName);
+
+  const rewardToken =
+    rewardProgram && areRewardTokensAvailable
+      ? getToken(rewardProgram.rewardTokenSymbol)
+      : undefined;
+  const availableRewardPercentage =
+    rewardProgram && areRewardTokensAvailable
+      ? parseUnits(String(rewardProgram.highestPct), 18)
+      : undefined;
 
   // Rewards are handled in the previous day so we need to convert the current UTC date to the previous day
   // As a note: if the current time is before 03:00 UTC, we need to actually go back two days because the

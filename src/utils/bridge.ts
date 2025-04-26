@@ -1,17 +1,26 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers, BigNumber, utils } from "ethers";
 import {
+  acrossPlusMulticallHandler,
   ChainId,
   fixedPointAdjustment,
+  getToken,
+  hyperLiquidBridge2Address,
   referrerDelimiterHex,
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import { getConfig, isContractDeployedToAddress } from "utils";
+import {
+  generateHyperLiquidPayload,
+  getConfig,
+  isContractDeployedToAddress,
+  toBytes32,
+} from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
 import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
 import { SpokePool, SpokePoolVerifier } from "./typechain";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -31,6 +40,7 @@ export type BridgeFees = {
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
   exclusivityDeadline: number;
+  fillDeadline: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -40,11 +50,74 @@ type GetBridgeFeesArgs = {
   fromChainId: ChainId;
   toChainId: ChainId;
   recipientAddress?: string;
+  message?: string;
 };
 
 export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
 };
+
+export async function getBridgeFeesWithExternalProjectId(
+  externalProjectId: string,
+  args: GetBridgeFeesArgs
+) {
+  let message = undefined;
+  let recipientAddress = args.recipientAddress;
+
+  if (externalProjectId === "hyperliquid") {
+    const arbitrumProvider = getProvider(CHAIN_IDs.ARBITRUM);
+    const wallet = ethers.Wallet.createRandom();
+    const signer = new ethers.Wallet(wallet.privateKey, arbitrumProvider);
+    const recipient = await signer.getAddress();
+
+    // Build the payload
+    const hyperLiquidPayload = await generateHyperLiquidPayload(
+      signer,
+      recipient,
+      args.amount
+    );
+    // Create a txn calldata for transfering amount to recipient
+    const erc20Interface = new utils.Interface([
+      "function transfer(address to, uint256 amount) returns (bool)",
+    ]);
+
+    const transferCalldata = erc20Interface.encodeFunctionData("transfer", [
+      recipient,
+      args.amount,
+    ]);
+
+    // Encode Instructions struct directly
+    message = utils.defaultAbiCoder.encode(
+      [
+        "tuple(tuple(address target, bytes callData, uint256 value)[] calls, address fallbackRecipient)",
+      ],
+      [
+        {
+          calls: [
+            {
+              target: getToken("USDC").addresses![CHAIN_IDs.ARBITRUM],
+              callData: transferCalldata,
+              value: 0,
+            },
+            {
+              target: hyperLiquidBridge2Address,
+              callData: hyperLiquidPayload,
+              value: 0,
+            },
+          ],
+          fallbackRecipient: recipient,
+        },
+      ]
+    );
+    recipientAddress = acrossPlusMulticallHandler[args.toChainId];
+  }
+
+  return getBridgeFees({
+    ...args,
+    recipientAddress,
+    message,
+  });
+}
 
 /**
  *
@@ -62,6 +135,7 @@ export async function getBridgeFees({
   fromChainId,
   toChainId,
   recipientAddress,
+  message,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const timeBeforeRequests = Date.now();
   const {
@@ -76,13 +150,15 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    fillDeadline,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
     getConfig().getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
     toChainId,
     fromChainId,
-    recipientAddress
+    recipientAddress,
+    message
   );
   const timeAfterRequests = Date.now();
 
@@ -102,6 +178,7 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    fillDeadline,
   };
 }
 
@@ -125,13 +202,13 @@ export const getConfirmationDepositTime = (
   const timing = Math.floor(inMinutes ? timeToFill / 60 : timeToFill);
 
   return {
-    formattedString: `~${timing} ${inMinutes ? "minute" : "second"}${timing > 1 ? "s" : ""}`,
+    formattedString: `~${timing} ${inMinutes ? "min" : "sec"}${timing > 1 ? "s" : ""}`,
     lowEstimate: timeToFill,
     highEstimate: timeToFill,
   };
 };
 
-export type AcrossDepositArgs = {
+export type AcrossDepositV3Args = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
@@ -144,12 +221,9 @@ export type AcrossDepositArgs = {
   referrer?: string;
   isNative: boolean;
   integratorId: string;
-};
-
-export type AcrossDepositV3Args = AcrossDepositArgs & {
   inputTokenAddress: string;
   outputTokenAddress: string;
-  fillDeadline?: number;
+  fillDeadline: number;
   exclusivityDeadline?: number;
   exclusiveRelayer?: string;
 };
@@ -161,16 +235,14 @@ type NetworkMismatchHandler = (
 /**
  * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
+ * @param depositArgs - An object containing the {@link AcrossDepositV3Args arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendSpokePoolVerifierDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
-    tokenAddress,
     amount,
-    maxCount = ethers.constants.MaxUint256,
     toAddress: recipient,
     toChain: destinationChainId,
     relayerFeePct,
@@ -178,23 +250,38 @@ export async function sendSpokePoolVerifierDepositTx(
     message = "0x",
     isNative,
     referrer,
+    fillDeadline,
+    inputTokenAddress,
+    exclusiveRelayer = ethers.constants.AddressZero,
+    exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositArgs,
+  }: AcrossDepositV3Args,
   spokePool: SpokePool,
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
+  if (!isNative) {
+    throw new Error(
+      "SpokePoolVerifier should only be used for native deposits"
+    );
+  }
+  const inputAmount = amount;
+  const outputAmount = inputAmount.sub(
+    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+  );
   const tx = await spokePoolVerifier.populateTransaction.deposit(
     spokePool.address,
-    recipient,
-    tokenAddress,
-    amount,
+    toBytes32(recipient),
+    toBytes32(inputTokenAddress),
+    inputAmount,
+    outputAmount,
     destinationChainId,
-    relayerFeePct,
+    toBytes32(exclusiveRelayer),
     quoteTimestamp,
+    fillDeadline,
+    exclusivityDeadline,
     message,
-    maxCount,
-    { value: isNative ? amount : ethers.constants.Zero }
+    { value: inputAmount }
   );
 
   return _tagRefAndSignTx(
@@ -235,11 +322,6 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
-
-  const useExclusiveRelayer =
-    exclusiveRelayer !== ethers.constants.AddressZero &&
-    exclusivityDeadline > 0;
 
   const depositArgs = [
     await signer.getAddress(),
@@ -257,9 +339,7 @@ export async function sendDepositV3Tx(
     { value },
   ] as const;
 
-  const tx = useExclusiveRelayer
-    ? await spokePool.populateTransaction.depositExclusive(...depositArgs)
-    : await spokePool.populateTransaction.depositV3(...depositArgs);
+  const tx = await spokePool.populateTransaction.depositV3(...depositArgs);
 
   return _tagRefAndSignTx(
     tx,
@@ -284,9 +364,7 @@ export async function sendSwapAndBridgeTx(
     isNative,
     referrer,
     fillDeadline,
-    inputTokenAddress,
     outputTokenAddress,
-    swapTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     swapQuote,
@@ -331,25 +409,10 @@ export async function sendSwapAndBridgeTx(
     );
   }
 
-  const [_swapTokenAddress, _acrossInputTokenAddress] = await Promise.all([
-    swapAndBridge.SWAP_TOKEN(),
-    swapAndBridge.ACROSS_INPUT_TOKEN(),
-  ]);
-
-  if (
-    swapTokenAddress.toLowerCase() !== _swapTokenAddress.toLowerCase() ||
-    inputTokenAddress.toLowerCase() !== _acrossInputTokenAddress.toLowerCase()
-  ) {
-    throw new Error(
-      `Mismatch between the SwapAndBridge contract's swap token and input token addresses`
-    );
-  }
-
   const inputAmount = BigNumber.from(swapQuote.minExpectedInputTokenAmount);
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
@@ -421,17 +484,6 @@ export async function getSpokePoolAndVerifier({
     spokePoolVerifier,
     shouldUseSpokePoolVerifier,
   };
-}
-
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 async function _tagRefAndSignTx(

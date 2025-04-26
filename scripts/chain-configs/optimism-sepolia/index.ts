@@ -17,7 +17,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://sepolia.optimism.io",
-  tokens: [],
+  tokens: ["ETH", "WETH", "USDC", "XYZ"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

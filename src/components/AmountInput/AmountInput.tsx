@@ -1,18 +1,21 @@
 import styled from "@emotion/styled";
 import { BigNumber, utils } from "ethers";
 
-import { Text } from "components/Text";
-import { UnstyledButton } from "components/Button";
-import { Tooltip } from "components/Tooltip";
-import { IconPair } from "components/IconPair";
-import {
-  QUERIESV2,
-  getToken,
-  isDefined,
-  formatUnitsWithMaxFractions,
-} from "utils";
-import { ReactComponent as II } from "assets/icons/info.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
+import { UnstyledButton } from "components/Button";
+import { IconPair } from "components/IconPair";
+import { Text } from "components/Text";
+import { Tooltip } from "components/Tooltip";
+import { useTokenConversion } from "hooks/useTokenConversion";
+import {
+  COLORS,
+  QUERIESV2,
+  formatUSD,
+  formatUnitsWithMaxFractions,
+  getToken,
+  isNumberEthersParseable,
+  parseUnits,
+} from "utils";
 
 export type Props = {
   balance?: BigNumber;
@@ -22,6 +25,7 @@ export type Props = {
   onClickMaxBalance: () => void;
   inputTokenSymbol: string;
   validationError?: string;
+  validationWarning?: string;
   dataCy?: string;
   disableErrorText?: boolean;
   disableInput?: boolean;
@@ -38,6 +42,7 @@ export function AmountInput({
   onClickMaxBalance,
   inputTokenSymbol,
   validationError,
+  validationWarning,
   disableErrorText,
   disableInput,
   disableMaxButton,
@@ -45,12 +50,33 @@ export function AmountInput({
 }: Props) {
   const token = getToken(inputTokenSymbol);
 
-  const isAmountValid =
-    (amountInput ?? "") === "" || !isDefined(validationError);
+  const validationLevel =
+    (amountInput ?? "") === ""
+      ? "valid"
+      : validationError
+        ? "error"
+        : validationWarning
+          ? "warning"
+          : "valid";
+
+  const { convertTokenToBaseCurrency } = useTokenConversion(
+    inputTokenSymbol,
+    "usd"
+  );
+
+  const inputAmountAsNumeric = isNumberEthersParseable(
+    amountInput,
+    token.decimals
+  )
+    ? parseUnits(amountInput, token.decimals)
+    : undefined;
+
+  const estimatedUsdInputAmount =
+    convertTokenToBaseCurrency(inputAmountAsNumeric);
 
   return (
     <Wrapper>
-      <InputGroupWrapper valid={isAmountValid}>
+      <InputGroupWrapper validationLevel={validationLevel}>
         {displayTokenIcon ? (
           token.logoURIs?.length === 2 ? (
             <IconPairContainer>
@@ -66,7 +92,7 @@ export function AmountInput({
         ) : null}
         <Input
           type="number"
-          valid={isAmountValid}
+          validationLevel={validationLevel}
           placeholder="Enter amount"
           value={amountInput}
           onWheel={(e) => e.currentTarget.blur()}
@@ -106,14 +132,18 @@ export function AmountInput({
           </MaxButtonWrapper>
         </BalanceAndMaxWrapper>
       </InputGroupWrapper>
-      {!isAmountValid && !disableErrorText && (
-        <ErrorWrapper>
-          <ErrorIcon />
-          <Text size="sm" color="error">
-            {validationError}
+      <InfoTextWrapper>
+        {estimatedUsdInputAmount && amountInput !== "" && (
+          <Text size="md" color="grey-400">
+            ${formatUSD(estimatedUsdInputAmount)}
           </Text>
-        </ErrorWrapper>
-      )}
+        )}
+        {validationLevel !== "valid" && !disableErrorText && (
+          <Text size="md" color={validationError ? "error" : "warning"}>
+            {validationError || validationWarning}
+          </Text>
+        )}
+      </InfoTextWrapper>
     </Wrapper>
   );
 }
@@ -121,13 +151,28 @@ export function AmountInput({
 export default AmountInput;
 
 interface IValidInput {
-  valid: boolean;
+  validationLevel: "valid" | "error" | "warning";
 }
+
+const colorMap = {
+  valid: {
+    border: COLORS["grey-600"],
+    text: COLORS["white-100"],
+  },
+  error: {
+    border: COLORS.red,
+    text: COLORS.red,
+  },
+  warning: {
+    border: COLORS.yellow,
+    text: COLORS.yellow,
+  },
+};
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 `;
 
@@ -137,7 +182,7 @@ const InputGroupWrapper = styled.div<IValidInput>`
   align-items: center;
   padding: 9px 12px 9px 16px;
   background: #2d2e33;
-  border: 1px solid ${({ valid }) => (valid ? "#3E4047" : "#f96c6c")};
+  border: 1px solid ${({ validationLevel }) => colorMap[validationLevel].border};
   border-radius: 12px;
   height: 48px;
   gap: 8px;
@@ -151,9 +196,7 @@ const Input = styled.input<IValidInput>`
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
-  color: #e0f3ff;
-
-  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
+  color: ${({ validationLevel }) => colorMap[validationLevel].text};
   background: none;
 
   width: 100%;
@@ -244,26 +287,6 @@ const MaxButtonWrapper = styled(UnstyledButton)`
   }
 `;
 
-const ErrorWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-end;
-  padding: 0px;
-  gap: 8px;
-
-  width: 100%;
-`;
-
-const ErrorIcon = styled(II)`
-  height: 16px;
-  width: 16px;
-
-  & path {
-    stroke: #f96c6c !important;
-  }
-`;
-
 const TokenIcon = styled.img`
   height: 16px;
   width: 16px;
@@ -272,4 +295,12 @@ const TokenIcon = styled.img`
 const IconPairContainer = styled.div`
   padding-top: 0px;
   margin-right: 8px;
+`;
+
+const InfoTextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  padding-left: 17px; /* 16px padding + 1px border */
 `;

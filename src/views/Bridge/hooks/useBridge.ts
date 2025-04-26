@@ -42,7 +42,13 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
-  const { transferQuoteQuery, limitsQuery, feesQuery } = useTransferQuote(
+  const {
+    transferQuoteQuery,
+    limitsQuery,
+    feesQuery,
+    swapQuoteQuery,
+    universalSwapQuoteQuery,
+  } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : bnZero,
     swapSlippage,
@@ -51,25 +57,42 @@ export function useBridge() {
   );
   const { data: transferQuote } = transferQuoteQuery;
 
-  const { quotedFees, quotedSwap, quotedLimits, estimatedTime } =
-    usedTransferQuote || {};
+  const {
+    quotedFees,
+    quotedSwap,
+    quotedLimits,
+    estimatedTime,
+    quotedUniversalSwap,
+  } = usedTransferQuote || {};
 
   const isQuoteUpdating =
     shouldUpdateQuote &&
-    (transferQuoteQuery.isInitialLoading || feesQuery.isInitialLoading) &&
+    (transferQuoteQuery.isLoading ||
+      feesQuery.isLoading ||
+      (selectedRoute.type === "swap" ? swapQuoteQuery.isLoading : false) ||
+      (selectedRoute.type === "universal-swap"
+        ? universalSwapQuoteQuery.isLoading
+        : false)) &&
     !transferQuote;
   const isManualRebalancer =
     account && manualRebalancerAddresses.includes(utils.getAddress(account));
 
-  const { error: amountValidationError } = validateBridgeAmount(
-    parsedAmount,
-    quotedFees?.isAmountTooLow,
-    maxBalance,
-    isManualRebalancer ? constants.MaxUint256 : limitsQuery.limits?.maxDeposit,
-    selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
-      ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
-      : parsedAmount
-  );
+  const { error: amountValidationError, warn: amountValidationWarning } =
+    validateBridgeAmount({
+      selectedRoute,
+      parsedAmountInput: parsedAmount,
+      quoteFees: quotedFees,
+      currentBalance: maxBalance,
+      maxDeposit: isManualRebalancer ? constants.MaxUint256 : limitsQuery.limits?.maxDeposit,
+      amountToBridgeAfterSwap:
+        selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
+          ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
+          : selectedRoute.type === "universal-swap" && quotedUniversalSwap
+            ? quotedUniversalSwap?.steps.bridge.inputAmount
+            : parsedAmount,
+      universalSwapQuoteError: universalSwapQuoteQuery.error ?? undefined,
+    });
+
   const isAmountValid = !amountValidationError;
 
   const {
@@ -126,6 +149,7 @@ export function useBridge() {
     limits: transferQuote ? quotedLimits : limitsQuery.limits,
     fees: quotedFees,
     swapQuote: quotedSwap,
+    universalSwapQuote: quotedUniversalSwap,
     balance,
     handleQuickSwap,
     isWrongChain: isWrongNetwork,
@@ -140,6 +164,7 @@ export function useBridge() {
     userAmountInput,
     swapSlippage,
     amountValidationError,
+    amountValidationWarning,
     handleSelectFromChain,
     handleSelectToChain,
     handleSelectInputToken,

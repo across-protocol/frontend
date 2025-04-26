@@ -15,6 +15,8 @@ import snxLogo from "assets/token-logos/snx.svg";
 import pooltogetherLogo from "assets/token-logos/pool.svg";
 import lskLogo from "assets/token-logos/lsk.svg";
 import usdbLogo from "assets/token-logos/usdb.svg";
+import ghoLogo from "assets/token-logos/gho.svg";
+import unknownLogo from "assets/icons/question-circle.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
 
@@ -29,6 +31,8 @@ export type TokenInfo = {
   // optional display symbol for tokens that have a different symbol on the frontend
   displaySymbol?: string;
   addresses?: Record<number, string>;
+  // optional, if this is a stable coin
+  isStable?: boolean;
 };
 export type TokenInfoList = TokenInfo[];
 
@@ -83,4 +87,13 @@ export const orderedTokenLogos = {
   OP: optimismLogo,
   ARB: arbitrumLogo,
   LSK: lskLogo,
+  GRASS: unknownLogo,
+  WGRASS: unknownLogo,
+  XYZ: unknownLogo,
+  GHO: ghoLogo,
+  WGHO: ghoLogo,
+  "TATARA-USDC": usdcLogo,
+  "TATARA-USDS": unknownLogo,
+  "TATARA-USDT": usdtLogo,
+  "TATARA-WBTC": wbtcLogo,
 };

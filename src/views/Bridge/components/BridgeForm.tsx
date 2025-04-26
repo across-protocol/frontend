@@ -5,7 +5,6 @@ import { Clock, Info } from "react-feather";
 import ExternalCardWrapper from "components/CardWrapper";
 import { PrimaryButton, SecondaryButton } from "components/Button";
 import { Alert, Text } from "components";
-import { InputErrorText } from "components/AmountInput";
 
 import QuickSwap from "./QuickSwap";
 import { AmountInput } from "./AmountInput";
@@ -20,9 +19,9 @@ import {
   GetBridgeFeesResult,
   QUERIESV2,
   chainIdToRewardsProgramName,
-  formatUnitsWithMaxFractions,
   formatWeiPct,
   rewardProgramsAvailable,
+  COLORS,
 } from "utils";
 import { VoidHandler } from "utils/types";
 
@@ -36,6 +35,7 @@ import { ToAccount } from "../hooks/useToAccount";
 import { BridgeLimits, useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { Tooltip } from "components/Tooltip";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -48,8 +48,8 @@ export type BridgeFormProps = {
   onClickMaxBalance: VoidHandler;
   onSelectInputToken: (token: string) => void;
   onSelectOutputToken: (token: string) => void;
-  onSelectFromChain: (chainId: number) => void;
-  onSelectToChain: (chainId: number) => void;
+  onSelectFromChain: (chainId: number, externalProjectId?: string) => void;
+  onSelectToChain: (chainId: number, externalProjectId?: string) => void;
   onClickQuickSwap: VoidHandler;
   onClickChainSwitch: VoidHandler;
   onClickActionButton: VoidHandler;
@@ -61,25 +61,14 @@ export type BridgeFormProps = {
   estimatedTimeString?: string;
   balance?: BigNumber;
   swapQuote?: SwapQuoteApiResponse;
-
+  universalSwapQuote?: UniversalSwapQuote;
   isConnected: boolean;
   isWrongChain: boolean;
   buttonLabel: string;
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
+  validationWarning?: AmountInputError;
   isQuoteLoading: boolean;
-};
-
-const validationErrorTextMap = {
-  [AmountInputError.INSUFFICIENT_BALANCE]:
-    "Insufficient balance to process this transfer.",
-  [AmountInputError.PAUSED_DEPOSITS]:
-    "[INPUT_TOKEN] deposits are temporarily paused.",
-  [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
-  [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
-  [AmountInputError.AMOUNT_TOO_LOW]:
-    "The amount you are trying to bridge is too low.",
 };
 
 // If swap price impact is lower than this threshold, show a warning
@@ -109,11 +98,13 @@ const BridgeForm = ({
   estimatedTimeString,
   balance,
   swapQuote,
+  universalSwapQuote,
 
   isConnected,
   buttonLabel,
   isBridgeDisabled,
   validationError,
+  validationWarning,
   isQuoteLoading,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
@@ -149,12 +140,12 @@ const BridgeForm = ({
           program={programName}
         />
       )}
-      <RowWrapper>
-        <RowLabelWrapper>
+      <AmountRowWrapper>
+        <AmountRowLabelWrapper>
           <Text size="md" color="grey-400">
             Send
           </Text>
-        </RowLabelWrapper>
+        </AmountRowLabelWrapper>
         <InputWrapper>
           <AmountInput
             amountInput={amountInput}
@@ -162,7 +153,11 @@ const BridgeForm = ({
             onChangeAmountInput={onChangeAmountInput}
             onClickMaxBalance={onClickMaxBalance}
             validationError={parsedAmountInput ? validationError : undefined}
+            validationWarning={
+              parsedAmountInput ? validationWarning : undefined
+            }
             balance={balance}
+            limits={limits}
           />
         </InputWrapper>
         <TokenSelectorWrapper>
@@ -172,20 +167,7 @@ const BridgeForm = ({
             inputOrOutputToken="input"
           />
         </TokenSelectorWrapper>
-      </RowWrapper>
-      {parsedAmountInput && validationError && (
-        <InputErrorText
-          errorText={validationErrorTextMap[validationError]
-            .replace("[INPUT_TOKEN]", selectedRoute.fromTokenSymbol)
-            .replace(
-              "[MAX_DEPOSIT]",
-              `${formatUnitsWithMaxFractions(
-                limits?.maxDeposit || 0,
-                getToken(selectedRoute.fromTokenSymbol).decimals
-              )} ${selectedRoute.fromTokenSymbol}`
-            )}
-        />
-      )}
+      </AmountRowWrapper>
       <RowWrapper>
         <RowLabelWrapper>
           <Text size="md" color="grey-400">
@@ -199,20 +181,25 @@ const BridgeForm = ({
         />
       </RowWrapper>
       <FillTimeRowWrapper>
+        <FillTimeRowUnderlay>
+          <Divider />
+        </FillTimeRowUnderlay>
         <QuickSwapRowLabelWrapper>
           <QuickSwap onQuickSwap={onClickQuickSwap} />
         </QuickSwapRowLabelWrapper>
-        <Divider />
+        <Spacer />
         <FillTimeWrapper>
           <Clock color="#9DAAB3" size="16" />
-          <Text size="md" color="grey-400">
-            {estimatedTimeString || ""}
-          </Text>
+          {estimatedTimeString && (
+            <Text size="md" color="grey-400">
+              {estimatedTimeString}
+            </Text>
+          )}
         </FillTimeWrapper>
         <QuickSwapWrapperMobile>
           <QuickSwap onQuickSwap={onClickQuickSwap} />
         </QuickSwapWrapperMobile>
-        <Divider />
+        <Spacer />
       </FillTimeRowWrapper>
       <RowWrapper>
         <RowLabelWrapper>
@@ -234,7 +221,7 @@ const BridgeForm = ({
           />
         </TokenSelectorWrapper>
       </RowWrapper>
-      {toAccount && (
+      {toAccount && selectedRoute.externalProjectId !== "hyperliquid" && (
         <RowWrapper>
           <RecipientRow
             onClickChangeToAddress={onClickChangeToAddress}
@@ -275,12 +262,14 @@ const BridgeForm = ({
         fromChainId={selectedRoute.fromChain}
         toChainId={selectedRoute.toChain}
         isSwap={selectedRoute.type === "swap"}
+        isUniversalSwap={selectedRoute.type === "universal-swap"}
         quotedLimits={limits}
         gasFee={fees?.relayerGasFee.total}
         capitalFee={fees?.relayerCapitalFee.total}
         lpFee={fees?.lpFee.total}
         parsedAmount={parsedAmountInput}
         swapQuote={swapQuote}
+        universalSwapQuote={universalSwapQuote}
         inputToken={getToken(selectedRoute.fromTokenSymbol)}
         outputToken={getToken(receiveTokenSymbol)}
         swapToken={
@@ -334,7 +323,12 @@ const RowLabelWrapper = styled.div`
   }
 `;
 
+const AmountRowLabelWrapper = styled(RowLabelWrapper)`
+  padding-top: 12px;
+`;
+
 const QuickSwapRowLabelWrapper = styled(RowLabelWrapper)`
+  z-index: 1;
   @media ${QUERIESV2.sm.andDown} {
     display: none;
   }
@@ -355,16 +349,26 @@ const RowWrapper = styled.div`
 `;
 
 const FillTimeRowWrapper = styled(RowWrapper)`
+  position: relative;
   @media ${QUERIESV2.sm.andDown} {
+    gap: 0px;
     flex-direction: row;
     align-items: center;
   }
 `;
 
+const AmountRowWrapper = styled(RowWrapper)`
+  align-items: start;
+`;
+
 const QuickSwapWrapperMobile = styled.div`
   display: none;
 
+  background-color: ${COLORS["black-700"]};
+  padding-right: 12px;
+
   @media ${QUERIESV2.sm.andDown} {
+    z-index: 1;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -391,7 +395,20 @@ const TokenSelectorWrapper = styled.div`
 const Divider = styled.div`
   height: 1px;
   width: 100%;
-  background: #3f4047;
+  background-image: radial-gradient(circle, #3f4047 0%, #3f404700 100%);
+`;
+
+const Spacer = styled.div`
+  height: 1px;
+  width: 100%;
+`;
+
+const FillTimeRowUnderlay = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 0;
+  width: 100%;
 `;
 
 const FillTimeWrapper = styled.div`
@@ -400,6 +417,9 @@ const FillTimeWrapper = styled.div`
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  background: ${() => COLORS["black-700"]};
+  padding: 0px 12px;
+  z-index: 1;
 `;
 
 const Button = styled(PrimaryButton)`

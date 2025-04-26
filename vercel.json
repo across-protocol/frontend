@@ -8,17 +8,42 @@
     {
       "path": "/api/cron-cache-gas-prices",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-cache-gas-costs",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-cache-l1-data-fee",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-ping-endpoints",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-cache-l1-token-configs",
+      "schedule": "0 * * * *"
     }
   ],
   "functions": {
     "api/cron-cache-gas-prices.ts": {
+      "maxDuration": 90
+    },
+    "api/cron-cache-gas-costs.ts": {
+      "maxDuration": 90
+    },
+    "api/cron-cache-l1-data-fee.ts": {
+      "maxDuration": 90
+    },
+    "api/cron-ping-endpoints.ts": {
       "maxDuration": 90
     }
   },
   "rewrites": [
     {
       "source": "/api/deposit/status",
-      "destination": "https://public.api.across.to/deposit/status"
+      "destination": "https://indexer.across.to/deposit/status"
     }
   ],
   "redirects": [

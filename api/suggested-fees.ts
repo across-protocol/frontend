@@ -1,10 +1,11 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string, enums } from "superstruct";
+import { type, assert, Infer, optional, string } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
+  CHAIN_IDs,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -19,12 +20,14 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
-  getDefaultRelayerAddress,
   getHubPool,
   callViaMulticall3,
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
+  OPT_IN_CHAINS,
+  parseL1TokenConfigSafe,
+  getL1TokenConfigCache,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -38,7 +41,10 @@ import {
   AmountTooHighError,
   AmountTooLowError,
 } from "./_errors";
-
+import { getFillDeadline } from "./_fill-deadline";
+import { parseRole, Role } from "./_auth";
+import { getEnvs } from "./_env";
+import { getDefaultRelayerAddress } from "./_relayer-address";
 const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -53,24 +59,25 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
-  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
+  request: TypedVercelRequest<SuggestedFeesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
-    query,
+    query: request.query,
   });
   try {
-    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
+    const { query } = request;
+    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 
+    const role = parseRole(request);
     const provider = getProvider(HUB_POOL_CHAIN_ID, {
       useSpeedProvider: true,
     });
@@ -85,7 +92,6 @@ const handler = async (
       recipient,
       relayer,
       message,
-      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -103,6 +109,23 @@ const handler = async (
       ? ethers.utils.getAddress(recipient)
       : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     const depositWithMessage = sdk.utils.isDefined(message);
+
+    // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
+    const isDestinationOptInChain = OPT_IN_CHAINS.includes(
+      String(destinationChainId)
+    );
+    const isOriginOptInChain = OPT_IN_CHAINS.includes(
+      String(computedOriginChainId)
+    );
+    if (
+      role !== Role.OPT_IN_CHAINS &&
+      (isDestinationOptInChain || isOriginOptInChain)
+    ) {
+      throw new InvalidParamError({
+        message: "Unsupported chain",
+        param: isDestinationOptInChain ? "destinationChainId" : "originChainId",
+      });
+    }
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 
@@ -186,6 +209,7 @@ const handler = async (
       [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPriceUsd,
       limits,
+      fillDeadline,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, "usd"),
@@ -202,6 +226,7 @@ const handler = async (
         depositWithMessage ? relayer : undefined,
         depositWithMessage ? message : undefined
       ),
+      getFillDeadline(destinationChainId),
     ]);
     const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
       limits;
@@ -222,14 +247,16 @@ const handler = async (
       });
     }
 
-    const parsedL1TokenConfig =
-      sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
-        String(rawL1TokenConfig)
-      );
+    const parsedL1TokenConfig = parseL1TokenConfigSafe(
+      String(rawL1TokenConfig)
+    );
+    const validL1TokenConfig =
+      parsedL1TokenConfig ||
+      (await getL1TokenConfigCache(l1Token.address).get());
     const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
-      parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
-      parsedL1TokenConfig.rateModel;
+      validL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
+      validL1TokenConfig.rateModel;
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
@@ -253,37 +280,48 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
-    let exclusivityDeadline = 0;
-    if (depositMethod === "depositExclusive") {
-      ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
-        await selectExclusiveRelayer(
-          computedOriginChainId,
-          destinationChainId,
-          outputToken,
-          amount.sub(totalRelayFee),
-          amountInUsd,
-          BigNumber.from(relayerFeeDetails.capitalFeePercent),
-          amount.gte(maxDepositInstant)
-            ? resolveRebalanceTiming(String(destinationChainId))
-            : resolveExclusivityTiming(
-                String(computedOriginChainId),
-                String(destinationChainId),
-                inputToken.symbol,
-                amountInUsd
-              )
-        ));
-    }
+    const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
+      await selectExclusiveRelayer(
+        computedOriginChainId,
+        destinationChainId,
+        outputToken,
+        amount.sub(totalRelayFee),
+        amountInUsd,
+        BigNumber.from(relayerFeeDetails.capitalFeePercent),
+        amount.gte(maxDepositInstant)
+          ? resolveRebalanceTiming(String(destinationChainId))
+          : resolveExclusivityTiming(
+              String(computedOriginChainId),
+              String(destinationChainId),
+              inputToken.symbol,
+              amountInUsd
+            )
+      );
+
+    // TODO: Remove after campaign is complete
+    /**
+     * Override estimated fill time for ZK Sync deposits.
+     * @todo Remove after campaign is complete
+     * @see Change in {@link ./limits.ts}
+     */
+    const estimatedTimingOverride =
+      computedOriginChainId === CHAIN_IDs.MAINNET &&
+      destinationChainId === CHAIN_IDs.ZK_SYNC &&
+      amount.gte(limits.maxDepositShortDelay)
+        ? 9600
+        : undefined;
 
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(maxDepositInstant)
-        ? resolveRebalanceTiming(String(destinationChainId))
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec:
+        estimatedTimingOverride ??
+        (amount.gt(maxDepositInstant)
+          ? resolveRebalanceTiming(String(destinationChainId))
+          : resolveTiming(
+              String(computedOriginChainId),
+              String(destinationChainId),
+              inputToken.symbol,
+              amountInUsd
+            )),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
@@ -326,15 +364,20 @@ const handler = async (
         maxDepositShortDelay: limits.maxDepositShortDelay,
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
+      fillDeadline: fillDeadline.toString(),
     };
 
-    logger.debug({
+    logger.info({
       at: "SuggestedFees",
       message: "Response data",
-      responseJson,
+      responseJson: JSON.stringify(responseJson, null, 2),
     });
 
-    response.setHeader("Cache-Control", "s-maxage=10");
+    // Only cache response if exclusivity is not set. This prevents race conditions where
+    // cached exclusivity data is returned for multiple deposits.
+    if (exclusiveRelayer === sdk.constants.ZERO_ADDRESS) {
+      response.setHeader("Cache-Control", "s-maxage=10");
+    }
     response.status(200).json(responseJson);
   } catch (error) {
     return handleErrorCondition("suggested-fees", response, logger, error);

@@ -103,10 +103,7 @@ paths:
           description: >
             Calldata passed to the `recipient` if `recipient` is a contract
             address.  This calldata is passed to the recipient via the
-            recipient's handleAcrossMessage() public function. The length of
-            this value is constrained by the API to ~4096 chars minus the length
-            of the full URL.
-
+            recipient's handleAcrossMessage() public function.
 
             _Example:_ 0xABC123
           schema:
@@ -169,13 +166,15 @@ paths:
                   "quoteBlock": "19237525",
                   "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
                   "expectedFillTimeSec": "4",
-                  "limits": {
+                  "fillDeadline": "1737033609",
+                  "limits":
+                    {
                       "minDeposit": "7799819",
                       "maxDeposit": "22287428516241",
                       "maxDepositInstant": "201958902363",
                       "maxDepositShortDelay": "2045367713809",
-                      "recommendedDepositInstant": "201958902363"
-                    }
+                      "recommendedDepositInstant": "201958902363",
+                    },
                 }
         "400":
           description: Invalid input
@@ -372,12 +371,14 @@ paths:
                 properties:
                   fillStatus:
                     type: string
-                    enum: ["filled", "pending", "expired"]
+                    enum: ["filled", "pending", "expired", "refunded", "slowFillRequested"]
                     description: >
                       The status of the deposit.
                        * filled: Deposits with this status have been filled on the destination chain and the recipient should have received funds. A FilledV3Relay event was emitted on the destination chain SpokePool.
                        * pending: Deposit has not been filled yet.
                        * expired: Deposit has expired and will not be filled. Expired deposits will be refunded to the `depositor` on the `originChainId` in the next batch of repayments.
+                       * refunded: Deposit has expired and the depositor has been successfully refunded on the originChain. 
+                       * slowFillRequested: Deposit has been made but no relayer has filled the intent, therefore Across' relayer fills the user’s intent without requiring another relayer to front the capital. It's important that the input token and output token are the same asset here.
                   fillTxHash:
                     type: string
                     description: >
@@ -530,8 +531,12 @@ components:
           description: >
             The expected time (in seconds) for a fill to be made. Represents 75th percentile of the 7-day rolling average of times (updated daily). Times are dynamic by origin/destination token/chain for a given amount.
           example: "4"
+        fillDeadline:
+          type: string
+          description: >
+            The recommended deadline (UNIX timestamp in seconds) for the relayer to fill the deposit. After this destination chain timestamp, the fill will revert on the destination chain.
         limits:
-          $ref: '#/components/schemas/TransferLimits'
+          $ref: "#/components/schemas/TransferLimits"
     TransferLimits:
       type: object
       properties:

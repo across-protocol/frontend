@@ -17,7 +17,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://sepolia.base.org",
-  tokens: ["WETH", "ETH", "USDC"],
+  tokens: ["WETH", "ETH", "USDC", "XYZ", "TATARA-USDC"],
   enableCCTP: true,
   swapTokens: [
     {

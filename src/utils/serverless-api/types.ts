@@ -5,6 +5,7 @@ import { CoingeckoApiCall } from "./prod/coingecko";
 import { PoolsApiCall } from "./prod/pools";
 import { SwapQuoteApiCall } from "./prod/swap-quote";
 import { PoolsUserApiCall } from "./prod/pools-user";
+import { SwapApprovalApiCall } from "./prod/swap-approval";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -22,6 +23,7 @@ export type ServerlessAPIEndpoints = {
   pools: PoolsApiCall;
   poolsUser: PoolsUserApiCall;
   swapQuote: SwapQuoteApiCall;
+  swapApproval: SwapApprovalApiCall;
 };
 
 export type RewardsApiFunction =
@@ -58,6 +60,7 @@ export type SuggestedApiFeeReturnType = {
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
   exclusivityDeadline: number;
+  fillDeadline: number;
 };
 
 export type SuggestedApiFeeType = (
@@ -66,7 +69,8 @@ export type SuggestedApiFeeType = (
   outputToken: string,
   toChainid: ChainId,
   fromChainid: ChainId,
-  recipientAddress?: string
+  recipientAddress?: string,
+  message?: string
 ) => Promise<SuggestedApiFeeReturnType>;
 
 export type RetrieveLinkedWalletType = (

@@ -25,12 +25,20 @@ import {
   sendSwapAndBridgeTx,
   manualRebalancerAddresses,
   ChainId,
+  getToken,
+  acrossPlusMulticallHandler,
+  hyperLiquidBridge2Address,
+  externalProjectNameToId,
+  generateHyperLiquidPayload,
+  fixedPointAdjustment,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
 import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
+import { CHAIN_IDs } from "@across-protocol/constants";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 const config = getConfig();
 
@@ -40,9 +48,8 @@ export type FromBridgePagePayload = {
   recipient: string;
   referrer: string;
   tokenPrice: string;
-  swapQuote?: Omit<SwapQuoteApiResponse, "minExpectedInputTokenAmount"> & {
-    minExpectedInputTokenAmount: string;
-  };
+  swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
   selectedRoute: SelectedRoute;
   quote: GetBridgeFeesResult;
   quotedLimits: BridgeLimitInterface;
@@ -63,6 +70,10 @@ export function useBridgeAction(
   const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
     selectedRoute.fromChain
   );
+
+  const { isWrongNetworkHandler: isWrongNetworkHandlerHyperLiquid } =
+    useIsWrongNetwork(CHAIN_IDs.ARBITRUM);
+
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
@@ -78,12 +89,16 @@ export function useBridgeAction(
         getDepositArgs(selectedRoute, usedTransferQuote, referrer, integratorId)
       );
       const frozenSwapQuote = cloneDeep(usedTransferQuote?.quotedSwap);
+      const frozenUniversalSwapQuote = cloneDeep(
+        usedTransferQuote?.quotedUniversalSwap
+      );
       const frozenFeeQuote = cloneDeep(usedTransferQuote?.quotedFees);
       const frozenLimits = cloneDeep(usedTransferQuote?.quotedLimits);
       const frozenTokenPrice = cloneDeep(usedTransferQuote?.quotePriceUSD);
       const frozenAccount = cloneDeep(account);
       const frozenRoute = cloneDeep(selectedRoute);
       const isSwapRoute = frozenRoute.type === "swap";
+      const isUniversalSwapRoute = frozenRoute.type === "universal-swap";
 
       if (
         !frozenDepositArgs ||
@@ -95,16 +110,102 @@ export function useBridgeAction(
         !frozenTokenPrice ||
         !frozenLimits ||
         // If swap route, we need also the swap quote
-        (isSwapRoute && !frozenSwapQuote)
+        (isSwapRoute && !frozenSwapQuote) ||
+        (isUniversalSwapRoute && !frozenUniversalSwapQuote)
       ) {
         throw new Error("Missing required data for bridge action");
       }
 
+      const externalProjectIsHyperLiquid =
+        frozenRoute.externalProjectId === "hyperliquid";
+
+      let externalPayload: string | undefined;
+
+      if (externalProjectIsHyperLiquid) {
+        await isWrongNetworkHandlerHyperLiquid();
+
+        // External Project Inclusion Considerations:
+        //
+        // HyperLiquid:
+        // We need to set up our crosschain message to the hyperliquid bridge with
+        // the following considerations:
+        // 1. Our recipient address is the default multicall handler
+        // 2. The recipient and the signer must be the same address
+        // 3. We will first transfer funds to the true recipient EoA
+        // 4. We must construct a payload to send to HL's Bridge2 contract
+        // 5. The user must sign this signature
+
+        // Subtract the relayer fee pct just like we do for our output token amount
+        const amount = frozenDepositArgs.amount.sub(
+          frozenDepositArgs.amount
+            .mul(frozenDepositArgs.relayerFeePct)
+            .div(fixedPointAdjustment)
+        );
+
+        // Build the payload
+        const hyperLiquidPayload = await generateHyperLiquidPayload(
+          signer,
+          frozenDepositArgs.toAddress,
+          amount
+        );
+        // Create a txn calldata for transfering amount to recipient
+        const erc20Interface = new utils.Interface([
+          "function transfer(address to, uint256 amount) returns (bool)",
+        ]);
+
+        const transferCalldata = erc20Interface.encodeFunctionData("transfer", [
+          frozenDepositArgs.toAddress,
+          amount,
+        ]);
+
+        // Encode Instructions struct directly
+        externalPayload = utils.defaultAbiCoder.encode(
+          [
+            "tuple(tuple(address target, bytes callData, uint256 value)[] calls, address fallbackRecipient)",
+          ],
+          [
+            {
+              calls: [
+                {
+                  target: getToken("USDC").addresses![CHAIN_IDs.ARBITRUM],
+                  callData: transferCalldata,
+                  value: 0,
+                },
+                {
+                  target: hyperLiquidBridge2Address,
+                  callData: hyperLiquidPayload,
+                  value: 0,
+                },
+              ],
+              fallbackRecipient: frozenDepositArgs.toAddress,
+            },
+          ]
+        );
+      }
+
       await isWrongNetworkHandler();
 
+      // If universal swap route then we need to approve the universal swap token for the `SwapAndBridge`
+      if (
+        isUniversalSwapRoute &&
+        frozenUniversalSwapQuote?.approvalTxns &&
+        frozenUniversalSwapQuote.approvalTxns.length > 0
+      ) {
+        if (!frozenUniversalSwapQuote) {
+          throw new Error(
+            "Missing universal swap quote for universal swap route"
+          );
+        }
+
+        // Some ERC-20 tokens require multiple approvals
+        for (const approvalTxn of frozenUniversalSwapQuote.approvalTxns) {
+          const approvalTx = await signer.sendTransaction(approvalTxn);
+          await approvalTx.wait();
+        }
+      }
       // If swap route then we need to approve the swap token for the `SwapAndBridge`
       // contract instead of the `SpokePool` contract.
-      if (isSwapRoute && frozenRoute.swapTokenSymbol !== "ETH") {
+      else if (isSwapRoute && frozenRoute.swapTokenSymbol !== "ETH") {
         if (!frozenSwapQuote) {
           throw new Error("Missing swap quote for swap route");
         }
@@ -131,6 +232,7 @@ export function useBridgeAction(
           allowedContractAddress: config.getSpokePoolAddress(
             frozenRoute.fromChain
           ),
+          enforceCorrectNetwork: frozenRoute.externalProjectId !== undefined,
         });
       }
 
@@ -140,7 +242,10 @@ export function useBridgeAction(
           generateTransferSubmitted(
             frozenQuoteForAnalytics,
             referrer,
-            frozenInitialQuoteTime
+            frozenInitialQuoteTime,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });
@@ -180,6 +285,18 @@ export function useBridgeAction(
           spokePool,
           networkMismatchHandler
         );
+      } else if (isUniversalSwapRoute) {
+        if (!frozenUniversalSwapQuote) {
+          throw new Error(
+            "Missing universal swap quote for universal swap route"
+          );
+        }
+
+        tx = await signer.sendTransaction({
+          to: frozenUniversalSwapQuote.swapTx.to,
+          data: frozenUniversalSwapQuote.swapTx.data,
+          value: frozenUniversalSwapQuote.swapTx.value,
+        });
       } else if (isSwapRoute) {
         tx = await sendSwapAndBridgeTx(
           signer,
@@ -194,6 +311,7 @@ export function useBridgeAction(
             // Disabling until we update the contract.
             exclusiveRelayer: constants.AddressZero,
             exclusivityDeadline: 0,
+            fillDeadline: frozenFeeQuote.fillDeadline,
           },
           networkMismatchHandler
         );
@@ -203,22 +321,28 @@ export function useBridgeAction(
           frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
+        const depositArgs = {
+          ...frozenDepositArgs,
+          inputTokenAddress: frozenRoute.fromTokenAddress,
+          outputTokenAddress: frozenRoute.toTokenAddress,
+          fillDeadline: frozenFeeQuote.fillDeadline,
+          message: externalPayload,
+          toAddress: externalProjectIsHyperLiquid
+            ? acrossPlusMulticallHandler[frozenRoute.toChain]
+            : frozenDepositArgs.toAddress,
+        };
         tx =
           shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
-                frozenDepositArgs,
+                depositArgs,
                 spokePool,
                 spokePoolVerifier,
                 networkMismatchHandler
               )
             : await sendDepositV3Tx(
                 signer,
-                {
-                  ...frozenDepositArgs,
-                  inputTokenAddress: frozenRoute.fromTokenAddress,
-                  outputTokenAddress: frozenRoute.toTokenAddress,
-                },
+                depositArgs,
                 spokePool,
                 networkMismatchHandler
               );
@@ -230,7 +354,10 @@ export function useBridgeAction(
             frozenQuoteForAnalytics,
             referrer,
             timeSubmitted,
-            tx.hash
+            tx.hash,
+            externalProjectIsHyperLiquid
+              ? externalProjectNameToId(frozenRoute.externalProjectId)
+              : undefined
           )
         );
       });
@@ -240,13 +367,8 @@ export function useBridgeAction(
         timeSigned: Date.now(),
         recipient: frozenDepositArgs.toAddress,
         referrer,
-        swapQuote: frozenSwapQuote
-          ? {
-              ...frozenSwapQuote,
-              minExpectedInputTokenAmount:
-                frozenSwapQuote?.minExpectedInputTokenAmount.toString(),
-            }
-          : undefined,
+        swapQuote: frozenSwapQuote,
+        universalSwapQuote: frozenUniversalSwapQuote,
         selectedRoute: frozenRoute,
         quote: frozenFeeQuote,
         quotedLimits: frozenLimits,
@@ -262,6 +384,9 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
+        ...(externalProjectIsHyperLiquid
+          ? { externalProjectId: frozenRoute.externalProjectId }
+          : {}),
       });
       if (existingIntegrator) {
         statusPageSearchParams.set("integrator", existingIntegrator);
@@ -278,16 +403,16 @@ export function useBridgeAction(
   const buttonDisabled =
     !usedTransferQuote ||
     (isConnected && dataLoading) ||
-    buttonActionHandler.isLoading;
+    buttonActionHandler.isPending;
   return {
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
-    isButtonActionLoading: buttonActionHandler.isLoading,
+    isButtonActionLoading: buttonActionHandler.isPending,
     didActionError: buttonActionHandler.isError,
     buttonLabel: getButtonLabel({
       isConnected,
       isDataLoading: dataLoading,
-      isMutating: buttonActionHandler.isLoading,
+      isMutating: buttonActionHandler.isPending,
       isWrongNetwork,
     }),
     buttonDisabled,
@@ -308,6 +433,7 @@ type DepositArgs = {
   exclusiveRelayer: string;
   exclusivityDeadline: number;
   integratorId: string;
+  externalProjectId?: string;
 };
 function getDepositArgs(
   selectedRoute: SelectedRoute,
@@ -342,6 +468,7 @@ function getDepositArgs(
     exclusiveRelayer: quotedFees.exclusiveRelayer,
     exclusivityDeadline: quotedFees.exclusivityDeadline,
     integratorId,
+    externalProjectId: selectedRoute.externalProjectId,
   };
 }
 

@@ -13,6 +13,7 @@ type Props = {
   selectedToken: {
     l1TokenAddress: string;
     symbol: string;
+    displaySymbol?: string;
     logoURI: string;
   };
   selectedPoolAction: "add" | "remove";
@@ -61,12 +62,15 @@ export function EarnByStakingInfoBox({
                 {hasStaked ? " on staked " : " by staking "}
                 {showDashIfLoading(
                   <Text color={textColor} as="span">
-                    {selectedToken.symbol}-LP
+                    {selectedToken.displaySymbol || selectedToken.symbol}-LP
                   </Text>
                 )}
               </Text>
             ) : (
-              <Text>Staking is not enabled for {selectedToken.symbol}-LP</Text>
+              <Text>
+                Staking is not enabled for{" "}
+                {selectedToken.displaySymbol || selectedToken.symbol}-LP
+              </Text>
             )
           )}
         </TextContainer>
@@ -91,7 +95,7 @@ export function EarnByStakingInfoBox({
               </Text>
             )}
             <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
-              {selectedToken.symbol}-LP
+              {selectedToken.displaySymbol || selectedToken.symbol}-LP
             </Text>
             <img
               src={selectedToken.logoURI}

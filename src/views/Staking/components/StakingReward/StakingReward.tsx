@@ -9,12 +9,15 @@ import { StakingRewardPropType } from "../../types";
 import { Text } from "components/Text";
 import ConnectWalletButton from "../ConnectWalletButton";
 import CardWrapper from "components/CardWrapper";
+import { SwitchNetworkButton } from "../StakingForm/StakingForm.styles";
 
 export const StakingReward = ({
   poolData: { outstandingRewards },
   isConnected,
   claimActionHandler,
   isMutating,
+  isWrongNetwork,
+  switchNetwork,
 }: StakingRewardPropType) => {
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && BigNumber.from(outstandingRewards).gt(0),
@@ -31,26 +34,34 @@ export const StakingReward = ({
           </Text>
         </Alert>
         {isConnected ? (
-          <ClaimRewardInputGroup>
-            <RewardClaimWrapper>
-              <Text color="white-70">Claimable rewards</Text>
-              {valueOrEmpty(
-                <Text
-                  color={outstandingRewards.gt(0) ? "white-100" : "white-70"}
-                >
-                  {formatUnitsWithMaxFractions(outstandingRewards, 18)} ACX
-                </Text>
-              )}
-            </RewardClaimWrapper>
-            <ClaimRewardButton
-              size="lg"
-              disabled={BigNumber.from(outstandingRewards).lte(0) || isMutating}
-              onClick={() => claimActionHandler()}
-              borderColor="yellow"
-            >
-              {isMutating ? "Claiming..." : "Claim"}
-            </ClaimRewardButton>
-          </ClaimRewardInputGroup>
+          isWrongNetwork ? (
+            <SwitchNetworkButton size="lg" onClick={() => switchNetwork()}>
+              Switch network
+            </SwitchNetworkButton>
+          ) : (
+            <ClaimRewardInputGroup>
+              <RewardClaimWrapper>
+                <Text color="white-70">Claimable rewards</Text>
+                {valueOrEmpty(
+                  <Text
+                    color={outstandingRewards.gt(0) ? "white-100" : "white-70"}
+                  >
+                    {formatUnitsWithMaxFractions(outstandingRewards, 18)} ACX
+                  </Text>
+                )}
+              </RewardClaimWrapper>
+              <ClaimRewardButton
+                size="lg"
+                disabled={
+                  BigNumber.from(outstandingRewards).lte(0) || isMutating
+                }
+                onClick={() => claimActionHandler()}
+                borderColor="yellow"
+              >
+                {isMutating ? "Claiming..." : "Claim"}
+              </ClaimRewardButton>
+            </ClaimRewardInputGroup>
+          )
         ) : (
           <ConnectWalletButton reasonToConnect="claim rewards" />
         )}

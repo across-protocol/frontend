@@ -6,6 +6,7 @@ import { Tooltip } from "components/Tooltip";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as II } from "assets/icons/info.svg";
 import { useSelector } from "./useSelector";
+import { ModalProps } from "components/Modal/Modal";
 
 export type SelectorElementType<Value> = {
   value: Value;
@@ -23,6 +24,7 @@ export type SelectorPropType<Value> = {
   elements: SelectorElementType<Value>[];
   selectedValue: Value;
   setSelectedValue: (ind: Value) => void;
+  modalProps?: Partial<ModalProps>;
   displayElement?: JSX.Element;
   disabled?: boolean;
   "data-cy"?: string;
@@ -38,6 +40,7 @@ const Selector = <ElementValue,>({
   disabled,
   "data-cy": dataCy,
   allowSelectDisabled,
+  modalProps,
 }: SelectorPropType<ElementValue>) => {
   const { displayModal, setDisplayModal, selectedIndex, isMobile } =
     useSelector(elements, selectedValue);
@@ -66,8 +69,8 @@ const Selector = <ElementValue,>({
           desktop: "top",
           mobile: "bottom",
         }}
-        topYOffset={isMobile ? 16 : 112}
-        bottomYOffset={isMobile ? 112 : undefined}
+        topYOffset={isMobile ? undefined : 112}
+        bottomYOffset={isMobile ? 16 : undefined}
         exitOnOutsideClick
         title={
           typeof title === "string" ? (
@@ -80,12 +83,17 @@ const Selector = <ElementValue,>({
         }
         padding="thin"
         data-cy={`${dataCy}-modal`}
+        {...modalProps}
       >
         <ElementRowDivider />
         <ElementRowWrapper enableScroll={elements.length > 6}>
           {elements.map((element, idx) => (
             <ElementRow
-              key={String(element.value)}
+              key={
+                typeof element.value === "object"
+                  ? JSON.stringify(element.value)
+                  : String(element.value)
+              }
               onClick={() => {
                 if (element.disabled && !allowSelectDisabled) {
                   return;

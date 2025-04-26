@@ -1,27 +1,27 @@
 import axios from "axios";
 
-import { AcrossSwap, SwapQuoteAndCalldata } from "./types";
-import { getSwapAndBridgeAddress } from "./utils";
+import { Swap, OriginSwapQuoteAndCalldata } from "./types";
+import { getSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getEnvs } from "../_env";
 
-export async function get1inchQuoteAndCalldata(
-  swap: AcrossSwap
-): Promise<SwapQuoteAndCalldata> {
-  const swapAndBridgeAddress = getSwapAndBridgeAddress(
-    "1inch",
-    swap.swapToken.chainId
-  );
-  const apiBaseUrl = `https://api.1inch.dev/swap/v6.0/${swap.swapToken.chainId}`;
+const { ONEINCH_API_KEY } = getEnvs();
+
+export async function get1inchQuoteForOriginSwapExactInput(
+  swap: Omit<Swap, "recipient">
+): Promise<OriginSwapQuoteAndCalldata> {
+  const swapAndBridgeAddress = getSwapAndBridgeAddress("1inch", swap.chainId);
+  const apiBaseUrl = `https://api.1inch.dev/swap/v6.0/${swap.chainId}`;
   const apiHeaders = {
-    Authorization: `Bearer ${process.env.ONEINCH_API_KEY}`,
+    Authorization: `Bearer ${ONEINCH_API_KEY}`,
     accept: "application/json",
   };
 
   const swapParams = {
-    src: swap.swapToken.address,
-    dst: swap.acrossInputToken.address,
-    amount: swap.swapTokenAmount,
+    src: swap.tokenIn.address,
+    dst: swap.tokenOut.address,
+    amount: swap.amount,
     from: swapAndBridgeAddress,
-    slippage: swap.slippage,
+    slippage: swap.slippageTolerance,
     disableEstimate: true,
     allowPartialFill: false,
     receiver: swapAndBridgeAddress,
@@ -47,6 +47,6 @@ export async function get1inchQuoteAndCalldata(
     value: response.data.tx.value,
     swapAndBridgeAddress,
     dex: "1inch",
-    slippage: swap.slippage,
+    slippage: swap.slippageTolerance,
   };
 }

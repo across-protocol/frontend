@@ -7,14 +7,13 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
-import { asL2Provider } from "@eth-optimism/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import axios from "axios";
+import axios, { AxiosError, AxiosRequestHeaders } from "axios";
 import {
   BigNumber,
   BigNumberish,
@@ -23,8 +22,18 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { define } from "superstruct";
-
+import {
+  assert,
+  coerce,
+  create,
+  define,
+  Infer,
+  integer,
+  min,
+  size,
+  string,
+  Struct,
+} from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import rpcProvidersJson from "../src/data/rpc-providers.json";
@@ -36,25 +45,27 @@ import {
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import { VercelResponse } from "@vercel/node";
+import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
+  CHAINS,
+  CUSTOM_GAS_TOKENS,
   DEFAULT_LITE_CHAIN_USD_MAX_BALANCE,
   DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT,
   DEFI_LLAMA_POOL_LOOKUP,
   DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   MULTICALL3_ADDRESS,
+  MULTICALL3_ADDRESS_OVERRIDES,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
-  defaultRelayerAddressOverride,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -64,27 +75,38 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  AcrossApiError,
+  HttpErrorToStatusCode,
+  AcrossErrorCode,
+  TokenNotFoundError,
 } from "./_errors";
+import { Token } from "./_dexes/types";
 
 export { InputError, handleErrorCondition } from "./_errors";
+export const { Profiler } = sdk.utils;
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
+import { getEnvs } from "./_env";
+
 const {
   REACT_APP_HUBPOOL_CHAINID,
-  REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  GAS_MARKUP,
+  BASE_FEE_MARKUP,
+  PRIORITY_FEE_MARKUP,
+  OP_STACK_L1_DATA_FEE_MARKUP,
   VERCEL_ENV,
   LOG_LEVEL,
-} = process.env;
-
-export const gasMarkup: {
-  [chainId: string]: number;
-} = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
-// Default to no markup.
-export const DEFAULT_GAS_MARKUP = 0;
+  REACT_APP_DISABLED_CHAINS,
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
+  LIMITS_BUFFER_MULTIPLIERS,
+  CHAIN_USD_MAX_BALANCES,
+  CHAIN_USD_MAX_DEPOSITS,
+  VERCEL_AUTOMATION_BYPASS_SECRET,
+  RPC_HEADERS,
+} = getEnvs();
 
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
@@ -93,28 +115,29 @@ export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
 
 // Tokens that should be disabled in the routes
 export const DISABLED_ROUTE_TOKENS = (
-  process.env.DISABLED_ROUTE_TOKENS || ""
+  getEnvs().DISABLED_ROUTE_TOKENS || ""
 ).split(",");
 
 // This is an array of chainIds that should be disabled. This array overrides
 // the ENABLED_ROUTES object below. This is useful for disabling a chainId
 // temporarily without having to redeploy the app or change core config
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
-export const DISABLED_CHAINS = (
-  process.env.REACT_APP_DISABLED_CHAINS || ""
-).split(",");
+export const DISABLED_CHAINS = (REACT_APP_DISABLED_CHAINS || "").split(",");
 
 // This is an array of chainIds that should be disabled. In contrast to the
 // above constant `DISABLED_CHAINS`, this constant is used to disable chains
 // only for the `/available-routes` endpoint and DOES NOT affect the
 // `ENABLED_ROUTES` object.
 export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
+  REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
+
+// Chains that require special role to be accessed.
+export const OPT_IN_CHAINS = (getEnvs().OPT_IN_CHAINS || "").split(",");
 
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
@@ -147,9 +170,9 @@ export const getLogger = (): LoggingUtility => {
     const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
 
     let logLevel =
-      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? defaultLogLevel
-        : (LOG_LEVEL as keyof typeof LogLevels);
+      LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
+        ? (LOG_LEVEL as keyof typeof LogLevels)
+        : defaultLogLevel;
 
     logger = {
       debug: (...args) => {
@@ -181,7 +204,10 @@ export const getLogger = (): LoggingUtility => {
  * Resolves the current vercel endpoint dynamically
  * @returns A valid URL of the current endpoint in vercel
  */
-export const resolveVercelEndpoint = () => {
+export const resolveVercelEndpoint = (omitOverride = false) => {
+  if (!omitOverride && process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
+    return process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE;
+  }
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
   switch (env) {
@@ -191,6 +217,14 @@ export const resolveVercelEndpoint = () => {
     case "development":
     default:
       return `http://127.0.0.1:3000`;
+  }
+};
+
+export const getVercelHeaders = (): AxiosRequestHeaders | undefined => {
+  if (VERCEL_AUTOMATION_BYPASS_SECRET) {
+    return {
+      "x-vercel-protection-bypass": VERCEL_AUTOMATION_BYPASS_SECRET,
+    };
   }
 };
 
@@ -339,6 +373,34 @@ function getStaticIsContract(chainId: number, address: string) {
     (contract) => contract.address.toLowerCase() === address.toLowerCase()
   );
   return !!deployedAcrossContract;
+}
+
+export function getChainInfo(chainId: number) {
+  const chainInfo = CHAINS[chainId];
+  if (!chainInfo) {
+    throw new Error(`Cannot get chain info for chain ${chainId}`);
+  }
+
+  return chainInfo;
+}
+
+export function getWrappedNativeTokenAddress(chainId: number) {
+  const chainInfo = getChainInfo(chainId);
+  const wrappedNativeTokenSymbol =
+    chainId === CHAIN_IDs.LENS ? "WGHO" : `W${chainInfo.nativeToken}`;
+  const wrappedNativeToken =
+    TOKEN_SYMBOLS_MAP[
+      wrappedNativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+    ];
+  const wrappedNativeTokenAddress = wrappedNativeToken?.addresses[chainId];
+
+  if (!wrappedNativeTokenAddress) {
+    throw new Error(
+      `Cannot get wrapped native token for chain ${chainId} and symbol ${wrappedNativeTokenSymbol}`
+    );
+  }
+
+  return wrappedNativeTokenAddress;
 }
 
 /**
@@ -520,28 +582,19 @@ export const getHubPool = (provider: providers.Provider) => {
 };
 
 /**
- * Resolves an Infura provider given the name of the ETH network
- * @param nameOrChainId The name of an ethereum network
- * @returns A valid Ethers RPC provider
- */
-export const infuraProvider = (nameOrChainId: providers.Networkish) => {
-  const url = new ethers.providers.InfuraProvider(
-    nameOrChainId,
-    REACT_APP_PUBLIC_INFURA_ID
-  ).connection.url;
-  return new ethers.providers.StaticJsonRpcProvider(url);
-};
-
-/**
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
  */
-export const overrideProvider = (
+export const getPublicProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const url = process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
-  if (url) {
-    return new ethers.providers.StaticJsonRpcProvider(url);
+  const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
+  if (chain) {
+    const headers = getProviderHeaders(chainId);
+    return new ethers.providers.StaticJsonRpcProvider({
+      url: chain.publicRPC,
+      headers,
+    });
   } else {
     return undefined;
   }
@@ -578,14 +631,71 @@ export const getHubPoolClient = () => {
   );
 };
 
-export const getGasMarkup = (chainId: string | number) => {
-  if (typeof gasMarkup[chainId] === "number") {
-    return gasMarkup[chainId];
+export const baseFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(BASE_FEE_MARKUP || "{}");
+export const priorityFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
+export const opStackL1DataFeeMarkup: {
+  [chainId: string]: number;
+} = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
+
+// Conservative values bsaed on existing configurations:
+// - base fee gets marked up 1.5x because most chains have a theoretically volatile base fee but practically little
+// volume so the base fee doesn't move much.
+// - priority fee gets marked up 1.0x because new chains don't have enough volume to move priority
+// fees much.
+// - op stack l1 data fee gets marked up 1.0x because the op stack l1 data fee is based on ethereum
+// base fee.
+export const DEFAULT_BASE_FEE_MARKUP = 0.5;
+export const DEFAULT_PRIORITY_FEE_MARKUP = 0;
+export const DEFAULT_OP_L1_DATA_FEE_MARKUP = 1;
+
+export const getGasMarkup = (
+  chainId: string | number
+): {
+  baseFeeMarkup: BigNumber;
+  priorityFeeMarkup: BigNumber;
+  opStackL1DataFeeMarkup: BigNumber;
+} => {
+  let _baseFeeMarkup: BigNumber | undefined;
+  let _priorityFeeMarkup: BigNumber | undefined;
+  let _opStackL1DataFeeMarkup: BigNumber | undefined;
+  if (typeof baseFeeMarkup[chainId] === "number") {
+    _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
+  }
+  if (typeof priorityFeeMarkup[chainId] === "number") {
+    _priorityFeeMarkup = utils.parseEther(
+      (1 + priorityFeeMarkup[chainId]).toString()
+    );
+  }
+  if (typeof opStackL1DataFeeMarkup[chainId] === "number") {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (1 + opStackL1DataFeeMarkup[chainId]).toString()
+    );
   }
 
-  return sdk.utils.chainIsOPStack(Number(chainId))
-    ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-    : DEFAULT_GAS_MARKUP;
+  // Otherwise, use default gas markup.
+  if (_baseFeeMarkup === undefined) {
+    _baseFeeMarkup = utils.parseEther((1 + DEFAULT_BASE_FEE_MARKUP).toString());
+  }
+  if (_priorityFeeMarkup === undefined) {
+    _priorityFeeMarkup = utils.parseEther(
+      (1 + DEFAULT_PRIORITY_FEE_MARKUP).toString()
+    );
+  }
+  if (_opStackL1DataFeeMarkup === undefined) {
+    _opStackL1DataFeeMarkup = utils.parseEther(
+      (1 + DEFAULT_OP_L1_DATA_FEE_MARKUP).toString()
+    );
+  }
+
+  return {
+    baseFeeMarkup: _baseFeeMarkup,
+    priorityFeeMarkup: _priorityFeeMarkup,
+    opStackL1DataFeeMarkup: _opStackL1DataFeeMarkup,
+  };
 };
 
 /**
@@ -616,22 +726,51 @@ export const getRelayerFeeCalculator = (
   );
 };
 
-const getRelayerFeeCalculatorQueries = (
+export const getRelayerFeeCalculatorQueries = (
   destinationChainId: number,
   overrides: Partial<{
     spokePoolAddress: string;
     relayerAddress: string;
   }> = {}
 ) => {
+  const baseArgs = {
+    chainId: destinationChainId,
+    provider: getProvider(destinationChainId, { useSpeedProvider: true }),
+    symbolMapping: TOKEN_SYMBOLS_MAP,
+    spokePoolAddress:
+      overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    simulatedRelayerAddress:
+      overrides.relayerAddress ||
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
+    logger: getLogger(),
+  };
+
+  const customGasTokenSymbol = CUSTOM_GAS_TOKENS[destinationChainId];
+  if (customGasTokenSymbol) {
+    return new sdk.relayFeeCalculator.CustomGasTokenQueries({
+      queryBaseArgs: [
+        baseArgs.provider,
+        baseArgs.symbolMapping,
+        baseArgs.spokePoolAddress,
+        baseArgs.simulatedRelayerAddress,
+        baseArgs.logger,
+        baseArgs.coingeckoProApiKey,
+        undefined,
+        "usd",
+      ],
+      customGasTokenSymbol,
+    });
+  }
+
   return sdk.relayFeeCalculator.QueryBase__factory.create(
-    destinationChainId,
-    getProvider(destinationChainId, { useSpeedProvider: true }),
-    undefined,
-    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    overrides.relayerAddress,
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(destinationChainId)
+    baseArgs.chainId,
+    baseArgs.provider,
+    baseArgs.symbolMapping,
+    baseArgs.spokePoolAddress,
+    baseArgs.simulatedRelayerAddress,
+    baseArgs.coingeckoProApiKey,
+    baseArgs.logger
   );
 };
 
@@ -643,12 +782,13 @@ const getRelayerFeeCalculatorQueries = (
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
  * @param recipientAddress The address that will receive the transferred funds
- * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @param message An optional message to include in the transfer
- * @param relayerAddress An optional relayer address to use for the transfer
- * @param gasUnits An optional gas unit to use for the transfer
- * @param gasPrice An optional gas price to use for the transfer
- * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
+ * @param tokenPrice Price of input token in gas token units, used by SDK to compute gas fee percentages.
+ * @param relayerAddress Relayer address that SDK will use to simulate the fill transaction for gas cost estimation if
+ * the gasUnits is not defined.
+ * @param gasPrice Gas price that SDK will use to compute gas fee percentages.
+ * @param [gasUnits] An optional gas cost to use for the transfer. If not provided, the SDK will recompute this.
+ * @returns Relayer fee components for a fill of the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
   deposit: {
@@ -660,10 +800,11 @@ export const getRelayerFeeDetails = async (
     recipientAddress: string;
     message?: string;
   },
-  tokenPrice?: number,
-  relayerAddress?: string,
+  tokenPrice: number,
+  relayerAddress: string,
+  gasPrice?: sdk.utils.BigNumberish,
   gasUnits?: sdk.utils.BigNumberish,
-  gasPrice?: sdk.utils.BigNumberish
+  tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const {
     inputToken,
@@ -692,7 +833,8 @@ export const getRelayerFeeDetails = async (
     relayerAddress,
     tokenPrice,
     gasPrice,
-    gasUnits
+    gasUnits,
+    tokenGasCost
   );
 };
 
@@ -721,7 +863,7 @@ export const buildDepositForSimulation = (depositArgs: {
     outputAmount: sdk.utils.isMessageEmpty(message)
       ? safeOutputAmount
       : sdk.utils.toBN(amount),
-    depositId: sdk.utils.bnUint32Max.toNumber(),
+    depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
     destinationChainId,
@@ -733,6 +875,9 @@ export const buildDepositForSimulation = (depositArgs: {
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
+    messageHash: sdk.utils.getMessageHash(
+      message ?? sdk.constants.EMPTY_MESSAGE
+    ),
     fromLiteChain: false, // FIXME
     toLiteChain: false, // FIXME
   };
@@ -748,12 +893,19 @@ export const buildDepositForSimulation = (depositArgs: {
 export const getCachedTokenPrice = async (
   l1Token: string,
   baseCurrency: string = "eth",
-  historicalDateISO?: string
+  historicalDateISO?: string,
+  chainId?: number
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency, date: historicalDateISO },
+        params: {
+          l1Token,
+          chainId,
+          baseCurrency,
+          date: historicalDateISO,
+        },
+        headers: getVercelHeaders(),
       })
     ).data.price
   );
@@ -792,6 +944,7 @@ export const getCachedLimits = async (
 }> => {
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
+      headers: getVercelHeaders(),
       params: {
         inputToken,
         outputToken,
@@ -805,6 +958,202 @@ export const getCachedLimits = async (
     })
   ).data;
 };
+
+export async function getSuggestedFees(params: {
+  inputToken: string;
+  outputToken: string;
+  originChainId: number;
+  destinationChainId: number;
+  amount: string;
+  skipAmountLimit?: boolean;
+  message?: string;
+  depositMethod?: string;
+  recipient?: string;
+}): Promise<{
+  estimatedFillTimeSec: number;
+  timestamp: number;
+  isAmountTooLow: boolean;
+  quoteBlock: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
+  spokePoolAddress: string;
+  destinationSpokePoolAddress: string;
+  totalRelayFee: {
+    pct: string;
+    total: string;
+  };
+  relayerCapitalFee: {
+    pct: string;
+    total: string;
+  };
+  relayerGasFee: {
+    pct: string;
+    total: string;
+  };
+  lpFee: {
+    pct: string;
+    total: string;
+  };
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+    recommendedDepositInstant: string;
+  };
+}> {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
+      params,
+    })
+  ).data;
+}
+
+export async function getBridgeQuoteForExactInput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  exactInputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const quote = await getSuggestedFees({
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: true,
+    recipient: params.recipient,
+    message: params.message,
+    amount: params.exactInputAmount.toString(),
+  });
+
+  return {
+    inputAmount: params.exactInputAmount,
+    outputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    minOutputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    suggestedFees: quote,
+    message: params.message,
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
+  };
+}
+
+export async function getBridgeQuoteForMinOutput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  minOutputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const maxTries = 3;
+  const tryChunkSize = 3;
+  const baseParams = {
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: true,
+    recipient: params.recipient,
+    message: params.message,
+  };
+
+  try {
+    // 1. Use the suggested fees to get an indicative quote with
+    // input amount equal to minOutputAmount
+    let tries = 0;
+    let adjustedInputAmount = addMarkupToAmount(params.minOutputAmount, 0.005);
+    let indicativeQuote = await getSuggestedFees({
+      ...baseParams,
+      amount: adjustedInputAmount.toString(),
+    });
+    let adjustmentPct = indicativeQuote.totalRelayFee.pct;
+    let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
+      undefined;
+
+    // 2. Adjust input amount to meet minOutputAmount
+    while (tries < maxTries) {
+      const inputAmounts = Array.from({ length: tryChunkSize }).map((_, i) => {
+        const buffer = 0.001 * i;
+        return addMarkupToAmount(
+          adjustedInputAmount
+            .mul(utils.parseEther("1").add(adjustmentPct))
+            .div(sdk.utils.fixedPointAdjustment),
+          buffer
+        );
+      });
+      const quotes = await Promise.all(
+        inputAmounts.map((inputAmount) => {
+          return getSuggestedFees({
+            ...baseParams,
+            amount: inputAmount.toString(),
+          });
+        })
+      );
+
+      for (const [i, quote] of Object.entries(quotes)) {
+        const inputAmount = inputAmounts[Number(i)];
+        const outputAmount = inputAmount.sub(
+          inputAmount
+            .mul(quote.totalRelayFee.pct)
+            .div(sdk.utils.fixedPointAdjustment)
+        );
+        if (outputAmount.gte(params.minOutputAmount)) {
+          finalQuote = quote;
+          adjustedInputAmount = inputAmount;
+          break;
+        }
+      }
+
+      if (finalQuote) {
+        break;
+      }
+
+      adjustedInputAmount = inputAmounts[inputAmounts.length - 1];
+      tries++;
+    }
+
+    if (!finalQuote) {
+      throw new Error("Failed to adjust input amount to meet minOutputAmount");
+    }
+
+    return {
+      inputAmount: adjustedInputAmount,
+      outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+      minOutputAmount: params.minOutputAmount,
+      suggestedFees: finalQuote,
+      message: params.message,
+      inputToken: params.inputToken,
+      outputToken: params.outputToken,
+    };
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const { response = { data: {} } } = err;
+      // If upstream error is an AcrossApiError, we just return it
+      if (response?.data?.type === "AcrossApiError") {
+        throw new AcrossApiError(
+          {
+            message: response.data.message,
+            status: response.data.status,
+            code: response.data.code,
+            param: response.data.param,
+          },
+          { cause: err }
+        );
+      } else {
+        const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
+        throw new AcrossApiError(
+          {
+            message,
+            status: HttpErrorToStatusCode.BAD_GATEWAY,
+            code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+          },
+          { cause: err }
+        );
+      }
+    }
+    throw err;
+  }
+}
 
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
@@ -824,16 +1173,14 @@ export const getProvider = (
   if (!providerCache[cacheKey]) {
     // Resolves provider from urls set in rpc-providers.json.
     const providerFromConfigJson = getProviderFromConfigJson(chainId, opts);
-    // Resolves provider from urls set via environment variables.
-    // Note that this is legacy and should be removed in the future.
-    const override = overrideProvider(chainId);
+    const publicProvider = getPublicProvider(chainId);
 
     if (providerFromConfigJson) {
       providerCache[cacheKey] = providerFromConfigJson;
-    } else if (override) {
-      providerCache[cacheKey] = override;
+    } else if (publicProvider) {
+      providerCache[cacheKey] = publicProvider;
     } else {
-      providerCache[cacheKey] = infuraProvider(_chainId);
+      throw new Error(`No provider URL set for chain: ${chainId}`);
     }
   }
   return providerCache[cacheKey];
@@ -850,17 +1197,19 @@ function getProviderFromConfigJson(
 ) {
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
+  const headers = getProviderHeaders(chainId);
 
   if (urls.length === 0) {
-    console.warn(
-      `No provider URL found for chainId ${chainId} in rpc-providers.json`
-    );
+    getLogger().warn({
+      at: "getProviderFromConfigJson",
+      message: `No provider URL found for chainId ${chainId} in rpc-providers.json`,
+    });
     return undefined;
   }
 
   if (!opts.useSpeedProvider) {
     return new sdk.providers.RetryProvider(
-      urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
       chainId,
       1, // quorum can be 1 in the context of the API
       3, // retries
@@ -872,7 +1221,7 @@ function getProviderFromConfigJson(
   }
 
   return new sdk.providers.SpeedProvider(
-    urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
     chainId,
     3, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
@@ -899,6 +1248,17 @@ export function getRpcUrlsFromConfigJson(chainId: number) {
   }
 
   return urls;
+}
+
+export function getProviderHeaders(
+  chainId: number | string
+): Record<string, string> | undefined {
+  const rpcHeaders = JSON.parse(RPC_HEADERS ?? "{}") as Record<
+    string,
+    Record<string, string>
+  >;
+
+  return rpcHeaders?.[String(chainId)];
 }
 
 /**
@@ -941,6 +1301,64 @@ export const isRouteEnabled = (
   );
   return !!enabled;
 };
+
+export function isInputTokenBridgeable(
+  inputTokenAddress: string,
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ fromTokenAddress, fromChain, toChain }) =>
+      originChainId === fromChain &&
+      destinationChainId === toChain &&
+      inputTokenAddress.toLowerCase() === fromTokenAddress.toLowerCase()
+  );
+}
+
+export function isOutputTokenBridgeable(
+  outputTokenAddress: string,
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ toTokenAddress, fromChain, toChain }) =>
+      originChainId === fromChain &&
+      destinationChainId === toChain &&
+      toTokenAddress.toLowerCase() === outputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByInputTokenAndDestinationChain(
+  inputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ fromTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      fromTokenAddress.toLowerCase() === inputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByOutputTokenAndOriginChain(
+  outputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ toTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      outputTokenAddress.toLowerCase() === toTokenAddress.toLowerCase()
+  );
+}
+
+export function getRoutesByChainIds(
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.filter(
+    ({ toChain, fromChain }) =>
+      originChainId === fromChain && destinationChainId === toChain
+  );
+}
 
 /**
  * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
@@ -1054,7 +1472,7 @@ export function getMulticall3(
   chainId: number,
   signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
-  const address = sdk.utils.getMulticallAddress(chainId);
+  const address = getMulticall3Address(chainId);
 
   // no multicall on this chain
   if (!address) {
@@ -1066,6 +1484,17 @@ export function getMulticall3(
     MINIMAL_MULTICALL3_ABI,
     signerOrProvider
   ) as Multicall3;
+}
+
+export function getMulticall3Address(chainId: number): string | undefined {
+  const addressOverride = MULTICALL3_ADDRESS_OVERRIDES[chainId];
+  const addressFromSdk = sdk.utils.getMulticallAddress(chainId);
+
+  if (addressOverride) {
+    return addressOverride;
+  }
+
+  return addressFromSdk;
 }
 
 /**
@@ -1107,7 +1536,10 @@ export const getCachedTokenBalances = async (
       chainId,
       addresses,
       tokenAddresses,
-    })}`
+    })}`,
+    {
+      headers: getVercelHeaders(),
+    }
   );
 
   return response.data;
@@ -1181,6 +1613,22 @@ export function applyMapFilter<InputType, MapType>(
   }, []);
 }
 
+// superstruct first coerces, then validates
+export const positiveInt = coerce(min(integer(), 0), string(), (value) =>
+  Number(value)
+);
+
+// parses, coerces and validates query params
+// first coerce any fields that can be coerced, then validate
+export function parseQuery<
+  Q extends VercelRequestQuery,
+  S extends Struct<any, any>,
+>(query: Q, schema: S): Infer<S> {
+  const coerced = create(query, schema);
+  assert(coerced, schema);
+  return coerced;
+}
+
 /* ------------------------- superstruct validators ------------------------- */
 
 export function parsableBigNumberString() {
@@ -1213,7 +1661,7 @@ export function validAddressOrENS() {
 
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
-    return Number.isInteger(Number(value)) && Number(value) > 0;
+    return Number.isInteger(Number(value)) && Number(value) >= 0;
   });
 }
 
@@ -1227,6 +1675,16 @@ export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
   });
+}
+
+export function hexString() {
+  return define<string>("hexString", (value) => {
+    return utils.isHexString(value);
+  });
+}
+
+export function bytes32() {
+  return size(hexString(), 66); // inclusive of "0x"
 }
 
 /**
@@ -1247,9 +1705,31 @@ export function getLpCushion(
       `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
       `REACT_APP_LP_CUSHION_${symbol}`,
     ]
-      .map((key) => process.env[key])
+      .map((key) => getEnvs()[key])
       .find((value) => value !== undefined) ?? "0"
   );
+}
+
+/**
+ * Returns the limit cap for a given token and toChainId.
+ * @param symbol The token symbol
+ * @param decimals The token decimals
+ * @param toChainId The destination chain ID
+ * @returns The cap in wei
+ */
+export function getLimitCap(
+  symbol: string,
+  decimals: number,
+  toChainId: number
+) {
+  const cap =
+    [`LIMIT_CAP_${symbol}_${toChainId}`, `LIMIT_CAP_${symbol}`]
+      .map((key) => getEnvs()[key])
+      .find((value) => value !== undefined) ?? undefined;
+
+  if (cap === undefined) return sdk.utils.bnUint256Max;
+
+  return ethers.utils.parseUnits(cap, decimals);
 }
 
 export async function tagReferrer(
@@ -1621,8 +2101,9 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
+  const chainId = provider.network.chainId;
   const multicall3 = new ethers.Contract(
-    MULTICALL3_ADDRESS,
+    getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
     provider
   );
@@ -1713,27 +2194,6 @@ export async function getBalancerV2TokenPrice(
 }
 
 /**
- * Returns the EOA that will serve as the default relayer address
- * @param destinationChainId The destination chain that a bridge operation will transfer to
- * @param symbol A valid token symbol
- * @returns A valid EOA address
- */
-export function getDefaultRelayerAddress(
-  destinationChainId: number,
-  symbol?: string
-) {
-  const symbolOverride = symbol
-    ? defaultRelayerAddressOverride?.symbols?.[symbol]
-    : undefined;
-  return (
-    symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
-    symbolOverride?.defaultAddr ?? // Specific Symbol override
-    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
-    sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
-  );
-}
-
-/**
  * Performs the needed function calls to return a Vercel Response
  * @param response The response client provided by Vercel
  * @param body A payload in JSON format to send to the client
@@ -1787,15 +2247,13 @@ export function isSwapRouteEnabled({
 }
 
 export function getLimitsBufferMultiplier(symbol: string) {
-  const limitsBufferMultipliers: Record<string, string> = process.env
-    .LIMITS_BUFFER_MULTIPLIERS
-    ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
-    : {};
+  const limitsBufferMultipliers: Record<string, string> =
+    LIMITS_BUFFER_MULTIPLIERS ? JSON.parse(LIMITS_BUFFER_MULTIPLIERS) : {};
   const bufferMultiplier = ethers.utils.parseEther(
-    limitsBufferMultipliers[symbol] || "1"
+    limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
-  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+  return minBN(bufferMultiplier, multiplierCap);
 }
 
 export function getChainInputTokenMaxBalanceInUsd(
@@ -1803,10 +2261,10 @@ export function getChainInputTokenMaxBalanceInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxBalances: Record<string, Record<string, string>> = process.env
-    .CHAIN_USD_MAX_BALANCES
-    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
-    : {};
+  const maxBalances: Record<
+    string,
+    Record<string, string>
+  > = CHAIN_USD_MAX_BALANCES ? JSON.parse(CHAIN_USD_MAX_BALANCES) : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
     : undefined;
@@ -1818,14 +2276,20 @@ export function getChainInputTokenMaxDepositInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxDeposits: Record<string, Record<string, string>> = process.env
-    .CHAIN_USD_MAX_DEPOSITS
-    ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
-    : {};
+  const maxDeposits: Record<
+    string,
+    Record<string, string>
+  > = CHAIN_USD_MAX_DEPOSITS ? JSON.parse(CHAIN_USD_MAX_DEPOSITS) : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
-  return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+
+  return (
+    maxDeposits[chainId.toString()]?.[symbol] ?? // specific chain => specific token
+    maxDeposits["*"]?.[symbol] ?? // all chains for specific token
+    maxDeposits["*"]?.["*"] ?? // all tokens for all chains
+    defaultValue // default
+  );
 }
 
 export function getCachedLatestBlock(chainId: number) {
@@ -1880,73 +2344,172 @@ export function isContractCache(chainId: number, address: string) {
   );
 }
 
-export function getCachedFillGasUsage(
+export function getCachedNativeGasCost(
   deposit: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
-    spokePoolAddress: string;
     relayerAddress: string;
   }>
 ) {
+  // We can use a long TTL since we are fetching only the native gas cost which should rarely change.
+  // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
-    default: 10,
-    [CHAIN_IDs.ARBITRUM]: 10,
+    default: 120,
   };
-
   const cacheKey = buildInternalCacheKey(
-    "fillGasUsage",
+    "nativeGasCost",
     deposit.destinationChainId,
     deposit.outputToken
   );
-  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
   const fetchFn = async () => {
+    const relayerAddress =
+      overrides?.relayerAddress ??
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
       overrides
     );
-    const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
-      buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      undefined,
-      undefined,
-      true
+    const unsignedFillTxn =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        relayerAddress
+      );
+    const voidSigner = new ethers.VoidSigner(
+      relayerAddress,
+      relayerFeeCalculatorQueries.provider
     );
-    return nativeGasCost;
-  };
-
-  return getCachedValue(cacheKey, ttl, fetchFn, (bnFromCache) =>
-    BigNumber.from(bnFromCache)
-  );
-}
-
-export function latestGasPriceCache(chainId: number) {
-  const ttlPerChain = {
-    default: 30,
-    [CHAIN_IDs.ARBITRUM]: 15,
+    return voidSigner.estimateGas(unsignedFillTxn);
   };
 
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("latestGasPriceCache", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
-    () => getMaxFeePerGas(chainId),
-    (bnFromCache) => BigNumber.from(bnFromCache)
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (nativeGasCostFromCache) => {
+      return BigNumber.from(nativeGasCostFromCache);
+    }
   );
 }
 
-/**
- * Resolve the current gas price for a given chain
- * @param chainId The chain ID to resolve the gas price for
- * @returns The gas price in the native currency of the chain
- */
-export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
-  if (sdk.utils.chainIsOPStack(chainId)) {
-    const l2Provider = asL2Provider(getProvider(chainId));
-    return l2Provider.getGasPrice();
-  }
-  const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
-    getProvider(chainId),
-    chainId
+export function getCachedOpStackL1DataFee(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  nativeGasCost: BigNumber,
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // The L1 data fee should change after each Ethereum block since its based on the L1 base fee.
+  // However, the L1 base fee should only change by 12.5% at most per block.
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 60,
+  };
+
+  const cacheKey = buildInternalCacheKey(
+    "opStackL1DataFee",
+    deposit.destinationChainId,
+    deposit.outputToken // This should technically differ based on the output token since the L2 calldata
+    // size affects the L1 data fee and this calldata can differ based on the output token.
   );
-  return maxFeePerGas;
+  const fetchFn = async () => {
+    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
+    // we'll compute the gas price separately.
+    const { opStackL1DataFeeMarkup } = getGasMarkup(deposit.destinationChainId);
+    const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+      deposit.destinationChainId,
+      overrides
+    );
+    const unsignedTx =
+      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      );
+    const opStackL1GasCost =
+      await relayerFeeCalculatorQueries.getOpStackL1DataFee(
+        unsignedTx,
+        overrides?.relayerAddress,
+        {
+          opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
+          opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
+        }
+      );
+    return opStackL1GasCost;
+  };
+
+  return makeCacheGetterAndSetter(
+    cacheKey,
+    ttlPerChain.default,
+    fetchFn,
+    (l1DataFeeFromCache) => {
+      return BigNumber.from(l1DataFeeFromCache);
+    }
+  );
+}
+
+export function latestGasPriceCache(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+) {
+  // We set this higher than the secondsPerUpdate value in the cron cache gas prices job which will update this
+  // more frequently.
+  const ttlPerChain = {
+    default: 30,
+  };
+  return makeCacheGetterAndSetter(
+    // If deposit is defined, then the gas price will be dependent on the fill transaction derived from the deposit.
+    // Therefore, we technically should cache a different gas price per different types of deposit so we add
+    // an additional outputToken to the cache key to distinguish between gas prices dependent on deposit args
+    // for different output tokens, which should be the main factor affecting the fill gas cost.
+    buildInternalCacheKey(
+      `latestGasPriceCache${deposit ? `-${deposit.outputToken}` : ""}`,
+      chainId
+    ),
+    ttlPerChain.default,
+    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
+      return {
+        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
+        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
+      };
+    }
+  );
+}
+
+export async function getMaxFeePerGas(
+  chainId: number,
+  deposit?: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    relayerAddress: string;
+  }>
+): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  if (deposit && deposit.destinationChainId !== chainId) {
+    throw new Error(
+      "Chain ID must match the destination chain ID of the deposit"
+    );
+  }
+  const {
+    baseFeeMarkup: baseFeeMultiplier,
+    priorityFeeMarkup: priorityFeeMultiplier,
+  } = getGasMarkup(chainId);
+  const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+    chainId,
+    overrides
+  );
+  const unsignedFillTxn = deposit
+    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+        buildDepositForSimulation(deposit),
+        overrides?.relayerAddress
+      )
+    : undefined;
+  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
+    chainId,
+    unsignedTx: unsignedFillTxn,
+    baseFeeMultiplier,
+    priorityFeeMultiplier,
+  });
 }
 
 /**
@@ -1969,14 +2532,16 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
  * const res = await axios.get(`${base_url}?${queryString}`)
  * ```
  */
-
 export function buildSearchParams(
-  params: Record<string, number | string | Array<number | string>>
+  params: Record<
+    string,
+    number | string | boolean | Array<number | string | boolean>
+  >
 ): string {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value = params[key];
-    if (!value) continue;
+    if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
       value.forEach((val) => searchParams.append(key, String(val)));
     } else {
@@ -1991,4 +2556,146 @@ export function paramToArray<T extends undefined | string | string[]>(
 ): string[] | undefined {
   if (!param) return;
   return Array.isArray(param) ? param : [param];
+}
+
+export type TokenOptions = {
+  chainId: number;
+  address: string;
+};
+
+const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
+
+function tokenInfoCache(params: TokenOptions) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("tokenInfo", params.address, params.chainId),
+    TTL_TOKEN_INFO,
+    () => getTokenInfo(params),
+    (tokenDetails) => tokenDetails
+  );
+}
+
+export async function getCachedTokenInfo(params: TokenOptions) {
+  return tokenInfoCache(params).get();
+}
+
+// find decimals and symbol for any token address on any chain we support
+export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals"> & {
+    chainId: number;
+  }
+> {
+  try {
+    if (!ethers.utils.isAddress(address)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: '"Address" must be a valid ethereum address',
+      });
+    }
+
+    if (!Number.isSafeInteger(chainId) || chainId < 0) {
+      throw new InvalidParamError({
+        param: "chainId",
+        message: '"chainId" must be a positive integer',
+      });
+    }
+
+    // ERC20 resolved statically
+    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+      Boolean(
+        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
+      )
+    );
+
+    if (token) {
+      return {
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.addresses[chainId],
+        name: token.name,
+        chainId,
+      };
+    }
+
+    // ERC20 resolved dynamically
+    const provider = getProvider(chainId);
+
+    const erc20 = ERC20__factory.connect(
+      ethers.utils.getAddress(address),
+      provider
+    );
+
+    const calls = [
+      {
+        contract: erc20,
+        functionName: "decimals",
+      },
+      {
+        contract: erc20,
+        functionName: "symbol",
+      },
+      {
+        contract: erc20,
+        functionName: "name",
+      },
+    ];
+
+    const [[decimals], [symbol], [name]] = await callViaMulticall3(
+      provider,
+      calls
+    );
+
+    return {
+      address,
+      decimals,
+      symbol,
+      name,
+      chainId,
+    };
+  } catch (error) {
+    throw new TokenNotFoundError({
+      chainId,
+      address,
+      opts: {
+        cause: error,
+      },
+    });
+  }
+}
+
+export function getL1TokenConfigCache(l1TokenAddress: string) {
+  l1TokenAddress = utils.getAddress(l1TokenAddress);
+  const cacheKey = buildInternalCacheKey("l1TokenConfig", l1TokenAddress);
+  const fetchFn = async () => {
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      ENABLED_ROUTES.acrossConfigStoreAddress,
+      getProvider(HUB_POOL_CHAIN_ID)
+    );
+    const l1TokenConfig =
+      await configStoreClient.getL1TokenConfig(l1TokenAddress);
+    return l1TokenConfig;
+  };
+  const ttl = 60 * 60 * 24 * 30; // 30 days
+  return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
+}
+
+export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
+  return amount
+    .mul(ethers.utils.parseEther((1 + Number(markup)).toString()))
+    .div(sdk.utils.fixedPointAdjustment);
+}
+
+export function parseL1TokenConfigSafe(jsonString: string) {
+  try {
+    return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+      jsonString
+    );
+  } catch (error) {
+    getLogger().error({
+      at: "parseL1TokenConfigSafe",
+      message: "Error parsing L1 token config",
+      error,
+      jsonString,
+    });
+    return null;
+  }
 }

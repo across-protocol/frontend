@@ -13,4 +13,4 @@ export type StylizedSVG = StyledComponent<
 
 export type VoidHandler = () => void;
 
-export type DepositStatusFilter = "all" | "pending" | "filled";
+export type DepositStatusFilter = "all" | "pending" | "filled" | "refunded";

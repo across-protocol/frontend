@@ -4,7 +4,7 @@
     "name": "Sepolia",
     "publicRpcUrl": "https://gateway.tenderly.co/public/sepolia",
     "explorerUrl": "https://sepolia.etherscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mainnet/assets/logo.svg",
     "spokePool": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
     "spokePoolBlock": 5288470,
     "inputTokens": [
@@ -28,6 +28,27 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ],
     "outputTokens": [
@@ -51,6 +72,27 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x2b9Ca0A8C773bb1B92A3dDAE9F882Fd14457DACc",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x2Be68B15c693D3b5747F9F0D49D30A2E81BAA2Df",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
       }
     ]
   },
@@ -59,7 +101,7 @@
     "name": "Base Sepolia",
     "publicRpcUrl": "https://sepolia.base.org",
     "explorerUrl": "https://sepolia.basescan.org",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/base_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/base/assets/logo.svg",
     "spokePool": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
     "spokePoolBlock": 6082004,
     "inputTokens": [
@@ -83,6 +125,20 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x3c95BB5f49F3643558aa8F699403564A652FBeB0",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ],
     "outputTokens": [
@@ -112,7 +168,21 @@
         "symbol": "USDbC",
         "name": "USD Coin (bridged)",
         "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdbc.svg"
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      },
+      {
+        "address": "0x3c95BB5f49F3643558aa8F699403564A652FBeB0",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   },
@@ -121,7 +191,7 @@
     "name": "Arbitrum Sepolia",
     "publicRpcUrl": "https://sepolia-rollup.arbitrum.io/rpc",
     "explorerUrl": "https://sepolia.arbiscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/arbitrum_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/arbitrum/assets/logo.svg",
     "spokePool": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
     "spokePoolBlock": 12411026,
     "inputTokens": [
@@ -176,18 +246,76 @@
     "name": "Optimism Sepolia",
     "publicRpcUrl": "https://sepolia.optimism.io",
     "explorerUrl": "https://sepolia-optimism.etherscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/optimism_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/optimism/assets/logo.svg",
     "spokePool": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
     "spokePoolBlock": 7762656,
-    "inputTokens": [],
-    "outputTokens": []
+    "inputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x180D555759e4d1d5Cf70C3BaBbAE4B8F410BDAD9",
+        "symbol": "XYZ",
+        "name": "XYZ Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/xyz.svg"
+      }
+    ]
   },
   {
     "chainId": 919,
     "name": "Mode Sepolia",
     "publicRpcUrl": "https://sepolia.mode.network",
     "explorerUrl": "https://sepolia.explorer.mode.network",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mode_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mode/assets/logo.svg",
     "spokePool": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
     "spokePoolBlock": 13999465,
     "inputTokens": [
@@ -228,7 +356,7 @@
     "name": "Polygon Amoy",
     "publicRpcUrl": "https://rpc-amoy.polygon.technology",
     "explorerUrl": "https://amoy.polygonscan.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon_amoy/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon/assets/logo.svg",
     "spokePool": "0xd08baaE74D6d2eAb1F3320B2E1a53eeb391ce8e5",
     "spokePoolBlock": 7529960,
     "inputTokens": [
@@ -238,6 +366,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x8B0180f2101c8260d49339abfEe87927412494B4",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ],
     "outputTokens": [
@@ -254,6 +389,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x8B0180f2101c8260d49339abfEe87927412494B4",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   },
@@ -262,7 +404,7 @@
     "name": "Blast Sepolia",
     "publicRpcUrl": "https://sepolia.blast.io",
     "explorerUrl": "https://sepolia.blastscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/blast_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/blast/assets/logo.svg",
     "spokePool": "0x5545092553Cf5Bf786e87a87192E902D50D8f022",
     "spokePoolBlock": 7634204,
     "inputTokens": [
@@ -303,7 +445,7 @@
     "name": "Lisk Sepolia",
     "publicRpcUrl": "https://rpc.sepolia-api.lisk.com",
     "explorerUrl": "https://sepolia-blockscout.lisk.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lisk_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lisk/assets/logo.svg",
     "spokePool": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
     "spokePoolBlock": 7267988,
     "inputTokens": [
@@ -336,6 +478,164 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 37111,
+    "name": "Lens Sepolia",
+    "publicRpcUrl": "https://rpc.testnet.lens.dev",
+    "explorerUrl": "https://block-explorer.testnet.lens.dev",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens-sepolia/assets/logo.svg",
+    "spokePool": "0x6A0a7f39530923911832Dd60667CE5da5449967B",
+    "spokePoolBlock": 156275,
+    "inputTokens": [
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "WGRASS",
+        "name": "Wrapped Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgrass.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xaA91D645D7a6C1aeaa5988e0547267B77d33fe16",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
+        "symbol": "GRASS",
+        "name": "Grass",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 1301,
+    "name": "Unichain Sepolia",
+    "publicRpcUrl": "https://sepolia.unichain.org",
+    "explorerUrl": "https://sepolia.uniscan.xyz",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/unichain-sepolia/assets/logo.svg",
+    "spokePool": "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
+    "spokePoolBlock": 12593713,
+    "inputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 129399,
+    "name": "Tatara",
+    "publicRpcUrl": "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
+    "explorerUrl": "https://explorer.tatara.katana.network",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/tatara/assets/logo.svg",
+    "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "spokePoolBlock": 2929205,
+    "inputTokens": [
+      {
+        "address": "0x102E14ffF48170F2e5b6d0e30259fCD4eE5E28aE",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      },
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x17B8Ee96E3bcB3b04b3e8334de4524520C51caB4",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x102E14ffF48170F2e5b6d0e30259fCD4eE5E28aE",
+        "symbol": "TATARA-USDC",
+        "name": "Tatara USDC",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
       }
     ]
   }

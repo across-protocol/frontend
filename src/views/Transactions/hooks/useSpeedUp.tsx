@@ -10,6 +10,7 @@ import {
   waitOnTransaction,
   fixedPointAdjustment,
   getUpdateV3DepositTypedData,
+  toBytes32,
 } from "utils";
 
 import type { Deposit } from "hooks/useDeposits";
@@ -61,6 +62,10 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         await isWrongNetworkHandler();
       }
 
+      if (process.env.REACT_APP_ENABLE_V6 !== "true") {
+        throw new Error("Speed up is temporarily disabled");
+      }
+
       const newRecipient =
         args.optionalUpdates?.newRecipient || transfer.recipientAddr;
       const newMessage = args.optionalUpdates?.newMessage || transfer.message;
@@ -83,11 +88,11 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
       const depositor = await signer.getAddress();
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
-      const txResponse = await spokePool.speedUpV3Deposit(
-        depositor,
-        transfer.depositId,
+      const txResponse = await spokePool.speedUpDeposit(
+        toBytes32(depositor),
+        BigNumber.from(transfer.depositId),
         updatedOutputAmount,
-        newRecipient,
+        toBytes32(newRecipient),
         newMessage,
         depositorSignature
       );

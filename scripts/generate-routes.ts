@@ -1,10 +1,24 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
+
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
-
+import path from "path";
 import * as chainConfigs from "./chain-configs";
+import * as externConfigs from "./extern-configs";
+import assert from "assert";
+
+function getTokenSymbolForLogo(tokenSymbol: string): string {
+  switch (tokenSymbol) {
+    case "USDC.e":
+    case "USDbC":
+    case "USDzC":
+      return "USDC";
+    default:
+      return tokenSymbol;
+  }
+}
 
 function getDeployedAddress(contractName: string, chainId: number): string {
   return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
@@ -17,7 +31,9 @@ type ToToken = ToChain["tokens"][number];
 type SwapToken = ToChain["swapTokens"][number];
 type ValidTokenSymbol = string;
 
-const enabledMainnetChainConfigs = [
+const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
+
+export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
   chainConfigs.POLYGON,
@@ -32,9 +48,14 @@ const enabledMainnetChainConfigs = [
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
+  chainConfigs.ALEPH_ZERO,
+  chainConfigs.INK,
+  chainConfigs.SONEIUM,
+  chainConfigs.UNICHAIN,
+  chainConfigs.LENS,
 ];
 
-const enabledSepoliaChainConfigs = [
+export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
   chainConfigs.ARBITRUM_SEPOLIA,
@@ -43,6 +64,9 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.POLYGON_AMOY,
   chainConfigs.BLAST_SEPOLIA,
   chainConfigs.LISK_SEPOLIA,
+  chainConfigs.LENS_SEPOLIA,
+  chainConfigs.UNICHAIN_SEPOLIA,
+  chainConfigs.TATARA,
 ];
 
 const enabledRoutes = {
@@ -59,14 +83,9 @@ const enabledRoutes = {
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
     merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
-    pools: [
-      {
-        tokenSymbol: "BOBA",
-        isNative: false,
-      },
-    ],
+    pools: [],
     spokePoolVerifier: {
-      address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
+      address: "0x630b76C7cA96164a5aCbC1105f8BA8B739C82570",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
@@ -81,8 +100,10 @@ const enabledRoutes = {
         CHAIN_IDs.SCROLL,
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
+        CHAIN_IDs.INK,
       ],
     },
+    // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
     swapAndBridgeAddresses: {
       "1inch": {
         [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
@@ -94,10 +115,63 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
         [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
         [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-        // [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
       },
     },
-    routes: transformChainConfigs(enabledMainnetChainConfigs),
+    // Addresses of `UniversalSwapAndBridge` contracts from deployment:
+    // https://github.com/across-protocol/contracts/pull/731/commits/6bdbfd38f50b616ac25e49687cbac6fb6bcb543b
+    universalSwapAndBridgeAddresses: {
+      "1inch": {
+        [CHAIN_IDs.ARBITRUM]: "0x81C7601ac0c5825e89F967f9222B977CCD78aD77",
+        [CHAIN_IDs.BASE]: "0x98285D11B9F7aFec2d475805E5255f26B4490167",
+        [CHAIN_IDs.OPTIMISM]: "0x7631eA29479Ee265241F13FB48555A2C886d3Bf8",
+        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
+      },
+      uniswap: {
+        [CHAIN_IDs.ARBITRUM]: "0x2414A759d4EFF700Ad81e257Ab5187d07eCeEbAb",
+        [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
+        [CHAIN_IDs.BLAST]: "0x57EE47829369e2EF62fBb423648bec70d0366204",
+        [CHAIN_IDs.LENS]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
+        [CHAIN_IDs.MAINNET]: "0x0e84f089B0923EfeA51C6dF91581BFBa66A3484A",
+        [CHAIN_IDs.OPTIMISM]: "0x04989eaF03547E6583f9d9e42aeD11D2b78A808b",
+        [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
+        [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
+        [CHAIN_IDs.ZK_SYNC]: "0xdB82479e3903869fbF8B308162E332FED771D51B",
+      },
+      gho: {
+        [CHAIN_IDs.MAINNET]: "0x18d0915ADA0d5969db64CA44A42dB1b51D8421aa",
+        [CHAIN_IDs.LENS]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
+      },
+      "gho-multicall3": {
+        [CHAIN_IDs.MAINNET]: "0x9736F26C6311701A984A53A0b555f8A20225173A",
+      },
+    },
+    spokePoolPeripheryAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BASE]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.BLAST]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.MAINNET]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.OPTIMISM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.POLYGON]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.WORLD_CHAIN]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.ZK_SYNC]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
+      [CHAIN_IDs.ZORA]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+    },
+    spokePoolPeripheryProxyAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BASE]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.BLAST]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.MAINNET]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.OPTIMISM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.POLYGON]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.WORLD_CHAIN]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+      [CHAIN_IDs.ZK_SYNC]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
+      [CHAIN_IDs.ZORA]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+    },
+    routes: transformChainConfigs(
+      enabledMainnetChainConfigs,
+      enabledMainnetExternalProjects
+    ),
   },
   [CHAIN_IDs.SEPOLIA]: {
     hubPoolChain: CHAIN_IDs.SEPOLIA,
@@ -124,18 +198,26 @@ const enabledRoutes = {
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
-    routes: transformChainConfigs(enabledSepoliaChainConfigs),
+    universalSwapAndBridgeAddresses: {
+      uniswap: {},
+    },
+    spokePoolPeripheryAddresses: {},
+    spokePoolPeripheryProxyAddresses: {},
+    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
 
 function transformChainConfigs(
-  enabledChainConfigs: typeof enabledMainnetChainConfigs
+  enabledChainConfigs: typeof enabledMainnetChainConfigs,
+  enabledExternalProjects: typeof enabledMainnetExternalProjects
 ) {
   const transformedChainConfigs: {
     fromChain: number;
     fromSpokeAddress: string;
+    externalProjectId?: string;
     toChains: {
       chainId: number;
+      externalProjectId?: string;
       tokens: (
         | string
         | {
@@ -183,121 +265,13 @@ function transformChainConfigs(
         throw new Error(`No config found for chain ${toChainId}`);
       }
 
-      const tokens = chainConfig.tokens.flatMap((token) => {
-        const tokenSymbol = typeof token === "string" ? token : token.symbol;
-
-        // Handle native USDC -> bridged USDC routes
-        if (tokenSymbol === "USDC") {
-          if (toChainConfig.enableCCTP) {
-            return [
-              "USDC",
-              {
-                inputTokenSymbol: "USDC",
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          } else if (
-            toChainConfig.tokens.find(
-              (token) =>
-                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-            )
-          ) {
-            return [
-              {
-                inputTokenSymbol: "USDC",
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          }
-        }
-
-        // Handle bridged USDC -> native/bridged USDC routes
-        if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
-          if (toChainConfig.enableCCTP) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDC",
-              },
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          } else if (toChainConfig.tokens.includes("USDC")) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDC",
-              },
-            ];
-          } else if (
-            toChainConfig.tokens.find(
-              (token) =>
-                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
-            )
-          ) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
-              },
-            ];
-          }
-        }
-
-        // Handle USDB -> DAI
-        if (tokenSymbol === "USDB" && toChainConfig.tokens.includes("DAI")) {
-          return [
-            {
-              inputTokenSymbol: "USDB",
-              outputTokenSymbol: "DAI",
-            },
-          ];
-        }
-        if (tokenSymbol === "DAI" && toChainConfig.tokens.includes("USDB")) {
-          return [
-            {
-              inputTokenSymbol: "DAI",
-              outputTokenSymbol: "USDB",
-            },
-          ];
-        }
-
-        // Handle WETH Polygon
-        if (
-          tokenSymbol === "WETH" &&
-          [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
-            toChainConfig.chainId
-          )
-        ) {
-          return ["WETH", "ETH"];
-        }
-
-        const chainIds =
-          typeof token === "string" ? [toChainId] : token.chainIds;
-
-        const toToken = toChainConfig.tokens.find((token) =>
-          typeof token === "string"
-            ? token === tokenSymbol
-            : token.symbol === tokenSymbol
-        );
-        if (
-          !toToken ||
-          (typeof toToken === "object" &&
-            !toToken.chainIds.includes(fromChainId)) ||
-          !chainIds.includes(toChainId)
-        ) {
-          return [];
-        }
-
-        return tokenSymbol;
-      });
+      const tokens = processTokenRoutes(chainConfig, toChainConfig);
 
       // Handle USDC swap tokens
-      const usdcSwapTokens = chainConfig.enableCCTP
-        ? getUsdcSwapTokens(fromChainId, toChainId)
-        : [];
+      const usdcSwapTokens =
+        chainConfig.enableCCTP && hasBridgedUsdc(fromChainId)
+          ? getUsdcSwapTokens(fromChainId, toChainId)
+          : [];
 
       const toChain = {
         chainId: toChainId,
@@ -319,6 +293,47 @@ function transformChainConfigs(
       toChains.push(toChain);
     }
 
+    for (const externalProject of enabledExternalProjects) {
+      if (externalProject.intermediaryChain === fromChainId) {
+        continue;
+      }
+      const associatedChain = enabledChainConfigs.find(
+        (config) => config.chainId === externalProject.intermediaryChain
+      );
+      assert(associatedChain, "Associated chain not found");
+
+      let associatedRoutes = processTokenRoutes(
+        chainConfig,
+        { ...associatedChain, enableCCTP: false },
+        externalProject.tokens
+      );
+
+      const externalProjectId = externalProject.projectId;
+
+      // Handle USDC swap tokens
+      const usdcSwapTokens = [];
+
+      const toChain = {
+        chainId: externalProject.intermediaryChain,
+        externalProjectId,
+        tokens: associatedRoutes,
+        swapTokens: usdcSwapTokens.filter(
+          ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
+            associatedRoutes.some((token) =>
+              typeof token === "string"
+                ? token === acrossInputTokenSymbol
+                : token.inputTokenSymbol === acrossInputTokenSymbol
+            ) &&
+            associatedRoutes.some((token) =>
+              typeof token === "string"
+                ? token === acrossOutputTokenSymbol
+                : token.outputTokenSymbol === acrossOutputTokenSymbol
+            )
+        ),
+      };
+      toChains.push(toChain);
+    }
+
     transformedChainConfigs.push({
       fromChain: fromChainId,
       fromSpokeAddress,
@@ -327,6 +342,152 @@ function transformChainConfigs(
   }
 
   return transformedChainConfigs;
+}
+
+function processTokenRoutes(
+  fromConfig: typeof chainConfigs.MAINNET,
+  toConfig: typeof chainConfigs.MAINNET,
+  tokensToProcess?: string[]
+) {
+  const toChainId = toConfig.chainId;
+  const tokens = tokensToProcess ?? fromConfig.tokens;
+  return tokens.flatMap((token) => {
+    const tokenSymbol = typeof token === "string" ? token : token.symbol;
+
+    // If the fromConfig does not support the token, return an empty array
+    if (!fromConfig.tokens.includes(tokenSymbol)) {
+      return [];
+    }
+
+    // Handle native USDC -> bridged USDC routes
+    if (tokenSymbol === "USDC") {
+      if (toConfig.enableCCTP) {
+        // Some chains only have native CCTP USDC
+        if (hasBridgedUsdc(toConfig.chainId)) {
+          return [
+            "USDC",
+            {
+              inputTokenSymbol: "USDC",
+              outputTokenSymbol: getBridgedUsdcSymbol(toConfig.chainId),
+            },
+          ];
+        } else {
+          return ["USDC"];
+        }
+      } else if (
+        toConfig.tokens.find(
+          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+        )
+      ) {
+        return [
+          {
+            inputTokenSymbol: "USDC",
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      }
+    }
+
+    // Handle bridged USDC -> native/bridged USDC routes
+    if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
+      if (toConfig.enableCCTP) {
+        // Some chains only have native CCTP USDC
+        if (hasBridgedUsdc(toConfig.chainId)) {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+            },
+          ];
+        } else {
+          return [
+            {
+              inputTokenSymbol: tokenSymbol,
+              outputTokenSymbol: "USDC",
+            },
+          ];
+        }
+      } else if (toConfig.tokens.includes("USDC")) {
+        return [
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: "USDC",
+          },
+        ];
+      } else if (
+        toConfig.tokens.find(
+          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+        ) &&
+        hasBridgedUsdc(toChainId)
+      ) {
+        return [
+          {
+            inputTokenSymbol: tokenSymbol,
+            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+          },
+        ];
+      }
+    }
+
+    // Handle USDB -> DAI
+    if (tokenSymbol === "USDB" && toConfig.tokens.includes("DAI")) {
+      return [
+        {
+          inputTokenSymbol: "USDB",
+          outputTokenSymbol: "DAI",
+        },
+      ];
+    }
+    if (tokenSymbol === "DAI" && toConfig.tokens.includes("USDB")) {
+      return [
+        {
+          inputTokenSymbol: "DAI",
+          outputTokenSymbol: "USDB",
+        },
+      ];
+    }
+
+    if (tokenSymbol === "WGRASS" && toConfig.tokens.includes("GRASS")) {
+      return [
+        {
+          inputTokenSymbol: "WGRASS",
+          outputTokenSymbol: "GRASS",
+        },
+      ];
+    }
+
+    // Handle WETH Polygon & other non-eth chains
+    if (
+      tokenSymbol === "WETH" &&
+      !toConfig.tokens.includes("ETH") &&
+      toConfig.tokens.includes("WETH") &&
+      fromConfig.tokens.includes("ETH")
+    ) {
+      return ["WETH", "ETH"];
+    }
+
+    const chainIds = typeof token === "string" ? [toChainId] : token.chainIds;
+
+    const toToken = toConfig.tokens.find((token) =>
+      typeof token === "string"
+        ? token === tokenSymbol
+        : token.symbol === tokenSymbol
+    );
+    if (
+      !toToken ||
+      (typeof toToken === "object" &&
+        !toToken.chainIds.includes(fromConfig.chainId)) ||
+      !chainIds.includes(toChainId)
+    ) {
+      return [];
+    }
+
+    return tokenSymbol;
+  });
 }
 
 async function generateRoutes(hubPoolChainId = 1) {
@@ -347,20 +508,20 @@ async function generateRoutes(hubPoolChainId = 1) {
     ),
     merkleDistributorAddress: utils.getAddress(config.merkleDistributorAddress),
     claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
-    swapAndBridgeAddresses: Object.entries(
-      config.swapAndBridgeAddresses
-    ).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: Object.entries(value).reduce(
-          (acc, [chainId, address]) => ({
-            ...acc,
-            [chainId]: utils.getAddress(address as string),
-          }),
-          {}
-        ),
-      }),
-      {}
+    swapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.swapAndBridgeAddresses as Record<string, Record<string, string>>
+    ),
+    universalSwapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.universalSwapAndBridgeAddresses as Record<
+        string,
+        Record<string, string>
+      >
+    ),
+    spokePoolPeripheryAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryAddresses as Record<string, string>
+    ),
+    spokePoolPeripheryProxyAddresses: checksumAddressOfMap(
+      config.spokePoolPeripheryProxyAddresses as Record<string, string>
     ),
     routes: config.routes.flatMap((route) =>
       transformBridgeRoute(route, config.hubPoolChain)
@@ -405,7 +566,7 @@ async function generateRoutes(hubPoolChainId = 1) {
         symbol: tokenSymbol,
         name: tokenInfo.name,
         decimals: tokenInfo.decimals,
-        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${tokenSymbol.toLowerCase()}.svg`,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
       };
     };
     return {
@@ -413,7 +574,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       name: chainConfig.name,
       publicRpcUrl: chainConfig.publicRpcUrl,
       explorerUrl: chainConfig.blockExplorer,
-      logoUrl: `${assetsBaseUrl}/scripts/chain-configs/${chainKey.toLowerCase()}/assets/logo.svg`,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
       inputTokens: routeFileContent.routes
@@ -507,12 +668,12 @@ function transformSwapRoute(route: Route, hubPoolChainId: number) {
           swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
         };
       } catch (e) {
-        if (e instanceof Error) {
-          throw new Error(
-            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
-          );
-        }
-        throw e;
+        throw new Error(
+          `Failed to transform swap route ${route.fromChain}->${toChain.chainId}`,
+          {
+            cause: e,
+          }
+        );
       }
     });
   });
@@ -525,7 +686,7 @@ function transformToRoute(
   outputTokenSymbol: ValidTokenSymbol,
   hubPoolChainId: number
 ) {
-  const inputToken = getTokenBySymbol(
+  let inputToken = getTokenBySymbol(
     inputTokenSymbol,
     route.fromChain,
     hubPoolChainId
@@ -535,10 +696,19 @@ function transformToRoute(
     toChain.chainId,
     hubPoolChainId
   );
+  const fromChain = Object.values(chainConfigs).find(
+    (config) => config.chainId === route.fromChain
+  )!;
+
+  if (fromChain.chainId === CHAIN_IDs.LENS && inputTokenSymbol === "GHO") {
+    inputToken = getTokenBySymbol("WGHO", route.fromChain, hubPoolChainId);
+  }
 
   if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
     throw new Error("Mismatching L1 addresses");
   }
+
+  const isNative = inputTokenSymbol === fromChain.nativeToken;
 
   return {
     fromChain: route.fromChain,
@@ -548,8 +718,9 @@ function transformToRoute(
     fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
     fromTokenSymbol: inputTokenSymbol,
     toTokenSymbol: outputTokenSymbol,
-    isNative: inputTokenSymbol === TOKEN_SYMBOLS_MAP.ETH.symbol,
+    isNative,
     l1TokenAddress: inputToken.l1TokenAddress,
+    externalProjectId: toChain.externalProjectId,
   };
 }
 
@@ -589,18 +760,28 @@ function getTokenBySymbol(
 
 function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
   const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
-  return [
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol,
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
-    },
-  ];
+  if (hasBridgedUsdc(toChainId)) {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+      },
+    ];
+  } else {
+    return [
+      {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol: "USDC",
+        acrossOutputTokenSymbol: "USDC",
+      },
+    ];
+  }
 }
 
 function getBridgedUsdcSymbol(chainId: number) {
@@ -613,6 +794,33 @@ function getBridgedUsdcSymbol(chainId: number) {
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
+}
+
+function checksumAddressOfMap(map: Record<string, string>) {
+  return Object.entries(map).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: utils.getAddress(value) }),
+    {}
+  );
+}
+
+function checksumAddressesOfNestedMap(
+  nestedMap: Record<string, Record<string, string>>
+) {
+  return Object.entries(nestedMap).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: checksumAddressOfMap(value),
+    }),
+    {}
+  );
+}
+
+function hasBridgedUsdc(chainId: number) {
+  const bridgedUsdcSymbol = getBridgedUsdcSymbol(chainId);
+  const token =
+    TOKEN_SYMBOLS_MAP[bridgedUsdcSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+      .addresses[chainId];
+  return !!token;
 }
 
 generateRoutes(Number(process.argv[2]));
