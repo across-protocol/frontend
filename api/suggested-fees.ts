@@ -373,6 +373,18 @@ const handler = async (
       },
       fillDeadline: fillDeadline.toString(),
       outputAmount: outputAmount.toString(),
+      inputToken: {
+        address: inputToken.address,
+        symbol: inputToken.symbol,
+        decimals: inputToken.decimals,
+        chainId: computedOriginChainId,
+      },
+      outputToken: {
+        address: outputToken.address,
+        symbol: outputToken.symbol,
+        decimals: outputToken.decimals,
+        chainId: destinationChainId,
+      },
     };
 
     logger.info({
