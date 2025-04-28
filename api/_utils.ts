@@ -941,7 +941,8 @@ export const getCachedLimits = async (
   amount?: string,
   recipient?: string,
   relayer?: string,
-  message?: string
+  message?: string,
+  allowUnmatchedDecimals?: boolean
 ): Promise<{
   minDeposit: string;
   maxDeposit: string;
@@ -969,6 +970,7 @@ export const getCachedLimits = async (
         message,
         recipient,
         relayer,
+        allowUnmatchedDecimals,
       },
     })
   ).data;

@@ -101,6 +101,7 @@ const handler = async (
       outputToken,
       destinationChainId,
       resolvedOriginChainId: computedOriginChainId,
+      allowUnmatchedDecimals,
     } = validateChainAndTokenParams(query);
 
     relayer = relayer
@@ -225,7 +226,8 @@ const handler = async (
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
         depositWithMessage ? recipient : undefined,
         depositWithMessage ? relayer : undefined,
-        depositWithMessage ? message : undefined
+        depositWithMessage ? message : undefined,
+        allowUnmatchedDecimals
       ),
       getFillDeadline(destinationChainId),
     ]);
