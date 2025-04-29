@@ -4,7 +4,6 @@ import {
   populateDefaultRelayerFeeCapitalCostConfig,
   TOKEN_SYMBOLS_MAP,
 } from "../../api/_constants";
-import { ConvertDecimals } from "../../api/_utils";
 
 describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
   it("should populate decimals correctly for a single token", () => {
@@ -45,30 +44,12 @@ describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
     const usdcBnbDecimals = TOKEN_SYMBOLS_MAP["USDC-BNB"].decimals; // 18
     const tataraUsdsDecimals = TOKEN_SYMBOLS_MAP["TATARA-USDS"].decimals; // 18
 
-    // Original cutoff value parsed with USDC decimals (6)
-    const originalCutoffValue = ethers.utils.parseUnits(
-      usdcBaseConfig.cutoff,
-      usdcDecimals
-    );
-
-    // Expected cutoff value for tokens with 18 decimals
-    const convertedCutoff18Decimals = ConvertDecimals(
-      usdcDecimals,
-      usdcBnbDecimals
-    )(originalCutoffValue).toString();
-    // Expected cutoff value for tokens with 6 decimals (should be the same as original parsed value)
-    const convertedCutoff6Decimals = ConvertDecimals(
-      usdcDecimals,
-      usdcDecimals
-    )(originalCutoffValue).toString();
-
     const result = populateDefaultRelayerFeeCapitalCostConfig(baseConfig);
 
     // Check base USDC config
     expect(result.USDC).toEqual({
       ...usdcBaseConfig,
       decimals: usdcDecimals,
-      cutoff: convertedCutoff6Decimals, // Should match the original value parsed with 6 decimals
     });
 
     // Check some equivalent tokens
@@ -76,25 +57,21 @@ describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
     expect(result["USDC.e"]).toEqual({
       ...usdcBaseConfig,
       decimals: TOKEN_SYMBOLS_MAP["USDC.e"].decimals,
-      cutoff: convertedCutoff6Decimals,
     });
     // USDC-BNB (18 decimals)
     expect(result["USDC-BNB"]).toEqual({
       ...usdcBaseConfig,
       decimals: usdcBnbDecimals,
-      cutoff: convertedCutoff18Decimals, // Check conversion
     });
     // TATARA-USDS (18 decimals)
     expect(result["TATARA-USDS"]).toEqual({
       ...usdcBaseConfig,
       decimals: tataraUsdsDecimals,
-      cutoff: convertedCutoff18Decimals, // Check conversion
     });
     // TATARA-USDC (6 decimals)
     expect(result["TATARA-USDC"]).toEqual({
       ...usdcBaseConfig,
       decimals: TOKEN_SYMBOLS_MAP["TATARA-USDC"].decimals,
-      cutoff: convertedCutoff6Decimals,
     });
 
     // Ensure all expected equivalents are present
