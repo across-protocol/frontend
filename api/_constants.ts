@@ -161,6 +161,18 @@ export const coinGeckoAssetPlatformLookup: Record<string, number> = {
 
 export const graphAPIKey = GRAPH_API_KEY;
 
+// {
+//   "TOKEN_SYMBOL": {
+//     "ORIGIN_CHAIN_ID": {
+//       "DESTINATION_CHAIN_ID": {
+//         "lowerBound": "1000000000000000",
+//         "upperBound": "5000000000000000",
+//         "cutoff": "10000000000000000000000",
+//         "decimals": 18
+//       }
+//     }
+//   }
+// }
 const relayerFeeCapitalCostRouteOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
@@ -168,6 +180,16 @@ const relayerFeeCapitalCostRouteOverrides: Record<
   ? JSON.parse(RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES)
   : {};
 
+// {
+//   "TOKEN_SYMBOL": {
+//     "DESTINATION_CHAIN_ID": {
+//       "lowerBound": "1000000000000000",
+//       "upperBound": "5000000000000000",
+//       "cutoff": "10000000000000000000000",
+//       "decimals": 18
+//     }
+//   }
+// }
 const relayerFeeCapitalCostDestinationChainOverrides: Record<
   string,
   Record<string, relayFeeCalculator.CapitalCostConfig>
