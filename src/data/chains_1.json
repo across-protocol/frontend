@@ -371,7 +371,7 @@
   {
     "chainId": 137,
     "name": "Polygon",
-    "publicRpcUrl": "https://rpc.ankr.com/polygon",
+    "publicRpcUrl": "https://polygon.drpc.org",
     "explorerUrl": "https://polygonscan.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon/assets/logo.svg",
     "spokePool": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
@@ -1706,6 +1706,47 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 56,
+    "name": "BNB Chain",
+    "publicRpcUrl": "https://bsc-dataseed1.binance.org",
+    "explorerUrl": "https://bscscan.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/bnb/assets/logo.svg",
+    "spokePool": "0x0000000000000000000000000000000000000000",
+    "spokePoolBlock": 0,
+    "inputTokens": [
+      {
+        "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "symbol": "USDC-BNB",
+        "name": "USD Coin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "symbol": "USDT-BNB",
+        "name": "Tether USD",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "symbol": "USDC-BNB",
+        "name": "USD Coin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "symbol": "USDT-BNB",
+        "name": "Tether USD",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ]
   }

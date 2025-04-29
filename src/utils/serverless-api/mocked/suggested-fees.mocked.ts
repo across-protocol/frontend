@@ -1,7 +1,8 @@
 import { BigNumber, ethers } from "ethers";
-import { ChainId, getTokenByAddress } from "utils/constants";
+import { ChainId } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
 import { parseUnits } from "utils/format";
+import { getConfig } from "utils";
 
 /**
  * Creates a mocked variant of the suggestedAPI Call
@@ -20,7 +21,8 @@ export async function suggestedFeesMockedApiCall(
   _recipientAddress?: string,
   _message?: string
 ): Promise<SuggestedApiFeeReturnType> {
-  const token = getTokenByAddress(_inputToken);
+  const config = getConfig();
+  const token = config.getTokenInfoByAddress(_fromChainid, _inputToken);
   const decimals = token?.decimals ?? 18;
 
   return {

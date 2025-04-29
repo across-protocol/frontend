@@ -163,18 +163,19 @@ describe("_utils", () => {
     });
 
     test("resolve all routes for unambiguous tokens and 'token' param", () => {
+      const ignoreTokens = [
+        "WETH",
+        "ETH",
+        "WBTC",
+        ...constants.STABLE_COIN_SYMBOLS,
+        "USDC-BNB",
+        "USDT-BNB",
+      ];
       ENABLED_ROUTES.routes
         .filter(
           (route) =>
-            ![
-              "WETH",
-              "ETH",
-              "DAI",
-              "USDC",
-              "WBTC",
-              ...constants.BRIDGED_USDC_SYMBOLS,
-              "GHO",
-            ].includes(route.fromTokenSymbol)
+            !ignoreTokens.includes(route.fromTokenSymbol) &&
+            !ignoreTokens.includes(route.toTokenSymbol)
         )
         .forEach((route) => {
           expect(

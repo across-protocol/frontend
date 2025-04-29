@@ -5,6 +5,7 @@ export { default as BASE } from "./base";
 export { default as BASE_SEPOLIA } from "./base-sepolia";
 export { default as BLAST } from "./blast";
 export { default as BLAST_SEPOLIA } from "./blast-sepolia";
+export { default as BNB } from "./bnb";
 export { default as INK } from "./ink";
 export { default as LENS } from "./lens";
 export { default as LENS_SEPOLIA } from "./lens-sepolia";

@@ -7,6 +7,7 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
+import { PUBLIC_NETWORKS } from "@across-protocol/constants";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -81,8 +82,10 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
+import { ConvertDecimals } from "./_convert-decimals";
 
 export { InputError, handleErrorCondition } from "./_errors";
+export { ConvertDecimals } from "./_convert-decimals";
 export const { Profiler } = sdk.utils;
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
@@ -543,10 +546,14 @@ export const getTokenByAddress = (
     return undefined;
   }
 
-  if (matches.length > 1) {
-    const nativeUsdc = matches.find(([symbol]) => symbol === "USDC");
-    if (chainId === HUB_POOL_CHAIN_ID && nativeUsdc) {
-      return nativeUsdc[1];
+  const ambiguousTokens = ["USDC", "USDT"];
+  const isAmbiguous =
+    matches.length > 1 &&
+    matches.some(([symbol]) => ambiguousTokens.includes(symbol));
+  if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
+    const token = matches.find(([symbol]) => ambiguousTokens.includes(symbol));
+    if (token) {
+      return token[1];
     }
   }
 
@@ -603,7 +610,7 @@ export const getHubPool = (provider: providers.Provider) => {
 export const getPublicProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
+  const chain = PUBLIC_NETWORKS[Number(chainId)];
   if (chain) {
     const headers = getProviderHeaders(chainId);
     return new ethers.providers.StaticJsonRpcProvider({
@@ -2073,20 +2080,6 @@ export async function fetchStakingPool(
     totalPoolSize,
   };
 }
-
-// Copied from @uma/common
-export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
-  // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
-  // returns: string with toDecimals in smallest unit
-  return (amount: BigNumber) => {
-    amount = BigNumber.from(amount);
-    if (amount.isZero()) return amount;
-    const diff = fromDecimals - toDecimals;
-    if (diff === 0) return amount;
-    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff));
-    return amount.mul(BigNumber.from("10").pow(-1 * diff));
-  };
-};
 
 export function getBaseRewardsApr(
   rewardsPerYearInUSD: BigNumber,

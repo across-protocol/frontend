@@ -1,12 +1,13 @@
-import { getTokenByAddress } from "utils/constants";
 import { PoolsUserQueryData } from "../prod/pools-user";
 import { parseUnits } from "utils/format";
+import { getConfig, hubPoolChainId } from "utils";
 
 export async function poolsUserApiCall(
   l1Token: string,
   userAddress: string
 ): Promise<PoolsUserQueryData> {
-  const token = getTokenByAddress(l1Token);
+  const config = getConfig();
+  const token = config.getTokenInfoByAddress(hubPoolChainId, l1Token);
   const decimals = token?.decimals ?? 18;
 
   return {

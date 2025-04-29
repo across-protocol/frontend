@@ -36,10 +36,14 @@ export type TokenInfo = {
 };
 export type TokenInfoList = TokenInfo[];
 
-const equivalentTokens = [BRIDGED_USDC_SYMBOLS, ["DAI", "USDB"]];
+const equivalentTokens = [
+  [...BRIDGED_USDC_SYMBOLS, "USDC-BNB"],
+  ["DAI", "USDB"],
+  ["USDT", "USDT-BNB"],
+];
 
 const similarTokens = [
-  ["USDC", ...BRIDGED_USDC_SYMBOLS],
+  ["USDC", ...BRIDGED_USDC_SYMBOLS, "USDC-BNB"],
   ["ETH", "WETH"],
 ];
 
@@ -74,7 +78,9 @@ export const orderedTokenLogos = {
   "USDC.e": usdcLogo,
   USDbC: usdcLogo,
   USDzC: usdcLogo,
+  "USDC-BNB": usdcLogo,
   USDT: usdtLogo,
+  "USDT-BNB": usdtLogo,
   DAI: daiLogo,
   USDB: usdbLogo,
   WBTC: wbtcLogo,

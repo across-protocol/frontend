@@ -36,6 +36,11 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import bnbChainLogo from "assets/chain-logos/bnb.svg";
+import bnbChainGrayscaleLogo from "assets/chain-logos/bnb-grayscale.svg";
+import { ReactComponent as bnbChainLogoSvg } from "assets/chain-logos/bnb.svg";
+import { ReactComponent as bnbChainGrayscaleLogoSvg } from "assets/chain-logos/bnb-grayscale.svg";
+
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
@@ -121,10 +126,10 @@ import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
-import katanaTataraLogo from "assets/chain-logos/tatara.svg";
-import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
-import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
-import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
+import tataraLogo from "assets/chain-logos/tatara.svg";
+import tataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as tataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as tataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
 
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
@@ -432,6 +437,47 @@ export const blastSepolia_viem = defineChain({
     default: {
       name: blastSepolia.name + " Explorer",
       url: blastSepolia.explorerUrl,
+    },
+  },
+});
+
+export const bnbChain = {
+  name: "BNB Chain",
+  fullName: "Bnb chain",
+  chainId: 56,
+  logoURI: bnbChainLogo,
+  grayscaleLogoURI: bnbChainGrayscaleLogo,
+  logoSvg: bnbChainLogoSvg,
+  grayscaleLogoSvg: bnbChainGrayscaleLogoSvg,
+  rpcUrl: "https://bsc-dataseed1.binance.org",
+  explorerUrl: "https://bscscan.com",
+  constructExplorerLink: (txHash: string) =>
+    `${bnbChain.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "BNB",
+  customRpcUrl: process.env.REACT_APP_CHAIN_56_CUSTOM_RPC_URL,
+  pollingInterval: 15000,
+};
+
+export const bnbChain_viem = defineChain({
+  id: bnbChain.chainId,
+  name: bnbChain.name,
+  nativeCurrency: {
+    name: bnbChain.nativeCurrencySymbol,
+    symbol: bnbChain.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        bnbChain.rpcUrl,
+        bnbChain.customRpcUrl ? bnbChain.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: bnbChain.name + " Explorer",
+      url: bnbChain.explorerUrl,
     },
   },
 });
@@ -1114,43 +1160,43 @@ export const soneium_viem = defineChain({
   },
 });
 
-export const katanaTatara = {
+export const tatara = {
   name: "Tatara",
   fullName: "Tatara",
   chainId: 129399,
-  logoURI: katanaTataraLogo,
-  grayscaleLogoURI: katanaTataraGrayscaleLogo,
-  logoSvg: katanaTataraLogoSvg,
-  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  logoURI: tataraLogo,
+  grayscaleLogoURI: tataraGrayscaleLogo,
+  logoSvg: tataraLogoSvg,
+  grayscaleLogoSvg: tataraGrayscaleLogoSvg,
   rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
   explorerUrl: "https://explorer.tatara.katana.network",
   constructExplorerLink: (txHash: string) =>
-    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+    `${tatara.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
-export const katanaTatara_viem = defineChain({
-  id: katanaTatara.chainId,
-  name: katanaTatara.name,
+export const tatara_viem = defineChain({
+  id: tatara.chainId,
+  name: tatara.name,
   nativeCurrency: {
-    name: katanaTatara.nativeCurrencySymbol,
-    symbol: katanaTatara.nativeCurrencySymbol,
+    name: tatara.nativeCurrencySymbol,
+    symbol: tatara.nativeCurrencySymbol,
     decimals: 18,
   },
   rpcUrls: {
     default: {
       http: [
-        katanaTatara.rpcUrl,
-        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+        tatara.rpcUrl,
+        tatara.customRpcUrl ? tatara.customRpcUrl : [],
       ].flat(),
     },
   },
   blockExplorers: {
     default: {
-      name: katanaTatara.name + " Explorer",
-      url: katanaTatara.explorerUrl,
+      name: tatara.name + " Explorer",
+      url: tatara.explorerUrl,
     },
   },
 });
@@ -1377,6 +1423,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  bnbChain,
   ink,
   lens,
   lensSepolia,
@@ -1394,7 +1441,7 @@ export const chainConfigs = [
   scroll,
   sepolia,
   soneium,
-  katanaTatara,
+  tatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1416,6 +1463,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
+  bnbChain_viem,
   ink_viem,
   lens_viem,
   lensSepolia_viem,
@@ -1433,7 +1481,7 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
-  katanaTatara_viem,
+  tatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,
