@@ -7,7 +7,11 @@ import {
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
 
-const { GRAPH_API_KEY, RELAYER_FEE_CAPITAL_COST_OVERRIDES } = getEnvs();
+const {
+  GRAPH_API_KEY,
+  RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES,
+  RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES,
+} = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
@@ -157,11 +161,40 @@ export const coinGeckoAssetPlatformLookup: Record<string, number> = {
 
 export const graphAPIKey = GRAPH_API_KEY;
 
-const relayerFeeCapitalCostOverrides: Record<
+// {
+//   "TOKEN_SYMBOL": {
+//     "ORIGIN_CHAIN_ID": {
+//       "DESTINATION_CHAIN_ID": {
+//         "lowerBound": "1000000000000000",
+//         "upperBound": "5000000000000000",
+//         "cutoff": "10000000000000000000000",
+//         "decimals": 18
+//       }
+//     }
+//   }
+// }
+const relayerFeeCapitalCostRouteOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
-> = RELAYER_FEE_CAPITAL_COST_OVERRIDES
-  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_OVERRIDES)
+> = RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES)
+  : {};
+
+// {
+//   "TOKEN_SYMBOL": {
+//     "DESTINATION_CHAIN_ID": {
+//       "lowerBound": "1000000000000000",
+//       "upperBound": "5000000000000000",
+//       "cutoff": "10000000000000000000000",
+//       "decimals": 18
+//     }
+//   }
+// }
+const relayerFeeCapitalCostDestinationChainOverrides: Record<
+  string,
+  Record<string, relayFeeCalculator.CapitalCostConfig>
+> = RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES)
   : {};
 
 export const relayerFeeCapitalCostConfig: {
@@ -173,7 +206,9 @@ export const relayerFeeCapitalCostConfig: {
         token,
         {
           default: defaultRelayerFeeCapitalCostConfig[token],
-          routeOverrides: relayerFeeCapitalCostOverrides[token] || {},
+          routeOverrides: relayerFeeCapitalCostRouteOverrides[token] || {},
+          destinationChainOverrides:
+            relayerFeeCapitalCostDestinationChainOverrides[token] || {},
         },
       ];
     }
