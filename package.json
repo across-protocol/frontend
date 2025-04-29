@@ -6,7 +6,7 @@
   "dependencies": {
     "@across-protocol/constants": "^3.1.51",
     "@across-protocol/contracts": "^4.0.5",
-    "@across-protocol/sdk": "^4.1.44",
+    "@across-protocol/sdk": "^4.1.47",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.13.0",
