@@ -17,8 +17,11 @@ import lskLogo from "assets/token-logos/lsk.svg";
 import usdbLogo from "assets/token-logos/usdb.svg";
 import ghoLogo from "assets/token-logos/gho.svg";
 import unknownLogo from "assets/icons/question-circle.svg";
+import cakeLogo from "assets/icons/cake.svg";
+import bnbLogo from "assets/icons/bnb.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
+import { TOKEN_SYMBOLS_MAP } from "utils";
 
 export type TokenInfo = {
   name: string;
@@ -40,6 +43,7 @@ const equivalentTokens = [
   [...BRIDGED_USDC_SYMBOLS, "USDC-BNB"],
   ["DAI", "USDB"],
   ["USDT", "USDT-BNB"],
+  ["WBTC", "BTCB"],
 ];
 
 const similarTokens = [
@@ -69,7 +73,9 @@ export const similarTokensMap: Record<string, string[]> = similarTokens.reduce(
 );
 
 // Order of this map determines the order of the tokens in the token selector
-export const orderedTokenLogos = {
+export const orderedTokenLogos: Partial<
+  Record<keyof typeof TOKEN_SYMBOLS_MAP, string>
+> = {
   ETH: ethLogo,
   WETH: wethLogo,
   MATIC: maticLogo,
@@ -102,4 +108,6 @@ export const orderedTokenLogos = {
   "TATARA-USDS": unknownLogo,
   "TATARA-USDT": usdtLogo,
   "TATARA-WBTC": wbtcLogo,
+  CAKE: cakeLogo,
+  BNB: bnbLogo,
 };
