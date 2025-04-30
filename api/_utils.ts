@@ -235,6 +235,7 @@ export const validateChainAndTokenParams = (
     outputToken: string;
     originChainId: string;
     destinationChainId: string;
+    allowUnmatchedDecimals: string;
   }>
 ) => {
   let {
@@ -243,6 +244,7 @@ export const validateChainAndTokenParams = (
     outputToken: outputTokenAddress,
     originChainId,
     destinationChainId: _destinationChainId,
+    allowUnmatchedDecimals: _allowUnmatchedDecimals,
   } = queryParams;
 
   if (!_destinationChainId) {
@@ -272,6 +274,7 @@ export const validateChainAndTokenParams = (
   outputTokenAddress = outputTokenAddress
     ? _getAddressOrThrowInputError(outputTokenAddress, "outputToken")
     : undefined;
+  const allowUnmatchedDecimals = _allowUnmatchedDecimals === "true";
 
   const { l1Token, outputToken, inputToken, resolvedOriginChainId } =
     getRouteDetails(
@@ -295,12 +298,25 @@ export const validateChainAndTokenParams = (
     });
   }
 
+  if (!allowUnmatchedDecimals && inputToken.decimals !== outputToken.decimals) {
+    throw new InvalidParamError({
+      message:
+        `Decimals of input and output tokens do not match. ` +
+        `This is likely due to unmatched decimals for USDC/USDT on BNB Chain. ` +
+        `Make sure to have followed the migration guide: ` +
+        `https://docs.across.to/introduction/migration-guides/bnb-chain-migration-guide ` +
+        `and set the query param 'allowUnmatchedDecimals=true' to allow this.`,
+      param: "allowUnmatchedDecimals",
+    });
+  }
+
   return {
     l1Token,
     inputToken,
     outputToken,
     destinationChainId,
     resolvedOriginChainId,
+    allowUnmatchedDecimals,
   };
 };
 
@@ -926,7 +942,8 @@ export const getCachedLimits = async (
   amount?: string,
   recipient?: string,
   relayer?: string,
-  message?: string
+  message?: string,
+  allowUnmatchedDecimals?: boolean
 ): Promise<{
   minDeposit: string;
   maxDeposit: string;
@@ -954,6 +971,7 @@ export const getCachedLimits = async (
         message,
         recipient,
         relayer,
+        allowUnmatchedDecimals,
       },
     })
   ).data;
@@ -2057,17 +2075,21 @@ export async function fetchStakingPool(
   };
 }
 
-// Copied from @uma/common
+/**
+ * Factory function that creates a function that converts an amount from one number of decimals to another.
+ * Copied from @uma/common
+ * @param fromDecimals The number of decimals of the input amount.
+ * @param toDecimals The number of decimals of the output amount.
+ * @returns A function that converts an amount from `fromDecimals` to `toDecimals`.
+ */
 export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
-  // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
-  // returns: string with toDecimals in smallest unit
-  return (amount: BigNumber): string => {
+  return (amount: BigNumber): BigNumber => {
     amount = BigNumber.from(amount);
-    if (amount.isZero()) return amount.toString();
+    if (amount.isZero()) return amount;
     const diff = fromDecimals - toDecimals;
-    if (diff === 0) return amount.toString();
-    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff)).toString();
-    return amount.mul(BigNumber.from("10").pow(-1 * diff)).toString();
+    if (diff === 0) return amount;
+    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff));
+    return amount.mul(BigNumber.from("10").pow(-1 * diff));
   };
 };
 

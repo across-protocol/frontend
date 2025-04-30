@@ -28,6 +28,7 @@ import {
   OPT_IN_CHAINS,
   parseL1TokenConfigSafe,
   getL1TokenConfigCache,
+  ConvertDecimals,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -100,6 +101,7 @@ const handler = async (
       outputToken,
       destinationChainId,
       resolvedOriginChainId: computedOriginChainId,
+      allowUnmatchedDecimals,
     } = validateChainAndTokenParams(query);
 
     relayer = relayer
@@ -224,7 +226,8 @@ const handler = async (
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
         depositWithMessage ? recipient : undefined,
         depositWithMessage ? relayer : undefined,
-        depositWithMessage ? message : undefined
+        depositWithMessage ? message : undefined,
+        allowUnmatchedDecimals
       ),
       getFillDeadline(destinationChainId),
     ]);
@@ -278,6 +281,11 @@ const handler = async (
     const totalRelayFeePct = BigNumber.from(
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
+
+    const outputAmount = ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(amount.sub(totalRelayFee));
 
     const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
       await selectExclusiveRelayer(
@@ -364,6 +372,19 @@ const handler = async (
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
       fillDeadline: fillDeadline.toString(),
+      outputAmount: outputAmount.toString(),
+      inputToken: {
+        address: inputToken.address,
+        symbol: inputToken.symbol,
+        decimals: inputToken.decimals,
+        chainId: computedOriginChainId,
+      },
+      outputToken: {
+        address: outputToken.address,
+        symbol: outputToken.symbol,
+        decimals: outputToken.decimals,
+        chainId: destinationChainId,
+      },
     };
 
     logger.info({
