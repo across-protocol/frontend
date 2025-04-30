@@ -140,9 +140,10 @@ function convertIndexerDepositToDeposit(
     recipientAddr: indexerDeposit.recipient,
     message: indexerDeposit.message,
     amount: indexerDeposit.inputAmount,
-    depositTxHash: indexerDeposit.depositTransactionHash,
+    depositTxHash:
+      indexerDeposit.depositTransactionHash || indexerDeposit.depositTxHash,
     fillTxs: indexerDeposit.fillTransactionHash
-      ? [indexerDeposit.fillTransactionHash]
+      ? [indexerDeposit.fillTransactionHash || indexerDeposit.fillTx]
       : [],
     speedUps: indexerDeposit.speedups,
     depositRelayerFeePct: "0",
