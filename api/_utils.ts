@@ -85,7 +85,6 @@ import { Token } from "./_dexes/types";
 import { ConvertDecimals } from "./_convert-decimals";
 
 export { InputError, handleErrorCondition } from "./_errors";
-export { ConvertDecimals } from "./_convert-decimals";
 export const { Profiler } = sdk.utils;
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
@@ -247,7 +246,7 @@ export const validateChainAndTokenParams = (
     outputToken: outputTokenAddress,
     originChainId,
     destinationChainId: _destinationChainId,
-    allowUnmatchedDecimals,
+    allowUnmatchedDecimals: _allowUnmatchedDecimals,
   } = queryParams;
 
   if (!_destinationChainId) {
@@ -277,6 +276,7 @@ export const validateChainAndTokenParams = (
   outputTokenAddress = outputTokenAddress
     ? _getAddressOrThrowInputError(outputTokenAddress, "outputToken")
     : undefined;
+  const allowUnmatchedDecimals = _allowUnmatchedDecimals === "true";
 
   const { l1Token, outputToken, inputToken, resolvedOriginChainId } =
     getRouteDetails(
@@ -300,14 +300,14 @@ export const validateChainAndTokenParams = (
     });
   }
 
-  if (
-    allowUnmatchedDecimals !== "true" &&
-    inputToken.decimals !== outputToken.decimals
-  ) {
+  if (!allowUnmatchedDecimals && inputToken.decimals !== outputToken.decimals) {
     throw new InvalidParamError({
       message:
         `Decimals of input and output tokens do not match. ` +
-        `Set allowUnmatchedDecimals=true to allow this.`,
+        `This is likely due to unmatched decimals for USDC/USDT on BNB Chain. ` +
+        `Make sure to have followed the migration guide: ` +
+        `https://docs.across.to/introduction/migration-guides/bnb-chain-migration-guide ` +
+        `and set the query param 'allowUnmatchedDecimals=true' to allow this.`,
       param: "allowUnmatchedDecimals",
     });
   }
@@ -318,7 +318,7 @@ export const validateChainAndTokenParams = (
     outputToken,
     destinationChainId,
     resolvedOriginChainId,
-    allowUnmatchedDecimals: allowUnmatchedDecimals === "true",
+    allowUnmatchedDecimals,
   };
 };
 

@@ -223,14 +223,22 @@ export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
   return route;
 }
 
+const defaultFilter = {
+  fromChain: hubPoolChainId,
+  toChain: CHAIN_IDs.ARBITRUM,
+};
+
 export function getInitialRoute(filter: RouteFilter = {}) {
-  const routeFromUrl = getRouteFromUrl(filter);
+  const routeFromUrl = getRouteFromUrl({
+    fromChain: filter.fromChain || defaultFilter.fromChain,
+    toChain: filter.toChain || defaultFilter.toChain,
+  });
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
       filter.inputTokenSymbol ??
       (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
-    fromChain: filter.fromChain || hubPoolChainId,
-    toChain: filter.toChain,
+    fromChain: filter.fromChain || defaultFilter.fromChain,
+    toChain: filter.toChain || defaultFilter.toChain,
   });
   const defaultRoute = findEnabledRoute(defaultRouteFilter) ?? {
     ...enabledRoutes[0],
@@ -585,6 +593,10 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
     externalProjectId,
   };
+
+  if (Object.values(filter).every((value) => !value)) {
+    return undefined;
+  }
 
   const route =
     findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||
