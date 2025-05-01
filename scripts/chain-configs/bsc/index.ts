@@ -15,8 +15,8 @@ export default {
     // TODO: use correct addresses
     // address: getDeployedAddress("SpokePool", chainId),
     // blockNumber: getDeployedBlockNumber("SpokePool", chainId),
-    address: "0x0000000000000000000000000000000000000000",
-    blockNumber: 0,
+    address: "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+    blockNumber: 48762335,
   },
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
