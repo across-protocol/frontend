@@ -2695,6 +2695,18 @@ export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
 
 export function parseL1TokenConfigSafe(jsonString: string) {
   try {
+    // This implies that the L1 token config is not set for the given token address.
+    // We should return a default rate model in this case.
+    if (jsonString === "") {
+      return {
+        rateModel: {
+          UBar: ethers.utils.parseUnits("1").toString(),
+          R0: "0",
+          R1: "0",
+          R2: "0",
+        },
+      };
+    }
     return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
       jsonString
     );
