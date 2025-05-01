@@ -9,12 +9,7 @@ import {
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import {
-  generateHyperLiquidPayload,
-  getConfig,
-  isContractDeployedToAddress,
-  toBytes32,
-} from "utils";
+import { getConfig } from "./config";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -22,6 +17,8 @@ import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
 import { SpokePool, SpokePoolVerifier } from "./typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { ConvertDecimals } from "./convertdecimals";
+import { generateHyperLiquidPayload } from "./hyperliquid";
+import { isContractDeployedToAddress, toBytes32 } from "./sdk";
 
 const config = getConfig();
 
