@@ -251,9 +251,15 @@ const handler = async (
     const parsedL1TokenConfig = parseL1TokenConfigSafe(
       String(rawL1TokenConfig)
     );
-    const validL1TokenConfig =
-      parsedL1TokenConfig ||
-      (await getL1TokenConfigCache(l1Token.address).get());
+    const validL1TokenConfig = parsedL1TokenConfig ||
+      (await getL1TokenConfigCache(l1Token.address).get()) || {
+        rateModel: {
+          UBar: "0",
+          R0: "0",
+          R1: "0",
+          R2: "0",
+        },
+      };
     const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
       validL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
