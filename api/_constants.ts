@@ -325,5 +325,5 @@ export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hour
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
   [CHAIN_IDs.LENS]: "GHO",
-  [CHAIN_IDs.BNB]: "BNB",
+  [CHAIN_IDs.BSC]: "BNB",
 };

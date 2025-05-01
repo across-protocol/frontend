@@ -56,7 +56,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
-  chainConfigs.BNB,
+  chainConfigs.BSC,
 ];
 
 export const enabledSepoliaChainConfigs = [
@@ -105,7 +105,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        CHAIN_IDs.BNB,
+        CHAIN_IDs.BSC,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
@@ -819,7 +819,7 @@ function getBridgedUsdcOrVariantSymbol(chainId: number) {
       return TOKEN_SYMBOLS_MAP.USDbC.symbol;
     case CHAIN_IDs.ZORA:
       return TOKEN_SYMBOLS_MAP.USDzC.symbol;
-    case CHAIN_IDs.BNB:
+    case CHAIN_IDs.BSC:
       return TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol;
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;

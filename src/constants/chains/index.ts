@@ -29,7 +29,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.INK,
   CHAIN_IDs.SONEIUM,
   CHAIN_IDs.UNICHAIN,
-  CHAIN_IDs.BNB,
+  CHAIN_IDs.BSC,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

@@ -36,10 +36,10 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
-import bnbChainLogo from "assets/chain-logos/bnb.svg";
-import bnbChainGrayscaleLogo from "assets/chain-logos/bnb-grayscale.svg";
-import { ReactComponent as bnbChainLogoSvg } from "assets/chain-logos/bnb.svg";
-import { ReactComponent as bnbChainGrayscaleLogoSvg } from "assets/chain-logos/bnb-grayscale.svg";
+import bnbSmartChainLogo from "assets/chain-logos/bsc.svg";
+import bnbSmartChainGrayscaleLogo from "assets/chain-logos/bsc-grayscale.svg";
+import { ReactComponent as bnbSmartChainLogoSvg } from "assets/chain-logos/bsc.svg";
+import { ReactComponent as bnbSmartChainGrayscaleLogoSvg } from "assets/chain-logos/bsc-grayscale.svg";
 
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
@@ -441,43 +441,43 @@ export const blastSepolia_viem = defineChain({
   },
 });
 
-export const bnbChain = {
-  name: "BNB Chain",
-  fullName: "Bnb chain",
+export const bnbSmartChain = {
+  name: "BNB Smart Chain",
+  fullName: "Bnb smart chain",
   chainId: 56,
-  logoURI: bnbChainLogo,
-  grayscaleLogoURI: bnbChainGrayscaleLogo,
-  logoSvg: bnbChainLogoSvg,
-  grayscaleLogoSvg: bnbChainGrayscaleLogoSvg,
+  logoURI: bnbSmartChainLogo,
+  grayscaleLogoURI: bnbSmartChainGrayscaleLogo,
+  logoSvg: bnbSmartChainLogoSvg,
+  grayscaleLogoSvg: bnbSmartChainGrayscaleLogoSvg,
   rpcUrl: "https://bsc-dataseed1.binance.org",
   explorerUrl: "https://bscscan.com",
   constructExplorerLink: (txHash: string) =>
-    `${bnbChain.explorerUrl}/tx/${txHash}`,
+    `${bnbSmartChain.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "BNB",
   customRpcUrl: process.env.REACT_APP_CHAIN_56_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
 
-export const bnbChain_viem = defineChain({
-  id: bnbChain.chainId,
-  name: bnbChain.name,
+export const bnbSmartChain_viem = defineChain({
+  id: bnbSmartChain.chainId,
+  name: bnbSmartChain.name,
   nativeCurrency: {
-    name: bnbChain.nativeCurrencySymbol,
-    symbol: bnbChain.nativeCurrencySymbol,
+    name: bnbSmartChain.nativeCurrencySymbol,
+    symbol: bnbSmartChain.nativeCurrencySymbol,
     decimals: 18,
   },
   rpcUrls: {
     default: {
       http: [
-        bnbChain.rpcUrl,
-        bnbChain.customRpcUrl ? bnbChain.customRpcUrl : [],
+        bnbSmartChain.rpcUrl,
+        bnbSmartChain.customRpcUrl ? bnbSmartChain.customRpcUrl : [],
       ].flat(),
     },
   },
   blockExplorers: {
     default: {
-      name: bnbChain.name + " Explorer",
-      url: bnbChain.explorerUrl,
+      name: bnbSmartChain.name + " Explorer",
+      url: bnbSmartChain.explorerUrl,
     },
   },
 });
@@ -1423,7 +1423,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
-  bnbChain,
+  bnbSmartChain,
   ink,
   lens,
   lensSepolia,
@@ -1463,7 +1463,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
-  bnbChain_viem,
+  bnbSmartChain_viem,
   ink_viem,
   lens_viem,
   lensSepolia_viem,
