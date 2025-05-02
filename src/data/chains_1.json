@@ -1783,13 +1783,20 @@
       },
       {
         "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
-        "symbol": "ETH",
-        "name": "Ether",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
         "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
       }
     ],
     "outputTokens": [
+      {
+        "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
       {
         "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
         "symbol": "ETH",
