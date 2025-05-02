@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants": "^3.1.61",
+    "@across-protocol/constants": "^3.1.63",
     "@across-protocol/contracts": "^4.0.5",
     "@across-protocol/sdk": "^4.1.47",
     "@amplitude/analytics-browser": "^2.3.5",
