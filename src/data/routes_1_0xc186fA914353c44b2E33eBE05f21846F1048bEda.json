@@ -13151,6 +13151,17 @@
     {
       "fromChain": 56,
       "toChain": 1,
+      "fromTokenAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "toTokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "WBNB",
+      "toTokenSymbol": "BNB",
+      "isNative": false,
+      "l1TokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
+    },
+    {
+      "fromChain": 56,
+      "toChain": 1,
       "fromTokenAddress": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
       "toTokenAddress": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
       "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",

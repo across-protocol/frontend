@@ -467,6 +467,15 @@ function processTokenRoutes(
       ];
     }
 
+    if (tokenSymbol === "WBNB" && toConfig.tokens.includes("BNB")) {
+      return [
+        {
+          inputTokenSymbol: "WBNB",
+          outputTokenSymbol: "BNB",
+        },
+      ];
+    }
+
     // Handle WETH Polygon & other non-eth chains
     if (
       tokenSymbol === "WETH" &&

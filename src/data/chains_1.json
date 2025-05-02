@@ -1768,6 +1768,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/bnb.svg"
       },
       {
+        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "symbol": "WBNB",
+        "name": "Wrapped BNB",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbnb.svg"
+      },
+      {
         "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
         "symbol": "CAKE",
         "name": "PancakeSwap Token",

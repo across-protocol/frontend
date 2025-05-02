@@ -22,6 +22,6 @@ export default {
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
   blockTimeSeconds: 3,
-  tokens: ["USDC-BNB", "USDT-BNB", "BNB", "CAKE", "ETH"],
+  tokens: ["USDC-BNB", "USDT-BNB", "BNB", "WBNB", "CAKE", "ETH"],
   enableCCTP: false,
 } as ChainConfig;
