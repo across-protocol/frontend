@@ -443,7 +443,7 @@ export const blastSepolia_viem = defineChain({
 
 export const bnbSmartChain = {
   name: "BNB Smart Chain",
-  fullName: "Bnb smart chain",
+  fullName: "BNB Smart Chain",
   chainId: 56,
   logoURI: bnbSmartChainLogo,
   grayscaleLogoURI: bnbSmartChainGrayscaleLogo,
@@ -455,7 +455,7 @@ export const bnbSmartChain = {
     `${bnbSmartChain.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "BNB",
   customRpcUrl: process.env.REACT_APP_CHAIN_56_CUSTOM_RPC_URL,
-  pollingInterval: 15000,
+  pollingInterval: 3000,
 };
 
 export const bnbSmartChain_viem = defineChain({

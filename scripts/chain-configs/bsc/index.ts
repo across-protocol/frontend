@@ -9,6 +9,7 @@ const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
+  fullName: "BNB Smart Chain",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -20,7 +21,7 @@ export default {
   },
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
-  blockTimeSeconds: 15,
+  blockTimeSeconds: 3,
   tokens: ["USDC-BNB", "USDT-BNB"],
   enableCCTP: false,
 } as ChainConfig;

@@ -1,5 +1,5 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { utils as sdkUtils, constants } from "@across-protocol/sdk";
+import { utils as sdkUtils } from "@across-protocol/sdk";
 
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
