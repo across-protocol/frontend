@@ -1296,8 +1296,6 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
-    case CHAIN_IDs.BSC: // TODO: remove this once @across-protocol/contracts is updated
-      return "0x4e8E101924eDE233C13e2D8622DC8aED2872d505";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId) as string;
   }

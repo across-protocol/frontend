@@ -13,11 +13,8 @@ export default {
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
-    // TODO: use correct addresses
-    // address: getDeployedAddress("SpokePool", chainId),
-    // blockNumber: getDeployedBlockNumber("SpokePool", chainId),
-    address: "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
-    blockNumber: 48762335,
+    address: getDeployedAddress("SpokePool", chainId),
+    blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
   publicRpcUrl: chainInfoBase.publicRPC,
