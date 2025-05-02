@@ -279,6 +279,13 @@
         "name": "PoolTogether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/pool.svg"
+      },
+      {
+        "address": "0xdC6fF44d5d932Cbd77B52E5612Ba0529DC6226F1",
+        "symbol": "WLD",
+        "name": "Worldcoin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wld.svg"
       }
     ],
     "outputTokens": [
@@ -365,13 +372,20 @@
         "name": "PoolTogether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/pool.svg"
+      },
+      {
+        "address": "0xdC6fF44d5d932Cbd77B52E5612Ba0529DC6226F1",
+        "symbol": "WLD",
+        "name": "Worldcoin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wld.svg"
       }
     ]
   },
   {
     "chainId": 137,
     "name": "Polygon",
-    "publicRpcUrl": "https://rpc.ankr.com/polygon",
+    "publicRpcUrl": "https://polygon.drpc.org",
     "explorerUrl": "https://polygonscan.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon/assets/logo.svg",
     "spokePool": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
@@ -1422,6 +1436,13 @@
         "name": "PoolTogether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/pool.svg"
+      },
+      {
+        "address": "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+        "symbol": "WLD",
+        "name": "Worldcoin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wld.svg"
       }
     ],
     "outputTokens": [
@@ -1459,6 +1480,13 @@
         "name": "PoolTogether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/pool.svg"
+      },
+      {
+        "address": "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+        "symbol": "WLD",
+        "name": "Worldcoin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wld.svg"
       }
     ]
   },
