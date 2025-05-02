@@ -170,6 +170,8 @@ describe("_utils", () => {
         ...constants.STABLE_COIN_SYMBOLS,
         "USDC-BNB",
         "USDT-BNB",
+        "BNB",
+        "WBNB",
       ];
       ENABLED_ROUTES.routes
         .filter(
