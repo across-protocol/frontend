@@ -108,4 +108,5 @@ export const orderedTokenLogos = {
   "TATARA-WBTC": wbtcLogo,
   CAKE: cakeLogo,
   BNB: bnbLogo,
+  WBNB: bnbLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;
