@@ -500,15 +500,21 @@ export const getRouteDetails = (
   return {
     inputToken: {
       ...inputToken,
-      symbol: sdk.utils.isBridgedUsdc(inputToken.symbol)
-        ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
+      symbol: _isBridgedUsdcOrVariant(inputToken.symbol)
+        ? _getBridgedUsdcOrVariantTokenSymbol(
+            inputToken.symbol,
+            resolvedOriginChainId
+          )
         : inputToken.symbol,
       address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
     },
     outputToken: {
       ...outputToken,
-      symbol: sdk.utils.isBridgedUsdc(outputToken.symbol)
-        ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
+      symbol: _isBridgedUsdcOrVariant(outputToken.symbol)
+        ? _getBridgedUsdcOrVariantTokenSymbol(
+            outputToken.symbol,
+            destinationChainId
+          )
         : outputToken.symbol,
       address: utils.getAddress(outputToken.addresses[destinationChainId]),
     },
@@ -572,9 +578,18 @@ const _getChainIdsOfToken = (
   return chainIds.map(([chainId]) => Number(chainId));
 };
 
-const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
-  if (!sdk.utils.isBridgedUsdc(tokenSymbol)) {
-    throw new Error(`Token ${tokenSymbol} is not a bridged USDC token`);
+const _isBridgedUsdcOrVariant = (tokenSymbol: string) => {
+  return sdk.utils.isBridgedUsdc(tokenSymbol) || tokenSymbol === "USDC-BNB";
+};
+
+const _getBridgedUsdcOrVariantTokenSymbol = (
+  tokenSymbol: string,
+  chainId: number
+) => {
+  if (!_isBridgedUsdcOrVariant(tokenSymbol)) {
+    throw new Error(
+      `Token ${tokenSymbol} is not a bridged USDC token or variant`
+    );
   }
 
   switch (chainId) {
@@ -582,6 +597,8 @@ const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
       return TOKEN_SYMBOLS_MAP.USDbC.symbol;
     case CHAIN_IDs.ZORA:
       return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    case CHAIN_IDs.BSC:
+      return TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol;
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
