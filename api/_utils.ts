@@ -992,6 +992,7 @@ export async function getSuggestedFees(params: {
   message?: string;
   depositMethod?: string;
   recipient?: string;
+  allowUnmatchedDecimals?: boolean;
 }): Promise<{
   estimatedFillTimeSec: number;
   timestamp: number;
@@ -1048,12 +1049,17 @@ export async function getBridgeQuoteForExactInput(params: {
     recipient: params.recipient,
     message: params.message,
     amount: params.exactInputAmount.toString(),
+    allowUnmatchedDecimals: true,
   });
+  const outputAmount = ConvertDecimals(
+    params.inputToken.decimals,
+    params.outputToken.decimals
+  )(params.exactInputAmount.sub(quote.totalRelayFee.total));
 
   return {
     inputAmount: params.exactInputAmount,
-    outputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
-    minOutputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    outputAmount,
+    minOutputAmount: outputAmount,
     suggestedFees: quote,
     message: params.message,
     inputToken: params.inputToken,
@@ -1078,6 +1084,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     skipAmountLimit: true,
     recipient: params.recipient,
     message: params.message,
+    allowUnmatchedDecimals: true,
   };
 
   try {
@@ -1115,11 +1122,10 @@ export async function getBridgeQuoteForMinOutput(params: {
 
       for (const [i, quote] of Object.entries(quotes)) {
         const inputAmount = inputAmounts[Number(i)];
-        const outputAmount = inputAmount.sub(
-          inputAmount
-            .mul(quote.totalRelayFee.pct)
-            .div(sdk.utils.fixedPointAdjustment)
-        );
+        const outputAmount = ConvertDecimals(
+          params.inputToken.decimals,
+          params.outputToken.decimals
+        )(inputAmount.sub(quote.totalRelayFee.total));
         if (outputAmount.gte(params.minOutputAmount)) {
           finalQuote = quote;
           adjustedInputAmount = inputAmount;
@@ -1139,9 +1145,14 @@ export async function getBridgeQuoteForMinOutput(params: {
       throw new Error("Failed to adjust input amount to meet minOutputAmount");
     }
 
+    const finalOutputAmount = ConvertDecimals(
+      params.inputToken.decimals,
+      params.outputToken.decimals
+    )(adjustedInputAmount.sub(finalQuote.totalRelayFee.total));
+
     return {
       inputAmount: adjustedInputAmount,
-      outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+      outputAmount: finalOutputAmount,
       minOutputAmount: params.minOutputAmount,
       suggestedFees: finalQuote,
       message: params.message,

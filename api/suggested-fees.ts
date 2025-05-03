@@ -293,7 +293,7 @@ const handler = async (
         computedOriginChainId,
         destinationChainId,
         outputToken,
-        amount.sub(totalRelayFee),
+        outputAmount,
         amountInUsd,
         BigNumber.from(relayerFeeDetails.capitalFeePercent),
         amount.gte(maxDepositInstant)
