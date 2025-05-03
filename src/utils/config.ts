@@ -501,13 +501,13 @@ export class ConfigClient {
       (token) => token.symbol.toUpperCase() === symbol.toUpperCase()
     );
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
-    const tokenInfo = constants.getToken(symbol);
-    return {
-      ...tokenInfo,
-      address: token.address,
-      isNative: token.isNative,
-      l1TokenAddress: token.l1TokenAddress,
-    };
+    const address = token.addresses?.[chainId] || token.mainnetAddress!;
+    const tokenInfoByAddress = this.getTokenInfoByAddress(
+      chainId,
+      address,
+      srcTokenList
+    );
+    return tokenInfoByAddress;
   }
   getTokenInfoByL1TokenAddress(chainId: number, l1TokenAddress: string): Token {
     const tokens = this.getTokenList(chainId);
