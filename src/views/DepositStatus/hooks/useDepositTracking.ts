@@ -86,7 +86,9 @@ export function useDepositTracking(
           fromBridgePagePayload.timeSigned,
           data.depositTxReceipt.transactionHash,
           true,
-          data.depositTimestamp
+          data.depositTimestamp,
+          fromBridgePagePayload.selectedRoute.fromTokenAddress,
+          fromBridgePagePayload.selectedRoute.toTokenAddress
         )
       );
     });

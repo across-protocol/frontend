@@ -509,21 +509,6 @@ export class ConfigClient {
       l1TokenAddress: token.l1TokenAddress,
     };
   }
-  getFromToAddressesBySymbol(
-    symbol: string,
-    fromChainId: number,
-    toChainId: number
-  ) {
-    const { addresses } = this.getTokenInfoBySymbol(fromChainId, symbol);
-    const fromAddress = addresses?.[fromChainId];
-    const toAddress = addresses?.[toChainId];
-    if (!fromAddress || !toAddress) {
-      throw new Error(
-        `Token not found on chain ${fromChainId} or ${toChainId} and symbol ${symbol}`
-      );
-    }
-    return { fromAddress, toAddress };
-  }
   getNativeTokenInfo(chainId: number): constants.TokenInfo {
     const chainInfo = constants.getChainInfo(chainId);
     return constants.getToken(chainInfo.nativeCurrencySymbol);
