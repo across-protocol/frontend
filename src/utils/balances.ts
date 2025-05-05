@@ -3,13 +3,16 @@ import { providers } from "ethers";
 import { getProvider } from "./providers";
 import { getMulticall3, ZERO_ADDRESS } from "./sdk";
 import { useQuery } from "@tanstack/react-query";
-import { getChainInfo, getToken } from "./constants";
+import { getChainInfo } from "./constants";
+import { getConfig } from "./config";
 
 export type MultiCallResult = {
   blockNumber: providers.BlockTag;
   // { [walletAddress]: { [tokenAddress]: balanceString } }
   balances: Record<string, Record<string, string>>;
 };
+
+const config = getConfig();
 
 /**
  * Fetches the balances for an array of addresses on a particular chain, for a particular erc20 token
@@ -78,7 +81,7 @@ export const getBatchBalanceViaMulticall3 = async (
   const erc20Data = tokenSymbols
     .filter((symbol) => symbol !== chainInfo.nativeCurrencySymbol)
     .map((symbol) => {
-      const tokenInfo = getToken(symbol);
+      const tokenInfo = config.getTokenInfoBySymbolSafe(chainIdAsInt, symbol);
       const address = tokenInfo?.addresses?.[chainIdAsInt];
       return { symbol, address, valid: !!address };
     })
