@@ -147,7 +147,7 @@ export const getBatchBalanceViaMulticall3 = async (
 
 // Define the type representing an individual balance request.
 interface BalanceRequest {
-  token: string;
+  tokenSymbol: string;
   address: string;
   resolve: (balance: string) => void;
   reject: (error: any) => void;
@@ -187,7 +187,7 @@ export class BalanceBatcher {
    */
   public async queueBalanceCall(
     chainId: number,
-    token: string,
+    tokenSymbol: string,
     address: string,
     blockTag: providers.BlockTag = "latest"
   ): Promise<string> {
@@ -197,9 +197,9 @@ export class BalanceBatcher {
         this.batchQueue[chainId] = {
           chainId,
           blockTag,
-          aggregatedTokens: new Set([token]),
+          aggregatedTokens: new Set([tokenSymbol]),
           aggregatedAddresses: new Set([address]),
-          requests: [{ token, address, resolve, reject }],
+          requests: [{ tokenSymbol, address, resolve, reject }],
         };
 
         this.batchQueue[chainId].timer = setTimeout(async () => {
@@ -217,10 +217,12 @@ export class BalanceBatcher {
               currentBatch.blockTag
             );
 
-            currentBatch.requests.forEach(({ token, address, resolve }) => {
-              const balance = result.balances[address]?.[token] || "0";
-              resolve(balance);
-            });
+            currentBatch.requests.forEach(
+              ({ tokenSymbol, address, resolve }) => {
+                const balance = result.balances[address]?.[tokenSymbol] || "0";
+                resolve(balance);
+              }
+            );
           } catch (error) {
             currentBatch.requests.forEach(({ reject }) => reject(error));
           }
@@ -228,9 +230,9 @@ export class BalanceBatcher {
       } else {
         // batch already exists for this interval, just add another
         const existingBatch = this.batchQueue[chainId];
-        existingBatch.aggregatedTokens.add(token);
+        existingBatch.aggregatedTokens.add(tokenSymbol);
         existingBatch.aggregatedAddresses.add(address);
-        existingBatch.requests.push({ token, address, resolve, reject });
+        existingBatch.requests.push({ tokenSymbol, address, resolve, reject });
       }
     });
   }
@@ -248,13 +250,13 @@ export const balanceBatcher = new BalanceBatcher(getBatchBalanceViaMulticall3);
  */
 export function useBalance({
   chainId,
-  token,
+  tokenSymbol,
   address,
   blockTag,
   options,
 }: {
   chainId: number;
-  token: string;
+  tokenSymbol: string;
   address: string;
   blockTag?: providers.BlockTag;
   options?: Partial<
@@ -265,14 +267,14 @@ export function useBalance({
     queryKey: [
       "balance",
       chainId,
-      token,
+      tokenSymbol,
       address,
       blockTag ?? "latest",
     ] as const,
     queryFn: () =>
       balanceBatcher.queueBalanceCall(
         chainId,
-        token,
+        tokenSymbol,
         address,
         blockTag ?? "latest"
       ),
