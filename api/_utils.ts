@@ -2728,7 +2728,7 @@ export function parseL1TokenConfigSafe(jsonString: string) {
     if (jsonString === "") {
       return {
         rateModel: {
-          UBar: ethers.utils.parseUnits("1").toString(),
+          UBar: "1",
           R0: "0",
           R1: "0",
           R2: "0",
