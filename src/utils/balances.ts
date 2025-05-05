@@ -30,30 +30,40 @@ export const getBatchBalanceViaMulticall3 = async (
   const provider = getProvider(chainIdAsInt);
 
   const multicall3 = getMulticall3(chainIdAsInt, provider);
-
   if (!multicall3) {
     throw new Error("No Multicall3 deployed on this chain");
   }
 
-  const inputs: { target: string; callData: string }[] = [];
-
   // Create a generic ERC20 contract for encoding function calls
   const genericErc20 = ERC20__factory.connect(ZERO_ADDRESS, provider);
 
-  // Map to track which token and address each call corresponds to
-  type CallInfo = {
-    tokenSymbol: string;
-    address: string;
-    isNative: boolean;
-  };
-  const callMap: CallInfo[] = [];
+  const inputs: { target: string; callData: string }[] = [];
+  const callMap: { tokenSymbol: string; address: string; isNative: boolean }[] =
+    [];
 
-  // Process native token first if needed
+  // Initialize result structure - set all balances to "0" by default
+  const balances = addresses.reduce(
+    (acc, address) => {
+      acc[address] = tokenSymbols.reduce(
+        (symbolAcc, symbol) => {
+          symbolAcc[symbol] = "0";
+          return symbolAcc;
+        },
+        {} as Record<string, string>
+      );
+      return acc;
+    },
+    {} as Record<string, Record<string, string>>
+  );
+
+  // Find native token if present
   const nativeSymbol = tokenSymbols.find(
     (symbol) => chainInfo.nativeCurrencySymbol === symbol
   );
+
+  // Process native token calls if needed
   if (nativeSymbol) {
-    for (const address of addresses) {
+    addresses.forEach((address) => {
       inputs.push({
         target: multicall3.address,
         callData: multicall3.interface.encodeFunctionData("getEthBalance", [
@@ -61,82 +71,60 @@ export const getBatchBalanceViaMulticall3 = async (
         ]),
       });
       callMap.push({ tokenSymbol: nativeSymbol, address, isNative: true });
-    }
+    });
   }
 
-  // Process ERC20 tokens
-  const erc20Symbols = tokenSymbols.filter(
-    (symbol) => chainInfo.nativeCurrencySymbol !== symbol
-  );
-  const tokenAddresses: string[] = [];
+  // Filter for valid ERC20 tokens and get their addresses
+  const erc20Data = tokenSymbols
+    .filter((symbol) => symbol !== chainInfo.nativeCurrencySymbol)
+    .map((symbol) => {
+      const tokenInfo = getToken(symbol);
+      const address = tokenInfo?.addresses?.[chainIdAsInt];
+      return { symbol, address, valid: !!address };
+    })
+    .filter(({ valid }) => valid);
 
-  // Get all token addresses first
-  for (const symbol of erc20Symbols) {
-    const tokenInfo = getToken(symbol);
-    const tokenAddress = tokenInfo?.addresses?.[chainIdAsInt];
-    if (!tokenAddress) {
-      throw new Error(
-        `No address found for token symbol ${symbol} for chainId ${chainId}`
-      );
-    }
-    tokenAddresses.push(tokenAddress);
-  }
-
-  // Generate balanceOf calls for all addresses and tokens
-  for (const address of addresses) {
-    // Create the callData once for this address
+  // Process valid ERC20 tokens
+  addresses.forEach((address) => {
+    // Create balanceOf callData once per address
     const balanceOfCallData = genericErc20.interface.encodeFunctionData(
       "balanceOf",
       [address]
     );
 
-    // Reuse this callData for each token
-    for (let i = 0; i < erc20Symbols.length; i++) {
-      const symbol = erc20Symbols[i];
-      const tokenAddress = tokenAddresses[i];
+    // Add calls for each valid token
+    erc20Data.forEach(({ symbol, address: tokenAddress }) => {
+      if (tokenAddress) {
+        inputs.push({
+          target: tokenAddress,
+          callData: balanceOfCallData,
+        });
+        callMap.push({ tokenSymbol: symbol, address, isNative: false });
+      }
+    });
+  });
 
-      inputs.push({
-        target: tokenAddress,
-        callData: balanceOfCallData,
-      });
-
-      callMap.push({ tokenSymbol: symbol, address, isNative: false });
-    }
+  // Skip the multicall if no valid calls
+  if (inputs.length === 0) {
+    return {
+      blockNumber: 0,
+      balances,
+    };
   }
 
+  // Execute the multicall
   const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
     blockTag,
   });
 
-  // Decode the results using the appropriate interface
-  const decodedResults = results.map((result, i) => {
-    const { isNative } = callMap[i];
-    if (isNative) {
-      return multicall3.interface.decodeFunctionResult("getEthBalance", result);
-    } else {
-      return genericErc20.interface.decodeFunctionResult("balanceOf", result);
-    }
-  });
+  // Decode results and update balances
+  results.forEach((result, i) => {
+    const { tokenSymbol, address, isNative } = callMap[i];
+    const value = isNative
+      ? multicall3.interface.decodeFunctionResult("getEthBalance", result)
+      : genericErc20.interface.decodeFunctionResult("balanceOf", result);
 
-  let balances: Record<string, Record<string, string>> = {};
-
-  // Process results
-  decodedResults.forEach((decodedResult, index) => {
-    const { tokenSymbol, address } = callMap[index];
-    const tokenInfo = getToken(tokenSymbol);
-    const tokenAddress = tokenInfo.addresses?.[chainIdAsInt];
-
-    if (!tokenAddress) {
-      throw new Error(
-        `No address found for token symbol ${tokenSymbol} for chainId ${chainId}`
-      );
-    }
-
-    if (!balances[address]) {
-      balances[address] = {};
-    }
-
-    balances[address][tokenAddress] = decodedResult.toString();
+    balances[address][tokenSymbol] = value.toString();
   });
 
   return {
@@ -238,7 +226,7 @@ export class BalanceBatcher {
   }
 }
 
-// Do something with this singleton
+// In-memory singleton
 export const balanceBatcher = new BalanceBatcher(getBatchBalanceViaMulticall3);
 
 /**
