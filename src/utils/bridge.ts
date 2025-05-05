@@ -456,9 +456,11 @@ export async function sendSwapAndBridgeTx(
 
 export async function getSpokePoolAndVerifier({
   fromChain,
+  toChain,
   isNative,
 }: {
   fromChain: ChainId;
+  toChain: ChainId;
   isNative: boolean;
 }) {
   const config = getConfig();
@@ -467,8 +469,15 @@ export async function getSpokePoolAndVerifier({
   const spokePool = config.getSpokePool(fromChain);
   const spokePoolVerifier = config.getSpokePoolVerifier(fromChain);
 
+  // Chains where the SpokePoolVerifier is should not be used.
+  const disabledChainsForSpokePoolVerifier = [CHAIN_IDs.BSC];
+  const disableSpokePoolVerifier =
+    disabledChainsForSpokePoolVerifier.includes(fromChain) ||
+    disabledChainsForSpokePoolVerifier.includes(toChain);
+
   // If the spoke pool verifier is enabled, use it for native transfers.
-  const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
+  const shouldUseSpokePoolVerifier =
+    Boolean(spokePoolVerifier) && isNative && !disableSpokePoolVerifier;
 
   if (shouldUseSpokePoolVerifier) {
     const isSpokePoolVerifierDeployed = await isContractDeployedToAddress(
