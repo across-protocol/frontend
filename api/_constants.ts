@@ -330,5 +330,3 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
 };
-
-export const ULTRA_LIGHT_CHAINS = [CHAIN_IDs.BSC];

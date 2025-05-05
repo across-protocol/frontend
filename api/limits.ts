@@ -5,7 +5,6 @@ import {
   CHAIN_IDs,
   CUSTOM_GAS_TOKENS,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  ULTRA_LIGHT_CHAINS,
 } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
@@ -157,6 +156,16 @@ const handler = async (
         functionName: "globalConfig",
         args: [encodedLiteChainsKey],
       },
+      {
+        contract: hubPool,
+        functionName: "poolRebalanceRoute",
+        args: [computedOriginChainId, l1Token.address],
+      },
+      {
+        contract: hubPool,
+        functionName: "poolRebalanceRoute",
+        args: [destinationChainId, l1Token.address],
+      },
     ];
 
     const depositArgs = {
@@ -266,6 +275,8 @@ const handler = async (
 
     const { liquidReserves: _liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
+    const [poolRebalanceRouteOrigin] = multicallOutput[3];
+    const [poolRebalanceRouteDestination] = multicallOutput[4];
 
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
@@ -275,11 +286,10 @@ const handler = async (
     const routeInvolvesLiteChain =
       originChainIsLiteChain || destinationChainIsLiteChain;
 
-    const originChainIsUltraLightChain = ULTRA_LIGHT_CHAINS.includes(
-      computedOriginChainId
-    );
+    const originChainIsUltraLightChain =
+      poolRebalanceRouteOrigin === ethers.constants.AddressZero;
     const destinationChainIsUltraLightChain =
-      ULTRA_LIGHT_CHAINS.includes(destinationChainId);
+      poolRebalanceRouteDestination === ethers.constants.AddressZero;
     const routeInvolvesUltraLightChain =
       originChainIsUltraLightChain || destinationChainIsUltraLightChain;
 
