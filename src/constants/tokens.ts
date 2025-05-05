@@ -40,7 +40,7 @@ export type TokenInfo = {
 export type TokenInfoList = TokenInfo[];
 
 const equivalentTokens = [
-  [...BRIDGED_USDC_SYMBOLS, "USDC-BNB"],
+  ["USDC", ...BRIDGED_USDC_SYMBOLS, "USDC-BNB"],
   ["DAI", "USDB"],
   ["USDT", "USDT-BNB"],
   ["WBTC", "BTCB"],
