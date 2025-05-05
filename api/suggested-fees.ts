@@ -195,7 +195,10 @@ const handler = async (
       {
         contract: hubPool,
         functionName: "liquidityUtilizationPostRelay",
-        args: [l1Token.address, amount],
+        args: [
+          l1Token.address,
+          ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount),
+        ],
       },
       {
         contract: hubPool,
