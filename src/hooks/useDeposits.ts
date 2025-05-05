@@ -13,7 +13,12 @@ import {
 } from "../utils/local-deposits";
 import { DepositStatusFilter } from "views/Transactions/types";
 
-export type DepositStatus = "pending" | "filled" | "refunded" | "expired";
+export type DepositStatus =
+  | "pending"
+  | "filled"
+  | "refunded"
+  | "expired"
+  | "slowFillRequested";
 
 export type SpeedUpDepositTx = {
   hash: string;

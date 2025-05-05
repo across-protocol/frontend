@@ -121,6 +121,12 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
   },
+  WLD: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
 };
 
 const defaultRelayerFeeCapitalCostConfig =
@@ -298,6 +304,7 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.LSK,
   TOKEN_SYMBOLS_MAP.BNB,
   TOKEN_SYMBOLS_MAP.CAKE,
+  TOKEN_SYMBOLS_MAP.WLD,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
