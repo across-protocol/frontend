@@ -5,6 +5,7 @@ import {
   CHAIN_IDs,
   CUSTOM_GAS_TOKENS,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+  ULTRA_LIGHT_CHAINS,
 } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
@@ -263,9 +264,9 @@ const handler = async (
       relayerFeeDetails,
     });
 
-    const { liquidReserves: _liquidReserves, isEnabled: isLpEnabled } =
-      multicallOutput[1];
+    const { liquidReserves: _liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
+
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
@@ -273,6 +274,14 @@ const handler = async (
       liteChainIds.includes(destinationChainId);
     const routeInvolvesLiteChain =
       originChainIsLiteChain || destinationChainIsLiteChain;
+
+    const originChainIsUltraLightChain = ULTRA_LIGHT_CHAINS.includes(
+      computedOriginChainId
+    );
+    const destinationChainIsUltraLightChain =
+      ULTRA_LIGHT_CHAINS.includes(destinationChainId);
+    const routeInvolvesUltraLightChain =
+      originChainIsUltraLightChain || destinationChainIsUltraLightChain;
 
     // Base every amount on the input token decimals.
     let liquidReserves = ConvertDecimals(
@@ -318,7 +327,7 @@ const handler = async (
       ...transferRestrictedBalances
     ); // balances on destination chain + mainnet
 
-    if (!routeInvolvesLiteChain && isLpEnabled) {
+    if (!routeInvolvesLiteChain && !routeInvolvesUltraLightChain) {
       const _lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
@@ -337,8 +346,10 @@ const handler = async (
     }
 
     // Apply chain max values when defined
-    const includeDefaultMaxValues = originChainIsLiteChain;
-    const includeRelayerBalances = originChainIsLiteChain;
+    const includeDefaultMaxValues =
+      originChainIsLiteChain || originChainIsUltraLightChain;
+    const includeRelayerBalances =
+      originChainIsLiteChain || originChainIsUltraLightChain;
     let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;
@@ -419,7 +430,7 @@ const handler = async (
       bufferedMaxDepositShortDelay,
       limitsBufferMultiplier,
       chainHasMaxBoundary,
-      routeInvolvesLiteChain
+      routeInvolvesLiteChain || routeInvolvesUltraLightChain
     );
 
     if (
