@@ -371,7 +371,7 @@
   {
     "chainId": 137,
     "name": "Polygon",
-    "publicRpcUrl": "https://rpc.ankr.com/polygon",
+    "publicRpcUrl": "https://polygon.drpc.org",
     "explorerUrl": "https://polygonscan.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon/assets/logo.svg",
     "spokePool": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
@@ -1683,6 +1683,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ],
     "outputTokens": [
@@ -1699,6 +1706,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       },
       {
         "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
