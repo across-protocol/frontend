@@ -1415,6 +1415,7 @@ export const getBatchBalanceViaMulticall3 = async (
   blockTag: providers.BlockTag = "latest"
 ): Promise<{
   blockNumber: providers.BlockTag;
+  // { [walletAddress]: { [tokenAddress]: balanceString } }
   balances: Record<string, Record<string, string>>;
 }> => {
   const chainIdAsInt = Number(chainId);
