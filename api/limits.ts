@@ -263,7 +263,8 @@ const handler = async (
       relayerFeeDetails,
     });
 
-    const { liquidReserves: _liquidReserves } = multicallOutput[1];
+    const { liquidReserves: _liquidReserves, isEnabled: isLpEnabled } =
+      multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
@@ -317,7 +318,7 @@ const handler = async (
       ...transferRestrictedBalances
     ); // balances on destination chain + mainnet
 
-    if (!routeInvolvesLiteChain) {
+    if (!routeInvolvesLiteChain && isLpEnabled) {
       const _lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
