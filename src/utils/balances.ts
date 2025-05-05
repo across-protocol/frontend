@@ -1,9 +1,9 @@
 import { ERC20__factory } from "@across-protocol/contracts";
 import { providers } from "ethers";
-import { callViaMulticall3 } from "../../api/_utils";
 import { getProvider } from "./providers";
 import { getMulticall3, ZERO_ADDRESS } from "./sdk";
 import { useQuery } from "@tanstack/react-query";
+import { getChainInfo, getToken } from "./constants";
 
 export type MultiCallResult = {
   blockNumber: providers.BlockTag;
@@ -22,10 +22,11 @@ export type MultiCallResult = {
 export const getBatchBalanceViaMulticall3 = async (
   chainId: string | number,
   addresses: string[],
-  tokenAddresses: string[],
+  tokenSymbols: string[],
   blockTag: providers.BlockTag = "latest"
 ): Promise<MultiCallResult> => {
   const chainIdAsInt = Number(chainId);
+  const chainInfo = getChainInfo(chainIdAsInt);
   const provider = getProvider(chainIdAsInt);
 
   const multicall3 = getMulticall3(chainIdAsInt, provider);
@@ -34,59 +35,109 @@ export const getBatchBalanceViaMulticall3 = async (
     throw new Error("No Multicall3 deployed on this chain");
   }
 
-  let calls: Parameters<typeof callViaMulticall3>[1] = [];
+  const inputs: { target: string; callData: string }[] = [];
 
-  for (const tokenAddress of tokenAddresses) {
-    if (tokenAddress === ZERO_ADDRESS) {
-      // For native currency
-      calls.push(
-        ...addresses.map((address) => ({
-          contract: multicall3,
-          functionName: "getEthBalance",
-          args: [address],
-        }))
-      );
-    } else {
-      // For ERC20 tokens
-      const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
-      calls.push(
-        ...addresses.map((address) => ({
-          contract: erc20Contract,
-          functionName: "balanceOf",
-          args: [address],
-        }))
-      );
+  // Create a generic ERC20 contract for encoding function calls
+  const genericErc20 = ERC20__factory.connect(ZERO_ADDRESS, provider);
+
+  // Map to track which token and address each call corresponds to
+  type CallInfo = {
+    tokenSymbol: string;
+    address: string;
+    isNative: boolean;
+  };
+  const callMap: CallInfo[] = [];
+
+  // Process native token first if needed
+  const nativeSymbol = tokenSymbols.find(
+    (symbol) => chainInfo.nativeCurrencySymbol === symbol
+  );
+  if (nativeSymbol) {
+    for (const address of addresses) {
+      inputs.push({
+        target: multicall3.address,
+        callData: multicall3.interface.encodeFunctionData("getEthBalance", [
+          address,
+        ]),
+      });
+      callMap.push({ tokenSymbol: nativeSymbol, address, isNative: true });
     }
   }
 
-  const inputs = calls.map(({ contract, functionName, args }) => ({
-    target: contract.address,
-    callData: contract.interface.encodeFunctionData(functionName, args),
-  }));
+  // Process ERC20 tokens
+  const erc20Symbols = tokenSymbols.filter(
+    (symbol) => chainInfo.nativeCurrencySymbol !== symbol
+  );
+  const tokenAddresses: string[] = [];
+
+  // Get all token addresses first
+  for (const symbol of erc20Symbols) {
+    const tokenInfo = getToken(symbol);
+    const tokenAddress = tokenInfo?.addresses?.[chainIdAsInt];
+    if (!tokenAddress) {
+      throw new Error(
+        `No address found for token symbol ${symbol} for chainId ${chainId}`
+      );
+    }
+    tokenAddresses.push(tokenAddress);
+  }
+
+  // Generate balanceOf calls for all addresses and tokens
+  for (const address of addresses) {
+    // Create the callData once for this address
+    const balanceOfCallData = genericErc20.interface.encodeFunctionData(
+      "balanceOf",
+      [address]
+    );
+
+    // Reuse this callData for each token
+    for (let i = 0; i < erc20Symbols.length; i++) {
+      const symbol = erc20Symbols[i];
+      const tokenAddress = tokenAddresses[i];
+
+      inputs.push({
+        target: tokenAddress,
+        callData: balanceOfCallData,
+      });
+
+      callMap.push({ tokenSymbol: symbol, address, isNative: false });
+    }
+  }
 
   const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
     blockTag,
   });
 
-  const decodedResults = results.map((result, i) =>
-    calls[i].contract.interface.decodeFunctionResult(
-      calls[i].functionName,
-      result
-    )
-  );
+  // Decode the results using the appropriate interface
+  const decodedResults = results.map((result, i) => {
+    const { isNative } = callMap[i];
+    if (isNative) {
+      return multicall3.interface.decodeFunctionResult("getEthBalance", result);
+    } else {
+      return genericErc20.interface.decodeFunctionResult("balanceOf", result);
+    }
+  });
 
   let balances: Record<string, Record<string, string>> = {};
 
-  let resultIndex = 0;
-  for (const tokenAddress of tokenAddresses) {
-    addresses.forEach((address) => {
-      if (!balances[address]) {
-        balances[address] = {};
-      }
-      balances[address][tokenAddress] = decodedResults[resultIndex].toString();
-      resultIndex++;
-    });
-  }
+  // Process results
+  decodedResults.forEach((decodedResult, index) => {
+    const { tokenSymbol, address } = callMap[index];
+    const tokenInfo = getToken(tokenSymbol);
+    const tokenAddress = tokenInfo.addresses?.[chainIdAsInt];
+
+    if (!tokenAddress) {
+      throw new Error(
+        `No address found for token symbol ${tokenSymbol} for chainId ${chainId}`
+      );
+    }
+
+    if (!balances[address]) {
+      balances[address] = {};
+    }
+
+    balances[address][tokenAddress] = decodedResult.toString();
+  });
 
   return {
     blockNumber: blockNumber.toNumber(),
