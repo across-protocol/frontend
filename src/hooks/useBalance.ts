@@ -1,8 +1,6 @@
 import { useQuery, useQueries, UseQueryOptions } from "@tanstack/react-query";
 import { useConnection } from "hooks";
 import {
-  getBalance,
-  getNativeBalance,
   balanceQueryKey,
   ChainId,
   getConfig,
@@ -12,6 +10,7 @@ import {
   getNativeTokenSymbol,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { balanceBatcher } from "utils/balances";
 
 const config = getConfig();
 
@@ -23,13 +22,7 @@ const getBalanceBySymbol = async (params: {
   config: ConfigClient;
   provider?: providers.JsonRpcProvider;
 }) => {
-  const {
-    accountToQuery,
-    chainIdToQuery,
-    tokenSymbolToQuery,
-    config,
-    provider,
-  } = params;
+  const { accountToQuery, chainIdToQuery, tokenSymbolToQuery, config } = params;
   if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
     return BigNumber.from(0);
   const tokenInfo = config.getTokenInfoBySymbolSafe(
@@ -39,17 +32,13 @@ const getBalanceBySymbol = async (params: {
   if (!tokenInfo || !tokenInfo.addresses?.[chainIdToQuery]) {
     return undefined;
   }
-  if (tokenInfo.isNative) {
-    return getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider);
-  } else {
-    return getBalance(
+  return BigNumber.from(
+    await balanceBatcher.queueBalanceCall(
       chainIdToQuery,
-      accountToQuery,
-      tokenInfo.addresses?.[chainIdToQuery],
-      "latest",
-      provider
-    );
-  }
+      tokenSymbolToQuery,
+      accountToQuery
+    )
+  );
 };
 
 /**
