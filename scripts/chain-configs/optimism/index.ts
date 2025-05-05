@@ -29,6 +29,7 @@ export default {
     "USDT",
     "SNX",
     "POOL",
+    "WLD",
   ],
   blockTimeSeconds: 2,
   enableCCTP: true,
