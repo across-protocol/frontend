@@ -501,39 +501,27 @@ export class ConfigClient {
       (token) => token.symbol.toUpperCase() === symbol.toUpperCase()
     );
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
-    const address = token.addresses?.[chainId] || token.mainnetAddress!;
-    const tokenInfoByAddress = this.getTokenInfoByAddress(
-      chainId,
-      address,
-      srcTokenList
-    );
-    return tokenInfoByAddress;
-  }
-  getTokenInfoByL1TokenAddress(chainId: number, l1TokenAddress: string): Token {
-    const tokens = this.getTokenList(chainId);
-    const token = tokens.find(
-      (token) => token.l1TokenAddress === l1TokenAddress
-    );
-    assert(
-      token,
-      `Token not found on chain ${chainId} and l1TokenAddress ${l1TokenAddress}`
-    );
-    return token;
+    const tokenInfo = constants.getToken(symbol);
+    return {
+      ...tokenInfo,
+      address: token.address,
+      isNative: token.isNative,
+      l1TokenAddress: token.l1TokenAddress,
+    };
   }
   getFromToAddressesBySymbol(
     symbol: string,
     fromChainId: number,
     toChainId: number
   ) {
-    const { l1TokenAddress } = this.getTokenInfoBySymbol(fromChainId, symbol);
-    const fromAddress = this.getTokenInfoByL1TokenAddress(
-      fromChainId,
-      l1TokenAddress
-    ).address;
-    const toAddress = this.getTokenInfoByL1TokenAddress(
-      toChainId,
-      l1TokenAddress
-    ).address;
+    const { addresses } = this.getTokenInfoBySymbol(fromChainId, symbol);
+    const fromAddress = addresses?.[fromChainId];
+    const toAddress = addresses?.[toChainId];
+    if (!fromAddress || !toAddress) {
+      throw new Error(
+        `Token not found on chain ${fromChainId} or ${toChainId} and symbol ${symbol}`
+      );
+    }
     return { fromAddress, toAddress };
   }
   getNativeTokenInfo(chainId: number): constants.TokenInfo {
