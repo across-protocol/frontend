@@ -112,14 +112,14 @@ const _defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
   },
   CAKE: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0005").toString(),
-    cutoff: ethers.utils.parseUnits("10000").toString(),
+    lowerBound: ethers.utils.parseUnits("0.005").toString(),
+    upperBound: ethers.utils.parseUnits("0.02").toString(),
+    cutoff: ethers.utils.parseUnits("1000").toString(),
   },
   BNB: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0005").toString(),
-    cutoff: ethers.utils.parseUnits("10000").toString(),
+    lowerBound: ethers.utils.parseUnits("0.25").toString(),
+    upperBound: ethers.utils.parseUnits("0.5").toString(),
+    cutoff: ethers.utils.parseUnits("1").toString(),
   },
   WLD: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
