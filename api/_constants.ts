@@ -168,11 +168,13 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
       ...config,
       decimals,
     };
-    const equivalentTokens = tokensWithSameConfig.find(
-      ([_, equivalentTokens]) => equivalentTokens.includes(token.symbol)
+    const equivalentTokens = tokensWithSameConfig.find(([_equivalentTokens]) =>
+      _equivalentTokens.includes(token.symbol)
     );
     if (equivalentTokens) {
-      for (const equivalentTokenSymbol of equivalentTokens) {
+      for (const equivalentTokenSymbol of equivalentTokens.filter(
+        (symbol) => symbol !== token.symbol
+      )) {
         const equivalentToken =
           TOKEN_SYMBOLS_MAP[
             equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
