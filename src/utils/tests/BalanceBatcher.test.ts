@@ -37,8 +37,8 @@ describe("BalanceBatcher", () => {
 
   it("should batch multiple requests into one multicall", async () => {
     const chainId = 1;
-    const tokenA = "0xTokenA";
-    const tokenB = "0xTokenB";
+    const tokenA = "ETH";
+    const tokenB = "USDC";
     const address1 = "0xAddress1";
     const address2 = "0xAddress2";
 
@@ -99,7 +99,7 @@ describe("BalanceBatcher", () => {
     batcher = new BalanceBatcher(failingGetBatchBalance);
 
     const chainId = 1;
-    const token = "0xTokenA";
+    const token = "ETH";
     const address = "0xAddress1";
 
     const promise = batcher.queueBalanceCall(chainId, token, address, "latest");
