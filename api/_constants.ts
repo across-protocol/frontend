@@ -153,6 +153,7 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
     ["WBTC", "TATARA-WBTC"],
     ["DAI", "USDB"],
     ["GHO", "WGHO"],
+    ["BNB", "WBNB"],
   ];
   for (const [tokenSymbol, config] of Object.entries(baseConfig)) {
     const token =
