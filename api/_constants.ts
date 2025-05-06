@@ -11,6 +11,7 @@ const {
   GRAPH_API_KEY,
   RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES,
   RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES,
+  RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
@@ -242,6 +243,13 @@ const relayerFeeCapitalCostDestinationChainOverrides: Record<
   ? JSON.parse(RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES)
   : {};
 
+const relayerFeeCapitalCostOriginChainOverrides: Record<
+  string,
+  Record<string, relayFeeCalculator.CapitalCostConfig>
+> = RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES)
+  : {};
+
 export const relayerFeeCapitalCostConfig: {
   [token: string]: relayFeeCalculator.RelayCapitalCostConfig;
 } = Object.fromEntries(
@@ -254,6 +262,8 @@ export const relayerFeeCapitalCostConfig: {
           routeOverrides: relayerFeeCapitalCostRouteOverrides[token] || {},
           destinationChainOverrides:
             relayerFeeCapitalCostDestinationChainOverrides[token] || {},
+          originChainOverrides:
+            relayerFeeCapitalCostOriginChainOverrides[token] || {},
         },
       ];
     }
