@@ -77,10 +77,10 @@ export const PREFERRED_BRIDGE_TOKENS: {
 } = {
   default: ["WETH", "USDC", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
-    [232]: ["WGHO", "WETH"],
+    [232]: ["WGHO", "WETH", "USDC"],
   },
   [232]: {
-    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH"],
+    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH", "USDC"],
   },
 };
 
