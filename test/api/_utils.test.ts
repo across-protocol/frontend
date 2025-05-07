@@ -174,6 +174,7 @@ describe("_utils", () => {
               "WBTC",
               ...constants.BRIDGED_USDC_SYMBOLS,
               "GHO",
+              "VLR",
             ].includes(route.fromTokenSymbol)
         )
         .forEach((route) => {
