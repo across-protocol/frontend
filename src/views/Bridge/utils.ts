@@ -230,6 +230,7 @@ const defaultFilter = {
 
 export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromUrl = getRouteFromUrl({
+    ...filter,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
