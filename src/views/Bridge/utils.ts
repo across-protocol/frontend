@@ -218,10 +218,15 @@ export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
     isStablecoin(route.fromTokenSymbol) &&
     route.toTokenSymbol !== "GHO"
   ) {
-    return {
-      ...route,
-      toTokenSymbol: "GHO",
-    };
+    const enabledRoute = findEnabledRoute({
+      fromChain: route.fromChain,
+      toChain: route.toChain,
+      inputTokenSymbol: route.fromTokenSymbol,
+      outputTokenSymbol: "GHO",
+    });
+    if (enabledRoute) {
+      return enabledRoute;
+    }
   }
 
   return route;
@@ -234,6 +239,7 @@ const defaultFilter = {
 
 export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromUrl = getRouteFromUrl({
+    ...filter,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
@@ -248,8 +254,8 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return getTokenDefaultsForRoute(
-    routeFromUrl ?? routeFromFilter ?? defaultRoute
+  return (
+    routeFromUrl ?? getTokenDefaultsForRoute(routeFromFilter ?? defaultRoute)
   );
 }
 
