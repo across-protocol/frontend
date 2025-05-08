@@ -14,7 +14,7 @@ import {
 
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 import { getSupportedChains } from "../utils";
 import { externConfigs } from "constants/chains/configs";
 
@@ -180,11 +180,7 @@ function sortChains(
       if (!isConnected || !isFrom) return 0;
       if (a.balance === undefined) return 1;
       if (b.balance === undefined) return -1;
-      return utils
-        .parseUnits(a.balanceFormatted)
-        .lt(utils.parseUnits(b.balanceFormatted))
-        ? 1
-        : -1;
+      return a.balance.lt(b.balance) ? 1 : -1;
     });
 }
 
