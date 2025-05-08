@@ -16,6 +16,7 @@ export async function retrieveLimits(
         outputToken,
         originChainId: fromChainId,
         destinationChainId: toChainId,
+        allowUnmatchedDecimals: true,
       },
     }
   );

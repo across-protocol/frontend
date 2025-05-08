@@ -10,10 +10,18 @@ import {
   getChainInfo,
   TOKEN_SYMBOLS_MAP,
   getNativeTokenSymbol,
+  formatUnitsWithMaxFractions,
 } from "utils";
 import { BigNumber, providers } from "ethers";
 
 const config = getConfig();
+
+const equivalentBalanceTokens = {
+  USDC: "USDC-BNB",
+  USDT: "USDT-BNB",
+  "USDC-BNB": "USDC",
+  "USDT-BNB": "USDT",
+};
 
 // Shared logic for querying by symbol using parameters which might not be available.
 const getBalanceBySymbol = async (params: {
@@ -22,7 +30,7 @@ const getBalanceBySymbol = async (params: {
   tokenSymbolToQuery?: string;
   config: ConfigClient;
   provider?: providers.JsonRpcProvider;
-}) => {
+}): Promise<{ balance: BigNumber; balanceFormatted: string }> => {
   const {
     accountToQuery,
     chainIdToQuery,
@@ -31,25 +39,42 @@ const getBalanceBySymbol = async (params: {
     provider,
   } = params;
   if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
-    return BigNumber.from(0);
-  const tokenInfo = config.getTokenInfoBySymbolSafe(
+    return { balance: BigNumber.from(0), balanceFormatted: "0" };
+  let tokenInfo = config.getTokenInfoBySymbolSafe(
     chainIdToQuery,
     tokenSymbolToQuery
   );
-  if (!tokenInfo || !tokenInfo.addresses?.[chainIdToQuery]) {
-    return undefined;
-  }
-  if (tokenInfo.isNative) {
-    return getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider);
-  } else {
-    return getBalance(
+  let addressToQuery = tokenInfo?.addresses?.[chainIdToQuery];
+  const equivalentBalanceTokenSymbol =
+    equivalentBalanceTokens[
+      tokenSymbolToQuery as keyof typeof equivalentBalanceTokens
+    ];
+  if (!addressToQuery && equivalentBalanceTokenSymbol) {
+    tokenInfo = config.getTokenInfoBySymbolSafe(
       chainIdToQuery,
-      accountToQuery,
-      tokenInfo.addresses?.[chainIdToQuery],
-      "latest",
-      provider
+      equivalentBalanceTokenSymbol
     );
+    addressToQuery = tokenInfo?.addresses?.[chainIdToQuery];
   }
+  if (!addressToQuery) {
+    return { balance: BigNumber.from(0), balanceFormatted: "0" };
+  }
+  const balance = tokenInfo?.isNative
+    ? await getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider)
+    : await getBalance(
+        chainIdToQuery,
+        accountToQuery,
+        addressToQuery,
+        "latest",
+        provider
+      );
+  return {
+    balance,
+    balanceFormatted: formatUnitsWithMaxFractions(
+      balance,
+      tokenInfo?.decimals ?? 18
+    ),
+  };
 };
 
 /**
@@ -71,7 +96,7 @@ export function useBalanceBySymbol(
   } = useConnection();
   account ??= connectedAccount;
 
-  const { data: balance, ...delegated } = useQuery({
+  const { data, ...delegated } = useQuery({
     queryKey: balanceQueryKey(account, chainId, tokenSymbol),
     queryFn: ({ queryKey }) => {
       const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
@@ -90,7 +115,8 @@ export function useBalanceBySymbol(
     refetchInterval: getChainInfo(chainId || 1).pollingInterval || 10_000,
   });
   return {
-    balance: balance as BigNumber | undefined,
+    balance: data?.balance ?? BigNumber.from(0),
+    balanceFormatted: data?.balanceFormatted ?? "0",
     ...delegated,
   };
 }
@@ -121,9 +147,9 @@ export function useBalancesBySymbols({
     queries: tokenSymbols.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         Error,
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         ReturnType<typeof balanceQueryKey>
       >
     >((tokenSymbolToQuery) => {
@@ -153,7 +179,8 @@ export function useBalancesBySymbols({
     }),
   });
   return {
-    balances: result.map((result) => result.data) as (BigNumber | undefined)[],
+    balances: result.map((result) => result.data?.balance),
+    balancesFormatted: result.map((result) => result.data?.balanceFormatted),
     isLoading: result.some((s) => s.isLoading),
   };
 }
@@ -171,9 +198,9 @@ export function useBalanceBySymbolPerChain({
     queries: chainIds.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         Error,
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         ReturnType<typeof balanceQueryKey>
       >
     >((chainId) => ({
@@ -184,7 +211,10 @@ export function useBalanceBySymbolPerChain({
           tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
           getNativeTokenSymbol(chainIdToQuery!) !== TOKEN_SYMBOLS_MAP.ETH.symbol
         ) {
-          return Promise.resolve(BigNumber.from(0));
+          return Promise.resolve({
+            balance: BigNumber.from(0),
+            balanceFormatted: "0",
+          });
         }
         return (
           (await getBalanceBySymbol({
@@ -192,7 +222,11 @@ export function useBalanceBySymbolPerChain({
             chainIdToQuery,
             tokenSymbolToQuery,
             accountToQuery,
-          })) ?? Promise.resolve(BigNumber.from(0))
+          })) ??
+          Promise.resolve({
+            balance: BigNumber.from(0),
+            balanceFormatted: "0",
+          })
         );
       },
       enabled: Boolean(account && tokenSymbol),
@@ -203,9 +237,16 @@ export function useBalanceBySymbolPerChain({
     balances: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+        [chainIds[idx]]: data?.balance ?? BigNumber.from(0),
       }),
       {} as Record<number, BigNumber>
+    ),
+    balancesFormatted: result.reduce(
+      (acc, { data }, idx) => ({
+        ...acc,
+        [chainIds[idx]]: data?.balanceFormatted ?? "0",
+      }),
+      {} as Record<number, string>
     ),
     isLoading: result.some((s) => s.isLoading),
   };

@@ -63,6 +63,7 @@ const handler = async (
       outputToken: acrossOutputTokenAddress,
       originChainId: _originChainId,
       destinationChainId: _destinationChainId,
+      allowUnmatchedDecimals: "true",
     });
 
     swapTokenAddress = ethers.utils.getAddress(swapTokenAddress);
