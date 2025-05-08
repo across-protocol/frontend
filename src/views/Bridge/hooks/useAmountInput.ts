@@ -77,11 +77,24 @@ export function useAmountInput(selectedRoute: SelectedRoute) {
       prevFromTokenSymbol === amountTokenSymbol ||
       areTokensInterchangeable(prevFromTokenSymbol, amountTokenSymbol)
     ) {
+      try {
+        const parsed = utils.parseUnits(userAmountInput, token.decimals);
+        setParsedAmount(parsed);
+      } catch (error) {
+        setParsedAmount(undefined);
+      }
       return;
     }
 
     clearInput();
-  }, [prevFromTokenSymbol, amountTokenSymbol, clearInput]);
+  }, [
+    prevFromTokenSymbol,
+    amountTokenSymbol,
+    clearInput,
+    _handleParsedAmount,
+    token.decimals,
+    userAmountInput,
+  ]);
 
   return {
     handleChangeAmountInput,

@@ -39,6 +39,7 @@ import {
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
   getLimitCap,
+  boolStr,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 import { getEnvs } from "./_env";
@@ -58,6 +59,7 @@ const LimitsQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  allowUnmatchedDecimals: optional(boolStr()),
 });
 
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
@@ -124,7 +126,7 @@ const handler = async (
       );
     }
     const amount = BigNumber.from(
-      amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
+      amountInput ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
     );
     let minDepositUsdForDestinationChainId = Number(
       getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
@@ -153,6 +155,16 @@ const handler = async (
         contract: configStoreClient.contract,
         functionName: "globalConfig",
         args: [encodedLiteChainsKey],
+      },
+      {
+        contract: hubPool,
+        functionName: "poolRebalanceRoute",
+        args: [computedOriginChainId, l1Token.address],
+      },
+      {
+        contract: hubPool,
+        functionName: "poolRebalanceRoute",
+        args: [destinationChainId, l1Token.address],
       },
     ];
 
@@ -200,9 +212,9 @@ const handler = async (
     const [
       opStackL1GasCost,
       multicallOutput,
-      fullRelayerBalances,
-      transferRestrictedBalances,
-      fullRelayerMainnetBalances,
+      _fullRelayerBalances,
+      _transferRestrictedBalances,
+      _fullRelayerMainnetBalances,
     ] = await Promise.all([
       nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
         ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
@@ -261,8 +273,11 @@ const handler = async (
       relayerFeeDetails,
     });
 
-    let { liquidReserves } = multicallOutput[1];
+    const { liquidReserves: _liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
+    const [poolRebalanceRouteOrigin] = multicallOutput[3];
+    const [poolRebalanceRouteDestination] = multicallOutput[4];
+
     const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
@@ -270,6 +285,30 @@ const handler = async (
       liteChainIds.includes(destinationChainId);
     const routeInvolvesLiteChain =
       originChainIsLiteChain || destinationChainIsLiteChain;
+
+    const originChainIsUltraLightChain =
+      poolRebalanceRouteOrigin === ethers.constants.AddressZero;
+    const destinationChainIsUltraLightChain =
+      poolRebalanceRouteDestination === ethers.constants.AddressZero;
+    const routeInvolvesUltraLightChain =
+      originChainIsUltraLightChain || destinationChainIsUltraLightChain;
+
+    // Base every amount on the input token decimals.
+    let liquidReserves = ConvertDecimals(
+      l1Token.decimals,
+      inputToken.decimals
+    )(_liquidReserves);
+    const fullRelayerBalances = _fullRelayerBalances.map((balance) =>
+      ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
+    );
+    const fullRelayerMainnetBalances = _fullRelayerMainnetBalances.map(
+      (balance) =>
+        ConvertDecimals(l1Token.decimals, inputToken.decimals)(balance)
+    );
+    const transferRestrictedBalances = _transferRestrictedBalances.map(
+      (balance) =>
+        ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
+    );
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
@@ -283,7 +322,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             minDepositUsdForDestinationChainId.toString(),
-            l1Token.decimals
+            inputToken.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
@@ -298,11 +337,15 @@ const handler = async (
       ...transferRestrictedBalances
     ); // balances on destination chain + mainnet
 
-    if (!routeInvolvesLiteChain) {
-      const lpCushion = ethers.utils.parseUnits(
+    if (!routeInvolvesLiteChain && !routeInvolvesUltraLightChain) {
+      const _lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
       );
+      const lpCushion = ConvertDecimals(
+        l1Token.decimals,
+        inputToken.decimals
+      )(_lpCushion);
       liquidReserves = maxBN(
         liquidReserves.sub(lpCushion),
         ethers.BigNumber.from(0)
@@ -313,8 +356,10 @@ const handler = async (
     }
 
     // Apply chain max values when defined
-    const includeDefaultMaxValues = originChainIsLiteChain;
-    const includeRelayerBalances = originChainIsLiteChain;
+    const includeDefaultMaxValues =
+      originChainIsLiteChain || originChainIsUltraLightChain;
+    const includeRelayerBalances =
+      originChainIsLiteChain || originChainIsUltraLightChain;
     let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;
@@ -395,7 +440,7 @@ const handler = async (
       bufferedMaxDepositShortDelay,
       limitsBufferMultiplier,
       chainHasMaxBoundary,
-      routeInvolvesLiteChain
+      routeInvolvesLiteChain || routeInvolvesUltraLightChain
     );
 
     if (
@@ -407,8 +452,8 @@ const handler = async (
     }
 
     const limitCap = getLimitCap(
-      l1Token.symbol,
-      l1Token.decimals,
+      inputToken.symbol,
+      inputToken.decimals,
       destinationChainId
     );
 

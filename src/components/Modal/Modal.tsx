@@ -16,7 +16,7 @@ export type ModalDirection = {
   mobile?: ModalDirectionOrientation;
 };
 
-type ModalProps = {
+export type ModalProps = {
   isOpen?: boolean;
   title?: string | JSX.Element;
 

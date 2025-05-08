@@ -43,6 +43,7 @@ export async function suggestedFeesApiCall(
       amount: amount.toString(),
       skipAmountLimit: true,
       message,
+      allowUnmatchedDecimals: true,
     },
   });
   const result = response.data;

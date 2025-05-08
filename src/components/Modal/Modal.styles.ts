@@ -24,7 +24,7 @@ export const Wrapper = styled.div<WrapperType>`
   justify-content: center;
 
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
 
   z-index: 99998;
 
@@ -88,8 +88,15 @@ type ModalWrapperType = {
   bottomYOffset?: number;
   padding: "normal" | "thin";
 };
+
+// minimum y-axis margin
+const minimumMargin = 32;
+
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
-  max-height: ${({ height }) => height ?? 400}px;
+  max-height: ${({ height, topYOffset }) =>
+    height
+      ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
+      : "calc(100svh - 64px)"};
   max-width: ${({ width }) => width ?? 800}px;
 
   height: fit-content;

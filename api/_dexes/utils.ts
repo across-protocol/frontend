@@ -77,10 +77,10 @@ export const PREFERRED_BRIDGE_TOKENS: {
 } = {
   default: ["WETH", "USDC", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
-    [232]: ["WGHO", "WETH"],
+    [232]: ["WGHO", "WETH", "USDC"],
   },
   [232]: {
-    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH"],
+    [CHAIN_IDs.MAINNET]: ["WGHO", "WETH", "USDC"],
   },
 };
 
@@ -551,19 +551,6 @@ export function assertMinOutputAmount(
     throw new Error(
       `Swap quote output amount ${amountOut.toString()} ` +
         `is less than required min. output amount ${expectedMinAmountOut.toString()}`
-    );
-  }
-}
-
-export class NoQuoteFoundError extends Error {
-  constructor(params: {
-    originSwapChainId: number;
-    inputTokenSymbol: string;
-    destinationSwapChainId: number;
-    outputTokenSymbol: string;
-  }) {
-    super(
-      `No quote found for ${params.originSwapChainId} ${params.inputTokenSymbol} -> ${params.destinationSwapChainId} ${params.outputTokenSymbol}`
     );
   }
 }
