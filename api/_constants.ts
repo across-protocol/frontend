@@ -7,7 +7,12 @@ import {
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
 
-const { GRAPH_API_KEY, RELAYER_FEE_CAPITAL_COST_OVERRIDES } = getEnvs();
+const {
+  GRAPH_API_KEY,
+  RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES,
+  RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES,
+  RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
+} = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
@@ -19,137 +24,182 @@ export const disabledL1Tokens = [
   TOKEN_SYMBOLS_MAP.BADGER.addresses[CHAIN_IDs.MAINNET],
 ].map((x) => x.toLowerCase());
 
-const defaultRelayerFeeCapitalCostConfig: {
-  [token: string]: relayFeeCalculator.CapitalCostConfig;
+const _defaultRelayerFeeCapitalCostConfig: {
+  [token: string]: Omit<relayFeeCalculator.CapitalCostConfig, "decimals">;
 } = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.000075").toString(),
     cutoff: ethers.utils.parseUnits("0.3").toString(),
-    decimals: 18,
   },
   WETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.000075").toString(),
     cutoff: ethers.utils.parseUnits("0.3").toString(),
-    decimals: 18,
   },
   WBTC: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.0025").toString(),
     cutoff: ethers.utils.parseUnits("10").toString(),
-    decimals: 8,
   },
   DAI: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 18,
   },
   USDC: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("100000").toString(),
-    decimals: 6,
   },
   USDT: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 6,
   },
   UMA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.00075").toString(),
     cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
   },
   BADGER: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
   },
   ACX: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("1000000").toString(),
-    decimals: 18,
   },
   BAL: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   GHO: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   POOL: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   BOBA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("100000").toString(),
-    decimals: 18,
   },
   SNX: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   LSK: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   GRASS: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
   },
   XYZ: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
-    decimals: 18,
+  },
+  CAKE: {
+    lowerBound: ethers.utils.parseUnits("0.005").toString(),
+    upperBound: ethers.utils.parseUnits("0.02").toString(),
+    cutoff: ethers.utils.parseUnits("1000").toString(),
+  },
+  BNB: {
+    lowerBound: ethers.utils.parseUnits("0.25").toString(),
+    upperBound: ethers.utils.parseUnits("0.5").toString(),
+    cutoff: ethers.utils.parseUnits("1").toString(),
+  },
+  WLD: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
   },
 };
 
-defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
-  ...defaultRelayerFeeCapitalCostConfig["USDC"],
-};
-defaultRelayerFeeCapitalCostConfig["USDzC"] = {
-  ...defaultRelayerFeeCapitalCostConfig["USDC"],
-};
-defaultRelayerFeeCapitalCostConfig["USDB"] = {
-  ...defaultRelayerFeeCapitalCostConfig["DAI"],
-};
-defaultRelayerFeeCapitalCostConfig["WGHO"] = {
-  ...defaultRelayerFeeCapitalCostConfig["GHO"],
-};
-defaultRelayerFeeCapitalCostConfig["TATARA-USDC"] = {
-  ...defaultRelayerFeeCapitalCostConfig["USDC"],
-};
-defaultRelayerFeeCapitalCostConfig["TATARA-USDT"] = {
-  ...defaultRelayerFeeCapitalCostConfig["USDC"],
-};
-defaultRelayerFeeCapitalCostConfig["TATARA-USDS"] = {
-  ...defaultRelayerFeeCapitalCostConfig["USDC"],
-};
-defaultRelayerFeeCapitalCostConfig["TATARA-WBTC"] = {
-  ...defaultRelayerFeeCapitalCostConfig["WBTC"],
-};
+const defaultRelayerFeeCapitalCostConfig =
+  populateDefaultRelayerFeeCapitalCostConfig(
+    _defaultRelayerFeeCapitalCostConfig
+  );
+
+export function populateDefaultRelayerFeeCapitalCostConfig(
+  baseConfig: Record<
+    string,
+    Omit<relayFeeCalculator.CapitalCostConfig, "decimals">
+  >
+): {
+  [token: string]: relayFeeCalculator.CapitalCostConfig;
+} {
+  const populatedConfig: {
+    [token: string]: relayFeeCalculator.CapitalCostConfig;
+  } = {};
+  const tokensWithSameConfig = [
+    ["USDT", "USDT-BNB"],
+    [
+      "USDC",
+      "USDC.e",
+      "USDC-BNB",
+      "USDzC",
+      "TATARA-USDC",
+      "TATARA-USDT",
+      "TATARA-USDS",
+    ],
+    ["WBTC", "TATARA-WBTC"],
+    ["DAI", "USDB"],
+    ["GHO", "WGHO"],
+    ["BNB", "WBNB"],
+  ];
+  for (const [tokenSymbol, config] of Object.entries(baseConfig)) {
+    const token =
+      TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+    if (!token) {
+      throw new Error(
+        `Can't populate capital cost config for ${tokenSymbol}: token not found`
+      );
+    }
+    const decimals = token.decimals;
+    populatedConfig[token.symbol] = {
+      ...config,
+      decimals,
+    };
+    const equivalentTokens = tokensWithSameConfig.find(([_equivalentTokens]) =>
+      _equivalentTokens.includes(token.symbol)
+    );
+    if (equivalentTokens) {
+      for (const equivalentTokenSymbol of equivalentTokens.filter(
+        (symbol) => symbol !== token.symbol
+      )) {
+        const equivalentToken =
+          TOKEN_SYMBOLS_MAP[
+            equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+          ];
+        if (!equivalentToken) {
+          throw new Error(
+            `Can't populate capital cost config for ${tokenSymbol}: equivalent token ${equivalentTokenSymbol} not found`
+          );
+        }
+        const equivalentTokenDecimals = equivalentToken.decimals;
+        populatedConfig[equivalentToken.symbol] = {
+          ...config,
+          decimals: equivalentTokenDecimals,
+        };
+      }
+    }
+  }
+  return populatedConfig;
+}
 
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
@@ -157,11 +207,47 @@ export const coinGeckoAssetPlatformLookup: Record<string, number> = {
 
 export const graphAPIKey = GRAPH_API_KEY;
 
-const relayerFeeCapitalCostOverrides: Record<
+// {
+//   "TOKEN_SYMBOL": {
+//     "ORIGIN_CHAIN_ID": {
+//       "DESTINATION_CHAIN_ID": {
+//         "lowerBound": "1000000000000000",
+//         "upperBound": "5000000000000000",
+//         "cutoff": "10000000000000000000000",
+//         "decimals": 18
+//       }
+//     }
+//   }
+// }
+const relayerFeeCapitalCostRouteOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
-> = RELAYER_FEE_CAPITAL_COST_OVERRIDES
-  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_OVERRIDES)
+> = RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_ROUTE_OVERRIDES)
+  : {};
+
+// {
+//   "TOKEN_SYMBOL": {
+//     "DESTINATION_CHAIN_ID": {
+//       "lowerBound": "1000000000000000",
+//       "upperBound": "5000000000000000",
+//       "cutoff": "10000000000000000000000",
+//       "decimals": 18
+//     }
+//   }
+// }
+const relayerFeeCapitalCostDestinationChainOverrides: Record<
+  string,
+  Record<string, relayFeeCalculator.CapitalCostConfig>
+> = RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_DESTINATION_CHAIN_OVERRIDES)
+  : {};
+
+const relayerFeeCapitalCostOriginChainOverrides: Record<
+  string,
+  Record<string, relayFeeCalculator.CapitalCostConfig>
+> = RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES
+  ? JSON.parse(RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES)
   : {};
 
 export const relayerFeeCapitalCostConfig: {
@@ -173,7 +259,11 @@ export const relayerFeeCapitalCostConfig: {
         token,
         {
           default: defaultRelayerFeeCapitalCostConfig[token],
-          routeOverrides: relayerFeeCapitalCostOverrides[token] || {},
+          routeOverrides: relayerFeeCapitalCostRouteOverrides[token] || {},
+          destinationChainOverrides:
+            relayerFeeCapitalCostDestinationChainOverrides[token] || {},
+          originChainOverrides:
+            relayerFeeCapitalCostOriginChainOverrides[token] || {},
         },
       ];
     }
@@ -194,12 +284,14 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "azero",
   "matic",
   "gho",
+  "bnb",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
+  TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -218,6 +310,8 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.SNX,
   TOKEN_SYMBOLS_MAP.POOL,
   TOKEN_SYMBOLS_MAP.WGHO,
+  TOKEN_SYMBOLS_MAP.LSK,
+  TOKEN_SYMBOLS_MAP.WLD,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
@@ -248,4 +342,5 @@ export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hour
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
   [CHAIN_IDs.LENS]: "GHO",
+  [CHAIN_IDs.BSC]: "BNB",
 };

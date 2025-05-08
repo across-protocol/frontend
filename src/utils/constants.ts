@@ -98,6 +98,15 @@ export const tokenList = [
       displaySymbol = "LGHO";
     }
 
+    // Override for USDC-BNB and USDT-BNB until reflected in the constants
+    if (symbol === "USDC-BNB") {
+      name = "USD Coin (BNB)";
+      displaySymbol = "USDC";
+    } else if (symbol === "USDT-BNB") {
+      name = "Tether USD (BNB)";
+      displaySymbol = "USDT";
+    }
+
     return {
       ...tokenInfo,
       name,
@@ -198,11 +207,10 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = (
-  String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-    .toLowerCase()
-    .split(",") as (keyof typeof rewardPrograms)[]
-).filter((v) => v);
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  "op-rebates",
+  "arb-rebates",
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
@@ -299,21 +307,6 @@ export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
         ? "ARB"
         : "ACX";
   return getToken(symbol);
-};
-
-/**
- * Resolves a token by address. This is useful for tokens that have multiple addresses on different chains.
- * @param address An address of a token
- * @returns The token info for the token with the given address
- */
-export const getTokenByAddress = (address: string): TokenInfo => {
-  const token = Object.values(tokenTable).find(
-    (token) =>
-      Object.values(token?.addresses ?? {}).includes(address) ||
-      token?.mainnetAddress === address
-  );
-  assert(token, "No token found for address: " + address);
-  return getToken(token.symbol);
 };
 
 const RouteSS = superstruct.object({
@@ -630,7 +623,7 @@ export const defaultSwapSlippage = Number(
 );
 
 export const indexerApiBaseUrl =
-  process.env.REACT_APP_INDEXER_BASE_URL || undefined;
+  process.env.REACT_APP_INDEXER_BASE_URL || "https://indexer.api.across.to";
 
 export const hyperLiquidBridge2Address =
   "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";

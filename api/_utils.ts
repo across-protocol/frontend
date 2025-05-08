@@ -7,6 +7,7 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
+import { PUBLIC_NETWORKS } from "@across-protocol/constants";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -237,6 +238,7 @@ export const validateChainAndTokenParams = (
     outputToken: string;
     originChainId: string;
     destinationChainId: string;
+    allowUnmatchedDecimals: string;
   }>
 ) => {
   let {
@@ -245,6 +247,7 @@ export const validateChainAndTokenParams = (
     outputToken: outputTokenAddress,
     originChainId,
     destinationChainId: _destinationChainId,
+    allowUnmatchedDecimals: _allowUnmatchedDecimals,
   } = queryParams;
 
   if (!_destinationChainId) {
@@ -274,6 +277,7 @@ export const validateChainAndTokenParams = (
   outputTokenAddress = outputTokenAddress
     ? _getAddressOrThrowInputError(outputTokenAddress, "outputToken")
     : undefined;
+  const allowUnmatchedDecimals = _allowUnmatchedDecimals === "true";
 
   const { l1Token, outputToken, inputToken, resolvedOriginChainId } =
     getRouteDetails(
@@ -297,12 +301,25 @@ export const validateChainAndTokenParams = (
     });
   }
 
+  if (!allowUnmatchedDecimals && inputToken.decimals !== outputToken.decimals) {
+    throw new InvalidParamError({
+      message:
+        `Decimals of input and output tokens do not match. ` +
+        `This is likely due to unmatched decimals for USDC/USDT on BNB Chain. ` +
+        `Make sure to have followed the migration guide: ` +
+        `https://docs.across.to/introduction/migration-guides/bnb-chain-migration-guide ` +
+        `and set the query param 'allowUnmatchedDecimals=true' to allow this.`,
+      param: "allowUnmatchedDecimals",
+    });
+  }
+
   return {
     l1Token,
     inputToken,
     outputToken,
     destinationChainId,
     resolvedOriginChainId,
+    allowUnmatchedDecimals,
   };
 };
 
@@ -485,15 +502,21 @@ export const getRouteDetails = (
   return {
     inputToken: {
       ...inputToken,
-      symbol: sdk.utils.isBridgedUsdc(inputToken.symbol)
-        ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
+      symbol: _isBridgedUsdcOrVariant(inputToken.symbol)
+        ? _getBridgedUsdcOrVariantTokenSymbol(
+            inputToken.symbol,
+            resolvedOriginChainId
+          )
         : inputToken.symbol,
       address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
     },
     outputToken: {
       ...outputToken,
-      symbol: sdk.utils.isBridgedUsdc(outputToken.symbol)
-        ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
+      symbol: _isBridgedUsdcOrVariant(outputToken.symbol)
+        ? _getBridgedUsdcOrVariantTokenSymbol(
+            outputToken.symbol,
+            destinationChainId
+          )
         : outputToken.symbol,
       address: utils.getAddress(outputToken.addresses[destinationChainId]),
     },
@@ -530,10 +553,14 @@ export const getTokenByAddress = (
     return undefined;
   }
 
-  if (matches.length > 1) {
-    const nativeUsdc = matches.find(([symbol]) => symbol === "USDC");
-    if (chainId === HUB_POOL_CHAIN_ID && nativeUsdc) {
-      return nativeUsdc[1];
+  const ambiguousTokens = ["USDC", "USDT"];
+  const isAmbiguous =
+    matches.length > 1 &&
+    matches.some(([symbol]) => ambiguousTokens.includes(symbol));
+  if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
+    const token = matches.find(([symbol]) => ambiguousTokens.includes(symbol));
+    if (token) {
+      return token[1];
     }
   }
 
@@ -553,9 +580,18 @@ const _getChainIdsOfToken = (
   return chainIds.map(([chainId]) => Number(chainId));
 };
 
-const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
-  if (!sdk.utils.isBridgedUsdc(tokenSymbol)) {
-    throw new Error(`Token ${tokenSymbol} is not a bridged USDC token`);
+const _isBridgedUsdcOrVariant = (tokenSymbol: string) => {
+  return sdk.utils.isBridgedUsdc(tokenSymbol) || tokenSymbol === "USDC-BNB";
+};
+
+const _getBridgedUsdcOrVariantTokenSymbol = (
+  tokenSymbol: string,
+  chainId: number
+) => {
+  if (!_isBridgedUsdcOrVariant(tokenSymbol)) {
+    throw new Error(
+      `Token ${tokenSymbol} is not a bridged USDC token or variant`
+    );
   }
 
   switch (chainId) {
@@ -563,6 +599,8 @@ const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
       return TOKEN_SYMBOLS_MAP.USDbC.symbol;
     case CHAIN_IDs.ZORA:
       return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    case CHAIN_IDs.BSC:
+      return TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol;
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
@@ -590,7 +628,7 @@ export const getHubPool = (provider: providers.Provider) => {
 export const getPublicProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const chain = sdk.constants.PUBLIC_NETWORKS[Number(chainId)];
+  const chain = PUBLIC_NETWORKS[Number(chainId)];
   if (chain) {
     const headers = getProviderHeaders(chainId);
     return new ethers.providers.StaticJsonRpcProvider({
@@ -928,7 +966,8 @@ export const getCachedLimits = async (
   amount?: string,
   recipient?: string,
   relayer?: string,
-  message?: string
+  message?: string,
+  allowUnmatchedDecimals?: boolean
 ): Promise<{
   minDeposit: string;
   maxDeposit: string;
@@ -956,6 +995,7 @@ export const getCachedLimits = async (
         message,
         recipient,
         relayer,
+        allowUnmatchedDecimals,
       },
     })
   ).data;
@@ -971,6 +1011,7 @@ export async function getSuggestedFees(params: {
   message?: string;
   depositMethod?: string;
   recipient?: string;
+  allowUnmatchedDecimals?: boolean;
 }): Promise<{
   estimatedFillTimeSec: number;
   timestamp: number;
@@ -1027,12 +1068,17 @@ export async function getBridgeQuoteForExactInput(params: {
     recipient: params.recipient,
     message: params.message,
     amount: params.exactInputAmount.toString(),
+    allowUnmatchedDecimals: true,
   });
+  const outputAmount = ConvertDecimals(
+    params.inputToken.decimals,
+    params.outputToken.decimals
+  )(params.exactInputAmount.sub(quote.totalRelayFee.total));
 
   return {
     inputAmount: params.exactInputAmount,
-    outputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
-    minOutputAmount: params.exactInputAmount.sub(quote.totalRelayFee.total),
+    outputAmount,
+    minOutputAmount: outputAmount,
     suggestedFees: quote,
     message: params.message,
     inputToken: params.inputToken,
@@ -1057,6 +1103,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     skipAmountLimit: true,
     recipient: params.recipient,
     message: params.message,
+    allowUnmatchedDecimals: true,
   };
 
   try {
@@ -1094,11 +1141,10 @@ export async function getBridgeQuoteForMinOutput(params: {
 
       for (const [i, quote] of Object.entries(quotes)) {
         const inputAmount = inputAmounts[Number(i)];
-        const outputAmount = inputAmount.sub(
-          inputAmount
-            .mul(quote.totalRelayFee.pct)
-            .div(sdk.utils.fixedPointAdjustment)
-        );
+        const outputAmount = ConvertDecimals(
+          params.inputToken.decimals,
+          params.outputToken.decimals
+        )(inputAmount.sub(quote.totalRelayFee.total));
         if (outputAmount.gte(params.minOutputAmount)) {
           finalQuote = quote;
           adjustedInputAmount = inputAmount;
@@ -1118,9 +1164,14 @@ export async function getBridgeQuoteForMinOutput(params: {
       throw new Error("Failed to adjust input amount to meet minOutputAmount");
     }
 
+    const finalOutputAmount = ConvertDecimals(
+      params.inputToken.decimals,
+      params.outputToken.decimals
+    )(adjustedInputAmount.sub(finalQuote.totalRelayFee.total));
+
     return {
       inputAmount: adjustedInputAmount,
-      outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+      outputAmount: finalOutputAmount,
       minOutputAmount: params.minOutputAmount,
       suggestedFees: finalQuote,
       message: params.message,
@@ -2075,20 +2126,6 @@ export async function fetchStakingPool(
   };
 }
 
-// Copied from @uma/common
-export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
-  // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
-  // returns: string with toDecimals in smallest unit
-  return (amount: BigNumber): string => {
-    amount = BigNumber.from(amount);
-    if (amount.isZero()) return amount.toString();
-    const diff = fromDecimals - toDecimals;
-    if (diff === 0) return amount.toString();
-    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff)).toString();
-    return amount.mul(BigNumber.from("10").pow(-1 * diff)).toString();
-  };
-};
-
 export function getBaseRewardsApr(
   rewardsPerYearInUSD: BigNumber,
   totalStakedInUSD: BigNumber
@@ -2704,6 +2741,18 @@ export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
 
 export function parseL1TokenConfigSafe(jsonString: string) {
   try {
+    // This implies that the L1 token config is not set for the given token address.
+    // We should return a default rate model in this case.
+    if (jsonString === "") {
+      return {
+        rateModel: {
+          UBar: ethers.utils.parseUnits("0.01").toString(),
+          R0: "0",
+          R1: "0",
+          R2: "0",
+        },
+      };
+    }
     return sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
       jsonString
     );
@@ -2717,3 +2766,22 @@ export function parseL1TokenConfigSafe(jsonString: string) {
     return null;
   }
 }
+
+// Copied from @uma/common
+/**
+ * Factory function that creates a function that converts an amount from one number of decimals to another.
+ * Copied from @uma/common
+ * @param fromDecimals The number of decimals of the input amount.
+ * @param toDecimals The number of decimals of the output amount.
+ * @returns A function that converts an amount from `fromDecimals` to `toDecimals`.
+ */
+export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
+  return (amount: BigNumber): BigNumber => {
+    amount = BigNumber.from(amount);
+    if (amount.isZero()) return amount;
+    const diff = fromDecimals - toDecimals;
+    if (diff === 0) return amount;
+    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff));
+    return amount.mul(BigNumber.from("10").pow(-1 * diff));
+  };
+};

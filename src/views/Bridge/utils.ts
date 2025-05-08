@@ -115,6 +115,10 @@ export function getReceiveTokenSymbol(
     return "GRASS";
   }
 
+  if (destinationChainId === CHAIN_IDs.BSC && inputTokenSymbol === "BNB") {
+    return isReceiverContract ? "WBNB" : "BNB";
+  }
+
   return outputTokenSymbol;
 }
 
@@ -214,30 +218,44 @@ export function getTokenDefaultsForRoute(route: SelectedRoute): SelectedRoute {
     isStablecoin(route.fromTokenSymbol) &&
     route.toTokenSymbol !== "GHO"
   ) {
-    return {
-      ...route,
-      toTokenSymbol: "GHO",
-    };
+    const enabledRoute = findEnabledRoute({
+      fromChain: route.fromChain,
+      toChain: route.toChain,
+      inputTokenSymbol: route.fromTokenSymbol,
+      outputTokenSymbol: "GHO",
+    });
+    if (enabledRoute) {
+      return enabledRoute;
+    }
   }
 
   return route;
 }
 
+const defaultFilter = {
+  fromChain: hubPoolChainId,
+  toChain: CHAIN_IDs.ARBITRUM,
+};
+
 export function getInitialRoute(filter: RouteFilter = {}) {
-  const routeFromUrl = getRouteFromUrl(filter);
+  const routeFromUrl = getRouteFromUrl({
+    ...filter,
+    fromChain: filter.fromChain || defaultFilter.fromChain,
+    toChain: filter.toChain || defaultFilter.toChain,
+  });
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
       filter.inputTokenSymbol ??
       (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
-    fromChain: filter.fromChain || hubPoolChainId,
-    toChain: filter.toChain,
+    fromChain: filter.fromChain || defaultFilter.fromChain,
+    toChain: filter.toChain || defaultFilter.toChain,
   });
   const defaultRoute = findEnabledRoute(defaultRouteFilter) ?? {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return getTokenDefaultsForRoute(
-    routeFromUrl ?? routeFromFilter ?? defaultRoute
+  return (
+    routeFromUrl ?? getTokenDefaultsForRoute(routeFromFilter ?? defaultRoute)
   );
 }
 
@@ -585,6 +603,10 @@ export function getRouteFromUrl(overrides?: RouteFilter) {
     outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
     externalProjectId,
   };
+
+  if (Object.values(filter).every((value) => !value)) {
+    return undefined;
+  }
 
   const route =
     findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||

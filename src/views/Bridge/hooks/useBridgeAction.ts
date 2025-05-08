@@ -241,6 +241,8 @@ export function useBridgeAction(
             frozenQuoteForAnalytics,
             referrer,
             frozenInitialQuoteTime,
+            frozenRoute.fromTokenAddress,
+            frozenRoute.toTokenAddress,
             externalProjectIsHyperLiquid
               ? externalProjectNameToId(frozenRoute.externalProjectId)
               : undefined
@@ -328,6 +330,8 @@ export function useBridgeAction(
             referrer,
             timeSubmitted,
             tx.hash,
+            frozenRoute.fromTokenAddress,
+            frozenRoute.toTokenAddress,
             externalProjectIsHyperLiquid
               ? externalProjectNameToId(frozenRoute.externalProjectId)
               : undefined

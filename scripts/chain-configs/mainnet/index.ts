@@ -30,6 +30,7 @@ export default {
     "BAL",
     "ACX",
     "USDT",
+    "WLD",
     "SNX",
     "POOL",
     "LSK",
