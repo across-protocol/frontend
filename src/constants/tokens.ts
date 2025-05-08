@@ -107,4 +107,5 @@ export const orderedTokenLogos = {
   "TATARA-USDS": unknownLogo,
   "TATARA-USDT": usdtLogo,
   "TATARA-WBTC": wbtcLogo,
+  VLR: unknownLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;
