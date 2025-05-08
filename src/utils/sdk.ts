@@ -20,7 +20,6 @@ export {
   compareAddressesSimple,
   toAddress,
   isContractDeployedToAddress,
-  toBytes32,
   toAddressType,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
