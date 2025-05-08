@@ -241,12 +241,6 @@ export class ConfigClient {
       "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829"
     );
   }
-  getL1TokenAddressBySymbol(symbol: string) {
-    // all routes have an l1Token address, so just find the first symbol that matches
-    const route = this.getRoutes().find((x) => x.fromTokenSymbol === symbol);
-    assert(route, `Unsupported l1 address lookup by symbol: ${symbol}`);
-    return route.l1TokenAddress;
-  }
   getHubPool(signer?: Signer): HubPool {
     const address = this.getHubPoolAddress();
     const provider =
@@ -437,14 +431,30 @@ export class ConfigClient {
   getTokenInfoByAddress(
     chainId: number,
     address: string,
-    tokens = this.getTokenList(chainId)
+    tokenList = this.getTokenList(chainId)
   ): Token {
-    const token = tokens.find((token) => token.address === address);
+    const tokens = tokenList.filter((token) => token.address === address);
     assert(
-      token,
+      tokens.length > 0,
       `Token not found on chain: ${chainId} and address ${address}`
     );
-    return token;
+
+    const ambiguousTokens = ["USDC", "USDT"];
+    const isAmbiguous =
+      tokens.length > 1 &&
+      tokens.some((token) => ambiguousTokens.includes(token.symbol));
+    if (isAmbiguous && chainId === constants.hubPoolChainId) {
+      const token = tokens.find((token) =>
+        ambiguousTokens.includes(token.symbol)
+      );
+      assert(
+        token,
+        `Token not found on chain: ${chainId} and address ${address}`
+      );
+      return token;
+    }
+
+    return tokens[0];
   }
   getPoolTokenInfoByAddress(chainId: number, address: string): Token {
     return this.getTokenInfoByAddress(
@@ -498,33 +508,6 @@ export class ConfigClient {
       isNative: token.isNative,
       l1TokenAddress: token.l1TokenAddress,
     };
-  }
-  getTokenInfoByL1TokenAddress(chainId: number, l1TokenAddress: string): Token {
-    const tokens = this.getTokenList(chainId);
-    const token = tokens.find(
-      (token) => token.l1TokenAddress === l1TokenAddress
-    );
-    assert(
-      token,
-      `Token not found on chain ${chainId} and l1TokenAddress ${l1TokenAddress}`
-    );
-    return token;
-  }
-  getFromToAddressesBySymbol(
-    symbol: string,
-    fromChainId: number,
-    toChainId: number
-  ) {
-    const { l1TokenAddress } = this.getTokenInfoBySymbol(fromChainId, symbol);
-    const fromAddress = this.getTokenInfoByL1TokenAddress(
-      fromChainId,
-      l1TokenAddress
-    ).address;
-    const toAddress = this.getTokenInfoByL1TokenAddress(
-      toChainId,
-      l1TokenAddress
-    ).address;
-    return { fromAddress, toAddress };
   }
   getNativeTokenInfo(chainId: number): constants.TokenInfo {
     const chainInfo = constants.getChainInfo(chainId);

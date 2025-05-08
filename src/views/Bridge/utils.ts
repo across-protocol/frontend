@@ -115,6 +115,10 @@ export function getReceiveTokenSymbol(
     return "GRASS";
   }
 
+  if (destinationChainId === CHAIN_IDs.BSC && inputTokenSymbol === "BNB") {
+    return isReceiverContract ? "WBNB" : "BNB";
+  }
+
   return outputTokenSymbol;
 }
 
