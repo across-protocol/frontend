@@ -14,7 +14,10 @@ function getTokenSymbolForLogo(tokenSymbol: string): string {
     case "USDC.e":
     case "USDbC":
     case "USDzC":
+    case "USDC-BNB":
       return "USDC";
+    case "USDT-BNB":
+      return "USDT";
     default:
       return tokenSymbol;
   }
@@ -269,7 +272,7 @@ function transformChainConfigs(
 
       // Handle USDC swap tokens
       const usdcSwapTokens =
-        chainConfig.enableCCTP && hasBridgedUsdc(fromChainId)
+        chainConfig.enableCCTP && hasBridgedUsdcOrVariant(fromChainId)
           ? getUsdcSwapTokens(fromChainId, toChainId)
           : [];
 
@@ -363,12 +366,14 @@ function processTokenRoutes(
     if (tokenSymbol === "USDC") {
       if (toConfig.enableCCTP) {
         // Some chains only have native CCTP USDC
-        if (hasBridgedUsdc(toConfig.chainId)) {
+        if (hasBridgedUsdcOrVariant(toConfig.chainId)) {
           return [
             "USDC",
             {
               inputTokenSymbol: "USDC",
-              outputTokenSymbol: getBridgedUsdcSymbol(toConfig.chainId),
+              outputTokenSymbol: getBridgedUsdcOrVariantSymbol(
+                toConfig.chainId
+              ),
             },
           ];
         } else {
@@ -376,23 +381,23 @@ function processTokenRoutes(
         }
       } else if (
         toConfig.tokens.find(
-          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+          (token) => typeof token === "string" && isBridgedUsdcOrVariant(token)
         )
       ) {
         return [
           {
             inputTokenSymbol: "USDC",
-            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+            outputTokenSymbol: getBridgedUsdcOrVariantSymbol(toChainId),
           },
         ];
       }
     }
 
     // Handle bridged USDC -> native/bridged USDC routes
-    if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
+    if (isBridgedUsdcOrVariant(tokenSymbol)) {
       if (toConfig.enableCCTP) {
         // Some chains only have native CCTP USDC
-        if (hasBridgedUsdc(toConfig.chainId)) {
+        if (hasBridgedUsdcOrVariant(toConfig.chainId)) {
           return [
             {
               inputTokenSymbol: tokenSymbol,
@@ -400,7 +405,7 @@ function processTokenRoutes(
             },
             {
               inputTokenSymbol: tokenSymbol,
-              outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+              outputTokenSymbol: getBridgedUsdcOrVariantSymbol(toChainId),
             },
           ];
         } else {
@@ -420,14 +425,14 @@ function processTokenRoutes(
         ];
       } else if (
         toConfig.tokens.find(
-          (token) => typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+          (token) => typeof token === "string" && isBridgedUsdcOrVariant(token)
         ) &&
-        hasBridgedUsdc(toChainId)
+        hasBridgedUsdcOrVariant(toChainId)
       ) {
         return [
           {
             inputTokenSymbol: tokenSymbol,
-            outputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+            outputTokenSymbol: getBridgedUsdcOrVariantSymbol(toChainId),
           },
         ];
       }
@@ -460,6 +465,15 @@ function processTokenRoutes(
       ];
     }
 
+    if (tokenSymbol === "WBNB" && toConfig.tokens.includes("BNB")) {
+      return [
+        {
+          inputTokenSymbol: "WBNB",
+          outputTokenSymbol: "BNB",
+        },
+      ];
+    }
+
     // Handle WETH Polygon & other non-eth chains
     if (
       tokenSymbol === "WETH" &&
@@ -468,6 +482,23 @@ function processTokenRoutes(
       fromConfig.tokens.includes("ETH")
     ) {
       return ["WETH", "ETH"];
+    }
+
+    // Handle USDT on BNB
+    if (tokenSymbol === "USDT" && toConfig.tokens.includes("USDT-BNB")) {
+      return [
+        {
+          inputTokenSymbol: "USDT",
+          outputTokenSymbol: "USDT-BNB",
+        },
+      ];
+    } else if (tokenSymbol === "USDT-BNB" && toConfig.tokens.includes("USDT")) {
+      return [
+        {
+          inputTokenSymbol: "USDT-BNB",
+          outputTokenSymbol: "USDT",
+        },
+      ];
     }
 
     const chainIds = typeof token === "string" ? [toChainId] : token.chainIds;
@@ -741,7 +772,11 @@ function getTokenBySymbol(
   }
 
   const effectiveSymbol = (
-    sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
+    isBridgedUsdcOrVariant(tokenSymbol)
+      ? "USDC"
+      : tokenSymbol === "USDT-BNB"
+        ? "USDT"
+        : tokenSymbol
   ) as keyof typeof TOKEN_SYMBOLS_MAP;
   const l1TokenAddress =
     TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
@@ -759,8 +794,8 @@ function getTokenBySymbol(
 }
 
 function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
-  const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
-  if (hasBridgedUsdc(toChainId)) {
+  const swapInputTokenSymbol = getBridgedUsdcOrVariantSymbol(fromChainId);
+  if (hasBridgedUsdcOrVariant(toChainId)) {
     return [
       {
         swapInputTokenSymbol,
@@ -770,7 +805,7 @@ function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
       {
         swapInputTokenSymbol,
         acrossInputTokenSymbol: "USDC",
-        acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+        acrossOutputTokenSymbol: getBridgedUsdcOrVariantSymbol(toChainId),
       },
     ];
   } else {
@@ -784,13 +819,15 @@ function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
   }
 }
 
-function getBridgedUsdcSymbol(chainId: number) {
+function getBridgedUsdcOrVariantSymbol(chainId: number) {
   switch (chainId) {
     case CHAIN_IDs.BASE:
     case CHAIN_IDs.BASE_SEPOLIA:
       return TOKEN_SYMBOLS_MAP.USDbC.symbol;
     case CHAIN_IDs.ZORA:
       return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    case CHAIN_IDs.BSC:
+      return TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol;
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
@@ -815,12 +852,16 @@ function checksumAddressesOfNestedMap(
   );
 }
 
-function hasBridgedUsdc(chainId: number) {
-  const bridgedUsdcSymbol = getBridgedUsdcSymbol(chainId);
+function hasBridgedUsdcOrVariant(chainId: number) {
+  const bridgedUsdcSymbol = getBridgedUsdcOrVariantSymbol(chainId);
   const token =
     TOKEN_SYMBOLS_MAP[bridgedUsdcSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
       .addresses[chainId];
   return !!token;
+}
+
+function isBridgedUsdcOrVariant(tokenSymbol: string): boolean {
+  return sdkUtils.isBridgedUsdc(tokenSymbol) || tokenSymbol === "USDC-BNB";
 }
 
 generateRoutes(Number(process.argv[2]));

@@ -15,18 +15,6 @@
     "fromChain": 232,
     "toChain": 1,
     "fromTokenAddress": "0x0000000000000000000000000000000000000000",
-    "toTokenAddress": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-    "fromTokenSymbol": "GHO",
-    "toTokenSymbol": "WGHO",
-    "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
-    "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
-    "type": "universal-swap",
-    "isNative": false
-  },
-  {
-    "fromChain": 232,
-    "toChain": 1,
-    "fromTokenAddress": "0x0000000000000000000000000000000000000000",
     "toTokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "fromTokenSymbol": "GHO",
     "toTokenSymbol": "GHO",

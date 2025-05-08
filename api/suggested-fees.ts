@@ -60,6 +60,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  allowUnmatchedDecimals: optional(boolStr()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -194,7 +195,10 @@ const handler = async (
       {
         contract: hubPool,
         functionName: "liquidityUtilizationPostRelay",
-        args: [l1Token.address, amount],
+        args: [
+          l1Token.address,
+          ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount),
+        ],
       },
       {
         contract: hubPool,
@@ -292,7 +296,7 @@ const handler = async (
         computedOriginChainId,
         destinationChainId,
         outputToken,
-        amount.sub(totalRelayFee),
+        outputAmount,
         amountInUsd,
         BigNumber.from(relayerFeeDetails.capitalFeePercent),
         amount.gte(maxDepositInstant)

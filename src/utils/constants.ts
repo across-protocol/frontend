@@ -98,6 +98,15 @@ export const tokenList = [
       displaySymbol = "LGHO";
     }
 
+    // Override for USDC-BNB and USDT-BNB until reflected in the constants
+    if (symbol === "USDC-BNB") {
+      name = "USD Coin (BNB)";
+      displaySymbol = "USDC";
+    } else if (symbol === "USDT-BNB") {
+      name = "Tether USD (BNB)";
+      displaySymbol = "USDT";
+    }
+
     return {
       ...tokenInfo,
       name,
@@ -298,21 +307,6 @@ export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
         ? "ARB"
         : "ACX";
   return getToken(symbol);
-};
-
-/**
- * Resolves a token by address. This is useful for tokens that have multiple addresses on different chains.
- * @param address An address of a token
- * @returns The token info for the token with the given address
- */
-export const getTokenByAddress = (address: string): TokenInfo => {
-  const token = Object.values(tokenTable).find(
-    (token) =>
-      Object.values(token?.addresses ?? {}).includes(address) ||
-      token?.mainnetAddress === address
-  );
-  assert(token, "No token found for address: " + address);
-  return getToken(token.symbol);
 };
 
 const RouteSS = superstruct.object({
