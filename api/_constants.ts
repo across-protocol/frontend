@@ -303,6 +303,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
 export const ENABLED_POOLS_UNDERLYING_TOKENS = [
+  TOKEN_SYMBOLS_MAP.VLR, // xxx relocate before merging to prod
   TOKEN_SYMBOLS_MAP.ETH,
   TOKEN_SYMBOLS_MAP.WETH,
   TOKEN_SYMBOLS_MAP.USDC,
