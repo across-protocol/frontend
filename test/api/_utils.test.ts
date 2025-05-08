@@ -171,6 +171,7 @@ describe("_utils", () => {
         "USDC-BNB",
         "USDT-BNB",
         "BNB",
+        "VLR",
         "WBNB",
       ];
       ENABLED_ROUTES.routes
