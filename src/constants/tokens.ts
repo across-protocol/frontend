@@ -1,3 +1,5 @@
+import { TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
+
 import ethLogo from "assets/token-logos/eth.svg";
 import maticLogo from "assets/token-logos/matic.svg";
 import usdcLogo from "assets/token-logos/usdc.svg";
@@ -22,7 +24,6 @@ import cakeLogo from "assets/token-logos/cake.svg";
 import bnbLogo from "assets/token-logos/bnb.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
-import { TOKEN_SYMBOLS_MAP } from "utils";
 
 export type TokenInfo = {
   name: string;
