@@ -31,7 +31,7 @@ const enabledSwapRoutes: {
       },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [CHAIN_IDs.MAINNET],
-        enabledOutputTokens: ["WGHO", "GHO", "USDC", "USDT", "DAI"],
+        enabledOutputTokens: ["GHO", "USDC", "USDT", "DAI"],
       },
     },
     [TOKEN_SYMBOLS_MAP.WGHO.symbol]: {
