@@ -156,10 +156,14 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       depositArgs.exclusiveRelayer !== constants.AddressZero;
     const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
       await getSpokePoolAndVerifier(selectedRoute);
+    const fillDeadline = transferQuote.quotedFees.fillDeadline;
     if (shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier) {
       tx = await sendSpokePoolVerifierDepositTx(
         signer,
-        depositArgs,
+        {
+          ...depositArgs,
+          fillDeadline,
+        },
         spokePool,
         spokePoolVerifier,
         onNetworkMismatch
@@ -169,9 +173,7 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         signer,
         {
           ...depositArgs,
-          inputTokenAddress: selectedRoute.fromTokenAddress,
-          outputTokenAddress: selectedRoute.toTokenAddress,
-          fillDeadline: transferQuote.quotedFees.fillDeadline,
+          fillDeadline,
         },
         spokePool,
         onNetworkMismatch
