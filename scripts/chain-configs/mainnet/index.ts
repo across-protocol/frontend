@@ -34,6 +34,7 @@ export default {
     "SNX",
     "POOL",
     "LSK",
+    "VLR",
     "WGHO",
   ],
   enableCCTP: false,
