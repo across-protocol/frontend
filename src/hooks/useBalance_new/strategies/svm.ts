@@ -4,9 +4,13 @@ import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { BalanceStrategy } from "./types";
-import { getConfig } from "utils";
+
+import { formatUnitsWithMaxFractions, getConfig } from "utils";
+import { ConvertDecimals } from "utils/convertdecimals";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
+
+import { Balance, BalanceStrategy } from "./types";
+import { zeroBalance } from "../utils";
 
 export class SVMBalanceStrategy implements BalanceStrategy {
   constructor(
@@ -21,20 +25,22 @@ export class SVMBalanceStrategy implements BalanceStrategy {
     chainId: number,
     tokenSymbol: string,
     account: string
-  ): Promise<BigNumber> {
+  ): Promise<Balance> {
     const config = getConfig();
     const tokenInfo = config.getTokenInfoBySymbolSafe(chainId, tokenSymbol);
 
     if (!tokenInfo || !tokenInfo.addresses?.[chainId]) {
-      return BigNumber.from(0);
+      return zeroBalance;
     }
+
+    let balance: BigNumber;
 
     if (tokenInfo.isNative) {
       // Get native SOL balance
-      const balance = await this.connection.provider.getBalance(
+      const solBalance = await this.connection.provider.getBalance(
         new PublicKey(account)
       );
-      return BigNumber.from(balance.toString());
+      balance = BigNumber.from(solBalance.toString());
     } else {
       // Get SPL token balance
       const tokenMint = new PublicKey(tokenInfo.addresses[chainId]);
@@ -52,11 +58,18 @@ export class SVMBalanceStrategy implements BalanceStrategy {
         // Get token account info
         const tokenAccountInfo =
           await this.connection.provider.getTokenAccountBalance(tokenAccount);
-        return BigNumber.from(tokenAccountInfo.value.amount);
+        balance = BigNumber.from(tokenAccountInfo.value.amount);
       } catch (error) {
         // If token account doesn't exist or other error, return 0 balance
-        return BigNumber.from(0);
+        balance = BigNumber.from(0);
       }
     }
+
+    const balanceDecimals = tokenInfo.decimals ?? 18;
+    return {
+      balance,
+      balanceComparable: ConvertDecimals(balanceDecimals, 18)(balance),
+      balanceFormatted: formatUnitsWithMaxFractions(balance, balanceDecimals),
+    };
   }
 }

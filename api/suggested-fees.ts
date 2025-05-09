@@ -28,6 +28,7 @@ import {
   OPT_IN_CHAINS,
   parseL1TokenConfigSafe,
   getL1TokenConfigCache,
+  ConvertDecimals,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -59,6 +60,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  allowUnmatchedDecimals: optional(boolStr()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -100,6 +102,7 @@ const handler = async (
       outputToken,
       destinationChainId,
       resolvedOriginChainId: computedOriginChainId,
+      allowUnmatchedDecimals,
     } = validateChainAndTokenParams(query);
 
     relayer = relayer
@@ -192,7 +195,10 @@ const handler = async (
       {
         contract: hubPool,
         functionName: "liquidityUtilizationPostRelay",
-        args: [l1Token.address, amount],
+        args: [
+          l1Token.address,
+          ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount),
+        ],
       },
       {
         contract: hubPool,
@@ -224,7 +230,8 @@ const handler = async (
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
         depositWithMessage ? recipient : undefined,
         depositWithMessage ? relayer : undefined,
-        depositWithMessage ? message : undefined
+        depositWithMessage ? message : undefined,
+        allowUnmatchedDecimals
       ),
       getFillDeadline(destinationChainId),
     ]);
@@ -279,12 +286,17 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
+    const outputAmount = ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(amount.sub(totalRelayFee));
+
     const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
       await selectExclusiveRelayer(
         computedOriginChainId,
         destinationChainId,
         outputToken,
-        amount.sub(totalRelayFee),
+        outputAmount,
         amountInUsd,
         BigNumber.from(relayerFeeDetails.capitalFeePercent),
         amount.gte(maxDepositInstant)
@@ -364,6 +376,19 @@ const handler = async (
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
       fillDeadline: fillDeadline.toString(),
+      outputAmount: outputAmount.toString(),
+      inputToken: {
+        address: inputToken.address,
+        symbol: inputToken.symbol,
+        decimals: inputToken.decimals,
+        chainId: computedOriginChainId,
+      },
+      outputToken: {
+        address: outputToken.address,
+        symbol: outputToken.symbol,
+        decimals: outputToken.decimals,
+        chainId: destinationChainId,
+      },
     };
 
     logger.info({

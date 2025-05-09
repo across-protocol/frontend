@@ -16,6 +16,7 @@ import {
   getOutputTokenSymbol,
   PriorityFilterKey,
   getInitialRoute,
+  getTokenDefaultsForRoute,
 } from "../utils";
 
 const initialRoute = getInitialRoute();
@@ -63,7 +64,7 @@ export function useSelectRoute() {
           selectedRoute.toTokenAddress
         ),
       };
-      const route =
+      const _route =
         findNextBestRoute(["inputTokenSymbol", "fromChain", "toChain"], {
           ...baseFilter,
           inputTokenSymbol: inputOrSwapTokenSymbol,
@@ -90,6 +91,7 @@ export function useSelectRoute() {
         }) ||
         initialRoute;
 
+      const route = getTokenDefaultsForRoute(_route);
       setSelectedRoute(route);
 
       addToAmpliQueue(() => {

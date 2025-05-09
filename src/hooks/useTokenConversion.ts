@@ -4,11 +4,14 @@ import { useCallback } from "react";
 import {
   fixedPointAdjustment,
   getToken,
-  getTokenByAddress,
   TOKEN_SYMBOLS_MAP,
   isDefined,
+  getConfig,
+  hubPoolChainId,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
+
+const config = getConfig();
 
 export function useTokenConversion(
   symbol: string,
@@ -33,10 +36,14 @@ export function useTokenConversion(
   const convertTokenToBaseCurrency = useCallback(
     (amount?: BigNumberish) => {
       const price = query.data?.price;
-      if (!isDefined(price) || !isDefined(amount)) {
+      const decimals =
+        token?.decimals ??
+        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+
+      if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
       }
-      const decimals = token?.decimals ?? getTokenByAddress(l1Token)?.decimals;
+
       const convertedAmount = ConvertDecimals(decimals, 18)(amount);
       return price.mul(convertedAmount).div(fixedPointAdjustment);
     },
@@ -46,10 +53,14 @@ export function useTokenConversion(
   const convertBaseCurrencyToToken = useCallback(
     (amount?: BigNumberish) => {
       const price = query.data?.price;
-      if (!isDefined(price) || !isDefined(amount)) {
+      const decimals =
+        token?.decimals ??
+        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+
+      if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
       }
-      const decimals = token?.decimals ?? getTokenByAddress(l1Token)?.decimals;
+
       const exchangeRate = convertTokenToBaseCurrency(
         ethers.utils.parseUnits("1", decimals)
       );

@@ -1,13 +1,13 @@
 import { useQuery, useQueries, UseQueryOptions } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
-import { BalanceStrategy } from "./strategies/types";
+import { Balance, BalanceStrategy } from "./strategies/types";
 import {
   getEcosystem,
   balanceQueryKey,
   TOKEN_SYMBOLS_MAP,
   getNativeTokenSymbol,
 } from "utils";
-
+import { zeroBalance } from "./utils";
 type StrategyPerEcosystem = {
   evm: BalanceStrategy;
   svm: BalanceStrategy;
@@ -16,30 +16,29 @@ type StrategyPerEcosystem = {
 type BalanceQueryKey = ReturnType<typeof balanceQueryKey>;
 
 type MultiBalanceQuery = UseQueryOptions<
-  BigNumber | undefined,
+  Balance | undefined,
   Error,
-  BigNumber | undefined,
+  Balance | undefined,
   BalanceQueryKey
 >;
 
 async function fetchBalance(
   queryKey: BalanceQueryKey,
   strategies: StrategyPerEcosystem
-) {
+): Promise<Balance> {
   const [, chainId, tokenSymbol, account] = queryKey;
 
   if (!chainId || !tokenSymbol) {
-    return BigNumber.from(0);
+    return zeroBalance;
   }
 
   const ecosystem = getEcosystem(chainId);
   const strategy = strategies[ecosystem];
 
   const accountToQuery = account ?? strategy.getAccount();
-  console.log("accountToQuery", queryKey, { accountToQuery });
 
   if (!accountToQuery) {
-    return BigNumber.from(0);
+    return zeroBalance;
   }
 
   return strategy.getBalance(chainId, tokenSymbol, accountToQuery);
@@ -53,7 +52,10 @@ export function createBalanceHook(strategies: StrategyPerEcosystem) {
   ) {
     const { data: balance, ...delegated } = useQuery({
       queryKey: balanceQueryKey(account, chainId, tokenSymbol, "balance"),
-      queryFn: ({ queryKey }) => fetchBalance(queryKey, strategies),
+      queryFn: async ({ queryKey }) => {
+        const { balance } = await fetchBalance(queryKey, strategies);
+        return balance;
+      },
       enabled: Boolean(chainId && tokenSymbol),
       refetchInterval: 10_000,
     });
@@ -122,7 +124,7 @@ export function createBalanceBySymbolPerChainHook(
             getNativeTokenSymbol(chainIdToQuery!) !==
               TOKEN_SYMBOLS_MAP.ETH.symbol
           ) {
-            return Promise.resolve(BigNumber.from(0));
+            return zeroBalance;
           }
           return fetchBalance(queryKey, strategies);
         },
@@ -132,12 +134,23 @@ export function createBalanceBySymbolPerChainHook(
     });
 
     return {
-      balances: result.reduce(
+      balancesPerChain: result.reduce(
         (acc, { data }, idx) => ({
           ...acc,
-          [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+          [chainIds[idx]]: {
+            balance: data?.balance ?? BigNumber.from(0),
+            balanceFormatted: data?.balanceFormatted ?? "0",
+            balanceComparable: data?.balanceComparable ?? BigNumber.from(0),
+          },
         }),
-        {} as Record<number, BigNumber>
+        {} as Record<
+          number,
+          {
+            balance: BigNumber;
+            balanceFormatted: string;
+            balanceComparable: BigNumber;
+          }
+        >
       ),
       isLoading: result.some((s) => s.isLoading),
     };

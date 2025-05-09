@@ -7,7 +7,6 @@ import {
   ChainInfo,
   Route,
   capitalizeFirstLetter,
-  formatUnitsWithMaxFractions,
   getChainInfo,
   getToken,
   shortenAddress,
@@ -42,15 +41,16 @@ export function ChainSelector({
   // Get supported chains and filter based on external projects
   const availableChains = filterAvailableChains(fromOrTo, selectedRoute);
 
-  const { isConnected } = useConnection();
-  const { balances } = useBalanceBySymbolPerChain({
+  const { account, isConnected } = useConnection();
+  const { balancesPerChain } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: availableChains.map((c) => c.chainId),
+    account,
   });
 
   const sortedChains = useMemo(
-    () => sortChains(availableChains, balances, isConnected, isFrom),
-    [availableChains, balances, isConnected, isFrom]
+    () => sortChains(availableChains, balancesPerChain, isConnected, isFrom),
+    [availableChains, balancesPerChain, isConnected, isFrom]
   );
 
   return (
@@ -61,7 +61,7 @@ export function ChainSelector({
         suffix:
           isConnected && isFrom ? (
             <Text size="lg" color="grey-400">
-              {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
+              {chain.balanceFormatted}
             </Text>
           ) : undefined,
       }))}
@@ -97,6 +97,10 @@ export function ChainSelector({
       }
       allowSelectDisabled={!isFrom}
       data-cy={`${fromOrTo}-chain-select`}
+      modalProps={{
+        height: 700,
+        bottomYOffset: 16,
+      }}
     />
   );
 }
@@ -154,21 +158,32 @@ function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
  */
 function sortChains(
   chains: ReturnType<typeof getSupportedChains>,
-  balances: Record<number, BigNumber>,
+  balances: Record<
+    number,
+    {
+      balance: BigNumber;
+      balanceFormatted: string;
+      balanceComparable: BigNumber;
+    }
+  >,
   isConnected: boolean,
   isFrom: boolean
 ) {
   return chains
     .map((c) => ({
       ...c,
-      balance: balances?.[c.chainId] ?? BigNumber.from(0),
-      disabled: !isConnected || !isFrom ? false : balances?.[c.chainId]?.eq(0),
+      balance: balances?.[c.chainId].balance ?? BigNumber.from(0),
+      balanceFormatted: balances?.[c.chainId].balanceFormatted ?? "0",
+      balanceComparable:
+        balances?.[c.chainId].balanceComparable ?? BigNumber.from(0),
+      disabled:
+        !isConnected || !isFrom ? false : balances?.[c.chainId]?.balance?.eq(0),
     }))
     .sort((a, b) => {
       if (!isConnected || !isFrom) return 0;
       if (a.balance === undefined) return 1;
       if (b.balance === undefined) return -1;
-      return a.balance.lt(b.balance) ? 1 : -1;
+      return a.balanceComparable.lt(b.balanceComparable) ? 1 : -1;
     });
 }
 

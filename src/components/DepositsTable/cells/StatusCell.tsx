@@ -19,11 +19,19 @@ type Props = {
 };
 
 export function StatusCell({ deposit, width }: Props) {
-  if (deposit.status === "pending") {
-    return <PendingStatusCell deposit={deposit} width={width} />;
+  if (deposit.status === "filled") {
+    return <FilledStatusCell deposit={deposit} width={width} />;
   }
 
-  return <FilledStatusCell deposit={deposit} width={width} />;
+  if (deposit.status === "refunded") {
+    return <RefundedStatusCell deposit={deposit} width={width} />;
+  }
+
+  if (deposit.status === "slowFillRequested") {
+    return <SlowFillRequestedStatusCell deposit={deposit} width={width} />;
+  }
+
+  return <PendingStatusCell deposit={deposit} width={width} />;
 }
 
 function FilledStatusCell({ deposit, width }: Props) {
@@ -101,6 +109,22 @@ function PendingStatusCell({ width, deposit }: Props) {
             <StyledInfoIcon />
           </Tooltip>
         ))}
+    </StyledPendingStatusCell>
+  );
+}
+
+function RefundedStatusCell({ width }: Props) {
+  return (
+    <StyledPendingStatusCell width={width}>
+      <Text color={"light-200"}>Refunded</Text>
+    </StyledPendingStatusCell>
+  );
+}
+
+function SlowFillRequestedStatusCell({ width }: Props) {
+  return (
+    <StyledPendingStatusCell width={width}>
+      <Text color={"light-200"}>Slow Fill Requested</Text>
     </StyledPendingStatusCell>
   );
 }

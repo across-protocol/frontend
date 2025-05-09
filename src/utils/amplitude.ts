@@ -344,22 +344,19 @@ export function generateTransferSubmitted(
   quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
   initialQuoteTime: number,
+  inputTokenAddress: string,
+  outputTokenAddress: string,
   externalProjectId?: string
 ): TransferSubmittedProperties {
-  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
-    quote.tokenSymbol,
-    Number(quote.fromChainId),
-    Number(quote.toChainId)
-  );
   return {
     ...quote,
-    fromTokenAddress: fromAddress,
+    fromTokenAddress: inputTokenAddress,
     referralProgramAddress: referralProgramAddress,
     timeFromFirstQuoteToTransferSubmittedInMilliseconds: String(
       Date.now() - initialQuoteTime
     ),
     transferTimestamp: String(Date.now()),
-    toTokenAddress: toAddress,
+    toTokenAddress: outputTokenAddress,
     externalProjectId: externalProjectNameToId(externalProjectId),
   };
 }
@@ -370,21 +367,18 @@ export function generateTransferSigned(
   referralProgramAddress: string,
   initialSubmissionTime: number,
   txHash: string,
+  inputTokenAddress: string,
+  outputTokenAddress: string,
   externalProjectId?: string
 ): TransferSignedProperties {
-  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
-    quote.tokenSymbol,
-    Number(quote.fromChainId),
-    Number(quote.toChainId)
-  );
   return {
     ...quote,
-    fromTokenAddress: fromAddress,
+    fromTokenAddress: inputTokenAddress,
     referralProgramAddress: referralProgramAddress,
     timeFromTransferSubmittedToTransferSignedInMilliseconds: String(
       Date.now() - initialSubmissionTime
     ),
-    toTokenAddress: toAddress,
+    toTokenAddress: outputTokenAddress,
     transactionHash: txHash,
     externalProjectId: externalProjectNameToId(externalProjectId),
   };
@@ -397,18 +391,15 @@ export function generateDepositConfirmed(
   initialSignTime: number,
   txHash: string,
   success: boolean,
-  txCompletedTimestamp: number
+  txCompletedTimestamp: number,
+  inputTokenAddress: string,
+  outputTokenAddress: string
 ): TransferDepositCompletedProperties {
-  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
-    quote.tokenSymbol,
-    Number(quote.fromChainId),
-    Number(quote.toChainId)
-  );
   return {
     ...quote,
-    fromTokenAddress: fromAddress,
+    fromTokenAddress: inputTokenAddress,
     referralProgramAddress: referralProgramAddress,
-    toTokenAddress: toAddress,
+    toTokenAddress: outputTokenAddress,
     transactionHash: txHash,
     succeeded: success,
     timeFromTransferSignedToTransferCompleteInMilliseconds: String(

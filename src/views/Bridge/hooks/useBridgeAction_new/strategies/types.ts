@@ -12,7 +12,9 @@ export type DepositArgs = {
   timestamp: BigNumber;
   referrer: string;
   relayerFeePct: BigNumber;
-  tokenAddress: string;
+  inputTokenAddress: string;
+  outputTokenAddress: string;
+  fillDeadline: number;
   isNative: boolean;
   toAddress: string;
   exclusiveRelayer: string;

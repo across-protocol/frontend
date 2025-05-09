@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, constants, providers, utils } from "ethers";
+import { constants, providers, utils } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -52,7 +52,7 @@ export type FromBridgePagePayload = {
   quote: GetBridgeFeesResult;
   quotedLimits: BridgeLimitInterface;
   quoteForAnalytics: TransferQuoteReceivedProperties;
-  depositArgs: DepositArgs;
+  depositArgs: NonNullable<ReturnType<typeof getDepositArgs>>;
 };
 
 export function useBridgeAction(
@@ -241,6 +241,8 @@ export function useBridgeAction(
             frozenQuoteForAnalytics,
             referrer,
             frozenInitialQuoteTime,
+            frozenRoute.fromTokenAddress,
+            frozenRoute.toTokenAddress,
             externalProjectIsHyperLiquid
               ? externalProjectNameToId(frozenRoute.externalProjectId)
               : undefined
@@ -294,27 +296,28 @@ export function useBridgeAction(
           frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
+        const depositArgs = {
+          ...frozenDepositArgs,
+          inputTokenAddress: frozenRoute.fromTokenAddress,
+          outputTokenAddress: frozenRoute.toTokenAddress,
+          fillDeadline: frozenFeeQuote.fillDeadline,
+          message: externalPayload,
+          toAddress: externalProjectIsHyperLiquid
+            ? acrossPlusMulticallHandler[frozenRoute.toChain]
+            : frozenDepositArgs.toAddress,
+        };
         tx =
           shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
-                frozenDepositArgs,
+                depositArgs,
                 spokePool,
                 spokePoolVerifier,
                 networkMismatchHandler
               )
             : await sendDepositV3Tx(
                 signer,
-                {
-                  ...frozenDepositArgs,
-                  inputTokenAddress: frozenRoute.fromTokenAddress,
-                  outputTokenAddress: frozenRoute.toTokenAddress,
-                  fillDeadline: frozenFeeQuote.fillDeadline,
-                  message: externalPayload,
-                  toAddress: externalProjectIsHyperLiquid
-                    ? acrossPlusMulticallHandler[frozenRoute.toChain]
-                    : frozenDepositArgs.toAddress,
-                },
+                depositArgs,
                 spokePool,
                 networkMismatchHandler
               );
@@ -327,6 +330,8 @@ export function useBridgeAction(
             referrer,
             timeSubmitted,
             tx.hash,
+            frozenRoute.fromTokenAddress,
+            frozenRoute.toTokenAddress,
             externalProjectIsHyperLiquid
               ? externalProjectNameToId(frozenRoute.externalProjectId)
               : undefined
@@ -391,28 +396,12 @@ export function useBridgeAction(
   };
 }
 
-type DepositArgs = {
-  initialAmount: BigNumber;
-  amount: BigNumber;
-  fromChain: number;
-  toChain: number;
-  timestamp: BigNumber;
-  referrer: string;
-  relayerFeePct: BigNumber;
-  tokenAddress: string;
-  isNative: boolean;
-  toAddress: string;
-  exclusiveRelayer: string;
-  exclusivityDeadline: number;
-  integratorId: string;
-  externalProjectId?: string;
-};
 function getDepositArgs(
   selectedRoute: SelectedRoute,
   usedTransferQuote: TransferQuote,
   referrer: string,
   integratorId: string
-): DepositArgs | undefined {
+) {
   const { amountToBridgeAfterSwap, initialAmount, quotedFees, recipient } =
     usedTransferQuote || {};
 
@@ -434,7 +423,9 @@ function getDepositArgs(
     timestamp: quotedFees.quoteTimestamp,
     referrer,
     relayerFeePct: quotedFees.totalRelayFee.pct,
-    tokenAddress: selectedRoute.fromTokenAddress,
+    inputTokenAddress: selectedRoute.fromTokenAddress,
+    outputTokenAddress: selectedRoute.toTokenAddress,
+    fillDeadline: quotedFees.fillDeadline,
     isNative: selectedRoute.isNative,
     toAddress: recipient,
     exclusiveRelayer: quotedFees.exclusiveRelayer,

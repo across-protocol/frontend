@@ -31,7 +31,7 @@ const enabledSwapRoutes: {
       },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [CHAIN_IDs.MAINNET],
-        enabledOutputTokens: ["WGHO", "GHO", "USDC", "USDT", "DAI"],
+        enabledOutputTokens: ["GHO", "USDC", "USDT", "DAI"],
       },
     },
     [TOKEN_SYMBOLS_MAP.WGHO.symbol]: {
@@ -41,23 +41,14 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-      [CHAIN_IDs.LENS]: {
-        enabledDestinationChains: [
-          CHAIN_IDs.MAINNET,
-          CHAIN_IDs.OPTIMISM,
-          CHAIN_IDs.POLYGON,
-          CHAIN_IDs.ARBITRUM,
-          CHAIN_IDs.BASE,
-        ],
-        enabledOutputTokens: ["USDC"],
-      },
       all: {
         disabledOriginChains: [
+          CHAIN_IDs.LINEA, // Not swappable on Uniswap V3
           CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
-          CHAIN_IDs.UNICHAIN,
+          CHAIN_IDs.UNICHAIN, // Not swappable on Uniswap V3
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["USDC", "GHO"],
+        enabledOutputTokens: ["GHO"],
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {

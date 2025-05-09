@@ -10,19 +10,60 @@ import {
   getChainInfo,
   TOKEN_SYMBOLS_MAP,
   getNativeTokenSymbol,
+  formatUnitsWithMaxFractions,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { ConvertDecimals } from "utils/convertdecimals";
 
 const config = getConfig();
 
-// Shared logic for querying by symbol using parameters which might not be available.
+const equivalentBalanceTokens = {
+  USDC: "USDC-BNB",
+  USDT: "USDT-BNB",
+  "USDC-BNB": "USDC",
+  "USDT-BNB": "USDT",
+};
+
+const zeroBalance = {
+  balance: BigNumber.from(0),
+  balanceFormatted: "0",
+  balanceComparable: BigNumber.from(0),
+};
+
+/**
+ * Returns the balance of the account by symbol.
+ * @param params - The parameters for the balance query.
+ * @param params.accountToQuery - The account to query the balance of.
+ * @param params.chainIdToQuery - The chain id to query the balance on.
+ * @param params.tokenSymbolToQuery - The token symbol to query the balance of.
+ * @param params.config - The config to use for the balance query.
+ * @param params.provider - The provider to use for the balance query.
+ * @returns The balance in different formats of the account by symbol.
+ * @example
+ * ```ts
+ * const {
+ *   // Denominated in the token's decimals.
+ *   balance,
+ *   // Human readable balance.
+ *   balanceFormatted,
+ *   // Denominated in 18 decimals. Can be used for comparisons for tokens with the same
+ *   // symbol but different decimals, e.g. USDC/USDT on BSC.
+ *   balanceComparable,
+ * } = getBalanceBySymbol(
+ *   // ...args
+ * );
+ */
 const getBalanceBySymbol = async (params: {
   accountToQuery?: string;
   chainIdToQuery?: ChainId;
   tokenSymbolToQuery?: string;
   config: ConfigClient;
   provider?: providers.JsonRpcProvider | providers.FallbackProvider;
-}) => {
+}): Promise<{
+  balance: BigNumber;
+  balanceFormatted: string;
+  balanceComparable: BigNumber;
+}> => {
   const {
     accountToQuery,
     chainIdToQuery,
@@ -31,25 +72,43 @@ const getBalanceBySymbol = async (params: {
     provider,
   } = params;
   if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
-    return BigNumber.from(0);
-  const tokenInfo = config.getTokenInfoBySymbolSafe(
+    return zeroBalance;
+  let tokenInfo = config.getTokenInfoBySymbolSafe(
     chainIdToQuery,
     tokenSymbolToQuery
   );
-  if (!tokenInfo || !tokenInfo.addresses?.[chainIdToQuery]) {
-    return undefined;
-  }
-  if (tokenInfo.isNative) {
-    return getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider);
-  } else {
-    return getBalance(
+  let addressToQuery = tokenInfo?.addresses?.[chainIdToQuery];
+  const equivalentBalanceTokenSymbol =
+    equivalentBalanceTokens[
+      tokenSymbolToQuery as keyof typeof equivalentBalanceTokens
+    ];
+  if (!addressToQuery && equivalentBalanceTokenSymbol) {
+    tokenInfo = config.getTokenInfoBySymbolSafe(
       chainIdToQuery,
-      accountToQuery,
-      tokenInfo.addresses?.[chainIdToQuery],
-      "latest",
-      provider
+      equivalentBalanceTokenSymbol
     );
+    addressToQuery = tokenInfo?.addresses?.[chainIdToQuery];
   }
+  if (!addressToQuery) {
+    return zeroBalance;
+  }
+  const balance = tokenInfo?.isNative
+    ? await getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider)
+    : await getBalance(
+        chainIdToQuery,
+        accountToQuery,
+        addressToQuery,
+        "latest",
+        provider
+      );
+  const balanceDecimals = tokenInfo?.decimals ?? 18;
+  return {
+    balance,
+    // We convert the balance to 18 decimals to be able to compare balances of tokens
+    // with the same symbol but different decimals, e.g. USDC/USDT on BSC.
+    balanceComparable: ConvertDecimals(balanceDecimals, 18)(balance),
+    balanceFormatted: formatUnitsWithMaxFractions(balance, balanceDecimals),
+  };
 };
 
 /**
@@ -71,7 +130,7 @@ export function useBalanceBySymbol(
   } = useConnection();
   account ??= connectedAccount;
 
-  const { data: balance, ...delegated } = useQuery({
+  const { data, ...delegated } = useQuery({
     queryKey: balanceQueryKey(account, chainId, tokenSymbol),
     queryFn: ({ queryKey }) => {
       const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
@@ -90,7 +149,8 @@ export function useBalanceBySymbol(
     refetchInterval: getChainInfo(chainId || 1).pollingInterval || 10_000,
   });
   return {
-    balance: balance as BigNumber | undefined,
+    balance: data?.balance ?? BigNumber.from(0),
+    balanceFormatted: data?.balanceFormatted ?? "0",
     ...delegated,
   };
 }
@@ -121,9 +181,9 @@ export function useBalancesBySymbols({
     queries: tokenSymbols.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         Error,
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         ReturnType<typeof balanceQueryKey>
       >
     >((tokenSymbolToQuery) => {
@@ -153,7 +213,8 @@ export function useBalancesBySymbols({
     }),
   });
   return {
-    balances: result.map((result) => result.data) as (BigNumber | undefined)[],
+    balances: result.map((result) => result.data?.balance),
+    balancesFormatted: result.map((result) => result.data?.balanceFormatted),
     isLoading: result.some((s) => s.isLoading),
   };
 }
@@ -171,9 +232,9 @@ export function useBalanceBySymbolPerChain({
     queries: chainIds.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         Error,
-        ReturnType<typeof getBalanceBySymbol>,
+        Awaited<ReturnType<typeof getBalanceBySymbol>>,
         ReturnType<typeof balanceQueryKey>
       >
     >((chainId) => ({
@@ -184,28 +245,37 @@ export function useBalanceBySymbolPerChain({
           tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
           getNativeTokenSymbol(chainIdToQuery!) !== TOKEN_SYMBOLS_MAP.ETH.symbol
         ) {
-          return Promise.resolve(BigNumber.from(0));
+          return zeroBalance;
         }
-        return (
-          (await getBalanceBySymbol({
-            config,
-            chainIdToQuery,
-            tokenSymbolToQuery,
-            accountToQuery,
-          })) ?? Promise.resolve(BigNumber.from(0))
-        );
+        return getBalanceBySymbol({
+          config,
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+        });
       },
       enabled: Boolean(account && tokenSymbol),
       refetchInterval: 10_000,
     })),
   });
   return {
-    balances: result.reduce(
+    balancesPerChain: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+        [chainIds[idx]]: {
+          balance: data?.balance ?? BigNumber.from(0),
+          balanceFormatted: data?.balanceFormatted ?? "0",
+          balanceComparable: data?.balanceComparable ?? BigNumber.from(0),
+        },
       }),
-      {} as Record<number, BigNumber>
+      {} as Record<
+        number,
+        {
+          balance: BigNumber;
+          balanceFormatted: string;
+          balanceComparable: BigNumber;
+        }
+      >
     ),
     isLoading: result.some((s) => s.isLoading),
   };

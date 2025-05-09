@@ -15,7 +15,7 @@ import { ampli, DepositNetworkMismatchProperties } from "ampli";
 import { FromBridgePagePayload } from "../useBridgeAction";
 import { TransferQuote } from "../useTransferQuote";
 import { SelectedRoute } from "../../utils";
-import { BridgeActionStrategy, DepositArgs } from "./strategies/types";
+import { BridgeActionStrategy } from "./strategies/types";
 
 export function createBridgeActionHook(strategy: BridgeActionStrategy) {
   return function useBridgeAction(
@@ -88,6 +88,8 @@ export function createBridgeActionHook(strategy: BridgeActionStrategy) {
               frozenQuoteForAnalytics,
               referrer,
               frozenInitialQuoteTime,
+              frozenRoute.fromTokenAddress,
+              frozenRoute.toTokenAddress,
               externalProjectId
             )
           );
@@ -113,6 +115,8 @@ export function createBridgeActionHook(strategy: BridgeActionStrategy) {
               referrer,
               timeSubmitted,
               txHash,
+              frozenRoute.fromTokenAddress,
+              frozenRoute.toTokenAddress,
               externalProjectId
             )
           );
@@ -182,7 +186,7 @@ function getDepositArgs(
   usedTransferQuote: TransferQuote,
   referrer: string,
   integratorId: string
-): DepositArgs | undefined {
+) {
   const { amountToBridgeAfterSwap, initialAmount, quotedFees, recipient } =
     usedTransferQuote || {};
 
@@ -204,7 +208,9 @@ function getDepositArgs(
     timestamp: quotedFees.quoteTimestamp,
     referrer,
     relayerFeePct: quotedFees.totalRelayFee.pct,
-    tokenAddress: selectedRoute.fromTokenAddress,
+    inputTokenAddress: selectedRoute.fromTokenAddress,
+    outputTokenAddress: selectedRoute.toTokenAddress,
+    fillDeadline: quotedFees.fillDeadline,
     isNative: selectedRoute.isNative,
     toAddress: recipient,
     exclusiveRelayer: quotedFees.exclusiveRelayer,
