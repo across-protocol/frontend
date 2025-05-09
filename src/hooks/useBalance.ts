@@ -13,6 +13,7 @@ import {
   formatUnitsWithMaxFractions,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { ConvertDecimals } from "utils/convertdecimals";
 
 const config = getConfig();
 
@@ -23,14 +24,46 @@ const equivalentBalanceTokens = {
   "USDT-BNB": "USDT",
 };
 
-// Shared logic for querying by symbol using parameters which might not be available.
+const zeroBalance = {
+  balance: BigNumber.from(0),
+  balanceFormatted: "0",
+  balanceComparable: BigNumber.from(0),
+};
+
+/**
+ * Returns the balance of the account by symbol.
+ * @param params - The parameters for the balance query.
+ * @param params.accountToQuery - The account to query the balance of.
+ * @param params.chainIdToQuery - The chain id to query the balance on.
+ * @param params.tokenSymbolToQuery - The token symbol to query the balance of.
+ * @param params.config - The config to use for the balance query.
+ * @param params.provider - The provider to use for the balance query.
+ * @returns The balance in different formats of the account by symbol.
+ * @example
+ * ```ts
+ * const {
+ *   // Denominated in the token's decimals.
+ *   balance,
+ *   // Human readable balance.
+ *   balanceFormatted,
+ *   // Denominated in 18 decimals. Can be used for comparisons for tokens with the same
+ *   // symbol but different decimals, e.g. USDC/USDT on BSC.
+ *   balanceComparable,
+ * } = getBalanceBySymbol(
+ *   // ...args
+ * );
+ */
 const getBalanceBySymbol = async (params: {
   accountToQuery?: string;
   chainIdToQuery?: ChainId;
   tokenSymbolToQuery?: string;
   config: ConfigClient;
   provider?: providers.JsonRpcProvider | providers.FallbackProvider;
-}): Promise<{ balance: BigNumber; balanceFormatted: string }> => {
+}): Promise<{
+  balance: BigNumber;
+  balanceFormatted: string;
+  balanceComparable: BigNumber;
+}> => {
   const {
     accountToQuery,
     chainIdToQuery,
@@ -39,7 +72,7 @@ const getBalanceBySymbol = async (params: {
     provider,
   } = params;
   if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
-    return { balance: BigNumber.from(0), balanceFormatted: "0" };
+    return zeroBalance;
   let tokenInfo = config.getTokenInfoBySymbolSafe(
     chainIdToQuery,
     tokenSymbolToQuery
@@ -57,7 +90,7 @@ const getBalanceBySymbol = async (params: {
     addressToQuery = tokenInfo?.addresses?.[chainIdToQuery];
   }
   if (!addressToQuery) {
-    return { balance: BigNumber.from(0), balanceFormatted: "0" };
+    return zeroBalance;
   }
   const balance = tokenInfo?.isNative
     ? await getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider)
@@ -68,12 +101,13 @@ const getBalanceBySymbol = async (params: {
         "latest",
         provider
       );
+  const balanceDecimals = tokenInfo?.decimals ?? 18;
   return {
     balance,
-    balanceFormatted: formatUnitsWithMaxFractions(
-      balance,
-      tokenInfo?.decimals ?? 18
-    ),
+    // We convert the balance to 18 decimals to be able to compare balances of tokens
+    // with the same symbol but different decimals, e.g. USDC/USDT on BSC.
+    balanceComparable: ConvertDecimals(balanceDecimals, 18)(balance),
+    balanceFormatted: formatUnitsWithMaxFractions(balance, balanceDecimals),
   };
 };
 
@@ -211,42 +245,37 @@ export function useBalanceBySymbolPerChain({
           tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
           getNativeTokenSymbol(chainIdToQuery!) !== TOKEN_SYMBOLS_MAP.ETH.symbol
         ) {
-          return Promise.resolve({
-            balance: BigNumber.from(0),
-            balanceFormatted: "0",
-          });
+          return zeroBalance;
         }
-        return (
-          (await getBalanceBySymbol({
-            config,
-            chainIdToQuery,
-            tokenSymbolToQuery,
-            accountToQuery,
-          })) ??
-          Promise.resolve({
-            balance: BigNumber.from(0),
-            balanceFormatted: "0",
-          })
-        );
+        return getBalanceBySymbol({
+          config,
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+        });
       },
       enabled: Boolean(account && tokenSymbol),
       refetchInterval: 10_000,
     })),
   });
   return {
-    balances: result.reduce(
+    balancesPerChain: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainIds[idx]]: data?.balance ?? BigNumber.from(0),
+        [chainIds[idx]]: {
+          balance: data?.balance ?? BigNumber.from(0),
+          balanceFormatted: data?.balanceFormatted ?? "0",
+          balanceComparable: data?.balanceComparable ?? BigNumber.from(0),
+        },
       }),
-      {} as Record<number, BigNumber>
-    ),
-    balancesFormatted: result.reduce(
-      (acc, { data }, idx) => ({
-        ...acc,
-        [chainIds[idx]]: data?.balanceFormatted ?? "0",
-      }),
-      {} as Record<number, string>
+      {} as Record<
+        number,
+        {
+          balance: BigNumber;
+          balanceFormatted: string;
+          balanceComparable: BigNumber;
+        }
+      >
     ),
     isLoading: result.some((s) => s.isLoading),
   };

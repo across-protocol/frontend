@@ -3,7 +3,6 @@ import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
-export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   bnUint256Max,
   bnUint32Max,
@@ -20,6 +19,8 @@ export {
   toBytes32,
   compareAddressesSimple,
   toAddress,
+  isContractDeployedToAddress,
+  toAddressType,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   getNativeTokenSymbol,

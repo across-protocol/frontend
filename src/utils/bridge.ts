@@ -213,7 +213,6 @@ export type AcrossDepositV3Args = {
   toChain: ChainId;
   toAddress: string;
   amount: ethers.BigNumber;
-  tokenAddress: string;
   relayerFeePct: ethers.BigNumber;
   timestamp: ethers.BigNumber;
   message?: string;

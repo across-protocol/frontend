@@ -1,3 +1,5 @@
+import { ChainId } from "./constants";
+
 /**
  * Resolves the current vercel endpoint dynamically
  * @returns A valid URL of the current endpoint in vercel
@@ -15,3 +17,9 @@ export const resolveWebsiteUrl = () => {
       return `http://localhost:3000`;
   }
 };
+
+export function getEcosystem(chainId: ChainId) {
+  return [ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(chainId)
+    ? "svm"
+    : "evm";
+}

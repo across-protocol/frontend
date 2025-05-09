@@ -7,10 +7,6 @@ import {
   defaultRefetchInterval,
   indexerApiBaseUrl,
 } from "utils";
-import {
-  getLocalDepositEntries,
-  removeLocalDeposits,
-} from "../utils/local-deposits";
 import { DepositStatusFilter } from "views/Transactions/types";
 
 export type DepositStatus =

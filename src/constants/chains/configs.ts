@@ -116,15 +116,20 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import solanaDevnetLogo from "assets/chain-logos/solana-devnet.svg";
+import solanaDevnetGrayscaleLogo from "assets/chain-logos/solana-devnet-grayscale.svg";
+import { ReactComponent as solanaDevnetLogoSvg } from "assets/chain-logos/solana-devnet.svg";
+import { ReactComponent as solanaDevnetGrayscaleLogoSvg } from "assets/chain-logos/solana-devnet-grayscale.svg";
+
 import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
-import katanaTataraLogo from "assets/chain-logos/tatara.svg";
-import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
-import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
-import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
+import tataraLogo from "assets/chain-logos/tatara.svg";
+import tataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as tataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as tataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
 
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
@@ -1073,6 +1078,47 @@ export const sepolia_viem = defineChain({
   },
 });
 
+export const solanaDevnet = {
+  name: "Solana Devnet",
+  fullName: "Solana devnet",
+  chainId: 133268194659241,
+  logoURI: solanaDevnetLogo,
+  grayscaleLogoURI: solanaDevnetGrayscaleLogo,
+  logoSvg: solanaDevnetLogoSvg,
+  grayscaleLogoSvg: solanaDevnetGrayscaleLogoSvg,
+  rpcUrl: "https://api.devnet.solana.com",
+  explorerUrl: "https://explorer.solana.com/?cluster=devnet",
+  constructExplorerLink: (txHash: string) =>
+    `${solanaDevnet.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "SOL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_133268194659241_CUSTOM_RPC_URL,
+  pollingInterval: 500,
+};
+
+export const solanaDevnet_viem = defineChain({
+  id: solanaDevnet.chainId,
+  name: solanaDevnet.name,
+  nativeCurrency: {
+    name: solanaDevnet.nativeCurrencySymbol,
+    symbol: solanaDevnet.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        solanaDevnet.rpcUrl,
+        solanaDevnet.customRpcUrl ? solanaDevnet.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: solanaDevnet.name + " Explorer",
+      url: solanaDevnet.explorerUrl,
+    },
+  },
+});
+
 export const soneium = {
   name: "Soneium",
   fullName: "Soneium",
@@ -1114,43 +1160,43 @@ export const soneium_viem = defineChain({
   },
 });
 
-export const katanaTatara = {
+export const tatara = {
   name: "Tatara",
   fullName: "Tatara",
   chainId: 129399,
-  logoURI: katanaTataraLogo,
-  grayscaleLogoURI: katanaTataraGrayscaleLogo,
-  logoSvg: katanaTataraLogoSvg,
-  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  logoURI: tataraLogo,
+  grayscaleLogoURI: tataraGrayscaleLogo,
+  logoSvg: tataraLogoSvg,
+  grayscaleLogoSvg: tataraGrayscaleLogoSvg,
   rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
   explorerUrl: "https://explorer.tatara.katana.network",
   constructExplorerLink: (txHash: string) =>
-    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+    `${tatara.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
-export const katanaTatara_viem = defineChain({
-  id: katanaTatara.chainId,
-  name: katanaTatara.name,
+export const tatara_viem = defineChain({
+  id: tatara.chainId,
+  name: tatara.name,
   nativeCurrency: {
-    name: katanaTatara.nativeCurrencySymbol,
-    symbol: katanaTatara.nativeCurrencySymbol,
+    name: tatara.nativeCurrencySymbol,
+    symbol: tatara.nativeCurrencySymbol,
     decimals: 18,
   },
   rpcUrls: {
     default: {
       http: [
-        katanaTatara.rpcUrl,
-        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+        tatara.rpcUrl,
+        tatara.customRpcUrl ? tatara.customRpcUrl : [],
       ].flat(),
     },
   },
   blockExplorers: {
     default: {
-      name: katanaTatara.name + " Explorer",
-      url: katanaTatara.explorerUrl,
+      name: tatara.name + " Explorer",
+      url: tatara.explorerUrl,
     },
   },
 });
@@ -1393,8 +1439,9 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  solanaDevnet,
   soneium,
-  katanaTatara,
+  tatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1432,8 +1479,9 @@ export const chains_viem = [
   redstone_viem,
   scroll_viem,
   sepolia_viem,
+  solanaDevnet_viem,
   soneium_viem,
-  katanaTatara_viem,
+  tatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,
