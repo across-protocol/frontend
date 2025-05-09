@@ -6,6 +6,7 @@ import Breadcrumb from "./components/Breadcrumb";
 import BridgeForm from "./components/BridgeForm";
 import ChangeAccountModal from "./components/ChangeAccountModal";
 import { useBridge } from "./hooks/useBridge";
+import { getEcosystem } from "utils";
 
 const Bridge = () => {
   const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
@@ -30,8 +31,10 @@ const Bridge = () => {
     estimatedTimeString,
     swapQuote,
     universalSwapQuote,
-    toAccount,
-    setCustomToAddress,
+    toAccountEVM,
+    toAccountSVM,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
     handleChangeAmountInput,
     handleClickMaxBalance,
     handleSelectInputToken,
@@ -41,16 +44,20 @@ const Bridge = () => {
     handleSetNewSlippage,
     isQuoteLoading,
   } = useBridge();
+
+  const destinationChainEcosystem = getEcosystem(selectedRoute.toChain);
+
   return (
     <>
-      {toAccount && (
-        <ChangeAccountModal
-          displayModal={displayChangeAccount}
-          displayModalCloseHandler={() => setDisplayChangeAccount(false)}
-          currentAccount={toAccount?.address}
-          changeAccountHandler={setCustomToAddress}
-        />
-      )}
+      <ChangeAccountModal
+        displayModal={displayChangeAccount}
+        onCloseModal={() => setDisplayChangeAccount(false)}
+        currentAccountEVM={toAccountEVM?.address}
+        currentAccountSVM={toAccountSVM?.address}
+        onChangeAccountEVM={handleChangeToAddressEVM}
+        onChangeAccountSVM={handleChangeToAddressSVM}
+        destinationChainEcosystem={destinationChainEcosystem}
+      />
       <LayoutV2 maxWidth={600}>
         <Wrapper>
           <Breadcrumb />
@@ -59,7 +66,8 @@ const Bridge = () => {
             parsedAmountInput={parsedAmountInput}
             amountInput={userAmountInput}
             swapSlippage={swapSlippage}
-            toAccount={toAccount}
+            toAccountEVM={toAccountEVM}
+            toAccountSVM={toAccountSVM}
             onChangeAmountInput={handleChangeAmountInput}
             onClickMaxBalance={handleClickMaxBalance}
             onSelectInputToken={handleSelectInputToken}

@@ -12,11 +12,12 @@ import {
 import { address, getU64Encoder } from "@solana/kit";
 
 import { SvmSpokeClient } from "utils/codama";
+import { ConvertDecimals } from "utils/convertdecimals";
 import { fixedPointAdjustment, getConfig, toAddressType } from "utils";
-import { AbstractBridgeActionStrategy } from "./abstract";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 
+import { AbstractBridgeActionStrategy } from "./abstract";
 import { ApproveTokensParams, DepositActionParams } from "./types";
 
 const u64Encoder = getU64Encoder();
@@ -68,6 +69,18 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       _message = await this.signHyperliquidMessage(params);
     }
 
+    const inputToken = config.getTokenInfoByAddressSafe(
+      selectedRoute.fromChain,
+      selectedRoute.fromTokenAddress
+    );
+    const outputToken = config.getTokenInfoByAddressSafe(
+      selectedRoute.toChain,
+      selectedRoute.toTokenAddress
+    );
+    if (!inputToken || !outputToken) {
+      throw new Error("Invalid input or output token");
+    }
+
     const _inputAmount = depositArgs.amount;
     const _outputAmount = _inputAmount.sub(
       _inputAmount
@@ -75,7 +88,12 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         .div(fixedPointAdjustment)
     );
     const inputAmount = BigInt(_inputAmount.toString());
-    const outputAmount = BigInt(_outputAmount.toString());
+    const outputAmount = BigInt(
+      ConvertDecimals(
+        inputToken.decimals,
+        outputToken.decimals
+      )(_outputAmount.toString()).toString()
+    );
 
     const _recipient = toAddressType(
       depositArgs.toAddress,
@@ -86,12 +104,12 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       selectedRoute.fromTokenAddress,
       selectedRoute.fromChain
     );
-    const inputToken = new PublicKey(_inputToken.toBase58());
+    const inputTokenAddress = new PublicKey(_inputToken.toBase58());
     const _outputToken = toAddressType(
       selectedRoute.toTokenAddress,
       selectedRoute.toChain
     );
-    const outputToken = new PublicKey(_outputToken.toBase58());
+    const outputTokenAddress = new PublicKey(_outputToken.toBase58());
     const _exclusiveRelayer = toAddressType(
       transferQuote.quotedFees.exclusiveRelayer,
       selectedRoute.fromChain
@@ -109,12 +127,12 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     const statePda = this._getStatePDA(originChainId);
     const routePda = this._getRoutePDA(
       originChainId,
-      inputToken,
+      inputTokenAddress,
       destinationChainId
     );
     const eventAuthorityPda = this._getEventAuthorityPDA(originChainId);
     const depositorTokenAccount = getAssociatedTokenAddressSync(
-      inputToken,
+      inputTokenAddress,
       this.signerPublicKey,
       true,
       TOKEN_PROGRAM_ID,
@@ -122,7 +140,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     );
     // Find ATA for the input token to be stored by state (vault). This was created when the route was enabled.
     const vault = getAssociatedTokenAddressSync(
-      inputToken,
+      inputTokenAddress,
       statePda,
       true,
       TOKEN_PROGRAM_ID,
@@ -136,8 +154,8 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     const depositInstructionData = depositInstructionDataEncoder.encode({
       depositor: address(this.signerPublicKey.toString()),
       recipient: address(recipient.toString()),
-      inputToken: address(inputToken.toString()),
-      outputToken: address(outputToken.toString()),
+      inputToken: address(inputTokenAddress.toString()),
+      outputToken: address(outputTokenAddress.toString()),
       inputAmount: inputAmount,
       outputAmount: outputAmount,
       destinationChainId,
@@ -156,7 +174,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         { pubkey: routePda, isSigner: false, isWritable: false },
         { pubkey: depositorTokenAccount, isSigner: false, isWritable: false },
         { pubkey: vault, isSigner: false, isWritable: true },
-        { pubkey: inputToken, isSigner: false, isWritable: false },
+        { pubkey: inputTokenAddress, isSigner: false, isWritable: false },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
         { pubkey: eventAuthorityPda, isSigner: false, isWritable: false },
         {
