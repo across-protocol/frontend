@@ -30,7 +30,7 @@ export class EVMBalanceStrategy implements BalanceStrategy {
   async getBalance(
     chainId: number,
     tokenSymbol: string,
-    account: string
+    account = this.getAccount()
   ): Promise<Balance> {
     const config = getConfig();
     let tokenInfo = config.getTokenInfoBySymbolSafe(chainId, tokenSymbol);
@@ -39,7 +39,7 @@ export class EVMBalanceStrategy implements BalanceStrategy {
         ? this.connection.provider
         : getProvider(chainId);
 
-    if (!tokenInfo || !tokenInfo.addresses?.[chainId]) {
+    if (!tokenInfo || !tokenInfo.addresses?.[chainId] || !account) {
       return zeroBalance;
     }
 

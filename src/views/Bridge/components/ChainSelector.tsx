@@ -12,7 +12,8 @@ import {
   shortenAddress,
 } from "utils";
 
-import { useConnection } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useBalanceBySymbolPerChain } from "hooks/useBalance_new";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
@@ -41,16 +42,23 @@ export function ChainSelector({
   // Get supported chains and filter based on external projects
   const availableChains = filterAvailableChains(fromOrTo, selectedRoute);
 
-  const { account, isConnected } = useConnection();
+  const { isConnected: isConnectedEVM } = useConnectionEVM();
+  const { isConnected: isConnectedSVM } = useConnectionSVM();
+
   const { balancesPerChain } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: availableChains.map((c) => c.chainId),
-    account,
   });
 
   const sortedChains = useMemo(
-    () => sortChains(availableChains, balancesPerChain, isConnected, isFrom),
-    [availableChains, balancesPerChain, isConnected, isFrom]
+    () =>
+      sortChains(
+        availableChains,
+        balancesPerChain,
+        isConnectedEVM || isConnectedSVM,
+        isFrom
+      ),
+    [availableChains, balancesPerChain, isConnectedEVM, isConnectedSVM, isFrom]
   );
 
   return (
@@ -59,7 +67,7 @@ export function ChainSelector({
         value: { chainId: chain.chainId, externalProjectId: chain.projectId },
         element: <ChainInfoElement chain={chain} />,
         suffix:
-          isConnected && isFrom ? (
+          (isConnectedEVM || isConnectedSVM) && isFrom ? (
             <Text size="lg" color="grey-400">
               {chain.balanceFormatted}
             </Text>

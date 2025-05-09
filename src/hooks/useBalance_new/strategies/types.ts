@@ -11,6 +11,6 @@ export interface BalanceStrategy {
   getBalance(
     chainId: number,
     tokenSymbol: string,
-    account: string
+    account?: string
   ): Promise<Balance>;
 }
