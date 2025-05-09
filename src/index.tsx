@@ -10,13 +10,13 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import App from "./App";
-import "./onboard-override.css";
 import { ErrorProvider } from "hooks";
 import { ToastProvider } from "components/Toast/useToast";
-import { OnboardProvider } from "hooks/useOnboard";
 import { AmpliProvider } from "hooks/useAmplitude";
+import { SidebarProvider } from "providers/SidebarProvider";
 import { enableReactQueryDevTools } from "utils";
 import Sentry from "utils/sentry";
+import { WalletProvider } from "providers/wallet/WalletProvider";
 
 const client = new QueryClient({
   queryCache: new QueryCache({
@@ -48,18 +48,20 @@ root.render(
   <React.StrictMode>
     <GlobalStyles />
     <ErrorBoundary>
-      <QueryClientProvider client={client}>
-        <OnboardProvider>
+      <WalletProvider>
+        <QueryClientProvider client={client}>
           <AmpliProvider>
             <ErrorProvider>
               <ToastProvider>
-                <App />
+                <SidebarProvider>
+                  <App />
+                </SidebarProvider>
               </ToastProvider>
             </ErrorProvider>
             {enableReactQueryDevTools && <ReactQueryDevtools />}
           </AmpliProvider>
-        </OnboardProvider>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </WalletProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );
