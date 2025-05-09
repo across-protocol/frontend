@@ -24,7 +24,7 @@ const equivalentBalanceTokens = {
   "USDT-BNB": "USDT",
 };
 
-const zeroBalance = {
+export const zeroBalance = {
   balance: BigNumber.from(0),
   balanceFormatted: "0",
   balanceComparable: BigNumber.from(0),
@@ -262,11 +262,7 @@ export function useBalanceBySymbolPerChain({
     balancesPerChain: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainIds[idx]]: {
-          balance: data?.balance ?? BigNumber.from(0),
-          balanceFormatted: data?.balanceFormatted ?? "0",
-          balanceComparable: data?.balanceComparable ?? BigNumber.from(0),
-        },
+        [chainIds[idx]]: data ?? zeroBalance,
       }),
       {} as Record<
         number,
