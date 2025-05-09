@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber, constants, ethers, utils } from "ethers";
 
-import { useBalanceBySymbol, useConnection } from "hooks";
+import { useConnection } from "hooks";
+import { useBalance } from "hooks/useBalance_new";
 import {
   max,
   getProvider,
@@ -18,10 +19,7 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
 
   const { account, signer } = useConnection();
 
-  const { balance } = useBalanceBySymbol(
-    balanceTokenSymbol,
-    selectedRoute.fromChain
-  );
+  const { balance } = useBalance(balanceTokenSymbol, selectedRoute.fromChain);
 
   return useQuery({
     queryKey: [
