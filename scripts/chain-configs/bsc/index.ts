@@ -1,16 +1,15 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
-
 import { ChainConfig } from "../types";
 
-const chainId = CHAIN_IDs.MAINNET;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
+
+const chainId = CHAIN_IDs.BSC;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  name: "Ethereum",
-  fullName: "Ethereum Mainnet",
+  fullName: "BNB Smart Chain",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -18,26 +17,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  blockTimeSeconds: 12,
-  publicRpcUrl: "https://mainnet.gateway.tenderly.co",
-  tokens: [
-    "WETH",
-    "ETH",
-    "USDC",
-    "WBTC",
-    "UMA",
-    "DAI",
-    "BAL",
-    "ACX",
-    "USDT",
-    "WLD",
-    "SNX",
-    "POOL",
-    "LSK",
-    "WGHO",
-    "CAKE",
-    "BNB",
-  ],
+  publicRpcUrl: chainInfoBase.publicRPC,
+  blockTimeSeconds: 3,
+  tokens: ["USDC-BNB", "USDT-BNB", "BNB", "WBNB", "CAKE", "WETH"],
   enableCCTP: false,
-  swapTokens: [],
 } as ChainConfig;
