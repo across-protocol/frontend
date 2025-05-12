@@ -8,6 +8,8 @@ import {
 import { EVMBalanceStrategy } from "./strategies/evm";
 import { SVMBalanceStrategy } from "./strategies/svm";
 
+export { zeroBalance } from "./utils";
+
 function useBalanceStrategies() {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
