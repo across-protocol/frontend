@@ -36,7 +36,6 @@ export default {
     "LSK",
     "WGHO",
     "CAKE",
-    "BNB",
   ],
   enableCCTP: false,
   swapTokens: [],

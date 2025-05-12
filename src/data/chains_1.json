@@ -112,13 +112,6 @@
         "name": "PancakeSwap Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
-      },
-      {
-        "address": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-        "symbol": "BNB",
-        "name": "BNB",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/bnb.svg"
       }
     ],
     "outputTokens": [
@@ -219,13 +212,6 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
-      },
-      {
-        "address": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-        "symbol": "BNB",
-        "name": "BNB",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/bnb.svg"
       },
       {
         "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
@@ -1817,20 +1803,6 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       },
       {
-        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-        "symbol": "BNB",
-        "name": "BNB",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/bnb.svg"
-      },
-      {
-        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-        "symbol": "WBNB",
-        "name": "Wrapped BNB",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbnb.svg"
-      },
-      {
         "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
         "symbol": "CAKE",
         "name": "PancakeSwap Token",
@@ -1880,13 +1852,6 @@
         "name": "PancakeSwap Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
-      },
-      {
-        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-        "symbol": "BNB",
-        "name": "BNB",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/bnb.svg"
       }
     ]
   }

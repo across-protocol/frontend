@@ -1205,17 +1205,6 @@
     },
     {
       "fromChain": 1,
-      "toChain": 56,
-      "fromTokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-      "toTokenAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
-      "fromTokenSymbol": "BNB",
-      "toTokenSymbol": "BNB",
-      "isNative": false,
-      "l1TokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
-    },
-    {
-      "fromChain": 1,
       "toChain": 42161,
       "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -13742,28 +13731,6 @@
       "toTokenSymbol": "USDT",
       "isNative": false,
       "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-    },
-    {
-      "fromChain": 56,
-      "toChain": 1,
-      "fromTokenAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-      "toTokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
-      "fromTokenSymbol": "BNB",
-      "toTokenSymbol": "BNB",
-      "isNative": true,
-      "l1TokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
-    },
-    {
-      "fromChain": 56,
-      "toChain": 1,
-      "fromTokenAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-      "toTokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
-      "fromTokenSymbol": "WBNB",
-      "toTokenSymbol": "BNB",
-      "isNative": false,
-      "l1TokenAddress": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
     },
     {
       "fromChain": 56,
