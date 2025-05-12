@@ -12,7 +12,7 @@ import {
   shortenAddress,
 } from "utils";
 
-import { useBalanceBySymbolPerChain, useConnection } from "hooks";
+import { useBalanceBySymbolPerChain, useConnection, zeroBalance } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 import { getSupportedChains } from "../utils";
@@ -171,10 +171,12 @@ function sortChains(
   return chains
     .map((c) => ({
       ...c,
-      balance: balances?.[c.chainId].balance ?? BigNumber.from(0),
-      balanceFormatted: balances?.[c.chainId].balanceFormatted ?? "0",
+      balance: balances?.[c.chainId].balance ?? zeroBalance.balance,
+      balanceFormatted:
+        balances?.[c.chainId].balanceFormatted ?? zeroBalance.balanceFormatted,
       balanceComparable:
-        balances?.[c.chainId].balanceComparable ?? BigNumber.from(0),
+        balances?.[c.chainId].balanceComparable ??
+        zeroBalance.balanceComparable,
       disabled:
         !isConnected || !isFrom ? false : balances?.[c.chainId]?.balance?.eq(0),
     }))
