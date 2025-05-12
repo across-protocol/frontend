@@ -141,7 +141,6 @@ export type IndexerDeposit = {
   swapTokenAmount: string;
   relayer: string;
   fillBlockTimestamp: string;
-  fillTransactionHash: string;
   fillTx: string;
   speedups: any[];
 };
