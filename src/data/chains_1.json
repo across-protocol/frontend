@@ -1155,6 +1155,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       },
       {
+        "address": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+        "symbol": "USDC.e",
+        "name": "USD Coin (bridged)",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
         "address": "0x05D032ac25d322df992303dCa074EE7392C117b9",
         "symbol": "USDT",
         "name": "Tether USD",
@@ -1190,6 +1197,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+        "symbol": "USDC.e",
+        "name": "USD Coin (bridged)",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       },
       {
         "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",
