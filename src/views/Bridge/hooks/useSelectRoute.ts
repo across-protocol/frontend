@@ -112,13 +112,30 @@ export function useSelectRoute() {
       const route =
         findEnabledRoute({
           ...baseFilter,
-          outputTokenSymbol,
-          inputTokenSymbol: selectedRoute.fromTokenSymbol,
+          inputTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : selectedRoute.fromTokenSymbol,
         }) ||
         findEnabledRoute({
           ...baseFilter,
-          outputTokenSymbol,
+          inputTokenSymbol: selectedRoute.fromTokenSymbol,
+          swapTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : undefined,
+        }) ||
+        findEnabledRoute({
+          ...baseFilter,
           swapTokenSymbol: selectedRoute.fromTokenSymbol,
+        }) ||
+        findNextBestRoute(["outputTokenSymbol", "fromChain", "toChain"], {
+          ...baseFilter,
+          inputTokenSymbol: selectedRoute.fromTokenSymbol,
+          swapTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : undefined,
         }) ||
         initialRoute;
 
