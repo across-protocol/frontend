@@ -51,6 +51,26 @@ const enabledSwapRoutes: {
         enabledOutputTokens: ["GHO"],
       },
     },
+    [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
+      [CHAIN_IDs.ARBITRUM]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+      [CHAIN_IDs.OPTIMISM]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+      [CHAIN_IDs.POLYGON]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDbC"].symbol]: {
+      [CHAIN_IDs.BASE]: {
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
