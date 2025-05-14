@@ -17,6 +17,7 @@ import {
   PriorityFilterKey,
   getInitialRoute,
   getTokenDefaultsForRoute,
+  findEnabledRoute,
 } from "../utils";
 
 const initialRoute = getInitialRoute();
@@ -109,17 +110,17 @@ export function useSelectRoute() {
         outputTokenSymbol,
       };
       const route =
-        findNextBestRoute(["outputTokenSymbol"], {
+        findEnabledRoute({
           ...baseFilter,
           outputTokenSymbol,
           inputTokenSymbol: selectedRoute.fromTokenSymbol,
-          swapTokenSymbol:
-            selectedRoute.type === "swap"
-              ? selectedRoute.swapTokenSymbol
-              : selectedRoute.type === "universal-swap"
-                ? selectedRoute.fromTokenSymbol
-                : undefined,
-        }) || initialRoute;
+        }) ||
+        findEnabledRoute({
+          ...baseFilter,
+          outputTokenSymbol,
+          swapTokenSymbol: selectedRoute.fromTokenSymbol,
+        }) ||
+        initialRoute;
 
       setSelectedRoute(route);
     },
