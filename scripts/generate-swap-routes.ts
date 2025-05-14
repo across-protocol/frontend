@@ -43,9 +43,7 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
       all: {
         disabledOriginChains: [
-          CHAIN_IDs.LINEA, // Not swappable on Uniswap V3
-          CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
-          CHAIN_IDs.UNICHAIN, // Not swappable on Uniswap V3
+          CHAIN_IDs.LINEA, // Not bridgeable
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],

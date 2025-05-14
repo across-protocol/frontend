@@ -132,6 +132,30 @@
     "isNative": false
   },
   {
+    "fromChain": 534352,
+    "toChain": 232,
+    "fromTokenAddress": "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 130,
+    "toChain": 232,
+    "fromTokenAddress": "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
     "fromChain": 10,
     "toChain": 232,
     "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
