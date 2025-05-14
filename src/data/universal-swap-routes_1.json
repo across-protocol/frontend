@@ -168,6 +168,78 @@
     "isNative": false
   },
   {
+    "fromChain": 324,
+    "toChain": 232,
+    "fromTokenAddress": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 34443,
+    "toChain": 232,
+    "fromTokenAddress": "0xd988097fb8612cc24eeC14542bC03424c656005f",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 1135,
+    "toChain": 232,
+    "fromTokenAddress": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 480,
+    "toChain": 232,
+    "fromTokenAddress": "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 41455,
+    "toChain": 232,
+    "fromTokenAddress": "0x18d25B4e18165c97e1285212e5d1f80eDD6d3Aa7",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 1868,
+    "toChain": 232,
+    "fromTokenAddress": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC.e",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
     "fromChain": 8453,
     "toChain": 232,
     "fromTokenAddress": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
@@ -175,6 +247,18 @@
     "fromTokenSymbol": "USDbC",
     "toTokenSymbol": "GHO",
     "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 7777777,
+    "toChain": 232,
+    "fromTokenAddress": "0xCccCCccc7021b32EBb4e8C08314bD62F7c653EC4",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDzC",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
     "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     "type": "universal-swap",
     "isNative": false

@@ -478,7 +478,7 @@ export function getAvailableOutputTokens(
       (route) =>
         route.fromChain === selectedFromChain &&
         route.toChain === selectedToChain &&
-        route.fromTokenSymbol === selectedInputTokenSymbol &&
+        route.swapTokenSymbol === selectedInputTokenSymbol &&
         route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.toTokenSymbol));

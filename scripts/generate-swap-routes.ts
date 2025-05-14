@@ -12,7 +12,7 @@ const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
-        disabledOriginChains: number[];
+        disabledOriginChains?: number[];
         enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
@@ -52,21 +52,22 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
-      [CHAIN_IDs.ARBITRUM]: {
-        enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["GHO"],
-      },
-      [CHAIN_IDs.OPTIMISM]: {
-        enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["GHO"],
-      },
-      [CHAIN_IDs.POLYGON]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },
     },
     [TOKEN_SYMBOLS_MAP["USDbC"].symbol]: {
-      [CHAIN_IDs.BASE]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDzC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },

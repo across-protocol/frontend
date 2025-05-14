@@ -116,7 +116,9 @@ export function useSelectRoute() {
           swapTokenSymbol:
             selectedRoute.type === "swap"
               ? selectedRoute.swapTokenSymbol
-              : undefined,
+              : selectedRoute.type === "universal-swap"
+                ? selectedRoute.fromTokenSymbol
+                : undefined,
         }) || initialRoute;
 
       setSelectedRoute(route);
