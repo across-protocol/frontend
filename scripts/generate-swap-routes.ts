@@ -43,6 +43,7 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
       all: {
         disabledOriginChains: [
+          CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
           CHAIN_IDs.LINEA, // Not bridgeable
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
@@ -51,7 +52,7 @@ const enabledSwapRoutes: {
     },
     [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
       all: {
-        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },
