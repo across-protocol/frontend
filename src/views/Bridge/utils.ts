@@ -473,6 +473,15 @@ export function getAvailableOutputTokens(
         route.externalProjectId === externalProjectId
     )
     .map((route) => getToken(route.toTokenSymbol));
+  const swapTokens = swapRoutes
+    .filter(
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain &&
+        route.fromTokenSymbol === selectedInputTokenSymbol &&
+        route.externalProjectId === externalProjectId
+    )
+    .map((route) => getToken(route.toTokenSymbol));
   const universalSwapTokens = universalSwapRoutes
     .filter(
       (route) =>
@@ -483,7 +492,7 @@ export function getAvailableOutputTokens(
     )
     .map((route) => getToken(route.toTokenSymbol));
 
-  return [...routeTokens, ...universalSwapTokens].filter(
+  return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(
     (token, index, self) =>
       index === self.findIndex((t) => t.symbol === token.symbol)
   );
