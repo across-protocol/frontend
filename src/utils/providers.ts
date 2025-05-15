@@ -5,7 +5,6 @@ import {
   getChainInfo,
   vercelApiBaseUrl,
 } from "./constants";
-import { Connection, ConnectionConfig } from "@solana/web3.js";
 import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
 
@@ -47,35 +46,6 @@ export function getProvider(
   chainId: ChainId = hubPoolChainId
 ): ethers.providers.StaticJsonRpcProvider {
   return providersTable[chainId];
-}
-
-// In-memory provider cache
-const solanaProviders: Record<number, Connection> = {};
-
-export function getSVMProvider(chainId: number): Connection {
-  // Return cached provider if it exists
-  if (solanaProviders[chainId]) {
-    return solanaProviders[chainId];
-  }
-
-  const url = getProviderUrl(chainId);
-
-  if (!url) {
-    throw new Error(`No Solana RPC URL configured for chain ID ${chainId}`);
-  }
-
-  // TODO
-  const connectionConfig: ConnectionConfig = {
-    commitment: "confirmed",
-    disableRetryOnRateLimit: false,
-  };
-
-  const connection = new Connection(url, connectionConfig);
-
-  // Cache it
-  solanaProviders[chainId] = connection;
-
-  return connection;
 }
 
 export function getSVMRpc(
