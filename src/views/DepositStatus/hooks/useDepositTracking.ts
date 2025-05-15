@@ -9,7 +9,6 @@ import {
   recordTransferUserProperties,
   wait,
   getChainInfo,
-  chainIsSvm,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -18,9 +17,7 @@ import {
 } from "utils/local-deposits";
 import { ampli } from "ampli";
 import { createChainStrategies } from "utils/deposit-strategies";
-
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { DepositStatus, FillStatus } from "./useDepositTracking_new/types";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -43,16 +40,6 @@ export function useDepositTracking({
   fromBridgePagePayload?: FromBridgePagePayload;
 }) {
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
-  const [depositStatus, setDepositStatus] = useState<DepositStatus>({
-    isLoading: true,
-    isSuccess: false,
-    isError: false,
-  });
-  const [fillStatus, setFillStatus] = useState<FillStatus>({
-    isLoading: false,
-    isSuccess: false,
-    isError: false,
-  });
 
   const { addToAmpliQueue } = useAmplitude();
   const { account } = useConnection();
@@ -83,30 +70,6 @@ export function useDepositTracking({
     enabled: shouldRetryDepositQuery,
     retryDelay: getRetryDelay(fromChainId),
   });
-
-  // Update deposit status when depositQuery changes
-  useEffect(() => {
-    if (depositQuery.isLoading) {
-      setDepositStatus({
-        isLoading: true,
-        isSuccess: false,
-        isError: false,
-      });
-    } else if (depositQuery.isError) {
-      setDepositStatus({
-        isLoading: false,
-        isSuccess: false,
-        isError: true,
-      });
-    } else if (depositQuery.data) {
-      setDepositStatus({
-        isLoading: false,
-        isSuccess: true,
-        isError: false,
-        timestamp: depositQuery.data.depositTimestamp,
-      });
-    }
-  }, [depositQuery.isLoading, depositQuery.isError, depositQuery.data]);
 
   // Track deposit in Amplitude and add to local storage
   useEffect(() => {
@@ -186,30 +149,6 @@ export function useDepositTracking({
     enabled: !!depositQuery.data,
   });
 
-  // Update fill status when fillQuery changes
-  useEffect(() => {
-    if (fillQuery.isLoading) {
-      setFillStatus({
-        isLoading: true,
-        isSuccess: false,
-        isError: false,
-      });
-    } else if (fillQuery.isError) {
-      setFillStatus({
-        isLoading: false,
-        isSuccess: false,
-        isError: true,
-      });
-    } else if (fillQuery.data) {
-      setFillStatus({
-        isLoading: false,
-        isSuccess: true,
-        isError: false,
-        timestamp: fillQuery.data.fillTxTimestamp,
-      });
-    }
-  }, [fillQuery.isLoading, fillQuery.isError, fillQuery.data]);
-
   // Track fill in local storage
   useEffect(() => {
     const fillInfo = fillQuery.data;
@@ -251,11 +190,6 @@ export function useDepositTracking({
   return {
     depositQuery,
     fillQuery,
-    depositStatus,
-    fillStatus,
-    // Return the origin and destination chain types for convenience
-    isFromSVM: chainIsSvm(fromChainId),
-    isToSVM: chainIsSvm(toChainId),
   };
 }
 
