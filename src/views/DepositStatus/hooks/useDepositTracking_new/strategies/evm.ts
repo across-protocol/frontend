@@ -11,6 +11,7 @@ import {
   FillInfo,
   DepositedInfo,
   FilledInfo,
+  FillData,
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
@@ -64,7 +65,7 @@ export class EVMStrategy implements IChainStrategy {
     depositInfo: DepositedInfo,
     toChainId: number
   ): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog?.args.depositId;
+    const depositId = depositInfo.depositLog?.depositId;
 
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
@@ -100,7 +101,18 @@ export class EVMStrategy implements IChainStrategy {
           fillTxHash: data.fillTx,
           fillTxTimestamp: fillTxBlock.timestamp,
           depositInfo,
-          fillLog: parsedFIllLog,
+          fillLog: {
+            ...parsedFIllLog,
+            ...parsedFIllLog.args,
+            destinationChainId: toChainId,
+            fillTimestamp: fillTxBlock.timestamp,
+            blockNumber: parsedFIllLog.blockNumber,
+            txnRef: parsedFIllLog.transactionHash,
+            txnIndex: parsedFIllLog.transactionIndex,
+            logIndex: parsedFIllLog.logIndex,
+            originChainId: Number(parsedFIllLog.args.originChainId),
+            repaymentChainId: Number(parsedFIllLog.args.repaymentChainId),
+          } satisfies FillData,
           status: "filled",
         };
       }
@@ -119,40 +131,18 @@ export class EVMStrategy implements IChainStrategy {
       const config = getConfig();
       const destinationSpokePool = config.getSpokePool(toChainId);
 
-      // Query for both legacy and new filled relay events
-      const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all(
-        [
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledV3Relay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              this.chainId,
-              depositId
-            ),
-            blockForTimestamp
-          ),
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledRelay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              this.chainId,
-              depositId
-            ),
-            blockForTimestamp
-          ),
-        ]
+      const filledRelayEvents = await destinationSpokePool.queryFilter(
+        destinationSpokePool.filters.FilledRelay(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          this.chainId,
+          depositId
+        ),
+        blockForTimestamp
       );
-
-      const filledRelayEvents = [
-        ...legacyFilledRelayEvents,
-        ...newFilledRelayEvents,
-      ];
 
       // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
@@ -169,7 +159,18 @@ export class EVMStrategy implements IChainStrategy {
         fillTxHash: filledRelayEvent.transactionHash,
         fillTxTimestamp: fillTxBlock.timestamp,
         depositInfo,
-        fillLog: filledRelayEvent,
+        fillLog: {
+          ...filledRelayEvent,
+          ...filledRelayEvent.args,
+          destinationChainId: toChainId,
+          fillTimestamp: fillTxBlock.timestamp,
+          blockNumber: filledRelayEvent.blockNumber,
+          txnRef: filledRelayEvent.transactionHash,
+          txnIndex: filledRelayEvent.transactionIndex,
+          logIndex: filledRelayEvent.logIndex,
+          originChainId: Number(filledRelayEvent.args.originChainId),
+          repaymentChainId: Number(filledRelayEvent.args.repaymentChainId),
+        } satisfies FillData,
         status: "filled",
       };
     } catch (error) {
@@ -203,7 +204,7 @@ export class EVMStrategy implements IChainStrategy {
     const { selectedRoute, depositArgs, quoteForAnalytics } =
       fromBridgePagePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
-      depositInfo.depositLog.args;
+      depositInfo.depositLog;
     const inputToken = config.getTokenInfoBySymbol(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol
@@ -272,7 +273,7 @@ export class EVMStrategy implements IChainStrategy {
     const config = getConfig();
     const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
-      fillInfo.depositInfo.depositLog.args;
+      fillInfo.depositInfo.depositLog;
     const inputToken = config.getTokenInfoBySymbol(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol

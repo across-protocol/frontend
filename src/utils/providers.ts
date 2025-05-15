@@ -6,6 +6,8 @@ import {
   vercelApiBaseUrl,
 } from "./constants";
 import { Connection, ConnectionConfig } from "@solana/web3.js";
+import { createSolanaRpc, MainnetUrl } from "@solana/kit";
+import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
 
 function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
@@ -66,7 +68,6 @@ export function getSVMProvider(chainId: number): Connection {
   const connectionConfig: ConnectionConfig = {
     commitment: "confirmed",
     disableRetryOnRateLimit: false,
-    confirmTransactionInitialTimeout: 60_000, // 1 minute
   };
 
   const connection = new Connection(url, connectionConfig);
@@ -75,4 +76,12 @@ export function getSVMProvider(chainId: number): Connection {
   solanaProviders[chainId] = connection;
 
   return connection;
+}
+
+export function getSVMRpc(
+  chainId: number,
+  config?: Parameters<typeof createSolanaRpc>[1]
+): SVMProvider {
+  const transport = getProviderUrl(chainId) as MainnetUrl;
+  return createSolanaRpc(transport, config) as SVMProvider;
 }

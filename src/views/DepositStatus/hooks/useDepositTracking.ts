@@ -20,11 +20,7 @@ import { ampli } from "ampli";
 import { createChainStrategies } from "utils/deposit-strategies";
 
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import {
-  DepositStatus,
-  FillInfo,
-  FillStatus,
-} from "./useDepositTracking_new/types";
+import { DepositStatus, FillStatus } from "./useDepositTracking_new/types";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -75,7 +71,7 @@ export function useDepositTracking({
       await wait(1_000);
 
       try {
-        // Use the strategy to get deposit information
+        // Use the strategy to get deposit information through the normalized interface
         return depositStrategy.getDeposit(depositTxHash);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
@@ -129,7 +125,6 @@ export function useDepositTracking({
     if (!localDepositByTxHash) {
       // Optimistically add deposit to local storage for instant visibility
       // Use the strategy-specific conversion method
-
       const localDeposit = depositStrategy.convertForDepositQuery(
         depositInfo,
         fromBridgePagePayload
@@ -138,7 +133,7 @@ export function useDepositTracking({
     }
 
     // Check if the deposit is from the current user
-    const isFromCurrentUser = depositInfo.depositLog.args.depositor === account;
+    const isFromCurrentUser = depositInfo.depositLog.depositor === account;
     if (!isFromCurrentUser) {
       return;
     }
@@ -182,7 +177,7 @@ export function useDepositTracking({
         return;
       }
 
-      // Use the strategy to get fill information, passing the destination chain ID
+      // Use the strategy to get fill information through the normalized interface
       return fillStrategy.getFill(depositInfo, toChainId);
     },
     staleTime: Infinity,
@@ -217,7 +212,7 @@ export function useDepositTracking({
 
   // Track fill in local storage
   useEffect(() => {
-    const fillInfo = fillQuery.data as FillInfo;
+    const fillInfo = fillQuery.data;
 
     if (!fromBridgePagePayload || !fillInfo || fillInfo.status === "filling") {
       return;

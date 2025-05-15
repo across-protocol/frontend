@@ -1,14 +1,16 @@
 import {
-  FundsDepositedEvent,
-  V3FundsDepositedEvent,
-  FilledRelayEvent,
-  FilledV3RelayEvent,
-} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
+  DepositEventFromSignature,
+  FillEventFromSignature,
+} from "@across-protocol/sdk/dist/esm/arch/svm";
+
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
-export type DepositLog = FundsDepositedEvent | V3FundsDepositedEvent;
-export type FillLog = FilledRelayEvent | FilledV3RelayEvent;
+/**
+ * Common types for deposit & fill information
+ */
+export type DepositData = DepositEventFromSignature;
+export type FillData = FillEventFromSignature;
 
 /**
  * Common type for deposit information
@@ -24,7 +26,7 @@ export type DepositInfo =
       depositTxHash: string;
       depositTimestamp: number;
       status: "deposit-reverted" | "deposited";
-      depositLog: DepositLog;
+      depositLog: DepositData;
     };
 
 export type DepositedInfo = Extract<
@@ -48,7 +50,7 @@ export type FillInfo =
       fillTxTimestamp: number;
       depositInfo: DepositedInfo;
       status: "filled" | "fill-reverted";
-      fillLog: FillLog;
+      fillLog: FillData;
     };
 
 export type FilledInfo = Extract<
@@ -77,13 +79,14 @@ export type FillStatus = {
 };
 
 /**
- * Base type for chain strategies
+ * Common chain strategy interface
+ * Each chain implementation adapts its native types to these normalized interfaces
  */
-export type IChainStrategy = {
+export interface IChainStrategy {
   /**
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
-   * @returns Deposit information
+   * @returns Normalized deposit information
    */
   getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
 
@@ -91,23 +94,24 @@ export type IChainStrategy = {
    * Get fill information for a deposit
    * @param depositInfo Deposit information
    * @param toChainId Destination chain ID
-   * @returns Fill information
+   * @returns Normalized fill information
    */
-  getFill(depositInfo: DepositInfo, toChainId: number): Promise<FillInfo>;
+  getFill(depositInfo: DepositedInfo, toChainId: number): Promise<FillInfo>;
 
   /**
-   * Convert fill information to local storage format for deposits
-   * @param data Deposit transaction and log information
+   * Convert deposit information to local storage format
+   * @param depositInfo Normalized deposit information
    * @param fromBridgePagePayload Bridge page payload containing route and quote details
    * @returns Local deposit format for storage
    */
   convertForDepositQuery(
-    depositInfo: DepositInfo,
+    depositInfo: DepositedInfo,
     fromBridgePagePayload: FromBridgePagePayload
   ): Deposit;
+
   /**
    * Convert fill information to local storage format
-   * @param fillInfo Fill information
+   * @param fillInfo Normalized fill information
    * @param bridgePayload Bridge payload information
    * @returns Local deposit format with fill information
    */
@@ -120,4 +124,4 @@ export type IChainStrategy = {
    * The chain ID this strategy handles
    */
   readonly chainId: number;
-};
+}
