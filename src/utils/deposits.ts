@@ -1,4 +1,4 @@
-import { DepositData } from "views/DepositStatus/hooks/useDepositTracking_new/types";
+import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 

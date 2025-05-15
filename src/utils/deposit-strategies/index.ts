@@ -1,6 +1,6 @@
 import { chainIsSvm } from "utils/sdk";
-import { EVMStrategy } from "../../views/DepositStatus/hooks/useDepositTracking_new/strategies/evm";
-import { SVMStrategy } from "../../views/DepositStatus/hooks/useDepositTracking_new/strategies/svm";
+import { EVMStrategy } from "../../views/DepositStatus/hooks/useDepositTracking/strategies/evm";
+import { SVMStrategy } from "../../views/DepositStatus/hooks/useDepositTracking/strategies/svm";
 
 /**
  * Factory function to create the appropriate chain strategy based on the chain type

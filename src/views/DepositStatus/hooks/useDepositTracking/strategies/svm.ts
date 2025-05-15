@@ -194,7 +194,7 @@ export class SVMStrategy implements IChainStrategy {
     );
 
     return {
-      depositId: Number(depositId),
+      depositId: depositId.toString(),
       depositTime:
         depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
       status: "pending" as const,
@@ -264,7 +264,7 @@ export class SVMStrategy implements IChainStrategy {
     );
 
     return {
-      depositId: Number(depositId),
+      depositId: depositId.toString(),
       depositTime:
         fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
       status: "filled" as const,
