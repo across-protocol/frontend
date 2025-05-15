@@ -37,12 +37,12 @@ export function DepositStatusUpperCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
-  const { depositQuery, fillQuery } = useDepositTracking(
+  const { depositQuery, fillQuery, status } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload
-  );
+    fromBridgePagePayload,
+  });
 
   const { estimatedRewards, amountAsBaseCurrency } =
     useResolveFromBridgePagePayload(
@@ -69,14 +69,6 @@ export function DepositStatusUpperCard({
     depositTxCompletedTime,
     fillTxCompletedTime
   );
-
-  const status = !depositTxCompletedTime
-    ? "depositing"
-    : depositQuery.data?.depositTxReceipt.status === 0
-      ? "deposit-reverted"
-      : !fillTxCompletedTime
-        ? "filling"
-        : "filled";
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -171,7 +163,7 @@ export function DepositStatusUpperCard({
           depositTxCompletedTimestampSeconds={depositTxCompletedTime}
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
-          fillTxHash={fillQuery.data?.fillTxHashes[0]}
+          fillTxHash={fillQuery.data?.fillTxHash}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

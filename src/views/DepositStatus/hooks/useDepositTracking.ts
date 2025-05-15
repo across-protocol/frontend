@@ -18,6 +18,7 @@ import {
 import { ampli } from "ampli";
 import { createChainStrategies } from "utils/deposit-strategies";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { DepositStatus } from "../types";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -187,9 +188,18 @@ export function useDepositTracking({
     );
   }, [fillQuery.data, depositTxHash, fromBridgePagePayload, fillStrategy]);
 
+  const status: DepositStatus = !depositQuery.data?.depositTimestamp
+    ? "depositing"
+    : depositQuery.data?.status === "deposit-reverted"
+      ? "deposit-reverted"
+      : !fillQuery.data?.fillTxTimestamp
+        ? "filling"
+        : "filled";
+
   return {
     depositQuery,
     fillQuery,
+    status,
   };
 }
 
