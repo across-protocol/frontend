@@ -1,6 +1,6 @@
 import { BigNumber, providers } from "ethers";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
-import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export {
@@ -69,7 +69,7 @@ export async function getBlockForTimestamp(
   provider: providers.JsonRpcProvider,
   timestamp: number
 ) {
-  const blockFinder = new BlockFinder(provider);
+  const blockFinder = new EVMBlockFinder(provider);
   const { number: blockNumberForTimestamp } =
     await blockFinder.getBlockForTimestamp(timestamp);
   return blockNumberForTimestamp;

@@ -46,6 +46,7 @@ import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/cjs/arch/evm";
 const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -171,7 +172,7 @@ const handler = async (
         });
       }
 
-      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
+      const blockFinder = new EVMBlockFinder(provider, [latestBlock]);
       const { number: blockNumberForTimestamp } =
         await blockFinder.getBlockForTimestamp(parsedTimestamp);
       quoteBlockNumber = blockNumberForTimestamp;
