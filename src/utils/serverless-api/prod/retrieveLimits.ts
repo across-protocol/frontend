@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChainId, vercelApiBaseUrl } from "utils";
+import { ChainId, vercelApiBaseUrl, chainIsSvm } from "utils";
 import { BridgeLimitInterface } from "../types";
 import { BigNumber, utils } from "ethers";
 
@@ -9,7 +9,8 @@ export async function retrieveLimits(
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
-  if ([ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(Number(fromChainId))) {
+  // @TODO: remove this once /limits is updated to support SVM
+  if (chainIsSvm(Number(fromChainId))) {
     return retrieveLimitsForSVM(
       inputToken,
       outputToken,
@@ -34,10 +35,10 @@ export async function retrieveLimits(
 }
 
 export async function retrieveLimitsForSVM(
-  inputToken: string,
-  outputToken: string,
-  fromChainId: string | ChainId,
-  toChainId: string | ChainId
+  _inputToken: string,
+  _outputToken: string,
+  _fromChainId: string | ChainId,
+  _toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
   const maxDeposit = utils.parseUnits("100", 6);
 

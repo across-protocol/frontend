@@ -1,4 +1,5 @@
 import { ChainId } from "./constants";
+import { chainIsSvm } from "./sdk";
 
 /**
  * Resolves the current vercel endpoint dynamically
@@ -19,7 +20,5 @@ export const resolveWebsiteUrl = () => {
 };
 
 export function getEcosystem(chainId: ChainId) {
-  return [ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(chainId)
-    ? "svm"
-    : "evm";
+  return chainIsSvm(chainId) ? "svm" : "evm";
 }

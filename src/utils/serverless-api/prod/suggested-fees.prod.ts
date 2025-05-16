@@ -2,7 +2,7 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { ChainId, vercelApiBaseUrl } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
-import { getCurrentTime } from "utils/sdk";
+import { getCurrentTime, chainIsSvm } from "utils/sdk";
 
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint
@@ -21,7 +21,8 @@ export async function suggestedFeesApiCall(
   recipientAddress?: string,
   message?: string
 ): Promise<SuggestedApiFeeReturnType> {
-  if ([ChainId.SOLANA, ChainId.SOLANA_DEVNET].includes(fromChainid)) {
+  // @TODO: remove this once /suggested-fees is updated to support SVM
+  if (chainIsSvm(fromChainid)) {
     return mockSuggestedFeesForSVM(
       amount,
       inputToken,
@@ -110,12 +111,12 @@ export async function suggestedFeesApiCall(
 
 async function mockSuggestedFeesForSVM(
   amount: ethers.BigNumber,
-  inputToken: string,
-  outputToken: string,
-  toChainid: ChainId,
-  fromChainid: ChainId,
-  recipientAddress?: string,
-  message?: string
+  _inputToken: string,
+  _outputToken: string,
+  _toChainid: ChainId,
+  _fromChainid: ChainId,
+  _recipientAddress?: string,
+  _message?: string
 ) {
   const zeroBN = BigNumber.from(0);
 
