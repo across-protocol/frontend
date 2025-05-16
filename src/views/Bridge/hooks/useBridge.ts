@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, utils, constants } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import { ampli } from "ampli";
-import { defaultSwapSlippage, bnZero } from "utils";
+import { defaultSwapSlippage, bnZero, manualRebalancerAddresses } from "utils";
 
 import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
@@ -74,6 +74,8 @@ export function useBridge() {
         ? universalSwapQuoteQuery.isLoading
         : false)) &&
     !transferQuote;
+  const isManualRebalancer =
+    account && manualRebalancerAddresses.includes(utils.getAddress(account));
 
   const { error: amountValidationError, warn: amountValidationWarning } =
     validateBridgeAmount({
@@ -81,7 +83,7 @@ export function useBridge() {
       parsedAmountInput: parsedAmount,
       quoteFees: quotedFees,
       currentBalance: maxBalance,
-      maxDeposit: limitsQuery.limits?.maxDeposit,
+      maxDeposit: isManualRebalancer ? constants.MaxUint256 : limitsQuery.limits?.maxDeposit,
       amountToBridgeAfterSwap:
         selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
           ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
@@ -90,6 +92,7 @@ export function useBridge() {
             : parsedAmount,
       universalSwapQuoteError: universalSwapQuoteQuery.error ?? undefined,
     });
+
   const isAmountValid = !amountValidationError;
 
   const {
