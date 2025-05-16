@@ -111,7 +111,7 @@ export function useDepositTracking({
           fromBridgePagePayload.timeSigned,
           depositInfo.depositTxHash,
           true,
-          data.depositTimestamp,
+          depositInfo.depositTimestamp,
           fromBridgePagePayload.selectedRoute.fromTokenAddress,
           fromBridgePagePayload.selectedRoute.toTokenAddress
         )
