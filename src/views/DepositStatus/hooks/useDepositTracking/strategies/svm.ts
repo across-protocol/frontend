@@ -10,12 +10,13 @@ import {
   DepositData,
   FillData,
 } from "../types";
-import { getSVMRpc, NoFilledRelayLogError } from "utils";
-import { isSignature } from "@solana/kit";
 import {
-  findFillEvent,
+  getSVMRpc,
+  NoFilledRelayLogError,
   SvmCpiEventsClient,
-} from "@across-protocol/sdk/dist/esm/arch/svm";
+  findFillEvent,
+} from "utils";
+import { isSignature } from "@solana/kit";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { Deposit } from "hooks/useDeposits";
 

@@ -2,12 +2,12 @@ import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types"
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 
-import { getMessageHash } from "@across-protocol/sdk/dist/esm/utils";
 import { TransactionReceipt } from "@ethersproject/providers";
 import {
   FundsDepositedEvent,
   FilledRelayEvent,
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
+import { getMessageHash } from "./sdk";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {

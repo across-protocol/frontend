@@ -1,6 +1,6 @@
 import { BigNumber, providers } from "ethers";
-import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export {
@@ -28,6 +28,9 @@ export {
   chainIsSvm,
   chainIsEvm,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
+export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
+export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,
