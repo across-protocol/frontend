@@ -1,6 +1,6 @@
 import { BigNumber, providers } from "ethers";
-import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export {
@@ -26,7 +26,11 @@ export {
   getNativeTokenSymbol,
   chainIsLens,
   chainIsSvm,
+  chainIsEvm,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
+export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
+export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,
@@ -65,7 +69,7 @@ export async function getBlockForTimestamp(
   provider: providers.JsonRpcProvider,
   timestamp: number
 ) {
-  const blockFinder = new BlockFinder(provider);
+  const blockFinder = new EVMBlockFinder(provider);
   const { number: blockNumberForTimestamp } =
     await blockFinder.getBlockForTimestamp(timestamp);
   return blockNumberForTimestamp;

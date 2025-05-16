@@ -141,9 +141,7 @@ function convertIndexerDepositToDeposit(
     message: indexerDeposit.message,
     amount: indexerDeposit.inputAmount,
     depositTxHash: indexerDeposit.depositTransactionHash,
-    fillTxs: indexerDeposit.fillTransactionHash
-      ? [indexerDeposit.fillTransactionHash]
-      : [],
+    fillTx: indexerDeposit.fillTransactionHash,
     speedUps: indexerDeposit.speedups,
     depositRelayerFeePct: "0",
     initialRelayerFeePct: "0",

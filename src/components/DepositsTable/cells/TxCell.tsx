@@ -16,22 +16,17 @@ type Props = {
 };
 
 export function TxCell({ deposit, width }: Props) {
-  const fillTxRow =
-    deposit.fillTxs.length === 0 ? null : deposit.fillTxs.length === 1 ? (
-      <DepositTxWrapper>
-        <Text color="grey-400">Fill:</Text>
-        <ExplorerLink
-          chainId={deposit.destinationChainId}
-          txHash={deposit.fillTxs[0]}
-        >
-          <Text color="light-200">
-            {shortenString(deposit.fillTxs[0], "..", 4)}
-          </Text>
-        </ExplorerLink>
-      </DepositTxWrapper>
-    ) : (
-      <FillTxDropdownMenu deposit={deposit} />
-    );
+  const fillTxRow = deposit.fillTx ? (
+    <DepositTxWrapper>
+      <Text color="grey-400">Fill:</Text>
+      <ExplorerLink
+        chainId={deposit.destinationChainId}
+        txHash={deposit.fillTx}
+      >
+        <Text color="light-200">{shortenString(deposit.fillTx, "..", 4)}</Text>
+      </ExplorerLink>
+    </DepositTxWrapper>
+  ) : null;
   const refundTxRow = deposit.depositRefundTxHash ? (
     <DepositTxWrapper>
       <Text color="grey-400">Refund:</Text>
@@ -74,30 +69,27 @@ function FillTxDropdownMenu({ deposit }: { deposit: Deposit }) {
         <FillTxWrapper>
           <Text color="grey-400">Fill:</Text>
           <Text color="light-200">
-            {shortenString(deposit.fillTxs[0], "..", 4)}
+            {shortenString(deposit.fillTx, "..", 4)}
           </Text>
-          <Text color="grey-400">+{deposit.fillTxs.length - 1}</Text>
+          {/* <Text color="grey-400">+{deposit.fillTxs.length - 1}</Text> */}
           {isOpen ? <ArrowUpIcon /> : <ArrowDownIcon />}
         </FillTxWrapper>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom">
-        {deposit.fillTxs.map((txHash) => (
-          <ExplorerLink
-            key={txHash}
-            chainId={deposit.destinationChainId}
-            txHash={txHash}
-          >
-            <DropdownMenuItem>
-              <DropdownMenuItemContentLeft>
-                <Text color="grey-400">Fill</Text>
-                <Text color="light-200">
-                  {shortenAddress(txHash, ". .", 4)}
-                </Text>
-              </DropdownMenuItemContentLeft>
-              <ArrowExternalLink />
-            </DropdownMenuItem>
-          </ExplorerLink>
-        ))}
+        <ExplorerLink
+          chainId={deposit.destinationChainId}
+          txHash={deposit.fillTx}
+        >
+          <DropdownMenuItem>
+            <DropdownMenuItemContentLeft>
+              <Text color="grey-400">Fill</Text>
+              <Text color="light-200">
+                {shortenAddress(deposit.fillTx, ". .", 4)}
+              </Text>
+            </DropdownMenuItemContentLeft>
+            <ArrowExternalLink />
+          </DropdownMenuItem>
+        </ExplorerLink>
       </DropdownMenuContent>
     </DropdownMenu.Root>
   );
