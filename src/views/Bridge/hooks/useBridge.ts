@@ -5,7 +5,7 @@ import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import { ampli } from "ampli";
 import { defaultSwapSlippage, bnZero } from "utils";
 
-import { useBridgeAction } from "./useBridgeAction";
+import { useBridgeAction } from "./useBridgeAction_new";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";

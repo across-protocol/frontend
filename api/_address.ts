@@ -1,7 +1,10 @@
 import { Address, Hex, padHex, toBytes, toHex, trim } from "viem";
-import { getAddressDecoder, getAddressEncoder } from "@solana/kit";
+import {
+  getAddressDecoder,
+  getAddressEncoder,
+  isAddress as isSvmAddress,
+} from "@solana/kit";
 import { isAddress } from "ethers/lib/utils";
-import { isAddress as isSvmAddress } from "@solana/kit"; // @solana/web3.js@v2
 
 // exports
 export { isSvmAddress };
