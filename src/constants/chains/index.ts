@@ -41,6 +41,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.LENS_SEPOLIA,
   CHAIN_IDs.UNICHAIN_SEPOLIA,
   CHAIN_IDs.TATARA,
+  CHAIN_IDs.SOLANA_DEVNET,
 ];
 
 export const chainInfoList: ChainInfoList = orderedEnabledChainIds.map(
