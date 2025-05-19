@@ -2,11 +2,7 @@ import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
-import {
-  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  DEFAULT_QUOTE_BLOCK_BUFFER,
-  CHAIN_IDs,
-} from "./_constants";
+import { DEFAULT_QUOTE_BLOCK_BUFFER, CHAIN_IDs } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -46,6 +42,8 @@ import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
+import { getDefaultRecipientAddress } from "./_recipient-address";
+
 const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -91,8 +89,8 @@ const handler = async (
       amount: amountInput,
       timestamp,
       skipAmountLimit,
-      recipient,
-      relayer,
+      recipient: _recipient,
+      relayer: _relayer,
       message,
     } = query;
 
@@ -105,12 +103,12 @@ const handler = async (
       allowUnmatchedDecimals,
     } = validateChainAndTokenParams(query);
 
-    relayer = relayer
-      ? ethers.utils.getAddress(relayer)
-      : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-    recipient = recipient
-      ? ethers.utils.getAddress(recipient)
-      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    const recipient = sdk.utils.toAddressType(
+      _recipient || getDefaultRecipientAddress(destinationChainId)
+    );
+    const relayer = sdk.utils.toAddressType(
+      _relayer || getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
+    );
     const depositWithMessage = sdk.utils.isDefined(message);
 
     // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
@@ -171,7 +169,9 @@ const handler = async (
         });
       }
 
-      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
+      const blockFinder = new sdk.arch.evm.EVMBlockFinder(provider, [
+        latestBlock,
+      ]);
       const { number: blockNumberForTimestamp } =
         await blockFinder.getBlockForTimestamp(parsedTimestamp);
       quoteBlockNumber = blockNumberForTimestamp;
@@ -228,8 +228,8 @@ const handler = async (
         amountInput,
         // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-        depositWithMessage ? recipient : undefined,
-        depositWithMessage ? relayer : undefined,
+        depositWithMessage ? recipient.toBytes32() : undefined,
+        depositWithMessage ? relayer.toBytes32() : undefined,
         depositWithMessage ? message : undefined,
         allowUnmatchedDecimals
       ),
