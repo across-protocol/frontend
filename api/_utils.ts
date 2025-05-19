@@ -767,6 +767,23 @@ export const getRelayerFeeCalculatorQueries = (
     coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
     logger: getLogger(),
   };
+  const parsedSpokePoolAddress = sdk.utils.toAddressType(
+    baseArgs.spokePoolAddress
+  );
+  const parsedSimulatedRelayerAddress = sdk.utils.toAddressType(
+    baseArgs.simulatedRelayerAddress
+  );
+
+  if (sdk.utils.chainIsSvm(destinationChainId)) {
+    return new sdk.relayFeeCalculator.SvmQuery(
+      getSvmProvider(destinationChainId).createRpcClient(),
+      baseArgs.symbolMapping,
+      parsedSpokePoolAddress.forceSvmAddress(),
+      parsedSimulatedRelayerAddress.forceSvmAddress(),
+      baseArgs.logger,
+      baseArgs.coingeckoProApiKey
+    );
+  }
 
   const customGasTokenSymbol = CUSTOM_GAS_TOKENS[destinationChainId];
   if (customGasTokenSymbol) {
@@ -774,8 +791,8 @@ export const getRelayerFeeCalculatorQueries = (
       queryBaseArgs: [
         getProvider(destinationChainId, { useSpeedProvider: true }),
         baseArgs.symbolMapping,
-        baseArgs.spokePoolAddress,
-        baseArgs.simulatedRelayerAddress,
+        parsedSpokePoolAddress.toEvmAddress(),
+        parsedSimulatedRelayerAddress.toEvmAddress(),
         baseArgs.logger,
         baseArgs.coingeckoProApiKey,
         undefined,
@@ -785,25 +802,12 @@ export const getRelayerFeeCalculatorQueries = (
     });
   }
 
-  if (sdk.utils.chainIsSvm(destinationChainId)) {
-    return new sdk.relayFeeCalculator.SvmQuery(
-      getSvmProvider(destinationChainId).createRpcClient(),
-      baseArgs.symbolMapping,
-      sdk.utils.toAddressType(baseArgs.spokePoolAddress).forceSvmAddress(),
-      sdk.utils
-        .toAddressType(baseArgs.simulatedRelayerAddress)
-        .forceSvmAddress(),
-      baseArgs.logger,
-      baseArgs.coingeckoProApiKey
-    );
-  }
-
   return sdk.relayFeeCalculator.QueryBase__factory.create(
     baseArgs.chainId,
     getProvider(destinationChainId, { useSpeedProvider: true }),
     baseArgs.symbolMapping,
-    baseArgs.spokePoolAddress,
-    baseArgs.simulatedRelayerAddress,
+    parsedSpokePoolAddress.toEvmAddress(),
+    parsedSimulatedRelayerAddress.toEvmAddress(),
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
   );
@@ -850,6 +854,10 @@ export const getRelayerFeeDetails = async (
     recipientAddress,
     message,
   } = deposit;
+  const parsedRelayerAddress = sdk.utils.toAddressType(relayerAddress);
+  relayerAddress = sdk.utils.chainIsSvm(destinationChainId)
+    ? parsedRelayerAddress.toBase58()
+    : parsedRelayerAddress.toEvmAddress();
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
@@ -2124,30 +2132,10 @@ export function getCachedNativeGasCost(
       deposit.destinationChainId,
       { relayerAddress }
     );
-    if (sdk.utils.chainIsSvm(deposit.destinationChainId)) {
-      const _deposit = buildDepositForSimulation(deposit);
-      console.log("deposit", _deposit);
-      console.log("relayerAddress", relayerAddress);
-      console.log(
-        "inputToken",
-        sdk.utils
-          .toAddressType(_deposit.inputToken)
-          .forceSvmAddress()
-          .toBytes32()
-      );
-      console.log(
-        "mint",
-        sdk.utils
-          .toAddressType(_deposit.outputToken)
-          .forceSvmAddress()
-          .toBase58()
-      );
-    }
     const gasCost = await relayerFeeCalculatorQueries.getNativeGasCost(
       buildDepositForSimulation(deposit),
-      relayerAddress
+      relayerFeeCalculatorQueries.simulatedRelayerAddress as string | undefined
     );
-    console.log("gasCost", deposit.destinationChainId, gasCost);
     return gasCost;
   };
 
