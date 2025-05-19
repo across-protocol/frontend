@@ -2186,12 +2186,16 @@ export function getCachedOpStackL1DataFee(
     const unsignedTx =
       await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
         buildDepositForSimulation(deposit),
-        overrides?.relayerAddress
+        relayerFeeCalculatorQueries.simulatedRelayerAddress as
+          | string
+          | undefined
       );
     const opStackL1GasCost =
       await relayerFeeCalculatorQueries.getOpStackL1DataFee(
         unsignedTx,
-        overrides?.relayerAddress,
+        relayerFeeCalculatorQueries.simulatedRelayerAddress as
+          | string
+          | undefined,
         {
           opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
           opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
