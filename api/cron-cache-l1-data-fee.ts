@@ -1,4 +1,7 @@
 import { VercelResponse } from "@vercel/node";
+import axios from "axios";
+import { utils } from "@across-protocol/sdk";
+
 import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
@@ -10,14 +13,10 @@ import {
   resolveVercelEndpoint,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
+import { getDepositArgsForCachedGasDetails } from "./_gas";
+import { getEnvs } from "./_env";
 
 import mainnetChains from "../src/data/chains_1.json";
-import { utils, constants } from "@across-protocol/sdk";
-import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
-import axios from "axios";
-import { ethers } from "ethers";
-
-import { getEnvs } from "./_env";
 
 const { CRON_SECRET } = getEnvs();
 
@@ -28,17 +27,6 @@ const updateIntervalsSecPerChain = {
 };
 
 const maxDurationSec = 60;
-
-const getDepositArgsForChainId = (chainId: number, tokenAddress: string) => {
-  return {
-    amount: ethers.BigNumber.from(100),
-    inputToken: constants.ZERO_ADDRESS,
-    outputToken: tokenAddress,
-    recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-    originChainId: 0, // Shouldn't matter for simulation
-    destinationChainId: Number(chainId),
-  };
-};
 
 const handler = async (
   request: TypedVercelRequest<Record<string, never>>,
@@ -89,7 +77,10 @@ const handler = async (
       updateCounts[chainId] ??= {};
       updateCounts[chainId][outputTokenAddress] ??= 0;
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
-      const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
+      const depositArgs = getDepositArgsForCachedGasDetails(
+        chainId,
+        outputTokenAddress
+      );
       const gasCostCache = getCachedNativeGasCost(depositArgs);
 
       while (true) {
