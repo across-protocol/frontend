@@ -1,18 +1,12 @@
 import styled from "@emotion/styled";
-import { BigNumber } from "ethers";
 import { useMemo } from "react";
 
 import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
 import { Selector } from "components";
 import { Text } from "components/Text";
 
-import {
-  formatUnitsWithMaxFractions,
-  TokenInfo,
-  getToken,
-  tokenList,
-} from "utils";
-import { useBalancesBySymbols, useConnection } from "hooks";
+import { TokenInfo, getToken, tokenList } from "utils";
+import { useBalancesBySymbols } from "hooks/useBalance_new";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 import {
@@ -58,8 +52,6 @@ export function TokenSelector({
     ? getToken(receiveTokenSymbol)
     : selectedToken;
 
-  const { account } = useConnection();
-
   const orderedTokens: Array<
     TokenInfo & {
       disabled?: boolean;
@@ -102,7 +94,6 @@ export function TokenSelector({
   const { balances } = useBalancesBySymbols({
     tokenSymbols: orderedTokens.filter((t) => !t.disabled).map((t) => t.symbol),
     chainId: isInputTokenSelector ? fromChain : toChain,
-    account,
   });
 
   return (
@@ -149,15 +140,11 @@ export function TokenSelector({
             </ElementTextWrapper>
           </CoinIconTextWrapper>
         ),
-        suffix:
-          balances && balances[i]?.gt(0) ? (
-            <Text size="lg" color="grey-400">
-              {formatUnitsWithMaxFractions(
-                balances[i] ?? BigNumber.from(0),
-                t.decimals
-              )}
-            </Text>
-          ) : undefined,
+        suffix: balances[i]?.balance.gt(0) ? (
+          <Text size="lg" color="grey-400">
+            {balances[i]?.balanceFormatted}
+          </Text>
+        ) : undefined,
       }))}
       displayElement={
         <CoinIconTextWrapper>
