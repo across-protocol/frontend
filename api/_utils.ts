@@ -523,38 +523,44 @@ export const getTokenByAddress = (
       coingeckoId: string;
     }
   | undefined => {
-  const parsedTokenAddress = sdk.utils.toAddressType(tokenAddress);
-  if (chainId && sdk.utils.chainIsSvm(chainId)) {
-    tokenAddress = parsedTokenAddress.toBase58();
-  } else {
-    tokenAddress = parsedTokenAddress.toEvmAddress();
-  }
+  try {
+    const parsedTokenAddress = sdk.utils.toAddressType(tokenAddress);
+    if (chainId && sdk.utils.chainIsSvm(chainId)) {
+      tokenAddress = parsedTokenAddress.toBase58();
+    } else {
+      tokenAddress = parsedTokenAddress.toEvmAddress();
+    }
 
-  const matches =
-    Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
-      chainId
-        ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
-        : Object.values(addresses).some(
-            (address) => address.toLowerCase() === tokenAddress.toLowerCase()
-          )
-    ) || [];
+    const matches =
+      Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
+        chainId
+          ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
+          : Object.values(addresses).some(
+              (address) => address.toLowerCase() === tokenAddress.toLowerCase()
+            )
+      ) || [];
 
-  if (matches.length === 0) {
+    if (matches.length === 0) {
+      return undefined;
+    }
+
+    const ambiguousTokens = ["USDC", "USDT"];
+    const isAmbiguous =
+      matches.length > 1 &&
+      matches.some(([symbol]) => ambiguousTokens.includes(symbol));
+    if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
+      const token = matches.find(([symbol]) =>
+        ambiguousTokens.includes(symbol)
+      );
+      if (token) {
+        return token[1];
+      }
+    }
+
+    return matches[0][1];
+  } catch (error) {
     return undefined;
   }
-
-  const ambiguousTokens = ["USDC", "USDT"];
-  const isAmbiguous =
-    matches.length > 1 &&
-    matches.some(([symbol]) => ambiguousTokens.includes(symbol));
-  if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
-    const token = matches.find(([symbol]) => ambiguousTokens.includes(symbol));
-    if (token) {
-      return token[1];
-    }
-  }
-
-  return matches[0][1];
 };
 
 const _getChainIdsOfToken = (
@@ -564,8 +570,14 @@ const _getChainIdsOfToken = (
     "coingeckoId"
   >
 ) => {
+  const parsedAddress = sdk.utils.toAddressType(tokenAddress);
   const chainIds = Object.entries(token.addresses).filter(
-    ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()
+    ([chainId, address]) => {
+      const comparableAddress = sdk.utils.chainIsSvm(Number(chainId))
+        ? parsedAddress.toBase58()
+        : parsedAddress.toEvmAddress();
+      return address.toLowerCase() === comparableAddress.toLowerCase();
+    }
   );
   return chainIds.map(([chainId]) => Number(chainId));
 };
