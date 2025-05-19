@@ -19,5 +19,5 @@ export default {
   publicRpcUrl: chainInfoBase.publicRPC,
   blockTimeSeconds: 0.5,
   tokens: ["USDC"],
-  enableCCTP: true,
+  enableCCTP: false,
 } as ChainConfig;

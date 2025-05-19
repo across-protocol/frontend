@@ -116,6 +116,11 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import solanaLogo from "assets/chain-logos/solana.svg";
+import solanaGrayscaleLogo from "assets/chain-logos/solana-grayscale.svg";
+import { ReactComponent as solanaLogoSvg } from "assets/chain-logos/solana.svg";
+import { ReactComponent as solanaGrayscaleLogoSvg } from "assets/chain-logos/solana-grayscale.svg";
+
 import solanaDevnetLogo from "assets/chain-logos/solana-devnet.svg";
 import solanaDevnetGrayscaleLogo from "assets/chain-logos/solana-devnet-grayscale.svg";
 import { ReactComponent as solanaDevnetLogoSvg } from "assets/chain-logos/solana-devnet.svg";
@@ -1078,6 +1083,23 @@ export const sepolia_viem = defineChain({
   },
 });
 
+export const solana = {
+  name: "Solana",
+  fullName: "Solana",
+  chainId: 34268394551451,
+  logoURI: solanaLogo,
+  grayscaleLogoURI: solanaGrayscaleLogo,
+  logoSvg: solanaLogoSvg,
+  grayscaleLogoSvg: solanaGrayscaleLogoSvg,
+  rpcUrl: "https://api.mainnet-beta.solana.com",
+  explorerUrl: "https://solscan.io",
+  constructExplorerLink: (txHash: string) =>
+    `${solana.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "SOL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_34268394551451_CUSTOM_RPC_URL,
+  pollingInterval: 500,
+};
+
 export const solanaDevnet = {
   name: "Solana Devnet",
   fullName: "Solana devnet",
@@ -1094,30 +1116,6 @@ export const solanaDevnet = {
   customRpcUrl: process.env.REACT_APP_CHAIN_133268194659241_CUSTOM_RPC_URL,
   pollingInterval: 500,
 };
-
-export const solanaDevnet_viem = defineChain({
-  id: solanaDevnet.chainId,
-  name: solanaDevnet.name,
-  nativeCurrency: {
-    name: solanaDevnet.nativeCurrencySymbol,
-    symbol: solanaDevnet.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        solanaDevnet.rpcUrl,
-        solanaDevnet.customRpcUrl ? solanaDevnet.customRpcUrl : [],
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: solanaDevnet.name + " Explorer",
-      url: solanaDevnet.explorerUrl,
-    },
-  },
-});
 
 export const soneium = {
   name: "Soneium",
@@ -1439,6 +1437,7 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  solana,
   solanaDevnet,
   soneium,
   tatara,
@@ -1479,7 +1478,6 @@ export const chains_viem = [
   redstone_viem,
   scroll_viem,
   sepolia_viem,
-  solanaDevnet_viem,
   soneium_viem,
   tatara_viem,
   unichain_viem,
