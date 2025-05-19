@@ -2,27 +2,16 @@ import { AcceleratingDistributor__factory } from "@across-protocol/across-token/
 import {
   ERC20__factory,
   HubPool__factory,
-  SpokePool,
-  SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
-import { PUBLIC_NETWORKS } from "@across-protocol/constants";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
-  Multicall3,
 } from "@balancer-labs/sdk";
 import axios, { AxiosError, AxiosRequestHeaders } from "axios";
-import {
-  BigNumber,
-  BigNumberish,
-  ethers,
-  providers,
-  utils,
-  Signer,
-} from "ethers";
+import { BigNumber, BigNumberish, ethers, providers, utils } from "ethers";
 import {
   assert,
   coerce,
@@ -38,18 +27,14 @@ import {
 } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
-import rpcProvidersJson from "../src/data/rpc-providers.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
   MINIMAL_BALANCER_V2_VAULT_ABI,
-  MINIMAL_MULTICALL3_ABI,
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
-  BLOCK_TAG_LAG,
   CHAIN_IDs,
   CHAINS,
   CUSTOM_GAS_TOKENS,
@@ -58,8 +43,6 @@ import {
   DEFI_LLAMA_POOL_LOOKUP,
   DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
-  MULTICALL3_ADDRESS,
-  MULTICALL3_ADDRESS_OVERRIDES,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
   disabledL1Tokens,
@@ -83,15 +66,31 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
+import {
+  getProvider,
+  getSvmProvider,
+  getRpcUrlsFromConfigJson,
+} from "./_providers";
+import { getLogger, logger } from "./_logger";
+import { getEnvs } from "./_env";
+import { isEvmAddress, isSvmAddress } from "./_address";
+import { getBalance, getBatchBalance } from "./_balance";
+import { callViaMulticall3 } from "./_multicall";
+import { getDefaultRelayerAddress } from "./_relayer-address";
+import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
-
-type LoggingUtility = sdk.relayFeeCalculator.Logger;
-type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
-
-import { getEnvs } from "./_env";
-import { isEvmAddress, isSvmAddress } from "./_address";
+export {
+  getLogger,
+  logger,
+  getProvider,
+  getBalance,
+  getBatchBalance,
+  callViaMulticall3,
+  getSpokePoolAddress,
+  getSpokePool,
+};
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -99,8 +98,6 @@ const {
   BASE_FEE_MARKUP,
   PRIORITY_FEE_MARKUP,
   OP_STACK_L1_DATA_FEE_MARKUP,
-  VERCEL_ENV,
-  LOG_LEVEL,
   REACT_APP_DISABLED_CHAINS,
   REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
@@ -108,7 +105,6 @@ const {
   CHAIN_USD_MAX_BALANCES,
   CHAIN_USD_MAX_DEPOSITS,
   VERCEL_AUTOMATION_BYPASS_SECRET,
-  RPC_HEADERS,
 } = getEnvs();
 
 // Don't permit HUB_POOL_CHAIN_ID=0
@@ -155,53 +151,6 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
-
-export const LogLevels = {
-  ERROR: 3,
-  WARN: 2,
-  INFO: 1,
-  DEBUG: 0,
-} as const;
-// Singleton logger so we don't create multiple.
-let logger: LoggingUtility;
-/**
- * Resolves a logging utility to be used. This instance caches its responses
- * @returns A valid Logging utility that can be used throughout the runtime
- */
-export const getLogger = (): LoggingUtility => {
-  if (!logger) {
-    const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
-
-    let logLevel =
-      LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? (LOG_LEVEL as keyof typeof LogLevels)
-        : defaultLogLevel;
-
-    logger = {
-      debug: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.DEBUG) {
-          console.debug(args);
-        }
-      },
-      info: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.INFO) {
-          console.info(args);
-        }
-      },
-      warn: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.WARN) {
-          console.warn(args);
-        }
-      },
-      error: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.ERROR) {
-          console.error(args);
-        }
-      },
-    };
-  }
-  return logger;
-};
 
 /**
  * Resolves the current vercel endpoint dynamically
@@ -378,6 +327,21 @@ export const validateDepositMessage = async (
 };
 
 function getStaticIsContract(chainId: number, address: string) {
+  const addressType = sdk.utils.toAddressType(address);
+  let comparableAddress = address;
+
+  if (sdk.utils.chainIsSvm(chainId)) {
+    try {
+      comparableAddress = addressType.toBase58();
+    } catch (error) {
+      // noop
+    }
+  } else {
+    if (addressType.isValidEvmAddress()) {
+      comparableAddress = addressType.toEvmAddress();
+    }
+  }
+
   const deployedAcrossContract = Object.values(
     (
       acrossDeployments as {
@@ -389,7 +353,8 @@ function getStaticIsContract(chainId: number, address: string) {
       }
     )[chainId]
   ).find(
-    (contract) => contract.address.toLowerCase() === address.toLowerCase()
+    (contract) =>
+      contract.address.toLowerCase() === comparableAddress.toLowerCase()
   );
   return !!deployedAcrossContract;
 }
@@ -499,6 +464,19 @@ export const getRouteDetails = (
 
   const resolvedOriginChainId = possibleOriginChainIds[0];
 
+  const parsedInputTokenAddress = sdk.utils.toAddressType(
+    inputToken.addresses[resolvedOriginChainId]
+  );
+  const resolvedInputTokenAddress = sdk.utils.chainIsSvm(resolvedOriginChainId)
+    ? parsedInputTokenAddress.toBase58()
+    : parsedInputTokenAddress.toEvmAddress();
+  const parsedOutputTokenAddress = sdk.utils.toAddressType(
+    outputToken.addresses[destinationChainId]
+  );
+  const resolvedOutputTokenAddress = sdk.utils.chainIsSvm(destinationChainId)
+    ? parsedOutputTokenAddress.toBase58()
+    : parsedOutputTokenAddress.toEvmAddress();
+
   return {
     inputToken: {
       ...inputToken,
@@ -508,7 +486,7 @@ export const getRouteDetails = (
             resolvedOriginChainId
           )
         : inputToken.symbol,
-      address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
+      address: resolvedInputTokenAddress,
     },
     outputToken: {
       ...outputToken,
@@ -518,7 +496,7 @@ export const getRouteDetails = (
             destinationChainId
           )
         : outputToken.symbol,
-      address: utils.getAddress(outputToken.addresses[destinationChainId]),
+      address: resolvedOutputTokenAddress,
     },
     l1Token: {
       ...l1Token,
@@ -540,6 +518,13 @@ export const getTokenByAddress = (
       coingeckoId: string;
     }
   | undefined => {
+  const parsedTokenAddress = sdk.utils.toAddressType(tokenAddress);
+  if (chainId && sdk.utils.chainIsSvm(chainId)) {
+    tokenAddress = parsedTokenAddress.toBase58();
+  } else {
+    tokenAddress = parsedTokenAddress.toEvmAddress();
+  }
+
   const matches =
     Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
@@ -608,7 +593,8 @@ const _getBridgedUsdcOrVariantTokenSymbol = (
 
 const _getAddressOrThrowInputError = (address: string, paramName: string) => {
   try {
-    return ethers.utils.getAddress(address);
+    const parsedAddress = sdk.utils.toAddressType(address);
+    return parsedAddress.toBytes32();
   } catch (err) {
     throw new InvalidParamError({
       message: `Invalid address provided for '${paramName}'`,
@@ -619,25 +605,6 @@ const _getAddressOrThrowInputError = (address: string, paramName: string) => {
 
 export const getHubPool = (provider: providers.Provider) => {
   return HubPool__factory.connect(ENABLED_ROUTES.hubPoolAddress, provider);
-};
-
-/**
- * Resolves a fixed Static RPC provider if an override url has been specified.
- * @returns A provider or undefined if an override was not specified.
- */
-export const getPublicProvider = (
-  chainId: string
-): providers.StaticJsonRpcProvider | undefined => {
-  const chain = PUBLIC_NETWORKS[Number(chainId)];
-  if (chain) {
-    const headers = getProviderHeaders(chainId);
-    return new ethers.providers.StaticJsonRpcProvider({
-      url: chain.publicRPC,
-      headers,
-    });
-  } else {
-    return undefined;
-  }
 };
 
 /**
@@ -775,13 +742,11 @@ export const getRelayerFeeCalculatorQueries = (
 ) => {
   const baseArgs = {
     chainId: destinationChainId,
-    provider: getProvider(destinationChainId, { useSpeedProvider: true }),
     symbolMapping: TOKEN_SYMBOLS_MAP,
     spokePoolAddress:
       overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     simulatedRelayerAddress:
-      overrides.relayerAddress ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+      overrides.relayerAddress || getDefaultRelayerAddress(destinationChainId),
     coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
     logger: getLogger(),
   };
@@ -790,7 +755,7 @@ export const getRelayerFeeCalculatorQueries = (
   if (customGasTokenSymbol) {
     return new sdk.relayFeeCalculator.CustomGasTokenQueries({
       queryBaseArgs: [
-        baseArgs.provider,
+        getProvider(destinationChainId, { useSpeedProvider: true }),
         baseArgs.symbolMapping,
         baseArgs.spokePoolAddress,
         baseArgs.simulatedRelayerAddress,
@@ -803,9 +768,22 @@ export const getRelayerFeeCalculatorQueries = (
     });
   }
 
+  if (sdk.utils.chainIsSvm(destinationChainId)) {
+    return new sdk.relayFeeCalculator.SvmQuery(
+      getSvmProvider(destinationChainId).createRpcClient(),
+      baseArgs.symbolMapping,
+      sdk.utils.toAddressType(baseArgs.spokePoolAddress).forceSvmAddress(),
+      sdk.utils
+        .toAddressType(baseArgs.simulatedRelayerAddress)
+        .forceSvmAddress(),
+      baseArgs.logger,
+      baseArgs.coingeckoProApiKey
+    );
+  }
+
   return sdk.relayFeeCalculator.QueryBase__factory.create(
     baseArgs.chainId,
-    baseArgs.provider,
+    getProvider(destinationChainId, { useSpeedProvider: true }),
     baseArgs.symbolMapping,
     baseArgs.spokePoolAddress,
     baseArgs.simulatedRelayerAddress,
@@ -904,15 +882,17 @@ export const buildDepositForSimulation = (depositArgs: {
       ? safeOutputAmount
       : sdk.utils.toBN(amount),
     depositId: sdk.utils.bnUint32Max,
-    depositor: recipientAddress,
-    recipient: recipientAddress,
+    depositor: sdk.utils.toAddressType(recipientAddress).toBytes32(),
+    recipient: sdk.utils.toAddressType(recipientAddress).toBytes32(),
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
     inputToken,
     outputToken,
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-    exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
+    exclusiveRelayer: sdk.utils
+      .toAddressType(sdk.constants.ZERO_ADDRESS)
+      .toBytes32(),
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
     messageHash: sdk.utils.getMessageHash(
@@ -1208,129 +1188,6 @@ export async function getBridgeQuoteForMinOutput(params: {
   }
 }
 
-export const providerCache: Record<string, StaticJsonRpcProvider> = {};
-
-/**
- * Generates a relevant provider for the given input chainId
- * @param _chainId A valid chain identifier where Across is deployed
- * @returns A provider object to query the requested blockchain
- */
-export const getProvider = (
-  _chainId: number,
-  opts = {
-    useSpeedProvider: false,
-  }
-): providers.StaticJsonRpcProvider => {
-  const chainId = _chainId.toString();
-  const cacheKey = `${chainId}-${opts.useSpeedProvider}`;
-  if (!providerCache[cacheKey]) {
-    // Resolves provider from urls set in rpc-providers.json.
-    const providerFromConfigJson = getProviderFromConfigJson(chainId, opts);
-    const publicProvider = getPublicProvider(chainId);
-
-    if (providerFromConfigJson) {
-      providerCache[cacheKey] = providerFromConfigJson;
-    } else if (publicProvider) {
-      providerCache[cacheKey] = publicProvider;
-    } else {
-      throw new Error(`No provider URL set for chain: ${chainId}`);
-    }
-  }
-  return providerCache[cacheKey];
-};
-
-/**
- * Resolves a provider from the `rpc-providers.json` configuration file.
- */
-function getProviderFromConfigJson(
-  _chainId: string,
-  opts = {
-    useSpeedProvider: false,
-  }
-) {
-  const chainId = Number(_chainId);
-  const urls = getRpcUrlsFromConfigJson(chainId);
-  const headers = getProviderHeaders(chainId);
-
-  if (urls.length === 0) {
-    getLogger().warn({
-      at: "getProviderFromConfigJson",
-      message: `No provider URL found for chainId ${chainId} in rpc-providers.json`,
-    });
-    return undefined;
-  }
-
-  if (!opts.useSpeedProvider) {
-    return new sdk.providers.RetryProvider(
-      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
-      chainId,
-      1, // quorum can be 1 in the context of the API
-      3, // retries
-      0.5, // delay
-      5, // max. concurrency
-      "RPC_PROVIDER", // cache namespace
-      0 // disable RPC calls logging
-    );
-  }
-
-  return new sdk.providers.SpeedProvider(
-    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
-    chainId,
-    3, // max. concurrency used in `SpeedProvider`
-    5, // max. concurrency used in `RateLimitedProvider`
-    "RPC_PROVIDER", // cache namespace
-    1 // disable RPC calls logging
-  );
-}
-
-export function getRpcUrlsFromConfigJson(chainId: number) {
-  const urls: string[] = [];
-
-  const { providers } = rpcProvidersJson;
-  const enabledProviders: RpcProviderName[] =
-    (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
-    providers.enabled.default;
-
-  for (const provider of enabledProviders) {
-    const providerUrl = (providers.urls[provider] as Record<string, string>)?.[
-      chainId
-    ];
-    if (providerUrl) {
-      urls.push(providerUrl);
-    }
-  }
-
-  return urls;
-}
-
-export function getProviderHeaders(
-  chainId: number | string
-): Record<string, string> | undefined {
-  const rpcHeaders = JSON.parse(RPC_HEADERS ?? "{}") as Record<
-    string,
-    Record<string, string>
-  >;
-
-  return rpcHeaders?.[String(chainId)];
-}
-
-/**
- * Generates a relevant SpokePool given the input chain ID
- * @param _chainId A valid chain Id that corresponds to an available AcrossV2 Spoke Pool
- * @returns The corresponding SpokePool for the given `_chainId`
- */
-export const getSpokePool = (_chainId: number): SpokePool => {
-  const spokePoolAddress = getSpokePoolAddress(_chainId);
-  return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
-};
-
-export const getSpokePoolAddress = (chainId: number): string => {
-  switch (chainId) {
-    default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId) as string;
-  }
-};
-
 /**
  * Determines if a given route is enabled to support an AcrossV2 bridge
  * @param fromChainId The chain id of the origin bridge action
@@ -1411,143 +1268,6 @@ export function getRoutesByChainIds(
     ({ toChain, fromChain }) =>
       originChainId === fromChain && destinationChainId === toChain
   );
-}
-
-/**
- * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
- * native currency will be returned.
- * @param chainId The blockchain Id to query against
- * @param account A valid Web3 wallet address
- * @param token The valid ERC20 token address on the given `chainId`.
- * @returns A promise that resolves to the BigNumber of the balance
- */
-export const getBalance = (
-  chainId: string | number,
-  account: string,
-  token: string,
-  blockTag?: string | number
-): Promise<BigNumber> => {
-  return sdk.utils.getTokenBalance(
-    account,
-    token,
-    getProvider(Number(chainId)),
-    blockTag ?? BLOCK_TAG_LAG
-  );
-};
-
-/**
- * Fetches the balances for an array of addresses on a particular chain, for a particular erc20 token
- * @param chainId The blockchain Id to query against
- * @param addresses An array of valid Web3 wallet addresses
- * @param tokenAddress The valid ERC20 token address on the given `chainId` or ZERO_ADDRESS for native balances
- * @param blockTag Block to query from, defaults to latest block
- * @returns a Promise that resolves to an array of BigNumbers
- */
-export const getBatchBalanceViaMulticall3 = async (
-  chainId: string | number,
-  addresses: string[],
-  tokenAddresses: string[],
-  blockTag: providers.BlockTag = "latest"
-): Promise<{
-  blockNumber: providers.BlockTag;
-  balances: Record<string, Record<string, string>>;
-}> => {
-  const chainIdAsInt = Number(chainId);
-  const provider = getProvider(chainIdAsInt);
-
-  const multicall3 = getMulticall3(chainIdAsInt, provider);
-
-  if (!multicall3) {
-    throw new Error("No Multicall3 deployed on this chain");
-  }
-
-  let calls: Parameters<typeof callViaMulticall3>[1] = [];
-
-  for (const tokenAddress of tokenAddresses) {
-    if (tokenAddress === sdk.constants.ZERO_ADDRESS) {
-      // For native currency
-      calls.push(
-        ...addresses.map((address) => ({
-          contract: multicall3,
-          functionName: "getEthBalance",
-          args: [address],
-        }))
-      );
-    } else {
-      // For ERC20 tokens
-      const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
-      calls.push(
-        ...addresses.map((address) => ({
-          contract: erc20Contract,
-          functionName: "balanceOf",
-          args: [address],
-        }))
-      );
-    }
-  }
-
-  const inputs = calls.map(({ contract, functionName, args }) => ({
-    target: contract.address,
-    callData: contract.interface.encodeFunctionData(functionName, args),
-  }));
-
-  const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
-    blockTag,
-  });
-
-  const decodedResults = results.map((result, i) =>
-    calls[i].contract.interface.decodeFunctionResult(
-      calls[i].functionName,
-      result
-    )
-  );
-
-  let balances: Record<string, Record<string, string>> = {};
-
-  let resultIndex = 0;
-  for (const tokenAddress of tokenAddresses) {
-    addresses.forEach((address) => {
-      if (!balances[address]) {
-        balances[address] = {};
-      }
-      balances[address][tokenAddress] = decodedResults[resultIndex].toString();
-      resultIndex++;
-    });
-  }
-
-  return {
-    blockNumber: blockNumber.toNumber(),
-    balances,
-  };
-};
-
-export function getMulticall3(
-  chainId: number,
-  signerOrProvider?: Signer | providers.Provider
-): Multicall3 | undefined {
-  const address = getMulticall3Address(chainId);
-
-  // no multicall on this chain
-  if (!address) {
-    return undefined;
-  }
-
-  return new ethers.Contract(
-    address,
-    MINIMAL_MULTICALL3_ABI,
-    signerOrProvider
-  ) as Multicall3;
-}
-
-export function getMulticall3Address(chainId: number): string | undefined {
-  const addressOverride = MULTICALL3_ADDRESS_OVERRIDES[chainId];
-  const addressFromSdk = sdk.utils.getMulticallAddress(chainId);
-
-  if (addressOverride) {
-    return addressOverride;
-  }
-
-  return addressFromSdk;
 }
 
 /**
@@ -2140,45 +1860,6 @@ export function getBaseRewardsApr(
 }
 
 /**
- * Makes a series of read calls via multicall3 (so they only hit the provider once).
- * @param provider Provider to use for the calls.
- * @param calls the calls to make via multicall3. Each call includes a contract, function name, and args, so that
- * this function can encode them correctly.
- * @param overrides Overrides to use for the multicall3 call.
- * @returns An array of the decoded results in the same order that they were passed in.
- */
-export async function callViaMulticall3(
-  provider: ethers.providers.JsonRpcProvider,
-  calls: {
-    contract: ethers.Contract;
-    functionName: string;
-    args?: any[];
-  }[],
-  overrides: ethers.CallOverrides = {}
-): Promise<ethers.utils.Result[]> {
-  const chainId = provider.network.chainId;
-  const multicall3 = new ethers.Contract(
-    getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
-    MINIMAL_MULTICALL3_ABI,
-    provider
-  );
-  const inputs = calls.map(({ contract, functionName, args }) => ({
-    target: contract.address,
-    callData: contract.interface.encodeFunctionData(functionName, args),
-  }));
-  const [, results] = await (multicall3.callStatic.aggregate(
-    inputs,
-    overrides
-  ) as Promise<[BigNumber, string[]]>);
-  return results.map((result, i) =>
-    calls[i].contract.interface.decodeFunctionResult(
-      calls[i].functionName,
-      result
-    )
-  );
-}
-
-/**
  * This gets a balancer v2 token price by querying the vault contract for the tokens and balances, and then
  * querying coingecko for the prices of those tokens.
  * @param tokenAddress The address of the balancer v2 token.
@@ -2390,6 +2071,9 @@ export function isContractCache(chainId: number, address: string) {
     buildInternalCacheKey("isContract", chainId, address),
     5 * 24 * 60 * 60, // 5 days - we can cache this for a long time
     async () => {
+      if (sdk.utils.chainIsSvm(chainId)) {
+        return false;
+      }
       const isDeployed = await sdk.utils.isContractDeployedToAddress(
         address,
         getProvider(chainId)
@@ -2418,21 +2102,36 @@ export function getCachedNativeGasCost(
   const fetchFn = async () => {
     const relayerAddress =
       overrides?.relayerAddress ??
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+      getDefaultRelayerAddress(deposit.destinationChainId);
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
-      overrides
+      { relayerAddress }
     );
-    const unsignedFillTxn =
-      await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        relayerAddress
+    if (sdk.utils.chainIsSvm(deposit.destinationChainId)) {
+      const _deposit = buildDepositForSimulation(deposit);
+      console.log("deposit", _deposit);
+      console.log("relayerAddress", relayerAddress);
+      console.log(
+        "inputToken",
+        sdk.utils
+          .toAddressType(_deposit.inputToken)
+          .forceSvmAddress()
+          .toBytes32()
       );
-    const voidSigner = new ethers.VoidSigner(
-      relayerAddress,
-      relayerFeeCalculatorQueries.provider
+      console.log(
+        "mint",
+        sdk.utils
+          .toAddressType(_deposit.outputToken)
+          .forceSvmAddress()
+          .toBase58()
+      );
+    }
+    const gasCost = await relayerFeeCalculatorQueries.getNativeGasCost(
+      buildDepositForSimulation(deposit),
+      relayerAddress
     );
-    return voidSigner.estimateGas(unsignedFillTxn);
+    console.log("gasCost", deposit.destinationChainId, gasCost);
+    return gasCost;
   };
 
   return makeCacheGetterAndSetter(
@@ -2474,6 +2173,11 @@ export function getCachedOpStackL1DataFee(
       deposit.destinationChainId,
       overrides
     );
+    if (
+      relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery
+    ) {
+      return undefined;
+    }
     const unsignedTx =
       await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
         buildDepositForSimulation(deposit),
@@ -2523,17 +2227,30 @@ export function latestGasPriceCache(
       chainId
     ),
     ttlPerChain.default,
-    async () => await getMaxFeePerGas(chainId, deposit, overrides),
+    () => getGasPriceEstimate(chainId, deposit, overrides),
     (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
-      return {
-        maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
-        maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
-      };
+      const evmGasPrice = gasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate;
+      const svmGasPrice = gasPrice as sdk.gasPriceOracle.SvmGasPriceEstimate;
+      if (evmGasPrice.maxFeePerGas && evmGasPrice.maxPriorityFeePerGas) {
+        return {
+          maxFeePerGas: BigNumber.from(evmGasPrice.maxFeePerGas),
+          maxPriorityFeePerGas: BigNumber.from(
+            evmGasPrice.maxPriorityFeePerGas
+          ),
+        };
+      } else {
+        return {
+          baseFee: BigNumber.from(svmGasPrice.baseFee),
+          microLamportsPerComputeUnit: BigNumber.from(
+            svmGasPrice.microLamportsPerComputeUnit
+          ),
+        };
+      }
     }
   );
 }
 
-export async function getMaxFeePerGas(
+export async function getGasPriceEstimate(
   chainId: number,
   deposit?: Parameters<typeof buildDepositForSimulation>[0],
   overrides?: Partial<{
@@ -2553,18 +2270,28 @@ export async function getMaxFeePerGas(
     chainId,
     overrides
   );
+  const isSvm =
+    relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery;
   const unsignedFillTxn = deposit
-    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        overrides?.relayerAddress
-      )
+    ? isSvm
+      ? await relayerFeeCalculatorQueries.getFillRelayTx(
+          buildDepositForSimulation(deposit),
+          overrides?.relayerAddress
+        )
+      : await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+          buildDepositForSimulation(deposit),
+          overrides?.relayerAddress
+        )
     : undefined;
-  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
-    chainId,
-    unsignedTx: unsignedFillTxn,
-    baseFeeMultiplier,
-    priorityFeeMultiplier,
-  });
+  return sdk.gasPriceOracle.getGasPriceEstimate(
+    relayerFeeCalculatorQueries.provider,
+    {
+      chainId,
+      unsignedTx: unsignedFillTxn,
+      baseFeeMultiplier,
+      priorityFeeMultiplier,
+    }
+  );
 }
 
 /**
