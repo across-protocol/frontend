@@ -44,6 +44,10 @@
     {
       "source": "/api/deposit/status",
       "destination": "https://indexer.api.across.to/deposit/status"
+    },
+    {
+      "source": "/api/deposits",
+      "destination": "https://indexer.api.across.to/deposits"
     }
   ],
   "redirects": [
