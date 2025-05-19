@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { assert, Infer, type, string, array, union } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
-  getBatchBalanceViaMulticall3,
+  getBatchBalance,
   getLogger,
   handleErrorCondition,
   paramToArray,
@@ -21,7 +21,7 @@ type BatchAccountBalanceQueryParams = Infer<
 >;
 
 export type BatchAccountBalanceResponse = Awaited<
-  ReturnType<typeof getBatchBalanceViaMulticall3>
+  ReturnType<typeof getBatchBalance>
 > & {
   chainId: number;
 };
@@ -88,7 +88,7 @@ const handler = async (
       });
     }
 
-    const result = await getBatchBalanceViaMulticall3(
+    const result = await getBatchBalance(
       chainIdAsInt,
       addresses,
       tokenAddresses
