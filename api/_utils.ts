@@ -70,6 +70,7 @@ import {
   getProvider,
   getSvmProvider,
   getRpcUrlsFromConfigJson,
+  getProviderHeaders,
 } from "./_providers";
 import { getLogger, logger } from "./_logger";
 import { getEnvs } from "./_env";
@@ -78,6 +79,7 @@ import { getBalance, getBatchBalance } from "./_balance";
 import { callViaMulticall3 } from "./_multicall";
 import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
+import { getMulticall3, getMulticall3Address } from "./_multicall";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -87,7 +89,10 @@ export {
   getProvider,
   getBalance,
   getBatchBalance,
+  getProviderHeaders,
   callViaMulticall3,
+  getMulticall3,
+  getMulticall3Address,
   getSpokePoolAddress,
   getSpokePool,
 };
