@@ -35,10 +35,9 @@ export class SVMBalanceStrategy implements BalanceStrategy {
     }
 
     const tokenAddressBase58 = toAddressType(
-      tokenInfo.addresses[chainId],
-      chainId
+      tokenInfo.addresses[chainId]
     ).toBase58();
-    const accountBase58 = toAddressType(account, chainId).toBase58();
+    const accountBase58 = toAddressType(account).toBase58();
 
     let balance: BigNumber;
 
