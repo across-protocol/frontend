@@ -6809,6 +6809,17 @@
     },
     {
       "fromChain": 59144,
+      "toChain": 34268394551451,
+      "fromTokenAddress": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+      "toTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 59144,
       "toChain": 42161,
       "fromTokenAddress": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
       "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -9036,6 +9047,17 @@
       "toChain": 232,
       "fromTokenAddress": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
       "toTokenAddress": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
+      "fromSpokeAddress": "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
+      "fromTokenSymbol": "USDC.e",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 1135,
+      "toChain": 34268394551451,
+      "fromTokenAddress": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
+      "toTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "fromSpokeAddress": "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
       "fromTokenSymbol": "USDC.e",
       "toTokenSymbol": "USDC",
@@ -14231,9 +14253,31 @@
     },
     {
       "fromChain": 34268394551451,
+      "toChain": 59144,
+      "fromTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "toTokenAddress": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+      "fromSpokeAddress": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 34268394551451,
       "toChain": 34443,
       "fromTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "toTokenAddress": "0xd988097fb8612cc24eeC14542bC03424c656005f",
+      "fromSpokeAddress": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC.e",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 34268394551451,
+      "toChain": 1135,
+      "fromTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "toTokenAddress": "0xF242275d3a6527d877f2c927a82D9b057609cc71",
       "fromSpokeAddress": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
       "fromTokenSymbol": "USDC",
       "toTokenSymbol": "USDC.e",

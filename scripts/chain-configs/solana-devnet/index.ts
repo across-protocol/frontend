@@ -4,7 +4,7 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.SOLANA;
+const chainId = CHAIN_IDs.SOLANA_DEVNET;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
@@ -20,4 +20,5 @@ export default {
   blockTimeSeconds: 0.5,
   tokens: ["USDC"],
   enableCCTP: true,
+  omitViemConfig: true,
 } as ChainConfig;
