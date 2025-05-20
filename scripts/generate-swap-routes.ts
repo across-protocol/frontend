@@ -12,7 +12,7 @@ const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
-        disabledOriginChains: number[];
+        disabledOriginChains?: number[];
         enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
@@ -43,10 +43,30 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
       all: {
         disabledOriginChains: [
-          CHAIN_IDs.LINEA, // Not swappable on Uniswap V3
-          CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
-          CHAIN_IDs.UNICHAIN, // Not swappable on Uniswap V3
+          CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
+          CHAIN_IDs.LINEA, // Not bridgeable
         ],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDbC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDzC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },

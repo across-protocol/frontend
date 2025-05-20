@@ -123,6 +123,7 @@ export type IndexerDeposit = {
   fillDeadline: string;
   quoteTimestamp: string;
   depositTransactionHash: string;
+  depositTxHash: string;
   depositBlockNumber: number;
   depositBlockTimestamp: string;
   status: "unfilled" | "filled";
@@ -140,7 +141,7 @@ export type IndexerDeposit = {
   swapTokenAmount: string;
   relayer: string;
   fillBlockTimestamp: string;
-  fillTransactionHash: string;
+  fillTx: string;
   speedups: any[];
 };
 
