@@ -3,7 +3,7 @@ import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp } from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
-import { rewardsApiUrl } from "utils/constants";
+import { indexerApiBaseUrl } from "utils/constants";
 import axios from "axios";
 import {
   IChainStrategy,
@@ -66,7 +66,7 @@ export class EVMStrategy implements IChainStrategy {
     toChainId: number
   ): Promise<FillInfo> {
     const depositId = depositInfo.depositLog?.depositId;
-
+    const originChainId = depositInfo.depositLog.originChainId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
     }
@@ -76,10 +76,11 @@ export class EVMStrategy implements IChainStrategy {
       const { data } = await axios.get<{
         status: "filled" | "pending";
         fillTx: string | null;
-      }>(`${rewardsApiUrl}/deposit/status`, {
+      }>(`${indexerApiBaseUrl}/deposit/status`, {
         params: {
+          originChainId,
           depositId: depositId.toString(),
-          originChainId: this.chainId,
+          depositTxHash: depositInfo.depositTxHash,
         },
       });
 
@@ -112,7 +113,7 @@ export class EVMStrategy implements IChainStrategy {
             logIndex: parsedFIllLog.logIndex,
             originChainId: Number(parsedFIllLog.args.originChainId),
             repaymentChainId: Number(parsedFIllLog.args.repaymentChainId),
-          } satisfies FillData,
+          } as const satisfies FillData,
           status: "filled",
         };
       }
@@ -130,7 +131,6 @@ export class EVMStrategy implements IChainStrategy {
 
       const config = getConfig();
       const destinationSpokePool = config.getSpokePool(toChainId);
-
       const filledRelayEvents = await destinationSpokePool.queryFilter(
         destinationSpokePool.filters.FilledRelay(
           undefined,
@@ -138,12 +138,11 @@ export class EVMStrategy implements IChainStrategy {
           undefined,
           undefined,
           undefined,
-          this.chainId,
+          originChainId,
           depositId
         ),
         blockForTimestamp
       );
-
       // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
       // The (depositId, fromChainId) tuple is unique for V3 filled relay events.

@@ -9,6 +9,7 @@ import {
   recordTransferUserProperties,
   wait,
   getChainInfo,
+  NoFundsDepositedLogError,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -63,7 +64,9 @@ export function useDepositTracking({
         return depositStrategy.getDeposit(depositTxHash);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
-        setShouldRetryDepositQuery(false);
+        if (e instanceof NoFundsDepositedLogError) {
+          setShouldRetryDepositQuery(false);
+        }
         throw e;
       }
     },
@@ -86,6 +89,7 @@ export function useDepositTracking({
 
     // Check if deposit is already in local storage
     const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+
     if (!localDepositByTxHash) {
       // Optimistically add deposit to local storage for instant visibility
       // Use the strategy-specific conversion method
@@ -137,17 +141,14 @@ export function useDepositTracking({
     queryFn: async () => {
       const depositInfo = depositQuery.data;
 
-      if (!depositInfo || depositInfo.status === "depositing") {
-        return;
-      }
-
       // Use the strategy to get fill information through the normalized interface
-      return fillStrategy.getFill(depositInfo, toChainId);
+      return await fillStrategy.getFill(depositInfo as any, toChainId);
     },
     staleTime: Infinity,
     retry: true,
+    refetchInterval: 10_000,
     retryDelay: getRetryDelay(toChainId),
-    enabled: !!depositQuery.data,
+    enabled: !!depositQuery.data && depositQuery.data.status !== "depositing",
   });
 
   // Track fill in local storage
@@ -157,7 +158,6 @@ export function useDepositTracking({
     if (!fromBridgePagePayload || !fillInfo || fillInfo.status === "filling") {
       return;
     }
-
     // Remove existing deposit and add updated one with fill information
     const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
 

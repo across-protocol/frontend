@@ -1,6 +1,6 @@
 import { getConfig } from "utils/config";
 import axios from "axios";
-import { rewardsApiUrl } from "utils/constants";
+import { indexerApiBaseUrl } from "utils/constants";
 import {
   IChainStrategy,
   DepositInfo,
@@ -75,17 +75,23 @@ export class SVMStrategy implements IChainStrategy {
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog.depositId;
+    const depositId = depositInfo.depositLog?.depositId;
+    const originChainId = depositInfo.depositLog.originChainId;
+
+    if (!depositId) {
+      throw new Error("Deposit ID not found in deposit information");
+    }
 
     try {
       // First try the rewards API
       const { data } = await axios.get<{
         status: "filled" | "pending";
         fillTx: string | null;
-      }>(`${rewardsApiUrl}/deposit/status`, {
+      }>(`${indexerApiBaseUrl}/deposit/status`, {
         params: {
+          originChainId,
           depositId: depositId.toString(),
-          originChainId: this.chainId,
+          depositTxHash: depositInfo.depositTxHash,
         },
       });
 
