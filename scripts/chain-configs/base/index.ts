@@ -17,7 +17,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://mainnet.base.org",
-  tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
+  tokens: ["USDC", "USDT", "WETH", "ETH", "DAI", "BAL", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 2,
 } as ChainConfig;
