@@ -95,24 +95,14 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       )(_outputAmount.toString()).toString()
     );
 
-    const _recipient = toAddressType(
-      depositArgs.toAddress,
-      selectedRoute.fromChain
-    );
+    const _recipient = toAddressType(depositArgs.toAddress);
     const recipient = new PublicKey(_recipient.toBase58());
-    const _inputToken = toAddressType(
-      selectedRoute.fromTokenAddress,
-      selectedRoute.fromChain
-    );
+    const _inputToken = toAddressType(selectedRoute.fromTokenAddress);
     const inputTokenAddress = new PublicKey(_inputToken.toBase58());
-    const _outputToken = toAddressType(
-      selectedRoute.toTokenAddress,
-      selectedRoute.toChain
-    );
+    const _outputToken = toAddressType(selectedRoute.toTokenAddress);
     const outputTokenAddress = new PublicKey(_outputToken.toBase58());
     const _exclusiveRelayer = toAddressType(
-      transferQuote.quotedFees.exclusiveRelayer,
-      selectedRoute.fromChain
+      transferQuote.quotedFees.exclusiveRelayer
     );
     const exclusiveRelayer = new PublicKey(_exclusiveRelayer.toBase58());
 
