@@ -86,20 +86,23 @@ export function shortenTransactionHash(hash: string): string {
 // for number less than 1, this will ensure at least 1 digit is shown ( not rounded to 0)
 export const smallNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
+    roundingMode: "floor",
     minimumSignificantDigits: 1,
-    maximumSignificantDigits: precision || 3,
+    maximumSignificantDigits: precision || 4,
   }).format(num);
 
 // for numbers 1 or greater, this will ensure we never round down and lose values > 1, while minimizing decimals to max of 3
 export const largeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: precision || 3,
+    roundingMode: "floor",
+    maximumFractionDigits: precision || 4,
   }).format(num);
 
 // for numbers 1000 or greater, this will remove any fractional component to make it a bit cleaner
 export const veryLargeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: precision || 0,
+    roundingMode: "floor",
+    maximumFractionDigits: precision || 2,
   }).format(num);
 
 export function formatUnitsWithMaxFractions(
