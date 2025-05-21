@@ -30,6 +30,7 @@ export default {
     "SNX",
     "POOL",
     "WLD",
+    "ezETH",
   ],
   blockTimeSeconds: 2,
   enableCCTP: true,

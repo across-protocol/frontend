@@ -35,6 +35,7 @@ export default {
     "POOL",
     "LSK",
     "WGHO",
+    "ezETH",
   ],
   enableCCTP: false,
   swapTokens: [],

@@ -18,7 +18,7 @@ export default {
   chainId,
   blockTimeSeconds: 2,
   publicRpcUrl: "https://mainnet.mode.network",
-  tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
+  tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC", "ezETH"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

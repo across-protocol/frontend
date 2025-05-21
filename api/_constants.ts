@@ -32,11 +32,6 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.000075").toString(),
     cutoff: ethers.utils.parseUnits("0.3").toString(),
   },
-  WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.000075").toString(),
-    cutoff: ethers.utils.parseUnits("0.3").toString(),
-  },
   WBTC: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.0025").toString(),
@@ -146,6 +141,7 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
     [token: string]: relayFeeCalculator.CapitalCostConfig;
   } = {};
   const tokensWithSameConfig = [
+    ["ETH", "WETH", "ezETH"],
     ["USDT", "USDT-BNB"],
     [
       "USDC",
