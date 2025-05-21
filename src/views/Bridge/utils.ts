@@ -212,6 +212,7 @@ export function validateBridgeAmount(params: {
 const defaultRouteFilter = {
   fromChain: hubPoolChainId,
   inputTokenSymbol: "ETH",
+  outputTokenSymbol: "ETH",
 };
 
 // for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
