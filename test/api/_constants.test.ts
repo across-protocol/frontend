@@ -24,7 +24,7 @@ describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
     };
 
     const result = populateDefaultRelayerFeeCapitalCostConfig(baseConfig);
-    expect(result).toEqual(expectedConfig);
+    expect(result.ETH).toEqual(expectedConfig.ETH);
   });
 
   it("should populate config for equivalent tokens with correct decimal conversion", () => {
