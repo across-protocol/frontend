@@ -238,15 +238,17 @@ const defaultFilter = {
 };
 
 export function getInitialRoute(filter: RouteFilter = {}) {
+  const inputTokenSymbol =
+    filter.inputTokenSymbol ??
+    (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH");
   const routeFromUrl = getRouteFromUrl({
     ...filter,
+    inputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
   const routeFromFilter = findEnabledRoute({
-    inputTokenSymbol:
-      filter.inputTokenSymbol ??
-      (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
+    inputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
