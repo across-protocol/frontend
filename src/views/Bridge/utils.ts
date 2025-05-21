@@ -245,9 +245,7 @@ export function getInitialRoute(filter: RouteFilter = {}) {
   const inputTokenSymbol =
     filter.inputTokenSymbol ??
     (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH");
-  const outputTokenSymbol =
-    filter.outputTokenSymbol ??
-    (isNonEthChain(filter?.toChain) ? "WETH" : "ETH");
+  const outputTokenSymbol = filter.outputTokenSymbol ?? inputTokenSymbol;
   const routeFromUrl = getRouteFromUrl({
     ...filter,
     inputTokenSymbol,
@@ -311,14 +309,6 @@ export function findEnabledRoute(
       };
     }
   } else {
-    const universalSwapRoute = universalSwapRoutes.find((route) =>
-      commonRouteFilter(route)
-    );
-
-    if (universalSwapRoute) {
-      return { ...universalSwapRoute, type: "universal-swap" };
-    }
-
     const route = enabledRoutes.find((route) => commonRouteFilter(route));
 
     if (route) {
@@ -326,6 +316,14 @@ export function findEnabledRoute(
         ...route,
         type: "bridge",
       };
+    }
+
+    const universalSwapRoute = universalSwapRoutes.find((route) =>
+      commonRouteFilter(route)
+    );
+
+    if (universalSwapRoute) {
+      return { ...universalSwapRoute, type: "universal-swap" };
     }
   }
 
