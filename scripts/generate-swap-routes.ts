@@ -12,6 +12,7 @@ const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
+        enabledOriginChains?: number[];
         disabledOriginChains?: number[];
         enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
@@ -84,22 +85,111 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.ezETH.symbol]: {
-      all: {
-        enabledDestinationChains: "all",
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.UNICHAIN,
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.OPTIMISM,
+        ],
+        enabledOutputTokens: ["ETH", "WETH"],
+      },
+      // TODO: Only possible if Uniswap V3 is supported on Unichain
+      // [CHAIN_IDs.UNICHAIN]: {
+      //   enabledDestinationChains: [
+      //     CHAIN_IDs.MAINNET,
+      //     CHAIN_IDs.BASE,
+      //     CHAIN_IDs.OPTIMISM,
+      //   ],
+      //   enabledOutputTokens: ["ETH", "WETH"],
+      // },
+      [CHAIN_IDs.BASE]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.UNICHAIN,
+          CHAIN_IDs.OPTIMISM,
+        ],
+        enabledOutputTokens: ["ETH", "WETH"],
+      },
+      [CHAIN_IDs.OPTIMISM]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.UNICHAIN,
+        ],
         enabledOutputTokens: ["ETH", "WETH"],
       },
     },
     [TOKEN_SYMBOLS_MAP.ETH.symbol]: {
-      all: {
-        enabledDestinationChains: "all",
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.OPTIMISM,
+          // TODO: Only possible if Uniswap V3 is supported on Unichain
+          // CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["ezETH"],
+      },
+      [CHAIN_IDs.BASE]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.OPTIMISM,
+          // TODO: Only possible if Uniswap V3 is supported on Unichain
+          // CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["ezETH"],
+      },
+      [CHAIN_IDs.OPTIMISM]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.BASE,
+          // TODO: Only possible if Uniswap V3 is supported on Unichain
+          // CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["ezETH"],
+      },
+      [CHAIN_IDs.UNICHAIN]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.OPTIMISM,
+        ],
         enabledOutputTokens: ["ezETH"],
       },
     },
     [TOKEN_SYMBOLS_MAP.WETH.symbol]: {
-      all: {
-        enabledDestinationChains: "all",
+      [CHAIN_IDs.MAINNET]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.OPTIMISM,
+          CHAIN_IDs.UNICHAIN,
+        ],
         enabledOutputTokens: ["ezETH"],
       },
+      [CHAIN_IDs.BASE]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.OPTIMISM,
+          CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["ezETH"],
+      },
+      [CHAIN_IDs.OPTIMISM]: {
+        enabledDestinationChains: [
+          CHAIN_IDs.MAINNET,
+          CHAIN_IDs.BASE,
+          CHAIN_IDs.UNICHAIN,
+        ],
+        enabledOutputTokens: ["ezETH"],
+      },
+      // TODO: Only possible if Uniswap V3 is supported on Unichain
+      // [CHAIN_IDs.UNICHAIN]: {
+      //   enabledDestinationChains: [
+      //     CHAIN_IDs.MAINNET,
+      //     CHAIN_IDs.BASE,
+      //     CHAIN_IDs.OPTIMISM,
+      //   ],
+      //   enabledOutputTokens: ["ezETH"],
+      // },
     },
   },
   [CHAIN_IDs.SEPOLIA]: {},
