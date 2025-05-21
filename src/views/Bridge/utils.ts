@@ -85,11 +85,13 @@ export function getReceiveTokenSymbol(
   destinationChainId: number,
   inputTokenSymbol: string,
   outputTokenSymbol: string,
-  isReceiverContract: boolean
+  isReceiverContract: boolean,
+  type: SelectedRoute["type"]
 ) {
   const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
 
   if (
+    type === "bridge" &&
     inputTokenSymbol === "ETH" &&
     (isDestinationChainWethOnly || isReceiverContract)
   ) {
@@ -97,6 +99,7 @@ export function getReceiveTokenSymbol(
   }
 
   if (
+    type === "bridge" &&
     inputTokenSymbol === "WETH" &&
     !isDestinationChainWethOnly &&
     !isReceiverContract
@@ -241,14 +244,19 @@ export function getInitialRoute(filter: RouteFilter = {}) {
   const inputTokenSymbol =
     filter.inputTokenSymbol ??
     (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH");
+  const outputTokenSymbol =
+    filter.outputTokenSymbol ??
+    (isNonEthChain(filter?.toChain) ? "WETH" : "ETH");
   const routeFromUrl = getRouteFromUrl({
     ...filter,
     inputTokenSymbol,
+    outputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol,
+    outputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });

@@ -62,6 +62,11 @@ export function DepositStatusLowerCard({
   const history = useHistory();
   const isReceiverContract = useIsContractAddress(recipient);
   const programName = chainIdToRewardsProgramName[toChainId];
+  const transferType = swapQuote
+    ? "swap"
+    : isUniversalSwap
+      ? "universal-swap"
+      : "bridge";
 
   const FeesTable =
     lpFee && gasFee && depositArgs?.initialAmount ? (
@@ -78,7 +83,8 @@ export function DepositStatusLowerCard({
             toChainId,
             inputTokenSymbol,
             outputToken.symbol,
-            isReceiverContract
+            isReceiverContract,
+            transferType
           )
         )}
         parsedAmount={BigNumber.from(depositArgs.initialAmount)}
