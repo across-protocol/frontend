@@ -208,7 +208,7 @@ export const getConfirmationDepositTime = (
   };
 };
 
-export type AcrossDepositV3Args = {
+export type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
@@ -234,7 +234,7 @@ type NetworkMismatchHandler = (
 /**
  * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link AcrossDepositV3Args arguments} to pass to the deposit function of the bridge contract.
+ * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendSpokePoolVerifierDepositTx(
@@ -251,10 +251,11 @@ export async function sendSpokePoolVerifierDepositTx(
     referrer,
     fillDeadline,
     inputTokenAddress,
+    outputTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositV3Args,
+  }: AcrossDepositArgs,
   spokePool: SpokePool,
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
@@ -265,14 +266,21 @@ export async function sendSpokePoolVerifierDepositTx(
     );
   }
   const inputAmount = amount;
-  const outputAmount = inputAmount.sub(
-    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
-  );
+  const outputAmount = getDepositOutputAmount({
+    amount: inputAmount,
+    relayerFeePct,
+    fromChain,
+    inputTokenAddress,
+    toChain: destinationChainId,
+    outputTokenAddress: inputTokenAddress,
+  });
+
   const tx = await spokePoolVerifier.populateTransaction.deposit(
     spokePool.address,
     toBytes32(recipient),
     toBytes32(inputTokenAddress),
     inputAmount,
+    toBytes32(outputTokenAddress),
     outputAmount,
     destinationChainId,
     toBytes32(exclusiveRelayer),
@@ -312,7 +320,7 @@ export async function sendDepositTx(
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositV3Args,
+  }: AcrossDepositArgs,
   spokePool: SpokePool,
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
@@ -376,7 +384,7 @@ export async function sendSwapAndBridgeTx(
     swapQuote,
     swapTokenAmount,
     integratorId,
-  }: AcrossDepositV3Args & {
+  }: AcrossDepositArgs & {
     swapTokenAmount: BigNumber;
     swapTokenAddress: string;
     swapQuote: SwapQuoteApiResponse;
@@ -546,7 +554,7 @@ async function _tagRefAndSignTx(
 
 function getDepositOutputAmount(
   depositArgs: Pick<
-    AcrossDepositV3Args,
+    AcrossDepositArgs,
     | "amount"
     | "relayerFeePct"
     | "fromChain"
