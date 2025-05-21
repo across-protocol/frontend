@@ -7,7 +7,7 @@ import {
   waitOnTransaction,
   getSpokePoolAndVerifier,
   sendSpokePoolVerifierDepositTx,
-  sendDepositV3Tx,
+  sendDepositTx,
   sendSwapAndBridgeTx,
   acrossPlusMulticallHandler,
 } from "utils";
@@ -169,7 +169,7 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         onNetworkMismatch
       );
     } else {
-      tx = await sendDepositV3Tx(
+      tx = await sendDepositTx(
         signer,
         {
           ...depositArgs,
@@ -259,7 +259,7 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     await this.assertCorrectNetwork(selectedRoute.fromChain);
 
     const { spokePool } = await getSpokePoolAndVerifier(selectedRoute);
-    const tx = await sendDepositV3Tx(
+    const tx = await sendDepositTx(
       this.signer,
       {
         ...depositArgs,

@@ -25,8 +25,6 @@ export function getSvmProvider(chainId: number) {
   if (urls.length === 0 && !publicNetwork) {
     throw new Error(`No provider URL set for SVM chain: ${chainId}`);
   }
-  console.log("urls", urls);
-  console.log("publicNetwork", publicNetwork);
   const clusterUrl = urls.length > 0 ? urls[0] : publicNetwork.publicRPC;
   return new sdk.providers.SolanaDefaultRpcFactory(clusterUrl, chainId);
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChainId, vercelApiBaseUrl, chainIsSvm } from "utils";
+import { ChainId, vercelApiBaseUrl } from "utils";
 import { BridgeLimitInterface } from "../types";
 import { BigNumber, utils } from "ethers";
 
@@ -9,16 +9,6 @@ export async function retrieveLimits(
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
-  // @TODO: remove this once /limits is updated to support SVM
-  if (chainIsSvm(Number(fromChainId))) {
-    return retrieveLimitsForSVM(
-      inputToken,
-      outputToken,
-      fromChainId,
-      toChainId
-    );
-  }
-
   const { data } = await axios.get<BridgeLimitInterface>(
     `${vercelApiBaseUrl}/api/limits`,
     {

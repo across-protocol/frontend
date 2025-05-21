@@ -162,7 +162,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         { pubkey: this.signerPublicKey, isSigner: true, isWritable: true },
         { pubkey: statePda, isSigner: false, isWritable: true },
         { pubkey: routePda, isSigner: false, isWritable: false },
-        { pubkey: depositorTokenAccount, isSigner: false, isWritable: false },
+        { pubkey: depositorTokenAccount, isSigner: false, isWritable: true },
         { pubkey: vault, isSigner: false, isWritable: true },
         { pubkey: inputTokenAddress, isSigner: false, isWritable: false },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },

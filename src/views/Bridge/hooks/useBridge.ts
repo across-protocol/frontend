@@ -7,7 +7,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { ampli } from "ampli";
 import { defaultSwapSlippage, bnZero, getEcosystem } from "utils";
 
-import { useBridgeAction } from "./useBridgeAction_new";
+import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";

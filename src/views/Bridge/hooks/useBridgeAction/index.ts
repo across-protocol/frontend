@@ -7,6 +7,8 @@ import { EVMBridgeActionStrategy } from "./strategies/evm";
 import { SVMBridgeActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
 
+export type { FromBridgePagePayload } from "./factory";
+
 function useBridgeActionEVM() {
   const connectionEVM = useConnectionEVM();
   const strategy = new EVMBridgeActionStrategy(connectionEVM);

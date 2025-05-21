@@ -10,12 +10,34 @@ import {
   generateTransferSigned,
   generateTransferSubmitted,
 } from "utils/amplitude";
-import { ampli, DepositNetworkMismatchProperties } from "ampli";
+import {
+  ampli,
+  DepositNetworkMismatchProperties,
+  TransferQuoteReceivedProperties,
+} from "ampli";
+import { BridgeLimitInterface } from "utils/serverless-api/types";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { GetBridgeFeesResult } from "utils/bridge";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
-import { FromBridgePagePayload } from "../useBridgeAction";
 import { TransferQuote } from "../useTransferQuote";
 import { SelectedRoute } from "../../utils";
 import { BridgeActionStrategy } from "./strategies/types";
+
+export type FromBridgePagePayload = {
+  expectedFillTime: string;
+  timeSigned: number;
+  recipient: string;
+  referrer: string;
+  tokenPrice: string;
+  swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
+  selectedRoute: SelectedRoute;
+  quote: GetBridgeFeesResult;
+  quotedLimits: BridgeLimitInterface;
+  quoteForAnalytics: TransferQuoteReceivedProperties;
+  depositArgs: NonNullable<ReturnType<typeof getDepositArgs>>;
+};
 
 export function createBridgeActionHook(strategy: BridgeActionStrategy) {
   return function useBridgeAction(

@@ -4,7 +4,7 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.SOLANA_DEVNET;
+const chainId = CHAIN_IDs.SOLANA;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
