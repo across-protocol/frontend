@@ -116,15 +116,25 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import solanaLogo from "assets/chain-logos/solana.svg";
+import solanaGrayscaleLogo from "assets/chain-logos/solana-grayscale.svg";
+import { ReactComponent as solanaLogoSvg } from "assets/chain-logos/solana.svg";
+import { ReactComponent as solanaGrayscaleLogoSvg } from "assets/chain-logos/solana-grayscale.svg";
+
+import solanaDevnetLogo from "assets/chain-logos/solana-devnet.svg";
+import solanaDevnetGrayscaleLogo from "assets/chain-logos/solana-devnet-grayscale.svg";
+import { ReactComponent as solanaDevnetLogoSvg } from "assets/chain-logos/solana-devnet.svg";
+import { ReactComponent as solanaDevnetGrayscaleLogoSvg } from "assets/chain-logos/solana-devnet-grayscale.svg";
+
 import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
-import katanaTataraLogo from "assets/chain-logos/tatara.svg";
-import katanaTataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
-import { ReactComponent as katanaTataraLogoSvg } from "assets/chain-logos/tatara.svg";
-import { ReactComponent as katanaTataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
+import tataraLogo from "assets/chain-logos/tatara.svg";
+import tataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
+import { ReactComponent as tataraLogoSvg } from "assets/chain-logos/tatara.svg";
+import { ReactComponent as tataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
 
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
@@ -184,8 +194,8 @@ export const alephZero_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        alephZero.rpcUrl,
         alephZero.customRpcUrl ? alephZero.customRpcUrl : [],
+        alephZero.rpcUrl,
       ].flat(),
     },
   },
@@ -225,8 +235,8 @@ export const arbitrum_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        arbitrum.rpcUrl,
         arbitrum.customRpcUrl ? arbitrum.customRpcUrl : [],
+        arbitrum.rpcUrl,
       ].flat(),
     },
   },
@@ -266,8 +276,8 @@ export const arbitrumSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        arbitrumSepolia.rpcUrl,
         arbitrumSepolia.customRpcUrl ? arbitrumSepolia.customRpcUrl : [],
+        arbitrumSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -305,7 +315,7 @@ export const base_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [base.rpcUrl, base.customRpcUrl ? base.customRpcUrl : []].flat(),
+      http: [base.customRpcUrl ? base.customRpcUrl : [], base.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -344,8 +354,8 @@ export const baseSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        baseSepolia.rpcUrl,
         baseSepolia.customRpcUrl ? baseSepolia.customRpcUrl : [],
+        baseSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -384,7 +394,7 @@ export const blast_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [blast.rpcUrl, blast.customRpcUrl ? blast.customRpcUrl : []].flat(),
+      http: [blast.customRpcUrl ? blast.customRpcUrl : [], blast.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -423,8 +433,8 @@ export const blastSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        blastSepolia.rpcUrl,
         blastSepolia.customRpcUrl ? blastSepolia.customRpcUrl : [],
+        blastSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -462,7 +472,7 @@ export const ink_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [ink.rpcUrl, ink.customRpcUrl ? ink.customRpcUrl : []].flat(),
+      http: [ink.customRpcUrl ? ink.customRpcUrl : [], ink.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -499,7 +509,7 @@ export const lens_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [lens.rpcUrl, lens.customRpcUrl ? lens.customRpcUrl : []].flat(),
+      http: [lens.customRpcUrl ? lens.customRpcUrl : [], lens.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -538,8 +548,8 @@ export const lensSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        lensSepolia.rpcUrl,
         lensSepolia.customRpcUrl ? lensSepolia.customRpcUrl : [],
+        lensSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -578,7 +588,7 @@ export const linea_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [linea.rpcUrl, linea.customRpcUrl ? linea.customRpcUrl : []].flat(),
+      http: [linea.customRpcUrl ? linea.customRpcUrl : [], linea.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -615,7 +625,7 @@ export const lisk_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [lisk.rpcUrl, lisk.customRpcUrl ? lisk.customRpcUrl : []].flat(),
+      http: [lisk.customRpcUrl ? lisk.customRpcUrl : [], lisk.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -654,8 +664,8 @@ export const liskSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        liskSepolia.rpcUrl,
         liskSepolia.customRpcUrl ? liskSepolia.customRpcUrl : [],
+        liskSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -695,8 +705,8 @@ export const ethereum_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        ethereum.rpcUrl,
         ethereum.customRpcUrl ? ethereum.customRpcUrl : [],
+        ethereum.rpcUrl,
       ].flat(),
     },
   },
@@ -734,7 +744,7 @@ export const mode_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [mode.rpcUrl, mode.customRpcUrl ? mode.customRpcUrl : []].flat(),
+      http: [mode.customRpcUrl ? mode.customRpcUrl : [], mode.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -773,8 +783,8 @@ export const modeSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        modeSepolia.rpcUrl,
         modeSepolia.customRpcUrl ? modeSepolia.customRpcUrl : [],
+        modeSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -814,8 +824,8 @@ export const optimism_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        optimism.rpcUrl,
         optimism.customRpcUrl ? optimism.customRpcUrl : [],
+        optimism.rpcUrl,
       ].flat(),
     },
   },
@@ -855,8 +865,8 @@ export const optimismSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        optimismSepolia.rpcUrl,
         optimismSepolia.customRpcUrl ? optimismSepolia.customRpcUrl : [],
+        optimismSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -896,8 +906,8 @@ export const polygon_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        polygon.rpcUrl,
         polygon.customRpcUrl ? polygon.customRpcUrl : [],
+        polygon.rpcUrl,
       ].flat(),
     },
   },
@@ -937,8 +947,8 @@ export const polygonAmoy_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        polygonAmoy.rpcUrl,
         polygonAmoy.customRpcUrl ? polygonAmoy.customRpcUrl : [],
+        polygonAmoy.rpcUrl,
       ].flat(),
     },
   },
@@ -978,8 +988,8 @@ export const redstone_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        redstone.rpcUrl,
         redstone.customRpcUrl ? redstone.customRpcUrl : [],
+        redstone.rpcUrl,
       ].flat(),
     },
   },
@@ -1019,8 +1029,8 @@ export const scroll_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        scroll.rpcUrl,
         scroll.customRpcUrl ? scroll.customRpcUrl : [],
+        scroll.rpcUrl,
       ].flat(),
     },
   },
@@ -1060,8 +1070,8 @@ export const sepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        sepolia.rpcUrl,
         sepolia.customRpcUrl ? sepolia.customRpcUrl : [],
+        sepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -1072,6 +1082,40 @@ export const sepolia_viem = defineChain({
     },
   },
 });
+
+export const solana = {
+  name: "Solana",
+  fullName: "Solana",
+  chainId: 34268394551451,
+  logoURI: solanaLogo,
+  grayscaleLogoURI: solanaGrayscaleLogo,
+  logoSvg: solanaLogoSvg,
+  grayscaleLogoSvg: solanaGrayscaleLogoSvg,
+  rpcUrl: "https://api.mainnet-beta.solana.com",
+  explorerUrl: "https://solscan.io",
+  constructExplorerLink: (txHash: string) =>
+    `${solana.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "SOL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_34268394551451_CUSTOM_RPC_URL,
+  pollingInterval: 500,
+};
+
+export const solanaDevnet = {
+  name: "Solana Devnet",
+  fullName: "Solana devnet",
+  chainId: 133268194659241,
+  logoURI: solanaDevnetLogo,
+  grayscaleLogoURI: solanaDevnetGrayscaleLogo,
+  logoSvg: solanaDevnetLogoSvg,
+  grayscaleLogoSvg: solanaDevnetGrayscaleLogoSvg,
+  rpcUrl: "https://api.devnet.solana.com",
+  explorerUrl: "https://explorer.solana.com/?cluster=devnet",
+  constructExplorerLink: (txHash: string) =>
+    `${solanaDevnet.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "SOL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_133268194659241_CUSTOM_RPC_URL,
+  pollingInterval: 500,
+};
 
 export const soneium = {
   name: "Soneium",
@@ -1101,8 +1145,8 @@ export const soneium_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        soneium.rpcUrl,
         soneium.customRpcUrl ? soneium.customRpcUrl : [],
+        soneium.rpcUrl,
       ].flat(),
     },
   },
@@ -1114,43 +1158,43 @@ export const soneium_viem = defineChain({
   },
 });
 
-export const katanaTatara = {
+export const tatara = {
   name: "Tatara",
   fullName: "Tatara",
   chainId: 129399,
-  logoURI: katanaTataraLogo,
-  grayscaleLogoURI: katanaTataraGrayscaleLogo,
-  logoSvg: katanaTataraLogoSvg,
-  grayscaleLogoSvg: katanaTataraGrayscaleLogoSvg,
+  logoURI: tataraLogo,
+  grayscaleLogoURI: tataraGrayscaleLogo,
+  logoSvg: tataraLogoSvg,
+  grayscaleLogoSvg: tataraGrayscaleLogoSvg,
   rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
   explorerUrl: "https://explorer.tatara.katana.network",
   constructExplorerLink: (txHash: string) =>
-    `${katanaTatara.explorerUrl}/tx/${txHash}`,
+    `${tatara.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
   pollingInterval: 1000,
 };
 
-export const katanaTatara_viem = defineChain({
-  id: katanaTatara.chainId,
-  name: katanaTatara.name,
+export const tatara_viem = defineChain({
+  id: tatara.chainId,
+  name: tatara.name,
   nativeCurrency: {
-    name: katanaTatara.nativeCurrencySymbol,
-    symbol: katanaTatara.nativeCurrencySymbol,
+    name: tatara.nativeCurrencySymbol,
+    symbol: tatara.nativeCurrencySymbol,
     decimals: 18,
   },
   rpcUrls: {
     default: {
       http: [
-        katanaTatara.rpcUrl,
-        katanaTatara.customRpcUrl ? katanaTatara.customRpcUrl : [],
+        tatara.customRpcUrl ? tatara.customRpcUrl : [],
+        tatara.rpcUrl,
       ].flat(),
     },
   },
   blockExplorers: {
     default: {
-      name: katanaTatara.name + " Explorer",
-      url: katanaTatara.explorerUrl,
+      name: tatara.name + " Explorer",
+      url: tatara.explorerUrl,
     },
   },
 });
@@ -1183,8 +1227,8 @@ export const unichain_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        unichain.rpcUrl,
         unichain.customRpcUrl ? unichain.customRpcUrl : [],
+        unichain.rpcUrl,
       ].flat(),
     },
   },
@@ -1224,8 +1268,8 @@ export const unichainSepolia_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        unichainSepolia.rpcUrl,
         unichainSepolia.customRpcUrl ? unichainSepolia.customRpcUrl : [],
+        unichainSepolia.rpcUrl,
       ].flat(),
     },
   },
@@ -1265,8 +1309,8 @@ export const worldChain_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        worldChain.rpcUrl,
         worldChain.customRpcUrl ? worldChain.customRpcUrl : [],
+        worldChain.rpcUrl,
       ].flat(),
     },
   },
@@ -1306,8 +1350,8 @@ export const zkSync_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        zkSync.rpcUrl,
         zkSync.customRpcUrl ? zkSync.customRpcUrl : [],
+        zkSync.rpcUrl,
       ].flat(),
     },
   },
@@ -1345,7 +1389,7 @@ export const zora_viem = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [zora.rpcUrl, zora.customRpcUrl ? zora.customRpcUrl : []].flat(),
+      http: [zora.customRpcUrl ? zora.customRpcUrl : [], zora.rpcUrl].flat(),
     },
   },
   blockExplorers: {
@@ -1393,8 +1437,10 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  solana,
+  solanaDevnet,
   soneium,
-  katanaTatara,
+  tatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1433,7 +1479,7 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
-  katanaTatara_viem,
+  tatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,
