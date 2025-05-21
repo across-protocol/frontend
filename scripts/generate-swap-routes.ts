@@ -83,6 +83,24 @@ const enabledSwapRoutes: {
         enabledOutputTokens: ["GHO"],
       },
     },
+    [TOKEN_SYMBOLS_MAP.ezETH.symbol]: {
+      all: {
+        enabledDestinationChains: "all",
+        enabledOutputTokens: ["ETH", "WETH"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP.ETH.symbol]: {
+      all: {
+        enabledDestinationChains: "all",
+        enabledOutputTokens: ["ezETH"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP.WETH.symbol]: {
+      all: {
+        enabledDestinationChains: "all",
+        enabledOutputTokens: ["ezETH"],
+      },
+    },
   },
   [CHAIN_IDs.SEPOLIA]: {},
 } as const;
