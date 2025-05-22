@@ -18,7 +18,7 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.blast.io",
   blockTimeSeconds: 2,
-  tokens: ["WETH", "ETH", "USDB", "WBTC"],
+  tokens: ["WETH", "ETH", "USDB", "WBTC", "ezETH"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

@@ -85,11 +85,13 @@ export function getReceiveTokenSymbol(
   destinationChainId: number,
   inputTokenSymbol: string,
   outputTokenSymbol: string,
-  isReceiverContract: boolean
+  isReceiverContract: boolean,
+  type: SelectedRoute["type"]
 ) {
   const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
 
   if (
+    type === "bridge" &&
     inputTokenSymbol === "ETH" &&
     (isDestinationChainWethOnly || isReceiverContract)
   ) {
@@ -97,6 +99,7 @@ export function getReceiveTokenSymbol(
   }
 
   if (
+    type === "bridge" &&
     inputTokenSymbol === "WETH" &&
     !isDestinationChainWethOnly &&
     !isReceiverContract
@@ -209,6 +212,7 @@ export function validateBridgeAmount(params: {
 const defaultRouteFilter = {
   fromChain: hubPoolChainId,
   inputTokenSymbol: "ETH",
+  outputTokenSymbol: "ETH",
 };
 
 // for certain chain routes (eg. Mainnet => Lens) we can set token IN/OUT defaults here
@@ -238,15 +242,20 @@ const defaultFilter = {
 };
 
 export function getInitialRoute(filter: RouteFilter = {}) {
+  const inputTokenSymbol =
+    filter.inputTokenSymbol ??
+    (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH");
+  const outputTokenSymbol = filter.outputTokenSymbol ?? inputTokenSymbol;
   const routeFromUrl = getRouteFromUrl({
     ...filter,
+    inputTokenSymbol,
+    outputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
   const routeFromFilter = findEnabledRoute({
-    inputTokenSymbol:
-      filter.inputTokenSymbol ??
-      (isNonEthChain(filter?.fromChain) ? "WETH" : "ETH"),
+    inputTokenSymbol,
+    outputTokenSymbol,
     fromChain: filter.fromChain || defaultFilter.fromChain,
     toChain: filter.toChain || defaultFilter.toChain,
   });
@@ -300,14 +309,6 @@ export function findEnabledRoute(
       };
     }
   } else {
-    const universalSwapRoute = universalSwapRoutes.find((route) =>
-      commonRouteFilter(route)
-    );
-
-    if (universalSwapRoute) {
-      return { ...universalSwapRoute, type: "universal-swap" };
-    }
-
     const route = enabledRoutes.find((route) => commonRouteFilter(route));
 
     if (route) {
@@ -315,6 +316,14 @@ export function findEnabledRoute(
         ...route,
         type: "bridge",
       };
+    }
+
+    const universalSwapRoute = universalSwapRoutes.find((route) =>
+      commonRouteFilter(route)
+    );
+
+    if (universalSwapRoute) {
+      return { ...universalSwapRoute, type: "universal-swap" };
     }
   }
 

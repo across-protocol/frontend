@@ -166,6 +166,7 @@ describe("_utils", () => {
       const ignoreTokens = [
         "WETH",
         "ETH",
+        "ezETH",
         "WBTC",
         ...constants.STABLE_COIN_SYMBOLS,
         "USDC-BNB",

@@ -19,6 +19,7 @@ import lskLogo from "assets/token-logos/lsk.svg";
 import usdbLogo from "assets/token-logos/usdb.svg";
 import ghoLogo from "assets/token-logos/gho.svg";
 import wldLogo from "assets/token-logos/wld.svg";
+import ezethLogo from "assets/token-logos/ezeth.svg";
 import unknownLogo from "assets/icons/question-circle.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
@@ -107,4 +108,5 @@ export const orderedTokenLogos = {
   "TATARA-USDS": unknownLogo,
   "TATARA-USDT": usdtLogo,
   "TATARA-WBTC": wbtcLogo,
+  ezETH: ezethLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;
