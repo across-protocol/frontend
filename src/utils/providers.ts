@@ -8,7 +8,7 @@ import {
 import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
 
-function getProviderUrl(chainId: number): string {
+export function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
     getChainInfo(chainId)?.customRpcUrl || getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {

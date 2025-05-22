@@ -8,15 +8,16 @@ import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import { WalletConnectWalletAdapter } from "@solana/wallet-adapter-walletconnect";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { clusterApiUrl } from "@solana/web3.js";
 
-import { ChainId, hubPoolChainId } from "utils";
+import { ChainId, getProviderUrl, hubPoolChainId } from "utils";
 
-const network =
-  hubPoolChainId === ChainId.MAINNET
-    ? WalletAdapterNetwork.Mainnet
-    : WalletAdapterNetwork.Devnet;
-const endpoint = clusterApiUrl(network);
+const isMainnet = hubPoolChainId === ChainId.MAINNET;
+const network = isMainnet
+  ? WalletAdapterNetwork.Mainnet
+  : WalletAdapterNetwork.Devnet;
+const endpoint = getProviderUrl(
+  isMainnet ? ChainId.SOLANA : ChainId.SOLANA_DEVNET
+);
 const wallets = [
   new PhantomWalletAdapter(),
   new SolflareWalletAdapter(),

@@ -18,7 +18,7 @@ import { SpokePool, SpokePoolVerifier } from "./typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { ConvertDecimals } from "./convertdecimals";
 import { generateHyperLiquidPayload } from "./hyperliquid";
-import { isContractDeployedToAddress, toBytes32 } from "./sdk";
+import { isContractDeployedToAddress, toAddressType, toBytes32 } from "./sdk";
 
 const config = getConfig();
 
@@ -294,7 +294,7 @@ export async function sendSpokePoolVerifierDepositTx(
   );
 }
 
-export async function sendDepositV3Tx(
+export async function sendDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
@@ -327,23 +327,24 @@ export async function sendDepositV3Tx(
     outputTokenAddress,
   });
 
+  const signerAddress = await signer.getAddress();
+
   const depositArgs = [
-    await signer.getAddress(),
-    recipient,
-    inputTokenAddress,
-    outputTokenAddress,
+    toAddressType(signerAddress).toBytes32(),
+    toAddressType(recipient).toBytes32(),
+    toAddressType(inputTokenAddress).toBytes32(),
+    toAddressType(outputTokenAddress).toBytes32(),
     inputAmount,
     outputAmount,
     destinationChainId,
-    exclusiveRelayer,
+    toAddressType(exclusiveRelayer).toBytes32(),
     quoteTimestamp,
     fillDeadline,
     exclusivityDeadline,
     message,
     { value },
   ] as const;
-
-  const tx = await spokePool.populateTransaction.depositV3(...depositArgs);
+  const tx = await spokePool.populateTransaction.deposit(...depositArgs);
 
   return _tagRefAndSignTx(
     tx,

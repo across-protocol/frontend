@@ -80,6 +80,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
+  chainConfigs.SOLANA,
 ];
 
 export const enabledSepoliaChainConfigs = [

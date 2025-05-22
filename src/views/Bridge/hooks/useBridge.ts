@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { BigNumber } from "ethers";
 
-import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
+import { useIsWrongNetwork, useAmplitude } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { ampli } from "ampli";
-import { defaultSwapSlippage, bnZero } from "utils";
+import { defaultSwapSlippage, bnZero, getEcosystem } from "utils";
 
-import { useBridgeAction } from "./useBridgeAction_new";
+import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
@@ -18,7 +20,13 @@ export function useBridge() {
 
   const [swapSlippage, setSwapSlippage] = useState(defaultSwapSlippage);
 
-  const { isConnected, chainId: walletChainId, account } = useConnection();
+  const {
+    isConnected: isConnectedEVM,
+    chainId: walletChainIdEVM,
+    account: accountEVM,
+  } = useConnectionEVM();
+  const { isConnected: isConnectedSVM, account: accountSVM } =
+    useConnectionSVM();
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -40,7 +48,20 @@ export function useBridge() {
     maxBalance,
   } = useAmountInput(selectedRoute);
 
-  const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
+  const originChainEcosystem = getEcosystem(selectedRoute.fromChain);
+  const destinationChainEcosystem = getEcosystem(selectedRoute.toChain);
+
+  const {
+    toAccountEVM,
+    toAccountSVM,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
+  } = useToAccount(selectedRoute.toChain);
+
+  const depositor =
+    originChainEcosystem === "evm" ? accountEVM : accountSVM?.toBase58();
+  const recipient =
+    destinationChainEcosystem === "evm" ? toAccountEVM : toAccountSVM;
 
   const {
     transferQuoteQuery,
@@ -52,8 +73,8 @@ export function useBridge() {
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : bnZero,
     swapSlippage,
-    account,
-    toAccount?.address
+    depositor,
+    recipient?.address
   );
   const { data: transferQuote } = transferQuoteQuery;
 
@@ -106,7 +127,7 @@ export function useBridge() {
 
   useEffect(() => {
     checkWrongNetworkHandler();
-  }, [selectedRoute.fromChain, isConnected, checkWrongNetworkHandler]);
+  }, [selectedRoute.fromChain, checkWrongNetworkHandler]);
 
   useEffect(() => {
     if (!isQuoteUpdating && shouldUpdateQuote) {
@@ -136,13 +157,17 @@ export function useBridge() {
   ]);
 
   const estimatedTimeString = estimatedTime?.formattedString;
+  const isConnected =
+    originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
 
   return {
     ...bridgeAction,
-    setCustomToAddress,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
     selectedRoute,
-    toAccount,
-    walletAccount: account,
+    toAccountEVM,
+    toAccountSVM,
+    walletAccount: accountEVM,
     limits: transferQuote ? quotedLimits : limitsQuery.limits,
     fees: quotedFees,
     swapQuote: quotedSwap,
@@ -151,7 +176,7 @@ export function useBridge() {
     handleQuickSwap,
     isWrongChain: isWrongNetwork,
     handleChainSwitch: isWrongNetworkHandler,
-    walletChainId,
+    walletChainId: walletChainIdEVM,
     isConnected,
     isBridgeDisabled: isConnected && bridgeAction.buttonDisabled,
     parsedAmountInput: parsedAmount,
