@@ -76,7 +76,7 @@ export interface IChainStrategy {
    * @param toChainId Destination chain ID
    * @returns Normalized fill information
    */
-  getFill(depositInfo: DepositedInfo, toChainId: number): Promise<FillInfo>;
+  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
 
   /**
    * Convert deposit information to local storage format

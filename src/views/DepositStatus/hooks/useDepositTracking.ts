@@ -141,14 +141,18 @@ export function useDepositTracking({
     queryFn: async () => {
       const depositInfo = depositQuery.data;
 
+      if (depositInfo?.status !== "deposited") {
+        return;
+      }
+
       // Use the strategy to get fill information through the normalized interface
-      return await fillStrategy.getFill(depositInfo as any, toChainId);
+      return await fillStrategy.getFill(depositInfo);
     },
     staleTime: Infinity,
     retry: true,
     refetchInterval: 10_000,
     retryDelay: getRetryDelay(toChainId),
-    enabled: !!depositQuery.data && depositQuery.data.status !== "depositing",
+    enabled: !!depositQuery.data && depositQuery.data.status === "deposited",
   });
 
   // Track fill in local storage
