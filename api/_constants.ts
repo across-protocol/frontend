@@ -292,8 +292,9 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
+  // @dev Note SOL is queried with the SOLANA address.
+  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
