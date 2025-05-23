@@ -24,6 +24,7 @@ import { InvalidParamError } from "./_errors";
 import { coingecko } from "@across-protocol/sdk";
 
 const { Coingecko } = coingecko;
+const { SOL } = TOKEN_SYMBOLS_MAP;
 
 import { getEnvs } from "./_env";
 const {
@@ -71,7 +72,10 @@ const handler = async (
 
     // Format the params for consistency
     baseCurrency = (baseCurrency ?? "eth").toLowerCase();
-    address = ethers.utils.getAddress(address);
+    address =
+      address.toLowerCase() === SOL.addresses[CHAIN_IDs.SOLANA]
+        ? (address = SOL.addresses[CHAIN_IDs.SOLANA])
+        : (address = ethers.utils.getAddress(address));
 
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
