@@ -21,7 +21,7 @@ import {
 } from "./_constants";
 import { InvalidParamError } from "./_errors";
 
-import { coingecko } from "@across-protocol/sdk";
+import { coingecko, utils } from "@across-protocol/sdk";
 
 const { Coingecko } = coingecko;
 
@@ -71,7 +71,13 @@ const handler = async (
 
     // Format the params for consistency
     baseCurrency = (baseCurrency ?? "eth").toLowerCase();
-    address = ethers.utils.getAddress(address);
+
+    chainId =
+      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
+
+    address = utils.chainIsSvm(chainId)
+      ? utils.toAddressType(address).toBase58()
+      : utils.toAddressType(address).toEvmAddress();
 
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
@@ -99,7 +105,11 @@ const handler = async (
 
     const coingeckoClient = Coingecko.get(
       logger,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      {
+        [CHAIN_IDs.SOLANA]: "solana",
+        [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+      }
     );
 
     // We want to compute price and return to caller.
@@ -109,10 +119,7 @@ const handler = async (
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
 
-    chainId =
-      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
-
-    if (balancerV2PoolTokens.includes(ethers.utils.getAddress(address))) {
+    if (balancerV2PoolTokens.includes(address)) {
       if (dateStr) {
         throw new InvalidParamError({
           message: "Historical price not supported for BalancerV2 tokens",
@@ -145,7 +152,8 @@ const handler = async (
         [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
           ? await coingeckoClient.getCurrentPriceById(
               address,
-              modifiedBaseCurrency
+              modifiedBaseCurrency,
+              chainId
             )
           : await coingeckoClient.getCurrentPriceByContract(
               address,
@@ -164,9 +172,18 @@ const handler = async (
         TOKEN_SYMBOLS_MAP[
           baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
         ];
+      let baseTokenAddress = token.addresses[CHAIN_IDs.MAINNET];
+      let baseTokenChainId = chainId;
+      // TODO: Make generic
+      if (baseCurrency === "sol") {
+        baseTokenAddress = TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA];
+        baseTokenChainId = CHAIN_IDs.SOLANA;
+      }
       quotePrice = await getCachedTokenPrice(
-        token.addresses[CHAIN_IDs.MAINNET],
-        "usd"
+        baseTokenAddress,
+        "usd",
+        undefined,
+        baseTokenChainId
       );
       quotePrecision = token.decimals;
     }

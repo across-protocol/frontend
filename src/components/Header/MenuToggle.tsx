@@ -1,6 +1,7 @@
 import { FC } from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as HamburgerIcon } from "assets/icons/hamburger.svg";
+import { COLORS } from "utils";
 
 interface MenuToggleProps {
   toggle: () => void;
@@ -17,19 +18,18 @@ const MenuToggle: FC<MenuToggleProps> = ({ toggle }) => {
 export default MenuToggle;
 
 const CloseButton = styled.button`
-  position: relative;
+  cursor: pointer;
+
+  display: flex;
   width: 40px;
   height: 40px;
-  padding: 0;
-  margin: 0;
-  display: flex;
   justify-content: center;
   align-items: center;
-  background-color: transparent;
-  border: 1px solid #4c4e57;
-  border-radius: 20px;
-  cursor: pointer;
-  outline: none;
+  gap: 6px;
+
+  border-radius: 12px;
+  border: 1px solid ${COLORS["grey-500"]};
+  background: #2d2e33;
 
   :hover {
     border: 1px solid #e0f3ff;

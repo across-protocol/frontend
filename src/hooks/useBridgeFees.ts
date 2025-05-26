@@ -83,7 +83,7 @@ export function useBridgeFees(
         (error.response?.data?.message?.includes(
           "doesn't have enough funds to support this deposit"
         ) ||
-          error.response?.data.includes(
+          error.response?.data?.message?.includes(
             "Amount exceeds max. deposit limit for short delay"
           ))
       ) {

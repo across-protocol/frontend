@@ -20,4 +20,5 @@ export type ChainConfig = {
       }
   )[];
   enableCCTP: boolean;
+  omitViemConfig?: boolean;
 };

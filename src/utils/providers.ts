@@ -6,7 +6,7 @@ import {
   vercelApiBaseUrl,
 } from "./constants";
 
-function getProviderUrl(chainId: number): string {
+export function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
     getChainInfo(chainId)?.customRpcUrl || getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {

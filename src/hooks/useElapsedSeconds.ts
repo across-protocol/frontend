@@ -9,7 +9,7 @@ export function useElapsedSeconds(
   const [elapsedSeconds, setElapsedSeconds] = useState<number | undefined>();
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number;
     if (startDateTimestampInSeconds && endDateTimestampInSeconds) {
       setElapsedSeconds(
         Math.max(endDateTimestampInSeconds - startDateTimestampInSeconds, 0)
