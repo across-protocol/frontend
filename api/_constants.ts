@@ -292,6 +292,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
+  TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
