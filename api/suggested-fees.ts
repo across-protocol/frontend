@@ -171,9 +171,7 @@ const handler = async (
         });
       }
 
-      const blockFinder = new sdk.arch.evm.EVMBlockFinder(provider, [
-        latestBlock,
-      ]);
+      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
       const { number: blockNumberForTimestamp } =
         await blockFinder.getBlockForTimestamp(parsedTimestamp);
       quoteBlockNumber = blockNumberForTimestamp;
