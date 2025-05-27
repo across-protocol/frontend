@@ -35,7 +35,6 @@ export default {
     "POOL",
     "LSK",
     "WGHO",
-    "CAKE",
   ],
   enableCCTP: false,
   swapTokens: [],
