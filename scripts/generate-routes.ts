@@ -56,6 +56,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
+  chainConfigs.BSC,
 ];
 
 export const enabledSepoliaChainConfigs = [
@@ -104,6 +105,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.BSC,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
