@@ -20,5 +20,11 @@ export default {
   tokens: ["USDC", "USDT", "WETH", "ETH", "DAI", "BAL", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 2,
-  disabledRoutes: [],
+  disabledRoutes: [
+    {
+      toChainId: CHAIN_IDs.BSC,
+      fromTokenSymbol: "USDT",
+      toTokenSymbol: "USDT-BNB",
+    },
+  ],
 } as ChainConfig;
