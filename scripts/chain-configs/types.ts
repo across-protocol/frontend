@@ -20,4 +20,9 @@ export type ChainConfig = {
       }
   )[];
   enableCCTP: boolean;
+  disabledRoutes?: {
+    toChainId: number;
+    fromTokenSymbol: string;
+    toTokenSymbol: string;
+  }[];
 };
