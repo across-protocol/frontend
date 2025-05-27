@@ -1,18 +1,20 @@
-import { Address, Hex, padHex, toBytes, toHex, trim } from "viem";
+import {
+  Address,
+  Hex,
+  padHex,
+  toBytes,
+  toHex,
+  trim,
+  isAddress as isEvmAddress,
+} from "viem";
 import {
   getAddressDecoder,
   getAddressEncoder,
   isAddress as isSvmAddress,
 } from "@solana/kit";
-import { isAddress } from "ethers/lib/utils";
 
 // exports
-export { isSvmAddress };
-
-// utils
-export function isEvmAddress(value: string): value is Address {
-  return isAddress(value);
-}
+export { isSvmAddress, isEvmAddress };
 
 export function svmToHex(pubkey: string): Hex {
   if (!isSvmAddress(pubkey)) {
