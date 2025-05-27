@@ -20,7 +20,7 @@ export class NoFundsDepositedLogError extends Error {
 export class NoFilledRelayLogError extends Error {
   constructor(depositId: number, chainId: number) {
     super(
-      `Could find related FilledV3Relay for Deposit #${depositId} on chain ${chainId}`
+      `Couldn't find related FilledV3Relay or FilledRelay for Deposit #${depositId} on chain ${chainId}`
     );
   }
 }
