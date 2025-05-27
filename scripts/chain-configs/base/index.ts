@@ -4,7 +4,7 @@ const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
 import { ChainConfig } from "../types";
 
-const chainId = CHAIN_IDs.BASE; // force rebuild
+const chainId = CHAIN_IDs.BASE;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
