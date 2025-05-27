@@ -5995,6 +5995,17 @@
     {
       "fromChain": 8453,
       "toChain": 56,
+      "fromTokenAddress": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+      "toTokenAddress": "0x55d398326f99059fF775485246999027B3197955",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT-BNB",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "fromChain": 8453,
+      "toChain": 56,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
       "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",

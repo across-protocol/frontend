@@ -271,19 +271,6 @@ function transformChainConfigs(
       }
 
       const tokens = processTokenRoutes(chainConfig, toChainConfig);
-      const filteredTokens = tokens.filter(
-        (token) =>
-          !chainConfig.disabledRoutes?.find(
-            (disabledRoute) =>
-              toChainConfig.chainId === disabledRoute.toChainId &&
-              (typeof token === "string"
-                ? token === disabledRoute.fromTokenSymbol
-                : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
-              (typeof token === "string"
-                ? token === disabledRoute.toTokenSymbol
-                : token.outputTokenSymbol === disabledRoute.toTokenSymbol)
-          )
-      );
 
       // Handle USDC swap tokens
       const usdcSwapTokens =
@@ -293,15 +280,15 @@ function transformChainConfigs(
 
       const toChain = {
         chainId: toChainId,
-        tokens: filteredTokens,
+        tokens,
         swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
-            filteredTokens.some((token) =>
+            tokens.some((token) =>
               typeof token === "string"
                 ? token === acrossInputTokenSymbol
                 : token.inputTokenSymbol === acrossInputTokenSymbol
             ) &&
-            filteredTokens.some((token) =>
+            tokens.some((token) =>
               typeof token === "string"
                 ? token === acrossOutputTokenSymbol
                 : token.outputTokenSymbol === acrossOutputTokenSymbol
