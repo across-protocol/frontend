@@ -175,12 +175,17 @@ const handler = async (
         TOKEN_SYMBOLS_MAP[
           baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
         ];
-      const baseTokenAddress = baseToken.addresses[chainId];
+      let baseTokenAddress = baseToken.addresses[CHAIN_IDs.MAINNET];
+      let baseTokenChainId = chainId;
+      if (baseCurrency === "sol") {
+        baseTokenAddress = baseToken.addresses[CHAIN_IDs.SOLANA];
+        baseTokenChainId = CHAIN_IDs.SOLANA;
+      }
       quotePrice = await getCachedTokenPrice(
         baseTokenAddress,
         "usd",
         undefined,
-        chainId
+        baseTokenChainId
       );
       quotePrecision = baseToken.decimals;
     }
