@@ -20,6 +20,7 @@ import {
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 import { InvalidParamError } from "./_errors";
+import { isSvmAddress } from "./_address";
 
 import { coingecko, utils } from "@across-protocol/sdk";
 
@@ -56,7 +57,7 @@ const handler = async (
     let {
       l1Token,
       tokenAddress,
-      chainId,
+      chainId: _chainId,
       baseCurrency,
       date: dateStr,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
@@ -69,11 +70,19 @@ const handler = async (
       });
     }
 
+    let fallbackChainId = _chainId;
+    if (isSvmAddress(address)) {
+      address = utils.toAddressType(address).toBase58();
+      fallbackChainId ??= CHAIN_IDs.SOLANA;
+    } else {
+      address = utils.toAddressType(address).toEvmAddress();
+      fallbackChainId ??= CHAIN_IDs.MAINNET;
+    }
+
     // Format the params for consistency
     baseCurrency = (baseCurrency ?? "eth").toLowerCase();
 
-    chainId =
-      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
+    const chainId = coinGeckoAssetPlatformLookup[address] ?? fallbackChainId;
 
     address = utils.chainIsSvm(chainId)
       ? utils.toAddressType(address).toBase58()
@@ -118,9 +127,6 @@ const handler = async (
     const balancerV2PoolTokens: string[] = JSON.parse(
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
-
-    chainId =
-      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
 
     if (balancerV2PoolTokens.includes(address)) {
       if (dateStr) {
