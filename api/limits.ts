@@ -99,17 +99,20 @@ const handler = async (
 
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
-    let { amount: amountInput, recipient, relayer, message } = query;
+    let { amount: _amount, recipient, relayer, message } = query;
     recipient = recipient
       ? ethers.utils.getAddress(recipient)
       : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     relayer = relayer
       ? ethers.utils.getAddress(relayer)
       : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
+    const amount = BigNumber.from(
+      _amount ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
+    );
 
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
-      if (!sdk.utils.isDefined(amountInput)) {
+      if (!sdk.utils.isDefined(_amount)) {
         throw new MissingParamError({
           message:
             "Parameter 'amount' must be defined when 'message' is defined",
@@ -121,13 +124,11 @@ const handler = async (
         destinationChainId,
         relayer,
         outputToken.address,
-        amountInput,
+        ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
         message!
       );
     }
-    const amount = BigNumber.from(
-      amountInput ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
-    );
+
     let minDepositUsdForDestinationChainId = Number(
       getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );

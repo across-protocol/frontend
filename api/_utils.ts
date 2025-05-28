@@ -326,7 +326,7 @@ export const validateDepositMessage = async (
   destinationChainId: number,
   relayer: string,
   outputTokenAddress: string,
-  amountInput: string,
+  amountInput: BigNumber,
   message: string
 ) => {
   if (!sdk.utils.isMessageEmpty(message)) {
