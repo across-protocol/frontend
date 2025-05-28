@@ -1216,6 +1216,17 @@
     },
     {
       "fromChain": 1,
+      "toChain": 56,
+      "fromTokenAddress": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+      "toTokenAddress": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "CAKE",
+      "toTokenSymbol": "CAKE",
+      "isNative": false,
+      "l1TokenAddress": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898"
+    },
+    {
+      "fromChain": 1,
       "toChain": 42161,
       "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
@@ -14293,6 +14304,17 @@
       "toTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 56,
+      "toChain": 1,
+      "fromTokenAddress": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+      "toTokenAddress": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "CAKE",
+      "toTokenSymbol": "CAKE",
+      "isNative": false,
+      "l1TokenAddress": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898"
     },
     {
       "fromChain": 56,
