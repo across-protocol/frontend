@@ -856,17 +856,18 @@ export const getRelayerFeeDetails = async (
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
+  const depositForSimulation = buildDepositForSimulation({
+    amount: amount.toString(),
+    inputToken,
+    outputToken,
+    recipientAddress,
+    originChainId,
+    destinationChainId,
+    message,
+  });
   return await relayFeeCalculator.relayerFeeDetails(
-    buildDepositForSimulation({
-      amount: amount.toString(),
-      inputToken,
-      outputToken,
-      recipientAddress,
-      originChainId,
-      destinationChainId,
-      message,
-    }),
-    amount,
+    depositForSimulation,
+    depositForSimulation.outputAmount,
     sdk.utils.isMessageEmpty(message),
     relayerAddress,
     tokenPrice,
@@ -887,28 +888,42 @@ export const buildDepositForSimulation = (depositArgs: {
 }) => {
   const {
     amount,
-    inputToken,
-    outputToken,
+    inputToken: _inputTokenAddress,
+    outputToken: _outputTokenAddress,
     recipientAddress,
     originChainId,
     destinationChainId,
     message,
   } = depositArgs;
+  const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
+  const outputToken = getTokenByAddress(
+    _outputTokenAddress,
+    destinationChainId
+  );
+  if (!inputToken || !outputToken) {
+    throw new Error(
+      "Can't build deposit for simulation due to unknown input or output token"
+    );
+  }
   // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
   const safeOutputAmount = sdk.utils.toBN(100);
+  const outputAmount = ConvertDecimals(
+    inputToken.decimals,
+    outputToken.decimals
+  )(sdk.utils.toBN(amount));
   return {
     inputAmount: sdk.utils.toBN(amount),
     outputAmount: sdk.utils.isMessageEmpty(message)
       ? safeOutputAmount
-      : sdk.utils.toBN(amount),
+      : outputAmount,
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-    inputToken,
-    outputToken,
+    inputToken: _inputTokenAddress,
+    outputToken: _outputTokenAddress,
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
