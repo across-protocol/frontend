@@ -2279,28 +2279,39 @@ export async function getGasPriceEstimate(
     chainId,
     overrides
   );
-  const isSvm =
-    relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery;
-  const unsignedFillTxn = deposit
-    ? isSvm
+  if (relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery) {
+    const unsignedFillTxn = deposit
       ? await relayerFeeCalculatorQueries.getFillRelayTx(
           buildDepositForSimulation(deposit),
           overrides?.relayerAddress
         )
-      : await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+      : undefined;
+    return sdk.gasPriceOracle.getGasPriceEstimate(
+      relayerFeeCalculatorQueries.provider,
+      {
+        chainId,
+        unsignedTx: unsignedFillTxn,
+        baseFeeMultiplier,
+        priorityFeeMultiplier,
+      }
+    );
+  } else {
+    const unsignedFillTxn = deposit
+      ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
           buildDepositForSimulation(deposit),
           overrides?.relayerAddress
         )
-    : undefined;
-  return sdk.gasPriceOracle.getGasPriceEstimate(
-    relayerFeeCalculatorQueries.provider,
-    {
-      chainId,
-      unsignedTx: unsignedFillTxn,
-      baseFeeMultiplier,
-      priorityFeeMultiplier,
-    }
-  );
+      : undefined;
+    return sdk.gasPriceOracle.getGasPriceEstimate(
+      relayerFeeCalculatorQueries.provider,
+      {
+        chainId,
+        unsignedTx: unsignedFillTxn,
+        baseFeeMultiplier,
+        priorityFeeMultiplier,
+      }
+    );
+  }
 }
 
 /**
