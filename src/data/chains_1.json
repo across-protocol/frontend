@@ -105,6 +105,13 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      },
+      {
+        "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ],
     "outputTokens": [
@@ -205,6 +212,13 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      },
+      {
+        "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ]
   },
@@ -1822,6 +1836,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ],
     "outputTokens": [
@@ -1852,6 +1873,13 @@
         "name": "Tether USD",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
+        "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ]
   }
