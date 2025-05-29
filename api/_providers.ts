@@ -18,7 +18,7 @@ export const providerCache: Record<string, providers.StaticJsonRpcProvider> =
 
 function getSvmRpcUrl(chainId: number): string {
   const urls = getRpcUrlsFromConfigJson(chainId);
-  const publicNetwork = PUBLIC_NETWORKS[Number(chainId)];
+  const publicNetwork = PUBLIC_NETWORKS[chainId];
   if (urls.length === 0 && !publicNetwork) {
     throw new Error(`No provider URL set for SVM chain: ${chainId}`);
   }
