@@ -2138,7 +2138,7 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
-  const chainId = provider.network.chainId;
+  const chainId = (await provider.getNetwork()).chainId;
   const multicall3 = new ethers.Contract(
     getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
