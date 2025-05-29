@@ -2293,7 +2293,9 @@ export async function getGasPriceEstimate(
         )
     : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(
-    relayerFeeCalculatorQueries.provider,
+    relayerFeeCalculatorQueries.provider as Parameters<
+      typeof sdk.gasPriceOracle.getGasPriceEstimate
+    >[0], // we don't need a narrow return type here
     {
       chainId,
       unsignedTx: unsignedFillTxn,
