@@ -1,6 +1,7 @@
 import { BigNumber, providers } from "ethers";
-import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
+export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export {

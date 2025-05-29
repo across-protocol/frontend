@@ -64,7 +64,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       throw new Error("Missing exclusiveRelayer");
     }
 
-    let _message = "0x";
+    let _message = "";
     if (selectedRoute.externalProjectId === "hyperliquid") {
       _message = await this.signHyperliquidMessage(params);
     }

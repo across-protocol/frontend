@@ -6,6 +6,8 @@ import { getEnvs } from "./_env";
 import { getLogger } from "./_logger";
 
 import rpcProvidersJson from "../src/data/rpc-providers.json";
+import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
+import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 
 export type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
@@ -14,19 +16,31 @@ const { RPC_HEADERS } = getEnvs();
 export const providerCache: Record<string, providers.StaticJsonRpcProvider> =
   {};
 
+function getSvmRpcUrl(chainId: number): string {
+  const urls = getRpcUrlsFromConfigJson(chainId);
+  const publicNetwork = PUBLIC_NETWORKS[chainId];
+  if (urls.length === 0 && !publicNetwork) {
+    throw new Error(`No provider URL set for SVM chain: ${chainId}`);
+  }
+  return urls.length > 0 ? urls[0] : publicNetwork.publicRPC;
+}
+
 /**
  * Generates a relevant provider for the given input chainId. Has to be used for SVM chains.
  * @param _chainId A valid chain identifier where Across is deployed
  * @returns A provider object to query the requested blockchain
  */
 export function getSvmProvider(chainId: number) {
-  const urls = getRpcUrlsFromConfigJson(chainId);
-  const publicNetwork = PUBLIC_NETWORKS[Number(chainId)];
-  if (urls.length === 0 && !publicNetwork) {
-    throw new Error(`No provider URL set for SVM chain: ${chainId}`);
-  }
-  const clusterUrl = urls.length > 0 ? urls[0] : publicNetwork.publicRPC;
+  const clusterUrl = getSvmRpcUrl(chainId);
   return new sdk.providers.SolanaDefaultRpcFactory(clusterUrl, chainId);
+}
+
+export function getSVMRpc(
+  chainId: number,
+  config?: Parameters<typeof createSolanaRpc>[1]
+): SVMProvider {
+  const clusterUrl = getSvmRpcUrl(chainId) as MainnetUrl;
+  return createSolanaRpc(clusterUrl, config) as SVMProvider;
 }
 
 /**
