@@ -866,9 +866,12 @@ export const getRelayerFeeDetails = async (
     destinationChainId,
     message,
   });
+  const outputAmount = isMessageEmpty(message)
+    ? amount
+    : depositForSimulation.outputAmount;
   return await relayFeeCalculator.relayerFeeDetails(
     depositForSimulation,
-    isMessageEmpty(message) ? amount : depositForSimulation.outputAmount,
+    outputAmount,
     isMessageEmpty(message),
     relayerAddress,
     tokenPrice,
