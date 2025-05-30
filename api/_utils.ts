@@ -34,6 +34,7 @@ import {
   size,
   string,
   Struct,
+  union,
 } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -82,6 +83,7 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
+import { isEvmAddress, isSvmAddress } from "./_address";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -809,7 +811,7 @@ export const getRelayerFeeCalculatorQueries = (
     baseArgs.simulatedRelayerAddress,
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
-  );
+  ) as sdk.relayFeeCalculator.QueryBase;
 };
 
 /**
@@ -1693,11 +1695,27 @@ export function parsableBigNumberString() {
   });
 }
 
-export function validAddress() {
-  return define<string>("validAddress", (value) =>
-    utils.isAddress(value as string)
-  );
+export function validEvmAddress() {
+  return define<string>("validEvmAddress", (value) => {
+    try {
+      return isEvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
 }
+
+export function validSvmAddress() {
+  return define<string>("validSvmAddress", (value) => {
+    try {
+      return isSvmAddress(value as string);
+    } catch {
+      return false;
+    }
+  });
+}
+
+export const validAddress = () => union([validEvmAddress(), validSvmAddress()]);
 
 export function validAddressOrENS() {
   return define<string>("validAddressOrENS", (value) => {
@@ -2506,7 +2524,7 @@ export function latestGasPriceCache(
     ),
     ttlPerChain.default,
     async () => await getMaxFeePerGas(chainId, deposit, overrides),
-    (gasPrice: sdk.gasPriceOracle.GasPriceEstimate) => {
+    (gasPrice: sdk.gasPriceOracle.EvmGasPriceEstimate) => {
       return {
         maxFeePerGas: BigNumber.from(gasPrice.maxFeePerGas),
         maxPriorityFeePerGas: BigNumber.from(gasPrice.maxPriorityFeePerGas),
@@ -2521,7 +2539,7 @@ export async function getMaxFeePerGas(
   overrides?: Partial<{
     relayerAddress: string;
   }>
-): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+): Promise<sdk.gasPriceOracle.EvmGasPriceEstimate> {
   if (deposit && deposit.destinationChainId !== chainId) {
     throw new Error(
       "Chain ID must match the destination chain ID of the deposit"

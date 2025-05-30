@@ -285,6 +285,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "matic",
   "gho",
   "bnb",
+  "sol",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -293,6 +294,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
+  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
+  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
