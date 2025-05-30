@@ -156,7 +156,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       message: new Uint8Array(message),
     });
     const depositInstruction = new TransactionInstruction({
-      programId: getSpokePoolProgramId(originChainId),
+      programId: config.getSpokePoolProgramId(originChainId),
       data: Buffer.from(depositInstructionData),
       keys: [
         { pubkey: this.signerPublicKey, isSigner: true, isWritable: true },
@@ -168,7 +168,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
         { pubkey: eventAuthorityPda, isSigner: false, isWritable: false },
         {
-          pubkey: getSpokePoolProgramId(originChainId),
+          pubkey: config.getSpokePoolProgramId(originChainId),
           isSigner: false,
           isWritable: false,
         },
@@ -225,7 +225,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
   }
 
   private _getStatePDA(fromChain: number) {
-    const programId = getSpokePoolProgramId(fromChain);
+    const programId = config.getSpokePoolProgramId(fromChain);
     const [statePda] = PublicKey.findProgramAddressSync(
       [Buffer.from("state"), Buffer.from(u64Encoder.encode(this.seed))],
       programId
@@ -238,7 +238,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     inputToken: PublicKey,
     destinationChainId: bigint
   ) {
-    const programId = getSpokePoolProgramId(originChainId);
+    const programId = config.getSpokePoolProgramId(originChainId);
     const [routePda] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("route"),
@@ -252,7 +252,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
   }
 
   private _getEventAuthorityPDA(originChainId: number) {
-    const programId = getSpokePoolProgramId(originChainId);
+    const programId = config.getSpokePoolProgramId(originChainId);
     const [eventAuthorityPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("__event_authority")],
       programId
@@ -270,9 +270,4 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       this.svmConnection.provider
     );
   }
-}
-
-function getSpokePoolProgramId(chainId: number) {
-  const address = config.getSpokePoolAddress(chainId);
-  return new PublicKey(address);
 }
