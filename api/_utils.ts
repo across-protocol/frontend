@@ -897,16 +897,13 @@ export const buildDepositForSimulation = (depositArgs: {
     );
   }
   const inputAmount = sdk.utils.toBN(amount);
-  const simulationOutputAmount = calculateSimulationOutputAmount({
-    inputAmount,
-    inputToken,
-    outputToken,
-    message,
-  });
 
   return {
     inputAmount,
-    outputAmount: simulationOutputAmount,
+    outputAmount: ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
@@ -926,28 +923,6 @@ export const buildDepositForSimulation = (depositArgs: {
     toLiteChain: false, // FIXME
   };
 };
-
-function calculateSimulationOutputAmount(params: {
-  inputAmount: BigNumber;
-  inputToken: Pick<TokenInfo, "decimals">;
-  outputToken: Pick<TokenInfo, "decimals">;
-  message?: string;
-}): BigNumber {
-  const { inputAmount, inputToken, outputToken, message } = params;
-  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
-  const safeOutputAmount = sdk.utils.toBN(100);
-  // If there's a message, we need the actual amount scaled to output decimals
-  if (!sdk.utils.isMessageEmpty(message)) {
-    return ConvertDecimals(
-      inputToken.decimals,
-      outputToken.decimals
-    )(inputAmount);
-  }
-
-  // For non-message transfers, use a small safe amount for gas estimation
-  // This amount is fixed and small to ensure simulation succeeds
-  return safeOutputAmount;
-}
 
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
