@@ -15,10 +15,18 @@ import {
   NoFilledRelayLogError,
   SvmCpiEventsClient,
   findFillEvent,
+  SVMBlockFinder,
+  toAddressType,
+  uint8ArrayToBigNumber,
+  uin8ArrayToHex,
 } from "utils";
 import { isSignature } from "@solana/kit";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { Deposit } from "hooks/useDeposits";
+import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
+import { BigNumber } from "ethers";
+import { toHex } from "viem";
+import { SvmSpokeClient } from "@across-protocol/contracts";
 
 /**
  * Strategy for handling Solana (SVM) chain operations
@@ -132,11 +140,17 @@ export class SVMStrategy implements IChainStrategy {
       const rpc = getSVMRpc(this.chainId);
       const eventsClient = await SvmCpiEventsClient.create(rpc);
 
+      const fromSlot = (
+        await new SVMBlockFinder(rpc).getBlockForTimestamp(
+          depositInfo.depositTimestamp
+        )
+      )?.number;
+
       const fillEvent = await findFillEvent(
-        depositInfo.depositLog,
+        this.formatRelayData(depositInfo.depositLog),
         this.chainId,
         eventsClient,
-        depositInfo.depositLog.blockNumber
+        fromSlot
       );
 
       if (!fillEvent) {
@@ -309,6 +323,31 @@ export class SVMStrategy implements IChainStrategy {
       token: inputToken,
       outputToken,
       swapToken,
+    };
+  }
+
+  // deposit could be from svm or evm
+  private formatRelayData(
+    data: RelayData | SvmSpokeClient.RelayDataArgs
+  ): RelayData {
+    return {
+      originChainId: Number(data.originChainId),
+      depositor: toAddressType(data.depositor).toBytes32(),
+      recipient: toAddressType(data.recipient).toBytes32(),
+      depositId: BigNumber.isBigNumber(data.depositId)
+        ? data.depositId
+        : uint8ArrayToBigNumber(data.depositId),
+      inputToken: toAddressType(data.inputToken).toBytes32(),
+      inputAmount: BigNumber.from(String(data.inputAmount)),
+      outputToken: toAddressType(data.outputToken).toBytes32(),
+      outputAmount: BigNumber.from(String(data.outputAmount)),
+      message:
+        typeof data.message === "string"
+          ? toHex(data.message)
+          : uin8ArrayToHex(data.message),
+      fillDeadline: Number(data.fillDeadline),
+      exclusiveRelayer: toAddressType(data.exclusiveRelayer).toBytes32(),
+      exclusivityDeadline: Number(data.exclusivityDeadline),
     };
   }
 }
