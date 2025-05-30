@@ -866,6 +866,13 @@ export const getRelayerFeeDetails = async (
     destinationChainId,
     message,
   });
+
+  // depositForSimulation's outputAmount is modified based on whether a deposit includes a message or not.
+  // If a message is present, the value is scaled for the destination chain. If no message is present,
+  // it is set to some safe low value that almost certainly does not match the deposit amount requested.
+  // @todo: This is very fragile and relies on separate implementation details. Handle it more sustainably.
+  // If it's known that a relayer has sufficient tokens on the destination chain, is it OK to always simulate
+  // with the user-specified amount?
   const outputAmount = isMessageEmpty(message)
     ? amount
     : depositForSimulation.outputAmount;
