@@ -845,41 +845,19 @@ export const getRelayerFeeDetails = async (
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const { isMessageEmpty } = sdk.utils;
-  const {
-    inputToken,
-    outputToken,
-    amount,
-    originChainId,
-    destinationChainId,
-    recipientAddress,
-    message,
-  } = deposit;
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
-    relayerAddress,
-  });
-  const depositForSimulation = buildDepositForSimulation({
-    amount: amount.toString(),
-    inputToken,
-    outputToken,
-    recipientAddress,
-    originChainId,
-    destinationChainId,
-    message,
-  });
+  const relayFeeCalculator = getRelayerFeeCalculator(
+    deposit.destinationChainId,
+    {
+      relayerAddress,
+    }
+  );
 
-  // depositForSimulation's outputAmount is modified based on whether a deposit includes a message or not.
-  // If a message is present, the value is scaled for the destination chain. If no message is present,
-  // it is set to some safe low value that almost certainly does not match the deposit amount requested.
-  // @todo: This is very fragile and relies on separate implementation details. Handle it more sustainably.
-  // If it's known that a relayer has sufficient tokens on the destination chain, is it OK to always simulate
-  // with the user-specified amount?
-  const outputAmount = isMessageEmpty(message)
-    ? amount
-    : depositForSimulation.outputAmount;
+  const depositForSimulation = buildDepositForSimulation(deposit);
+
   return await relayFeeCalculator.relayerFeeDetails(
     depositForSimulation,
-    outputAmount,
-    isMessageEmpty(message),
+    depositForSimulation.outputAmount, // scaled output amount
+    isMessageEmpty(deposit.message),
     relayerAddress,
     tokenPrice,
     gasPrice,
@@ -906,27 +884,29 @@ export const buildDepositForSimulation = (depositArgs: {
     destinationChainId,
     message,
   } = depositArgs;
+
   const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
   const outputToken = getTokenByAddress(
     _outputTokenAddress,
     destinationChainId
   );
+
   if (!inputToken || !outputToken) {
     throw new Error(
       "Can't build deposit for simulation due to unknown input or output token"
     );
   }
-  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
-  const safeOutputAmount = sdk.utils.toBN(100);
-  const outputAmount = ConvertDecimals(
-    inputToken.decimals,
-    outputToken.decimals
-  )(sdk.utils.toBN(amount));
+
+  const simulationOutputAmount = calculateSimulationOutputAmount({
+    inputAmount: sdk.utils.toBN(amount),
+    inputToken,
+    outputToken,
+    message,
+  });
+
   return {
     inputAmount: sdk.utils.toBN(amount),
-    outputAmount: sdk.utils.isMessageEmpty(message)
-      ? safeOutputAmount
-      : outputAmount,
+    outputAmount: simulationOutputAmount,
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
@@ -946,6 +926,28 @@ export const buildDepositForSimulation = (depositArgs: {
     toLiteChain: false, // FIXME
   };
 };
+
+function calculateSimulationOutputAmount(params: {
+  inputAmount: BigNumber;
+  inputToken: Pick<TokenInfo, "decimals">;
+  outputToken: Pick<TokenInfo, "decimals">;
+  message?: string;
+}): BigNumber {
+  const { inputAmount, inputToken, outputToken, message } = params;
+  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
+  const safeOutputAmount = sdk.utils.toBN(100);
+  // If there's a message, we need the actual amount scaled to output decimals
+  if (!sdk.utils.isMessageEmpty(message)) {
+    return ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(inputAmount);
+  }
+
+  // For non-message transfers, use a small safe amount for gas estimation
+  // This amount is fixed and small to ensure simulation succeeds
+  return safeOutputAmount;
+}
 
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
