@@ -6,26 +6,21 @@ import {
   useHistory,
   Redirect,
 } from "react-router-dom";
-import { Header, SuperHeader, Banner, Sidebar } from "components";
+import { Header, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
-import styled from "@emotion/styled";
 import {
-  disableDeposits,
   enableMigration,
-  WrongNetworkError,
-  rewardsBannerWarning,
-  generalMaintenanceMessage,
   stringValueInArray,
   getConfig,
   chainEndpointToId,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
+import Banners from "components/Banners";
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -55,12 +50,6 @@ const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
-
-const warningMessage = `
-  We noticed that you have connected from a contract address.
-  We recommend that you change the destination of the transfer (by clicking the "Change account" text below the To dropdown)
-  to a non-contract wallet you control on the destination chain to avoid having your funds lost or stolen.
-`;
 
 function useRoutes() {
   const [enableACXBanner, setEnableACXBanner] = useState(true);
@@ -108,33 +97,11 @@ const Routes: React.FC = () => {
   return (
     <>
       <AmpliTrace />
-      {generalMaintenanceMessage && (
-        <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
-      )}
-      {disableDeposits && (
-        <SuperHeader>
-          Across is experiencing issues. Deposits are currently disabled into
-          the pools. Please try again later
-        </SuperHeader>
-      )}
-      {error && !(error instanceof WrongNetworkError) && (
-        <SuperHeader>
-          <div>{error.message}</div>
-          <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
-        </SuperHeader>
-      )}
-      {rewardsBannerWarning && location.pathname === "/rewards" && (
-        <Banner>
-          <InfoLogo />
-          <span>
-            Due to maintenance, rewards will not be visually updated for a few
-            hours. This does not impact your reward earnings.
-          </span>
-        </Banner>
-      )}
-      {isContractAddress && (
-        <SuperHeader size="lg">{warningMessage}</SuperHeader>
-      )}
+      <Banners
+        networkError={error}
+        onClickNetworkError={() => removeError()}
+        isContractAddress={isContractAddress}
+      />
       <Header transparentHeader={isAirdrop || isHomepage} />
       <Sidebar />
       <ScrollToTop />
@@ -209,9 +176,3 @@ const Routes: React.FC = () => {
 };
 
 export default Routes;
-
-const RemoveErrorSpan = styled.span`
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-`;
