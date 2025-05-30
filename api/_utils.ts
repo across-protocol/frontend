@@ -896,16 +896,16 @@ export const buildDepositForSimulation = (depositArgs: {
       "Can't build deposit for simulation due to unknown input or output token"
     );
   }
-
+  const inputAmount = sdk.utils.toBN(amount);
   const simulationOutputAmount = calculateSimulationOutputAmount({
-    inputAmount: sdk.utils.toBN(amount),
+    inputAmount,
     inputToken,
     outputToken,
     message,
   });
 
   return {
-    inputAmount: sdk.utils.toBN(amount),
+    inputAmount,
     outputAmount: simulationOutputAmount,
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
