@@ -844,20 +844,30 @@ export const getRelayerFeeDetails = async (
   gasUnits?: sdk.utils.BigNumberish,
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const { isMessageEmpty } = sdk.utils;
-  const relayFeeCalculator = getRelayerFeeCalculator(
-    deposit.destinationChainId,
-    {
-      relayerAddress,
-    }
-  );
-
-  const depositForSimulation = buildDepositForSimulation(deposit);
-
+  const {
+    inputToken,
+    outputToken,
+    amount,
+    originChainId,
+    destinationChainId,
+    recipientAddress,
+    message,
+  } = deposit;
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
+    relayerAddress,
+  });
   return await relayFeeCalculator.relayerFeeDetails(
-    depositForSimulation,
-    depositForSimulation.outputAmount, // scaled output amount
-    isMessageEmpty(deposit.message),
+    buildDepositForSimulation({
+      amount: amount.toString(),
+      inputToken,
+      outputToken,
+      recipientAddress,
+      originChainId,
+      destinationChainId,
+      message,
+    }),
+    amount,
+    sdk.utils.isMessageEmpty(message),
     relayerAddress,
     tokenPrice,
     gasPrice,
@@ -877,41 +887,28 @@ export const buildDepositForSimulation = (depositArgs: {
 }) => {
   const {
     amount,
-    inputToken: _inputTokenAddress,
-    outputToken: _outputTokenAddress,
+    inputToken,
+    outputToken,
     recipientAddress,
     originChainId,
     destinationChainId,
     message,
   } = depositArgs;
-
-  const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
-  const outputToken = getTokenByAddress(
-    _outputTokenAddress,
-    destinationChainId
-  );
-
-  if (!inputToken || !outputToken) {
-    throw new Error(
-      "Can't build deposit for simulation due to unknown input or output token"
-    );
-  }
-  const inputAmount = sdk.utils.toBN(amount);
-
+  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
+  const safeOutputAmount = sdk.utils.toBN(100);
   return {
-    inputAmount,
-    outputAmount: ConvertDecimals(
-      inputToken.decimals,
-      outputToken.decimals
-    )(inputAmount),
+    inputAmount: sdk.utils.toBN(amount),
+    outputAmount: sdk.utils.isMessageEmpty(message)
+      ? safeOutputAmount
+      : sdk.utils.toBN(amount),
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-    inputToken: _inputTokenAddress,
-    outputToken: _outputTokenAddress,
+    inputToken,
+    outputToken,
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
     exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
