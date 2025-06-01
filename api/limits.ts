@@ -107,7 +107,8 @@ const handler = async (
       ? ethers.utils.getAddress(relayer)
       : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
     const amount = BigNumber.from(
-      _amount ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
+      // 0.0001 tokens so we don't expect to have less than this on any chain, even for the most valuable tokens (BTC).
+      _amount ?? ethers.BigNumber.from("10").pow(inputToken.decimals - 4)
     );
 
     const isMessageDefined = sdk.utils.isDefined(message);
