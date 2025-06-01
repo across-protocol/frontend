@@ -267,13 +267,7 @@ const handler = async (
       currentUt,
       nextUt
     );
-    const convertInputToOutputDecimals = ConvertDecimals(
-      inputToken.decimals,
-      outputToken.decimals
-    );
-    const lpFeeTotal = convertInputToOutputDecimals(
-      amount.mul(lpFeePct).div(ethers.constants.WeiPerEther)
-    );
+    const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
 
     const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
 
@@ -292,9 +286,10 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    const outputAmount = convertInputToOutputDecimals(
-      amount.sub(totalRelayFee)
-    );
+    const outputAmount = ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(amount.sub(totalRelayFee));
 
     const { exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
       await selectExclusiveRelayer(
