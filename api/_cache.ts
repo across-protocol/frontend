@@ -11,6 +11,7 @@ const {
   UPSTASH_REDIS_READ_ONLY_TOKEN,
   CACHE_PREFIX,
   VERCEL_ENV,
+  VERCEL_URL,
 } = getEnvs();
 
 const isRedisCacheEnabled =
@@ -85,7 +86,7 @@ export function buildCacheKey(
 
 export function buildInternalCacheKey(...args: (string | number)[]): string {
   const defaultCachePrefix =
-    VERCEL_ENV === "production" ? "" : `${VERCEL_ENV}_`;
+    VERCEL_ENV === "production" ? "" : `${VERCEL_URL}_`;
   const cachePrefix = CACHE_PREFIX ? CACHE_PREFIX + "_" : defaultCachePrefix;
 
   return buildCacheKey(`${cachePrefix}QUOTES_API`, ...args);
