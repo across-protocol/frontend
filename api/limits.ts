@@ -100,16 +100,17 @@ const handler = async (
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
     let { amount: _amount, recipient, relayer, message } = query;
+    // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
+    const simulationAmount = ethers.BigNumber.from("100");
     recipient = recipient
       ? ethers.utils.getAddress(recipient)
       : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     relayer = relayer
       ? ethers.utils.getAddress(relayer)
       : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
-    const amount = BigNumber.from(
-      // 0.0001 tokens so we don't expect to have less than this on any chain, even for the most valuable tokens (BTC).
-      _amount ?? ethers.BigNumber.from("10").pow(inputToken.decimals - 4)
-    );
+
+    // If the amount is not provided, we use the simulation amount throughout.
+    const amount = BigNumber.from(_amount ?? simulationAmount);
 
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
@@ -170,8 +171,10 @@ const handler = async (
       },
     ];
 
-    const depositArgs = {
-      amount,
+    // These simulation args are only used when the message is not defined.
+    const simulationDepositArgs = {
+      // For the purposes of estimating gas costs, we always use the small simulation amount.
+      amount: simulationAmount,
       inputToken: inputToken.address,
       outputToken: outputToken.address,
       recipientAddress: recipient,
@@ -198,14 +201,16 @@ const handler = async (
       // because only Linea's priority fee depends on the destination chain call data.
       latestGasPriceCache(
         destinationChainId,
-        CHAIN_IDs.LINEA === destinationChainId ? depositArgs : undefined,
+        CHAIN_IDs.LINEA === destinationChainId
+          ? simulationDepositArgs
+          : undefined,
         {
           relayerAddress: relayer,
         }
       ).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedNativeGasCost(depositArgs, {
+        : getCachedNativeGasCost(simulationDepositArgs, {
             relayerAddress: relayer,
           }).get(),
     ]);
@@ -220,7 +225,7 @@ const handler = async (
     ] = await Promise.all([
       nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
         ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
+          getCachedOpStackL1DataFee(simulationDepositArgs, nativeGasCost, {
             relayerAddress: relayer,
           }).get()
         : undefined,
@@ -262,7 +267,8 @@ const handler = async (
     // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
     // and tokenGasCost.
     const relayerFeeDetails = await getRelayerFeeDetails(
-      depositArgs,
+      // We need to pass in the true amount here so the returned percentages are correct.
+      { ...simulationDepositArgs, amount: amount },
       tokenPriceNative,
       relayer,
       gasPrice,
