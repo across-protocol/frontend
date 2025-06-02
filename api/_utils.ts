@@ -890,8 +890,10 @@ export const buildDepositForSimulation = (depositArgs: {
     _outputTokenAddress,
     destinationChainId
   );
+  const inputTokenDecimals = inputToken?.decimals ?? outputToken?.decimals;
+  const outputTokenDecimals = outputToken?.decimals ?? inputToken?.decimals;
 
-  if (!inputToken || !outputToken) {
+  if (!inputTokenDecimals || !outputTokenDecimals) {
     throw new Error(
       "Can't build deposit for simulation due to unknown input or output token"
     );
@@ -901,8 +903,8 @@ export const buildDepositForSimulation = (depositArgs: {
   return {
     inputAmount,
     outputAmount: ConvertDecimals(
-      inputToken.decimals,
-      outputToken.decimals
+      inputTokenDecimals,
+      outputTokenDecimals
     )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
