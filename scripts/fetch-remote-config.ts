@@ -86,14 +86,13 @@ const remoteConfigs = {
           const dynamicWeight = dynamicWeights[relayerAddress] ?? 0;
           const fixedWeight = fixedWeights[relayerAddress] ?? 0;
 
-          if (dynamicWeight === 0 && fixedWeight === 0) {
-            return acc;
+          if (dynamicWeight > 0 || fixedWeight > 0) {
+            acc[relayerAddress] = {
+              dynamicWeight,
+              fixedWeight,
+            };
           }
 
-          acc[relayerAddress] = {
-            dynamicWeight,
-            fixedWeight,
-          };
           return acc;
         },
         {}
