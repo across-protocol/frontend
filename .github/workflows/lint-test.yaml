@@ -33,3 +33,11 @@ jobs:
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
           REACT_APP_MOCK_SERVERLESS: true
         run: yarn test
+
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: API tests
+        run: yarn test-api
