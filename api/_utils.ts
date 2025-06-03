@@ -1702,21 +1702,13 @@ export function parsableBigNumberString() {
 
 export function validEvmAddress() {
   return define<string>("validEvmAddress", (value) => {
-    try {
-      return isEvmAddress(value as string);
-    } catch {
-      return false;
-    }
+    return isEvmAddress(value as string);
   });
 }
 
 export function validSvmAddress() {
   return define<string>("validSvmAddress", (value) => {
-    try {
-      return isSvmAddress(value as string);
-    } catch {
-      return false;
-    }
+    return isSvmAddress(value as string);
   });
 }
 
