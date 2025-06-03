@@ -56,6 +56,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
+  chainConfigs.BSC,
 ];
 
 export const enabledSepoliaChainConfigs = [
@@ -104,6 +105,7 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.BSC,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
@@ -269,6 +271,19 @@ function transformChainConfigs(
       }
 
       const tokens = processTokenRoutes(chainConfig, toChainConfig);
+      const filteredTokens = tokens.filter(
+        (token) =>
+          !chainConfig.disabledRoutes?.find(
+            (disabledRoute) =>
+              toChainConfig.chainId === disabledRoute.toChainId &&
+              (typeof token === "string"
+                ? token === disabledRoute.fromTokenSymbol
+                : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
+              (typeof token === "string"
+                ? token === disabledRoute.toTokenSymbol
+                : token.outputTokenSymbol === disabledRoute.toTokenSymbol)
+          )
+      );
 
       // Handle USDC swap tokens
       const usdcSwapTokens =
@@ -278,15 +293,15 @@ function transformChainConfigs(
 
       const toChain = {
         chainId: toChainId,
-        tokens,
+        tokens: filteredTokens,
         swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
-            tokens.some((token) =>
+            filteredTokens.some((token) =>
               typeof token === "string"
                 ? token === acrossInputTokenSymbol
                 : token.inputTokenSymbol === acrossInputTokenSymbol
             ) &&
-            tokens.some((token) =>
+            filteredTokens.some((token) =>
               typeof token === "string"
                 ? token === acrossOutputTokenSymbol
                 : token.outputTokenSymbol === acrossOutputTokenSymbol

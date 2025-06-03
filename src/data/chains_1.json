@@ -1792,5 +1792,67 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       }
     ]
+  },
+  {
+    "chainId": 56,
+    "name": "BNB Smart Chain",
+    "publicRpcUrl": "https://bsc-dataseed1.binance.org",
+    "explorerUrl": "https://bscscan.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/bsc/assets/logo.svg",
+    "spokePool": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+    "spokePoolBlock": 48762335,
+    "inputTokens": [
+      {
+        "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "symbol": "USDC-BNB",
+        "name": "USD Coin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "symbol": "USDT-BNB",
+        "name": "Tether USD",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
+        "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        "symbol": "USDC-BNB",
+        "name": "USD Coin",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "symbol": "USDT-BNB",
+        "name": "Tether USD",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ]
   }
 ]
