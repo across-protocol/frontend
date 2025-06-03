@@ -1708,7 +1708,11 @@ export function validEvmAddress() {
 
 export function validSvmAddress() {
   return define<string>("validSvmAddress", (value) => {
-    return isSvmAddress(value as string);
+    try {
+      return isSvmAddress(value as string);
+    } catch {
+      return false;
+    }
   });
 }
 
