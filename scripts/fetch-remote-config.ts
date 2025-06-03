@@ -76,9 +76,20 @@ const remoteConfigs = {
           )
         ),
       ]);
-      const mergedWeights = Object.entries(dynamicWeights).reduce(
-        (acc, [relayerAddress, dynamicWeight]) => {
-          const fixedWeight = fixedWeights[relayerAddress] ?? 1;
+      const relayerAddresses = new Set([
+        ...Object.keys(dynamicWeights),
+        ...Object.keys(fixedWeights),
+      ]);
+      const relayerAddressesArray = Array.from(relayerAddresses);
+      const mergedWeights = relayerAddressesArray.reduce(
+        (acc, relayerAddress) => {
+          const dynamicWeight = dynamicWeights[relayerAddress] ?? 0;
+          const fixedWeight = fixedWeights[relayerAddress] ?? 0;
+
+          if (dynamicWeight === 0 && fixedWeight === 0) {
+            return acc;
+          }
+
           acc[relayerAddress] = {
             dynamicWeight,
             fixedWeight,
