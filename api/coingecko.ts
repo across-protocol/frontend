@@ -20,7 +20,7 @@ import {
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 import { InvalidParamError } from "./_errors";
-import { isSvmAddress } from "./_address";
+import { isEvmAddress } from "./_address";
 
 import { coingecko, utils } from "@across-protocol/sdk";
 
@@ -70,15 +70,9 @@ const handler = async (
       });
     }
 
-    let fallbackChainId = _chainId;
-    if (isSvmAddress(address)) {
-      address = utils.toAddressType(address).toBase58();
-      fallbackChainId ??= CHAIN_IDs.SOLANA;
-    } else {
-      address = utils.toAddressType(address).toEvmAddress();
-      fallbackChainId ??= CHAIN_IDs.MAINNET;
-    }
-
+    const fallbackChainId =
+      _chainId ??
+      (isEvmAddress(address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
     const chainId = coinGeckoAssetPlatformLookup[address] ?? fallbackChainId;
 
     address = utils.chainIsSvm(chainId)
@@ -86,7 +80,7 @@ const handler = async (
       : utils.toAddressType(address).toEvmAddress();
 
     baseCurrency = (
-      (baseCurrency ?? utils.chainIsSvm(chainId)) ? "sol" : "eth"
+      baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
     ).toLowerCase();
 
     // Confirm that the base Currency is supported by Coingecko
