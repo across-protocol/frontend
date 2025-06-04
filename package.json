@@ -63,7 +63,7 @@
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
-    "test-api": "jest test/api",
+    "test-api": "yarn remote-config && jest test/api",
     "pretest:e2e": "npm pkg set 'type'='module'",
     "test:e2e:headful": "yarn pretest:e2e && playwright test",
     "test:e2e:headless": "yarn pretest:e2e && HEADLESS=true playwright test",
