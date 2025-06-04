@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 
 import { useConnection } from "hooks";
 import { getCode } from "utils";
+import {
+  useIsContractAddress,
+  is7702Delegate,
+} from "hooks/useIsContractAddress";
 
 export type ToAccount = {
   address: string;
@@ -12,10 +16,11 @@ export function useToAccount(toChainId?: number) {
   const [customToAddress, setCustomToAddress] = useState<string | undefined>();
   const [toAccount, setToAccount] = useState<ToAccount | undefined>();
 
-  const {
-    account: connectedAccount,
-    isContractAddress: isConnectedAccountContract,
-  } = useConnection();
+  const { account: connectedAccount } = useConnection();
+  const isConnectedAccountContract = useIsContractAddress(
+    connectedAccount,
+    toChainId
+  );
 
   useEffect(() => {
     if (!toChainId) {
@@ -27,16 +32,16 @@ export function useToAccount(toChainId?: number) {
         .then((code) =>
           setToAccount({
             address: customToAddress,
-            isContract: code !== "0x",
+            isContract: code !== "0x" || !is7702Delegate(code),
           })
         )
         .catch((error) => {
-          console.error(error);
+          console.error("Failed to get code", error);
+          setToAccount({
+            address: customToAddress,
+            isContract: false,
+          });
         });
-      setToAccount({
-        address: customToAddress,
-        isContract: false,
-      });
     } else if (connectedAccount) {
       setToAccount({
         address: connectedAccount,
