@@ -10,6 +10,8 @@ const {
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_READ_ONLY_TOKEN,
   CACHE_PREFIX,
+  VERCEL_ENV,
+  VERCEL_URL,
 } = getEnvs();
 
 const isRedisCacheEnabled =
@@ -83,10 +85,11 @@ export function buildCacheKey(
 }
 
 export function buildInternalCacheKey(...args: (string | number)[]): string {
-  return buildCacheKey(
-    `${CACHE_PREFIX ? CACHE_PREFIX + "-" : ""}QUOTES_API`,
-    ...args
-  );
+  const defaultCachePrefix =
+    VERCEL_ENV === "production" ? "" : `${VERCEL_URL}_`;
+  const cachePrefix = CACHE_PREFIX ? CACHE_PREFIX + "_" : defaultCachePrefix;
+
+  return buildCacheKey(`${cachePrefix}QUOTES_API`, ...args);
 }
 
 export async function getCachedValue<T>(
