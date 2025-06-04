@@ -79,14 +79,15 @@ const handler = async (
       fallbackChainId ??= CHAIN_IDs.MAINNET;
     }
 
-    // Format the params for consistency
-    baseCurrency = (baseCurrency ?? "eth").toLowerCase();
-
     const chainId = coinGeckoAssetPlatformLookup[address] ?? fallbackChainId;
 
     address = utils.chainIsSvm(chainId)
       ? utils.toAddressType(address).toBase58()
       : utils.toAddressType(address).toEvmAddress();
+
+    baseCurrency = (
+      (baseCurrency ?? utils.chainIsSvm(chainId)) ? "sol" : "eth"
+    ).toLowerCase();
 
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
