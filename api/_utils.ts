@@ -844,31 +844,20 @@ export const getRelayerFeeDetails = async (
   gasUnits?: sdk.utils.BigNumberish,
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const {
-    inputToken,
-    outputToken,
-    amount,
-    originChainId,
-    destinationChainId,
-    recipientAddress,
-    message,
-  } = deposit;
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
-    relayerAddress,
-  });
-  const depositForSimulation = buildDepositForSimulation({
-    amount: amount.toString(),
-    inputToken,
-    outputToken,
-    recipientAddress,
-    originChainId,
-    destinationChainId,
-    message,
-  });
+  const { isMessageEmpty } = sdk.utils;
+  const relayFeeCalculator = getRelayerFeeCalculator(
+    deposit.destinationChainId,
+    {
+      relayerAddress,
+    }
+  );
+
+  const depositForSimulation = buildDepositForSimulation(deposit);
+
   return await relayFeeCalculator.relayerFeeDetails(
     depositForSimulation,
-    depositForSimulation.outputAmount,
-    sdk.utils.isMessageEmpty(message),
+    depositForSimulation.outputAmount, // scaled output amount
+    isMessageEmpty(deposit.message),
     relayerAddress,
     tokenPrice,
     gasPrice,
@@ -895,12 +884,16 @@ export const buildDepositForSimulation = (depositArgs: {
     destinationChainId,
     message,
   } = depositArgs;
+
   const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
   const outputToken = getTokenByAddress(
     _outputTokenAddress,
     destinationChainId
   );
-  if (!inputToken || !outputToken) {
+  const inputTokenDecimals = inputToken?.decimals ?? outputToken?.decimals;
+  const outputTokenDecimals = outputToken?.decimals ?? inputToken?.decimals;
+
+  if (!inputTokenDecimals || !outputTokenDecimals) {
     throw new Error(
       "Can't build deposit for simulation due to unknown input or output token"
     );
@@ -2153,7 +2146,7 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
-  const chainId = provider.network.chainId;
+  const chainId = (await provider.getNetwork()).chainId;
   const multicall3 = new ethers.Contract(
     getMulticall3Address(chainId) ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
