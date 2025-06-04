@@ -898,17 +898,14 @@ export const buildDepositForSimulation = (depositArgs: {
       "Can't build deposit for simulation due to unknown input or output token"
     );
   }
-  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
-  const safeOutputAmount = sdk.utils.toBN(100);
-  const outputAmount = ConvertDecimals(
-    inputToken.decimals,
-    outputToken.decimals
-  )(sdk.utils.toBN(amount));
+  const inputAmount = sdk.utils.toBN(amount);
+
   return {
-    inputAmount: sdk.utils.toBN(amount),
-    outputAmount: sdk.utils.isMessageEmpty(message)
-      ? safeOutputAmount
-      : outputAmount,
+    inputAmount,
+    outputAmount: ConvertDecimals(
+      inputTokenDecimals,
+      outputTokenDecimals
+    )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
     depositor: recipientAddress,
     recipient: recipientAddress,
