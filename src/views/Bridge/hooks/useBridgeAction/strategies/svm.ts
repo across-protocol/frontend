@@ -155,7 +155,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         exclusivityParameter: new BN(exclusivityDeadline),
         message: new Uint8Array(message),
       },
-      getSpokePoolProgramId(originChainId)
+      config.getSpokePoolProgramId(originChainId)
     );
 
     const approveTokenInstruction = this._createApproveInstruction(
@@ -281,7 +281,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     });
 
     return new TransactionInstruction({
-      programId: getSpokePoolProgramId(originChainId),
+      programId: config.getSpokePoolProgramId(originChainId),
       data: Buffer.from(depositInstructionData),
       keys: [
         { pubkey: depositor, isSigner: true, isWritable: true },
@@ -300,7 +300,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         // manually append these 2 state accounts, not explicitly listed in program
         { pubkey: eventAuthorityPda, isSigner: false, isWritable: false },
         {
-          pubkey: getSpokePoolProgramId(originChainId),
+          pubkey: config.getSpokePoolProgramId(originChainId),
           isSigner: false,
           isWritable: false,
         },
