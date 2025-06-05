@@ -1,13 +1,18 @@
 import styled from "@emotion/styled";
-import { QUERIES } from "utils";
-export const Wrapper = styled.div`
+import { QUERIESV2, COLORS } from "utils";
+
+export const Wrapper = styled.div<{
+  type?: "info" | "success";
+  onClick?: () => void;
+}>`
+  cursor: ${({ onClick }) => (onClick ? "pointer" : "default")};
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0 30px;
-  height: 72px;
-  color: #e0f3ff;
-  background-color: #202024;
+  height: 56px;
+  background-color: ${({ type }) =>
+    type === "success" ? COLORS.aqua : COLORS["grey-400"]};
   border-bottom: 1px solid #3e4047;
   font-size: ${16 / 16}rem;
   position: unset;
@@ -15,7 +20,8 @@ export const Wrapper = styled.div`
   top: 0;
   left: 0;
   z-index: 1100;
-  @media ${QUERIES.tabletAndDown} {
+
+  @media ${QUERIESV2.tb.andDown} {
     padding: 0 10px;
   }
   svg {
