@@ -1,13 +1,13 @@
-import { LogDescription } from "ethers/lib/utils";
-import axios from "axios";
-
-import { getConfig } from "./config";
-import { getBlockForTimestamp, isDefined } from "./sdk";
+import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
-import { rewardsApiUrl } from "./constants";
 
-const config = getConfig();
+import { TransactionReceipt } from "@ethersproject/providers";
+import {
+  FundsDepositedEvent,
+  FilledRelayEvent,
+} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
+import { getMessageHash } from "./sdk";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
@@ -30,7 +30,7 @@ export function parseFundsDepositedLog(
     topics: string[];
     data: string;
   }>
-): LogDescription | undefined {
+): FundsDepositedEvent {
   const spokePoolIface = SpokePool__factory.createInterface();
   const parsedLogs = logs.flatMap((log) => {
     try {
@@ -44,13 +44,51 @@ export function parseFundsDepositedLog(
       "V3FundsDeposited", // NOTE: kept for backwards compatibility
       "FundsDeposited", // NOTE: this is the new name for the event
     ].includes(name)
-  );
+  ) as unknown as FundsDepositedEvent;
+}
+
+export function parseFilledRelayLog(
+  logs: Array<{
+    topics: string[];
+    data: string;
+  }>
+): FilledRelayEvent | undefined {
+  const spokePoolIface = SpokePool__factory.createInterface();
+  const parsedLogs = logs.flatMap((log) => {
+    try {
+      return spokePoolIface.parseLog(log);
+    } catch (e) {
+      return [];
+    }
+  });
+
+  if (!parsedLogs) {
+    return undefined;
+  }
+
+  return parsedLogs.find(({ name }) =>
+    [
+      "FilledV3Relay", // NOTE: kept for backwards compatibility
+      "FilledRelay", // NOTE: this is the new name for the event
+    ].includes(name)
+  ) as unknown as FilledRelayEvent;
 }
 
 export async function getDepositByTxHash(
   depositTxHash: string,
   fromChainId: number
-) {
+): Promise<
+  | {
+      depositTxReceipt: TransactionReceipt;
+      parsedDepositLog: DepositData;
+      depositTimestamp: number;
+    }
+  | {
+      depositTxReceipt: TransactionReceipt;
+      parsedDepositLog: undefined;
+      depositTimestamp: number;
+    }
+> {
   const fromProvider = getProvider(fromChainId);
   const depositTxReceipt =
     await fromProvider.getTransactionReceipt(depositTxHash);
@@ -77,98 +115,18 @@ export async function getDepositByTxHash(
 
   return {
     depositTxReceipt,
-    parsedDepositLog,
+    parsedDepositLog: {
+      ...parsedDepositLog,
+      ...parsedDepositLog.args,
+      depositTimestamp: block.timestamp,
+      originChainId: fromChainId,
+      logIndex: parsedDepositLog.logIndex,
+      messageHash: getMessageHash(parsedDepositLog.args.message),
+      blockNumber: parsedDepositLog.blockNumber,
+      txnIndex: parsedDepositLog.transactionIndex,
+      txnRef: parsedDepositLog.transactionHash,
+      destinationChainId: Number(parsedDepositLog.args.destinationChainId),
+    } satisfies DepositData,
     depositTimestamp: block.timestamp,
-  };
-}
-
-export async function getFillByDepositTxHash(
-  depositTxHash: string,
-  fromChainId: number,
-  toChainId: number,
-  depositByTxHash: Awaited<ReturnType<typeof getDepositByTxHash>>
-) {
-  if (!depositByTxHash || !depositByTxHash.parsedDepositLog) {
-    throw new Error(
-      `Could not fetch deposit by tx hash ${depositTxHash} on chain ${fromChainId}`
-    );
-  }
-
-  const { parsedDepositLog } = depositByTxHash;
-  const depositId = parsedDepositLog.args.depositId;
-  const provider = getProvider(toChainId);
-
-  try {
-    const { data } = await axios.get<{
-      status: "filled" | "pending";
-      fillTx: string | null;
-    }>(`${rewardsApiUrl}/deposit/status`, {
-      params: {
-        depositId: depositId.toString(),
-        originChainId: fromChainId,
-      },
-    });
-
-    if (data?.status === "filled" && data.fillTx) {
-      const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
-      const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
-      return {
-        fillTxHashes: [data.fillTx],
-        fillTxTimestamp: fillTxBlock.timestamp,
-        depositByTxHash,
-      };
-    }
-  } catch (e) {
-    // If the deposit is not found, we can assume it is not indexed yet.
-    // We continue to look for the filled relay event via RPC.
-  }
-
-  const blockForTimestamp = await getBlockForTimestamp(
-    provider,
-    depositByTxHash.depositTimestamp
-  );
-  const destinationSpokePool = config.getSpokePool(toChainId);
-  const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all([
-    destinationSpokePool.queryFilter(
-      destinationSpokePool.filters.FilledV3Relay(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        fromChainId,
-        depositId
-      ),
-      blockForTimestamp
-    ),
-    destinationSpokePool.queryFilter(
-      destinationSpokePool.filters.FilledRelay(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        fromChainId,
-        depositId
-      ),
-      blockForTimestamp
-    ),
-  ]);
-  const filledRelayEvents = [
-    ...legacyFilledRelayEvents,
-    ...newFilledRelayEvents,
-  ];
-  // If we make it to this point, we can be sure that there is exactly one filled relay event
-  // that corresponds to the deposit we are looking for.
-  // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
-  const filledRelayEvent = filledRelayEvents[0];
-  if (!isDefined(filledRelayEvent)) {
-    throw new NoFilledRelayLogError(depositId, toChainId);
-  }
-  const fillTxBlock = await filledRelayEvent.getBlock();
-  return {
-    fillTxHashes: filledRelayEvents.map((event) => event.transactionHash),
-    fillTxTimestamp: fillTxBlock.timestamp,
-    depositByTxHash,
   };
 }
