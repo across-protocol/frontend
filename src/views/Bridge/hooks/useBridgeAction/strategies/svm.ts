@@ -8,8 +8,10 @@ import {
   PublicKey,
   Transaction,
   TransactionInstruction,
+  SystemProgram,
 } from "@solana/web3.js";
 import { address, getU64Encoder } from "@solana/kit";
+import BN from "bn.js";
 
 import { SvmSpokeClient } from "utils/codama";
 import { ConvertDecimals } from "utils/convertdecimals";
@@ -19,6 +21,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 
 import { AbstractBridgeActionStrategy } from "./abstract";
 import { ApproveTokensParams, DepositActionParams } from "./types";
+import { getDepositPda } from "@across-protocol/contracts/dist/src/svm/web3-v1";
 
 const u64Encoder = getU64Encoder();
 const config = getConfig();
@@ -115,12 +118,10 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     const integratorId = depositArgs.integratorId;
 
     const statePda = this._getStatePDA(originChainId);
-    const routePda = this._getRoutePDA(
-      originChainId,
-      inputTokenAddress,
-      destinationChainId
-    );
+
     const eventAuthorityPda = this._getEventAuthorityPDA(originChainId);
+
+    // Get the user's token account
     const depositorTokenAccount = getAssociatedTokenAddressSync(
       inputTokenAddress,
       this.signerPublicKey,
@@ -128,7 +129,8 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       TOKEN_PROGRAM_ID,
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
-    // Find ATA for the input token to be stored by state (vault). This was created when the route was enabled.
+
+    // vaults should be initialized manually when adding new tokens
     const vault = getAssociatedTokenAddressSync(
       inputTokenAddress,
       statePda,
@@ -137,43 +139,53 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    const approveTokenInstruction = await this._getApproveInstruction(params);
+    // Get the delegatePda that will be used for both approve and deposit
+    const delegatePda = getDepositPda(
+      {
+        depositor: this.signerPublicKey,
+        recipient,
+        inputToken: inputTokenAddress,
+        outputToken: outputTokenAddress,
+        inputAmount: new BN(inputAmount.toString()),
+        outputAmount: new BN(outputAmount.toString()),
+        destinationChainId: new BN(destinationChainId.toString()),
+        exclusiveRelayer,
+        quoteTimestamp: new BN(quoteTimestamp.toString()),
+        fillDeadline: new BN(fillDeadline),
+        exclusivityParameter: new BN(exclusivityDeadline),
+        message: new Uint8Array(message),
+      },
+      getSpokePoolProgramId(originChainId)
+    );
 
-    const depositInstructionDataEncoder =
-      SvmSpokeClient.getDepositInstructionDataEncoder();
-    const depositInstructionData = depositInstructionDataEncoder.encode({
-      depositor: address(this.signerPublicKey.toString()),
-      recipient: address(recipient.toString()),
-      inputToken: address(inputTokenAddress.toString()),
-      outputToken: address(outputTokenAddress.toString()),
-      inputAmount: inputAmount,
-      outputAmount: outputAmount,
+    const approveTokenInstruction = this._createApproveInstruction(
+      depositorTokenAccount,
+      inputTokenAddress,
+      delegatePda,
+      inputAmount,
+      inputToken.decimals
+    );
+
+    const depositInstruction = this._createDepositInstruction(
+      originChainId,
+      this.signerPublicKey,
+      statePda,
+      delegatePda,
+      depositorTokenAccount,
+      vault,
+      inputTokenAddress,
+      outputTokenAddress,
+      recipient,
+      inputAmount,
+      outputAmount,
       destinationChainId,
-      exclusiveRelayer: address(exclusiveRelayer.toString()),
-      quoteTimestamp: Number(quoteTimestamp),
-      fillDeadline: Number(fillDeadline),
-      exclusivityParameter: Number(exclusivityDeadline),
-      message: new Uint8Array(message),
-    });
-    const depositInstruction = new TransactionInstruction({
-      programId: getSpokePoolProgramId(originChainId),
-      data: Buffer.from(depositInstructionData),
-      keys: [
-        { pubkey: this.signerPublicKey, isSigner: true, isWritable: true },
-        { pubkey: statePda, isSigner: false, isWritable: true },
-        { pubkey: routePda, isSigner: false, isWritable: false },
-        { pubkey: depositorTokenAccount, isSigner: false, isWritable: true },
-        { pubkey: vault, isSigner: false, isWritable: true },
-        { pubkey: inputTokenAddress, isSigner: false, isWritable: false },
-        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        { pubkey: eventAuthorityPda, isSigner: false, isWritable: false },
-        {
-          pubkey: getSpokePoolProgramId(originChainId),
-          isSigner: false,
-          isWritable: false,
-        },
-      ],
-    });
+      exclusiveRelayer,
+      Number(quoteTimestamp),
+      Number(fillDeadline),
+      Number(exclusivityDeadline),
+      message,
+      eventAuthorityPda
+    );
 
     const tx = new Transaction().add(
       approveTokenInstruction,
@@ -192,36 +204,6 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     }
 
     return this._sendTransaction(tx);
-  }
-
-  private async _getApproveInstruction(params: ApproveTokensParams) {
-    const { depositArgs, selectedRoute } = params;
-    const { fromChain, amount } = depositArgs;
-
-    const signer = this.signerPublicKey;
-    const inputToken = new PublicKey(selectedRoute.fromTokenAddress);
-
-    const statePda = this._getStatePDA(fromChain);
-    const userTokenAccount = getAssociatedTokenAddressSync(inputToken, signer);
-
-    const tokenInfo = config.getTokenInfoBySymbol(
-      fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const tokenDecimals = tokenInfo.decimals;
-
-    const approveInstruction = createApproveCheckedInstruction(
-      userTokenAccount,
-      inputToken,
-      statePda,
-      signer,
-      BigInt(amount.toString()),
-      tokenDecimals,
-      undefined,
-      TOKEN_PROGRAM_ID
-    );
-
-    return approveInstruction;
   }
 
   private _getStatePDA(fromChain: number) {
@@ -258,6 +240,91 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       programId
     );
     return eventAuthorityPda;
+  }
+
+  private _createDepositInstruction(
+    originChainId: number,
+    depositor: PublicKey,
+    statePda: PublicKey,
+    delegatePda: PublicKey,
+    depositorTokenAccount: PublicKey,
+    vault: PublicKey,
+    inputTokenAddress: PublicKey,
+    outputTokenAddress: PublicKey,
+    recipient: PublicKey,
+    inputAmount: bigint,
+    outputAmount: bigint,
+    destinationChainId: bigint,
+    exclusiveRelayer: PublicKey,
+    quoteTimestamp: number,
+    fillDeadline: number,
+    exclusivityDeadline: number,
+    message: Buffer,
+    eventAuthorityPda: PublicKey
+  ): TransactionInstruction {
+    const depositInstructionDataEncoder =
+      SvmSpokeClient.getDepositInstructionDataEncoder();
+
+    const depositInstructionData = depositInstructionDataEncoder.encode({
+      depositor: address(depositor.toString()),
+      recipient: address(recipient.toString()),
+      inputToken: address(inputTokenAddress.toString()),
+      outputToken: address(outputTokenAddress.toString()),
+      inputAmount,
+      outputAmount,
+      destinationChainId,
+      exclusiveRelayer: address(exclusiveRelayer.toString()),
+      quoteTimestamp,
+      fillDeadline,
+      exclusivityParameter: exclusivityDeadline,
+      message: new Uint8Array(message),
+    });
+
+    return new TransactionInstruction({
+      programId: getSpokePoolProgramId(originChainId),
+      data: Buffer.from(depositInstructionData),
+      keys: [
+        { pubkey: depositor, isSigner: true, isWritable: true },
+        { pubkey: statePda, isSigner: false, isWritable: true },
+        { pubkey: delegatePda, isSigner: false, isWritable: false },
+        { pubkey: depositorTokenAccount, isSigner: false, isWritable: true },
+        { pubkey: vault, isSigner: false, isWritable: true },
+        { pubkey: inputTokenAddress, isSigner: false, isWritable: false },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+        {
+          pubkey: ASSOCIATED_TOKEN_PROGRAM_ID,
+          isSigner: false,
+          isWritable: false,
+        },
+        { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        // manually append these 2 state accounts, not explicitly listed in program
+        { pubkey: eventAuthorityPda, isSigner: false, isWritable: false },
+        {
+          pubkey: getSpokePoolProgramId(originChainId),
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+    });
+  }
+
+  private _createApproveInstruction(
+    depositorTokenAccount: PublicKey,
+    inputTokenAddress: PublicKey,
+    delegatePda: PublicKey,
+    inputAmount: bigint,
+    inputTokenDecimals: number
+  ): TransactionInstruction {
+    return createApproveCheckedInstruction(
+      depositorTokenAccount,
+      inputTokenAddress,
+      delegatePda,
+      this.signerPublicKey,
+      inputAmount,
+      inputTokenDecimals,
+      undefined,
+      TOKEN_PROGRAM_ID
+    );
   }
 
   private async _sendTransaction(tx: Transaction) {
