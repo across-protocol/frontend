@@ -11,7 +11,6 @@ import {
   verifySignatures,
 } from "./_utils";
 import { strategiesByName } from "./_strategies";
-import { CHAIN_IDs } from "../_constants";
 import { pushRelayRequestToQueue } from "./_queue";
 import { RelayRequest } from "./_types";
 
@@ -27,8 +26,7 @@ export const BaseRelayRequestBodySchema = object({
 });
 
 const strategies = {
-  default: strategiesByName.gelato,
-  [CHAIN_IDs.WORLD_CHAIN]: strategiesByName["local-signers"],
+  default: strategiesByName["local-signers"],
 };
 
 export default async function handler(
