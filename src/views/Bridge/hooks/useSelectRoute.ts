@@ -16,6 +16,8 @@ import {
   getOutputTokenSymbol,
   PriorityFilterKey,
   getInitialRoute,
+  getTokenDefaultsForRoute,
+  findEnabledRoute,
 } from "../utils";
 
 const initialRoute = getInitialRoute();
@@ -63,7 +65,7 @@ export function useSelectRoute() {
           selectedRoute.toTokenAddress
         ),
       };
-      const route =
+      const _route =
         findNextBestRoute(["inputTokenSymbol", "fromChain", "toChain"], {
           ...baseFilter,
           inputTokenSymbol: inputOrSwapTokenSymbol,
@@ -90,6 +92,7 @@ export function useSelectRoute() {
         }) ||
         initialRoute;
 
+      const route = getTokenDefaultsForRoute(_route);
       setSelectedRoute(route);
 
       addToAmpliQueue(() => {
@@ -107,15 +110,34 @@ export function useSelectRoute() {
         outputTokenSymbol,
       };
       const route =
-        findNextBestRoute(["outputTokenSymbol"], {
+        findEnabledRoute({
           ...baseFilter,
-          outputTokenSymbol,
+          inputTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : selectedRoute.fromTokenSymbol,
+        }) ||
+        findEnabledRoute({
+          ...baseFilter,
           inputTokenSymbol: selectedRoute.fromTokenSymbol,
           swapTokenSymbol:
             selectedRoute.type === "swap"
               ? selectedRoute.swapTokenSymbol
               : undefined,
-        }) || initialRoute;
+        }) ||
+        findEnabledRoute({
+          ...baseFilter,
+          swapTokenSymbol: selectedRoute.fromTokenSymbol,
+        }) ||
+        findNextBestRoute(["outputTokenSymbol", "fromChain", "toChain"], {
+          ...baseFilter,
+          inputTokenSymbol: selectedRoute.fromTokenSymbol,
+          swapTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : undefined,
+        }) ||
+        initialRoute;
 
       setSelectedRoute(route);
     },

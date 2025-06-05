@@ -1,5 +1,5 @@
 import { BigNumber, providers } from "ethers";
-import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
 import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
@@ -11,19 +11,20 @@ export {
 } from "@across-protocol/sdk/dist/esm/utils/BigNumberUtils";
 export { mapAsync } from "@across-protocol/sdk/dist/esm/utils/ArrayUtils";
 export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
-export { isBridgedUsdc } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
+export {
+  isBridgedUsdc,
+  isStablecoin,
+} from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
 export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
+  toBytes32,
   compareAddressesSimple,
   toAddress,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
-export {
-  getNativeTokenSymbol,
-  chainIsLens,
-} from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+export { getNativeTokenSymbol } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 
 export function getUpdateV3DepositTypedData(
-  depositId: number,
+  depositId: string,
   originChainId: number,
   updatedOutputAmount: BigNumber,
   updatedRecipient: string,
@@ -59,7 +60,7 @@ export async function getBlockForTimestamp(
   provider: providers.JsonRpcProvider,
   timestamp: number
 ) {
-  const blockFinder = new BlockFinder(provider);
+  const blockFinder = new EVMBlockFinder(provider);
   const { number: blockNumberForTimestamp } =
     await blockFinder.getBlockForTimestamp(timestamp);
   return blockNumberForTimestamp;

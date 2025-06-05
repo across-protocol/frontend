@@ -2,18 +2,19 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
-  rewardsApiUrl,
   depositsQueryKey,
   userDepositsQueryKey,
   defaultRefetchInterval,
+  indexerApiBaseUrl,
 } from "utils";
-import {
-  getLocalDepositEntries,
-  removeLocalDeposits,
-} from "../utils/local-deposits";
 import { DepositStatusFilter } from "views/Transactions/types";
 
-export type DepositStatus = "pending" | "filled";
+export type DepositStatus =
+  | "pending"
+  | "filled"
+  | "refunded"
+  | "expired"
+  | "slowFillRequested";
 
 export type SpeedUpDepositTx = {
   hash: string;
@@ -23,7 +24,7 @@ export type SpeedUpDepositTx = {
 };
 
 export type Deposit = {
-  depositId: number;
+  depositId: string;
   depositTime: number;
   status: DepositStatus;
   filled: string;
@@ -71,24 +72,25 @@ export type Deposit = {
   };
   token?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   outputToken?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   swapToken?: {
     address: string;
-    symbol: string;
-    name: string;
-    decimals: number;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
   swapTokenAmount?: string;
   swapTokenAddress?: string;
+  depositRefundTxHash?: string;
 };
 
 export type Pagination = {
@@ -101,6 +103,49 @@ export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
 };
+
+export type IndexerDeposit = {
+  id: number;
+  relayHash: string;
+  depositId: string;
+  originChainId: number;
+  destinationChainId: number;
+  depositor: string;
+  recipient: string;
+  inputToken: string;
+  inputAmount: string;
+  outputToken: string;
+  outputAmount: string;
+  message: string;
+  messageHash: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: string;
+  fillDeadline: string;
+  quoteTimestamp: string;
+  depositTransactionHash: string;
+  depositTxHash: string;
+  depositBlockNumber: number;
+  depositBlockTimestamp: string;
+  status: "unfilled" | "filled";
+  depositRefundTxHash: string;
+  swapTokenPriceUsd: string;
+  swapFeeUsd: string;
+  bridgeFeeUsd: string;
+  inputPriceUsd: string;
+  outputPriceUsd: string;
+  fillGasFee: string;
+  fillGasFeeUsd: string;
+  fillGasTokenPriceUsd: string;
+  swapTransactionHash: string;
+  swapToken: string;
+  swapTokenAmount: string;
+  relayer: string;
+  fillBlockTimestamp: string;
+  fillTx: string;
+  speedups: any[];
+};
+
+export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
   status: DepositStatusFilter,
@@ -143,64 +188,15 @@ export function useUserDeposits(
       }
 
       const omitStatusFilter = status === "all";
-
-      // To provide a better UX, we take optimistically updated local deposits
-      // into account to show on the "My Transactions" page.
-      const localUserDeposits = getLocalDepositEntries()
-        .filter(({ deposit }) =>
-          omitStatusFilter
-            ? true
-            : deposit.status === status &&
-              (deposit.depositorAddr === userAddress ||
-                deposit.recipientAddr === userAddress)
-        )
-        .map(({ deposit }) => deposit);
-      const { deposits, pagination } = await getDeposits({
+      const deposits = await getDeposits({
         address: userAddress,
         status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       });
-      const indexedDepositTxHashes = new Set(
-        deposits.map((d) => d.depositTxHash)
-      );
-
-      // If the Scraper API is still a few blocks behind and didn't index
-      // the optimistically added deposits, then we merge them to provide instant
-      // visibility of a deposit after a user performed a transaction.
-      // - If the local deposit is pending, we show it if it's not indexed yet.
-      // - If the local deposit is filled, we only show it if the indexed deposit is pending.
-      const localDepositsToShow = localUserDeposits.filter(
-        (localUserDeposit) => {
-          if (localUserDeposit.status === "pending") {
-            return !indexedDepositTxHashes.has(localUserDeposit.depositTxHash);
-          } else if (localUserDeposit.status === "filled") {
-            const indexedDeposit = deposits.find(
-              (d) => d.depositTxHash === localUserDeposit.depositTxHash
-            );
-            return !indexedDeposit || indexedDeposit.status === "pending";
-          }
-        }
-      );
-      const localDepositsToShowTxHashes = new Set(
-        localDepositsToShow.map((d) => d.depositTxHash)
-      );
-      const indexedDepositsToShow = deposits.filter(
-        (deposit) => !localDepositsToShowTxHashes.has(deposit.depositTxHash)
-      );
-      const mergedDeposits = [...localDepositsToShow, ...indexedDepositsToShow];
-
-      // Remove local deposits that are in sync with the Scraper
-      const localUserDepositsToRemove = localUserDeposits
-        .filter(
-          (deposit) => !localDepositsToShowTxHashes.has(deposit.depositTxHash)
-        )
-        .map((d) => d.depositTxHash);
-      removeLocalDeposits(localUserDepositsToRemove);
 
       return {
-        deposits: mergedDeposits,
-        pagination,
+        deposits,
       };
     },
     placeholderData: keepPreviousData,
@@ -218,17 +214,14 @@ async function getDeposits(
     offset: number;
   }> = {}
 ) {
-  const { data } = await axios.get<GetDepositsResponse>(
-    `${rewardsApiUrl}/deposits/tx-page`,
+  const { data } = await axios.get<GetIndexerDepositsResponse>(
+    `${indexerApiBaseUrl}/deposits`,
     {
       params: {
-        status: params.status,
-        skipOldUnprofitable: params.skipOldUnprofitable,
+        status: params.status === "pending" ? "unfilled" : params.status,
         limit: params.limit,
-        offset: params.offset,
-        depositorOrRecipientAddress: params.address,
-        orderBy: "status",
-        include: ["token"],
+        skip: params.offset,
+        depositor: params.address,
       },
     }
   );

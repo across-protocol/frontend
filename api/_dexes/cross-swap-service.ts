@@ -1,5 +1,4 @@
 import { TradeType } from "@uniswap/sdk-core";
-import { utils } from "ethers";
 
 import {
   getBridgeQuoteForMinOutput,
@@ -19,7 +18,6 @@ import {
   getCrossSwapType,
   getPreferredBridgeTokens,
   getQuoteFetchStrategy,
-  NoQuoteFoundError,
   QuoteFetchStrategies,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
@@ -30,7 +28,11 @@ import {
   buildDestinationSwapCrossChainMessage,
   assertMinOutputAmount,
 } from "./utils";
-import { AmountTooLowError } from "../_errors";
+import {
+  AmountTooLowError,
+  InvalidParamError,
+  SwapQuoteUnavailableError,
+} from "../_errors";
 
 const indicativeQuoteBuffer = 0.005; // 0.5% buffer for indicative quotes
 
@@ -63,7 +65,9 @@ export async function getCrossSwapQuotes(
     });
   }
 
-  throw new Error("Invalid amount type");
+  throw new InvalidParamError({
+    message: `Failed to fetch swap quote: invalid amount type '${crossSwap.type}'`,
+  });
 }
 
 function getCrossSwapQuoteForAmountType(
@@ -88,7 +92,9 @@ function getCrossSwapQuoteForAmountType(
 
   const handler = typeToHandler[crossSwapType];
   if (!handler) {
-    throw new Error("Invalid cross swap type");
+    throw new InvalidParamError({
+      message: `Failed to fetch swap quote: invalid cross swap type '${crossSwapType}'`,
+    });
   }
 
   return handler(crossSwap, strategies);
@@ -111,6 +117,15 @@ export async function getCrossSwapQuotesForExactInputB2B(
     recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
     message: buildExactInputBridgeTokenMessage(crossSwap, crossSwap.amount),
   });
+
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Failed to fetch swap quote: ` +
+        `Bridge amount is too low to cover bridge fees`,
+    });
+  }
+
   bridgeQuote.message = buildExactInputBridgeTokenMessage(
     crossSwap,
     bridgeQuote.outputAmount
@@ -211,8 +226,8 @@ export async function getCrossSwapQuotesForExactInputB2A(
   if (bridgeQuote.outputAmount.lt(0)) {
     throw new AmountTooLowError({
       message:
-        `Bridge amount is too low to cover bridge fees: ` +
-        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, crossSwap.inputToken.decimals)}`,
+        `Failed to fetch swap quote: ` +
+        `Bridge amount is too low to cover bridge fees`,
     });
   }
 
@@ -353,10 +368,12 @@ function _prepCrossSwapQuotesRetrievalB2A(
   );
 
   if (!bridgeRoute) {
-    throw new Error(
-      `No bridge route found for input token ${crossSwap.inputToken.symbol} ` +
-        `${crossSwap.inputToken.chainId} -> ${destinationSwapChainId}`
-    );
+    throw new InvalidParamError({
+      message:
+        `Failed to fetch swap quote: ` +
+        `No bridge route found for input token ${crossSwap.inputToken.symbol} ` +
+        `${crossSwap.inputToken.chainId} -> ${destinationSwapChainId}`,
+    });
   }
 
   const _bridgeableOutputToken = getTokenByAddress(
@@ -365,9 +382,12 @@ function _prepCrossSwapQuotesRetrievalB2A(
   );
 
   if (!_bridgeableOutputToken) {
-    throw new Error(
-      `No bridgeable output token found for ${bridgeRoute.toTokenAddress} on chain ${bridgeRoute.toChain}`
-    );
+    throw new InvalidParamError({
+      message:
+        `Failed to fetch swap quote: ` +
+        `No bridgeable output token found for ${bridgeRoute.toTokenAddress} ` +
+        `on chain ${bridgeRoute.toChain}`,
+    });
   }
 
   const bridgeableOutputToken = {
@@ -442,6 +462,15 @@ export async function getCrossSwapQuotesForExactInputA2B(
       originSwapQuote.minAmountOut
     ),
   });
+
+  if (bridgeQuote.outputAmount.lt(0)) {
+    throw new AmountTooLowError({
+      message:
+        `Failed to fetch swap quote: ` +
+        `Input amount is too low to cover swap and bridge fees`,
+    });
+  }
+
   bridgeQuote.message = buildExactInputBridgeTokenMessage(
     crossSwap,
     bridgeQuote.outputAmount
@@ -629,9 +658,11 @@ export async function getCrossSwapQuotesA2A(
   );
 
   if (allBridgeRoutes.length === 0) {
-    throw new Error(
-      `No bridge routes found for ${originSwapChainId} -> ${destinationSwapChainId}`
-    );
+    throw new InvalidParamError({
+      message:
+        `Failed to fetch swap quote: ` +
+        `No bridge routes found for ${originSwapChainId} -> ${destinationSwapChainId}`,
+    });
   }
 
   const preferredBridgeRoutes = allBridgeRoutes.filter(({ toTokenSymbol }) =>
@@ -648,9 +679,11 @@ export async function getCrossSwapQuotesA2A(
     );
 
     if (bridgeRoutesToCompare.length === 0) {
-      throw new Error(
-        `No bridge routes to compare for ${originSwapChainId} -> ${destinationSwapChainId}`
-      );
+      throw new InvalidParamError({
+        message:
+          `Failed to fetch swap quote: ` +
+          `No bridge routes to compare for ${originSwapChainId} -> ${destinationSwapChainId}`,
+      });
     }
 
     const crossSwapQuotesResults = await Promise.allSettled(
@@ -685,11 +718,14 @@ export async function getCrossSwapQuotesA2A(
     return bestCrossSwapQuote;
   }
 
-  throw new NoQuoteFoundError({
-    originSwapChainId,
-    inputTokenSymbol: crossSwap.inputToken.symbol,
-    destinationSwapChainId,
-    outputTokenSymbol: crossSwap.outputToken.symbol,
+  throw new SwapQuoteUnavailableError({
+    message:
+      `Failed to fetch swap quote: ` +
+      `No quotes available ${
+        crossSwap.inputToken.symbol
+      } ${crossSwap.inputToken.chainId} -> ${
+        crossSwap.outputToken.symbol
+      } ${crossSwap.outputToken.chainId}`,
   });
 }
 
@@ -753,9 +789,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
 
   if (bridgeQuote.outputAmount.lt(0)) {
     throw new AmountTooLowError({
-      message:
-        `Bridge amount is too low to cover bridge fees: ` +
-        `${utils.formatUnits(bridgeQuote.suggestedFees.totalRelayFee.total, bridgeQuote.inputToken.decimals)}`,
+      message: `Failed to fetch swap quote: Bridge amount is too low to cover bridge fees`,
     });
   }
 

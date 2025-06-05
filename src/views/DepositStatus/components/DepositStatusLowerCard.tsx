@@ -60,7 +60,7 @@ export function DepositStatusLowerCard({
   );
 
   const history = useHistory();
-  const isReceiverContract = useIsContractAddress(recipient);
+  const isReceiverContract = useIsContractAddress(recipient, toChainId);
   const programName = chainIdToRewardsProgramName[toChainId];
 
   const FeesTable =

@@ -12,7 +12,7 @@ const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
-        disabledOriginChains: number[];
+        disabledOriginChains?: number[];
         enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
@@ -31,7 +31,7 @@ const enabledSwapRoutes: {
       },
       [CHAIN_IDs.LENS]: {
         enabledDestinationChains: [CHAIN_IDs.MAINNET],
-        enabledOutputTokens: ["WGHO", "GHO", "USDC", "USDT", "DAI"],
+        enabledOutputTokens: ["GHO", "USDC", "USDT", "DAI"],
       },
     },
     [TOKEN_SYMBOLS_MAP.WGHO.symbol]: {
@@ -41,23 +41,34 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-      [CHAIN_IDs.LENS]: {
-        enabledDestinationChains: [
-          CHAIN_IDs.MAINNET,
-          CHAIN_IDs.OPTIMISM,
-          CHAIN_IDs.POLYGON,
-          CHAIN_IDs.ARBITRUM,
-          CHAIN_IDs.BASE,
-        ],
-        enabledOutputTokens: ["USDC"],
-      },
       all: {
         disabledOriginChains: [
-          CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
-          CHAIN_IDs.UNICHAIN,
+          CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
+          CHAIN_IDs.LINEA, // Not bridgeable
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
-        enabledOutputTokens: ["USDC", "GHO"],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDbC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDzC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {

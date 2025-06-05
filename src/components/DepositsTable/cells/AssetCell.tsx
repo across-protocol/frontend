@@ -21,32 +21,34 @@ export function AssetCell({
 }: Props) {
   const leftToken = swapToken || inputToken;
   const rightToken = outputToken || inputToken;
-  const shouldDisplayIconPair = leftToken.symbol !== rightToken.symbol;
+  const leftTokenSymbol = leftToken.displaySymbol || leftToken.symbol;
+  const rightTokenSymbol = rightToken.displaySymbol || rightToken.symbol;
+  const shouldDisplayIconPair = leftTokenSymbol !== rightTokenSymbol;
 
   const Icon = shouldDisplayIconPair ? (
     <TokenPairContainer>
       <IconPair
         LeftIcon={
-          <img src={leftToken.logoURI} alt={`${leftToken.symbol} logo`} />
+          <img src={leftToken.logoURI} alt={`${leftTokenSymbol} logo`} />
         }
         RightIcon={
-          <img src={rightToken.logoURI} alt={`${rightToken.symbol} logo`} />
+          <img src={rightToken.logoURI} alt={`${rightTokenSymbol} logo`} />
         }
         iconSize={24}
       />
     </TokenPairContainer>
   ) : (
-    <TokenIconImg src={leftToken.logoURI} alt={`${leftToken.symbol} logo`} />
+    <TokenIconImg src={leftToken.logoURI} alt={`${leftTokenSymbol} logo`} />
   );
   const AssetText = shouldDisplayIconPair ? (
     <div>
-      <Text color="light-200">→{rightToken.symbol}</Text>
+      <Text color="light-200">→{rightTokenSymbol}</Text>
       <Text size="sm" color="grey-400">
-        {leftToken.symbol}
+        {leftTokenSymbol}
       </Text>
     </div>
   ) : (
-    <Text color="light-200">{leftToken.symbol}</Text>
+    <Text color="light-200">{leftTokenSymbol}</Text>
   );
   return (
     <StyledAssetCell width={width}>

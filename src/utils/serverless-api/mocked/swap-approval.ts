@@ -1,16 +1,24 @@
 import { BigNumber } from "ethers";
 
-import { getTokenByAddress } from "utils/constants";
 import {
   SwapApprovalApiReturnType,
   SwapApprovalApiQueryParams,
 } from "../prod/swap-approval";
+import { getConfig } from "utils/config";
+
+const config = getConfig();
 
 export async function swapApprovalApiCall(
   params: SwapApprovalApiQueryParams
 ): Promise<SwapApprovalApiReturnType> {
-  const inputToken = getTokenByAddress(params.inputToken);
-  const outputToken = getTokenByAddress(params.outputToken);
+  const inputToken = config.getTokenInfoByAddressSafe(
+    params.originChainId,
+    params.inputToken
+  );
+  const outputToken = config.getTokenInfoByAddressSafe(
+    params.destinationChainId,
+    params.outputToken
+  );
 
   return {
     checks: {
@@ -35,14 +43,14 @@ export async function swapApprovalApiCall(
         tokenIn: {
           address: params.inputToken,
           chainId: params.originChainId,
-          decimals: inputToken.decimals,
-          symbol: inputToken.symbol,
+          decimals: inputToken?.decimals ?? 18,
+          symbol: inputToken?.symbol ?? "UNKNOWN",
         },
         tokenOut: {
           address: params.outputToken,
           chainId: params.destinationChainId,
-          decimals: outputToken.decimals,
-          symbol: outputToken.symbol,
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
         },
         fees: {
           totalRelay: {
