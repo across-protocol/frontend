@@ -18,7 +18,11 @@ export function useConnection() {
     didAttemptAutoSelect,
   } = useOnboard();
 
-  const isContractAddress = useIsContractAddress(account?.address, chainId);
+  const isContractAddress = useIsContractAddress(
+    account?.address,
+    chainId,
+    true
+  );
 
   return {
     account: account ? ethers.utils.getAddress(account.address) : undefined,
