@@ -27,7 +27,7 @@ export const BaseRelayRequestBodySchema = object({
 });
 
 const strategies = {
-  default: strategiesByName["local-signers"],
+  default: strategiesByName["gelato"],
   [CHAIN_IDs.WORLD_CHAIN]: strategiesByName["local-signers"],
 };
 

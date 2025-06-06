@@ -7,7 +7,7 @@ const GELATO_API_KEY = process.env.GELATO_API_KEY;
 export function getGelatoStrategy(): RelayStrategy {
   return {
     strategyName: "gelato",
-    queueParallelism: 2,
+    queueParallelism: 1,
     relay: async (request: RelayRequest) => {
       const encodedCalldata = encodeCalldataForRelayRequest(request);
 

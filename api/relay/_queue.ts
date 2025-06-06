@@ -25,7 +25,7 @@ export async function pushRelayRequestToQueue({
     retries: 3,
     contentBasedDeduplication: true,
     headers: new Headers({
-      "Retry-After": "1",
+      "Retry-After": "10",
     }),
     url: `${baseUrl}/api/relay/jobs/process`,
     body: {
@@ -40,7 +40,11 @@ function getRelayRequestQueue(
   strategyName: RelayStrategyName,
   chainId: number
 ) {
+  const queueName =
+    strategyName === "gelato"
+      ? `relay-request-queue-gelato`
+      : `relay-request-queue-${strategyName}-${chainId}`;
   return client.queue({
-    queueName: `relay-request-queue-${chainId}-${strategyName}`,
+    queueName,
   });
 }
