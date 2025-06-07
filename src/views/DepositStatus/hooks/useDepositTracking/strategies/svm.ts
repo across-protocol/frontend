@@ -14,19 +14,20 @@ import {
   getSVMRpc,
   NoFilledRelayLogError,
   SvmCpiEventsClient,
-  findFillEvent,
   SVMBlockFinder,
   toAddressType,
+  findFillEvent,
+  isBigNumberish,
   uint8ArrayToBigNumber,
-  uin8ArrayToHex,
 } from "utils";
 import { isSignature } from "@solana/kit";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { Deposit } from "hooks/useDeposits";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
 import { BigNumber } from "ethers";
-import { toHex } from "viem";
 import { SvmSpokeClient } from "@across-protocol/contracts";
+import { hexlify } from "ethers/lib/utils";
+import { isHex } from "viem";
 
 /**
  * Strategy for handling Solana (SVM) chain operations
@@ -146,8 +147,10 @@ export class SVMStrategy implements IChainStrategy {
         )
       )?.number;
 
+      const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
+
       const fillEvent = await findFillEvent(
-        this.formatRelayData(depositInfo.depositLog),
+        formattedRelayData,
         this.chainId,
         eventsClient,
         fromSlot
@@ -328,26 +331,25 @@ export class SVMStrategy implements IChainStrategy {
 
   // deposit could be from svm or evm
   private formatRelayData(
-    data: RelayData | SvmSpokeClient.RelayDataArgs
+    relayData: RelayData | SvmSpokeClient.RelayDataArgs
   ): RelayData {
     return {
-      originChainId: Number(data.originChainId),
-      depositor: toAddressType(data.depositor).toBytes32(),
-      recipient: toAddressType(data.recipient).toBytes32(),
-      depositId: BigNumber.isBigNumber(data.depositId)
-        ? data.depositId
-        : uint8ArrayToBigNumber(data.depositId),
-      inputToken: toAddressType(data.inputToken).toBytes32(),
-      inputAmount: BigNumber.from(String(data.inputAmount)),
-      outputToken: toAddressType(data.outputToken).toBytes32(),
-      outputAmount: BigNumber.from(String(data.outputAmount)),
-      message:
-        typeof data.message === "string"
-          ? toHex(data.message)
-          : uin8ArrayToHex(data.message),
-      fillDeadline: Number(data.fillDeadline),
-      exclusiveRelayer: toAddressType(data.exclusiveRelayer).toBytes32(),
-      exclusivityDeadline: Number(data.exclusivityDeadline),
+      originChainId: Number(relayData.originChainId),
+      depositor: toAddressType(relayData.depositor).toBytes32(),
+      depositId: isBigNumberish(relayData.depositId)
+        ? BigNumber.from(relayData.depositId)
+        : uint8ArrayToBigNumber(relayData.depositId),
+      recipient: toAddressType(relayData.recipient).toBytes32(),
+      inputToken: toAddressType(relayData.inputToken).toBytes32(),
+      outputToken: toAddressType(relayData.outputToken).toBytes32(),
+      inputAmount: BigNumber.from(relayData.inputAmount),
+      outputAmount: BigNumber.from(relayData.outputAmount),
+      fillDeadline: relayData.fillDeadline,
+      exclusivityDeadline: relayData.exclusivityDeadline,
+      message: isHex(relayData.message)
+        ? relayData.message
+        : hexlify(relayData.message),
+      exclusiveRelayer: toAddressType(relayData.exclusiveRelayer).toBytes32(),
     };
   }
 }
