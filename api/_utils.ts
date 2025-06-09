@@ -987,6 +987,7 @@ export const getCachedLimits = async (
     gasFeePercent: string;
     gasFeeTotal: string;
   };
+  routeInvolvesUltraLiteChain: boolean;
 }> => {
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
