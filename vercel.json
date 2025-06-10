@@ -42,6 +42,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/deposit",
+      "destination": "https://indexer.api.across.to/deposit"
+    },
+    {
       "source": "/api/deposit/status",
       "destination": "https://indexer.api.across.to/deposit/status"
     },
