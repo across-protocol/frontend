@@ -1,14 +1,9 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-
-import { ReactComponent as ArrowDownIcon } from "assets/icons/chevron-down.svg";
-import { ReactComponent as ArrowExternalLink } from "assets/icons/arrow-up-right.svg";
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { COLORS, getChainInfo, shortenAddress, shortenString } from "utils";
+import { getChainInfo, shortenString } from "utils";
 
 type Props = {
   deposit: Deposit;
@@ -60,41 +55,6 @@ export function TxCell({ deposit, width }: Props) {
   );
 }
 
-function FillTxDropdownMenu({ deposit }: { deposit: Deposit }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <FillTxWrapper>
-          <Text color="grey-400">Fill:</Text>
-          <Text color="light-200">
-            {shortenString(deposit.fillTx, "..", 4)}
-          </Text>
-          {/* <Text color="grey-400">+{deposit.fillTxs.length - 1}</Text> */}
-          {isOpen ? <ArrowUpIcon /> : <ArrowDownIcon />}
-        </FillTxWrapper>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom">
-        <ExplorerLink
-          chainId={deposit.destinationChainId}
-          txHash={deposit.fillTx}
-        >
-          <DropdownMenuItem>
-            <DropdownMenuItemContentLeft>
-              <Text color="grey-400">Fill</Text>
-              <Text color="light-200">
-                {shortenAddress(deposit.fillTx, ". .", 4)}
-              </Text>
-            </DropdownMenuItemContentLeft>
-            <ArrowExternalLink />
-          </DropdownMenuItem>
-        </ExplorerLink>
-      </DropdownMenuContent>
-    </DropdownMenu.Root>
-  );
-}
-
 function ExplorerLink({
   txHash,
   chainId,
@@ -126,56 +86,6 @@ const DepositTxWrapper = styled.div`
   align-items: center;
 `;
 
-const FillTxWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  align-items: center;
-`;
-
-const ArrowUpIcon = styled(ArrowDownIcon)`
-  transform: rotate(180deg);
-`;
-
 const ExplorerLinkWrapper = styled.a`
   text-decoration: none;
-`;
-
-const DropdownMenuTrigger = styled(DropdownMenu.Trigger)`
-  cursor: pointer;
-`;
-
-const DropdownMenuContent = styled(DropdownMenu.Content)`
-  display: flex;
-  width: 240px;
-  flex-direction: column;
-
-  border-radius: 10px;
-  border: 1px solid ${COLORS["black-700"]};
-  background: ${COLORS["black-900"]};
-  box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.2);
-`;
-
-const DropdownMenuItem = styled(DropdownMenu.Item)`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  cursor: pointer;
-  border: none;
-
-  &:hover {
-    background: ${COLORS["black-800"]};
-  }
-
-  > svg {
-    height: 16px;
-    width: 16px;
-  }
-`;
-
-const DropdownMenuItemContentLeft = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
