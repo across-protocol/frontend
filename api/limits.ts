@@ -215,7 +215,7 @@ const handler = async (
           relayerAddress: relayer.toBytes32(),
         }
       ).get(),
-      isMessageDefined
+      isMessageDefined || sdk.utils.chainIsSvm(destinationChainId)
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         : getCachedNativeGasCost(simulationDepositArgs, {
             relayerAddress: relayer.toBytes32(),

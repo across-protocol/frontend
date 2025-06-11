@@ -228,7 +228,9 @@ const handler = async (
         amountInput,
         // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-        depositWithMessage ? recipient.toBytes32() : undefined,
+        depositWithMessage || sdk.utils.chainIsSvm(destinationChainId)
+          ? recipient.toBytes32()
+          : undefined,
         depositWithMessage ? relayer.toBytes32() : undefined,
         depositWithMessage ? message : undefined,
         allowUnmatchedDecimals
