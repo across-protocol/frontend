@@ -6,7 +6,7 @@ import { Selector } from "components";
 import { Text } from "components/Text";
 
 import { TokenInfo, getToken, tokenList } from "utils";
-import { useBalancesBySymbols } from "hooks/useBalance_new";
+import { useBalancesBySymbols } from "hooks/useBalance";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 import {

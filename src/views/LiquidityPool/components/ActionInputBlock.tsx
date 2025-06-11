@@ -4,7 +4,7 @@ import { utils } from "ethers";
 
 import { QUERIESV2, trackMaxButtonClicked, getConfig } from "utils";
 import { useStakingPool, useAmplitude } from "hooks";
-import { useBalance } from "hooks/useBalance_new";
+import { useBalance } from "hooks/useBalance";
 import { Text, AmountInput } from "components";
 
 import {

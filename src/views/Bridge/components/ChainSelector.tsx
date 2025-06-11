@@ -14,7 +14,7 @@ import {
 
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
-import { useBalanceBySymbolPerChain, zeroBalance } from "hooks/useBalance_new";
+import { useBalanceBySymbolPerChain, zeroBalance } from "hooks/useBalance";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 import { getSupportedChains } from "../utils";

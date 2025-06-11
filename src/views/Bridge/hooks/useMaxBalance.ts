@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BigNumber, constants, ethers, utils } from "ethers";
 
 import { useConnection } from "hooks";
-import { useBalance } from "hooks/useBalance_new";
+import { useBalance } from "hooks/useBalance";
 import {
   max,
   getProvider,

@@ -2264,7 +2264,7 @@ export async function getGasPriceEstimate(
   overrides?: Partial<{
     relayerAddress: string;
   }>
-): Promise<sdk.gasPriceOracle.EvmGasPriceEstimate> {
+): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
   if (deposit && deposit.destinationChainId !== chainId) {
     throw new Error(
       "Chain ID must match the destination chain ID of the deposit"

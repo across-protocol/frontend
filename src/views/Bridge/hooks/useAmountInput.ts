@@ -3,7 +3,7 @@ import { BigNumber, utils } from "ethers";
 import { debounce } from "lodash-es";
 
 import { useAmplitude, usePrevious } from "hooks";
-import { useBalance } from "hooks/useBalance_new";
+import { useBalance } from "hooks/useBalance";
 import { getConfig, trackMaxButtonClicked } from "utils";
 
 import { SelectedRoute, areTokensInterchangeable } from "../utils";
