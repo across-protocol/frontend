@@ -36,6 +36,11 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import bnbSmartChainLogo from "assets/chain-logos/bsc.svg";
+import bnbSmartChainGrayscaleLogo from "assets/chain-logos/bsc-grayscale.svg";
+import { ReactComponent as bnbSmartChainLogoSvg } from "assets/chain-logos/bsc.svg";
+import { ReactComponent as bnbSmartChainGrayscaleLogoSvg } from "assets/chain-logos/bsc-grayscale.svg";
+
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
@@ -442,6 +447,47 @@ export const blastSepolia_viem = defineChain({
     default: {
       name: blastSepolia.name + " Explorer",
       url: blastSepolia.explorerUrl,
+    },
+  },
+});
+
+export const bnbSmartChain = {
+  name: "BNB Smart Chain",
+  fullName: "BNB Smart Chain",
+  chainId: 56,
+  logoURI: bnbSmartChainLogo,
+  grayscaleLogoURI: bnbSmartChainGrayscaleLogo,
+  logoSvg: bnbSmartChainLogoSvg,
+  grayscaleLogoSvg: bnbSmartChainGrayscaleLogoSvg,
+  rpcUrl: "https://bsc-dataseed1.binance.org",
+  explorerUrl: "https://bscscan.com",
+  constructExplorerLink: (txHash: string) =>
+    `${bnbSmartChain.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "BNB",
+  customRpcUrl: process.env.REACT_APP_CHAIN_56_CUSTOM_RPC_URL,
+  pollingInterval: 3000,
+};
+
+export const bnbSmartChain_viem = defineChain({
+  id: bnbSmartChain.chainId,
+  name: bnbSmartChain.name,
+  nativeCurrency: {
+    name: bnbSmartChain.nativeCurrencySymbol,
+    symbol: bnbSmartChain.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        bnbSmartChain.rpcUrl,
+        bnbSmartChain.customRpcUrl ? bnbSmartChain.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: bnbSmartChain.name + " Explorer",
+      url: bnbSmartChain.explorerUrl,
     },
   },
 });
@@ -1421,6 +1467,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  bnbSmartChain,
   ink,
   lens,
   lensSepolia,
@@ -1462,6 +1509,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
+  bnbSmartChain_viem,
   ink_viem,
   lens_viem,
   lensSepolia_viem,

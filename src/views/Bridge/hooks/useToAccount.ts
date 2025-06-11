@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { getCode, getEcosystem } from "utils";
+import {
+  useIsContractAddress,
+  is7702Delegate,
+} from "hooks/useIsContractAddress";
 
 export type ToAccount = {
   address: string;
@@ -26,6 +29,11 @@ export function useToAccount(toChainId?: number) {
   } = useConnectionEVM();
   const { account: connectedAccountSVM } = useConnectionSVM();
 
+  const isConnectedAccountContract = useIsContractAddress(
+    connectedAccountEVM,
+    toChainId
+  );
+
   const ecosystem = toChainId ? getEcosystem(toChainId) : "evm";
 
   // Handle EVM recipient address changes
@@ -39,20 +47,20 @@ export function useToAccount(toChainId?: number) {
         .then((code) =>
           setToAccountEVM({
             address: customToAddressEVM,
-            isContract: code !== "0x",
+            isContract: code !== "0x" || !is7702Delegate(code),
           })
         )
         .catch((error) => {
-          console.error(error);
+          console.error("Failed to get code", error);
+          setToAccountEVM({
+            address: customToAddressEVM,
+            isContract: false,
+          });
         });
-      setToAccountEVM({
-        address: customToAddressEVM,
-        isContract: false,
-      });
     } else if (connectedAccountEVM) {
       setToAccountEVM({
         address: connectedAccountEVM,
-        isContract: isConnectedAccountContractEVM,
+        isContract: isConnectedAccountContract,
       });
     } else {
       setToAccountEVM(undefined);
@@ -63,6 +71,7 @@ export function useToAccount(toChainId?: number) {
     isConnectedAccountContractEVM,
     toChainId,
     ecosystem,
+    isConnectedAccountContract,
   ]);
 
   // Handle SVM recipient address changes

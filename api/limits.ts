@@ -97,11 +97,13 @@ const handler = async (
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
     let {
-      amount: amountInput,
+      amount: _amount,
       recipient: _recipient,
       relayer: _relayer,
       message,
     } = query;
+    // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
+    const simulationAmount = ethers.BigNumber.from("100");
     const recipient = sdk.utils.toAddressType(
       _recipient || getDefaultRecipientAddress(destinationChainId)
     );
@@ -109,9 +111,12 @@ const handler = async (
       _relayer || getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
     );
 
+    // If the amount is not provided, we use the simulation amount throughout.
+    const amount = BigNumber.from(_amount ?? simulationAmount);
+
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
-      if (!sdk.utils.isDefined(amountInput)) {
+      if (!sdk.utils.isDefined(_amount)) {
         throw new MissingParamError({
           message:
             "Parameter 'amount' must be defined when 'message' is defined",
@@ -123,13 +128,11 @@ const handler = async (
         destinationChainId,
         relayer.toBytes32(),
         outputToken.address,
-        amountInput,
+        ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
         message!
       );
     }
-    const amount = BigNumber.from(
-      amountInput ?? ethers.BigNumber.from("10").pow(inputToken.decimals)
-    );
+
     let minDepositUsdForDestinationChainId = Number(
       getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );
@@ -170,8 +173,10 @@ const handler = async (
       },
     ];
 
-    const depositArgs = {
-      amount,
+    // These simulation args are only used when the message is not defined.
+    const simulationDepositArgs = {
+      // For the purposes of estimating gas costs, we always use the small simulation amount.
+      amount: simulationAmount,
       inputToken: sdk.utils.toAddressType(inputToken.address).toBytes32(),
       outputToken: sdk.utils.toAddressType(outputToken.address).toBytes32(),
       recipientAddress: recipient.toBytes32(),
@@ -203,14 +208,16 @@ const handler = async (
       getCachedLatestBlock(HUB_POOL_CHAIN_ID),
       latestGasPriceCache(
         destinationChainId,
-        shouldUseUnsignedFillForGasPriceCache ? depositArgs : undefined,
+        shouldUseUnsignedFillForGasPriceCache
+          ? simulationDepositArgs
+          : undefined,
         {
           relayerAddress: relayer.toBytes32(),
         }
       ).get(),
       isMessageDefined
         ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedNativeGasCost(depositArgs, {
+        : getCachedNativeGasCost(simulationDepositArgs, {
             relayerAddress: relayer.toBytes32(),
           }).get(),
     ]);
@@ -225,7 +232,7 @@ const handler = async (
     ] = await Promise.all([
       nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
         ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-          getCachedOpStackL1DataFee(depositArgs, nativeGasCost, {
+          getCachedOpStackL1DataFee(simulationDepositArgs, nativeGasCost, {
             relayerAddress: relayer.toBytes32(),
           }).get()
         : undefined,
@@ -274,7 +281,8 @@ const handler = async (
     // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
     // and tokenGasCost.
     const relayerFeeDetails = await getRelayerFeeDetails(
-      depositArgs,
+      // We need to pass in the true amount here so the returned percentages are correct.
+      { ...simulationDepositArgs, amount: amount },
       tokenPriceNative,
       relayer.toBytes32(),
       gasPrice,
@@ -370,10 +378,8 @@ const handler = async (
     }
 
     // Apply chain max values when defined
-    const includeDefaultMaxValues =
-      originChainIsLiteChain || originChainIsUltraLightChain;
-    const includeRelayerBalances =
-      originChainIsLiteChain || originChainIsUltraLightChain;
+    const includeDefaultMaxValues = originChainIsLiteChain;
+    const includeRelayerBalances = originChainIsLiteChain;
     let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;

@@ -72,7 +72,7 @@ export function useConnectionEVM() {
     [switchChainAsync]
   );
 
-  const isContractAddress = useIsContractAddress(address, chainId);
+  const isContractAddress = useIsContractAddress(address, chainId, true);
 
   return {
     account: address,

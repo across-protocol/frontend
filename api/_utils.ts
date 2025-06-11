@@ -282,7 +282,7 @@ export const validateDepositMessage = async (
   destinationChainId: number,
   relayer: string,
   outputTokenAddress: string,
-  amountInput: string,
+  amountInput: BigNumber,
   message: string
 ) => {
   if (!sdk.utils.isMessageEmpty(message)) {
@@ -810,7 +810,7 @@ export const getRelayerFeeCalculatorQueries = (
     parsedSimulatedRelayerAddress.toEvmAddress(),
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
-  );
+  ) as sdk.relayFeeCalculator.QueryBase;
 };
 
 /**
@@ -845,15 +845,7 @@ export const getRelayerFeeDetails = async (
   gasUnits?: sdk.utils.BigNumberish,
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const {
-    inputToken,
-    outputToken,
-    amount,
-    originChainId,
-    destinationChainId,
-    recipientAddress,
-    message,
-  } = deposit;
+  const { destinationChainId } = deposit;
   const parsedRelayerAddress = sdk.utils.toAddressType(relayerAddress);
   relayerAddress = sdk.utils.chainIsSvm(destinationChainId)
     ? parsedRelayerAddress.toBase58()
@@ -861,18 +853,14 @@ export const getRelayerFeeDetails = async (
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
+  const { isMessageEmpty } = sdk.utils;
+
+  const depositForSimulation = buildDepositForSimulation(deposit);
+
   return await relayFeeCalculator.relayerFeeDetails(
-    buildDepositForSimulation({
-      amount: amount.toString(),
-      inputToken,
-      outputToken,
-      recipientAddress,
-      originChainId,
-      destinationChainId,
-      message,
-    }),
-    amount,
-    sdk.utils.isMessageEmpty(message),
+    depositForSimulation,
+    depositForSimulation.outputAmount, // scaled output amount
+    isMessageEmpty(deposit.message),
     relayerAddress,
     tokenPrice,
     gasPrice,
@@ -892,28 +880,43 @@ export const buildDepositForSimulation = (depositArgs: {
 }) => {
   const {
     amount,
-    inputToken,
-    outputToken,
+    inputToken: _inputTokenAddress,
+    outputToken: _outputTokenAddress,
     recipientAddress,
     originChainId,
     destinationChainId,
     message,
   } = depositArgs;
-  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
-  const safeOutputAmount = sdk.utils.toBN(100);
+
+  const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
+  const outputToken = getTokenByAddress(
+    _outputTokenAddress,
+    destinationChainId
+  );
+  const inputTokenDecimals = inputToken?.decimals ?? outputToken?.decimals;
+  const outputTokenDecimals = outputToken?.decimals ?? inputToken?.decimals;
+
+  if (!inputTokenDecimals || !outputTokenDecimals) {
+    throw new Error(
+      "Can't build deposit for simulation due to unknown input or output token"
+    );
+  }
+  const inputAmount = sdk.utils.toBN(amount);
+
   return {
-    inputAmount: sdk.utils.toBN(amount),
-    outputAmount: sdk.utils.isMessageEmpty(message)
-      ? safeOutputAmount
-      : sdk.utils.toBN(amount),
+    inputAmount,
+    outputAmount: ConvertDecimals(
+      inputTokenDecimals,
+      outputTokenDecimals
+    )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
     depositor: sdk.utils.toAddressType(recipientAddress).toBytes32(),
     recipient: sdk.utils.toAddressType(recipientAddress).toBytes32(),
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-    inputToken,
-    outputToken,
+    inputToken: sdk.utils.toAddressType(_inputTokenAddress).toBytes32(),
+    outputToken: sdk.utils.toAddressType(_outputTokenAddress).toBytes32(),
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
     exclusiveRelayer: sdk.utils
       .toAddressType(sdk.constants.ZERO_ADDRESS)
@@ -1442,11 +1445,7 @@ export function parsableBigNumberString() {
 
 export function validEvmAddress() {
   return define<string>("validEvmAddress", (value) => {
-    try {
-      return isEvmAddress(value as string);
-    } catch {
-      return false;
-    }
+    return isEvmAddress(value as string);
   });
 }
 
@@ -2265,7 +2264,7 @@ export async function getGasPriceEstimate(
   overrides?: Partial<{
     relayerAddress: string;
   }>
-): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+): Promise<sdk.gasPriceOracle.EvmGasPriceEstimate> {
   if (deposit && deposit.destinationChainId !== chainId) {
     throw new Error(
       "Chain ID must match the destination chain ID of the deposit"

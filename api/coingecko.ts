@@ -20,6 +20,7 @@ import {
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 import { InvalidParamError } from "./_errors";
+import { isEvmAddress } from "./_address";
 
 import { coingecko, utils } from "@across-protocol/sdk";
 
@@ -56,7 +57,7 @@ const handler = async (
     let {
       l1Token,
       tokenAddress,
-      chainId,
+      chainId: _chainId,
       baseCurrency,
       date: dateStr,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
@@ -69,15 +70,18 @@ const handler = async (
       });
     }
 
-    // Format the params for consistency
-    baseCurrency = (baseCurrency ?? "eth").toLowerCase();
-
-    chainId =
-      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
+    const fallbackChainId =
+      _chainId ??
+      (isEvmAddress(address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
+    const chainId = coinGeckoAssetPlatformLookup[address] ?? fallbackChainId;
 
     address = utils.chainIsSvm(chainId)
       ? utils.toAddressType(address).toBase58()
       : utils.toAddressType(address).toEvmAddress();
+
+    baseCurrency = (
+      baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
+    ).toLowerCase();
 
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
@@ -168,15 +172,14 @@ const handler = async (
     let quotePrice = 1.0;
     let quotePrecision = 18;
     if (isDerivedCurrency) {
-      const token =
+      const baseToken =
         TOKEN_SYMBOLS_MAP[
           baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
         ];
-      let baseTokenAddress = token.addresses[CHAIN_IDs.MAINNET];
+      let baseTokenAddress = baseToken.addresses[CHAIN_IDs.MAINNET];
       let baseTokenChainId = chainId;
-      // TODO: Make generic
       if (baseCurrency === "sol") {
-        baseTokenAddress = TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA];
+        baseTokenAddress = baseToken.addresses[CHAIN_IDs.SOLANA];
         baseTokenChainId = CHAIN_IDs.SOLANA;
       }
       quotePrice = await getCachedTokenPrice(
@@ -185,7 +188,7 @@ const handler = async (
         undefined,
         baseTokenChainId
       );
-      quotePrecision = token.decimals;
+      quotePrecision = baseToken.decimals;
     }
     price = Number((price / quotePrice).toFixed(quotePrecision));
 

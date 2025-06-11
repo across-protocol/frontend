@@ -506,10 +506,22 @@ export class ConfigClient {
       (token) => token.symbol.toUpperCase() === symbol.toUpperCase()
     );
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
-    const tokenInfo = constants.getToken(symbol);
+    const tokenAddress = token.addresses?.[chainId] || token.address;
+    const matchingTokens = srcTokenList.filter(
+      (token) => token.address === tokenAddress
+    );
+    if (matchingTokens.length > 1) {
+      const decimalsA = matchingTokens[0].decimals;
+      const unmatchedDecimals = matchingTokens.some(
+        (token) => token.decimals !== decimalsA
+      );
+      if (unmatchedDecimals) {
+        return this.getTokenInfoByAddress(chainId, tokenAddress, srcTokenList);
+      }
+    }
     return {
-      ...tokenInfo,
-      address: token.address,
+      ...token,
+      address: tokenAddress,
       isNative: token.isNative,
       l1TokenAddress: token.l1TokenAddress,
     };

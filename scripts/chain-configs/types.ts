@@ -21,4 +21,9 @@ export type ChainConfig = {
   )[];
   enableCCTP: boolean;
   omitViemConfig?: boolean;
+  disabledRoutes?: {
+    toChainId: number;
+    fromTokenSymbol: string;
+    toTokenSymbol: string;
+  }[];
 };
