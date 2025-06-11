@@ -735,10 +735,16 @@ export const getRelayerFeeCalculator = (
   }> = {}
 ) => {
   const queries = getRelayerFeeCalculatorQueries(destinationChainId, overrides);
+  const destinationChainInfo = getChainInfo(destinationChainId);
+  const destinationChainNativeTokenDecimals =
+    TOKEN_SYMBOLS_MAP[
+      destinationChainInfo.nativeToken as keyof typeof TOKEN_SYMBOLS_MAP
+    ]?.decimals ?? 18;
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     queries,
     capitalCostsConfig: relayerFeeCapitalCostConfig,
+    nativeTokenDecimals: destinationChainNativeTokenDecimals,
   };
   if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
     throw new Error(
