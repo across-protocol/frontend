@@ -110,6 +110,7 @@ const handler = async (
       _relayer || getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
     );
     const depositWithMessage = sdk.utils.isDefined(message);
+    const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
 
     // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
     const isDestinationOptInChain = OPT_IN_CHAINS.includes(
@@ -228,10 +229,16 @@ const handler = async (
         amountInput,
         // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-        depositWithMessage || sdk.utils.chainIsSvm(destinationChainId)
-          ? recipient.toBytes32()
+        depositWithMessage || isDestinationSvm
+          ? isDestinationSvm
+            ? recipient.toBase58()
+            : recipient.toEvmAddress()
           : undefined,
-        depositWithMessage ? relayer.toBytes32() : undefined,
+        depositWithMessage
+          ? isDestinationSvm
+            ? relayer.toBase58()
+            : relayer.toEvmAddress()
+          : undefined,
         depositWithMessage ? message : undefined,
         allowUnmatchedDecimals
       ),
