@@ -273,7 +273,7 @@ export const chainEndpointToId = Object.fromEntries(
         vanity: [
           chain.name.toLowerCase().replaceAll(" ", ""),
           ...(additionalVanityMapping[chain.chainId] ?? []),
-        ].map((v) => v.toLowerCase()),
+        ],
         chainId: chain.chainId,
         associatedProjectIds: projects.map(({ projectId }) => projectId),
       },
