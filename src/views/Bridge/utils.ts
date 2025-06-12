@@ -557,12 +557,13 @@ export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
 
 export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
+  const vanityPath = window.location.pathname.substring(1);
 
-  const preferredToChain =
-    chainEndpointToId[window.location.pathname.substring(1)];
+  const preferredToChain = Object.values(chainEndpointToId).find((v) =>
+    v.vanity.includes(vanityPath.toLowerCase())
+  );
 
-  const preferredExternalProject =
-    externConfigs[window.location.pathname.substring(1)];
+  const preferredExternalProject = externConfigs[vanityPath.toLowerCase()];
 
   const fromChain =
     Number(
