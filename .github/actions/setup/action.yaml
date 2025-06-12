@@ -9,7 +9,7 @@ runs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: 20.18.0
+        node-version: 20
         registry-url: https://registry.npmjs.org
         cache: yarn
 
@@ -19,3 +19,5 @@ runs:
 
     - run: yarn install --immutable
       shell: bash
+      env:
+        YARN_ENABLE_HARDENED_MODE: 0
