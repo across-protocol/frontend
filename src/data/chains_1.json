@@ -1480,6 +1480,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       },
       {
+        "address": "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
         "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",
         "symbol": "WBTC",
         "name": "Wrapped Bitcoin",
@@ -1522,6 +1529,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       },
       {
         "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",

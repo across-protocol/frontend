@@ -1,12 +1,7 @@
-import { VercelResponse } from "@vercel/node";
-import { assert, Infer, type, string } from "superstruct";
-import { TypedVercelRequest } from "./_types";
-import {
-  latestBalanceCache,
-  getLogger,
-  handleErrorCondition,
-  validAddress,
-} from "./_utils";
+import { type, string, Infer } from "superstruct";
+import { latestBalanceCache, validAddress } from "./_utils";
+import { ApiHandler } from "./_base/api-handler";
+import { VercelAdapter } from "./_adapters/vercel-adapter";
 
 const AccountBalanceQueryParamsSchema = type({
   token: validAddress(),
@@ -16,44 +11,51 @@ const AccountBalanceQueryParamsSchema = type({
 
 type AccountBalanceQueryParams = Infer<typeof AccountBalanceQueryParamsSchema>;
 
-const handler = async (
-  { query }: TypedVercelRequest<AccountBalanceQueryParams>,
-  response: VercelResponse
-) => {
-  const logger = getLogger();
-  logger.debug({
-    at: "AccountBalance",
-    message: "Query data",
-    query,
-  });
-  try {
-    assert(query, AccountBalanceQueryParamsSchema);
+const AccountBalanceResponseSchema = type({
+  balance: string(),
+  account: validAddress(),
+  token: validAddress(),
+});
 
-    let { token, account, chainId } = query;
+type AccountBalanceResponse = Infer<typeof AccountBalanceResponseSchema>;
+
+class AccountBalanceHandler extends ApiHandler<
+  AccountBalanceQueryParams,
+  AccountBalanceResponse
+> {
+  constructor() {
+    super({
+      name: "AccountBalance",
+      requestSchema: AccountBalanceQueryParamsSchema,
+      responseSchema: AccountBalanceResponseSchema,
+      headers: {
+        "Cache-Control": "s-maxage=60, stale-while-revalidate=60",
+      },
+    });
+  }
+
+  protected async process(
+    request: AccountBalanceQueryParams
+  ): Promise<AccountBalanceResponse> {
+    const { token, account, chainId } = request;
 
     const balance = await latestBalanceCache({
       chainId: Number(chainId),
       tokenAddress: token,
       address: account,
     }).get();
-    const result = {
+
+    return {
       balance: balance.toString(),
       account: account,
       token: token,
     };
-    logger.debug({
-      at: "AccountBalance",
-      message: "Response data",
-      responseJson: result,
-    });
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=60, stale-while-revalidate=60"
-    );
-    response.status(200).json(result);
-  } catch (error: unknown) {
-    return handleErrorCondition("account-balance", response, logger, error);
   }
-};
+}
 
-export default handler;
+const handler = new AccountBalanceHandler();
+const adapter = new VercelAdapter<
+  AccountBalanceQueryParams,
+  AccountBalanceResponse
+>();
+export default adapter.adaptHandler(handler);

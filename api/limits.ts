@@ -364,10 +364,8 @@ const handler = async (
     }
 
     // Apply chain max values when defined
-    const includeDefaultMaxValues =
-      originChainIsLiteChain || originChainIsUltraLightChain;
-    const includeRelayerBalances =
-      originChainIsLiteChain || originChainIsUltraLightChain;
+    const includeDefaultMaxValues = originChainIsLiteChain;
+    const includeRelayerBalances = originChainIsLiteChain;
     let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;
