@@ -39,7 +39,8 @@ export function EarnActionCard({
 const Wrapper = styled.div<{ color: string }>`
   border-radius: 0.5rem;
 
-  background-image: linear-gradient(
+  background-image:
+    linear-gradient(
       90deg,
       ${({ color }) => (color === "aqua" ? COLORS["aqua-5"] : COLORS["teal-5"])}
         0%,
