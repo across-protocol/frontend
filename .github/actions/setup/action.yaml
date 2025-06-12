@@ -17,5 +17,5 @@ runs:
       run: yarn config set enableScripts false
       shell: bash
 
-    - run: yarn install --frozen-lockfile
+    - run: yarn install --immutable
       shell: bash

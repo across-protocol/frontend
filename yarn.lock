@@ -16632,7 +16632,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:6.6.1, elliptic@npm:^6.4.0, elliptic@npm:^6.4.1, elliptic@npm:^6.5.2, elliptic@npm:^6.5.3, elliptic@npm:^6.5.5, elliptic@npm:^6.5.7":
+"elliptic@npm:6.6.1, elliptic@npm:^6.4.0, elliptic@npm:^6.5.2, elliptic@npm:^6.5.3, elliptic@npm:^6.5.5, elliptic@npm:^6.5.7":
   version: 6.6.1
   resolution: "elliptic@npm:6.6.1"
   dependencies:
@@ -28200,19 +28200,19 @@ __metadata:
   linkType: hard
 
 "secp256k1@npm:3.7.1":
-  version: 3.7.1
-  resolution: "secp256k1@npm:3.7.1"
+  version: 3.8.1
+  resolution: "secp256k1@npm:3.8.1"
   dependencies:
     bindings: "npm:^1.5.0"
     bip66: "npm:^1.1.5"
     bn.js: "npm:^4.11.8"
     create-hash: "npm:^1.2.0"
     drbg.js: "npm:^1.0.1"
-    elliptic: "npm:^6.4.1"
+    elliptic: "npm:^6.5.7"
     nan: "npm:^2.14.0"
     node-gyp: "npm:latest"
     safe-buffer: "npm:^5.1.2"
-  checksum: 10c0/e487b5e62efc91354dfdb8289a106e247eb785d59e6c2036146ff34292c06d651f07556fbd947f69db61feff2f12559e2cd335c0d84368c0f8bd48781fe78f51
+  checksum: 10c0/ec5b2071824d18914518d6b65b59838bef9191fd7ad6bf59cd87401c1b084bf6c02375d68b21abbfadc8b1b0a3d102714272aba0f2ea0a15b68de597d78b4e09
   languageName: node
   linkType: hard
 
