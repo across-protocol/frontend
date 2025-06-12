@@ -19,7 +19,7 @@ const mockedDeposits: Deposit[] = [
     amount: "50000000000000000",
     depositTxHash:
       "0x13a619b510e643d51f74f5a01f98c16161e1d93c2db6f689478472a3f42ec7e0",
-    fillTxs: [],
+    fillTx: "",
     speedUps: [],
     depositRelayerFeePct: "4952678372124980",
     initialRelayerFeePct: "4952678372124980",
@@ -40,7 +40,7 @@ const mockedDeposits: Deposit[] = [
     amount: "2000000000000000000000",
     depositTxHash:
       "0x66a7c4e34f91325d0c17bc7bb98350e15c61166d6138a0e89e002637b36fe3e5",
-    fillTxs: [],
+    fillTx: "",
     speedUps: [],
     depositRelayerFeePct: "0",
     initialRelayerFeePct: "0",
@@ -62,9 +62,8 @@ const mockedDeposits: Deposit[] = [
     amount: "12000000",
     depositTxHash:
       "0xe8a2d8ed449a6a2fe7fa3dc24e699a951f945280c27df259a910008683b1e296",
-    fillTxs: [
+    fillTx:
       "0x8caf6a0e38a8788f47dfad89e709f1c0854783987558af9c34d0fadb61c20941",
-    ],
     speedUps: [],
     depositRelayerFeePct: "24394417866666666",
     initialRelayerFeePct: "24394417866666666",
@@ -85,11 +84,8 @@ const mockedDeposits: Deposit[] = [
     amount: "12000000",
     depositTxHash:
       "0x4eecaeee9b6d2df9d06d249b99ce042dd16dbf7bf2fd5d0cc6938e336fdaadd3",
-    fillTxs: [
+    fillTx:
       "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806a",
-      "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806b",
-      "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806c",
-    ],
     speedUps: [],
     depositRelayerFeePct: "28434751200000000",
     initialRelayerFeePct: "28434751200000000",
@@ -123,11 +119,8 @@ const mockedDeposits: Deposit[] = [
     amount: "12000000",
     depositTxHash:
       "0x4eecaeee9b6d2df9d06d249b99ce042dd16dbf7bf2fd5d0cc6938e336fdaadd3",
-    fillTxs: [
+    fillTx:
       "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806a",
-      "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806b",
-      "0xb88ad8d998f0b453c351b0415475e197847e73911bcfb41cab2ee9b0ceb4806c",
-    ],
     speedUps: [],
     depositRelayerFeePct: "28434751200000000",
     initialRelayerFeePct: "28434751200000000",
