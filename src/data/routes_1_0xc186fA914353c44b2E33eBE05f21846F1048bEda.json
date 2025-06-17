@@ -45,7 +45,8 @@
     },
     "gho-multicall3": {
       "1": "0x9736F26C6311701A984A53A0b555f8A20225173A"
-    }
+    },
+    "0x": {}
   },
   "spokePoolPeripheryAddresses": {
     "1": "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
