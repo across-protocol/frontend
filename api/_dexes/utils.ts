@@ -396,6 +396,7 @@ export function getQuoteFetchStrategy(
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
+    strategies.default ??
     defaultQuoteFetchStrategy
   );
 }
