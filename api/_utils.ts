@@ -735,10 +735,16 @@ export const getRelayerFeeCalculator = (
   }> = {}
 ) => {
   const queries = getRelayerFeeCalculatorQueries(destinationChainId, overrides);
+  const destinationChainInfo = getChainInfo(destinationChainId);
+  const destinationChainNativeTokenDecimals =
+    TOKEN_SYMBOLS_MAP[
+      destinationChainInfo.nativeToken as keyof typeof TOKEN_SYMBOLS_MAP
+    ]?.decimals ?? 18;
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     queries,
     capitalCostsConfig: relayerFeeCapitalCostConfig,
+    nativeTokenDecimals: destinationChainNativeTokenDecimals,
   };
   if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
     throw new Error(
@@ -2117,12 +2123,17 @@ export function getCachedNativeGasCost(
   // Set this longer than the secondsPerUpdate value in the cron cache gas prices job.
   const ttlPerChain = {
     default: 120,
+    [CHAIN_IDs.SOLANA]: 1,
   };
-  const cacheKey = buildInternalCacheKey(
+  const cacheKeyArgs = [
     "nativeGasCost",
     deposit.destinationChainId,
-    deposit.outputToken
-  );
+    deposit.outputToken,
+    sdk.utils.chainIsSvm(deposit.destinationChainId)
+      ? deposit.recipientAddress
+      : [],
+  ].flat();
+  const cacheKey = buildInternalCacheKey(...cacheKeyArgs);
   const fetchFn = async () => {
     const relayerAddress =
       overrides?.relayerAddress ??
