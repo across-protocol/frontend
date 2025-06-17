@@ -21,9 +21,10 @@ export function latestBlockQueryKey(chainId: ChainId) {
 export function balanceQueryKey(
   account?: string,
   chainId?: ChainId,
-  token?: string
+  token?: string,
+  prefix = "balance"
 ) {
-  return ["balance", chainId, token, account] as const;
+  return [prefix, chainId, token, account] as const;
 }
 
 /**

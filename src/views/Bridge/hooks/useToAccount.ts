@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-
-import { useConnection } from "hooks";
-import { getCode } from "utils";
+import { useState, useEffect, useCallback } from "react";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { getCode, getEcosystem } from "utils";
 import {
   useIsContractAddress,
   is7702Delegate,
@@ -13,52 +13,100 @@ export type ToAccount = {
 };
 
 export function useToAccount(toChainId?: number) {
-  const [customToAddress, setCustomToAddress] = useState<string | undefined>();
-  const [toAccount, setToAccount] = useState<ToAccount | undefined>();
+  const [customToAddressEVM, setCustomToAddressEVM] = useState<
+    string | undefined
+  >();
+  const [customToAddressSVM, setCustomToAddressSVM] = useState<
+    string | undefined
+  >();
 
-  const { account: connectedAccount } = useConnection();
+  const [toAccountEVM, setToAccountEVM] = useState<ToAccount | undefined>();
+  const [toAccountSVM, setToAccountSVM] = useState<ToAccount | undefined>();
+
+  const {
+    account: connectedAccountEVM,
+    isContractAddress: isConnectedAccountContractEVM,
+  } = useConnectionEVM();
+  const { account: connectedAccountSVM } = useConnectionSVM();
+
   const isConnectedAccountContract = useIsContractAddress(
-    connectedAccount,
+    connectedAccountEVM,
     toChainId
   );
 
+  const ecosystem = toChainId ? getEcosystem(toChainId) : "evm";
+
+  // Handle EVM recipient address changes
   useEffect(() => {
-    if (!toChainId) {
+    if (!toChainId || ecosystem === "svm") {
       return;
     }
 
-    if (customToAddress) {
-      getCode(customToAddress, toChainId)
+    if (customToAddressEVM) {
+      getCode(customToAddressEVM, toChainId)
         .then((code) =>
-          setToAccount({
-            address: customToAddress,
+          setToAccountEVM({
+            address: customToAddressEVM,
             isContract: code !== "0x" || !is7702Delegate(code),
           })
         )
         .catch((error) => {
           console.error("Failed to get code", error);
-          setToAccount({
-            address: customToAddress,
+          setToAccountEVM({
+            address: customToAddressEVM,
             isContract: false,
           });
         });
-    } else if (connectedAccount) {
-      setToAccount({
-        address: connectedAccount,
+    } else if (connectedAccountEVM) {
+      setToAccountEVM({
+        address: connectedAccountEVM,
         isContract: isConnectedAccountContract,
       });
     } else {
-      setToAccount(undefined);
+      setToAccountEVM(undefined);
     }
   }, [
-    customToAddress,
-    connectedAccount,
-    isConnectedAccountContract,
+    customToAddressEVM,
+    connectedAccountEVM,
+    isConnectedAccountContractEVM,
     toChainId,
+    ecosystem,
+    isConnectedAccountContract,
   ]);
 
+  // Handle SVM recipient address changes
+  useEffect(() => {
+    if (!toChainId || ecosystem === "evm") {
+      return;
+    }
+
+    if (customToAddressSVM) {
+      setToAccountSVM({
+        address: customToAddressSVM,
+        isContract: false,
+      });
+    } else if (connectedAccountSVM) {
+      setToAccountSVM({
+        address: connectedAccountSVM.toBase58(),
+        isContract: false,
+      });
+    } else {
+      setToAccountSVM(undefined);
+    }
+  }, [toChainId, ecosystem, customToAddressSVM, connectedAccountSVM]);
+
+  const handleChangeToAddressEVM = useCallback((address: string) => {
+    setCustomToAddressEVM(address);
+  }, []);
+
+  const handleChangeToAddressSVM = useCallback((address: string) => {
+    setCustomToAddressSVM(address);
+  }, []);
+
   return {
-    toAccount,
-    setCustomToAddress,
+    toAccountEVM,
+    toAccountSVM,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
   };
 }
