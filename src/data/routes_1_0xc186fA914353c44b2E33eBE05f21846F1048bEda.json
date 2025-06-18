@@ -46,7 +46,13 @@
     "gho-multicall3": {
       "1": "0x9736F26C6311701A984A53A0b555f8A20225173A"
     },
-    "0x": {}
+    "0x": {},
+    "lifi": {
+      "1": "0x96804f83B2f77A8F7631b284000F84e5225f8f31",
+      "10": "0xdce5D1a7D52C62E3246117a5657a0306894C1ee8",
+      "137": "0xDee13c711c91c1ae3A8a1E7b8c983f820AFFBF18",
+      "42161": "0x6925036403d3e1A5fB6A530f62bA53fe06018522"
+    }
   },
   "spokePoolPeripheryAddresses": {
     "1": "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",

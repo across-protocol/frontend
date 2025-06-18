@@ -45,7 +45,8 @@ export type SupportedDex =
   | "uniswap"
   | "gho"
   | "gho-multicall3"
-  | "0x";
+  | "0x"
+  | "lifi";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -131,7 +132,7 @@ export type QuoteFetchStrategy = {
       | {
           name: "UniversalSwapAndBridge";
           address: string;
-          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "0x";
+          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "0x" | "lifi";
         }
       | {
           name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
