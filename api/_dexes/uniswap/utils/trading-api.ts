@@ -47,6 +47,7 @@ export async function getUniswapClassicQuoteFromApi(
   swap: UniswapParamForApi,
   tradeType: TradeType
 ) {
+  let swapperAddress = swap.swapper;
   // NOTE: Temporary fix Stablecoin Mainnet -> Lens. The Multicall3 address is currently blocked
   // by the Uniswap API. We use a dummy address for just fetching the quote.
   // TODO: Remove this once the Uniswap API is updated.
@@ -54,7 +55,7 @@ export async function getUniswapClassicQuoteFromApi(
     swap.tokenIn.chainId === CHAIN_IDs.MAINNET &&
     swap.swapper === getMulticall3Address(swap.tokenIn.chainId)
   ) {
-    swap.swapper = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+    swapperAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
   }
   const response = await axios.post<{
     requestId: string;
@@ -69,7 +70,7 @@ export async function getUniswapClassicQuoteFromApi(
       tokenOutChainId: swap.tokenOut.chainId,
       tokenIn: swap.tokenIn.address,
       tokenOut: swap.tokenOut.address,
-      swapper: swap.swapper,
+      swapper: swapperAddress,
       slippageTolerance: swap.slippageTolerance,
       autoSlippage: swap.slippageTolerance ? undefined : "DEFAULT",
       amount: swap.amount,
