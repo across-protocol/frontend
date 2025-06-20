@@ -3,6 +3,8 @@ import axios, { AxiosError } from "axios";
 
 import { Swap } from "../../types";
 import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
+import { getMulticall3Address } from "../../../_utils";
+import { CHAIN_IDs } from "../../../_constants";
 
 export type UniswapClassicQuoteFromApi = {
   chainId: number;
@@ -45,6 +47,15 @@ export async function getUniswapClassicQuoteFromApi(
   swap: UniswapParamForApi,
   tradeType: TradeType
 ) {
+  // NOTE: Temporary fix Stablecoin Mainnet -> Lens. The Multicall3 address is currently blocked
+  // by the Uniswap API. We use a dummy address for just fetching the quote.
+  // TODO: Remove this once the Uniswap API is updated.
+  if (
+    swap.tokenIn.chainId === CHAIN_IDs.MAINNET &&
+    swap.swapper === getMulticall3Address(swap.tokenIn.chainId)
+  ) {
+    swap.swapper = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+  }
   const response = await axios.post<{
     requestId: string;
     routing: "CLASSIC";
