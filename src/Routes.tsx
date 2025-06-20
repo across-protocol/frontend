@@ -188,14 +188,11 @@ const Routes: React.FC = () => {
               search: location.search,
             }}
           />
-          {Object.entries(chainEndpointToId).flatMap(
-            ([chainName, { chainId, associatedProjectIds }]) => [
-              <Route
-                key={chainId}
-                exact
-                path={`/${chainName}`}
-                render={() => <Send />}
-              />,
+          {Object.values(chainEndpointToId).flatMap(
+            ({ chainId, associatedProjectIds, vanity }) => [
+              vanity.map((v) => (
+                <Route key={v} exact path={`/${v}`} render={() => <Send />} />
+              )),
               associatedProjectIds.map((projectId) => (
                 <Route
                   key={`${chainId}:${projectId}`}
