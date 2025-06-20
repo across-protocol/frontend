@@ -4,6 +4,7 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
+import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
 import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
@@ -17,6 +18,7 @@ import { DateTime } from "luxon";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
+import { usePMFForm } from "hooks/usePMFForm";
 
 type Props = {
   depositTxHash: string;
@@ -77,6 +79,9 @@ export function DepositStatusUpperCard({
       : !fillTxCompletedTime
         ? "filling"
         : "filled";
+
+  const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
+  const showPMFForm = isPMFormAvailable && status == "filled";
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -181,6 +186,12 @@ export function DepositStatusUpperCard({
           netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
         />
       </DepositTimeCardSocialSharedWrapper>
+      {showPMFForm && (
+        <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
+          <MegaphoneIcon />
+          <span>Help improve Across—1 min survey</span>
+        </PMFFormButton>
+      )}
     </Wrapper>
   );
 }
@@ -258,4 +269,20 @@ const DepositRevertedRow = styled.div`
       stroke: ${COLORS.warning};
     }
   }
+`;
+
+const PMFFormButton = styled.div`
+  display: flex;
+  height: 64px;
+
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  background: ${COLORS["aqua-15"]};
+  width: 100%;
+  cursor: pointer;
+
+  color: ${COLORS["aqua"]};
+  font-weight: 500;
 `;
