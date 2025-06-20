@@ -86,6 +86,13 @@ export async function getUniswapClassicQuoteFromApi(
     ...response.data,
     quote: {
       ...quote,
+      output: {
+        ...quote.output,
+        // Revert the dummy recipient address to the original recipient address.
+        recipient: shouldUseDummySwapper
+          ? swap.recipient
+          : quote.output.recipient,
+      },
       // Revert the dummy swapper address to the original swapper address.
       swapper: shouldUseDummySwapper ? swap.swapper : quote.swapper,
     },
