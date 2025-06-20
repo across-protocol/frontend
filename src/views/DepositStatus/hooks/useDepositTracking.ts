@@ -10,6 +10,8 @@ import {
   wait,
   getChainInfo,
   NoFundsDepositedLogError,
+  toAddressType,
+  debug,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -20,6 +22,7 @@ import { ampli } from "ampli";
 import { createChainStrategies } from "utils/deposit-strategies";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DepositStatus } from "../types";
+import { DepositData } from "./useDepositTracking/types";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -144,7 +147,7 @@ export function useDepositTracking({
       if (depositInfo?.status !== "deposited") {
         return;
       }
-
+      logRelayData(depositInfo.depositLog);
       // Use the strategy to get fill information through the normalized interface
       return await fillStrategy.getFill(depositInfo);
     },
@@ -210,4 +213,25 @@ export function useDepositTracking({
 function getRetryDelay(chainId: number) {
   const pollingInterval = getChainInfo(chainId).pollingInterval || 1_000;
   return Math.floor(pollingInterval / 3);
+}
+
+// https://github.com/across-protocol/contracts/blob/master/scripts/svm/simpleFill.ts
+function logRelayData(depositInfo: DepositData): void {
+  if (debug) {
+    console.debug("RelayData\n", {
+      seed: 0,
+      destinationChainId: depositInfo.destinationChainId,
+      depositor: toAddressType(depositInfo.depositor).toBase58(),
+      recipient: toAddressType(depositInfo.recipient).toBase58(),
+      exclusiveRelayer: toAddressType(depositInfo.exclusiveRelayer).toBase58(),
+      inputToken: toAddressType(depositInfo.inputToken).toBase58(),
+      outputToken: toAddressType(depositInfo.outputToken).toBase58(),
+      inputAmount: depositInfo.inputAmount.toString(),
+      outputAmount: depositInfo.outputAmount.toString(),
+      originChainId: depositInfo.originChainId,
+      depositId: depositInfo.depositId.toString(),
+      fillDeadline: depositInfo.fillDeadline,
+      exclusivityDeadline: depositInfo.exclusivityDeadline,
+    });
+  }
 }
