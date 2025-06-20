@@ -31,6 +31,7 @@ export {
 export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
 export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
 export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
+export { bigToU8a32 } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,

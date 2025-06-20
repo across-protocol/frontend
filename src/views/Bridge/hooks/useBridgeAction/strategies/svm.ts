@@ -15,7 +15,12 @@ import BN from "bn.js";
 
 import { SvmSpokeClient } from "utils/codama";
 import { ConvertDecimals } from "utils/convertdecimals";
-import { fixedPointAdjustment, getConfig, toAddressType } from "utils";
+import {
+  bigToU8a32,
+  fixedPointAdjustment,
+  getConfig,
+  toAddressType,
+} from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 
@@ -147,7 +152,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         inputToken: inputTokenAddress,
         outputToken: outputTokenAddress,
         inputAmount: new BN(inputAmount.toString()),
-        outputAmount: new BN(outputAmount.toString()),
+        outputAmount: Array.from(bigToU8a32(outputAmount)),
         destinationChainId: new BN(destinationChainId.toString()),
         exclusiveRelayer,
         quoteTimestamp: new BN(quoteTimestamp.toString()),
@@ -271,7 +276,7 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       inputToken: address(inputTokenAddress.toString()),
       outputToken: address(outputTokenAddress.toString()),
       inputAmount,
-      outputAmount,
+      outputAmount: bigToU8a32(outputAmount),
       destinationChainId,
       exclusiveRelayer: address(exclusiveRelayer.toString()),
       quoteTimestamp,
