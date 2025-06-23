@@ -34,23 +34,23 @@ export type CrossSwapType =
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
 /**
- * Describes which quote fetch strategy to use for a given chain,
+ * Describes which quote fetch strategies to use for a given chain,
  *
  * @example
  * {
- *   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
- *   [CHAIN_IDs.MAINNET]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+ *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
-  default: QuoteFetchStrategy;
+  default: QuoteFetchStrategy[];
   chains: {
-    [chainId: number]: QuoteFetchStrategy;
+    [chainId: number]: QuoteFetchStrategy[];
   };
   swapPairs: {
     [chainId: number]: {
       [tokenInSymbol: string]: {
-        [tokenOutSymbol: string]: QuoteFetchStrategy;
+        [tokenOutSymbol: string]: QuoteFetchStrategy[];
       };
     };
   };
@@ -84,9 +84,9 @@ export const PREFERRED_BRIDGE_TOKENS: {
   },
 };
 
-export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
-  // This will be our default strategy until the periphery contract is audited
-  getSwapRouter02Strategy("UniversalSwapAndBridge");
+export const defaultQuoteFetchStrategies: QuoteFetchStrategy[] =
+  // These will be our default strategies until the periphery contract is audited
+  [getSwapRouter02Strategy("UniversalSwapAndBridge")];
 
 export function getPreferredBridgeTokens(
   fromChainId: number,
@@ -387,16 +387,17 @@ async function getFillDeadline(spokePool: SpokePool): Promise<number> {
   return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
-export function getQuoteFetchStrategy(
+export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
   strategies: QuoteFetchStrategies
-) {
+): QuoteFetchStrategy[] {
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
-    defaultQuoteFetchStrategy
+    strategies.default ??
+    defaultQuoteFetchStrategies
   );
 }
 
