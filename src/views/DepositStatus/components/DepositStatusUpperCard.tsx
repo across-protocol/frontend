@@ -184,6 +184,8 @@ export function DepositStatusUpperCard({
           outputTokenSymbol={outputTokenSymbol}
           amountSent={amountAsBaseCurrency?.toString()}
           netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
+          bridgeFee={estimatedRewards?.bridgeFeeAsBaseCurrency?.toString()}
+          gasFee={estimatedRewards?.gasFeeAsBaseCurrency?.toString()}
         />
       </DepositTimeCardSocialSharedWrapper>
       {showPMFForm && (
@@ -285,4 +287,7 @@ const PMFFormButton = styled.div`
 
   color: ${COLORS["aqua"]};
   font-weight: 500;
+
+  margin-top: -8px;
+  margin-bottom: -8px;
 `;

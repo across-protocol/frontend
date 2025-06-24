@@ -16,6 +16,7 @@ import { getReceiveTokenSymbol } from "views/Bridge/utils";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { BuildOnAcrossCard } from "./BuildOnAcrossCard";
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
+import { usePMFForm } from "hooks/usePMFForm";
 
 type Props = {
   fromChainId: number;
@@ -63,6 +64,8 @@ export function DepositStatusLowerCard({
   const isReceiverContract = useIsContractAddress(recipient, toChainId);
   const programName = chainIdToRewardsProgramName[toChainId];
 
+  const { isPMFormAvailable } = usePMFForm();
+
   const FeesTable =
     lpFee && gasFee && depositArgs?.initialAmount ? (
       <FeesCollapsible
@@ -95,15 +98,20 @@ export function DepositStatusLowerCard({
 
   return (
     <>
-      <BuildOnAcrossCard />
-      <EarnByLpAndStakingCard
-        l1TokenAddress={bridgeToken.mainnetAddress!}
-        bridgeTokenSymbol={inputTokenSymbol}
-      />
-      {programName && (
-        <RewardsProgramCTA toChain={toChainId} program={programName} />
+      {!isPMFormAvailable && (
+        <>
+          <BuildOnAcrossCard />
+          <EarnByLpAndStakingCard
+            l1TokenAddress={bridgeToken.mainnetAddress!}
+            bridgeTokenSymbol={inputTokenSymbol}
+          />
+          {programName && (
+            <RewardsProgramCTA toChain={toChainId} program={programName} />
+          )}
+          {fromBridgePagePayload && FeesTable}
+        </>
       )}
-      {fromBridgePagePayload && FeesTable}
+
       <Button
         onClick={() =>
           history.push(

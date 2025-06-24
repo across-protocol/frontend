@@ -7,6 +7,7 @@ import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
+import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import { Text } from "components";
 import {
@@ -21,6 +22,8 @@ import { ampli } from "ampli";
 
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
+import { usePMFForm } from "hooks/usePMFForm";
+import { useState } from "react";
 
 type Props = {
   status: DepositStatus;
@@ -35,6 +38,8 @@ type Props = {
   outputTokenSymbol?: string;
   amountSent?: string;
   netFee?: string;
+  bridgeFee?: string;
+  gasFee?: string;
 };
 
 export function DepositTimesCard({
@@ -50,10 +55,14 @@ export function DepositTimesCard({
   outputTokenSymbol,
   amountSent,
   netFee,
+  bridgeFee,
+  gasFee,
 }: Props) {
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
   const isDepositReverted = status === "deposit-reverted";
+
+  const { isPMFormAvailable } = usePMFForm();
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -128,17 +137,29 @@ export function DepositTimesCard({
         )}
       </Row>
       {(netFee || amountSent) && <Divider />}
-      {isDefined(netFee) && (
-        <Row>
-          <Text color="grey-400">Net fee</Text>
-          <Text color="grey-400">${formatUSD(netFee)}</Text>
-        </Row>
+      {isPMFormAvailable && (
+        <PMFAwareFeeSentRow
+          amountSent={amountSent}
+          netFee={netFee}
+          bridgeFee={bridgeFee}
+          gasFee={gasFee}
+        />
       )}
-      {isDefined(amountSent) && (
-        <Row>
-          <Text color="grey-400">Amount sent</Text>
-          <Text color="grey-400">${formatUSD(amountSent)}</Text>
-        </Row>
+      {!isPMFormAvailable && (
+        <>
+          {isDefined(netFee) && (
+            <Row>
+              <Text color="grey-400">Net fee</Text>
+              <Text color="grey-400">${formatUSD(netFee)}</Text>
+            </Row>
+          )}
+          {isDefined(amountSent) && (
+            <Row>
+              <Text color="grey-400">Amount sent</Text>
+              <Text color="grey-400">${formatUSD(amountSent)}</Text>
+            </Row>
+          )}
+        </>
       )}
       <Divider />
       <TransactionsPageLinkWrapper
@@ -167,6 +188,55 @@ export function DepositTimesCard({
     </CardWrapper>
   );
 }
+
+const PMFAwareFeeSentRow = ({
+  netFee,
+  amountSent,
+  bridgeFee,
+  gasFee,
+}: {
+  netFee?: string;
+  amountSent?: string;
+  bridgeFee?: string;
+  gasFee?: string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const canExpand =
+    isDefined(netFee) && (isDefined(bridgeFee) || isDefined(gasFee));
+
+  return (
+    <>
+      {isDefined(amountSent) && (
+        <Row>
+          <Text color="grey-400">Amount sent</Text>
+          <Text color="grey-400">${formatUSD(amountSent)}</Text>
+        </Row>
+      )}
+      {isDefined(netFee) && (
+        <ClickableRow onClick={() => canExpand && setIsExpanded(!isExpanded)}>
+          <Text color="grey-400">Net fee</Text>
+          <ChevronIconWrapper>
+            {canExpand && <ChevronIconStyled isExpanded={isExpanded} />}
+            <Text color="grey-400">${formatUSD(netFee)}</Text>
+          </ChevronIconWrapper>
+        </ClickableRow>
+      )}
+      {isExpanded && isDefined(bridgeFee) && (
+        <Row>
+          <Text color="grey-400">Bridge fee</Text>
+          <Text color="grey-400">${formatUSD(bridgeFee)}</Text>
+        </Row>
+      )}
+      {isExpanded && isDefined(gasFee) && (
+        <Row>
+          <Text color="grey-400">Gas fee</Text>
+          <Text color="grey-400">${formatUSD(gasFee)}</Text>
+        </Row>
+      )}
+    </>
+  );
+};
 
 function CheckIconExplorerLink({
   txHash,
@@ -266,4 +336,24 @@ const CardWrapper = styled.div`
   background: ${COLORS["black-800"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(12px);
+`;
+
+const ChevronIconWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ChevronIconStyled = styled(ChevronIcon)`
+  transform: rotate(
+    ${({ isExpanded }: { isExpanded: boolean }) =>
+      isExpanded ? "180deg" : "0deg"}
+  );
+  transition: transform 0.2s ease-in-out;
+`;
+
+const ClickableRow = styled(Row)`
+  cursor: pointer;
 `;
