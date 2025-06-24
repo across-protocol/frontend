@@ -1,23 +1,30 @@
 import { Wallet } from "ethers";
 
 import { getProvider } from "../../api/_utils";
-import { fetchSwapQuote, signAndWaitPermitFlow } from "./_swap-utils";
+import { fetchSwapQuotes, signAndWaitPermitFlow } from "./_swap-utils";
 
 async function swapWithAuth() {
   console.log("Swapping with auth...");
-  const swapQuote = await fetchSwapQuote("auth");
+  const swapQuotes = await fetchSwapQuotes("auth");
 
-  if (!swapQuote || !swapQuote.swapTx || !swapQuote.eip712) {
-    console.log("No swap quote with EIP712 data for auth");
+  if (swapQuotes.length === 0) {
+    console.log("No swap quotes found");
     return;
   }
 
-  if (process.env.DEV_WALLET_PK) {
-    const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
-      getProvider(swapQuote.swapTx.chainId)
-    );
+  for (const swapQuote of swapQuotes) {
+    if (!swapQuote.swapTx || !swapQuote.eip712) {
+      console.log("No swap quote with EIP712 data for auth");
+      return;
+    }
 
-    await signAndWaitPermitFlow({ wallet, swapResponse: swapQuote });
+    if (process.env.DEV_WALLET_PK) {
+      const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
+        getProvider(swapQuote.swapTx.chainId)
+      );
+
+      await signAndWaitPermitFlow({ wallet, swapResponse: swapQuote });
+    }
   }
 }
 

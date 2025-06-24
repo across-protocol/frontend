@@ -1,23 +1,32 @@
 import { Wallet } from "ethers";
 
 import { getProvider } from "../../api/_utils";
-import { fetchSwapQuote, signAndWaitAllowanceFlow } from "./_swap-utils";
+import { fetchSwapQuotes, signAndWaitAllowanceFlow } from "./_swap-utils";
 
 async function swapWithAllowance() {
   console.log("Swapping with allowance...");
-  const swapQuote = await fetchSwapQuote("approval");
+  const swapQuotes = await fetchSwapQuotes("approval");
 
-  if (!swapQuote || !swapQuote.swapTx || !("data" in swapQuote.swapTx)) {
-    console.log("No swap quote with tx data for approval");
+  if (swapQuotes.length === 0) {
+    console.log("No swap quotes found");
     return;
   }
 
-  if (process.env.DEV_WALLET_PK) {
-    const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
-      getProvider(swapQuote.swapTx.chainId)
-    );
+  for (const swapQuote of swapQuotes) {
+    if (!swapQuote.swapTx || !("data" in swapQuote.swapTx)) {
+      console.log("No swap quote with tx data for approval");
+      return;
+    }
 
-    await signAndWaitAllowanceFlow({ wallet, swapResponse: swapQuote });
+    console.log("\nSwap quote:", JSON.stringify(swapQuote, null, 2));
+
+    if (!process.env.DEV_WALLET_PK) {
+      const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
+        getProvider(swapQuote.swapTx.chainId)
+      );
+
+      await signAndWaitAllowanceFlow({ wallet, swapResponse: swapQuote });
+    }
   }
 }
 
