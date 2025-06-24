@@ -32,9 +32,7 @@ export async function getSvmSpokeState(
 
 export function getSpokePoolAddress(chainId: number): string {
   if (sdk.utils.chainIsSvm(chainId)) {
-    // TODO: revert
-    // return sdk.utils.getDeployedAddress("SvmSpoke", chainId) as string;
-    return "4Jg83Lhggz2EdzSsDX2NVcEK56F25jJKK5btUbHAU4Xu"; //
+    return sdk.utils.getDeployedAddress("SvmSpoke", chainId) as string;
   }
   switch (chainId) {
     default:
