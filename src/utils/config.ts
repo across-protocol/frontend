@@ -139,9 +139,8 @@ export class ConfigClient {
     return address;
   }
   getSpokePoolProgramId(chainId: constants.ChainId): PublicKey {
-    // TODO: revert
-    // const address = this.getSpokePoolAddress(chainId);
-    return new PublicKey("4Jg83Lhggz2EdzSsDX2NVcEK56F25jJKK5btUbHAU4Xu");
+    const address = this.getSpokePoolAddress(chainId);
+    return new PublicKey(address);
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
