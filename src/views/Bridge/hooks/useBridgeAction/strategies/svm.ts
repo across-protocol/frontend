@@ -220,24 +220,6 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     return statePda;
   }
 
-  private _getRoutePDA(
-    originChainId: number,
-    inputToken: PublicKey,
-    destinationChainId: bigint
-  ) {
-    const programId = config.getSpokePoolProgramId(originChainId);
-    const [routePda] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("route"),
-        inputToken.toBytes(),
-        Buffer.from(u64Encoder.encode(this.seed)),
-        Buffer.from(u64Encoder.encode(destinationChainId)),
-      ],
-      programId
-    );
-    return routePda;
-  }
-
   private _getEventAuthorityPDA(originChainId: number) {
     const programId = config.getSpokePoolProgramId(originChainId);
     const [eventAuthorityPda] = PublicKey.findProgramAddressSync(
