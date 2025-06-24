@@ -8,7 +8,7 @@ export function buildTwitterShareUrl(params: {
 }): string {
   const originChainName = getChainInfo(params.originChainId).name;
   const destinationChainName = getChainInfo(params.destinationChainId).name;
-  const hashTags = ["PoweredByIntents"];
+  const hashTags = ["PoweredByIntents"]; // tags without "#"
   const relatedAccounts = ["@AcrossProtocol"];
   const tweetText = `I just used @AcrossProtocol to bridge from ${originChainName} to ${destinationChainName} in ${params.time} seconds!\n\nTry it yourself app.across.to`; // TODO: get copy
   const imageUrl = `${vercelApiBaseUrl}/api/twitter-share?${buildSearchParams({
