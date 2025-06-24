@@ -7,20 +7,16 @@ import {
   signAndWaitPermitFlow,
 } from "./_swap-utils";
 
-async function swapUnified() {
-  console.log("Swapping with unified endpoint...");
+async function swap() {
   const swapQuotes = await fetchSwapQuotes();
-
-  if (swapQuotes.length === 0) {
-    console.log("No swap quotes found");
-    return;
-  }
 
   for (const swapQuote of swapQuotes) {
     if (!swapQuote || !swapQuote.swapTx) {
       console.log("No swap quote");
-      return;
+      continue;
     }
+
+    console.log("\nSwap quote:", JSON.stringify(swapQuote, null, 2));
 
     if (process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
@@ -42,7 +38,7 @@ async function swapUnified() {
   }
 }
 
-swapUnified()
+swap()
   .then(() => console.log("Done"))
   .catch((e) => {
     console.error(e);

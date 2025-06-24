@@ -101,6 +101,12 @@ const argsFromCli = yargs(hideBin(process.argv))
     description: "Host to use for the API",
     default: "http://localhost:3000",
   })
+  .option("flowType", {
+    alias: "ft",
+    description: "Flow type.",
+    default: "approval",
+    choices: ["approval", "permit", "auth", "unified"],
+  })
   .help()
   .parseSync();
 
@@ -125,10 +131,14 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
-export async function fetchSwapQuotes(slug?: "approval" | "permit" | "auth") {
+export async function fetchSwapQuotes() {
+  const flowType = argsFromCli.flowType;
+  const slug = flowType === "unified" ? undefined : flowType;
   const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
   const url = `${baseUrl}/api/swap${slug ? `/${slug}` : ""}`;
   console.log("\nFetching swap quotes from:", url);
+
+  const swapQuotes: BaseSwapResponse[] = [];
 
   // Args are provided via CLI
   if (argsFromCli._.includes("args")) {
@@ -163,35 +173,36 @@ export async function fetchSwapQuotes(slug?: "approval" | "permit" | "auth") {
     const response = await axios.get(url, {
       params,
     });
-    return [response.data as BaseSwapResponse];
-  }
-
-  // Args are provided via test case filter
-  const filterString = (argsFromCli.filter as string) || "";
-  const testCases = [
-    ...MIN_OUTPUT_CASES,
-    ...EXACT_OUTPUT_CASES,
-    ...EXACT_INPUT_CASES,
-    ...LENS_CASES,
-  ];
-  const filteredTestCases = filterTestCases(testCases, filterString);
-
-  if (filteredTestCases.length === 0) {
-    throw new Error("No test cases found");
-  }
-
-  const swapQuotes: BaseSwapResponse[] = [];
-  for (const testCase of filteredTestCases) {
-    console.log("Test case:", testCase.labels.join(" "));
-    console.log("Params:", testCase.params);
-    const response = await axios.get(
-      `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-      {
-        params: testCase.params,
-      }
-    );
     swapQuotes.push(response.data as BaseSwapResponse);
+  } else {
+    // Args are provided via test case filter
+    const filterString = (argsFromCli.filter as string) || "";
+    const testCases = [
+      ...MIN_OUTPUT_CASES,
+      ...EXACT_OUTPUT_CASES,
+      ...EXACT_INPUT_CASES,
+      ...LENS_CASES,
+    ];
+    const filteredTestCases = filterTestCases(testCases, filterString);
+
+    if (filteredTestCases.length === 0) {
+      throw new Error("No test cases found");
+    }
+
+    const swapQuotes: BaseSwapResponse[] = [];
+    for (const testCase of filteredTestCases) {
+      console.log("Test case:", testCase.labels.join(" "));
+      console.log("Params:", testCase.params);
+      const response = await axios.get(
+        `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
+        {
+          params: testCase.params,
+        }
+      );
+      swapQuotes.push(response.data as BaseSwapResponse);
+    }
   }
+
   return swapQuotes;
 }
 
