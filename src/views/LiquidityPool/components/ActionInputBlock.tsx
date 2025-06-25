@@ -83,6 +83,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onSuccess: () => {
             setAmount("");
             maxAmountsQuery.refetch();
+            stakingPoolQuery.refetch();
           },
         }
       );
@@ -97,6 +98,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onSuccess: () => {
             setAmount("");
             maxAmountsQuery.refetch();
+            stakingPoolQuery.refetch();
           },
         }
       );
