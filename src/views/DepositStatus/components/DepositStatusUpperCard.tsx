@@ -182,7 +182,8 @@ export function DepositStatusUpperCard({
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          amountSent={amountAsBaseCurrency?.toString()}
+          amountSentBaseCurrency={amountAsBaseCurrency?.toString()}
+          amountSent={fromBridgePagePayload?.depositArgs?.amount}
           netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
           bridgeFee={estimatedRewards?.bridgeFeeAsBaseCurrency?.toString()}
           gasFee={estimatedRewards?.gasFeeAsBaseCurrency?.toString()}

@@ -16,6 +16,7 @@ import {
   getBridgeUrlWithQueryParams,
   isDefined,
   formatUSD,
+  getToken,
 } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
@@ -24,6 +25,8 @@ import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { usePMFForm } from "hooks/usePMFForm";
 import { useState } from "react";
+import TokenFee from "views/Bridge/components/TokenFee";
+import { BigNumber } from "ethers";
 
 type Props = {
   status: DepositStatus;
@@ -36,10 +39,11 @@ type Props = {
   toChainId: number;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  amountSent?: string;
   netFee?: string;
   bridgeFee?: string;
   gasFee?: string;
+  amountSentBaseCurrency?: string;
+  amountSent?: BigNumber;
 };
 
 export function DepositTimesCard({
@@ -53,6 +57,7 @@ export function DepositTimesCard({
   toChainId,
   inputTokenSymbol,
   outputTokenSymbol,
+  amountSentBaseCurrency,
   amountSent,
   netFee,
   bridgeFee,
@@ -136,13 +141,16 @@ export function DepositTimesCard({
           />
         )}
       </Row>
-      {(netFee || amountSent) && <Divider />}
+      {(netFee || amountSentBaseCurrency) && <Divider />}
       {isPMFormAvailable && (
         <PMFAwareFeeSentRow
           amountSent={amountSent}
           netFee={netFee}
           bridgeFee={bridgeFee}
           gasFee={gasFee}
+          outputTokenSymbol={outputTokenSymbol}
+          toChainId={toChainId}
+          amountSentBaseCurrency={amountSentBaseCurrency}
         />
       )}
       {!isPMFormAvailable && (
@@ -153,10 +161,10 @@ export function DepositTimesCard({
               <Text color="grey-400">${formatUSD(netFee)}</Text>
             </Row>
           )}
-          {isDefined(amountSent) && (
+          {isDefined(amountSentBaseCurrency) && (
             <Row>
               <Text color="grey-400">Amount sent</Text>
-              <Text color="grey-400">${formatUSD(amountSent)}</Text>
+              <Text color="grey-400">${formatUSD(amountSentBaseCurrency)}</Text>
             </Row>
           )}
         </>
@@ -194,31 +202,54 @@ const PMFAwareFeeSentRow = ({
   amountSent,
   bridgeFee,
   gasFee,
+  outputTokenSymbol,
+  toChainId,
+  amountSentBaseCurrency,
 }: {
   netFee?: string;
-  amountSent?: string;
+  amountSent?: BigNumber;
   bridgeFee?: string;
   gasFee?: string;
+  outputTokenSymbol?: string;
+  toChainId: number;
+  amountSentBaseCurrency?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const canExpand =
     isDefined(netFee) && (isDefined(bridgeFee) || isDefined(gasFee));
 
+  const outputToken = outputTokenSymbol
+    ? getToken(outputTokenSymbol)
+    : undefined;
+
   return (
     <>
-      {isDefined(amountSent) && (
-        <Row>
-          <Text color="grey-400">Amount sent</Text>
-          <Text color="grey-400">${formatUSD(amountSent)}</Text>
-        </Row>
-      )}
+      {isDefined(amountSent) &&
+        isDefined(outputToken) &&
+        isDefined(amountSentBaseCurrency) && (
+          <Row>
+            <Text color="grey-400">Amount sent</Text>
+            <TokenWrapper>
+              <TokenFee
+                token={outputToken}
+                amount={BigNumber.from(amountSent)}
+                tokenChainId={toChainId}
+                tokenFirst
+                textColor="light-100"
+              />
+              <Text color="grey-400">
+                (${formatUSD(amountSentBaseCurrency)})
+              </Text>
+            </TokenWrapper>
+          </Row>
+        )}
       {isDefined(netFee) && (
         <ClickableRow onClick={() => canExpand && setIsExpanded(!isExpanded)}>
           <Text color="grey-400">Net fee</Text>
           <ChevronIconWrapper>
-            {canExpand && <ChevronIconStyled isExpanded={isExpanded} />}
             <Text color="grey-400">${formatUSD(netFee)}</Text>
+            {canExpand && <ChevronIconStyled isExpanded={isExpanded} />}
           </ChevronIconWrapper>
         </ClickableRow>
       )}
@@ -356,4 +387,11 @@ const ChevronIconStyled = styled(ChevronIcon)`
 
 const ClickableRow = styled(Row)`
   cursor: pointer;
+`;
+
+const TokenWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;
