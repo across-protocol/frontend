@@ -294,12 +294,12 @@ const handler = async (
     const routeInvolvesLiteChain =
       originChainIsLiteChain || destinationChainIsLiteChain;
 
-    const originChainIsUltraLightChain =
+    const originChainIsUltraLiteChain =
       poolRebalanceRouteOrigin === ethers.constants.AddressZero;
-    const destinationChainIsUltraLightChain =
+    const destinationChainIsUltraLiteChain =
       poolRebalanceRouteDestination === ethers.constants.AddressZero;
-    const routeInvolvesUltraLightChain =
-      originChainIsUltraLightChain || destinationChainIsUltraLightChain;
+    const routeInvolvesUltraLiteChain =
+      originChainIsUltraLiteChain || destinationChainIsUltraLiteChain;
 
     // Base every amount on the input token decimals.
     let liquidReserves = ConvertDecimals(
@@ -345,7 +345,7 @@ const handler = async (
       ...transferRestrictedBalances
     ); // balances on destination chain + mainnet
 
-    if (!routeInvolvesLiteChain && !routeInvolvesUltraLightChain) {
+    if (!routeInvolvesLiteChain && !routeInvolvesUltraLiteChain) {
       const _lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
@@ -446,7 +446,7 @@ const handler = async (
       bufferedMaxDepositShortDelay,
       limitsBufferMultiplier,
       chainHasMaxBoundary,
-      routeInvolvesLiteChain || routeInvolvesUltraLightChain
+      routeInvolvesLiteChain || routeInvolvesUltraLiteChain
     );
 
     if (
@@ -496,6 +496,7 @@ const handler = async (
             tokenGasCost: tokenGasCost.toString(),
           }
         : undefined,
+      routeInvolvesUltraLiteChain,
     };
     logger.debug({
       at: "Limits",
