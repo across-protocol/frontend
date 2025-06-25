@@ -221,7 +221,7 @@ async function getDeposits(
         status: params.status === "pending" ? "unfilled" : params.status,
         limit: params.limit,
         skip: params.offset,
-        depositor: params.address,
+        address: params.address,
       },
     }
   );
