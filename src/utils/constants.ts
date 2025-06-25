@@ -259,6 +259,9 @@ export function getChainInfo(chainId: number): ChainInfo {
   return chainInfo;
 }
 
+const additionalVanityMapping: Record<ChainId, string[]> = {
+  [ChainId.BSC]: ["bsc"],
+};
 export const chainEndpointToId = Object.fromEntries(
   chainInfoList.map((chain) => {
     const projects = Object.values(externConfigs).filter(
@@ -267,6 +270,10 @@ export const chainEndpointToId = Object.fromEntries(
     return [
       chain.name.toLowerCase().replaceAll(" ", ""),
       {
+        vanity: [
+          chain.name.toLowerCase().replaceAll(" ", ""),
+          ...(additionalVanityMapping[chain.chainId] ?? []),
+        ],
         chainId: chain.chainId,
         associatedProjectIds: projects.map(({ projectId }) => projectId),
       },
