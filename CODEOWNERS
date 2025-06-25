@@ -7,8 +7,12 @@
 
 # These owners will be the default owners for everything in
 # the repo unless a later match takes precedence.
-*       @mrice32 @nicholaspai @dohaki @james-a-morris @gsteenkamp89
+*       @mrice32 @nicholaspai @dohaki @james-a-morris @gsteenkamp89 @amateima
 
 # Serverless api
-/api/ @mrice32 @nicholaspai @dohaki @james-a-morris @pxrl
+/api/ @mrice32 @nicholaspai @dohaki @james-a-morris @pxrl @melisaguevara @amateima @ashwinrava
+
+# Shared
+/scripts/ @mrice32 @nicholaspai @dohaki @james-a-morris @pxrl @gsteenkamp89 @melisaguevara @amateima @ashwinrava
+/src/data/ @mrice32 @nicholaspai @dohaki @james-a-morris @pxrl @gsteenkamp89 @melisaguevara @amateima @ashwinrava
 
