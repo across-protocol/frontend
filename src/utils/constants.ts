@@ -631,3 +631,11 @@ export const hyperLiquidBridge2Address =
 export const acrossPlusMulticallHandler: Record<number, string> = {
   [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
 };
+
+// List of addresses that have special manual rebalancing rights in the FE
+export const manualRebalancerAddresses = String(
+  process.env.REACT_APP_MANUAL_REBALANCER_ADDRESSES ||
+    "0x1d933Fd71FF07E69f066d50B39a7C34EB3b69F05"
+)
+  .split(",")
+  .map(ethers.utils.getAddress);
