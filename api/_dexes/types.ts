@@ -40,7 +40,12 @@ export type CrossSwap = {
   isOutputNative?: boolean;
 };
 
-export type SupportedDex = "1inch" | "uniswap" | "gho" | "gho-multicall3";
+export type SupportedDex =
+  | "1inch"
+  | "uniswap"
+  | "gho"
+  | "gho-multicall3"
+  | "lifi";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -126,7 +131,7 @@ export type QuoteFetchStrategy = {
       | {
           name: "UniversalSwapAndBridge";
           address: string;
-          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3";
+          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "lifi";
         }
       | {
           name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
@@ -143,7 +148,9 @@ export type QuoteFetchStrategy = {
 export type QuoteFetchFn = (
   swap: Swap,
   tradeType: TradeType,
-  opts?: Partial<{
-    useIndicativeQuote: boolean;
-  }>
+  opts?: QuoteFetchOpts
 ) => Promise<SwapQuote>;
+
+export type QuoteFetchOpts = Partial<{
+  useIndicativeQuote: boolean;
+}>;
