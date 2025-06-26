@@ -12,8 +12,8 @@ type TwitterShareImageParams = {
 };
 
 export const CANVAS = {
-  width: 1200,
-  height: 600,
+  width: 580,
+  height: 580,
 };
 
 export default async function handler(
