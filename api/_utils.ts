@@ -19,6 +19,7 @@ import {
   BigNumber,
   BigNumberish,
   ethers,
+  PopulatedTransaction,
   providers,
   utils,
   Signer,
@@ -2581,7 +2582,7 @@ export async function getMaxFeePerGas(
     overrides
   );
 
-  let unsignedTx;
+  let unsignedTx: PopulatedTransaction | undefined = undefined;
   if (deposit) {
     const relayData = buildDepositForSimulation(deposit);
     const { recipient, outputToken, destinationChainId } = relayData;
