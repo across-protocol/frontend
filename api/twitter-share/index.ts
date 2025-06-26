@@ -17,12 +17,9 @@ export default async function handler(
   const { originChainId, destinationChainId, seconds } = request.query;
 
   try {
-    console.log("request.url", request.url);
     // Construct the image URL (same params as this request)
     const imageUrl = `${resolveVercelEndpoint()}/api/twitter-share/image?seconds=${seconds}&originChainId=${originChainId}&destinationChainId=${destinationChainId}`;
     const pageUrl = `${resolveVercelEndpoint()}${request.url}`;
-
-    console.log("imageUrl", imageUrl);
 
     // Generate HTML with meta tags
     // TODOs:

@@ -10,7 +10,7 @@ export function buildTwitterShareUrl(params: {
   const destinationChainName = getChainInfo(params.destinationChainId).name;
   const hashTags = ["PoweredByIntents"]; // tags without "#"
   const relatedAccounts = ["@AcrossProtocol"];
-  const tweetText = `I just used @AcrossProtocol to bridge from ${originChainName} to ${destinationChainName} in ${params.time} seconds!\n\nTry it yourself app.across.to`; // TODO: get copy
+  const tweetText = `I just used @AcrossProtocol to bridge from ${originChainName} to ${destinationChainName} in ${params.time} seconds!\n\nTry it yourself!\n\n`; // TODO: get copy
   const imageUrl = `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams(
     {
       seconds: params.time,
