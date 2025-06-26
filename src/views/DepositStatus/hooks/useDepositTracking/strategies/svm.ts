@@ -342,7 +342,9 @@ export class SVMStrategy implements IChainStrategy {
       recipient: toAddressType(relayData.recipient).toBytes32(),
       inputToken: toAddressType(relayData.inputToken).toBytes32(),
       outputToken: toAddressType(relayData.outputToken).toBytes32(),
-      inputAmount: BigNumber.from(relayData.inputAmount),
+      inputAmount: isBigNumberish(relayData.inputAmount)
+        ? BigNumber.from(relayData.inputAmount)
+        : uint8ArrayToBigNumber(relayData.inputAmount),
       outputAmount: BigNumber.from(relayData.outputAmount),
       fillDeadline: relayData.fillDeadline,
       exclusivityDeadline: relayData.exclusivityDeadline,

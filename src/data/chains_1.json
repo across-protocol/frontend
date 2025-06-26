@@ -1813,8 +1813,8 @@
     "publicRpcUrl": "https://api.mainnet-beta.solana.com",
     "explorerUrl": "https://solscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana/assets/logo.svg",
-    "spokePool": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
-    "spokePoolBlock": 317101505,
+    "spokePool": "4Jg83Lhggz2EdzSsDX2NVcEK56F25jJKK5btUbHAU4Xu",
+    "spokePoolBlock": 347611576,
     "inputTokens": [
       {
         "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",

@@ -203,7 +203,7 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const walletConnectProjectId =
   process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID!;
-export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const debug = Boolean(process.env.REACT_APP_DEBUG === "true");
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
