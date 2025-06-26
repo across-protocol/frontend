@@ -7,7 +7,6 @@ import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
-import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import { Text } from "components";
 import {
@@ -24,9 +23,16 @@ import { ampli } from "ampli";
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { usePMFForm } from "hooks/usePMFForm";
-import { useState } from "react";
 import TokenFee from "views/Bridge/components/TokenFee";
 import { BigNumber } from "ethers";
+import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import {
+  calcFeesForEstimatedTable,
+  getTokensForFeesCalc,
+} from "views/Bridge/utils";
+import { useTokenConversion } from "hooks/useTokenConversion";
+import EstimatedTable from "views/Bridge/components/EstimatedTable";
 
 type Props = {
   status: DepositStatus;
@@ -39,11 +45,7 @@ type Props = {
   toChainId: number;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  netFee?: string;
-  bridgeFee?: string;
-  gasFee?: string;
-  amountSentBaseCurrency?: string;
-  amountSent?: BigNumber;
+  fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositTimesCard({
@@ -57,12 +59,55 @@ export function DepositTimesCard({
   toChainId,
   inputTokenSymbol,
   outputTokenSymbol,
-  amountSentBaseCurrency,
-  amountSent,
-  netFee,
-  bridgeFee,
-  gasFee,
+  fromBridgePagePayload,
 }: Props) {
+  const { estimatedRewards, amountAsBaseCurrency, isSwap, isUniversalSwap } =
+    useResolveFromBridgePagePayload(
+      fromChainId,
+      toChainId,
+      inputTokenSymbol,
+      outputTokenSymbol || inputTokenSymbol,
+      fromBridgePagePayload
+    );
+
+  const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
+  const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
+
+  const { inputToken, bridgeToken } = getTokensForFeesCalc({
+    inputToken: getToken(inputTokenSymbol),
+    outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
+    isUniversalSwap: isUniversalSwap,
+    universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+    fromChainId: fromChainId,
+    toChainId: toChainId,
+  });
+
+  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
+    useTokenConversion(inputToken.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
+    useTokenConversion(bridgeToken.symbol, "usd");
+  const {
+    convertTokenToBaseCurrency: convertOutputTokenToUsd,
+    convertBaseCurrencyToToken: convertUsdToOutputToken,
+  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+
+  const { outputAmountUsd } =
+    calcFeesForEstimatedTable({
+      gasFee: fromBridgePagePayload?.quote?.relayerGasFee?.total,
+      capitalFee: fromBridgePagePayload?.quote?.relayerCapitalFee?.total,
+      lpFee: fromBridgePagePayload?.quote?.lpFee?.total,
+      isSwap,
+      isUniversalSwap,
+      swapQuote: fromBridgePagePayload?.swapQuote,
+      universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+      parsedAmount:
+        fromBridgePagePayload?.depositArgs?.initialAmount || BigNumber.from(0),
+      convertInputTokenToUsd,
+      convertBridgeTokenToUsd,
+      convertOutputTokenToUsd,
+    }) || {};
+  const outputAmount = convertUsdToOutputToken(outputAmountUsd);
+
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
   const isDepositReverted = status === "deposit-reverted";
@@ -143,15 +188,45 @@ export function DepositTimesCard({
       </Row>
       {(netFee || amountSentBaseCurrency) && <Divider />}
       {isPMFormAvailable && (
-        <PMFAwareFeeSentRow
-          amountSent={amountSent}
-          netFee={netFee}
-          bridgeFee={bridgeFee}
-          gasFee={gasFee}
-          outputTokenSymbol={outputTokenSymbol}
-          toChainId={toChainId}
-          amountSentBaseCurrency={amountSentBaseCurrency}
-        />
+        <>
+          {isDefined(outputAmount) &&
+            isDefined(outputTokenSymbol) &&
+            isDefined(amountSentBaseCurrency) && (
+              <Row>
+                <Text color="grey-400">Amount sent</Text>
+                <TokenWrapper>
+                  <TokenFee
+                    token={getToken(outputTokenSymbol)}
+                    amount={BigNumber.from(outputAmount)}
+                    tokenChainId={toChainId}
+                    tokenFirst
+                    showTokenLinkOnHover
+                    textColor="light-100"
+                  />
+                  <Text color="grey-400">
+                    (${formatUSD(amountSentBaseCurrency)})
+                  </Text>
+                </TokenWrapper>
+              </Row>
+            )}
+          {isDefined(outputTokenSymbol) && (
+            <EstimatedTable
+              {...estimatedRewards}
+              isQuoteLoading={false}
+              fromChainId={fromChainId}
+              toChainId={toChainId}
+              inputToken={inputToken}
+              outputToken={getToken(outputTokenSymbol)}
+              isSwap={isSwap}
+              isUniversalSwap={isUniversalSwap}
+              swapQuote={fromBridgePagePayload?.swapQuote}
+              universalSwapQuote={fromBridgePagePayload?.universalSwapQuote}
+              omitDivider
+              collapsible
+              onSetNewSlippage={undefined}
+            />
+          )}
+        </>
       )}
       {!isPMFormAvailable && (
         <>
@@ -197,77 +272,88 @@ export function DepositTimesCard({
   );
 }
 
-const PMFAwareFeeSentRow = ({
-  netFee,
-  amountSent,
-  bridgeFee,
-  gasFee,
-  outputTokenSymbol,
-  toChainId,
-  amountSentBaseCurrency,
-}: {
-  netFee?: string;
-  amountSent?: BigNumber;
-  bridgeFee?: string;
-  gasFee?: string;
-  outputTokenSymbol?: string;
-  toChainId: number;
-  amountSentBaseCurrency?: string;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+// const PMFAwareFeeSentRow = ({
+//   netFee,
+//   amountSent,
+//   bridgeFee,
+//   gasFee,
+//   outputTokenSymbol,
+//   toChainId,
+//   amountSentBaseCurrency,
+//   estimatedRewards,
+// }: {
+//   netFee?: string;
+//   amountSent?: BigNumber;
+//   bridgeFee?: string;
+//   gasFee?: string;
+//   outputTokenSymbol?: string;
+//   toChainId: number;
+//   amountSentBaseCurrency?: string;
+//   estimatedRewards?: EstimatedRewards;
+// }) => {
+//   const [isExpanded, setIsExpanded] = useState(false);
 
-  const canExpand =
-    isDefined(netFee) && (isDefined(bridgeFee) || isDefined(gasFee));
+//   const canExpand =
+//     isDefined(netFee) && (isDefined(bridgeFee) || isDefined(gasFee));
 
-  const outputToken = outputTokenSymbol
-    ? getToken(outputTokenSymbol)
-    : undefined;
+//   const outputToken = outputTokenSymbol
+//     ? getToken(outputTokenSymbol)
+//     : undefined;
 
-  return (
-    <>
-      {isDefined(amountSent) &&
-        isDefined(outputToken) &&
-        isDefined(amountSentBaseCurrency) && (
-          <Row>
-            <Text color="grey-400">Amount sent</Text>
-            <TokenWrapper>
-              <TokenFee
-                token={outputToken}
-                amount={BigNumber.from(amountSent)}
-                tokenChainId={toChainId}
-                tokenFirst
-                textColor="light-100"
-              />
-              <Text color="grey-400">
-                (${formatUSD(amountSentBaseCurrency)})
-              </Text>
-            </TokenWrapper>
-          </Row>
-        )}
-      {isDefined(netFee) && (
-        <ClickableRow onClick={() => canExpand && setIsExpanded(!isExpanded)}>
-          <Text color="grey-400">Net fee</Text>
-          <ChevronIconWrapper>
-            <Text color="grey-400">${formatUSD(netFee)}</Text>
-            {canExpand && <ChevronIconStyled isExpanded={isExpanded} />}
-          </ChevronIconWrapper>
-        </ClickableRow>
-      )}
-      {isExpanded && isDefined(bridgeFee) && (
-        <Row>
-          <Text color="grey-400">Bridge fee</Text>
-          <Text color="grey-400">${formatUSD(bridgeFee)}</Text>
-        </Row>
-      )}
-      {isExpanded && isDefined(gasFee) && (
-        <Row>
-          <Text color="grey-400">Gas fee</Text>
-          <Text color="grey-400">${formatUSD(gasFee)}</Text>
-        </Row>
-      )}
-    </>
-  );
-};
+//   return (
+//     <>
+//       {isDefined(amountSent) &&
+//         isDefined(outputToken) &&
+//         isDefined(amountSentBaseCurrency) && (
+//           <Row>
+//             <Text color="grey-400">Amount sent</Text>
+//             <TokenWrapper>
+//               <TokenFee
+//                 token={outputToken}
+//                 amount={BigNumber.from(amountSent)}
+//                 tokenChainId={toChainId}
+//                 tokenFirst
+//                 showTokenLinkOnHover
+//                 textColor="light-100"
+//               />
+//               <Text color="grey-400">
+//                 (${formatUSD(amountSentBaseCurrency)})
+//               </Text>
+//             </TokenWrapper>
+//           </Row>
+//         )}
+//       <EstimatedTable
+//         {...estimatedRewards}
+//         isQuoteLoading={false}
+//         fromChainId={fromChainId}
+//         toChainId={toChainId}
+//         inputToken={inputToken}
+//         outputToken={outputToken}
+//       />
+//       {isDefined(netFee) && (
+//         <ClickableRow onClick={() => canExpand && setIsExpanded(!isExpanded)}>
+//           <Text color="grey-400">Net fee</Text>
+//           <ChevronIconWrapper>
+//             <Text color="grey-400">${formatUSD(netFee)}</Text>
+//             {canExpand && <ChevronIconStyled isExpanded={isExpanded} />}
+//           </ChevronIconWrapper>
+//         </ClickableRow>
+//       )}
+//       {isExpanded && isDefined(bridgeFee) && (
+//         <Row>
+//           <Text color="grey-400">Bridge fee</Text>
+//           <Text color="grey-400">${formatUSD(bridgeFee)}</Text>
+//         </Row>
+//       )}
+//       {isExpanded && isDefined(gasFee) && (
+//         <Row>
+//           <Text color="grey-400">Gas fee</Text>
+//           <Text color="grey-400">${formatUSD(gasFee)}</Text>
+//         </Row>
+//       )}
+//     </>
+//   );
+// };
 
 function CheckIconExplorerLink({
   txHash,
@@ -367,26 +453,6 @@ const CardWrapper = styled.div`
   background: ${COLORS["black-800"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(12px);
-`;
-
-const ChevronIconWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-`;
-
-const ChevronIconStyled = styled(ChevronIcon)`
-  transform: rotate(
-    ${({ isExpanded }: { isExpanded: boolean }) =>
-      isExpanded ? "180deg" : "0deg"}
-  );
-  transition: transform 0.2s ease-in-out;
-`;
-
-const ClickableRow = styled(Row)`
-  cursor: pointer;
 `;
 
 const TokenWrapper = styled.div`

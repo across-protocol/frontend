@@ -15,7 +15,6 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
-import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
@@ -46,15 +45,6 @@ export function DepositStatusUpperCard({
     fromBridgePagePayload
   );
 
-  const { estimatedRewards, amountAsBaseCurrency } =
-    useResolveFromBridgePagePayload(
-      fromChainId,
-      toChainId,
-      inputTokenSymbol,
-      outputTokenSymbol || inputTokenSymbol,
-      fromBridgePagePayload
-    );
-
   void useIndexerDepositsTracking([
     { originChainId: fromChainId, depositTxnHash: depositTxHash },
   ]);
@@ -81,7 +71,6 @@ export function DepositStatusUpperCard({
         : "filled";
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
-  const showPMFForm = isPMFormAvailable && status == "filled";
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -182,14 +171,10 @@ export function DepositStatusUpperCard({
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          amountSentBaseCurrency={amountAsBaseCurrency?.toString()}
-          amountSent={fromBridgePagePayload?.depositArgs?.amount}
-          netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
-          bridgeFee={estimatedRewards?.bridgeFeeAsBaseCurrency?.toString()}
-          gasFee={estimatedRewards?.gasFeeAsBaseCurrency?.toString()}
+          fromBridgePagePayload={fromBridgePagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
-      {showPMFForm && (
+      {isPMFormAvailable && (
         <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
           <MegaphoneIcon />
           <span>Help improve Across—1 min survey</span>

@@ -7,6 +7,7 @@ import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as SwapIcon } from "assets/icons/swap.svg";
 import { ReactComponent as SettingsIcon } from "assets/icons/settings.svg";
+import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import {
   COLORS,
@@ -26,7 +27,11 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 
-export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
+export type EstimatedTableProps = EstimatedRewards &
+  FeesCollapsibleProps & {
+    omitDivider?: boolean;
+    collapsible?: boolean;
+  };
 
 const EstimatedTable = ({
   toChainId,
@@ -51,6 +56,8 @@ const EstimatedTable = ({
   isQuoteLoading,
   validationError,
   fromChainId,
+  omitDivider,
+  collapsible,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
@@ -59,6 +66,8 @@ const EstimatedTable = ({
     validationError === AmountInputError.PAUSED_DEPOSITS;
 
   const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
+
+  const [isExpanded, setIsExpanded] = useState(!collapsible);
 
   const showLoadingSkeleton = isQuoteLoading && !doesAmountExceedMaxDeposit;
   const showSwapFeeRow =
@@ -185,7 +194,7 @@ const EstimatedTable = ({
 
   return (
     <Wrapper>
-      <Divider />
+      {!omitDivider && <Divider />}
       {rewardToken && reward && (
         <>
           <Row>
@@ -221,10 +230,13 @@ const EstimatedTable = ({
               </RewardRebateWrapper>
             )}
           </Row>
-          <Divider />
+          {!omitDivider && <Divider />}
         </>
       )}
-      <Row>
+      <Row
+        collapsible={collapsible}
+        onClick={() => collapsible && setIsExpanded(!isExpanded)}
+      >
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
             Net fee
@@ -242,26 +254,35 @@ const EstimatedTable = ({
         {showLoadingSkeleton ? (
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
-          <Text
-            size="md"
-            color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
-          >
-            {netFeeAsBaseCurrency && !doesAmountExceedMaxDeposit
-              ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
-              : "-"}
-          </Text>
+          <ChevronIconWrapper>
+            <Text
+              size="md"
+              color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
+            >
+              {netFeeAsBaseCurrency && !doesAmountExceedMaxDeposit
+                ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
+                : "-"}
+            </Text>
+            {collapsible && <ChevronIconStyled isExpanded={isExpanded} />}
+          </ChevronIconWrapper>
         )}
       </Row>
-      <Divider />
-      <InnerWrapper>
-        <VectorVertical />
-        {nestedFeesRowElements.map((element, index) => (
-          <InnerRow key={index}>
-            {index < nestedFeesRowElements.length - 1 && <VectorHorizontal />}
-            {element}
-          </InnerRow>
-        ))}
-      </InnerWrapper>
+      {!omitDivider && <Divider />}
+      {isExpanded && (
+        <>
+          <InnerWrapper>
+            <VectorVertical />
+            {nestedFeesRowElements.map((element, index) => (
+              <InnerRow key={index}>
+                {index < nestedFeesRowElements.length - 1 && (
+                  <VectorHorizontal />
+                )}
+                {element}
+              </InnerRow>
+            ))}
+          </InnerWrapper>
+        </>
+      )}
       {onSetNewSlippage && currentSwapSlippage && (
         <SwapSlippageModal
           isOpen={isSlippageModalOpen}
@@ -629,13 +650,15 @@ const VectorHorizontal = styled.div`
   background-color: ${COLORS["grey-500"]};
 `;
 
-const Row = styled.div<{ stackOnMobile?: boolean }>`
+const Row = styled.div<{ stackOnMobile?: boolean; collapsible?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 0px;
   gap: 6px;
+
+  cursor: ${({ collapsible }) => (collapsible ? "pointer" : "default")};
 
   width: 100%;
 
@@ -756,4 +779,20 @@ const RewardRebateWrapper = styled.div`
   border-radius: 22px;
   border: 1px solid ${() => COLORS["grey-500"]};
   background: ${() => COLORS["grey-600"]};
+`;
+
+const ChevronIconWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ChevronIconStyled = styled(ChevronIcon)`
+  transform: rotate(
+    ${({ isExpanded }: { isExpanded: boolean }) =>
+      isExpanded ? "180deg" : "0deg"}
+  );
+  transition: transform 0.2s ease-in-out;
 `;
