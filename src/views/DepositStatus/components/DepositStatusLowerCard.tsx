@@ -16,8 +16,10 @@ import { getReceiveTokenSymbol } from "views/Bridge/utils";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { BuildOnAcrossCard } from "./BuildOnAcrossCard";
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
+import { TwitterShareCard } from "./TwitterShareCard";
 
-type Props = {
+export type DepositStatusLowerCardProps = {
+  depositTxHash: string;
   fromChainId: number;
   toChainId: number;
   externalProjectId?: string;
@@ -26,14 +28,15 @@ type Props = {
   fromBridgePagePayload?: FromBridgePagePayload;
 };
 
-export function DepositStatusLowerCard({
-  fromChainId,
-  toChainId,
-  externalProjectId,
-  inputTokenSymbol,
-  outputTokenSymbol,
-  fromBridgePagePayload,
-}: Props) {
+export function DepositStatusLowerCard(props: DepositStatusLowerCardProps) {
+  const {
+    fromChainId,
+    toChainId,
+    externalProjectId,
+    inputTokenSymbol,
+    outputTokenSymbol,
+    fromBridgePagePayload,
+  } = props;
   const {
     recipient,
     lpFee,
@@ -104,6 +107,7 @@ export function DepositStatusLowerCard({
         <RewardsProgramCTA toChain={toChainId} program={programName} />
       )}
       {fromBridgePagePayload && FeesTable}
+      <TwitterShareCard {...props} />
       <Button
         onClick={() =>
           history.push(
