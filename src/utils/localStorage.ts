@@ -1,4 +1,5 @@
 const TX_HISTORY_PAGE_SIZE_KEY = "txHistoryPageSize";
+const PMF_GOOGLE_FORM_ENTERED_KEY = "pmfGoogleFormEntered";
 
 export function setTxHistoryPageSize(value: number) {
   localStorage.setItem(TX_HISTORY_PAGE_SIZE_KEY, value.toString());
@@ -10,12 +11,10 @@ export function getTxHistoryPageSize(): number | undefined {
     : undefined;
 }
 
-export function setAccountSeenWelcomeTravellerFlow(account: string) {
-  localStorage.setItem(`accountSeenWelcomeTravellerFlow-${account}`, account);
+export function setPMFGoogleFormEntered() {
+  localStorage.setItem(PMF_GOOGLE_FORM_ENTERED_KEY, "true");
 }
 
-export function getAccountSeenWelcomeTravellerFlow(
-  account: string
-): string | null {
-  return localStorage.getItem(`accountSeenWelcomeTravellerFlow-${account}`);
+export function getPMFGoogleFormEntered(): boolean {
+  return localStorage.getItem(PMF_GOOGLE_FORM_ENTERED_KEY) === "true";
 }

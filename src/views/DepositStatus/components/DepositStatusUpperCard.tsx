@@ -4,6 +4,7 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
+import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
 import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
@@ -14,9 +15,9 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
-import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
+import { usePMFForm } from "hooks/usePMFForm";
 
 type Props = {
   depositTxHash: string;
@@ -44,15 +45,6 @@ export function DepositStatusUpperCard({
     fromBridgePagePayload
   );
 
-  const { estimatedRewards, amountAsBaseCurrency } =
-    useResolveFromBridgePagePayload(
-      fromChainId,
-      toChainId,
-      inputTokenSymbol,
-      outputTokenSymbol || inputTokenSymbol,
-      fromBridgePagePayload
-    );
-
   void useIndexerDepositsTracking([
     { originChainId: fromChainId, depositTxnHash: depositTxHash },
   ]);
@@ -77,6 +69,8 @@ export function DepositStatusUpperCard({
       : !fillTxCompletedTime
         ? "filling"
         : "filled";
+
+  const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -177,10 +171,15 @@ export function DepositStatusUpperCard({
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          amountSent={amountAsBaseCurrency?.toString()}
-          netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
+          fromBridgePagePayload={fromBridgePagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
+      {isPMFormAvailable && (
+        <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
+          <MegaphoneIcon />
+          <span>Help improve Across—1 min survey</span>
+        </PMFFormButton>
+      )}
     </Wrapper>
   );
 }
@@ -258,4 +257,23 @@ const DepositRevertedRow = styled.div`
       stroke: ${COLORS.warning};
     }
   }
+`;
+
+const PMFFormButton = styled.div`
+  display: flex;
+  height: 64px;
+
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  background: ${COLORS["aqua-15"]};
+  width: 100%;
+  cursor: pointer;
+
+  color: ${COLORS["aqua"]};
+  font-weight: 500;
+
+  margin-top: -8px;
+  margin-bottom: -8px;
 `;

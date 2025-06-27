@@ -638,3 +638,5 @@ export const hyperLiquidBridge2Address =
 export const acrossPlusMulticallHandler: Record<number, string> = {
   [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
 };
+
+export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;

@@ -1,21 +1,14 @@
 import styled from "@emotion/styled";
-import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
 
 import { SecondaryButton } from "components/Button";
-import { useIsContractAddress } from "hooks/useIsContractAddress";
 import {
   chainIdToRewardsProgramName,
   getBridgeUrlWithQueryParams,
-  getToken,
 } from "utils";
-import { FeesCollapsible } from "views/Bridge/components/FeesCollapsible";
 import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { getReceiveTokenSymbol } from "views/Bridge/utils";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
-import { BuildOnAcrossCard } from "./BuildOnAcrossCard";
-import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 
 type Props = {
   fromChainId: number;
@@ -34,24 +27,7 @@ export function DepositStatusLowerCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
-  const {
-    recipient,
-    lpFee,
-    depositArgs,
-    gasFee,
-    quotedLimits,
-    capitalFee,
-    isSwap,
-    swapToken,
-    swapQuote,
-    quote,
-    estimatedRewards,
-    inputToken,
-    outputToken,
-    bridgeToken,
-    isUniversalSwap,
-    universalSwapQuote,
-  } = useResolveFromBridgePagePayload(
+  const { inputToken } = useResolveFromBridgePagePayload(
     fromChainId,
     toChainId,
     inputTokenSymbol,
@@ -60,50 +36,13 @@ export function DepositStatusLowerCard({
   );
 
   const history = useHistory();
-  const isReceiverContract = useIsContractAddress(recipient, toChainId);
   const programName = chainIdToRewardsProgramName[toChainId];
-
-  const FeesTable =
-    lpFee && gasFee && depositArgs?.initialAmount ? (
-      <FeesCollapsible
-        fromChainId={fromChainId}
-        toChainId={toChainId}
-        quotedLimits={quotedLimits}
-        gasFee={gasFee}
-        lpFee={lpFee}
-        capitalFee={capitalFee}
-        inputToken={getToken(inputTokenSymbol)}
-        outputToken={getToken(
-          getReceiveTokenSymbol(
-            toChainId,
-            inputTokenSymbol,
-            outputToken.symbol,
-            isReceiverContract
-          )
-        )}
-        parsedAmount={BigNumber.from(depositArgs.initialAmount)}
-        isSwap={isSwap}
-        swapQuote={swapQuote}
-        swapToken={swapToken}
-        isQuoteLoading={false}
-        estimatedFillTimeSec={quote?.estimatedFillTimeSec}
-        universalSwapQuote={universalSwapQuote}
-        isUniversalSwap={isUniversalSwap}
-        {...estimatedRewards}
-      />
-    ) : null;
 
   return (
     <>
-      <BuildOnAcrossCard />
-      <EarnByLpAndStakingCard
-        l1TokenAddress={bridgeToken.mainnetAddress!}
-        bridgeTokenSymbol={inputTokenSymbol}
-      />
       {programName && (
         <RewardsProgramCTA toChain={toChainId} program={programName} />
       )}
-      {fromBridgePagePayload && FeesTable}
       <Button
         onClick={() =>
           history.push(
