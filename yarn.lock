@@ -95,10 +95,10 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^4.2.9":
-  version "4.2.9"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.2.9.tgz#3b8ae1db87d5491a62277e62c01714d46612c127"
-  integrity sha512-0+xWBjdudn8g9P/7RkdF6NDxui2vJZCVNPqDYzqOwF06g2Hna5GtdNbhqGy9PgeiTRzfLBnpnhtB2hoVKlBBJg==
+"@across-protocol/sdk@^4.2.16-alpha.6":
+  version "4.2.16-alpha.6"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.2.16-alpha.6.tgz#39bd0975648dd9c3f075d1361d4a3c36c69404d0"
+  integrity sha512-zvIbaLGl77ZseZxahgufhfTUB/JvTWCOiyiVwpLBUV/zR3XGZv1jnvcL9IT+CsKCdEzaRnbFr9QsL82Wu1x65A==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.68"
@@ -108,7 +108,6 @@
     "@ethersproject/bignumber" "^5.7.0"
     "@pinata/sdk" "^2.1.0"
     "@solana-program/system" "^0.7.0"
-    "@solana-program/token" "^0.5.1"
     "@solana-program/token-2022" "^0.4.0"
     "@solana/kit" "^2.1.0"
     "@solana/web3.js" "^1.31.0"
