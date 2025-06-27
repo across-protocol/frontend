@@ -19,32 +19,31 @@ import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+  default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
   chains: {
-    [CHAIN_IDs.LENS]: getSwapRouter02Strategy(
-      "UniversalSwapAndBridge",
-      "sdk-swap-quoter"
-    ),
+    [CHAIN_IDs.LENS]: [
+      getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
+    ],
   },
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {
       GHO: {
-        WGHO: getWrappedGhoStrategy(),
+        WGHO: [getWrappedGhoStrategy()],
       },
       WGHO: {
-        GHO: getWrappedGhoStrategy(),
-        USDC: getWrappedGhoStrategy(),
-        USDT: getWrappedGhoStrategy(),
-        DAI: getWrappedGhoStrategy(),
+        GHO: [getWrappedGhoStrategy()],
+        USDC: [getWrappedGhoStrategy()],
+        USDT: [getWrappedGhoStrategy()],
+        DAI: [getWrappedGhoStrategy()],
       },
       USDC: {
-        WGHO: getWghoMulticallStrategy(),
+        WGHO: [getWghoMulticallStrategy()],
       },
       USDT: {
-        WGHO: getWghoMulticallStrategy(),
+        WGHO: [getWghoMulticallStrategy()],
       },
       DAI: {
-        WGHO: getWghoMulticallStrategy(),
+        WGHO: [getWghoMulticallStrategy()],
       },
     },
   },

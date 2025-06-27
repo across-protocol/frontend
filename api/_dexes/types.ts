@@ -154,3 +154,106 @@ export type QuoteFetchFn = (
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
 }>;
+
+export type CrossSwapQuotesRetrievalB2AResult = {
+  destinationSwap: {
+    chainId: number;
+    tokenIn: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    tokenOut: any;
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originRouter: any;
+  destinationRouter: any;
+  depositEntryPoint: any;
+  bridgeableOutputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  destinationSwapChainId: number;
+  destinationStrategy: QuoteFetchStrategy;
+  originStrategy: QuoteFetchStrategy;
+};
+
+export type CrossSwapQuotesRetrievalA2BResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: any;
+    tokenOut: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationChainId: number;
+  bridgeableInputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  originSwapEntryPoint: any;
+};
+
+export type CrossSwapQuotesRetrievalA2AResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: any;
+    tokenOut: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  destinationSwap: {
+    chainId: number;
+    tokenIn: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    tokenOut: any;
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originStrategy: QuoteFetchStrategy;
+  destinationStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationSwapChainId: number;
+  bridgeableInputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  bridgeableOutputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  originSwapEntryPoint: any;
+  depositEntryPoint: any;
+  originRouter: any;
+  destinationRouter: any;
+};
