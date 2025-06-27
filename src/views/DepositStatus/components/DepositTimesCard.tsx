@@ -22,7 +22,6 @@ import { ampli } from "ampli";
 
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
-import { usePMFForm } from "hooks/usePMFForm";
 import TokenFee from "views/Bridge/components/TokenFee";
 import { BigNumber } from "ethers";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
@@ -111,9 +110,6 @@ export function DepositTimesCard({
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
   const isDepositReverted = status === "deposit-reverted";
-
-  const { isPMFormAvailable } = usePMFForm();
-
   const { addToAmpliQueue } = useAmplitude();
 
   return (
@@ -187,62 +183,42 @@ export function DepositTimesCard({
         )}
       </Row>
       {(netFee || amountSentBaseCurrency) && <Divider />}
-      {isPMFormAvailable && (
-        <>
-          {isDefined(outputAmount) &&
-            isDefined(outputTokenSymbol) &&
-            isDefined(amountSentBaseCurrency) && (
-              <Row>
-                <Text color="grey-400">Amount sent</Text>
-                <TokenWrapper>
-                  <TokenFee
-                    token={getToken(outputTokenSymbol)}
-                    amount={BigNumber.from(outputAmount)}
-                    tokenChainId={toChainId}
-                    tokenFirst
-                    showTokenLinkOnHover
-                    textColor="light-100"
-                  />
-                  <Text color="grey-400">
-                    (${formatUSD(amountSentBaseCurrency)})
-                  </Text>
-                </TokenWrapper>
-              </Row>
-            )}
-          {isDefined(outputTokenSymbol) && (
-            <EstimatedTable
-              {...estimatedRewards}
-              isQuoteLoading={false}
-              fromChainId={fromChainId}
-              toChainId={toChainId}
-              inputToken={inputToken}
-              outputToken={getToken(outputTokenSymbol)}
-              isSwap={isSwap}
-              isUniversalSwap={isUniversalSwap}
-              swapQuote={fromBridgePagePayload?.swapQuote}
-              universalSwapQuote={fromBridgePagePayload?.universalSwapQuote}
-              omitDivider
-              collapsible
-              onSetNewSlippage={undefined}
-            />
-          )}
-        </>
-      )}
-      {!isPMFormAvailable && (
-        <>
-          {isDefined(netFee) && (
-            <Row>
-              <Text color="grey-400">Net fee</Text>
-              <Text color="grey-400">${formatUSD(netFee)}</Text>
-            </Row>
-          )}
-          {isDefined(amountSentBaseCurrency) && (
-            <Row>
-              <Text color="grey-400">Amount sent</Text>
-              <Text color="grey-400">${formatUSD(amountSentBaseCurrency)}</Text>
-            </Row>
-          )}
-        </>
+      {isDefined(outputAmount) &&
+        isDefined(outputTokenSymbol) &&
+        isDefined(amountSentBaseCurrency) && (
+          <Row>
+            <Text color="grey-400">Amount sent</Text>
+            <TokenWrapper>
+              <TokenFee
+                token={getToken(outputTokenSymbol)}
+                amount={BigNumber.from(outputAmount)}
+                tokenChainId={toChainId}
+                tokenFirst
+                showTokenLinkOnHover
+                textColor="light-100"
+              />
+              <Text color="grey-400">
+                (${formatUSD(amountSentBaseCurrency)})
+              </Text>
+            </TokenWrapper>
+          </Row>
+        )}
+      {isDefined(outputTokenSymbol) && (
+        <EstimatedTable
+          {...estimatedRewards}
+          isQuoteLoading={false}
+          fromChainId={fromChainId}
+          toChainId={toChainId}
+          inputToken={inputToken}
+          outputToken={getToken(outputTokenSymbol)}
+          isSwap={isSwap}
+          isUniversalSwap={isUniversalSwap}
+          swapQuote={fromBridgePagePayload?.swapQuote}
+          universalSwapQuote={fromBridgePagePayload?.universalSwapQuote}
+          omitDivider
+          collapsible
+          onSetNewSlippage={undefined}
+        />
       )}
       <Divider />
       <TransactionsPageLinkWrapper
