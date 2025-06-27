@@ -35,6 +35,7 @@ export default async function handler(
     const baseImage = await loadImage(
       path.join(assetsDir, "base", `${seconds}.png`)
     );
+    // TODO: draw chain icons
     // const [baseImage, origin, destination] = await Promise.all([
     //   loadImage(path.join(assetsDir, "base", `${seconds}.png`)),
     //   loadImage(path.join(assetsDir, "chain-logos", `${originChainId}.png`)),

@@ -18,15 +18,12 @@ export default async function handler(
   const { originChainId, destinationChainId, seconds } = request.query;
 
   try {
-    // Construct the image URL (same params as this request)
     const imageUrl = `${resolveVercelEndpoint()}/api/twitter-share/image?seconds=${seconds}&originChainId=${originChainId}&destinationChainId=${destinationChainId}`;
     const pageUrl = `${resolveVercelEndpoint()}${request.url}`;
 
-    // Generate HTML with meta tags
     // TODOs:
-    // 1. consider adding a meta refresh-redirect to app.across.to after x seconds (for real users)
-    // 2. we can even populate query params with the exact route
-    // 3. style the page, consider using the background
+    // 1. populate redirect query params with the exact route
+    // 2. style the page
 
     const html = `
       <!DOCTYPE html>
@@ -53,18 +50,16 @@ export default async function handler(
             <meta name="twitter:image" content="${imageUrl}" />
             <meta name="twitter:image:alt" content="Bridge transfer achievement showing ${seconds} second completion time with Across Protocol branding" />
         </head>
-        <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background: linear-gradient(135deg, #1a1a1a 0%, #2d2e33 100%); color: white; text-align: center;">
-            <div style="max-width: 600px; margin: 0 auto;">
-                <img src="${imageUrl}" alt="Bridge Transfer Achievement" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px;" />
-                <h1 style="margin: 0 0 10px 0; font-size: 24px;">${seconds}s Bridge Transfer</h1>
-                <p style="margin: 0 0 20px 0; font-size: 16px; opacity: 0.9;">I just bridged assets between chains in ${seconds} seconds using Across Protocol!</p>
-                <p style="margin: 0; font-size: 14px; opacity: 0.7;">Powered by <a href="https://across.to" style="color: #4CAF50; text-decoration: none;">Across Protocol</a></p>
+        <body style="margin: 0; color: white; text-align: center;">
+            <div style="width: 100vw; height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px;">
+            <img src="${resolveVercelEndpoint()}/assets/twitter-bg.png" style="position: absolute; object-fit: cover; width: 100%; height: 100%; z-index: 0;"  />
+              <img src="${imageUrl}" alt="Bridge Transfer Achievement" style="width: 100%; max-width:400px; height: auto; border-radius: 8px; z-index: 2;" />
+              <a href="${resolveVercelEndpoint()}/bridge" style="color: white; text-decoration: none; z-index: 2;">Try it</a>
             </div>
         </body>
       </html>`;
-
-    // Set cache headers (cache for 1 year)
-    // response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    // TODO: restore
+    // response.setHeader("Cache-Control", "public, max-age=31536000, immutable"); // 1 year
     response.setHeader("Content-Type", "text/html");
     response.send(html);
   } catch (err) {
