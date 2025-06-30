@@ -13,9 +13,9 @@ export function buildTwitterShareUrl(params: {
   const tweetText = `I just used @AcrossProtocol to bridge from ${originChainName} to ${destinationChainName} in ${params.time} seconds!\n\nTry it yourself!\n\n`; // TODO: get copy
   const imageUrl = `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams(
     {
-      seconds: params.time,
-      originChainId: params.originChainId,
-      destinationChainId: params.destinationChainId,
+      s: params.time,
+      from: params.originChainId,
+      to: params.destinationChainId,
     }
   )}`;
   const twitterUrl = `https://twitter.com/intent/tweet?${buildSearchParams({
