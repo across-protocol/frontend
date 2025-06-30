@@ -25,7 +25,6 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
 } from "../_utils";
-import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
 import { TransferType } from "../_spoke-pool-periphery";
 
 export type CrossSwapType =
@@ -341,11 +340,13 @@ export async function extractDepositDataStruct(
 
 export async function extractSwapAndDepositDataStruct(
   crossSwapQuotes: CrossSwapQuotes,
+  transferType: TransferType,
+  permitNonce?: number,
   submissionFees?: {
     amount: BigNumberish;
     recipient: string;
   }
-): Promise<SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct> {
+) {
   const { originSwapQuote, contracts } = crossSwapQuotes;
   const { originRouter } = contracts;
   if (!originSwapQuote || !originRouter) {
@@ -358,6 +359,7 @@ export async function extractSwapAndDepositDataStruct(
       "Can not extract 'SwapAndDepositDataStruct' without a single swap transaction"
     );
   }
+  const spokePool = getSpokePool(originSwapQuote.tokenIn.chainId);
 
   const { baseDepositData, submissionFees: _submissionFees } =
     await extractDepositDataStruct(crossSwapQuotes, submissionFees);
@@ -369,10 +371,10 @@ export async function extractSwapAndDepositDataStruct(
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
     routerCalldata: originSwapQuote.swapTxns[0].data,
     exchange: originRouter.address,
-    transferType:
-      originRouter.name === "UniswapV3UniversalRouter"
-        ? TransferType.Transfer
-        : TransferType.Approval,
+    transferType,
+    enableProportionalAdjustment: false, // TODO: Properly implement this
+    spokePool: spokePool.address,
+    nonce: permitNonce || 0, // Only used for permit transfers
   };
 }
 

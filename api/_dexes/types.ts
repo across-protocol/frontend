@@ -94,7 +94,7 @@ export type CrossSwapQuotes = {
 
 export type OriginSwapEntryPointContract =
   | {
-      name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
+      name: "SpokePoolPeriphery";
       address: string;
     }
   | {
@@ -134,7 +134,7 @@ export type QuoteFetchStrategy = {
           dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "lifi";
         }
       | {
-          name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
+          name: "SpokePoolPeriphery";
           address: string;
         };
     deposit: {
