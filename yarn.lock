@@ -4107,6 +4107,11 @@
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-1.0.4.tgz#b740f68609dfae8aa71c3a6cab15d816407ba493"
   integrity sha512-60CHpq+eqnTxLZQ4PGHYNwUX572hgpMHGPtTWMjdTMsAvlm69lZV/4ly6O3sAYkomo4NggGcomrDpBe34rxUqw==
 
+"@opentelemetry/api@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.9.0.tgz#d03eba68273dc0f7509e2a3d5cba21eae10379fe"
+  integrity sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==
+
 "@openzeppelin/contracts-upgradeable@4.9.6", "@openzeppelin/contracts-upgradeable@^4.8.1":
   version "4.9.6"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.6.tgz#38b21708a719da647de4bb0e4802ee235a0d24df"
@@ -8178,6 +8183,11 @@
     ts-node "10.9.1"
     typescript "4.9.5"
     undici "5.28.4"
+
+"@vercel/otel@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@vercel/otel/-/otel-1.13.0.tgz#7b7dd737b7b1ba0895fcb36673416b31b99e7ea9"
+  integrity sha512-esRkt470Y2jRK1B1g7S1vkt4Csu44gp83Zpu8rIyPoqy2BKgk4z7ik1uSMswzi45UogLHFl6yR5TauDurBQi4Q==
 
 "@vercel/python@4.7.0":
   version "4.7.0"

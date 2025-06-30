@@ -48,6 +48,8 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+import { getTracer } from "./_tracer";
+import { SpanStatusCode } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -69,445 +71,468 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const tracer = getTracer();
   logger.debug({
     at: "Limits",
     message: "Query data",
     query,
   });
-  try {
-    const {
-      MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
-      // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
-    } = getEnvs();
-    const provider = getProvider(HUB_POOL_CHAIN_ID);
+  tracer.startActiveSpan("limits", async (span) => {
+    try {
+      const {
+        MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
+        // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
+      } = getEnvs();
+      const provider = getProvider(HUB_POOL_CHAIN_ID);
 
-    assert(query, LimitsQueryParamsSchema);
+      assert(query, LimitsQueryParamsSchema);
 
-    const {
-      destinationChainId,
-      resolvedOriginChainId: computedOriginChainId,
-      l1Token,
-      inputToken,
-      outputToken,
-    } = validateChainAndTokenParams(query);
-
-    const fullRelayers = getFullRelayers();
-    const transferRestrictedRelayers = getTransferRestrictedRelayers(
-      destinationChainId,
-      l1Token.symbol
-    );
-
-    // Optional parameters that caller can use to specify specific deposit details with which
-    // to compute limits.
-    let { amount: _amount, recipient, relayer, message } = query;
-    // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
-    const simulationAmount = ethers.BigNumber.from("100");
-    recipient = recipient
-      ? ethers.utils.getAddress(recipient)
-      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-    relayer = relayer
-      ? ethers.utils.getAddress(relayer)
-      : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
-
-    // If the amount is not provided, we use the simulation amount throughout.
-    const amount = BigNumber.from(_amount ?? simulationAmount);
-
-    const isMessageDefined = sdk.utils.isDefined(message);
-    if (isMessageDefined) {
-      if (!sdk.utils.isDefined(_amount)) {
-        throw new MissingParamError({
-          message:
-            "Parameter 'amount' must be defined when 'message' is defined",
-          param: "amount",
-        });
-      }
-      await validateDepositMessage(
-        recipient,
+      const {
         destinationChainId,
-        relayer,
-        outputToken.address,
-        ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
-        message!
+        resolvedOriginChainId: computedOriginChainId,
+        l1Token,
+        inputToken,
+        outputToken,
+      } = validateChainAndTokenParams(query);
+
+      const fullRelayers = getFullRelayers();
+      const transferRestrictedRelayers = getTransferRestrictedRelayers(
+        destinationChainId,
+        l1Token.symbol
       );
-    }
 
-    let minDepositUsdForDestinationChainId = Number(
-      getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
-    );
-    if (isNaN(minDepositUsdForDestinationChainId)) {
-      minDepositUsdForDestinationChainId = 0;
-    }
+      // Optional parameters that caller can use to specify specific deposit details with which
+      // to compute limits.
+      let { amount: _amount, recipient, relayer, message } = query;
+      // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
+      const simulationAmount = ethers.BigNumber.from("100");
+      recipient = recipient
+        ? ethers.utils.getAddress(recipient)
+        : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+      relayer = relayer
+        ? ethers.utils.getAddress(relayer)
+        : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
 
-    const hubPool = getHubPool(provider);
-    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
-      ENABLED_ROUTES.acrossConfigStoreAddress,
-      provider
-    );
-    const liteChainsKey =
-      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
-    const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
+      // If the amount is not provided, we use the simulation amount throughout.
+      const amount = BigNumber.from(_amount ?? simulationAmount);
 
-    const multiCalls = [
-      { contract: hubPool, functionName: "sync", args: [l1Token.address] },
-      {
-        contract: hubPool,
-        functionName: "pooledTokens",
-        args: [l1Token.address],
-      },
-      {
-        contract: configStoreClient.contract,
-        functionName: "globalConfig",
-        args: [encodedLiteChainsKey],
-      },
-      {
-        contract: hubPool,
-        functionName: "poolRebalanceRoute",
-        args: [computedOriginChainId, l1Token.address],
-      },
-      {
-        contract: hubPool,
-        functionName: "poolRebalanceRoute",
-        args: [destinationChainId, l1Token.address],
-      },
-    ];
-
-    // These simulation args are only used when the message is not defined.
-    const simulationDepositArgs = {
-      // For the purposes of estimating gas costs, we always use the small simulation amount.
-      amount: simulationAmount,
-      inputToken: inputToken.address,
-      outputToken: outputToken.address,
-      recipientAddress: recipient,
-      originChainId: computedOriginChainId,
-      destinationChainId,
-      message,
-    };
-
-    const [
-      tokenPriceNative,
-      _tokenPriceUsd,
-      latestBlock,
-      { maxFeePerGas: gasPrice },
-      nativeGasCost,
-    ] = await Promise.all([
-      getCachedTokenPrice(
-        l1Token.address,
-        CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
-          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-      ),
-      getCachedTokenPrice(l1Token.address, "usd"),
-      getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-      // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
-      // because only Linea's priority fee depends on the destination chain call data.
-      latestGasPriceCache(
-        destinationChainId,
-        CHAIN_IDs.LINEA === destinationChainId
-          ? simulationDepositArgs
-          : undefined,
-        {
-          relayerAddress: relayer,
+      const isMessageDefined = sdk.utils.isDefined(message);
+      if (isMessageDefined) {
+        if (!sdk.utils.isDefined(_amount)) {
+          throw new MissingParamError({
+            message:
+              "Parameter 'amount' must be defined when 'message' is defined",
+            param: "amount",
+          });
         }
-      ).get(),
-      isMessageDefined
-        ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-        : getCachedNativeGasCost(simulationDepositArgs, {
-            relayerAddress: relayer,
-          }).get(),
-    ]);
-    const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
+        await validateDepositMessage(
+          recipient,
+          destinationChainId,
+          relayer,
+          outputToken.address,
+          ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
+          message!
+        );
+      }
 
-    const [
-      opStackL1GasCost,
-      multicallOutput,
-      _fullRelayerBalances,
-      _transferRestrictedBalances,
-      _fullRelayerMainnetBalances,
-    ] = await Promise.all([
-      nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
-        ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
-          getCachedOpStackL1DataFee(simulationDepositArgs, nativeGasCost, {
-            relayerAddress: relayer,
-          }).get()
-        : undefined,
-      callViaMulticall3(provider, multiCalls, {
-        blockTag: latestBlock.number,
-      }),
-      Promise.all(
-        fullRelayers.map((relayer) =>
-          getCachedTokenBalance(
-            destinationChainId,
-            relayer,
-            outputToken.address
-          )
-        )
-      ),
-      Promise.all(
-        transferRestrictedRelayers.map((relayer) =>
-          getCachedTokenBalance(
-            destinationChainId,
-            relayer,
-            outputToken.address
-          )
-        )
-      ),
-      Promise.all(
-        fullRelayers.map((relayer) =>
-          destinationChainId === HUB_POOL_CHAIN_ID
-            ? ethers.BigNumber.from("0")
-            : getCachedTokenBalance(HUB_POOL_CHAIN_ID, relayer, l1Token.address)
-        )
-      ),
-    ]);
-    const tokenGasCost =
-      nativeGasCost && gasPrice
-        ? nativeGasCost
-            .mul(gasPrice)
-            .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
-        : undefined;
-    // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
-    // and tokenGasCost.
-    const relayerFeeDetails = await getRelayerFeeDetails(
-      // We need to pass in the true amount here so the returned percentages are correct.
-      { ...simulationDepositArgs, amount: amount },
-      tokenPriceNative,
-      relayer,
-      gasPrice,
-      nativeGasCost,
-      tokenGasCost
-    );
-    logger.debug({
-      at: "Limits",
-      message: "Relayer fee details from SDK",
-      relayerFeeDetails,
-    });
-
-    const { liquidReserves: _liquidReserves } = multicallOutput[1];
-    const [liteChainIdsEncoded] = multicallOutput[2];
-    const [poolRebalanceRouteOrigin] = multicallOutput[3];
-    const [poolRebalanceRouteDestination] = multicallOutput[4];
-
-    const liteChainIds: number[] =
-      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
-    const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
-    const destinationChainIsLiteChain =
-      liteChainIds.includes(destinationChainId);
-    const routeInvolvesLiteChain =
-      originChainIsLiteChain || destinationChainIsLiteChain;
-
-    const originChainIsUltraLightChain =
-      poolRebalanceRouteOrigin === ethers.constants.AddressZero;
-    const destinationChainIsUltraLightChain =
-      poolRebalanceRouteDestination === ethers.constants.AddressZero;
-    const routeInvolvesUltraLightChain =
-      originChainIsUltraLightChain || destinationChainIsUltraLightChain;
-
-    // Base every amount on the input token decimals.
-    let liquidReserves = ConvertDecimals(
-      l1Token.decimals,
-      inputToken.decimals
-    )(_liquidReserves);
-    const fullRelayerBalances = _fullRelayerBalances.map((balance) =>
-      ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
-    );
-    const fullRelayerMainnetBalances = _fullRelayerMainnetBalances.map(
-      (balance) =>
-        ConvertDecimals(l1Token.decimals, inputToken.decimals)(balance)
-    );
-    const transferRestrictedBalances = _transferRestrictedBalances.map(
-      (balance) =>
-        ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
-    );
-
-    const transferBalances = fullRelayerBalances.map((balance, i) =>
-      balance.add(fullRelayerMainnetBalances[i])
-    );
-
-    let minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
-
-    // Normalise the environment-set USD minimum to units of the token being bridged.
-    let minDepositFloor = tokenPriceUsd.lte(0)
-      ? ethers.BigNumber.from(0)
-      : ethers.utils
-          .parseUnits(
-            minDepositUsdForDestinationChainId.toString(),
-            inputToken.decimals
-          )
-          .mul(ethers.utils.parseUnits("1"))
-          .div(tokenPriceUsd);
-
-    let maxDepositInstant = maxBN(
-      ...fullRelayerBalances,
-      ...transferRestrictedBalances
-    ); // balances on destination chain
-
-    let maxDepositShortDelay = maxBN(
-      ...transferBalances,
-      ...transferRestrictedBalances
-    ); // balances on destination chain + mainnet
-
-    if (!routeInvolvesLiteChain && !routeInvolvesUltraLightChain) {
-      const _lpCushion = ethers.utils.parseUnits(
-        getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
-        l1Token.decimals
+      let minDepositUsdForDestinationChainId = Number(
+        getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
       );
-      const lpCushion = ConvertDecimals(
+      if (isNaN(minDepositUsdForDestinationChainId)) {
+        minDepositUsdForDestinationChainId = 0;
+      }
+
+      const hubPool = getHubPool(provider);
+      const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+        ENABLED_ROUTES.acrossConfigStoreAddress,
+        provider
+      );
+      const liteChainsKey =
+        sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
+      const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
+
+      const multiCalls = [
+        { contract: hubPool, functionName: "sync", args: [l1Token.address] },
+        {
+          contract: hubPool,
+          functionName: "pooledTokens",
+          args: [l1Token.address],
+        },
+        {
+          contract: configStoreClient.contract,
+          functionName: "globalConfig",
+          args: [encodedLiteChainsKey],
+        },
+        {
+          contract: hubPool,
+          functionName: "poolRebalanceRoute",
+          args: [computedOriginChainId, l1Token.address],
+        },
+        {
+          contract: hubPool,
+          functionName: "poolRebalanceRoute",
+          args: [destinationChainId, l1Token.address],
+        },
+      ];
+
+      // These simulation args are only used when the message is not defined.
+      const simulationDepositArgs = {
+        // For the purposes of estimating gas costs, we always use the small simulation amount.
+        amount: simulationAmount,
+        inputToken: inputToken.address,
+        outputToken: outputToken.address,
+        recipientAddress: recipient,
+        originChainId: computedOriginChainId,
+        destinationChainId,
+        message,
+      };
+
+      const [
+        tokenPriceNative,
+        _tokenPriceUsd,
+        latestBlock,
+        { maxFeePerGas: gasPrice },
+        nativeGasCost,
+      ] = await Promise.all([
+        getCachedTokenPrice(
+          l1Token.address,
+          CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+            sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        ),
+        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+        // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
+        // because only Linea's priority fee depends on the destination chain call data.
+        latestGasPriceCache(
+          destinationChainId,
+          CHAIN_IDs.LINEA === destinationChainId
+            ? simulationDepositArgs
+            : undefined,
+          {
+            relayerAddress: relayer,
+          }
+        ).get(),
+        isMessageDefined
+          ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+          : getCachedNativeGasCost(simulationDepositArgs, {
+              relayerAddress: relayer,
+            }).get(),
+      ]);
+      const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
+
+      const [
+        opStackL1GasCost,
+        multicallOutput,
+        _fullRelayerBalances,
+        _transferRestrictedBalances,
+        _fullRelayerMainnetBalances,
+      ] = await Promise.all([
+        nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
+          ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+            getCachedOpStackL1DataFee(simulationDepositArgs, nativeGasCost, {
+              relayerAddress: relayer,
+            }).get()
+          : undefined,
+        callViaMulticall3(provider, multiCalls, {
+          blockTag: latestBlock.number,
+        }),
+        Promise.all(
+          fullRelayers.map((relayer) =>
+            getCachedTokenBalance(
+              destinationChainId,
+              relayer,
+              outputToken.address
+            )
+          )
+        ),
+        Promise.all(
+          transferRestrictedRelayers.map((relayer) =>
+            getCachedTokenBalance(
+              destinationChainId,
+              relayer,
+              outputToken.address
+            )
+          )
+        ),
+        Promise.all(
+          fullRelayers.map((relayer) =>
+            destinationChainId === HUB_POOL_CHAIN_ID
+              ? ethers.BigNumber.from("0")
+              : getCachedTokenBalance(
+                  HUB_POOL_CHAIN_ID,
+                  relayer,
+                  l1Token.address
+                )
+          )
+        ),
+      ]);
+      const tokenGasCost =
+        nativeGasCost && gasPrice
+          ? nativeGasCost
+              .mul(gasPrice)
+              .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
+          : undefined;
+      // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
+      // and tokenGasCost.
+      const relayerFeeDetails = await getRelayerFeeDetails(
+        // We need to pass in the true amount here so the returned percentages are correct.
+        { ...simulationDepositArgs, amount: amount },
+        tokenPriceNative,
+        relayer,
+        gasPrice,
+        nativeGasCost,
+        tokenGasCost
+      );
+      logger.debug({
+        at: "Limits",
+        message: "Relayer fee details from SDK",
+        relayerFeeDetails,
+      });
+
+      const { liquidReserves: _liquidReserves } = multicallOutput[1];
+      const [liteChainIdsEncoded] = multicallOutput[2];
+      const [poolRebalanceRouteOrigin] = multicallOutput[3];
+      const [poolRebalanceRouteDestination] = multicallOutput[4];
+
+      const liteChainIds: number[] =
+        liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
+      const originChainIsLiteChain = liteChainIds.includes(
+        computedOriginChainId
+      );
+      const destinationChainIsLiteChain =
+        liteChainIds.includes(destinationChainId);
+      const routeInvolvesLiteChain =
+        originChainIsLiteChain || destinationChainIsLiteChain;
+
+      const originChainIsUltraLightChain =
+        poolRebalanceRouteOrigin === ethers.constants.AddressZero;
+      const destinationChainIsUltraLightChain =
+        poolRebalanceRouteDestination === ethers.constants.AddressZero;
+      const routeInvolvesUltraLightChain =
+        originChainIsUltraLightChain || destinationChainIsUltraLightChain;
+
+      // Base every amount on the input token decimals.
+      let liquidReserves = ConvertDecimals(
         l1Token.decimals,
         inputToken.decimals
-      )(_lpCushion);
-      liquidReserves = maxBN(
-        liquidReserves.sub(lpCushion),
-        ethers.BigNumber.from(0)
+      )(_liquidReserves);
+      const fullRelayerBalances = _fullRelayerBalances.map((balance) =>
+        ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
+      );
+      const fullRelayerMainnetBalances = _fullRelayerMainnetBalances.map(
+        (balance) =>
+          ConvertDecimals(l1Token.decimals, inputToken.decimals)(balance)
+      );
+      const transferRestrictedBalances = _transferRestrictedBalances.map(
+        (balance) =>
+          ConvertDecimals(outputToken.decimals, inputToken.decimals)(balance)
       );
 
-      maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
-      maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
-    }
-
-    // Apply chain max values when defined
-    const includeDefaultMaxValues = originChainIsLiteChain;
-    const includeRelayerBalances = originChainIsLiteChain;
-    let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
-    let chainInputTokenMaxDeposit: BigNumber | undefined;
-    let chainHasMaxBoundary: boolean = false;
-
-    const chainInputTokenMaxBalanceInUsd = getChainInputTokenMaxBalanceInUsd(
-      computedOriginChainId,
-      inputToken.symbol,
-      includeDefaultMaxValues
-    );
-
-    const chainInputTokenMaxDepositInUsd = getChainInputTokenMaxDepositInUsd(
-      computedOriginChainId,
-      inputToken.symbol,
-      includeDefaultMaxValues
-    );
-
-    if (chainInputTokenMaxBalanceInUsd) {
-      const chainInputTokenMaxBalance = parseAndConvertUsdToTokenUnits(
-        chainInputTokenMaxBalanceInUsd,
-        tokenPriceUsd,
-        inputToken
+      const transferBalances = fullRelayerBalances.map((balance, i) =>
+        balance.add(fullRelayerMainnetBalances[i])
       );
-      const relayers = includeRelayerBalances
-        ? [...fullRelayers, ...transferRestrictedRelayers]
-        : [];
-      chainAvailableInputTokenAmountForDeposits =
-        await getAvailableAmountForDeposits(
-          computedOriginChainId,
-          inputToken,
-          chainInputTokenMaxBalance,
-          relayers
+
+      let minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
+
+      // Normalise the environment-set USD minimum to units of the token being bridged.
+      let minDepositFloor = tokenPriceUsd.lte(0)
+        ? ethers.BigNumber.from(0)
+        : ethers.utils
+            .parseUnits(
+              minDepositUsdForDestinationChainId.toString(),
+              inputToken.decimals
+            )
+            .mul(ethers.utils.parseUnits("1"))
+            .div(tokenPriceUsd);
+
+      let maxDepositInstant = maxBN(
+        ...fullRelayerBalances,
+        ...transferRestrictedBalances
+      ); // balances on destination chain
+
+      let maxDepositShortDelay = maxBN(
+        ...transferBalances,
+        ...transferRestrictedBalances
+      ); // balances on destination chain + mainnet
+
+      if (!routeInvolvesLiteChain && !routeInvolvesUltraLightChain) {
+        const _lpCushion = ethers.utils.parseUnits(
+          getLpCushion(
+            l1Token.symbol,
+            computedOriginChainId,
+            destinationChainId
+          ),
+          l1Token.decimals
         );
-      chainHasMaxBoundary = true;
-    }
+        const lpCushion = ConvertDecimals(
+          l1Token.decimals,
+          inputToken.decimals
+        )(_lpCushion);
+        liquidReserves = maxBN(
+          liquidReserves.sub(lpCushion),
+          ethers.BigNumber.from(0)
+        );
 
-    if (chainInputTokenMaxDepositInUsd) {
-      chainInputTokenMaxDeposit = parseAndConvertUsdToTokenUnits(
-        chainInputTokenMaxDepositInUsd,
-        tokenPriceUsd,
-        inputToken
+        maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
+        maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
+      }
+
+      // Apply chain max values when defined
+      const includeDefaultMaxValues = originChainIsLiteChain;
+      const includeRelayerBalances = originChainIsLiteChain;
+      let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
+      let chainInputTokenMaxDeposit: BigNumber | undefined;
+      let chainHasMaxBoundary: boolean = false;
+
+      const chainInputTokenMaxBalanceInUsd = getChainInputTokenMaxBalanceInUsd(
+        computedOriginChainId,
+        inputToken.symbol,
+        includeDefaultMaxValues
       );
-      chainHasMaxBoundary = true;
-    }
 
-    const bnOrMax = (value?: BigNumber) => value ?? ethers.constants.MaxUint256;
-    const resolvedChainAvailableAmountForDeposits = bnOrMax(
-      chainAvailableInputTokenAmountForDeposits
-    );
-    const resolvedChainInputTokenMaxDeposit = bnOrMax(
-      chainInputTokenMaxDeposit
-    );
+      const chainInputTokenMaxDepositInUsd = getChainInputTokenMaxDepositInUsd(
+        computedOriginChainId,
+        inputToken.symbol,
+        includeDefaultMaxValues
+      );
 
-    const chainMaxBoundary = minBN(
-      resolvedChainAvailableAmountForDeposits,
-      resolvedChainInputTokenMaxDeposit
-    );
+      if (chainInputTokenMaxBalanceInUsd) {
+        const chainInputTokenMaxBalance = parseAndConvertUsdToTokenUnits(
+          chainInputTokenMaxBalanceInUsd,
+          tokenPriceUsd,
+          inputToken
+        );
+        const relayers = includeRelayerBalances
+          ? [...fullRelayers, ...transferRestrictedRelayers]
+          : [];
+        chainAvailableInputTokenAmountForDeposits =
+          await getAvailableAmountForDeposits(
+            computedOriginChainId,
+            inputToken,
+            chainInputTokenMaxBalance,
+            relayers
+          );
+        chainHasMaxBoundary = true;
+      }
 
-    minDeposit = minBN(minDeposit, chainMaxBoundary);
-    minDepositFloor = minBN(minDepositFloor, chainMaxBoundary);
-    maxDepositInstant = minBN(maxDepositInstant, chainMaxBoundary);
-    maxDepositShortDelay = minBN(maxDepositShortDelay, chainMaxBoundary);
+      if (chainInputTokenMaxDepositInUsd) {
+        chainInputTokenMaxDeposit = parseAndConvertUsdToTokenUnits(
+          chainInputTokenMaxDepositInUsd,
+          tokenPriceUsd,
+          inputToken
+        );
+        chainHasMaxBoundary = true;
+      }
 
-    const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
+      const bnOrMax = (value?: BigNumber) =>
+        value ?? ethers.constants.MaxUint256;
+      const resolvedChainAvailableAmountForDeposits = bnOrMax(
+        chainAvailableInputTokenAmountForDeposits
+      );
+      const resolvedChainInputTokenMaxDeposit = bnOrMax(
+        chainInputTokenMaxDeposit
+      );
 
-    // Apply multipliers
-    const bufferedRecommendedDepositInstant = limitsBufferMultiplier
-      .mul(maxDepositInstant)
-      .div(sdk.utils.fixedPointAdjustment);
-    const bufferedMaxDepositInstant = limitsBufferMultiplier
-      .mul(maxDepositInstant)
-      .div(sdk.utils.fixedPointAdjustment);
-    const bufferedMaxDepositShortDelay = limitsBufferMultiplier
-      .mul(maxDepositShortDelay)
-      .div(sdk.utils.fixedPointAdjustment);
+      const chainMaxBoundary = minBN(
+        resolvedChainAvailableAmountForDeposits,
+        resolvedChainInputTokenMaxDeposit
+      );
 
-    let maximumDeposit = getMaxDeposit(
-      liquidReserves,
-      bufferedMaxDepositShortDelay,
-      limitsBufferMultiplier,
-      chainHasMaxBoundary,
-      routeInvolvesLiteChain || routeInvolvesUltraLightChain
-    );
+      minDeposit = minBN(minDeposit, chainMaxBoundary);
+      minDepositFloor = minBN(minDepositFloor, chainMaxBoundary);
+      maxDepositInstant = minBN(maxDepositInstant, chainMaxBoundary);
+      maxDepositShortDelay = minBN(maxDepositShortDelay, chainMaxBoundary);
 
-    if (
-      (destinationChainId === CHAIN_IDs.ZK_SYNC &&
-        computedOriginChainId === CHAIN_IDs.MAINNET) ||
-      inputToken.symbol.toUpperCase() === "POOL"
-    ) {
-      maximumDeposit = liquidReserves;
-    }
+      const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
 
-    const limitCap = getLimitCap(
-      inputToken.symbol,
-      inputToken.decimals,
-      destinationChainId
-    );
+      // Apply multipliers
+      const bufferedRecommendedDepositInstant = limitsBufferMultiplier
+        .mul(maxDepositInstant)
+        .div(sdk.utils.fixedPointAdjustment);
+      const bufferedMaxDepositInstant = limitsBufferMultiplier
+        .mul(maxDepositInstant)
+        .div(sdk.utils.fixedPointAdjustment);
+      const bufferedMaxDepositShortDelay = limitsBufferMultiplier
+        .mul(maxDepositShortDelay)
+        .div(sdk.utils.fixedPointAdjustment);
 
-    const responseJson = {
-      // Absolute minimum may be overridden by the environment.
-      minDeposit: minBN(
-        maximumDeposit,
-        limitCap,
-        maxBN(minDeposit, minDepositFloor)
-      ).toString(),
-      maxDeposit: minBN(maximumDeposit, limitCap).toString(),
-      maxDepositInstant: minBN(bufferedMaxDepositInstant, limitCap).toString(),
-      maxDepositShortDelay: minBN(
+      let maximumDeposit = getMaxDeposit(
+        liquidReserves,
         bufferedMaxDepositShortDelay,
-        limitCap
-      ).toString(),
-      recommendedDepositInstant: minBN(
-        bufferedRecommendedDepositInstant,
-        limitCap
-      ).toString(),
-      relayerFeeDetails: {
-        relayFeeTotal: relayerFeeDetails.relayFeeTotal,
-        relayFeePercent: relayerFeeDetails.relayFeePercent,
-        gasFeeTotal: relayerFeeDetails.gasFeeTotal,
-        gasFeePercent: relayerFeeDetails.gasFeePercent,
-        capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
-        capitalFeePercent: relayerFeeDetails.capitalFeePercent,
-      },
-      gasFeeDetails: tokenGasCost
-        ? {
-            nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
-            opStackL1GasCost: opStackL1GasCost?.toString(),
-            gasPrice: gasPrice.toString(),
-            tokenGasCost: tokenGasCost.toString(),
-          }
-        : undefined,
-    };
-    logger.debug({
-      at: "Limits",
-      message: "Response data",
-      responseJson,
-    });
-    // Respond with a 200 status code and 1 second of cache time with
-    // 59s to keep serving the stale data while recomputing the cached value.
-    sendResponse(response, responseJson, 200, 1, 59);
-  } catch (error: unknown) {
-    return handleErrorCondition("limits", response, logger, error);
-  }
+        limitsBufferMultiplier,
+        chainHasMaxBoundary,
+        routeInvolvesLiteChain || routeInvolvesUltraLightChain
+      );
+
+      if (
+        (destinationChainId === CHAIN_IDs.ZK_SYNC &&
+          computedOriginChainId === CHAIN_IDs.MAINNET) ||
+        inputToken.symbol.toUpperCase() === "POOL"
+      ) {
+        maximumDeposit = liquidReserves;
+      }
+
+      const limitCap = getLimitCap(
+        inputToken.symbol,
+        inputToken.decimals,
+        destinationChainId
+      );
+
+      const responseJson = {
+        // Absolute minimum may be overridden by the environment.
+        minDeposit: minBN(
+          maximumDeposit,
+          limitCap,
+          maxBN(minDeposit, minDepositFloor)
+        ).toString(),
+        maxDeposit: minBN(maximumDeposit, limitCap).toString(),
+        maxDepositInstant: minBN(
+          bufferedMaxDepositInstant,
+          limitCap
+        ).toString(),
+        maxDepositShortDelay: minBN(
+          bufferedMaxDepositShortDelay,
+          limitCap
+        ).toString(),
+        recommendedDepositInstant: minBN(
+          bufferedRecommendedDepositInstant,
+          limitCap
+        ).toString(),
+        relayerFeeDetails: {
+          relayFeeTotal: relayerFeeDetails.relayFeeTotal,
+          relayFeePercent: relayerFeeDetails.relayFeePercent,
+          gasFeeTotal: relayerFeeDetails.gasFeeTotal,
+          gasFeePercent: relayerFeeDetails.gasFeePercent,
+          capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
+          capitalFeePercent: relayerFeeDetails.capitalFeePercent,
+        },
+        gasFeeDetails: tokenGasCost
+          ? {
+              nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
+              opStackL1GasCost: opStackL1GasCost?.toString(),
+              gasPrice: gasPrice.toString(),
+              tokenGasCost: tokenGasCost.toString(),
+            }
+          : undefined,
+      };
+      logger.debug({
+        at: "Limits",
+        message: "Response data",
+        responseJson,
+      });
+      span.end();
+      // Respond with a 200 status code and 1 second of cache time with
+      // 59s to keep serving the stale data while recomputing the cached value.
+      sendResponse(response, responseJson, 200, 1, 59);
+    } catch (error: unknown) {
+      span.recordException(error as Error);
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: (error as Error).message,
+      });
+      return handleErrorCondition("limits", response, logger, error);
+    }
+  });
 };
 
 const getAvailableAmountForDeposits = async (
