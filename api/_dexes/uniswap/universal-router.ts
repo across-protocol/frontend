@@ -5,10 +5,7 @@ import { SwapRouter } from "@uniswap/universal-router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
+import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
@@ -41,8 +38,8 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   const getOriginEntryPoints = (chainId: number) =>
     ({
       swapAndBridge: {
-        name: "SpokePoolPeripheryProxy",
-        address: getSpokePoolPeripheryProxyAddress(chainId),
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
       },
       deposit: {
         name: "SpokePoolPeriphery",

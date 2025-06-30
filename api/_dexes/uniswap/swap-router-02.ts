@@ -8,10 +8,7 @@ import {
   addMarkupToAmount,
 } from "../../_utils";
 import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
+import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
 import { floatToPercent } from "./utils/conversion";
 import {
@@ -32,7 +29,6 @@ type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 export function getSwapRouter02Strategy(
   originSwapEntryPointContractName:
     | "SpokePoolPeriphery"
-    | "SpokePoolPeripheryProxy"
     | "UniversalSwapAndBridge",
   quoteSource: QuoteSource = "trading-api"
 ): QuoteFetchStrategy {
@@ -43,18 +39,7 @@ export function getSwapRouter02Strategy(
     };
   };
   const getOriginEntryPoints = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeripheryProxy") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeripheryProxy",
-          address: getSpokePoolPeripheryProxyAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+    if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
       return {
         swapAndBridge: {
           name: "SpokePoolPeriphery",
