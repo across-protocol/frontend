@@ -1,6 +1,8 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
+import { trace } from "@opentelemetry/api";
+
 import {
   CHAIN_IDs,
   CUSTOM_GAS_TOKENS,
@@ -48,7 +50,6 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
-import { getTracer } from "./_tracer";
 import { SpanStatusCode } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
@@ -71,13 +72,13 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
-  const tracer = getTracer();
+  const tracer = trace.getTracer("api/limits");
   logger.debug({
     at: "Limits",
     message: "Query data",
     query,
   });
-  tracer.startActiveSpan("limits", async (span) => {
+  tracer.startActiveSpan("limits-handler", async (span) => {
     try {
       const {
         MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
