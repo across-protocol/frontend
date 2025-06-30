@@ -3,14 +3,16 @@ import {
   getPMFGoogleFormEntered,
   setPMFGoogleFormEntered,
 } from "utils/localStorage";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { pmfSurveyGFormUrl } from "utils";
 
 export function usePMFForm() {
   const { account } = useConnection();
-  const isPMFGoogleFormEntered = getPMFGoogleFormEntered();
-  const isPMFormAvailable =
-    !!pmfSurveyGFormUrl && !isPMFGoogleFormEntered && !!account;
+
+  const isPMFormAvailable = useMemo(() => {
+    const isPMFGoogleFormEntered = getPMFGoogleFormEntered();
+    return !!pmfSurveyGFormUrl && !isPMFGoogleFormEntered && !!account;
+  }, [account]);
 
   const handleNavigateToPMFGoogleForm = useCallback(() => {
     if (!isPMFormAvailable) {
