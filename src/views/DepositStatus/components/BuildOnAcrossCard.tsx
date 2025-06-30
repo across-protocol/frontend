@@ -8,6 +8,7 @@ export function BuildOnAcrossCard() {
   return (
     <EarnActionCard
       color="teal"
+      backgroundVariant="a"
       title={<Text color="white">Build with Across</Text>}
       subTitle="Integrate seamless cross-chain bridging directly into your dApp."
       LeftIcon={
