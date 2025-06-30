@@ -8,7 +8,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 50
+ * Tracking Plan Version: 51
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -32,10 +32,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "50",
+    version: "51",
     branch: "main",
     source: "web",
-    versionId: "5b6bde07-5ed3-4021-967f-fdaec4b35a87",
+    versionId: "523bd72c-20c7-4820-bc98-aa0ff37ae9b4",
   },
   ...{
     ingestionMetadata: {
@@ -598,6 +598,31 @@ export interface PageViewedProperties {
    * The current URL of the website on which this event was generated
    */
   siteUrl?: string;
+}
+
+export interface PmfButtonClickedProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage";
 }
 
 export interface QuickSwapButtonClickedProperties {
@@ -1613,6 +1638,14 @@ export class PageViewed implements BaseEvent {
   }
 }
 
+export class PmfButtonClicked implements BaseEvent {
+  event_type = "PMFButtonClicked";
+
+  constructor(public event_properties: PmfButtonClickedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class QuickSwapButtonClicked implements BaseEvent {
   event_type = "QuickSwapButtonClicked";
 
@@ -2031,6 +2064,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new PageViewed(properties), options);
+  }
+
+  /**
+   * PMFButtonClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/PMFButtonClicked)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. page)
+   * @param options Amplitude event options.
+   */
+  pmfButtonClicked(
+    properties: PmfButtonClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new PmfButtonClicked(properties), options);
   }
 
   /**
