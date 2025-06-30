@@ -63,7 +63,7 @@
   ],
   "headers": [
     {
-      "source": "/api/deposit(?:/.*)?",
+      "source": "/api/deposit(.*)",
       "headers": [
         {
           "key": "CDN-Cache-Control",
