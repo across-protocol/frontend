@@ -1,8 +1,17 @@
 import { registerOTel } from "@vercel/otel";
 
-const serviceName =
-  process.env.VERCEL_ENV === "production"
-    ? "app.across.to"
-    : process.env.VERCEL_URL || "preview";
+const environment = process.env.VERCEL_ENV;
+const serviceName = "app.across.to";
+const version = process.env.VERCEL_GIT_COMMIT_SHA;
 
-registerOTel({ serviceName });
+registerOTel({
+  serviceName,
+  attributes: {
+    env: environment,
+    "deployment.environment": environment,
+    "deployment.environment.name": environment,
+    service: serviceName,
+    "service.version": version,
+    version: version,
+  },
+});
