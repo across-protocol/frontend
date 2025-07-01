@@ -774,15 +774,21 @@ export const getRelayerFeeCalculatorQueries = (
     relayerAddress: string;
   }> = {}
 ) => {
+  const relayerAddress = sdk.utils.toAddressType(
+    overrides.relayerAddress || sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    destinationChainId
+  );
+  if (!relayerAddress.isEVM()) {
+    throw new Error(`relayerAddress is not EVM: ${relayerAddress.toNative()}`);
+  }
+
   const baseArgs = {
     chainId: destinationChainId,
     provider: getProvider(destinationChainId, { useSpeedProvider: true }),
     symbolMapping: TOKEN_SYMBOLS_MAP,
     spokePoolAddress:
       overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    simulatedRelayerAddress:
-      overrides.relayerAddress ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    relayerAddress,
     coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
     logger: getLogger(),
   };
@@ -794,7 +800,7 @@ export const getRelayerFeeCalculatorQueries = (
         baseArgs.provider,
         baseArgs.symbolMapping,
         baseArgs.spokePoolAddress,
-        baseArgs.simulatedRelayerAddress,
+        baseArgs.relayerAddress,
         baseArgs.logger,
         baseArgs.coingeckoProApiKey,
         undefined,
@@ -809,7 +815,7 @@ export const getRelayerFeeCalculatorQueries = (
     baseArgs.provider,
     baseArgs.symbolMapping,
     baseArgs.spokePoolAddress,
-    baseArgs.simulatedRelayerAddress,
+    baseArgs.relayerAddress,
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
   ) as sdk.relayFeeCalculator.QueryBase;

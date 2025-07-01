@@ -21,6 +21,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
   const { originSwapQuote, crossSwap, contracts } = crossSwapQuotes;
   const { originSwapEntryPoint, originRouter, depositEntryPoint } = contracts;
   const originChainId = crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwap.outputToken.chainId;
   const spokePool = getSpokePool(originChainId);
 
   let tx: PopulatedTransaction;
@@ -52,16 +53,28 @@ export async function buildCrossSwapTxForAllowanceHolder(
           depositData: {
             ...swapAndDepositData.depositData,
             inputToken: sdk.utils
-              .toAddressType(swapAndDepositData.depositData.inputToken)
+              .toAddressType(
+                swapAndDepositData.depositData.inputToken,
+                originChainId
+              )
               .toEvmAddress(),
             outputToken: sdk.utils
-              .toAddressType(swapAndDepositData.depositData.outputToken)
+              .toAddressType(
+                swapAndDepositData.depositData.outputToken,
+                destinationChainId
+              )
               .toBytes32(),
             depositor: sdk.utils
-              .toAddressType(swapAndDepositData.depositData.depositor)
+              .toAddressType(
+                swapAndDepositData.depositData.depositor,
+                originChainId
+              )
               .toEvmAddress(),
             recipient: sdk.utils
-              .toAddressType(swapAndDepositData.depositData.recipient)
+              .toAddressType(
+                swapAndDepositData.depositData.recipient,
+                destinationChainId
+              )
               .toBytes32(),
           },
         },
@@ -92,13 +105,22 @@ export async function buildCrossSwapTxForAllowanceHolder(
         {
           ...swapAndDepositData.depositData,
           depositor: sdk.utils
-            .toAddressType(swapAndDepositData.depositData.depositor)
+            .toAddressType(
+              swapAndDepositData.depositData.depositor,
+              originChainId
+            )
             .toEvmAddress(),
           recipient: sdk.utils
-            .toAddressType(swapAndDepositData.depositData.recipient)
+            .toAddressType(
+              swapAndDepositData.depositData.recipient,
+              destinationChainId
+            )
             .toEvmAddress(),
           outputToken: sdk.utils
-            .toAddressType(swapAndDepositData.depositData.outputToken)
+            .toAddressType(
+              swapAndDepositData.depositData.outputToken,
+              destinationChainId
+            )
             .toEvmAddress(),
           exclusivityDeadline:
             swapAndDepositData.depositData.exclusivityParameter,
@@ -133,10 +155,16 @@ export async function buildCrossSwapTxForAllowanceHolder(
       );
       tx = await spokePoolPeriphery.populateTransaction.depositNative(
         spokePool.address,
-        sdk.utils.toAddressType(baseDepositData.recipient).toBytes32(),
-        sdk.utils.toAddressType(baseDepositData.inputToken).toEvmAddress(),
+        sdk.utils
+          .toAddressType(baseDepositData.recipient, destinationChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.inputToken, originChainId)
+          .toEvmAddress(),
         baseDepositData.inputAmount.toString(),
-        sdk.utils.toAddressType(baseDepositData.outputToken).toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.outputToken, destinationChainId)
+          .toBytes32(),
         baseDepositData.outputAmount.toString(),
         baseDepositData.destinationChainId,
         baseDepositData.exclusiveRelayer,
@@ -156,14 +184,24 @@ export async function buildCrossSwapTxForAllowanceHolder(
     ) {
       const spokePool = getSpokePool(originChainId);
       tx = await spokePool.populateTransaction.deposit(
-        sdk.utils.toAddressType(baseDepositData.depositor).toBytes32(),
-        sdk.utils.toAddressType(baseDepositData.recipient).toBytes32(),
-        sdk.utils.toAddressType(baseDepositData.inputToken).toBytes32(),
-        sdk.utils.toAddressType(baseDepositData.outputToken).toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.depositor, originChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.recipient, destinationChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.inputToken, originChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.outputToken, destinationChainId)
+          .toBytes32(),
         baseDepositData.inputAmount,
         baseDepositData.outputAmount,
         baseDepositData.destinationChainId,
-        sdk.utils.toAddressType(baseDepositData.exclusiveRelayer).toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.exclusiveRelayer, destinationChainId)
+          .toBytes32(),
         baseDepositData.quoteTimestamp,
         baseDepositData.fillDeadline,
         baseDepositData.exclusivityParameter,
