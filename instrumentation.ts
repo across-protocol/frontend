@@ -1,6 +1,6 @@
 import { registerOTel } from "@vercel/otel";
 
-const serviceName = "across-api";
+const serviceName = "app-frontend-v3";
 
 export function register() {
   registerOTel({
