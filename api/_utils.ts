@@ -918,7 +918,7 @@ export const buildDepositForSimulation = (depositArgs: {
       outputTokenDecimals
     )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
-    depositor: recipient, // nb. Address type may not be valid on origin chain. Should be OK.
+    depositor: recipient, // nb. Address type may be invalid for origin chain. Depositor address is never validated.
     recipient,
     destinationChainId,
     originChainId,
