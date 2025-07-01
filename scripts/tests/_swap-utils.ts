@@ -189,7 +189,6 @@ export async function fetchSwapQuotes() {
       throw new Error("No test cases found");
     }
 
-    const swapQuotes: BaseSwapResponse[] = [];
     for (const testCase of filteredTestCases) {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
