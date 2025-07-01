@@ -1,7 +1,9 @@
 import { registerOTel } from "@vercel/otel";
 
-const serviceName = "app.across.to";
+const serviceName = "Across API";
 
-registerOTel({
-  serviceName,
-});
+export function register() {
+  registerOTel({
+    serviceName,
+  });
+}
