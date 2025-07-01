@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useConnection } from "hooks";
-import { useAddressType } from "hooks/useIsContractAddress";
+import { useAddressType } from "hooks/useAddressType";
 
 export type ToAccount = {
   address: string;
