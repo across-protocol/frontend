@@ -78,7 +78,7 @@ const handler = async (
     message: "Query data",
     query,
   });
-  tracer.startActiveSpan("limits-handler", async (span) => {
+  return tracer.startActiveSpan("limits-handler", async (span) => {
     try {
       const {
         MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
@@ -521,7 +521,7 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-      span.end();
+      span.setStatus({ code: SpanStatusCode.OK });
       // Respond with a 200 status code and 1 second of cache time with
       // 59s to keep serving the stale data while recomputing the cached value.
       sendResponse(response, responseJson, 200, 1, 59);
@@ -532,6 +532,8 @@ const handler = async (
         message: (error as Error).message,
       });
       return handleErrorCondition("limits", response, logger, error);
+    } finally {
+      span.end();
     }
   });
 };
