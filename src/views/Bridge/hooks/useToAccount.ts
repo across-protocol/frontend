@@ -32,7 +32,7 @@ export function useToAccount(toChainId?: number) {
         .then((code) =>
           setToAccount({
             address: customToAddress,
-            isContract: code !== "0x" || !is7702Delegate(code),
+            isContract: code !== "0x" && !is7702Delegate(code),
           })
         )
         .catch((error) => {
