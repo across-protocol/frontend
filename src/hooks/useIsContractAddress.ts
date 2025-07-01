@@ -2,30 +2,40 @@ import { useQuery } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import { getCode, noContractCode } from "utils";
 
-export function useIsContractAddress(
-  address?: string,
-  chainId = 1,
-  ignore7702 = false
-) {
+export const AddressTypes = {
+  contract: "contract",
+  "7702Delegate": "7702Delegate",
+  EOA: "EOA",
+} as const;
+
+export type AddressType = (typeof AddressTypes)[keyof typeof AddressTypes];
+
+export function useAddressType(address?: string, chainId = 1): AddressType {
   const result = useQuery({
-    queryKey: ["isContractAddress", address, chainId, ignore7702],
-    queryFn: async () => {
-      if (!address || !chainId) return false;
-      const code = await getCode(address, chainId);
+    queryKey: ["addressType", address, chainId],
+    queryFn: async (): Promise<AddressType> => {
+      try {
+        if (!address || !chainId) return AddressTypes.EOA;
+        const code = await getCode(address, chainId);
 
-      if (code === noContractCode) {
-        return false;
+        if (code === noContractCode) {
+          return AddressTypes.EOA;
+        }
+        if (is7702Delegate(code)) {
+          return AddressTypes["7702Delegate"];
+        }
+
+        return AddressTypes.contract;
+      } catch (e) {
+        console.warn(
+          `Unable to get code at address ${address} on chain ${chainId}`
+        );
+        // defaults to an EOA
+        return AddressTypes.EOA;
       }
-
-      // Ignore EIP-7702 delegations if ignore7702 was set.
-      if (ignore7702) {
-        return !is7702Delegate(code);
-      }
-
-      return true;
     },
     enabled: Boolean(address && chainId),
-    // we don't expect this change for a given address, cache heavily
+    // we don't expect this to change for a given address, cache heavily
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -33,7 +43,7 @@ export function useIsContractAddress(
     refetchOnReconnect: false,
   });
 
-  return result.data ?? false;
+  return result.data ?? AddressTypes.EOA;
 }
 
 export function is7702Delegate(code: string): boolean {
