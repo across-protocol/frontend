@@ -27,7 +27,7 @@ import type {
   OnEvent,
 } from "@across-protocol/contracts/dist/typechain/common";
 
-export declare namespace SpokePoolV3PeripheryInterface {
+export declare namespace SpokePoolPeripheryInterface {
   export type FeesStruct = { amount: BigNumberish; recipient: string };
 
   export type FeesStructOutput = [BigNumber, string] & {
@@ -37,12 +37,12 @@ export declare namespace SpokePoolV3PeripheryInterface {
 
   export type BaseDepositDataStruct = {
     inputToken: string;
-    outputToken: string;
+    outputToken: BytesLike;
     outputAmount: BigNumberish;
     depositor: string;
-    recipient: string;
+    recipient: BytesLike;
     destinationChainId: BigNumberish;
-    exclusiveRelayer: string;
+    exclusiveRelayer: BytesLike;
     quoteTimestamp: BigNumberish;
     fillDeadline: BigNumberish;
     exclusivityParameter: BigNumberish;
@@ -76,50 +76,65 @@ export declare namespace SpokePoolV3PeripheryInterface {
   };
 
   export type DepositDataStruct = {
-    submissionFees: SpokePoolV3PeripheryInterface.FeesStruct;
-    baseDepositData: SpokePoolV3PeripheryInterface.BaseDepositDataStruct;
+    submissionFees: SpokePoolPeripheryInterface.FeesStruct;
+    baseDepositData: SpokePoolPeripheryInterface.BaseDepositDataStruct;
     inputAmount: BigNumberish;
+    spokePool: string;
+    nonce: BigNumberish;
   };
 
   export type DepositDataStructOutput = [
-    SpokePoolV3PeripheryInterface.FeesStructOutput,
-    SpokePoolV3PeripheryInterface.BaseDepositDataStructOutput,
+    SpokePoolPeripheryInterface.FeesStructOutput,
+    SpokePoolPeripheryInterface.BaseDepositDataStructOutput,
+    BigNumber,
+    string,
     BigNumber,
   ] & {
-    submissionFees: SpokePoolV3PeripheryInterface.FeesStructOutput;
-    baseDepositData: SpokePoolV3PeripheryInterface.BaseDepositDataStructOutput;
+    submissionFees: SpokePoolPeripheryInterface.FeesStructOutput;
+    baseDepositData: SpokePoolPeripheryInterface.BaseDepositDataStructOutput;
     inputAmount: BigNumber;
+    spokePool: string;
+    nonce: BigNumber;
   };
 
   export type SwapAndDepositDataStruct = {
-    submissionFees: SpokePoolV3PeripheryInterface.FeesStruct;
-    depositData: SpokePoolV3PeripheryInterface.BaseDepositDataStruct;
+    submissionFees: SpokePoolPeripheryInterface.FeesStruct;
+    depositData: SpokePoolPeripheryInterface.BaseDepositDataStruct;
     swapToken: string;
     exchange: string;
     transferType: BigNumberish;
     swapTokenAmount: BigNumberish;
     minExpectedInputTokenAmount: BigNumberish;
     routerCalldata: BytesLike;
+    enableProportionalAdjustment: boolean;
+    spokePool: string;
+    nonce: BigNumberish;
   };
 
   export type SwapAndDepositDataStructOutput = [
-    SpokePoolV3PeripheryInterface.FeesStructOutput,
-    SpokePoolV3PeripheryInterface.BaseDepositDataStructOutput,
+    SpokePoolPeripheryInterface.FeesStructOutput,
+    SpokePoolPeripheryInterface.BaseDepositDataStructOutput,
     string,
     string,
     number,
     BigNumber,
     BigNumber,
     string,
+    boolean,
+    string,
+    BigNumber,
   ] & {
-    submissionFees: SpokePoolV3PeripheryInterface.FeesStructOutput;
-    depositData: SpokePoolV3PeripheryInterface.BaseDepositDataStructOutput;
+    submissionFees: SpokePoolPeripheryInterface.FeesStructOutput;
+    depositData: SpokePoolPeripheryInterface.BaseDepositDataStructOutput;
     swapToken: string;
     exchange: string;
     transferType: number;
     swapTokenAmount: BigNumber;
     minExpectedInputTokenAmount: BigNumber;
     routerCalldata: string;
+    enableProportionalAdjustment: boolean;
+    spokePool: string;
+    nonce: BigNumber;
   };
 }
 
@@ -148,57 +163,53 @@ export declare namespace IPermit2 {
   };
 }
 
-export interface SpokePoolV3PeripheryInterface extends utils.Interface {
+export interface SpokePoolPeripheryInterface extends utils.Interface {
   functions: {
-    "deposit(address,address,uint256,uint256,uint256,address,uint32,uint32,uint32,bytes)": FunctionFragment;
-    "depositWithAuthorization(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256),uint256,uint256,bytes32,bytes,bytes)": FunctionFragment;
-    "depositWithPermit(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256),uint256,bytes,bytes)": FunctionFragment;
-    "depositWithPermit2(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
+    "depositNative(address,bytes32,address,uint256,bytes32,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)": FunctionFragment;
+    "depositWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),uint256,uint256,bytes,bytes)": FunctionFragment;
+    "depositWithPermit(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),uint256,bytes,bytes)": FunctionFragment;
+    "depositWithPermit2(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
     "domainSeparator()": FunctionFragment;
     "eip712Domain()": FunctionFragment;
-    "initialize(address,address,address,address)": FunctionFragment;
-    "isValidSignature(bytes32,bytes)": FunctionFragment;
     "multicall(bytes[])": FunctionFragment;
     "permit2()": FunctionFragment;
-    "proxy()": FunctionFragment;
-    "spokePool()": FunctionFragment;
-    "swapAndBridge(((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes))": FunctionFragment;
-    "swapAndBridgeWithAuthorization(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes),uint256,uint256,bytes32,bytes,bytes)": FunctionFragment;
-    "swapAndBridgeWithPermit(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes),uint256,bytes,bytes)": FunctionFragment;
-    "swapAndBridgeWithPermit2(address,((uint256,address),(address,address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
-    "wrappedNativeToken()": FunctionFragment;
+    "permitNonces(address)": FunctionFragment;
+    "swapAndBridge(((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256))": FunctionFragment;
+    "swapAndBridgeWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),uint256,uint256,bytes,bytes)": FunctionFragment;
+    "swapAndBridgeWithPermit(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),uint256,bytes,bytes)": FunctionFragment;
+    "swapAndBridgeWithPermit2(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
+    "swapProxy()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "deposit"
+      | "depositNative"
       | "depositWithAuthorization"
       | "depositWithPermit"
       | "depositWithPermit2"
       | "domainSeparator"
       | "eip712Domain"
-      | "initialize"
-      | "isValidSignature"
       | "multicall"
       | "permit2"
-      | "proxy"
-      | "spokePool"
+      | "permitNonces"
       | "swapAndBridge"
       | "swapAndBridgeWithAuthorization"
       | "swapAndBridgeWithPermit"
       | "swapAndBridgeWithPermit2"
-      | "wrappedNativeToken"
+      | "swapProxy"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "deposit",
+    functionFragment: "depositNative",
     values: [
       string,
+      BytesLike,
       string,
       BigNumberish,
+      BytesLike,
       BigNumberish,
       BigNumberish,
-      string,
+      BytesLike,
       BigNumberish,
       BigNumberish,
       BigNumberish,
@@ -209,10 +220,9 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "depositWithAuthorization",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.DepositDataStruct,
+      SpokePoolPeripheryInterface.DepositDataStruct,
       BigNumberish,
       BigNumberish,
-      BytesLike,
       BytesLike,
       BytesLike,
     ]
@@ -221,7 +231,7 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "depositWithPermit",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.DepositDataStruct,
+      SpokePoolPeripheryInterface.DepositDataStruct,
       BigNumberish,
       BytesLike,
       BytesLike,
@@ -231,7 +241,7 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "depositWithPermit2",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.DepositDataStruct,
+      SpokePoolPeripheryInterface.DepositDataStruct,
       IPermit2.PermitTransferFromStruct,
       BytesLike,
     ]
@@ -243,34 +253,27 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "eip712Domain",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "initialize",
-    values: [string, string, string, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isValidSignature",
-    values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "multicall",
     values: [BytesLike[]]
   ): string;
   encodeFunctionData(functionFragment: "permit2", values?: undefined): string;
-  encodeFunctionData(functionFragment: "proxy", values?: undefined): string;
-  encodeFunctionData(functionFragment: "spokePool", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "permitNonces",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "swapAndBridge",
-    values: [SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct]
+    values: [SpokePoolPeripheryInterface.SwapAndDepositDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "swapAndBridgeWithAuthorization",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       BigNumberish,
       BigNumberish,
-      BytesLike,
       BytesLike,
       BytesLike,
     ]
@@ -279,7 +282,7 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "swapAndBridgeWithPermit",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       BigNumberish,
       BytesLike,
       BytesLike,
@@ -289,17 +292,17 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "swapAndBridgeWithPermit2",
     values: [
       string,
-      SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       IPermit2.PermitTransferFromStruct,
       BytesLike,
     ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "wrappedNativeToken",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "swapProxy", values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "depositNative",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "depositWithAuthorization",
     data: BytesLike
@@ -320,15 +323,12 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "eip712Domain",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isValidSignature",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "permit2", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "proxy", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "spokePool", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "permitNonces",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "swapAndBridge",
     data: BytesLike
@@ -345,14 +345,11 @@ export interface SpokePoolV3PeripheryInterface extends utils.Interface {
     functionFragment: "swapAndBridgeWithPermit2",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "wrappedNativeToken",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "swapProxy", data: BytesLike): Result;
 
   events: {
     "EIP712DomainChanged()": EventFragment;
-    "SwapBeforeBridge(address,bytes,address,address,uint256,uint256,address,uint256)": EventFragment;
+    "SwapBeforeBridge(address,bytes,address,address,uint256,uint256,bytes32,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
@@ -386,12 +383,12 @@ export type SwapBeforeBridgeEvent = TypedEvent<
 export type SwapBeforeBridgeEventFilter =
   TypedEventFilter<SwapBeforeBridgeEvent>;
 
-export interface SpokePoolV3Periphery extends BaseContract {
+export interface SpokePoolPeriphery extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: SpokePoolV3PeripheryInterface;
+  interface: SpokePoolPeripheryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -413,13 +410,15 @@ export interface SpokePoolV3Periphery extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    deposit(
-      recipient: string,
+    depositNative(
+      spokePool: string,
+      recipient: BytesLike,
       inputToken: string,
       inputAmount: BigNumberish,
+      outputToken: BytesLike,
       outputAmount: BigNumberish,
       destinationChainId: BigNumberish,
-      exclusiveRelayer: string,
+      exclusiveRelayer: BytesLike,
       quoteTimestamp: BigNumberish,
       fillDeadline: BigNumberish,
       exclusivityParameter: BigNumberish,
@@ -429,10 +428,9 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithAuthorization(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -440,7 +438,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       depositDataSignature: BytesLike,
@@ -449,7 +447,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit2(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -469,20 +467,6 @@ export interface SpokePoolV3Periphery extends BaseContract {
       }
     >;
 
-    initialize(
-      _spokePool: string,
-      _wrappedNativeToken: string,
-      _proxy: string,
-      _permit2: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    isValidSignature(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string] & { magicBytes: string }>;
-
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -490,21 +474,18 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<[string]>;
 
-    proxy(overrides?: CallOverrides): Promise<[string]>;
-
-    spokePool(overrides?: CallOverrides): Promise<[string]>;
+    permitNonces(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     swapAndBridge(
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     swapAndBridgeWithAuthorization(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -512,7 +493,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
@@ -521,22 +502,24 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit2(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    wrappedNativeToken(overrides?: CallOverrides): Promise<[string]>;
+    swapProxy(overrides?: CallOverrides): Promise<[string]>;
   };
 
-  deposit(
-    recipient: string,
+  depositNative(
+    spokePool: string,
+    recipient: BytesLike,
     inputToken: string,
     inputAmount: BigNumberish,
+    outputToken: BytesLike,
     outputAmount: BigNumberish,
     destinationChainId: BigNumberish,
-    exclusiveRelayer: string,
+    exclusiveRelayer: BytesLike,
     quoteTimestamp: BigNumberish,
     fillDeadline: BigNumberish,
     exclusivityParameter: BigNumberish,
@@ -546,10 +529,9 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   depositWithAuthorization(
     signatureOwner: string,
-    depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+    depositData: SpokePoolPeripheryInterface.DepositDataStruct,
     validAfter: BigNumberish,
     validBefore: BigNumberish,
-    nonce: BytesLike,
     receiveWithAuthSignature: BytesLike,
     depositDataSignature: BytesLike,
     overrides?: Overrides & { from?: string }
@@ -557,7 +539,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   depositWithPermit(
     signatureOwner: string,
-    depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+    depositData: SpokePoolPeripheryInterface.DepositDataStruct,
     deadline: BigNumberish,
     permitSignature: BytesLike,
     depositDataSignature: BytesLike,
@@ -566,7 +548,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   depositWithPermit2(
     signatureOwner: string,
-    depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+    depositData: SpokePoolPeripheryInterface.DepositDataStruct,
     permit: IPermit2.PermitTransferFromStruct,
     signature: BytesLike,
     overrides?: Overrides & { from?: string }
@@ -586,20 +568,6 @@ export interface SpokePoolV3Periphery extends BaseContract {
     }
   >;
 
-  initialize(
-    _spokePool: string,
-    _wrappedNativeToken: string,
-    _proxy: string,
-    _permit2: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  isValidSignature(
-    arg0: BytesLike,
-    arg1: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   multicall(
     data: BytesLike[],
     overrides?: Overrides & { from?: string }
@@ -607,21 +575,18 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   permit2(overrides?: CallOverrides): Promise<string>;
 
-  proxy(overrides?: CallOverrides): Promise<string>;
-
-  spokePool(overrides?: CallOverrides): Promise<string>;
+  permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   swapAndBridge(
-    swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+    swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   swapAndBridgeWithAuthorization(
     signatureOwner: string,
-    swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+    swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
     validAfter: BigNumberish,
     validBefore: BigNumberish,
-    nonce: BytesLike,
     receiveWithAuthSignature: BytesLike,
     swapAndDepositDataSignature: BytesLike,
     overrides?: Overrides & { from?: string }
@@ -629,7 +594,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   swapAndBridgeWithPermit(
     signatureOwner: string,
-    swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+    swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
     deadline: BigNumberish,
     permitSignature: BytesLike,
     swapAndDepositDataSignature: BytesLike,
@@ -638,22 +603,24 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
   swapAndBridgeWithPermit2(
     signatureOwner: string,
-    swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+    swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
     permit: IPermit2.PermitTransferFromStruct,
     signature: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  wrappedNativeToken(overrides?: CallOverrides): Promise<string>;
+  swapProxy(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
-    deposit(
-      recipient: string,
+    depositNative(
+      spokePool: string,
+      recipient: BytesLike,
       inputToken: string,
       inputAmount: BigNumberish,
+      outputToken: BytesLike,
       outputAmount: BigNumberish,
       destinationChainId: BigNumberish,
-      exclusiveRelayer: string,
+      exclusiveRelayer: BytesLike,
       quoteTimestamp: BigNumberish,
       fillDeadline: BigNumberish,
       exclusivityParameter: BigNumberish,
@@ -663,10 +630,9 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithAuthorization(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       depositDataSignature: BytesLike,
       overrides?: CallOverrides
@@ -674,7 +640,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       depositDataSignature: BytesLike,
@@ -683,7 +649,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit2(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: CallOverrides
@@ -703,39 +669,22 @@ export interface SpokePoolV3Periphery extends BaseContract {
       }
     >;
 
-    initialize(
-      _spokePool: string,
-      _wrappedNativeToken: string,
-      _proxy: string,
-      _permit2: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    isValidSignature(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
     multicall(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
     permit2(overrides?: CallOverrides): Promise<string>;
 
-    proxy(overrides?: CallOverrides): Promise<string>;
-
-    spokePool(overrides?: CallOverrides): Promise<string>;
+    permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     swapAndBridge(
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
     swapAndBridgeWithAuthorization(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
       overrides?: CallOverrides
@@ -743,7 +692,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
@@ -752,27 +701,27 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit2(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    wrappedNativeToken(overrides?: CallOverrides): Promise<string>;
+    swapProxy(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
     "EIP712DomainChanged()"(): EIP712DomainChangedEventFilter;
     EIP712DomainChanged(): EIP712DomainChangedEventFilter;
 
-    "SwapBeforeBridge(address,bytes,address,address,uint256,uint256,address,uint256)"(
+    "SwapBeforeBridge(address,bytes,address,address,uint256,uint256,bytes32,uint256)"(
       exchange?: null,
       exchangeCalldata?: null,
       swapToken?: string | null,
       acrossInputToken?: string | null,
       swapTokenAmount?: null,
       acrossInputAmount?: null,
-      acrossOutputToken?: string | null,
+      acrossOutputToken?: BytesLike | null,
       acrossOutputAmount?: null
     ): SwapBeforeBridgeEventFilter;
     SwapBeforeBridge(
@@ -782,19 +731,21 @@ export interface SpokePoolV3Periphery extends BaseContract {
       acrossInputToken?: string | null,
       swapTokenAmount?: null,
       acrossInputAmount?: null,
-      acrossOutputToken?: string | null,
+      acrossOutputToken?: BytesLike | null,
       acrossOutputAmount?: null
     ): SwapBeforeBridgeEventFilter;
   };
 
   estimateGas: {
-    deposit(
-      recipient: string,
+    depositNative(
+      spokePool: string,
+      recipient: BytesLike,
       inputToken: string,
       inputAmount: BigNumberish,
+      outputToken: BytesLike,
       outputAmount: BigNumberish,
       destinationChainId: BigNumberish,
-      exclusiveRelayer: string,
+      exclusiveRelayer: BytesLike,
       quoteTimestamp: BigNumberish,
       fillDeadline: BigNumberish,
       exclusivityParameter: BigNumberish,
@@ -804,10 +755,9 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithAuthorization(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -815,7 +765,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       depositDataSignature: BytesLike,
@@ -824,7 +774,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit2(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -834,20 +784,6 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     eip712Domain(overrides?: CallOverrides): Promise<BigNumber>;
 
-    initialize(
-      _spokePool: string,
-      _wrappedNativeToken: string,
-      _proxy: string,
-      _permit2: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    isValidSignature(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -855,21 +791,18 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<BigNumber>;
 
-    proxy(overrides?: CallOverrides): Promise<BigNumber>;
-
-    spokePool(overrides?: CallOverrides): Promise<BigNumber>;
+    permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     swapAndBridge(
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     swapAndBridgeWithAuthorization(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -877,7 +810,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
@@ -886,23 +819,25 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit2(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    wrappedNativeToken(overrides?: CallOverrides): Promise<BigNumber>;
+    swapProxy(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    deposit(
-      recipient: string,
+    depositNative(
+      spokePool: string,
+      recipient: BytesLike,
       inputToken: string,
       inputAmount: BigNumberish,
+      outputToken: BytesLike,
       outputAmount: BigNumberish,
       destinationChainId: BigNumberish,
-      exclusiveRelayer: string,
+      exclusiveRelayer: BytesLike,
       quoteTimestamp: BigNumberish,
       fillDeadline: BigNumberish,
       exclusivityParameter: BigNumberish,
@@ -912,10 +847,9 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithAuthorization(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -923,7 +857,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       depositDataSignature: BytesLike,
@@ -932,7 +866,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     depositWithPermit2(
       signatureOwner: string,
-      depositData: SpokePoolV3PeripheryInterface.DepositDataStruct,
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -942,20 +876,6 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     eip712Domain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    initialize(
-      _spokePool: string,
-      _wrappedNativeToken: string,
-      _proxy: string,
-      _permit2: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    isValidSignature(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -963,21 +883,21 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    proxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    spokePool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    permitNonces(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     swapAndBridge(
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     swapAndBridgeWithAuthorization(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
-      nonce: BytesLike,
       receiveWithAuthSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
@@ -985,7 +905,7 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       deadline: BigNumberish,
       permitSignature: BytesLike,
       swapAndDepositDataSignature: BytesLike,
@@ -994,14 +914,12 @@ export interface SpokePoolV3Periphery extends BaseContract {
 
     swapAndBridgeWithPermit2(
       signatureOwner: string,
-      swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct,
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       permit: IPermit2.PermitTransferFromStruct,
       signature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    wrappedNativeToken(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    swapProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
