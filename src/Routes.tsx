@@ -18,14 +18,17 @@ import {
   stringValueInArray,
   getConfig,
   chainEndpointToId,
+  showV4LaunchBanner,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
+
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
+import AcrossV4Banner from "components/Banners/AcrossV4Banner";
+import RewardsWarningBanner from "components/Banners/RewardsWarningBanner";
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -129,14 +132,9 @@ const Routes: React.FC = () => {
         </SuperHeader>
       )}
       {rewardsBannerWarning && location.pathname === "/rewards" && (
-        <Banner>
-          <InfoLogo />
-          <span>
-            Due to maintenance, rewards will not be visually updated for a few
-            hours. This does not impact your reward earnings.
-          </span>
-        </Banner>
+        <RewardsWarningBanner />
       )}
+      {showV4LaunchBanner && <AcrossV4Banner />}
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
