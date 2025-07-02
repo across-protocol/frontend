@@ -225,7 +225,6 @@ export const AddressZero = ethers.constants.AddressZero;
 export const showV4LaunchBanner = Boolean(
   process.env.REACT_APP_SHOW_V4_BANNER === "true"
 );
-process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
 assert(
   isSupportedChainId(hubPoolChainId),
