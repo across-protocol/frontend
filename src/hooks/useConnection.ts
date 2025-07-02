@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { useOnboard } from "hooks/useOnboard";
-import { useIsContractAddress } from "hooks/useIsContractAddress";
+import { useAddressType } from "hooks/useAddressType";
 
 export function useConnection() {
   const {
@@ -18,11 +18,7 @@ export function useConnection() {
     didAttemptAutoSelect,
   } = useOnboard();
 
-  const isContractAddress = useIsContractAddress(
-    account?.address,
-    chainId,
-    true
-  );
+  const addressType = useAddressType(account?.address, chainId);
 
   return {
     account: account ? ethers.utils.getAddress(account.address) : undefined,
@@ -36,7 +32,7 @@ export function useConnection() {
     error,
     wallet,
     setChain,
-    isContractAddress,
+    isContractAddress: addressType === "contract",
     didAttemptAutoSelect,
   };
 }

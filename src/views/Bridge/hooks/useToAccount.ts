@@ -1,60 +1,41 @@
-import { useState, useEffect } from "react";
-
+import { useState, useMemo } from "react";
 import { useConnection } from "hooks";
-import { getCode } from "utils";
-import {
-  useIsContractAddress,
-  is7702Delegate,
-} from "hooks/useIsContractAddress";
+import { useAddressType } from "hooks/useAddressType";
 
 export type ToAccount = {
   address: string;
   isContract: boolean;
+  is7702Delegate: boolean;
 };
 
 export function useToAccount(toChainId?: number) {
   const [customToAddress, setCustomToAddress] = useState<string | undefined>();
-  const [toAccount, setToAccount] = useState<ToAccount | undefined>();
 
   const { account: connectedAccount } = useConnection();
-  const isConnectedAccountContract = useIsContractAddress(
-    connectedAccount,
-    toChainId
-  );
+  const connectedRecipientAccount = useAddressType(connectedAccount, toChainId);
+  const customRecipientAccount = useAddressType(customToAddress, toChainId);
 
-  useEffect(() => {
-    if (!toChainId) {
-      return;
-    }
-
+  const toAccount = useMemo<ToAccount | undefined>(() => {
     if (customToAddress) {
-      getCode(customToAddress, toChainId)
-        .then((code) =>
-          setToAccount({
-            address: customToAddress,
-            isContract: code !== "0x" || !is7702Delegate(code),
-          })
-        )
-        .catch((error) => {
-          console.error("Failed to get code", error);
-          setToAccount({
-            address: customToAddress,
-            isContract: false,
-          });
-        });
-    } else if (connectedAccount) {
-      setToAccount({
-        address: connectedAccount,
-        isContract: isConnectedAccountContract,
-      });
-    } else {
-      setToAccount(undefined);
+      return {
+        address: customToAddress,
+        isContract: customRecipientAccount === "contract",
+        is7702Delegate: customRecipientAccount === "7702Delegate",
+      };
     }
+    if (connectedAccount) {
+      return {
+        address: connectedAccount,
+        isContract: connectedRecipientAccount === "contract",
+        is7702Delegate: connectedRecipientAccount === "7702Delegate",
+      };
+    }
+    return undefined;
   }, [
-    customToAddress,
     connectedAccount,
-    isConnectedAccountContract,
-    toChainId,
+    connectedRecipientAccount,
+    customRecipientAccount,
+    customToAddress,
   ]);
 
   return {
