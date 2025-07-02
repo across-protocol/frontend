@@ -6,7 +6,7 @@ import {
   useHistory,
   Redirect,
 } from "react-router-dom";
-import { Header, SuperHeader, Banner, Sidebar } from "components";
+import { Header, SuperHeader, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
 import styled from "@emotion/styled";
 import {
