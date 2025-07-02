@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Wrapper } from "./Banner.styles";
 /**
  * React component that renders its children in a super header on top of the page.
  */
@@ -20,7 +19,11 @@ const Banner = ({ children }: { children: React.ReactNode }) => {
   if (!container.current) {
     return null;
   }
-  return createPortal(<Wrapper>{children}</Wrapper>, container.current);
+  return createPortal(
+    children,
+    // <Wrapper className={className}>{children}</Wrapper>,
+    container.current
+  );
 };
 
 export default Banner;
