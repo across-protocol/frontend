@@ -43,6 +43,8 @@ export type CrossSwap = {
 export type SupportedDex =
   | "1inch"
   | "uniswap"
+  | "uniswap-v3/swap-router-02"
+  | "uniswap-v3/universal-router"
   | "gho"
   | "gho-multicall3"
   | "lifi";
@@ -126,22 +128,7 @@ export type QuoteFetchStrategy = {
     address: string;
     name: string;
   };
-  getOriginEntryPoints: (chainId: number) => {
-    swapAndBridge:
-      | {
-          name: "UniversalSwapAndBridge";
-          address: string;
-          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "lifi";
-        }
-      | {
-          name: "SpokePoolPeriphery";
-          address: string;
-        };
-    deposit: {
-      name: "SpokePoolPeriphery" | "SpokePool";
-      address: string;
-    };
-  };
+  getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
 };
 
@@ -154,6 +141,26 @@ export type QuoteFetchFn = (
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
 }>;
+
+export type OriginEntryPointContractName =
+  | "SpokePoolPeriphery"
+  | "UniversalSwapAndBridge";
+
+export type OriginEntryPoints = {
+  originSwapInitialRecipient: {
+    name: "UniversalSwapAndBridge" | "SwapProxy";
+    address: string;
+  };
+  swapAndBridge: {
+    name: OriginEntryPointContractName;
+    address: string;
+    dex: string;
+  };
+  deposit: {
+    name: "SpokePoolPeriphery" | "SpokePool";
+    address: string;
+  };
+};
 
 export type CrossSwapQuotesRetrievalB2AResult = {
   destinationSwap: {

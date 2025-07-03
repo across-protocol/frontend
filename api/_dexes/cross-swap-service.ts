@@ -689,13 +689,13 @@ function _prepCrossSwapQuotesRetrievalA2B(
 
   // Return a list of results for each origin strategy
   return originStrategies.map((originStrategy) => {
-    const originSwapEntryPoint =
-      originStrategy.getOriginEntryPoints(originSwapChainId).swapAndBridge;
+    const { swapAndBridge, originSwapInitialRecipient } =
+      originStrategy.getOriginEntryPoints(originSwapChainId);
     const originSwap = {
       chainId: originSwapChainId,
       tokenIn: crossSwap.inputToken,
       tokenOut: bridgeableInputToken,
-      recipient: originSwapEntryPoint.address,
+      recipient: originSwapInitialRecipient.address,
       slippageTolerance: crossSwap.slippageTolerance,
       type: crossSwap.type,
     };
@@ -706,7 +706,7 @@ function _prepCrossSwapQuotesRetrievalA2B(
       originSwapChainId,
       destinationChainId,
       bridgeableInputToken,
-      originSwapEntryPoint,
+      originSwapEntryPoint: swapAndBridge,
     };
   });
 }
@@ -1165,8 +1165,8 @@ function _prepCrossSwapQuotesRetrievalA2A(
       const multiCallHandlerAddress = getMultiCallHandlerAddress(
         destinationSwapChainId
       );
-      const originSwapEntryPoint =
-        originStrategy.getOriginEntryPoints(originSwapChainId).swapAndBridge;
+      const { swapAndBridge, originSwapInitialRecipient } =
+        originStrategy.getOriginEntryPoints(originSwapChainId);
       const depositEntryPoint =
         originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
       const originRouter = originStrategy.getRouter(originSwapChainId);
@@ -1177,7 +1177,7 @@ function _prepCrossSwapQuotesRetrievalA2A(
         chainId: originSwapChainId,
         tokenIn: crossSwap.inputToken,
         tokenOut: bridgeableInputToken,
-        recipient: originSwapEntryPoint.address,
+        recipient: originSwapInitialRecipient.address,
         slippageTolerance: crossSwap.slippageTolerance,
         type: crossSwap.type,
       };
@@ -1199,7 +1199,7 @@ function _prepCrossSwapQuotesRetrievalA2A(
         destinationSwapChainId,
         bridgeableInputToken,
         bridgeableOutputToken,
-        originSwapEntryPoint,
+        originSwapEntryPoint: swapAndBridge,
         depositEntryPoint,
         originRouter,
         destinationRouter,

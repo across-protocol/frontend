@@ -45,12 +45,14 @@ const argsFromCli = yargs(hideBin(process.argv))
       .option("inputToken", {
         alias: "it",
         description: "Input token address.",
+        type: "string",
         // USDC on Optimism
         default: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
       })
       .option("outputToken", {
         alias: "ot",
         description: "Output token address.",
+        type: "string",
         // USDC on Base
         default: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       })
