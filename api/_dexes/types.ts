@@ -47,7 +47,8 @@ export type SupportedDex =
   | "uniswap-v3/universal-router"
   | "gho"
   | "gho-multicall3"
-  | "lifi";
+  | "lifi"
+  | "0x";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
