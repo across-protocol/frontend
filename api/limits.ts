@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { trace } from "@opentelemetry/api";
+import { SpanStatusCode } from "@opentelemetry/api";
 
 import {
   CHAIN_IDs,
@@ -51,7 +51,6 @@ import {
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
 import { tracer } from "../instrumentation";
-import { SpanStatusCode } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
