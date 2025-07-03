@@ -35,7 +35,6 @@ export function isSocialMediaBot(userAgent: string | undefined): boolean {
 
   const botPatterns = [
     // Twitter/X bots
-    /Twitterbot/i,
     /Twitter.*Bot/i,
     /X.*Bot/i,
 
@@ -45,20 +44,16 @@ export function isSocialMediaBot(userAgent: string | undefined): boolean {
     /facebook/i,
 
     // LinkedIn bots
-    /LinkedInBot/i,
     /LinkedIn.*Bot/i,
 
     // Discord bots
-    /Discordbot/i,
     /Discord.*Bot/i,
 
     // Telegram bots
-    /TelegramBot/i,
     /Telegram.*Bot/i,
 
     // General social media crawlers
     /WhatsApp/i,
-    /Slackbot/i,
     /Slack.*Bot/i,
 
     // Generic bot patterns that might be used by social platforms
