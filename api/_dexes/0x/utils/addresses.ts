@@ -1,0 +1,10 @@
+import { CHAIN_IDs } from "@across-protocol/constants";
+
+// Taken from here: https://0x.org/docs/developer-resources/core-concepts/contracts#allowanceholder-address
+export const ALLOWANCE_HOLDER_ADDRESS = {
+  [CHAIN_IDs.MAINNET]: "0x0000000000001fF3684f28c67538d4D072C22734",
+  [CHAIN_IDs.OPTIMISM]: "0x0000000000001fF3684f28c67538d4D072C22734",
+  [CHAIN_IDs.ARBITRUM]: "0x0000000000001fF3684f28c67538d4D072C22734",
+  [CHAIN_IDs.BASE]: "0x0000000000001fF3684f28c67538d4D072C22734",
+  [CHAIN_IDs.POLYGON]: "0x0000000000001fF3684f28c67538d4D072C22734",
+};
