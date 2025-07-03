@@ -50,6 +50,7 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+import { tracer } from "../instrumentation";
 import { SpanStatusCode } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
@@ -72,13 +73,12 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
-  const tracer = trace.getTracer("api/limits");
   logger.debug({
     at: "Limits",
     message: "Query data",
     query,
   });
-  return tracer.startActiveSpan("limits-handler", async (span) => {
+  return tracer.startActiveSpan("limits", async (span) => {
     try {
       const {
         MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
