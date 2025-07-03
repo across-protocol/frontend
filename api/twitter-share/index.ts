@@ -9,6 +9,7 @@ import {
 } from "../_utils";
 import { CANVAS } from "./image";
 import { assert, Infer, type } from "superstruct";
+import { isSocialMediaBot } from "./_utils";
 
 const TwitterShareParamsSchema = type({
   s: positiveIntStr(),
@@ -23,15 +24,42 @@ export default async function handler(
   response: VercelResponse
 ) {
   const logger = getLogger();
+  const userAgent = request.headers["user-agent"];
+  const isBot = isSocialMediaBot(userAgent);
+
   logger.debug({
     at: "api/twitter-share",
-    message: "Query data",
+    message: "Request details",
     query: request.query,
+    userAgent,
+    isBot,
   });
+
   assert(request.query, TwitterShareParamsSchema);
   const { from, to, s } = request.query;
 
   try {
+    // If not a social media bot, redirect to the main app
+    if (!isBot) {
+      const redirectUrl = `${resolveVercelEndpoint()}/bridge?${buildSearchParams(
+        {
+          fromChain: from,
+          toChain: to,
+        }
+      )}`;
+
+      logger.info({
+        at: "api/twitter-share",
+        message: "Redirecting non-bot user to main app",
+        userAgent,
+        redirectUrl,
+      });
+
+      response.setHeader("Cache-Control", "public, max-age=300"); // 5 minutes for redirects
+      return response.redirect(302, redirectUrl);
+    }
+
+    // For social media bots, serve the HTML content
     const imageUrl = `${resolveVercelEndpoint()}/api/twitter-share/image?${buildSearchParams({ s, from, to })}`;
     const imageUrlWithBg = `${imageUrl}&background=true`; // use this for twitter card
     const pageUrl = `${resolveVercelEndpoint()}${request.url}`;
@@ -79,6 +107,14 @@ export default async function handler(
             </div>
         </body>
       </html>`;
+
+    logger.info({
+      at: "api/twitter-share",
+      message: "Serving HTML to social media bot",
+      userAgent,
+      botType: "social-media",
+    });
+
     response.setHeader(
       "Cache-Control",
       `public, max-age=${60 * 60 * 24 * 7}, immutable`

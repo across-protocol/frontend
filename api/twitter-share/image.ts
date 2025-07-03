@@ -2,10 +2,11 @@ import { VercelResponse } from "@vercel/node";
 import { createCanvas, loadImage } from "canvas";
 import { TypedVercelRequest } from "../_types";
 import { handleErrorCondition } from "../_errors";
-import { boolStr, getChainInfo, getLogger, positiveIntStr } from "../_utils";
+import { boolStr, getLogger, positiveIntStr } from "../_utils";
 import path from "path";
-import fs from "fs";
+
 import { assert, Infer, optional, type } from "superstruct";
+import { getChainLogoPath } from "./_utils";
 const assetsDir = path.join(__dirname, "assets");
 
 const TwitterShareParamsSchema = type({
@@ -134,26 +135,5 @@ export default async function handler(
   } catch (err) {
     console.error(err);
     handleErrorCondition("twitter-share-image", response, logger, err);
-  }
-}
-
-function getChainLogoPath(chainId: number): string | undefined {
-  try {
-    const chainName = getChainInfo(chainId)
-      .name.toLowerCase()
-      .replaceAll(" ", "-");
-    const logoPath = path.join(assetsDir, "chain-logos", `${chainName}.png`);
-
-    if (!fs.existsSync(logoPath)) {
-      throw new Error(`No chain logo found at path ${logoPath}`);
-    }
-
-    return logoPath;
-  } catch (e) {
-    console.warn(`Unable to find logo for chainId ${chainId}.`, {
-      cause: e,
-      chainId,
-    });
-    return undefined;
   }
 }
