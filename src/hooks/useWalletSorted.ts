@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { useDetectBrowserWallets } from "./useDetectBrowserWallets";
 import { useLatestWallets } from "./useLatestSvmWallet";
 import { Wallet, useWallet } from "@solana/wallet-adapter-react";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
 
 export type WalletWithInstalled = Wallet & {
   installed: boolean;
@@ -9,14 +9,14 @@ export type WalletWithInstalled = Wallet & {
 
 export function useWalletsSorted() {
   const wallet = useWallet();
-  const installedWallets = useDetectBrowserWallets();
+
   const { svm: latestWalletName } = useLatestWallets();
 
   const sortedWallets: WalletWithInstalled[] = useMemo(() => {
     return wallet.wallets
       .map((wallet) => ({
         ...wallet,
-        installed: installedWallets.includes(wallet.adapter.name.toLowerCase()),
+        installed: wallet.readyState === WalletReadyState.Installed,
       }))
       .sort((a, b) => {
         // latest first
@@ -38,7 +38,7 @@ export function useWalletsSorted() {
         // fallback
         return a.adapter.name.localeCompare(b.adapter.name);
       });
-  }, [installedWallets, latestWalletName, wallet.wallets]);
+  }, [latestWalletName, wallet.wallets]);
 
   return { sortedWallets, ...wallet };
 }
