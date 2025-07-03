@@ -22,6 +22,10 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
 
   const getOriginEntryPoints = (chainId: number) => {
     return {
+      originSwapInitialRecipient: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress("gho", chainId),
+      },
       swapAndBridge: {
         name: "UniversalSwapAndBridge",
         address: getUniversalSwapAndBridgeAddress("gho", chainId),

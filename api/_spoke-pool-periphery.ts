@@ -67,6 +67,12 @@ export class UnknownPeripheryOnChain extends Error {
   }
 }
 
+export class UnknownSwapProxyOnChain extends Error {
+  constructor(chainId: number) {
+    super(`Unknown 'SwapProxy' on chain ${chainId}`);
+  }
+}
+
 export enum TransferType {
   Approval = 0,
   Transfer = 1,
@@ -80,6 +86,17 @@ export function getSpokePoolPeripheryAddress(chainId: number) {
     ];
   if (!address) {
     throw new UnknownPeripheryOnChain(chainId);
+  }
+  return address;
+}
+
+export function getSwapProxyAddress(chainId: number) {
+  const address =
+    ENABLED_ROUTES.swapProxyAddresses[
+      chainId as keyof typeof ENABLED_ROUTES.swapProxyAddresses
+    ];
+  if (!address) {
+    throw new UnknownSwapProxyOnChain(chainId);
   }
   return address;
 }
