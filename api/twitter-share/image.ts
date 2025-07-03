@@ -27,8 +27,8 @@ export const CANVAS = {
 };
 
 const chainLogoDimensions = 48; // px
-const px = 32; // px
-const py = 24; // px
+const px = 20; // px 32
+const py = 20; // px 24
 
 export default async function handler(
   request: TypedVercelRequest<TwitterShareImageParams>,
@@ -86,8 +86,8 @@ export default async function handler(
       if (originChainLogo) {
         ctx.drawImage(
           originChainLogo,
-          267,
-          94,
+          263,
+          92,
           chainLogoDimensions,
           chainLogoDimensions
         );
@@ -95,8 +95,8 @@ export default async function handler(
       if (destinationChainLogo) {
         ctx.drawImage(
           destinationChainLogo,
-          487,
-          94,
+          490,
+          92,
           chainLogoDimensions,
           chainLogoDimensions
         );
