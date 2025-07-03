@@ -75,10 +75,6 @@ const handler = async (
     query,
   });
   try {
-    const {
-      MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
-      // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
-    } = getEnvs();
     const provider = getProvider(HUB_POOL_CHAIN_ID);
 
     assert(query, LimitsQueryParamsSchema);
@@ -131,12 +127,11 @@ const handler = async (
       );
     }
 
-    let minDepositUsdForDestinationChainId = Number(
-      getEnvs()[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+    const minDepositUsd = getMinDepositUsd(
+      computedOriginChainId,
+      destinationChainId,
+      inputToken.symbol
     );
-    if (isNaN(minDepositUsdForDestinationChainId)) {
-      minDepositUsdForDestinationChainId = 0;
-    }
 
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
@@ -328,10 +323,7 @@ const handler = async (
     let minDepositFloor = tokenPriceUsd.lte(0)
       ? ethers.BigNumber.from(0)
       : ethers.utils
-          .parseUnits(
-            minDepositUsdForDestinationChainId.toString(),
-            inputToken.decimals
-          )
+          .parseUnits(minDepositUsd.toString(), inputToken.decimals)
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
 
@@ -573,5 +565,50 @@ const parseAndConvertUsdToTokenUnits = (
   const tokenValue = ConvertDecimals(18, inputToken.decimals)(tokenValueInWei);
   return sdk.utils.toBN(tokenValue);
 };
+
+/**
+ * Returns the global minimum deposit in USD for all destination chains. The minimum deposit
+ * returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
+ * @param originChainId The origin chain ID
+ * @param destinationChainId The destination chain ID
+ * @param inputTokenSymbol The input token symbol
+ * @returns The minimum deposit in USD
+ */
+function getMinDepositUsd(
+  originChainId: number,
+  destinationChainId: number,
+  inputTokenSymbol: string
+) {
+  const { MIN_DEPOSIT_USD, MIN_DEPOSIT_USD_OVERRIDES } = getEnvs();
+  const minDepositUsdOverrides = JSON.parse(
+    MIN_DEPOSIT_USD_OVERRIDES || "{}"
+  ) as {
+    routes?: { [key: string]: string };
+    originChains?: { [key: string]: string };
+    destinationChains?: { [key: string]: string };
+    tokens?: { [key: string]: string };
+  };
+  const routeOverride =
+    minDepositUsdOverrides.routes?.[
+      `${originChainId}-${destinationChainId}-${inputTokenSymbol}`
+    ];
+  const tokenOverride = minDepositUsdOverrides.tokens?.[inputTokenSymbol];
+  const originChainOverride =
+    minDepositUsdOverrides.originChains?.[originChainId];
+  const destinationChainOverride =
+    minDepositUsdOverrides.destinationChains?.[destinationChainId];
+  let minDepositUsd = Number(
+    routeOverride ??
+      tokenOverride ??
+      originChainOverride ??
+      destinationChainOverride ??
+      MIN_DEPOSIT_USD
+  );
+
+  if (isNaN(minDepositUsd)) {
+    minDepositUsd = 0;
+  }
+  return minDepositUsd;
+}
 
 export default handler;
