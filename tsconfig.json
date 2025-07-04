@@ -20,5 +20,5 @@
   "paths": {
     "*": ["./src/*"]
   },
-  "include": ["src", "test", "api", "instrumentation.ts"]
+  "include": ["src", "test", "api"]
 }
