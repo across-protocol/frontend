@@ -13,6 +13,7 @@ import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 const resource = resourceFromAttributes({
   [ATTR_SERVICE_NAME]: "app-frontend-v3",
   [ATTR_SERVICE_VERSION]: process.env.VERCEL_DEPLOYMENT_ID || "unknown",
+  version: process.env.VERCEL_DEPLOYMENT_ID || "unknown",
   env: process.env.VERCEL_ENV || "preview",
   "vercel.region": process.env.VERCEL_REGION,
   "vercel.sha": process.env.VERCEL_GIT_COMMIT_SHA || "unknown",
