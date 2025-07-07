@@ -125,7 +125,7 @@ function SVMWalletContent() {
       </WalletTypeSeparator>
       {sortedWallets.map((wallet) => (
         <WalletItem
-          key={wallet.adapter.name}
+          key={wallet.key}
           label={wallet.adapter.name}
           iconUrl={wallet.adapter.icon}
           onClick={() => handleClickSvmWallet(wallet.adapter)}
