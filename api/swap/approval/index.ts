@@ -26,14 +26,16 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
+      span.setStatus({ code: SpanStatusCode.OK });
       response.status(200).json(responseJson);
     } catch (error: unknown) {
-      span.recordException(error as Error);
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: (error as Error).message,
-      });
-      return handleErrorCondition("swap/approval", response, logger, error);
+      return handleErrorCondition(
+        "swap/approval",
+        response,
+        logger,
+        error,
+        span
+      );
     } finally {
       span.end();
     }

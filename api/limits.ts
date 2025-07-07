@@ -525,12 +525,7 @@ const handler = async (
       // 59s to keep serving the stale data while recomputing the cached value.
       sendResponse(response, responseJson, 200, 1, 59);
     } catch (error: unknown) {
-      span.recordException(error as Error);
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: (error as Error).message,
-      });
-      return handleErrorCondition("limits", response, logger, error);
+      return handleErrorCondition("limits", response, logger, error, span);
     } finally {
       span.end();
     }
