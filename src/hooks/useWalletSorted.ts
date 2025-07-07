@@ -5,6 +5,7 @@ import { WalletReadyState } from "@solana/wallet-adapter-base";
 
 export type WalletWithInstalled = Wallet & {
   installed: boolean;
+  key: string;
 };
 
 export function useWalletsSorted() {
@@ -17,6 +18,7 @@ export function useWalletsSorted() {
       .map((wallet) => ({
         ...wallet,
         installed: wallet.readyState === WalletReadyState.Installed,
+        key: wallet.adapter.name + wallet.adapter.icon, // handle MetaMask x2
       }))
       .sort((a, b) => {
         // latest first
