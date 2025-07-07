@@ -9,7 +9,13 @@ import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import { WalletConnectWalletAdapter } from "@solana/wallet-adapter-walletconnect";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
-import { ChainId, getProviderUrl, hubPoolChainId } from "utils";
+import {
+  ChainId,
+  getProviderUrl,
+  hubPoolChainId,
+  resolveWebsiteUrl,
+  walletConnectProjectId,
+} from "utils";
 
 const isMainnet = hubPoolChainId === ChainId.MAINNET;
 const network = isMainnet
@@ -25,11 +31,12 @@ const wallets = [
   new WalletConnectWalletAdapter({
     network,
     options: {
+      projectId: walletConnectProjectId,
       metadata: {
         name: "Across Bridge",
         description: "Across Protocol",
-        url: "https://app.across.to",
-        icons: ["https://app.across.to/logo-small.png"],
+        url: resolveWebsiteUrl(),
+        icons: [`${resolveWebsiteUrl()}/logo-small.png`],
       },
     },
   }),
