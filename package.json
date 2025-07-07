@@ -33,7 +33,6 @@
     "@uniswap/v3-sdk": "^3.18.1",
     "@upstash/qstash": "^2.7.20",
     "@vercel/kv": "^2.0.0",
-    "@vercel/otel": "^1.13.0",
     "@web3-onboard/coinbase": "^2.4.1",
     "@web3-onboard/core": "^2.24.0",
     "@web3-onboard/gnosis": "^2.2.0",
