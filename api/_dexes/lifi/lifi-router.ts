@@ -3,11 +3,16 @@ import { TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
 
 import { getLogger } from "../../_utils";
-import { QuoteFetchOpts, QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
-import { getSpokePoolAddress } from "../../_utils";
+import {
+  OriginEntryPointContractName,
+  QuoteFetchOpts,
+  QuoteFetchStrategy,
+  Swap,
+  SwapQuote,
+} from "../types";
 import { getEnvs } from "../../_env";
 import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
+import { getOriginSwapEntryPoints } from "../utils";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -18,7 +23,9 @@ const API_HEADERS = {
   "x-lifi-api-key": `${API_KEY_LIFI}`,
 };
 
-export function getLifiStrategy(): QuoteFetchStrategy {
+export function getLifiStrategy(
+  originSwapEntryPointContractName: OriginEntryPointContractName
+): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     const address = LIFI_ROUTER_ADDRESS[chainId];
     if (!address) {
@@ -30,19 +37,8 @@ export function getLifiStrategy(): QuoteFetchStrategy {
     };
   };
 
-  const getOriginEntryPoints = (chainId: number) => {
-    return {
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("lifi", chainId),
-        dex: "lifi",
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
-      },
-    } as const;
-  };
+  const getOriginEntryPoints = (chainId: number) =>
+    getOriginSwapEntryPoints(originSwapEntryPointContractName, chainId, "lifi");
 
   const fetchFn = async (
     swap: Swap,

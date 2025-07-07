@@ -30,6 +30,10 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
 
   const getOriginEntryPoints = (chainId: number) => {
     return {
+      originSwapInitialRecipient: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress("gho-multicall3", chainId),
+      },
       swapAndBridge: {
         name: "UniversalSwapAndBridge",
         address: getUniversalSwapAndBridgeAddress("gho-multicall3", chainId),
