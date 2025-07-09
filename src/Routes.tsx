@@ -57,6 +57,9 @@ const Transactions = lazyWithRetry(
 const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
+const SwapAndBridge = lazyWithRetry(
+  () => import(/* webpackChunkName: "SwapAndBridge" */ "./views/SwapAndBridge")
+);
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
 
 const warningMessage = `
@@ -177,6 +180,7 @@ const Routes: React.FC = () => {
             }}
           />
           <Route exact path="/bridge" component={Send} />
+          <Route exact path="/swap" component={SwapAndBridge} />
           <Route path="/bridge/:depositTxHash" component={DepositStatus} />
           <Redirect
             exact
