@@ -8,6 +8,7 @@ import {
   boolean,
   optional,
   unknown,
+  array,
 } from "superstruct";
 import { validAddress } from "../_utils";
 
@@ -18,21 +19,24 @@ export const OrderbookQueryParamsSchema = type({
   destinationToken: validAddress(),
 });
 
-export const OrderbookResponseSchema = type({
-  relayerAddresses: record(validAddress(), record(string(), number())),
-});
+export const OrderbookResponseSchema = record(
+  validAddress(),
+  array(
+    object({
+      amount: number(),
+      spread: number(),
+    })
+  )
+);
 
 export const RelayerConfigSchema = type({
   prices: record(
     string(),
     object({
-      origin: record(
-        string(),
-        record(string(), record(string(), record(string(), number())))
-      ),
+      origin: record(string(), record(string(), record(string(), number()))),
       destination: record(
         string(),
-        record(string(), record(string(), record(string(), number())))
+        record(string(), record(string(), number()))
       ),
       messageExecution: boolean(),
     })
