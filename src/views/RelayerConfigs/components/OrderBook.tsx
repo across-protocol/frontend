@@ -256,13 +256,13 @@ const OrderBookContainer = styled.div`
   gap: 24px;
   width: 100%;
   max-width: 600px;
+  margin-bottom: 24px;
 `;
 
 const OrderBookList = styled.div`
   border: 1px solid ${COLORS["grey-600"]};
   border-radius: 0 0 4px 4px;
   background-color: ${COLORS["black-700"]};
-  max-height: 200px;
   overflow-y: auto;
 `;
 
