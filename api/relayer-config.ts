@@ -38,7 +38,8 @@ const handler = async (
     // TODO: validate authentication
 
     // store config in redis
-    const config = { ...body, updatedAt: new Date().getTime() };
+    const config: any = body;
+    config.updatedAt = new Date().getTime();
 
     const cacheKey = buildCacheKey(
       "relayer-config",
