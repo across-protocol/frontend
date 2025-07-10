@@ -1,7 +1,13 @@
-import { COLORS, fixedPointAdjustment, formatUSD } from "utils";
+import {
+  COLORS,
+  fixedPointAdjustment,
+  formatUnitsWithMaxFractions,
+  formatUSD,
+} from "utils";
 import SelectorButton, {
   EnrichedTokenSelect,
 } from "./ChainTokenSelector/SelectorButton";
+import BalanceSelector from "./BalanceSelector";
 import styled from "@emotion/styled";
 import { useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
@@ -96,7 +102,27 @@ const TokenInput = ({
           </TokenAmountInputEstimatedUsd>
         )}
       </TokenAmountStack>
-      <SelectorButton onSelect={setToken} isOriginToken={isOrigin} />
+      <SelectorButton
+        onSelect={setToken}
+        isOriginToken={isOrigin}
+        marginBottom={token ? "24px" : "0px"}
+      />
+      {token && (
+        <BalanceSelectorWrapper>
+          <BalanceSelector
+            balance={token.balance}
+            decimals={token.decimals}
+            setAmount={(amount) => {
+              if (amount) {
+                setAmount(amount);
+                setAmountString(
+                  formatUnitsWithMaxFractions(amount, token.decimals)
+                );
+              }
+            }}
+          />
+        </BalanceSelectorWrapper>
+      )}
     </TokenInputWrapper>
   );
 };
@@ -119,7 +145,7 @@ const TokenAmountInputTitle = styled.div`
 `;
 
 const TokenAmountInput = styled.input`
-  color: ${() => COLORS.aqua};
+  color: #e0f3ff;
   font-family: Barlow;
   font-size: 48px;
   font-weight: 300;
@@ -155,6 +181,13 @@ const TokenInputWrapper = styled.div`
   border-radius: 12px;
   border: 1px solid rgba(224, 243, 255, 0.05);
   background: #2d2e32;
+  position: relative;
+`;
+
+const BalanceSelectorWrapper = styled.div`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
 `;
 
 const Wrapper = styled.div`

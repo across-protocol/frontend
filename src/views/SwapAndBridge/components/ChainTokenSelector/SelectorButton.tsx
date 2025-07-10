@@ -22,12 +22,14 @@ type Props = {
   defaultToken?: TokenSelect;
   onSelect?: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
+  marginBottom?: string;
 };
 
 export default function SelectorButton({
   defaultToken,
   onSelect,
   isOriginToken,
+  marginBottom,
 }: Props) {
   const [selectedToken, _setSelectedToken] = useState<TokenSelect | null>(null);
   const [displayModal, setDisplayModal] = useState(false);
@@ -50,7 +52,10 @@ export default function SelectorButton({
   if (!selectedToken) {
     return (
       <>
-        <SelectWrapper onClick={() => setDisplayModal(true)}>
+        <SelectWrapper
+          onClick={() => setDisplayModal(true)}
+          marginBottom={marginBottom}
+        >
           <NamesStack>
             <SelectTokenName>Select a token</SelectTokenName>
           </NamesStack>
@@ -73,7 +78,10 @@ export default function SelectorButton({
 
   return (
     <>
-      <Wrapper onClick={() => setDisplayModal(true)}>
+      <Wrapper
+        onClick={() => setDisplayModal(true)}
+        marginBottom={marginBottom}
+      >
         <TokenStack>
           <TokenImg src={selectedToken.symbolUri} />
           <ChainImg src={chain.logoURI} />
@@ -97,10 +105,11 @@ export default function SelectorButton({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ marginBottom?: string }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  margin-bottom: ${({ marginBottom }) => marginBottom || "0"};
 
   border-radius: 8px;
   border: 1px solid #3f4247;
