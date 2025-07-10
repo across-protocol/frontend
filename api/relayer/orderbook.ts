@@ -29,11 +29,18 @@ class OrderbookHandler extends ApiHandler<
   protected async process(
     request: OrderbookQueryParams
   ): Promise<OrderbookResponse> {
-    const { originChainId, destinationChainId, originToken, destinationToken } =
-      request;
+    const {
+      originChainId: _originChainId,
+      destinationChainId: _destinationChainId,
+      originToken,
+      destinationToken,
+    } = request;
+
+    const originChainId = Number(_originChainId);
+    const destinationChainId = Number(_destinationChainId);
 
     const relayerConfigs =
-      await redisCache.getAll<RelayerConfig>("relayer-configs*");
+      await redisCache.getAll<RelayerConfig>("relayer-config*");
 
     if (!relayerConfigs) {
       throw new Error("No relayer configs found");

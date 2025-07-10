@@ -82,7 +82,7 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     const [_, values] = await this.client.scan(0, {
       match: prefix,
     });
-    if (values === null || values === undefined) {
+    if (values.length === 0 || values == null) {
       return null;
     }
 

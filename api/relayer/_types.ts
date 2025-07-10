@@ -10,11 +10,11 @@ import {
   unknown,
   array,
 } from "superstruct";
-import { validAddress } from "../_utils";
+import { validAddress, positiveIntStr } from "../_utils";
 
 export const OrderbookQueryParamsSchema = type({
-  originChainId: number(),
-  destinationChainId: number(),
+  originChainId: positiveIntStr(),
+  destinationChainId: positiveIntStr(),
   originToken: validAddress(),
   destinationToken: validAddress(),
 });
