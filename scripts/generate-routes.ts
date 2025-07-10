@@ -39,7 +39,6 @@ const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
 export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
-  chainConfigs.POLYGON,
   chainConfigs.ARBITRUM,
   chainConfigs.ZK_SYNC,
   chainConfigs.BASE,
