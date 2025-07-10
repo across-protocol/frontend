@@ -11,6 +11,8 @@ import { poolsApiCall } from "./pools.mocked";
 import { swapQuoteApiCall } from "./swap-quote";
 import { poolsUserApiCall } from "./pools-user.mocked";
 import { swapApprovalApiCall } from "../prod/swap-approval";
+import { orderBookApiCall } from "../prod/order-book";
+import { relayerConfigsApiCall } from "../prod/relayer-configs";
 
 export const mockedEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoMockedApiCall,
@@ -29,4 +31,6 @@ export const mockedEndpoints: ServerlessAPIEndpoints = {
   poolsUser: poolsUserApiCall,
   swapQuote: swapQuoteApiCall,
   swapApproval: swapApprovalApiCall,
+  orderBook: orderBookApiCall,
+  relayerConfigs: relayerConfigsApiCall,
 };
