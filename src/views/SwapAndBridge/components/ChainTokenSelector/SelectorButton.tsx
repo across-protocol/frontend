@@ -39,14 +39,9 @@ export default function SelectorButton({
   }, [defaultToken, selectedToken]);
 
   const setSelectedToken = useCallback(
-    (token: TokenSelect) => {
+    (token: EnrichedTokenSelect) => {
       _setSelectedToken(token);
-      onSelect?.({
-        ...token,
-        priceUsd: BigNumber.from(0),
-        balance: BigNumber.from(0),
-        decimals: 18,
-      });
+      onSelect?.(token);
       setDisplayModal(false);
     },
     [onSelect]
@@ -54,15 +49,23 @@ export default function SelectorButton({
 
   if (!selectedToken) {
     return (
-      <SelectWrapper>
-        <NamesStack>
-          <SelectTokenName>Select a token</SelectTokenName>
-        </NamesStack>
-        <VerticalDivider />
-        <ChevronStack>
-          <ChevronDown />
-        </ChevronStack>
-      </SelectWrapper>
+      <>
+        <SelectWrapper onClick={() => setDisplayModal(true)}>
+          <NamesStack>
+            <SelectTokenName>Select a token</SelectTokenName>
+          </NamesStack>
+          <VerticalDivider />
+          <ChevronStack>
+            <ChevronDown />
+          </ChevronStack>
+        </SelectWrapper>
+        <ChainTokenSelectorModal
+          onSelect={setSelectedToken}
+          displayModal={displayModal}
+          setDisplayModal={setDisplayModal}
+          isOriginToken={isOriginToken}
+        />
+      </>
     );
   }
 
@@ -85,7 +88,6 @@ export default function SelectorButton({
         </ChevronStack>
       </Wrapper>
       <ChainTokenSelectorModal
-        selectedToken={selectedToken}
         onSelect={setSelectedToken}
         displayModal={displayModal}
         setDisplayModal={setDisplayModal}
@@ -187,7 +189,7 @@ const TokenImg = styled.img`
 const ChainImg = styled.img`
   position: absolute;
   bottom: 0;
-  left: 4px;
+  left: 4.5px;
   width: 24px;
   height: 24px;
   z-index: 2;

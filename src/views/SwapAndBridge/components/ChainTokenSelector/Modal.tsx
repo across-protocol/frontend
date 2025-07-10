@@ -1,5 +1,5 @@
 import Modal from "components/Modal";
-import { EnrichedTokenSelect, TokenSelect } from "./SelectorButton";
+import { EnrichedTokenSelect } from "./SelectorButton";
 import styled from "@emotion/styled";
 import Searchbar from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
@@ -20,7 +20,6 @@ import useEnrichedCrosschainBalances from "hooks/useEnrichedCrosschainBalances";
 import { BigNumber } from "ethers";
 
 type Props = {
-  selectedToken: TokenSelect;
   onSelect: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
 
@@ -180,11 +179,11 @@ const ChainEntry = ({
         name: "All",
       };
   return (
-    <ChainEntryItem isSelected={isSelected} onClick={onClick}>
+    <EntryItem isSelected={isSelected} onClick={onClick}>
       <ChainItemImage src={chainInfo.logoURI} alt={chainInfo.name} />
       <ChainItemName>{chainInfo.name}</ChainItemName>
       {isSelected && <ChainItemCheckmark />}
-    </ChainEntryItem>
+    </EntryItem>
   );
 };
 
@@ -336,6 +335,9 @@ const EntryItem = styled.div<{ isSelected: boolean }>`
   flex-direction: row;
   justify-content: space-between;
 
+  width: 100%;
+  flex-shrink: 0;
+
   align-items: center;
 
   padding: 8px;
@@ -354,10 +356,6 @@ const EntryItem = styled.div<{ isSelected: boolean }>`
     background: ${({ isSelected }) =>
       isSelected ? COLORS["aqua-15"] : COLORS["grey-400-15"]};
   }
-`;
-
-const ChainEntryItem = styled(EntryItem)`
-  width: 100px;
 `;
 
 const ChainItemImage = styled.img`

@@ -1,33 +1,33 @@
 import { LayoutV2 } from "components";
-import SelectorButton, {
-  EnrichedTokenSelect,
-} from "./components/ChainTokenSelector/SelectorButton";
+import { EnrichedTokenSelect } from "./components/ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
 import { useState } from "react";
+import { InputForm } from "./components/InputForm";
+import { BigNumber } from "ethers";
 
 export default function SwapAndBridge() {
-  const [, setSelectedToken] =
-    useState<EnrichedTokenSelect | null>(null);
-  const defaultToken = {
-    chainId: 8453,
-    symbolUri: "https://token-icons.s3.amazonaws.com/eth.png",
-    symbol: "ETH",
-  };
+  const [inputToken, setInputToken] = useState<EnrichedTokenSelect | null>(
+    null
+  );
+  const [outputToken, setOutputToken] = useState<EnrichedTokenSelect | null>(
+    null
+  );
+  const [, setAmount] = useState<BigNumber | null>(null);
+  const [, setIsAmountOrigin] = useState<boolean>(true);
+
+  console.log("Input Token", inputToken);
+  console.log("Output Token", outputToken);
 
   return (
     <LayoutV2 maxWidth={720}>
       <Wrapper>
-        Origin
-        <SelectorButton
-          defaultToken={defaultToken}
-          onSelect={setSelectedToken}
-          isOriginToken={true}
-        />
-        Destination
-        <SelectorButton
-          defaultToken={defaultToken}
-          onSelect={setSelectedToken}
-          isOriginToken={false}
+        <InputForm
+          inputToken={inputToken}
+          setInputToken={setInputToken}
+          outputToken={outputToken}
+          setOutputToken={setOutputToken}
+          setAmount={setAmount}
+          setIsAmountOrigin={setIsAmountOrigin}
         />
       </Wrapper>
     </LayoutV2>
@@ -44,5 +44,6 @@ const Wrapper = styled.div`
   justify-content: center;
 
   width: 100%;
-  height: 100vh;
+
+  padding-top: 64px;
 `;

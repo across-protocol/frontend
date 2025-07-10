@@ -54,7 +54,9 @@ export default function useTokenBalancesOnChain() {
               tokenBalance: string;
             }[]
           )
-            .filter((t) => !!t.tokenBalance && BigNumber.from(t.tokenBalance).gt(0))
+            .filter(
+              (t) => !!t.tokenBalance && BigNumber.from(t.tokenBalance).gt(0)
+            )
             .map((t) => ({
               address: t.contractAddress,
               balance: BigNumber.from(t.tokenBalance),
