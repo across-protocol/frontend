@@ -78,11 +78,11 @@ class OrderbookHandler extends ApiHandler<
 
       const originTokenPrices =
         originChainPrices.origin?.[originBaseCurrency]?.[
-          originTokenInfo.symbol
+          originTokenInfo.addresses[originChainId]
         ];
       const destinationTokenPrices =
         destinationChainPrices.destination?.[destinationBaseCurrency]?.[
-          destinationTokenInfo.symbol
+          destinationTokenInfo.addresses[destinationChainId]
         ];
 
       if (!originTokenPrices || !destinationTokenPrices) {
