@@ -38,19 +38,17 @@ export const RelayerConfigSchema = type({
     })
   ),
   minExclusivityPeriods: object({
-    default: record(string(), record(string(), number())),
+    default: number(),
     routes: optional(record(string(), record(string(), number()))),
     origin: optional(record(string(), record(string(), number()))),
     destination: optional(record(string(), record(string(), number()))),
     sizes: optional(record(string(), number())),
   }),
-  authentication: optional(
-    object({
-      address: validAddress(),
-      method: string(),
-      payload: record(string(), unknown()),
-    })
-  ),
+  authentication: object({
+    address: validAddress(),
+    method: optional(string()),
+    payload: optional(record(string(), unknown())),
+  }),
 });
 
 export type OrderbookQueryParams = Infer<typeof OrderbookQueryParamsSchema>;

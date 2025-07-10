@@ -1,11 +1,11 @@
 import { VercelResponse } from "@vercel/node";
-import { assert, Infer, type } from "superstruct";
+import { assert, Infer } from "superstruct";
 import { getLogger, handleErrorCondition } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { RelayerConfigSchema } from "./relayer/_types";
+import { buildCacheKey, redisCache } from "./_cache";
 
-const RelayerConfigBodySchema = type({});
-
-type RelayerConfigBody = Infer<typeof RelayerConfigBodySchema>;
+type RelayerConfigBody = Infer<typeof RelayerConfigSchema>;
 
 const handler = async (
   request: TypedVercelRequest<RelayerConfigBody>,
@@ -19,7 +19,11 @@ const handler = async (
   });
   try {
     const { body, method } = request;
-
+    logger.info({
+      at: "RelayerConfig",
+      message: "processing",
+      body: request.body,
+    });
     if (method !== "POST") {
       return handleErrorCondition(
         "relayer-config",
@@ -29,20 +33,26 @@ const handler = async (
       );
     }
 
-    assert(body, RelayerConfigBodySchema);
+    assert(body, RelayerConfigSchema);
 
     // TODO: validate authentication
 
     // store config in redis
+    const config = { ...body, updatedAt: new Date().getTime() };
 
-    // return stored entity
+    const cacheKey = buildCacheKey(
+      "relayer-config",
+      body.authentication.address
+    );
+    await redisCache.set(cacheKey, config, 60 * 60 * 24 * 2);
+    const storedConfig = await redisCache.get(cacheKey);
 
     logger.debug({
       at: "RelayerConfig",
       message: "Response data",
-      responseJson: body,
+      responseJson: storedConfig,
     });
-    response.status(201).json(body);
+    response.status(201).json(storedConfig);
   } catch (error: unknown) {
     return handleErrorCondition("relayer-config", response, logger, error);
   }
