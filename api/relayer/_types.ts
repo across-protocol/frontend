@@ -34,10 +34,13 @@ export const RelayerConfigSchema = type({
   prices: record(
     string(),
     object({
-      origin: record(string(), record(string(), record(string(), number()))),
+      origin: record(
+        string(),
+        record(validAddress(), record(positiveIntStr(), number()))
+      ),
       destination: record(
         string(),
-        record(string(), record(string(), number()))
+        record(validAddress(), record(positiveIntStr(), number()))
       ),
       messageExecution: boolean(),
     })
