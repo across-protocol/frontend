@@ -1,15 +1,11 @@
 import { VercelResponse } from "@vercel/node";
-import { Infer, type } from "superstruct";
 import { getLogger, handleErrorCondition } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { RelayerConfigCacheEntry } from "./relayer/_types";
 import { redisCache } from "./_cache";
 
-const RelayerConfigBodySchema = type({});
-
-type RelayerConfigBody = Infer<typeof RelayerConfigBodySchema>;
-
 const handler = async (
-  request: TypedVercelRequest<RelayerConfigBody>,
+  request: TypedVercelRequest<Record<string, never>>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -19,16 +15,15 @@ const handler = async (
     body: request.body,
   });
   try {
-    // get all configs from redis
-
-    const configs = await redisCache.getAll("relayer-config*");
+    const relayerConfigs =
+      await redisCache.getAll<RelayerConfigCacheEntry>("relayer-config*");
 
     logger.debug({
       at: "RelayerConfigList",
       message: "Response data",
-      responseJson: configs,
+      responseJson: relayerConfigs,
     });
-    response.status(200).json(configs);
+    response.status(200).json(relayerConfigs);
   } catch (error: unknown) {
     return handleErrorCondition("relayer-config", response, logger, error);
   }

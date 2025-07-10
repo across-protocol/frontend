@@ -1,5 +1,6 @@
 import {
   Infer,
+  assign,
   number,
   object,
   type,
@@ -55,8 +56,19 @@ export const RelayerConfigSchema = type({
   }),
 });
 
+export const RelayerConfigCacheEntrySchema = assign(
+  RelayerConfigSchema,
+  object({
+    updatedAt: number(),
+  })
+);
+
 export type OrderbookQueryParams = Infer<typeof OrderbookQueryParamsSchema>;
 
 export type OrderbookResponse = Infer<typeof OrderbookResponseSchema>;
 
 export type RelayerConfig = Infer<typeof RelayerConfigSchema>;
+
+export type RelayerConfigCacheEntry = Infer<
+  typeof RelayerConfigCacheEntrySchema
+>;
