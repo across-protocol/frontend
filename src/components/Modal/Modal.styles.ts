@@ -87,6 +87,7 @@ type ModalWrapperType = {
   topYOffset?: number;
   bottomYOffset?: number;
   padding: "normal" | "thin";
+  darkBackground?: boolean;
 };
 
 // minimum y-axis margin
@@ -112,7 +113,8 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
 
   margin-top: ${({ topYOffset }) => topYOffset ?? 0}px;
   margin-bottom: ${({ bottomYOffset }) => bottomYOffset ?? 0}px;
-  background: #202024;
+  background: ${({ darkBackground }) =>
+    darkBackground ? "#121214" : "#202024"};
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
   border-radius: 16px;
@@ -148,4 +150,14 @@ export const Title = styled.p`
 
 export const StyledExitIcon = styled(CrossIcon)`
   cursor: pointer;
+`;
+
+export const HorizontalDivider = styled.div<{ padding: "normal" | "thin" }>`
+  width: 100%;
+  height: 1px;
+  background-color: #34353b;
+
+  width: ${({ padding }) =>
+    padding === "normal" ? "calc(100% + 48px)" : "calc(100% + 32px)"};
+  margin-left: ${({ padding }) => (padding === "normal" ? "-24px" : "-16px")};
 `;

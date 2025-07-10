@@ -643,3 +643,5 @@ export const acrossPlusMulticallHandler: Record<number, string> = {
 };
 
 export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
+
+export const ALCHEMY_API_KEY = process.env.REACT_APP_ALCHEMY_API_KEY;

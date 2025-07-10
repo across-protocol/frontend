@@ -2,6 +2,7 @@ import usePageScrollLock from "hooks/usePageScrollLock";
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
+  HorizontalDivider,
   ModalContentWrapper,
   StyledExitIcon,
   Title,
@@ -33,6 +34,8 @@ export type ModalProps = {
   topYOffset?: number;
   "data-cy"?: string;
   bottomYOffset?: number;
+  topDivider?: boolean;
+  darkBackground?: boolean;
 
   children?: React.ReactNode;
 };
@@ -50,6 +53,8 @@ const Modal = ({
   topYOffset,
   bottomYOffset,
   padding,
+  topDivider,
+  darkBackground,
   "data-cy": dataCy,
 }: ModalProps) => {
   const verticalLocation: ModalDirection | undefined =
@@ -142,6 +147,7 @@ const Modal = ({
             topYOffset={topYOffset}
             bottomYOffset={bottomYOffset}
             padding={padding ?? "normal"}
+            darkBackground={darkBackground}
           >
             <TitleAndExitWrapper>
               {typeof title === "string" ? (
@@ -152,6 +158,7 @@ const Modal = ({
 
               <StyledExitIcon onClick={() => externalModalExitHandler()} />
             </TitleAndExitWrapper>
+            {topDivider && <HorizontalDivider padding={padding ?? "normal"} />}
             {children}
           </ModalContentWrapper>
         </Wrapper>,
