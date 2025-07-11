@@ -148,6 +148,7 @@ export default function ChainTokenSelectorModal({
                     chainId: token.chainId,
                     symbolUri: token.logoURI,
                     symbol: token.symbol,
+                    address: token.address,
                     balance: token.balance,
                     priceUsd: parseUnits(token.priceUSD, 18),
                     decimals: token.decimals,

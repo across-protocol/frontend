@@ -1,7 +1,7 @@
 import { LayoutV2 } from "components";
 import { EnrichedTokenSelect } from "./components/ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InputForm } from "./components/InputForm";
 import { BigNumber } from "ethers";
 
@@ -12,16 +12,19 @@ export default function SwapAndBridge() {
   const [outputToken, setOutputToken] = useState<EnrichedTokenSelect | null>(
     null
   );
-  const [, setAmount] = useState<BigNumber | null>(null);
-  const [, setIsAmountOrigin] = useState<boolean>(true);
+  const [amount, setAmount] = useState<BigNumber | null>(null);
+  const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
 
-  console.log("Input Token", inputToken);
-  console.log("Output Token", outputToken);
+  useEffect(() => {
+    console.log(" from inside amount", amount?.toString());
+  }, [amount]);
 
   return (
     <LayoutV2 maxWidth={720}>
       <Wrapper>
         <InputForm
+          amount={amount}
+          isAmountOrigin={isAmountOrigin}
           inputToken={inputToken}
           setInputToken={setInputToken}
           outputToken={outputToken}

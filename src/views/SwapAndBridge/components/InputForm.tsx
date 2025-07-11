@@ -11,6 +11,7 @@ import BalanceSelector from "./BalanceSelector";
 import styled from "@emotion/styled";
 import { useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
+import useSwapQuote from "../hooks/useSwapQuote";
 
 export const InputForm = ({
   inputToken,
@@ -18,7 +19,9 @@ export const InputForm = ({
   setInputToken,
   setOutputToken,
   setAmount,
+  isAmountOrigin,
   setIsAmountOrigin,
+  amount,
 }: {
   inputToken: EnrichedTokenSelect | null;
   setInputToken: (token: EnrichedTokenSelect) => void;
@@ -26,9 +29,29 @@ export const InputForm = ({
   outputToken: EnrichedTokenSelect | null;
   setOutputToken: (token: EnrichedTokenSelect) => void;
 
+  amount: BigNumber | null;
   setAmount: (amount: BigNumber | null) => void;
+
+  isAmountOrigin: boolean;
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
 }) => {
+  const { data: swapData, isLoading: isUpdateLoading } = useSwapQuote({
+    origin: inputToken
+      ? {
+          address: inputToken.address,
+          chainId: inputToken.chainId,
+        }
+      : null,
+    destination: outputToken
+      ? {
+          address: outputToken.address,
+          chainId: outputToken.chainId,
+        }
+      : null,
+    amount: amount,
+    isInputAmount: isAmountOrigin,
+  });
+
   return (
     <Wrapper>
       <TokenInput
@@ -39,6 +62,9 @@ export const InputForm = ({
           setIsAmountOrigin(true);
         }}
         isOrigin={true}
+        expectedAmount={swapData?.inputAmount}
+        shouldUpdate={!isAmountOrigin}
+        isUpdateLoading={isUpdateLoading}
       />
       <TokenInput
         setToken={setOutputToken}
@@ -48,6 +74,9 @@ export const InputForm = ({
           setIsAmountOrigin(false);
         }}
         isOrigin={false}
+        expectedAmount={swapData?.expectedOutputAmount}
+        shouldUpdate={isAmountOrigin}
+        isUpdateLoading={isUpdateLoading}
       />
     </Wrapper>
   );
@@ -58,21 +87,61 @@ const TokenInput = ({
   token,
   setAmount,
   isOrigin,
+  expectedAmount,
+  shouldUpdate,
+  isUpdateLoading,
 }: {
   setToken: (token: EnrichedTokenSelect) => void;
   token: EnrichedTokenSelect | null;
   setAmount: (amount: BigNumber | null) => void;
   isOrigin: boolean;
+  expectedAmount: string | undefined;
+  shouldUpdate: boolean;
+  isUpdateLoading: boolean;
 }) => {
   const [amountString, setAmountString] = useState<string>("");
 
+  // Handle user input changes
   useEffect(() => {
+    if (amountString && expectedAmount) {
+      const priceDelta = Math.abs(
+        Number(amountString) -
+          Number(formatUnitsWithMaxFractions(expectedAmount, token!.decimals))
+      );
+      if (priceDelta < 0.01 && !isUpdateLoading) {
+        return;
+      }
+    }
     try {
       setAmount(utils.parseUnits(amountString, token!.decimals));
     } catch (e) {
       setAmount(null);
     }
-  }, [amountString, token, setAmount]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amountString]);
+
+  // Reset amount when token changes
+  useEffect(() => {
+    if (token) {
+      setAmountString("");
+    }
+  }, [token]);
+
+  // Handle quote updates - only update the field that should receive the quote
+  useEffect(() => {
+    if (shouldUpdate && isUpdateLoading) {
+      setAmountString("");
+    }
+
+    if (expectedAmount && token && shouldUpdate) {
+      setAmountString(
+        formatUnitsWithMaxFractions(expectedAmount, token.decimals)
+      );
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expectedAmount, isUpdateLoading]);
 
   const estimatedUsdAmount = useMemo(() => {
     try {
@@ -93,14 +162,16 @@ const TokenInput = ({
           {isOrigin ? "Sell" : "Buy"}
         </TokenAmountInputTitle>
         <TokenAmountInput
+          placeholder="0.00"
           value={amountString}
-          onChange={(e) => setAmountString(e.target.value)}
+          onChange={(e) => {
+            setAmountString(e.target.value);
+          }}
+          disabled={shouldUpdate && isUpdateLoading}
         />
-        {estimatedUsdAmount && (
-          <TokenAmountInputEstimatedUsd>
-            Value: ~${estimatedUsdAmount}
-          </TokenAmountInputEstimatedUsd>
-        )}
+        <TokenAmountInputEstimatedUsd>
+          {estimatedUsdAmount && <>Value: ~${estimatedUsdAmount}</>}
+        </TokenAmountInputEstimatedUsd>
       </TokenAmountStack>
       <SelectorButton
         onSelect={setToken}

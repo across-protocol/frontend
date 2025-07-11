@@ -10,6 +10,7 @@ export type TokenSelect = {
   chainId: number;
   symbolUri: string;
   symbol: string;
+  address: string;
 };
 
 export type EnrichedTokenSelect = TokenSelect & {
