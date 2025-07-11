@@ -20,7 +20,7 @@ export function useOrderBook(params: {
         outputToken: params.outputToken,
       });
     },
-    refetchInterval: 2000,
+    refetchInterval: 1000,
     enabled: !!params.inputToken && !!params.outputToken,
   });
 }

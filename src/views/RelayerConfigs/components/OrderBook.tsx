@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import { keyframes } from "@emotion/react";
 import { COLORS, getConfig } from "utils";
 import { Text } from "components/Text";
 import { useOrderBook } from "../hooks/useOrderBook";
@@ -15,6 +16,23 @@ const availableChains = [
 const availableTokens = ["USDC", "USDC.e", "USDT", "DAI"];
 
 const config = getConfig();
+
+// Add the fade-in animation keyframes
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+// Create a styled component for the spread text with fade-in effect
+const SpreadText = styled(Text)`
+  animation: ${fadeIn} 0.5s ease-out;
+`;
 
 type Orderbook = {
   [relayerAddress: string]: {
@@ -48,9 +66,9 @@ function OrderBook({ orderbook }: OrderBookProps) {
                       <Text size="sm" color="light-200" monospace>
                         {order.amount}
                       </Text>
-                      <Text size="sm" color="aqua" monospace>
+                      <SpreadText size="sm" color="aqua" monospace>
                         @ {formatPrice(order.spread)} USD
-                      </Text>
+                      </SpreadText>
                     </PriceAmount>
                   ))}
                 </SpreadsContainer>
