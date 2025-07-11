@@ -20,30 +20,29 @@ export type EnrichedTokenSelect = TokenSelect & {
 };
 
 type Props = {
-  defaultToken?: TokenSelect;
+  selectedToken: EnrichedTokenSelect | null;
   onSelect?: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
   marginBottom?: string;
 };
 
 export default function SelectorButton({
-  defaultToken,
   onSelect,
+  selectedToken,
   isOriginToken,
   marginBottom,
 }: Props) {
-  const [selectedToken, _setSelectedToken] = useState<TokenSelect | null>(null);
   const [displayModal, setDisplayModal] = useState(false);
 
   useEffect(() => {
-    if (defaultToken && !selectedToken) {
-      _setSelectedToken(defaultToken);
+    if (selectedToken) {
+      onSelect?.(selectedToken);
     }
-  }, [defaultToken, selectedToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedToken]);
 
   const setSelectedToken = useCallback(
     (token: EnrichedTokenSelect) => {
-      _setSelectedToken(token);
       onSelect?.(token);
       setDisplayModal(false);
     },

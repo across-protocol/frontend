@@ -8,12 +8,14 @@ type BalanceSelectorProps = {
   balance: BigNumber;
   decimals: number;
   setAmount: (amount: BigNumber | null) => void;
+  disableHover?: boolean;
 };
 
 export default function BalanceSelector({
   balance,
   decimals,
   setAmount,
+  disableHover,
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
   if (!balance || balance.lte(0)) return null;
@@ -33,8 +35,8 @@ export default function BalanceSelector({
 
   return (
     <BalanceWrapper
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => !disableHover && setIsHovered(true)}
+      onMouseLeave={() => !disableHover && setIsHovered(false)}
     >
       <PillsContainer>
         <AnimatePresence>

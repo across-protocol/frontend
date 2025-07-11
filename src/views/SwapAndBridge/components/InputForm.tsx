@@ -1,17 +1,12 @@
-import {
-  COLORS,
-  fixedPointAdjustment,
-  formatUnitsWithMaxFractions,
-  formatUSD,
-} from "utils";
+import { COLORS, formatUnitsWithMaxFractions, formatUSD } from "utils";
 import SelectorButton, {
   EnrichedTokenSelect,
 } from "./ChainTokenSelector/SelectorButton";
 import BalanceSelector from "./BalanceSelector";
 import styled from "@emotion/styled";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
-import useSwapQuote from "../hooks/useSwapQuote";
+import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 
 export const InputForm = ({
   inputToken,
@@ -21,36 +16,35 @@ export const InputForm = ({
   setAmount,
   isAmountOrigin,
   setIsAmountOrigin,
-  amount,
+  isQuoteLoading,
+  expectedOutputAmount,
+  expectedInputAmount,
 }: {
   inputToken: EnrichedTokenSelect | null;
-  setInputToken: (token: EnrichedTokenSelect) => void;
+  setInputToken: (token: EnrichedTokenSelect | null) => void;
 
   outputToken: EnrichedTokenSelect | null;
-  setOutputToken: (token: EnrichedTokenSelect) => void;
+  setOutputToken: (token: EnrichedTokenSelect | null) => void;
 
-  amount: BigNumber | null;
+  isQuoteLoading: boolean;
+  expectedOutputAmount: string | undefined;
+  expectedInputAmount: string | undefined;
+
   setAmount: (amount: BigNumber | null) => void;
 
   isAmountOrigin: boolean;
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
 }) => {
-  const { data: swapData, isLoading: isUpdateLoading } = useSwapQuote({
-    origin: inputToken
-      ? {
-          address: inputToken.address,
-          chainId: inputToken.chainId,
-        }
-      : null,
-    destination: outputToken
-      ? {
-          address: outputToken.address,
-          chainId: outputToken.chainId,
-        }
-      : null,
-    amount: amount,
-    isInputAmount: isAmountOrigin,
-  });
+  const quickSwap = useCallback(() => {
+    const origin = inputToken;
+    const destination = outputToken;
+
+    setOutputToken(origin);
+    setInputToken(destination);
+
+    setAmount(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputToken, outputToken]);
 
   return (
     <Wrapper>
@@ -62,10 +56,15 @@ export const InputForm = ({
           setIsAmountOrigin(true);
         }}
         isOrigin={true}
-        expectedAmount={swapData?.inputAmount}
+        expectedAmount={expectedInputAmount}
         shouldUpdate={!isAmountOrigin}
-        isUpdateLoading={isUpdateLoading}
+        isUpdateLoading={isQuoteLoading}
       />
+      <QuickSwapButtonWrapper>
+        <QuickSwapButton onClick={quickSwap}>
+          <ArrowsCross />
+        </QuickSwapButton>
+      </QuickSwapButtonWrapper>
       <TokenInput
         setToken={setOutputToken}
         token={outputToken}
@@ -74,9 +73,9 @@ export const InputForm = ({
           setIsAmountOrigin(false);
         }}
         isOrigin={false}
-        expectedAmount={swapData?.expectedOutputAmount}
+        expectedAmount={expectedOutputAmount}
         shouldUpdate={isAmountOrigin}
-        isUpdateLoading={isUpdateLoading}
+        isUpdateLoading={isQuoteLoading}
       />
     </Wrapper>
   );
@@ -100,24 +99,19 @@ const TokenInput = ({
   isUpdateLoading: boolean;
 }) => {
   const [amountString, setAmountString] = useState<string>("");
+  const [justTyped, setJustTyped] = useState(false);
 
   // Handle user input changes
   useEffect(() => {
-    if (amountString && expectedAmount) {
-      const priceDelta = Math.abs(
-        Number(amountString) -
-          Number(formatUnitsWithMaxFractions(expectedAmount, token!.decimals))
-      );
-      if (priceDelta < 0.01 && !isUpdateLoading) {
-        return;
-      }
+    if (!justTyped) {
+      return;
     }
+    setJustTyped(false);
     try {
       setAmount(utils.parseUnits(amountString, token!.decimals));
     } catch (e) {
       setAmount(null);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amountString]);
 
@@ -149,7 +143,14 @@ const TokenInput = ({
       if (!token) {
         return null;
       }
-      return formatUSD(amount.mul(token.priceUsd).div(fixedPointAdjustment));
+      const priceAsNumeric = Number(utils.formatUnits(token.priceUsd, 18));
+      const amountAsNumeric = Number(utils.formatUnits(amount, token.decimals));
+      const estimatedUsdAmountNumeric = amountAsNumeric * priceAsNumeric;
+      const estimatedUsdAmount = utils.parseUnits(
+        estimatedUsdAmountNumeric.toString(),
+        18
+      );
+      return formatUSD(estimatedUsdAmount);
     } catch (e) {
       return null;
     }
@@ -165,6 +166,7 @@ const TokenInput = ({
           placeholder="0.00"
           value={amountString}
           onChange={(e) => {
+            setJustTyped(true);
             setAmountString(e.target.value);
           }}
           disabled={shouldUpdate && isUpdateLoading}
@@ -177,11 +179,13 @@ const TokenInput = ({
         onSelect={setToken}
         isOriginToken={isOrigin}
         marginBottom={token ? "24px" : "0px"}
+        selectedToken={token}
       />
       {token && (
         <BalanceSelectorWrapper>
           <BalanceSelector
             balance={token.balance}
+            disableHover={!isOrigin}
             decimals={token.decimals}
             setAmount={(amount) => {
               if (amount) {
@@ -262,9 +266,12 @@ const BalanceSelectorWrapper = styled.div`
 `;
 
 const Wrapper = styled.div`
+  position: relative;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 12px;
   align-self: stretch;
   padding: 12px;
@@ -272,4 +279,32 @@ const Wrapper = styled.div`
   border: 1px solid rgba(224, 243, 255, 0.05);
   background: #34353b;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+`;
+
+const QuickSwapButton = styled.button`
+  display: flex;
+  width: 48px;
+  height: 32px;
+
+  padding: 0px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 32px;
+  border: 1px solid #4c4e57;
+  background: #34353b;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+
+  & * {
+    flex-shrink: 0;
+  }
+`;
+
+const QuickSwapButtonWrapper = styled.div`
+  position: absolute;
+  left: calc(50% - 24px);
+  top: calc(50% - 16px);
+
+  z-index: 4;
 `;
