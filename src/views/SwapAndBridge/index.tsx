@@ -1,11 +1,13 @@
 import { LayoutV2 } from "components";
 import { EnrichedTokenSelect } from "./components/ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { InputForm } from "./components/InputForm";
 import { BigNumber } from "ethers";
 import ConfirmationButton from "./components/ConfirmationButton";
 import useSwapQuote from "./hooks/useSwapQuote";
+import { useConnection } from "hooks";
+import { useHistory } from "react-router-dom";
 
 export default function SwapAndBridge() {
   const [inputToken, setInputToken] = useState<EnrichedTokenSelect | null>(
@@ -16,6 +18,8 @@ export default function SwapAndBridge() {
   );
   const [amount, setAmount] = useState<BigNumber | null>(null);
   const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
+  const { signer } = useConnection();
+  const history = useHistory();
 
   const { data: swapData, isLoading: isUpdateLoading } = useSwapQuote({
     origin: inputToken
@@ -35,15 +39,32 @@ export default function SwapAndBridge() {
   });
 
   // Handle confirmation (placeholder for now)
-  const handleConfirm = async () => {
-    console.log("Confirming swap...", {
-      swapData,
-      inputToken,
-      outputToken,
-      amount,
+  const handleConfirm = useCallback(async () => {
+    if (!swapData || !signer) {
+      return;
+    }
+
+    if (swapData.approvalTxns?.length > 0) {
+      for (const approvalTxn of swapData.approvalTxns) {
+        await signer.sendTransaction({
+          data: approvalTxn.data,
+          to: approvalTxn.to,
+          chainId: approvalTxn.chainId,
+        });
+      }
+    }
+
+    const tx = await signer.sendTransaction({
+      data: swapData.swapTx.data,
+      to: swapData.swapTx.to,
+      chainId: swapData.swapTx.chainId,
     });
-    // TODO: Implement actual swap confirmation logic
-  };
+
+    history.push(
+      `/bridge/${tx.hash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swapData, signer]);
 
   return (
     <LayoutV2 maxWidth={720}>

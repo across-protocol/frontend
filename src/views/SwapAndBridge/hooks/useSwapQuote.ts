@@ -21,6 +21,15 @@ type SwapQuoteParams = {
   slippageTolerance?: number;
 };
 
+type SwapTransaction = {
+  simulationSuccess: boolean;
+  chainId: number;
+  to: string;
+  data: string;
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+};
+
 type SwapQuoteResponse = {
   checks: object;
   steps: object;
@@ -29,7 +38,12 @@ type SwapQuoteResponse = {
   expectedOutputAmount: string;
   minOutputAmount: string;
   expectedFillTime: number;
-  swapTx: object;
+  swapTx: SwapTransaction;
+  approvalTxns: {
+    chainId: number;
+    data: string;
+    to: string;
+  }[];
 };
 
 const useSwapQuote = ({
