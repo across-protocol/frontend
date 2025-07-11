@@ -3,7 +3,8 @@ import { AxiosError } from "axios";
 import { StructError } from "superstruct";
 import { relayFeeCalculator, typeguards } from "@across-protocol/sdk";
 import { ethers } from "ethers";
-
+import { Span, SpanStatusCode } from "@opentelemetry/api";
+import { ATTR_HTTP_RESPONSE_STATUS_CODE } from "@opentelemetry/semantic-conventions";
 type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
 
 type EthersErrorTransaction = {
@@ -220,13 +221,15 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
  * @param response A VercelResponse object that is used to interract with the returning reponse
  * @param logger A logging utility to write to a cloud logging provider
  * @param error The error that will be returned to the user
+ * @param span The span to record the error on
  * @returns The `response` input with a status/send sent. Note: using this object again will cause an exception
  */
 export function handleErrorCondition(
   endpoint: string,
   response: VercelResponse,
   logger: relayFeeCalculator.Logger,
-  error: unknown
+  error: unknown,
+  span?: Span
 ): VercelResponse {
   let acrossApiError: AcrossApiError;
 
@@ -297,6 +300,15 @@ export function handleErrorCondition(
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
     cause: acrossApiError.cause,
   });
+
+  if (span) {
+    span.recordException(acrossApiError);
+    span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, acrossApiError.status);
+    span.setStatus({
+      code: SpanStatusCode.ERROR,
+      message: acrossApiError.message,
+    });
+  }
 
   return response.status(acrossApiError.status).json(acrossApiError);
 }
