@@ -21,7 +21,7 @@ class OrderbookHandler extends ApiHandler<
       requestSchema: OrderbookQueryParamsSchema,
       responseSchema: OrderbookResponseSchema,
       headers: {
-        "Cache-Control": "s-maxage=60, stale-while-revalidate=60",
+        "Cache-Control": "s-maxage=1, stale-while-revalidate=1",
       },
     });
   }
