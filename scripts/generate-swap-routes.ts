@@ -52,11 +52,7 @@ const enabledSwapRoutes: {
     },
     [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
       all: {
-        disabledOriginChains: [
-          CHAIN_IDs.MAINNET,
-          CHAIN_IDs.ALEPH_ZERO,
-          CHAIN_IDs.POLYGON,
-        ],
+        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },
