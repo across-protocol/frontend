@@ -6,6 +6,8 @@ import { PoolsApiCall } from "./prod/pools";
 import { SwapQuoteApiCall } from "./prod/swap-quote";
 import { PoolsUserApiCall } from "./prod/pools-user";
 import { SwapApprovalApiCall } from "./prod/swap-approval";
+import { OrderBookApiCall } from "./prod/order-book";
+import { RelayerConfigsApiCall } from "./prod/relayer-configs";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -24,6 +26,8 @@ export type ServerlessAPIEndpoints = {
   poolsUser: PoolsUserApiCall;
   swapQuote: SwapQuoteApiCall;
   swapApproval: SwapApprovalApiCall;
+  orderBook: OrderBookApiCall;
+  relayerConfigs: RelayerConfigsApiCall;
 };
 
 export type RewardsApiFunction =

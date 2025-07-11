@@ -73,6 +73,21 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     }
     await this.client.del(key);
   }
+
+  async getAll<T>(prefix: string): Promise<T[] | null> {
+    if (!this.client) {
+      return null;
+    }
+
+    const [_, values] = await this.client.scan(0, {
+      match: prefix,
+    });
+    if (values.length === 0 || values == null) {
+      return null;
+    }
+
+    return (await this.client.mget(values)) as T[];
+  }
 }
 
 export const redisCache = new RedisCache();
