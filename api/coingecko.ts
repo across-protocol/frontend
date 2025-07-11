@@ -149,10 +149,7 @@ async function resolvePrice(params: {
   const chainId =
     coinGeckoAssetPlatformLookup[params.address] ?? fallbackChainId;
 
-  let address = utils.chainIsSvm(chainId)
-    ? utils.toAddressType(params.address).toBase58()
-    : utils.toAddressType(params.address).toEvmAddress();
-
+  let address = utils.toAddressType(params.address, chainId).toNative();
   const baseCurrency = (
     params.baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
   ).toLowerCase();
