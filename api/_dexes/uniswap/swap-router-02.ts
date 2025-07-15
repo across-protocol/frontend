@@ -3,7 +3,12 @@ import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
-import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
+import {
+  OriginEntryPointContractName,
+  QuoteFetchStrategy,
+  Swap,
+  SwapQuote,
+} from "../types";
 import { floatToPercent } from "./utils/conversion";
 import {
   getUniswapClassicQuoteFromApi,
@@ -22,9 +27,7 @@ import { getOriginSwapEntryPoints } from "../utils";
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName:
-    | "SpokePoolPeriphery"
-    | "UniversalSwapAndBridge",
+  originSwapEntryPointContractName: OriginEntryPointContractName,
   quoteSource: QuoteSource = "trading-api"
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
