@@ -4,6 +4,7 @@ import { handleErrorCondition } from "../_errors";
 import {
   buildSearchParams,
   getLogger,
+  intStringInRange,
   positiveIntStr,
   resolveVercelEndpoint,
 } from "../_utils";
@@ -12,7 +13,7 @@ import { assert, Infer, type } from "superstruct";
 import { isSocialMediaBot } from "./_utils";
 
 const TwitterShareParamsSchema = type({
-  s: positiveIntStr(),
+  s: intStringInRange(0, 5),
   from: positiveIntStr(),
   to: positiveIntStr(),
 });
