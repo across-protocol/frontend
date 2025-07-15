@@ -237,8 +237,13 @@ const handler = async (
       ),
       getFillDeadline(destinationChainId),
     ]);
-    const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
-      limits;
+    const {
+      maxDeposit,
+      maxDepositInstant,
+      minDeposit,
+      relayerFeeDetails,
+      routeInvolvesUltraLiteChain,
+    } = limits;
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
     const amountInUsd = amount
@@ -264,11 +269,13 @@ const handler = async (
     const rateModel =
       validL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
       validL1TokenConfig.rateModel;
-    const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-      rateModel,
-      currentUt,
-      nextUt
-    );
+    const lpFeePct = routeInvolvesUltraLiteChain
+      ? 0 // Ultra lite routes do not have an LP fee
+      : sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+          rateModel,
+          currentUt,
+          nextUt
+        );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
 
     const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
