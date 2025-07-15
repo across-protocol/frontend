@@ -2,7 +2,12 @@ import { VercelResponse } from "@vercel/node";
 import { createCanvas, loadImage } from "canvas";
 import { TypedVercelRequest } from "../_types";
 import { handleErrorCondition } from "../_errors";
-import { boolStr, getLogger, positiveIntStr } from "../_utils";
+import {
+  boolStr,
+  getLogger,
+  intStringInRange,
+  positiveIntStr,
+} from "../_utils";
 import path from "path";
 
 import { assert, Infer, optional, type } from "superstruct";
@@ -10,7 +15,7 @@ import { getChainLogoPath } from "./_utils";
 const assetsDir = path.join(__dirname, "assets");
 
 const TwitterShareParamsSchema = type({
-  s: positiveIntStr(),
+  s: intStringInRange(0, 5),
   from: positiveIntStr(),
   to: positiveIntStr(),
   background: optional(boolStr()),
