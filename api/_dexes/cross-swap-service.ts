@@ -12,10 +12,11 @@ import {
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
+  AmountType,
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
-  getCrossSwapType,
+  getCrossSwapTypes,
   getPreferredBridgeTokens,
   getQuoteFetchStrategies,
   QuoteFetchStrategies,
@@ -85,8 +86,8 @@ function getCrossSwapQuoteForAmountType(
       strategies: QuoteFetchStrategies
     ) => Promise<CrossSwapQuotes>
   >
-) {
-  const crossSwapType = getCrossSwapType({
+): Promise<CrossSwapQuotes> {
+  const crossSwapTypes = getCrossSwapTypes({
     inputToken: crossSwap.inputToken.address,
     originChainId: crossSwap.inputToken.chainId,
     outputToken: crossSwap.outputToken.address,
@@ -95,20 +96,23 @@ function getCrossSwapQuoteForAmountType(
     isOutputNative: Boolean(crossSwap.isOutputNative),
   });
 
-  const handler = typeToHandler[crossSwapType];
-  if (!handler) {
-    throw new InvalidParamError({
-      message: `Failed to fetch swap quote: invalid cross swap type '${crossSwapType}'`,
-    });
-  }
+  const crossSwaps = crossSwapTypes.map((crossSwapType) => {
+    const handler = typeToHandler[crossSwapType];
+    if (!handler) {
+      throw new InvalidParamError({
+        message: `Failed to fetch swap quote: invalid cross swap type '${crossSwapType}'`,
+      });
+    }
+    return handler(crossSwap, strategies);
+  });
 
-  return handler(crossSwap, strategies);
+  return selectBestCrossSwapQuote(crossSwaps, crossSwap.type);
 }
 
 export async function getCrossSwapQuotesForExactInputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
-) {
+): Promise<CrossSwapQuotes> {
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
@@ -159,7 +163,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
 export async function getCrossSwapQuotesForOutputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
-) {
+): Promise<CrossSwapQuotes> {
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
@@ -1367,4 +1371,64 @@ function assertSources(sources: QuoteFetchOpts["sources"]) {
     message:
       "None of the provided sources are valid. Call the endpoint /swap/sources to get a list of valid sources.",
   });
+}
+
+/**
+ * Executes quotes for multiple cross swap types and selects the best one.
+ * For exact input, compare based on destination swap output amount if available, otherwise bridge output amount.
+ * For exact output, compare based on destination swap input amount if available, otherwise bridge input amount.
+ */
+async function selectBestCrossSwapQuote(
+  crossSwapQuotePromises: Promise<CrossSwapQuotes>[],
+  amountType: AmountType
+): Promise<CrossSwapQuotes> {
+  const crossSwapQuotes = await Promise.allSettled(crossSwapQuotePromises);
+
+  const fulfilledQuotes = crossSwapQuotes
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (fulfilledQuotes.length === 0) {
+    throw new SwapQuoteUnavailableError({
+      message:
+        "Failed to fetch swap quote: No quotes available from any cross swap type",
+    });
+  }
+
+  if (fulfilledQuotes.length === 1) {
+    return fulfilledQuotes[0];
+  }
+
+  const bestQuote = fulfilledQuotes.reduce((best, current) => {
+    const currentDestinationSwapQuote = current.destinationSwapQuote;
+    const bestDestinationSwapQuote = best.destinationSwapQuote;
+    const currentBridgeQuote = current.bridgeQuote;
+    const bestBridgeQuote = best.bridgeQuote;
+    const isExactInput = amountType === "exactInput";
+
+    const currentAmount = currentDestinationSwapQuote
+      ? isExactInput
+        ? currentDestinationSwapQuote.expectedAmountOut
+        : currentDestinationSwapQuote.expectedAmountIn
+      : isExactInput
+        ? currentBridgeQuote.outputAmount
+        : currentBridgeQuote.inputAmount;
+    const bestAmount = bestDestinationSwapQuote
+      ? isExactInput
+        ? bestDestinationSwapQuote.expectedAmountOut
+        : bestDestinationSwapQuote.expectedAmountIn
+      : isExactInput
+        ? bestBridgeQuote.outputAmount
+        : bestBridgeQuote.inputAmount;
+
+    return isExactInput
+      ? currentAmount.gt(bestAmount)
+        ? current
+        : best
+      : currentAmount.lt(bestAmount)
+        ? current
+        : best;
+  });
+
+  return bestQuote;
 }
