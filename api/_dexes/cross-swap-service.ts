@@ -9,6 +9,7 @@ import {
   Profiler,
   addMarkupToAmount,
   getBridgeQuoteForExactInput,
+  addTimeoutToPromise,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
@@ -40,7 +41,9 @@ import {
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
 
-const indicativeQuoteBuffer = 0.005; // 0.5% buffer for indicative quotes
+const INDICATIVE_QUOTE_BUFFER = 0.005; // 0.5% buffer for indicative quotes
+
+const PROMISE_TIMEOUT_MS = 10000;
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
@@ -625,7 +628,7 @@ export async function getCrossSwapQuotesForOutputA2B(
         depositor: crossSwap.depositor,
         amount: addMarkupToAmount(
           prioritizedStrategy.indicativeOriginSwapQuote.maximumAmountIn,
-          indicativeQuoteBuffer
+          INDICATIVE_QUOTE_BUFFER
         ).toString(),
       },
       TradeType.EXACT_INPUT
@@ -973,7 +976,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       minOutputAmount: addMarkupToAmount(
         prioritizedDestinationStrategy.indicativeDestinationSwapQuote
           .maximumAmountIn,
-        indicativeQuoteBuffer
+        INDICATIVE_QUOTE_BUFFER
       ),
       recipient: getMultiCallHandlerAddress(
         prioritizedDestinationStrategy.result.destinationSwapChainId
@@ -999,7 +1002,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
           depositor: crossSwap.depositor,
           amount: addMarkupToAmount(
             indicativeBridgeQuote.inputAmount,
-            indicativeQuoteBuffer
+            INDICATIVE_QUOTE_BUFFER
           ).toString(),
         },
         TradeType.EXACT_OUTPUT,
@@ -1067,7 +1070,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
             amount: addMarkupToAmount(
               prioritizedOriginStrategy.indicativeOriginSwapQuote
                 .maximumAmountIn,
-              indicativeQuoteBuffer
+              INDICATIVE_QUOTE_BUFFER
             ).toString(),
           },
           TradeType.EXACT_INPUT
@@ -1230,7 +1233,12 @@ async function selectBestCrossSwapQuote(
   crossSwapQuotePromises: Promise<CrossSwapQuotes>[],
   amountType: AmountType
 ): Promise<CrossSwapQuotes> {
-  const crossSwapQuotes = await Promise.allSettled(crossSwapQuotePromises);
+  const crossSwapQuotePromisesWithTimeout = crossSwapQuotePromises.map(
+    (promise) => addTimeoutToPromise(promise, PROMISE_TIMEOUT_MS)
+  );
+  const crossSwapQuotes = await Promise.allSettled(
+    crossSwapQuotePromisesWithTimeout
+  );
 
   const fulfilledQuotes = crossSwapQuotes
     .filter((result) => result.status === "fulfilled")
