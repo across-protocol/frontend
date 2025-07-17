@@ -3,12 +3,12 @@ import { SpanStatusCode } from "@opentelemetry/api";
 
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition } from "../../_utils";
-import { BaseSwapQueryParams } from "../_utils";
+import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
 import { tracer } from "../../../instrumentation";
 
 const handler = async (
-  request: TypedVercelRequest<BaseSwapQueryParams>,
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -19,6 +19,14 @@ const handler = async (
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
     try {
+      // This handler supports both GET and POST requests.
+      // For GET requests, we expect the body to be empty.
+      // TODO: Allow only POST requests
+      if (request.method !== "POST" && request.body) {
+        throw new Error(
+          "Only POST requests are supported." // Improve wording
+        );
+      }
       const responseJson = await handleApprovalSwap(request);
 
       logger.debug({
