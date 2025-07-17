@@ -1,4 +1,12 @@
-import { assert, Infer, type, string, optional, enums } from "superstruct";
+import {
+  assert,
+  Infer,
+  type,
+  string,
+  optional,
+  enums,
+  array,
+} from "superstruct";
 import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
@@ -10,6 +18,7 @@ import {
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
+  paramToArray,
 } from "../_utils";
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -37,6 +46,8 @@ export const BaseSwapQueryParamsSchema = type({
   refundOnOrigin: optional(boolStr()),
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
+  excludeSources: optional(array(string())),
+  includeSources: optional(array(string())),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -60,6 +71,8 @@ export async function handleBaseSwapQueryParams(
     refundOnOrigin: _refundOnOrigin = "true",
     slippageTolerance = "1", // Default to 1% slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
+    excludeSources: _excludeSources,
+    includeSources: _includeSources,
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -74,6 +87,20 @@ export async function handleBaseSwapQueryParams(
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
     : utils.getAddress(_outputTokenAddress);
+  const excludeSources = _excludeSources
+    ? paramToArray(_excludeSources)
+    : undefined;
+  const includeSources = _includeSources
+    ? paramToArray(_includeSources)
+    : undefined;
+
+  if (excludeSources && includeSources) {
+    throw new InvalidParamError({
+      param: "excludeSources, includeSources",
+      message:
+        "Cannot use 'excludeSources' and 'includeSources' together. Please use only one of them.",
+    });
+  }
 
   if (integratorId && !isValidIntegratorId(integratorId)) {
     throw new InvalidParamError({
@@ -127,6 +154,8 @@ export async function handleBaseSwapQueryParams(
     depositor,
     slippageTolerance,
     refundToken,
+    excludeSources,
+    includeSources,
   };
 }
 

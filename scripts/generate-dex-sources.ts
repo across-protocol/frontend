@@ -133,6 +133,7 @@ function generateSourcesFile(sources: DexSources, fileName: string): string {
         .flat(),
     ])
   )
+    .sort()
     .map((source) => `  ${source}`)
     .join(",\n");
 

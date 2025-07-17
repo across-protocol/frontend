@@ -22,6 +22,7 @@ import {
   Swap,
   SwapQuote,
   Token,
+  DexSources,
 } from "./types";
 import {
   isInputTokenBridgeable,
@@ -654,4 +655,56 @@ export async function estimateInputForExactOutput(
 
   // Add 1% buffer for slippage and rounding
   return requiredInputAmount.mul(101).div(100).toString();
+}
+
+export function isValidSource(
+  _source: string,
+  chainId: number,
+  sources: DexSources
+) {
+  const sourceToCheck = _source.toLowerCase();
+  return sources.sources[chainId].some((source) =>
+    source.names.includes(sourceToCheck)
+  );
+}
+
+export function makeGetSources(sources: DexSources) {
+  return (
+    chainId: number,
+    opts?: {
+      excludeSources?: string[];
+      includeSources?: string[];
+    }
+  ) => {
+    if (!opts || (!opts?.excludeSources && !opts?.includeSources)) {
+      return undefined;
+    }
+
+    const filteredSources = opts?.excludeSources
+      ? opts.excludeSources.filter((excludeSource) =>
+          isValidSource(excludeSource, chainId, sources)
+        )
+      : opts.includeSources
+        ? opts.includeSources.filter((includeSource) =>
+            isValidSource(includeSource, chainId, sources)
+          )
+        : [];
+    const sourcesKeys = Array.from(
+      new Set(
+        filteredSources.flatMap(
+          (source) =>
+            sources.sources[chainId].find((s) =>
+              s.names.some(
+                (name) => name.toLowerCase() === source.toLowerCase()
+              )
+            )?.key || []
+        )
+      )
+    );
+
+    return {
+      sourcesKeys,
+      sourcesType: opts?.excludeSources ? "exclude" : "include",
+    } as const;
+  };
 }

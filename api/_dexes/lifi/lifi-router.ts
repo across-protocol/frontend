@@ -12,7 +12,8 @@ import {
 } from "../types";
 import { getEnvs } from "../../_env";
 import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
-import { getOriginSwapEntryPoints } from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+import { SOURCES } from "./utils/sources";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -40,11 +41,25 @@ export function getLifiStrategy(
   const getOriginEntryPoints = (chainId: number) =>
     getOriginSwapEntryPoints(originSwapEntryPointContractName, chainId, "lifi");
 
+  const getSources = makeGetSources(SOURCES);
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
     opts?: QuoteFetchOpts
   ) => {
+    const sources = opts?.sources;
+    const sourcesParams =
+      sources?.sourcesType === "exclude"
+        ? {
+            excludeSources: sources.sourcesKeys.join(","),
+          }
+        : sources?.sourcesType === "include"
+          ? {
+              includeSources: sources.sourcesKeys.join(","),
+            }
+          : {};
+
     const params = {
       fromChain: swap.chainId,
       toChain: swap.chainId,
@@ -56,6 +71,7 @@ export function getLifiStrategy(
         ? { fromAmount: swap.amount }
         : { toAmount: swap.amount }),
       ...(opts?.useIndicativeQuote ? { skipSimulation: true } : {}),
+      ...sourcesParams,
     };
 
     const response = await axios.get(
@@ -118,5 +134,6 @@ export function getLifiStrategy(
     getRouter,
     getOriginEntryPoints,
     fetchFn,
+    getSources,
   };
 }

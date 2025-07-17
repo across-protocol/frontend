@@ -10,7 +10,7 @@ import {
   addMarkupToAmount,
   getBridgeQuoteForExactInput,
 } from "../_utils";
-import { CrossSwap, CrossSwapQuotes } from "./types";
+import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
@@ -211,13 +211,23 @@ export async function getCrossSwapQuotesForExactInputB2A(
   const results = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
   const strategyFetches = results.map(async (result) => {
+    const sources = result.destinationStrategy.getSources(
+      result.destinationSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(sources);
+
     const indicativeDestinationSwapQuote =
       await result.destinationStrategy.fetchFn(
         {
           ...result.destinationSwap,
           amount: crossSwap.amount.toString(),
         },
-        TradeType.EXACT_INPUT
+        TradeType.EXACT_INPUT,
+        { sources }
       );
     return {
       result,
@@ -261,12 +271,19 @@ export async function getCrossSwapQuotesForExactInputB2A(
   }
 
   // 3. Get destination swap quote with correct amount
+  const sources = destinationStrategy.getSources(destinationSwap.chainId, {
+    excludeSources: crossSwap.excludeSources,
+    includeSources: crossSwap.includeSources,
+  });
+  assertSources(sources);
+
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
     },
-    TradeType.EXACT_INPUT
+    TradeType.EXACT_INPUT,
+    { sources }
   );
 
   // 4. Build bridge quote message for destination swap
@@ -301,6 +318,15 @@ export async function getCrossSwapQuotesForOutputB2A(
   const results = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
   const strategyFetches = results.map(async (result) => {
+    const sources = result.destinationStrategy.getSources(
+      result.destinationSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(sources);
+
     const indicativeDestinationSwapQuote =
       await result.destinationStrategy.fetchFn(
         {
@@ -308,13 +334,12 @@ export async function getCrossSwapQuotesForOutputB2A(
           amount: crossSwap.amount.toString(),
         },
         TradeType.EXACT_OUTPUT,
-        {
-          useIndicativeQuote: true,
-        }
+        { useIndicativeQuote: true, sources }
       );
     return {
       result,
       indicativeDestinationSwapQuote,
+      sources,
     };
   });
 
@@ -341,7 +366,8 @@ export async function getCrossSwapQuotesForOutputB2A(
           ...destinationSwap,
           amount: crossSwap.amount.toString(),
         },
-        TradeType.EXACT_OUTPUT
+        TradeType.EXACT_OUTPUT,
+        { sources: prioritizedStrategy.sources }
       ),
       // 2.2. Bridge quote for bridgeable input token -> bridgeable output token based on
       //      indicative destination swap quote.
@@ -481,12 +507,22 @@ export async function getCrossSwapQuotesForExactInputA2B(
   const results = _prepCrossSwapQuotesRetrievalA2B(crossSwap, strategies);
 
   const strategyFetches = results.map(async (result) => {
+    const sources = result.originStrategy.getSources(
+      result.originSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(sources);
+
     const originSwapQuote = await result.originStrategy.fetchFn(
       {
         ...result.originSwap,
         amount: crossSwap.amount.toString(),
       },
-      TradeType.EXACT_INPUT
+      TradeType.EXACT_INPUT,
+      { sources }
     );
     return {
       result,
@@ -589,6 +625,15 @@ export async function getCrossSwapQuotesForOutputA2B(
   }
 
   const strategyFetches = results.map(async (result) => {
+    const sources = result.originStrategy.getSources(
+      result.originSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(sources);
+
     const indicativeOriginSwapQuote = await profiler.measureAsync(
       result.originStrategy.fetchFn(
         {
@@ -599,6 +644,7 @@ export async function getCrossSwapQuotesForOutputA2B(
         TradeType.EXACT_OUTPUT,
         {
           useIndicativeQuote: true,
+          sources,
         }
       ),
       "INDICATIVE_getOriginSwapQuote"
@@ -606,6 +652,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     return {
       result,
       indicativeOriginSwapQuote,
+      sources,
     };
   });
 
@@ -624,7 +671,8 @@ export async function getCrossSwapQuotesForOutputA2B(
           indicativeQuoteBuffer
         ).toString(),
       },
-      TradeType.EXACT_INPUT
+      TradeType.EXACT_INPUT,
+      { sources: prioritizedStrategy.sources }
     ),
     "getOriginSwapQuote"
   );
@@ -821,17 +869,28 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   );
 
   const strategyFetches = results.map(async (result) => {
+    const originSources = result.originStrategy.getSources(
+      result.originSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(originSources);
+
     const originSwapQuote = await result.originStrategy.fetchFn(
       {
         ...result.originSwap,
         depositor: crossSwap.depositor,
         amount: crossSwap.amount.toString(),
       },
-      TradeType.EXACT_INPUT
+      TradeType.EXACT_INPUT,
+      { sources: originSources }
     );
     return {
       result,
       originSwapQuote,
+      originSources,
     };
   });
 
@@ -857,7 +916,8 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       ...destinationSwap,
       amount: prioritizedStrategy.originSwapQuote.minAmountOut.toString(),
     },
-    TradeType.EXACT_INPUT
+    TradeType.EXACT_INPUT,
+    { sources: prioritizedStrategy.originSources }
   );
 
   // 3. Get bridge quote for bridgeable input token -> bridgeable output token
@@ -881,12 +941,24 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   }
 
   // 4. Get destination swap quote for bridgeable output token -> any token
+  const destinationSources = destinationStrategy.getSources(
+    destinationSwap.chainId,
+    {
+      excludeSources: crossSwap.excludeSources,
+      includeSources: crossSwap.includeSources,
+    }
+  );
+  assertSources(destinationSources);
+
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
     },
-    TradeType.EXACT_INPUT
+    TradeType.EXACT_INPUT,
+    {
+      sources: destinationSources,
+    }
   );
 
   // 5. Build bridge quote message for destination swap
@@ -938,6 +1010,15 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   // These requests are faster but do not contain calldata.
 
   const destinationStrategyFetches = results.map(async (result) => {
+    const destinationSources = result.destinationStrategy.getSources(
+      result.destinationSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(destinationSources);
+
     const indicativeDestinationSwapQuote = await profiler.measureAsync(
       result.destinationStrategy.fetchFn(
         {
@@ -947,6 +1028,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         TradeType.EXACT_OUTPUT,
         {
           useIndicativeQuote: true,
+          sources: destinationSources,
         }
       ),
       "INDICATIVE_getDestinationSwapQuote"
@@ -954,6 +1036,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     return {
       result,
       indicativeDestinationSwapQuote,
+      destinationSources,
     };
   });
 
@@ -988,6 +1071,15 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   );
 
   const originStrategyFetches = results.map(async (result) => {
+    const originSources = result.originStrategy.getSources(
+      result.originSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(originSources);
+
     const indicativeOriginSwapQuote = await profiler.measureAsync(
       result.originStrategy.fetchFn(
         {
@@ -1001,6 +1093,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         TradeType.EXACT_OUTPUT,
         {
           useIndicativeQuote: true,
+          sources: originSources,
         }
       ),
       "INDICATIVE_getOriginSwapQuote"
@@ -1008,6 +1101,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     return {
       result,
       indicativeOriginSwapQuote,
+      originSources,
     };
   });
 
@@ -1039,7 +1133,10 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
             ...destinationSwap,
             amount: crossSwap.amount.toString(),
           },
-          TradeType.EXACT_OUTPUT
+          TradeType.EXACT_OUTPUT,
+          {
+            sources: prioritizedDestinationStrategy.destinationSources,
+          }
         ),
         getBridgeQuoteForMinOutput({
           inputToken: bridgeableInputToken,
@@ -1066,7 +1163,10 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
               indicativeQuoteBuffer
             ).toString(),
           },
-          TradeType.EXACT_INPUT
+          TradeType.EXACT_INPUT,
+          {
+            sources: prioritizedOriginStrategy.originSources,
+          }
         ),
       ]),
       "getAllQuotes"
@@ -1215,4 +1315,16 @@ function _prepCrossSwapQuotesRetrievalA2A(
  */
 async function executeStrategies<T>(strategyFetches: Promise<T>[]): Promise<T> {
   return await Promise.any(strategyFetches);
+}
+
+function assertSources(sources: QuoteFetchOpts["sources"]) {
+  if (!sources || sources.sourcesKeys.length > 0) {
+    return;
+  }
+
+  throw new InvalidParamError({
+    param:
+      sources.sourcesType === "exclude" ? "excludeSources" : "includeSources",
+    message: "None of the provided sources are valid",
+  });
 }
