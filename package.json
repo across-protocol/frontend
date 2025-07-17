@@ -94,12 +94,23 @@
     "generate:routes:testnet": "yarn generate:routes 11155111",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
     "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
+    "generate:swap-routes": "tsx scripts/generate-swap-routes.ts",
+    "generate:swap-routes:mainnet": "yarn generate:swap-routes 1",
+    "generate:swap-routes:testnet": "yarn generate:swap-routes 11155111",
     "gas-prices": "tsx scripts/gas-prices.ts"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
       "yarn lint:fix",
       "yarn format:fix"
+    ],
+    "scripts/generate-routes.ts": [
+      "tsx",
+      "git add src/data/"
+    ],
+    "scripts/generate-swap-routes.ts": [
+      "tsx",
+      "git add src/data/"
     ]
   },
   "browserslist": {

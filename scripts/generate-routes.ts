@@ -7,6 +7,10 @@ import * as prettier from "prettier";
 import path from "path";
 import * as chainConfigs from "./chain-configs";
 import * as externConfigs from "./extern-configs";
+import {
+  enabledMainnetChainConfigs,
+  enabledSepoliaChainConfigs,
+} from "./utils/enabled-chain-configs";
 import assert from "assert";
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
@@ -35,43 +39,6 @@ type SwapToken = ToChain["swapTokens"][number];
 type ValidTokenSymbol = string;
 
 const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
-
-export const enabledMainnetChainConfigs = [
-  chainConfigs.MAINNET,
-  chainConfigs.OPTIMISM,
-  chainConfigs.POLYGON,
-  chainConfigs.ARBITRUM,
-  chainConfigs.ZK_SYNC,
-  chainConfigs.BASE,
-  chainConfigs.LINEA,
-  chainConfigs.MODE,
-  chainConfigs.BLAST,
-  chainConfigs.LISK,
-  chainConfigs.SCROLL,
-  chainConfigs.REDSTONE,
-  chainConfigs.ZORA,
-  chainConfigs.WORLD_CHAIN,
-  chainConfigs.ALEPH_ZERO,
-  chainConfigs.INK,
-  chainConfigs.SONEIUM,
-  chainConfigs.UNICHAIN,
-  chainConfigs.LENS,
-  chainConfigs.BSC,
-];
-
-export const enabledSepoliaChainConfigs = [
-  chainConfigs.SEPOLIA,
-  chainConfigs.BASE_SEPOLIA,
-  chainConfigs.ARBITRUM_SEPOLIA,
-  chainConfigs.OPTIMISM_SEPOLIA,
-  chainConfigs.MODE_SEPOLIA,
-  chainConfigs.POLYGON_AMOY,
-  chainConfigs.BLAST_SEPOLIA,
-  chainConfigs.LISK_SEPOLIA,
-  chainConfigs.LENS_SEPOLIA,
-  chainConfigs.UNICHAIN_SEPOLIA,
-  chainConfigs.TATARA,
-];
 
 const enabledRoutes = {
   [CHAIN_IDs.MAINNET]: {
@@ -915,4 +882,11 @@ function isBridgedUsdcOrVariant(tokenSymbol: string): boolean {
   return sdkUtils.isBridgedUsdc(tokenSymbol) || tokenSymbol === "USDC-BNB";
 }
 
-generateRoutes(Number(process.argv[2]));
+const hubPoolChainId = process.argv[2];
+if (hubPoolChainId) {
+  generateRoutes(Number(hubPoolChainId));
+} else {
+  Object.keys(enabledRoutes).forEach((chainId) => {
+    generateRoutes(Number(chainId));
+  });
+}
