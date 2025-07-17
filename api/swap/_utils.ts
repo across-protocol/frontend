@@ -193,16 +193,20 @@ export function handleSwapBody(body: SwapBody) {
   assert(body, SwapBody);
 
   // Helper function to recursively extract only the .value fields from args array
-  const flattenArgs = (args: any[]): any[] =>
-    args.map((arg) => {
+  const flattenArgs = (args: any[], depth: number = 0): any[] => {
+    if (depth > 10) {
+      throw new Error("Arguments array is too deeply nested");
+    }
+    return args.map((arg) => {
       if (Array.isArray(arg)) {
-        return flattenArgs(arg);
+        return flattenArgs(arg, depth + 1);
       } else if (arg && typeof arg === "object" && "value" in arg) {
         return arg.value;
       } else {
         return arg;
       }
     });
+  };
 
   body.actions.forEach((action) => {
     const methodAbi = action.functionSignature;
