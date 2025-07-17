@@ -204,7 +204,7 @@ export function handleSwapBody(body: SwapBody) {
       }
     });
 
-  body.actions.map((action) => {
+  body.actions.forEach((action) => {
     const methodAbi = action.functionSignature;
     const positionalArgs = flattenArgs(action.args);
     const iface = new utils.Interface([methodAbi]);
