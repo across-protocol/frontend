@@ -171,7 +171,6 @@ const RecursiveArgumentArray: any = lazy(() =>
 // Instructions for a single function call
 const Action = type({
   target: validEvmAddress(),
-  functionName: string(),
   functionSignature: string(), // Will be validated at runtime
   args: array(RecursiveArgumentArray),
   value: positiveIntStr(),
@@ -208,15 +207,14 @@ export function handleSwapBody(body: SwapBody) {
   body.actions.map((action) => {
     const methodAbi = action.functionSignature;
     const positionalArgs = flattenArgs(action.args);
-
     const iface = new utils.Interface([methodAbi]);
-
+    const functionName = iface.fragments[0].name;
     try {
-      iface.encodeFunctionData(action.functionName, positionalArgs);
+      iface.encodeFunctionData(functionName, positionalArgs);
     } catch (err) {
       throw new AbiEncodingError(
         {
-          message: `Failed to encode function data for ${action.functionName}. Arguments may be invalid or mismatched.`,
+          message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
         },
         {
           cause: `${err instanceof Error ? err.message : String(err)}`,
