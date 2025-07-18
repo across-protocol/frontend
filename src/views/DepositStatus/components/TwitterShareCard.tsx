@@ -54,7 +54,7 @@ export function TwitterShareCard({
       title={<Text color="white">Share and win!</Text>}
       subTitle={
         <Text>
-          Share a screenshot to enter this week's drawing for{" "}
+          Share your experience on X to enter this week's drawing for{" "}
           <Highlight>1,000 ACX</Highlight> #PoweredByIntents
         </Text>
       }
