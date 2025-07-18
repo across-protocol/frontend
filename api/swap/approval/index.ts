@@ -2,7 +2,8 @@ import { VercelResponse } from "@vercel/node";
 import { SpanStatusCode } from "@opentelemetry/api";
 
 import { TypedVercelRequest } from "../../_types";
-import { getLogger, handleErrorCondition } from "../../_utils";
+import { getLogger, handleErrorCondition, InputError } from "../../_utils";
+import { AcrossErrorCode } from "../../_errors";
 import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
 import { tracer } from "../../../instrumentation";
@@ -23,9 +24,10 @@ const handler = async (
       // For GET requests, we expect the body to be empty.
       // TODO: Allow only POST requests
       if (request.method !== "POST" && request.body) {
-        throw new Error(
-          "Only POST requests are supported." // Improve wording
-        );
+        throw new InputError({
+          message: "POST method required when request.body is provided",
+          code: AcrossErrorCode.INVALID_METHOD,
+        });
       }
       const responseJson = await handleApprovalSwap(request);
 

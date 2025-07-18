@@ -31,6 +31,7 @@ export const HttpErrorToStatusCode = {
 export const AcrossErrorCode = {
   // Status: 40X
   INVALID_PARAM: "INVALID_PARAM",
+  INVALID_METHOD: "INVALID_METHOD",
   MISSING_PARAM: "MISSING_PARAM",
   SIMULATION_ERROR: "SIMULATION_ERROR",
   AMOUNT_TOO_LOW: "AMOUNT_TOO_LOW",
