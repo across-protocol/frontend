@@ -46,11 +46,11 @@ class SwapSourcesHandler extends ApiHandler<
 
     if (chainIdParam) {
       const chainId = Number(chainIdParam);
-      const zeroXSources = ZERO_X_SOURCES.sources[chainId].map(
-        (source) => source.key
+      const zeroXSources = ZERO_X_SOURCES.sources[chainId].flatMap(
+        (source) => source.names
       );
-      const lifiSources = LIFI_SOURCES.sources[chainId].map(
-        (source) => source.key
+      const lifiSources = LIFI_SOURCES.sources[chainId].flatMap(
+        (source) => source.names
       );
       combinedSources = [...zeroXSources, ...lifiSources];
     } else {
