@@ -9,5 +9,5 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   publicRpcUrl: "https://arbitrum.publicnode.com",
   intermediaryChain: CHAIN_IDs.ARBITRUM,
-  tokens: ["USDC", "USDC.e"],
+  tokens: ["USDC", "USDC.e", "USDC-BNB"],
 } as ExternalProjectConfig;

@@ -1412,7 +1412,7 @@
     "chainId": 7777777,
     "name": "Zora",
     "publicRpcUrl": "https://rpc.zora.energy",
-    "explorerUrl": "https://zorascan.xyz",
+    "explorerUrl": "https://explorer.zora.energy",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zora/assets/logo.svg",
     "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
     "spokePoolBlock": 18382867,

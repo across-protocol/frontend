@@ -5,11 +5,17 @@ import { ReactComponent as ExternalLink12Icon } from "assets/icons/arrow-up-righ
 type Props = {
   text: string;
   href: string;
+  className?: string;
 };
 
 export function ExternalLink(props: Props) {
   return (
-    <Link href={props.href} target="_blank" rel="noopener noreferrer">
+    <Link
+      className={props?.className}
+      href={props.href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       {props.text} <ExternalLinkIcon />
     </Link>
   );
@@ -26,12 +32,6 @@ const Link = styled.a`
   transition: opacity 0.1s;
   cursor: pointer;
 
-  svg {
-    path {
-      fill: #e0f3ff;
-    }
-  }
-
   &:hover {
     opacity: 0.8;
   }
@@ -44,4 +44,5 @@ const Link = styled.a`
 
 export const ExternalLinkIcon = styled(ExternalLink12Icon)`
   margin: 2px 0 0 4px;
+  color: inherit;
 `;

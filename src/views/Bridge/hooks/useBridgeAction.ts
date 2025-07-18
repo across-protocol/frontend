@@ -29,6 +29,7 @@ import {
   externalProjectNameToId,
   generateHyperLiquidPayload,
   fixedPointAdjustment,
+  sendTxn,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -267,7 +268,7 @@ export function useBridgeAction(
           );
         }
 
-        tx = await signer.sendTransaction({
+        tx = await sendTxn(frozenRoute.fromChain, signer, {
           to: frozenUniversalSwapQuote.swapTx.to,
           data: frozenUniversalSwapQuote.swapTx.data,
           value: frozenUniversalSwapQuote.swapTx.value,

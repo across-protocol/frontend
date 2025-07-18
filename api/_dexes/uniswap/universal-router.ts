@@ -6,16 +6,13 @@ import { SwapRouter } from "@uniswap/universal-router-sdk";
 import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
 import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
-import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
 import { RouterTradeAdapter } from "./utils/adapter";
+import { getOriginSwapEntryPoints } from "../utils";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -39,16 +36,11 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   const getOriginEntryPoints = (chainId: number) =>
-    ({
-      swapAndBridge: {
-        name: "SpokePoolPeripheryProxy",
-        address: getSpokePoolPeripheryProxyAddress(chainId),
-      },
-      deposit: {
-        name: "SpokePoolPeriphery",
-        address: getSpokePoolPeripheryAddress(chainId),
-      },
-    }) as const;
+    getOriginSwapEntryPoints(
+      "UniversalSwapAndBridge",
+      chainId,
+      "uniswap-v3/universal-router"
+    );
 
   const fetchFn = async (
     swap: Swap,

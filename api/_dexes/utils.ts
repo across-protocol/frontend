@@ -15,7 +15,11 @@ import {
 import {
   CrossSwap,
   CrossSwapQuotes,
+  OriginEntryPointContractName,
+  OriginEntryPoints,
   QuoteFetchStrategy,
+  SupportedDex,
+  Swap,
   SwapQuote,
   Token,
 } from "./types";
@@ -24,9 +28,15 @@ import {
   isRouteEnabled,
   isOutputTokenBridgeable,
   getSpokePool,
+  getSpokePoolAddress,
 } from "../_utils";
-import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
-import { TransferType } from "../_spoke-pool-periphery";
+import {
+  getSpokePoolPeripheryAddress,
+  TransferType,
+  getSwapProxyAddress,
+} from "../_spoke-pool-periphery";
+import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import axios, { AxiosRequestHeaders } from "axios";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -34,23 +44,23 @@ export type CrossSwapType =
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
 /**
- * Describes which quote fetch strategy to use for a given chain,
+ * Describes which quote fetch strategies to use for a given chain,
  *
  * @example
  * {
- *   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
- *   [CHAIN_IDs.MAINNET]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+ *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
-  default: QuoteFetchStrategy;
+  default: QuoteFetchStrategy[];
   chains: {
-    [chainId: number]: QuoteFetchStrategy;
+    [chainId: number]: QuoteFetchStrategy[];
   };
   swapPairs: {
     [chainId: number]: {
       [tokenInSymbol: string]: {
-        [tokenOutSymbol: string]: QuoteFetchStrategy;
+        [tokenOutSymbol: string]: QuoteFetchStrategy[];
       };
     };
   };
@@ -84,9 +94,9 @@ export const PREFERRED_BRIDGE_TOKENS: {
   },
 };
 
-export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
-  // This will be our default strategy until the periphery contract is audited
-  getSwapRouter02Strategy("UniversalSwapAndBridge");
+export const defaultQuoteFetchStrategies: QuoteFetchStrategy[] =
+  // These will be our default strategies until the periphery contract is audited
+  [getSwapRouter02Strategy("UniversalSwapAndBridge")];
 
 export function getPreferredBridgeTokens(
   fromChainId: number,
@@ -341,11 +351,13 @@ export async function extractDepositDataStruct(
 
 export async function extractSwapAndDepositDataStruct(
   crossSwapQuotes: CrossSwapQuotes,
+  transferType: TransferType,
+  permitNonce?: number,
   submissionFees?: {
     amount: BigNumberish;
     recipient: string;
   }
-): Promise<SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct> {
+) {
   const { originSwapQuote, contracts } = crossSwapQuotes;
   const { originRouter } = contracts;
   if (!originSwapQuote || !originRouter) {
@@ -358,6 +370,7 @@ export async function extractSwapAndDepositDataStruct(
       "Can not extract 'SwapAndDepositDataStruct' without a single swap transaction"
     );
   }
+  const spokePool = getSpokePool(originSwapQuote.tokenIn.chainId);
 
   const { baseDepositData, submissionFees: _submissionFees } =
     await extractDepositDataStruct(crossSwapQuotes, submissionFees);
@@ -369,10 +382,10 @@ export async function extractSwapAndDepositDataStruct(
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
     routerCalldata: originSwapQuote.swapTxns[0].data,
     exchange: originRouter.address,
-    transferType:
-      originRouter.name === "UniswapV3UniversalRouter"
-        ? TransferType.Transfer
-        : TransferType.Approval,
+    transferType,
+    enableProportionalAdjustment: true,
+    spokePool: spokePool.address,
+    nonce: permitNonce || 0, // Only used for permit transfers
   };
 }
 
@@ -387,16 +400,17 @@ async function getFillDeadline(spokePool: SpokePool): Promise<number> {
   return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
-export function getQuoteFetchStrategy(
+export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
   strategies: QuoteFetchStrategies
-) {
+): QuoteFetchStrategy[] {
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
-    defaultQuoteFetchStrategy
+    strategies.default ??
+    defaultQuoteFetchStrategies
   );
 }
 
@@ -553,4 +567,91 @@ export function assertMinOutputAmount(
         `is less than required min. output amount ${expectedMinAmountOut.toString()}`
     );
   }
+}
+
+export function getOriginSwapEntryPoints(
+  originSwapEntryPointContractName: OriginEntryPointContractName,
+  chainId: number,
+  dex: SupportedDex
+): OriginEntryPoints {
+  if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+    return {
+      // The `SpokePoolPeriphery` contract is used to initiate an origin swap. It uses a
+      // proxy-pattern for security reasons which requires us to use the `SwapProxy`
+      // contract as the recipient for the origin swap.
+      originSwapInitialRecipient: {
+        name: "SwapProxy",
+        address: getSwapProxyAddress(chainId),
+      },
+      swapAndBridge: {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
+        dex,
+      },
+      deposit: {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
+      },
+    } as const;
+  } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
+    return {
+      originSwapInitialRecipient: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress(dex, chainId),
+      },
+      swapAndBridge: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress(dex, chainId),
+        dex,
+      },
+      deposit: {
+        name: "SpokePool",
+        address: getSpokePoolAddress(chainId),
+      },
+    } as const;
+  }
+  throw new Error(
+    `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+  );
+}
+
+/**
+ * Estimates the input amount required for an exact output amount by using the
+ * a single unit amount of the input token as a reference.
+ *
+ * @param swap - The swap object containing the tokenIn, tokenOut, amount, and slippageTolerance.
+ * @param apiEndpoint - The API endpoint to use for the swap.
+ * @param apiHeaders - The headers to use for the API request.
+ * @returns The required input amount.
+ */
+export async function estimateInputForExactOutput(
+  swap: Swap,
+  apiEndpoint: string,
+  apiHeaders: AxiosRequestHeaders
+): Promise<string> {
+  const inputUnit = BigNumber.from(10).pow(swap.tokenIn.decimals);
+
+  const inputUnitResponse = await axios.get(apiEndpoint, {
+    headers: apiHeaders,
+    params: {
+      chainId: swap.chainId,
+      sellToken: swap.tokenIn.address,
+      buyToken: swap.tokenOut.address,
+      sellAmount: inputUnit.toString(),
+      taker: swap.recipient,
+      slippageBps: Math.floor(swap.slippageTolerance * 100),
+    },
+  });
+
+  const inputUnitQuote = inputUnitResponse.data;
+  const inputUnitOutputAmount = BigNumber.from(inputUnitQuote.buyAmount);
+
+  // Estimate the required input amount for the desired output
+  const desiredOutputAmount = BigNumber.from(swap.amount);
+  const requiredInputAmount = desiredOutputAmount
+    .mul(inputUnit)
+    .div(inputUnitOutputAmount);
+
+  // Add 1% buffer for slippage and rounding
+  return requiredInputAmount.mul(101).div(100).toString();
 }

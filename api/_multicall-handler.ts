@@ -1,9 +1,12 @@
 import { BigNumber, ethers } from "ethers";
+import { utils } from "@across-protocol/sdk";
 import { CHAIN_IDs } from "./_constants";
 
 export function getMultiCallHandlerAddress(chainId: number) {
   // @todo: use API to source addresses?
-  const defaultAddress = "0x924a9f036260DdD5808007E1AA95f08eD08aA569";
+  const defaultAddress =
+    utils.getDeployedAddress("MulticallHandler", chainId) ||
+    "0x924a9f036260DdD5808007E1AA95f08eD08aA569";
   switch (chainId) {
     case CHAIN_IDs.LENS:
       return "0xc5939F59b3c9662377DdA53A08D5085b2d52b719";
