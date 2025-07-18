@@ -16,10 +16,16 @@ import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { CHAIN_IDs } from "../../_constants";
 import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
+import { get0xStrategy } from "../../_dexes/0x/allowance-holder";
+import { getLifiStrategy } from "../../_dexes/lifi/lifi-router";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
+  default: [
+    getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+    get0xStrategy("SpokePoolPeriphery"),
+    getLifiStrategy("SpokePoolPeriphery"),
+  ],
   chains: {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
