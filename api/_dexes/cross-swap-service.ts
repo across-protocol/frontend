@@ -1317,12 +1317,38 @@ async function executeStrategies<T>(strategyFetches: Promise<T>[]): Promise<T> {
   try {
     return await Promise.any(strategyFetches);
   } catch (error) {
+    // If all quote fetches errored, we need to determine which error to propagate to the
+    // caller.
     if (error instanceof AggregateError) {
       const errors = error.errors;
-      if (errors.every((error) => error instanceof InvalidParamError)) {
-        const errorToThrow = errors[0];
-        errorToThrow.cause = error;
-        throw errorToThrow;
+      const swapQuoteUnavailableError = errors.find(
+        (error) => error instanceof SwapQuoteUnavailableError
+      );
+
+      // If all quote fetches errored and at least one of them errored with a
+      // SwapQuoteUnavailableError, throw the error.
+      if (swapQuoteUnavailableError) {
+        throw new SwapQuoteUnavailableError(
+          {
+            message: "No available quotes for specified transfer",
+          },
+          {
+            cause: swapQuoteUnavailableError,
+          }
+        );
+      }
+      // If all quote fetches errored with an InvalidParamError, throw the first one.
+      if (
+        errors.every(
+          (error) =>
+            error instanceof InvalidParamError &&
+            (error.param === "excludeSources" ||
+              error.param === "includeSources")
+        )
+      ) {
+        throw new InvalidParamError({
+          message: "No available quotes for specified sources",
+        });
       }
     }
     throw error;
