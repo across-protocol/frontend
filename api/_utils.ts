@@ -2788,3 +2788,15 @@ export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
     return amount.mul(BigNumber.from("10").pow(-1 * diff));
   };
 };
+
+export function addTimeoutToPromise<T>(
+  promise: Promise<T>,
+  delay: number
+): Promise<T> {
+  const timeout = new Promise<T>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error("Promise timed out"));
+    }, delay);
+  });
+  return Promise.race([promise, timeout]);
+}
