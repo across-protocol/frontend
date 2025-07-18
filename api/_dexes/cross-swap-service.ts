@@ -1314,7 +1314,19 @@ function _prepCrossSwapQuotesRetrievalA2A(
  * other prioritization criteria in the future.
  */
 async function executeStrategies<T>(strategyFetches: Promise<T>[]): Promise<T> {
-  return await Promise.any(strategyFetches);
+  try {
+    return await Promise.any(strategyFetches);
+  } catch (error) {
+    if (error instanceof AggregateError) {
+      const errors = error.errors;
+      if (errors.every((error) => error instanceof InvalidParamError)) {
+        const errorToThrow = errors[0];
+        errorToThrow.cause = error;
+        throw errorToThrow;
+      }
+    }
+    throw error;
+  }
 }
 
 function assertSources(sources: QuoteFetchOpts["sources"]) {
@@ -1325,6 +1337,7 @@ function assertSources(sources: QuoteFetchOpts["sources"]) {
   throw new InvalidParamError({
     param:
       sources.sourcesType === "exclude" ? "excludeSources" : "includeSources",
-    message: "None of the provided sources are valid",
+    message:
+      "None of the provided sources are valid. Call the endpoint /swap/sources to get a list of valid sources.",
   });
 }
