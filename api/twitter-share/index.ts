@@ -46,6 +46,9 @@ export default async function handler(
         {
           fromChain: from,
           toChain: to,
+          utm_campaign: "ugc_twitter_weekly",
+          utm_source: "twitter",
+          utm_medium: "social",
         }
       )}`;
 
