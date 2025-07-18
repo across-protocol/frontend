@@ -1,4 +1,18 @@
-import { assert, Infer, type, string, optional, enums } from "superstruct";
+import {
+  assert,
+  Infer,
+  type,
+  string,
+  optional,
+  enums,
+  array,
+  object,
+  boolean,
+  lazy,
+  union,
+  unknown,
+  refine,
+} from "superstruct";
 import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
@@ -6,12 +20,13 @@ import {
   positiveFloatStr,
   positiveIntStr,
   validAddress,
+  validEvmAddress,
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
 } from "../_utils";
-import { InvalidParamError } from "../_errors";
+import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
 import {
   CrossSwapFees,
@@ -128,6 +143,89 @@ export async function handleBaseSwapQueryParams(
     slippageTolerance,
     refundToken,
   };
+}
+
+// Schema definitions for embedded actions
+// Input param for a function call
+const ActionArg = refine(
+  object({
+    value: unknown(), // Will be validated at runtime
+    populateDynamically: boolean(),
+    balanceSource: optional(validEvmAddress()),
+  }),
+  "balanceSource",
+  (argument) => {
+    if (argument.populateDynamically && !argument.balanceSource) {
+      return "balanceSource is required when populateDynamically is true";
+    }
+    return true;
+  }
+);
+
+// Recursive array type that can have nested arrays at any depth
+// Needed to support arguments of type tuple and array
+const RecursiveArgumentArray: any = lazy(() =>
+  union([ActionArg, array(RecursiveArgumentArray)])
+);
+
+// Instructions for a single function call
+const Action = type({
+  target: validEvmAddress(),
+  functionSignature: string(), // Will be validated at runtime
+  args: array(RecursiveArgumentArray),
+  value: positiveIntStr(),
+});
+
+const SwapBody = type({
+  actions: array(Action),
+});
+
+export type SwapBody = Infer<typeof SwapBody>;
+
+/**
+ * Validates that all actions in the swap body can be properly encoded.
+ * Recursively extracts argument values and validates they match the function signature.
+ *
+ * @param body - The request body containing an array of actions to validate
+ * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
+ */
+export function handleSwapBody(body: SwapBody) {
+  assert(body, SwapBody);
+
+  // Helper function to recursively extract only the .value fields from args array
+  const flattenArgs = (args: any[], depth: number = 0): any[] => {
+    if (depth > 10) {
+      throw new Error("Arguments array is too deeply nested");
+    }
+    return args.map((arg) => {
+      if (Array.isArray(arg)) {
+        return flattenArgs(arg, depth + 1);
+      } else if (arg && typeof arg === "object" && "value" in arg) {
+        return arg.value;
+      } else {
+        return arg;
+      }
+    });
+  };
+
+  body.actions.forEach((action) => {
+    const methodAbi = action.functionSignature;
+    const positionalArgs = flattenArgs(action.args);
+    const iface = new utils.Interface([methodAbi]);
+    const functionName = iface.fragments[0].name;
+    try {
+      iface.encodeFunctionData(functionName, positionalArgs);
+    } catch (err) {
+      throw new AbiEncodingError(
+        {
+          message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
+        },
+        {
+          cause: `${err instanceof Error ? err.message : String(err)}`,
+        }
+      );
+    }
+  });
 }
 
 export function getApprovalTxns(params: {
