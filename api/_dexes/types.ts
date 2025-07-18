@@ -38,6 +38,8 @@ export type CrossSwap = {
   refundAddress?: string;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  excludeSources?: string[];
+  includeSources?: string[];
 };
 
 export type SupportedDex =
@@ -124,6 +126,19 @@ export type CrossSwapFees = {
   destinationSwapFees?: Record<string, number>;
 };
 
+export type GetSourcesFn = (
+  chainId: number,
+  opts?: {
+    excludeSources?: string[];
+    includeSources?: string[];
+  }
+) =>
+  | {
+      sourcesKeys: string[];
+      sourcesType: "exclude" | "include";
+    }
+  | undefined;
+
 export type QuoteFetchStrategy = {
   getRouter: (chainId: number) => {
     address: string;
@@ -131,6 +146,7 @@ export type QuoteFetchStrategy = {
   };
   getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
+  getSources: GetSourcesFn;
 };
 
 export type QuoteFetchFn = (
@@ -141,6 +157,7 @@ export type QuoteFetchFn = (
 
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
+  sources?: ReturnType<GetSourcesFn>;
 }>;
 
 export type OriginEntryPointContractName =
@@ -264,4 +281,14 @@ export type CrossSwapQuotesRetrievalA2AResult = {
   depositEntryPoint: any;
   originRouter: any;
   destinationRouter: any;
+};
+
+export type DexSources = {
+  strategy: string;
+  sources: {
+    [chainId: number]: {
+      key: string; // Source key used by the DEX API
+      names: string[]; // Source names that match the key
+    }[];
+  };
 };

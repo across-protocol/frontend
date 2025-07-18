@@ -8,6 +8,7 @@ import { QuoteFetchStrategy, Swap } from "../types";
 import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
+import { makeGetSources } from "../utils";
 
 /**
  * Returns a swap quote fetch strategy for handling GHO/WGHO swaps.
@@ -37,6 +38,13 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       },
     } as const;
   };
+
+  const getSources = makeGetSources({
+    strategy: "gho",
+    sources: {
+      [CHAIN_IDs.MAINNET]: [{ key: "gho", names: ["gho"] }],
+    },
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -157,5 +165,6 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
     getRouter,
     getOriginEntryPoints,
     fetchFn,
+    getSources,
   };
 }

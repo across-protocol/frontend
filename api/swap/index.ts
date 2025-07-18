@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 
 import { TypedVercelRequest } from "../_types";
 import { getLogger, handleErrorCondition } from "../_utils";
-import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
+import { BaseSwapQueryParams } from "./_utils";
 import { handleApprovalSwap } from "./approval/_service";
 
 type SwapFlowType = "approval";
@@ -22,9 +22,6 @@ export default async function handler(
     query: request.query,
   });
   try {
-    // `/swap` only validate shared base params
-    await handleBaseSwapQueryParams(request.query);
-
     // TODO: Enable other swap flow types in the future
     const swapFlowType = "approval";
 

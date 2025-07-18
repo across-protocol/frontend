@@ -15,7 +15,9 @@ import { getEnvs } from "../../_env";
 import {
   estimateInputForExactOutput,
   getOriginSwapEntryPoints,
+  makeGetSources,
 } from "../utils";
+import { SOURCES } from "./utils/sources";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -46,6 +48,8 @@ export function get0xStrategy(
   const getOriginEntryPoints = (chainId: number) =>
     getOriginSwapEntryPoints(originSwapEntryPointContractName, chainId, "0x");
 
+  const getSources = makeGetSources(SOURCES);
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
@@ -60,6 +64,24 @@ export function get0xStrategy(
       );
     }
 
+    const sources = opts?.sources;
+    const sourcesParams =
+      sources?.sourcesType === "exclude"
+        ? {
+            excludeSources: sources.sourcesKeys.join(","),
+          }
+        : // We need to invert the include sources to be compatible with the API
+          // because 0x doesn't support the `includeSources` parameter
+          sources?.sourcesType === "include"
+          ? {
+              excludeSources: SOURCES.sources[swap.chainId]
+                .map((s) => s.key)
+                .filter(
+                  (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
+                ),
+            }
+          : {};
+
     const response = await axios.get(
       `${API_BASE_URL}/${opts?.useIndicativeQuote ? "price" : "quote"}`,
       {
@@ -71,6 +93,7 @@ export function get0xStrategy(
           sellAmount: swapAmount,
           taker: swap.recipient,
           slippageBps: Math.floor(swap.slippageTolerance * 100),
+          ...sourcesParams,
         },
       }
     );
@@ -127,5 +150,6 @@ export function get0xStrategy(
     getRouter,
     getOriginEntryPoints,
     fetchFn,
+    getSources,
   };
 }
