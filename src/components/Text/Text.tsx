@@ -77,9 +77,11 @@ type TextProps = {
   weight?: number;
   color?: TextColor;
   casing?: TextCasing;
+  monospace?: boolean;
 };
 
 export const Text = styled.div<TextProps>`
+  font-family: ${({ monospace }) => (monospace ? "monospace" : "inherit")};
   font-style: normal;
   font-weight: ${({ weight = 400 }) => weight};
   color: ${({ color = "white-88" }) => COLORS[color]};

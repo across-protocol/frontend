@@ -3,3 +3,4 @@ export { default as Transactions } from "./Transactions";
 export { default as Rewards } from "./Rewards";
 export { default as NotFound } from "./NotFound";
 export { default as Staking } from "./Staking";
+export { default as RelayerConfigs } from "./RelayerConfigs";
