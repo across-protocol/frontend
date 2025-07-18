@@ -598,11 +598,9 @@ export async function getCrossSwapQuotesForOutputA2B(
 
   const {
     originSwap,
-    originStrategy,
     originSwapChainId,
     destinationChainId,
     bridgeableInputToken,
-    originSwapEntryPoint,
   } = results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
@@ -662,7 +660,7 @@ export async function getCrossSwapQuotesForOutputA2B(
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
   let originSwapQuote = await profiler.measureAsync(
-    originStrategy.fetchFn(
+    prioritizedStrategy.result.originStrategy.fetchFn(
       {
         ...originSwap,
         depositor: crossSwap.depositor,
@@ -684,10 +682,13 @@ export async function getCrossSwapQuotesForOutputA2B(
     destinationSwapQuote: undefined,
     originSwapQuote,
     contracts: {
-      originSwapEntryPoint,
+      originSwapEntryPoint: prioritizedStrategy.result.originSwapEntryPoint,
       depositEntryPoint:
-        originStrategy.getOriginEntryPoints(originSwapChainId).deposit,
-      originRouter: originStrategy.getRouter(originSwapChainId),
+        prioritizedStrategy.result.originStrategy.getOriginEntryPoints(
+          originSwapChainId
+        ).deposit,
+      originRouter:
+        prioritizedStrategy.result.originStrategy.getRouter(originSwapChainId),
     },
   };
 }
