@@ -26,6 +26,7 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
+      span.setAttribute("swap.type", responseJson.crossSwapType);
       span.setStatus({ code: SpanStatusCode.OK });
       response.status(200).json(responseJson);
     } catch (error: unknown) {

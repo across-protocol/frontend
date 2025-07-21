@@ -20,7 +20,7 @@ import {
   Token,
   AmountType,
 } from "../_dexes/types";
-import { AMOUNT_TYPE } from "../_dexes/utils";
+import { AMOUNT_TYPE, CROSS_SWAP_TYPE } from "../_dexes/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
@@ -292,7 +292,16 @@ export function buildBaseSwapResponseJson(params: {
   };
   permitSwapTx?: any; // TODO: Add type
 }) {
+  const crossSwapType =
+    params.originSwapQuote && params.destinationSwapQuote
+      ? CROSS_SWAP_TYPE.ANY_TO_ANY
+      : params.originSwapQuote && params.bridgeQuote
+        ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
+        : params.destinationSwapQuote && params.bridgeQuote
+          ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
+          : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   return stringifyBigNumProps({
+    crossSwapType,
     checks: {
       allowance: params.approvalSwapTx
         ? {
