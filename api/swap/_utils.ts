@@ -295,9 +295,9 @@ export function buildBaseSwapResponseJson(params: {
   const crossSwapType =
     params.originSwapQuote && params.destinationSwapQuote
       ? CROSS_SWAP_TYPE.ANY_TO_ANY
-      : params.originSwapQuote && params.bridgeQuote
+      : params.originSwapQuote && !params.destinationSwapQuote
         ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
-        : params.destinationSwapQuote && params.bridgeQuote
+        : params.destinationSwapQuote && !params.originSwapQuote
           ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
           : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   return stringifyBigNumProps({
