@@ -77,7 +77,10 @@ export async function buildCrossSwapTxForAllowanceHolder(
               )
               .toBytes32(),
             exclusiveRelayer: sdk.utils
-              .toAddressType(swapAndDepositData.depositData.exclusiveRelayer)
+              .toAddressType(
+                swapAndDepositData.depositData.exclusiveRelayer,
+                destinationChainId
+              )
               .toBytes32(),
           },
         },
@@ -126,7 +129,10 @@ export async function buildCrossSwapTxForAllowanceHolder(
             )
             .toEvmAddress(),
           exclusiveRelayer: sdk.utils
-            .toAddressType(swapAndDepositData.depositData.exclusiveRelayer)
+            .toAddressType(
+              swapAndDepositData.depositData.exclusiveRelayer,
+              destinationChainId
+            )
             .toEvmAddress(),
           exclusivityDeadline:
             swapAndDepositData.depositData.exclusivityParameter,
@@ -173,7 +179,9 @@ export async function buildCrossSwapTxForAllowanceHolder(
           .toBytes32(),
         baseDepositData.outputAmount.toString(),
         baseDepositData.destinationChainId,
-        sdk.utils.toAddressType(baseDepositData.exclusiveRelayer).toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.exclusiveRelayer, destinationChainId)
+          .toBytes32(),
         baseDepositData.quoteTimestamp,
         baseDepositData.fillDeadline,
         baseDepositData.exclusivityParameter,
