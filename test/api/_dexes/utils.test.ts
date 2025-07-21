@@ -1,4 +1,4 @@
-import { getCrossSwapTypes, CROSS_SWAP_TYPE } from "../../../api/_dexes/utils";
+import { getCrossSwapType, CROSS_SWAP_TYPE } from "../../../api/_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 
 describe("_dexes/utils", () => {
@@ -12,8 +12,8 @@ describe("_dexes/utils", () => {
         isOutputNative: true,
         isInputNative: false,
       };
-      const crossSwapTypes = getCrossSwapTypes(params);
-      expect(crossSwapTypes).toEqual([CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE]);
+      const crossSwapType = getCrossSwapType(params);
+      expect(crossSwapType).toBe(CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE);
     });
 
     test("Lens GHO -> L1 GHO - should return bridgeable-to-any", () => {
@@ -25,39 +25,8 @@ describe("_dexes/utils", () => {
         isOutputNative: false,
         isInputNative: true,
       };
-      const crossSwapTypes = getCrossSwapTypes(params);
-      expect(crossSwapTypes).toEqual([CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY]);
-    });
-
-    test("Optimism USDC -> Arbitrum USDC - should return bridgeable-to-bridgeable", () => {
-      const params = {
-        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-        originChainId: CHAIN_IDs.OPTIMISM,
-        outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-        destinationChainId: CHAIN_IDs.ARBITRUM,
-        isOutputNative: false,
-        isInputNative: false,
-      };
-      const crossSwapTypes = getCrossSwapTypes(params);
-      expect(crossSwapTypes).toEqual([
-        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
-      ]);
-    });
-
-    test("Optimism USDC -> Arbitrum ETH - should return any-to-bridgeable and bridgeable-to-any", () => {
-      const params = {
-        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-        originChainId: CHAIN_IDs.OPTIMISM,
-        outputToken: TOKEN_SYMBOLS_MAP.ETH.addresses[CHAIN_IDs.ARBITRUM],
-        destinationChainId: CHAIN_IDs.ARBITRUM,
-        isOutputNative: false,
-        isInputNative: false,
-      };
-      const crossSwapTypes = getCrossSwapTypes(params);
-      expect(crossSwapTypes).toEqual([
-        CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
-        CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY,
-      ]);
+      const crossSwapType = getCrossSwapType(params);
+      expect(crossSwapType).toBe(CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY);
     });
   });
 });
