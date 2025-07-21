@@ -2,14 +2,13 @@ import { BigNumber, ethers } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
+import { getLogger, addMarkupToAmount } from "../../_utils";
 import {
-  getLogger,
-  getSpokePoolAddress,
-  addMarkupToAmount,
-} from "../../_utils";
-import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
+  OriginEntryPointContractName,
+  QuoteFetchStrategy,
+  Swap,
+  SwapQuote,
+} from "../types";
 import { floatToPercent } from "./utils/conversion";
 import {
   getUniswapClassicQuoteFromApi,
@@ -23,13 +22,12 @@ import {
   getUniswapQuoteWithSwapQuoterFromSdk,
   getUniswapQuoteWithSwapRouter02FromSdk,
 } from "./utils/v3-sdk";
+import { getOriginSwapEntryPoints } from "../utils";
 
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName:
-    | "SpokePoolPeriphery"
-    | "UniversalSwapAndBridge",
+  originSwapEntryPointContractName: OriginEntryPointContractName,
   quoteSource: QuoteSource = "trading-api"
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
@@ -39,32 +37,10 @@ export function getSwapRouter02Strategy(
     };
   };
   const getOriginEntryPoints = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-      return {
-        swapAndBridge: {
-          name: "UniversalSwapAndBridge",
-          address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
-          dex: "uniswap",
-        },
-        deposit: {
-          name: "SpokePool",
-          address: getSpokePoolAddress(chainId),
-        },
-      } as const;
-    }
-    throw new Error(
-      `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+    return getOriginSwapEntryPoints(
+      originSwapEntryPointContractName,
+      chainId,
+      "uniswap-v3/swap-router-02"
     );
   };
 

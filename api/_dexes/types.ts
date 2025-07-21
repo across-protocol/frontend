@@ -43,9 +43,12 @@ export type CrossSwap = {
 export type SupportedDex =
   | "1inch"
   | "uniswap"
+  | "uniswap-v3/swap-router-02"
+  | "uniswap-v3/universal-router"
   | "gho"
   | "gho-multicall3"
-  | "lifi";
+  | "lifi"
+  | "0x";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -126,22 +129,7 @@ export type QuoteFetchStrategy = {
     address: string;
     name: string;
   };
-  getOriginEntryPoints: (chainId: number) => {
-    swapAndBridge:
-      | {
-          name: "UniversalSwapAndBridge";
-          address: string;
-          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3" | "lifi";
-        }
-      | {
-          name: "SpokePoolPeriphery";
-          address: string;
-        };
-    deposit: {
-      name: "SpokePoolPeriphery" | "SpokePool";
-      address: string;
-    };
-  };
+  getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
 };
 
@@ -154,3 +142,126 @@ export type QuoteFetchFn = (
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
 }>;
+
+export type OriginEntryPointContractName =
+  | "SpokePoolPeriphery"
+  | "UniversalSwapAndBridge";
+
+export type OriginEntryPoints = {
+  originSwapInitialRecipient: {
+    name: "UniversalSwapAndBridge" | "SwapProxy";
+    address: string;
+  };
+  swapAndBridge: {
+    name: OriginEntryPointContractName;
+    address: string;
+    dex: string;
+  };
+  deposit: {
+    name: "SpokePoolPeriphery" | "SpokePool";
+    address: string;
+  };
+};
+
+export type CrossSwapQuotesRetrievalB2AResult = {
+  destinationSwap: {
+    chainId: number;
+    tokenIn: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    tokenOut: any;
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originRouter: any;
+  destinationRouter: any;
+  depositEntryPoint: any;
+  bridgeableOutputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  destinationSwapChainId: number;
+  destinationStrategy: QuoteFetchStrategy;
+  originStrategy: QuoteFetchStrategy;
+};
+
+export type CrossSwapQuotesRetrievalA2BResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: any;
+    tokenOut: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationChainId: number;
+  bridgeableInputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  originSwapEntryPoint: any;
+};
+
+export type CrossSwapQuotesRetrievalA2AResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: any;
+    tokenOut: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  destinationSwap: {
+    chainId: number;
+    tokenIn: {
+      address: string;
+      decimals: number;
+      symbol: string;
+      chainId: number;
+    };
+    tokenOut: any;
+    recipient: string;
+    slippageTolerance: number;
+    type: any;
+  };
+  originStrategy: QuoteFetchStrategy;
+  destinationStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationSwapChainId: number;
+  bridgeableInputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  bridgeableOutputToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+    chainId: number;
+  };
+  originSwapEntryPoint: any;
+  depositEntryPoint: any;
+  originRouter: any;
+  destinationRouter: any;
+};

@@ -14,10 +14,10 @@
     }
   },
   "universalSwapAndBridgeAddresses": {
-    "uniswap": {}
+    "uniswap-v3/swap-router-02": {}
   },
   "spokePoolPeripheryAddresses": {},
-  "spokePoolPeripheryProxyAddresses": {},
+  "swapProxyAddresses": {},
   "routes": [
     {
       "fromChain": 11155111,

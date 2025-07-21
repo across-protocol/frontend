@@ -222,6 +222,9 @@ export const MAX_RELAY_FEE_PERCENT = Number(
 export const SHOW_ACX_NAV_TOKEN =
   process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
+export const showV4LaunchBanner = Boolean(
+  process.env.REACT_APP_SHOW_V4_BANNER === "true"
+);
 
 assert(
   isSupportedChainId(hubPoolChainId),

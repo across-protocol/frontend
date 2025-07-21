@@ -673,13 +673,13 @@ export const getHubPoolClient = () => {
 };
 
 export const baseFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(BASE_FEE_MARKUP || "{}");
 export const priorityFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
 export const opStackL1DataFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
 
 // Conservative values bsaed on existing configurations:
@@ -703,17 +703,19 @@ export const getGasMarkup = (
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
   let _opStackL1DataFeeMarkup: BigNumber | undefined;
-  if (typeof baseFeeMarkup[chainId] === "number") {
-    _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
-  }
-  if (typeof priorityFeeMarkup[chainId] === "number") {
-    _priorityFeeMarkup = utils.parseEther(
-      (1 + priorityFeeMarkup[chainId]).toString()
+  if (!Number.isNaN(Number(baseFeeMarkup[chainId]))) {
+    _baseFeeMarkup = utils.parseEther(
+      (1 + Number(baseFeeMarkup[chainId])).toString()
     );
   }
-  if (typeof opStackL1DataFeeMarkup[chainId] === "number") {
+  if (!Number.isNaN(Number(priorityFeeMarkup[chainId]))) {
+    _priorityFeeMarkup = utils.parseEther(
+      (1 + Number(priorityFeeMarkup[chainId])).toString()
+    );
+  }
+  if (!Number.isNaN(Number(opStackL1DataFeeMarkup[chainId]))) {
     _opStackL1DataFeeMarkup = utils.parseEther(
-      (1 + opStackL1DataFeeMarkup[chainId]).toString()
+      (1 + Number(opStackL1DataFeeMarkup[chainId])).toString()
     );
   }
 
