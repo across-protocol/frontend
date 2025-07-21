@@ -98,8 +98,8 @@ const _defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("10000").toString(),
   },
   LSK: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0005").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0005").toString(),
+    upperBound: ethers.utils.parseUnits("0.0020").toString(),
     cutoff: ethers.utils.parseUnits("10000").toString(),
   },
   GRASS: {
