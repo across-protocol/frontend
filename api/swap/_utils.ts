@@ -52,7 +52,7 @@ export async function handleBaseSwapQueryParams(
     originChainId: _originChainId,
     destinationChainId: _destinationChainId,
     amount: _amount,
-    tradeType = AMOUNT_TYPE.MIN_OUTPUT,
+    tradeType = AMOUNT_TYPE.EXACT_INPUT,
     recipient,
     depositor,
     integratorId,
@@ -268,6 +268,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 }
 
 export function buildBaseSwapResponseJson(params: {
+  amountType: AmountType;
   inputTokenAddress: string;
   originChainId: number;
   inputAmount: BigNumber;
@@ -302,6 +303,7 @@ export function buildBaseSwapResponseJson(params: {
           : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   return stringifyBigNumProps({
     crossSwapType,
+    amountType: params.amountType,
     checks: {
       allowance: params.approvalSwapTx
         ? {
@@ -358,6 +360,10 @@ export function buildBaseSwapResponseJson(params: {
           }
         : undefined,
     },
+    inputToken:
+      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
+    outputToken:
+      params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
     refundToken:
       params.refundToken.symbol === "ETH"
         ? {
