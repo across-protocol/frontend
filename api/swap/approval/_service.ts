@@ -7,6 +7,8 @@ import {
   BaseSwapQueryParams,
   getApprovalTxns,
   buildBaseSwapResponseJson,
+  handleSwapBody,
+  SwapBody,
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
@@ -50,7 +52,7 @@ const quoteFetchStrategies: QuoteFetchStrategies = {
 };
 
 export async function handleApprovalSwap(
-  request: TypedVercelRequest<BaseSwapQueryParams>
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>
 ) {
   const {
     integratorId,
@@ -68,6 +70,10 @@ export async function handleApprovalSwap(
     slippageTolerance,
     refundToken,
   } = await handleBaseSwapQueryParams(request.query);
+
+  if (request.body) {
+    handleSwapBody(request.body);
+  }
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
