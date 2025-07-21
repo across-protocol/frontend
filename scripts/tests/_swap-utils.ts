@@ -109,6 +109,12 @@ const argsFromCli = yargs(hideBin(process.argv))
     description: "Host to use for the API",
     default: "http://localhost:3000",
   })
+  .option("includeDestinationAction", {
+    alias: "da",
+    description: "Include destination action.",
+    type: "boolean",
+    default: false,
+  })
   .option("flowType", {
     alias: "ft",
     description: "Flow type.",
