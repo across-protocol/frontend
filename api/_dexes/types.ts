@@ -3,6 +3,7 @@ import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
 import { AmountType, CrossSwapType } from "./utils";
+import { Action } from "../swap/_utils";
 
 export type { AmountType, CrossSwapType };
 
@@ -38,6 +39,7 @@ export type CrossSwap = {
   refundAddress?: string;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  embeddedActions: Action[];
 };
 
 export type SupportedDex =

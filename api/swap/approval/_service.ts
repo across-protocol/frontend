@@ -71,9 +71,9 @@ export async function handleApprovalSwap(
     refundToken,
   } = await handleBaseSwapQueryParams(request.query);
 
-  if (request.body) {
-    handleSwapBody(request.body);
-  }
+  const { actions } = request.body
+    ? handleSwapBody(request.body)
+    : { actions: [] };
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -88,6 +88,7 @@ export async function handleApprovalSwap(
       refundAddress,
       isInputNative,
       isOutputNative,
+      embeddedActions: actions,
     },
     quoteFetchStrategies
   );
