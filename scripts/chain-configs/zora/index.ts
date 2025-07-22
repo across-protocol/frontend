@@ -17,6 +17,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://rpc.zora.energy",
+  blockExplorer: "https://explorer.zora.energy",
   blockTimeSeconds: 2,
   tokens: ["WETH", "ETH", "USDzC"],
   enableCCTP: false,

@@ -31,12 +31,14 @@ export const HttpErrorToStatusCode = {
 export const AcrossErrorCode = {
   // Status: 40X
   INVALID_PARAM: "INVALID_PARAM",
+  INVALID_METHOD: "INVALID_METHOD",
   MISSING_PARAM: "MISSING_PARAM",
   SIMULATION_ERROR: "SIMULATION_ERROR",
   AMOUNT_TOO_LOW: "AMOUNT_TOO_LOW",
   AMOUNT_TOO_HIGH: "AMOUNT_TOO_HIGH",
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
   SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
+  ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
 
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
@@ -136,6 +138,18 @@ export class MissingParamError extends InputError {
       code: AcrossErrorCode.MISSING_PARAM,
       param: args.param,
     });
+  }
+}
+
+export class AbiEncodingError extends InputError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.ABI_ENCODING_ERROR,
+      },
+      opts
+    );
   }
 }
 

@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 
 import { TypedVercelRequest } from "../_types";
 import { getLogger, handleErrorCondition } from "../_utils";
-import { BaseSwapQueryParams } from "./_utils";
+import { BaseSwapQueryParams, SwapBody } from "./_utils";
 import { handleApprovalSwap } from "./approval/_service";
 
 type SwapFlowType = "approval";
@@ -12,7 +12,7 @@ const swapFlowTypeToHandler = {
 };
 
 export default async function handler(
-  request: TypedVercelRequest<BaseSwapQueryParams>,
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
   response: VercelResponse
 ) {
   const logger = getLogger();
