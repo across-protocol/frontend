@@ -2850,3 +2850,43 @@ export function addTimeoutToPromise<T>(
   });
   return Promise.race([promise, timeout]);
 }
+
+export function flattenErrors(reason: any, depth: number = 0): string[] {
+  if (
+    reason instanceof AggregateError &&
+    Array.isArray(reason.errors) &&
+    depth < 1
+  ) {
+    return reason.errors.flatMap((error) => flattenErrors(error, depth + 1));
+  }
+  const response = reason.response;
+  if (reason.isAxiosError && response) {
+    const responseData = response.data;
+    const responseMessage =
+      responseData.message ||
+      responseData.detail ||
+      JSON.stringify(responseData);
+    return [
+      `AxiosError: status: ${response.status}, details: ${responseMessage}`,
+    ];
+  }
+  return [`Error: ${JSON.stringify(reason)}`];
+}
+
+export function getRejectedReasons(
+  settledResults: PromiseSettledResult<any>[]
+): string[] {
+  try {
+    return settledResults
+      .map((result, idx) => {
+        if (result.status === "rejected") {
+          const reason = (result as PromiseRejectedResult).reason;
+          return flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`);
+        }
+        return [];
+      })
+      .flat();
+  } catch (err) {
+    return [];
+  }
+}

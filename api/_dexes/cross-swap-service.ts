@@ -10,10 +10,10 @@ import {
   addMarkupToAmount,
   getBridgeQuoteForExactInput,
   addTimeoutToPromise,
+  getRejectedReasons,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
-  AmountType,
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
@@ -109,7 +109,7 @@ function getCrossSwapQuoteForAmountType(
     return handler(crossSwap, strategies);
   });
 
-  return selectBestCrossSwapQuote(crossSwaps, crossSwap.type);
+  return selectBestCrossSwapQuote(crossSwaps, crossSwap);
 }
 
 export async function getCrossSwapQuotesForExactInputB2B(
@@ -1383,7 +1383,7 @@ function assertSources(sources: QuoteFetchOpts["sources"]) {
  */
 async function selectBestCrossSwapQuote(
   crossSwapQuotePromises: Promise<CrossSwapQuotes>[],
-  amountType: AmountType
+  crossSwap: CrossSwap
 ): Promise<CrossSwapQuotes> {
   const crossSwapQuotePromisesWithTimeout = crossSwapQuotePromises.map(
     (promise) => addTimeoutToPromise(promise, PROMISE_TIMEOUT_MS)
@@ -1397,10 +1397,17 @@ async function selectBestCrossSwapQuote(
     .map((result) => result.value);
 
   if (fulfilledQuotes.length === 0) {
-    throw new SwapQuoteUnavailableError({
-      message:
-        "Failed to fetch swap quote: No quotes available from any cross swap type",
-    });
+    const rejectedReasons = getRejectedReasons(crossSwapQuotes);
+    const message = `Failed to fetch swap quote: No quotes available for ${crossSwap.type} ${crossSwap.inputToken.symbol} to ${crossSwap.outputToken.symbol} from ${crossSwap.inputToken.chainId} to ${crossSwap.outputToken.chainId} for amount ${crossSwap.amount}`;
+    throw new SwapQuoteUnavailableError(
+      {
+        message,
+      },
+      {
+        cause:
+          rejectedReasons.length > 0 ? rejectedReasons.join(", ") : undefined,
+      }
+    );
   }
 
   if (fulfilledQuotes.length === 1) {
@@ -1412,7 +1419,7 @@ async function selectBestCrossSwapQuote(
     const bestDestinationSwapQuote = best.destinationSwapQuote;
     const currentBridgeQuote = current.bridgeQuote;
     const bestBridgeQuote = best.bridgeQuote;
-    const isExactInput = amountType === "exactInput";
+    const isExactInput = crossSwap.type === "exactInput";
 
     const currentAmount = currentDestinationSwapQuote
       ? isExactInput
