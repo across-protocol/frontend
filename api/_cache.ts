@@ -73,6 +73,17 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     }
     await this.client.del(key);
   }
+
+  pub(_channel: string, _message: string): Promise<number> {
+    throw new Error("pub: not supported");
+  }
+
+  async sub(
+    _channel: string,
+    _listener: (message: string, channel: string) => void
+  ): Promise<number> {
+    throw new Error("sub: not supported");
+  }
 }
 
 export const redisCache = new RedisCache();

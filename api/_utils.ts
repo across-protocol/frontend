@@ -19,6 +19,7 @@ import {
   BigNumber,
   BigNumberish,
   ethers,
+  PopulatedTransaction,
   providers,
   utils,
   Signer,
@@ -775,15 +776,21 @@ export const getRelayerFeeCalculatorQueries = (
     relayerAddress: string;
   }> = {}
 ) => {
+  const relayerAddress = sdk.utils.toAddressType(
+    overrides.relayerAddress || sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    destinationChainId
+  );
+  if (!relayerAddress.isEVM()) {
+    throw new Error(`relayerAddress is not EVM: ${relayerAddress.toNative()}`);
+  }
+
   const baseArgs = {
     chainId: destinationChainId,
     provider: getProvider(destinationChainId, { useSpeedProvider: true }),
     symbolMapping: TOKEN_SYMBOLS_MAP,
     spokePoolAddress:
       overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    simulatedRelayerAddress:
-      overrides.relayerAddress ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+    relayerAddress,
     coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
     logger: getLogger(),
   };
@@ -795,7 +802,7 @@ export const getRelayerFeeCalculatorQueries = (
         baseArgs.provider,
         baseArgs.symbolMapping,
         baseArgs.spokePoolAddress,
-        baseArgs.simulatedRelayerAddress,
+        baseArgs.relayerAddress,
         baseArgs.logger,
         baseArgs.coingeckoProApiKey,
         undefined,
@@ -810,7 +817,7 @@ export const getRelayerFeeCalculatorQueries = (
     baseArgs.provider,
     baseArgs.symbolMapping,
     baseArgs.spokePoolAddress,
-    baseArgs.simulatedRelayerAddress,
+    baseArgs.relayerAddress,
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
   ) as sdk.relayFeeCalculator.QueryBase;
@@ -862,7 +869,7 @@ export const getRelayerFeeDetails = async (
     depositForSimulation,
     depositForSimulation.outputAmount, // scaled output amount
     isMessageEmpty(deposit.message),
-    relayerAddress,
+    sdk.utils.toAddressType(relayerAddress, deposit.destinationChainId),
     tokenPrice,
     gasPrice,
     gasUnits,
@@ -879,6 +886,7 @@ export const buildDepositForSimulation = (depositArgs: {
   destinationChainId: number;
   message?: string;
 }) => {
+  const { toAddressType } = sdk.utils;
   const {
     amount,
     inputToken: _inputTokenAddress,
@@ -903,6 +911,7 @@ export const buildDepositForSimulation = (depositArgs: {
     );
   }
   const inputAmount = sdk.utils.toBN(amount);
+  const recipient = toAddressType(recipientAddress, destinationChainId);
 
   return {
     inputAmount,
@@ -911,15 +920,18 @@ export const buildDepositForSimulation = (depositArgs: {
       outputTokenDecimals
     )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
-    depositor: recipientAddress,
-    recipient: recipientAddress,
+    depositor: recipient, // nb. Address type may be invalid for origin chain. Depositor address is never validated.
+    recipient,
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-    inputToken: _inputTokenAddress,
-    outputToken: _outputTokenAddress,
+    inputToken: toAddressType(_inputTokenAddress, originChainId),
+    outputToken: toAddressType(_outputTokenAddress, destinationChainId),
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-    exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
+    exclusiveRelayer: toAddressType(
+      sdk.constants.ZERO_ADDRESS,
+      destinationChainId
+    ),
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
     messageHash: sdk.utils.getMessageHash(
@@ -2418,18 +2430,27 @@ export function getCachedNativeGasCost(
     deposit.destinationChainId,
     deposit.outputToken
   );
+
   const fetchFn = async () => {
     const relayerAddress =
       overrides?.relayerAddress ??
       sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+
     const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
       deposit.destinationChainId,
       overrides
     );
+    const relayData = buildDepositForSimulation(deposit);
+    const { destinationChainId, recipient, outputToken } = relayData;
+    if (!recipient.isEVM() || !outputToken.isEVM()) {
+      throw new Error(
+        `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+      );
+    }
     const unsignedFillTxn =
       await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        relayerAddress
+        { ...relayData, recipient, outputToken },
+        sdk.utils.toAddressType(relayerAddress, relayData.destinationChainId)
       );
     const voidSigner = new ethers.VoidSigner(
       relayerAddress,
@@ -2477,15 +2498,30 @@ export function getCachedOpStackL1DataFee(
       deposit.destinationChainId,
       overrides
     );
+    const relayData = buildDepositForSimulation(deposit);
+    const { recipient, outputToken, destinationChainId } = relayData;
+    if (!recipient.isEVM() || !outputToken.isEVM()) {
+      throw new Error(
+        `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+      );
+    }
+    const relayer = overrides?.relayerAddress
+      ? sdk.utils.toAddressType(
+          overrides.relayerAddress,
+          deposit.destinationChainId
+        )
+      : undefined;
+
     const unsignedTx =
       await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        overrides?.relayerAddress
+        { ...relayData, recipient, outputToken },
+        relayer
       );
+
     const opStackL1GasCost =
       await relayerFeeCalculatorQueries.getOpStackL1DataFee(
         unsignedTx,
-        overrides?.relayerAddress,
+        relayer,
         {
           opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
           opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
@@ -2556,15 +2592,29 @@ export async function getMaxFeePerGas(
     chainId,
     overrides
   );
-  const unsignedFillTxn = deposit
-    ? await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        overrides?.relayerAddress
-      )
-    : undefined;
+
+  let unsignedTx: PopulatedTransaction | undefined = undefined;
+  if (deposit) {
+    const relayData = buildDepositForSimulation(deposit);
+    const { recipient, outputToken, destinationChainId } = relayData;
+    if (!recipient.isEVM() || !outputToken.isEVM()) {
+      throw new Error(
+        `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+      );
+    }
+    const relayer = overrides?.relayerAddress
+      ? sdk.utils.toAddressType(overrides.relayerAddress, destinationChainId)
+      : undefined;
+
+    unsignedTx = await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
+      { ...relayData, recipient, outputToken },
+      relayer
+    );
+  }
+
   return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
     chainId,
-    unsignedTx: unsignedFillTxn,
+    unsignedTx,
     baseFeeMultiplier,
     priorityFeeMultiplier,
   });
