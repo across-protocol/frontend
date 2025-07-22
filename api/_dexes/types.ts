@@ -74,6 +74,10 @@ export type SwapQuote = {
   }[];
   tokenIn: Token;
   tokenOut: Token;
+  swapProvider: {
+    name: string;
+    sources: string[];
+  };
 };
 
 export type CrossSwapQuotes = {

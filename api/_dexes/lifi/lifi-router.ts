@@ -76,6 +76,7 @@ export function getLifiStrategy(
         ...sourcesParams,
       };
 
+      // https://docs.li.fi/api-reference/get-a-quote-for-a-token-transfer
       const response = await axios.get(
         `${API_BASE_URL}/quote/${tradeType === TradeType.EXACT_INPUT ? "" : "toAmount"}`,
         {
@@ -113,6 +114,10 @@ export function getLifiStrategy(
         expectedAmountIn,
         slippageTolerance: swap.slippageTolerance,
         swapTxns: [swapTx],
+        swapProvider: {
+          name: "lifi",
+          sources: [quote.tool],
+        },
       };
 
       getLogger().debug({

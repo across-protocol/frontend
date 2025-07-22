@@ -82,6 +82,7 @@ export function get0xStrategy(
             }
           : {};
 
+    // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
     const response = await axios.get(
       `${API_BASE_URL}/${opts?.useIndicativeQuote ? "price" : "quote"}`,
       {
@@ -99,6 +100,10 @@ export function get0xStrategy(
     );
 
     const quote = response.data;
+
+    const usedSources = quote.route.fills.map((fill: { source: string }) =>
+      fill.source.toLowerCase()
+    );
 
     const expectedAmountIn = BigNumber.from(quote.sellAmount);
     const maximumAmountIn = expectedAmountIn;
@@ -127,6 +132,10 @@ export function get0xStrategy(
       expectedAmountIn,
       slippageTolerance: swap.slippageTolerance,
       swapTxns: [swapTx],
+      swapProvider: {
+        name: "0x",
+        sources: usedSources,
+      },
     };
 
     getLogger().debug({

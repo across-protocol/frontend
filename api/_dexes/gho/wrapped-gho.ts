@@ -102,6 +102,10 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         expectedAmountIn: BigNumber.from(amount),
         slippageTolerance: swap.slippageTolerance,
         swapTxns,
+        swapProvider: {
+          name: "wrapped-gho",
+          sources: ["wgho"],
+        },
       };
     }
 
@@ -158,6 +162,10 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
       slippageTolerance: swap.slippageTolerance,
       swapTxns,
+      swapProvider: {
+        name: "wrapped-gho",
+        sources: ["wgho", "uniswap_v3"],
+      },
     };
   };
 

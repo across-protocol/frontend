@@ -1,4 +1,5 @@
 import { BigNumber, constants } from "ethers";
+import { Span } from "@opentelemetry/api";
 
 import { getProvider, InputError, latestGasPriceCache } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
@@ -19,10 +20,16 @@ import { CHAIN_IDs } from "../../_constants";
 import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 import { AcrossErrorCode } from "../../_errors";
+import { get0xStrategy } from "../../_dexes/0x/allowance-holder";
+import { getLifiStrategy } from "../../_dexes/lifi/lifi-router";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
+  default: [
+    getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+    get0xStrategy("UniversalSwapAndBridge"),
+    getLifiStrategy("UniversalSwapAndBridge"),
+  ],
   chains: {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
@@ -53,7 +60,8 @@ const quoteFetchStrategies: QuoteFetchStrategies = {
 };
 
 export async function handleApprovalSwap(
-  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
+  span?: Span
 ) {
   // This handler supports both GET and POST requests.
   // For GET requests, we expect the body to be empty.
@@ -191,5 +199,66 @@ export async function handleApprovalSwap(
     destinationSwapQuote,
     refundToken,
   });
+
+  if (span) {
+    setSpanAttributes(span, responseJson);
+  }
+
   return responseJson;
+}
+
+function setSpanAttributes(
+  span: Span,
+  responseJson: Awaited<ReturnType<typeof handleApprovalSwap>>
+) {
+  span.setAttribute("swap.type", responseJson.crossSwapType);
+  span.setAttribute("swap.tradeType", responseJson.amountType);
+  span.setAttribute("swap.originChainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.destinationChainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputToken.address", responseJson.inputToken.address);
+  span.setAttribute("swap.inputToken.symbol", responseJson.inputToken.symbol);
+  span.setAttribute("swap.inputToken.chainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.outputToken.address",
+    responseJson.outputToken.address
+  );
+  span.setAttribute("swap.outputToken.symbol", responseJson.outputToken.symbol);
+  span.setAttribute(
+    "swap.outputToken.chainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputAmount", responseJson.inputAmount.toString());
+  span.setAttribute(
+    "swap.minOutputAmount",
+    responseJson.minOutputAmount.toString()
+  );
+  span.setAttribute(
+    "swap.expectedOutputAmount",
+    responseJson.expectedOutputAmount.toString()
+  );
+
+  if (responseJson.steps.originSwap) {
+    span.setAttribute(
+      "swap.originSwap.swapProvider.name",
+      responseJson.steps.originSwap.swapProvider.name
+    );
+    span.setAttribute(
+      "swap.originSwap.swapProvider.sources",
+      responseJson.steps.originSwap.swapProvider.sources
+    );
+  }
+
+  if (responseJson.steps.destinationSwap) {
+    span.setAttribute(
+      "swap.destinationSwap.swapProvider.name",
+      responseJson.steps.destinationSwap.swapProvider.name
+    );
+    span.setAttribute(
+      "swap.destinationSwap.swapProvider.sources",
+      responseJson.steps.destinationSwap.swapProvider.sources
+    );
+  }
 }
