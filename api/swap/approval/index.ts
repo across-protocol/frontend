@@ -2,8 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { SpanStatusCode } from "@opentelemetry/api";
 
 import { TypedVercelRequest } from "../../_types";
-import { getLogger, handleErrorCondition, InputError } from "../../_utils";
-import { AcrossErrorCode } from "../../_errors";
+import { getLogger, handleErrorCondition } from "../../_utils";
 import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
 import { tracer } from "../../../instrumentation";
@@ -20,15 +19,6 @@ const handler = async (
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
     try {
-      // This handler supports both GET and POST requests.
-      // For GET requests, we expect the body to be empty.
-      // TODO: Allow only POST requests
-      if (request.method !== "POST" && request.body) {
-        throw new InputError({
-          message: "POST method required when request.body is provided",
-          code: AcrossErrorCode.INVALID_METHOD,
-        });
-      }
       const responseJson = await handleApprovalSwap(request);
 
       logger.debug({
