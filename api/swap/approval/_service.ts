@@ -72,7 +72,7 @@ export async function handleApprovalSwap(
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } = request.body
-    ? handleSwapBody(request.body)
+    ? handleSwapBody(request.body, Number(request.query.destinationChainId))
     : { actions: [] };
 
   const crossSwapQuotes = await getCrossSwapQuotes(

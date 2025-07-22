@@ -41,7 +41,7 @@ export default async function handler(
     // `/swap` only validate shared base params
     await handleBaseSwapQueryParams(request.query);
     if (request.body) {
-      handleSwapBody(request.body);
+      handleSwapBody(request.body, Number(request.query.destinationChainId));
     }
 
     // TODO: Enable other swap flow types in the future
