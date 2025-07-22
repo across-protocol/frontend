@@ -22,7 +22,7 @@ import {
   getUniswapQuoteWithSwapQuoterFromSdk,
   getUniswapQuoteWithSwapRouter02FromSdk,
 } from "./utils/v3-sdk";
-import { getOriginSwapEntryPoints } from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
@@ -36,6 +36,7 @@ export function getSwapRouter02Strategy(
       name: "UniswapV3SwapRouter02",
     };
   };
+
   const getOriginEntryPoints = (chainId: number) => {
     return getOriginSwapEntryPoints(
       originSwapEntryPointContractName,
@@ -43,6 +44,23 @@ export function getSwapRouter02Strategy(
       "uniswap-v3/swap-router-02"
     );
   };
+
+  const getSources = makeGetSources({
+    strategy: "uniswap-v3/swap-router-02",
+    sources: Object.keys(SWAP_ROUTER_02_ADDRESS).reduce(
+      (acc, chainIdStr) => {
+        const chainId = Number(chainIdStr);
+        acc[chainId] = [
+          {
+            key: "uniswap-v3/swap-router-02",
+            names: ["uniswap_v3"],
+          },
+        ];
+        return acc;
+      },
+      {} as Record<number, { key: string; names: string[] }[]>
+    ),
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -84,6 +102,7 @@ export function getSwapRouter02Strategy(
   return {
     getRouter,
     getOriginEntryPoints,
+    getSources,
     fetchFn,
   };
 }
