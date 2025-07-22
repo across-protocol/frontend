@@ -27,8 +27,8 @@ import { getLifiStrategy } from "../../_dexes/lifi/lifi-router";
 const quoteFetchStrategies: QuoteFetchStrategies = {
   default: [
     getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
-    get0xStrategy("UniversalSwapAndBridge"),
-    getLifiStrategy("UniversalSwapAndBridge"),
+    get0xStrategy("SpokePoolPeriphery"),
+    getLifiStrategy("SpokePoolPeriphery"),
   ],
   chains: {
     [CHAIN_IDs.LENS]: [
