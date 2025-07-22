@@ -29,6 +29,12 @@ const argsFromCli = yargs(hideBin(process.argv))
         "Filter predefined test cases in scripts/tests/_swap-cases.ts by comma-separated list of labels.",
     });
   })
+  .option("includeDestinationAction", {
+    alias: "da",
+    description: "Include destination action.",
+    type: "boolean",
+    default: false,
+  })
   .command("args", "Run with custom args", (yargs) => {
     return yargs
       .usage("Usage: $0 args [options]")
@@ -102,12 +108,6 @@ const argsFromCli = yargs(hideBin(process.argv))
     alias: "h",
     description: "Host to use for the API",
     default: "http://localhost:3000",
-  })
-  .option("includeDestinationAction", {
-    alias: "da",
-    description: "Include destination action.",
-    type: "boolean",
-    default: false,
   })
   .option("flowType", {
     alias: "ft",
