@@ -152,6 +152,7 @@ export async function handleApprovalSwap(
   }
 
   const responseJson = buildBaseSwapResponseJson({
+    amountType,
     originChainId,
     inputTokenAddress,
     inputAmount,
