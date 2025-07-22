@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { SpanStatusCode } from "@opentelemetry/api";
+import { Span, SpanStatusCode } from "@opentelemetry/api";
 
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition } from "../../_utils";
@@ -26,7 +26,7 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-      span.setAttribute("swap.type", responseJson.crossSwapType);
+      setSpanAttributes(span, responseJson);
       span.setStatus({ code: SpanStatusCode.OK });
       response.status(200).json(responseJson);
     } catch (error: unknown) {
@@ -42,5 +42,39 @@ const handler = async (
     }
   });
 };
+
+function setSpanAttributes(
+  span: Span,
+  responseJson: Awaited<ReturnType<typeof handleApprovalSwap>>
+) {
+  span.setAttribute("swap.type", responseJson.crossSwapType);
+  span.setAttribute("swap.tradeType", responseJson.amountType);
+  span.setAttribute("swap.originChainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.destinationChainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputToken.address", responseJson.inputToken.address);
+  span.setAttribute("swap.inputToken.symbol", responseJson.inputToken.symbol);
+  span.setAttribute("swap.inputToken.chainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.outputToken.address",
+    responseJson.outputToken.address
+  );
+  span.setAttribute("swap.outputToken.symbol", responseJson.outputToken.symbol);
+  span.setAttribute(
+    "swap.outputToken.chainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputAmount", responseJson.inputAmount.toString());
+  span.setAttribute(
+    "swap.minOutputAmount",
+    responseJson.minOutputAmount.toString()
+  );
+  span.setAttribute(
+    "swap.expectedOutputAmount",
+    responseJson.expectedOutputAmount.toString()
+  );
+}
 
 export default handler;
