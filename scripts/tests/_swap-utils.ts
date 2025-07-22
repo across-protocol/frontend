@@ -1,4 +1,4 @@
-import { Wallet } from "ethers";
+import { Wallet, ethers } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
 import yargs from "yargs";
@@ -28,6 +28,12 @@ const argsFromCli = yargs(hideBin(process.argv))
       description:
         "Filter predefined test cases in scripts/tests/_swap-cases.ts by comma-separated list of labels.",
     });
+  })
+  .option("includeDestinationAction", {
+    alias: "da",
+    description: "Include destination action.",
+    type: "boolean",
+    default: false,
   })
   .command("args", "Run with custom args", (yargs) => {
     return yargs
@@ -118,6 +124,7 @@ export function filterTestCases(
   testCases: {
     labels: string[];
     params: { [key: string]: any };
+    body?: { [key: string]: any };
   }[],
   filterString: string
 ) {
@@ -135,6 +142,8 @@ export function filterTestCases(
 
 export async function fetchSwapQuotes() {
   const flowType = argsFromCli.flowType;
+  const includeDestinationAction =
+    argsFromCli.includeDestinationAction || false;
   const slug = flowType === "unified" ? undefined : flowType;
   const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
   const url = `${baseUrl}/api/swap${slug ? `/${slug}` : ""}`;
@@ -192,13 +201,16 @@ export async function fetchSwapQuotes() {
     }
 
     for (const testCase of filteredTestCases) {
+      const body = includeDestinationAction
+        ? await getDefaultDestinationAction(testCase)
+        : undefined;
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
-      const response = await axios.get(
+      console.log("Body:", body);
+      const response = await axios.post(
         `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-        {
-          params: testCase.params,
-        }
+        body,
+        { params: testCase.params }
       );
       swapQuotes.push(response.data as BaseSwapResponse);
     }
@@ -289,4 +301,39 @@ export async function signAndWaitAllowanceFlow(params: {
   } catch (e) {
     console.error("Tx reverted", e);
   }
+}
+
+/**
+ * Creates the body to execute a transfer call in the destination chain after bridge and swap.
+ * Can be either a ETH native transfer or an ERC-20 token transfer.
+ */
+export async function getDefaultDestinationAction(testCase: {
+  params: { [key: string]: any };
+}) {
+  const ACROSS_DEV_WALLET_2 = "0x718648C8c531F91b528A7757dD2bE813c3940608";
+  return testCase.params.outputToken === ethers.constants.AddressZero
+    ? {
+        actions: [
+          {
+            target: ACROSS_DEV_WALLET_2,
+            functionSignature: "",
+            args: [],
+            value: testCase.params.amount,
+            isNativeTransfer: "true",
+          },
+        ],
+      }
+    : {
+        actions: [
+          {
+            target: testCase.params.outputToken,
+            functionSignature: "function transfer(address to, uint256 value)",
+            args: [
+              { value: ACROSS_DEV_WALLET_2, populateDynamically: false },
+              { value: testCase.params.amount, populateDynamically: false },
+            ],
+            value: "0",
+          },
+        ],
+      };
 }

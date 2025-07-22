@@ -12,6 +12,7 @@ import {
   union,
   unknown,
   refine,
+  defaulted,
 } from "superstruct";
 import { BigNumber, constants, utils } from "ethers";
 
@@ -172,9 +173,12 @@ const RecursiveArgumentArray: any = lazy(() =>
 const Action = type({
   target: validEvmAddress(),
   functionSignature: string(), // Will be validated at runtime
+  isNativeTransfer: defaulted(optional(boolStr()), false),
   args: array(RecursiveArgumentArray),
   value: positiveIntStr(),
 });
+
+export type Action = Infer<typeof Action>;
 
 const SwapBody = type({
   actions: array(Action),
@@ -191,7 +195,12 @@ export type SwapBody = Infer<typeof SwapBody>;
  */
 export function handleSwapBody(body: SwapBody) {
   assert(body, SwapBody);
+  // Assert that provided actions can be encoded
+  encodeActionCalls(body.actions);
+  return body;
+}
 
+export function encodeActionCalls(actions: Action[]) {
   // Helper function to recursively extract only the .value fields from args array
   const flattenArgs = (args: any[], depth: number = 0): any[] => {
     if (depth > 10) {
@@ -208,22 +217,34 @@ export function handleSwapBody(body: SwapBody) {
     });
   };
 
-  body.actions.forEach((action) => {
-    const methodAbi = action.functionSignature;
-    const positionalArgs = flattenArgs(action.args);
-    const iface = new utils.Interface([methodAbi]);
-    const functionName = iface.fragments[0].name;
-    try {
-      iface.encodeFunctionData(functionName, positionalArgs);
-    } catch (err) {
-      throw new AbiEncodingError(
-        {
-          message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
-        },
-        {
-          cause: `${err instanceof Error ? err.message : String(err)}`,
-        }
-      );
+  return actions.map((action) => {
+    if (action.isNativeTransfer) {
+      return {
+        target: action.target,
+        callData: "0x",
+        value: action.value,
+      };
+    } else {
+      const methodAbi = action.functionSignature;
+      const positionalArgs = flattenArgs(action.args);
+      const iface = new utils.Interface([methodAbi]);
+      const functionName = iface.fragments[0].name;
+      try {
+        return {
+          target: action.target,
+          callData: iface.encodeFunctionData(functionName, positionalArgs),
+          value: action.value,
+        };
+      } catch (err) {
+        throw new AbiEncodingError(
+          {
+            message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
+          },
+          {
+            cause: `${err instanceof Error ? err.message : String(err)}`,
+          }
+        );
+      }
     }
   });
 }
