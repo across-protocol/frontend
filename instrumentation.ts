@@ -28,11 +28,7 @@ const processor = new BatchSpanProcessor(new OTLPTraceExporter());
 const sdk = new NodeSDK({
   resource,
   spanProcessors: [processor],
-  instrumentations: [
-    new HttpInstrumentation({
-      disableIncomingRequestInstrumentation: true,
-    }),
-  ],
+  instrumentations: [new HttpInstrumentation()],
 });
 
 sdk.start();
