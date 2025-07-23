@@ -22,10 +22,10 @@ import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 import { AcrossErrorCode } from "../../_errors";
 
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: [getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api")],
+  default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
   chains: {
     [CHAIN_IDs.LENS]: [
-      getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
+      getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
     ],
   },
   swapPairs: {
