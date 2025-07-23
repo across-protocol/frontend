@@ -82,6 +82,8 @@ export async function handleApprovalSwap(
     refundToken,
     excludeSources,
     includeSources,
+    appFeePercent,
+    appFeeRecipient,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } = request.body
@@ -95,7 +97,7 @@ export async function handleApprovalSwap(
       outputToken,
       depositor,
       recipient: recipient || depositor,
-      slippageTolerance: Number(slippageTolerance),
+      slippageTolerance,
       type: amountType,
       refundOnOrigin,
       refundAddress,
@@ -104,6 +106,8 @@ export async function handleApprovalSwap(
       embeddedActions: actions,
       excludeSources,
       includeSources,
+      appFeePercent,
+      appFeeRecipient,
     },
     quoteFetchStrategies
   );

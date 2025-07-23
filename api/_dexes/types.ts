@@ -42,6 +42,8 @@ export type CrossSwap = {
   embeddedActions: Action[];
   excludeSources?: string[];
   includeSources?: string[];
+  appFeePercent?: number;
+  appFeeRecipient?: string;
 };
 
 export type SupportedDex =

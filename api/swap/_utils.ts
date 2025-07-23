@@ -56,6 +56,8 @@ export const BaseSwapQueryParamsSchema = type({
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
+  appFeePercent: optional(positiveFloatStr(100)),
+  appFeeRecipient: optional(validAddress()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -81,6 +83,8 @@ export async function handleBaseSwapQueryParams(
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
+    appFeePercent = "0",
+    appFeeRecipient,
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -134,6 +138,9 @@ export async function handleBaseSwapQueryParams(
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
 
+  const slippageToleranceNum = parseFloat(slippageTolerance);
+  const appFeePercentNum = parseFloat(appFeePercent);
+
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
       address: inputTokenAddress,
@@ -160,10 +167,12 @@ export async function handleBaseSwapQueryParams(
     refundAddress,
     recipient,
     depositor,
-    slippageTolerance,
+    slippageTolerance: slippageToleranceNum,
     refundToken,
     excludeSources,
     includeSources,
+    appFeePercent: appFeePercentNum,
+    appFeeRecipient,
   };
 }
 

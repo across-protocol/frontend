@@ -1,4 +1,9 @@
-import { BigNumber, BigNumberish, constants } from "ethers";
+import {
+  BigNumber,
+  BigNumberish,
+  constants,
+  utils as ethersUtils,
+} from "ethers";
 import { utils } from "@across-protocol/sdk";
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
@@ -493,6 +498,25 @@ export function buildDestinationSwapCrossChainMessage({
 
   let transferActions: Action[] = [];
   let unwrapActions: Action[] = [];
+  let appFeeActions: Action[] = [];
+
+  const destinationOutputAmount =
+    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
+      ? destinationSwapQuote.minAmountOut
+      : crossSwap.amount;
+
+  const { feeAmount: appFeeAmount, feeActions: calculatedAppFeeActions } =
+    calculateAppFee(
+      destinationOutputAmount,
+      crossSwap.outputToken.address,
+      crossSwap.outputToken.decimals,
+      crossSwap.appFeePercent,
+      crossSwap.appFeeRecipient,
+      crossSwap.isOutputNative
+    );
+
+  appFeeActions = calculatedAppFeeActions;
+  const remainingAmount = destinationOutputAmount.sub(appFeeAmount);
 
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
@@ -512,7 +536,7 @@ export function buildDestinationSwapCrossChainMessage({
       {
         target: crossSwap.recipient,
         callData: "0x",
-        value: crossSwap.amount.toString(),
+        value: remainingAmount.toString(),
       },
     ];
   }
@@ -523,7 +547,7 @@ export function buildDestinationSwapCrossChainMessage({
     transferActions = [
       {
         target: crossSwap.outputToken.address,
-        callData: encodeTransferCalldata(crossSwap.recipient, crossSwap.amount),
+        callData: encodeTransferCalldata(crossSwap.recipient, remainingAmount),
         value: "0",
       },
       {
@@ -554,9 +578,7 @@ export function buildDestinationSwapCrossChainMessage({
       unwrapActions = [
         {
           target: crossSwap.outputToken.address,
-          callData: encodeWethWithdrawCalldata(
-            destinationSwapQuote.minAmountOut
-          ),
+          callData: encodeWethWithdrawCalldata(destinationOutputAmount),
           value: "0",
         },
       ];
@@ -564,7 +586,7 @@ export function buildDestinationSwapCrossChainMessage({
         {
           target: crossSwap.recipient,
           callData: "0x",
-          value: destinationSwapQuote.minAmountOut.toString(),
+          value: remainingAmount.toString(),
         },
       ];
     }
@@ -610,6 +632,8 @@ export function buildDestinationSwapCrossChainMessage({
       ...swapActions,
       // unwrap weth if output token is native
       ...unwrapActions,
+      // transfer app fee if applicable
+      ...appFeeActions,
       // transfer output tokens to recipient or execute destination actions
       ...(embeddedActions.length > 0 ? embeddedActions : transferActions),
       // drain remaining bridgeable output tokens from MultiCallHandler contract
@@ -774,4 +798,46 @@ export function makeGetSources(sources: DexSources) {
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };
+}
+
+function calculateAppFee(
+  outputAmount: BigNumber,
+  tokenAddress: string,
+  tokenDecimals: number,
+  appFeePercent?: number,
+  appFeeRecipient?: string,
+  isNative: boolean = false
+): {
+  feeAmount: BigNumber;
+  feeActions: Array<{ target: string; callData: string; value: string }>;
+} {
+  if (!appFeePercent || !appFeeRecipient || Number(appFeePercent) === 0) {
+    return { feeAmount: BigNumber.from(0), feeActions: [] };
+  }
+
+  const feePercent = Number(appFeePercent);
+  const feePercentBaseUnit = ethersUtils
+    .parseUnits(feePercent.toString(), tokenDecimals)
+    .div(100);
+  const feeAmount = outputAmount
+    .mul(feePercentBaseUnit)
+    .div(ethersUtils.parseUnits("1", tokenDecimals));
+
+  const feeActions = isNative
+    ? [
+        {
+          target: appFeeRecipient,
+          callData: "0x",
+          value: feeAmount.toString(),
+        },
+      ]
+    : [
+        {
+          target: tokenAddress!,
+          callData: encodeTransferCalldata(appFeeRecipient, feeAmount),
+          value: "0",
+        },
+      ];
+
+  return { feeAmount, feeActions };
 }
