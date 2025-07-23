@@ -7,13 +7,15 @@ import {
   getRoutesByChainIds,
   getTokenByAddress,
   getBridgeQuoteForExactInput,
+  addTimeoutToPromise,
+  getRejectedReasons,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
-  getCrossSwapType,
+  getCrossSwapTypes,
   getPreferredBridgeTokens,
   getQuoteFetchStrategies,
   QuoteFetchStrategies,
@@ -36,6 +38,8 @@ import {
   CrossSwapQuotesRetrievalA2BResult,
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
+
+const PROMISE_TIMEOUT_MS = 10000;
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
@@ -81,8 +85,8 @@ function getCrossSwapQuoteForAmountType(
       strategies: QuoteFetchStrategies
     ) => Promise<CrossSwapQuotes>
   >
-) {
-  const crossSwapType = getCrossSwapType({
+): Promise<CrossSwapQuotes> {
+  const crossSwapTypes = getCrossSwapTypes({
     inputToken: crossSwap.inputToken.address,
     originChainId: crossSwap.inputToken.chainId,
     outputToken: crossSwap.outputToken.address,
@@ -91,20 +95,23 @@ function getCrossSwapQuoteForAmountType(
     isOutputNative: Boolean(crossSwap.isOutputNative),
   });
 
-  const handler = typeToHandler[crossSwapType];
-  if (!handler) {
-    throw new InvalidParamError({
-      message: `Failed to fetch swap quote: invalid cross swap type '${crossSwapType}'`,
-    });
-  }
+  const crossSwaps = crossSwapTypes.map((crossSwapType) => {
+    const handler = typeToHandler[crossSwapType];
+    if (!handler) {
+      throw new InvalidParamError({
+        message: `Failed to fetch swap quote: invalid cross swap type '${crossSwapType}'`,
+      });
+    }
+    return handler(crossSwap, strategies);
+  });
 
-  return handler(crossSwap, strategies);
+  return selectBestCrossSwapQuote(crossSwaps, crossSwap);
 }
 
 export async function getCrossSwapQuotesForExactInputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
-) {
+): Promise<CrossSwapQuotes> {
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
@@ -154,7 +161,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
 export async function getCrossSwapQuotesForOutputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
-) {
+): Promise<CrossSwapQuotes> {
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
@@ -1261,4 +1268,76 @@ function assertSources(sources: QuoteFetchOpts["sources"]) {
     message:
       "None of the provided sources are valid. Call the endpoint /swap/sources to get a list of valid sources.",
   });
+}
+
+/**
+ * Executes quotes for multiple cross swap types and selects the best one.
+ * For exact input, compare based on destination swap output amount if available, otherwise bridge output amount.
+ * For exact output, compare based on destination swap input amount if available, otherwise bridge input amount.
+ */
+async function selectBestCrossSwapQuote(
+  crossSwapQuotePromises: Promise<CrossSwapQuotes>[],
+  crossSwap: CrossSwap
+): Promise<CrossSwapQuotes> {
+  const crossSwapQuotePromisesWithTimeout = crossSwapQuotePromises.map(
+    (promise) => addTimeoutToPromise(promise, PROMISE_TIMEOUT_MS)
+  );
+  const crossSwapQuotes = await Promise.allSettled(
+    crossSwapQuotePromisesWithTimeout
+  );
+
+  const fulfilledQuotes = crossSwapQuotes
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (fulfilledQuotes.length === 0) {
+    const rejectedReasons = getRejectedReasons(crossSwapQuotes);
+    const message = `Failed to fetch swap quote: No quotes available for ${crossSwap.type} ${crossSwap.inputToken.symbol} to ${crossSwap.outputToken.symbol} from ${crossSwap.inputToken.chainId} to ${crossSwap.outputToken.chainId} for amount ${crossSwap.amount}`;
+    throw new SwapQuoteUnavailableError(
+      {
+        message,
+      },
+      {
+        cause:
+          rejectedReasons.length > 0 ? rejectedReasons.join(", ") : undefined,
+      }
+    );
+  }
+
+  if (fulfilledQuotes.length === 1) {
+    return fulfilledQuotes[0];
+  }
+
+  const bestQuote = fulfilledQuotes.reduce((best, current) => {
+    const currentDestinationSwapQuote = current.destinationSwapQuote;
+    const bestDestinationSwapQuote = best.destinationSwapQuote;
+    const currentBridgeQuote = current.bridgeQuote;
+    const bestBridgeQuote = best.bridgeQuote;
+    const isExactInput = crossSwap.type === "exactInput";
+
+    const currentAmount = currentDestinationSwapQuote
+      ? isExactInput
+        ? currentDestinationSwapQuote.expectedAmountOut
+        : currentDestinationSwapQuote.expectedAmountIn
+      : isExactInput
+        ? currentBridgeQuote.outputAmount
+        : currentBridgeQuote.inputAmount;
+    const bestAmount = bestDestinationSwapQuote
+      ? isExactInput
+        ? bestDestinationSwapQuote.expectedAmountOut
+        : bestDestinationSwapQuote.expectedAmountIn
+      : isExactInput
+        ? bestBridgeQuote.outputAmount
+        : bestBridgeQuote.inputAmount;
+
+    return isExactInput
+      ? currentAmount.gt(bestAmount)
+        ? current
+        : best
+      : currentAmount.lt(bestAmount)
+        ? current
+        : best;
+  });
+
+  return bestQuote;
 }
