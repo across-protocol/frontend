@@ -20,9 +20,15 @@ import { CHAIN_IDs } from "../../_constants";
 import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 import { AcrossErrorCode } from "../../_errors";
+import { get0xStrategy } from "../../_dexes/0x/allowance-holder";
+import { getLifiStrategy } from "../../_dexes/lifi/lifi-router";
 
 const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: [getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api")],
+  default: [
+    get0xStrategy("SpokePoolPeriphery"),
+    getLifiStrategy("SpokePoolPeriphery"),
+    getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api"),
+  ],
   chains: {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),

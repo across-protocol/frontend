@@ -161,6 +161,7 @@ export function getLifiStrategy(
   };
 
   return {
+    strategyName: "lifi",
     getRouter,
     getOriginEntryPoints,
     fetchFn,
