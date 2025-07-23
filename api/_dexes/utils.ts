@@ -109,14 +109,14 @@ export function getPreferredBridgeTokens(
   );
 }
 
-export function getCrossSwapType(params: {
+export function getCrossSwapTypes(params: {
   inputToken: string;
   originChainId: number;
   outputToken: string;
   destinationChainId: number;
   isInputNative: boolean;
   isOutputNative: boolean;
-}): CrossSwapType {
+}): CrossSwapType[] {
   if (
     isRouteEnabled(
       params.originChainId,
@@ -125,7 +125,7 @@ export function getCrossSwapType(params: {
       params.outputToken
     )
   ) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -143,7 +143,7 @@ export function getCrossSwapType(params: {
   // `UniversalSwapAndBridge` does not support native tokens as input.
   if (params.isInputNative) {
     if (inputBridgeable) {
-      return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+      return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
     }
     // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
     // throw until we have periphery contract audited so that it can accept native
@@ -153,15 +153,22 @@ export function getCrossSwapType(params: {
     );
   }
 
+  if (inputBridgeable && outputBridgeable) {
+    return [
+      CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY,
+    ];
+  }
+
   if (outputBridgeable) {
-    return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
   }
 
   if (inputBridgeable) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
   }
 
-  return CROSS_SWAP_TYPE.ANY_TO_ANY;
+  return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
 export function buildExactInputBridgeTokenMessage(
