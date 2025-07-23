@@ -26,6 +26,7 @@ import {
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
+  paramToArray,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -53,6 +54,8 @@ export const BaseSwapQueryParamsSchema = type({
   refundOnOrigin: optional(boolStr()),
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
+  excludeSources: optional(union([array(string()), string()])),
+  includeSources: optional(union([array(string()), string()])),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -68,7 +71,7 @@ export async function handleBaseSwapQueryParams(
     originChainId: _originChainId,
     destinationChainId: _destinationChainId,
     amount: _amount,
-    tradeType = AMOUNT_TYPE.MIN_OUTPUT,
+    tradeType = AMOUNT_TYPE.EXACT_INPUT,
     recipient,
     depositor,
     integratorId,
@@ -76,6 +79,8 @@ export async function handleBaseSwapQueryParams(
     refundOnOrigin: _refundOnOrigin = "true",
     slippageTolerance = "1", // Default to 1% slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
+    excludeSources: _excludeSources,
+    includeSources: _includeSources,
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -90,6 +95,20 @@ export async function handleBaseSwapQueryParams(
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
     : utils.getAddress(_outputTokenAddress);
+  const excludeSources = _excludeSources
+    ? paramToArray(_excludeSources)
+    : undefined;
+  const includeSources = _includeSources
+    ? paramToArray(_includeSources)
+    : undefined;
+
+  if (excludeSources && includeSources) {
+    throw new InvalidParamError({
+      param: "excludeSources, includeSources",
+      message:
+        "Cannot use 'excludeSources' and 'includeSources' together. Please use only one of them.",
+    });
+  }
 
   if (integratorId && !isValidIntegratorId(integratorId)) {
     throw new InvalidParamError({
@@ -143,6 +162,8 @@ export async function handleBaseSwapQueryParams(
     depositor,
     slippageTolerance,
     refundToken,
+    excludeSources,
+    includeSources,
   };
 }
 
@@ -387,6 +408,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 }
 
 export function buildBaseSwapResponseJson(params: {
+  amountType: AmountType;
   inputTokenAddress: string;
   originChainId: number;
   inputAmount: BigNumber;
@@ -421,6 +443,7 @@ export function buildBaseSwapResponseJson(params: {
           : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   return stringifyBigNumProps({
     crossSwapType,
+    amountType: params.amountType,
     checks: {
       allowance: params.approvalSwapTx
         ? {
@@ -477,6 +500,10 @@ export function buildBaseSwapResponseJson(params: {
           }
         : undefined,
     },
+    inputToken:
+      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
+    outputToken:
+      params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
     refundToken:
       params.refundToken.symbol === "ETH"
         ? {

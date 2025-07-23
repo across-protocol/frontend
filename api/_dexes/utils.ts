@@ -22,6 +22,7 @@ import {
   Swap,
   SwapQuote,
   Token,
+  DexSources,
 } from "./types";
 import {
   isInputTokenBridgeable,
@@ -109,14 +110,14 @@ export function getPreferredBridgeTokens(
   );
 }
 
-export function getCrossSwapType(params: {
+export function getCrossSwapTypes(params: {
   inputToken: string;
   originChainId: number;
   outputToken: string;
   destinationChainId: number;
   isInputNative: boolean;
   isOutputNative: boolean;
-}): CrossSwapType {
+}): CrossSwapType[] {
   if (
     isRouteEnabled(
       params.originChainId,
@@ -125,7 +126,7 @@ export function getCrossSwapType(params: {
       params.outputToken
     )
   ) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -143,7 +144,7 @@ export function getCrossSwapType(params: {
   // `UniversalSwapAndBridge` does not support native tokens as input.
   if (params.isInputNative) {
     if (inputBridgeable) {
-      return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+      return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
     }
     // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
     // throw until we have periphery contract audited so that it can accept native
@@ -153,15 +154,22 @@ export function getCrossSwapType(params: {
     );
   }
 
+  if (inputBridgeable && outputBridgeable) {
+    return [
+      CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY,
+    ];
+  }
+
   if (outputBridgeable) {
-    return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
   }
 
   if (inputBridgeable) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
   }
 
-  return CROSS_SWAP_TYPE.ANY_TO_ANY;
+  return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
 export function buildExactInputBridgeTokenMessage(
@@ -714,4 +722,56 @@ export async function estimateInputForExactOutput(
 
   // Add 1% buffer for slippage and rounding
   return requiredInputAmount.mul(101).div(100).toString();
+}
+
+export function isValidSource(
+  _source: string,
+  chainId: number,
+  sources: DexSources
+) {
+  const sourceToCheck = _source.toLowerCase();
+  return sources.sources[chainId].some((source) =>
+    source.names.includes(sourceToCheck)
+  );
+}
+
+export function makeGetSources(sources: DexSources) {
+  return (
+    chainId: number,
+    opts?: {
+      excludeSources?: string[];
+      includeSources?: string[];
+    }
+  ) => {
+    if (!opts || (!opts?.excludeSources && !opts?.includeSources)) {
+      return undefined;
+    }
+
+    const filteredSources = opts?.excludeSources
+      ? opts.excludeSources.filter((excludeSource) =>
+          isValidSource(excludeSource, chainId, sources)
+        )
+      : opts.includeSources
+        ? opts.includeSources.filter((includeSource) =>
+            isValidSource(includeSource, chainId, sources)
+          )
+        : [];
+    const sourcesKeys = Array.from(
+      new Set(
+        filteredSources.flatMap(
+          (source) =>
+            sources.sources[chainId].find((s) =>
+              s.names.some(
+                (name) => name.toLowerCase() === source.toLowerCase()
+              )
+            )?.key || []
+        )
+      )
+    );
+
+    return {
+      sourcesKeys,
+      sourcesType: opts?.excludeSources ? "exclude" : "include",
+    } as const;
+  };
 }

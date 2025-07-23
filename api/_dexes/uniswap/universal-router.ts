@@ -12,7 +12,7 @@ import {
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
 import { RouterTradeAdapter } from "./utils/adapter";
-import { getOriginSwapEntryPoints } from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -41,6 +41,23 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
       chainId,
       "uniswap-v3/universal-router"
     );
+
+  const getSources = makeGetSources({
+    strategy: "uniswap-v3/universal-router",
+    sources: Object.keys(UNIVERSAL_ROUTER_ADDRESS).reduce(
+      (acc, chainIdStr) => {
+        const chainId = Number(chainIdStr);
+        acc[chainId] = [
+          {
+            key: "uniswap-v3/universal-router",
+            names: ["uniswap_v3"],
+          },
+        ];
+        return acc;
+      },
+      {} as Record<number, { key: string; names: string[] }[]>
+    ),
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -135,6 +152,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   return {
     getRouter,
     getOriginEntryPoints,
+    getSources,
     fetchFn,
   };
 }
