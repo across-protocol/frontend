@@ -22,7 +22,7 @@ const API_BASE_URL = "https://li.quest/v1";
 
 const API_HEADERS = {
   "Content-Type": "application/json",
-  "x-lifi-api-key": `${API_KEY_LIFI}`,
+  ...(API_KEY_LIFI ? { "x-lifi-api-key": `${API_KEY_LIFI}` } : {}),
 };
 
 export function getLifiStrategy(
@@ -136,6 +136,11 @@ export function getLifiStrategy(
 
       return swapQuote;
     } catch (error) {
+      getLogger().debug({
+        at: "lifi/fetchFn",
+        message: "Error fetching LI.FI quote",
+        error,
+      });
       if (error instanceof AxiosError) {
         if (
           error.response?.status === 404 &&
