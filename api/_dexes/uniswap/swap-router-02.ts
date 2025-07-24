@@ -176,6 +176,10 @@ async function fetchViaTradingApi(
       expectedAmountIn,
       slippageTolerance: quote.slippage,
       swapTxns: [swapTx],
+      swapProvider: {
+        name: "uniswap/api/swap-router-02",
+        sources: ["uniswap_v3"],
+      },
     };
   } else {
     const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
@@ -274,6 +278,10 @@ function buildIndicativeQuote(
         value: "0x0",
       },
     ],
+    swapProvider: {
+      name: "uniswap/api/swap-router-02",
+      sources: ["uniswap_v3"],
+    },
   };
 
   return swapQuote;

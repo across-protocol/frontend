@@ -22,7 +22,9 @@ const resource = resourceFromAttributes({
   "vercel.deployment_id": process.env.VERCEL_DEPLOYMENT_ID || "unknown",
 });
 
-const processor = new BatchSpanProcessor(new OTLPTraceExporter());
+const processor = new BatchSpanProcessor(new OTLPTraceExporter(), {
+  scheduledDelayMillis: 500,
+});
 
 // sdk
 const sdk = new NodeSDK({

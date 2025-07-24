@@ -187,6 +187,10 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
       slippageTolerance: swap.slippageTolerance,
       swapTxns: [aggregateTx],
+      swapProvider: {
+        name: "gho-multicall3",
+        sources: ["gho-multicall3", "uniswap_v3"],
+      },
     };
   };
 
