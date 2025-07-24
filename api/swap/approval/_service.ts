@@ -117,8 +117,13 @@ export async function handleApprovalSwap(
     integratorId
   );
 
-  const { originSwapQuote, bridgeQuote, destinationSwapQuote, crossSwap } =
-    crossSwapQuotes;
+  const {
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    crossSwap,
+    appFee,
+  } = crossSwapQuotes;
 
   const originChainId = crossSwap.inputToken.chainId;
   const inputTokenAddress = isInputNative
@@ -177,7 +182,7 @@ export async function handleApprovalSwap(
     });
   }
 
-  const responseJson = buildBaseSwapResponseJson({
+  const responseJson = await buildBaseSwapResponseJson({
     amountType,
     originChainId,
     inputTokenAddress,
@@ -195,6 +200,9 @@ export async function handleApprovalSwap(
     bridgeQuote,
     destinationSwapQuote,
     refundToken,
+    appFeePercent,
+    appFeeRecipient,
+    appFee,
   });
   return responseJson;
 }
