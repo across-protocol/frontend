@@ -454,6 +454,7 @@ export function buildBaseSwapResponseJson(params: {
             outputAmount: params.originSwapQuote.expectedAmountOut,
             minOutputAmount: params.originSwapQuote.minAmountOut,
             maxInputAmount: params.originSwapQuote.maximumAmountIn,
+            swapProvider: params.originSwapQuote.swapProvider,
           }
         : undefined,
       bridge: {
@@ -476,6 +477,7 @@ export function buildBaseSwapResponseJson(params: {
             maxInputAmount: params.destinationSwapQuote.maximumAmountIn,
             outputAmount: params.destinationSwapQuote.expectedAmountOut,
             minOutputAmount: params.destinationSwapQuote.minAmountOut,
+            swapProvider: params.destinationSwapQuote.swapProvider,
           }
         : undefined,
     },

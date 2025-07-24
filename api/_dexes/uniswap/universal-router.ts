@@ -96,6 +96,10 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
         expectedAmountIn,
         slippageTolerance: quote.slippage,
         swapTxns: [swapTx],
+        swapProvider: {
+          name: "uniswap-v3/universal-router",
+          sources: ["uniswap_v3"],
+        },
       };
     } else {
       const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
@@ -129,6 +133,10 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
             value: "0x",
           },
         ],
+        swapProvider: {
+          name: "uniswap-v3/universal-router",
+          sources: ["uniswap_v3"],
+        },
       };
     }
 
