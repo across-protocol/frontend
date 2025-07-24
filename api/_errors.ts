@@ -394,3 +394,25 @@ export function resolveEthersError(err: unknown) {
     { cause: err }
   );
 }
+
+export function compactAxiosError(error: Error) {
+  if (!(error instanceof AxiosError)) {
+    return error;
+  }
+
+  const { response } = error;
+  if (!response) {
+    return error;
+  }
+
+  const compactError = new Error(
+    [
+      "[AxiosError]",
+      `Status ${response.status} - ${response.statusText}`,
+      `Request URL: ${response.config.url}`,
+      `Data: ${JSON.stringify(response.data)}`,
+    ].join(" - ")
+  );
+
+  return compactError;
+}

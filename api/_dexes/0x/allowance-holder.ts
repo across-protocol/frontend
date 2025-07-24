@@ -18,6 +18,7 @@ import {
   makeGetSources,
 } from "../utils";
 import { SOURCES } from "./utils/sources";
+import { compactAxiosError } from "../../_errors";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -158,7 +159,7 @@ export function get0xStrategy(
       getLogger().debug({
         at: "0x/fetchFn",
         message: "Error fetching 0x quote",
-        error,
+        error: compactAxiosError(error as Error),
       });
       throw error;
     }

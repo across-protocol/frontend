@@ -14,7 +14,7 @@ import { getEnvs } from "../../_env";
 import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
-import { SwapQuoteUnavailableError } from "../../_errors";
+import { compactAxiosError, SwapQuoteUnavailableError } from "../../_errors";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -139,7 +139,7 @@ export function getLifiStrategy(
       getLogger().debug({
         at: "lifi/fetchFn",
         message: "Error fetching LI.FI quote",
-        error,
+        error: compactAxiosError(error as Error),
       });
       if (error instanceof AxiosError) {
         if (

@@ -861,6 +861,15 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     );
     assertSources(originSources);
 
+    const destinationSources = result.destinationStrategy.getSources(
+      destinationSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(destinationSources);
+
     // 1. Get origin swap quote for any input token -> bridgeable input token
     const originSwapQuote = await result.originStrategy.fetchFn(
       {
@@ -871,10 +880,24 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       TradeType.EXACT_INPUT,
       { sources: originSources }
     );
+
+    // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+    //    with exact input amount set to `originSwapQuote.minAmountOut`.
+    const indicativeDestinationSwapQuote =
+      await result.destinationStrategy.fetchFn(
+        {
+          ...result.destinationSwap,
+          amount: originSwapQuote.minAmountOut.toString(),
+        },
+        TradeType.EXACT_INPUT,
+        { sources: destinationSources }
+      );
     return {
       result,
       originSwapQuote,
       originSources,
+      indicativeDestinationSwapQuote,
+      destinationSources,
     };
   });
 
@@ -895,26 +918,6 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     destinationStrategy,
   } = prioritizedOriginStrategy.result;
 
-  const destinationSources = destinationStrategy.getSources(
-    destinationSwap.chainId,
-    {
-      excludeSources: crossSwap.excludeSources,
-      includeSources: crossSwap.includeSources,
-    }
-  );
-  assertSources(destinationSources);
-
-  // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
-  //    with exact input amount set to `originSwapQuote.minAmountOut`.
-  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
-    {
-      ...destinationSwap,
-      amount: prioritizedOriginStrategy.originSwapQuote.minAmountOut.toString(),
-    },
-    TradeType.EXACT_INPUT,
-    { sources: prioritizedOriginStrategy.originSources }
-  );
-
   // 3. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForExactInput({
     inputToken: bridgeableInputToken,
@@ -923,7 +926,8 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
     message: buildDestinationSwapCrossChainMessage({
       crossSwap,
-      destinationSwapQuote: indicativeDestinationSwapQuote,
+      destinationSwapQuote:
+        prioritizedOriginStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
       routerAddress: destinationRouter.address,
     }),
@@ -944,7 +948,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     },
     TradeType.EXACT_INPUT,
     {
-      sources: destinationSources,
+      sources: prioritizedOriginStrategy.destinationSources,
     }
   );
 
