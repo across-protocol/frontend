@@ -5,7 +5,7 @@ import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition } from "../../_utils";
 import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
-import { tracer } from "../../../instrumentation";
+import { tracer, processor } from "../../../instrumentation";
 
 const handler = async (
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
@@ -38,6 +38,7 @@ const handler = async (
       );
     } finally {
       span.end();
+      processor.forceFlush();
     }
   });
 };

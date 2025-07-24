@@ -26,7 +26,6 @@ const processor = new BatchSpanProcessor(new OTLPTraceExporter(), {
   scheduledDelayMillis: 500,
 });
 
-// sdk
 const sdk = new NodeSDK({
   resource,
   spanProcessors: [processor],
