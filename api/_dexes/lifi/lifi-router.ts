@@ -68,11 +68,11 @@ export function getLifiStrategy(
         fromToken: swap.tokenIn.address,
         toToken: swap.tokenOut.address,
         fromAddress: swap.recipient,
+        skipSimulation: true,
         slippage: Math.floor(swap.slippageTolerance / 100),
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
           : { toAmount: swap.amount }),
-        ...(opts?.useIndicativeQuote ? { skipSimulation: true } : {}),
         ...sourcesParams,
       };
 
