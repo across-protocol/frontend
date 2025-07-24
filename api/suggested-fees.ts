@@ -48,7 +48,9 @@ import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
+import { getRequestId } from "./_request_utils";
 import { tracer } from "../instrumentation";
+import { sendResponse } from "./_response_utils";
 
 const { BigNumber } = ethers;
 
@@ -74,10 +76,12 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const requestId = getRequestId(request);
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
     query: request.query,
+    requestId,
   });
   return tracer.startActiveSpan("suggested-fees", async (span) => {
     try {
@@ -406,15 +410,27 @@ const handler = async (
         responseJson: JSON.stringify(responseJson, null, 2),
       });
 
-      // Only cache response if exclusivity is not set. This prevents race conditions where
-      // cached exclusivity data is returned for multiple deposits.
-      if (exclusiveRelayer === sdk.constants.ZERO_ADDRESS) {
-        response.setHeader("Cache-Control", "s-maxage=10");
-      }
       span.setStatus({ code: SpanStatusCode.OK });
-      response.status(200).json(responseJson);
+
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        requestId,
+        // Only cache response if exclusivity is not set. This prevents race conditions where
+        // cached exclusivity data is returned for multiple deposits.
+        cacheSeconds:
+          exclusiveRelayer === sdk.constants.ZERO_ADDRESS ? 10 : undefined,
+      });
     } catch (error) {
-      return handleErrorCondition("suggested-fees", response, logger, error);
+      return handleErrorCondition(
+        "suggested-fees",
+        response,
+        logger,
+        error,
+        span,
+        requestId
+      );
     } finally {
       span.end();
     }

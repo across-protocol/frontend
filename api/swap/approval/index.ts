@@ -5,6 +5,8 @@ import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition } from "../../_utils";
 import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
+import { getRequestId } from "../../_request_utils";
+import { sendResponse } from "../../_response_utils";
 import { tracer } from "../../../instrumentation";
 
 const handler = async (
@@ -12,10 +14,12 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const requestId = getRequestId(request);
   logger.debug({
     at: "Swap/approval",
     message: "Query data",
     query: request.query,
+    requestId,
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
     try {
@@ -26,16 +30,24 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
+
       setSpanAttributes(span, responseJson);
       span.setStatus({ code: SpanStatusCode.OK });
-      response.status(200).json(responseJson);
+
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        requestId,
+      });
     } catch (error: unknown) {
       return handleErrorCondition(
         "swap/approval",
         response,
         logger,
         error,
-        span
+        span,
+        requestId
       );
     } finally {
       span.end();
