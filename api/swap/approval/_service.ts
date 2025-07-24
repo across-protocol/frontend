@@ -1,6 +1,6 @@
 import { BigNumber, constants } from "ethers";
 
-import { getProvider, latestGasPriceCache } from "../../_utils";
+import { getProvider, InputError, latestGasPriceCache } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
   handleBaseSwapQueryParams,
@@ -18,6 +18,7 @@ import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { CHAIN_IDs } from "../../_constants";
 import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
+import { AcrossErrorCode } from "../../_errors";
 
 // For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
 const quoteFetchStrategies: QuoteFetchStrategies = {
@@ -54,6 +55,16 @@ const quoteFetchStrategies: QuoteFetchStrategies = {
 export async function handleApprovalSwap(
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>
 ) {
+  // This handler supports both GET and POST requests.
+  // For GET requests, we expect the body to be empty.
+  // TODO: Allow only POST requests
+  if (request.method !== "POST" && request.body) {
+    throw new InputError({
+      message: "POST method required when request.body is provided",
+      code: AcrossErrorCode.INVALID_METHOD,
+    });
+  }
+
   const {
     integratorId,
     skipOriginTxEstimation,
@@ -69,6 +80,8 @@ export async function handleApprovalSwap(
     depositor,
     slippageTolerance,
     refundToken,
+    excludeSources,
+    includeSources,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } = request.body
@@ -89,6 +102,8 @@ export async function handleApprovalSwap(
       isInputNative,
       isOutputNative,
       embeddedActions: actions,
+      excludeSources,
+      includeSources,
     },
     quoteFetchStrategies
   );
@@ -159,6 +174,7 @@ export async function handleApprovalSwap(
   }
 
   const responseJson = buildBaseSwapResponseJson({
+    amountType,
     originChainId,
     inputTokenAddress,
     inputAmount,

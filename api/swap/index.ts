@@ -1,14 +1,8 @@
 import { VercelResponse } from "@vercel/node";
 
 import { TypedVercelRequest } from "../_types";
-import { getLogger, handleErrorCondition, InputError } from "../_utils";
-import { AcrossErrorCode } from "../_errors";
-import {
-  handleBaseSwapQueryParams,
-  BaseSwapQueryParams,
-  handleSwapBody,
-  SwapBody,
-} from "./_utils";
+import { getLogger, handleErrorCondition } from "../_utils";
+import { BaseSwapQueryParams, SwapBody } from "./_utils";
 import { handleApprovalSwap } from "./approval/_service";
 
 type SwapFlowType = "approval";
@@ -28,22 +22,6 @@ export default async function handler(
     query: request.query,
   });
   try {
-    // This handler supports both GET and POST requests.
-    // For GET requests, we expect the body to be empty.
-    // TODO: Allow only POST requests
-    if (request.method !== "POST" && request.body) {
-      throw new InputError({
-        message: "POST method required when request.body is provided",
-        code: AcrossErrorCode.INVALID_METHOD,
-      });
-    }
-
-    // `/swap` only validate shared base params
-    await handleBaseSwapQueryParams(request.query);
-    if (request.body) {
-      handleSwapBody(request.body, Number(request.query.destinationChainId));
-    }
-
     // TODO: Enable other swap flow types in the future
     const swapFlowType = "approval";
 

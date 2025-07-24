@@ -1,6 +1,6 @@
 import { BigNumber, providers } from "ethers";
 import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
-import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+import { toEvmAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
@@ -19,7 +19,6 @@ export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
   toBytes32,
   compareAddressesSimple,
-  toAddress,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export { getNativeTokenSymbol } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 

@@ -5,6 +5,7 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
+import { buildSearchParams } from "../../api/_utils";
 import {
   MIN_OUTPUT_CASES,
   EXACT_OUTPUT_CASES,
@@ -102,6 +103,16 @@ const argsFromCli = yargs(hideBin(process.argv))
       .option("integratorId", {
         alias: "i",
         description: "Integrator ID.",
+      })
+      .option("includeSources", {
+        alias: "is",
+        description: "Comma-separated list of sources to include.",
+        type: "string",
+      })
+      .option("excludeSources", {
+        alias: "es",
+        description: "Comma-separated list of sources to exclude.",
+        type: "string",
       });
   })
   .option("host", {
@@ -165,6 +176,8 @@ export async function fetchSwapQuotes() {
       depositor,
       refundAddress,
       skipOriginTxEstimation,
+      includeSources,
+      excludeSources,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -178,11 +191,20 @@ export async function fetchSwapQuotes() {
       depositor,
       refundAddress,
       skipOriginTxEstimation,
+      includeSources:
+        typeof includeSources === "string"
+          ? includeSources.split(",")
+          : includeSources,
+      excludeSources:
+        typeof excludeSources === "string"
+          ? excludeSources.split(",")
+          : excludeSources,
     };
     console.log("Params:", params);
 
     const response = await axios.get(url, {
       params,
+      paramsSerializer: buildSearchParams,
     });
     swapQuotes.push(response.data as BaseSwapResponse);
   } else {
