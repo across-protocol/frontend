@@ -204,7 +204,10 @@ export function buildExactInputBridgeTokenMessage(
         },
       ];
   const embeddedActions = crossSwap.embeddedActions
-    ? encodeActionCalls(crossSwap.embeddedActions)
+    ? encodeActionCalls(
+        crossSwap.embeddedActions,
+        crossSwap.outputToken.chainId
+      )
     : [];
 
   return buildMulticallHandlerMessage({
@@ -264,7 +267,10 @@ export function buildExactOutputBridgeTokenMessage(crossSwap: CrossSwap) {
         },
       ];
   const embeddedActions = crossSwap.embeddedActions
-    ? encodeActionCalls(crossSwap.embeddedActions)
+    ? encodeActionCalls(
+        crossSwap.embeddedActions,
+        crossSwap.outputToken.chainId
+      )
     : [];
 
   return buildMulticallHandlerMessage({
@@ -329,7 +335,10 @@ export function buildMinOutputBridgeTokenMessage(
       ];
 
   const embeddedActions = crossSwap.embeddedActions
-    ? encodeActionCalls(crossSwap.embeddedActions)
+    ? encodeActionCalls(
+        crossSwap.embeddedActions,
+        crossSwap.outputToken.chainId
+      )
     : [];
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
@@ -591,7 +600,7 @@ export function buildDestinationSwapCrossChainMessage({
 
   const embeddedActions =
     crossSwap.embeddedActions && !isIndicativeQuote
-      ? encodeActionCalls(crossSwap.embeddedActions)
+      ? encodeActionCalls(crossSwap.embeddedActions, destinationSwapChainId)
       : [];
 
   return buildMulticallHandlerMessage({

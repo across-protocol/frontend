@@ -352,7 +352,11 @@ export async function getDefaultDestinationAction(testCase: {
             functionSignature: "function transfer(address to, uint256 value)",
             args: [
               { value: ACROSS_DEV_WALLET_2, populateDynamically: false },
-              { value: testCase.params.amount, populateDynamically: false },
+              {
+                value: testCase.params.amount,
+                populateDynamically: true,
+                balanceSource: testCase.params.outputToken,
+              },
             ],
             value: "0",
           },
