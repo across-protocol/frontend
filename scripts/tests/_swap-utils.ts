@@ -22,7 +22,7 @@ export type BaseSwapResponse = Awaited<
 >;
 
 // Common args handling
-const argsFromCli = yargs(hideBin(process.argv))
+export const argsFromCli = yargs(hideBin(process.argv))
   .command("test-cases", "Run predefined test cases", (yargs) => {
     return yargs.usage("Usage: $0 test-cases [options]").option("filter", {
       alias: "f",
@@ -93,6 +93,7 @@ const argsFromCli = yargs(hideBin(process.argv))
         alias: "ste",
         description: "Skip origin tx estimation.",
         type: "boolean",
+        default: "false",
       })
       .option("integratorId", {
         alias: "i",
@@ -119,6 +120,12 @@ const argsFromCli = yargs(hideBin(process.argv))
     description: "Flow type.",
     default: "approval",
     choices: ["approval", "permit", "auth", "unified"],
+  })
+  .option("skipTxExecution", {
+    alias: "ste",
+    description: "Skip tx execution.",
+    type: "boolean",
+    default: "false",
   })
   .help()
   .parseSync();
@@ -166,7 +173,7 @@ export async function fetchSwapQuotes() {
       recipient,
       depositor,
       refundAddress,
-      skipOriginTxEstimation,
+      skipOriginTxEstimation: _skipOriginTxEstimation,
       includeSources,
       excludeSources,
     } = argsFromCli;
@@ -181,7 +188,7 @@ export async function fetchSwapQuotes() {
       recipient,
       depositor,
       refundAddress,
-      skipOriginTxEstimation,
+      skipOriginTxEstimation: _skipOriginTxEstimation === "true",
       includeSources:
         typeof includeSources === "string"
           ? includeSources.split(",")
