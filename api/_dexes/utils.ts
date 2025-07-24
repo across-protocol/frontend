@@ -715,3 +715,13 @@ export function makeGetSources(sources: DexSources) {
     } as const;
   };
 }
+
+export function inferCrossSwapType(params: CrossSwapQuotes) {
+  return params.originSwapQuote && params.destinationSwapQuote
+    ? CROSS_SWAP_TYPE.ANY_TO_ANY
+    : params.originSwapQuote && !params.destinationSwapQuote
+      ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
+      : params.destinationSwapQuote && !params.originSwapQuote
+        ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
+        : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
+}

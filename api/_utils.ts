@@ -37,6 +37,7 @@ import {
   Struct,
   union,
 } from "superstruct";
+import { inspect } from "util";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import rpcProvidersJson from "../src/data/rpc-providers.json";
@@ -177,21 +178,22 @@ export const getLogger = (): LoggingUtility => {
       LOG_LEVEL && Object.keys(LogLevels).includes(LOG_LEVEL)
         ? (LOG_LEVEL as keyof typeof LogLevels)
         : defaultLogLevel;
+    const depth = 5;
 
     logger = {
       debug: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.DEBUG) {
-          console.debug(args);
+          console.debug(inspect(args, { depth }));
         }
       },
       info: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.INFO) {
-          console.info(args);
+          console.info(inspect(args, { depth }));
         }
       },
       warn: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.WARN) {
-          console.warn(args);
+          console.warn(inspect(args, { depth }));
         }
       },
       error: (...args) => {
@@ -2870,22 +2872,31 @@ export function flattenErrors(reason: any, depth: number = 0): string[] {
       `AxiosError: status: ${response.status}, details: ${responseMessage}`,
     ];
   }
-  return [`Error: ${JSON.stringify(reason)}`];
+
+  if (reason instanceof AcrossApiError) {
+    return [
+      `AcrossApiError: status: ${reason.status}, code: ${reason.code}, message: ${reason.message}`,
+    ];
+  }
+  return [reason.toString()];
 }
 
 export function getRejectedReasons(
-  settledResults: PromiseSettledResult<any>[]
+  settledResultsOrErrors: PromiseSettledResult<any>[] | Error[]
 ): string[] {
   try {
-    return settledResults
-      .map((result, idx) => {
-        if (result.status === "rejected") {
-          const reason = (result as PromiseRejectedResult).reason;
-          return flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`);
-        }
-        return [];
-      })
-      .flat();
+    const rejections = settledResultsOrErrors.flatMap((result) => {
+      if (result instanceof Error) {
+        return result;
+      }
+      if (result.status === "rejected") {
+        return result.reason;
+      }
+      return [];
+    });
+    return rejections.flatMap((reason, idx) =>
+      flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`)
+    );
   } catch (err) {
     return [];
   }

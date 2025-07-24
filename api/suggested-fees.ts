@@ -403,7 +403,7 @@ const handler = async (
       logger.info({
         at: "SuggestedFees",
         message: "Response data",
-        responseJson: JSON.stringify(responseJson, null, 2),
+        responseJson,
       });
 
       // Only cache response if exclusivity is not set. This prevents race conditions where

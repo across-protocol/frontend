@@ -9,6 +9,7 @@ import {
   getBridgeQuoteForExactInput,
   addTimeoutToPromise,
   getRejectedReasons,
+  getLogger,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -39,7 +40,9 @@ import {
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
 
-const PROMISE_TIMEOUT_MS = 10000;
+const PROMISE_TIMEOUT_MS = 15_000;
+
+const logger = getLogger();
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
@@ -759,7 +762,7 @@ export async function getCrossSwapQuotesA2A(
     preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes;
 
   let chunkStart = 0;
-  const crossSwapQuotesFailures: Error[] = [];
+  const allCrossSwapQuotesFailures: Error[] = [];
   while (chunkStart < bridgeRoutes.length) {
     const bridgeRoutesToCompare = bridgeRoutes.slice(
       chunkStart,
@@ -783,7 +786,7 @@ export async function getCrossSwapQuotesA2A(
     const crossSwapQuotesFailures = crossSwapQuotesResults
       .filter((result) => result.status === "rejected")
       .map((result) => result.reason);
-    crossSwapQuotesFailures.push(...crossSwapQuotesFailures);
+    allCrossSwapQuotesFailures.push(...crossSwapQuotesFailures);
 
     const crossSwapQuotes = crossSwapQuotesResults
       .filter((result) => result.status === "fulfilled")
@@ -811,21 +814,22 @@ export async function getCrossSwapQuotesA2A(
     return bestCrossSwapQuote;
   }
 
+  const rejectedReasons = getRejectedReasons(allCrossSwapQuotesFailures);
+  logger.debug({
+    at: "getCrossSwapQuotesA2A",
+    message: "All bridge routes and providers failed",
+    failedReasons: rejectedReasons,
+  });
   throw new SwapQuoteUnavailableError(
     {
-      message:
-        `Failed to fetch swap quote: ` +
-        `No quotes available ${
-          crossSwap.inputToken.symbol
-        } ${crossSwap.inputToken.chainId} -> ${
-          crossSwap.outputToken.symbol
-        } ${crossSwap.outputToken.chainId}`,
+      message: `No swap quotes currently available ${
+        crossSwap.inputToken.symbol
+      } ${crossSwap.inputToken.chainId} -> ${
+        crossSwap.outputToken.symbol
+      } ${crossSwap.outputToken.chainId}`,
     },
     {
-      cause:
-        crossSwapQuotesFailures.length > 0
-          ? crossSwapQuotesFailures[0]
-          : undefined,
+      cause: rejectedReasons.join(","),
     }
   );
 }
@@ -1291,8 +1295,24 @@ async function selectBestCrossSwapQuote(
     .map((result) => result.value);
 
   if (fulfilledQuotes.length === 0) {
+    const rejectedQuotes = crossSwapQuotes.filter(
+      (result) => result.status === "rejected"
+    );
+
+    // If there is only one rejected quote and it is a SwapQuoteUnavailableError, throw it.
+    if (
+      rejectedQuotes.length === 1 &&
+      rejectedQuotes[0].reason instanceof SwapQuoteUnavailableError
+    ) {
+      throw rejectedQuotes[0].reason;
+    }
+
     const rejectedReasons = getRejectedReasons(crossSwapQuotes);
-    const message = `Failed to fetch swap quote: No quotes available for ${crossSwap.type} ${crossSwap.inputToken.symbol} to ${crossSwap.outputToken.symbol} from ${crossSwap.inputToken.chainId} to ${crossSwap.outputToken.chainId} for amount ${crossSwap.amount}`;
+    const message = `No swap quotes currently available ${
+      crossSwap.inputToken.symbol
+    } ${crossSwap.inputToken.chainId} -> ${
+      crossSwap.outputToken.symbol
+    } ${crossSwap.outputToken.chainId}`;
     throw new SwapQuoteUnavailableError(
       {
         message,
