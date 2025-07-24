@@ -82,6 +82,8 @@ export async function handleApprovalSwap(
     refundToken,
     excludeSources,
     includeSources,
+    appFeePercent,
+    appFeeRecipient,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } = request.body
@@ -95,7 +97,7 @@ export async function handleApprovalSwap(
       outputToken,
       depositor,
       recipient: recipient || depositor,
-      slippageTolerance: Number(slippageTolerance),
+      slippageTolerance,
       type: amountType,
       refundOnOrigin,
       refundAddress,
@@ -104,6 +106,8 @@ export async function handleApprovalSwap(
       embeddedActions: actions,
       excludeSources,
       includeSources,
+      appFeePercent,
+      appFeeRecipient,
     },
     quoteFetchStrategies
   );
@@ -113,8 +117,13 @@ export async function handleApprovalSwap(
     integratorId
   );
 
-  const { originSwapQuote, bridgeQuote, destinationSwapQuote, crossSwap } =
-    crossSwapQuotes;
+  const {
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    crossSwap,
+    appFee,
+  } = crossSwapQuotes;
 
   const originChainId = crossSwap.inputToken.chainId;
   const inputTokenAddress = isInputNative
@@ -173,7 +182,7 @@ export async function handleApprovalSwap(
     });
   }
 
-  const responseJson = buildBaseSwapResponseJson({
+  const responseJson = await buildBaseSwapResponseJson({
     amountType,
     originChainId,
     inputTokenAddress,
@@ -191,6 +200,9 @@ export async function handleApprovalSwap(
     bridgeQuote,
     destinationSwapQuote,
     refundToken,
+    appFeePercent,
+    appFeeRecipient,
+    appFee,
   });
   return responseJson;
 }

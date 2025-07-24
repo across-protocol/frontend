@@ -14,7 +14,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, utils } from "ethers";
+import { BigNumber, constants, ethers, utils } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
 import {
@@ -37,7 +37,7 @@ import {
   Token,
   AmountType,
 } from "../_dexes/types";
-import { AMOUNT_TYPE, CROSS_SWAP_TYPE } from "../_dexes/utils";
+import { AMOUNT_TYPE, AppFee, CROSS_SWAP_TYPE } from "../_dexes/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
@@ -56,6 +56,8 @@ export const BaseSwapQueryParamsSchema = type({
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
+  appFeePercent: optional(positiveFloatStr(100)),
+  appFeeRecipient: optional(validAddress()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -81,6 +83,8 @@ export async function handleBaseSwapQueryParams(
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
+    appFeePercent = "0",
+    appFeeRecipient,
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -134,6 +138,9 @@ export async function handleBaseSwapQueryParams(
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
 
+  const slippageToleranceNum = parseFloat(slippageTolerance);
+  const appFeePercentNum = parseFloat(appFeePercent);
+
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
       address: inputTokenAddress,
@@ -160,10 +167,12 @@ export async function handleBaseSwapQueryParams(
     refundAddress,
     recipient,
     depositor,
-    slippageTolerance,
+    slippageTolerance: slippageToleranceNum,
     refundToken,
     excludeSources,
     includeSources,
+    appFeePercent: appFeePercentNum,
+    appFeeRecipient,
   };
 }
 
@@ -407,7 +416,146 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
-export function buildBaseSwapResponseJson(params: {
+function getNormalizedPercentage(
+  value: number,
+  amount: BigNumber,
+  decimals: number,
+  price: number
+): number {
+  return (
+    (value / (parseFloat(utils.formatUnits(amount, decimals)) * price)) * 100
+  );
+}
+
+export async function calculateSwapFees(params: {
+  inputAmount: BigNumber;
+  originSwapQuote?: SwapQuote;
+  bridgeQuote: CrossSwapQuotes["bridgeQuote"];
+  destinationSwapQuote?: SwapQuote;
+  appFeePercent?: number;
+  appFeeRecipient?: string;
+  appFee?: AppFee;
+  originTxGas?: BigNumber;
+}) {
+  const inputToken =
+    params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken;
+  const outputToken =
+    params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken;
+
+  const originGas = params.originTxGas || BigNumber.from(0);
+
+  const appFeeAmount = params.appFee?.feeAmount || BigNumber.from(0);
+  const appFeeToken = params.appFee?.feeToken;
+  let appFeeUsd = 0;
+  if (appFeeToken) {
+    const appFeeTokenPriceUsd = await getCachedTokenPrice(
+      appFeeToken.address,
+      "usd",
+      undefined,
+      appFeeToken.chainId
+    );
+    appFeeUsd =
+      parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
+      appFeeTokenPriceUsd;
+  }
+
+  const bridgeFees = params.bridgeQuote.suggestedFees;
+  const relayerCapital = bridgeFees.relayerCapitalFee;
+  const destinationGas = bridgeFees.relayerGasFee;
+
+  // Get USD prices for all tokens and native tokens
+  const [
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+  ] = await Promise.all([
+    getCachedTokenPrice(
+      inputToken.address,
+      "usd",
+      undefined,
+      inputToken.chainId
+    ),
+    getCachedTokenPrice(
+      outputToken.address,
+      "usd",
+      undefined,
+      outputToken.chainId
+    ),
+    getCachedTokenPrice(
+      ethers.constants.AddressZero,
+      "usd",
+      undefined,
+      inputToken.chainId
+    ),
+    getCachedTokenPrice(
+      ethers.constants.AddressZero,
+      "usd",
+      undefined,
+      outputToken.chainId
+    ),
+  ]);
+
+  // Calculate USD amounts
+  const originGasUsd =
+    parseFloat(utils.formatUnits(originGas, 18)) * originNativePriceUsd;
+  const destinationGasUsd =
+    parseFloat(utils.formatUnits(destinationGas.total, 18)) *
+    destinationNativePriceUsd;
+  const relayerCapitalUsd =
+    parseFloat(utils.formatUnits(relayerCapital.total, outputToken.decimals)) *
+    outputTokenPriceUsd;
+  const relayerTotalUsd =
+    parseFloat(
+      utils.formatUnits(bridgeFees.totalRelayFee.total, outputToken.decimals)
+    ) * outputTokenPriceUsd;
+
+  const totalFeeUsd = relayerTotalUsd + appFeeUsd;
+
+  return {
+    total: {
+      amountUsd: totalFeeUsd,
+      pct: getNormalizedPercentage(
+        totalFeeUsd,
+        params.inputAmount,
+        inputToken.decimals,
+        inputTokenPriceUsd
+      ),
+    },
+    originGas: {
+      amount: originGas,
+      amountUsd: originGasUsd,
+      pct: getNormalizedPercentage(
+        originGasUsd,
+        params.inputAmount,
+        inputToken.decimals,
+        inputTokenPriceUsd
+      ),
+    },
+    destinationGas: {
+      amount: destinationGas.total,
+      amountUsd: destinationGasUsd,
+      pct: destinationGas.pct,
+    },
+    relayerCapital: {
+      amount: relayerCapital.total,
+      amountUsd: relayerCapitalUsd,
+      pct: relayerCapital.pct,
+    },
+    relayerTotal: {
+      amount: bridgeFees.totalRelayFee.total,
+      amountUsd: relayerTotalUsd,
+      pct: bridgeFees.totalRelayFee.pct,
+    },
+    app: {
+      amount: appFeeAmount,
+      amountUsd: appFeeUsd,
+      pct: params.appFeePercent || 0,
+    },
+  };
+}
+
+export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   inputTokenAddress: string;
   originChainId: number;
@@ -432,6 +580,9 @@ export function buildBaseSwapResponseJson(params: {
     maxPriorityFeePerGas?: BigNumber;
   };
   permitSwapTx?: any; // TODO: Add type
+  appFeePercent?: number;
+  appFeeRecipient?: string;
+  appFee?: AppFee;
 }) {
   const crossSwapType =
     params.originSwapQuote && params.destinationSwapQuote
@@ -511,6 +662,16 @@ export function buildBaseSwapResponseJson(params: {
             symbol: "WETH",
           }
         : params.refundToken,
+    fees: await calculateSwapFees({
+      inputAmount: params.inputAmount,
+      originSwapQuote: params.originSwapQuote,
+      bridgeQuote: params.bridgeQuote,
+      destinationSwapQuote: params.destinationSwapQuote,
+      appFeePercent: params.appFeePercent,
+      appFeeRecipient: params.appFeeRecipient,
+      appFee: params.appFee,
+      originTxGas: params.approvalSwapTx?.gas,
+    }),
     inputAmount:
       params.originSwapQuote?.expectedAmountIn ??
       params.bridgeQuote.inputAmount,
