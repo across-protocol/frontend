@@ -666,8 +666,8 @@ export async function estimateInputForExactOutput(
     .mul(inputUnit)
     .div(inputUnitOutputAmount);
 
-  // Add 2% buffer for slippage and rounding
-  return requiredInputAmount.mul(102).div(100).toString();
+  // Add 1% buffer for slippage and rounding
+  return requiredInputAmount.mul(101).div(100).toString();
 }
 
 export function isValidSource(

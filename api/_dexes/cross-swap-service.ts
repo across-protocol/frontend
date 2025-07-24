@@ -755,9 +755,15 @@ export async function getCrossSwapQuotesA2A(
     });
   }
 
-  const preferredBridgeRoutes = allBridgeRoutes.filter(({ toTokenSymbol }) =>
-    preferredBridgeTokens.includes(toTokenSymbol)
-  );
+  const preferredBridgeRoutes = allBridgeRoutes
+    .filter(({ toTokenSymbol }) =>
+      preferredBridgeTokens.includes(toTokenSymbol)
+    )
+    .sort((a, b) => {
+      const aIndex = preferredBridgeTokens.indexOf(a.toTokenSymbol);
+      const bIndex = preferredBridgeTokens.indexOf(b.toTokenSymbol);
+      return aIndex - bIndex;
+    });
   const bridgeRoutes =
     preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes;
 
