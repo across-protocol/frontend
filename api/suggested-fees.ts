@@ -85,6 +85,8 @@ const handler = async (
   });
   return tracer.startActiveSpan("suggested-fees", async (span) => {
     try {
+      span.setAttribute("http.request_id", requestId);
+
       const { query } = request;
       const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 

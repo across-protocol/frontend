@@ -11,7 +11,6 @@ import { VercelResponse } from "@vercel/node";
  * @returns The response object
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
  * @see https://datatracker.ietf.org/doc/html/rfc7234
- * @note Be careful to not set anything negative please. The comment in the fn explains why
  */
 export function sendResponse(params: {
   response: VercelResponse;

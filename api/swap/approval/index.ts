@@ -23,6 +23,8 @@ const handler = async (
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
     try {
+      span.setAttribute("http.request_id", requestId);
+
       const responseJson = await handleApprovalSwap(request);
 
       logger.debug({
