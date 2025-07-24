@@ -566,13 +566,19 @@ export function buildDestinationSwapCrossChainMessage({
 }
 
 export function assertMinOutputAmount(
-  amountOut: BigNumber,
-  expectedMinAmountOut: BigNumber
+  actualAmountOut: BigNumber,
+  expectedMinAmountOut: BigNumber,
+  labels?: {
+    actualAmountOut: string;
+    expectedMinAmountOut: string;
+  }
 ) {
-  if (amountOut.lt(expectedMinAmountOut)) {
+  if (actualAmountOut.lt(expectedMinAmountOut)) {
     throw new Error(
-      `Swap quote output amount ${amountOut.toString()} ` +
-        `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+      `[${labels?.actualAmountOut ?? "actualAmountOut"}] ${actualAmountOut.toString()} ` +
+        `is less than required min. output amount ` +
+        `[${labels?.expectedMinAmountOut ?? "expectedMinAmountOut"}] ` +
+        `${expectedMinAmountOut.toString()}`
     );
   }
 }

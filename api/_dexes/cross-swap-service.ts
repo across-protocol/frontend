@@ -1036,6 +1036,10 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     originStrategy,
     originSwapChainId,
   } = result;
+  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount, {
+    actualAmountOut: "destinationSwapQuote.minAmountOut",
+    expectedMinAmountOut: "crossSwap.amount",
+  });
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -1050,6 +1054,14 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       routerAddress: destinationRouter.address,
     }),
   });
+  assertMinOutputAmount(
+    bridgeQuote.outputAmount,
+    destinationSwapQuote.maximumAmountIn,
+    {
+      actualAmountOut: "bridgeQuote.outputAmount",
+      expectedMinAmountOut: "destinationSwapQuote.maximumAmountIn",
+    }
+  );
 
   const originSources = originStrategy.getSources(originSwapChainId, {
     excludeSources: crossSwap.excludeSources,
@@ -1069,12 +1081,10 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       sources: originSources,
     }
   );
-  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
-  assertMinOutputAmount(
-    bridgeQuote.outputAmount,
-    destinationSwapQuote.maximumAmountIn
-  );
-  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
+  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount, {
+    actualAmountOut: "originSwapQuote.minAmountOut",
+    expectedMinAmountOut: "bridgeQuote.inputAmount",
+  });
 
   return {
     crossSwap,
