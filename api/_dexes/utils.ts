@@ -86,7 +86,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["WETH", "USDC", "USDT", "DAI"],
+  default: ["USDC", "WETH", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },
@@ -666,8 +666,8 @@ export async function estimateInputForExactOutput(
     .mul(inputUnit)
     .div(inputUnitOutputAmount);
 
-  // Add 1% buffer for slippage and rounding
-  return requiredInputAmount.mul(101).div(100).toString();
+  // Add 2% buffer for slippage and rounding
+  return requiredInputAmount.mul(102).div(100).toString();
 }
 
 export function isValidSource(

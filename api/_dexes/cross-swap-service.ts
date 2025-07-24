@@ -734,7 +734,7 @@ export async function getCrossSwapQuotesA2A(
     crossSwap.inputToken.chainId,
     crossSwap.outputToken.chainId
   );
-  const bridgeRoutesToCompareChunkSize = 2;
+  const bridgeRoutesToCompareChunkSize = 1;
   const fetchQuoteForRoute =
     crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
       ? getCrossSwapQuotesForExactInputByRouteA2A
