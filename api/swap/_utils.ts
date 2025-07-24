@@ -38,7 +38,11 @@ import {
   AmountType,
 } from "../_dexes/types";
 import { AMOUNT_TYPE, CrossSwapType } from "../_dexes/utils";
-import { encodeApproveCalldata } from "../_multicall-handler";
+import {
+  encodeApproveCalldata,
+  encodeMakeCallWithBalanceCalldata,
+  getMultiCallHandlerAddress,
+} from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -214,14 +218,14 @@ export type SwapBody = Infer<typeof SwapBody>;
  * @param body - The request body containing an array of actions to validate
  * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
  */
-export function handleSwapBody(body: SwapBody) {
+export function handleSwapBody(body: SwapBody, destinationChainId: number) {
   assert(body, SwapBody);
   // Assert that provided actions can be encoded
-  encodeActionCalls(body.actions);
+  encodeActionCalls(body.actions, destinationChainId);
   return body;
 }
 
-export function encodeActionCalls(actions: Action[]) {
+export function encodeActionCalls(actions: Action[], targetChainId: number) {
   // Helper function to recursively extract only the .value fields from args array
   const flattenArgs = (args: any[], depth: number = 0): any[] => {
     if (depth > 10) {
@@ -231,7 +235,8 @@ export function encodeActionCalls(actions: Action[]) {
       if (Array.isArray(arg)) {
         return flattenArgs(arg, depth + 1);
       } else if (arg && typeof arg === "object" && "value" in arg) {
-        return arg.value;
+        // Fields to be populated dynamically must be zeroed out
+        return arg.populateDynamically ? "0" : arg.value;
       } else {
         return arg;
       }
@@ -250,12 +255,24 @@ export function encodeActionCalls(actions: Action[]) {
       const positionalArgs = flattenArgs(action.args);
       const iface = new utils.Interface([methodAbi]);
       const functionName = iface.fragments[0].name;
+      const populateDynamically = action.args.some(
+        (arg) => arg.populateDynamically
+      );
       try {
-        return {
-          target: action.target,
-          callData: iface.encodeFunctionData(functionName, positionalArgs),
-          value: action.value,
-        };
+        const callData = iface.encodeFunctionData(functionName, positionalArgs);
+        if (populateDynamically) {
+          return getWrappedCallForMakeCallWithBalance(
+            action,
+            callData,
+            targetChainId
+          );
+        } else {
+          return {
+            target: action.target,
+            callData,
+            value: action.value,
+          };
+        }
       } catch (err) {
         throw new AbiEncodingError(
           {
@@ -268,6 +285,38 @@ export function encodeActionCalls(actions: Action[]) {
       }
     }
   });
+}
+
+export function getWrappedCallForMakeCallWithBalance(
+  action: Action,
+  callData: string,
+  targetChainId: number
+) {
+  const replacements = action.args
+    .map((arg, index) => {
+      if (arg.populateDynamically) {
+        return {
+          token: arg.balanceSource,
+          // Arguments start at byte 4 (after the 4-byte function selector)
+          // And each argument is 32 bytes long
+          offset: 4 + index * 32,
+        };
+      }
+    })
+    .filter((replacement) => replacement !== undefined);
+
+  const wrappedCall = encodeMakeCallWithBalanceCalldata(
+    action.target,
+    callData,
+    action.value,
+    replacements
+  );
+
+  return {
+    target: getMultiCallHandlerAddress(targetChainId),
+    callData: wrappedCall,
+    value: "0", // Value for this call is already included in the wrapped call
+  };
 }
 
 export function getApprovalTxns(params: {

@@ -79,3 +79,22 @@ export function encodeDrainCalldata(token: string, destination: string) {
     destination,
   ]);
 }
+
+export function encodeMakeCallWithBalanceCalldata(
+  target: string,
+  callData: string,
+  value: ethers.BigNumberish,
+  replacements: Array<{ token: string; offset: ethers.BigNumberish }>
+) {
+  const makeCallWithBalanceFunction =
+    "function makeCallWithBalance(address target, bytes callData, uint256 value, (address token, uint256 offset)[] replacement)";
+  const multicallHandlerInterface = new ethers.utils.Interface([
+    makeCallWithBalanceFunction,
+  ]);
+  return multicallHandlerInterface.encodeFunctionData("makeCallWithBalance", [
+    target,
+    callData,
+    value,
+    replacements,
+  ]);
+}
