@@ -94,7 +94,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
     // contract. Should be removed once we've migrated to the new `SpokePoolPeriphery`.
     else if (originSwapEntryPoint.name === "UniversalSwapAndBridge") {
       const universalSwapAndBridge = getUniversalSwapAndBridge(
-        originSwapEntryPoint.dex,
+        originSwapEntryPoint.dex || "unknown",
         originChainId
       );
       if (originSwapQuote.swapTxns.length !== 1) {

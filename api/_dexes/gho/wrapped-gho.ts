@@ -170,6 +170,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
   };
 
   return {
+    strategyName: "wrapped-gho",
     getRouter,
     getOriginEntryPoints,
     fetchFn,

@@ -208,6 +208,23 @@ export class AmountTooLowError extends InputError {
   }
 }
 
+export class SwapAmountTooLowForBridgeFeesError extends InputError {
+  constructor(
+    args: { bridgeAmount: string; bridgeFee: string },
+    opts?: ErrorOptions
+  ) {
+    super(
+      {
+        message: `Failed to fetch swap quote: Bridge amount ${
+          args.bridgeAmount
+        } is too low to cover bridge fees ${args.bridgeFee}`,
+        code: AcrossErrorCode.AMOUNT_TOO_LOW,
+      },
+      opts
+    );
+  }
+}
+
 export class AmountTooHighError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
@@ -386,4 +403,26 @@ export function resolveEthersError(err: unknown) {
     },
     { cause: err }
   );
+}
+
+export function compactAxiosError(error: Error) {
+  if (!(error instanceof AxiosError)) {
+    return error;
+  }
+
+  const { response } = error;
+  if (!response) {
+    return error;
+  }
+
+  const compactError = new Error(
+    [
+      "[AxiosError]",
+      `Status ${response.status} - ${response.statusText}`,
+      `Request URL: ${response.config.url}`,
+      `Data: ${JSON.stringify(response.data)}`,
+    ].join(" - ")
+  );
+
+  return compactError;
 }

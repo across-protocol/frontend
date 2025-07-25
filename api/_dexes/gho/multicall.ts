@@ -195,6 +195,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
   };
 
   return {
+    strategyName: "gho-multicall3",
     getRouter,
     getOriginEntryPoints,
     fetchFn,

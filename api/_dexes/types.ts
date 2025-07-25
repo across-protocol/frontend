@@ -101,16 +101,12 @@ export type CrossSwapQuotes = {
   };
 };
 
-export type OriginSwapEntryPointContract =
-  | {
-      name: "SpokePoolPeriphery";
-      address: string;
-    }
-  | {
-      name: "UniversalSwapAndBridge";
-      address: string;
-      dex: SupportedDex;
-    };
+export type OriginSwapEntryPointContract = {
+  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery";
+  address: string;
+  dex?: SupportedDex;
+};
+
 export type DepositEntryPointContract = {
   name: "SpokePoolPeriphery" | "SpokePool";
   address: string;
@@ -144,6 +140,7 @@ export type GetSourcesFn = (
   | undefined;
 
 export type QuoteFetchStrategy = {
+  strategyName: string;
   getRouter: (chainId: number) => {
     address: string;
     name: string;
@@ -152,6 +149,11 @@ export type QuoteFetchStrategy = {
   fetchFn: QuoteFetchFn;
   getSources: GetSourcesFn;
 };
+
+export type SwapRouter = ReturnType<QuoteFetchStrategy["getRouter"]>;
+export type OriginEntryPoint = ReturnType<
+  QuoteFetchStrategy["getOriginEntryPoints"]
+>;
 
 export type QuoteFetchFn = (
   swap: Swap,
@@ -173,40 +175,27 @@ export type OriginEntryPoints = {
     name: "UniversalSwapAndBridge" | "SwapProxy";
     address: string;
   };
-  swapAndBridge: {
-    name: OriginEntryPointContractName;
-    address: string;
-    dex: string;
-  };
+  swapAndBridge: OriginSwapEntryPointContract;
   deposit: {
     name: "SpokePoolPeriphery" | "SpokePool";
     address: string;
   };
 };
+export type DepositEntryPoint = OriginEntryPoints["deposit"];
 
 export type CrossSwapQuotesRetrievalB2AResult = {
   destinationSwap: {
     chainId: number;
-    tokenIn: {
-      address: string;
-      decimals: number;
-      symbol: string;
-      chainId: number;
-    };
-    tokenOut: any;
+    tokenIn: Token;
+    tokenOut: Token;
     recipient: string;
     slippageTolerance: number;
-    type: any;
+    type: AmountType;
   };
-  originRouter: any;
-  destinationRouter: any;
-  depositEntryPoint: any;
-  bridgeableOutputToken: {
-    address: string;
-    decimals: number;
-    symbol: string;
-    chainId: number;
-  };
+  originRouter: SwapRouter;
+  destinationRouter: SwapRouter;
+  depositEntryPoint: DepositEntryPoint;
+  bridgeableOutputToken: Token;
   destinationSwapChainId: number;
   destinationStrategy: QuoteFetchStrategy;
   originStrategy: QuoteFetchStrategy;
@@ -215,77 +204,47 @@ export type CrossSwapQuotesRetrievalB2AResult = {
 export type CrossSwapQuotesRetrievalA2BResult = {
   originSwap: {
     chainId: number;
-    tokenIn: any;
-    tokenOut: {
-      address: string;
-      decimals: number;
-      symbol: string;
-      chainId: number;
-    };
+    tokenIn: Token;
+    tokenOut: Token;
     recipient: string;
     slippageTolerance: number;
-    type: any;
+    type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
   originSwapChainId: number;
   destinationChainId: number;
-  bridgeableInputToken: {
-    address: string;
-    decimals: number;
-    symbol: string;
-    chainId: number;
-  };
-  originSwapEntryPoint: any;
+  bridgeableInputToken: Token;
+  originSwapEntryPoint: OriginSwapEntryPointContract;
 };
 
 export type CrossSwapQuotesRetrievalA2AResult = {
   originSwap: {
     chainId: number;
-    tokenIn: any;
-    tokenOut: {
-      address: string;
-      decimals: number;
-      symbol: string;
-      chainId: number;
-    };
+    tokenIn: Token;
+    tokenOut: Token;
     recipient: string;
     slippageTolerance: number;
-    type: any;
+    type: AmountType;
   };
   destinationSwap: {
     chainId: number;
-    tokenIn: {
-      address: string;
-      decimals: number;
-      symbol: string;
-      chainId: number;
-    };
-    tokenOut: any;
+    tokenIn: Token;
+    tokenOut: Token;
     recipient: string;
     slippageTolerance: number;
-    type: any;
+    type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
-  destinationStrategy: QuoteFetchStrategy;
   originSwapChainId: number;
   destinationSwapChainId: number;
-  bridgeableInputToken: {
-    address: string;
-    decimals: number;
-    symbol: string;
-    chainId: number;
-  };
-  bridgeableOutputToken: {
-    address: string;
-    decimals: number;
-    symbol: string;
-    chainId: number;
-  };
-  originSwapEntryPoint: any;
-  depositEntryPoint: any;
-  originRouter: any;
-  destinationRouter: any;
-};
+  bridgeableInputToken: Token;
+  bridgeableOutputToken: Token;
+  originSwapEntryPoint: OriginSwapEntryPointContract;
+  depositEntryPoint: DepositEntryPoint;
+  originRouter: SwapRouter;
+  destinationRouter: SwapRouter;
+  destinationStrategy: QuoteFetchStrategy;
+}[];
 
 export type DexSources = {
   strategy: string;

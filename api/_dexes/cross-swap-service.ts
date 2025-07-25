@@ -6,11 +6,10 @@ import {
   getRouteByOutputTokenAndOriginChain,
   getRoutesByChainIds,
   getTokenByAddress,
-  Profiler,
-  addMarkupToAmount,
   getBridgeQuoteForExactInput,
   addTimeoutToPromise,
   getRejectedReasons,
+  getLogger,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -31,7 +30,7 @@ import {
   assertMinOutputAmount,
 } from "./utils";
 import {
-  AmountTooLowError,
+  SwapAmountTooLowForBridgeFeesError,
   InvalidParamError,
   SwapQuoteUnavailableError,
 } from "../_errors";
@@ -41,9 +40,9 @@ import {
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
 
-const INDICATIVE_QUOTE_BUFFER = 0.005; // 0.5% buffer for indicative quotes
+const PROMISE_TIMEOUT_MS = 15_000;
 
-const PROMISE_TIMEOUT_MS = 10000;
+const logger = getLogger();
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
@@ -138,10 +137,9 @@ export async function getCrossSwapQuotesForExactInputB2B(
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
-    throw new AmountTooLowError({
-      message:
-        `Failed to fetch swap quote: ` +
-        `Bridge amount is too low to cover bridge fees`,
+    throw new SwapAmountTooLowForBridgeFeesError({
+      bridgeAmount: crossSwap.amount.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
     });
   }
 
@@ -270,10 +268,9 @@ export async function getCrossSwapQuotesForExactInputB2A(
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
-    throw new AmountTooLowError({
-      message:
-        `Failed to fetch swap quote: ` +
-        `Bridge amount is too low to cover bridge fees`,
+    throw new SwapAmountTooLowForBridgeFeesError({
+      bridgeAmount: crossSwap.amount.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
     });
   }
 
@@ -318,10 +315,6 @@ export async function getCrossSwapQuotesForOutputB2A(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
-  const profiler = new Profiler({
-    at: "api/_dexes/cross-swap-service#getCrossSwapQuotesForOutputB2A",
-    logger: console,
-  });
   const results = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
   const strategyFetches = results.map(async (result) => {
@@ -341,7 +334,7 @@ export async function getCrossSwapQuotesForOutputB2A(
           amount: crossSwap.amount.toString(),
         },
         TradeType.EXACT_OUTPUT,
-        { useIndicativeQuote: true, sources }
+        { sources }
       );
     return {
       result,
@@ -364,37 +357,34 @@ export async function getCrossSwapQuotesForOutputB2A(
   } = prioritizedStrategy.result;
 
   // 2. Fetch REAL destination swap quote and bridge quote in parallel to improve performance.
-  const [destinationSwapQuote, bridgeQuote] = await profiler.measureAsync(
-    Promise.all([
-      // 2.1. REAL destination swap quote for bridgeable output token -> any token.
-      //      Quote contains calldata.
-      destinationStrategy.fetchFn(
-        {
-          ...destinationSwap,
-          amount: crossSwap.amount.toString(),
-        },
-        TradeType.EXACT_OUTPUT,
-        { sources: prioritizedStrategy.sources }
-      ),
-      // 2.2. Bridge quote for bridgeable input token -> bridgeable output token based on
-      //      indicative destination swap quote.
-      getBridgeQuoteForMinOutput({
-        inputToken: crossSwap.inputToken,
-        outputToken: bridgeableOutputToken,
-        minOutputAmount:
-          prioritizedStrategy.indicativeDestinationSwapQuote.maximumAmountIn,
-        recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-        message: buildDestinationSwapCrossChainMessage({
-          crossSwap,
-          destinationSwapQuote:
-            prioritizedStrategy.indicativeDestinationSwapQuote,
-          bridgeableOutputToken,
-          routerAddress: destinationRouter.address,
-        }),
+  const [destinationSwapQuote, bridgeQuote] = await Promise.all([
+    // 2.1. REAL destination swap quote for bridgeable output token -> any token.
+    //      Quote contains calldata.
+    destinationStrategy.fetchFn(
+      {
+        ...destinationSwap,
+        amount: crossSwap.amount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      { sources: prioritizedStrategy.sources }
+    ),
+    // 2.2. Bridge quote for bridgeable input token -> bridgeable output token based on
+    //      indicative destination swap quote.
+    getBridgeQuoteForMinOutput({
+      inputToken: crossSwap.inputToken,
+      outputToken: bridgeableOutputToken,
+      minOutputAmount:
+        prioritizedStrategy.indicativeDestinationSwapQuote.maximumAmountIn,
+      recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+      message: buildDestinationSwapCrossChainMessage({
+        crossSwap,
+        destinationSwapQuote:
+          prioritizedStrategy.indicativeDestinationSwapQuote,
+        bridgeableOutputToken,
+        routerAddress: destinationRouter.address,
       }),
-    ]),
-    "getAllQuotes"
-  );
+    }),
+  ]);
   assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
   assertMinOutputAmount(
     bridgeQuote.outputAmount,
@@ -431,6 +421,15 @@ function _prepCrossSwapQuotesRetrievalB2A(
     crossSwap.inputToken.symbol,
     strategies
   );
+  // Use the first origin strategy since we don't need to fetch multiple origin quotes
+  // for B2A swaps.
+  const originStrategy = originStrategies.at(0);
+  if (!originStrategy) {
+    throw new InvalidParamError({
+      message: `Failed to fetch swap quote: no origin strategy found for ${crossSwap.inputToken.symbol}`,
+    });
+  }
+
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByInputTokenAndDestinationChain(
@@ -483,28 +482,25 @@ function _prepCrossSwapQuotesRetrievalB2A(
     strategies
   );
 
-  // Return a list of results for each combination of origin and destination strategies
-  return originStrategies.flatMap((originStrategy) =>
-    destinationStrategies.map((destinationStrategy) => {
-      const originRouter = originStrategy.getRouter(originSwapChainId);
-      const destinationRouter = destinationStrategy.getRouter(
-        destinationSwapChainId
-      );
-      const depositEntryPoint =
-        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
+  return destinationStrategies.map((destinationStrategy) => {
+    const originRouter = originStrategy.getRouter(originSwapChainId);
+    const destinationRouter = destinationStrategy.getRouter(
+      destinationSwapChainId
+    );
+    const depositEntryPoint =
+      originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
 
-      return {
-        destinationSwap,
-        originRouter,
-        destinationRouter,
-        depositEntryPoint,
-        bridgeableOutputToken,
-        destinationSwapChainId,
-        destinationStrategy,
-        originStrategy,
-      };
-    })
-  );
+    return {
+      destinationSwap,
+      originRouter,
+      destinationRouter,
+      depositEntryPoint,
+      bridgeableOutputToken,
+      destinationSwapChainId,
+      destinationStrategy,
+      originStrategy,
+    };
+  });
 }
 
 export async function getCrossSwapQuotesForExactInputA2B(
@@ -561,10 +557,9 @@ export async function getCrossSwapQuotesForExactInputA2B(
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
-    throw new AmountTooLowError({
-      message:
-        `Failed to fetch swap quote: ` +
-        `Input amount is too low to cover swap and bridge fees`,
+    throw new SwapAmountTooLowForBridgeFeesError({
+      bridgeAmount: prioritizedStrategy.originSwapQuote.minAmountOut.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
     });
   }
 
@@ -591,10 +586,6 @@ export async function getCrossSwapQuotesForOutputA2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ) {
-  const profiler = new Profiler({
-    at: "api/_dexes/cross-swap-service#getCrossSwapQuotesForOutputA2B",
-    logger: console,
-  });
   const results = _prepCrossSwapQuotesRetrievalA2B(crossSwap, strategies);
 
   if (results.length === 0) {
@@ -603,24 +594,17 @@ export async function getCrossSwapQuotesForOutputA2B(
     });
   }
 
-  const {
-    originSwap,
-    originSwapChainId,
-    destinationChainId,
-    bridgeableInputToken,
-  } = results[0];
+  const { originSwapChainId, destinationChainId, bridgeableInputToken } =
+    results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await profiler.measureAsync(
-    getBridgeQuoteForMinOutput({
-      inputToken: bridgeableInputToken,
-      outputToken: crossSwap.outputToken,
-      minOutputAmount: crossSwap.amount,
-      recipient: getMultiCallHandlerAddress(destinationChainId),
-      message: buildExactOutputBridgeTokenMessage(crossSwap),
-    }),
-    "getBridgeQuote"
-  );
+  const bridgeQuote = await getBridgeQuoteForMinOutput({
+    inputToken: bridgeableInputToken,
+    outputToken: crossSwap.outputToken,
+    minOutputAmount: crossSwap.amount,
+    recipient: getMultiCallHandlerAddress(destinationChainId),
+    message: buildExactOutputBridgeTokenMessage(crossSwap),
+  });
   // 1.1. Update bridge quote message for min. output amount
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT && crossSwap.isOutputNative) {
     bridgeQuote.message = buildMinOutputBridgeTokenMessage(
@@ -639,24 +623,18 @@ export async function getCrossSwapQuotesForOutputA2B(
     );
     assertSources(sources);
 
-    const indicativeOriginSwapQuote = await profiler.measureAsync(
-      result.originStrategy.fetchFn(
-        {
-          ...result.originSwap,
-          depositor: crossSwap.depositor,
-          amount: bridgeQuote.inputAmount.toString(),
-        },
-        TradeType.EXACT_OUTPUT,
-        {
-          useIndicativeQuote: true,
-          sources,
-        }
-      ),
-      "INDICATIVE_getOriginSwapQuote"
+    const originSwapQuote = await result.originStrategy.fetchFn(
+      {
+        ...result.originSwap,
+        depositor: crossSwap.depositor,
+        amount: bridgeQuote.inputAmount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      { sources }
     );
     return {
       result,
-      indicativeOriginSwapQuote,
+      originSwapQuote,
       sources,
     };
   });
@@ -664,30 +642,11 @@ export async function getCrossSwapQuotesForOutputA2B(
   // Run fetchFn for all strategy combinations and choose the fastest response
   const prioritizedStrategy = await executeStrategies(strategyFetches);
 
-  // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
-  //      This prevents leftover tokens in the SwapAndBridge contract.
-  let originSwapQuote = await profiler.measureAsync(
-    prioritizedStrategy.result.originStrategy.fetchFn(
-      {
-        ...originSwap,
-        depositor: crossSwap.depositor,
-        amount: addMarkupToAmount(
-          prioritizedStrategy.indicativeOriginSwapQuote.maximumAmountIn,
-          INDICATIVE_QUOTE_BUFFER
-        ).toString(),
-      },
-      TradeType.EXACT_INPUT,
-      { sources: prioritizedStrategy.sources }
-    ),
-    "getOriginSwapQuote"
-  );
-  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
-
   return {
     crossSwap,
     bridgeQuote,
     destinationSwapQuote: undefined,
-    originSwapQuote,
+    originSwapQuote: prioritizedStrategy.originSwapQuote,
     contracts: {
       originSwapEntryPoint: prioritizedStrategy.result.originSwapEntryPoint,
       depositEntryPoint:
@@ -775,7 +734,7 @@ export async function getCrossSwapQuotesA2A(
     crossSwap.inputToken.chainId,
     crossSwap.outputToken.chainId
   );
-  const bridgeRoutesToCompareChunkSize = 2;
+  const bridgeRoutesToCompareChunkSize = 1;
   const fetchQuoteForRoute =
     crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
       ? getCrossSwapQuotesForExactInputByRouteA2A
@@ -796,13 +755,20 @@ export async function getCrossSwapQuotesA2A(
     });
   }
 
-  const preferredBridgeRoutes = allBridgeRoutes.filter(({ toTokenSymbol }) =>
-    preferredBridgeTokens.includes(toTokenSymbol)
-  );
+  const preferredBridgeRoutes = allBridgeRoutes
+    .filter(({ toTokenSymbol }) =>
+      preferredBridgeTokens.includes(toTokenSymbol)
+    )
+    .sort((a, b) => {
+      const aIndex = preferredBridgeTokens.indexOf(a.toTokenSymbol);
+      const bIndex = preferredBridgeTokens.indexOf(b.toTokenSymbol);
+      return aIndex - bIndex;
+    });
   const bridgeRoutes =
     preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes;
 
   let chunkStart = 0;
+  const allCrossSwapQuotesFailures: Error[] = [];
   while (chunkStart < bridgeRoutes.length) {
     const bridgeRoutesToCompare = bridgeRoutes.slice(
       chunkStart,
@@ -822,6 +788,11 @@ export async function getCrossSwapQuotesA2A(
         fetchQuoteForRoute(crossSwap, bridgeRoute, strategies)
       )
     );
+
+    const crossSwapQuotesFailures = crossSwapQuotesResults
+      .filter((result) => result.status === "rejected")
+      .map((result) => result.reason);
+    allCrossSwapQuotesFailures.push(...crossSwapQuotesFailures);
 
     const crossSwapQuotes = crossSwapQuotesResults
       .filter((result) => result.status === "fulfilled")
@@ -849,15 +820,24 @@ export async function getCrossSwapQuotesA2A(
     return bestCrossSwapQuote;
   }
 
-  throw new SwapQuoteUnavailableError({
-    message:
-      `Failed to fetch swap quote: ` +
-      `No quotes available ${
+  const rejectedReasons = getRejectedReasons(allCrossSwapQuotesFailures);
+  logger.debug({
+    at: "getCrossSwapQuotesA2A",
+    message: "All bridge routes and providers failed",
+    failedReasons: rejectedReasons,
+  });
+  throw new SwapQuoteUnavailableError(
+    {
+      message: `No swap quotes currently available ${
         crossSwap.inputToken.symbol
       } ${crossSwap.inputToken.chainId} -> ${
         crossSwap.outputToken.symbol
       } ${crossSwap.outputToken.chainId}`,
-  });
+    },
+    {
+      cause: rejectedReasons.join(","),
+    }
+  );
 }
 
 export async function getCrossSwapQuotesForExactInputByRouteA2A(
@@ -873,10 +853,11 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   const results = _prepCrossSwapQuotesRetrievalA2A(
     crossSwap,
     bridgeRoute,
-    strategies
+    strategies,
+    "origin"
   );
 
-  const strategyFetches = results.map(async (result) => {
+  const originStrategyFetches = results.map(async (result) => {
     const originSources = result.originStrategy.getSources(
       result.originSwap.chainId,
       {
@@ -886,6 +867,16 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     );
     assertSources(originSources);
 
+    const destinationSources = result.destinationStrategy.getSources(
+      destinationSwap.chainId,
+      {
+        excludeSources: crossSwap.excludeSources,
+        includeSources: crossSwap.includeSources,
+      }
+    );
+    assertSources(destinationSources);
+
+    // 1. Get origin swap quote for any input token -> bridgeable input token
     const originSwapQuote = await result.originStrategy.fetchFn(
       {
         ...result.originSwap,
@@ -895,15 +886,31 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       TradeType.EXACT_INPUT,
       { sources: originSources }
     );
+
+    // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+    //    with exact input amount set to `originSwapQuote.minAmountOut`.
+    const indicativeDestinationSwapQuote =
+      await result.destinationStrategy.fetchFn(
+        {
+          ...result.destinationSwap,
+          amount: originSwapQuote.minAmountOut.toString(),
+        },
+        TradeType.EXACT_INPUT,
+        { sources: destinationSources }
+      );
     return {
       result,
       originSwapQuote,
       originSources,
+      indicativeDestinationSwapQuote,
+      destinationSources,
     };
   });
 
-  // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  // Run fetchFn for all origin strategies and choose the fastest response
+  const prioritizedOriginStrategy = await executeStrategies(
+    originStrategyFetches
+  );
 
   const {
     destinationSwap,
@@ -915,49 +922,31 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     destinationSwapChainId,
     originSwapEntryPoint,
     destinationStrategy,
-  } = prioritizedStrategy.result;
-
-  // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
-  //    with exact input amount set to `originSwapQuote.minAmountOut`.
-  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
-    {
-      ...destinationSwap,
-      amount: prioritizedStrategy.originSwapQuote.minAmountOut.toString(),
-    },
-    TradeType.EXACT_INPUT,
-    { sources: prioritizedStrategy.originSources }
-  );
+  } = prioritizedOriginStrategy.result;
 
   // 3. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForExactInput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
-    exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
+    exactInputAmount: prioritizedOriginStrategy.originSwapQuote.minAmountOut,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
     message: buildDestinationSwapCrossChainMessage({
       crossSwap,
-      destinationSwapQuote: indicativeDestinationSwapQuote,
+      destinationSwapQuote:
+        prioritizedOriginStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
       routerAddress: destinationRouter.address,
     }),
   });
-
   if (bridgeQuote.outputAmount.lt(0)) {
-    throw new AmountTooLowError({
-      message: `Failed to fetch swap quote: Bridge amount is too low to cover bridge fees`,
+    throw new SwapAmountTooLowForBridgeFeesError({
+      bridgeAmount:
+        prioritizedOriginStrategy.originSwapQuote.minAmountOut.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
     });
   }
 
   // 4. Get destination swap quote for bridgeable output token -> any token
-  const destinationSources = destinationStrategy.getSources(
-    destinationSwap.chainId,
-    {
-      excludeSources: crossSwap.excludeSources,
-      includeSources: crossSwap.includeSources,
-    }
-  );
-  assertSources(destinationSources);
-
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
@@ -965,7 +954,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     },
     TradeType.EXACT_INPUT,
     {
-      sources: destinationSources,
+      sources: prioritizedOriginStrategy.destinationSources,
     }
   );
 
@@ -981,7 +970,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     crossSwap,
     destinationSwapQuote,
     bridgeQuote,
-    originSwapQuote: prioritizedStrategy.originSwapQuote,
+    originSwapQuote: prioritizedOriginStrategy.originSwapQuote,
     contracts: {
       originSwapEntryPoint,
       depositEntryPoint,
@@ -1001,21 +990,12 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   },
   strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
-  const profiler = new Profiler({
-    at: "api/_dexes/cross-swap-service#getCrossSwapQuotesForOutputByRouteA2A",
-    logger: console,
-  });
   const results = _prepCrossSwapQuotesRetrievalA2A(
     crossSwap,
     bridgeRoute,
-    strategies
+    strategies,
+    "destination"
   );
-
-  // Fetch INDICATIVE quotes sequentially:
-  // 1. Destination swap quote for bridgeable output token -> any token
-  // 2. Bridge quote for bridgeable input token -> bridgeable output token
-  // 3. Origin swap quote for any input token -> bridgeable input token
-  // These requests are faster but do not contain calldata.
 
   const destinationStrategyFetches = results.map(async (result) => {
     const destinationSources = result.destinationStrategy.getSources(
@@ -1027,23 +1007,20 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     );
     assertSources(destinationSources);
 
-    const indicativeDestinationSwapQuote = await profiler.measureAsync(
-      result.destinationStrategy.fetchFn(
-        {
-          ...result.destinationSwap,
-          amount: crossSwap.amount.toString(),
-        },
-        TradeType.EXACT_OUTPUT,
-        {
-          useIndicativeQuote: true,
-          sources: destinationSources,
-        }
-      ),
-      "INDICATIVE_getDestinationSwapQuote"
+    // 1. Get destination swap quote for bridgeable output token -> any token
+    const destinationSwapQuote = await result.destinationStrategy.fetchFn(
+      {
+        ...result.destinationSwap,
+        amount: crossSwap.amount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        sources: destinationSources,
+      }
     );
     return {
       result,
-      indicativeDestinationSwapQuote,
+      destinationSwapQuote,
       destinationSources,
     };
   });
@@ -1052,75 +1029,8 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   const prioritizedDestinationStrategy = await executeStrategies(
     destinationStrategyFetches
   );
-
-  const indicativeBridgeQuote = await profiler.measureAsync(
-    getBridgeQuoteForMinOutput({
-      inputToken: prioritizedDestinationStrategy.result.bridgeableInputToken,
-      outputToken: prioritizedDestinationStrategy.result.bridgeableOutputToken,
-      minOutputAmount: addMarkupToAmount(
-        prioritizedDestinationStrategy.indicativeDestinationSwapQuote
-          .maximumAmountIn,
-        INDICATIVE_QUOTE_BUFFER
-      ),
-      recipient: getMultiCallHandlerAddress(
-        prioritizedDestinationStrategy.result.destinationSwapChainId
-      ),
-      message: buildDestinationSwapCrossChainMessage({
-        crossSwap,
-        destinationSwapQuote:
-          prioritizedDestinationStrategy.indicativeDestinationSwapQuote,
-        bridgeableOutputToken:
-          prioritizedDestinationStrategy.result.bridgeableOutputToken,
-        routerAddress:
-          prioritizedDestinationStrategy.result.destinationRouter.address,
-      }),
-    }),
-    "INDICATIVE_getBridgeQuote"
-  );
-
-  const originStrategyFetches = results.map(async (result) => {
-    const originSources = result.originStrategy.getSources(
-      result.originSwap.chainId,
-      {
-        excludeSources: crossSwap.excludeSources,
-        includeSources: crossSwap.includeSources,
-      }
-    );
-    assertSources(originSources);
-
-    const indicativeOriginSwapQuote = await profiler.measureAsync(
-      result.originStrategy.fetchFn(
-        {
-          ...result.originSwap,
-          depositor: crossSwap.depositor,
-          amount: addMarkupToAmount(
-            indicativeBridgeQuote.inputAmount,
-            INDICATIVE_QUOTE_BUFFER
-          ).toString(),
-        },
-        TradeType.EXACT_OUTPUT,
-        {
-          useIndicativeQuote: true,
-          sources: originSources,
-        }
-      ),
-      "INDICATIVE_getOriginSwapQuote"
-    );
-    return {
-      result,
-      indicativeOriginSwapQuote,
-      originSources,
-    };
-  });
-
-  // Run origin swap quote fetches for all strategy combinations and choose the fastest
-  const prioritizedOriginStrategy = await executeStrategies(
-    originStrategyFetches
-  );
-
+  const { result, destinationSwapQuote } = prioritizedDestinationStrategy;
   const {
-    originSwap,
-    destinationSwap,
     originRouter,
     destinationRouter,
     depositEntryPoint,
@@ -1128,69 +1038,58 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     bridgeableOutputToken,
     destinationSwapChainId,
     originSwapEntryPoint,
+    originSwap,
     originStrategy,
-    destinationStrategy,
-  } = prioritizedOriginStrategy.result;
+    originSwapChainId,
+  } = result;
+  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount, {
+    actualAmountOut: "destinationSwapQuote.minAmountOut",
+    expectedMinAmountOut: "crossSwap.amount",
+  });
 
-  // Fetch REAL quotes in parallel. These requests are slower but contain calldata.
-  const [destinationSwapQuote, bridgeQuote, originSwapQuote] =
-    await profiler.measureAsync(
-      Promise.all([
-        destinationStrategy.fetchFn(
-          {
-            ...destinationSwap,
-            amount: crossSwap.amount.toString(),
-          },
-          TradeType.EXACT_OUTPUT,
-          {
-            sources: prioritizedDestinationStrategy.destinationSources,
-          }
-        ),
-        getBridgeQuoteForMinOutput({
-          inputToken: bridgeableInputToken,
-          outputToken: bridgeableOutputToken,
-          minOutputAmount:
-            prioritizedDestinationStrategy.indicativeDestinationSwapQuote
-              .maximumAmountIn,
-          recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-          message: buildDestinationSwapCrossChainMessage({
-            crossSwap,
-            destinationSwapQuote:
-              prioritizedDestinationStrategy.indicativeDestinationSwapQuote,
-            bridgeableOutputToken,
-            routerAddress: destinationRouter.address,
-          }),
-        }),
-        originStrategy.fetchFn(
-          {
-            ...originSwap,
-            depositor: crossSwap.depositor,
-            amount: addMarkupToAmount(
-              prioritizedOriginStrategy.indicativeOriginSwapQuote
-                .maximumAmountIn,
-              INDICATIVE_QUOTE_BUFFER
-            ).toString(),
-          },
-          TradeType.EXACT_INPUT,
-          {
-            sources: prioritizedOriginStrategy.originSources,
-          }
-        ),
-      ]),
-      "getAllQuotes"
-    );
-  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  // 2. Get bridge quote for bridgeable input token -> bridgeable output token
+  const bridgeQuote = await getBridgeQuoteForMinOutput({
+    inputToken: bridgeableInputToken,
+    outputToken: bridgeableOutputToken,
+    minOutputAmount: destinationSwapQuote.maximumAmountIn,
+    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote,
+      bridgeableOutputToken,
+      routerAddress: destinationRouter.address,
+    }),
+  });
   assertMinOutputAmount(
     bridgeQuote.outputAmount,
-    destinationSwapQuote.maximumAmountIn
+    destinationSwapQuote.maximumAmountIn,
+    {
+      actualAmountOut: "bridgeQuote.outputAmount",
+      expectedMinAmountOut: "destinationSwapQuote.maximumAmountIn",
+    }
   );
-  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
 
-  bridgeQuote.message = buildDestinationSwapCrossChainMessage({
-    crossSwap,
-    destinationSwapQuote,
-    bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+  const originSources = originStrategy.getSources(originSwapChainId, {
+    excludeSources: crossSwap.excludeSources,
+    includeSources: crossSwap.includeSources,
+  });
+  assertSources(originSources);
+
+  // 3. Get origin swap quote for any input token -> bridgeable input token
+  const originSwapQuote = await originStrategy.fetchFn(
+    {
+      ...originSwap,
+      depositor: crossSwap.depositor,
+      amount: bridgeQuote.inputAmount.toString(),
+    },
+    TradeType.EXACT_OUTPUT,
+    {
+      sources: originSources,
+    }
+  );
+  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount, {
+    actualAmountOut: "originSwapQuote.minAmountOut",
+    expectedMinAmountOut: "bridgeQuote.inputAmount",
   });
 
   return {
@@ -1215,8 +1114,9 @@ function _prepCrossSwapQuotesRetrievalA2A(
     toTokenAddress: string;
     toChain: number;
   },
-  strategies: QuoteFetchStrategies
-): CrossSwapQuotesRetrievalA2AResult[] {
+  strategies: QuoteFetchStrategies,
+  strategiesToUseForComparison: "origin" | "destination" = "origin"
+): CrossSwapQuotesRetrievalA2AResult {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
 
@@ -1267,53 +1167,71 @@ function _prepCrossSwapQuotesRetrievalA2A(
     strategies
   );
 
-  // Return a list of results for each combination of origin and destination strategies
-  return originStrategies.flatMap((originStrategy) =>
-    destinationStrategies.map((destinationStrategy) => {
-      const multiCallHandlerAddress = getMultiCallHandlerAddress(
-        destinationSwapChainId
-      );
-      const { swapAndBridge, originSwapInitialRecipient } =
-        originStrategy.getOriginEntryPoints(originSwapChainId);
-      const depositEntryPoint =
-        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
-      const originRouter = originStrategy.getRouter(originSwapChainId);
-      const destinationRouter = destinationStrategy.getRouter(
-        destinationSwapChainId
-      );
-      const originSwap = {
-        chainId: originSwapChainId,
-        tokenIn: crossSwap.inputToken,
-        tokenOut: bridgeableInputToken,
-        recipient: originSwapInitialRecipient.address,
-        slippageTolerance: crossSwap.slippageTolerance,
-        type: crossSwap.type,
-      };
-      const destinationSwap = {
-        chainId: destinationSwapChainId,
-        tokenIn: bridgeableOutputToken,
-        tokenOut: crossSwap.outputToken,
-        recipient: multiCallHandlerAddress,
-        slippageTolerance: crossSwap.slippageTolerance,
-        type: crossSwap.type,
-      };
+  const baseStrategies =
+    strategiesToUseForComparison === "origin"
+      ? originStrategies
+      : destinationStrategies;
 
-      return {
-        originSwap,
-        destinationSwap,
-        originStrategy,
-        destinationStrategy,
-        originSwapChainId,
-        destinationSwapChainId,
-        bridgeableInputToken,
-        bridgeableOutputToken,
-        originSwapEntryPoint: swapAndBridge,
-        depositEntryPoint,
-        originRouter,
-        destinationRouter,
-      };
-    })
-  );
+  return baseStrategies.map((strategy) => {
+    const originStrategy =
+      strategiesToUseForComparison === "origin"
+        ? strategy
+        : (originStrategies.find(
+            (originStrategy) =>
+              originStrategy.strategyName === strategy.strategyName
+          ) ?? originStrategies[0]);
+    const destinationStrategy =
+      strategiesToUseForComparison === "destination"
+        ? strategy
+        : (destinationStrategies.find(
+            (destinationStrategy) =>
+              destinationStrategy.strategyName === strategy.strategyName
+          ) ?? destinationStrategies[0]);
+
+    const { swapAndBridge, originSwapInitialRecipient } =
+      originStrategy.getOriginEntryPoints(originSwapChainId);
+    const depositEntryPoint =
+      originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
+    const originRouter = originStrategy.getRouter(originSwapChainId);
+    const multiCallHandlerAddress = getMultiCallHandlerAddress(
+      destinationSwapChainId
+    );
+    const destinationRouter = destinationStrategy.getRouter(
+      destinationSwapChainId
+    );
+
+    const originSwap = {
+      chainId: originSwapChainId,
+      tokenIn: crossSwap.inputToken,
+      tokenOut: bridgeableInputToken,
+      recipient: originSwapInitialRecipient.address,
+      slippageTolerance: crossSwap.slippageTolerance,
+      type: crossSwap.type,
+    };
+    const destinationSwap = {
+      chainId: destinationSwapChainId,
+      tokenIn: bridgeableOutputToken,
+      tokenOut: crossSwap.outputToken,
+      recipient: multiCallHandlerAddress,
+      slippageTolerance: crossSwap.slippageTolerance,
+      type: crossSwap.type,
+    };
+
+    return {
+      originSwap,
+      destinationSwap,
+      originStrategy,
+      destinationStrategy,
+      originSwapChainId,
+      destinationSwapChainId,
+      originSwapEntryPoint: swapAndBridge,
+      depositEntryPoint,
+      bridgeableInputToken,
+      bridgeableOutputToken,
+      originRouter,
+      destinationRouter,
+    };
+  });
 }
 
 /**
@@ -1397,8 +1315,24 @@ async function selectBestCrossSwapQuote(
     .map((result) => result.value);
 
   if (fulfilledQuotes.length === 0) {
+    const rejectedQuotes = crossSwapQuotes.filter(
+      (result) => result.status === "rejected"
+    );
+
+    // If there is only one rejected quote and it is a SwapQuoteUnavailableError, throw it.
+    if (
+      rejectedQuotes.length === 1 &&
+      rejectedQuotes[0].reason instanceof SwapQuoteUnavailableError
+    ) {
+      throw rejectedQuotes[0].reason;
+    }
+
     const rejectedReasons = getRejectedReasons(crossSwapQuotes);
-    const message = `Failed to fetch swap quote: No quotes available for ${crossSwap.type} ${crossSwap.inputToken.symbol} to ${crossSwap.outputToken.symbol} from ${crossSwap.inputToken.chainId} to ${crossSwap.outputToken.chainId} for amount ${crossSwap.amount}`;
+    const message = `No swap quotes currently available ${
+      crossSwap.inputToken.symbol
+    } ${crossSwap.inputToken.chainId} -> ${
+      crossSwap.outputToken.symbol
+    } ${crossSwap.outputToken.chainId}`;
     throw new SwapQuoteUnavailableError(
       {
         message,

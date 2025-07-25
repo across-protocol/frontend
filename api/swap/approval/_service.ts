@@ -1,7 +1,12 @@
 import { BigNumber, constants } from "ethers";
 import { Span } from "@opentelemetry/api";
 
-import { getProvider, InputError, latestGasPriceCache } from "../../_utils";
+import {
+  getProvider,
+  InputError,
+  latestGasPriceCache,
+  getLogger,
+} from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
   handleBaseSwapQueryParams,
@@ -13,13 +18,15 @@ import {
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
-import { QuoteFetchStrategies } from "../../_dexes/utils";
+import { inferCrossSwapType, QuoteFetchStrategies } from "../../_dexes/utils";
 import { TypedVercelRequest } from "../../_types";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { CHAIN_IDs } from "../../_constants";
 import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 import { AcrossErrorCode } from "../../_errors";
+
+const logger = getLogger();
 
 const quoteFetchStrategies: QuoteFetchStrategies = {
   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
@@ -107,6 +114,14 @@ export async function handleApprovalSwap(
     },
     quoteFetchStrategies
   );
+  const crossSwapType = inferCrossSwapType(crossSwapQuotes);
+  logger.debug({
+    at: "handleApprovalSwap",
+    message: "Cross swap quotes",
+    crossSwapType,
+    amountType,
+    crossSwapQuotes,
+  });
 
   const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
     crossSwapQuotes,
@@ -174,6 +189,7 @@ export async function handleApprovalSwap(
   }
 
   const responseJson = buildBaseSwapResponseJson({
+    crossSwapType,
     amountType,
     originChainId,
     inputTokenAddress,

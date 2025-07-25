@@ -22,7 +22,7 @@ export type BaseSwapResponse = Awaited<
 >;
 
 // Common args handling
-const argsFromCli = yargs(hideBin(process.argv))
+export const argsFromCli = yargs(hideBin(process.argv))
   .command("test-cases", "Run predefined test cases", (yargs) => {
     return yargs.usage("Usage: $0 test-cases [options]").option("filter", {
       alias: "f",
@@ -90,7 +90,7 @@ const argsFromCli = yargs(hideBin(process.argv))
         type: "boolean",
       })
       .option("skipOriginTxEstimation", {
-        alias: "ste",
+        alias: "sote",
         description: "Skip origin tx estimation.",
         type: "boolean",
       })
@@ -119,6 +119,12 @@ const argsFromCli = yargs(hideBin(process.argv))
     description: "Flow type.",
     default: "approval",
     choices: ["approval", "permit", "auth", "unified"],
+  })
+  .option("skipTxExecution", {
+    alias: "ste",
+    description: "Skip tx execution.",
+    type: "boolean",
+    default: false,
   })
   .help()
   .parseSync();

@@ -27,6 +27,8 @@ export const UNIVERSAL_ROUTER_ADDRESS = {
   [CHAIN_IDs.ZK_SYNC]: "0x28731BCC616B5f51dD52CF2e4dF0E78dD1136C06",
 };
 
+const STRATEGY_NAME = "uniswap-v3/universal-router";
+
 export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     return {
@@ -36,20 +38,16 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   const getOriginEntryPoints = (chainId: number) =>
-    getOriginSwapEntryPoints(
-      "UniversalSwapAndBridge",
-      chainId,
-      "uniswap-v3/universal-router"
-    );
+    getOriginSwapEntryPoints("UniversalSwapAndBridge", chainId, STRATEGY_NAME);
 
   const getSources = makeGetSources({
-    strategy: "uniswap-v3/universal-router",
+    strategy: STRATEGY_NAME,
     sources: Object.keys(UNIVERSAL_ROUTER_ADDRESS).reduce(
       (acc, chainIdStr) => {
         const chainId = Number(chainIdStr);
         acc[chainId] = [
           {
-            key: "uniswap-v3/universal-router",
+            key: STRATEGY_NAME,
             names: ["uniswap_v3"],
           },
         ];
@@ -97,7 +95,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
         slippageTolerance: quote.slippage,
         swapTxns: [swapTx],
         swapProvider: {
-          name: "uniswap-v3/universal-router",
+          name: STRATEGY_NAME,
           sources: ["uniswap_v3"],
         },
       };
@@ -134,7 +132,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
           },
         ],
         swapProvider: {
-          name: "uniswap-v3/universal-router",
+          name: STRATEGY_NAME,
           sources: ["uniswap_v3"],
         },
       };
@@ -158,6 +156,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   return {
+    strategyName: STRATEGY_NAME,
     getRouter,
     getOriginEntryPoints,
     getSources,

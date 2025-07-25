@@ -86,7 +86,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["WETH", "USDC", "USDT", "DAI"],
+  default: ["USDC", "WETH", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },
@@ -566,13 +566,19 @@ export function buildDestinationSwapCrossChainMessage({
 }
 
 export function assertMinOutputAmount(
-  amountOut: BigNumber,
-  expectedMinAmountOut: BigNumber
+  actualAmountOut: BigNumber,
+  expectedMinAmountOut: BigNumber,
+  labels?: {
+    actualAmountOut: string;
+    expectedMinAmountOut: string;
+  }
 ) {
-  if (amountOut.lt(expectedMinAmountOut)) {
+  if (actualAmountOut.lt(expectedMinAmountOut)) {
     throw new Error(
-      `Swap quote output amount ${amountOut.toString()} ` +
-        `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+      `[${labels?.actualAmountOut ?? "actualAmountOut"}] ${actualAmountOut.toString()} ` +
+        `is less than required min. output amount ` +
+        `[${labels?.expectedMinAmountOut ?? "expectedMinAmountOut"}] ` +
+        `${expectedMinAmountOut.toString()}`
     );
   }
 }
@@ -714,4 +720,14 @@ export function makeGetSources(sources: DexSources) {
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };
+}
+
+export function inferCrossSwapType(params: CrossSwapQuotes) {
+  return params.originSwapQuote && params.destinationSwapQuote
+    ? CROSS_SWAP_TYPE.ANY_TO_ANY
+    : params.originSwapQuote && !params.destinationSwapQuote
+      ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
+      : params.destinationSwapQuote && !params.originSwapQuote
+        ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
+        : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
 }

@@ -409,7 +409,7 @@ const handler = async (
       logger.info({
         at: "SuggestedFees",
         message: "Response data",
-        responseJson: JSON.stringify(responseJson, null, 2),
+        responseJson,
       });
 
       span.setStatus({ code: SpanStatusCode.OK });
