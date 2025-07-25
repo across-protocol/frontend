@@ -206,6 +206,7 @@ export async function getCrossSwapQuotesForOutputB2B(
       crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
         ? buildExactOutputBridgeTokenMessage(crossSwap, appFee)
         : buildMinOutputBridgeTokenMessage(crossSwap, undefined, appFee),
+    appFee,
   });
 
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
@@ -715,15 +716,25 @@ export async function getCrossSwapQuotesForOutputA2B(
 
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
+  const appFee = calculateAppFee({
+    outputAmount: bridgeQuote.outputAmount,
+    token: crossSwap.inputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isInputNative,
+  });
+  let adjustedInputAmount = addMarkupToAmount(
+    prioritizedStrategy.indicativeOriginSwapQuote.maximumAmountIn.add(
+      appFee.feeAmount
+    ),
+    INDICATIVE_QUOTE_BUFFER
+  );
   let originSwapQuote = await profiler.measureAsync(
     prioritizedStrategy.result.originStrategy.fetchFn(
       {
         ...originSwap,
         depositor: crossSwap.depositor,
-        amount: addMarkupToAmount(
-          prioritizedStrategy.indicativeOriginSwapQuote.maximumAmountIn,
-          INDICATIVE_QUOTE_BUFFER
-        ).toString(),
+        amount: adjustedInputAmount.toString(),
       },
       TradeType.EXACT_INPUT,
       { sources: prioritizedStrategy.sources }

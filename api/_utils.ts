@@ -93,6 +93,7 @@ type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 import { getEnvs } from "./_env";
+import { AppFee } from "./_dexes/utils";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1111,6 +1112,7 @@ export async function getBridgeQuoteForMinOutput(params: {
   minOutputAmount: BigNumber;
   recipient?: string;
   message?: string;
+  appFee?: AppFee;
 }) {
   const maxTries = 3;
   const tryChunkSize = 3;
@@ -1129,7 +1131,10 @@ export async function getBridgeQuoteForMinOutput(params: {
     // 1. Use the suggested fees to get an indicative quote with
     // input amount equal to minOutputAmount
     let tries = 0;
-    let adjustedInputAmount = addMarkupToAmount(params.minOutputAmount, 0.005);
+    let adjustedInputAmount = addMarkupToAmount(
+      params.minOutputAmount,
+      0.005
+    ).add(params.appFee?.feeAmount || BigNumber.from(0));
     let indicativeQuote = await getSuggestedFees({
       ...baseParams,
       amount: adjustedInputAmount.toString(),
