@@ -90,10 +90,9 @@ export const argsFromCli = yargs(hideBin(process.argv))
         type: "boolean",
       })
       .option("skipOriginTxEstimation", {
-        alias: "ste",
+        alias: "sote",
         description: "Skip origin tx estimation.",
         type: "boolean",
-        default: "false",
       })
       .option("integratorId", {
         alias: "i",
@@ -125,7 +124,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
     alias: "ste",
     description: "Skip tx execution.",
     type: "boolean",
-    default: "false",
+    default: false,
   })
   .help()
   .parseSync();
@@ -173,7 +172,7 @@ export async function fetchSwapQuotes() {
       recipient,
       depositor,
       refundAddress,
-      skipOriginTxEstimation: _skipOriginTxEstimation,
+      skipOriginTxEstimation,
       includeSources,
       excludeSources,
     } = argsFromCli;
@@ -188,7 +187,7 @@ export async function fetchSwapQuotes() {
       recipient,
       depositor,
       refundAddress,
-      skipOriginTxEstimation: _skipOriginTxEstimation === "true",
+      skipOriginTxEstimation,
       includeSources:
         typeof includeSources === "string"
           ? includeSources.split(",")
