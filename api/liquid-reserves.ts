@@ -13,9 +13,9 @@ import {
   getProvider,
   getTokenByAddress,
   handleErrorCondition,
-  sendResponse,
 } from "./_utils";
 import { InvalidParamError } from "./_errors";
+import { sendResponse } from "./_response_utils";
 
 const LiquidReservesQueryParamsSchema = type({
   l1Tokens: string(),
@@ -113,7 +113,13 @@ const handler = async (
     });
     // Respond with a 200 status code and 4 minutes of cache with
     // a minute of stale-while-revalidate.
-    sendResponse(response, responses, 200, 240, 60);
+    sendResponse({
+      response,
+      body: responses,
+      statusCode: 200,
+      cacheSeconds: 240,
+      staleWhileRevalidateSeconds: 60,
+    });
   } catch (error: unknown) {
     return handleErrorCondition("liquidReserves", response, logger, error);
   }

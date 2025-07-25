@@ -31,7 +31,6 @@ import {
   maxBN,
   minBN,
   positiveIntStr,
-  sendResponse,
   validAddress,
   validateChainAndTokenParams,
   getCachedLatestBlock,
@@ -50,6 +49,7 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+import { sendResponse } from "./_response_utils";
 import { tracer } from "../instrumentation";
 
 const LimitsQueryParamsSchema = type({
@@ -521,9 +521,13 @@ const handler = async (
         responseJson,
       });
       span.setStatus({ code: SpanStatusCode.OK });
-      // Respond with a 200 status code and 1 second of cache time with
-      // 59s to keep serving the stale data while recomputing the cached value.
-      sendResponse(response, responseJson, 200, 1, 59);
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        cacheSeconds: 1,
+        staleWhileRevalidateSeconds: 59,
+      });
     } catch (error: unknown) {
       return handleErrorCondition("limits", response, logger, error, span);
     } finally {

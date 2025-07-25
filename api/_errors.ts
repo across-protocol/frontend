@@ -5,6 +5,9 @@ import { relayFeeCalculator, typeguards } from "@across-protocol/sdk";
 import { ethers } from "ethers";
 import { Span, SpanStatusCode } from "@opentelemetry/api";
 import { ATTR_HTTP_RESPONSE_STATUS_CODE } from "@opentelemetry/semantic-conventions";
+
+import { sendResponse } from "./_response_utils";
+
 type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
 
 type EthersErrorTransaction = {
@@ -252,6 +255,7 @@ export class SwapQuoteUnavailableError extends InputError {
  * @param logger A logging utility to write to a cloud logging provider
  * @param error The error that will be returned to the user
  * @param span The span to record the error on
+ * @param requestId The request ID to set in the response body
  * @returns The `response` input with a status/send sent. Note: using this object again will cause an exception
  */
 export function handleErrorCondition(
@@ -259,7 +263,8 @@ export function handleErrorCondition(
   response: VercelResponse,
   logger: relayFeeCalculator.Logger,
   error: unknown,
-  span?: Span
+  span?: Span,
+  requestId?: string
 ): VercelResponse {
   let acrossApiError: AcrossApiError;
 
@@ -340,7 +345,12 @@ export function handleErrorCondition(
     });
   }
 
-  return response.status(acrossApiError.status).json(acrossApiError);
+  return sendResponse({
+    response,
+    body: acrossApiError,
+    statusCode: acrossApiError.status,
+    requestId,
+  });
 }
 
 export function resolveEthersError(err: unknown) {
