@@ -1,6 +1,11 @@
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, ethers } from "ethers";
 
-import { getProvider, InputError, latestGasPriceCache } from "../../_utils";
+import {
+  getCachedTokenPrice,
+  getProvider,
+  InputError,
+  latestGasPriceCache,
+} from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
   handleBaseSwapQueryParams,
@@ -151,17 +156,84 @@ export async function handleApprovalSwap(
         maxPriorityFeePerGas: BigNumber;
       }
     | undefined;
+  let inputTokenPriceUsd: number;
+  let outputTokenPriceUsd: number;
+  let originNativePriceUsd: number;
+  let destinationNativePriceUsd: number;
   if (isSwapTxEstimationPossible) {
     const provider = getProvider(originChainId);
-    [originTxGas, originTxGasPrice] = await Promise.all([
+    [
+      originTxGas,
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+    ] = await Promise.all([
       provider.estimateGas({
         ...crossSwapTx,
         from: crossSwap.depositor,
       }),
       latestGasPriceCache(originChainId).get(),
+      getCachedTokenPrice(
+        inputToken.address,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        outputToken.address,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        ethers.constants.AddressZero,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        ethers.constants.AddressZero,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
     ]);
   } else {
-    originTxGasPrice = await latestGasPriceCache(originChainId).get();
+    [
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+    ] = await Promise.all([
+      latestGasPriceCache(originChainId).get(),
+      getCachedTokenPrice(
+        inputToken.address,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        outputToken.address,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        ethers.constants.AddressZero,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        ethers.constants.AddressZero,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+    ]);
   }
 
   let approvalTxns:
@@ -201,8 +273,11 @@ export async function handleApprovalSwap(
     destinationSwapQuote,
     refundToken,
     appFeePercent,
-    appFeeRecipient,
     appFee,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
   });
   return responseJson;
 }

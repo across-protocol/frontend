@@ -14,7 +14,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, utils } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
 import {
@@ -111,6 +111,18 @@ export async function handleBaseSwapQueryParams(
       param: "excludeSources, includeSources",
       message:
         "Cannot use 'excludeSources' and 'includeSources' together. Please use only one of them.",
+    });
+  }
+
+  // Validate that both app fee parameters are provided together
+  if (
+    (appFeePercent && !appFeeRecipient) ||
+    (!appFeePercent && appFeeRecipient)
+  ) {
+    throw new InvalidParamError({
+      param: "appFeePercent, appFeeRecipient",
+      message:
+        "Both 'appFeePercent' and 'appFeeRecipient' must be provided together, or neither should be provided.",
     });
   }
 
@@ -433,19 +445,37 @@ export async function calculateSwapFees(params: {
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   destinationSwapQuote?: SwapQuote;
   appFeePercent?: number;
-  appFeeRecipient?: string;
   appFee?: AppFee;
   originTxGas?: BigNumber;
+  inputTokenPriceUsd: number;
+  outputTokenPriceUsd: number;
+  originNativePriceUsd: number;
+  destinationNativePriceUsd: number;
+  outputAmount: BigNumber;
 }) {
-  const inputToken =
-    params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken;
-  const outputToken =
-    params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken;
+  const {
+    inputAmount,
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    appFeePercent,
+    appFee,
+    originTxGas,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+    outputAmount,
+  } = params;
 
-  const originGas = params.originTxGas || BigNumber.from(0);
+  const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
+  const outputToken = destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
 
-  const appFeeAmount = params.appFee?.feeAmount || BigNumber.from(0);
-  const appFeeToken = params.appFee?.feeToken;
+  const originGas = originTxGas || BigNumber.from(0);
+
+  const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
+  const appFeeToken = appFee?.feeToken;
+
   let appFeeUsd = 0;
   if (appFeeToken) {
     const appFeeTokenPriceUsd = await getCachedTokenPrice(
@@ -459,42 +489,9 @@ export async function calculateSwapFees(params: {
       appFeeTokenPriceUsd;
   }
 
-  const bridgeFees = params.bridgeQuote.suggestedFees;
+  const bridgeFees = bridgeQuote.suggestedFees;
   const relayerCapital = bridgeFees.relayerCapitalFee;
   const destinationGas = bridgeFees.relayerGasFee;
-
-  // Get USD prices for all tokens and native tokens
-  const [
-    inputTokenPriceUsd,
-    outputTokenPriceUsd,
-    originNativePriceUsd,
-    destinationNativePriceUsd,
-  ] = await Promise.all([
-    getCachedTokenPrice(
-      inputToken.address,
-      "usd",
-      undefined,
-      inputToken.chainId
-    ),
-    getCachedTokenPrice(
-      outputToken.address,
-      "usd",
-      undefined,
-      outputToken.chainId
-    ),
-    getCachedTokenPrice(
-      ethers.constants.AddressZero,
-      "usd",
-      undefined,
-      inputToken.chainId
-    ),
-    getCachedTokenPrice(
-      ethers.constants.AddressZero,
-      "usd",
-      undefined,
-      outputToken.chainId
-    ),
-  ]);
 
   // Calculate USD amounts
   const originGasUsd =
@@ -510,14 +507,22 @@ export async function calculateSwapFees(params: {
       utils.formatUnits(bridgeFees.totalRelayFee.total, outputToken.decimals)
     ) * outputTokenPriceUsd;
 
-  const totalFeeUsd = relayerTotalUsd + appFeeUsd;
+  const inputAmountUsd =
+    parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
+    inputTokenPriceUsd;
+  const outputAmountUsd =
+    parseFloat(utils.formatUnits(outputAmount, outputToken.decimals)) *
+    outputTokenPriceUsd;
+
+  const totalFeeUsd =
+    inputAmountUsd - outputAmountUsd - relayerTotalUsd - appFeeUsd;
 
   return {
     total: {
       amountUsd: totalFeeUsd,
       pct: getNormalizedPercentage(
         totalFeeUsd,
-        params.inputAmount,
+        inputAmount,
         inputToken.decimals,
         inputTokenPriceUsd
       ),
@@ -525,32 +530,23 @@ export async function calculateSwapFees(params: {
     originGas: {
       amount: originGas,
       amountUsd: originGasUsd,
-      pct: getNormalizedPercentage(
-        originGasUsd,
-        params.inputAmount,
-        inputToken.decimals,
-        inputTokenPriceUsd
-      ),
     },
     destinationGas: {
       amount: destinationGas.total,
       amountUsd: destinationGasUsd,
-      pct: destinationGas.pct,
     },
     relayerCapital: {
       amount: relayerCapital.total,
       amountUsd: relayerCapitalUsd,
-      pct: relayerCapital.pct,
     },
     relayerTotal: {
       amount: bridgeFees.totalRelayFee.total,
       amountUsd: relayerTotalUsd,
-      pct: bridgeFees.totalRelayFee.pct,
     },
     app: {
       amount: appFeeAmount,
       amountUsd: appFeeUsd,
-      pct: params.appFeePercent || 0,
+      pct: appFeePercent || 0,
     },
   };
 }
@@ -581,121 +577,144 @@ export async function buildBaseSwapResponseJson(params: {
   };
   permitSwapTx?: any; // TODO: Add type
   appFeePercent?: number;
-  appFeeRecipient?: string;
   appFee?: AppFee;
+  inputTokenPriceUsd: number;
+  outputTokenPriceUsd: number;
+  originNativePriceUsd: number;
+  destinationNativePriceUsd: number;
 }) {
+  const {
+    amountType,
+    inputTokenAddress,
+    originChainId,
+    inputAmount,
+    allowance,
+    balance,
+    approvalTxns,
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    refundToken,
+    approvalSwapTx,
+    permitSwapTx,
+    appFeePercent,
+    appFee,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+  } = params;
   const crossSwapType =
-    params.originSwapQuote && params.destinationSwapQuote
+    originSwapQuote && destinationSwapQuote
       ? CROSS_SWAP_TYPE.ANY_TO_ANY
-      : params.originSwapQuote && !params.destinationSwapQuote
+      : originSwapQuote && !destinationSwapQuote
         ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
-        : params.destinationSwapQuote && !params.originSwapQuote
+        : destinationSwapQuote && !originSwapQuote
           ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
           : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   return stringifyBigNumProps({
     crossSwapType,
-    amountType: params.amountType,
+    amountType,
     checks: {
-      allowance: params.approvalSwapTx
+      allowance: approvalSwapTx
         ? {
-            token: params.inputTokenAddress,
-            spender: params.approvalSwapTx.to,
-            actual: params.allowance,
-            expected: params.inputAmount,
+            token: inputTokenAddress,
+            spender: approvalSwapTx.to,
+            actual: allowance,
+            expected: inputAmount,
           }
         : // TODO: Handle permit2 required allowance
           {
-            token: params.inputTokenAddress,
+            token: inputTokenAddress,
             spender: constants.AddressZero,
             actual: 0,
             expected: 0,
           },
       balance: {
-        token: params.inputTokenAddress,
-        actual: params.balance,
-        expected: params.inputAmount,
+        token: inputTokenAddress,
+        actual: balance,
+        expected: inputAmount,
       },
     },
-    approvalTxns: params.approvalTxns,
+    approvalTxns: approvalTxns,
     steps: {
-      originSwap: params.originSwapQuote
+      originSwap: originSwapQuote
         ? {
-            tokenIn: params.originSwapQuote.tokenIn,
-            tokenOut: params.originSwapQuote.tokenOut,
-            inputAmount: params.originSwapQuote.expectedAmountIn,
-            outputAmount: params.originSwapQuote.expectedAmountOut,
-            minOutputAmount: params.originSwapQuote.minAmountOut,
-            maxInputAmount: params.originSwapQuote.maximumAmountIn,
+            tokenIn: originSwapQuote.tokenIn,
+            tokenOut: originSwapQuote.tokenOut,
+            inputAmount: originSwapQuote.expectedAmountIn,
+            outputAmount: originSwapQuote.expectedAmountOut,
+            minOutputAmount: originSwapQuote.minAmountOut,
+            maxInputAmount: originSwapQuote.maximumAmountIn,
           }
         : undefined,
       bridge: {
-        inputAmount: params.bridgeQuote.inputAmount,
-        outputAmount: params.bridgeQuote.outputAmount,
-        tokenIn: params.bridgeQuote.inputToken,
-        tokenOut: params.bridgeQuote.outputToken,
+        inputAmount: bridgeQuote.inputAmount,
+        outputAmount: bridgeQuote.outputAmount,
+        tokenIn: bridgeQuote.inputToken,
+        tokenOut: bridgeQuote.outputToken,
         fees: {
-          totalRelay: params.bridgeQuote.suggestedFees.totalRelayFee,
-          relayerCapital: params.bridgeQuote.suggestedFees.relayerCapitalFee,
-          relayerGas: params.bridgeQuote.suggestedFees.relayerGasFee,
-          lp: params.bridgeQuote.suggestedFees.lpFee,
+          totalRelay: bridgeQuote.suggestedFees.totalRelayFee,
+          relayerCapital: bridgeQuote.suggestedFees.relayerCapitalFee,
+          relayerGas: bridgeQuote.suggestedFees.relayerGasFee,
+          lp: bridgeQuote.suggestedFees.lpFee,
         },
       },
-      destinationSwap: params.destinationSwapQuote
+      destinationSwap: destinationSwapQuote
         ? {
-            tokenIn: params.destinationSwapQuote.tokenIn,
-            tokenOut: params.destinationSwapQuote.tokenOut,
-            inputAmount: params.destinationSwapQuote.expectedAmountIn,
-            maxInputAmount: params.destinationSwapQuote.maximumAmountIn,
-            outputAmount: params.destinationSwapQuote.expectedAmountOut,
-            minOutputAmount: params.destinationSwapQuote.minAmountOut,
+            tokenIn: destinationSwapQuote.tokenIn,
+            tokenOut: destinationSwapQuote.tokenOut,
+            inputAmount: destinationSwapQuote.expectedAmountIn,
+            maxInputAmount: destinationSwapQuote.maximumAmountIn,
+            outputAmount: destinationSwapQuote.expectedAmountOut,
+            minOutputAmount: destinationSwapQuote.minAmountOut,
           }
         : undefined,
     },
-    inputToken:
-      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
-    outputToken:
-      params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
+    inputToken: originSwapQuote?.tokenIn ?? bridgeQuote.inputToken,
+    outputToken: destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken,
     refundToken:
-      params.refundToken.symbol === "ETH"
+      refundToken.symbol === "ETH"
         ? {
-            ...params.refundToken,
+            ...refundToken,
             symbol: "WETH",
           }
-        : params.refundToken,
+        : refundToken,
     fees: await calculateSwapFees({
-      inputAmount: params.inputAmount,
-      originSwapQuote: params.originSwapQuote,
-      bridgeQuote: params.bridgeQuote,
-      destinationSwapQuote: params.destinationSwapQuote,
-      appFeePercent: params.appFeePercent,
-      appFeeRecipient: params.appFeeRecipient,
-      appFee: params.appFee,
-      originTxGas: params.approvalSwapTx?.gas,
+      inputAmount: inputAmount,
+      originSwapQuote: originSwapQuote,
+      bridgeQuote: bridgeQuote,
+      destinationSwapQuote: destinationSwapQuote,
+      appFeePercent: appFeePercent,
+      appFee: appFee,
+      originTxGas: approvalSwapTx?.gas,
+      inputTokenPriceUsd: inputTokenPriceUsd,
+      outputTokenPriceUsd: outputTokenPriceUsd,
+      originNativePriceUsd: originNativePriceUsd,
+      destinationNativePriceUsd: destinationNativePriceUsd,
+      outputAmount:
+        destinationSwapQuote?.minAmountOut ?? bridgeQuote.outputAmount,
     }),
-    inputAmount:
-      params.originSwapQuote?.expectedAmountIn ??
-      params.bridgeQuote.inputAmount,
+    inputAmount: originSwapQuote?.expectedAmountIn ?? bridgeQuote.inputAmount,
     expectedOutputAmount:
-      params.destinationSwapQuote?.expectedAmountOut ??
-      params.bridgeQuote.outputAmount,
+      destinationSwapQuote?.expectedAmountOut ?? bridgeQuote.outputAmount,
     minOutputAmount:
-      params.destinationSwapQuote?.minAmountOut ??
-      params.bridgeQuote.outputAmount,
-    expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
+      destinationSwapQuote?.minAmountOut ?? bridgeQuote.outputAmount,
+    expectedFillTime: bridgeQuote.suggestedFees.estimatedFillTimeSec,
     swapTx: params.approvalSwapTx
       ? {
-          simulationSuccess: !!params.approvalSwapTx.gas,
-          chainId: params.originChainId,
-          to: params.approvalSwapTx.to,
-          data: params.approvalSwapTx.data,
-          value: params.approvalSwapTx.value,
-          gas: params.approvalSwapTx.gas,
-          maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
-          maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
+          simulationSuccess: !!approvalSwapTx?.gas,
+          chainId: originChainId,
+          to: approvalSwapTx?.to,
+          data: approvalSwapTx?.data,
+          value: approvalSwapTx?.value,
+          gas: approvalSwapTx?.gas,
+          maxFeePerGas: approvalSwapTx?.maxFeePerGas,
+          maxPriorityFeePerGas: approvalSwapTx?.maxPriorityFeePerGas,
         }
-      : params.permitSwapTx
-        ? params.permitSwapTx.swapTx
+      : permitSwapTx
+        ? permitSwapTx.swapTx
         : undefined,
-    eip712: params.permitSwapTx?.eip712,
+    eip712: permitSwapTx?.eip712,
   });
 }

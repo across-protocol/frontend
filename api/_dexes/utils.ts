@@ -52,7 +52,7 @@ export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
 export type AppFee = {
   feeAmount: BigNumber;
-  feeToken?: Token;
+  feeToken: Token;
   feeActions: AppFeeAction[];
 };
 
@@ -841,17 +841,20 @@ export function makeGetSources(sources: DexSources) {
   };
 }
 
-export function calculateAppFee(
-  outputAmount: BigNumber,
-  token: Token,
-  appFeePercent?: number,
-  appFeeRecipient?: string,
-  isNative: boolean = false
-): AppFee {
+export function calculateAppFee(params: {
+  outputAmount: BigNumber;
+  token: Token;
+  appFeePercent?: number;
+  appFeeRecipient?: string;
+  isNative?: boolean;
+}): AppFee {
+  const { outputAmount, token, appFeePercent, appFeeRecipient, isNative } =
+    params;
+
   if (!appFeePercent || !appFeeRecipient || Number(appFeePercent) === 0) {
     return {
       feeAmount: BigNumber.from(0),
-      feeToken: undefined,
+      feeToken: token,
       feeActions: [],
     };
   }

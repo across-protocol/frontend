@@ -146,13 +146,13 @@ export async function getCrossSwapQuotesForExactInputB2B(
     });
   }
 
-  const appFee = calculateAppFee(
-    bridgeQuote.outputAmount,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  const appFee = calculateAppFee({
+    outputAmount: bridgeQuote.outputAmount,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   bridgeQuote.message = buildExactInputBridgeTokenMessage(
     crossSwap,
     bridgeQuote.outputAmount,
@@ -190,13 +190,13 @@ export async function getCrossSwapQuotesForOutputB2B(
     });
   }
 
-  let appFee = calculateAppFee(
-    crossSwap.amount,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  let appFee = calculateAppFee({
+    outputAmount: crossSwap.amount,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   const bridgeQuote = await getBridgeQuoteForMinOutput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
@@ -209,13 +209,13 @@ export async function getCrossSwapQuotesForOutputB2B(
   });
 
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    appFee = calculateAppFee(
-      bridgeQuote.outputAmount,
-      crossSwap.outputToken,
-      crossSwap.appFeePercent,
-      crossSwap.appFeeRecipient,
-      crossSwap.isOutputNative
-    );
+    appFee = calculateAppFee({
+      outputAmount: bridgeQuote.outputAmount,
+      token: crossSwap.outputToken,
+      appFeePercent: crossSwap.appFeePercent,
+      appFeeRecipient: crossSwap.appFeeRecipient,
+      isNative: crossSwap.isOutputNative,
+    });
     bridgeQuote.message = buildMinOutputBridgeTokenMessage(
       crossSwap,
       bridgeQuote.outputAmount,
@@ -322,13 +322,13 @@ export async function getCrossSwapQuotesForExactInputB2A(
   );
 
   // 4. Build bridge quote message for destination swap
-  const appFee = calculateAppFee(
-    destinationSwapQuote.minAmountOut,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  const appFee = calculateAppFee({
+    outputAmount: destinationSwapQuote.minAmountOut,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
@@ -440,22 +440,19 @@ export async function getCrossSwapQuotesForOutputB2A(
     destinationSwapQuote.maximumAmountIn
   );
 
-  const appFee = calculateAppFee(
-    destinationSwapQuote.minAmountOut,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  const appFee = calculateAppFee({
+    outputAmount: destinationSwapQuote.minAmountOut,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
     bridgeableOutputToken,
     routerAddress: destinationRouter.address,
-    destinationOutputAmount:
-      crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
-        ? destinationSwapQuote.minAmountOut
-        : crossSwap.amount,
+    destinationOutputAmount: crossSwap.amount,
     appFee,
   });
 
@@ -1023,13 +1020,13 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   );
 
   // 5. Build bridge quote message for destination swap
-  const appFee = calculateAppFee(
-    destinationSwapQuote.minAmountOut,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  const appFee = calculateAppFee({
+    outputAmount: destinationSwapQuote.minAmountOut,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
@@ -1136,7 +1133,9 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
           prioritizedDestinationStrategy.result.bridgeableOutputToken,
         routerAddress:
           prioritizedDestinationStrategy.result.destinationRouter.address,
-        destinationOutputAmount: crossSwap.amount,
+        destinationOutputAmount:
+          prioritizedDestinationStrategy.indicativeDestinationSwapQuote
+            .minAmountOut,
       }),
     }),
     "INDICATIVE_getBridgeQuote"
@@ -1223,7 +1222,9 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
               prioritizedDestinationStrategy.indicativeDestinationSwapQuote,
             bridgeableOutputToken,
             routerAddress: destinationRouter.address,
-            destinationOutputAmount: crossSwap.amount,
+            destinationOutputAmount:
+              prioritizedDestinationStrategy.indicativeDestinationSwapQuote
+                .minAmountOut,
           }),
         }),
         originStrategy.fetchFn(
@@ -1251,13 +1252,13 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   );
   assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
 
-  const appFee = calculateAppFee(
-    crossSwap.amount,
-    crossSwap.outputToken,
-    crossSwap.appFeePercent,
-    crossSwap.appFeeRecipient,
-    crossSwap.isOutputNative
-  );
+  const appFee = calculateAppFee({
+    outputAmount: crossSwap.amount,
+    token: crossSwap.outputToken,
+    appFeePercent: crossSwap.appFeePercent,
+    appFeeRecipient: crossSwap.appFeeRecipient,
+    isNative: crossSwap.isOutputNative,
+  });
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
