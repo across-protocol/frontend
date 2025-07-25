@@ -1,11 +1,10 @@
 import { VercelResponse } from "@vercel/node";
-import { SpanStatusCode } from "@opentelemetry/api";
 
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition } from "../../_utils";
 import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
-import { getRequestId } from "../../_request_utils";
+import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
 
@@ -23,7 +22,7 @@ const handler = async (
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
     try {
-      span.setAttribute("http.request_id", requestId);
+      setRequestSpanAttributes(request, span, requestId);
 
       const responseJson = await handleApprovalSwap(request, span);
 
@@ -32,8 +31,6 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-
-      span.setStatus({ code: SpanStatusCode.OK });
 
       sendResponse({
         response,
