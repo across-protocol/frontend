@@ -19,6 +19,7 @@ import {
   getCrossSwapTypes,
   getPreferredBridgeTokens,
   getQuoteFetchStrategies,
+  QuoteFetchPrioritizationMode,
   QuoteFetchStrategies,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
@@ -46,9 +47,7 @@ const logger = getLogger();
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies = {
-    default: defaultQuoteFetchStrategies,
-  }
+  strategies: QuoteFetchStrategies = defaultQuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
   if (crossSwap.type === AMOUNT_TYPE.EXACT_INPUT) {
     return getCrossSwapQuoteForAmountType(crossSwap, strategies, {
@@ -241,7 +240,10 @@ export async function getCrossSwapQuotesForExactInputB2A(
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   const {
     destinationSwap,
@@ -344,7 +346,10 @@ export async function getCrossSwapQuotesForOutputB2A(
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   const {
     destinationSwap,
@@ -534,7 +539,10 @@ export async function getCrossSwapQuotesForExactInputA2B(
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   const {
     originStrategy,
@@ -640,7 +648,10 @@ export async function getCrossSwapQuotesForOutputA2B(
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   return {
     crossSwap,
@@ -909,7 +920,8 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
 
   // Run fetchFn for all origin strategies and choose the fastest response
   const prioritizedOriginStrategy = await executeStrategies(
-    originStrategyFetches
+    originStrategyFetches,
+    strategies.prioritizationMode
   );
 
   const {
@@ -1027,7 +1039,8 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
 
   // Run destination swap quote fetches for all strategy combinations and choose the fastest
   const prioritizedDestinationStrategy = await executeStrategies(
-    destinationStrategyFetches
+    destinationStrategyFetches,
+    strategies.prioritizationMode
   );
   const { result, destinationSwapQuote } = prioritizedDestinationStrategy;
   const {
@@ -1235,13 +1248,53 @@ function _prepCrossSwapQuotesRetrievalA2A(
 }
 
 /**
- * Executes multiple strategy fetches and returns the first one that completes.
- * Currently prioritizes speed by using Promise.any, but can be extended to use
- * other prioritization criteria in the future.
+ * Executes multiple strategy fetches based on configured prioritization mode.
+ * @param strategyFetches - The strategy fetches to execute.
+ * @param prioritizationMode - The prioritization mode to use.
+ * - `equal-speed` - Executes all strategy fetches in parallel and returns the first
+ *                   one that completes.
+ * - `priority-speed` - Executes the first `priorityChunkSize` strategy fetches in
+ *                      parallel and returns the first one that completes. If all
+ *                      of the first `priorityChunkSize` strategy fetches fail,
+ *                      the remaining strategy fetches are executed in parallel
+ *                      and the first one that completes is returned.
+ * @returns The prioritized strategy fetch.
  */
-async function executeStrategies<T>(strategyFetches: Promise<T>[]): Promise<T> {
+export async function executeStrategies<T>(
+  strategyFetches: Promise<T>[],
+  prioritizationMode: QuoteFetchPrioritizationMode = {
+    mode: "equal-speed",
+  }
+): Promise<T> {
   try {
-    return await Promise.any(strategyFetches);
+    // `equal-speed` mode
+    if (prioritizationMode.mode === "equal-speed") {
+      return await Promise.any(strategyFetches);
+    }
+
+    // `priority-speed` mode
+    const errors: Error[] = [];
+    let chunkStartIndex = 0;
+    const priorityChunkSize = prioritizationMode.priorityChunkSize;
+    while (chunkStartIndex < strategyFetches.length) {
+      const chunkEndIndex = chunkStartIndex + priorityChunkSize;
+      const priorityFetches = strategyFetches.slice(
+        chunkStartIndex,
+        chunkEndIndex
+      );
+      try {
+        const successfulFetch = await Promise.any(priorityFetches);
+        return successfulFetch;
+      } catch (error) {
+        if (error instanceof AggregateError) {
+          errors.push(...error.errors);
+        } else {
+          errors.push(error as Error);
+        }
+        chunkStartIndex = chunkEndIndex;
+      }
+    }
+    throw new AggregateError(errors);
   } catch (error) {
     // If all quote fetches errored, we need to determine which error to propagate to the
     // caller.

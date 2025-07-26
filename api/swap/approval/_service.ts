@@ -18,46 +18,12 @@ import {
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
-import { inferCrossSwapType, QuoteFetchStrategies } from "../../_dexes/utils";
+import { inferCrossSwapType } from "../../_dexes/utils";
+import { quoteFetchStrategies } from "../_configs";
 import { TypedVercelRequest } from "../../_types";
-import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
-import { CHAIN_IDs } from "../../_constants";
-import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
-import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
 import { AcrossErrorCode } from "../../_errors";
 
 const logger = getLogger();
-
-const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
-  chains: {
-    [CHAIN_IDs.LENS]: [
-      getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
-    ],
-  },
-  swapPairs: {
-    [CHAIN_IDs.MAINNET]: {
-      GHO: {
-        WGHO: [getWrappedGhoStrategy()],
-      },
-      WGHO: {
-        GHO: [getWrappedGhoStrategy()],
-        USDC: [getWrappedGhoStrategy()],
-        USDT: [getWrappedGhoStrategy()],
-        DAI: [getWrappedGhoStrategy()],
-      },
-      USDC: {
-        WGHO: [getWghoMulticallStrategy()],
-      },
-      USDT: {
-        WGHO: [getWghoMulticallStrategy()],
-      },
-      DAI: {
-        WGHO: [getWghoMulticallStrategy()],
-      },
-    },
-  },
-};
 
 export async function handleApprovalSwap(
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
