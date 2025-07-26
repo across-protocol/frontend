@@ -54,15 +54,18 @@ describe("#executeStrategies()", () => {
 
     it("should return the first successful result when all promises succeed", async () => {
       const results = [
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 1, data: "first" }), 10)
-        ),
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 2, data: "second" }), 20)
-        ),
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 3, data: "third" }), 30)
-        ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 1, data: "first" }), 10)
+          ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 2, data: "second" }), 20)
+          ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 3, data: "third" }), 30)
+          ),
       ];
 
       const result = await executeStrategies(results, equalSpeedMode);
@@ -78,9 +81,9 @@ describe("#executeStrategies()", () => {
 
     it("should return first successful result when some promises fail", async () => {
       const results = [
-        Promise.reject(new Error("First failed")),
-        Promise.resolve({ id: 2, data: "success" }),
-        Promise.reject(new Error("Third failed")),
+        () => Promise.reject(new Error("First failed")),
+        () => Promise.resolve({ id: 2, data: "success" }),
+        () => Promise.reject(new Error("Third failed")),
       ];
 
       const result = await executeStrategies(results, equalSpeedMode);
@@ -89,14 +92,16 @@ describe("#executeStrategies()", () => {
 
     it("should throw SwapQuoteUnavailableError when all promises fail with it", async () => {
       const results = [
-        Promise.reject(
-          new SwapQuoteUnavailableError({
-            message: "No quotes available",
-          })
-        ),
-        Promise.reject(
-          new SwapQuoteUnavailableError({ message: "Also no quotes" })
-        ),
+        () =>
+          Promise.reject(
+            new SwapQuoteUnavailableError({
+              message: "No quotes available",
+            })
+          ),
+        () =>
+          Promise.reject(
+            new SwapQuoteUnavailableError({ message: "Also no quotes" })
+          ),
       ];
 
       await expect(executeStrategies(results, equalSpeedMode)).rejects.toThrow(
@@ -115,8 +120,8 @@ describe("#executeStrategies()", () => {
       });
 
       const results = [
-        Promise.reject(invalidParamError1),
-        Promise.reject(invalidParamError2),
+        () => Promise.reject(invalidParamError1),
+        () => Promise.reject(invalidParamError2),
       ];
 
       await expect(executeStrategies(results, equalSpeedMode)).rejects.toThrow(
@@ -126,13 +131,14 @@ describe("#executeStrategies()", () => {
 
     it("should prioritize SwapQuoteUnavailableError over other errors", async () => {
       const results = [
-        Promise.reject(
-          new SwapQuoteUnavailableError({
-            message: "No quotes available",
-          })
-        ),
-        Promise.reject(new Error("Some other error")),
-        Promise.reject(new Error("Another error")),
+        () =>
+          Promise.reject(
+            new SwapQuoteUnavailableError({
+              message: "No quotes available",
+            })
+          ),
+        () => Promise.reject(new Error("Some other error")),
+        () => Promise.reject(new Error("Another error")),
       ];
 
       await expect(executeStrategies(results, equalSpeedMode)).rejects.toThrow(
@@ -142,8 +148,8 @@ describe("#executeStrategies()", () => {
 
     it("should throw generic error when no specific error patterns match", async () => {
       const results = [
-        Promise.reject(new Error("Generic error")),
-        Promise.reject(new Error("Another generic error")),
+        () => Promise.reject(new Error("Generic error")),
+        () => Promise.reject(new Error("Another generic error")),
       ];
 
       await expect(
@@ -160,15 +166,18 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 1, data: "first-chunk-1" }), 10)
-        ),
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 2, data: "first-chunk-2" }), 20)
-        ),
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 3, data: "second-chunk-1" }), 30)
-        ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 1, data: "first-chunk-1" }), 10)
+          ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 2, data: "first-chunk-2" }), 20)
+          ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ id: 3, data: "second-chunk-1" }), 30)
+          ),
       ];
 
       const result = await executeStrategies(results, priorityMode);
@@ -184,17 +193,22 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        Promise.reject(new Error("First chunk failed 1")),
-        Promise.reject(new Error("First chunk failed 2")),
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ id: 3, data: "second-chunk-success" }), 10)
-        ),
-        new Promise((resolve) =>
-          setTimeout(
-            () => resolve({ id: 4, data: "second-chunk-success-2" }),
-            20
-          )
-        ),
+        () => Promise.reject(new Error("First chunk failed 1")),
+        () => Promise.reject(new Error("First chunk failed 2")),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () => resolve({ id: 3, data: "second-chunk-success" }),
+              10
+            )
+          ),
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () => resolve({ id: 4, data: "second-chunk-success-2" }),
+              20
+            )
+          ),
       ];
 
       const result = await executeStrategies(results, priorityMode);
@@ -208,8 +222,8 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        Promise.resolve({ id: 1, data: "success" }),
-        Promise.resolve({ id: 2, data: "success2" }),
+        () => Promise.resolve({ id: 1, data: "success" }),
+        () => Promise.resolve({ id: 2, data: "success2" }),
       ];
 
       const result = await executeStrategies(results, priorityMode);
@@ -223,9 +237,9 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        Promise.reject(new Error("Chunk 1 failed")),
-        Promise.reject(new Error("Chunk 2 failed")),
-        Promise.resolve({ id: 3, data: "chunk-3-success" }),
+        () => Promise.reject(new Error("Chunk 1 failed")),
+        () => Promise.reject(new Error("Chunk 2 failed")),
+        () => Promise.resolve({ id: 3, data: "chunk-3-success" }),
       ];
 
       const result = await executeStrategies(results, priorityMode);
@@ -239,13 +253,14 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        Promise.reject(new Error("First error")),
-        Promise.reject(
-          new SwapQuoteUnavailableError({
-            message: "No quotes available",
-          })
-        ),
-        Promise.reject(new Error("Third error")),
+        () => Promise.reject(new Error("First error")),
+        () =>
+          Promise.reject(
+            new SwapQuoteUnavailableError({
+              message: "No quotes available",
+            })
+          ),
+        () => Promise.reject(new Error("Third error")),
       ];
 
       await expect(executeStrategies(results, priorityMode)).rejects.toThrow(
@@ -260,15 +275,20 @@ describe("#executeStrategies()", () => {
       };
 
       const results = [
-        Promise.reject(
-          new InvalidParamError({
-            message: "Invalid sources",
-            param: "excludeSources",
-          })
-        ),
-        Promise.reject(
-          new InvalidParamError({ message: "Invalid", param: "includeSources" })
-        ),
+        () =>
+          Promise.reject(
+            new InvalidParamError({
+              message: "Invalid sources",
+              param: "excludeSources",
+            })
+          ),
+        () =>
+          Promise.reject(
+            new InvalidParamError({
+              message: "Invalid",
+              param: "includeSources",
+            })
+          ),
       ];
 
       await expect(executeStrategies(results, priorityMode)).rejects.toThrow(
