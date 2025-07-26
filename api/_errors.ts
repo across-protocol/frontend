@@ -340,7 +340,8 @@ export function handleErrorCondition(
     span.recordException(acrossApiError);
     span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, acrossApiError.status);
     span.setStatus({
-      code: SpanStatusCode.ERROR,
+      code:
+        acrossApiError.status >= 500 ? SpanStatusCode.ERROR : SpanStatusCode.OK,
       message: acrossApiError.message,
     });
   }
