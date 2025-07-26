@@ -44,6 +44,15 @@ export type CrossSwapType =
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
+export type QuoteFetchPrioritizationMode =
+  | {
+      mode: "equal-speed";
+    }
+  | {
+      mode: "priority-speed";
+      priorityChunkSize: number;
+    };
+
 /**
  * Describes which quote fetch strategies to use for a given chain,
  *
@@ -54,6 +63,7 @@ export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
  * }
  */
 export type QuoteFetchStrategies = Partial<{
+  prioritizationMode: QuoteFetchPrioritizationMode;
   default: QuoteFetchStrategy[];
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
@@ -95,9 +105,13 @@ export const PREFERRED_BRIDGE_TOKENS: {
   },
 };
 
-export const defaultQuoteFetchStrategies: QuoteFetchStrategy[] =
-  // These will be our default strategies until the periphery contract is audited
-  [getSwapRouter02Strategy("UniversalSwapAndBridge")];
+export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
+  prioritizationMode: {
+    mode: "priority-speed",
+    priorityChunkSize: 1,
+  },
+  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+};
 
 export function getPreferredBridgeTokens(
   fromChainId: number,
@@ -418,7 +432,7 @@ export function getQuoteFetchStrategies(
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
     strategies.default ??
-    defaultQuoteFetchStrategies
+    defaultQuoteFetchStrategies.default!
   );
 }
 

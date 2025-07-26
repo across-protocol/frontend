@@ -10,6 +10,7 @@ import {
   addTimeoutToPromise,
   getRejectedReasons,
   getLogger,
+  addMarkupToAmount,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -19,6 +20,7 @@ import {
   getCrossSwapTypes,
   getPreferredBridgeTokens,
   getQuoteFetchStrategies,
+  QuoteFetchPrioritizationMode,
   QuoteFetchStrategies,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
@@ -40,15 +42,15 @@ import {
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
 
+const QUOTE_BUFFER = 0.005; // 0.5%
+
 const PROMISE_TIMEOUT_MS = 15_000;
 
 const logger = getLogger();
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies = {
-    default: defaultQuoteFetchStrategies,
-  }
+  strategies: QuoteFetchStrategies = defaultQuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
   if (crossSwap.type === AMOUNT_TYPE.EXACT_INPUT) {
     return getCrossSwapQuoteForAmountType(crossSwap, strategies, {
@@ -215,7 +217,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
 ): Promise<CrossSwapQuotes> {
   const results = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
-  const strategyFetches = results.map(async (result) => {
+  const strategyFetches = results.map((result) => {
     const sources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
       {
@@ -225,23 +227,32 @@ export async function getCrossSwapQuotesForExactInputB2A(
     );
     assertSources(sources);
 
-    const indicativeDestinationSwapQuote =
-      await result.destinationStrategy.fetchFn(
-        {
-          ...result.destinationSwap,
-          amount: crossSwap.amount.toString(),
-        },
-        TradeType.EXACT_INPUT,
-        { sources }
-      );
-    return {
-      result,
-      indicativeDestinationSwapQuote,
+    const fetchFn = async () => {
+      // 1. Get destination swap quote for bridgeable output token -> any token
+      const indicativeDestinationSwapQuote =
+        await result.destinationStrategy.fetchFn(
+          {
+            ...result.destinationSwap,
+            amount: crossSwap.amount.toString(),
+          },
+          TradeType.EXACT_INPUT,
+          { sources }
+        );
+      return {
+        result,
+        sources,
+        indicativeDestinationSwapQuote,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   const {
     destinationSwap,
@@ -275,19 +286,13 @@ export async function getCrossSwapQuotesForExactInputB2A(
   }
 
   // 3. Get destination swap quote with correct amount
-  const sources = destinationStrategy.getSources(destinationSwap.chainId, {
-    excludeSources: crossSwap.excludeSources,
-    includeSources: crossSwap.includeSources,
-  });
-  assertSources(sources);
-
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
     },
     TradeType.EXACT_INPUT,
-    { sources }
+    { sources: prioritizedStrategy.sources }
   );
 
   // 4. Build bridge quote message for destination swap
@@ -317,7 +322,7 @@ export async function getCrossSwapQuotesForOutputB2A(
 ): Promise<CrossSwapQuotes> {
   const results = _prepCrossSwapQuotesRetrievalB2A(crossSwap, strategies);
 
-  const strategyFetches = results.map(async (result) => {
+  const strategyFetches = results.map((result) => {
     const sources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
       {
@@ -327,8 +332,9 @@ export async function getCrossSwapQuotesForOutputB2A(
     );
     assertSources(sources);
 
-    const indicativeDestinationSwapQuote =
-      await result.destinationStrategy.fetchFn(
+    const fetchFn = async () => {
+      // 1. Get destination swap quote for bridgeable output token -> any token
+      const destinationSwapQuote = await result.destinationStrategy.fetchFn(
         {
           ...result.destinationSwap,
           amount: crossSwap.amount.toString(),
@@ -336,72 +342,66 @@ export async function getCrossSwapQuotesForOutputB2A(
         TradeType.EXACT_OUTPUT,
         { sources }
       );
-    return {
-      result,
-      indicativeDestinationSwapQuote,
-      sources,
+      return {
+        result,
+        destinationSwapQuote,
+        sources,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
+  assertMinOutputAmount(
+    prioritizedStrategy.destinationSwapQuote.minAmountOut,
+    crossSwap.amount,
+    {
+      actualAmountOut: "destinationSwapQuote.minAmountOut",
+      expectedMinAmountOut: "crossSwap.amount",
+    }
+  );
 
   const {
-    destinationSwap,
     originRouter,
     destinationRouter,
     depositEntryPoint,
     bridgeableOutputToken,
     destinationSwapChainId,
-    destinationStrategy,
   } = prioritizedStrategy.result;
 
-  // 2. Fetch REAL destination swap quote and bridge quote in parallel to improve performance.
-  const [destinationSwapQuote, bridgeQuote] = await Promise.all([
-    // 2.1. REAL destination swap quote for bridgeable output token -> any token.
-    //      Quote contains calldata.
-    destinationStrategy.fetchFn(
-      {
-        ...destinationSwap,
-        amount: crossSwap.amount.toString(),
-      },
-      TradeType.EXACT_OUTPUT,
-      { sources: prioritizedStrategy.sources }
-    ),
-    // 2.2. Bridge quote for bridgeable input token -> bridgeable output token based on
-    //      indicative destination swap quote.
-    getBridgeQuoteForMinOutput({
-      inputToken: crossSwap.inputToken,
-      outputToken: bridgeableOutputToken,
-      minOutputAmount:
-        prioritizedStrategy.indicativeDestinationSwapQuote.maximumAmountIn,
-      recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-      message: buildDestinationSwapCrossChainMessage({
-        crossSwap,
-        destinationSwapQuote:
-          prioritizedStrategy.indicativeDestinationSwapQuote,
-        bridgeableOutputToken,
-        routerAddress: destinationRouter.address,
-      }),
+  // 2, Fetch  bridge quote for bridgeable input token -> bridgeable output token based on
+  //    destination swap quote.
+  const bridgeQuote = await getBridgeQuoteForMinOutput({
+    inputToken: crossSwap.inputToken,
+    outputToken: bridgeableOutputToken,
+    minOutputAmount: prioritizedStrategy.destinationSwapQuote.maximumAmountIn,
+    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote: prioritizedStrategy.destinationSwapQuote,
+      bridgeableOutputToken,
+      routerAddress: destinationRouter.address,
     }),
-  ]);
-  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  });
   assertMinOutputAmount(
     bridgeQuote.outputAmount,
-    destinationSwapQuote.maximumAmountIn
+    prioritizedStrategy.destinationSwapQuote.maximumAmountIn,
+    {
+      actualAmountOut: "bridgeQuote.outputAmount",
+      expectedMinAmountOut:
+        "prioritizedStrategy.destinationSwapQuote.maximumAmountIn",
+    }
   );
-
-  bridgeQuote.message = buildDestinationSwapCrossChainMessage({
-    crossSwap,
-    destinationSwapQuote,
-    bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
-  });
 
   return {
     crossSwap,
     bridgeQuote,
-    destinationSwapQuote,
+    destinationSwapQuote: prioritizedStrategy.destinationSwapQuote,
     originSwapQuote: undefined,
     contracts: {
       originRouter,
@@ -509,7 +509,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
 ) {
   const results = _prepCrossSwapQuotesRetrievalA2B(crossSwap, strategies);
 
-  const strategyFetches = results.map(async (result) => {
+  const strategyFetches = results.map((result) => {
     const sources = result.originStrategy.getSources(
       result.originSwap.chainId,
       {
@@ -519,22 +519,30 @@ export async function getCrossSwapQuotesForExactInputA2B(
     );
     assertSources(sources);
 
-    const originSwapQuote = await result.originStrategy.fetchFn(
-      {
-        ...result.originSwap,
-        amount: crossSwap.amount.toString(),
-      },
-      TradeType.EXACT_INPUT,
-      { sources }
-    );
-    return {
-      result,
-      originSwapQuote,
+    const fetchFn = async () => {
+      // 1. Get origin swap quote for any input token -> bridgeable output token
+      const originSwapQuote = await result.originStrategy.fetchFn(
+        {
+          ...result.originSwap,
+          amount: crossSwap.amount.toString(),
+        },
+        TradeType.EXACT_INPUT,
+        { sources }
+      );
+      return {
+        result,
+        originSwapQuote,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   const {
     originStrategy,
@@ -590,7 +598,9 @@ export async function getCrossSwapQuotesForOutputA2B(
 
   if (results.length === 0) {
     throw new InvalidParamError({
-      message: `Failed to fetch swap quote: no strategies available for ${crossSwap.inputToken.symbol} -> ${crossSwap.outputToken.symbol} on chain ${crossSwap.inputToken.chainId}`,
+      message: `Failed to fetch swap quote: no strategies available for ${
+        crossSwap.inputToken.symbol
+      } -> ${crossSwap.outputToken.symbol} on chain ${crossSwap.inputToken.chainId}`,
     });
   }
 
@@ -613,7 +623,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     );
   }
 
-  const strategyFetches = results.map(async (result) => {
+  const strategyFetches = results.map((result) => {
     const sources = result.originStrategy.getSources(
       result.originSwap.chainId,
       {
@@ -623,24 +633,35 @@ export async function getCrossSwapQuotesForOutputA2B(
     );
     assertSources(sources);
 
-    const originSwapQuote = await result.originStrategy.fetchFn(
-      {
-        ...result.originSwap,
-        depositor: crossSwap.depositor,
-        amount: bridgeQuote.inputAmount.toString(),
-      },
-      TradeType.EXACT_OUTPUT,
-      { sources }
-    );
-    return {
-      result,
-      originSwapQuote,
-      sources,
+    const fetchFn = async () => {
+      const originSwapQuote = await result.originStrategy.fetchFn(
+        {
+          ...result.originSwap,
+          depositor: crossSwap.depositor,
+          amount: addMarkupToAmount(
+            bridgeQuote.inputAmount,
+            QUOTE_BUFFER
+          ).toString(),
+        },
+        TradeType.EXACT_OUTPUT,
+        { sources }
+      );
+
+      return {
+        result,
+        originSwapQuote,
+        sources,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run fetchFn for all strategy combinations and choose the fastest response
-  const prioritizedStrategy = await executeStrategies(strategyFetches);
+  const prioritizedStrategy = await executeStrategies(
+    strategyFetches,
+    strategies.prioritizationMode
+  );
 
   return {
     crossSwap,
@@ -857,7 +878,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     "origin"
   );
 
-  const originStrategyFetches = results.map(async (result) => {
+  const originStrategyFetches = results.map((result) => {
     const originSources = result.originStrategy.getSources(
       result.originSwap.chainId,
       {
@@ -868,7 +889,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     assertSources(originSources);
 
     const destinationSources = result.destinationStrategy.getSources(
-      destinationSwap.chainId,
+      result.destinationSwap.chainId,
       {
         excludeSources: crossSwap.excludeSources,
         includeSources: crossSwap.includeSources,
@@ -876,40 +897,45 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     );
     assertSources(destinationSources);
 
-    // 1. Get origin swap quote for any input token -> bridgeable input token
-    const originSwapQuote = await result.originStrategy.fetchFn(
-      {
-        ...result.originSwap,
-        depositor: crossSwap.depositor,
-        amount: crossSwap.amount.toString(),
-      },
-      TradeType.EXACT_INPUT,
-      { sources: originSources }
-    );
-
-    // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
-    //    with exact input amount set to `originSwapQuote.minAmountOut`.
-    const indicativeDestinationSwapQuote =
-      await result.destinationStrategy.fetchFn(
+    const fetchFn = async () => {
+      // 1. Get origin swap quote for any input token -> bridgeable input token
+      const originSwapQuote = await result.originStrategy.fetchFn(
         {
-          ...result.destinationSwap,
-          amount: originSwapQuote.minAmountOut.toString(),
+          ...result.originSwap,
+          depositor: crossSwap.depositor,
+          amount: crossSwap.amount.toString(),
         },
         TradeType.EXACT_INPUT,
-        { sources: destinationSources }
+        { sources: originSources }
       );
-    return {
-      result,
-      originSwapQuote,
-      originSources,
-      indicativeDestinationSwapQuote,
-      destinationSources,
+
+      // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
+      //    with exact input amount set to `originSwapQuote.minAmountOut`.
+      const indicativeDestinationSwapQuote =
+        await result.destinationStrategy.fetchFn(
+          {
+            ...result.destinationSwap,
+            amount: originSwapQuote.minAmountOut.toString(),
+          },
+          TradeType.EXACT_INPUT,
+          { sources: destinationSources }
+        );
+      return {
+        result,
+        originSwapQuote,
+        originSources,
+        indicativeDestinationSwapQuote,
+        destinationSources,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run fetchFn for all origin strategies and choose the fastest response
   const prioritizedOriginStrategy = await executeStrategies(
-    originStrategyFetches
+    originStrategyFetches,
+    strategies.prioritizationMode
   );
 
   const {
@@ -997,7 +1023,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     "destination"
   );
 
-  const destinationStrategyFetches = results.map(async (result) => {
+  const destinationStrategyFetches = results.map((result) => {
     const destinationSources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
       {
@@ -1007,27 +1033,33 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     );
     assertSources(destinationSources);
 
-    // 1. Get destination swap quote for bridgeable output token -> any token
-    const destinationSwapQuote = await result.destinationStrategy.fetchFn(
-      {
-        ...result.destinationSwap,
-        amount: crossSwap.amount.toString(),
-      },
-      TradeType.EXACT_OUTPUT,
-      {
-        sources: destinationSources,
-      }
-    );
-    return {
-      result,
-      destinationSwapQuote,
-      destinationSources,
+    const fetchFn = async () => {
+      // 1. Get destination swap quote for bridgeable output token -> any token
+      const destinationSwapQuote = await result.destinationStrategy.fetchFn(
+        {
+          ...result.destinationSwap,
+          amount: crossSwap.amount.toString(),
+        },
+        TradeType.EXACT_OUTPUT,
+        {
+          sources: destinationSources,
+        }
+      );
+
+      return {
+        result,
+        destinationSwapQuote,
+        destinationSources,
+      };
     };
+
+    return fetchFn;
   });
 
   // Run destination swap quote fetches for all strategy combinations and choose the fastest
   const prioritizedDestinationStrategy = await executeStrategies(
-    destinationStrategyFetches
+    destinationStrategyFetches,
+    strategies.prioritizationMode
   );
   const { result, destinationSwapQuote } = prioritizedDestinationStrategy;
   const {
@@ -1080,7 +1112,10 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     {
       ...originSwap,
       depositor: crossSwap.depositor,
-      amount: bridgeQuote.inputAmount.toString(),
+      amount: addMarkupToAmount(
+        bridgeQuote.inputAmount,
+        QUOTE_BUFFER
+      ).toString(),
     },
     TradeType.EXACT_OUTPUT,
     {
@@ -1235,13 +1270,55 @@ function _prepCrossSwapQuotesRetrievalA2A(
 }
 
 /**
- * Executes multiple strategy fetches and returns the first one that completes.
- * Currently prioritizes speed by using Promise.any, but can be extended to use
- * other prioritization criteria in the future.
+ * Executes multiple strategy fetches based on configured prioritization mode.
+ * @param strategyFetches - The strategy fetches to execute.
+ * @param prioritizationMode - The prioritization mode to use.
+ * - `equal-speed` - Executes all strategy fetches in parallel and returns the first
+ *                   one that completes.
+ * - `priority-speed` - Executes the first `priorityChunkSize` strategy fetches in
+ *                      parallel and returns the first one that completes. If all
+ *                      of the first `priorityChunkSize` strategy fetches fail,
+ *                      the remaining strategy fetches are executed in parallel
+ *                      and the first one that completes is returned.
+ * @returns The prioritized strategy fetch.
  */
-async function executeStrategies<T>(strategyFetches: Promise<T>[]): Promise<T> {
+export async function executeStrategies<T>(
+  strategyFetches: (() => Promise<T>)[],
+  prioritizationMode: QuoteFetchPrioritizationMode = {
+    mode: "equal-speed",
+  }
+): Promise<T> {
   try {
-    return await Promise.any(strategyFetches);
+    // `equal-speed` mode
+    if (prioritizationMode.mode === "equal-speed") {
+      return await Promise.any(strategyFetches.map((fetch) => fetch()));
+    }
+
+    // `priority-speed` mode
+    const errors: Error[] = [];
+    let chunkStartIndex = 0;
+    const priorityChunkSize = prioritizationMode.priorityChunkSize;
+    while (chunkStartIndex < strategyFetches.length) {
+      const chunkEndIndex = chunkStartIndex + priorityChunkSize;
+      const priorityFetches = strategyFetches.slice(
+        chunkStartIndex,
+        chunkEndIndex
+      );
+      try {
+        const successfulFetch = await Promise.any(
+          priorityFetches.map((fetch) => fetch())
+        );
+        return successfulFetch;
+      } catch (error) {
+        if (error instanceof AggregateError) {
+          errors.push(...error.errors);
+        } else {
+          errors.push(error as Error);
+        }
+        chunkStartIndex = chunkEndIndex;
+      }
+    }
+    throw new AggregateError(errors);
   } catch (error) {
     // If all quote fetches errored, we need to determine which error to propagate to the
     // caller.
