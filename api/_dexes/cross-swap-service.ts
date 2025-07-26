@@ -879,7 +879,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     assertSources(originSources);
 
     const destinationSources = result.destinationStrategy.getSources(
-      destinationSwap.chainId,
+      result.destinationSwap.chainId,
       {
         excludeSources: crossSwap.excludeSources,
         includeSources: crossSwap.includeSources,
