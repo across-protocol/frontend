@@ -2,7 +2,6 @@ import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
-import { SpanStatusCode } from "@opentelemetry/api";
 import { parseUnits } from "ethers/lib/utils";
 
 import {
@@ -48,7 +47,7 @@ import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
-import { getRequestId } from "./_request_utils";
+import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
 import { tracer } from "../instrumentation";
 import { sendResponse } from "./_response_utils";
 
@@ -85,7 +84,7 @@ const handler = async (
   });
   return tracer.startActiveSpan("suggested-fees", async (span) => {
     try {
-      span.setAttribute("http.request_id", requestId);
+      setRequestSpanAttributes(request, span, requestId);
 
       const { query } = request;
       const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
@@ -411,8 +410,6 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-
-      span.setStatus({ code: SpanStatusCode.OK });
 
       sendResponse({
         response,

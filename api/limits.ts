@@ -1,7 +1,6 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { SpanStatusCode } from "@opentelemetry/api";
 
 import {
   CHAIN_IDs,
@@ -520,7 +519,6 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-      span.setStatus({ code: SpanStatusCode.OK });
       sendResponse({
         response,
         body: responseJson,
