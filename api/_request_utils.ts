@@ -35,7 +35,7 @@ export function setRequestSpanAttributes(
       serverName: httpInstrumentation.getConfig().serverName,
       enableSyntheticSourceDetection:
         httpInstrumentation.getConfig().enableSyntheticSourceDetection || false,
-      semconvStability: SemconvStability.OLD,
+      semconvStability: SemconvStability.STABLE,
     },
     diag.createComponentLogger({
       namespace: "https",
