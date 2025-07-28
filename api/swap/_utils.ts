@@ -40,6 +40,7 @@ import {
 import { AMOUNT_TYPE, CROSS_SWAP_TYPE } from "../_dexes/utils";
 import {
   encodeApproveCalldata,
+  encodeDrainCalldata,
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
@@ -201,6 +202,7 @@ const Action = type({
   isNativeTransfer: defaulted(optional(boolStr()), false),
   args: array(RecursiveArgumentArray),
   value: positiveIntStr(),
+  populateCallValueDynamically: defaulted(optional(boolStr()), false),
 });
 
 export type Action = Infer<typeof Action>;
@@ -244,7 +246,20 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
   };
 
   return actions.map((action) => {
-    if (action.isNativeTransfer) {
+    const isNativeTransfer = action.isNativeTransfer === "true";
+    const populateCallValueDynamically =
+      action.populateCallValueDynamically === "true";
+    if (isNativeTransfer) {
+      if (populateCallValueDynamically) {
+        // If action is a native transfer and populateCallValueDynamically is true
+        // we can use a drain call to send all native balance to the target address
+        return {
+          target: getMultiCallHandlerAddress(targetChainId),
+          callData: encodeDrainCalldata(constants.AddressZero, action.target),
+          value: "0",
+        };
+      }
+      // Otherwise we send the provided value to the target address
       return {
         target: action.target,
         callData: "0x",
@@ -255,18 +270,23 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
       const positionalArgs = flattenArgs(action.args);
       const iface = new utils.Interface([methodAbi]);
       const functionName = iface.fragments[0].name;
-      const populateDynamically = action.args.some(
+      const populateArgsDynamically = action.args.some(
         (arg) => arg.populateDynamically
       );
+
       try {
         const callData = iface.encodeFunctionData(functionName, positionalArgs);
-        if (populateDynamically) {
+        if (populateArgsDynamically || populateCallValueDynamically) {
+          // If any argument or msg.value should be populated dynamically,
+          // we have to wrap the call with makeCallWithBalance
           return getWrappedCallForMakeCallWithBalance(
             action,
             callData,
+            populateCallValueDynamically,
             targetChainId
           );
         } else {
+          // Otherwise we call the specified function with the provided args and value
           return {
             target: action.target,
             callData,
@@ -287,11 +307,30 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
   });
 }
 
+/**
+ * Wraps contract calls with `makeCallWithBalance` to inject token or native balances dynamically.
+ *
+ * makeCallWithBalance takes the calldata to execute and a list of replacement instructions.
+ * For each replacement instruction, it:
+ * - Reads the current balance of the specified token (or native token when using zero address).
+ * - Overwrites the specified byte offset in the calldata with the balance.
+ * - For native token, it also sets `msg.value = balance`.
+ *
+ * Calldata offsets must point to zeroed-out regions, allowing safe in-place modification.
+ *
+ * @param action Contains the target address, function signature, args and value.
+ * @param callData ABI-encoded function call to be modified.
+ * @param populateCallValueDynamically Whether to inject the full native balance as msg.value.
+ * @param targetChainId Destination chain id. Needed to get the MulticallHandler address.
+ * @returns ABI-encoded input for calling `makeCallWithBalance`.
+ */
 export function getWrappedCallForMakeCallWithBalance(
   action: Action,
   callData: string,
+  populateCallValueDynamically: boolean,
   targetChainId: number
 ) {
+  // Create replacement instructions for arguments marked for dynamic population
   const replacements = action.args
     .map((arg, index) => {
       if (arg.populateDynamically) {
@@ -304,6 +343,20 @@ export function getWrappedCallForMakeCallWithBalance(
       }
     })
     .filter((replacement) => replacement !== undefined);
+
+  // Handle native balance injection if needed
+  if (populateCallValueDynamically) {
+    // If only msg.value needs to be injected, append 32 zeroed bytes to the calldata
+    // and point the replacement to those extra bytes.
+    // This prevents the MulticallHandler from corrupting actual function parameters
+    // as the extra bytes are ignored during execution.
+    const paddingToReplace = constants.HashZero.slice(2); // 32 zeroed bytes, remove the 0x prefix
+    callData = callData + paddingToReplace;
+    replacements.push({
+      token: constants.AddressZero, // Use zeroAddress to replace msg.value with native balance
+      offset: 4 + action.args.length * 32, // Set the replacement offset to point to the extra bytes
+    });
+  }
 
   const wrappedCall = encodeMakeCallWithBalanceCalldata(
     action.target,
