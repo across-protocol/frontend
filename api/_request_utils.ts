@@ -28,18 +28,21 @@ export function setRequestSpanAttributes(
   const requestIdToUse = requestId ?? getRequestId(request);
   span.setAttribute("http.request_id", requestIdToUse);
 
-  const attributes = getIncomingRequestAttributes(
-    request,
-    {
-      component: "https",
-      serverName: httpInstrumentation.getConfig().serverName,
-      enableSyntheticSourceDetection:
-        httpInstrumentation.getConfig().enableSyntheticSourceDetection || false,
-      semconvStability: SemconvStability.STABLE,
-    },
-    diag.createComponentLogger({
-      namespace: "https",
-    })
-  );
-  span.setAttributes(attributes);
+  if (request.headers) {
+    const attributes = getIncomingRequestAttributes(
+      request,
+      {
+        component: "https",
+        serverName: httpInstrumentation.getConfig().serverName,
+        enableSyntheticSourceDetection:
+          httpInstrumentation.getConfig().enableSyntheticSourceDetection ||
+          false,
+        semconvStability: SemconvStability.STABLE,
+      },
+      diag.createComponentLogger({
+        namespace: "https",
+      })
+    );
+    span.setAttributes(attributes);
+  }
 }
