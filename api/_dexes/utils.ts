@@ -30,6 +30,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
+  addMarkupToAmount,
 } from "../_utils";
 import {
   getSpokePoolPeripheryAddress,
@@ -680,8 +681,14 @@ export async function estimateInputForExactOutput(
     .mul(inputUnit)
     .div(inputUnitOutputAmount);
 
-  // Add 1% buffer for slippage and rounding
-  return requiredInputAmount.mul(101).div(100).toString();
+  // Consider slippage and add fixed buffer for price discrepancies between the input
+  // unit and the desired output amount
+  const buffer = 0.05; // 5%
+  const adjustedInputAmount = addMarkupToAmount(
+    requiredInputAmount,
+    swap.slippageTolerance / 100 + buffer
+  );
+  return adjustedInputAmount.toString();
 }
 
 export function isValidSource(
