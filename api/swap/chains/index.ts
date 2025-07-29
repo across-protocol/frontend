@@ -41,8 +41,8 @@ export default async function handler(
         body: responseJson,
         statusCode: 200,
         requestId,
-        cacheSeconds: 60,
-        staleWhileRevalidateSeconds: 60,
+        cacheSeconds: 60 * 5,
+        staleWhileRevalidateSeconds: 60 * 5,
       });
     } catch (error: unknown) {
       return handleErrorCondition(
