@@ -178,7 +178,7 @@ export async function handleBaseSwapQueryParams(
 const ActionArg = refine(
   object({
     value: unknown(), // Will be validated at runtime
-    populateDynamically: boolean(),
+    populateDynamically: optional(boolean()),
     balanceSource: optional(validEvmAddress()),
   }),
   "balanceSource",
