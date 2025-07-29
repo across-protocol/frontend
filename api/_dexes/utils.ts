@@ -30,6 +30,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
+  addMarkupToAmount,
 } from "../_utils";
 import {
   getSpokePoolPeripheryAddress,
@@ -44,6 +45,15 @@ export type CrossSwapType =
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
+export type QuoteFetchPrioritizationMode =
+  | {
+      mode: "equal-speed";
+    }
+  | {
+      mode: "priority-speed";
+      priorityChunkSize: number;
+    };
+
 /**
  * Describes which quote fetch strategies to use for a given chain,
  *
@@ -54,6 +64,7 @@ export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
  * }
  */
 export type QuoteFetchStrategies = Partial<{
+  prioritizationMode: QuoteFetchPrioritizationMode;
   default: QuoteFetchStrategy[];
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
@@ -95,9 +106,13 @@ export const PREFERRED_BRIDGE_TOKENS: {
   },
 };
 
-export const defaultQuoteFetchStrategies: QuoteFetchStrategy[] =
-  // These will be our default strategies until the periphery contract is audited
-  [getSwapRouter02Strategy("UniversalSwapAndBridge")];
+export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
+  prioritizationMode: {
+    mode: "priority-speed",
+    priorityChunkSize: 1,
+  },
+  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+};
 
 export function getPreferredBridgeTokens(
   fromChainId: number,
@@ -418,7 +433,7 @@ export function getQuoteFetchStrategies(
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
     strategies.default ??
-    defaultQuoteFetchStrategies
+    defaultQuoteFetchStrategies.default!
   );
 }
 
@@ -666,8 +681,14 @@ export async function estimateInputForExactOutput(
     .mul(inputUnit)
     .div(inputUnitOutputAmount);
 
-  // Add 1% buffer for slippage and rounding
-  return requiredInputAmount.mul(101).div(100).toString();
+  // Consider slippage and add fixed buffer for price discrepancies between the input
+  // unit and the desired output amount
+  const buffer = 0.05; // 5%
+  const adjustedInputAmount = addMarkupToAmount(
+    requiredInputAmount,
+    swap.slippageTolerance / 100 + buffer
+  );
+  return adjustedInputAmount.toString();
 }
 
 export function isValidSource(
