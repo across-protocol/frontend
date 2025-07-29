@@ -251,7 +251,7 @@ export class SwapQuoteUnavailableError extends InputError {
 /**
  * Handles the recurring case of error handling
  * @param endpoint A string numeric to indicate to the logging utility where this error occurs
- * @param response A VercelResponse object that is used to interract with the returning reponse
+ * @param response A VercelResponse object that is used to interact with the returning response
  * @param logger A logging utility to write to a cloud logging provider
  * @param error The error that will be returned to the user
  * @param span The span to record the error on
