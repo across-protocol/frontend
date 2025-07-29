@@ -14,10 +14,10 @@ const { CRON_SECRET } = getEnvs();
 
 const endpoints = [
   {
-    url: "https://preview.across.to/api/swap/allowance",
+    url: "https://app.across.to/api/swap/allowance",
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
+      tradeType: "exactInput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
       originChainId: CHAIN_IDs.ARBITRUM,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
@@ -29,40 +29,10 @@ const endpoints = [
     updateIntervalSec: 10,
   },
   {
-    url: "https://preview.across.to/api/swap/auth",
+    url: "https://app.across.to/api/swap",
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      originChainId: CHAIN_IDs.ARBITRUM,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-      destinationChainId: CHAIN_IDs.OPTIMISM,
-      depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-      skipOriginTxEstimation: true,
-      refundOnOrigin: false,
-    },
-    updateIntervalSec: 10,
-  },
-  {
-    url: "https://preview.across.to/api/swap/permit",
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      originChainId: CHAIN_IDs.ARBITRUM,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-      destinationChainId: CHAIN_IDs.OPTIMISM,
-      depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-      skipOriginTxEstimation: true,
-      refundOnOrigin: false,
-    },
-    updateIntervalSec: 10,
-  },
-  {
-    url: "https://preview.across.to/api/swap",
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "minOutput",
+      tradeType: "exactInput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
       originChainId: CHAIN_IDs.ARBITRUM,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
