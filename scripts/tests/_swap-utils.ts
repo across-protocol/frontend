@@ -229,7 +229,7 @@ export async function fetchSwapQuotes() {
         : undefined;
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
-      console.log("Body:", body);
+      console.log("Body:", JSON.stringify(body, null, 2));
       const response = await axios.post(
         `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
         body,
@@ -362,8 +362,8 @@ export async function getNativeDestinationAction(testCase: {
             { value: 0, populateDynamically: false },
           ],
           value: "0", // Will be populated dynamically
-          isNativeTransfer: "false",
-          populateCallValueDynamically: "true",
+          isNativeTransfer: false,
+          populateCallValueDynamically: true,
         },
       ],
     };
@@ -376,9 +376,8 @@ export async function getNativeDestinationAction(testCase: {
           target: ACROSS_DEV_WALLET_2,
           functionSignature: "",
           args: [],
-          value: "0",
-          populateCallValueDynamically: "true",
-          isNativeTransfer: "true",
+          populateCallValueDynamically: true,
+          isNativeTransfer: true,
         },
       ],
     };

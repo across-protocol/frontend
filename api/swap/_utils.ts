@@ -1,5 +1,6 @@
 import {
   assert,
+  create,
   Infer,
   type,
   string,
@@ -199,10 +200,10 @@ const RecursiveArgumentArray: any = lazy(() =>
 const Action = type({
   target: validEvmAddress(),
   functionSignature: string(), // Will be validated at runtime
-  isNativeTransfer: defaulted(optional(boolStr()), false),
+  isNativeTransfer: defaulted(boolean(), false),
   args: array(RecursiveArgumentArray),
   value: positiveIntStr(),
-  populateCallValueDynamically: defaulted(optional(boolStr()), false),
+  populateCallValueDynamically: defaulted(boolean(), false),
 });
 
 export type Action = Infer<typeof Action>;
@@ -221,10 +222,10 @@ export type SwapBody = Infer<typeof SwapBody>;
  * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
  */
 export function handleSwapBody(body: SwapBody, destinationChainId: number) {
-  assert(body, SwapBody);
+  const parsedBody = create(body, SwapBody);
   // Assert that provided actions can be encoded
-  encodeActionCalls(body.actions, destinationChainId);
-  return body;
+  encodeActionCalls(parsedBody.actions, destinationChainId);
+  return parsedBody;
 }
 
 export function encodeActionCalls(actions: Action[], targetChainId: number) {
@@ -246,9 +247,8 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
   };
 
   return actions.map((action) => {
-    const isNativeTransfer = action.isNativeTransfer === "true";
-    const populateCallValueDynamically =
-      action.populateCallValueDynamically === "true";
+    const isNativeTransfer = action.isNativeTransfer;
+    const populateCallValueDynamically = action.populateCallValueDynamically;
     if (isNativeTransfer) {
       if (populateCallValueDynamically) {
         // If action is a native transfer and populateCallValueDynamically is true
