@@ -357,12 +357,10 @@ export async function getNativeDestinationAction(testCase: {
           functionSignature:
             "function depositETH(address, address onBehalfOf, uint16 referralCode)",
           args: [
-            { value: ethers.constants.AddressZero, populateDynamically: false },
-            { value: ACROSS_DEV_WALLET_2, populateDynamically: false },
-            { value: 0, populateDynamically: false },
+            { value: ethers.constants.AddressZero },
+            { value: ACROSS_DEV_WALLET_2 },
+            { value: 0 },
           ],
-          value: "0", // Will be populated dynamically
-          isNativeTransfer: false,
           populateCallValueDynamically: true,
         },
       ],
@@ -397,7 +395,7 @@ export async function getERC20DestinationAction(testCase: {
         target: testCase.params.outputToken,
         functionSignature: "function transfer(address to, uint256 value)",
         args: [
-          { value: ACROSS_DEV_WALLET_2, populateDynamically: false },
+          { value: ACROSS_DEV_WALLET_2 },
           {
             value: testCase.params.amount,
             populateDynamically: true,

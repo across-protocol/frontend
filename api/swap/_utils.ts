@@ -202,7 +202,7 @@ const Action = type({
   functionSignature: string(), // Will be validated at runtime
   isNativeTransfer: defaulted(boolean(), false),
   args: array(RecursiveArgumentArray),
-  value: positiveIntStr(),
+  value: defaulted(positiveIntStr(), "0"),
   populateCallValueDynamically: defaulted(boolean(), false),
 });
 
@@ -214,20 +214,42 @@ const SwapBody = type({
 
 export type SwapBody = Infer<typeof SwapBody>;
 
-/**
- * Validates that all actions in the swap body can be properly encoded.
- * Recursively extracts argument values and validates they match the function signature.
- *
- * @param body - The request body containing an array of actions to validate
- * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
- */
 export function handleSwapBody(body: SwapBody, destinationChainId: number) {
+  // Validate rules for each action. We have to validate the input before default values are applied.
+  body.actions.forEach((action, index) => {
+    // 1. Validate that value is provided when populateCallValueDynamically is false or omitted
+    if (!action.populateCallValueDynamically && !action.value) {
+      throw new InvalidParamError({
+        param: `body.actions[${index}].value`,
+        message:
+          "value is required when populateCallValueDynamically is false or omitted",
+      });
+    }
+    // 2. Validate that no function signature or args are provided when isNativeTransfer is true
+    if (
+      action.isNativeTransfer &&
+      (action.functionSignature !== "" || action.args.length > 0)
+    ) {
+      throw new InvalidParamError({
+        param: `body.actions[${index}].functionSignature, body.actions[${index}].args`,
+        message:
+          "function signature or args are not allowed when isNativeTransfer is true",
+      });
+    }
+  });
+
   const parsedBody = create(body, SwapBody);
   // Assert that provided actions can be encoded
   encodeActionCalls(parsedBody.actions, destinationChainId);
   return parsedBody;
 }
 
+/**
+ * Validates that provided actions can be properly encoded.
+ * Recursively extracts argument values and validates they match the function signature.
+ *
+ * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
+ */
 export function encodeActionCalls(actions: Action[], targetChainId: number) {
   // Helper function to recursively extract only the .value fields from args array
   const flattenArgs = (args: any[], depth: number = 0): any[] => {
