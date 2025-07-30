@@ -70,8 +70,10 @@ export function useToast({
           if (el.createdAt + autoDeleteTime < Date.now()) {
             idsToDelete.push(el.id);
           }
-          context.deleteToast(idsToDelete);
         });
+        if (idsToDelete.length > 0) {
+          context.deleteToast(idsToDelete);
+        }
       }
     }, autoDeleteTime);
 
