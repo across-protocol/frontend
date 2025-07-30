@@ -1,6 +1,8 @@
-import { Span } from "@opentelemetry/api";
-import { ATTR_HTTP_REQUEST_METHOD } from "@opentelemetry/semantic-conventions";
+import { Span, diag } from "@opentelemetry/api";
+import { getIncomingRequestAttributes } from "@opentelemetry/instrumentation-http/build/src/utils.js";
+import { SemconvStability } from "@opentelemetry/instrumentation";
 
+import { httpInstrumentation } from "../instrumentation";
 import { TypedVercelRequest } from "./_types";
 
 export function getRequestId(req: TypedVercelRequest<unknown, unknown>) {
@@ -25,5 +27,22 @@ export function setRequestSpanAttributes(
 ) {
   const requestIdToUse = requestId ?? getRequestId(request);
   span.setAttribute("http.request_id", requestIdToUse);
-  span.setAttribute(ATTR_HTTP_REQUEST_METHOD, request.method ?? "unknown");
+
+  if (request.headers) {
+    const attributes = getIncomingRequestAttributes(
+      request,
+      {
+        component: "https",
+        serverName: httpInstrumentation.getConfig().serverName,
+        enableSyntheticSourceDetection:
+          httpInstrumentation.getConfig().enableSyntheticSourceDetection ||
+          false,
+        semconvStability: SemconvStability.STABLE,
+      },
+      diag.createComponentLogger({
+        namespace: "https",
+      })
+    );
+    span.setAttributes(attributes);
+  }
 }
