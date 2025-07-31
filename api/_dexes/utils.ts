@@ -645,6 +645,20 @@ export function buildDestinationSwapCrossChainMessage({
         ),
         value: "0",
       },
+      // drain remaining swap output tokens from MultiCallHandler contract
+      // (only needed when there's embedded actions, otherwise the drain call is already part of transferActions)
+      ...(embeddedActions.length > 0
+        ? [
+            {
+              target: getMultiCallHandlerAddress(destinationSwapChainId),
+              callData: encodeDrainCalldata(
+                crossSwap.outputToken.address,
+                crossSwap.refundAddress ?? crossSwap.depositor
+              ),
+              value: "0",
+            },
+          ]
+        : []),
     ],
   });
 }
