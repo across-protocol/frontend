@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 
-import { useAmplitude, useConnection } from "hooks";
+import { useAmplitude } from "hooks";
 import {
   generateDepositConfirmed,
   getToken,
@@ -10,8 +10,8 @@ import {
   wait,
   getChainInfo,
   NoFundsDepositedLogError,
-  toAddressType,
   debug,
+  getEcosystem,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -23,6 +23,8 @@ import { createChainStrategies } from "utils/deposit-strategies";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -47,7 +49,10 @@ export function useDepositTracking({
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
   const { addToAmpliQueue } = useAmplitude();
-  const { account } = useConnection();
+  const { account: accountEVM } = useConnectionEVM();
+  const { account: accountSVM } = useConnectionSVM();
+  const account =
+    getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
 
   // Create appropriate strategy for the source chain
   const { depositStrategy, fillStrategy } = createChainStrategies(
@@ -104,7 +109,8 @@ export function useDepositTracking({
     }
 
     // Check if the deposit is from the current user
-    const isFromCurrentUser = depositInfo.depositLog.depositor === account;
+    const isFromCurrentUser =
+      depositInfo.depositLog.depositor.toNative() === account;
     if (!isFromCurrentUser) {
       return;
     }
@@ -221,11 +227,11 @@ function logRelayData(depositInfo: DepositData): void {
     console.debug("RelayData\n", {
       seed: 0,
       destinationChainId: depositInfo.destinationChainId,
-      depositor: toAddressType(depositInfo.depositor).toBase58(),
-      recipient: toAddressType(depositInfo.recipient).toBase58(),
-      exclusiveRelayer: toAddressType(depositInfo.exclusiveRelayer).toBase58(),
-      inputToken: toAddressType(depositInfo.inputToken).toBase58(),
-      outputToken: toAddressType(depositInfo.outputToken).toBase58(),
+      depositor: depositInfo.depositor.toBase58(),
+      recipient: depositInfo.recipient.toBase58(),
+      exclusiveRelayer: depositInfo.exclusiveRelayer.toBase58(),
+      inputToken: depositInfo.inputToken.toBase58(),
+      outputToken: depositInfo.outputToken.toBase58(),
       inputAmount: depositInfo.inputAmount.toString(),
       outputAmount: depositInfo.outputAmount.toString(),
       originChainId: depositInfo.originChainId,

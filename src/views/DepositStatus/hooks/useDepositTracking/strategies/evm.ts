@@ -1,7 +1,7 @@
 import { getProvider } from "utils/providers";
 import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
 import { getConfig } from "utils/config";
-import { getBlockForTimestamp, getMessageHash } from "utils/sdk";
+import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
 import { indexerApiBaseUrl } from "utils/constants";
 import axios from "axios";
@@ -102,6 +102,30 @@ export class EVMStrategy implements IChainStrategy {
           fillLog: {
             ...parsedFIllLog,
             ...parsedFIllLog.args,
+            inputToken: toAddressType(
+              parsedFIllLog.args.inputToken,
+              Number(parsedFIllLog.args.originChainId)
+            ),
+            outputToken: toAddressType(
+              parsedFIllLog.args.outputToken,
+              Number(this.chainId)
+            ),
+            depositor: toAddressType(
+              parsedFIllLog.args.depositor,
+              Number(parsedFIllLog.args.originChainId)
+            ),
+            recipient: toAddressType(
+              parsedFIllLog.args.recipient,
+              Number(this.chainId)
+            ),
+            exclusiveRelayer: toAddressType(
+              parsedFIllLog.args.exclusiveRelayer,
+              Number(this.chainId)
+            ),
+            relayer: toAddressType(
+              parsedFIllLog.args.relayer,
+              Number(this.chainId)
+            ),
             destinationChainId: this.chainId,
             fillTimestamp: fillTxBlock.timestamp,
             blockNumber: parsedFIllLog.blockNumber,
@@ -117,8 +141,10 @@ export class EVMStrategy implements IChainStrategy {
                 getMessageHash(
                   parsedFIllLog.args.relayExecutionInfo.updatedMessageHash
                 ),
-              updatedRecipient:
+              updatedRecipient: toAddressType(
                 parsedFIllLog.args.relayExecutionInfo.updatedRecipient,
+                this.chainId
+              ),
               updatedOutputAmount:
                 parsedFIllLog.args.relayExecutionInfo.updatedOutputAmount,
               fillType: parsedFIllLog.args.relayExecutionInfo.fillType,
@@ -200,6 +226,30 @@ export class EVMStrategy implements IChainStrategy {
         fillLog: {
           ...filledRelayEvent,
           ...filledRelayEvent.args,
+          inputToken: toAddressType(
+            filledRelayEvent.args.inputToken,
+            Number(filledRelayEvent.args.originChainId)
+          ),
+          outputToken: toAddressType(
+            filledRelayEvent.args.outputToken,
+            Number(this.chainId)
+          ),
+          depositor: toAddressType(
+            filledRelayEvent.args.depositor,
+            Number(filledRelayEvent.args.originChainId)
+          ),
+          recipient: toAddressType(
+            filledRelayEvent.args.recipient,
+            Number(this.chainId)
+          ),
+          exclusiveRelayer: toAddressType(
+            filledRelayEvent.args.exclusiveRelayer,
+            Number(this.chainId)
+          ),
+          relayer: toAddressType(
+            filledRelayEvent.args.relayer,
+            Number(this.chainId)
+          ),
           messageHash,
           destinationChainId: this.chainId,
           fillTimestamp: fillTxBlock.timestamp,
@@ -213,6 +263,10 @@ export class EVMStrategy implements IChainStrategy {
           relayExecutionInfo: {
             ...filledRelayEvent.args.relayExecutionInfo,
             updatedMessageHash,
+            updatedRecipient: toAddressType(
+              filledRelayEvent.args.relayExecutionInfo.updatedRecipient,
+              Number(this.chainId)
+            ),
           },
         } satisfies FillData,
         status: "filled",
@@ -274,8 +328,8 @@ export class EVMStrategy implements IChainStrategy {
         selectedRoute.type === "swap"
           ? selectedRoute.swapTokenAddress
           : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor,
-      recipientAddr: recipient,
+      depositorAddr: depositor.toBase58(),
+      recipientAddr: recipient.toBase58(),
       message: message || "0x",
       amount: inputAmount.toString(),
       depositTxHash: depositInfo.depositTxHash,
@@ -343,8 +397,8 @@ export class EVMStrategy implements IChainStrategy {
         selectedRoute.type === "swap"
           ? selectedRoute.swapTokenAddress
           : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor,
-      recipientAddr: recipient,
+      depositorAddr: depositor.toBytes32(),
+      recipientAddr: recipient.toBytes32(),
       message: message || "0x",
       amount: inputAmount.toString(),
       depositTxHash: fillInfo.depositInfo.depositTxHash,

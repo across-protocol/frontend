@@ -5,6 +5,7 @@ import {
   getGasMarkup,
   getLogger,
   handleErrorCondition,
+  HUB_POOL_CHAIN_ID,
   latestGasPriceCache,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
@@ -52,6 +53,7 @@ const handler = async (
     const gasData = await Promise.all(
       Object.entries(chainIdsWithToken).map(([chainId, tokenAddress]) => {
         const depositArgs = getDepositArgsForCachedGasDetails(
+          HUB_POOL_CHAIN_ID,
           Number(chainId),
           tokenAddress
         );
@@ -77,6 +79,7 @@ const handler = async (
       Object.entries(chainIdsWithToken).map(
         async ([chainId, tokenAddress], i) => {
           const depositArgs = getDepositArgsForCachedGasDetails(
+            HUB_POOL_CHAIN_ID,
             Number(chainId),
             tokenAddress
           );

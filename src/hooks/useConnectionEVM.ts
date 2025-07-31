@@ -10,7 +10,6 @@ import {
 } from "wagmi";
 import type { Account, Chain, Client, Transport } from "viem";
 
-import { useIsContractAddress } from "./useIsContractAddress";
 import { useSidebarContext } from "./useSidebarContext";
 import { useEnsQuery } from "./useEns";
 import {
@@ -23,6 +22,7 @@ import {
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
 import { useDisallowList } from "hooks/useDisallowList";
+import { useAddressType } from "./useAddressType";
 
 export function useConnectionEVM() {
   const { openSidebar } = useSidebarContext();
@@ -35,6 +35,7 @@ export function useConnectionEVM() {
   const { isBlocked } = useDisallowList(address);
 
   const { data: ensName } = useEnsQuery(address);
+  const addressType = useAddressType(address, chainId);
 
   const connect = useCallback(
     (options?: {
@@ -72,8 +73,6 @@ export function useConnectionEVM() {
     [switchChainAsync]
   );
 
-  const isContractAddress = useIsContractAddress(address, chainId, true);
-
   return {
     account: address,
     ensName,
@@ -85,7 +84,7 @@ export function useConnectionEVM() {
     disconnect,
     connector,
     setChain,
-    isContractAddress,
+    isContractAddress: addressType === "contract",
     isBlocked,
   };
 }

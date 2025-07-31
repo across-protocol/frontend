@@ -54,17 +54,25 @@ export function calcGasFeeDetails(params: {
 }
 
 export function getDepositArgsForCachedGasDetails(
-  chainId: number,
+  originChainId: number,
+  destinationChainId: number,
   tokenAddress: string
 ) {
   return {
     amount: BigNumber.from(100),
-    inputToken: sdk.utils.toAddressType(sdk.constants.ZERO_ADDRESS).toBytes32(),
-    outputToken: sdk.utils.toAddressType(tokenAddress).toBytes32(),
-    recipientAddress: sdk.utils
-      .toAddressType(getDefaultRecipientAddress(chainId))
+    inputToken: sdk.utils
+      .toAddressType(sdk.constants.ZERO_ADDRESS, originChainId)
       .toBytes32(),
-    originChainId: 0, // Shouldn't matter for simulation
-    destinationChainId: Number(chainId),
+    outputToken: sdk.utils
+      .toAddressType(tokenAddress, destinationChainId)
+      .toBytes32(),
+    recipientAddress: sdk.utils
+      .toAddressType(
+        getDefaultRecipientAddress(destinationChainId),
+        destinationChainId
+      )
+      .toBytes32(),
+    originChainId: originChainId,
+    destinationChainId: destinationChainId,
   };
 }

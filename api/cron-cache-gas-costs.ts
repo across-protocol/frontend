@@ -65,19 +65,20 @@ const handler = async (
     /**
      * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
      * up to `maxDurationSec` seconds.
-     * @param chainId Chain to estimate gas cost for
+     * @param destinationChainId Chain to estimate gas cost for
      * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
      * gas costs for.
      */
     const updateNativeGasCostPromise = async (
-      chainId: number,
+      destinationChainId: number,
       outputTokenAddress: string
     ): Promise<void> => {
-      updateCounts[chainId] ??= {};
-      updateCounts[chainId][outputTokenAddress] ??= 0;
+      updateCounts[destinationChainId] ??= {};
+      updateCounts[destinationChainId][outputTokenAddress] ??= 0;
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
       const depositArgs = getDepositArgsForCachedGasDetails(
-        chainId,
+        HUB_POOL_CHAIN_ID,
+        destinationChainId,
         outputTokenAddress
       );
       const cache = getCachedNativeGasCost(depositArgs);
@@ -90,11 +91,11 @@ const handler = async (
         }
         try {
           await cache.set();
-          updateCounts[chainId][outputTokenAddress]++;
+          updateCounts[destinationChainId][outputTokenAddress]++;
         } catch (err) {
           logger.warn({
             at: "CronCacheGasCosts#updateNativeGasCostPromise",
-            message: `Failed to set native gas cost cache for chain ${chainId}`,
+            message: `Failed to set native gas cost cache for chain ${destinationChainId}`,
             depositArgs,
             error: err,
           });

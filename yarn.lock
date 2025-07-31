@@ -16,41 +16,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.66", "@across-protocol/constants@^3.1.68", "@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.71":
+"@across-protocol/constants@^3.1.68", "@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.71":
   version "3.1.71"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.71.tgz#18009a026781e8e661d726e06fb3cbb0f1f42f4b"
   integrity sha512-e8TwCp2xC2ixXjX9TwQxWfzngBcf4nDv/NIKIOfEro7eobgoftEh1kDGacB2OIGDYorjeYhLRjY2EHzdam8wUQ==
-
-"@across-protocol/contracts@4.0.14-alpha.1":
-  version "4.0.14-alpha.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.0.14-alpha.1.tgz#0f6a04df5a999c56e787304b7a68e76c3f456cbc"
-  integrity sha512-HgUy3Di7qxdwbOV6BrmqPgN6RmiijBL/m/LrAJ2AMIF7rqSe3urEE1skpMyGBzVOL3d2ocOa0rT3YqAxqlz2yA==
-  dependencies:
-    "@across-protocol/constants" "^3.1.66"
-    "@coral-xyz/anchor" "^0.31.1"
-    "@defi-wonderland/smock" "^2.3.4"
-    "@eth-optimism/contracts" "^0.5.40"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.6"
-    "@openzeppelin/contracts-upgradeable" "4.9.6"
-    "@scroll-tech/contracts" "^0.1.0"
-    "@solana-developers/helpers" "^2.4.0"
-    "@solana-program/address-lookup-table" "^0.7.0"
-    "@solana-program/token" "^0.5.1"
-    "@solana/kit" "^2.1.0"
-    "@solana/spl-token" "^0.4.6"
-    "@solana/web3.js" "1.98.2"
-    "@types/yargs" "^17.0.33"
-    "@uma/common" "^2.37.3"
-    "@uma/contracts-node" "^0.4.17"
-    "@uma/core" "^2.61.0"
-    axios "^1.7.4"
-    bs58 "^6.0.0"
-    prettier-plugin-rust "^0.1.9"
-    yargs "^17.7.2"
-    zksync-web3 "^0.14.3"
 
 "@across-protocol/contracts@^0.1.4":
   version "0.1.4"
@@ -21482,11 +21451,6 @@ regenerator-runtime@^0.13.11:
   version "0.13.11"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz#f6dca3e7ceec20590d07ada785636a90cdca17f9"
   integrity sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==
-
-regenerator-runtime@^0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.0.tgz#5e19d68eb12d486f797e15a3c6a918f7cec5eb45"
-  integrity sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==
 
 regenerator-transform@^0.15.2:
   version "0.15.2"
