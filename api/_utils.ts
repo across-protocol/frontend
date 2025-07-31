@@ -857,7 +857,10 @@ export const getRelayerFeeDetails = async (
   });
   const { isMessageEmpty } = sdk.utils;
 
-  const depositForSimulation = buildDepositForSimulation(deposit);
+  const depositForSimulation = buildDepositForSimulation({
+    ...deposit,
+    relayerAddress,
+  });
 
   return await relayFeeCalculator.relayerFeeDetails(
     depositForSimulation,
@@ -878,6 +881,7 @@ export const buildDepositForSimulation = (depositArgs: {
   recipientAddress: string;
   originChainId: number;
   destinationChainId: number;
+  relayerAddress: string;
   message?: string;
 }) => {
   const { toAddressType } = sdk.utils;
@@ -889,6 +893,7 @@ export const buildDepositForSimulation = (depositArgs: {
     originChainId,
     destinationChainId,
     message,
+    relayerAddress,
   } = depositArgs;
 
   const inputToken = getTokenByAddress(_inputTokenAddress, originChainId);
@@ -922,10 +927,7 @@ export const buildDepositForSimulation = (depositArgs: {
     inputToken: toAddressType(_inputTokenAddress, originChainId),
     outputToken: toAddressType(_outputTokenAddress, destinationChainId),
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-    exclusiveRelayer: toAddressType(
-      getDefaultRelayerAddress(destinationChainId),
-      destinationChainId
-    ),
+    exclusiveRelayer: toAddressType(relayerAddress, destinationChainId),
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
     messageHash: sdk.utils.getMessageHash(
@@ -2114,7 +2116,7 @@ export function getCachedNativeGasCost(
       { relayerAddress }
     );
     const gasCost = await relayerFeeCalculatorQueries.getNativeGasCost(
-      buildDepositForSimulation(deposit),
+      buildDepositForSimulation({ ...deposit, relayerAddress }),
       relayerFeeCalculatorQueries.simulatedRelayerAddress
     );
     return gasCost;

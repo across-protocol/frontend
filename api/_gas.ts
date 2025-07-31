@@ -1,6 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { BigNumber, BigNumberish } from "ethers";
 import { getDefaultRecipientAddress } from "./_recipient-address";
+import { getDefaultRelayerAddress } from "./_relayer-address";
 
 export function calcGasFeeDetails(params: {
   gasPriceEstimate: sdk.gasPriceOracle.GasPriceEstimate;
@@ -74,5 +75,11 @@ export function getDepositArgsForCachedGasDetails(
       .toBytes32(),
     originChainId: originChainId,
     destinationChainId: destinationChainId,
+    relayerAddress: sdk.utils
+      .toAddressType(
+        getDefaultRelayerAddress(destinationChainId),
+        destinationChainId
+      )
+      .toBytes32(),
   };
 }

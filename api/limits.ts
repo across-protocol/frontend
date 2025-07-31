@@ -193,6 +193,7 @@ const handler = async (
         originChainId: computedOriginChainId,
         destinationChainId,
         message,
+        relayerAddress: relayer.toBytes32(),
       };
       // We only want to derive an unsigned fill txn from the deposit args if the
       // destination chain is Linea or Solana:
