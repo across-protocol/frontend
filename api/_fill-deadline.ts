@@ -11,10 +11,10 @@ function getFillDeadlineBuffer(chainId: number) {
   return Number(bufferFromEnv ?? DEFAULT_FILL_DEADLINE_BUFFER_SECONDS);
 }
 
-export async function getFillDeadline(
+export function getFillDeadline(
   chainId: number,
   quoteTimestamp: number
-): Promise<number> {
+): number {
   const fillDeadlineBuffer = getFillDeadlineBuffer(chainId);
   // Quote timestamp cannot be in the future or more than an hour old, so this is safe (i.e. cannot
   // cause the contract to revert) as long as the fill deadline buffer is at least 1 hour smaller
