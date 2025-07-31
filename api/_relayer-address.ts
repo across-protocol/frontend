@@ -53,9 +53,9 @@ export function getDefaultRelayerAddress(
       destinationChainId
     );
     if (chainIsSvm) {
-      return overrideAddressType.isEVM()
-        ? constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM
-        : overrideAddressType.toBase58();
+      return overrideAddressType.isSVM()
+        ? overrideAddressType.toBase58()
+        : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM;
     }
     return overrideAddressType.isEVM()
       ? overrideAddressType.toEvmAddress()
