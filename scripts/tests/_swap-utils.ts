@@ -69,7 +69,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
       .option("tradeType", {
         alias: "tt",
         description: "Trade type.",
-        choices: ["exactOutput", "exactInput"],
+        choices: ["exactOutput", "exactInput", "minOutput"],
       })
       .option("recipient", {
         alias: "r",
