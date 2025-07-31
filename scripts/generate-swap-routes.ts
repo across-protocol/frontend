@@ -2,11 +2,10 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
 import { ethers } from "ethers";
-
 import {
   enabledMainnetChainConfigs,
   enabledSepoliaChainConfigs,
-} from "./generate-routes";
+} from "./utils/enabled-chain-configs";
 
 const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
@@ -218,4 +217,11 @@ async function generateSwapRoutes(hubPoolChainId = 1) {
   );
 }
 
-generateSwapRoutes(Number(process.argv[2])).catch(console.error);
+const hubPoolChainId = process.argv[2];
+if (hubPoolChainId) {
+  generateSwapRoutes(Number(hubPoolChainId));
+} else {
+  Object.keys(enabledSwapRoutes).forEach((chainId) => {
+    generateSwapRoutes(Number(chainId));
+  });
+}

@@ -15,12 +15,23 @@ import {
   getBridgeUrlWithQueryParams,
   isDefined,
   formatUSD,
+  getToken,
 } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
 
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
+import TokenFee from "views/Bridge/components/TokenFee";
+import { BigNumber } from "ethers";
+import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import {
+  calcFeesForEstimatedTable,
+  getTokensForFeesCalc,
+} from "views/Bridge/utils";
+import { useTokenConversion } from "hooks/useTokenConversion";
+import EstimatedTable from "views/Bridge/components/EstimatedTable";
 
 type Props = {
   status: DepositStatus;
@@ -33,8 +44,7 @@ type Props = {
   toChainId: number;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  amountSent?: string;
-  netFee?: string;
+  fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositTimesCard({
@@ -48,13 +58,58 @@ export function DepositTimesCard({
   toChainId,
   inputTokenSymbol,
   outputTokenSymbol,
-  amountSent,
-  netFee,
+  fromBridgePagePayload,
 }: Props) {
+  const { estimatedRewards, amountAsBaseCurrency, isSwap, isUniversalSwap } =
+    useResolveFromBridgePagePayload(
+      fromChainId,
+      toChainId,
+      inputTokenSymbol,
+      outputTokenSymbol || inputTokenSymbol,
+      fromBridgePagePayload
+    );
+
+  const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
+  const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
+
+  const { inputToken, bridgeToken } = getTokensForFeesCalc({
+    inputToken: getToken(inputTokenSymbol),
+    outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
+    isUniversalSwap: isUniversalSwap,
+    universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+    fromChainId: fromChainId,
+    toChainId: toChainId,
+  });
+
+  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
+    useTokenConversion(inputToken.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
+    useTokenConversion(bridgeToken.symbol, "usd");
+  const {
+    convertTokenToBaseCurrency: convertOutputTokenToUsd,
+    convertBaseCurrencyToToken: convertUsdToOutputToken,
+  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+
+  const { outputAmountUsd } =
+    calcFeesForEstimatedTable({
+      gasFee: fromBridgePagePayload?.quote?.relayerGasFee?.total,
+      capitalFee: fromBridgePagePayload?.quote?.relayerCapitalFee?.total,
+      lpFee: fromBridgePagePayload?.quote?.lpFee?.total,
+      isSwap,
+      isUniversalSwap,
+      swapQuote: fromBridgePagePayload?.swapQuote,
+      universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+      parsedAmount:
+        fromBridgePagePayload?.depositArgs?.initialAmount || BigNumber.from(0),
+      convertInputTokenToUsd,
+      convertBridgeTokenToUsd,
+      convertOutputTokenToUsd,
+    }) || {};
+  const outputAmount = convertUsdToOutputToken(outputAmountUsd);
+
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
   const isDepositReverted = status === "deposit-reverted";
-
   const { addToAmpliQueue } = useAmplitude();
 
   return (
@@ -127,18 +182,43 @@ export function DepositTimesCard({
           />
         )}
       </Row>
-      {(netFee || amountSent) && <Divider />}
-      {isDefined(netFee) && (
-        <Row>
-          <Text color="grey-400">Net fee</Text>
-          <Text color="grey-400">${formatUSD(netFee)}</Text>
-        </Row>
-      )}
-      {isDefined(amountSent) && (
-        <Row>
-          <Text color="grey-400">Amount sent</Text>
-          <Text color="grey-400">${formatUSD(amountSent)}</Text>
-        </Row>
+      {(netFee || amountSentBaseCurrency) && <Divider />}
+      {isDefined(outputAmount) &&
+        isDefined(outputTokenSymbol) &&
+        isDefined(amountSentBaseCurrency) && (
+          <Row>
+            <Text color="grey-400">Amount sent</Text>
+            <TokenWrapper>
+              <TokenFee
+                token={getToken(outputTokenSymbol)}
+                amount={BigNumber.from(outputAmount)}
+                tokenChainId={toChainId}
+                tokenFirst
+                showTokenLinkOnHover
+                textColor="light-100"
+              />
+              <Text color="grey-400">
+                (${formatUSD(amountSentBaseCurrency)})
+              </Text>
+            </TokenWrapper>
+          </Row>
+        )}
+      {isDefined(outputTokenSymbol) && (
+        <EstimatedTable
+          {...estimatedRewards}
+          isQuoteLoading={false}
+          fromChainId={fromChainId}
+          toChainId={toChainId}
+          inputToken={inputToken}
+          outputToken={getToken(outputTokenSymbol)}
+          isSwap={isSwap}
+          isUniversalSwap={isUniversalSwap}
+          swapQuote={fromBridgePagePayload?.swapQuote}
+          universalSwapQuote={fromBridgePagePayload?.universalSwapQuote}
+          omitDivider
+          collapsible
+          onSetNewSlippage={undefined}
+        />
       )}
       <Divider />
       <TransactionsPageLinkWrapper
@@ -266,4 +346,11 @@ const CardWrapper = styled.div`
   background: ${COLORS["black-800"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(12px);
+`;
+
+const TokenWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;

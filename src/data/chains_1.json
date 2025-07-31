@@ -105,6 +105,13 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      },
+      {
+        "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ],
     "outputTokens": [
@@ -205,6 +212,13 @@
         "name": "Wrapped GHO Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
+      },
+      {
+        "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ]
   },
@@ -1398,7 +1412,7 @@
     "chainId": 7777777,
     "name": "Zora",
     "publicRpcUrl": "https://rpc.zora.energy",
-    "explorerUrl": "https://zorascan.xyz",
+    "explorerUrl": "https://explorer.zora.energy",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zora/assets/logo.svg",
     "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
     "spokePoolBlock": 18382867,
@@ -1808,33 +1822,6 @@
     ]
   },
   {
-    "chainId": 34268394551451,
-    "name": "Solana",
-    "publicRpcUrl": "https://api.mainnet-beta.solana.com",
-    "explorerUrl": "https://solscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana/assets/logo.svg",
-    "spokePool": "4Jg83Lhggz2EdzSsDX2NVcEK56F25jJKK5btUbHAU4Xu",
-    "spokePoolBlock": 347611576,
-    "inputTokens": [
-      {
-        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ],
-    "outputTokens": [
-      {
-        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ]
-  },
-  {
     "chainId": 56,
     "name": "BNB Smart Chain",
     "publicRpcUrl": "https://bsc-dataseed1.binance.org",
@@ -1863,6 +1850,13 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ],
     "outputTokens": [
@@ -1893,6 +1887,13 @@
         "name": "Tether USD",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
+        "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+        "symbol": "CAKE",
+        "name": "PancakeSwap Token",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
       }
     ]
   }

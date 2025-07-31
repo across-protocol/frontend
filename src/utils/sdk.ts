@@ -1,8 +1,8 @@
 import { BigNumber, providers } from "ethers";
-import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
-export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
+import { toAddressType as _toAddressType } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
+export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export {
   bnUint256Max,
@@ -19,7 +19,6 @@ export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
   toBytes32,
   compareAddressesSimple,
-  toAddress,
   isContractDeployedToAddress,
   toAddressType,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
@@ -76,9 +75,9 @@ export async function getBlockForTimestamp(
   return blockNumberForTimestamp;
 }
 
-export function toAddressSafe(address: string) {
+export function toAddressSafe(address: string, chainId: number) {
   try {
-    return _toAddress(address);
+    return _toAddressType(address, chainId);
   } catch (e) {
     return address;
   }

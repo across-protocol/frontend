@@ -222,6 +222,9 @@ export const MAX_RELAY_FEE_PERCENT = Number(
 export const SHOW_ACX_NAV_TOKEN =
   process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
+export const showV4LaunchBanner = Boolean(
+  process.env.REACT_APP_SHOW_V4_BANNER === "true"
+);
 
 assert(
   isSupportedChainId(hubPoolChainId),
@@ -259,6 +262,9 @@ export function getChainInfo(chainId: number): ChainInfo {
   return chainInfo;
 }
 
+const additionalVanityMapping: Record<ChainId, string[]> = {
+  [ChainId.BSC]: ["bsc"],
+};
 export const chainEndpointToId = Object.fromEntries(
   chainInfoList.map((chain) => {
     const projects = Object.values(externConfigs).filter(
@@ -267,6 +273,10 @@ export const chainEndpointToId = Object.fromEntries(
     return [
       chain.name.toLowerCase().replaceAll(" ", ""),
       {
+        vanity: [
+          chain.name.toLowerCase().replaceAll(" ", ""),
+          ...(additionalVanityMapping[chain.chainId] ?? []),
+        ],
         chainId: chain.chainId,
         associatedProjectIds: projects.map(({ projectId }) => projectId),
       },
@@ -633,3 +643,5 @@ export const acrossPlusMulticallHandler: Record<number, string> = {
 };
 
 export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
+
+export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;

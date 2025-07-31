@@ -1418,7 +1418,7 @@ export const zora = {
   logoSvg: zoraLogoSvg,
   grayscaleLogoSvg: zoraGrayscaleLogoSvg,
   rpcUrl: "https://rpc.zora.energy",
-  explorerUrl: "https://zorascan.xyz",
+  explorerUrl: "https://explorer.zora.energy",
   constructExplorerLink: (txHash: string) => `${zora.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_7777777_CUSTOM_RPC_URL,

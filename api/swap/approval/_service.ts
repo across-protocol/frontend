@@ -1,59 +1,45 @@
 import { BigNumber, constants } from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import { Span } from "@opentelemetry/api";
 
-import { getProvider, latestGasPriceCache } from "../../_utils";
+import {
+  getProvider,
+  InputError,
+  latestGasPriceCache,
+  getLogger,
+} from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
   getApprovalTxns,
   buildBaseSwapResponseJson,
+  handleSwapBody,
+  SwapBody,
 } from "../_utils";
 import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
-import { QuoteFetchStrategies } from "../../_dexes/utils";
+import { inferCrossSwapType } from "../../_dexes/utils";
+import { quoteFetchStrategies } from "../_configs";
 import { TypedVercelRequest } from "../../_types";
-import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
-import { CHAIN_IDs } from "../../_constants";
-import { getWrappedGhoStrategy } from "../../_dexes/gho/wrapped-gho";
-import { getWghoMulticallStrategy } from "../../_dexes/gho/multicall";
+import { AcrossErrorCode } from "../../_errors";
 
-// For approval-based flows, we use the `UniversalSwapAndBridge` strategy with Uniswap V3's `SwapRouter02`
-const quoteFetchStrategies: QuoteFetchStrategies = {
-  default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
-  chains: {
-    [CHAIN_IDs.LENS]: getSwapRouter02Strategy(
-      "UniversalSwapAndBridge",
-      "sdk-swap-quoter"
-    ),
-  },
-  swapPairs: {
-    [CHAIN_IDs.MAINNET]: {
-      GHO: {
-        WGHO: getWrappedGhoStrategy(),
-      },
-      WGHO: {
-        GHO: getWrappedGhoStrategy(),
-        USDC: getWrappedGhoStrategy(),
-        USDT: getWrappedGhoStrategy(),
-        DAI: getWrappedGhoStrategy(),
-      },
-      USDC: {
-        WGHO: getWghoMulticallStrategy(),
-      },
-      USDT: {
-        WGHO: getWghoMulticallStrategy(),
-      },
-      DAI: {
-        WGHO: getWghoMulticallStrategy(),
-      },
-    },
-  },
-};
+const logger = getLogger();
 
 export async function handleApprovalSwap(
-  request: TypedVercelRequest<BaseSwapQueryParams>
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
+  span?: Span
 ) {
+  // This handler supports both GET and POST requests.
+  // For GET requests, we expect the body to be empty.
+  // TODO: Allow only POST requests
+  if (request.method !== "POST" && request.body) {
+    throw new InputError({
+      message: "POST method required when request.body is provided",
+      code: AcrossErrorCode.INVALID_METHOD,
+    });
+  }
+
   const {
     integratorId,
     skipOriginTxEstimation,
@@ -69,7 +55,13 @@ export async function handleApprovalSwap(
     depositor,
     slippageTolerance,
     refundToken,
+    excludeSources,
+    includeSources,
   } = await handleBaseSwapQueryParams(request.query);
+
+  if (request.body) {
+    handleSwapBody(request.body);
+  }
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -84,9 +76,19 @@ export async function handleApprovalSwap(
       refundAddress,
       isInputNative,
       isOutputNative,
+      excludeSources,
+      includeSources,
     },
     quoteFetchStrategies
   );
+  const crossSwapType = inferCrossSwapType(crossSwapQuotes);
+  logger.debug({
+    at: "handleApprovalSwap",
+    message: "Cross swap quotes",
+    crossSwapType,
+    amountType,
+    crossSwapQuotes,
+  });
 
   const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
     crossSwapQuotes,
@@ -149,6 +151,8 @@ export async function handleApprovalSwap(
   }
 
   const responseJson = buildBaseSwapResponseJson({
+    crossSwapType,
+    amountType,
     originChainId,
     inputTokenAddress,
     inputAmount,
@@ -169,5 +173,66 @@ export async function handleApprovalSwap(
     destinationSwapQuote,
     refundToken,
   });
+
+  if (span) {
+    setSpanAttributes(span, responseJson);
+  }
+
   return responseJson;
+}
+
+function setSpanAttributes(
+  span: Span,
+  responseJson: Awaited<ReturnType<typeof handleApprovalSwap>>
+) {
+  span.setAttribute("swap.type", responseJson.crossSwapType);
+  span.setAttribute("swap.tradeType", responseJson.amountType);
+  span.setAttribute("swap.originChainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.destinationChainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputToken.address", responseJson.inputToken.address);
+  span.setAttribute("swap.inputToken.symbol", responseJson.inputToken.symbol);
+  span.setAttribute("swap.inputToken.chainId", responseJson.inputToken.chainId);
+  span.setAttribute(
+    "swap.outputToken.address",
+    responseJson.outputToken.address
+  );
+  span.setAttribute("swap.outputToken.symbol", responseJson.outputToken.symbol);
+  span.setAttribute(
+    "swap.outputToken.chainId",
+    responseJson.outputToken.chainId
+  );
+  span.setAttribute("swap.inputAmount", responseJson.inputAmount.toString());
+  span.setAttribute(
+    "swap.minOutputAmount",
+    responseJson.minOutputAmount.toString()
+  );
+  span.setAttribute(
+    "swap.expectedOutputAmount",
+    responseJson.expectedOutputAmount.toString()
+  );
+
+  if (responseJson.steps.originSwap) {
+    span.setAttribute(
+      "swap.originSwap.swapProvider.name",
+      responseJson.steps.originSwap.swapProvider.name
+    );
+    span.setAttribute(
+      "swap.originSwap.swapProvider.sources",
+      responseJson.steps.originSwap.swapProvider.sources
+    );
+  }
+
+  if (responseJson.steps.destinationSwap) {
+    span.setAttribute(
+      "swap.destinationSwap.swapProvider.name",
+      responseJson.steps.destinationSwap.swapProvider.name
+    );
+    span.setAttribute(
+      "swap.destinationSwap.swapProvider.sources",
+      responseJson.steps.destinationSwap.swapProvider.sources
+    );
+  }
 }

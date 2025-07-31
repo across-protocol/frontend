@@ -43,10 +43,6 @@ const handler = async (
       message: "Response data",
       responseJson: poolStateOfUser,
     });
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=300, stale-while-revalidate=300"
-    );
     response.status(200).json(poolStateOfUser);
   } catch (error: unknown) {
     return handleErrorCondition("pools-user", response, logger, error);

@@ -1,11 +1,12 @@
 import { PopulatedTransaction } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 
 import { CrossSwapQuotes } from "../../_dexes/types";
 import { tagIntegratorId } from "../../_integrator-id";
 import { getSpokePool } from "../../_utils";
 import {
   getSpokePoolPeriphery,
-  getSpokePoolPeripheryProxy,
+  TransferType,
 } from "../../_spoke-pool-periphery";
 import {
   extractDepositDataStruct,
@@ -20,6 +21,8 @@ export async function buildCrossSwapTxForAllowanceHolder(
   const { originSwapQuote, crossSwap, contracts } = crossSwapQuotes;
   const { originSwapEntryPoint, originRouter, depositEntryPoint } = contracts;
   const originChainId = crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwap.outputToken.chainId;
+  const spokePool = getSpokePool(originChainId);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
@@ -32,25 +35,66 @@ export async function buildCrossSwapTxForAllowanceHolder(
       );
     }
 
-    const swapAndDepositData =
-      await extractSwapAndDepositDataStruct(crossSwapQuotes);
+    const swapAndDepositData = await extractSwapAndDepositDataStruct(
+      crossSwapQuotes,
+      originRouter.name === "UniswapV3UniversalRouter"
+        ? TransferType.Transfer
+        : TransferType.Approval
+    );
 
-    if (originSwapEntryPoint.name === "SpokePoolPeripheryProxy") {
-      const spokePoolPeripheryProxy = getSpokePoolPeripheryProxy(
+    if (originSwapEntryPoint.name === "SpokePoolPeriphery") {
+      const spokePoolPeriphery = getSpokePoolPeriphery(
         originSwapEntryPoint.address,
         originChainId
       );
-      tx = await spokePoolPeripheryProxy.populateTransaction.swapAndBridge(
-        swapAndDepositData
-        // TODO: Add payable modifier to SpokePoolPeripheryProxy swapAndBridge function
-        // {
-        //   value: crossSwap.isInputNative ? originSwapQuote.maximumAmountIn : 0,
-        // }
+      tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
+        {
+          ...swapAndDepositData,
+          depositData: {
+            ...swapAndDepositData.depositData,
+            inputToken: sdk.utils
+              .toAddressType(
+                swapAndDepositData.depositData.inputToken,
+                originChainId
+              )
+              .toEvmAddress(),
+            outputToken: sdk.utils
+              .toAddressType(
+                swapAndDepositData.depositData.outputToken,
+                destinationChainId
+              )
+              .toBytes32(),
+            depositor: sdk.utils
+              .toAddressType(
+                swapAndDepositData.depositData.depositor,
+                originChainId
+              )
+              .toEvmAddress(),
+            recipient: sdk.utils
+              .toAddressType(
+                swapAndDepositData.depositData.recipient,
+                destinationChainId
+              )
+              .toBytes32(),
+            exclusiveRelayer: sdk.utils
+              .toAddressType(
+                swapAndDepositData.depositData.exclusiveRelayer,
+                destinationChainId
+              )
+              .toBytes32(),
+          },
+        },
+        {
+          value: crossSwap.isInputNative ? originSwapQuote.maximumAmountIn : 0,
+        }
       );
-      toAddress = spokePoolPeripheryProxy.address;
-    } else if (originSwapEntryPoint.name === "UniversalSwapAndBridge") {
+      toAddress = spokePoolPeriphery.address;
+    }
+    // NOTE: Left for backwards compatibility with the old `UniversalSwapAndBridge`
+    // contract. Should be removed once we've migrated to the new `SpokePoolPeriphery`.
+    else if (originSwapEntryPoint.name === "UniversalSwapAndBridge") {
       const universalSwapAndBridge = getUniversalSwapAndBridge(
-        originSwapEntryPoint.dex,
+        originSwapEntryPoint.dex || "unknown",
         originChainId
       );
       if (originSwapQuote.swapTxns.length !== 1) {
@@ -66,6 +110,30 @@ export async function buildCrossSwapTxForAllowanceHolder(
         originSwapQuote.minAmountOut,
         {
           ...swapAndDepositData.depositData,
+          depositor: sdk.utils
+            .toAddressType(
+              swapAndDepositData.depositData.depositor,
+              originChainId
+            )
+            .toEvmAddress(),
+          recipient: sdk.utils
+            .toAddressType(
+              swapAndDepositData.depositData.recipient,
+              destinationChainId
+            )
+            .toEvmAddress(),
+          outputToken: sdk.utils
+            .toAddressType(
+              swapAndDepositData.depositData.outputToken,
+              destinationChainId
+            )
+            .toEvmAddress(),
+          exclusiveRelayer: sdk.utils
+            .toAddressType(
+              swapAndDepositData.depositData.exclusiveRelayer,
+              destinationChainId
+            )
+            .toEvmAddress(),
           exclusivityDeadline:
             swapAndDepositData.depositData.exclusivityParameter,
           // Typo in the contract
@@ -97,16 +165,26 @@ export async function buildCrossSwapTxForAllowanceHolder(
         depositEntryPoint.address,
         originChainId
       );
-      tx = await spokePoolPeriphery.populateTransaction.deposit(
-        baseDepositData.recipient,
-        baseDepositData.inputToken,
-        baseDepositData.inputAmount,
-        baseDepositData.outputAmount,
+      tx = await spokePoolPeriphery.populateTransaction.depositNative(
+        spokePool.address,
+        sdk.utils
+          .toAddressType(baseDepositData.recipient, destinationChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.inputToken, originChainId)
+          .toEvmAddress(),
+        baseDepositData.inputAmount.toString(),
+        sdk.utils
+          .toAddressType(baseDepositData.outputToken, destinationChainId)
+          .toBytes32(),
+        baseDepositData.outputAmount.toString(),
         baseDepositData.destinationChainId,
-        baseDepositData.exclusiveRelayer,
+        sdk.utils
+          .toAddressType(baseDepositData.exclusiveRelayer, destinationChainId)
+          .toBytes32(),
         baseDepositData.quoteTimestamp,
         baseDepositData.fillDeadline,
-        baseDepositData.exclusivityDeadline,
+        baseDepositData.exclusivityParameter,
         baseDepositData.message,
         {
           value: baseDepositData.inputAmount,
@@ -119,18 +197,28 @@ export async function buildCrossSwapTxForAllowanceHolder(
         !crossSwapQuotes.crossSwap.isInputNative)
     ) {
       const spokePool = getSpokePool(originChainId);
-      tx = await spokePool.populateTransaction.depositV3(
-        baseDepositData.depositor,
-        baseDepositData.recipient,
-        baseDepositData.inputToken,
-        baseDepositData.outputToken,
+      tx = await spokePool.populateTransaction.deposit(
+        sdk.utils
+          .toAddressType(baseDepositData.depositor, originChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.recipient, destinationChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.inputToken, originChainId)
+          .toBytes32(),
+        sdk.utils
+          .toAddressType(baseDepositData.outputToken, destinationChainId)
+          .toBytes32(),
         baseDepositData.inputAmount,
         baseDepositData.outputAmount,
         baseDepositData.destinationChainId,
-        baseDepositData.exclusiveRelayer,
+        sdk.utils
+          .toAddressType(baseDepositData.exclusiveRelayer, destinationChainId)
+          .toBytes32(),
         baseDepositData.quoteTimestamp,
         baseDepositData.fillDeadline,
-        baseDepositData.exclusivityDeadline,
+        baseDepositData.exclusivityParameter,
         baseDepositData.message,
         {
           value: crossSwapQuotes.crossSwap.isInputNative

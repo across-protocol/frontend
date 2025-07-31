@@ -7,6 +7,10 @@ import * as prettier from "prettier";
 import path from "path";
 import * as chainConfigs from "./chain-configs";
 import * as externConfigs from "./extern-configs";
+import {
+  enabledMainnetChainConfigs,
+  enabledSepoliaChainConfigs,
+} from "./utils/enabled-chain-configs";
 import assert from "assert";
 
 // TODO: replace with Address utilities from sdk
@@ -59,45 +63,6 @@ type SwapToken = ToChain["swapTokens"][number];
 type ValidTokenSymbol = string;
 
 const enabledMainnetExternalProjects = [externConfigs.HYPERLIQUID];
-
-export const enabledMainnetChainConfigs = [
-  chainConfigs.MAINNET,
-  chainConfigs.OPTIMISM,
-  chainConfigs.POLYGON,
-  chainConfigs.ARBITRUM,
-  chainConfigs.ZK_SYNC,
-  chainConfigs.BASE,
-  chainConfigs.LINEA,
-  chainConfigs.MODE,
-  chainConfigs.BLAST,
-  chainConfigs.LISK,
-  chainConfigs.SCROLL,
-  chainConfigs.REDSTONE,
-  chainConfigs.ZORA,
-  chainConfigs.WORLD_CHAIN,
-  chainConfigs.ALEPH_ZERO,
-  chainConfigs.INK,
-  chainConfigs.SONEIUM,
-  chainConfigs.UNICHAIN,
-  chainConfigs.LENS,
-  chainConfigs.SOLANA,
-  chainConfigs.BSC,
-];
-
-export const enabledSepoliaChainConfigs = [
-  chainConfigs.SEPOLIA,
-  chainConfigs.BASE_SEPOLIA,
-  chainConfigs.ARBITRUM_SEPOLIA,
-  chainConfigs.OPTIMISM_SEPOLIA,
-  chainConfigs.MODE_SEPOLIA,
-  chainConfigs.POLYGON_AMOY,
-  chainConfigs.BLAST_SEPOLIA,
-  chainConfigs.LISK_SEPOLIA,
-  chainConfigs.LENS_SEPOLIA,
-  chainConfigs.UNICHAIN_SEPOLIA,
-  chainConfigs.SOLANA_DEVNET,
-  chainConfigs.TATARA,
-];
 
 const enabledRoutes = {
   [CHAIN_IDs.MAINNET]: {
@@ -160,7 +125,7 @@ const enabledRoutes = {
         [CHAIN_IDs.OPTIMISM]: "0x7631eA29479Ee265241F13FB48555A2C886d3Bf8",
         [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
       },
-      uniswap: {
+      "uniswap-v3/swap-router-02": {
         [CHAIN_IDs.ARBITRUM]: "0x2414A759d4EFF700Ad81e257Ab5187d07eCeEbAb",
         [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
         [CHAIN_IDs.BLAST]: "0x57EE47829369e2EF62fBb423648bec70d0366204",
@@ -179,28 +144,64 @@ const enabledRoutes = {
       "gho-multicall3": {
         [CHAIN_IDs.MAINNET]: "0x9736F26C6311701A984A53A0b555f8A20225173A",
       },
+      lifi: {
+        [CHAIN_IDs.MAINNET]: "0x96804f83B2f77A8F7631b284000F84e5225f8f31",
+        [CHAIN_IDs.OPTIMISM]: "0xdce5D1a7D52C62E3246117a5657a0306894C1ee8",
+        [CHAIN_IDs.UNICHAIN]: "0x868041C095cA2b19e462eC0BC8718262bFF1baCD",
+        [CHAIN_IDs.POLYGON]: "0xDee13c711c91c1ae3A8a1E7b8c983f820AFFBF18",
+        [CHAIN_IDs.LENS]: "0xD6cdAFd8C8860B664f953d2b23c52AC8c624cB1A",
+        [CHAIN_IDs.ZK_SYNC]: "0x5a003fA0dae249A31FD4f610fbb3B84A1503a156",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x53dcB809269AE777fCA05232bb323A9e90feA6b0",
+        [CHAIN_IDs.LISK]: "0xE0A722530d48aC27eF87596ace5b49629e7DBa5A",
+        [CHAIN_IDs.SONEIUM]: "0xB6EA3c1a03d842A2E07C48ceF5F2DBd502428406",
+        [CHAIN_IDs.BASE]: "0x53dcB809269AE777fCA05232bb323A9e90feA6b0",
+        [CHAIN_IDs.MODE]: "0xBdF9357077B3ED082f0521fA6c726Deca2dcbaB4",
+        [CHAIN_IDs.ARBITRUM]: "0x6925036403d3e1A5fB6A530f62bA53fe06018522",
+        [CHAIN_IDs.BLAST]: "0x7593d6394947C9ef0f67575Ce66Be1D529A98886",
+        [CHAIN_IDs.SCROLL]: "0xBdF9357077B3ED082f0521fA6c726Deca2dcbaB4",
+      },
     },
     spokePoolPeripheryAddresses: {
-      [CHAIN_IDs.ARBITRUM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.BASE]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.BLAST]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.MAINNET]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.OPTIMISM]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.POLYGON]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.WORLD_CHAIN]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
-      [CHAIN_IDs.ZK_SYNC]: "0xDFD7f7AC8F2331C4E83A43E73aB7579e736AC1Bf",
-      [CHAIN_IDs.ZORA]: "0xED7Bf315Ba2E9Db86b766b8AaC48502298dfe7d3",
+      [CHAIN_IDs.ARBITRUM]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.BASE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.BLAST]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.BSC]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.INK]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.LENS]: "0x8A8cA9c4112c67b7Dae7dF7E89EA45D592362107",
+      [CHAIN_IDs.LINEA]: "0xE0BCff426509723B18D6b2f0D8F4602d143bE3e0",
+      [CHAIN_IDs.LISK]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.MAINNET]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.MODE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.OPTIMISM]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.POLYGON]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.REDSTONE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.SCROLL]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.SONEIUM]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.UNICHAIN]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.WORLD_CHAIN]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.ZK_SYNC]: "0x672b9ba0CE73b69b5F940362F0ee36AAA3F02986",
+      [CHAIN_IDs.ZORA]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
     },
-    spokePoolPeripheryProxyAddresses: {
-      [CHAIN_IDs.ARBITRUM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.BASE]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.BLAST]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.MAINNET]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.OPTIMISM]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.POLYGON]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.WORLD_CHAIN]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
-      [CHAIN_IDs.ZK_SYNC]: "0x793Ff9Cd09819C537500dFcEB6F61861c1B80dCD",
-      [CHAIN_IDs.ZORA]: "0x2d5E44b66bD40267fb816c9537E026545bEbbAC8",
+    swapProxyAddresses: {
+      [CHAIN_IDs.ARBITRUM]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.BASE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.BLAST]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.BSC]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.INK]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.LENS]: "0xda16F0B16bC38825e225E4bB5E272833f3EcacB8",
+      [CHAIN_IDs.LINEA]: "0xAFa3f221e677aE796Deb45db31089375Cbc4cC07",
+      [CHAIN_IDs.LISK]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.MAINNET]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.MODE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.OPTIMISM]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.POLYGON]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.REDSTONE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.SCROLL]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.SONEIUM]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.UNICHAIN]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.WORLD_CHAIN]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.ZK_SYNC]: "0x7D5Be8D7F6228AF23cF93264132eE9613e271575",
+      [CHAIN_IDs.ZORA]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
@@ -233,10 +234,10 @@ const enabledRoutes = {
       },
     },
     universalSwapAndBridgeAddresses: {
-      uniswap: {},
+      "uniswap-v3/swap-router-02": {},
     },
     spokePoolPeripheryAddresses: {},
-    spokePoolPeripheryProxyAddresses: {},
+    swapProxyAddresses: {},
     routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
@@ -595,8 +596,8 @@ async function generateRoutes(hubPoolChainId = 1) {
     spokePoolPeripheryAddresses: checksumAddressOfMap(
       config.spokePoolPeripheryAddresses as Record<string, string>
     ),
-    spokePoolPeripheryProxyAddresses: checksumAddressOfMap(
-      config.spokePoolPeripheryProxyAddresses as Record<string, string>
+    swapProxyAddresses: checksumAddressOfMap(
+      config.swapProxyAddresses as Record<string, string>
     ),
     routes: config.routes.flatMap((route) =>
       transformBridgeRoute(route, config.hubPoolChain)
@@ -908,4 +909,11 @@ function isBridgedUsdcOrVariant(tokenSymbol: string): boolean {
   return sdkUtils.isBridgedUsdc(tokenSymbol) || tokenSymbol === "USDC-BNB";
 }
 
-generateRoutes(Number(process.argv[2]));
+const hubPoolChainId = process.argv[2];
+if (hubPoolChainId) {
+  generateRoutes(Number(hubPoolChainId));
+} else {
+  Object.keys(enabledRoutes).forEach((chainId) => {
+    generateRoutes(Number(chainId));
+  });
+}

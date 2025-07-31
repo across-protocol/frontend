@@ -19,6 +19,11 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { ConvertDecimals } from "./convertdecimals";
 import { generateHyperLiquidPayload } from "./hyperliquid";
 import { isContractDeployedToAddress, toAddressType, toBytes32 } from "./sdk";
+import {
+  TransactionRequest,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
+import { Deferrable } from "@ethersproject/properties";
 
 const config = getConfig();
 
@@ -338,14 +343,14 @@ export async function sendDepositTx(
   const signerAddress = await signer.getAddress();
 
   const depositArgs = [
-    toAddressType(signerAddress).toBytes32(),
-    toAddressType(recipient).toBytes32(),
-    toAddressType(inputTokenAddress).toBytes32(),
-    toAddressType(outputTokenAddress).toBytes32(),
+    toAddressType(signerAddress, fromChain).toBytes32(),
+    toAddressType(recipient, destinationChainId).toBytes32(),
+    toAddressType(inputTokenAddress, fromChain).toBytes32(),
+    toAddressType(outputTokenAddress, destinationChainId).toBytes32(),
     inputAmount,
     outputAmount,
     destinationChainId,
-    toAddressType(exclusiveRelayer).toBytes32(),
+    toAddressType(exclusiveRelayer, destinationChainId).toBytes32(),
     quoteTimestamp,
     fillDeadline,
     exclusivityDeadline,
@@ -549,7 +554,8 @@ async function _tagRefAndSignTx(
     );
   }
 
-  return signer.sendTransaction(tx);
+  // Use sendUncheckedTransaction to avoid waiting for the transaction to be mined
+  return sendTxn(originChainId, signer, tx);
 }
 
 function getDepositOutputAmount(
@@ -580,4 +586,68 @@ function getDepositOutputAmount(
     inputToken.decimals,
     outputToken.decimals
   )(outputAmount);
+}
+
+/**
+ * Sends a transaction with optimized behavior for different chains.
+ *
+ * For mainnet, this function uses `sendUncheckedTransaction` to avoid the polling
+ * delay that occurs with the standard `sendTransaction` method. This is critical
+ * for user experience as mainnet transactions can take 10-13 seconds (or longer)
+ * to be included in a block, during which time the UI would be blocked waiting
+ * for confirmation.
+ *
+ * The standard `sendTransaction` method performs the following steps:
+ * 1. Sends the transaction via `sendUncheckedTransaction`
+ * 2. Polls the network for the transaction receipt
+ * 3. Waits for the transaction to be mined and included in a block
+ * 4. Returns the transaction response with full details
+ *
+ * This polling behavior is problematic for mainnet because:
+ * - Block times are ~12-15 seconds
+ * - Transactions may not be included in the next block
+ * - Network congestion can cause longer inclusion times
+ * - The UI becomes unresponsive during the polling period
+ *
+ * By using `sendUncheckedTransaction` directly for mainnet:
+ * - The transaction is sent immediately without waiting for confirmation
+ * - The UI can remain responsive and show appropriate loading states
+ * - Users can continue interacting with the application
+ * - Transaction status can be tracked separately via the returned hash
+ *
+ * For other chains (testnets, L2s, etc.), we use the standard `sendTransaction`
+ * method because:
+ * - Block times are typically much faster (1-2 seconds)
+ * - Network congestion is less of an issue
+ * - The polling delay is acceptable for better transaction confirmation
+ *
+ * @param originChain - The chain ID where the transaction is being sent
+ * @param signer - The ethers signer instance
+ * @param tx - The populated transaction to send
+ * @returns A promise that resolves to the transaction response
+ */
+export async function sendTxn(
+  originChain: number,
+  signer: ethers.Signer,
+  tx: Deferrable<TransactionRequest>
+): Promise<TransactionResponse> {
+  if (originChain === CHAIN_IDs.MAINNET) {
+    console.log("signer", signer);
+    const txnHash = await (signer as any).sendUncheckedTransaction(tx);
+    return {
+      hash: String(txnHash),
+      confirmations: 0,
+      from: await signer.getAddress(),
+      nonce: 0,
+      gasLimit: BigNumber.from(0),
+      gasPrice: BigNumber.from(0),
+      data: "",
+      to: "",
+      value: BigNumber.from(0),
+      wait: async () => signer.provider!.getTransactionReceipt(txnHash),
+      chainId: originChain,
+    };
+  }
+
+  return signer.sendTransaction(tx);
 }

@@ -113,6 +113,10 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
         value: methodParameters.value,
       },
     ],
+    swapProvider: {
+      name: "uniswap/v3-sdk/swap-quoter",
+      sources: ["uniswap_v3"],
+    },
   };
 
   return swapQuote;
@@ -185,6 +189,10 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
         value: route.methodParameters.value,
       },
     ],
+    swapProvider: {
+      name: "uniswap/v3-sdk/swap-router-02",
+      sources: ["uniswap_v3"],
+    },
   };
 
   return swapQuote;

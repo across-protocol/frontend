@@ -33,7 +33,7 @@ import {
   MINIMAL_BALANCER_V2_VAULT_ABI,
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
-import { VercelRequestQuery, VercelResponse } from "@vercel/node";
+import { VercelRequestQuery } from "@vercel/node";
 import {
   CHAIN_IDs,
   CHAINS,
@@ -82,7 +82,7 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 
 export { InputError, handleErrorCondition } from "./_errors";
-export const { Profiler } = sdk.utils;
+export const { Profiler, toAddressType } = sdk.utils;
 export {
   getLogger,
   logger,
@@ -332,7 +332,7 @@ export const validateDepositMessage = async (
 };
 
 function getStaticIsContract(chainId: number, address: string) {
-  const addressType = sdk.utils.toAddressType(address);
+  const addressType = toAddressType(address, chainId);
   let comparableAddress = address;
 
   if (sdk.utils.chainIsSvm(chainId)) {
@@ -342,7 +342,7 @@ function getStaticIsContract(chainId: number, address: string) {
       // noop
     }
   } else {
-    if (addressType.isValidEvmAddress()) {
+    if (addressType.isEVM()) {
       comparableAddress = addressType.toEvmAddress();
     }
   }
@@ -469,18 +469,16 @@ export const getRouteDetails = (
 
   const resolvedOriginChainId = possibleOriginChainIds[0];
 
-  const parsedInputTokenAddress = sdk.utils.toAddressType(
-    inputToken.addresses[resolvedOriginChainId]
+  const parsedInputTokenAddress = toAddressType(
+    inputToken.addresses[resolvedOriginChainId],
+    resolvedOriginChainId
   );
-  const resolvedInputTokenAddress = sdk.utils.chainIsSvm(resolvedOriginChainId)
-    ? parsedInputTokenAddress.toBase58()
-    : parsedInputTokenAddress.toEvmAddress();
-  const parsedOutputTokenAddress = sdk.utils.toAddressType(
-    outputToken.addresses[destinationChainId]
+  const resolvedInputTokenAddress = parsedInputTokenAddress.toNative();
+  const parsedOutputTokenAddress = toAddressType(
+    outputToken.addresses[destinationChainId],
+    destinationChainId
   );
-  const resolvedOutputTokenAddress = sdk.utils.chainIsSvm(destinationChainId)
-    ? parsedOutputTokenAddress.toBase58()
-    : parsedOutputTokenAddress.toEvmAddress();
+  const resolvedOutputTokenAddress = parsedOutputTokenAddress.toNative();
 
   return {
     inputToken: {
@@ -524,12 +522,8 @@ export const getTokenByAddress = (
     }
   | undefined => {
   try {
-    const parsedTokenAddress = sdk.utils.toAddressType(tokenAddress);
-    if (chainId && sdk.utils.chainIsSvm(chainId)) {
-      tokenAddress = parsedTokenAddress.toBase58();
-    } else {
-      tokenAddress = parsedTokenAddress.toEvmAddress();
-    }
+    const parsedTokenAddress = toAddressType(tokenAddress, chainId ?? 1);
+    tokenAddress = parsedTokenAddress.toNative();
 
     const matches =
       Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
@@ -570,13 +564,11 @@ const _getChainIdsOfToken = (
     "coingeckoId"
   >
 ) => {
-  const parsedAddress = sdk.utils.toAddressType(tokenAddress);
   const chainIds = Object.entries(token.addresses).filter(
     ([chainId, address]) => {
-      const comparableAddress = sdk.utils.chainIsSvm(Number(chainId))
-        ? parsedAddress.toBase58()
-        : parsedAddress.toEvmAddress();
-      return address.toLowerCase() === comparableAddress.toLowerCase();
+      const parsedTokenAddress = toAddressType(tokenAddress, Number(chainId));
+      const addressToCompare = toAddressType(address, Number(chainId));
+      return addressToCompare.toNative() === parsedTokenAddress.toNative();
     }
   );
   return chainIds.map(([chainId]) => Number(chainId));
@@ -610,7 +602,7 @@ const _getBridgedUsdcOrVariantTokenSymbol = (
 
 const _getAddressOrThrowInputError = (address: string, paramName: string) => {
   try {
-    const parsedAddress = sdk.utils.toAddressType(address);
+    const parsedAddress = sdk.utils.toAddressType(address, 0);
     return parsedAddress.toBytes32();
   } catch (err) {
     throw new InvalidParamError({
@@ -656,13 +648,13 @@ export const getHubPoolClient = () => {
 };
 
 export const baseFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(BASE_FEE_MARKUP || "{}");
 export const priorityFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(PRIORITY_FEE_MARKUP || "{}");
 export const opStackL1DataFeeMarkup: {
-  [chainId: string]: number;
+  [chainId: string]: number | string;
 } = JSON.parse(OP_STACK_L1_DATA_FEE_MARKUP || "{}");
 
 // Conservative values bsaed on existing configurations:
@@ -686,17 +678,19 @@ export const getGasMarkup = (
   let _baseFeeMarkup: BigNumber | undefined;
   let _priorityFeeMarkup: BigNumber | undefined;
   let _opStackL1DataFeeMarkup: BigNumber | undefined;
-  if (typeof baseFeeMarkup[chainId] === "number") {
-    _baseFeeMarkup = utils.parseEther((1 + baseFeeMarkup[chainId]).toString());
-  }
-  if (typeof priorityFeeMarkup[chainId] === "number") {
-    _priorityFeeMarkup = utils.parseEther(
-      (1 + priorityFeeMarkup[chainId]).toString()
+  if (!Number.isNaN(Number(baseFeeMarkup[chainId]))) {
+    _baseFeeMarkup = utils.parseEther(
+      (1 + Number(baseFeeMarkup[chainId])).toString()
     );
   }
-  if (typeof opStackL1DataFeeMarkup[chainId] === "number") {
+  if (!Number.isNaN(Number(priorityFeeMarkup[chainId]))) {
+    _priorityFeeMarkup = utils.parseEther(
+      (1 + Number(priorityFeeMarkup[chainId])).toString()
+    );
+  }
+  if (!Number.isNaN(Number(opStackL1DataFeeMarkup[chainId]))) {
     _opStackL1DataFeeMarkup = utils.parseEther(
-      (1 + opStackL1DataFeeMarkup[chainId]).toString()
+      (1 + Number(opStackL1DataFeeMarkup[chainId])).toString()
     );
   }
 
@@ -763,29 +757,30 @@ export const getRelayerFeeCalculatorQueries = (
     relayerAddress: string;
   }> = {}
 ) => {
+  const spokePoolAddress = sdk.utils.toAddressType(
+    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    destinationChainId
+  );
+  const relayerAddress = sdk.utils.toAddressType(
+    overrides.relayerAddress || getDefaultRelayerAddress(destinationChainId),
+    destinationChainId
+  );
+
   const baseArgs = {
     chainId: destinationChainId,
     symbolMapping: TOKEN_SYMBOLS_MAP,
-    spokePoolAddress:
-      overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    simulatedRelayerAddress:
-      overrides.relayerAddress || getDefaultRelayerAddress(destinationChainId),
+    spokePoolAddress,
+    relayerAddress,
     coingeckoProApiKey: REACT_APP_COINGECKO_PRO_API_KEY,
     logger: getLogger(),
   };
-  const parsedSpokePoolAddress = sdk.utils.toAddressType(
-    baseArgs.spokePoolAddress
-  );
-  const parsedSimulatedRelayerAddress = sdk.utils.toAddressType(
-    baseArgs.simulatedRelayerAddress
-  );
 
   if (sdk.utils.chainIsSvm(destinationChainId)) {
     return new sdk.relayFeeCalculator.SvmQuery(
       getSvmProvider(destinationChainId).createRpcClient(),
       baseArgs.symbolMapping,
-      parsedSpokePoolAddress.forceSvmAddress(),
-      parsedSimulatedRelayerAddress.forceSvmAddress(),
+      baseArgs.spokePoolAddress.forceSvmAddress(),
+      baseArgs.relayerAddress.forceSvmAddress(),
       baseArgs.logger,
       baseArgs.coingeckoProApiKey
     );
@@ -797,8 +792,8 @@ export const getRelayerFeeCalculatorQueries = (
       queryBaseArgs: [
         getProvider(destinationChainId, { useSpeedProvider: true }),
         baseArgs.symbolMapping,
-        parsedSpokePoolAddress.toEvmAddress(),
-        parsedSimulatedRelayerAddress.toEvmAddress(),
+        baseArgs.spokePoolAddress.toEvmAddress(),
+        baseArgs.relayerAddress as sdk.utils.EvmAddress,
         baseArgs.logger,
         baseArgs.coingeckoProApiKey,
         undefined,
@@ -812,8 +807,8 @@ export const getRelayerFeeCalculatorQueries = (
     baseArgs.chainId,
     getProvider(destinationChainId, { useSpeedProvider: true }),
     baseArgs.symbolMapping,
-    parsedSpokePoolAddress.toEvmAddress(),
-    parsedSimulatedRelayerAddress.toEvmAddress(),
+    baseArgs.spokePoolAddress.toEvmAddress(),
+    baseArgs.relayerAddress as sdk.utils.EvmAddress,
     baseArgs.coingeckoProApiKey,
     baseArgs.logger
   ) as sdk.relayFeeCalculator.QueryBase;
@@ -852,10 +847,11 @@ export const getRelayerFeeDetails = async (
   tokenGasCost?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const { destinationChainId } = deposit;
-  const parsedRelayerAddress = sdk.utils.toAddressType(relayerAddress);
-  relayerAddress = sdk.utils.chainIsSvm(destinationChainId)
-    ? parsedRelayerAddress.toBase58()
-    : parsedRelayerAddress.toEvmAddress();
+  const parsedRelayerAddress = toAddressType(
+    relayerAddress,
+    destinationChainId
+  );
+  relayerAddress = parsedRelayerAddress.toNative();
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
@@ -867,7 +863,7 @@ export const getRelayerFeeDetails = async (
     depositForSimulation,
     depositForSimulation.outputAmount, // scaled output amount
     isMessageEmpty(deposit.message),
-    relayerAddress,
+    sdk.utils.toAddressType(relayerAddress, deposit.destinationChainId),
     tokenPrice,
     gasPrice,
     gasUnits,
@@ -884,6 +880,7 @@ export const buildDepositForSimulation = (depositArgs: {
   destinationChainId: number;
   message?: string;
 }) => {
+  const { toAddressType } = sdk.utils;
   const {
     amount,
     inputToken: _inputTokenAddress,
@@ -908,6 +905,7 @@ export const buildDepositForSimulation = (depositArgs: {
     );
   }
   const inputAmount = sdk.utils.toBN(amount);
+  const recipient = toAddressType(recipientAddress, destinationChainId);
 
   return {
     inputAmount,
@@ -916,17 +914,18 @@ export const buildDepositForSimulation = (depositArgs: {
       outputTokenDecimals
     )(inputAmount),
     depositId: sdk.utils.bnUint32Max,
-    depositor: sdk.utils.toAddressType(recipientAddress).toBytes32(),
-    recipient: sdk.utils.toAddressType(recipientAddress).toBytes32(),
+    depositor: recipient, // nb. Address type may be invalid for origin chain. Depositor address is never validated.
+    recipient,
     destinationChainId,
     originChainId,
     quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-    inputToken: sdk.utils.toAddressType(_inputTokenAddress).toBytes32(),
-    outputToken: sdk.utils.toAddressType(_outputTokenAddress).toBytes32(),
+    inputToken: toAddressType(_inputTokenAddress, originChainId),
+    outputToken: toAddressType(_outputTokenAddress, destinationChainId),
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-    exclusiveRelayer: sdk.utils
-      .toAddressType(sdk.constants.ZERO_ADDRESS)
-      .toBytes32(),
+    exclusiveRelayer: toAddressType(
+      sdk.constants.ZERO_ADDRESS,
+      destinationChainId
+    ),
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
     message: message ?? sdk.constants.EMPTY_MESSAGE,
     messageHash: sdk.utils.getMessageHash(
@@ -1959,34 +1958,6 @@ export async function getBalancerV2TokenPrice(
   return Number((totalValue / floatTotalSupply).toFixed(18));
 }
 
-/**
- * Performs the needed function calls to return a Vercel Response
- * @param response The response client provided by Vercel
- * @param body A payload in JSON format to send to the client
- * @param statusCode The status code - defaults to 200
- * @param cacheSeconds The cache time in non-negative whole seconds
- * @param staleWhileRevalidateSeconds The stale while revalidate time in non-negative whole seconds
- * @returns The response object
- * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
- * @see https://datatracker.ietf.org/doc/html/rfc7234
- * @note Be careful to not set anything negative please. The comment in the fn explains why
- */
-export function sendResponse(
-  response: VercelResponse,
-  body: Record<string, unknown>,
-  statusCode: number,
-  cacheSeconds: number,
-  staleWhileRevalidateSeconds: number
-) {
-  // Invalid (non-positive/non-integer) values will be considered undefined per RFC-7234.
-  // Most browsers will consider these invalid and will request fresh data.
-  response.setHeader(
-    "Cache-Control",
-    `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
-  );
-  return response.status(statusCode).json(body);
-}
-
 export function isSwapRouteEnabled({
   originChainId,
   destinationChainId,
@@ -2144,7 +2115,7 @@ export function getCachedNativeGasCost(
     );
     const gasCost = await relayerFeeCalculatorQueries.getNativeGasCost(
       buildDepositForSimulation(deposit),
-      relayerFeeCalculatorQueries.simulatedRelayerAddress as string | undefined
+      relayerFeeCalculatorQueries.simulatedRelayerAddress
     );
     return gasCost;
   };
@@ -2188,24 +2159,34 @@ export function getCachedOpStackL1DataFee(
       deposit.destinationChainId,
       overrides
     );
+
     if (
       relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery
     ) {
       return undefined;
     }
+
+    const relayData = buildDepositForSimulation(deposit);
+    const { recipient, outputToken, destinationChainId } = relayData;
+    if (!recipient.isEVM() || !outputToken.isEVM()) {
+      throw new Error(
+        `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+      );
+    }
+    const relayer = overrides?.relayerAddress
+      ? toAddressType(overrides.relayerAddress, deposit.destinationChainId)
+      : undefined;
+
     const unsignedTx =
       await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-        buildDepositForSimulation(deposit),
-        relayerFeeCalculatorQueries.simulatedRelayerAddress as
-          | string
-          | undefined
+        { ...relayData, recipient, outputToken },
+        relayer
       );
+
     const opStackL1GasCost =
       await relayerFeeCalculatorQueries.getOpStackL1DataFee(
         unsignedTx,
-        relayerFeeCalculatorQueries.simulatedRelayerAddress as
-          | string
-          | undefined,
+        relayer,
         {
           opStackL2GasUnits: nativeGasCost, // Passed in here to avoid gas cost recomputation by the SDK
           opStackL1DataFeeMultiplier: opStackL1DataFeeMarkup,
@@ -2290,25 +2271,60 @@ export async function getGasPriceEstimate(
     overrides
   );
   const isSvm =
+    sdk.utils.chainIsSvm(chainId) &&
     relayerFeeCalculatorQueries instanceof sdk.relayFeeCalculator.SvmQuery;
-  const unsignedFillTxn = deposit
-    ? isSvm
-      ? await relayerFeeCalculatorQueries.getFillRelayTx(
-          buildDepositForSimulation(deposit),
-          overrides?.relayerAddress
-        )
-      : await relayerFeeCalculatorQueries.getUnsignedTxFromDeposit(
-          buildDepositForSimulation(deposit),
-          overrides?.relayerAddress
-        )
-    : undefined;
+  const relayer = sdk.utils.toAddressType(
+    overrides?.relayerAddress ?? getDefaultRelayerAddress(chainId),
+    chainId
+  );
+
+  let unsignedFillTx:
+    | Awaited<ReturnType<typeof sdk.arch.svm.getFillRelayTx>>
+    | Awaited<
+        ReturnType<sdk.relayFeeCalculator.QueryBase["getUnsignedTxFromDeposit"]>
+      >
+    | undefined = undefined;
+
+  if (deposit) {
+    const relayData = buildDepositForSimulation(deposit);
+    const { recipient, outputToken, destinationChainId } = relayData;
+
+    if (isSvm) {
+      if (!recipient.isSVM() || !outputToken.isSVM()) {
+        throw new Error(
+          `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+        );
+      }
+      unsignedFillTx = await sdk.arch.svm.getFillRelayTx(
+        relayerFeeCalculatorQueries.spokePool,
+        relayerFeeCalculatorQueries.provider,
+        { ...relayData, recipient, outputToken },
+        sdk.arch.svm.SolanaVoidSigner(relayer.toBase58()),
+        deposit.originChainId,
+        relayerFeeCalculatorQueries.simulatedRelayerAddress
+      );
+    } else {
+      if (!recipient.isEVM() || !outputToken.isEVM()) {
+        throw new Error(
+          `Unexpected address type for ${destinationChainId}: ${recipient}/${outputToken}`
+        );
+      }
+
+      unsignedFillTx = await (
+        relayerFeeCalculatorQueries as sdk.relayFeeCalculator.QueryBase
+      ).getUnsignedTxFromDeposit(
+        { ...relayData, recipient, outputToken },
+        relayer
+      );
+    }
+  }
   return sdk.gasPriceOracle.getGasPriceEstimate(
     relayerFeeCalculatorQueries.provider as Parameters<
       typeof sdk.gasPriceOracle.getGasPriceEstimate
     >[0], // we don't need a narrow return type here
     {
       chainId,
-      unsignedTx: unsignedFillTxn,
+      unsignedTx: unsignedFillTx,
       baseFeeMultiplier,
       priorityFeeMultiplier,
     }
@@ -2533,3 +2549,64 @@ export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
     return amount.mul(BigNumber.from("10").pow(-1 * diff));
   };
 };
+
+export function addTimeoutToPromise<T>(
+  promise: Promise<T>,
+  delay: number
+): Promise<T> {
+  const timeout = new Promise<T>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error("Promise timed out"));
+    }, delay);
+  });
+  return Promise.race([promise, timeout]);
+}
+
+export function flattenErrors(reason: any, depth: number = 0): string[] {
+  if (
+    reason instanceof AggregateError &&
+    Array.isArray(reason.errors) &&
+    depth < 1
+  ) {
+    return reason.errors.flatMap((error) => flattenErrors(error, depth + 1));
+  }
+  const response = reason.response;
+  if (reason.isAxiosError && response) {
+    const responseData = response.data;
+    const responseMessage =
+      responseData.message ||
+      responseData.detail ||
+      JSON.stringify(responseData);
+    return [
+      `AxiosError: status: ${response.status}, details: ${responseMessage}`,
+    ];
+  }
+
+  if (reason instanceof AcrossApiError) {
+    return [
+      `AcrossApiError: status: ${reason.status}, code: ${reason.code}, message: ${reason.message}`,
+    ];
+  }
+  return [reason.toString()];
+}
+
+export function getRejectedReasons(
+  settledResultsOrErrors: PromiseSettledResult<any>[] | Error[]
+): string[] {
+  try {
+    const rejections = settledResultsOrErrors.flatMap((result) => {
+      if (result instanceof Error) {
+        return result;
+      }
+      if (result.status === "rejected") {
+        return result.reason;
+      }
+      return [];
+    });
+    return rejections.flatMap((reason, idx) =>
+      flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`)
+    );
+  } catch (err) {
+    return [];
+  }
+}
