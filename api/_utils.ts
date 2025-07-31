@@ -923,7 +923,7 @@ export const buildDepositForSimulation = (depositArgs: {
     outputToken: toAddressType(_outputTokenAddress, destinationChainId),
     fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
     exclusiveRelayer: toAddressType(
-      sdk.constants.ZERO_ADDRESS,
+      getDefaultRelayerAddress(destinationChainId),
       destinationChainId
     ),
     exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
@@ -2301,7 +2301,10 @@ export async function getGasPriceEstimate(
         { ...relayData, recipient, outputToken },
         sdk.arch.svm.SolanaVoidSigner(relayer.toBase58()),
         deposit.originChainId,
-        relayerFeeCalculatorQueries.simulatedRelayerAddress
+        sdk.utils.toAddressType(
+          getDefaultRelayerAddress(deposit.originChainId),
+          deposit.originChainId
+        )
       );
     } else {
       if (!recipient.isEVM() || !outputToken.isEVM()) {
