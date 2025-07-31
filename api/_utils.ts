@@ -74,6 +74,7 @@ import {
   buildInternalCacheKey,
   getCachedValue,
   makeCacheGetterAndSetter,
+  redisCache,
 } from "./_cache";
 import {
   MissingParamError,
@@ -1290,7 +1291,8 @@ function getProviderFromConfigJson(
       0.5, // delay
       5, // max. concurrency
       "RPC_PROVIDER", // cache namespace
-      0 // disable RPC calls logging
+      0, // disable RPC calls logging
+      redisCache
     );
   }
 
@@ -1300,7 +1302,8 @@ function getProviderFromConfigJson(
     3, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
     "RPC_PROVIDER", // cache namespace
-    1 // disable RPC calls logging
+    0, // disable RPC calls logging
+    redisCache
   );
 }
 
