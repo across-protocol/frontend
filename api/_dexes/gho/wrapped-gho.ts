@@ -8,6 +8,7 @@ import { QuoteFetchStrategy, Swap } from "../types";
 import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
+import { makeGetSources } from "../utils";
 
 /**
  * Returns a swap quote fetch strategy for handling GHO/WGHO swaps.
@@ -22,6 +23,10 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
 
   const getOriginEntryPoints = (chainId: number) => {
     return {
+      originSwapInitialRecipient: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress("gho", chainId),
+      },
       swapAndBridge: {
         name: "UniversalSwapAndBridge",
         address: getUniversalSwapAndBridgeAddress("gho", chainId),
@@ -33,6 +38,13 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       },
     } as const;
   };
+
+  const getSources = makeGetSources({
+    strategy: "gho",
+    sources: {
+      [CHAIN_IDs.MAINNET]: [{ key: "gho", names: ["gho"] }],
+    },
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -90,6 +102,10 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         expectedAmountIn: BigNumber.from(amount),
         slippageTolerance: swap.slippageTolerance,
         swapTxns,
+        swapProvider: {
+          name: "wrapped-gho",
+          sources: ["wgho"],
+        },
       };
     }
 
@@ -146,12 +162,18 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
       slippageTolerance: swap.slippageTolerance,
       swapTxns,
+      swapProvider: {
+        name: "wrapped-gho",
+        sources: ["wgho", "uniswap_v3"],
+      },
     };
   };
 
   return {
+    strategyName: "wrapped-gho",
     getRouter,
     getOriginEntryPoints,
     fetchFn,
+    getSources,
   };
 }

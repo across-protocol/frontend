@@ -75,7 +75,11 @@ const handler = async (
       updateCounts[chainId] ??= 0;
       const secondsPerUpdateForChain = updateIntervalsSecPerChain.default;
       const depositArgs = outputTokenAddress
-        ? getDepositArgsForCachedGasDetails(chainId, outputTokenAddress)
+        ? getDepositArgsForCachedGasDetails(
+            HUB_POOL_CHAIN_ID,
+            chainId,
+            outputTokenAddress
+          )
         : undefined;
       const cache = latestGasPriceCache(chainId, depositArgs);
 

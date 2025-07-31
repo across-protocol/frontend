@@ -2,17 +2,13 @@ import { BigNumber, ethers } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
+import { getLogger, addMarkupToAmount } from "../../_utils";
 import {
-  getLogger,
-  getSpokePoolAddress,
-  addMarkupToAmount,
-} from "../../_utils";
-import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
+  OriginEntryPointContractName,
+  QuoteFetchStrategy,
+  Swap,
+  SwapQuote,
+} from "../types";
 import { floatToPercent } from "./utils/conversion";
 import {
   getUniswapClassicQuoteFromApi,
@@ -26,14 +22,14 @@ import {
   getUniswapQuoteWithSwapQuoterFromSdk,
   getUniswapQuoteWithSwapRouter02FromSdk,
 } from "./utils/v3-sdk";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
+const STRATEGY_NAME = "uniswap-v3/swap-router-02";
+
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName:
-    | "SpokePoolPeriphery"
-    | "SpokePoolPeripheryProxy"
-    | "UniversalSwapAndBridge",
+  originSwapEntryPointContractName: OriginEntryPointContractName,
   quoteSource: QuoteSource = "trading-api"
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
@@ -42,46 +38,31 @@ export function getSwapRouter02Strategy(
       name: "UniswapV3SwapRouter02",
     };
   };
+
   const getOriginEntryPoints = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeripheryProxy") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeripheryProxy",
-          address: getSpokePoolPeripheryProxyAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-      return {
-        swapAndBridge: {
-          name: "UniversalSwapAndBridge",
-          address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
-          dex: "uniswap",
-        },
-        deposit: {
-          name: "SpokePool",
-          address: getSpokePoolAddress(chainId),
-        },
-      } as const;
-    }
-    throw new Error(
-      `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+    return getOriginSwapEntryPoints(
+      originSwapEntryPointContractName,
+      chainId,
+      STRATEGY_NAME
     );
   };
+
+  const getSources = makeGetSources({
+    strategy: STRATEGY_NAME,
+    sources: Object.keys(SWAP_ROUTER_02_ADDRESS).reduce(
+      (acc, chainIdStr) => {
+        const chainId = Number(chainIdStr);
+        acc[chainId] = [
+          {
+            key: STRATEGY_NAME,
+            names: ["uniswap_v3"],
+          },
+        ];
+        return acc;
+      },
+      {} as Record<number, { key: string; names: string[] }[]>
+    ),
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -121,8 +102,10 @@ export function getSwapRouter02Strategy(
   };
 
   return {
+    strategyName: STRATEGY_NAME,
     getRouter,
     getOriginEntryPoints,
+    getSources,
     fetchFn,
   };
 }
@@ -196,6 +179,10 @@ async function fetchViaTradingApi(
       expectedAmountIn,
       slippageTolerance: quote.slippage,
       swapTxns: [swapTx],
+      swapProvider: {
+        name: "uniswap/api/swap-router-02",
+        sources: ["uniswap_v3"],
+      },
     };
   } else {
     const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
@@ -294,6 +281,10 @@ function buildIndicativeQuote(
         value: "0x0",
       },
     ],
+    swapProvider: {
+      name: "uniswap/api/swap-router-02",
+      sources: ["uniswap_v3"],
+    },
   };
 
   return swapQuote;

@@ -5,6 +5,7 @@ import {
   isAddress as isSvmAddress,
 } from "@solana/kit";
 import { isAddress } from "ethers/lib/utils";
+import { arch, utils as sdkUtils } from "@across-protocol/sdk";
 
 // exports
 export { isSvmAddress };
@@ -42,4 +43,8 @@ export function toBytes32(value: string) {
     });
   }
   throw new Error("Invalid Address type. Must be valid EVM or SVM address");
+}
+
+export function toSolanaKitAddress(address: sdkUtils.Address) {
+  return arch.svm.toAddress(address);
 }

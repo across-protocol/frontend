@@ -592,33 +592,6 @@
     ]
   },
   {
-    "chainId": 133268194659241,
-    "name": "Solana Devnet",
-    "publicRpcUrl": "https://api.devnet.solana.com",
-    "explorerUrl": "https://explorer.solana.com/?cluster=devnet",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana-devnet/assets/logo.svg",
-    "spokePool": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
-    "spokePoolBlock": 356313770,
-    "inputTokens": [
-      {
-        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ],
-    "outputTokens": [
-      {
-        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ]
-  },
-  {
     "chainId": 129399,
     "name": "Tatara",
     "publicRpcUrl": "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
@@ -663,6 +636,33 @@
         "name": "Tatara USDC",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 133268194659241,
+    "name": "Solana Devnet",
+    "publicRpcUrl": "https://api.devnet.solana.com",
+    "explorerUrl": "https://explorer.solana.com/?cluster=devnet",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana-devnet/assets/logo.svg",
+    "spokePool": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
+    "spokePoolBlock": 356313770,
+    "inputTokens": [
+      {
+        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   }

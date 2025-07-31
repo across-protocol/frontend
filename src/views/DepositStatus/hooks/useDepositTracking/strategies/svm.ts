@@ -229,8 +229,8 @@ export class SVMStrategy implements IChainStrategy {
         selectedRoute.type === "swap"
           ? selectedRoute.swapTokenAddress
           : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor,
-      recipientAddr: recipient,
+      depositorAddr: depositor.toBytes32(),
+      recipientAddr: recipient.toBytes32(),
       message: message || "0x",
       amount: inputAmount.toString(),
       depositTxHash: depositInfo.depositTxHash,
@@ -299,8 +299,8 @@ export class SVMStrategy implements IChainStrategy {
         selectedRoute.type === "swap"
           ? selectedRoute.swapTokenAddress
           : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor,
-      recipientAddr: recipient,
+      depositorAddr: depositor.toBytes32(),
+      recipientAddr: recipient.toBytes32(),
       message: message || "0x",
       amount: inputAmount.toString(),
       depositTxHash: fillInfo.depositInfo.depositTxHash,
@@ -335,13 +335,25 @@ export class SVMStrategy implements IChainStrategy {
   ): RelayData {
     return {
       originChainId: Number(relayData.originChainId),
-      depositor: toAddressType(relayData.depositor).toBytes32(),
+      depositor: toAddressType(
+        relayData.depositor.toString(),
+        Number(relayData.originChainId)
+      ),
       depositId: isBigNumberish(relayData.depositId)
         ? BigNumber.from(relayData.depositId)
         : uint8ArrayToBigNumber(relayData.depositId),
-      recipient: toAddressType(relayData.recipient).toBytes32(),
-      inputToken: toAddressType(relayData.inputToken).toBytes32(),
-      outputToken: toAddressType(relayData.outputToken).toBytes32(),
+      recipient: toAddressType(
+        relayData.recipient.toString(),
+        Number(this.chainId)
+      ),
+      inputToken: toAddressType(
+        relayData.inputToken.toString(),
+        Number(relayData.originChainId)
+      ),
+      outputToken: toAddressType(
+        relayData.outputToken.toString(),
+        Number(this.chainId)
+      ),
       inputAmount: isBigNumberish(relayData.inputAmount)
         ? BigNumber.from(relayData.inputAmount)
         : uint8ArrayToBigNumber(relayData.inputAmount),
@@ -351,7 +363,10 @@ export class SVMStrategy implements IChainStrategy {
       message: isHex(relayData.message)
         ? relayData.message
         : hexlify(relayData.message),
-      exclusiveRelayer: toAddressType(relayData.exclusiveRelayer).toBytes32(),
+      exclusiveRelayer: toAddressType(
+        relayData.exclusiveRelayer.toString(),
+        Number(this.chainId)
+      ),
     };
   }
 }

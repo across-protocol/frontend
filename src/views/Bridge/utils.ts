@@ -69,25 +69,48 @@ export function areTokensInterchangeable(
   );
 }
 
+// @dev: remove the dependency on this list once all Spokepools are upgraded to support 7702 as ETH recipient
+export function supports7702EthReceipt(destinationChainId: number): boolean {
+  return [
+    // only these have been upgraded so far
+    CHAIN_IDs.MAINNET,
+    CHAIN_IDs.UNICHAIN,
+    CHAIN_IDs.BASE,
+    CHAIN_IDs.OPTIMISM,
+    CHAIN_IDs.BSC,
+  ].includes(destinationChainId);
+}
+
 /**
  * Returns the token symbol to be used for the receive token. The protocol bridges
  * ETH/WETH depending on certain conditions:
  * - If the user wants to bridge ETH and destination chain is Polygon, the bridge will send WETH
  * - If the user wants to bridge ETH and the receiver is a contract, the bridge will send WETH
  * - If the user wants to bridge WETH and the receiver is an EOA, the bridge will send ETH
+ * - If the user wants to bridge ETH and the receiver is a 7702 smart wallet (on supported chains), the bridge will send ETH
  * @param destinationChainId Destination chain id.
  * @param inputTokenSymbol Input token symbol.
  * @param outputTokenSymbol Output token symbol.
  * @param isReceiverContract Whether the receiver is a contract or not.
+ * @param isReceiver7702 Whether the receiver is a 7702 smart wallet or not.
  * @returns The token symbol to be used for the receive token.
  */
 export function getReceiveTokenSymbol(
   destinationChainId: number,
   inputTokenSymbol: string,
   outputTokenSymbol: string,
-  isReceiverContract: boolean
+  isReceiverContract: boolean,
+  isReceiver7702: boolean = false
 ) {
   const isDestinationChainWethOnly = isNonEthChain(destinationChainId);
+
+  if (
+    inputTokenSymbol === "ETH" &&
+    isReceiver7702 &&
+    supports7702EthReceipt(destinationChainId) // @dev: remove the dependency on this list once all Spokepools are upgraded to support 7702 as ETH recipient
+  ) {
+    return "ETH";
+  }
 
   if (
     inputTokenSymbol === "ETH" &&
@@ -557,12 +580,13 @@ export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
 
 export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
+  const vanityPath = window.location.pathname.substring(1);
 
-  const preferredToChain =
-    chainEndpointToId[window.location.pathname.substring(1)];
+  const preferredToChain = Object.values(chainEndpointToId).find((v) =>
+    v.vanity.includes(vanityPath.toLowerCase())
+  );
 
-  const preferredExternalProject =
-    externConfigs[window.location.pathname.substring(1)];
+  const preferredExternalProject = externConfigs[vanityPath.toLowerCase()];
 
   const fromChain =
     Number(

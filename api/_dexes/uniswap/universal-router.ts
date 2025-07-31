@@ -6,16 +6,13 @@ import { SwapRouter } from "@uniswap/universal-router-sdk";
 import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
 import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
-import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
 import { RouterTradeAdapter } from "./utils/adapter";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -30,6 +27,8 @@ export const UNIVERSAL_ROUTER_ADDRESS = {
   [CHAIN_IDs.ZK_SYNC]: "0x28731BCC616B5f51dD52CF2e4dF0E78dD1136C06",
 };
 
+const STRATEGY_NAME = "uniswap-v3/universal-router";
+
 export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     return {
@@ -39,16 +38,24 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   const getOriginEntryPoints = (chainId: number) =>
-    ({
-      swapAndBridge: {
-        name: "SpokePoolPeripheryProxy",
-        address: getSpokePoolPeripheryProxyAddress(chainId),
+    getOriginSwapEntryPoints("UniversalSwapAndBridge", chainId, STRATEGY_NAME);
+
+  const getSources = makeGetSources({
+    strategy: STRATEGY_NAME,
+    sources: Object.keys(UNIVERSAL_ROUTER_ADDRESS).reduce(
+      (acc, chainIdStr) => {
+        const chainId = Number(chainIdStr);
+        acc[chainId] = [
+          {
+            key: STRATEGY_NAME,
+            names: ["uniswap_v3"],
+          },
+        ];
+        return acc;
       },
-      deposit: {
-        name: "SpokePoolPeriphery",
-        address: getSpokePoolPeripheryAddress(chainId),
-      },
-    }) as const;
+      {} as Record<number, { key: string; names: string[] }[]>
+    ),
+  });
 
   const fetchFn = async (
     swap: Swap,
@@ -87,6 +94,10 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
         expectedAmountIn,
         slippageTolerance: quote.slippage,
         swapTxns: [swapTx],
+        swapProvider: {
+          name: STRATEGY_NAME,
+          sources: ["uniswap_v3"],
+        },
       };
     } else {
       const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
@@ -120,6 +131,10 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
             value: "0x",
           },
         ],
+        swapProvider: {
+          name: STRATEGY_NAME,
+          sources: ["uniswap_v3"],
+        },
       };
     }
 
@@ -141,8 +156,10 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   return {
+    strategyName: STRATEGY_NAME,
     getRouter,
     getOriginEntryPoints,
+    getSources,
     fetchFn,
   };
 }

@@ -6,6 +6,7 @@ import * as sdk from "@across-protocol/sdk";
 
 import { getProvider, getSvmProvider } from "./_providers";
 import { fetchState } from "@across-protocol/contracts/dist/src/svm/clients/SvmSpoke";
+import { toSolanaKitAddress } from "./_address";
 
 /**
  * Generates a relevant SpokePool given the input chain ID
@@ -21,8 +22,8 @@ export async function getSvmSpokeState(
   chainId: number
 ): ReturnType<typeof fetchState> {
   const spokePoolAddress = getSpokePoolAddress(chainId);
-  const address = sdk.utils.toAddressType(spokePoolAddress).forceSvmAddress();
-  const statePda = await sdk.arch.svm.getStatePda(address.toV2Address());
+  const address = sdk.utils.toAddressType(spokePoolAddress, chainId);
+  const statePda = await sdk.arch.svm.getStatePda(toSolanaKitAddress(address));
   const svmProvider = getSvmProvider(chainId);
   const client = svmProvider.createRpcClient();
 

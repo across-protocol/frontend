@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 
 import { getEnvs } from "./_env";
 import { HUB_POOL_CHAIN_ID } from "./_utils";
+import { CHAIN_IDs } from "./_constants";
 
 const {
   RELAYER_ADDRESS_OVERRIDES,
@@ -47,13 +48,16 @@ export function getDefaultRelayerAddress(
     defaultRelayerAddressOverride?.defaultAddr; // Default override
 
   if (overrideAddress) {
-    const overrideAddressType = utils.toAddressType(overrideAddress);
+    const overrideAddressType = utils.toAddressType(
+      overrideAddress,
+      destinationChainId
+    );
     if (chainIsSvm) {
-      return overrideAddressType.isValidEvmAddress()
-        ? constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM
-        : overrideAddressType.toBase58();
+      return overrideAddressType.isSVM()
+        ? overrideAddressType.toBase58()
+        : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM;
     }
-    return overrideAddressType.isValidEvmAddress()
+    return overrideAddressType.isEVM()
       ? overrideAddressType.toEvmAddress()
       : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
   }
@@ -86,7 +90,7 @@ function _getFullRelayersSvm() {
     return [];
   }
   return (JSON.parse(FULL_RELAYERS_SVM) as string[]).map((relayer) => {
-    return utils.toAddressType(relayer).toBase58();
+    return utils.toAddressType(relayer, CHAIN_IDs.SOLANA).toBase58();
   });
 }
 
@@ -104,7 +108,7 @@ export function getTransferRestrictedRelayers(
   const restrictedRelayers =
     transferRestrictedRelayers[destinationChainId]?.[symbol] ?? [];
   return restrictedRelayers.map((relayer) => {
-    const relayerAddressType = utils.toAddressType(relayer);
+    const relayerAddressType = utils.toAddressType(relayer, destinationChainId);
     return chainIsSvm
       ? relayerAddressType.toBase58()
       : relayerAddressType.toEvmAddress();

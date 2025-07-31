@@ -5,12 +5,13 @@ import {
   getGasMarkup,
   getLogger,
   handleErrorCondition,
+  HUB_POOL_CHAIN_ID,
   latestGasPriceCache,
-  sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import { sendResponse } from "./_response_utils";
 
 import mainnetChains from "../src/data/chains_1.json";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
@@ -52,6 +53,7 @@ const handler = async (
     const gasData = await Promise.all(
       Object.entries(chainIdsWithToken).map(([chainId, tokenAddress]) => {
         const depositArgs = getDepositArgsForCachedGasDetails(
+          HUB_POOL_CHAIN_ID,
           Number(chainId),
           tokenAddress
         );
@@ -77,6 +79,7 @@ const handler = async (
       Object.entries(chainIdsWithToken).map(
         async ([chainId, tokenAddress], i) => {
           const depositArgs = getDepositArgsForCachedGasDetails(
+            HUB_POOL_CHAIN_ID,
             Number(chainId),
             tokenAddress
           );
@@ -167,7 +170,13 @@ const handler = async (
     });
     // Respond with a 200 status code and 10 seconds of cache with
     // 45 seconds of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 10, 45);
+    sendResponse({
+      response,
+      body: responseJson,
+      statusCode: 200,
+      cacheSeconds: 10,
+      staleWhileRevalidateSeconds: 45,
+    });
   } catch (error: unknown) {
     return handleErrorCondition("gas-prices", response, logger, error);
   }

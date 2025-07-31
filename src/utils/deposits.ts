@@ -7,7 +7,7 @@ import {
   FundsDepositedEvent,
   FilledRelayEvent,
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
-import { getMessageHash } from "./sdk";
+import { getMessageHash, toAddressType } from "./sdk";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
@@ -118,6 +118,20 @@ export async function getDepositByTxHash(
     parsedDepositLog: {
       ...parsedDepositLog,
       ...parsedDepositLog.args,
+      recipient: toAddressType(
+        parsedDepositLog.args.recipient,
+        Number(parsedDepositLog.args.destinationChainId)
+      ),
+      depositor: toAddressType(parsedDepositLog.args.depositor, fromChainId),
+      exclusiveRelayer: toAddressType(
+        parsedDepositLog.args.exclusiveRelayer,
+        Number(parsedDepositLog.args.destinationChainId)
+      ),
+      inputToken: toAddressType(parsedDepositLog.args.inputToken, fromChainId),
+      outputToken: toAddressType(
+        parsedDepositLog.args.outputToken,
+        Number(parsedDepositLog.args.destinationChainId)
+      ),
       depositTimestamp: block.timestamp,
       originChainId: fromChainId,
       logIndex: parsedDepositLog.logIndex,

@@ -1,7 +1,6 @@
-import { SpokePoolPeripheryProxy__factory } from "./_typechain/factories/SpokePoolPeripheryProxy__factory";
-import { SpokePoolV3Periphery__factory } from "./_typechain/factories/SpokePoolV3Periphery__factory";
+import { SpokePoolPeriphery__factory } from "./_typechain/factories/SpokePoolPeriphery.sol/SpokePoolPeriphery__factory";
+import { SpokePoolPeripheryInterface } from "./_typechain/SpokePoolPeriphery.sol/SpokePoolPeriphery";
 import { ENABLED_ROUTES, getProvider } from "./_utils";
-import { SpokePoolV3PeripheryInterface } from "./_typechain/SpokePoolV3Periphery";
 
 const sharedEIP712Types = {
   Fees: [
@@ -21,7 +20,7 @@ const sharedEIP712Types = {
     },
     {
       name: "outputToken",
-      type: "address",
+      type: "bytes32",
     },
     {
       name: "outputAmount",
@@ -33,7 +32,7 @@ const sharedEIP712Types = {
     },
     {
       name: "recipient",
-      type: "address",
+      type: "bytes32",
     },
     {
       name: "destinationChainId",
@@ -41,7 +40,7 @@ const sharedEIP712Types = {
     },
     {
       name: "exclusiveRelayer",
-      type: "address",
+      type: "bytes32",
     },
     {
       name: "quoteTimestamp",
@@ -68,9 +67,9 @@ export class UnknownPeripheryOnChain extends Error {
   }
 }
 
-export class UnknownPeripheryProxyOnChain extends Error {
+export class UnknownSwapProxyOnChain extends Error {
   constructor(chainId: number) {
-    super(`Unknown 'SpokePoolPeripheryProxy' on chain ${chainId}`);
+    super(`Unknown 'SwapProxy' on chain ${chainId}`);
   }
 }
 
@@ -91,30 +90,23 @@ export function getSpokePoolPeripheryAddress(chainId: number) {
   return address;
 }
 
-export function getSpokePoolPeripheryProxyAddress(chainId: number) {
+export function getSwapProxyAddress(chainId: number) {
   const address =
-    ENABLED_ROUTES.spokePoolPeripheryProxyAddresses[
-      chainId as keyof typeof ENABLED_ROUTES.spokePoolPeripheryProxyAddresses
+    ENABLED_ROUTES.swapProxyAddresses[
+      chainId as keyof typeof ENABLED_ROUTES.swapProxyAddresses
     ];
   if (!address) {
-    throw new UnknownPeripheryProxyOnChain(chainId);
+    throw new UnknownSwapProxyOnChain(chainId);
   }
   return address;
 }
 
 export function getSpokePoolPeriphery(address: string, chainId: number) {
-  return SpokePoolV3Periphery__factory.connect(address, getProvider(chainId));
-}
-
-export function getSpokePoolPeripheryProxy(address: string, chainId: number) {
-  return SpokePoolPeripheryProxy__factory.connect(
-    address,
-    getProvider(chainId)
-  );
+  return SpokePoolPeriphery__factory.connect(address, getProvider(chainId));
 }
 
 export async function getDepositTypedData(params: {
-  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
+  depositData: SpokePoolPeripheryInterface.DepositDataStruct;
   chainId: number;
 }) {
   const spokePoolPeriphery = getSpokePoolPeriphery(
@@ -159,7 +151,7 @@ export async function getDepositTypedData(params: {
 }
 
 export async function getSwapAndDepositTypedData(params: {
-  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
+  swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct;
   chainId: number;
 }) {
   const spokePoolPeriphery = getSpokePoolPeriphery(
@@ -209,6 +201,18 @@ export async function getSwapAndDepositTypedData(params: {
             name: "routerCalldata",
             type: "bytes",
           },
+          {
+            name: "enableProportionalAdjustment",
+            type: "bool",
+          },
+          {
+            name: "spokePool",
+            type: "address",
+          },
+          {
+            name: "nonce",
+            type: "uint256",
+          },
         ],
       },
       primaryType: "SwapAndDepositData",
@@ -221,88 +225,4 @@ export async function getSwapAndDepositTypedData(params: {
       message: params.swapAndDepositData,
     },
   };
-}
-
-export function encodeDepositWithPermitCalldata(args: {
-  signatureOwner: string;
-  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
-  deadline: number;
-  permitSignature: string;
-  depositDataSignature: string;
-}) {
-  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
-    "depositWithPermit",
-    [
-      args.signatureOwner,
-      args.depositData,
-      args.deadline,
-      args.permitSignature,
-      args.depositDataSignature,
-    ]
-  );
-}
-
-export function encodeSwapAndBridgeWithPermitCalldata(args: {
-  signatureOwner: string;
-  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
-  deadline: number;
-  permitSignature: string;
-  swapAndDepositDataSignature: string;
-}) {
-  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
-    "swapAndBridgeWithPermit",
-    [
-      args.signatureOwner,
-      args.swapAndDepositData,
-      args.deadline,
-      args.permitSignature,
-      args.swapAndDepositDataSignature,
-    ]
-  );
-}
-
-export function encodeDepositWithAuthCalldata(args: {
-  signatureOwner: string;
-  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
-  validAfter: number;
-  validBefore: number;
-  nonce: string;
-  receiveWithAuthSignature: string;
-  depositDataSignature: string;
-}) {
-  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
-    "depositWithAuthorization",
-    [
-      args.signatureOwner,
-      args.depositData,
-      args.validAfter,
-      args.validBefore,
-      args.nonce,
-      args.receiveWithAuthSignature,
-      args.depositDataSignature,
-    ]
-  );
-}
-
-export function encodeSwapAndBridgeWithAuthCalldata(args: {
-  signatureOwner: string;
-  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
-  validAfter: number;
-  validBefore: number;
-  nonce: string;
-  receiveWithAuthSignature: string;
-  swapAndDepositDataSignature: string;
-}) {
-  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
-    "swapAndBridgeWithAuthorization",
-    [
-      args.signatureOwner,
-      args.swapAndDepositData,
-      args.validAfter,
-      args.validBefore,
-      args.nonce,
-      args.receiveWithAuthSignature,
-      args.swapAndDepositDataSignature,
-    ]
-  );
 }

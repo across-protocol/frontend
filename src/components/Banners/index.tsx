@@ -7,8 +7,11 @@ import {
   WrongNetworkError,
   disableDeposits,
   rewardsBannerWarning,
+  showV4LaunchBanner,
 } from "utils";
-import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
+import AcrossV4Banner from "components/Banners/AcrossV4Banner";
+import RewardsWarningBanner from "components/Banners/RewardsWarningBanner";
+
 import { ReactComponent as SolanaLogo } from "assets/icons/solana-with-bg.svg";
 import { ReactComponent as ArrowRight } from "assets/icons/arrow-right.svg";
 
@@ -60,14 +63,9 @@ export default function Banners({
         </SuperHeader>
       )}
       {rewardsBannerWarning && location.pathname === "/rewards" && (
-        <Banner>
-          <InfoLogo />
-          <span>
-            Due to maintenance, rewards will not be visually updated for a few
-            hours. This does not impact your reward earnings.
-          </span>
-        </Banner>
+        <RewardsWarningBanner />
       )}
+      {showV4LaunchBanner && <AcrossV4Banner />}
       {isContractAddress && (
         <SuperHeader size="lg">
           We noticed that you have connected from a contract address. We

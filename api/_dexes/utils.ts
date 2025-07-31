@@ -15,42 +15,64 @@ import {
 import {
   CrossSwap,
   CrossSwapQuotes,
+  OriginEntryPointContractName,
+  OriginEntryPoints,
   QuoteFetchStrategy,
+  SupportedDex,
+  Swap,
   SwapQuote,
   Token,
+  DexSources,
 } from "./types";
 import {
   isInputTokenBridgeable,
   isRouteEnabled,
   isOutputTokenBridgeable,
   getSpokePool,
+  getSpokePoolAddress,
+  addMarkupToAmount,
 } from "../_utils";
-import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
-import { TransferType } from "../_spoke-pool-periphery";
+import {
+  getSpokePoolPeripheryAddress,
+  TransferType,
+  getSwapProxyAddress,
+} from "../_spoke-pool-periphery";
+import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import axios, { AxiosRequestHeaders } from "axios";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
+export type QuoteFetchPrioritizationMode =
+  | {
+      mode: "equal-speed";
+    }
+  | {
+      mode: "priority-speed";
+      priorityChunkSize: number;
+    };
+
 /**
- * Describes which quote fetch strategy to use for a given chain,
+ * Describes which quote fetch strategies to use for a given chain,
  *
  * @example
  * {
- *   default: getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
- *   [CHAIN_IDs.MAINNET]: getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk"),
+ *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
-  default: QuoteFetchStrategy;
+  prioritizationMode: QuoteFetchPrioritizationMode;
+  default: QuoteFetchStrategy[];
   chains: {
-    [chainId: number]: QuoteFetchStrategy;
+    [chainId: number]: QuoteFetchStrategy[];
   };
   swapPairs: {
     [chainId: number]: {
       [tokenInSymbol: string]: {
-        [tokenOutSymbol: string]: QuoteFetchStrategy;
+        [tokenOutSymbol: string]: QuoteFetchStrategy[];
       };
     };
   };
@@ -75,7 +97,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["WETH", "USDC", "USDT", "DAI"],
+  default: ["USDC", "WETH", "USDT", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },
@@ -84,9 +106,13 @@ export const PREFERRED_BRIDGE_TOKENS: {
   },
 };
 
-export const defaultQuoteFetchStrategy: QuoteFetchStrategy =
-  // This will be our default strategy until the periphery contract is audited
-  getSwapRouter02Strategy("UniversalSwapAndBridge");
+export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
+  prioritizationMode: {
+    mode: "priority-speed",
+    priorityChunkSize: 1,
+  },
+  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+};
 
 export function getPreferredBridgeTokens(
   fromChainId: number,
@@ -98,14 +124,14 @@ export function getPreferredBridgeTokens(
   );
 }
 
-export function getCrossSwapType(params: {
+export function getCrossSwapTypes(params: {
   inputToken: string;
   originChainId: number;
   outputToken: string;
   destinationChainId: number;
   isInputNative: boolean;
   isOutputNative: boolean;
-}): CrossSwapType {
+}): CrossSwapType[] {
   if (
     isRouteEnabled(
       params.originChainId,
@@ -114,7 +140,7 @@ export function getCrossSwapType(params: {
       params.outputToken
     )
   ) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -132,7 +158,7 @@ export function getCrossSwapType(params: {
   // `UniversalSwapAndBridge` does not support native tokens as input.
   if (params.isInputNative) {
     if (inputBridgeable) {
-      return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+      return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
     }
     // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
     // throw until we have periphery contract audited so that it can accept native
@@ -142,15 +168,22 @@ export function getCrossSwapType(params: {
     );
   }
 
+  if (inputBridgeable && outputBridgeable) {
+    return [
+      CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY,
+    ];
+  }
+
   if (outputBridgeable) {
-    return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
+    return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
   }
 
   if (inputBridgeable) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
   }
 
-  return CROSS_SWAP_TYPE.ANY_TO_ANY;
+  return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
 export function buildExactInputBridgeTokenMessage(
@@ -341,11 +374,13 @@ export async function extractDepositDataStruct(
 
 export async function extractSwapAndDepositDataStruct(
   crossSwapQuotes: CrossSwapQuotes,
+  transferType: TransferType,
+  permitNonce?: number,
   submissionFees?: {
     amount: BigNumberish;
     recipient: string;
   }
-): Promise<SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct> {
+) {
   const { originSwapQuote, contracts } = crossSwapQuotes;
   const { originRouter } = contracts;
   if (!originSwapQuote || !originRouter) {
@@ -358,6 +393,7 @@ export async function extractSwapAndDepositDataStruct(
       "Can not extract 'SwapAndDepositDataStruct' without a single swap transaction"
     );
   }
+  const spokePool = getSpokePool(originSwapQuote.tokenIn.chainId);
 
   const { baseDepositData, submissionFees: _submissionFees } =
     await extractDepositDataStruct(crossSwapQuotes, submissionFees);
@@ -369,10 +405,10 @@ export async function extractSwapAndDepositDataStruct(
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
     routerCalldata: originSwapQuote.swapTxns[0].data,
     exchange: originRouter.address,
-    transferType:
-      originRouter.name === "UniswapV3UniversalRouter"
-        ? TransferType.Transfer
-        : TransferType.Approval,
+    transferType,
+    enableProportionalAdjustment: true,
+    spokePool: spokePool.address,
+    nonce: permitNonce || 0, // Only used for permit transfers
   };
 }
 
@@ -387,16 +423,17 @@ async function getFillDeadline(spokePool: SpokePool): Promise<number> {
   return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
-export function getQuoteFetchStrategy(
+export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
   strategies: QuoteFetchStrategies
-) {
+): QuoteFetchStrategy[] {
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
-    defaultQuoteFetchStrategy
+    strategies.default ??
+    defaultQuoteFetchStrategies.default!
   );
 }
 
@@ -544,13 +581,174 @@ export function buildDestinationSwapCrossChainMessage({
 }
 
 export function assertMinOutputAmount(
-  amountOut: BigNumber,
-  expectedMinAmountOut: BigNumber
+  actualAmountOut: BigNumber,
+  expectedMinAmountOut: BigNumber,
+  labels?: {
+    actualAmountOut: string;
+    expectedMinAmountOut: string;
+  }
 ) {
-  if (amountOut.lt(expectedMinAmountOut)) {
+  if (actualAmountOut.lt(expectedMinAmountOut)) {
     throw new Error(
-      `Swap quote output amount ${amountOut.toString()} ` +
-        `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+      `[${labels?.actualAmountOut ?? "actualAmountOut"}] ${actualAmountOut.toString()} ` +
+        `is less than required min. output amount ` +
+        `[${labels?.expectedMinAmountOut ?? "expectedMinAmountOut"}] ` +
+        `${expectedMinAmountOut.toString()}`
     );
   }
+}
+
+export function getOriginSwapEntryPoints(
+  originSwapEntryPointContractName: OriginEntryPointContractName,
+  chainId: number,
+  dex: SupportedDex
+): OriginEntryPoints {
+  if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+    return {
+      // The `SpokePoolPeriphery` contract is used to initiate an origin swap. It uses a
+      // proxy-pattern for security reasons which requires us to use the `SwapProxy`
+      // contract as the recipient for the origin swap.
+      originSwapInitialRecipient: {
+        name: "SwapProxy",
+        address: getSwapProxyAddress(chainId),
+      },
+      swapAndBridge: {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
+        dex,
+      },
+      deposit: {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
+      },
+    } as const;
+  } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
+    return {
+      originSwapInitialRecipient: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress(dex, chainId),
+      },
+      swapAndBridge: {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress(dex, chainId),
+        dex,
+      },
+      deposit: {
+        name: "SpokePool",
+        address: getSpokePoolAddress(chainId),
+      },
+    } as const;
+  }
+  throw new Error(
+    `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+  );
+}
+
+/**
+ * Estimates the input amount required for an exact output amount by using the
+ * a single unit amount of the input token as a reference.
+ *
+ * @param swap - The swap object containing the tokenIn, tokenOut, amount, and slippageTolerance.
+ * @param apiEndpoint - The API endpoint to use for the swap.
+ * @param apiHeaders - The headers to use for the API request.
+ * @returns The required input amount.
+ */
+export async function estimateInputForExactOutput(
+  swap: Swap,
+  apiEndpoint: string,
+  apiHeaders: AxiosRequestHeaders
+): Promise<string> {
+  const inputUnit = BigNumber.from(10).pow(swap.tokenIn.decimals);
+
+  const inputUnitResponse = await axios.get(apiEndpoint, {
+    headers: apiHeaders,
+    params: {
+      chainId: swap.chainId,
+      sellToken: swap.tokenIn.address,
+      buyToken: swap.tokenOut.address,
+      sellAmount: inputUnit.toString(),
+      taker: swap.recipient,
+      slippageBps: Math.floor(swap.slippageTolerance * 100),
+    },
+  });
+
+  const inputUnitQuote = inputUnitResponse.data;
+  const inputUnitOutputAmount = BigNumber.from(inputUnitQuote.buyAmount);
+
+  // Estimate the required input amount for the desired output
+  const desiredOutputAmount = BigNumber.from(swap.amount);
+  const requiredInputAmount = desiredOutputAmount
+    .mul(inputUnit)
+    .div(inputUnitOutputAmount);
+
+  // Consider slippage and add fixed buffer for price discrepancies between the input
+  // unit and the desired output amount
+  const buffer = 0.05; // 5%
+  const adjustedInputAmount = addMarkupToAmount(
+    requiredInputAmount,
+    swap.slippageTolerance / 100 + buffer
+  );
+  return adjustedInputAmount.toString();
+}
+
+export function isValidSource(
+  _source: string,
+  chainId: number,
+  sources: DexSources
+) {
+  const sourceToCheck = _source.toLowerCase();
+  return sources.sources[chainId].some((source) =>
+    source.names.includes(sourceToCheck)
+  );
+}
+
+export function makeGetSources(sources: DexSources) {
+  return (
+    chainId: number,
+    opts?: {
+      excludeSources?: string[];
+      includeSources?: string[];
+    }
+  ) => {
+    if (!opts || (!opts?.excludeSources && !opts?.includeSources)) {
+      return undefined;
+    }
+
+    const filteredSources = opts?.excludeSources
+      ? opts.excludeSources.filter((excludeSource) =>
+          isValidSource(excludeSource, chainId, sources)
+        )
+      : opts.includeSources
+        ? opts.includeSources.filter((includeSource) =>
+            isValidSource(includeSource, chainId, sources)
+          )
+        : [];
+    const sourcesKeys = Array.from(
+      new Set(
+        filteredSources.flatMap(
+          (source) =>
+            sources.sources[chainId].find((s) =>
+              s.names.some(
+                (name) => name.toLowerCase() === source.toLowerCase()
+              )
+            )?.key || []
+        )
+      )
+    );
+
+    return {
+      sourcesKeys,
+      sourcesType: opts?.excludeSources ? "exclude" : "include",
+    } as const;
+  };
+}
+
+export function inferCrossSwapType(params: CrossSwapQuotes) {
+  return params.originSwapQuote && params.destinationSwapQuote
+    ? CROSS_SWAP_TYPE.ANY_TO_ANY
+    : params.originSwapQuote && !params.destinationSwapQuote
+      ? CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE
+      : params.destinationSwapQuote && !params.originSwapQuote
+        ? CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY
+        : CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
 }

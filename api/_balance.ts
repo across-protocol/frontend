@@ -5,6 +5,7 @@ import { ERC20__factory } from "@across-protocol/contracts/dist/typechain";
 import { getSvmProvider, getProvider } from "./_providers";
 import { BLOCK_TAG_LAG } from "./_constants";
 import { getMulticall3, callViaMulticall3 } from "./_multicall";
+import { toSolanaKitAddress } from "./_address";
 
 /**
  * Resolves the balance of a given token at a provided address.
@@ -22,9 +23,11 @@ export async function getBalance(
   if (sdk.utils.chainIsSvm(Number(chainId))) {
     return getSvmBalance(chainId, account, token);
   }
+  const parsedAccount = sdk.utils.toAddressType(account, Number(chainId));
+  const parsedToken = sdk.utils.toAddressType(token, Number(chainId));
   return sdk.utils.getTokenBalance(
-    account,
-    token,
+    parsedAccount.toNative(),
+    parsedToken.toNative(),
     getProvider(Number(chainId)),
     blockTag ?? BLOCK_TAG_LAG
   );
@@ -35,12 +38,12 @@ async function getSvmBalance(
   account: string,
   token: string
 ) {
-  const tokenMint = sdk.utils.toAddressType(token);
-  const owner = sdk.utils.toAddressType(account);
+  const tokenMint = sdk.utils.toAddressType(token, Number(chainId));
+  const owner = sdk.utils.toAddressType(account, Number(chainId));
   const svmProvider = getSvmProvider(Number(chainId)).createRpcClient();
 
   if (tokenMint.isZeroAddress()) {
-    const address = owner.forceSvmAddress().toV2Address();
+    const address = toSolanaKitAddress(owner);
     const balance = await svmProvider.getBalance(address).send();
     return BigNumber.from(balance.value);
   }

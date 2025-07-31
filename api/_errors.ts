@@ -3,6 +3,10 @@ import { AxiosError } from "axios";
 import { StructError } from "superstruct";
 import { relayFeeCalculator, typeguards } from "@across-protocol/sdk";
 import { ethers } from "ethers";
+import { Span, SpanStatusCode } from "@opentelemetry/api";
+import { ATTR_HTTP_RESPONSE_STATUS_CODE } from "@opentelemetry/semantic-conventions";
+
+import { sendResponse } from "./_response_utils";
 
 type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
 
@@ -30,16 +34,18 @@ export const HttpErrorToStatusCode = {
 export const AcrossErrorCode = {
   // Status: 40X
   INVALID_PARAM: "INVALID_PARAM",
+  INVALID_METHOD: "INVALID_METHOD",
   MISSING_PARAM: "MISSING_PARAM",
   SIMULATION_ERROR: "SIMULATION_ERROR",
   AMOUNT_TOO_LOW: "AMOUNT_TOO_LOW",
   AMOUNT_TOO_HIGH: "AMOUNT_TOO_HIGH",
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
+  SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
+  ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
 
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
   UPSTREAM_HTTP_ERROR: "UPSTREAM_HTTP_ERROR",
-  SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
 } as const;
 
 export class AcrossApiError extends Error {
@@ -138,6 +144,18 @@ export class MissingParamError extends InputError {
   }
 }
 
+export class AbiEncodingError extends InputError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.ABI_ENCODING_ERROR,
+      },
+      opts
+    );
+  }
+}
+
 export class SimulationError extends InputError {
   public transaction: EthersErrorTransaction;
 
@@ -190,6 +208,23 @@ export class AmountTooLowError extends InputError {
   }
 }
 
+export class SwapAmountTooLowForBridgeFeesError extends InputError {
+  constructor(
+    args: { bridgeAmount: string; bridgeFee: string },
+    opts?: ErrorOptions
+  ) {
+    super(
+      {
+        message: `Failed to fetch swap quote: Bridge amount ${
+          args.bridgeAmount
+        } is too low to cover bridge fees ${args.bridgeFee}`,
+        code: AcrossErrorCode.AMOUNT_TOO_LOW,
+      },
+      opts
+    );
+  }
+}
+
 export class AmountTooHighError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
@@ -202,13 +237,12 @@ export class AmountTooHighError extends InputError {
   }
 }
 
-export class SwapQuoteUnavailableError extends AcrossApiError {
+export class SwapQuoteUnavailableError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
       {
         message: args.message,
         code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
-        status: HttpErrorToStatusCode.SERVICE_UNAVAILABLE,
       },
       opts
     );
@@ -220,13 +254,17 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
  * @param response A VercelResponse object that is used to interract with the returning reponse
  * @param logger A logging utility to write to a cloud logging provider
  * @param error The error that will be returned to the user
+ * @param span The span to record the error on
+ * @param requestId The request ID to set in the response body
  * @returns The `response` input with a status/send sent. Note: using this object again will cause an exception
  */
 export function handleErrorCondition(
   endpoint: string,
   response: VercelResponse,
   logger: relayFeeCalculator.Logger,
-  error: unknown
+  error: unknown,
+  span?: Span,
+  requestId?: string
 ): VercelResponse {
   let acrossApiError: AcrossApiError;
 
@@ -298,7 +336,22 @@ export function handleErrorCondition(
     cause: acrossApiError.cause,
   });
 
-  return response.status(acrossApiError.status).json(acrossApiError);
+  if (span) {
+    span.recordException(acrossApiError);
+    span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, acrossApiError.status);
+    span.setStatus({
+      code:
+        acrossApiError.status >= 500 ? SpanStatusCode.ERROR : SpanStatusCode.OK,
+      message: acrossApiError.message,
+    });
+  }
+
+  return sendResponse({
+    response,
+    body: acrossApiError,
+    statusCode: acrossApiError.status,
+    requestId,
+  });
 }
 
 export function resolveEthersError(err: unknown) {
@@ -351,4 +404,26 @@ export function resolveEthersError(err: unknown) {
     },
     { cause: err }
   );
+}
+
+export function compactAxiosError(error: Error) {
+  if (!(error instanceof AxiosError)) {
+    return error;
+  }
+
+  const { response } = error;
+  if (!response) {
+    return error;
+  }
+
+  const compactError = new Error(
+    [
+      "[AxiosError]",
+      `Status ${response.status} - ${response.statusText}`,
+      `Request URL: ${response.config.url}`,
+      `Data: ${JSON.stringify(response.data)}`,
+    ].join(" - ")
+  );
+
+  return compactError;
 }

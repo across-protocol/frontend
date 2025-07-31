@@ -7,7 +7,6 @@ import {
   handleErrorCondition,
   validAddress,
   getBalancerV2TokenPrice,
-  getCachedTokenPrice,
   parseQuery,
   positiveInt,
 } from "./_utils";
@@ -58,7 +57,7 @@ const handler = async (
       l1Token,
       tokenAddress,
       chainId: _chainId,
-      baseCurrency,
+      baseCurrency: _baseCurrency,
       date: dateStr,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
 
@@ -70,102 +69,13 @@ const handler = async (
       });
     }
 
-    const fallbackChainId =
-      _chainId ??
-      (isEvmAddress(address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
-    const chainId = coinGeckoAssetPlatformLookup[address] ?? fallbackChainId;
-
-    address = utils.chainIsSvm(chainId)
-      ? utils.toAddressType(address).toBase58()
-      : utils.toAddressType(address).toEvmAddress();
-
-    baseCurrency = (
-      baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
-    ).toLowerCase();
-
-    // Confirm that the base Currency is supported by Coingecko
-    const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
-    if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
-      throw new InvalidParamError({
-        message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
-          SUPPORTED_CG_BASE_CURRENCIES
-        ).join(", ")}].`,
-        param: "baseCurrency",
+    let { price, baseCurrency, isDerivedCurrency, chainId } =
+      await resolvePrice({
+        address,
+        chainId: _chainId,
+        baseCurrency: _baseCurrency,
+        dateStr,
       });
-    }
-
-    // Resolve the optional address lookup that maps one token's
-    // contract address to another.
-    const redirectLookupAddresses: Record<string, string> =
-      REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES !== undefined
-        ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES)
-        : {};
-
-    // Perform a 1-deep lookup to see if the provided l1Token is
-    // to be "redirected" to another provided token contract address
-    if (redirectLookupAddresses[address]) {
-      address = redirectLookupAddresses[address];
-    }
-
-    const coingeckoClient = Coingecko.get(
-      logger,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      {
-        [CHAIN_IDs.SOLANA]: "solana",
-        [CHAIN_IDs.SOLANA_DEVNET]: "solana",
-      }
-    );
-
-    // We want to compute price and return to caller.
-    let price: number;
-
-    const balancerV2PoolTokens: string[] = JSON.parse(
-      BALANCER_V2_TOKENS ?? "[]"
-    ).map(ethers.utils.getAddress);
-
-    if (balancerV2PoolTokens.includes(address)) {
-      if (dateStr) {
-        throw new InvalidParamError({
-          message: "Historical price not supported for BalancerV2 tokens",
-          param: "date",
-        });
-      }
-      if (baseCurrency === "usd") {
-        price = await getBalancerV2TokenPrice(address);
-      } else {
-        throw new InvalidParamError({
-          message: "Only CG base currency allowed for BalancerV2 tokens is usd",
-          param: "baseCurrency",
-        });
-      }
-    }
-    // Fetch price dynamically from Coingecko API. If a historical
-    // date is provided, fetch historical price. Otherwise, fetch
-    // current price.
-    else {
-      // // If derived, we need to convert to USD first.
-      const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
-      if (dateStr) {
-        price = await coingeckoClient.getContractHistoricDayPrice(
-          address,
-          dateStr,
-          modifiedBaseCurrency,
-          chainId
-        );
-      } else {
-        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
-          ? await coingeckoClient.getCurrentPriceById(
-              address,
-              modifiedBaseCurrency,
-              chainId
-            )
-          : await coingeckoClient.getCurrentPriceByContract(
-              address,
-              modifiedBaseCurrency,
-              chainId
-            );
-      }
-    }
 
     // If the base currency is a derived currency, we just need to grab
     // the price of the quote currency in USD and perform the conversion.
@@ -182,12 +92,13 @@ const handler = async (
         baseTokenAddress = baseToken.addresses[CHAIN_IDs.SOLANA];
         baseTokenChainId = CHAIN_IDs.SOLANA;
       }
-      quotePrice = await getCachedTokenPrice(
-        baseTokenAddress,
-        "usd",
-        undefined,
-        baseTokenChainId
-      );
+      const { price: baseTokenPrice } = await resolvePrice({
+        address: baseTokenAddress,
+        chainId: baseTokenChainId,
+        baseCurrency: "usd",
+        dateStr,
+      });
+      quotePrice = baseTokenPrice;
       quotePrecision = baseToken.decimals;
     }
     price = Number((price / quotePrice).toFixed(quotePrecision));
@@ -221,5 +132,112 @@ const handler = async (
     return handleErrorCondition("coingecko", response, logger, error);
   }
 };
+
+// Wrapping the price resolution in a separate function to avoid 508 LOOP_DETECTED errors for
+// derived currency price resolution.
+async function resolvePrice(params: {
+  address: string;
+  chainId?: number;
+  baseCurrency?: string;
+  dateStr?: string;
+}) {
+  const logger = getLogger();
+
+  const fallbackChainId =
+    params.chainId ??
+    (isEvmAddress(params.address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
+  const chainId =
+    coinGeckoAssetPlatformLookup[params.address] ?? fallbackChainId;
+
+  let address = utils.toAddressType(params.address, chainId).toNative();
+  const baseCurrency = (
+    params.baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
+  ).toLowerCase();
+
+  // Confirm that the base Currency is supported by Coingecko
+  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
+    throw new InvalidParamError({
+      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
+        SUPPORTED_CG_BASE_CURRENCIES
+      ).join(", ")}].`,
+      param: "baseCurrency",
+    });
+  }
+
+  // Resolve the optional address lookup that maps one token's
+  // contract address to another.
+  const redirectLookupAddresses: Record<string, string> =
+    REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES !== undefined
+      ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES)
+      : {};
+
+  // Perform a 1-deep lookup to see if the provided l1Token is
+  // to be "redirected" to another provided token contract address
+  if (redirectLookupAddresses[address]) {
+    address = redirectLookupAddresses[address];
+  }
+
+  const coingeckoClient = Coingecko.get(
+    logger,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    {
+      [CHAIN_IDs.SOLANA]: "solana",
+      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+    }
+  );
+
+  // We want to compute price and return to caller.
+  let price: number;
+
+  const balancerV2PoolTokens: string[] = JSON.parse(
+    BALANCER_V2_TOKENS ?? "[]"
+  ).map(ethers.utils.getAddress);
+
+  if (balancerV2PoolTokens.includes(address)) {
+    if (params.dateStr) {
+      throw new InvalidParamError({
+        message: "Historical price not supported for BalancerV2 tokens",
+        param: "date",
+      });
+    }
+    if (baseCurrency === "usd") {
+      price = await getBalancerV2TokenPrice(address);
+    } else {
+      throw new InvalidParamError({
+        message: "Only CG base currency allowed for BalancerV2 tokens is usd",
+        param: "baseCurrency",
+      });
+    }
+  }
+  // Fetch price dynamically from Coingecko API. If a historical
+  // date is provided, fetch historical price. Otherwise, fetch
+  // current price.
+  else {
+    // // If derived, we need to convert to USD first.
+    const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
+    if (params.dateStr) {
+      price = await coingeckoClient.getContractHistoricDayPrice(
+        address,
+        params.dateStr,
+        modifiedBaseCurrency,
+        chainId
+      );
+    } else {
+      [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
+        ? await coingeckoClient.getCurrentPriceById(
+            address,
+            modifiedBaseCurrency,
+            chainId
+          )
+        : await coingeckoClient.getCurrentPriceByContract(
+            address,
+            modifiedBaseCurrency,
+            chainId
+          );
+    }
+  }
+  return { price, baseCurrency, isDerivedCurrency, chainId };
+}
 
 export default handler;

@@ -2,8 +2,10 @@ import { VercelResponse } from "@vercel/node";
 
 import { TypedVercelRequest } from "../_types";
 import { getLogger, handleErrorCondition } from "../_utils";
-import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
+import { BaseSwapQueryParams, SwapBody } from "./_utils";
 import { handleApprovalSwap } from "./approval/_service";
+import { getRequestId } from "../_request_utils";
+import { sendResponse } from "../_response_utils";
 
 type SwapFlowType = "approval";
 
@@ -12,19 +14,18 @@ const swapFlowTypeToHandler = {
 };
 
 export default async function handler(
-  request: TypedVercelRequest<BaseSwapQueryParams>,
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
   response: VercelResponse
 ) {
   const logger = getLogger();
+  const requestId = getRequestId(request);
   logger.debug({
     at: "Swap",
     message: "Query data",
     query: request.query,
+    requestId,
   });
   try {
-    // `/swap` only validate shared base params
-    await handleBaseSwapQueryParams(request.query);
-
     // TODO: Enable other swap flow types in the future
     const swapFlowType = "approval";
 
@@ -40,8 +41,20 @@ export default async function handler(
       message: "Response data",
       responseJson: enrichedResponseJson,
     });
-    response.status(200).json(enrichedResponseJson);
+    sendResponse({
+      response,
+      body: enrichedResponseJson,
+      statusCode: 200,
+      requestId,
+    });
   } catch (error: unknown) {
-    return handleErrorCondition("swap", response, logger, error);
+    return handleErrorCondition(
+      "swap",
+      response,
+      logger,
+      error,
+      undefined,
+      requestId
+    );
   }
 }
