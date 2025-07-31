@@ -18,7 +18,7 @@ import {
   makeGetSources,
 } from "../utils";
 import { SOURCES } from "./utils/sources";
-import { compactAxiosError } from "../../_errors";
+import { compactAxiosError, SwapQuoteUnavailableError } from "../../_errors";
 
 const { API_KEY_0X } = getEnvs();
 
