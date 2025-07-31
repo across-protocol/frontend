@@ -2876,3 +2876,27 @@ export function getRejectedReasons(
     return [];
   }
 }
+
+type PooledToken = {
+  lpToken: string;
+  isEnabled: boolean;
+  lastLpFeeUpdate: BigNumber;
+  utilizedReserves: BigNumber;
+  liquidReserves: BigNumber;
+  undistributedLpFees: BigNumber;
+};
+
+// This logic is directly ported from the HubPool smart contract function by the same name.
+export function computeUtilizationPostRelay(
+  pooledToken: PooledToken,
+  amount: BigNumber
+) {
+  const flooredUtilizedReserves = pooledToken.utilizedReserves.gt(0)
+    ? pooledToken.utilizedReserves
+    : BigNumber.from(0);
+  const numerator = amount.add(flooredUtilizedReserves);
+  const denominator = pooledToken.liquidReserves.add(flooredUtilizedReserves);
+
+  if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
+  return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
+}

@@ -11,9 +11,13 @@ function getFillDeadlineBuffer(chainId: number) {
   return Number(bufferFromEnv ?? DEFAULT_FILL_DEADLINE_BUFFER_SECONDS);
 }
 
-export async function getFillDeadline(chainId: number): Promise<number> {
+export async function getFillDeadline(
+  chainId: number,
+  quoteTimestamp: number
+): Promise<number> {
   const fillDeadlineBuffer = getFillDeadlineBuffer(chainId);
-  const spokePool = getSpokePool(chainId);
-  const currentTime = await spokePool.callStatic.getCurrentTime();
-  return Number(currentTime) + fillDeadlineBuffer;
+  // Quote timestamp cannot be in the future or more than an hour old, so this is safe (i.e. cannot
+  // cause the contract to revert) as long as the fill deadline buffer is at least 1 hour smaller
+  // than the maximum buffer length allowed by the contract.
+  return Number(quoteTimestamp) + fillDeadlineBuffer;
 }
