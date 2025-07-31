@@ -976,11 +976,15 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
-      amount: bridgeQuote.outputAmount.toString(),
+      amount: addMarkupToAmount(
+        bridgeQuote.outputAmount,
+        QUOTE_BUFFER + crossSwap.slippageTolerance / 100
+      ).toString(),
     },
     TradeType.EXACT_INPUT,
     {
       sources: prioritizedOriginStrategy.destinationSources,
+      sellEntireBalance: true,
     }
   );
 
@@ -1045,6 +1049,14 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
           sources: destinationSources,
         }
       );
+      assertMinOutputAmount(
+        destinationSwapQuote.minAmountOut,
+        crossSwap.amount,
+        {
+          actualAmountOut: "destinationSwapQuote.minAmountOut",
+          expectedMinAmountOut: "crossSwap.amount",
+        }
+      );
 
       return {
         result,
@@ -1061,7 +1073,8 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     destinationStrategyFetches,
     strategies.prioritizationMode
   );
-  const { result, destinationSwapQuote } = prioritizedDestinationStrategy;
+  const { result, destinationSwapQuote, destinationSources } =
+    prioritizedDestinationStrategy;
   const {
     originRouter,
     destinationRouter,
@@ -1073,11 +1086,9 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     originSwap,
     originStrategy,
     originSwapChainId,
+    destinationSwap,
+    destinationStrategy,
   } = result;
-  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount, {
-    actualAmountOut: "destinationSwapQuote.minAmountOut",
-    expectedMinAmountOut: "crossSwap.amount",
-  });
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -1107,19 +1118,50 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   });
   assertSources(originSources);
 
-  // 3. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await originStrategy.fetchFn(
+  const [finalDestinationSwapQuote, originSwapQuote] = await Promise.all([
+    // 3.1. Get destination swap quote for bridgeable output token -> any token
+    destinationStrategy.fetchFn(
+      {
+        ...destinationSwap,
+        amount: addMarkupToAmount(
+          bridgeQuote.outputAmount,
+          QUOTE_BUFFER + crossSwap.slippageTolerance / 100
+        ).toString(),
+      },
+      TradeType.EXACT_INPUT,
+      {
+        sources: destinationSources,
+        sellEntireBalance: true,
+      }
+    ),
+    // 3.2. Get origin swap quote for any input token -> bridgeable input token
+    originStrategy.fetchFn(
+      {
+        ...originSwap,
+        depositor: crossSwap.depositor,
+        amount: addMarkupToAmount(
+          bridgeQuote.inputAmount,
+          QUOTE_BUFFER
+        ).toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        sources: originSources,
+      }
+    ),
+  ]);
+  bridgeQuote.message = buildDestinationSwapCrossChainMessage({
+    crossSwap,
+    destinationSwapQuote: finalDestinationSwapQuote,
+    bridgeableOutputToken,
+    routerAddress: destinationRouter.address,
+  });
+  assertMinOutputAmount(
+    finalDestinationSwapQuote.minAmountOut,
+    crossSwap.amount,
     {
-      ...originSwap,
-      depositor: crossSwap.depositor,
-      amount: addMarkupToAmount(
-        bridgeQuote.inputAmount,
-        QUOTE_BUFFER
-      ).toString(),
-    },
-    TradeType.EXACT_OUTPUT,
-    {
-      sources: originSources,
+      actualAmountOut: "finalDestinationSwapQuote.minAmountOut",
+      expectedMinAmountOut: "crossSwap.amount",
     }
   );
   assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount, {
@@ -1129,7 +1171,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
 
   return {
     crossSwap,
-    destinationSwapQuote,
+    destinationSwapQuote: finalDestinationSwapQuote,
     bridgeQuote,
     originSwapQuote,
     contracts: {
