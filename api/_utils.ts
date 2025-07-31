@@ -2877,7 +2877,7 @@ export function getRejectedReasons(
   }
 }
 
-type PooledToken = {
+export type PooledToken = {
   lpToken: string;
   isEnabled: boolean;
   lastLpFeeUpdate: BigNumber;

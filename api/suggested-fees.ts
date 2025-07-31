@@ -32,6 +32,7 @@ import {
   getL1TokenConfigCache,
   ConvertDecimals,
   computeUtilizationPostRelay,
+  PooledToken,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -224,7 +225,7 @@ const handler = async (
       ];
 
       const [
-        [currentUt, pooledTokens, _quoteTimestamp, rawL1TokenConfig],
+        [currentUt, pooledToken, _quoteTimestamp, rawL1TokenConfig],
         tokenPriceUsd,
         limits,
       ] = await Promise.all([
@@ -247,7 +248,7 @@ const handler = async (
       ]);
 
       const nextUt = computeUtilizationPostRelay(
-        pooledTokens[l1Token.address],
+        pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
         ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount)
       );
 
