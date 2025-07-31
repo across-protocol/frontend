@@ -38,6 +38,7 @@ import {
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
 import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getFillDeadline } from "../_fill-deadline";
 import axios, { AxiosRequestHeaders } from "axios";
 
 export type CrossSwapType =
@@ -355,7 +356,10 @@ export async function extractDepositDataStruct(
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
     quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    fillDeadline: await getFillDeadline(spokePool),
+    fillDeadline: getFillDeadline(
+      destinationChainId,
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
+    ),
     exclusivityDeadline:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     exclusivityParameter:
@@ -410,17 +414,6 @@ export async function extractSwapAndDepositDataStruct(
     spokePool: spokePool.address,
     nonce: permitNonce || 0, // Only used for permit transfers
   };
-}
-
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 export function getQuoteFetchStrategies(
