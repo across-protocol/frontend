@@ -1,5 +1,4 @@
 import { DEFAULT_FILL_DEADLINE_BUFFER_SECONDS } from "./_constants";
-import { getSpokePool } from "./_utils";
 
 function getFillDeadlineBuffer(chainId: number) {
   const bufferFromEnv = (

@@ -1,6 +1,5 @@
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
@@ -334,9 +333,7 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
-  const spokePool = getSpokePool(originChainId);
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
