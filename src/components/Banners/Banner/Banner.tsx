@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Wrapper } from "./Banner.styles";
+
 /**
  * React component that renders its children in a super header on top of the page.
  */

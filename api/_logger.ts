@@ -1,4 +1,5 @@
 import * as sdk from "@across-protocol/sdk";
+import { inspect } from "util";
 
 import { getEnvs } from "./_env";
 
@@ -29,25 +30,27 @@ export const getLogger = (): LoggingUtility => {
         ? (LOG_LEVEL as keyof typeof LogLevels)
         : defaultLogLevel;
 
+    const depth = 5;
+
     logger = {
       debug: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.DEBUG) {
-          console.debug(args);
+          console.debug(inspect(args, { depth }));
         }
       },
       info: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.INFO) {
-          console.info(args);
+          console.info(inspect(args, { depth }));
         }
       },
       warn: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.WARN) {
-          console.warn(args);
+          console.warn(inspect(args, { depth }));
         }
       },
       error: (...args) => {
         if (LogLevels[logLevel] <= LogLevels.ERROR) {
-          console.error(args);
+          console.error(inspect(args, { depth }));
         }
       },
     };
