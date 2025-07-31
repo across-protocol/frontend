@@ -23,9 +23,11 @@ export async function getBalance(
   if (sdk.utils.chainIsSvm(Number(chainId))) {
     return getSvmBalance(chainId, account, token);
   }
+  const parsedAccount = sdk.utils.toAddressType(account, Number(chainId));
+  const parsedToken = sdk.utils.toAddressType(token, Number(chainId));
   return sdk.utils.getTokenBalance(
-    account,
-    token,
+    parsedAccount.toNative(),
+    parsedToken.toNative(),
     getProvider(Number(chainId)),
     blockTag ?? BLOCK_TAG_LAG
   );
