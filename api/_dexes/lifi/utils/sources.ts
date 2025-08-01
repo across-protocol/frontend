@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-07-17T13:38:39.952Z
+// Generated on 2025-08-01T06:23:05.853Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -11,11 +11,11 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "bebop", names: ["bebop"] },
+      { key: "okx", names: ["okx"] },
+      { key: "merkle", names: ["merkle"] },
     ],
     "10": [
       { key: "paraswap", names: ["paraswap"] },
@@ -23,11 +23,10 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "bebop", names: ["bebop"] },
+      { key: "okx", names: ["okx"] },
     ],
     "56": [
       { key: "dodo", names: ["dodo"] },
@@ -36,15 +35,13 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "bebop", names: ["bebop"] },
+      { key: "okx", names: ["okx"] },
     ],
     "130": [
       { key: "enso", names: ["enso"] },
-      { key: "0x", names: ["0x"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
     ],
     "137": [
@@ -53,10 +50,10 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
+      { key: "okx", names: ["okx"] },
     ],
     "232": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "288": [
@@ -70,11 +67,9 @@ export const SOURCES = {
       { key: "openocean", names: ["openocean"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
+      { key: "okx", names: ["okx"] },
     ],
-    "480": [
-      { key: "0x", names: ["0x"] },
-      { key: "lifidexaggregator", names: ["lifidexaggregator"] },
-    ],
+    "480": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "1135": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "1868": [
       { key: "enso", names: ["enso"] },
@@ -86,16 +81,14 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "bebop", names: ["bebop"] },
+      { key: "okx", names: ["okx"] },
     ],
     "34443": [
       { key: "odos", names: ["odos"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
     ],
@@ -105,15 +98,13 @@ export const SOURCES = {
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "bebop", names: ["bebop"] },
+      { key: "okx", names: ["okx"] },
     ],
     "57073": [
       { key: "enso", names: ["enso"] },
-      { key: "0x", names: ["0x"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "superswap", names: ["superswap"] },
     ],
@@ -121,25 +112,26 @@ export const SOURCES = {
       { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
+      { key: "okx", names: ["okx"] },
     ],
+    "60808": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "81457": [
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
+      { key: "okx", names: ["okx"] },
     ],
     "534352": [
       { key: "odos", names: ["odos"] },
       { key: "openocean", names: ["openocean"] },
-      { key: "0x", names: ["0x"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
+      { key: "okx", names: ["okx"] },
     ],
   },
 } as {
@@ -153,14 +145,14 @@ export const SOURCES = {
 };
 
 export const ALL_SOURCES = [
-  "0x",
   "1inch",
-  "bebop",
   "dodo",
   "enso",
   "kyberswap",
   "lifidexaggregator",
+  "merkle",
   "odos",
+  "okx",
   "openocean",
   "paraswap",
   "superswap",
