@@ -96,6 +96,7 @@ export function get0xStrategy(
             sellAmount: swapAmount,
             taker: swap.recipient,
             slippageBps: Math.floor(swap.slippageTolerance * 100),
+            sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
         }
