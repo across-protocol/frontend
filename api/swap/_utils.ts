@@ -144,8 +144,6 @@ export async function handleBaseSwapQueryParams(
     }),
   ]);
 
-  const refundToken = refundOnOrigin ? inputToken : outputToken;
-
   return {
     inputToken,
     outputToken,
@@ -160,7 +158,6 @@ export async function handleBaseSwapQueryParams(
     recipient,
     depositor,
     slippageTolerance,
-    refundToken,
     excludeSources,
     includeSources,
   };
@@ -389,6 +386,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 export function buildBaseSwapResponseJson(params: {
   crossSwapType: CrossSwapType;
   amountType: AmountType;
+  amount: BigNumber;
   inputTokenAddress: string;
   originChainId: number;
   inputAmount: BigNumber;
@@ -401,7 +399,7 @@ export function buildBaseSwapResponseJson(params: {
   originSwapQuote?: SwapQuote;
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   destinationSwapQuote?: SwapQuote;
-  refundToken: Token;
+  refundOnOrigin: boolean;
   approvalSwapTx?: {
     from: string;
     to: string;
@@ -413,6 +411,9 @@ export function buildBaseSwapResponseJson(params: {
   };
   permitSwapTx?: any; // TODO: Add type
 }) {
+  const refundToken = params.refundOnOrigin
+    ? params.bridgeQuote.inputToken
+    : params.bridgeQuote.outputToken;
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
@@ -479,21 +480,27 @@ export function buildBaseSwapResponseJson(params: {
     outputToken:
       params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
     refundToken:
-      params.refundToken.symbol === "ETH"
+      refundToken.symbol === "ETH"
         ? {
-            ...params.refundToken,
+            ...refundToken,
             symbol: "WETH",
           }
-        : params.refundToken,
+        : refundToken,
     inputAmount:
-      params.originSwapQuote?.expectedAmountIn ??
-      params.bridgeQuote.inputAmount,
+      params.amountType === "exactInput"
+        ? params.amount
+        : (params.originSwapQuote?.expectedAmountIn ??
+          params.bridgeQuote.inputAmount),
     expectedOutputAmount:
-      params.destinationSwapQuote?.expectedAmountOut ??
-      params.bridgeQuote.outputAmount,
+      params.amountType === "exactOutput"
+        ? params.amount
+        : (params.destinationSwapQuote?.expectedAmountOut ??
+          params.bridgeQuote.outputAmount),
     minOutputAmount:
-      params.destinationSwapQuote?.minAmountOut ??
-      params.bridgeQuote.outputAmount,
+      params.amountType === "exactOutput"
+        ? params.amount
+        : (params.destinationSwapQuote?.minAmountOut ??
+          params.bridgeQuote.outputAmount),
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     swapTx: params.approvalSwapTx
       ? {

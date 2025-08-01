@@ -18,7 +18,7 @@ import {
   makeGetSources,
 } from "../utils";
 import { SOURCES } from "./utils/sources";
-import { compactAxiosError } from "../../_errors";
+import { compactAxiosError, SwapQuoteUnavailableError } from "../../_errors";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -102,6 +102,14 @@ export function get0xStrategy(
       );
 
       const quote = response.data;
+
+      if (!quote.liquidityAvailable) {
+        throw new SwapQuoteUnavailableError({
+          message: `0x: No liquidity available for ${
+            swap.tokenIn.symbol
+          } -> ${swap.tokenOut.symbol} on chain ${swap.chainId}`,
+        });
+      }
 
       const usedSources = quote.route.fills.map((fill: { source: string }) =>
         fill.source.toLowerCase()
