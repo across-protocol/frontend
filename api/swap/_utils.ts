@@ -213,7 +213,7 @@ export type SwapBody = Infer<typeof SwapBody>;
 
 export function handleSwapBody(body: SwapBody, destinationChainId: number) {
   // Validate rules for each action. We have to validate the input before default values are applied.
-  body.actions.forEach((action, index) => {
+  body.actions?.forEach((action, index) => {
     // 1. Validate that value is provided when populateCallValueDynamically is false or omitted
     if (!action.populateCallValueDynamically && !action.value) {
       throw new InvalidParamError({
