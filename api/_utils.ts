@@ -1107,12 +1107,13 @@ export async function getBridgeQuoteForExactInput(params: {
   };
 }
 
-export async function getBridgeQuoteForMinOutput(params: {
+export async function getBridgeQuoteForOutput(params: {
   inputToken: Token;
   outputToken: Token;
   minOutputAmount: BigNumber;
   recipient?: string;
   message?: string;
+  forceExactOutput?: boolean;
 }) {
   const maxTries = 3;
   const tryChunkSize = 3;
@@ -1190,9 +1191,47 @@ export async function getBridgeQuoteForMinOutput(params: {
       params.outputToken.decimals
     )(adjustedInputAmount.sub(finalQuote.totalRelayFee.total));
 
+    // If forceExactOutput, we'll hardcode the output amount to the minOutputAmount
+    // so we need to adjust fees to reflect that
+    if (params.forceExactOutput) {
+      // Calculate the difference and add to fees
+      const excessOutput = finalOutputAmount.sub(params.minOutputAmount);
+
+      const excessInput = ConvertDecimals(
+        params.outputToken.decimals,
+        params.inputToken.decimals
+      )(excessOutput);
+
+      // Adjust fees by adding the excess
+      const adjustedRelayerCapitalFeeTotal = BigNumber.from(
+        finalQuote.relayerCapitalFee.total
+      ).add(excessInput);
+      const adjustedTotalRelayFeeTotal = BigNumber.from(
+        finalQuote.totalRelayFee.total
+      ).add(excessInput);
+
+      // Calculate new percentages based on adjusted totals
+      const adjustedRelayerCapitalFeePct = adjustedRelayerCapitalFeeTotal
+        .mul(utils.parseEther("1"))
+        .div(adjustedInputAmount);
+      const adjustedTotalRelayFeePct = adjustedTotalRelayFeeTotal
+        .mul(utils.parseEther("1"))
+        .div(adjustedInputAmount);
+
+      // Update the quote with the adjusted values
+      finalQuote.relayerCapitalFee.total =
+        adjustedRelayerCapitalFeeTotal.toString();
+      finalQuote.relayerCapitalFee.pct =
+        adjustedRelayerCapitalFeePct.toString();
+      finalQuote.totalRelayFee.total = adjustedTotalRelayFeeTotal.toString();
+      finalQuote.totalRelayFee.pct = adjustedTotalRelayFeePct.toString();
+    }
+
     return {
       inputAmount: adjustedInputAmount,
-      outputAmount: finalOutputAmount,
+      outputAmount: params.forceExactOutput
+        ? params.minOutputAmount
+        : finalOutputAmount,
       minOutputAmount: params.minOutputAmount,
       suggestedFees: finalQuote,
       message: params.message,

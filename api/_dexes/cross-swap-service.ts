@@ -1,7 +1,7 @@
 import { TradeType } from "@uniswap/sdk-core";
 
 import {
-  getBridgeQuoteForMinOutput,
+  getBridgeQuoteForOutput,
   getRouteByInputTokenAndDestinationChain,
   getRouteByOutputTokenAndOriginChain,
   getRoutesByChainIds,
@@ -180,7 +180,7 @@ export async function getCrossSwapQuotesForOutputB2B(
     });
   }
 
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
+  const bridgeQuote = await getBridgeQuoteForOutput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
@@ -189,6 +189,7 @@ export async function getCrossSwapQuotesForOutputB2B(
       crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
         ? buildExactOutputBridgeTokenMessage(crossSwap)
         : buildMinOutputBridgeTokenMessage(crossSwap),
+    forceExactOutput: crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
@@ -376,7 +377,7 @@ export async function getCrossSwapQuotesForOutputB2A(
 
   // 2, Fetch  bridge quote for bridgeable input token -> bridgeable output token based on
   //    destination swap quote.
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
+  const bridgeQuote = await getBridgeQuoteForOutput({
     inputToken: crossSwap.inputToken,
     outputToken: bridgeableOutputToken,
     minOutputAmount: prioritizedStrategy.destinationSwapQuote.maximumAmountIn,
@@ -608,7 +609,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
+  const bridgeQuote = await getBridgeQuoteForOutput({
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
@@ -1091,7 +1092,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   } = result;
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
+  const bridgeQuote = await getBridgeQuoteForOutput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
     minOutputAmount: destinationSwapQuote.maximumAmountIn,
