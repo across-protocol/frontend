@@ -53,7 +53,6 @@ export async function handleApprovalSwap(
     recipient,
     depositor,
     slippageTolerance,
-    refundToken,
     excludeSources,
     includeSources,
   } = await handleBaseSwapQueryParams(request.query);
@@ -157,6 +156,7 @@ export async function handleApprovalSwap(
   const responseJson = buildBaseSwapResponseJson({
     crossSwapType,
     amountType,
+    amount,
     originChainId,
     inputTokenAddress,
     inputAmount,
@@ -171,8 +171,8 @@ export async function handleApprovalSwap(
     approvalTxns,
     originSwapQuote,
     bridgeQuote,
+    refundOnOrigin,
     destinationSwapQuote,
-    refundToken,
   });
 
   if (span) {
@@ -217,6 +217,13 @@ function setSpanAttributes(
 
   if (responseJson.steps.originSwap) {
     span.setAttribute(
+      "swap.originSwap.route",
+      [
+        responseJson.steps.originSwap.tokenIn.symbol,
+        responseJson.steps.originSwap.tokenOut.symbol,
+      ].join(" -> ")
+    );
+    span.setAttribute(
       "swap.originSwap.swapProvider.name",
       responseJson.steps.originSwap.swapProvider.name
     );
@@ -227,6 +234,13 @@ function setSpanAttributes(
   }
 
   if (responseJson.steps.destinationSwap) {
+    span.setAttribute(
+      "swap.destinationSwap.route",
+      [
+        responseJson.steps.destinationSwap.tokenIn.symbol,
+        responseJson.steps.destinationSwap.tokenOut.symbol,
+      ].join(" -> ")
+    );
     span.setAttribute(
       "swap.destinationSwap.swapProvider.name",
       responseJson.steps.destinationSwap.swapProvider.name

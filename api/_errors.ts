@@ -53,6 +53,7 @@ export class AcrossApiError extends Error {
   status: number;
   message: string;
   param?: string;
+  id?: string;
 
   constructor(
     args: {
@@ -77,6 +78,7 @@ export class AcrossApiError extends Error {
       status: this.status,
       message: this.message,
       param: this.param,
+      id: this.id,
     };
   }
 }
@@ -288,15 +290,25 @@ export function handleErrorCondition(
 
     // If upstream error is an AcrossApiError, we just return it
     if (response?.data?.type === "AcrossApiError") {
-      acrossApiError = new AcrossApiError(
-        {
-          message: response.data.message,
-          status: response.data.status,
-          code: response.data.code,
-          param: response.data.param,
-        },
-        { cause: error }
-      );
+      if (response.data.code === AcrossErrorCode.SIMULATION_ERROR) {
+        acrossApiError = new SimulationError(
+          {
+            message: response.data.message,
+            transaction: response.data.transaction,
+          },
+          { cause: error }
+        );
+      } else {
+        acrossApiError = new AcrossApiError(
+          {
+            message: response.data.message,
+            status: response.data.status,
+            code: response.data.code,
+            param: response.data.param,
+          },
+          { cause: error }
+        );
+      }
     } else {
       const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
       acrossApiError = new AcrossApiError(
