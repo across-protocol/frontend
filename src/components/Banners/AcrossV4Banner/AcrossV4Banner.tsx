@@ -3,7 +3,7 @@ import Banner from "../Banner";
 
 export function AcrossV4Banner() {
   return (
-    <Banner>
+    <Banner type="success">
       <StyledWrapper>
         <div>
           <Logo />

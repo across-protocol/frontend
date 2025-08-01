@@ -1,10 +1,14 @@
-import { constants } from "@across-protocol/sdk";
-import { getEnvs } from "./_env";
+import { constants, utils } from "@across-protocol/sdk";
 import { ethers } from "ethers";
+
+import { getEnvs } from "./_env";
+import { HUB_POOL_CHAIN_ID } from "./_utils";
+import { CHAIN_IDs } from "./_constants";
 
 const {
   RELAYER_ADDRESS_OVERRIDES,
   REACT_APP_FULL_RELAYERS,
+  FULL_RELAYERS_SVM,
   TRANSFER_RESTRICTED_RELAYERS,
 } = getEnvs();
 
@@ -34,27 +38,59 @@ export function getDefaultRelayerAddress(
   destinationChainId: number,
   symbol?: string
 ) {
+  const chainIsSvm = utils.chainIsSvm(destinationChainId);
   const symbolOverride = symbol
     ? defaultRelayerAddressOverride?.symbols?.[symbol]
     : undefined;
-  return (
+  const overrideAddress =
     symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
     symbolOverride?.defaultAddr ?? // Specific Symbol override
-    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
-    constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
-  );
+    defaultRelayerAddressOverride?.defaultAddr; // Default override
+
+  if (overrideAddress) {
+    const overrideAddressType = utils.toAddressType(
+      overrideAddress,
+      destinationChainId
+    );
+    if (chainIsSvm) {
+      return overrideAddressType.isSVM()
+        ? overrideAddressType.toBase58()
+        : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM;
+    }
+    return overrideAddressType.isEVM()
+      ? overrideAddressType.toEvmAddress()
+      : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+  }
+
+  return chainIsSvm
+    ? constants.DEFAULT_SIMULATED_RELAYER_ADDRESS_SVM
+    : constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
 }
 
 /**
  * Returns a list of relayers that run a full auto-rebalancing strategy.
  * @returns A list of relayer addresses
  */
-export function getFullRelayers() {
+export function getFullRelayers(chainId: number = HUB_POOL_CHAIN_ID) {
+  const chainIsSvm = utils.chainIsSvm(chainId);
+  return chainIsSvm ? _getFullRelayersSvm() : _getFullRelayersEvm();
+}
+
+function _getFullRelayersEvm() {
   if (!REACT_APP_FULL_RELAYERS) {
     return [];
   }
   return (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
     return ethers.utils.getAddress(relayer);
+  });
+}
+
+function _getFullRelayersSvm() {
+  if (!FULL_RELAYERS_SVM) {
+    return [];
+  }
+  return (JSON.parse(FULL_RELAYERS_SVM) as string[]).map((relayer) => {
+    return utils.toAddressType(relayer, CHAIN_IDs.SOLANA).toBase58();
   });
 }
 
@@ -68,9 +104,13 @@ export function getTransferRestrictedRelayers(
   destinationChainId: number,
   symbol: string
 ) {
+  const chainIsSvm = utils.chainIsSvm(destinationChainId);
   const restrictedRelayers =
     transferRestrictedRelayers[destinationChainId]?.[symbol] ?? [];
   return restrictedRelayers.map((relayer) => {
-    return ethers.utils.getAddress(relayer);
+    const relayerAddressType = utils.toAddressType(relayer, destinationChainId);
+    return chainIsSvm
+      ? relayerAddressType.toBase58()
+      : relayerAddressType.toEvmAddress();
   });
 }

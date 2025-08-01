@@ -43,7 +43,9 @@ const TokenFee = ({
         <LoadingSkeleton width="70px" height="20px" />
       ) : (
         <NumericText size="md" color={textColor}>
-          {formatUnitsWithMaxFractions(amount, token.decimals)}{" "}
+          {formatUnitsWithMaxFractions(amount, token.decimals, {
+            s: 4,
+          })}{" "}
           {token.displaySymbol || token.symbol.toUpperCase()}{" "}
         </NumericText>
       )}

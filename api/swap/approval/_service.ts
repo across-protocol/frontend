@@ -1,4 +1,5 @@
 import { BigNumber, constants } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 import { Span } from "@opentelemetry/api";
 
 import {
@@ -118,12 +119,7 @@ export async function handleApprovalSwap(
     balance.gte(inputAmount);
 
   let originTxGas: BigNumber | undefined;
-  let originTxGasPrice:
-    | {
-        maxFeePerGas: BigNumber;
-        maxPriorityFeePerGas: BigNumber;
-      }
-    | undefined;
+  let originTxGasPrice: sdk.gasPriceOracle.GasPriceEstimate | undefined;
   if (isSwapTxEstimationPossible) {
     const provider = getProvider(originChainId);
     [originTxGas, originTxGasPrice] = await Promise.all([
@@ -165,8 +161,11 @@ export async function handleApprovalSwap(
     approvalSwapTx: {
       ...crossSwapTx,
       gas: originTxGas,
-      maxFeePerGas: originTxGasPrice?.maxFeePerGas,
-      maxPriorityFeePerGas: originTxGasPrice?.maxPriorityFeePerGas,
+      maxFeePerGas: (originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate)
+        ?.maxFeePerGas,
+      maxPriorityFeePerGas: (
+        originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
+      )?.maxPriorityFeePerGas,
     },
     allowance,
     balance,

@@ -6,7 +6,7 @@ import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
-import { COLORS } from "utils";
+import { chainsWithSpeedupDisabled, COLORS } from "utils";
 
 import { useDepositStatus } from "../hooks/useDepositStatus";
 
@@ -17,6 +17,9 @@ type Props = {
 
 export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
   const { isDelayed, isProfitable, isExpired } = useDepositStatus(deposit);
+  const isReferencingDisabledSpeedupChain =
+    chainsWithSpeedupDisabled.includes(deposit.sourceChainId) ||
+    chainsWithSpeedupDisabled.includes(deposit.destinationChainId);
 
   const slowRelayInfo =
     isDelayed && isProfitable ? (
@@ -46,6 +49,7 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
     !isExpired &&
     !isDelayed &&
     !isProfitable &&
+    !isReferencingDisabledSpeedupChain &&
     deposit.status === "pending" ? (
       <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;

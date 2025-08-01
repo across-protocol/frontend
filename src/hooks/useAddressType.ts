@@ -6,6 +6,7 @@ export const AddressTypes = {
   contract: "contract",
   "7702Delegate": "7702Delegate",
   EOA: "EOA",
+  EOA_SVM: "EOA_SVM",
 } as const;
 
 export type AddressType = (typeof AddressTypes)[keyof typeof AddressTypes];

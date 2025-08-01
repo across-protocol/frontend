@@ -1,4 +1,7 @@
 import { VercelResponse } from "@vercel/node";
+import axios from "axios";
+import { utils } from "@across-protocol/sdk";
+
 import { DepositRoute, TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
@@ -9,14 +12,10 @@ import {
   resolveVercelEndpoint,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
+import { getDepositArgsForCachedGasDetails } from "./_gas";
+import { getEnvs } from "./_env";
 
 import mainnetChains from "../src/data/chains_1.json";
-import { utils, constants } from "@across-protocol/sdk";
-import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
-import axios from "axios";
-import { ethers } from "ethers";
-
-import { getEnvs } from "./_env";
 
 const { CRON_SECRET } = getEnvs();
 
@@ -27,17 +26,6 @@ const updateIntervalsSecPerChain = {
 };
 
 const maxDurationSec = 60;
-
-const getDepositArgsForChainId = (chainId: number, tokenAddress: string) => {
-  return {
-    amount: ethers.BigNumber.from(100),
-    inputToken: constants.ZERO_ADDRESS,
-    outputToken: tokenAddress,
-    recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-    originChainId: 0, // Shouldn't matter for simulation
-    destinationChainId: Number(chainId),
-  };
-};
 
 const handler = async (
   request: TypedVercelRequest<Record<string, never>>,
@@ -77,18 +65,22 @@ const handler = async (
     /**
      * @notice Updates the native gas cost cache every `updateNativeGasCostIntervalsSecPerChain` seconds
      * up to `maxDurationSec` seconds.
-     * @param chainId Chain to estimate gas cost for
+     * @param destinationChainId Chain to estimate gas cost for
      * @param outputTokenAddress This output token will be used to construct a fill transaction to simulate
      * gas costs for.
      */
     const updateNativeGasCostPromise = async (
-      chainId: number,
+      destinationChainId: number,
       outputTokenAddress: string
     ): Promise<void> => {
-      updateCounts[chainId] ??= {};
-      updateCounts[chainId][outputTokenAddress] ??= 0;
+      updateCounts[destinationChainId] ??= {};
+      updateCounts[destinationChainId][outputTokenAddress] ??= 0;
       const secondsPerUpdate = updateIntervalsSecPerChain.default;
-      const depositArgs = getDepositArgsForChainId(chainId, outputTokenAddress);
+      const depositArgs = getDepositArgsForCachedGasDetails(
+        HUB_POOL_CHAIN_ID,
+        destinationChainId,
+        outputTokenAddress
+      );
       const cache = getCachedNativeGasCost(depositArgs);
 
       while (true) {
@@ -99,11 +91,11 @@ const handler = async (
         }
         try {
           await cache.set();
-          updateCounts[chainId][outputTokenAddress]++;
+          updateCounts[destinationChainId][outputTokenAddress]++;
         } catch (err) {
           logger.warn({
             at: "CronCacheGasCosts#updateNativeGasCostPromise",
-            message: `Failed to set native gas cost cache for chain ${chainId}`,
+            message: `Failed to set native gas cost cache for chain ${destinationChainId}`,
             depositArgs,
             error: err,
           });
