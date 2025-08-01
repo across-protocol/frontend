@@ -23,6 +23,7 @@ export default async function handler(
     at: "Swap",
     message: "Query data",
     query: request.query,
+    body: request.body,
     requestId,
   });
   try {
