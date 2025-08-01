@@ -18,6 +18,7 @@ const handler = async (
     at: "Swap/approval",
     message: "Query data",
     query: request.query,
+    body: request.body,
     requestId,
   });
   return tracer.startActiveSpan("swap/approval", async (span) => {
