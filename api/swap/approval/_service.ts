@@ -57,10 +57,9 @@ export async function handleApprovalSwap(
     includeSources,
   } = await handleBaseSwapQueryParams(request.query);
 
-  const { actions } =
-    Object.keys(request.body).length > 0
-      ? handleSwapBody(request.body, Number(request.query.destinationChainId))
-      : { actions: [] };
+  if (request.body) {
+    handleSwapBody(request.body);
+  }
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -77,7 +76,6 @@ export async function handleApprovalSwap(
       isOutputNative,
       excludeSources,
       includeSources,
-      embeddedActions: actions,
     },
     quoteFetchStrategies
   );
