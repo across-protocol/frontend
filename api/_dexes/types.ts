@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType } from "./utils";
+import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 
 export type { AmountType, CrossSwapType };
@@ -42,6 +42,8 @@ export type CrossSwap = {
   excludeSources?: string[];
   includeSources?: string[];
   embeddedActions: Action[];
+  appFeePercent?: number;
+  appFeeRecipient?: string;
 };
 
 export type SupportedDex =
@@ -101,6 +103,7 @@ export type CrossSwapQuotes = {
     destinationRouter?: RouterContract;
     originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
+  appFee?: AppFee;
 };
 
 export type OriginSwapEntryPointContract = {
