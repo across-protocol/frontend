@@ -15,7 +15,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, utils } from "ethers";
+import { BigNumber, constants, ethers, logger, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
@@ -48,6 +48,7 @@ import {
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -571,6 +572,7 @@ export async function calculateSwapFees(params: {
   outputAmount: BigNumber;
   originChainId: number;
   destinationChainId: number;
+  logger: Logger;
 }) {
   const {
     inputAmount,
@@ -589,146 +591,176 @@ export async function calculateSwapFees(params: {
     outputAmount,
     originChainId,
     destinationChainId,
+    logger,
   } = params;
 
-  const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
-  const outputToken = destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
-
-  const originGas =
-    originTxGas && originTxGasPrice
-      ? originTxGas.mul(originTxGasPrice)
-      : BigNumber.from(0);
-
-  const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
-  const appFeeToken = appFee?.feeToken;
-
-  let appFeeUsd = 0;
-  if (appFeeToken) {
-    const appFeeTokenPriceUsd = await getCachedTokenPrice(
-      appFeeToken.address,
-      "usd",
-      undefined,
-      appFeeToken.chainId
-    );
-    appFeeUsd =
-      parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
-      appFeeTokenPriceUsd;
-  }
-
-  const bridgeFees = bridgeQuote.suggestedFees;
-  const relayerCapital = bridgeFees.relayerCapitalFee;
-  const destinationGas = bridgeFees.relayerGasFee;
-  const lpFee = bridgeFees.lpFee;
-
-  const originGasToken = getNativeTokenInfo(originChainId);
-  const destinationGasToken = getNativeTokenInfo(destinationChainId);
-
-  // Calculate USD amounts
-  const originGasUsd =
-    parseFloat(utils.formatUnits(originGas, originGasToken.decimals)) *
-    originNativePriceUsd;
-  // We need to use bridge input token price for destination gas since
-  // suggested fees returns the gas total in input token decimals
-  const destinationGasUsd =
-    parseFloat(
-      utils.formatUnits(destinationGas.total, bridgeQuote.inputToken.decimals)
-    ) * bridgeQuoteInputTokenPriceUsd;
-  const relayerCapitalUsd =
-    parseFloat(
-      utils.formatUnits(relayerCapital.total, bridgeQuote.inputToken.decimals)
-    ) * bridgeQuoteInputTokenPriceUsd;
-  const lpFeeUsd =
-    parseFloat(
-      utils.formatUnits(lpFee.total, bridgeQuote.inputToken.decimals)
-    ) * bridgeQuoteInputTokenPriceUsd;
-  const relayerTotalUsd =
-    parseFloat(
-      utils.formatUnits(
-        bridgeFees.totalRelayFee.total,
-        bridgeQuote.inputToken.decimals
-      )
-    ) * bridgeQuoteInputTokenPriceUsd;
-  const inputAmountUsd =
-    parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
-    inputTokenPriceUsd;
-  const outputAmountUsd =
-    parseFloat(utils.formatUnits(outputAmount, outputToken.decimals)) *
-    outputTokenPriceUsd;
-
-  const totalFeeUsd =
-    inputAmountUsd - (outputAmountUsd - relayerTotalUsd - appFeeUsd);
-  const totalFeePct = totalFeeUsd / inputAmountUsd;
-  const totalFeeAmount = inputAmount
-    .mul(utils.parseEther(totalFeePct.toFixed(18)))
-    .div(sdk.utils.fixedPointAdjustment);
-
-  return {
-    total: {
-      amount: totalFeeAmount,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(totalFeeUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther(totalFeePct.toFixed(18)),
-      token: inputToken,
-    },
-    originGas: {
-      amount: originGas,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(originGasUsd.toFixed(18))
-      ),
-      token: originGasToken,
-    },
-    destinationGas: {
-      amount: safeUsdToTokenAmount(
-        destinationGasUsd,
+  try {
+    if (
+      inputTokenPriceUsd === 0 ||
+      outputTokenPriceUsd === 0 ||
+      originNativePriceUsd === 0 ||
+      destinationNativePriceUsd === 0 ||
+      bridgeQuoteInputTokenPriceUsd === 0
+    ) {
+      logger.debug({
+        at: "calculateSwapFees",
+        message: "Error calculating swap fees from USD prices",
+        inputTokenPriceUsd,
+        outputTokenPriceUsd,
+        originNativePriceUsd,
         destinationNativePriceUsd,
-        destinationGasToken.decimals
-      ),
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(destinationGasUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther(
-        (destinationGasUsd / inputAmountUsd).toFixed(18)
-      ),
-      token: destinationGasToken,
-    },
-    relayerCapital: {
-      amount: relayerCapital.total,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(relayerCapitalUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther(
-        (relayerCapitalUsd / inputAmountUsd).toFixed(18)
-      ),
-      token: bridgeQuote.inputToken,
-    },
-    lpFee: {
-      amount: lpFee.total,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(lpFeeUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther((lpFeeUsd / inputAmountUsd).toFixed(18)),
-      token: bridgeQuote.inputToken,
-    },
-    relayerTotal: {
-      amount: bridgeFees.totalRelayFee.total,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther(
-        (relayerTotalUsd / inputAmountUsd).toFixed(18)
-      ),
-      token: bridgeQuote.inputToken,
-    },
-    app: {
-      amount: appFeeAmount,
-      amountUsd: ethers.utils.formatEther(
-        ethers.utils.parseEther(appFeeUsd.toFixed(18))
-      ),
-      pct: ethers.utils.parseEther((appFeePercent || 0).toFixed(18)),
-      token: appFeeToken,
-    },
-  };
+        bridgeQuoteInputTokenPriceUsd,
+      });
+      return {};
+    }
+
+    const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
+    const outputToken =
+      destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
+
+    const originGas =
+      originTxGas && originTxGasPrice
+        ? originTxGas.mul(originTxGasPrice)
+        : BigNumber.from(0);
+
+    const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
+    const appFeeToken = appFee?.feeToken;
+
+    let appFeeUsd = 0;
+    if (appFeeToken) {
+      const appFeeTokenPriceUsd = await getCachedTokenPrice(
+        appFeeToken.address,
+        "usd",
+        undefined,
+        appFeeToken.chainId
+      );
+      appFeeUsd =
+        parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
+        appFeeTokenPriceUsd;
+    }
+
+    const bridgeFees = bridgeQuote.suggestedFees;
+    const relayerCapital = bridgeFees.relayerCapitalFee;
+    const destinationGas = bridgeFees.relayerGasFee;
+    const lpFee = bridgeFees.lpFee;
+
+    const originGasToken = getNativeTokenInfo(originChainId);
+    const destinationGasToken = getNativeTokenInfo(destinationChainId);
+
+    // Calculate USD amounts
+    const originGasUsd =
+      parseFloat(utils.formatUnits(originGas, originGasToken.decimals)) *
+      originNativePriceUsd;
+    // We need to use bridge input token price for destination gas since
+    // suggested fees returns the gas total in input token decimals
+    const destinationGasUsd =
+      parseFloat(
+        utils.formatUnits(destinationGas.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const relayerCapitalUsd =
+      parseFloat(
+        utils.formatUnits(relayerCapital.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const lpFeeUsd =
+      parseFloat(
+        utils.formatUnits(lpFee.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const relayerTotalUsd =
+      parseFloat(
+        utils.formatUnits(
+          bridgeFees.totalRelayFee.total,
+          bridgeQuote.inputToken.decimals
+        )
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const inputAmountUsd =
+      parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
+      inputTokenPriceUsd;
+    const outputAmountUsd =
+      parseFloat(utils.formatUnits(outputAmount, outputToken.decimals)) *
+      outputTokenPriceUsd;
+
+    const totalFeeUsd =
+      inputAmountUsd - (outputAmountUsd - relayerTotalUsd - appFeeUsd);
+    const totalFeePct = totalFeeUsd / inputAmountUsd;
+    const totalFeeAmount = inputAmount
+      .mul(utils.parseEther(totalFeePct.toFixed(18)))
+      .div(sdk.utils.fixedPointAdjustment);
+
+    return {
+      total: {
+        amount: totalFeeAmount,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(totalFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(totalFeePct.toFixed(18)),
+        token: inputToken,
+      },
+      originGas: {
+        amount: originGas,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(originGasUsd.toFixed(18))
+        ),
+        token: originGasToken,
+      },
+      destinationGas: {
+        amount: safeUsdToTokenAmount(
+          destinationGasUsd,
+          destinationNativePriceUsd,
+          destinationGasToken.decimals
+        ),
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(destinationGasUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (destinationGasUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: destinationGasToken,
+      },
+      relayerCapital: {
+        amount: relayerCapital.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(relayerCapitalUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (relayerCapitalUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: bridgeQuote.inputToken,
+      },
+      lpFee: {
+        amount: lpFee.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(lpFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther((lpFeeUsd / inputAmountUsd).toFixed(18)),
+        token: bridgeQuote.inputToken,
+      },
+      relayerTotal: {
+        amount: bridgeFees.totalRelayFee.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (relayerTotalUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: bridgeQuote.inputToken,
+      },
+      app: {
+        amount: appFeeAmount,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(appFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther((appFeePercent || 0).toFixed(18)),
+        token: appFeeToken,
+      },
+    };
+  } catch (error) {
+    logger.debug({
+      at: "calculateSwapFees",
+      message: "Error calculating swap fees",
+      error,
+    });
+    return {};
+  }
 }
 
 function getNativeTokenInfo(chainId: number): Token {
@@ -794,6 +826,7 @@ export async function buildBaseSwapResponseJson(params: {
   destinationNativePriceUsd: number;
   bridgeQuoteInputTokenPriceUsd: number;
   crossSwapType: CrossSwapType;
+  logger: Logger;
 }) {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
@@ -889,6 +922,7 @@ export async function buildBaseSwapResponseJson(params: {
         params.bridgeQuote.outputAmount,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
+      logger: params.logger,
     }),
     inputAmount:
       params.amountType === "exactInput"
