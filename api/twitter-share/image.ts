@@ -23,17 +23,23 @@ const TwitterShareParamsSchema = type({
 
 type TwitterShareImageParams = Infer<typeof TwitterShareParamsSchema>;
 
-// Twitter recommends 2:1 aspect ratio with minimum 300x157, maximum 4096x4096
+// Twitter recommends 1.9:1 aspect ratio with minimum 300x157, maximum 4096x4096
 // Must be under 5MB limit
 // https://developer.x.com/en/docs/x-for-websites/cards/overview/summary-card-with-large-image
 export const CANVAS = {
-  width: 800,
+  width: 760,
   height: 400,
 };
 
-const chainLogoDimensions = 48; // px
+const chainLogoBaseDimension = 48; // px
 const px = 20; // px 32
 const py = 20; // px 24
+const xScalingFactor = (CANVAS.width - px * 2) / CANVAS.width;
+const yScalingFactor = (CANVAS.height - py * 2) / CANVAS.height;
+const chainLogoDimensions = {
+  x: Math.floor(chainLogoBaseDimension * xScalingFactor),
+  y: Math.floor(chainLogoBaseDimension * yScalingFactor),
+};
 
 export default async function handler(
   request: TypedVercelRequest<TwitterShareImageParams>,
@@ -91,19 +97,19 @@ export default async function handler(
       if (originChainLogo) {
         ctx.drawImage(
           originChainLogo,
-          263,
-          92,
-          chainLogoDimensions,
-          chainLogoDimensions
+          254,
+          86,
+          chainLogoDimensions.x,
+          chainLogoDimensions.y
         );
       }
       if (destinationChainLogo) {
         ctx.drawImage(
           destinationChainLogo,
-          490,
-          92,
-          chainLogoDimensions,
-          chainLogoDimensions
+          461,
+          86,
+          chainLogoDimensions.x,
+          chainLogoDimensions.y
         );
       }
     } else {
@@ -113,19 +119,19 @@ export default async function handler(
       if (originChainLogo) {
         ctx.drawImage(
           originChainLogo,
-          257,
-          82,
-          chainLogoDimensions,
-          chainLogoDimensions
+          248,
+          77,
+          chainLogoDimensions.x,
+          chainLogoDimensions.y
         );
       }
       if (destinationChainLogo) {
         ctx.drawImage(
           destinationChainLogo,
-          497,
-          82,
-          chainLogoDimensions,
-          chainLogoDimensions
+          467,
+          77,
+          chainLogoDimensions.x,
+          chainLogoDimensions.y
         );
       }
     }
