@@ -278,6 +278,7 @@ export async function handleApprovalSwap(
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
     crossSwapType,
+    logger,
   });
 
   if (span) {
