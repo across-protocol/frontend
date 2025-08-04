@@ -6,9 +6,8 @@ export function buildTwitterShareUrl(params: {
   originChainId: number;
   destinationChainId: number;
 }): string {
-  const hashTags: string[] = []; // tags without "#"
+  const hashTags: string[] = ["PoweredByIntents ⛺"]; // tags without "#"
   const relatedAccounts = ["@AcrossProtocol"];
-  const tweetText = `Bridged in seconds with @acrossprotocol\nGo crosschain at ${resolveWebsiteUrl()}\n#PoweredByIntents ⛺`;
   const imageUrl = `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams(
     {
       s: params.time,
@@ -16,10 +15,10 @@ export function buildTwitterShareUrl(params: {
       to: params.destinationChainId,
     }
   )}`;
+  const tweetText = `Bridged in seconds with @AcrossProtocol\nGo crosschain at ${imageUrl}\n\n`;
   const twitterUrl = `https://twitter.com/intent/tweet?${buildSearchParams({
     text: tweetText,
     hashtags: hashTags.join(","),
-    url: imageUrl,
     related: relatedAccounts.join(","),
   })}`;
 
