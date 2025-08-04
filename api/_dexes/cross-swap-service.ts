@@ -8,7 +8,6 @@ import {
   getTokenByAddress,
   getBridgeQuoteForExactInput,
   addTimeoutToPromise,
-  getRejectedReasons,
   getLogger,
   addMarkupToAmount,
 } from "../_utils";
@@ -35,7 +34,7 @@ import {
 import {
   SwapAmountTooLowForBridgeFeesError,
   InvalidParamError,
-  SwapQuoteUnavailableError,
+  getSwapQuoteUnavailableError,
 } from "../_errors";
 import {
   CrossSwapQuotesRetrievalA2AResult,
@@ -946,24 +945,12 @@ export async function getCrossSwapQuotesA2A(
     return bestCrossSwapQuote;
   }
 
-  const rejectedReasons = getRejectedReasons(allCrossSwapQuotesFailures);
   logger.debug({
     at: "getCrossSwapQuotesA2A",
     message: "All bridge routes and providers failed",
-    failedReasons: rejectedReasons,
+    failedReasons: allCrossSwapQuotesFailures,
   });
-  throw new SwapQuoteUnavailableError(
-    {
-      message: `No swap quotes currently available ${
-        crossSwap.inputToken.symbol
-      } ${crossSwap.inputToken.chainId} -> ${
-        crossSwap.outputToken.symbol
-      } ${crossSwap.outputToken.chainId}`,
-    },
-    {
-      cause: rejectedReasons.join(","),
-    }
-  );
+  throw getSwapQuoteUnavailableError(allCrossSwapQuotesFailures);
 }
 
 export async function getCrossSwapQuotesForExactInputByRouteA2A(
@@ -1497,26 +1484,9 @@ export async function executeStrategies<T>(
     }
     throw new AggregateError(errors);
   } catch (error) {
-    // If all quote fetches errored, we need to determine which error to propagate to the
-    // caller.
     if (error instanceof AggregateError) {
       const errors = error.errors;
-      const swapQuoteUnavailableError = errors.find(
-        (error) => error instanceof SwapQuoteUnavailableError
-      );
 
-      // If all quote fetches errored and at least one of them errored with a
-      // SwapQuoteUnavailableError, throw the error.
-      if (swapQuoteUnavailableError) {
-        throw new SwapQuoteUnavailableError(
-          {
-            message: "No available quotes for specified transfer",
-          },
-          {
-            cause: swapQuoteUnavailableError,
-          }
-        );
-      }
       // If all quote fetches errored with an InvalidParamError, throw the first one.
       if (
         errors.every(
@@ -1530,6 +1500,10 @@ export async function executeStrategies<T>(
           message: "No available quotes for specified sources",
         });
       }
+
+      // If all quote fetches errored, we need to determine which error to propagate to the
+      // caller.
+      throw getSwapQuoteUnavailableError(errors);
     }
     throw error;
   }
@@ -1569,33 +1543,10 @@ async function selectBestCrossSwapQuote(
     .map((result) => result.value);
 
   if (fulfilledQuotes.length === 0) {
-    const rejectedQuotes = crossSwapQuotes.filter(
-      (result) => result.status === "rejected"
-    );
-
-    // If there is only one rejected quote and it is a SwapQuoteUnavailableError, throw it.
-    if (
-      rejectedQuotes.length === 1 &&
-      rejectedQuotes[0].reason instanceof SwapQuoteUnavailableError
-    ) {
-      throw rejectedQuotes[0].reason;
-    }
-
-    const rejectedReasons = getRejectedReasons(crossSwapQuotes);
-    const message = `No swap quotes currently available ${
-      crossSwap.inputToken.symbol
-    } ${crossSwap.inputToken.chainId} -> ${
-      crossSwap.outputToken.symbol
-    } ${crossSwap.outputToken.chainId}`;
-    throw new SwapQuoteUnavailableError(
-      {
-        message,
-      },
-      {
-        cause:
-          rejectedReasons.length > 0 ? rejectedReasons.join(", ") : undefined,
-      }
-    );
+    const rejectedReasons = crossSwapQuotes
+      .filter((result) => result.status === "rejected")
+      .map((result) => result.reason as Error);
+    throw getSwapQuoteUnavailableError(rejectedReasons);
   }
 
   if (fulfilledQuotes.length === 1) {
