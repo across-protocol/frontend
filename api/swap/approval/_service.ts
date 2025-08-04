@@ -140,7 +140,7 @@ export async function handleApprovalSwap(
   let outputTokenPriceUsd: number;
   let originNativePriceUsd: number;
   let destinationNativePriceUsd: number;
-  let bridgeQuoteOutputTokenPriceUsd: number;
+  let bridgeQuoteInputTokenPriceUsd: number;
 
   if (isSwapTxEstimationPossible) {
     const provider = getProvider(originChainId);
@@ -151,7 +151,7 @@ export async function handleApprovalSwap(
       outputTokenPriceUsd,
       originNativePriceUsd,
       destinationNativePriceUsd,
-      bridgeQuoteOutputTokenPriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
     ] = await Promise.all([
       provider.estimateGas({
         ...crossSwapTx,
@@ -183,10 +183,10 @@ export async function handleApprovalSwap(
         outputToken.chainId
       ),
       getCachedTokenPrice(
-        bridgeQuote.outputToken.address,
+        bridgeQuote.inputToken.address,
         "usd",
         undefined,
-        bridgeQuote.outputToken.chainId
+        bridgeQuote.inputToken.chainId
       ),
     ]);
   } else {
@@ -196,7 +196,7 @@ export async function handleApprovalSwap(
       outputTokenPriceUsd,
       originNativePriceUsd,
       destinationNativePriceUsd,
-      bridgeQuoteOutputTokenPriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
     ] = await Promise.all([
       latestGasPriceCache(originChainId).get(),
       getCachedTokenPrice(
@@ -224,10 +224,10 @@ export async function handleApprovalSwap(
         outputToken.chainId
       ),
       getCachedTokenPrice(
-        bridgeQuote.outputToken.address,
+        bridgeQuote.inputToken.address,
         "usd",
         undefined,
-        bridgeQuote.outputToken.chainId
+        bridgeQuote.inputToken.chainId
       ),
     ]);
   }
@@ -276,7 +276,7 @@ export async function handleApprovalSwap(
     outputTokenPriceUsd,
     originNativePriceUsd,
     destinationNativePriceUsd,
-    bridgeQuoteOutputTokenPriceUsd,
+    bridgeQuoteInputTokenPriceUsd,
     crossSwapType,
   });
 
