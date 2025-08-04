@@ -15,7 +15,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, logger, utils } from "ethers";
+import { BigNumber, constants, ethers, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
@@ -223,9 +223,9 @@ const RecursiveArgumentArray: any = lazy(() =>
 // Instructions for a single function call
 const Action = type({
   target: validEvmAddress(),
-  functionSignature: string(), // Will be validated at runtime
+  functionSignature: defaulted(string(), ""), // Will be validated at runtime
   isNativeTransfer: defaulted(boolean(), false),
-  args: array(RecursiveArgumentArray),
+  args: defaulted(array(RecursiveArgumentArray), []),
   value: defaulted(positiveIntStr(), "0"),
   populateCallValueDynamically: defaulted(boolean(), false),
 });
@@ -249,16 +249,29 @@ export function handleSwapBody(body: SwapBody, destinationChainId: number) {
           "value is required when populateCallValueDynamically is false or omitted",
       });
     }
-    // 2. Validate that no function signature or args are provided when isNativeTransfer is true
-    if (
-      action.isNativeTransfer &&
-      (action.functionSignature !== "" || action.args.length > 0)
-    ) {
-      throw new InvalidParamError({
-        param: `body.actions[${index}].functionSignature, body.actions[${index}].args`,
-        message:
-          "function signature or args are not allowed when isNativeTransfer is true",
-      });
+
+    // 2. Validate isNativeTransfer rules
+    if (action.isNativeTransfer) {
+      // When isNativeTransfer is true, functionSignature and args must be empty
+      if (
+        (action.functionSignature && action.functionSignature !== "") ||
+        (action.args && action.args.length > 0)
+      ) {
+        throw new InvalidParamError({
+          param: `body.actions[${index}].functionSignature, body.actions[${index}].args`,
+          message:
+            "function signature or args are not allowed when isNativeTransfer is true",
+        });
+      }
+    } else {
+      // When isNativeTransfer is false, functionSignature is required
+      if (!action.functionSignature || action.functionSignature === "") {
+        throw new InvalidParamError({
+          param: `body.actions[${index}].functionSignature`,
+          message:
+            "functionSignature is required when isNativeTransfer is false or omitted",
+        });
+      }
     }
   });
 
