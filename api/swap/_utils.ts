@@ -627,8 +627,8 @@ export async function calculateSwapFees(params: {
   const originGasUsd =
     parseFloat(utils.formatUnits(originGas, originGasToken.decimals)) *
     originNativePriceUsd;
-  // We need to use bridge output token price for destination gas since
-  // suggested fees returns the gas total in output token decimals
+  // We need to use bridge input token price for destination gas since
+  // suggested fees returns the gas total in input token decimals
   const destinationGasUsd =
     parseFloat(
       utils.formatUnits(destinationGas.total, bridgeQuote.inputToken.decimals)
