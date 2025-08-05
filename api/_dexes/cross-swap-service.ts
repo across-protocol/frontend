@@ -40,6 +40,7 @@ import {
   CrossSwapQuotesRetrievalA2BResult,
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
+import { SWAP_PROVIDER_NAME as SWAP_PROVIDER_NAME_0X } from "./0x/allowance-holder";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
@@ -1087,10 +1088,13 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
-      amount: addMarkupToAmount(
-        bridgeQuote.outputAmount,
-        QUOTE_BUFFER + crossSwap.slippageTolerance / 100
-      ).toString(),
+      amount:
+        destinationStrategy.strategyName === SWAP_PROVIDER_NAME_0X
+          ? addMarkupToAmount(
+              bridgeQuote.outputAmount,
+              QUOTE_BUFFER + crossSwap.slippageTolerance / 100
+            ).toString()
+          : bridgeQuote.outputAmount.toString(),
     },
     TradeType.EXACT_INPUT,
     {
@@ -1252,10 +1256,13 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     destinationStrategy.fetchFn(
       {
         ...destinationSwap,
-        amount: addMarkupToAmount(
-          bridgeQuote.outputAmount,
-          QUOTE_BUFFER + crossSwapWithAppFee.slippageTolerance / 100
-        ).toString(),
+        amount:
+          destinationStrategy.strategyName === SWAP_PROVIDER_NAME_0X
+            ? addMarkupToAmount(
+                bridgeQuote.outputAmount,
+                QUOTE_BUFFER + crossSwapWithAppFee.slippageTolerance / 100
+              ).toString()
+            : bridgeQuote.outputAmount.toString(),
       },
       TradeType.EXACT_INPUT,
       {

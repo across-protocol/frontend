@@ -34,7 +34,7 @@ const API_HEADERS = {
   "0x-version": "v2",
 };
 
-const SWAP_PROVIDER_NAME = "0x";
+export const SWAP_PROVIDER_NAME = "0x";
 
 export function get0xStrategy(
   originSwapEntryPointContractName: OriginEntryPointContractName
