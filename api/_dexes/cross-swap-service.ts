@@ -837,26 +837,35 @@ function _prepCrossSwapQuotesRetrievalA2B(
   );
 
   // Return a list of results for each origin strategy
-  return originStrategies.map((originStrategy) => {
-    const { swapAndBridge, originSwapInitialRecipient } =
-      originStrategy.getOriginEntryPoints(originSwapChainId);
-    const originSwap = {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
-      recipient: originSwapInitialRecipient.address,
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: crossSwap.type,
-    };
+  return originStrategies.flatMap((originStrategy) => {
+    try {
+      const { swapAndBridge, originSwapInitialRecipient } =
+        originStrategy.getOriginEntryPoints(originSwapChainId);
+      const originSwap = {
+        chainId: originSwapChainId,
+        tokenIn: crossSwap.inputToken,
+        tokenOut: bridgeableInputToken,
+        recipient: originSwapInitialRecipient.address,
+        slippageTolerance: crossSwap.slippageTolerance,
+        type: crossSwap.type,
+      };
 
-    return {
-      originSwap,
-      originStrategy,
-      originSwapChainId,
-      destinationChainId,
-      bridgeableInputToken,
-      originSwapEntryPoint: swapAndBridge,
-    };
+      return {
+        originSwap,
+        originStrategy,
+        originSwapChainId,
+        destinationChainId,
+        bridgeableInputToken,
+        originSwapEntryPoint: swapAndBridge,
+      };
+    } catch (error) {
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalA2B",
+        message: "Could not map origin strategy",
+        error,
+      });
+      return [];
+    }
   });
 }
 
