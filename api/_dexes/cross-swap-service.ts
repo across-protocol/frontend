@@ -25,7 +25,6 @@ import {
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 import {
-  defaultQuoteFetchStrategies,
   AMOUNT_TYPE,
   CROSS_SWAP_TYPE,
   buildDestinationSwapCrossChainMessage,
@@ -50,7 +49,7 @@ const logger = getLogger();
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies = defaultQuoteFetchStrategies
+  strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
   if (crossSwap.type === AMOUNT_TYPE.EXACT_INPUT) {
     return getCrossSwapQuoteForAmountType(crossSwap, strategies, {
@@ -546,24 +545,33 @@ function _prepCrossSwapQuotesRetrievalB2A(
     strategies
   );
 
-  return destinationStrategies.map((destinationStrategy) => {
-    const originRouter = originStrategy.getRouter(originSwapChainId);
-    const destinationRouter = destinationStrategy.getRouter(
-      destinationSwapChainId
-    );
-    const depositEntryPoint =
-      originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
+  return destinationStrategies.flatMap((destinationStrategy) => {
+    try {
+      const originRouter = originStrategy.getRouter(originSwapChainId);
+      const destinationRouter = destinationStrategy.getRouter(
+        destinationSwapChainId
+      );
+      const depositEntryPoint =
+        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
 
-    return {
-      destinationSwap,
-      originRouter,
-      destinationRouter,
-      depositEntryPoint,
-      bridgeableOutputToken,
-      destinationSwapChainId,
-      destinationStrategy,
-      originStrategy,
-    };
+      return {
+        destinationSwap,
+        originRouter,
+        destinationRouter,
+        depositEntryPoint,
+        bridgeableOutputToken,
+        destinationSwapChainId,
+        destinationStrategy,
+        originStrategy,
+      };
+    } catch (error) {
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalB2A",
+        message: "Could not map destination strategy",
+        error,
+      });
+      return [];
+    }
   });
 }
 
@@ -828,26 +836,35 @@ function _prepCrossSwapQuotesRetrievalA2B(
   );
 
   // Return a list of results for each origin strategy
-  return originStrategies.map((originStrategy) => {
-    const { swapAndBridge, originSwapInitialRecipient } =
-      originStrategy.getOriginEntryPoints(originSwapChainId);
-    const originSwap = {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
-      recipient: originSwapInitialRecipient.address,
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: crossSwap.type,
-    };
+  return originStrategies.flatMap((originStrategy) => {
+    try {
+      const { swapAndBridge, originSwapInitialRecipient } =
+        originStrategy.getOriginEntryPoints(originSwapChainId);
+      const originSwap = {
+        chainId: originSwapChainId,
+        tokenIn: crossSwap.inputToken,
+        tokenOut: bridgeableInputToken,
+        recipient: originSwapInitialRecipient.address,
+        slippageTolerance: crossSwap.slippageTolerance,
+        type: crossSwap.type,
+      };
 
-    return {
-      originSwap,
-      originStrategy,
-      originSwapChainId,
-      destinationChainId,
-      bridgeableInputToken,
-      originSwapEntryPoint: swapAndBridge,
-    };
+      return {
+        originSwap,
+        originStrategy,
+        originSwapChainId,
+        destinationChainId,
+        bridgeableInputToken,
+        originSwapEntryPoint: swapAndBridge,
+      };
+    } catch (error) {
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalA2B",
+        message: "Could not map origin strategy",
+        error,
+      });
+      return [];
+    }
   });
 }
 
@@ -1371,65 +1388,74 @@ function _prepCrossSwapQuotesRetrievalA2A(
       ? originStrategies
       : destinationStrategies;
 
-  return baseStrategies.map((strategy) => {
-    const originStrategy =
-      strategiesToUseForComparison === "origin"
-        ? strategy
-        : (originStrategies.find(
-            (originStrategy) =>
-              originStrategy.strategyName === strategy.strategyName
-          ) ?? originStrategies[0]);
-    const destinationStrategy =
-      strategiesToUseForComparison === "destination"
-        ? strategy
-        : (destinationStrategies.find(
-            (destinationStrategy) =>
-              destinationStrategy.strategyName === strategy.strategyName
-          ) ?? destinationStrategies[0]);
+  return baseStrategies.flatMap((strategy) => {
+    try {
+      const originStrategy =
+        strategiesToUseForComparison === "origin"
+          ? strategy
+          : (originStrategies.find(
+              (originStrategy) =>
+                originStrategy.strategyName === strategy.strategyName
+            ) ?? originStrategies[0]);
+      const destinationStrategy =
+        strategiesToUseForComparison === "destination"
+          ? strategy
+          : (destinationStrategies.find(
+              (destinationStrategy) =>
+                destinationStrategy.strategyName === strategy.strategyName
+            ) ?? destinationStrategies[0]);
 
-    const { swapAndBridge, originSwapInitialRecipient } =
-      originStrategy.getOriginEntryPoints(originSwapChainId);
-    const depositEntryPoint =
-      originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
-    const originRouter = originStrategy.getRouter(originSwapChainId);
-    const multiCallHandlerAddress = getMultiCallHandlerAddress(
-      destinationSwapChainId
-    );
-    const destinationRouter = destinationStrategy.getRouter(
-      destinationSwapChainId
-    );
+      const { swapAndBridge, originSwapInitialRecipient } =
+        originStrategy.getOriginEntryPoints(originSwapChainId);
+      const depositEntryPoint =
+        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
+      const originRouter = originStrategy.getRouter(originSwapChainId);
+      const multiCallHandlerAddress = getMultiCallHandlerAddress(
+        destinationSwapChainId
+      );
+      const destinationRouter = destinationStrategy.getRouter(
+        destinationSwapChainId
+      );
 
-    const originSwap = {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
-      recipient: originSwapInitialRecipient.address,
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: crossSwap.type,
-    };
-    const destinationSwap = {
-      chainId: destinationSwapChainId,
-      tokenIn: bridgeableOutputToken,
-      tokenOut: crossSwap.outputToken,
-      recipient: multiCallHandlerAddress,
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: crossSwap.type,
-    };
+      const originSwap = {
+        chainId: originSwapChainId,
+        tokenIn: crossSwap.inputToken,
+        tokenOut: bridgeableInputToken,
+        recipient: originSwapInitialRecipient.address,
+        slippageTolerance: crossSwap.slippageTolerance,
+        type: crossSwap.type,
+      };
+      const destinationSwap = {
+        chainId: destinationSwapChainId,
+        tokenIn: bridgeableOutputToken,
+        tokenOut: crossSwap.outputToken,
+        recipient: multiCallHandlerAddress,
+        slippageTolerance: crossSwap.slippageTolerance,
+        type: crossSwap.type,
+      };
 
-    return {
-      originSwap,
-      destinationSwap,
-      originStrategy,
-      destinationStrategy,
-      originSwapChainId,
-      destinationSwapChainId,
-      originSwapEntryPoint: swapAndBridge,
-      depositEntryPoint,
-      bridgeableInputToken,
-      bridgeableOutputToken,
-      originRouter,
-      destinationRouter,
-    };
+      return {
+        originSwap,
+        destinationSwap,
+        originStrategy,
+        destinationStrategy,
+        originSwapChainId,
+        destinationSwapChainId,
+        originSwapEntryPoint: swapAndBridge,
+        depositEntryPoint,
+        bridgeableInputToken,
+        bridgeableOutputToken,
+        originRouter,
+        destinationRouter,
+      };
+    } catch (error) {
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalA2A",
+        message: "Could not map strategy",
+        error,
+      });
+      return [];
+    }
   });
 }
 
