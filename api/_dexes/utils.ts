@@ -172,20 +172,6 @@ export function getCrossSwapTypes(params: {
     params.destinationChainId
   );
 
-  // Prefer destination swap if input token is native because legacy
-  // `UniversalSwapAndBridge` does not support native tokens as input.
-  if (params.isInputNative) {
-    if (inputBridgeable) {
-      return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
-    }
-    // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
-    // throw until we have periphery contract audited so that it can accept native
-    // tokens and do an origin swap.
-    throw new Error(
-      "Unsupported swap: Input token is native but not bridgeable"
-    );
-  }
-
   if (inputBridgeable && outputBridgeable) {
     return [
       CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
