@@ -252,7 +252,7 @@ async function resolveUsdPriceViaFallbackResolver(params: {
         `https://li.quest/v1/token`,
         {
           params: {
-            chainId: params.chainId,
+            chain: params.chainId,
             token: params.address,
           },
         }
