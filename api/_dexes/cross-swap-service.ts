@@ -546,24 +546,33 @@ function _prepCrossSwapQuotesRetrievalB2A(
     strategies
   );
 
-  return destinationStrategies.map((destinationStrategy) => {
-    const originRouter = originStrategy.getRouter(originSwapChainId);
-    const destinationRouter = destinationStrategy.getRouter(
-      destinationSwapChainId
-    );
-    const depositEntryPoint =
-      originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
+  return destinationStrategies.flatMap((destinationStrategy) => {
+    try {
+      const originRouter = originStrategy.getRouter(originSwapChainId);
+      const destinationRouter = destinationStrategy.getRouter(
+        destinationSwapChainId
+      );
+      const depositEntryPoint =
+        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
 
-    return {
-      destinationSwap,
-      originRouter,
-      destinationRouter,
-      depositEntryPoint,
-      bridgeableOutputToken,
-      destinationSwapChainId,
-      destinationStrategy,
-      originStrategy,
-    };
+      return {
+        destinationSwap,
+        originRouter,
+        destinationRouter,
+        depositEntryPoint,
+        bridgeableOutputToken,
+        destinationSwapChainId,
+        destinationStrategy,
+        originStrategy,
+      };
+    } catch (error) {
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalB2A",
+        message: "Could not map destination strategy",
+        error,
+      });
+      return [];
+    }
   });
 }
 
