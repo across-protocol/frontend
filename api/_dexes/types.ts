@@ -170,6 +170,7 @@ export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
   sources?: ReturnType<GetSourcesFn>;
   sellEntireBalance?: boolean;
+  quoteBuffer?: number;
 }>;
 
 export type OriginEntryPointContractName =

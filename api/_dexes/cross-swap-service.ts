@@ -1087,15 +1087,13 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   const destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
-      amount: addMarkupToAmount(
-        bridgeQuote.outputAmount,
-        QUOTE_BUFFER + crossSwap.slippageTolerance / 100
-      ).toString(),
+      amount: bridgeQuote.outputAmount.toString(),
     },
     TradeType.EXACT_INPUT,
     {
       sources: prioritizedOriginStrategy.destinationSources,
       sellEntireBalance: true,
+      quoteBuffer: QUOTE_BUFFER,
     }
   );
 
@@ -1252,15 +1250,13 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     destinationStrategy.fetchFn(
       {
         ...destinationSwap,
-        amount: addMarkupToAmount(
-          bridgeQuote.outputAmount,
-          QUOTE_BUFFER + crossSwapWithAppFee.slippageTolerance / 100
-        ).toString(),
+        amount: bridgeQuote.outputAmount.toString(),
       },
       TradeType.EXACT_INPUT,
       {
         sources: destinationSources,
         sellEntireBalance: true,
+        quoteBuffer: QUOTE_BUFFER,
       }
     ),
     // 3.2. Get origin swap quote for any input token -> bridgeable input token
