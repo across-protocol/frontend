@@ -15,7 +15,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, logger, utils } from "ethers";
+import { BigNumber, constants, ethers, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
@@ -555,7 +555,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
-export async function calculateSwapFees(params: {
+export function calculateSwapFees(params: {
   inputAmount: BigNumber;
   originSwapQuote?: SwapQuote;
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -569,6 +569,7 @@ export async function calculateSwapFees(params: {
   originNativePriceUsd: number;
   destinationNativePriceUsd: number;
   bridgeQuoteInputTokenPriceUsd: number;
+  appFeeTokenPriceUsd: number;
   outputAmount: BigNumber;
   originChainId: number;
   destinationChainId: number;
@@ -588,6 +589,7 @@ export async function calculateSwapFees(params: {
     originNativePriceUsd,
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
+    appFeeTokenPriceUsd,
     outputAmount,
     originChainId,
     destinationChainId,
@@ -624,20 +626,10 @@ export async function calculateSwapFees(params: {
         : BigNumber.from(0);
 
     const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
-    const appFeeToken = appFee?.feeToken;
-
-    let appFeeUsd = 0;
-    if (appFeeToken) {
-      const appFeeTokenPriceUsd = await getCachedTokenPrice(
-        appFeeToken.address,
-        "usd",
-        undefined,
-        appFeeToken.chainId
-      );
-      appFeeUsd =
-        parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
-        appFeeTokenPriceUsd;
-    }
+    const appFeeToken = appFee?.feeToken || outputToken;
+    const appFeeUsd =
+      parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
+      appFeeTokenPriceUsd;
 
     const bridgeFees = bridgeQuote.suggestedFees;
     const relayerCapital = bridgeFees.relayerCapitalFee;
@@ -791,7 +783,7 @@ function safeUsdToTokenAmount(
   );
 }
 
-export async function buildBaseSwapResponseJson(params: {
+export function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
@@ -903,7 +895,7 @@ export async function buildBaseSwapResponseJson(params: {
             symbol: "WETH",
           }
         : refundToken,
-    fees: await calculateSwapFees({
+    fees: calculateSwapFees({
       inputAmount: params.inputAmount,
       originSwapQuote: params.originSwapQuote,
       bridgeQuote: params.bridgeQuote,
@@ -917,6 +909,7 @@ export async function buildBaseSwapResponseJson(params: {
       originNativePriceUsd: params.originNativePriceUsd,
       destinationNativePriceUsd: params.destinationNativePriceUsd,
       bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
+      appFeeTokenPriceUsd: params.outputTokenPriceUsd,
       outputAmount:
         params.destinationSwapQuote?.minAmountOut ??
         params.bridgeQuote.outputAmount,
