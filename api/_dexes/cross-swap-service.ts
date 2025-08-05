@@ -40,7 +40,6 @@ import {
   CrossSwapQuotesRetrievalA2BResult,
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
-import { SWAP_PROVIDER_NAME as SWAP_PROVIDER_NAME_0X } from "./0x/allowance-holder";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
