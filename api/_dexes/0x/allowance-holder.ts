@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import axios, { AxiosError } from "axios";
 
-import { getLogger } from "../../_utils";
+import { addMarkupToAmount, getLogger } from "../../_utils";
 import {
   OriginEntryPointContractName,
   QuoteFetchOpts,
@@ -63,6 +63,12 @@ export function get0xStrategy(
     opts?: QuoteFetchOpts
   ) => {
     try {
+      if (opts?.sellEntireBalance && opts.quoteBuffer) {
+        swap.amount = addMarkupToAmount(
+          BigNumber.from(swap.amount),
+          opts.quoteBuffer + swap.slippageTolerance / 100
+        ).toString();
+      }
       let swapAmount = swap.amount;
       if (tradeType === TradeType.EXACT_OUTPUT) {
         swapAmount = await estimateInputForExactOutput(
