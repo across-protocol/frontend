@@ -89,7 +89,7 @@ export function encodeWithdrawAllWethCalldata(token: string) {
     token,
     encodeWethWithdrawCalldata(BigNumber.from(0)), // Placeholder amount, will be replaced
     "0", // No ETH value needed for this call
-    // Replacement instructions to dynamically set the balance to withdraw
+    // Replacement instructions to dynamically set the balance to withdraw:
     [
       {
         token,
