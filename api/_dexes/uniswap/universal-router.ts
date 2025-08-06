@@ -38,7 +38,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   };
 
   const getOriginEntryPoints = (chainId: number) =>
-    getOriginSwapEntryPoints("UniversalSwapAndBridge", chainId, STRATEGY_NAME);
+    getOriginSwapEntryPoints("SpokePoolPeriphery", chainId, STRATEGY_NAME);
 
   const getSources = makeGetSources({
     strategy: STRATEGY_NAME,

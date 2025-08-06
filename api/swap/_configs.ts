@@ -15,11 +15,11 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
   default: [
     get0xStrategy("SpokePoolPeriphery"),
     getLifiStrategy("SpokePoolPeriphery"),
-    getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
+    getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api"),
   ],
   chains: {
     [CHAIN_IDs.LENS]: [
-      getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
+      getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
     ],
   },
   swapPairs: {
