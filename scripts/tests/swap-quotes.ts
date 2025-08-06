@@ -265,14 +265,15 @@ async function main() {
         }
 
         const maxTokensToTest = Math.min(maxTokens, inputTokens.length);
-        const inputTokensToTest = inputTokens.slice(0, maxTokensToTest);
+        const shuffledInputTokens = inputTokens.sort(() => Math.random() - 0.5);
+        const inputTokensToTest = shuffledInputTokens.slice(0, maxTokensToTest);
 
         for (const inputToken of inputTokensToTest) {
-          console.log([
-            originChain.name,
-            destinationChain.name,
-            inputToken.symbol,
-          ]);
+          console.log({
+            originChain: originChain.name,
+            destinationChain: destinationChain.name,
+            inputToken: inputToken.symbol,
+          });
 
           // Calculate normalized amount based on token decimals
           const normalizedAmount = normalizeAmount(amount, inputToken.decimals);
@@ -348,9 +349,7 @@ async function main() {
                 success: false,
                 error: {
                   message: error.message || "Unknown error",
-                  code: error.response?.data?.code || "UNKNOWN_ERROR",
-                  status: error.response?.data?.status,
-                  requestId: error.response?.data?.requestId,
+                  data: error.response?.data,
                 },
               });
             } finally {
