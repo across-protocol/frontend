@@ -246,9 +246,9 @@ export async function getCrossSwapQuotesForExactInputB2A(
         includeSources: crossSwap.includeSources,
       }
     );
-    assertSources(sources);
 
     const fetchFn = async () => {
+      assertSources(sources);
       // 1. Get destination swap quote for bridgeable output token -> any token
       const indicativeDestinationSwapQuote =
         await result.destinationStrategy.fetchFn(
@@ -370,9 +370,9 @@ export async function getCrossSwapQuotesForOutputB2A(
         includeSources: crossSwapWithAppFee.includeSources,
       }
     );
-    assertSources(sources);
 
     const fetchFn = async () => {
+      assertSources(sources);
       // 1. Get destination swap quote for bridgeable output token -> any token
       const destinationSwapQuote = await result.destinationStrategy.fetchFn(
         {
@@ -579,9 +579,9 @@ export async function getCrossSwapQuotesForExactInputA2B(
         includeSources: crossSwap.includeSources,
       }
     );
-    assertSources(sources);
 
     const fetchFn = async () => {
+      assertSources(sources);
       // 1. Get origin swap quote for any input token -> bridgeable output token
       const originSwapQuote = await result.originStrategy.fetchFn(
         {
@@ -704,9 +704,9 @@ export async function getCrossSwapQuotesForOutputA2B(
         includeSources: crossSwapWithAppFee.includeSources,
       }
     );
-    assertSources(sources);
 
     const fetchFn = async () => {
+      assertSources(sources);
       const originSwapQuote = await result.originStrategy.fetchFn(
         {
           ...result.originSwap,
@@ -988,7 +988,6 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
         includeSources: crossSwap.includeSources,
       }
     );
-    assertSources(originSources);
 
     const destinationSources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
@@ -997,9 +996,10 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
         includeSources: crossSwap.includeSources,
       }
     );
-    assertSources(destinationSources);
 
     const fetchFn = async () => {
+      assertSources(originSources);
+      assertSources(destinationSources);
       // 1. Get origin swap quote for any input token -> bridgeable input token
       const originSwapQuote = await result.originStrategy.fetchFn(
         {
@@ -1151,9 +1151,9 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         includeSources: crossSwapWithAppFee.includeSources,
       }
     );
-    assertSources(destinationSources);
 
     const fetchFn = async () => {
+      assertSources(destinationSources);
       // 1. Get destination swap quote for bridgeable output token -> any token
       const destinationSwapQuote = await result.destinationStrategy.fetchFn(
         {
@@ -1232,7 +1232,6 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     excludeSources: crossSwapWithAppFee.excludeSources,
     includeSources: crossSwapWithAppFee.includeSources,
   });
-  assertSources(originSources);
 
   const [finalDestinationSwapQuote, originSwapQuote] = await Promise.all([
     // 3.1. Get destination swap quote for bridgeable output token -> any token
@@ -1249,20 +1248,23 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       }
     ),
     // 3.2. Get origin swap quote for any input token -> bridgeable input token
-    originStrategy.fetchFn(
-      {
-        ...originSwap,
-        depositor: crossSwapWithAppFee.depositor,
-        amount: addMarkupToAmount(
-          bridgeQuote.inputAmount,
-          QUOTE_BUFFER
-        ).toString(),
-      },
-      TradeType.EXACT_OUTPUT,
-      {
-        sources: originSources,
-      }
-    ),
+    (async () => {
+      assertSources(originSources);
+      return originStrategy.fetchFn(
+        {
+          ...originSwap,
+          depositor: crossSwapWithAppFee.depositor,
+          amount: addMarkupToAmount(
+            bridgeQuote.inputAmount,
+            QUOTE_BUFFER
+          ).toString(),
+        },
+        TradeType.EXACT_OUTPUT,
+        {
+          sources: originSources,
+        }
+      );
+    })(),
   ]);
   const appFee = calculateAppFee({
     outputAmount:
