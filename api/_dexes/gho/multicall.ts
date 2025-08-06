@@ -79,7 +79,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     });
     const transferCall = {
       callData: erc20.interface.encodeFunctionData("transferFrom", [
-        getOriginEntryPoints(chainId).swapAndBridge.address,
+        getOriginEntryPoints(chainId).originSwapInitialRecipient.address,
         getRouter(chainId).address,
         amount,
       ]),
