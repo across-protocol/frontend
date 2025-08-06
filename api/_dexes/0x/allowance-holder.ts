@@ -82,17 +82,18 @@ export function get0xStrategy(
       const sourcesParams =
         sources?.sourcesType === "exclude"
           ? {
-              excludeSources: sources.sourcesKeys.join(","),
+              excludedSources: sources.sourcesKeys.join(","),
             }
           : // We need to invert the include sources to be compatible with the API
             // because 0x doesn't support the `includeSources` parameter
             sources?.sourcesType === "include"
             ? {
-                excludeSources: SOURCES.sources[swap.chainId]
+                excludedSources: SOURCES.sources[swap.chainId]
                   .map((s) => s.key)
                   .filter(
                     (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
-                  ),
+                  )
+                  .join(","),
               }
             : {};
 
@@ -126,9 +127,24 @@ export function get0xStrategy(
         });
       }
 
-      const usedSources = quote.route.fills.map((fill: { source: string }) =>
-        fill.source.toLowerCase()
+      const usedSources: string[] = quote.route.fills.map(
+        (fill: { source: string }) => fill.source.toLowerCase()
       );
+
+      if (
+        sources?.sourcesType === "include" &&
+        !usedSources.every((source: string) =>
+          sources.sourcesNames?.includes(source)
+        )
+      ) {
+        throw new UpstreamSwapProviderError({
+          message: `0x: Used sources ${usedSources.join(
+            ", "
+          )} do not match include sources ${sources.sourcesKeys.join(", ")}`,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE,
+          swapProvider: "0x",
+        });
+      }
 
       const expectedAmountIn = BigNumber.from(quote.sellAmount);
       const maximumAmountIn = expectedAmountIn;

@@ -855,21 +855,26 @@ export function makeGetSources(sources: DexSources) {
             isValidSource(includeSource, chainId, sources)
           )
         : [];
-    const sourcesKeys = Array.from(
+    const sourcesData = Array.from(
       new Set(
-        filteredSources.flatMap(
-          (source) =>
-            sources.sources[chainId].find((s) =>
-              s.names.some(
-                (name) => name.toLowerCase() === source.toLowerCase()
-              )
-            )?.key || []
-        )
+        filteredSources.flatMap((source) => {
+          const sourceData = sources.sources[chainId].find((s) =>
+            s.names.some((name) => name.toLowerCase() === source.toLowerCase())
+          );
+          if (!sourceData) {
+            return [];
+          }
+          return {
+            key: sourceData.key,
+            names: sourceData.names,
+          };
+        })
       )
     );
 
     return {
-      sourcesKeys,
+      sourcesKeys: sourcesData.map((s) => s.key),
+      sourcesNames: sourcesData.flatMap((s) => s.names),
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };

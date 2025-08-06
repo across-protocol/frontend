@@ -140,6 +140,7 @@ export type GetSourcesFn = (
 ) =>
   | {
       sourcesKeys: string[];
+      sourcesNames?: string[];
       sourcesType: "exclude" | "include";
     }
   | undefined;
