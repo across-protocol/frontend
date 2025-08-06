@@ -551,14 +551,12 @@ export function buildDestinationSwapCrossChainMessage({
   destinationSwapQuote,
   bridgeableOutputToken,
   routerAddress,
-  destinationOutputAmount,
   appFee,
 }: {
   crossSwap: CrossSwap;
   bridgeableOutputToken: Token;
   destinationSwapQuote: SwapQuote;
   routerAddress: string;
-  destinationOutputAmount: BigNumber;
   appFee?: AppFee;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
@@ -581,19 +579,18 @@ export function buildDestinationSwapCrossChainMessage({
     appFee || { feeAmount: BigNumber.from(0), feeActions: [] };
 
   appFeeActions = calculatedAppFeeActions;
-  const remainingAmount = destinationOutputAmount.sub(appFeeAmount);
+  const remainingOutputAmount =
+    crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+      ? crossSwap.amount.sub(appFeeAmount)
+      : destinationSwapQuote.minAmountOut.sub(appFeeAmount);
 
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
-  if (
-    crossSwap.isOutputNative &&
-    (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT ||
-      crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT)
-  ) {
+  if (crossSwap.isOutputNative) {
     unwrapActions = [
       {
         target: crossSwap.outputToken.address,
-        callData: encodeWethWithdrawCalldata(crossSwap.amount),
+        callData: encodeWethWithdrawCalldata(remainingOutputAmount),
         value: "0",
       },
     ];
@@ -601,7 +598,7 @@ export function buildDestinationSwapCrossChainMessage({
       {
         target: crossSwap.recipient,
         callData: "0x",
-        value: remainingAmount.toString(),
+        value: remainingOutputAmount.toString(),
       },
     ];
   }
@@ -612,7 +609,10 @@ export function buildDestinationSwapCrossChainMessage({
     transferActions = [
       {
         target: crossSwap.outputToken.address,
-        callData: encodeTransferCalldata(crossSwap.recipient, remainingAmount),
+        callData: encodeTransferCalldata(
+          crossSwap.recipient,
+          remainingOutputAmount
+        ),
         value: "0",
       },
       {
@@ -639,22 +639,6 @@ export function buildDestinationSwapCrossChainMessage({
       },
     ];
   } else if (crossSwap.type === AMOUNT_TYPE.EXACT_INPUT) {
-    if (crossSwap.isOutputNative) {
-      unwrapActions = [
-        {
-          target: crossSwap.outputToken.address,
-          callData: encodeWethWithdrawCalldata(destinationOutputAmount),
-          value: "0",
-        },
-      ];
-      transferActions = [
-        {
-          target: crossSwap.recipient,
-          callData: "0x",
-          value: remainingAmount.toString(),
-        },
-      ];
-    }
     transferActions = [
       ...transferActions,
       {

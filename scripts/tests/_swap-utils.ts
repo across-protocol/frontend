@@ -114,6 +114,16 @@ export const argsFromCli = yargs(hideBin(process.argv))
         alias: "es",
         description: "Comma-separated list of sources to exclude.",
         type: "string",
+      })
+      .option("appFeePercent", {
+        alias: "apf",
+        description: "App fee percent.",
+        type: "number",
+      })
+      .option("appFeeRecipient", {
+        alias: "apr",
+        description: "App fee recipient.",
+        type: "string",
       });
   })
   .option("host", {
@@ -185,6 +195,8 @@ export async function fetchSwapQuotes() {
       skipOriginTxEstimation,
       includeSources,
       excludeSources,
+      appFeePercent,
+      appFeeRecipient,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -206,6 +218,8 @@ export async function fetchSwapQuotes() {
         typeof excludeSources === "string"
           ? excludeSources.split(",")
           : excludeSources,
+      appFeePercent,
+      appFeeRecipient,
     };
     console.log("Params:", params);
 
