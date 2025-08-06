@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-07-17T13:38:39.947Z
+// Generated on 2025-08-01T06:23:05.851Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -43,7 +43,6 @@ export const SOURCES = {
       { key: "Uniswap_V2", names: ["uniswap_v2", "uniswap"] },
       { key: "Uniswap_V3", names: ["uniswap_v3", "uniswap"] },
       { key: "Uniswap_V4", names: ["uniswap_v4", "uniswap"] },
-      { key: "Wrapped_USDM", names: ["wrapped_usdm"] },
       { key: "Yearn", names: ["yearn"] },
       { key: "Yearn_V3", names: ["yearn_v3", "yearn"] },
     ],
@@ -59,7 +58,6 @@ export const SOURCES = {
       { key: "Velodrome_V2", names: ["velodrome_v2", "velodrome"] },
       { key: "Velodrome_V3", names: ["velodrome_v3", "velodrome"] },
       { key: "WOOFi_V2", names: ["woofi_v2", "woofi"] },
-      { key: "Wrapped_USDM", names: ["wrapped_usdm"] },
     ],
     "56": [
       { key: "ApeSwap", names: ["apeswap"] },
@@ -121,13 +119,13 @@ export const SOURCES = {
       { key: "Uniswap_V4", names: ["uniswap_v4", "uniswap"] },
       { key: "WOOFi_V2", names: ["woofi_v2", "woofi"] },
       { key: "WaultSwap", names: ["waultswap"] },
-      { key: "Wrapped_USDM", names: ["wrapped_usdm"] },
     ],
     "480": [
       { key: "DYORSwap", names: ["dyorswap"] },
       { key: "Uniswap_V2", names: ["uniswap_v2", "uniswap"] },
       { key: "Uniswap_V3", names: ["uniswap_v3", "uniswap"] },
       { key: "Uniswap_V4", names: ["uniswap_v4", "uniswap"] },
+      { key: "WorldSwap_V2", names: ["worldswap_v2", "worldswap"] },
     ],
     "8453": [
       { key: "0x_RFQ", names: ["0x_rfq"] },
@@ -166,7 +164,6 @@ export const SOURCES = {
       { key: "Spark_PSM", names: ["spark_psm"] },
       { key: "SushiSwap", names: ["sushiswap"] },
       { key: "SushiSwap_V3", names: ["sushiswap_v3", "sushiswap"] },
-      { key: "Swaap_V2", names: ["swaap_v2", "swaap"] },
       { key: "SwapBased_V3", names: ["swapbased_v3", "swapbased"] },
       { key: "Synapse", names: ["synapse"] },
       { key: "Synthswap_V2", names: ["synthswap_v2", "synthswap"] },
@@ -179,7 +176,6 @@ export const SOURCES = {
       { key: "Uniswap_V4", names: ["uniswap_v4", "uniswap"] },
       { key: "WOOFi_V2", names: ["woofi_v2", "woofi"] },
       { key: "Wrapped_BLT", names: ["wrapped_blt"] },
-      { key: "Wrapped_USDM", names: ["wrapped_usdm"] },
     ],
     "34443": [
       { key: "Balancer_V2", names: ["balancer_v2", "balancer"] },
@@ -219,7 +215,6 @@ export const SOURCES = {
       { key: "Solidly_V3", names: ["solidly_v3", "solidly"] },
       { key: "SpartaDex", names: ["spartadex"] },
       { key: "SushiSwap", names: ["sushiswap"] },
-      { key: "Swaap_V2", names: ["swaap_v2", "swaap"] },
       { key: "Swapr", names: ["swapr"] },
       { key: "Synapse", names: ["synapse"] },
       { key: "TraderJoe_V2.1", names: ["traderjoe_v2.1", "traderjoe"] },
@@ -228,7 +223,6 @@ export const SOURCES = {
       { key: "Uniswap_V3", names: ["uniswap_v3", "uniswap"] },
       { key: "Uniswap_V4", names: ["uniswap_v4", "uniswap"] },
       { key: "WOOFi_V2", names: ["woofi_v2", "woofi"] },
-      { key: "Wrapped_USDM", names: ["wrapped_usdm"] },
     ],
     "57073": [
       { key: "DYORSwap", names: ["dyorswap"] },
@@ -243,7 +237,6 @@ export const SOURCES = {
       { key: "EchoDEX_V3", names: ["echodex_v3", "echodex"] },
       { key: "IziSwap", names: ["iziswap"] },
       { key: "Lynex", names: ["lynex"] },
-      { key: "Lynex_Fusion", names: ["lynex_fusion"] },
       { key: "Nile", names: ["nile"] },
       { key: "Nile_V2", names: ["nile_v2", "nile"] },
       { key: "Overnight", names: ["overnight"] },
@@ -383,7 +376,6 @@ export const ALL_SOURCES = [
   "kinetix",
   "lido",
   "lynex",
-  "lynex_fusion",
   "maker_psm",
   "maverick",
   "maverick_v2",
@@ -488,9 +480,10 @@ export const ALL_SOURCES = [
   "wombat",
   "woofi",
   "woofi_v2",
+  "worldswap",
+  "worldswap_v2",
   "wrapped_blt",
   "wrapped_mlt",
-  "wrapped_usdm",
   "xfai",
   "yearn",
   "yearn_v3",

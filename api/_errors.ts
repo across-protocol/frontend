@@ -40,6 +40,7 @@ export const AcrossErrorCode = {
   AMOUNT_TOO_LOW: "AMOUNT_TOO_LOW",
   AMOUNT_TOO_HIGH: "AMOUNT_TOO_HIGH",
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
+  SWAP_LIQUIDITY_INSUFFICIENT: "SWAP_LIQUIDITY_INSUFFICIENT",
   SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
   ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
 
@@ -53,6 +54,7 @@ export class AcrossApiError extends Error {
   status: number;
   message: string;
   param?: string;
+  id?: string;
 
   constructor(
     args: {
@@ -77,6 +79,7 @@ export class AcrossApiError extends Error {
       status: this.status,
       message: this.message,
       param: this.param,
+      id: this.id,
     };
   }
 }
@@ -237,17 +240,58 @@ export class AmountTooHighError extends InputError {
   }
 }
 
-export class SwapQuoteUnavailableError extends InputError {
-  constructor(args: { message: string }, opts?: ErrorOptions) {
+export class SwapQuoteUnavailableError extends AcrossApiError {
+  constructor(
+    args: {
+      message: string;
+      code: (typeof AcrossErrorCode)[
+        | "SWAP_QUOTE_UNAVAILABLE"
+        | "SWAP_LIQUIDITY_INSUFFICIENT"
+        | "UPSTREAM_HTTP_ERROR"];
+    },
+    opts?: ErrorOptions
+  ) {
     super(
       {
         message: args.message,
-        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+        code: args.code,
+        status:
+          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR
+            ? HttpErrorToStatusCode.BAD_GATEWAY
+            : HttpErrorToStatusCode.BAD_REQUEST,
       },
       opts
     );
   }
 }
+
+export const UPSTREAM_SWAP_PROVIDER_ERRORS = {
+  INSUFFICIENT_LIQUIDITY: "INSUFFICIENT_LIQUIDITY",
+  NO_POSSIBLE_ROUTE: "NO_POSSIBLE_ROUTE",
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
+  UNKNOWN_ERROR: "UNKNOWN_ERROR",
+} as const;
+export type UpstreamSwapProviderErrorCode =
+  (typeof UPSTREAM_SWAP_PROVIDER_ERRORS)[keyof typeof UPSTREAM_SWAP_PROVIDER_ERRORS];
+
+export class UpstreamSwapProviderError extends Error {
+  code: UpstreamSwapProviderErrorCode;
+  swapProvider: string;
+
+  constructor(
+    args: {
+      message: string;
+      code: UpstreamSwapProviderErrorCode;
+      swapProvider: string;
+    },
+    opts?: ErrorOptions
+  ) {
+    super(args.message, opts);
+    this.code = args.code;
+    this.swapProvider = args.swapProvider;
+  }
+}
+
 /**
  * Handles the recurring case of error handling
  * @param endpoint A string numeric to indicate to the logging utility where this error occurs
@@ -288,15 +332,25 @@ export function handleErrorCondition(
 
     // If upstream error is an AcrossApiError, we just return it
     if (response?.data?.type === "AcrossApiError") {
-      acrossApiError = new AcrossApiError(
-        {
-          message: response.data.message,
-          status: response.data.status,
-          code: response.data.code,
-          param: response.data.param,
-        },
-        { cause: error }
-      );
+      if (response.data.code === AcrossErrorCode.SIMULATION_ERROR) {
+        acrossApiError = new SimulationError(
+          {
+            message: response.data.message,
+            transaction: response.data.transaction,
+          },
+          { cause: error }
+        );
+      } else {
+        acrossApiError = new AcrossApiError(
+          {
+            message: response.data.message,
+            status: response.data.status,
+            code: response.data.code,
+            param: response.data.param,
+          },
+          { cause: error }
+        );
+      }
     } else {
       const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
       acrossApiError = new AcrossApiError(
@@ -419,11 +473,120 @@ export function compactAxiosError(error: Error) {
   const compactError = new Error(
     [
       "[AxiosError]",
-      `Status ${response.status} - ${response.statusText}`,
+      `Status ${response.status} ${response.statusText}`,
       `Request URL: ${response.config.url}`,
       `Data: ${JSON.stringify(response.data)}`,
     ].join(" - ")
   );
 
   return compactError;
+}
+
+export function flattenErrors(reason: any, depth: number = 0): string[] {
+  if (
+    reason instanceof AggregateError &&
+    Array.isArray(reason.errors) &&
+    depth < 1
+  ) {
+    return reason.errors.flatMap((error) => flattenErrors(error, depth + 1));
+  }
+  const response = reason.response;
+  if (reason.isAxiosError && response) {
+    return [compactAxiosError(reason).toString()];
+  }
+
+  if (reason instanceof AcrossApiError) {
+    return [`[AcrossApiError]: ${JSON.stringify(reason)}`];
+  }
+
+  return [reason.toString()];
+}
+
+export function getRejectedReasons(
+  settledResultsOrErrors: PromiseSettledResult<any>[] | Error[]
+): string[] {
+  try {
+    const rejections = settledResultsOrErrors.flatMap((result) => {
+      if (result instanceof Error) {
+        return result;
+      }
+      if (result.status === "rejected") {
+        return result.reason;
+      }
+      return [];
+    });
+    return rejections.flatMap((reason, idx) =>
+      flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`)
+    );
+  } catch (err) {
+    return [];
+  }
+}
+
+export function getSwapQuoteUnavailableError(errors: Error[]) {
+  if (errors.length === 1 && errors[0] instanceof SwapQuoteUnavailableError) {
+    return errors[0];
+  }
+
+  const upstreamSwapProviderErrors = errors.filter(
+    (error) => error instanceof UpstreamSwapProviderError
+  );
+
+  // Generic error message for when no swap quotes are available
+  if (upstreamSwapProviderErrors.length === 0) {
+    return new SwapQuoteUnavailableError(
+      {
+        message: "No swap quotes currently available",
+        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+      },
+      {
+        cause: errors,
+      }
+    );
+  }
+
+  // Map upstream swap provider errors to AcrossApiErrors
+  const upstreamErrorToAcrossApiError = {
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.INSUFFICIENT_LIQUIDITY]: {
+      message: "Insufficient liquidity",
+      code: AcrossErrorCode.SWAP_LIQUIDITY_INSUFFICIENT,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE]: {
+      message: "No possible route",
+      code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE]: {
+      message: "Service unavailable",
+      code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR]: {
+      message: "Unknown error",
+      code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+    },
+  };
+
+  for (const [code, mapping] of Object.entries(upstreamErrorToAcrossApiError)) {
+    const errors = upstreamSwapProviderErrors.filter(
+      (error) => error.code === code
+    );
+    if (errors.length > 0) {
+      return new SwapQuoteUnavailableError(
+        {
+          message: mapping.message,
+          code: mapping.code,
+        },
+        {
+          cause: errors,
+        }
+      );
+    }
+  }
+
+  return new SwapQuoteUnavailableError(
+    {
+      message: "No swap quotes currently available",
+      code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+    },
+    { cause: errors }
+  );
 }

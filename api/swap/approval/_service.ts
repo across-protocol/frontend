@@ -1,11 +1,13 @@
-import { BigNumber, constants } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Span } from "@opentelemetry/api";
 
 import {
+  getCachedTokenPrice,
   getProvider,
   InputError,
   latestGasPriceCache,
   getLogger,
+  getWrappedNativeTokenAddress,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
@@ -53,14 +55,16 @@ export async function handleApprovalSwap(
     recipient,
     depositor,
     slippageTolerance,
-    refundToken,
     excludeSources,
     includeSources,
+    appFeePercent,
+    appFeeRecipient,
   } = await handleBaseSwapQueryParams(request.query);
 
-  if (request.body) {
-    handleSwapBody(request.body);
-  }
+  const { actions } =
+    request.body && Object.keys(request.body).length > 0
+      ? handleSwapBody(request.body, Number(request.query.destinationChainId))
+      : { actions: [] };
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -69,7 +73,7 @@ export async function handleApprovalSwap(
       outputToken,
       depositor,
       recipient: recipient || depositor,
-      slippageTolerance: Number(slippageTolerance),
+      slippageTolerance,
       type: amountType,
       refundOnOrigin,
       refundAddress,
@@ -77,6 +81,9 @@ export async function handleApprovalSwap(
       isOutputNative,
       excludeSources,
       includeSources,
+      embeddedActions: actions,
+      appFeePercent,
+      appFeeRecipient,
     },
     quoteFetchStrategies
   );
@@ -94,12 +101,18 @@ export async function handleApprovalSwap(
     integratorId
   );
 
-  const { originSwapQuote, bridgeQuote, destinationSwapQuote, crossSwap } =
-    crossSwapQuotes;
+  const {
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    crossSwap,
+    appFee,
+  } = crossSwapQuotes;
 
   const originChainId = crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwap.outputToken.chainId;
   const inputTokenAddress = isInputNative
-    ? constants.AddressZero
+    ? ethers.constants.AddressZero
     : crossSwap.inputToken.address;
   const inputAmount =
     originSwapQuote?.maximumAmountIn || bridgeQuote.inputAmount;
@@ -123,17 +136,100 @@ export async function handleApprovalSwap(
         maxPriorityFeePerGas: BigNumber;
       }
     | undefined;
+  let inputTokenPriceUsd: number;
+  let outputTokenPriceUsd: number;
+  let originNativePriceUsd: number;
+  let destinationNativePriceUsd: number;
+  let bridgeQuoteInputTokenPriceUsd: number;
+
   if (isSwapTxEstimationPossible) {
     const provider = getProvider(originChainId);
-    [originTxGas, originTxGasPrice] = await Promise.all([
+    [
+      originTxGas,
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
+    ] = await Promise.all([
       provider.estimateGas({
         ...crossSwapTx,
         from: crossSwap.depositor,
       }),
       latestGasPriceCache(originChainId).get(),
+      getCachedTokenPrice(
+        inputToken.address,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        outputToken.address,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        getWrappedNativeTokenAddress(inputToken.chainId),
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        getWrappedNativeTokenAddress(outputToken.chainId),
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        bridgeQuote.inputToken.address,
+        "usd",
+        undefined,
+        bridgeQuote.inputToken.chainId
+      ),
     ]);
   } else {
-    originTxGasPrice = await latestGasPriceCache(originChainId).get();
+    [
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
+    ] = await Promise.all([
+      latestGasPriceCache(originChainId).get(),
+      getCachedTokenPrice(
+        inputToken.address,
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        outputToken.address,
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        getWrappedNativeTokenAddress(inputToken.chainId),
+        "usd",
+        undefined,
+        inputToken.chainId
+      ),
+      getCachedTokenPrice(
+        getWrappedNativeTokenAddress(outputToken.chainId),
+        "usd",
+        undefined,
+        outputToken.chainId
+      ),
+      getCachedTokenPrice(
+        bridgeQuote.inputToken.address,
+        "usd",
+        undefined,
+        bridgeQuote.inputToken.chainId
+      ),
+    ]);
   }
 
   let approvalTxns:
@@ -144,7 +240,7 @@ export async function handleApprovalSwap(
       }[]
     | undefined;
   // @TODO: Allow for just enough approval amount to be set.
-  const approvalAmount = constants.MaxUint256;
+  const approvalAmount = ethers.constants.MaxUint256;
   if (allowance.lt(inputAmount)) {
     approvalTxns = getApprovalTxns({
       allowance,
@@ -154,10 +250,11 @@ export async function handleApprovalSwap(
     });
   }
 
-  const responseJson = buildBaseSwapResponseJson({
-    crossSwapType,
+  const responseJson = await buildBaseSwapResponseJson({
     amountType,
+    amount,
     originChainId,
+    destinationChainId,
     inputTokenAddress,
     inputAmount,
     approvalSwapTx: {
@@ -171,8 +268,17 @@ export async function handleApprovalSwap(
     approvalTxns,
     originSwapQuote,
     bridgeQuote,
+    refundOnOrigin,
     destinationSwapQuote,
-    refundToken,
+    appFeePercent,
+    appFee,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+    bridgeQuoteInputTokenPriceUsd,
+    crossSwapType,
+    logger,
   });
 
   if (span) {
@@ -217,6 +323,13 @@ function setSpanAttributes(
 
   if (responseJson.steps.originSwap) {
     span.setAttribute(
+      "swap.originSwap.route",
+      [
+        responseJson.steps.originSwap.tokenIn.symbol,
+        responseJson.steps.originSwap.tokenOut.symbol,
+      ].join(" -> ")
+    );
+    span.setAttribute(
       "swap.originSwap.swapProvider.name",
       responseJson.steps.originSwap.swapProvider.name
     );
@@ -227,6 +340,13 @@ function setSpanAttributes(
   }
 
   if (responseJson.steps.destinationSwap) {
+    span.setAttribute(
+      "swap.destinationSwap.route",
+      [
+        responseJson.steps.destinationSwap.tokenIn.symbol,
+        responseJson.steps.destinationSwap.tokenOut.symbol,
+      ].join(" -> ")
+    );
     span.setAttribute(
       "swap.destinationSwap.swapProvider.name",
       responseJson.steps.destinationSwap.swapProvider.name

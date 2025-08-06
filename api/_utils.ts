@@ -1108,12 +1108,13 @@ export async function getBridgeQuoteForExactInput(params: {
   };
 }
 
-export async function getBridgeQuoteForMinOutput(params: {
+export async function getBridgeQuoteForOutput(params: {
   inputToken: Token;
   outputToken: Token;
   minOutputAmount: BigNumber;
   recipient?: string;
   message?: string;
+  forceExactOutput?: boolean;
 }) {
   const maxTries = 3;
   const tryChunkSize = 3;
@@ -1191,9 +1192,47 @@ export async function getBridgeQuoteForMinOutput(params: {
       params.outputToken.decimals
     )(adjustedInputAmount.sub(finalQuote.totalRelayFee.total));
 
+    // If forceExactOutput, we'll hardcode the output amount to the minOutputAmount
+    // so we need to adjust fees to reflect that
+    if (params.forceExactOutput) {
+      // Calculate the difference and add to fees
+      const excessOutput = finalOutputAmount.sub(params.minOutputAmount);
+
+      const excessInput = ConvertDecimals(
+        params.outputToken.decimals,
+        params.inputToken.decimals
+      )(excessOutput);
+
+      // Adjust fees by adding the excess
+      const adjustedRelayerCapitalFeeTotal = BigNumber.from(
+        finalQuote.relayerCapitalFee.total
+      ).add(excessInput);
+      const adjustedTotalRelayFeeTotal = BigNumber.from(
+        finalQuote.totalRelayFee.total
+      ).add(excessInput);
+
+      // Calculate new percentages based on adjusted totals
+      const adjustedRelayerCapitalFeePct = adjustedRelayerCapitalFeeTotal
+        .mul(utils.parseEther("1"))
+        .div(adjustedInputAmount);
+      const adjustedTotalRelayFeePct = adjustedTotalRelayFeeTotal
+        .mul(utils.parseEther("1"))
+        .div(adjustedInputAmount);
+
+      // Update the quote with the adjusted values
+      finalQuote.relayerCapitalFee.total =
+        adjustedRelayerCapitalFeeTotal.toString();
+      finalQuote.relayerCapitalFee.pct =
+        adjustedRelayerCapitalFeePct.toString();
+      finalQuote.totalRelayFee.total = adjustedTotalRelayFeeTotal.toString();
+      finalQuote.totalRelayFee.pct = adjustedTotalRelayFeePct.toString();
+    }
+
     return {
       inputAmount: adjustedInputAmount,
-      outputAmount: finalOutputAmount,
+      outputAmount: params.forceExactOutput
+        ? params.minOutputAmount
+        : finalOutputAmount,
       minOutputAmount: params.minOutputAmount,
       suggestedFees: finalQuote,
       message: params.message,
@@ -2845,55 +2884,6 @@ export function addTimeoutToPromise<T>(
     }, delay);
   });
   return Promise.race([promise, timeout]);
-}
-
-export function flattenErrors(reason: any, depth: number = 0): string[] {
-  if (
-    reason instanceof AggregateError &&
-    Array.isArray(reason.errors) &&
-    depth < 1
-  ) {
-    return reason.errors.flatMap((error) => flattenErrors(error, depth + 1));
-  }
-  const response = reason.response;
-  if (reason.isAxiosError && response) {
-    const responseData = response.data;
-    const responseMessage =
-      responseData.message ||
-      responseData.detail ||
-      JSON.stringify(responseData);
-    return [
-      `AxiosError: status: ${response.status}, details: ${responseMessage}`,
-    ];
-  }
-
-  if (reason instanceof AcrossApiError) {
-    return [
-      `AcrossApiError: status: ${reason.status}, code: ${reason.code}, message: ${reason.message}`,
-    ];
-  }
-  return [reason.toString()];
-}
-
-export function getRejectedReasons(
-  settledResultsOrErrors: PromiseSettledResult<any>[] | Error[]
-): string[] {
-  try {
-    const rejections = settledResultsOrErrors.flatMap((result) => {
-      if (result instanceof Error) {
-        return result;
-      }
-      if (result.status === "rejected") {
-        return result.reason;
-      }
-      return [];
-    });
-    return rejections.flatMap((reason, idx) =>
-      flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`)
-    );
-  } catch (err) {
-    return [];
-  }
 }
 
 export type PooledToken = {
