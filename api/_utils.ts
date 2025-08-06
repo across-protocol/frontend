@@ -955,7 +955,8 @@ export const getCachedTokenPrice = async (
   l1Token: string,
   baseCurrency: string = "eth",
   historicalDateISO?: string,
-  chainId?: number
+  chainId?: number,
+  fallbackResolver?: string
 ): Promise<number> => {
   return Number(
     (
@@ -965,6 +966,7 @@ export const getCachedTokenPrice = async (
           chainId,
           baseCurrency,
           date: historicalDateISO,
+          fallbackResolver,
         },
         headers: getVercelHeaders(),
       })
