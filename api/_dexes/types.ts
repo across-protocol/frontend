@@ -51,8 +51,8 @@ export type SupportedDex =
   | "uniswap"
   | "uniswap-v3/swap-router-02"
   | "uniswap-v3/universal-router"
-  | "gho"
   | "gho-multicall3"
+  | "wrapped-gho"
   | "lifi"
   | "0x";
 

@@ -5,18 +5,15 @@ import {
   MULTICALL3_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "../../_constants";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
-import {
-  getMulticall3,
-  getMulticall3Address,
-  getSpokePoolAddress,
-} from "../../_utils";
+import { getMulticall3, getMulticall3Address } from "../../_utils";
 import { QuoteFetchStrategy, Swap } from "../types";
 import { getWghoContract } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
 import { getErc20 } from "../../_erc20";
-import { makeGetSources } from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+
+const SWAP_PROVIDER_NAME = "gho-multicall3";
 
 /**
  * Returns a swap quote fetch strategy for handling Stable -> GHO swaps.
@@ -29,29 +26,14 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     };
   };
 
-  const getOriginEntryPoints = (chainId: number) => {
-    return {
-      originSwapInitialRecipient: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("gho-multicall3", chainId),
-      },
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("gho-multicall3", chainId),
-        dex: "gho-multicall3",
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
-      },
-    } as const;
-  };
+  const getOriginEntryPoints = (chainId: number) =>
+    getOriginSwapEntryPoints("SpokePoolPeriphery", chainId, SWAP_PROVIDER_NAME);
 
   const getSources = makeGetSources({
-    strategy: "gho-multicall3",
+    strategy: SWAP_PROVIDER_NAME,
     sources: {
       [CHAIN_IDs.MAINNET]: [
-        { key: "gho-multicall3", names: ["gho-multicall3"] },
+        { key: SWAP_PROVIDER_NAME, names: [SWAP_PROVIDER_NAME] },
       ],
     },
   });
@@ -106,7 +88,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
 
     // 2. Perform swap via Uniswap Stable -> GHO
     const swapRouter02Strategy = getSwapRouter02Strategy(
-      "UniversalSwapAndBridge",
+      "SpokePoolPeriphery",
       "trading-api"
     );
     const ghoSwap = {
@@ -188,14 +170,14 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       slippageTolerance: swap.slippageTolerance,
       swapTxns: [aggregateTx],
       swapProvider: {
-        name: "gho-multicall3",
-        sources: ["gho-multicall3", "uniswap_v3"],
+        name: SWAP_PROVIDER_NAME,
+        sources: [SWAP_PROVIDER_NAME, "uniswap_v3"],
       },
     };
   };
 
   return {
-    strategyName: "gho-multicall3",
+    strategyName: SWAP_PROVIDER_NAME,
     getRouter,
     getOriginEntryPoints,
     fetchFn,
