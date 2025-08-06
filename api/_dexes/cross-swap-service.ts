@@ -43,7 +43,7 @@ import {
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
-const PROMISE_TIMEOUT_MS = 15_000;
+const PROMISE_TIMEOUT_MS = 20_000;
 
 const logger = getLogger();
 
