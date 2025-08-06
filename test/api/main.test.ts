@@ -40,7 +40,7 @@ describe("API Test", () => {
   });
 
   test("suggested-fees has no load-time errors", async () => {
-    await feesHandler(request as TypedVercelRequest<any>, response);
+    await feesHandler(request as TypedVercelRequest<any, any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining(/At path: amount/)
