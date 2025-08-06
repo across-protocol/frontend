@@ -1069,12 +1069,17 @@ export async function getSuggestedFees(params: {
   };
   outputAmount: string;
 }> {
-  const { message, ...rest } = params;
+  const { message, ...paramsWithoutMessage } = params;
+  // Vercel imposes a 14KB URL length limit (https://vercel.com/docs/errors/URL_TOO_LONG)
+  // We use a POST request to avoid this limit if message is too long.
+  const maxLength = 25_000; // ~14KB
+  const isMessageTooLong = message && message.length > maxLength;
+
   return (
     await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
-      params: rest,
-      method: "POST",
-      data: message ? { message } : undefined,
+      params: isMessageTooLong ? paramsWithoutMessage : params,
+      method: isMessageTooLong ? "POST" : "GET",
+      data: isMessageTooLong ? { message } : undefined,
     })
   ).data;
 }
