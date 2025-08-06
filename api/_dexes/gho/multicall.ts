@@ -140,7 +140,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     // 3.2. Perform wrap
     const wrapCall = {
       callData: wgho.interface.encodeFunctionData("depositFor", [
-        getOriginEntryPoints(chainId).swapAndBridge.address,
+        getOriginEntryPoints(chainId).originSwapInitialRecipient.address,
         amountToWrap,
       ]),
       target: wgho.address,
