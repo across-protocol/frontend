@@ -679,7 +679,10 @@ export async function getCrossSwapQuotesForOutputA2B(
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
     recipient: getMultiCallHandlerAddress(destinationChainId),
-    message: buildExactOutputBridgeTokenMessage(crossSwapWithAppFee),
+    message:
+      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
+        ? buildExactOutputBridgeTokenMessage(crossSwapWithAppFee)
+        : buildMinOutputBridgeTokenMessage(crossSwapWithAppFee),
   });
 
   const strategyFetches = results.map((result) => {
@@ -733,23 +736,12 @@ export async function getCrossSwapQuotesForOutputA2B(
     appFeeRecipient: crossSwapWithAppFee.appFeeRecipient,
     isNative: crossSwapWithAppFee.isOutputNative,
   });
-  if (
-    crossSwapWithAppFee.type === AMOUNT_TYPE.MIN_OUTPUT &&
-    (crossSwapWithAppFee.isOutputNative || appFee.feeAmount.gt(0))
-  ) {
-    bridgeQuote.message = buildMinOutputBridgeTokenMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
-  }
-  if (
-    crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT &&
-    appFee.feeAmount.gt(0)
-  ) {
-    bridgeQuote.message = buildExactOutputBridgeTokenMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
+
+  if (appFee.feeAmount.gt(0)) {
+    bridgeQuote.message =
+      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
+        ? buildExactOutputBridgeTokenMessage(crossSwapWithAppFee, appFee)
+        : buildMinOutputBridgeTokenMessage(crossSwapWithAppFee, appFee);
   }
 
   return {
