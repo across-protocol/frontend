@@ -555,25 +555,54 @@ export function buildDestinationSwapCrossChainMessage({
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
   if (crossSwap.isOutputNative) {
-    // Unwrap all balance using MulticallHandler's makeCallWithBalance
-    unwrapActions = [
-      {
-        target: multicallHandlerAddress,
-        callData: encodeWithdrawAllWethCalldata(crossSwap.outputToken.address),
-        value: "0",
-      },
-    ];
-    // Send all native tokens to the recipient
-    transferActions = [
-      {
-        target: multicallHandlerAddress,
-        callData: encodeDrainCalldata(
-          constants.AddressZero, // Drain native token
-          crossSwap.recipient
-        ),
-        value: "0",
-      },
-    ];
+    if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT) {
+      // If trade type is EXACT_OUTPUT, unwrap only the needed amount of WETH to cover the desired output amount,
+      // transfer the unwrapped WETH to the recipient and drain the remaining WETH from the MultiCallHandler.
+      unwrapActions = [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(remainingOutputAmount),
+          value: "0",
+        },
+      ];
+      transferActions = [
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: remainingOutputAmount.toString(),
+        },
+        {
+          target: multicallHandlerAddress,
+          callData: encodeDrainCalldata(
+            crossSwap.outputToken.address,
+            crossSwap.recipient
+          ),
+          value: "0",
+        },
+      ];
+    } else {
+      // If trade type is MIN_OUTPUT or EXACT_INPUT, we can unwrap all balance using MulticallHandler's makeCallWithBalance
+      // and send all native tokens to the recipient using a drain call.
+      unwrapActions = [
+        {
+          target: multicallHandlerAddress,
+          callData: encodeWithdrawAllWethCalldata(
+            crossSwap.outputToken.address
+          ),
+          value: "0",
+        },
+      ];
+      transferActions = [
+        {
+          target: multicallHandlerAddress,
+          callData: encodeDrainCalldata(
+            constants.AddressZero, // Drain native token
+            crossSwap.recipient
+          ),
+          value: "0",
+        },
+      ];
+    }
   }
   // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
   // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
