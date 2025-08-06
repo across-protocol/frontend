@@ -32,7 +32,7 @@ describe("API Test", () => {
   });
 
   test("limits has no load-time errors", async () => {
-    await limitsHandler(request as TypedVercelRequest<any>, response);
+    await limitsHandler(request as TypedVercelRequest<any, any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining(/At path: destinationChainId/)

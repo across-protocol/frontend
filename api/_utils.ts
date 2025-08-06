@@ -94,6 +94,7 @@ type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 import { getEnvs } from "./_env";
+import { isMessageTooLong } from "./_message";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1006,20 +1007,28 @@ export const getCachedLimits = async (
     gasFeeTotal: string;
   };
 }> => {
+  const messageTooLong = isMessageTooLong(message ?? "");
+
+  const params = {
+    inputToken,
+    outputToken,
+    originChainId,
+    destinationChainId,
+    amount,
+    message,
+    recipient,
+    relayer,
+    allowUnmatchedDecimals,
+  };
+
+  const { message: _message, ...paramsWithoutMessage } = params;
+
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
       headers: getVercelHeaders(),
-      params: {
-        inputToken,
-        outputToken,
-        originChainId,
-        destinationChainId,
-        amount,
-        message,
-        recipient,
-        relayer,
-        allowUnmatchedDecimals,
-      },
+      params: messageTooLong ? paramsWithoutMessage : params,
+      method: messageTooLong ? "POST" : "GET",
+      data: messageTooLong ? { message: _message } : undefined,
     })
   ).data;
 };
@@ -1070,16 +1079,13 @@ export async function getSuggestedFees(params: {
   outputAmount: string;
 }> {
   const { message, ...paramsWithoutMessage } = params;
-  // Vercel imposes a 14KB URL length limit (https://vercel.com/docs/errors/URL_TOO_LONG)
-  // We use a POST request to avoid this limit if message is too long.
-  const maxLength = 25_000; // ~14KB
-  const isMessageTooLong = message && message.length > maxLength;
+  const tooLong = isMessageTooLong(message ?? "");
 
   return (
     await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
-      params: isMessageTooLong ? paramsWithoutMessage : params,
-      method: isMessageTooLong ? "POST" : "GET",
-      data: isMessageTooLong ? { message } : undefined,
+      params: tooLong ? paramsWithoutMessage : params,
+      method: tooLong ? "POST" : "GET",
+      data: tooLong ? { message } : undefined,
     })
   ).data;
 }
