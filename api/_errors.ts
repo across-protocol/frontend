@@ -528,6 +528,9 @@ export function getSwapQuoteUnavailableError(errors: Error[]) {
     return errors[0];
   }
 
+  const swapQuoteUnavailableErrors = errors.filter(
+    (error) => error instanceof SwapQuoteUnavailableError
+  );
   const upstreamSwapProviderErrors = errors.filter(
     (error) => error instanceof UpstreamSwapProviderError
   );
@@ -580,6 +583,10 @@ export function getSwapQuoteUnavailableError(errors: Error[]) {
         }
       );
     }
+  }
+
+  if (swapQuoteUnavailableErrors.length > 0) {
+    return swapQuoteUnavailableErrors[0];
   }
 
   return new SwapQuoteUnavailableError(
