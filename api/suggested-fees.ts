@@ -102,7 +102,10 @@ const handler = async (
       const hubPool = getHubPool(provider);
 
       assert(query, SuggestedFeesQueryParamsSchema);
-      assert(body, SuggestedFeesBodySchema);
+
+      if (body) {
+        assert(body, SuggestedFeesBodySchema);
+      }
 
       let {
         amount: amountInput,
@@ -112,7 +115,7 @@ const handler = async (
         relayer,
         message: _messageFromQuery,
       } = query;
-      const { message: _messageFromBody } = body;
+      const { message: _messageFromBody } = body ?? {};
 
       const message = _messageFromQuery || _messageFromBody;
 

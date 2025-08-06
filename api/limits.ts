@@ -90,7 +90,10 @@ const handler = async (
       const provider = getProvider(HUB_POOL_CHAIN_ID);
 
       assert(query, LimitsQueryParamsSchema);
-      assert(body, LimitsBodySchema);
+
+      if (body) {
+        assert(body, LimitsBodySchema);
+      }
 
       const {
         destinationChainId,
@@ -114,7 +117,7 @@ const handler = async (
         relayer,
         message: _messageFromQuery,
       } = query;
-      const { message: _messageFromBody } = body;
+      const { message: _messageFromBody } = body ?? {};
 
       const message = _messageFromQuery || _messageFromBody;
 
