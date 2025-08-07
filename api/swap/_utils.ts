@@ -583,7 +583,7 @@ export function calculateSwapFees(params: {
   destinationNativePriceUsd: number;
   bridgeQuoteInputTokenPriceUsd: number;
   appFeeTokenPriceUsd: number;
-  outputAmount: BigNumber;
+  minOutputAmountSansAppFees: BigNumber;
   originChainId: number;
   destinationChainId: number;
   logger: Logger;
@@ -593,7 +593,6 @@ export function calculateSwapFees(params: {
     originSwapQuote,
     bridgeQuote,
     destinationSwapQuote,
-    appFeePercent,
     appFee,
     originTxGas,
     originTxGasPrice,
@@ -603,7 +602,7 @@ export function calculateSwapFees(params: {
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
     appFeeTokenPriceUsd,
-    outputAmount,
+    minOutputAmountSansAppFees,
     originChainId,
     destinationChainId,
     logger,
@@ -648,6 +647,7 @@ export function calculateSwapFees(params: {
     const relayerCapital = bridgeFees.relayerCapitalFee;
     const destinationGas = bridgeFees.relayerGasFee;
     const lpFee = bridgeFees.lpFee;
+    const relayerTotal = bridgeFees.totalRelayFee;
 
     const originGasToken = getNativeTokenInfo(originChainId);
     const destinationGasToken = getNativeTokenInfo(destinationChainId);
@@ -672,20 +672,17 @@ export function calculateSwapFees(params: {
       ) * bridgeQuoteInputTokenPriceUsd;
     const relayerTotalUsd =
       parseFloat(
-        utils.formatUnits(
-          bridgeFees.totalRelayFee.total,
-          bridgeQuote.inputToken.decimals
-        )
+        utils.formatUnits(relayerTotal.total, bridgeQuote.inputToken.decimals)
       ) * bridgeQuoteInputTokenPriceUsd;
     const inputAmountUsd =
       parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
       inputTokenPriceUsd;
-    const outputAmountUsd =
-      parseFloat(utils.formatUnits(outputAmount, outputToken.decimals)) *
-      outputTokenPriceUsd;
+    const outputMinAmountSansAppFeesUsd =
+      parseFloat(
+        utils.formatUnits(minOutputAmountSansAppFees, outputToken.decimals)
+      ) * outputTokenPriceUsd;
 
-    const totalFeeUsd =
-      inputAmountUsd - (outputAmountUsd - relayerTotalUsd - appFeeUsd);
+    const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
     const totalFeePct = totalFeeUsd / inputAmountUsd;
     const totalFeeAmount = inputAmount
       .mul(utils.parseEther(totalFeePct.toFixed(18)))
@@ -740,7 +737,7 @@ export function calculateSwapFees(params: {
         token: bridgeQuote.inputToken,
       },
       relayerTotal: {
-        amount: bridgeFees.totalRelayFee.total,
+        amount: relayerTotal.total,
         amountUsd: ethers.utils.formatEther(
           ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
         ),
@@ -754,7 +751,7 @@ export function calculateSwapFees(params: {
         amountUsd: ethers.utils.formatEther(
           ethers.utils.parseEther(appFeeUsd.toFixed(18))
         ),
-        pct: ethers.utils.parseEther((appFeePercent || 0).toFixed(18)),
+        pct: ethers.utils.parseEther((appFeeUsd / inputAmountUsd).toFixed(18)),
         token: appFeeToken,
       },
     };
@@ -836,6 +833,26 @@ export function buildBaseSwapResponseJson(params: {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
+
+  const minOutputAmount =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : (params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount);
+  const minOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : minOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+  const expectedOutputAmount =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : (params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount);
+  const expectedOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : expectedOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
@@ -923,28 +940,18 @@ export function buildBaseSwapResponseJson(params: {
       destinationNativePriceUsd: params.destinationNativePriceUsd,
       bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
       appFeeTokenPriceUsd: params.outputTokenPriceUsd,
-      outputAmount:
-        params.destinationSwapQuote?.minAmountOut ??
-        params.bridgeQuote.outputAmount,
+      minOutputAmountSansAppFees,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
       logger: params.logger,
     }),
     inputAmount:
-      params.amountType === "exactInput"
+      params.amountType === AMOUNT_TYPE.EXACT_INPUT
         ? params.amount
         : (params.originSwapQuote?.expectedAmountIn ??
           params.bridgeQuote.inputAmount),
-    expectedOutputAmount:
-      params.amountType === "exactOutput"
-        ? params.amount
-        : (params.destinationSwapQuote?.expectedAmountOut ??
-          params.bridgeQuote.outputAmount),
-    minOutputAmount:
-      params.amountType === "exactOutput"
-        ? params.amount
-        : (params.destinationSwapQuote?.minAmountOut ??
-          params.bridgeQuote.outputAmount),
+    expectedOutputAmount: expectedOutputAmountSansAppFees,
+    minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     swapTx: params.approvalSwapTx
       ? {
