@@ -80,6 +80,25 @@ export function encodeDrainCalldata(token: string, destination: string) {
   ]);
 }
 
+/**
+ * Encodes calldata for withdrawing all wrapped native tokens using MulticallHandler's makeCallWithBalance
+ * @param token - The wrapped native token contract address
+ */
+export function encodeWithdrawAllWethCalldata(token: string) {
+  return encodeMakeCallWithBalanceCalldata(
+    token,
+    encodeWethWithdrawCalldata(BigNumber.from(0)), // Placeholder amount, will be replaced
+    "0", // No ETH value needed for this call
+    // Replacement instructions to dynamically set the balance to withdraw:
+    [
+      {
+        token,
+        offset: 4, // Amount is the only parameter, so just skip the first 4 bytes which are the function selector
+      },
+    ]
+  );
+}
+
 export function encodeMakeCallWithBalanceCalldata(
   target: string,
   callData: string,

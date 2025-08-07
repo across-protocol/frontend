@@ -10,7 +10,6 @@ import {
   addTimeoutToPromise,
   getLogger,
   addMarkupToAmount,
-  ConvertDecimals,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -135,13 +134,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
     recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
-    message: buildExactInputBridgeTokenMessage(
-      crossSwap,
-      ConvertDecimals(
-        crossSwap.inputToken.decimals,
-        crossSwap.outputToken.decimals
-      )(crossSwap.amount)
-    ),
+    message: buildExactInputBridgeTokenMessage(crossSwap),
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -158,11 +151,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = buildExactInputBridgeTokenMessage(
-    crossSwap,
-    bridgeQuote.outputAmount,
-    appFee
-  );
+  bridgeQuote.message = buildExactInputBridgeTokenMessage(crossSwap, appFee);
 
   return {
     crossSwap,
@@ -215,11 +204,7 @@ export async function getCrossSwapQuotesForOutputB2B(
     isNative: crossSwap.isOutputNative,
   });
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    bridgeQuote.message = buildMinOutputBridgeTokenMessage(
-      crossSwap,
-      bridgeQuote.outputAmount,
-      appFee
-    );
+    bridgeQuote.message = buildMinOutputBridgeTokenMessage(crossSwap, appFee);
   }
   if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT && appFee.feeAmount.gt(0)) {
     bridgeQuote.message = buildExactOutputBridgeTokenMessage(crossSwap, appFee);
@@ -627,13 +612,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
     recipient: getMultiCallHandlerAddress(destinationChainId),
-    message: buildExactInputBridgeTokenMessage(
-      crossSwap,
-      ConvertDecimals(
-        prioritizedStrategy.originSwapQuote.tokenOut.decimals,
-        crossSwap.outputToken.decimals
-      )(prioritizedStrategy.originSwapQuote.minAmountOut)
-    ),
+    message: buildExactInputBridgeTokenMessage(crossSwap),
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -650,11 +629,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isInputNative,
   });
-  bridgeQuote.message = buildExactInputBridgeTokenMessage(
-    crossSwap,
-    bridgeQuote.outputAmount,
-    appFee
-  );
+  bridgeQuote.message = buildExactInputBridgeTokenMessage(crossSwap, appFee);
 
   return {
     crossSwap,
@@ -703,7 +678,10 @@ export async function getCrossSwapQuotesForOutputA2B(
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
     recipient: getMultiCallHandlerAddress(destinationChainId),
-    message: buildExactOutputBridgeTokenMessage(crossSwapWithAppFee),
+    message:
+      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
+        ? buildExactOutputBridgeTokenMessage(crossSwapWithAppFee)
+        : buildMinOutputBridgeTokenMessage(crossSwapWithAppFee),
   });
 
   const strategyFetches = results.map((result) => {
@@ -757,24 +735,12 @@ export async function getCrossSwapQuotesForOutputA2B(
     appFeeRecipient: crossSwapWithAppFee.appFeeRecipient,
     isNative: crossSwapWithAppFee.isOutputNative,
   });
-  if (
-    crossSwapWithAppFee.type === AMOUNT_TYPE.MIN_OUTPUT &&
-    (crossSwapWithAppFee.isOutputNative || appFee.feeAmount.gt(0))
-  ) {
-    bridgeQuote.message = buildMinOutputBridgeTokenMessage(
-      crossSwapWithAppFee,
-      bridgeQuote.outputAmount,
-      appFee
-    );
-  }
-  if (
-    crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT &&
-    appFee.feeAmount.gt(0)
-  ) {
-    bridgeQuote.message = buildExactOutputBridgeTokenMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
+
+  if (appFee.feeAmount.gt(0)) {
+    bridgeQuote.message =
+      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
+        ? buildExactOutputBridgeTokenMessage(crossSwapWithAppFee, appFee)
+        : buildMinOutputBridgeTokenMessage(crossSwapWithAppFee, appFee);
   }
 
   return {
