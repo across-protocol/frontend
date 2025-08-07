@@ -10,7 +10,6 @@ import {
   addTimeoutToPromise,
   getLogger,
   addMarkupToAmount,
-  ConvertDecimals,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
