@@ -10,6 +10,7 @@ import {
   addTimeoutToPromise,
   getLogger,
   addMarkupToAmount,
+  ConvertDecimals,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -246,7 +247,10 @@ export async function getCrossSwapQuotesForExactInputB2A(
         await result.destinationStrategy.fetchFn(
           {
             ...result.destinationSwap,
-            amount: crossSwap.amount.toString(),
+            amount: ConvertDecimals(
+              crossSwap.inputToken.decimals,
+              result.destinationSwap.tokenIn.decimals
+            )(crossSwap.amount).toString(),
           },
           TradeType.EXACT_INPUT,
           { sources }
