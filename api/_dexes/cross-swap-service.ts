@@ -147,7 +147,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
   if (bridgeQuote.outputAmount.lt(0)) {
     throw new SwapAmountTooLowForBridgeFeesError({
       bridgeAmount: crossSwap.amount.toString(),
-      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
     });
   }
 
@@ -309,7 +309,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
   if (bridgeQuote.outputAmount.lt(0)) {
     throw new SwapAmountTooLowForBridgeFeesError({
       bridgeAmount: crossSwap.amount.toString(),
-      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
     });
   }
 
@@ -639,7 +639,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
   if (bridgeQuote.outputAmount.lt(0)) {
     throw new SwapAmountTooLowForBridgeFeesError({
       bridgeAmount: prioritizedStrategy.originSwapQuote.minAmountOut.toString(),
-      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
     });
   }
 
@@ -1080,7 +1080,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     throw new SwapAmountTooLowForBridgeFeesError({
       bridgeAmount:
         prioritizedOriginStrategy.originSwapQuote.minAmountOut.toString(),
-      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.toString(),
+      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
     });
   }
 
@@ -1555,7 +1555,12 @@ async function selectBestCrossSwapQuote(
   crossSwap: CrossSwap
 ): Promise<CrossSwapQuotes> {
   const crossSwapQuotePromisesWithTimeout = crossSwapQuotePromises.map(
-    (promise) => addTimeoutToPromise(promise, PROMISE_TIMEOUT_MS)
+    (promise) =>
+      addTimeoutToPromise(
+        promise,
+        PROMISE_TIMEOUT_MS,
+        "Timeout while fetching swap quotes from providers"
+      )
   );
   const crossSwapQuotes = await Promise.allSettled(
     crossSwapQuotePromisesWithTimeout
