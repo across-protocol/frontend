@@ -83,6 +83,7 @@ import {
   HttpErrorToStatusCode,
   AcrossErrorCode,
   TokenNotFoundError,
+  UpstreamTimeoutError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
 import { isEvmAddress, isSvmAddress } from "./_address";
@@ -2874,11 +2875,16 @@ export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
 
 export function addTimeoutToPromise<T>(
   promise: Promise<T>,
-  delay: number
+  delay: number,
+  timeOutMessage?: string
 ): Promise<T> {
   const timeout = new Promise<T>((_, reject) => {
     setTimeout(() => {
-      reject(new Error("Promise timed out"));
+      reject(
+        new UpstreamTimeoutError({
+          message: timeOutMessage ?? "Promise timed out",
+        })
+      );
     }, delay);
   });
   return Promise.race([promise, timeout]);

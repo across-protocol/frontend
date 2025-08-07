@@ -47,6 +47,8 @@ export const AcrossErrorCode = {
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
   UPSTREAM_HTTP_ERROR: "UPSTREAM_HTTP_ERROR",
+  UPSTREAM_GATEWAY_TIMEOUT: "UPSTREAM_GATEWAY_TIMEOUT",
+  UNEXPECTED_ERROR: "UNEXPECTED_ERROR",
 } as const;
 
 export class AcrossApiError extends Error {
@@ -267,6 +269,60 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
   }
 }
 
+export class UpstreamTimeoutError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_GATEWAY_TIMEOUT,
+        status: HttpErrorToStatusCode.GATEWAY_TIMEOUT,
+      },
+      opts
+    );
+  }
+}
+
+export class UpstreamHttpError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+        status: HttpErrorToStatusCode.BAD_GATEWAY,
+      },
+      opts
+    );
+  }
+}
+
+export class UpstreamRpcError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_RPC_ERROR,
+        status: HttpErrorToStatusCode.BAD_GATEWAY,
+      },
+      opts
+    );
+  }
+}
+
+export class UnexpectedError extends AcrossApiError {
+  constructor(args: { message?: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message:
+          args.message ??
+          "Unexpected error occurred. Please try again later or contact support.",
+        code: AcrossErrorCode.UNEXPECTED_ERROR,
+        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
+      },
+      opts
+    );
+  }
+}
+
 export const UPSTREAM_SWAP_PROVIDER_ERRORS = {
   INSUFFICIENT_LIQUIDITY: "INSUFFICIENT_LIQUIDITY",
   NO_POSSIBLE_ROUTE: "NO_POSSIBLE_ROUTE",
@@ -331,6 +387,7 @@ export function handleErrorCondition(
   // Handle axios errors
   else if (error instanceof AxiosError) {
     const { response } = error;
+    const compactError = compactAxiosError(error);
 
     // If upstream error is an AcrossApiError, we just return it
     if (response?.data?.type === "AcrossApiError") {
@@ -340,7 +397,7 @@ export function handleErrorCondition(
             message: response.data.message,
             transaction: response.data.transaction,
           },
-          { cause: error }
+          { cause: compactError }
         );
       } else {
         acrossApiError = new AcrossApiError(
@@ -350,18 +407,14 @@ export function handleErrorCondition(
             code: response.data.code,
             param: response.data.param,
           },
-          { cause: error }
+          { cause: compactError }
         );
       }
     } else {
       const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
-      acrossApiError = new AcrossApiError(
-        {
-          message,
-          status: HttpErrorToStatusCode.BAD_GATEWAY,
-          code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
-        },
-        { cause: error }
+      acrossApiError = new UpstreamHttpError(
+        { message },
+        { cause: compactError }
       );
     }
   }
@@ -375,13 +428,7 @@ export function handleErrorCondition(
   }
   // Handle other errors
   else {
-    acrossApiError = new AcrossApiError(
-      {
-        message: (error as Error).message,
-        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
-      },
-      { cause: error }
-    );
+    acrossApiError = new UnexpectedError({}, { cause: error });
   }
 
   const logLevel = acrossApiError.status >= 500 ? "error" : "warn";
@@ -412,11 +459,9 @@ export function handleErrorCondition(
 
 export function resolveEthersError(err: unknown) {
   if (!typeguards.isEthersError(err)) {
-    return new AcrossApiError(
+    return new UpstreamRpcError(
       {
         message: err instanceof Error ? err.message : "Unknown error",
-        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
-        code: AcrossErrorCode.UPSTREAM_RPC_ERROR,
       },
       { cause: err }
     );
