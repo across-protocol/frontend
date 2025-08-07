@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 
 import { useAmplitude } from "hooks";
@@ -55,9 +55,9 @@ export function useDepositTracking({
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
 
   // Create appropriate strategy for the source chain
-  const { depositStrategy, fillStrategy } = useMemo(
-    () => createChainStrategies(fromChainId, toChainId),
-    [fromChainId, toChainId]
+  const { depositStrategy, fillStrategy } = createChainStrategies(
+    fromChainId,
+    toChainId
   );
 
   // Query for deposit information
