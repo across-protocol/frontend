@@ -69,9 +69,9 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Amount of input token.",
         default: 1_000_000,
       })
-      .option("slippageTolerance", {
+      .option("slippage", {
         alias: "s",
-        description: "Slippage tolerance.",
+        description: "Slippage tolerance. 0 <= slippage <= 1, 0.01 = 1%",
       })
       .option("tradeType", {
         alias: "tt",
@@ -115,9 +115,9 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Comma-separated list of sources to exclude.",
         type: "string",
       })
-      .option("appFeePercent", {
+      .option("appFee", {
         alias: "apf",
-        description: "App fee percent.",
+        description: "App fee percent. 0 <= appFee <= 1, 0.01 = 1%",
         type: "number",
       })
       .option("appFeeRecipient", {
@@ -187,7 +187,7 @@ export async function fetchSwapQuotes() {
       inputToken,
       outputToken,
       amount,
-      slippageTolerance,
+      slippage,
       tradeType,
       recipient,
       depositor,
@@ -195,7 +195,7 @@ export async function fetchSwapQuotes() {
       skipOriginTxEstimation,
       includeSources,
       excludeSources,
-      appFeePercent,
+      appFee,
       appFeeRecipient,
     } = argsFromCli;
     const params = {
@@ -204,7 +204,7 @@ export async function fetchSwapQuotes() {
       inputToken,
       outputToken,
       amount,
-      slippageTolerance,
+      slippage,
       tradeType,
       recipient,
       depositor,
@@ -218,7 +218,7 @@ export async function fetchSwapQuotes() {
         typeof excludeSources === "string"
           ? excludeSources.split(",")
           : excludeSources,
-      appFeePercent,
+      appFee,
       appFeeRecipient,
     };
     console.log("Params:", params);
