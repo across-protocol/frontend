@@ -247,6 +247,8 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
       code: (typeof AcrossErrorCode)[
         | "SWAP_QUOTE_UNAVAILABLE"
         | "SWAP_LIQUIDITY_INSUFFICIENT"
+        | "AMOUNT_TOO_LOW"
+        | "AMOUNT_TOO_HIGH"
         | "UPSTREAM_HTTP_ERROR"];
     },
     opts?: ErrorOptions
@@ -528,25 +530,21 @@ export function getSwapQuoteUnavailableError(errors: Error[]) {
     return errors[0];
   }
 
-  const swapQuoteUnavailableErrors = errors.filter(
-    (error) => error instanceof SwapQuoteUnavailableError
-  );
   const upstreamSwapProviderErrors = errors.filter(
     (error) => error instanceof UpstreamSwapProviderError
   );
-
-  // Generic error message for when no swap quotes are available
-  if (upstreamSwapProviderErrors.length === 0) {
-    return new SwapQuoteUnavailableError(
-      {
-        message: "No swap quotes currently available",
-        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
-      },
-      {
-        cause: errors,
-      }
-    );
-  }
+  const swapQuoteUnavailableErrors = errors.filter(
+    (error) => error instanceof SwapQuoteUnavailableError
+  );
+  const otherAcrossApiErrors = errors.filter(
+    (error) =>
+      error instanceof AcrossApiError &&
+      !(error instanceof SwapQuoteUnavailableError)
+  );
+  const axiosErrors = errors.filter((error) => error instanceof AxiosError);
+  const upstreamAcrossApiErrors = axiosErrors.filter(
+    (error) => error.response?.data?.type === "AcrossApiError"
+  );
 
   // Map upstream swap provider errors to AcrossApiErrors
   const upstreamErrorToAcrossApiError = {
@@ -589,11 +587,30 @@ export function getSwapQuoteUnavailableError(errors: Error[]) {
     return swapQuoteUnavailableErrors[0];
   }
 
+  if (otherAcrossApiErrors.length > 0) {
+    return otherAcrossApiErrors[0];
+  }
+
+  if (upstreamAcrossApiErrors.length > 0) {
+    const upstreamErrorToAcrossApiError =
+      upstreamAcrossApiErrors[0].response?.data;
+
+    return new SwapQuoteUnavailableError(
+      {
+        message: upstreamErrorToAcrossApiError.message,
+        code: upstreamErrorToAcrossApiError.code,
+      },
+      {
+        cause: upstreamAcrossApiErrors.map((error) => compactAxiosError(error)),
+      }
+    );
+  }
+
   return new SwapQuoteUnavailableError(
     {
       message: "No swap quotes currently available",
       code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
     },
-    { cause: errors }
+    { cause: errors.map((error) => compactAxiosError(error)) }
   );
 }

@@ -10,6 +10,7 @@ import {
   addTimeoutToPromise,
   getLogger,
   addMarkupToAmount,
+  ConvertDecimals,
 } from "../_utils";
 import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
 import {
@@ -134,7 +135,13 @@ export async function getCrossSwapQuotesForExactInputB2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
     recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
-    message: buildExactInputBridgeTokenMessage(crossSwap, crossSwap.amount),
+    message: buildExactInputBridgeTokenMessage(
+      crossSwap,
+      ConvertDecimals(
+        crossSwap.inputToken.decimals,
+        crossSwap.outputToken.decimals
+      )(crossSwap.amount)
+    ),
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -622,7 +629,10 @@ export async function getCrossSwapQuotesForExactInputA2B(
     recipient: getMultiCallHandlerAddress(destinationChainId),
     message: buildExactInputBridgeTokenMessage(
       crossSwap,
-      prioritizedStrategy.originSwapQuote.minAmountOut
+      ConvertDecimals(
+        prioritizedStrategy.originSwapQuote.tokenOut.decimals,
+        crossSwap.outputToken.decimals
+      )(prioritizedStrategy.originSwapQuote.minAmountOut)
     ),
   });
 

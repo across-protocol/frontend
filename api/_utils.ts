@@ -94,6 +94,7 @@ type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 import { getEnvs } from "./_env";
+import { isMessageTooLong } from "./_message";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1006,20 +1007,28 @@ export const getCachedLimits = async (
     gasFeeTotal: string;
   };
 }> => {
+  const messageTooLong = isMessageTooLong(message ?? "");
+
+  const params = {
+    inputToken,
+    outputToken,
+    originChainId,
+    destinationChainId,
+    amount,
+    message,
+    recipient,
+    relayer,
+    allowUnmatchedDecimals,
+  };
+
+  const { message: _message, ...paramsWithoutMessage } = params;
+
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
       headers: getVercelHeaders(),
-      params: {
-        inputToken,
-        outputToken,
-        originChainId,
-        destinationChainId,
-        amount,
-        message,
-        recipient,
-        relayer,
-        allowUnmatchedDecimals,
-      },
+      params: messageTooLong ? paramsWithoutMessage : params,
+      method: messageTooLong ? "POST" : "GET",
+      data: messageTooLong ? { message: _message } : undefined,
     })
   ).data;
 };
@@ -1067,10 +1076,16 @@ export async function getSuggestedFees(params: {
     maxDepositShortDelay: string;
     recommendedDepositInstant: string;
   };
+  outputAmount: string;
 }> {
+  const { message, ...paramsWithoutMessage } = params;
+  const tooLong = isMessageTooLong(message ?? "");
+
   return (
     await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
-      params,
+      params: tooLong ? paramsWithoutMessage : params,
+      method: tooLong ? "POST" : "GET",
+      data: tooLong ? { message } : undefined,
     })
   ).data;
 }
@@ -1134,7 +1149,13 @@ export async function getBridgeQuoteForOutput(params: {
     // 1. Use the suggested fees to get an indicative quote with
     // input amount equal to minOutputAmount
     let tries = 0;
-    let adjustedInputAmount = addMarkupToAmount(params.minOutputAmount, 0.005);
+    let adjustedInputAmount = addMarkupToAmount(
+      ConvertDecimals(
+        params.outputToken.decimals,
+        params.inputToken.decimals
+      )(params.minOutputAmount),
+      0.005
+    );
     let indicativeQuote = await getSuggestedFees({
       ...baseParams,
       amount: adjustedInputAmount.toString(),
@@ -1188,10 +1209,7 @@ export async function getBridgeQuoteForOutput(params: {
       throw new Error("Failed to adjust input amount to meet minOutputAmount");
     }
 
-    const finalOutputAmount = ConvertDecimals(
-      params.inputToken.decimals,
-      params.outputToken.decimals
-    )(adjustedInputAmount.sub(finalQuote.totalRelayFee.total));
+    const finalOutputAmount = BigNumber.from(finalQuote.outputAmount);
 
     // If forceExactOutput, we'll hardcode the output amount to the minOutputAmount
     // so we need to adjust fees to reflect that
