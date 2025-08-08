@@ -29,3 +29,4 @@ export { default as UNICHAIN_SEPOLIA } from "./unichain-sepolia";
 export { default as WORLD_CHAIN } from "./world-chain";
 export { default as ZK_SYNC } from "./zk-sync";
 export { default as ZORA } from "./zora";
+export { default as BOB_SEPOLIA } from "./bob-sepolia";
