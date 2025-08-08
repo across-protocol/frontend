@@ -57,6 +57,10 @@ export function get0xStrategy(
 
   const getSources = makeGetSources(SOURCES);
 
+  const assertSellEntireBalanceSupported = () => {
+    return;
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
@@ -210,6 +214,7 @@ export function get0xStrategy(
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
 }
 
@@ -275,4 +280,13 @@ export function parse0xError(error: unknown) {
       { cause: compactedError }
     );
   }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: SWAP_PROVIDER_NAME,
+    },
+    { cause: error }
+  );
 }

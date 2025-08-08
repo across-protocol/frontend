@@ -6,12 +6,16 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "../../_constants";
 import { getMulticall3, getMulticall3Address } from "../../_utils";
-import { QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
 import { getWghoContract } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
 import { getErc20 } from "../../_erc20";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+import {
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
 
 const SWAP_PROVIDER_NAME = "gho-multicall3";
 
@@ -38,15 +42,23 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     },
   });
 
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: `Option 'sellEntireBalance' is not supported by ${SWAP_PROVIDER_NAME}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: SWAP_PROVIDER_NAME,
+    });
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
-    opts: Partial<{
-      useIndicativeQuote: boolean;
-    }> = {
-      useIndicativeQuote: false,
-    }
+    opts?: QuoteFetchOpts
   ) => {
+    if (opts?.sellEntireBalance && opts?.throwIfSellEntireBalanceUnsupported) {
+      assertSellEntireBalanceSupported();
+    }
+
     const { tokenIn, tokenOut, amount, chainId } = swap;
 
     // Only support:
@@ -182,5 +194,6 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
 }

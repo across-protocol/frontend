@@ -124,6 +124,12 @@ export const argsFromCli = yargs(hideBin(process.argv))
         alias: "apr",
         description: "App fee recipient.",
         type: "string",
+      })
+      .option("strictTradeType", {
+        alias: "stt",
+        description: "Strict trade type.",
+        type: "boolean",
+        default: true,
       });
   })
   .option("host", {
@@ -197,6 +203,7 @@ export async function fetchSwapQuotes() {
       excludeSources,
       appFee,
       appFeeRecipient,
+      strictTradeType,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -220,6 +227,7 @@ export async function fetchSwapQuotes() {
           : excludeSources,
       appFee,
       appFeeRecipient,
+      strictTradeType,
     };
     console.log("Params:", params);
 

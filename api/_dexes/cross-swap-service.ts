@@ -35,6 +35,9 @@ import {
   SwapAmountTooLowForBridgeFeesError,
   InvalidParamError,
   getSwapQuoteUnavailableError,
+  SwapQuoteUnavailableError,
+  AcrossErrorCode,
+  compactAxiosError,
 } from "../_errors";
 import {
   CrossSwapQuotesRetrievalA2AResult,
@@ -470,9 +473,16 @@ function _prepCrossSwapQuotesRetrievalB2A(
     crossSwap.inputToken.symbol,
     strategies
   );
-  // Use the first origin strategy since we don't need to fetch multiple origin quotes
-  // for B2A swaps.
-  const originStrategy = originStrategies.at(0);
+  // Use the first origin strategy that is supported for the input token since we don't need
+  // to fetch multiple origin quotes for B2A swaps.
+  const originStrategy = originStrategies.find((originStrategy) => {
+    try {
+      originStrategy.getRouter(crossSwap.inputToken.chainId);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  });
   if (!originStrategy) {
     throw new InvalidParamError({
       message: `Failed to fetch swap quote: no origin strategy found for ${crossSwap.inputToken.symbol}`,
@@ -938,7 +948,9 @@ export async function getCrossSwapQuotesA2A(
   logger.debug({
     at: "getCrossSwapQuotesA2A",
     message: "All bridge routes and providers failed",
-    failedReasons: allCrossSwapQuotesFailures,
+    failedReasons: allCrossSwapQuotesFailures.map((failure) =>
+      compactAxiosError(failure)
+    ),
   });
   throw getSwapQuoteUnavailableError(allCrossSwapQuotesFailures);
 }
@@ -980,6 +992,11 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     const fetchFn = async () => {
       assertSources(originSources);
       assertSources(destinationSources);
+
+      if (crossSwap.strictTradeType) {
+        result.destinationStrategy.assertSellEntireBalanceSupported();
+      }
+
       // 1. Get origin swap quote for any input token -> bridgeable input token
       const originSwapQuote = await result.originStrategy.fetchFn(
         {
@@ -1064,6 +1081,10 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     {
       sources: prioritizedOriginStrategy.destinationSources,
       sellEntireBalance: true,
+      // `sellEntireBalance` is not supported by all swap strategies. We throw an error
+      // if we want to be strict about the provided `tradeType`. The user can override
+      // this behavior by setting `strictTradeType=false` in the query params.
+      throwIfSellEntireBalanceUnsupported: crossSwap.strictTradeType,
       quoteBuffer: QUOTE_BUFFER,
     }
   );
@@ -1134,6 +1155,14 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
 
     const fetchFn = async () => {
       assertSources(destinationSources);
+
+      if (
+        crossSwapWithAppFee.strictTradeType &&
+        crossSwapWithAppFee.type === AMOUNT_TYPE.MIN_OUTPUT
+      ) {
+        result.destinationStrategy.assertSellEntireBalanceSupported();
+      }
+
       // 1. Get destination swap quote for bridgeable output token -> any token
       const destinationSwapQuote = await result.destinationStrategy.fetchFn(
         {
@@ -1224,6 +1253,13 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       {
         sources: destinationSources,
         sellEntireBalance: true,
+        // `sellEntireBalance` is not supported by all swap strategies. We throw an error
+        // if we want to be strict about the provided `tradeType`. The user can override
+        // this behavior by setting `strictTradeType=false` in the query params.
+        throwIfSellEntireBalanceUnsupported:
+          crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
+            ? false
+            : crossSwapWithAppFee.strictTradeType,
         quoteBuffer: QUOTE_BUFFER,
       }
     ),
@@ -1448,6 +1484,18 @@ export async function executeStrategies<T>(
   }
 ): Promise<T> {
   try {
+    if (strategyFetches.length === 0) {
+      throw new SwapQuoteUnavailableError(
+        {
+          message: "No quotes available",
+          code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+        },
+        {
+          cause: new Error("No strategies to execute"),
+        }
+      );
+    }
+
     // `equal-speed` mode
     if (prioritizationMode.mode === "equal-speed") {
       return await Promise.any(strategyFetches.map((fetch) => fetch()));

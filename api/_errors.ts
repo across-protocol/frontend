@@ -14,6 +14,7 @@ type EthersErrorTransaction = {
   from: string;
   to: string;
   data: string;
+  chainId?: number;
 };
 
 export const HttpErrorToStatusCode = {
@@ -42,6 +43,7 @@ export const AcrossErrorCode = {
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
   SWAP_LIQUIDITY_INSUFFICIENT: "SWAP_LIQUIDITY_INSUFFICIENT",
   SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
+  SWAP_TYPE_NOT_GUARANTEED: "SWAP_TYPE_NOT_GUARANTEED",
   ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
 
   // Status: 50X
@@ -249,6 +251,7 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
       code: (typeof AcrossErrorCode)[
         | "SWAP_QUOTE_UNAVAILABLE"
         | "SWAP_LIQUIDITY_INSUFFICIENT"
+        | "SWAP_TYPE_NOT_GUARANTEED"
         | "AMOUNT_TOO_LOW"
         | "AMOUNT_TOO_HIGH"
         | "UPSTREAM_HTTP_ERROR"];
@@ -328,6 +331,7 @@ export const UPSTREAM_SWAP_PROVIDER_ERRORS = {
   NO_POSSIBLE_ROUTE: "NO_POSSIBLE_ROUTE",
   SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
   UNKNOWN_ERROR: "UNKNOWN_ERROR",
+  SELL_ENTIRE_BALANCE_UNSUPPORTED: "SELL_ENTIRE_BALANCE_UNSUPPORTED",
 } as const;
 export type UpstreamSwapProviderErrorCode =
   (typeof UPSTREAM_SWAP_PROVIDER_ERRORS)[keyof typeof UPSTREAM_SWAP_PROVIDER_ERRORS];
@@ -600,6 +604,13 @@ export function getSwapQuoteUnavailableError(errors: Error[]) {
     [UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE]: {
       message: "No possible route",
       code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED]: {
+      message: [
+        "Trade type can not be guaranteed with the available swap providers on this route.",
+        "Please try again with a different trade type or set 'strictTradeType=false' in the query params.",
+      ].join(" "),
+      code: AcrossErrorCode.SWAP_TYPE_NOT_GUARANTEED,
     },
     [UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE]: {
       message: "Service unavailable",

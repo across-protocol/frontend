@@ -50,12 +50,27 @@ export function getLifiStrategy(
 
   const getSources = makeGetSources(SOURCES);
 
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: "Option 'sellEntireBalance' is not supported by Li.Fi",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: SWAP_PROVIDER_NAME,
+    });
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
     opts?: QuoteFetchOpts
   ) => {
     try {
+      if (
+        opts?.sellEntireBalance &&
+        opts?.throwIfSellEntireBalanceUnsupported
+      ) {
+        assertSellEntireBalanceSupported();
+      }
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
@@ -157,6 +172,7 @@ export function getLifiStrategy(
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
 }
 
@@ -220,4 +236,13 @@ export function parseLiFiError(error: unknown) {
       { cause: compactedError }
     );
   }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: SWAP_PROVIDER_NAME,
+    },
+    { cause: error }
+  );
 }
