@@ -69,7 +69,7 @@ export async function handleApprovalSwap(
       ? handleSwapBody(request.body, Number(request.query.destinationChainId))
       : { actions: [] };
 
-  const slippageTolerance = _slippageTolerance ?? (slippage * 100);
+  const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
