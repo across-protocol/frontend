@@ -36,6 +36,11 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import bobSepoliaLogo from "assets/chain-logos/bob-sepolia.svg";
+import bobSepoliaGrayscaleLogo from "assets/chain-logos/bob-sepolia-grayscale.svg";
+import { ReactComponent as bobSepoliaLogoSvg } from "assets/chain-logos/bob-sepolia.svg";
+import { ReactComponent as bobSepoliaGrayscaleLogoSvg } from "assets/chain-logos/bob-sepolia-grayscale.svg";
+
 import bnbSmartChainLogo from "assets/chain-logos/bsc.svg";
 import bnbSmartChainGrayscaleLogo from "assets/chain-logos/bsc-grayscale.svg";
 import { ReactComponent as bnbSmartChainLogoSvg } from "assets/chain-logos/bsc.svg";
@@ -437,6 +442,47 @@ export const blastSepolia_viem = defineChain({
     default: {
       name: blastSepolia.name + " Explorer",
       url: blastSepolia.explorerUrl,
+    },
+  },
+});
+
+export const bobSepolia = {
+  name: "BOB Sepolia",
+  fullName: "Bob sepolia",
+  chainId: 808813,
+  logoURI: bobSepoliaLogo,
+  grayscaleLogoURI: bobSepoliaGrayscaleLogo,
+  logoSvg: bobSepoliaLogoSvg,
+  grayscaleLogoSvg: bobSepoliaGrayscaleLogoSvg,
+  rpcUrl: "https://bob-sepolia.rpc.gobob.xyz",
+  explorerUrl: "https://bob-sepolia.explorer.gobob.xyz",
+  constructExplorerLink: (txHash: string) =>
+    `${bobSepolia.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_808813_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const bobSepolia_viem = defineChain({
+  id: bobSepolia.chainId,
+  name: bobSepolia.name,
+  nativeCurrency: {
+    name: bobSepolia.nativeCurrencySymbol,
+    symbol: bobSepolia.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        bobSepolia.rpcUrl,
+        bobSepolia.customRpcUrl ? bobSepolia.customRpcUrl : [],
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: bobSepolia.name + " Explorer",
+      url: bobSepolia.explorerUrl,
     },
   },
 });
@@ -1423,6 +1469,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  bobSepolia,
   bnbSmartChain,
   ink,
   lens,
@@ -1463,6 +1510,7 @@ export const chains_viem = [
   baseSepolia_viem,
   blast_viem,
   blastSepolia_viem,
+  bobSepolia_viem,
   bnbSmartChain_viem,
   ink_viem,
   lens_viem,
