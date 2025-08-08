@@ -62,11 +62,13 @@ export const BaseSwapQueryParamsSchema = type({
   integratorId: optional(string()),
   refundAddress: optional(validAddress()),
   refundOnOrigin: optional(boolStr()),
+  // DEPRECATED: Use `slippage` instead
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
+  slippage: optional(positiveFloatStr(0.5)), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
-  appFeePercent: optional(positiveFloatStr(1)),
+  appFee: optional(positiveFloatStr(1)),
   appFeeRecipient: optional(validAddress()),
 });
 
@@ -89,11 +91,12 @@ export async function handleBaseSwapQueryParams(
     integratorId,
     refundAddress,
     refundOnOrigin: _refundOnOrigin = "true",
-    slippageTolerance = "1", // Default to 1% slippage
+    slippageTolerance,
+    slippage = "0.01", // Default to 1% slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
-    appFeePercent,
+    appFee,
     appFeeRecipient,
   } = query;
 
@@ -125,14 +128,11 @@ export async function handleBaseSwapQueryParams(
   }
 
   // Validate that both app fee parameters are provided together
-  if (
-    (appFeePercent && !appFeeRecipient) ||
-    (!appFeePercent && appFeeRecipient)
-  ) {
+  if ((appFee && !appFeeRecipient) || (!appFee && appFeeRecipient)) {
     throw new InvalidParamError({
-      param: "appFeePercent, appFeeRecipient",
+      param: "appFee, appFeeRecipient",
       message:
-        "Both 'appFeePercent' and 'appFeeRecipient' must be provided together, or neither should be provided.",
+        "Both 'appFee' and 'appFeeRecipient' must be provided together, or neither should be provided.",
     });
   }
 
@@ -160,10 +160,11 @@ export async function handleBaseSwapQueryParams(
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
 
-  const slippageToleranceNum = parseFloat(slippageTolerance);
-  const appFeePercentNum = appFeePercent
-    ? parseFloat(appFeePercent)
+  const slippageToleranceNum = slippageTolerance
+    ? parseFloat(slippageTolerance)
     : undefined;
+  const slippageNum = parseFloat(slippage);
+  const appFeeNum = appFee ? parseFloat(appFee) : undefined;
 
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
@@ -190,9 +191,10 @@ export async function handleBaseSwapQueryParams(
     recipient,
     depositor,
     slippageTolerance: slippageToleranceNum,
+    slippage: slippageNum,
     excludeSources,
     includeSources,
-    appFeePercent: appFeePercentNum,
+    appFeePercent: appFeeNum,
     appFeeRecipient,
   };
 }

@@ -56,7 +56,8 @@ export async function handleApprovalSwap(
     refundAddress,
     recipient,
     depositor,
-    slippageTolerance,
+    slippageTolerance: _slippageTolerance, // DEPRECATED: slippage expressed as 0 <= slippage <= 100, 1 = 1%
+    slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1%
     excludeSources,
     includeSources,
     appFeePercent,
@@ -67,6 +68,8 @@ export async function handleApprovalSwap(
     request.body && Object.keys(request.body).length > 0
       ? handleSwapBody(request.body, Number(request.query.destinationChainId))
       : { actions: [] };
+
+  const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
