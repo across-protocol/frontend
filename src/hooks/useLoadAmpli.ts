@@ -8,12 +8,16 @@ import {
   isProductionBuild,
   amplitudeServerUrl,
 } from "utils";
+import { sessionReplayPlugin } from "@amplitude/plugin-session-replay-browser";
 
 export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
 
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {
+      const sessionReplayTracking = sessionReplayPlugin();
+      amplitude.add(sessionReplayTracking);
+
       amplitude
         .init(amplitudeAPIKey, undefined, {
           serverUrl: amplitudeServerUrl,
@@ -25,7 +29,7 @@ export function useLoadAmpli() {
           defaultTracking: {
             attribution: true,
             pageViews: false,
-            sessions: false,
+            sessions: true,
             fileDownloads: false,
             formInteractions: false,
           },
