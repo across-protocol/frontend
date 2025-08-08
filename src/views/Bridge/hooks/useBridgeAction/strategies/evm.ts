@@ -364,10 +364,7 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
 
       return message;
     } finally {
-      // Restore original chain if it was different
-      if (currentChainId !== ChainId.ARBITRUM) {
-        await this.evmConnection.setChain(currentChainId);
-      }
+      await this.evmConnection.setChain(selectedRoute.fromChain);
     }
   }
 
