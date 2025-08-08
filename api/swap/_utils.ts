@@ -298,7 +298,7 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
     return args.map((arg) => {
       if (Array.isArray(arg)) {
         return flattenArgs(arg, depth + 1);
-      } else if (arg && typeof arg === "object" && "value" in arg) {
+      } else if (arg && typeof arg === "object") {
         // Fields to be populated dynamically must be zeroed out
         return arg.populateDynamically ? "0" : arg.value;
       } else {
