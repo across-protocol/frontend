@@ -164,7 +164,7 @@ export async function handleBaseSwapQueryParams(
     ? parseFloat(slippageTolerance)
     : undefined;
   const slippageNum = parseFloat(slippage);
-  const appFeePercentNum = appFee ? parseFloat(appFee) : undefined;
+  const appFeeNum = appFee ? parseFloat(appFee) : undefined;
 
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
@@ -194,7 +194,7 @@ export async function handleBaseSwapQueryParams(
     slippage: slippageNum,
     excludeSources,
     includeSources,
-    appFeePercent: appFeePercentNum,
+    appFeePercent: appFeeNum,
     appFeeRecipient,
   };
 }
