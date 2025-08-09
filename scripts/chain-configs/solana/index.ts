@@ -1,6 +1,7 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
 import { ChainConfig } from "../types";
+import hyperliquid from "../../extern-configs/hyperliquid";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
@@ -21,4 +22,12 @@ export default {
   tokens: ["USDC"],
   enableCCTP: true,
   omitViemConfig: true,
+  disabledRoutes: [
+    {
+      toChainId: hyperliquid.intermediaryChain,
+      fromTokenSymbol: "USDC",
+      toTokenSymbol: "USDC",
+      externalProjectId: hyperliquid.projectId,
+    },
+  ],
 } as ChainConfig;
