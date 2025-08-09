@@ -74,7 +74,9 @@ export class SVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
 
     let _message = "";
     if (selectedRoute.externalProjectId === "hyperliquid") {
-      _message = await this.signHyperliquidMessage(params);
+      // Note: Hyperliquid deposits are not supported from SVM chains
+      // This is a fallback that should not be reached in practice
+      throw new Error("Hyperliquid deposits are not supported from SVM chains");
     }
 
     const inputToken = config.getTokenInfoByAddressSafe(

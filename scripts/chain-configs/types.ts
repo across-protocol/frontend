@@ -25,5 +25,6 @@ export type ChainConfig = {
     toChainId: number;
     fromTokenSymbol: string;
     toTokenSymbol: string;
+    externalProjectId?: string;
   }[];
 };
