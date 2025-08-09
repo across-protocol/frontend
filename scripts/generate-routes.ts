@@ -306,6 +306,7 @@ function transformChainConfigs(
           !chainConfig.disabledRoutes?.find(
             (disabledRoute) =>
               toChainConfig.chainId === disabledRoute.toChainId &&
+              !disabledRoute.externalProjectId && // not external project routes
               (typeof token === "string"
                 ? token === disabledRoute.fromTokenSymbol
                 : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
@@ -358,21 +359,37 @@ function transformChainConfigs(
 
       const externalProjectId = externalProject.projectId;
 
+      // Filter disabled routes for external projects
+      const filteredAssociatedRoutes = associatedRoutes.filter(
+        (token) =>
+          !chainConfig.disabledRoutes?.find(
+            (disabledRoute) =>
+              externalProject.intermediaryChain === disabledRoute.toChainId &&
+              disabledRoute.externalProjectId === externalProjectId &&
+              (typeof token === "string"
+                ? token === disabledRoute.fromTokenSymbol
+                : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
+              (typeof token === "string"
+                ? token === disabledRoute.toTokenSymbol
+                : token.outputTokenSymbol === disabledRoute.toTokenSymbol)
+          )
+      );
+
       // Handle USDC swap tokens
       const usdcSwapTokens = [];
 
       const toChain = {
         chainId: externalProject.intermediaryChain,
         externalProjectId,
-        tokens: associatedRoutes,
+        tokens: filteredAssociatedRoutes,
         swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
-            associatedRoutes.some((token) =>
+            filteredAssociatedRoutes.some((token) =>
               typeof token === "string"
                 ? token === acrossInputTokenSymbol
                 : token.inputTokenSymbol === acrossInputTokenSymbol
             ) &&
-            associatedRoutes.some((token) =>
+            filteredAssociatedRoutes.some((token) =>
               typeof token === "string"
                 ? token === acrossOutputTokenSymbol
                 : token.outputTokenSymbol === acrossOutputTokenSymbol
