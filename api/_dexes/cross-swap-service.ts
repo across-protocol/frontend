@@ -449,6 +449,7 @@ export async function getCrossSwapQuotesForOutputB2A(
       routerAddress: destinationRouter.address,
       appFee,
     }),
+    forceExactOutput: true,
   });
   assertMinOutputAmount(
     bridgeQuote.outputAmount,
