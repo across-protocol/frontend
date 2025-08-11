@@ -44,6 +44,7 @@ export type CrossSwap = {
   embeddedActions: Action[];
   appFeePercent?: number;
   appFeeRecipient?: string;
+  strictTradeType: boolean;
 };
 
 export type SupportedDex =
@@ -145,6 +146,8 @@ export type GetSourcesFn = (
     }
   | undefined;
 
+export type AssertSellEntireBalanceSupportedFn = () => void;
+
 export type QuoteFetchStrategy = {
   strategyName: string;
   getRouter: (chainId: number) => {
@@ -154,6 +157,7 @@ export type QuoteFetchStrategy = {
   getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
   getSources: GetSourcesFn;
+  assertSellEntireBalanceSupported: AssertSellEntireBalanceSupportedFn;
 };
 
 export type SwapRouter = ReturnType<QuoteFetchStrategy["getRouter"]>;
@@ -171,6 +175,7 @@ export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
   sources?: ReturnType<GetSourcesFn>;
   sellEntireBalance?: boolean;
+  throwIfSellEntireBalanceUnsupported?: boolean;
   quoteBuffer?: number;
 }>;
 
