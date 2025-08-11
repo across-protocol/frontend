@@ -2,7 +2,8 @@ import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType } from "./utils";
+import { AmountType, AppFee, CrossSwapType } from "./utils";
+import { Action } from "../swap/_utils";
 
 export type { AmountType, CrossSwapType };
 
@@ -40,6 +41,10 @@ export type CrossSwap = {
   isOutputNative?: boolean;
   excludeSources?: string[];
   includeSources?: string[];
+  embeddedActions: Action[];
+  appFeePercent?: number;
+  appFeeRecipient?: string;
+  strictTradeType: boolean;
 };
 
 export type SupportedDex =
@@ -47,8 +52,8 @@ export type SupportedDex =
   | "uniswap"
   | "uniswap-v3/swap-router-02"
   | "uniswap-v3/universal-router"
-  | "gho"
   | "gho-multicall3"
+  | "wrapped-gho"
   | "lifi"
   | "0x";
 
@@ -99,6 +104,7 @@ export type CrossSwapQuotes = {
     destinationRouter?: RouterContract;
     originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
+  appFee?: AppFee;
 };
 
 export type OriginSwapEntryPointContract = {
@@ -135,9 +141,12 @@ export type GetSourcesFn = (
 ) =>
   | {
       sourcesKeys: string[];
+      sourcesNames?: string[];
       sourcesType: "exclude" | "include";
     }
   | undefined;
+
+export type AssertSellEntireBalanceSupportedFn = () => void;
 
 export type QuoteFetchStrategy = {
   strategyName: string;
@@ -148,6 +157,7 @@ export type QuoteFetchStrategy = {
   getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
   getSources: GetSourcesFn;
+  assertSellEntireBalanceSupported: AssertSellEntireBalanceSupportedFn;
 };
 
 export type SwapRouter = ReturnType<QuoteFetchStrategy["getRouter"]>;
@@ -164,6 +174,9 @@ export type QuoteFetchFn = (
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
   sources?: ReturnType<GetSourcesFn>;
+  sellEntireBalance?: boolean;
+  throwIfSellEntireBalanceUnsupported?: boolean;
+  quoteBuffer?: number;
 }>;
 
 export type OriginEntryPointContractName =

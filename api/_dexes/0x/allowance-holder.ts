@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
-import { getLogger } from "../../_utils";
+import { addMarkupToAmount, getLogger } from "../../_utils";
 import {
   OriginEntryPointContractName,
   QuoteFetchOpts,
@@ -18,7 +18,11 @@ import {
   makeGetSources,
 } from "../utils";
 import { SOURCES } from "./utils/sources";
-import { compactAxiosError, SwapQuoteUnavailableError } from "../../_errors";
+import {
+  compactAxiosError,
+  UpstreamSwapProviderError,
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+} from "../../_errors";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -29,6 +33,8 @@ const API_HEADERS = {
   "0x-api-key": `${API_KEY_0X}`,
   "0x-version": "v2",
 };
+
+const SWAP_PROVIDER_NAME = "0x";
 
 export function get0xStrategy(
   originSwapEntryPointContractName: OriginEntryPointContractName
@@ -51,12 +57,22 @@ export function get0xStrategy(
 
   const getSources = makeGetSources(SOURCES);
 
+  const assertSellEntireBalanceSupported = () => {
+    return;
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
     opts?: QuoteFetchOpts
   ) => {
     try {
+      if (opts?.sellEntireBalance && opts.quoteBuffer) {
+        swap.amount = addMarkupToAmount(
+          BigNumber.from(swap.amount),
+          opts.quoteBuffer + swap.slippageTolerance / 100
+        ).toString();
+      }
       let swapAmount = swap.amount;
       if (tradeType === TradeType.EXACT_OUTPUT) {
         swapAmount = await estimateInputForExactOutput(
@@ -70,17 +86,18 @@ export function get0xStrategy(
       const sourcesParams =
         sources?.sourcesType === "exclude"
           ? {
-              excludeSources: sources.sourcesKeys.join(","),
+              excludedSources: sources.sourcesKeys.join(","),
             }
           : // We need to invert the include sources to be compatible with the API
             // because 0x doesn't support the `includeSources` parameter
             sources?.sourcesType === "include"
             ? {
-                excludeSources: SOURCES.sources[swap.chainId]
+                excludedSources: SOURCES.sources[swap.chainId]
                   .map((s) => s.key)
                   .filter(
                     (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
-                  ),
+                  )
+                  .join(","),
               }
             : {};
 
@@ -96,6 +113,7 @@ export function get0xStrategy(
             sellAmount: swapAmount,
             taker: swap.recipient,
             slippageBps: Math.floor(swap.slippageTolerance * 100),
+            sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
         }
@@ -104,16 +122,33 @@ export function get0xStrategy(
       const quote = response.data;
 
       if (!quote.liquidityAvailable) {
-        throw new SwapQuoteUnavailableError({
+        throw new UpstreamSwapProviderError({
           message: `0x: No liquidity available for ${
             swap.tokenIn.symbol
           } -> ${swap.tokenOut.symbol} on chain ${swap.chainId}`,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.INSUFFICIENT_LIQUIDITY,
+          swapProvider: "0x",
         });
       }
 
-      const usedSources = quote.route.fills.map((fill: { source: string }) =>
-        fill.source.toLowerCase()
+      const usedSources: string[] = quote.route.fills.map(
+        (fill: { source: string }) => fill.source.toLowerCase()
       );
+
+      if (
+        sources?.sourcesType === "include" &&
+        !usedSources.every((source: string) =>
+          sources.sourcesNames?.includes(source)
+        )
+      ) {
+        throw new UpstreamSwapProviderError({
+          message: `0x: Used sources ${usedSources.join(
+            ", "
+          )} do not match include sources ${sources.sourcesKeys.join(", ")}`,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE,
+          swapProvider: "0x",
+        });
+      }
 
       const expectedAmountIn = BigNumber.from(quote.sellAmount);
       const maximumAmountIn = expectedAmountIn;
@@ -143,7 +178,7 @@ export function get0xStrategy(
         slippageTolerance: swap.slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
-          name: "0x",
+          name: SWAP_PROVIDER_NAME,
           sources: usedSources,
         },
       };
@@ -169,15 +204,89 @@ export function get0xStrategy(
         message: "Error fetching 0x quote",
         error: compactAxiosError(error as Error),
       });
-      throw error;
+      throw parse0xError(error);
     }
   };
 
   return {
-    strategyName: "0x",
+    strategyName: SWAP_PROVIDER_NAME,
     getRouter,
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
+}
+
+// https://0x.org/docs/introduction/api-issues#swap-api
+export function parse0xError(error: unknown) {
+  if (error instanceof UpstreamSwapProviderError) {
+    return error;
+  }
+
+  if (error instanceof AxiosError) {
+    const compactedError = compactAxiosError(error);
+
+    if (!error.response?.data) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Unknown error",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    const { data, status } = error.response;
+
+    if (
+      [
+        "INPUT_INVALID",
+        "SWAP_VALIDATION_FAILED",
+        "TOKEN_NOT_SUPPORTED",
+        "TAKER_NOT_AUTHORIZED_FOR_TRADE",
+        "BUY_TOKEN_NOT_AUTHORIZED_FOR_TRADE",
+        "SELL_TOKEN_NOT_AUTHORIZED_FOR_TRADE",
+      ].includes(data.name)
+    ) {
+      return new UpstreamSwapProviderError(
+        {
+          message: data.message,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    if (status >= 500) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Service unavailable",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    return new UpstreamSwapProviderError(
+      {
+        message: "Unknown error",
+        code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+        swapProvider: SWAP_PROVIDER_NAME,
+      },
+      { cause: compactedError }
+    );
+  }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: SWAP_PROVIDER_NAME,
+    },
+    { cause: error }
+  );
 }

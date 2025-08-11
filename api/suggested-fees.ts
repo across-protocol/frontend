@@ -65,10 +65,15 @@ const SuggestedFeesQueryParamsSchema = type({
   allowUnmatchedDecimals: optional(boolStr()),
 });
 
+const SuggestedFeesBodySchema = type({
+  message: optional(string()),
+});
+
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
+type SuggestedFeesBody = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
-  request: TypedVercelRequest<SuggestedFeesQueryParams>,
+  request: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedFeesBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -77,13 +82,14 @@ const handler = async (
     at: "SuggestedFees",
     message: "Query data",
     query: request.query,
+    body: request.body,
     requestId,
   });
   return tracer.startActiveSpan("suggested-fees", async (span) => {
     try {
       setRequestSpanAttributes(request, span, requestId);
 
-      const { query } = request;
+      const { query, body } = request;
       const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 
       const role = parseRole(request);
@@ -94,14 +100,21 @@ const handler = async (
 
       assert(query, SuggestedFeesQueryParamsSchema);
 
+      if (body) {
+        assert(body, SuggestedFeesBodySchema);
+      }
+
       let {
         amount: amountInput,
         timestamp,
         skipAmountLimit,
         recipient: _recipient,
         relayer: _relayer,
-        message,
+        message: _messageFromQuery,
       } = query;
+      const { message: _messageFromBody } = body ?? {};
+
+      const message = _messageFromQuery || _messageFromBody;
 
       const {
         l1Token,

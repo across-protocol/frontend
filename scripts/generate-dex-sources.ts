@@ -29,6 +29,8 @@ type LiFiSourcesResponse = {
   exchanges: LiFiTool[];
 };
 
+const LIFI_SOURCES_TO_EXCLUDE = ["0x"];
+
 async function fetch0xSources(): Promise<DexSources> {
   const chains = Object.values(CHAIN_IDs);
   const sources: DexSources = {
@@ -108,7 +110,16 @@ async function fetchLiFiSources(): Promise<DexSources> {
         continue;
       }
 
-      sources.sources[chain] = _sources.map((source) => ({
+      // Filter out sources to exclude
+      const filteredSources = _sources.filter(
+        (source) =>
+          !(
+            LIFI_SOURCES_TO_EXCLUDE.includes(source.key) ||
+            LIFI_SOURCES_TO_EXCLUDE.includes(source.name)
+          )
+      );
+
+      sources.sources[chain] = filteredSources.map((source) => ({
         key: source.key,
         names: [source.key],
       }));

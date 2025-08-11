@@ -2,6 +2,7 @@ import { executeStrategies } from "../../../api/_dexes/cross-swap-service";
 import {
   SwapQuoteUnavailableError,
   InvalidParamError,
+  AcrossErrorCode,
 } from "../../../api/_errors";
 
 // format the following
@@ -96,11 +97,15 @@ describe("#executeStrategies()", () => {
           Promise.reject(
             new SwapQuoteUnavailableError({
               message: "No quotes available",
+              code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
             })
           ),
         () =>
           Promise.reject(
-            new SwapQuoteUnavailableError({ message: "Also no quotes" })
+            new SwapQuoteUnavailableError({
+              message: "Also no quotes",
+              code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+            })
           ),
       ];
 
@@ -135,6 +140,7 @@ describe("#executeStrategies()", () => {
           Promise.reject(
             new SwapQuoteUnavailableError({
               message: "No quotes available",
+              code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
             })
           ),
         () => Promise.reject(new Error("Some other error")),
@@ -258,6 +264,7 @@ describe("#executeStrategies()", () => {
           Promise.reject(
             new SwapQuoteUnavailableError({
               message: "No quotes available",
+              code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
             })
           ),
         () => Promise.reject(new Error("Third error")),

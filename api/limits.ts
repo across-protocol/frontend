@@ -62,10 +62,15 @@ const LimitsQueryParamsSchema = type({
   allowUnmatchedDecimals: optional(boolStr()),
 });
 
+const LimitsBodySchema = type({
+  message: optional(string()),
+});
+
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
+type LimitsBody = Infer<typeof LimitsBodySchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<LimitsQueryParams>,
+  { query, body }: TypedVercelRequest<LimitsQueryParams, LimitsBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -83,6 +88,10 @@ const handler = async (
       const provider = getProvider(HUB_POOL_CHAIN_ID);
 
       assert(query, LimitsQueryParamsSchema);
+
+      if (body) {
+        assert(body, LimitsBodySchema);
+      }
 
       const {
         destinationChainId,
@@ -103,8 +112,12 @@ const handler = async (
         amount: _amount,
         recipient: _recipient,
         relayer: _relayer,
-        message,
+        message: _messageFromQuery,
       } = query;
+      const { message: _messageFromBody } = body ?? {};
+
+      const message = _messageFromQuery || _messageFromBody;
+
       // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
       const simulationAmount = ethers.BigNumber.from("100");
       const recipient = sdk.utils.toAddressType(

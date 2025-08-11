@@ -4,7 +4,7 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { SwapRouter } from "@uniswap/universal-router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
-import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap, SwapQuote } from "../types";
 import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
@@ -13,6 +13,12 @@ import {
 import { floatToPercent } from "./utils/conversion";
 import { RouterTradeAdapter } from "./utils/adapter";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+import { parseUniswapError } from "./swap-router-02";
+import {
+  compactAxiosError,
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -31,14 +37,20 @@ const STRATEGY_NAME = "uniswap-v3/universal-router";
 
 export function getUniversalRouterStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
+    const address = UNIVERSAL_ROUTER_ADDRESS[chainId];
+    if (!address) {
+      throw new Error(
+        `UniswapV3UniversalRouter address not found for chain id ${chainId}`
+      );
+    }
     return {
-      address: UNIVERSAL_ROUTER_ADDRESS[chainId],
+      address,
       name: "UniswapV3UniversalRouter",
     };
   };
 
   const getOriginEntryPoints = (chainId: number) =>
-    getOriginSwapEntryPoints("UniversalSwapAndBridge", chainId, STRATEGY_NAME);
+    getOriginSwapEntryPoints("SpokePoolPeriphery", chainId, STRATEGY_NAME);
 
   const getSources = makeGetSources({
     strategy: STRATEGY_NAME,
@@ -57,102 +69,125 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
     ),
   });
 
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: `Option 'sellEntireBalance' is not supported by ${STRATEGY_NAME}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: STRATEGY_NAME,
+    });
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
-    opts: Partial<{
-      useIndicativeQuote: boolean;
-    }> = {
-      useIndicativeQuote: false,
-    }
+    opts?: QuoteFetchOpts
   ) => {
-    let swapQuote: SwapQuote;
-    if (!opts.useIndicativeQuote) {
-      const { quote } = await getUniswapClassicQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
-        tradeType
-      );
-      const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
+    try {
+      if (
+        opts?.sellEntireBalance &&
+        opts?.throwIfSellEntireBalanceUnsupported
+      ) {
+        assertSellEntireBalanceSupported();
+      }
 
-      const expectedAmountIn = BigNumber.from(quote.input.amount);
-      const maxAmountIn =
-        tradeType === TradeType.EXACT_INPUT
-          ? expectedAmountIn
-          : addMarkupToAmount(expectedAmountIn, quote.slippage / 100);
-      const expectedAmountOut = BigNumber.from(quote.output.amount);
-      const minAmountOut =
-        tradeType === TradeType.EXACT_OUTPUT
-          ? expectedAmountOut
-          : addMarkupToAmount(expectedAmountOut, -quote.slippage / 100);
+      let swapQuote: SwapQuote;
+      if (!opts?.useIndicativeQuote) {
+        const { quote } = await getUniswapClassicQuoteFromApi(
+          { ...swap, swapper: swap.recipient },
+          tradeType
+        );
+        const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
 
-      swapQuote = {
-        tokenIn: swap.tokenIn,
-        tokenOut: swap.tokenOut,
-        maximumAmountIn: maxAmountIn,
-        minAmountOut,
-        expectedAmountOut,
-        expectedAmountIn,
-        slippageTolerance: quote.slippage,
-        swapTxns: [swapTx],
-        swapProvider: {
-          name: STRATEGY_NAME,
-          sources: ["uniswap_v3"],
-        },
-      };
-    } else {
-      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
-        tradeType
-      );
+        const expectedAmountIn = BigNumber.from(quote.input.amount);
+        const maxAmountIn =
+          tradeType === TradeType.EXACT_INPUT
+            ? expectedAmountIn
+            : addMarkupToAmount(expectedAmountIn, quote.slippage / 100);
+        const expectedAmountOut = BigNumber.from(quote.output.amount);
+        const minAmountOut =
+          tradeType === TradeType.EXACT_OUTPUT
+            ? expectedAmountOut
+            : addMarkupToAmount(expectedAmountOut, -quote.slippage / 100);
 
-      const expectedAmountIn = BigNumber.from(input.amount);
-      const maxAmountIn =
-        tradeType === TradeType.EXACT_INPUT
-          ? expectedAmountIn
-          : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
-      const expectedAmountOut = BigNumber.from(output.amount);
-      const minAmountOut =
-        tradeType === TradeType.EXACT_OUTPUT
-          ? expectedAmountOut
-          : addMarkupToAmount(expectedAmountOut, -swap.slippageTolerance / 100);
-
-      swapQuote = {
-        tokenIn: swap.tokenIn,
-        tokenOut: swap.tokenOut,
-        maximumAmountIn: maxAmountIn,
-        minAmountOut,
-        expectedAmountOut,
-        expectedAmountIn,
-        slippageTolerance: swap.slippageTolerance,
-        swapTxns: [
-          {
-            to: "0x",
-            data: "0x",
-            value: "0x",
+        swapQuote = {
+          tokenIn: swap.tokenIn,
+          tokenOut: swap.tokenOut,
+          maximumAmountIn: maxAmountIn,
+          minAmountOut,
+          expectedAmountOut,
+          expectedAmountIn,
+          slippageTolerance: quote.slippage,
+          swapTxns: [swapTx],
+          swapProvider: {
+            name: STRATEGY_NAME,
+            sources: ["uniswap_v3"],
           },
-        ],
-        swapProvider: {
-          name: STRATEGY_NAME,
-          sources: ["uniswap_v3"],
-        },
-      };
+        };
+      } else {
+        const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
+          { ...swap, swapper: swap.recipient },
+          tradeType
+        );
+
+        const expectedAmountIn = BigNumber.from(input.amount);
+        const maxAmountIn =
+          tradeType === TradeType.EXACT_INPUT
+            ? expectedAmountIn
+            : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
+        const expectedAmountOut = BigNumber.from(output.amount);
+        const minAmountOut =
+          tradeType === TradeType.EXACT_OUTPUT
+            ? expectedAmountOut
+            : addMarkupToAmount(
+                expectedAmountOut,
+                -swap.slippageTolerance / 100
+              );
+
+        swapQuote = {
+          tokenIn: swap.tokenIn,
+          tokenOut: swap.tokenOut,
+          maximumAmountIn: maxAmountIn,
+          minAmountOut,
+          expectedAmountOut,
+          expectedAmountIn,
+          slippageTolerance: swap.slippageTolerance,
+          swapTxns: [
+            {
+              to: "0x",
+              data: "0x",
+              value: "0x",
+            },
+          ],
+          swapProvider: {
+            name: STRATEGY_NAME,
+            sources: ["uniswap_v3"],
+          },
+        };
+      }
+
+      getLogger().debug({
+        at: "uniswap/universal-router/fetchFn",
+        message: "Swap quote",
+        type:
+          tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
+        tokenIn: swapQuote.tokenIn.symbol,
+        tokenOut: swapQuote.tokenOut.symbol,
+        chainId: swap.chainId,
+        maximumAmountIn: swapQuote.maximumAmountIn.toString(),
+        minAmountOut: swapQuote.minAmountOut.toString(),
+        expectedAmountOut: swapQuote.expectedAmountOut.toString(),
+        expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+      });
+
+      return swapQuote;
+    } catch (error) {
+      getLogger().debug({
+        at: "uniswap/universal-router/fetchFn",
+        message: "Error fetching quote",
+        error: compactAxiosError(error as Error),
+      });
+      throw parseUniswapError(error);
     }
-
-    getLogger().debug({
-      at: "uniswap/universal-router/fetchFn",
-      message: "Swap quote",
-      type:
-        tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
-      tokenIn: swapQuote.tokenIn.symbol,
-      tokenOut: swapQuote.tokenOut.symbol,
-      chainId: swap.chainId,
-      maximumAmountIn: swapQuote.maximumAmountIn.toString(),
-      minAmountOut: swapQuote.minAmountOut.toString(),
-      expectedAmountOut: swapQuote.expectedAmountOut.toString(),
-      expectedAmountIn: swapQuote.expectedAmountIn.toString(),
-    });
-
-    return swapQuote;
   };
 
   return {
@@ -161,6 +196,7 @@ export function getUniversalRouterStrategy(): QuoteFetchStrategy {
     getOriginEntryPoints,
     getSources,
     fetchFn,
+    assertSellEntireBalanceSupported,
   };
 }
 

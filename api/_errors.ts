@@ -14,6 +14,7 @@ type EthersErrorTransaction = {
   from: string;
   to: string;
   data: string;
+  chainId?: number;
 };
 
 export const HttpErrorToStatusCode = {
@@ -40,12 +41,16 @@ export const AcrossErrorCode = {
   AMOUNT_TOO_LOW: "AMOUNT_TOO_LOW",
   AMOUNT_TOO_HIGH: "AMOUNT_TOO_HIGH",
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
+  SWAP_LIQUIDITY_INSUFFICIENT: "SWAP_LIQUIDITY_INSUFFICIENT",
   SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
+  SWAP_TYPE_NOT_GUARANTEED: "SWAP_TYPE_NOT_GUARANTEED",
   ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
 
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
   UPSTREAM_HTTP_ERROR: "UPSTREAM_HTTP_ERROR",
+  UPSTREAM_GATEWAY_TIMEOUT: "UPSTREAM_GATEWAY_TIMEOUT",
+  UNEXPECTED_ERROR: "UNEXPECTED_ERROR",
 } as const;
 
 export class AcrossApiError extends Error {
@@ -239,17 +244,116 @@ export class AmountTooHighError extends InputError {
   }
 }
 
-export class SwapQuoteUnavailableError extends InputError {
-  constructor(args: { message: string }, opts?: ErrorOptions) {
+export class SwapQuoteUnavailableError extends AcrossApiError {
+  constructor(
+    args: {
+      message: string;
+      code: (typeof AcrossErrorCode)[
+        | "SWAP_QUOTE_UNAVAILABLE"
+        | "SWAP_LIQUIDITY_INSUFFICIENT"
+        | "SWAP_TYPE_NOT_GUARANTEED"
+        | "AMOUNT_TOO_LOW"
+        | "AMOUNT_TOO_HIGH"
+        | "UPSTREAM_HTTP_ERROR"];
+    },
+    opts?: ErrorOptions
+  ) {
     super(
       {
         message: args.message,
-        code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+        code: args.code,
+        status:
+          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR
+            ? HttpErrorToStatusCode.BAD_GATEWAY
+            : HttpErrorToStatusCode.BAD_REQUEST,
       },
       opts
     );
   }
 }
+
+export class UpstreamTimeoutError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_GATEWAY_TIMEOUT,
+        status: HttpErrorToStatusCode.GATEWAY_TIMEOUT,
+      },
+      opts
+    );
+  }
+}
+
+export class UpstreamHttpError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+        status: HttpErrorToStatusCode.BAD_GATEWAY,
+      },
+      opts
+    );
+  }
+}
+
+export class UpstreamRpcError extends AcrossApiError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.UPSTREAM_RPC_ERROR,
+        status: HttpErrorToStatusCode.BAD_GATEWAY,
+      },
+      opts
+    );
+  }
+}
+
+export class UnexpectedError extends AcrossApiError {
+  constructor(args: { message?: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message:
+          args.message ??
+          "Unexpected error occurred. Please try again later or contact support.",
+        code: AcrossErrorCode.UNEXPECTED_ERROR,
+        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
+      },
+      opts
+    );
+  }
+}
+
+export const UPSTREAM_SWAP_PROVIDER_ERRORS = {
+  INSUFFICIENT_LIQUIDITY: "INSUFFICIENT_LIQUIDITY",
+  NO_POSSIBLE_ROUTE: "NO_POSSIBLE_ROUTE",
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
+  UNKNOWN_ERROR: "UNKNOWN_ERROR",
+  SELL_ENTIRE_BALANCE_UNSUPPORTED: "SELL_ENTIRE_BALANCE_UNSUPPORTED",
+} as const;
+export type UpstreamSwapProviderErrorCode =
+  (typeof UPSTREAM_SWAP_PROVIDER_ERRORS)[keyof typeof UPSTREAM_SWAP_PROVIDER_ERRORS];
+
+export class UpstreamSwapProviderError extends Error {
+  code: UpstreamSwapProviderErrorCode;
+  swapProvider: string;
+
+  constructor(
+    args: {
+      message: string;
+      code: UpstreamSwapProviderErrorCode;
+      swapProvider: string;
+    },
+    opts?: ErrorOptions
+  ) {
+    super(args.message, opts);
+    this.code = args.code;
+    this.swapProvider = args.swapProvider;
+  }
+}
+
 /**
  * Handles the recurring case of error handling
  * @param endpoint A string numeric to indicate to the logging utility where this error occurs
@@ -287,6 +391,7 @@ export function handleErrorCondition(
   // Handle axios errors
   else if (error instanceof AxiosError) {
     const { response } = error;
+    const compactError = compactAxiosError(error);
 
     // If upstream error is an AcrossApiError, we just return it
     if (response?.data?.type === "AcrossApiError") {
@@ -296,7 +401,7 @@ export function handleErrorCondition(
             message: response.data.message,
             transaction: response.data.transaction,
           },
-          { cause: error }
+          { cause: compactError }
         );
       } else {
         acrossApiError = new AcrossApiError(
@@ -306,18 +411,14 @@ export function handleErrorCondition(
             code: response.data.code,
             param: response.data.param,
           },
-          { cause: error }
+          { cause: compactError }
         );
       }
     } else {
       const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
-      acrossApiError = new AcrossApiError(
-        {
-          message,
-          status: HttpErrorToStatusCode.BAD_GATEWAY,
-          code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
-        },
-        { cause: error }
+      acrossApiError = new UpstreamHttpError(
+        { message },
+        { cause: compactError }
       );
     }
   }
@@ -331,13 +432,7 @@ export function handleErrorCondition(
   }
   // Handle other errors
   else {
-    acrossApiError = new AcrossApiError(
-      {
-        message: (error as Error).message,
-        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
-      },
-      { cause: error }
-    );
+    acrossApiError = new UnexpectedError({}, { cause: error });
   }
 
   const logLevel = acrossApiError.status >= 500 ? "error" : "warn";
@@ -368,11 +463,9 @@ export function handleErrorCondition(
 
 export function resolveEthersError(err: unknown) {
   if (!typeguards.isEthersError(err)) {
-    return new AcrossApiError(
+    return new UpstreamRpcError(
       {
         message: err instanceof Error ? err.message : "Unknown error",
-        status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
-        code: AcrossErrorCode.UPSTREAM_RPC_ERROR,
       },
       { cause: err }
     );
@@ -431,11 +524,149 @@ export function compactAxiosError(error: Error) {
   const compactError = new Error(
     [
       "[AxiosError]",
-      `Status ${response.status} - ${response.statusText}`,
+      `Status ${response.status} ${response.statusText}`,
       `Request URL: ${response.config.url}`,
       `Data: ${JSON.stringify(response.data)}`,
     ].join(" - ")
   );
 
   return compactError;
+}
+
+export function flattenErrors(reason: any, depth: number = 0): string[] {
+  if (
+    reason instanceof AggregateError &&
+    Array.isArray(reason.errors) &&
+    depth < 1
+  ) {
+    return reason.errors.flatMap((error) => flattenErrors(error, depth + 1));
+  }
+  const response = reason.response;
+  if (reason.isAxiosError && response) {
+    return [compactAxiosError(reason).toString()];
+  }
+
+  if (reason instanceof AcrossApiError) {
+    return [`[AcrossApiError]: ${JSON.stringify(reason)}`];
+  }
+
+  return [reason.toString()];
+}
+
+export function getRejectedReasons(
+  settledResultsOrErrors: PromiseSettledResult<any>[] | Error[]
+): string[] {
+  try {
+    const rejections = settledResultsOrErrors.flatMap((result) => {
+      if (result instanceof Error) {
+        return result;
+      }
+      if (result.status === "rejected") {
+        return result.reason;
+      }
+      return [];
+    });
+    return rejections.flatMap((reason, idx) =>
+      flattenErrors(reason).map((msg) => `Quote ${idx + 1}: ${msg}`)
+    );
+  } catch (err) {
+    return [];
+  }
+}
+
+export function getSwapQuoteUnavailableError(errors: Error[]) {
+  if (errors.length === 1 && errors[0] instanceof SwapQuoteUnavailableError) {
+    return errors[0];
+  }
+
+  const upstreamSwapProviderErrors = errors.filter(
+    (error) => error instanceof UpstreamSwapProviderError
+  );
+  const swapQuoteUnavailableErrors = errors.filter(
+    (error) => error instanceof SwapQuoteUnavailableError
+  );
+  const otherAcrossApiErrors = errors.filter(
+    (error) =>
+      error instanceof AcrossApiError &&
+      !(error instanceof SwapQuoteUnavailableError)
+  );
+  const axiosErrors = errors.filter((error) => error instanceof AxiosError);
+  const upstreamAcrossApiErrors = axiosErrors.filter(
+    (error) => error.response?.data?.type === "AcrossApiError"
+  );
+
+  // Map upstream swap provider errors to AcrossApiErrors
+  const upstreamErrorToAcrossApiError = {
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.INSUFFICIENT_LIQUIDITY]: {
+      message: "Insufficient liquidity",
+      code: AcrossErrorCode.SWAP_LIQUIDITY_INSUFFICIENT,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE]: {
+      message: "No possible route",
+      code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED]: {
+      message: [
+        "Trade type can not be guaranteed with the available swap providers on this route.",
+        "Please try again with a different trade type or set 'strictTradeType=false' in the query params.",
+      ].join(" "),
+      code: AcrossErrorCode.SWAP_TYPE_NOT_GUARANTEED,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE]: {
+      message: "Service unavailable",
+      code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+    },
+    [UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR]: {
+      message: "Unknown error",
+      code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+    },
+  };
+
+  for (const [code, mapping] of Object.entries(upstreamErrorToAcrossApiError)) {
+    const errors = upstreamSwapProviderErrors.filter(
+      (error) => error.code === code
+    );
+    if (errors.length > 0) {
+      return new SwapQuoteUnavailableError(
+        {
+          message: mapping.message,
+          code: mapping.code,
+        },
+        {
+          cause: errors,
+        }
+      );
+    }
+  }
+
+  if (swapQuoteUnavailableErrors.length > 0) {
+    return swapQuoteUnavailableErrors[0];
+  }
+
+  if (otherAcrossApiErrors.length > 0) {
+    return otherAcrossApiErrors[0];
+  }
+
+  if (upstreamAcrossApiErrors.length > 0) {
+    const upstreamErrorToAcrossApiError =
+      upstreamAcrossApiErrors[0].response?.data;
+
+    return new SwapQuoteUnavailableError(
+      {
+        message: upstreamErrorToAcrossApiError.message,
+        code: upstreamErrorToAcrossApiError.code,
+      },
+      {
+        cause: upstreamAcrossApiErrors.map((error) => compactAxiosError(error)),
+      }
+    );
+  }
+
+  return new SwapQuoteUnavailableError(
+    {
+      message: "No swap quotes currently available",
+      code: AcrossErrorCode.SWAP_QUOTE_UNAVAILABLE,
+    },
+    { cause: errors.map((error) => compactAxiosError(error)) }
+  );
 }

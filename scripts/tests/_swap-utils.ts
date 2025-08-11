@@ -1,8 +1,9 @@
-import { Wallet } from "ethers";
+import { Wallet, ethers } from "ethers";
 import dotenv from "dotenv";
 import axios from "axios";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { buildSearchParams } from "../../api/_utils";
@@ -29,6 +30,12 @@ export const argsFromCli = yargs(hideBin(process.argv))
       description:
         "Filter predefined test cases in scripts/tests/_swap-cases.ts by comma-separated list of labels.",
     });
+  })
+  .option("includeDestinationAction", {
+    alias: "da",
+    description: "Include destination action.",
+    type: "boolean",
+    default: false,
   })
   .command("args", "Run with custom args", (yargs) => {
     return yargs
@@ -62,9 +69,9 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Amount of input token.",
         default: 1_000_000,
       })
-      .option("slippageTolerance", {
+      .option("slippage", {
         alias: "s",
-        description: "Slippage tolerance.",
+        description: "Slippage tolerance. 0 <= slippage <= 1, 0.01 = 1%",
       })
       .option("tradeType", {
         alias: "tt",
@@ -107,6 +114,22 @@ export const argsFromCli = yargs(hideBin(process.argv))
         alias: "es",
         description: "Comma-separated list of sources to exclude.",
         type: "string",
+      })
+      .option("appFee", {
+        alias: "apf",
+        description: "App fee percent. 0 <= appFee <= 1, 0.01 = 1%",
+        type: "number",
+      })
+      .option("appFeeRecipient", {
+        alias: "apr",
+        description: "App fee recipient.",
+        type: "string",
+      })
+      .option("strictTradeType", {
+        alias: "stt",
+        description: "Strict trade type.",
+        type: "boolean",
+        default: true,
       });
   })
   .option("host", {
@@ -135,6 +158,7 @@ export function filterTestCases(
   testCases: {
     labels: string[];
     params: { [key: string]: any };
+    body?: { [key: string]: any };
   }[],
   filterString: string
 ) {
@@ -152,6 +176,8 @@ export function filterTestCases(
 
 export async function fetchSwapQuotes() {
   const flowType = argsFromCli.flowType;
+  const includeDestinationAction =
+    argsFromCli.includeDestinationAction || false;
   const slug = flowType === "unified" ? undefined : flowType;
   const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
   const url = `${baseUrl}/api/swap${slug ? `/${slug}` : ""}`;
@@ -167,7 +193,7 @@ export async function fetchSwapQuotes() {
       inputToken,
       outputToken,
       amount,
-      slippageTolerance,
+      slippage,
       tradeType,
       recipient,
       depositor,
@@ -175,6 +201,9 @@ export async function fetchSwapQuotes() {
       skipOriginTxEstimation,
       includeSources,
       excludeSources,
+      appFee,
+      appFeeRecipient,
+      strictTradeType,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -182,7 +211,7 @@ export async function fetchSwapQuotes() {
       inputToken,
       outputToken,
       amount,
-      slippageTolerance,
+      slippage,
       tradeType,
       recipient,
       depositor,
@@ -196,6 +225,9 @@ export async function fetchSwapQuotes() {
         typeof excludeSources === "string"
           ? excludeSources.split(",")
           : excludeSources,
+      appFee,
+      appFeeRecipient,
+      strictTradeType,
     };
     console.log("Params:", params);
 
@@ -220,13 +252,16 @@ export async function fetchSwapQuotes() {
     }
 
     for (const testCase of filteredTestCases) {
+      const body = includeDestinationAction
+        ? await getDefaultDestinationAction(testCase)
+        : undefined;
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
-      const response = await axios.get(
+      console.log("Body:", JSON.stringify(body, null, 2));
+      const response = await axios.post(
         `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-        {
-          params: testCase.params,
-        }
+        body,
+        { params: testCase.params }
       );
       swapQuotes.push(response.data as BaseSwapResponse);
     }
@@ -317,4 +352,86 @@ export async function signAndWaitAllowanceFlow(params: {
   } catch (e) {
     console.error("Tx reverted", e);
   }
+}
+
+/**
+ * Creates the body to execute an action in the destination chain after bridge and swap.
+ * Can be a native ETH transfer, an ETH deposit into Aave or an ERC-20 token transfer.
+ */
+export async function getDefaultDestinationAction(testCase: {
+  params: { [key: string]: any };
+}) {
+  return testCase.params.outputToken === ethers.constants.AddressZero
+    ? await getNativeDestinationAction(testCase)
+    : await getERC20DestinationAction(testCase);
+}
+
+/**
+ * Creates the body to execute a destination action involving native balance.
+ */
+export async function getNativeDestinationAction(testCase: {
+  params: { [key: string]: any };
+}) {
+  const ACROSS_DEV_WALLET_2 = "0x718648C8c531F91b528A7757dD2bE813c3940608";
+  const AAVE_ETH_HANDLER_CONTRACT =
+    "0x5283BEcEd7ADF6D003225C13896E536f2D4264FF";
+  if (testCase.params.destinationChainId === CHAIN_IDs.ARBITRUM) {
+    // If the destination chain is Arbitrum, deposit ETH into Aave
+    // ACROSS_DEV_WALLET_2 will receive 'aArbWETH' as a result
+    return {
+      actions: [
+        {
+          target: AAVE_ETH_HANDLER_CONTRACT,
+          functionSignature:
+            "function depositETH(address, address onBehalfOf, uint16 referralCode)",
+          args: [
+            { value: ethers.constants.AddressZero },
+            { value: ACROSS_DEV_WALLET_2 },
+            { value: 0 },
+          ],
+          populateCallValueDynamically: true,
+        },
+      ],
+    };
+  } else {
+    // For other chains, send all native balance to ACROSS_DEV_WALLET_2
+    // Note this uses drainLeftoverTokens instead of a makeCallWithBalance
+    return {
+      actions: [
+        {
+          target: ACROSS_DEV_WALLET_2,
+          functionSignature: "",
+          args: [],
+          populateCallValueDynamically: true,
+          isNativeTransfer: true,
+        },
+      ],
+    };
+  }
+}
+
+/**
+ * Creates the body to execute an ERC-20 token transfer call in the destination chain after bridge and swap.
+ */
+export async function getERC20DestinationAction(testCase: {
+  params: { [key: string]: any };
+}) {
+  const ACROSS_DEV_WALLET_2 = "0x718648C8c531F91b528A7757dD2bE813c3940608";
+  return {
+    actions: [
+      {
+        target: testCase.params.outputToken,
+        functionSignature: "function transfer(address to, uint256 value)",
+        args: [
+          { value: ACROSS_DEV_WALLET_2 },
+          {
+            value: testCase.params.amount,
+            populateDynamically: true,
+            balanceSource: testCase.params.outputToken,
+          },
+        ],
+        value: "0",
+      },
+    ],
+  };
 }

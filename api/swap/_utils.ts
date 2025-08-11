@@ -1,5 +1,6 @@
 import {
   assert,
+  create,
   Infer,
   type,
   string,
@@ -12,8 +13,10 @@ import {
   union,
   unknown,
   refine,
+  defaulted,
 } from "superstruct";
-import { BigNumber, constants, utils } from "ethers";
+import { BigNumber, constants, ethers, utils } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
 import {
@@ -26,6 +29,7 @@ import {
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
   paramToArray,
+  getChainInfo,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -36,8 +40,15 @@ import {
   Token,
   AmountType,
 } from "../_dexes/types";
-import { AMOUNT_TYPE, CrossSwapType } from "../_dexes/utils";
-import { encodeApproveCalldata } from "../_multicall-handler";
+import { AMOUNT_TYPE, AppFee, CrossSwapType } from "../_dexes/utils";
+import {
+  encodeApproveCalldata,
+  encodeDrainCalldata,
+  encodeMakeCallWithBalanceCalldata,
+  getMultiCallHandlerAddress,
+} from "../_multicall-handler";
+import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -51,10 +62,15 @@ export const BaseSwapQueryParamsSchema = type({
   integratorId: optional(string()),
   refundAddress: optional(validAddress()),
   refundOnOrigin: optional(boolStr()),
+  // DEPRECATED: Use `slippage` instead
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
+  slippage: optional(positiveFloatStr(0.5)), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
+  appFee: optional(positiveFloatStr(1)),
+  appFeeRecipient: optional(validAddress()),
+  strictTradeType: optional(boolStr()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -76,16 +92,21 @@ export async function handleBaseSwapQueryParams(
     integratorId,
     refundAddress,
     refundOnOrigin: _refundOnOrigin = "true",
-    slippageTolerance = "1", // Default to 1% slippage
+    slippageTolerance,
+    slippage = "0.01", // Default to 1% slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
+    appFee,
+    appFeeRecipient,
+    strictTradeType: _strictTradeType = "true",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
   const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
+  const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
   const inputTokenAddress = isInputNative
@@ -106,6 +127,15 @@ export async function handleBaseSwapQueryParams(
       param: "excludeSources, includeSources",
       message:
         "Cannot use 'excludeSources' and 'includeSources' together. Please use only one of them.",
+    });
+  }
+
+  // Validate that both app fee parameters are provided together
+  if ((appFee && !appFeeRecipient) || (!appFee && appFeeRecipient)) {
+    throw new InvalidParamError({
+      param: "appFee, appFeeRecipient",
+      message:
+        "Both 'appFee' and 'appFeeRecipient' must be provided together, or neither should be provided.",
     });
   }
 
@@ -133,6 +163,12 @@ export async function handleBaseSwapQueryParams(
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
 
+  const slippageToleranceNum = slippageTolerance
+    ? parseFloat(slippageTolerance)
+    : undefined;
+  const slippageNum = parseFloat(slippage);
+  const appFeeNum = appFee ? parseFloat(appFee) : undefined;
+
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
       address: inputTokenAddress,
@@ -157,9 +193,13 @@ export async function handleBaseSwapQueryParams(
     refundAddress,
     recipient,
     depositor,
-    slippageTolerance,
+    slippageTolerance: slippageToleranceNum,
+    slippage: slippageNum,
     excludeSources,
     includeSources,
+    appFeePercent: appFeeNum,
+    appFeeRecipient,
+    strictTradeType,
   };
 }
 
@@ -168,7 +208,7 @@ export async function handleBaseSwapQueryParams(
 const ActionArg = refine(
   object({
     value: unknown(), // Will be validated at runtime
-    populateDynamically: boolean(),
+    populateDynamically: optional(boolean()),
     balanceSource: optional(validEvmAddress()),
   }),
   "balanceSource",
@@ -189,10 +229,14 @@ const RecursiveArgumentArray: any = lazy(() =>
 // Instructions for a single function call
 const Action = type({
   target: validEvmAddress(),
-  functionSignature: string(), // Will be validated at runtime
-  args: array(RecursiveArgumentArray),
-  value: positiveIntStr(),
+  functionSignature: defaulted(string(), ""), // Will be validated at runtime
+  isNativeTransfer: defaulted(boolean(), false),
+  args: defaulted(array(RecursiveArgumentArray), []),
+  value: defaulted(positiveIntStr(), "0"),
+  populateCallValueDynamically: defaulted(boolean(), false),
 });
+
+export type Action = Infer<typeof Action>;
 
 const SwapBody = type({
   actions: array(Action),
@@ -200,16 +244,56 @@ const SwapBody = type({
 
 export type SwapBody = Infer<typeof SwapBody>;
 
+export function handleSwapBody(body: SwapBody, destinationChainId: number) {
+  // Validate rules for each action. We have to validate the input before default values are applied.
+  body.actions?.forEach((action, index) => {
+    // 1. Validate that value is provided when populateCallValueDynamically is false or omitted
+    if (!action.populateCallValueDynamically && !action.value) {
+      throw new InvalidParamError({
+        param: `body.actions[${index}].value`,
+        message:
+          "value is required when populateCallValueDynamically is false or omitted",
+      });
+    }
+
+    // 2. Validate isNativeTransfer rules
+    if (action.isNativeTransfer) {
+      // When isNativeTransfer is true, functionSignature and args must be empty
+      if (
+        (action.functionSignature && action.functionSignature !== "") ||
+        (action.args && action.args.length > 0)
+      ) {
+        throw new InvalidParamError({
+          param: `body.actions[${index}].functionSignature, body.actions[${index}].args`,
+          message:
+            "function signature or args are not allowed when isNativeTransfer is true",
+        });
+      }
+    } else {
+      // When isNativeTransfer is false, functionSignature is required
+      if (!action.functionSignature || action.functionSignature === "") {
+        throw new InvalidParamError({
+          param: `body.actions[${index}].functionSignature`,
+          message:
+            "functionSignature is required when isNativeTransfer is false or omitted",
+        });
+      }
+    }
+  });
+
+  const parsedBody = create(body, SwapBody);
+  // Assert that provided actions can be encoded
+  encodeActionCalls(parsedBody.actions, destinationChainId);
+  return parsedBody;
+}
+
 /**
- * Validates that all actions in the swap body can be properly encoded.
+ * Validates that provided actions can be properly encoded.
  * Recursively extracts argument values and validates they match the function signature.
  *
- * @param body - The request body containing an array of actions to validate
  * @throws {AbiEncodingError} When function encoding fails due to invalid arguments or mismatched signatures
  */
-export function handleSwapBody(body: SwapBody) {
-  assert(body, SwapBody);
-
+export function encodeActionCalls(actions: Action[], targetChainId: number) {
   // Helper function to recursively extract only the .value fields from args array
   const flattenArgs = (args: any[], depth: number = 0): any[] => {
     if (depth > 10) {
@@ -218,32 +302,139 @@ export function handleSwapBody(body: SwapBody) {
     return args.map((arg) => {
       if (Array.isArray(arg)) {
         return flattenArgs(arg, depth + 1);
-      } else if (arg && typeof arg === "object" && "value" in arg) {
-        return arg.value;
+      } else if (arg && typeof arg === "object") {
+        // Fields to be populated dynamically must be zeroed out
+        return arg.populateDynamically ? "0" : arg.value;
       } else {
         return arg;
       }
     });
   };
 
-  body.actions.forEach((action) => {
-    const methodAbi = action.functionSignature;
-    const positionalArgs = flattenArgs(action.args);
-    const iface = new utils.Interface([methodAbi]);
-    const functionName = iface.fragments[0].name;
-    try {
-      iface.encodeFunctionData(functionName, positionalArgs);
-    } catch (err) {
-      throw new AbiEncodingError(
-        {
-          message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
-        },
-        {
-          cause: `${err instanceof Error ? err.message : String(err)}`,
-        }
+  return actions.map((action) => {
+    const isNativeTransfer = action.isNativeTransfer;
+    const populateCallValueDynamically = action.populateCallValueDynamically;
+    if (isNativeTransfer) {
+      if (populateCallValueDynamically) {
+        // If action is a native transfer and populateCallValueDynamically is true
+        // we can use a drain call to send all native balance to the target address
+        return {
+          target: getMultiCallHandlerAddress(targetChainId),
+          callData: encodeDrainCalldata(constants.AddressZero, action.target),
+          value: "0",
+        };
+      }
+      // Otherwise we send the provided value to the target address
+      return {
+        target: action.target,
+        callData: "0x",
+        value: action.value,
+      };
+    } else {
+      const methodAbi = action.functionSignature;
+      const positionalArgs = flattenArgs(action.args);
+      const iface = new utils.Interface([methodAbi]);
+      const functionName = iface.fragments[0].name;
+      const populateArgsDynamically = action.args.some(
+        (arg) => arg.populateDynamically
       );
+
+      try {
+        const callData = iface.encodeFunctionData(functionName, positionalArgs);
+        if (populateArgsDynamically || populateCallValueDynamically) {
+          // If any argument or msg.value should be populated dynamically,
+          // we have to wrap the call with makeCallWithBalance
+          return getWrappedCallForMakeCallWithBalance(
+            action,
+            callData,
+            populateCallValueDynamically,
+            targetChainId
+          );
+        } else {
+          // Otherwise we call the specified function with the provided args and value
+          return {
+            target: action.target,
+            callData,
+            value: action.value,
+          };
+        }
+      } catch (err) {
+        throw new AbiEncodingError(
+          {
+            message: `Failed to encode function data for ${functionName}. Arguments may be invalid or mismatched.`,
+          },
+          {
+            cause: `${err instanceof Error ? err.message : String(err)}`,
+          }
+        );
+      }
     }
   });
+}
+
+/**
+ * Wraps contract calls with `makeCallWithBalance` to inject token or native balances dynamically.
+ *
+ * makeCallWithBalance takes the calldata to execute and a list of replacement instructions.
+ * For each replacement instruction, it:
+ * - Reads the current balance of the specified token (or native token when using zero address).
+ * - Overwrites the specified byte offset in the calldata with the balance.
+ * - For native token, it also sets `msg.value = balance`.
+ *
+ * Calldata offsets must point to zeroed-out regions, allowing safe in-place modification.
+ *
+ * @param action Contains the target address, function signature, args and value.
+ * @param callData ABI-encoded function call to be modified.
+ * @param populateCallValueDynamically Whether to inject the full native balance as msg.value.
+ * @param targetChainId Destination chain id. Needed to get the MulticallHandler address.
+ * @returns ABI-encoded input for calling `makeCallWithBalance`.
+ */
+export function getWrappedCallForMakeCallWithBalance(
+  action: Action,
+  callData: string,
+  populateCallValueDynamically: boolean,
+  targetChainId: number
+) {
+  // Create replacement instructions for arguments marked for dynamic population
+  const replacements = action.args
+    .map((arg, index) => {
+      if (arg.populateDynamically) {
+        return {
+          token: arg.balanceSource,
+          // Arguments start at byte 4 (after the 4-byte function selector)
+          // And each argument is 32 bytes long
+          offset: 4 + index * 32,
+        };
+      }
+    })
+    .filter((replacement) => replacement !== undefined);
+
+  // Handle native balance injection if needed
+  if (populateCallValueDynamically) {
+    // If only msg.value needs to be injected, append 32 zeroed bytes to the calldata
+    // and point the replacement to those extra bytes.
+    // This prevents the MulticallHandler from corrupting actual function parameters
+    // as the extra bytes are ignored during execution.
+    const paddingToReplace = constants.HashZero.slice(2); // 32 zeroed bytes, remove the 0x prefix
+    callData = callData + paddingToReplace;
+    replacements.push({
+      token: constants.AddressZero, // Use zeroAddress to replace msg.value with native balance
+      offset: 4 + action.args.length * 32, // Set the replacement offset to point to the extra bytes
+    });
+  }
+
+  const wrappedCall = encodeMakeCallWithBalanceCalldata(
+    action.target,
+    callData,
+    action.value,
+    replacements
+  );
+
+  return {
+    target: getMultiCallHandlerAddress(targetChainId),
+    callData: wrappedCall,
+    value: "0", // Value for this call is already included in the wrapped call
+  };
 }
 
 export function getApprovalTxns(params: {
@@ -383,12 +574,237 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
+export function calculateSwapFees(params: {
+  inputAmount: BigNumber;
+  originSwapQuote?: SwapQuote;
+  bridgeQuote: CrossSwapQuotes["bridgeQuote"];
+  destinationSwapQuote?: SwapQuote;
+  appFeePercent?: number;
+  appFee?: AppFee;
+  originTxGas?: BigNumber;
+  originTxGasPrice?: BigNumber;
+  inputTokenPriceUsd: number;
+  outputTokenPriceUsd: number;
+  originNativePriceUsd: number;
+  destinationNativePriceUsd: number;
+  bridgeQuoteInputTokenPriceUsd: number;
+  appFeeTokenPriceUsd: number;
+  minOutputAmountSansAppFees: BigNumber;
+  originChainId: number;
+  destinationChainId: number;
+  logger: Logger;
+}) {
+  const {
+    inputAmount,
+    originSwapQuote,
+    bridgeQuote,
+    destinationSwapQuote,
+    appFee,
+    originTxGas,
+    originTxGasPrice,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+    bridgeQuoteInputTokenPriceUsd,
+    appFeeTokenPriceUsd,
+    minOutputAmountSansAppFees,
+    originChainId,
+    destinationChainId,
+    logger,
+  } = params;
+
+  try {
+    if (
+      inputTokenPriceUsd === 0 ||
+      outputTokenPriceUsd === 0 ||
+      originNativePriceUsd === 0 ||
+      destinationNativePriceUsd === 0 ||
+      bridgeQuoteInputTokenPriceUsd === 0
+    ) {
+      logger.debug({
+        at: "calculateSwapFees",
+        message: "Error calculating swap fees from USD prices",
+        inputTokenPriceUsd,
+        outputTokenPriceUsd,
+        originNativePriceUsd,
+        destinationNativePriceUsd,
+        bridgeQuoteInputTokenPriceUsd,
+      });
+      return {};
+    }
+
+    const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
+    const outputToken =
+      destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
+
+    const originGas =
+      originTxGas && originTxGasPrice
+        ? originTxGas.mul(originTxGasPrice)
+        : BigNumber.from(0);
+
+    const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
+    const appFeeToken = appFee?.feeToken || outputToken;
+    const appFeeUsd =
+      parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
+      appFeeTokenPriceUsd;
+
+    const bridgeFees = bridgeQuote.suggestedFees;
+    const relayerCapital = bridgeFees.relayerCapitalFee;
+    const destinationGas = bridgeFees.relayerGasFee;
+    const lpFee = bridgeFees.lpFee;
+    const relayerTotal = bridgeFees.totalRelayFee;
+
+    const originGasToken = getNativeTokenInfo(originChainId);
+    const destinationGasToken = getNativeTokenInfo(destinationChainId);
+
+    // Calculate USD amounts
+    const originGasUsd =
+      parseFloat(utils.formatUnits(originGas, originGasToken.decimals)) *
+      originNativePriceUsd;
+    // We need to use bridge input token price for destination gas since
+    // suggested fees returns the gas total in input token decimals
+    const destinationGasUsd =
+      parseFloat(
+        utils.formatUnits(destinationGas.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const relayerCapitalUsd =
+      parseFloat(
+        utils.formatUnits(relayerCapital.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const lpFeeUsd =
+      parseFloat(
+        utils.formatUnits(lpFee.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const relayerTotalUsd =
+      parseFloat(
+        utils.formatUnits(relayerTotal.total, bridgeQuote.inputToken.decimals)
+      ) * bridgeQuoteInputTokenPriceUsd;
+    const inputAmountUsd =
+      parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
+      inputTokenPriceUsd;
+    const outputMinAmountSansAppFeesUsd =
+      parseFloat(
+        utils.formatUnits(minOutputAmountSansAppFees, outputToken.decimals)
+      ) * outputTokenPriceUsd;
+
+    const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
+    const totalFeePct = totalFeeUsd / inputAmountUsd;
+    const totalFeeAmount = inputAmount
+      .mul(utils.parseEther(totalFeePct.toFixed(18)))
+      .div(sdk.utils.fixedPointAdjustment);
+
+    return {
+      total: {
+        amount: totalFeeAmount,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(totalFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(totalFeePct.toFixed(18)),
+        token: inputToken,
+      },
+      originGas: {
+        amount: originGas,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(originGasUsd.toFixed(18))
+        ),
+        token: originGasToken,
+      },
+      destinationGas: {
+        amount: safeUsdToTokenAmount(
+          destinationGasUsd,
+          destinationNativePriceUsd,
+          destinationGasToken.decimals
+        ),
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(destinationGasUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (destinationGasUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: destinationGasToken,
+      },
+      relayerCapital: {
+        amount: relayerCapital.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(relayerCapitalUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (relayerCapitalUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: bridgeQuote.inputToken,
+      },
+      lpFee: {
+        amount: lpFee.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(lpFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther((lpFeeUsd / inputAmountUsd).toFixed(18)),
+        token: bridgeQuote.inputToken,
+      },
+      relayerTotal: {
+        amount: relayerTotal.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (relayerTotalUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: bridgeQuote.inputToken,
+      },
+      app: {
+        amount: appFeeAmount,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(appFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther((appFeeUsd / inputAmountUsd).toFixed(18)),
+        token: appFeeToken,
+      },
+    };
+  } catch (error) {
+    logger.debug({
+      at: "calculateSwapFees",
+      message: "Error calculating swap fees",
+      error,
+    });
+    return {};
+  }
+}
+
+function getNativeTokenInfo(chainId: number): Token {
+  const chainInfo = getChainInfo(chainId);
+  const token =
+    TOKEN_SYMBOLS_MAP[chainInfo.nativeToken as keyof typeof TOKEN_SYMBOLS_MAP];
+  return {
+    chainId,
+    address: ethers.constants.AddressZero,
+    decimals: token.decimals,
+    symbol: token.symbol,
+  };
+}
+
+function safeUsdToTokenAmount(
+  usdAmount: number,
+  tokenPriceUsd: number,
+  decimals: number
+) {
+  if (tokenPriceUsd === 0) return utils.parseUnits("0", decimals);
+  const tokenAmount = usdAmount / tokenPriceUsd;
+  if (tokenAmount <= 0 || isNaN(tokenAmount) || !isFinite(tokenAmount)) {
+    return utils.parseUnits("0", decimals);
+  }
+  return utils.parseUnits(
+    tokenAmount.toFixed(Math.min(decimals, 18)),
+    decimals
+  );
+}
+
 export function buildBaseSwapResponseJson(params: {
-  crossSwapType: CrossSwapType;
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
   originChainId: number;
+  destinationChainId: number;
   inputAmount: BigNumber;
   allowance: BigNumber;
   balance: BigNumber;
@@ -410,10 +826,39 @@ export function buildBaseSwapResponseJson(params: {
     maxPriorityFeePerGas?: BigNumber;
   };
   permitSwapTx?: any; // TODO: Add type
+  appFeePercent?: number;
+  appFee?: AppFee;
+  inputTokenPriceUsd: number;
+  outputTokenPriceUsd: number;
+  originNativePriceUsd: number;
+  destinationNativePriceUsd: number;
+  bridgeQuoteInputTokenPriceUsd: number;
+  crossSwapType: CrossSwapType;
+  logger: Logger;
 }) {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
+
+  const minOutputAmount =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : (params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount);
+  const minOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : minOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+  const expectedOutputAmount =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : (params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount);
+  const expectedOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? params.amount
+      : expectedOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
@@ -486,21 +931,33 @@ export function buildBaseSwapResponseJson(params: {
             symbol: "WETH",
           }
         : refundToken,
+    fees: calculateSwapFees({
+      inputAmount: params.inputAmount,
+      originSwapQuote: params.originSwapQuote,
+      bridgeQuote: params.bridgeQuote,
+      destinationSwapQuote: params.destinationSwapQuote,
+      appFeePercent: params.appFeePercent,
+      appFee: params.appFee,
+      originTxGas: params.approvalSwapTx?.gas,
+      originTxGasPrice: params.approvalSwapTx?.maxFeePerGas,
+      inputTokenPriceUsd: params.inputTokenPriceUsd,
+      outputTokenPriceUsd: params.outputTokenPriceUsd,
+      originNativePriceUsd: params.originNativePriceUsd,
+      destinationNativePriceUsd: params.destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
+      appFeeTokenPriceUsd: params.outputTokenPriceUsd,
+      minOutputAmountSansAppFees,
+      originChainId: params.originChainId,
+      destinationChainId: params.destinationChainId,
+      logger: params.logger,
+    }),
     inputAmount:
-      params.amountType === "exactInput"
+      params.amountType === AMOUNT_TYPE.EXACT_INPUT
         ? params.amount
         : (params.originSwapQuote?.expectedAmountIn ??
           params.bridgeQuote.inputAmount),
-    expectedOutputAmount:
-      params.amountType === "exactOutput"
-        ? params.amount
-        : (params.destinationSwapQuote?.expectedAmountOut ??
-          params.bridgeQuote.outputAmount),
-    minOutputAmount:
-      params.amountType === "exactOutput"
-        ? params.amount
-        : (params.destinationSwapQuote?.minAmountOut ??
-          params.bridgeQuote.outputAmount),
+    expectedOutputAmount: expectedOutputAmountSansAppFees,
+    minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     swapTx: params.approvalSwapTx
       ? {

@@ -14,7 +14,11 @@ import { getEnvs } from "../../_env";
 import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
-import { compactAxiosError, SwapQuoteUnavailableError } from "../../_errors";
+import {
+  compactAxiosError,
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -24,6 +28,8 @@ const API_HEADERS = {
   "Content-Type": "application/json",
   ...(API_KEY_LIFI ? { "x-lifi-api-key": `${API_KEY_LIFI}` } : {}),
 };
+
+const SWAP_PROVIDER_NAME = "lifi";
 
 export function getLifiStrategy(
   originSwapEntryPointContractName: OriginEntryPointContractName
@@ -44,12 +50,27 @@ export function getLifiStrategy(
 
   const getSources = makeGetSources(SOURCES);
 
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: "Option 'sellEntireBalance' is not supported by Li.Fi",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: SWAP_PROVIDER_NAME,
+    });
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
     opts?: QuoteFetchOpts
   ) => {
     try {
+      if (
+        opts?.sellEntireBalance &&
+        opts?.throwIfSellEntireBalanceUnsupported
+      ) {
+        assertSellEntireBalanceSupported();
+      }
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
@@ -115,7 +136,7 @@ export function getLifiStrategy(
         slippageTolerance: swap.slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
-          name: "lifi",
+          name: SWAP_PROVIDER_NAME,
           sources: [quote.tool],
         },
       };
@@ -141,30 +162,87 @@ export function getLifiStrategy(
         message: "Error fetching LI.FI quote",
         error: compactAxiosError(error as Error),
       });
-      if (error instanceof AxiosError) {
-        if (
-          error.response?.status === 404 &&
-          error.response?.data.message.includes("No available quotes")
-        ) {
-          throw new SwapQuoteUnavailableError(
-            {
-              message: "No available quotes from LI.FI",
-            },
-            {
-              cause: error,
-            }
-          );
-        }
-      }
-      throw error;
+      throw parseLiFiError(error);
     }
   };
 
   return {
-    strategyName: "lifi",
+    strategyName: SWAP_PROVIDER_NAME,
     getRouter,
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
+}
+
+// https://docs.li.fi/api-reference/error-codes
+export function parseLiFiError(error: unknown) {
+  if (error instanceof UpstreamSwapProviderError) {
+    return error;
+  }
+
+  if (error instanceof AxiosError) {
+    const compactedError = compactAxiosError(error);
+
+    if (!error.response?.data) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Unknown error",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    const { data, status } = error.response;
+
+    if (
+      [
+        1002, // NoQuoteError
+        1003, // NotFoundError
+      ].includes(data.code)
+    ) {
+      return new UpstreamSwapProviderError(
+        {
+          message: data.message,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        {
+          cause: compactedError,
+        }
+      );
+    }
+
+    if (status >= 500) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Service unavailable",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE,
+          swapProvider: SWAP_PROVIDER_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    return new UpstreamSwapProviderError(
+      {
+        message: "Unknown error",
+        code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+        swapProvider: SWAP_PROVIDER_NAME,
+      },
+      { cause: compactedError }
+    );
+  }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: SWAP_PROVIDER_NAME,
+    },
+    { cause: error }
+  );
 }
