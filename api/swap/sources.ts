@@ -1,7 +1,9 @@
 import { type, string, Infer, array, optional } from "superstruct";
+import { CHAIN_IDs } from "@across-protocol/constants";
 import { positiveIntStr } from "../_utils";
 import { ApiHandler } from "../_base/api-handler";
 import { VercelAdapter } from "../_adapters/vercel-adapter";
+import { InvalidParamError } from "../_errors";
 
 import {
   SOURCES as ZERO_X_SOURCES,
@@ -46,6 +48,12 @@ class SwapSourcesHandler extends ApiHandler<
 
     if (chainIdParam) {
       const chainId = Number(chainIdParam);
+      if (!Object.values(CHAIN_IDs).includes(chainId)) {
+        throw new InvalidParamError({
+          message: `Invalid chain ID: ${chainId}`,
+          param: "chainId",
+        });
+      }
       const zeroXSources = ZERO_X_SOURCES.sources[chainId].flatMap(
         (source) => source.names
       );
