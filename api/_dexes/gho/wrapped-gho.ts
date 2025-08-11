@@ -19,8 +19,12 @@ const SWAP_PROVIDER_NAME = "wrapped-gho";
  */
 export function getWrappedGhoStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
+    const address = WGHO_ADDRESS[chainId];
+    if (!address) {
+      throw new Error(`WGHO address not found for chain ${chainId}`);
+    }
     return {
-      address: WGHO_ADDRESS[chainId],
+      address,
       name: "WGHO",
     };
   };
