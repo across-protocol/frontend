@@ -261,21 +261,26 @@ export function buildExactInputBridgeTokenMessage(
  */
 export function buildExactOutputBridgeTokenMessage(
   crossSwap: CrossSwap,
+  exactOutputAmount: BigNumber,
   appFee?: AppFee
 ) {
-  const { feeAmount: appFeeAmount, feeActions: appFeeActions } = appFee || {
+  const { feeActions: appFeeActions } = appFee || {
     feeAmount: BigNumber.from(0),
     feeActions: [],
   };
 
-  const remainingAmount = crossSwap.amount.sub(appFeeAmount);
+  const multicallHandlerAddress = getMultiCallHandlerAddress(
+    crossSwap.outputToken.chainId
+  );
 
   const unwrapActions = crossSwap.isOutputNative
     ? // WETH unwrap to ETH
       [
         {
-          target: crossSwap.outputToken.address,
-          callData: encodeWethWithdrawCalldata(crossSwap.amount),
+          target: multicallHandlerAddress,
+          callData: encodeWithdrawAllWethCalldata(
+            crossSwap.outputToken.address
+          ),
           value: "0",
         },
       ]
@@ -286,7 +291,7 @@ export function buildExactOutputBridgeTokenMessage(
         {
           target: crossSwap.recipient,
           callData: "0x",
-          value: remainingAmount.toString(),
+          value: exactOutputAmount.toString(),
         },
       ]
     : // ERC-20 token transfer
@@ -295,7 +300,7 @@ export function buildExactOutputBridgeTokenMessage(
           target: crossSwap.outputToken.address,
           callData: encodeTransferCalldata(
             crossSwap.recipient,
-            remainingAmount
+            exactOutputAmount
           ),
           value: "0",
         },
@@ -320,7 +325,9 @@ export function buildExactOutputBridgeTokenMessage(
       {
         target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
         callData: encodeDrainCalldata(
-          crossSwap.outputToken.address,
+          crossSwap.isOutputNative
+            ? constants.AddressZero // ETH Transfer
+            : crossSwap.outputToken.address, // ERC-20 Transfer
           crossSwap.refundAddress ?? crossSwap.depositor
         ),
         value: "0",
