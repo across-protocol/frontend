@@ -84,11 +84,13 @@ import {
   AcrossErrorCode,
   TokenNotFoundError,
   UpstreamTimeoutError,
+  SimulationError,
+  compactAxiosError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
 import { isEvmAddress, isSvmAddress } from "./_address";
 
-export { InputError, handleErrorCondition } from "./_errors";
+export { InputError, handleErrorCondition, compactAxiosError } from "./_errors";
 export const { Profiler } = sdk.utils;
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
@@ -1264,6 +1266,12 @@ export async function getBridgeQuoteForOutput(params: {
       const { response = { data: {} } } = err;
       // If upstream error is an AcrossApiError, we just return it
       if (response?.data?.type === "AcrossApiError") {
+        if (response.data.code === "SIMULATION_ERROR") {
+          throw new SimulationError({
+            message: response.data.message,
+            transaction: response.data.transaction,
+          });
+        }
         throw new AcrossApiError(
           {
             message: response.data.message,
@@ -1271,7 +1279,7 @@ export async function getBridgeQuoteForOutput(params: {
             code: response.data.code,
             param: response.data.param,
           },
-          { cause: err }
+          { cause: compactAxiosError(err) }
         );
       } else {
         const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
@@ -1281,7 +1289,7 @@ export async function getBridgeQuoteForOutput(params: {
             status: HttpErrorToStatusCode.BAD_GATEWAY,
             code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
           },
-          { cause: err }
+          { cause: compactAxiosError(err) }
         );
       }
     }
