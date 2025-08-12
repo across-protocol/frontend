@@ -1283,23 +1283,28 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       }
     ),
     // 3.2. Get origin swap quote for any input token -> bridgeable input token
-    (async () => {
-      assertSources(originSources);
-      return originStrategy.fetchFn(
-        {
-          ...originSwap,
-          depositor: crossSwapWithAppFee.depositor,
-          amount: addMarkupToAmount(
-            bridgeQuote.inputAmount,
-            QUOTE_BUFFER
-          ).toString(),
+    executeStrategies(
+      [
+        async () => {
+          assertSources(originSources);
+          return originStrategy.fetchFn(
+            {
+              ...originSwap,
+              depositor: crossSwapWithAppFee.depositor,
+              amount: addMarkupToAmount(
+                bridgeQuote.inputAmount,
+                QUOTE_BUFFER
+              ).toString(),
+            },
+            TradeType.EXACT_OUTPUT,
+            {
+              sources: originSources,
+            }
+          );
         },
-        TradeType.EXACT_OUTPUT,
-        {
-          sources: originSources,
-        }
-      );
-    })(),
+      ],
+      strategies.prioritizationMode
+    ),
   ]);
   const appFee = calculateAppFee({
     outputAmount:
