@@ -1175,10 +1175,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     const fetchFn = async () => {
       assertSources(destinationSources);
 
-      if (
-        crossSwapWithAppFee.strictTradeType &&
-        crossSwapWithAppFee.type === AMOUNT_TYPE.MIN_OUTPUT
-      ) {
+      if (crossSwapWithAppFee.strictTradeType) {
         result.destinationStrategy.assertSellEntireBalanceSupported();
       }
 
@@ -1276,9 +1273,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         // if we want to be strict about the provided `tradeType`. The user can override
         // this behavior by setting `strictTradeType=false` in the query params.
         throwIfSellEntireBalanceUnsupported:
-          crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
-            ? false
-            : crossSwapWithAppFee.strictTradeType,
+          crossSwapWithAppFee.strictTradeType,
         quoteBuffer: QUOTE_BUFFER,
       }
     ),
@@ -1429,10 +1424,19 @@ function _prepCrossSwapQuotesRetrievalA2A(
       const destinationStrategy =
         strategiesToUseForComparison === "destination"
           ? strategy
-          : (destinationStrategies.find(
-              (destinationStrategy) =>
-                destinationStrategy.strategyName === strategy.strategyName
-            ) ?? destinationStrategies[0]);
+          : (destinationStrategies.find((destinationStrategy) => {
+              // If strict trade type is enabled, we need to check if the destination strategy supports
+              // selling the entire balance.
+              if (crossSwap.strictTradeType) {
+                try {
+                  destinationStrategy.assertSellEntireBalanceSupported();
+                  return true;
+                } catch (error) {
+                  return false;
+                }
+              }
+              return destinationStrategy.strategyName === strategy.strategyName;
+            }) ?? destinationStrategies[0]);
 
       const { swapAndBridge, originSwapInitialRecipient } =
         originStrategy.getOriginEntryPoints(originSwapChainId);
