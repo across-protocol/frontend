@@ -15629,18 +15629,6 @@
       "toTokenSymbol": "USDC-BNB",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-    },
-    {
-      "fromChain": 34268394551451,
-      "toChain": 42161,
-      "fromTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      "toTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-      "fromSpokeAddress": "DLv3NggMiSaef97YCkew5xKUHDh13tVGZ7tydt3ZeAru",
-      "fromTokenSymbol": "USDC",
-      "toTokenSymbol": "USDC",
-      "isNative": false,
-      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      "externalProjectId": "hyperliquid"
     }
   ],
   "swapRoutes": [
