@@ -1522,17 +1522,34 @@ export async function executeStrategies<T>(
 
     // `priority-speed` mode
     const errors: Error[] = [];
-    let chunkStartIndex = 0;
+    // First fetch the priority chunk
     const priorityChunkSize = prioritizationMode.priorityChunkSize;
-    while (chunkStartIndex < strategyFetches.length) {
-      const chunkEndIndex = chunkStartIndex + priorityChunkSize;
-      const priorityFetches = strategyFetches.slice(
-        chunkStartIndex,
-        chunkEndIndex
+    const priorityChunkEndIndex = Math.min(
+      priorityChunkSize,
+      strategyFetches.length
+    );
+    const priorityFetches = strategyFetches.slice(0, priorityChunkEndIndex);
+    try {
+      const successfulFetch = await Promise.any(
+        priorityFetches.map((fetch) => fetch())
+      );
+      return successfulFetch;
+    } catch (error) {
+      if (error instanceof AggregateError) {
+        errors.push(...error.errors);
+      } else {
+        errors.push(error as Error);
+      }
+    }
+    // If the priority chunk failed, fetch all the remaining strategies
+    if (priorityChunkEndIndex < strategyFetches.length) {
+      const remainingFetches = strategyFetches.slice(
+        priorityChunkEndIndex,
+        strategyFetches.length
       );
       try {
         const successfulFetch = await Promise.any(
-          priorityFetches.map((fetch) => fetch())
+          remainingFetches.map((fetch) => fetch())
         );
         return successfulFetch;
       } catch (error) {
@@ -1541,7 +1558,6 @@ export async function executeStrategies<T>(
         } else {
           errors.push(error as Error);
         }
-        chunkStartIndex = chunkEndIndex;
       }
     }
     throw new AggregateError(errors);

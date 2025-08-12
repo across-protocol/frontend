@@ -195,7 +195,7 @@ describe("#executeStrategies()", () => {
     it("should move to next chunk when first chunk fails completely", async () => {
       const priorityMode = {
         mode: "priority-speed" as const,
-        priorityChunkSize: 2,
+        priorityChunkSize: 1,
       };
 
       const results = [
@@ -205,20 +205,20 @@ describe("#executeStrategies()", () => {
           new Promise((resolve) =>
             setTimeout(
               () => resolve({ id: 3, data: "second-chunk-success" }),
-              10
+              20
             )
           ),
         () =>
           new Promise((resolve) =>
             setTimeout(
               () => resolve({ id: 4, data: "second-chunk-success-2" }),
-              20
+              10
             )
           ),
       ];
 
       const result = await executeStrategies(results, priorityMode);
-      expect(result).toEqual({ id: 3, data: "second-chunk-success" });
+      expect(result).toEqual({ id: 4, data: "second-chunk-success-2" });
     });
 
     it("should handle chunks correctly when priority chunk size is larger than array", async () => {
