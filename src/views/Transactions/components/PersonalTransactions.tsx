@@ -1,18 +1,20 @@
 import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
+import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
-import { SecondaryButton } from "components";
-import { useConnection } from "hooks";
-import { getConfig } from "utils";
 
+import { SecondaryButton } from "components";
+import { getConfig } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { usePersonalTransactions } from "../hooks/usePersonalTransactions";
 import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
 import { Deposit, IndexerDeposit } from "hooks/useDeposits";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -30,9 +32,14 @@ export function PersonalTransactions({ statusFilter }: Props) {
     setDepositToSpeedUp,
     depositToSpeedUp,
   } = usePersonalTransactions(statusFilter);
-  const { isConnected, connect } = useConnection();
+  const { isConnected: isConnectedEVM, connect: connectEVM } =
+    useConnectionEVM();
+  const { isConnected: isConnectedSolana, connect: connectSolana } =
+    useConnectionSVM();
   const history = useHistory();
   const queryClient = useQueryClient();
+
+  const isConnected = isConnectedEVM || isConnectedSolana;
 
   const convertedDeposits = useMemo(
     () => deposits.map((deposit) => convertIndexerDepositToDeposit(deposit)),
@@ -43,13 +50,22 @@ export function PersonalTransactions({ statusFilter }: Props) {
     return (
       <EmptyTable>
         <Text size="lg">Please connect your wallet to view transactions</Text>
-        <SecondaryButton
-          data-cy="connect-wallet"
-          size="md"
-          onClick={() => connect()}
-        >
-          Connect Wallet
-        </SecondaryButton>
+        <ButtonStack>
+          <SecondaryButton
+            data-cy="connect-wallet"
+            size="md"
+            onClick={() => connectEVM()}
+          >
+            Connect EVM Wallet
+          </SecondaryButton>
+          <SecondaryButton
+            data-cy="connect-wallet"
+            size="md"
+            onClick={() => connectSolana()}
+          >
+            Connect Solana Wallet
+          </SecondaryButton>
+        </ButtonStack>
       </EmptyTable>
     );
   }
@@ -196,3 +212,11 @@ function convertIndexerDepositToDeposit(
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
   };
 }
+
+const ButtonStack = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+`;
