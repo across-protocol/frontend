@@ -13,7 +13,7 @@ jobs:
   format-and-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
       - name: Format and lint
         run: |
@@ -23,7 +23,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
       - name: Unit tests
         env:
@@ -38,7 +38,7 @@ jobs:
   api-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
       - name: API tests
         run: yarn test-api

@@ -11,7 +11,7 @@ jobs:
       contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
       # For now, we only need Chromium.
       - name: Install Playwright Browsers
