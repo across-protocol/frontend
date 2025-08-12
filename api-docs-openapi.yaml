@@ -263,7 +263,7 @@ paths:
   /available-routes:
     get:
       summary: Retrieve available routes for transfers
-      description: Returns available routes based on specified parameters.
+      description: Returns available routes based on specified parameters. If no parameters are provided, available routes on all chains are returned.
       parameters:
         - name: originChainId
           in: query
