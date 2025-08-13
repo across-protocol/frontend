@@ -1167,8 +1167,17 @@ export async function getBridgeQuoteForOutput(params: {
     let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
       undefined;
 
-    // 2. Adjust input amount to meet minOutputAmount
-    while (tries < maxTries) {
+    // 2. Use indicative quote if it meets minOutputAmount
+    const outputAmount = ConvertDecimals(
+      params.inputToken.decimals,
+      params.outputToken.decimals
+    )(adjustedInputAmount.sub(indicativeQuote.totalRelayFee.total));
+    if (outputAmount.gte(params.minOutputAmount)) {
+      finalQuote = indicativeQuote;
+    }
+
+    // 3. Adjust input amount to meet minOutputAmount
+    while (tries < maxTries && !finalQuote) {
       const inputAmounts = Array.from({ length: tryChunkSize }).map((_, i) => {
         const buffer = 0.001 * i;
         return addMarkupToAmount(
@@ -1198,10 +1207,6 @@ export async function getBridgeQuoteForOutput(params: {
           adjustedInputAmount = inputAmount;
           break;
         }
-      }
-
-      if (finalQuote) {
-        break;
       }
 
       adjustedInputAmount = inputAmounts[inputAmounts.length - 1];
