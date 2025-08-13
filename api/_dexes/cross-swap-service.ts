@@ -305,7 +305,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
       crossSwap,
       destinationSwapQuote: prioritizedStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
 
@@ -338,7 +338,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
     crossSwap,
     destinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
 
@@ -446,7 +446,7 @@ export async function getCrossSwapQuotesForOutputB2A(
       crossSwap: crossSwapWithAppFee,
       destinationSwapQuote: prioritizedStrategy.destinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
       appFee,
     }),
     forceExactOutput: true,
@@ -1079,7 +1079,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       destinationSwapQuote:
         prioritizedOriginStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -1120,7 +1120,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     crossSwap,
     destinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
 
@@ -1241,7 +1241,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       crossSwap: crossSwapWithAppFee,
       destinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
   assertMinOutputAmount(
@@ -1315,7 +1315,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     crossSwap: crossSwapWithAppFee,
     destinationSwapQuote: finalDestinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
   assertMinOutputAmount(

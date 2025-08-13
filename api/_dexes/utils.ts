@@ -522,13 +522,16 @@ export function buildDestinationSwapCrossChainMessage({
   crossSwap,
   destinationSwapQuote,
   bridgeableOutputToken,
-  routerAddress,
+  router,
   appFee,
 }: {
   crossSwap: CrossSwap;
   bridgeableOutputToken: Token;
   destinationSwapQuote: SwapQuote;
-  routerAddress: string;
+  router: {
+    address: string;
+    transferType?: TransferType;
+  };
   appFee?: AppFee;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
@@ -665,18 +668,31 @@ export function buildDestinationSwapCrossChainMessage({
       ? encodeActionCalls(crossSwap.embeddedActions, destinationSwapChainId)
       : [];
 
+  // If the router is an approval-based router, we need to approve the bridgeable output token.
+  // Otherwise, we need to transfer the bridgeable output token to the router.
+  const routerTransferAction =
+    router.transferType === TransferType.Transfer
+      ? {
+          target: multicallHandlerAddress,
+          callData: encodeDrainCalldata(
+            bridgeableOutputToken.address,
+            router.address
+          ),
+          value: "0",
+        }
+      : {
+          target: bridgeableOutputToken.address,
+          callData: encodeApproveCalldata(
+            router.address,
+            destinationSwapQuote.maximumAmountIn
+          ),
+          value: "0",
+        };
+
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
-      // approve bridgeable output token
-      {
-        target: bridgeableOutputToken.address,
-        callData: encodeApproveCalldata(
-          routerAddress,
-          destinationSwapQuote.maximumAmountIn
-        ),
-        value: "0",
-      },
+      routerTransferAction,
       // swap bridgeable output token -> cross swap output token
       ...swapActions,
       // unwrap weth if output token is native

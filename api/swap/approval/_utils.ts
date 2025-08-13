@@ -37,9 +37,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
 
     const swapAndDepositData = await extractSwapAndDepositDataStruct(
       crossSwapQuotes,
-      originRouter.name === "UniswapV3UniversalRouter"
-        ? TransferType.Transfer
-        : TransferType.Approval
+      originRouter.transferType ?? TransferType.Approval
     );
 
     if (originSwapEntryPoint.name === "SpokePoolPeriphery") {

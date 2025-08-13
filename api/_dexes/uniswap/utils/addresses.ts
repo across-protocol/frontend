@@ -46,6 +46,23 @@ export const QUOTER_CONTRACT_ADDRESS = {
   [CHAIN_IDs.ZORA]: "0x11867e1b3348F3ce4FcC170BC5af3d23E07E64Df",
 };
 
+// https://api-docs.uniswap.org/guides/supported_chains
+// https://github.com/Uniswap/sdks/blob/6413af9bcda811c76157e14d6e0ff6924e1959f2/sdks/universal-router-sdk/src/utils/constants.ts#L21
+export const UNIVERSAL_ROUTER_02_ADDRESS = {
+  [CHAIN_IDs.ARBITRUM]: "0xa51afafe0263b40edaef0df8781ea9aa03e381a3",
+  [CHAIN_IDs.BASE]: "0x6ff5693b99212da76ad316178a184ab56d299b43",
+  [CHAIN_IDs.BLAST]: "0xeabbcb3e8e415306207ef514f660a3f820025be3",
+  [CHAIN_IDs.BSC]: "0x1906c1d672b88cd1b9ac7593301ca990f94eae07",
+  [CHAIN_IDs.MAINNET]: "0x66a9893cc07d91d95644aedd05d03f95e1dba8af",
+  [CHAIN_IDs.OPTIMISM]: "0x851116d9223fabed8e56c0e6b8ad0c31d98b3507",
+  [CHAIN_IDs.POLYGON]: "0x1095692a6237d83c6a72f3f5efedb9a670c49223",
+  [CHAIN_IDs.SONEIUM]: "0x0e2850543f69f678257266e0907ff9a58b3f13de",
+  [CHAIN_IDs.UNICHAIN]: "0xef740bf23acae26f6492b10de645d6b98dc8eaf3",
+  [CHAIN_IDs.WORLD_CHAIN]: "0x8ac7bee993bb44dab564ea4bc9ea67bf9eb5e743",
+  [CHAIN_IDs.ZK_SYNC]: "0x28731BCC616B5f51dD52CF2e4dF0E78dD1136C06",
+  [CHAIN_IDs.ZORA]: "0x3315ef7ca28db74abadc6c44570efdf06b04b020",
+};
+
 // Hardcoded LP addresses
 export const POOL_ADDRESS = {
   [CHAIN_IDs.LENS]: {
