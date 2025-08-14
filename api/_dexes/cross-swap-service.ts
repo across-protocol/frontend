@@ -12,7 +12,12 @@ import {
   addMarkupToAmount,
   ConvertDecimals,
 } from "../_utils";
-import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
+import {
+  CrossSwap,
+  CrossSwapQuotes,
+  QuoteFetchOpts,
+  QuoteFetchStrategy,
+} from "./types";
 import {
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
@@ -1417,26 +1422,19 @@ function _prepCrossSwapQuotesRetrievalA2A(
       const originStrategy =
         strategiesToUseForComparison === "origin"
           ? strategy
-          : (originStrategies.find(
-              (originStrategy) =>
-                originStrategy.strategyName === strategy.strategyName
-            ) ?? originStrategies[0]);
+          : getMatchingStrategy(
+              strategy,
+              originStrategies,
+              crossSwap.strictTradeType
+            );
       const destinationStrategy =
         strategiesToUseForComparison === "destination"
           ? strategy
-          : (destinationStrategies.find((destinationStrategy) => {
-              // If strict trade type is enabled, we need to check if the destination strategy supports
-              // selling the entire balance.
-              if (crossSwap.strictTradeType) {
-                try {
-                  destinationStrategy.assertSellEntireBalanceSupported();
-                  return true;
-                } catch (error) {
-                  return false;
-                }
-              }
-              return destinationStrategy.strategyName === strategy.strategyName;
-            }) ?? destinationStrategies[0]);
+          : getMatchingStrategy(
+              strategy,
+              destinationStrategies,
+              crossSwap.strictTradeType
+            );
 
       const { swapAndBridge, originSwapInitialRecipient } =
         originStrategy.getOriginEntryPoints(originSwapChainId);
@@ -1490,6 +1488,51 @@ function _prepCrossSwapQuotesRetrievalA2A(
       return [];
     }
   });
+}
+
+function getMatchingStrategy(
+  baseStrategy: QuoteFetchStrategy,
+  otherStrategies: QuoteFetchStrategy[],
+  strictTradeType: boolean
+) {
+  // If strict trade type is enabled, we need to check if the matching strategy supports
+  // selling the entire balance.
+  return strictTradeType
+    ? // First check if other strategy with same name supports selling the entire balance.
+      (otherStrategies.find((otherStrategy) => {
+        const sameStrategy =
+          otherStrategy.strategyName === baseStrategy.strategyName;
+        let supportsSellEntireBalance = false;
+        try {
+          otherStrategy.assertSellEntireBalanceSupported();
+          supportsSellEntireBalance = true;
+        } catch (error) {
+          supportsSellEntireBalance = false;
+        }
+        return sameStrategy && supportsSellEntireBalance;
+      }) ??
+        // If no other strategy with same name supports selling the entire balance,
+        // check if any other strategy supports selling the entire balance.
+        otherStrategies.find((otherStrategy) => {
+          try {
+            otherStrategy.assertSellEntireBalanceSupported();
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }) ??
+        // If no other strategy supports selling the entire balance,
+        // return the first other strategy with same name.
+        otherStrategies.find((otherStrategy) => {
+          return otherStrategy.strategyName === baseStrategy.strategyName;
+        }) ??
+        // If no other strategy supports selling the entire balance,
+        // return the first other strategy.
+        otherStrategies[0])
+    : // If strict trade type is disabled, return the strategy with same name.
+      (otherStrategies.find((otherStrategy) => {
+        return otherStrategy.strategyName === baseStrategy.strategyName;
+      }) ?? otherStrategies[0]);
 }
 
 /**
@@ -1583,9 +1626,7 @@ export async function executeStrategies<T>(
               error.param === "includeSources")
         )
       ) {
-        throw new InvalidParamError({
-          message: "No available quotes for specified sources",
-        });
+        throw errors[0];
       }
 
       // If all quote fetches errored, we need to determine which error to propagate to the
