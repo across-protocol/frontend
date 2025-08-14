@@ -261,21 +261,26 @@ export function buildExactInputBridgeTokenMessage(
  */
 export function buildExactOutputBridgeTokenMessage(
   crossSwap: CrossSwap,
+  exactOutputAmount: BigNumber,
   appFee?: AppFee
 ) {
-  const { feeAmount: appFeeAmount, feeActions: appFeeActions } = appFee || {
+  const { feeActions: appFeeActions } = appFee || {
     feeAmount: BigNumber.from(0),
     feeActions: [],
   };
 
-  const remainingAmount = crossSwap.amount.sub(appFeeAmount);
+  const multicallHandlerAddress = getMultiCallHandlerAddress(
+    crossSwap.outputToken.chainId
+  );
 
   const unwrapActions = crossSwap.isOutputNative
     ? // WETH unwrap to ETH
       [
         {
-          target: crossSwap.outputToken.address,
-          callData: encodeWethWithdrawCalldata(crossSwap.amount),
+          target: multicallHandlerAddress,
+          callData: encodeWithdrawAllWethCalldata(
+            crossSwap.outputToken.address
+          ),
           value: "0",
         },
       ]
@@ -286,7 +291,7 @@ export function buildExactOutputBridgeTokenMessage(
         {
           target: crossSwap.recipient,
           callData: "0x",
-          value: remainingAmount.toString(),
+          value: exactOutputAmount.toString(),
         },
       ]
     : // ERC-20 token transfer
@@ -295,7 +300,7 @@ export function buildExactOutputBridgeTokenMessage(
           target: crossSwap.outputToken.address,
           callData: encodeTransferCalldata(
             crossSwap.recipient,
-            remainingAmount
+            exactOutputAmount
           ),
           value: "0",
         },
@@ -320,7 +325,9 @@ export function buildExactOutputBridgeTokenMessage(
       {
         target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
         callData: encodeDrainCalldata(
-          crossSwap.outputToken.address,
+          crossSwap.isOutputNative
+            ? constants.AddressZero // ETH Transfer
+            : crossSwap.outputToken.address, // ERC-20 Transfer
           crossSwap.refundAddress ?? crossSwap.depositor
         ),
         value: "0",
@@ -515,13 +522,16 @@ export function buildDestinationSwapCrossChainMessage({
   crossSwap,
   destinationSwapQuote,
   bridgeableOutputToken,
-  routerAddress,
+  router,
   appFee,
 }: {
   crossSwap: CrossSwap;
   bridgeableOutputToken: Token;
   destinationSwapQuote: SwapQuote;
-  routerAddress: string;
+  router: {
+    address: string;
+    transferType?: TransferType;
+  };
   appFee?: AppFee;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
@@ -658,18 +668,31 @@ export function buildDestinationSwapCrossChainMessage({
       ? encodeActionCalls(crossSwap.embeddedActions, destinationSwapChainId)
       : [];
 
+  // If the router is an approval-based router, we need to approve the bridgeable output token.
+  // Otherwise, we need to transfer the bridgeable output token to the router.
+  const routerTransferAction =
+    router.transferType === TransferType.Transfer
+      ? {
+          target: multicallHandlerAddress,
+          callData: encodeDrainCalldata(
+            bridgeableOutputToken.address,
+            router.address
+          ),
+          value: "0",
+        }
+      : {
+          target: bridgeableOutputToken.address,
+          callData: encodeApproveCalldata(
+            router.address,
+            destinationSwapQuote.maximumAmountIn
+          ),
+          value: "0",
+        };
+
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
-      // approve bridgeable output token
-      {
-        target: bridgeableOutputToken.address,
-        callData: encodeApproveCalldata(
-          routerAddress,
-          destinationSwapQuote.maximumAmountIn
-        ),
-        value: "0",
-      },
+      routerTransferAction,
       // swap bridgeable output token -> cross swap output token
       ...swapActions,
       // unwrap weth if output token is native

@@ -4,6 +4,7 @@ import { TradeType } from "@uniswap/sdk-core";
 import { getSuggestedFees } from "../_utils";
 import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
+import { TransferType } from "../_spoke-pool-periphery";
 
 export type { AmountType, CrossSwapType };
 
@@ -44,13 +45,14 @@ export type CrossSwap = {
   embeddedActions: Action[];
   appFeePercent?: number;
   appFeeRecipient?: string;
+  strictTradeType: boolean;
 };
 
 export type SupportedDex =
   | "1inch"
   | "uniswap"
   | "uniswap-v3/swap-router-02"
-  | "uniswap-v3/universal-router"
+  | "uniswap/universal-router-02"
   | "gho-multicall3"
   | "wrapped-gho"
   | "lifi"
@@ -119,6 +121,7 @@ export type DepositEntryPointContract = {
 export type RouterContract = {
   name: string;
   address: string;
+  transferType?: TransferType;
 };
 
 export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
@@ -145,15 +148,19 @@ export type GetSourcesFn = (
     }
   | undefined;
 
+export type AssertSellEntireBalanceSupportedFn = () => void;
+
 export type QuoteFetchStrategy = {
   strategyName: string;
   getRouter: (chainId: number) => {
     address: string;
     name: string;
+    transferType?: TransferType;
   };
   getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
   getSources: GetSourcesFn;
+  assertSellEntireBalanceSupported: AssertSellEntireBalanceSupportedFn;
 };
 
 export type SwapRouter = ReturnType<QuoteFetchStrategy["getRouter"]>;
@@ -171,6 +178,7 @@ export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
   sources?: ReturnType<GetSourcesFn>;
   sellEntireBalance?: boolean;
+  throwIfSellEntireBalanceUnsupported?: boolean;
   quoteBuffer?: number;
 }>;
 

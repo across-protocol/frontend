@@ -103,7 +103,7 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
         return destMatch && origMatch && tokenMatch && amountMatch;
       });
       if (matchedRoute) {
-        return matchedRoute.p75_fill_time_secs;
+        return matchedRoute.p50_fill_time_secs;
       }
     }
     // Return default value if no match is found
@@ -115,7 +115,7 @@ function makeLookup(rawTimings: typeof timings) {
   return (
     rawTimings
       .map((timing) => ({
-        p75_fill_time_secs: Number(timing.p75_fill_time_secs),
+        p50_fill_time_secs: Number(timing.p50_fill_time_secs),
         max_size_usd: parseUnits(timing.max_size_usd, 18),
         destination_route_classification:
           timing.destination_route_classification.split(","),

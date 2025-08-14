@@ -70,6 +70,7 @@ export const BaseSwapQueryParamsSchema = type({
   includeSources: optional(union([array(string()), string()])),
   appFee: optional(positiveFloatStr(1)),
   appFeeRecipient: optional(validAddress()),
+  strictTradeType: optional(boolStr()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -98,12 +99,14 @@ export async function handleBaseSwapQueryParams(
     includeSources: _includeSources,
     appFee,
     appFeeRecipient,
+    strictTradeType: _strictTradeType = "true",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
   const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
+  const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
   const inputTokenAddress = isInputNative
@@ -196,6 +199,7 @@ export async function handleBaseSwapQueryParams(
     includeSources,
     appFeePercent: appFeeNum,
     appFeeRecipient,
+    strictTradeType,
   };
 }
 
@@ -205,12 +209,12 @@ const ActionArg = refine(
   object({
     value: unknown(), // Will be validated at runtime
     populateDynamically: optional(boolean()),
-    balanceSource: optional(validEvmAddress()),
+    balanceSourceToken: optional(validEvmAddress()),
   }),
-  "balanceSource",
+  "balanceSourceToken",
   (argument) => {
-    if (argument.populateDynamically && !argument.balanceSource) {
-      return "balanceSource is required when populateDynamically is true";
+    if (argument.populateDynamically && !argument.balanceSourceToken) {
+      return "balanceSourceToken is required when populateDynamically is true";
     }
     return true;
   }
@@ -396,7 +400,7 @@ export function getWrappedCallForMakeCallWithBalance(
     .map((arg, index) => {
       if (arg.populateDynamically) {
         return {
-          token: arg.balanceSource,
+          token: arg.balanceSourceToken,
           // Arguments start at byte 4 (after the 4-byte function selector)
           // And each argument is 32 bytes long
           offset: 4 + index * 32,
