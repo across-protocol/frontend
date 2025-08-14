@@ -446,10 +446,30 @@ export function handleErrorCondition(
   if (span) {
     span.recordException(acrossApiError);
     span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, acrossApiError.status);
+
+    let spanMessage = acrossApiError.message;
+    if (acrossApiError.cause) {
+      let causeMessage: string;
+
+      if (Array.isArray(acrossApiError.cause)) {
+        causeMessage = acrossApiError.cause
+          .map((error) =>
+            error instanceof Error ? error.message : String(error)
+          )
+          .join("; ");
+      } else if (acrossApiError.cause instanceof Error) {
+        causeMessage = acrossApiError.cause.message;
+      } else {
+        causeMessage = String(acrossApiError.cause);
+      }
+
+      spanMessage += ` | Cause: ${causeMessage}`;
+    }
+
     span.setStatus({
       code:
         acrossApiError.status >= 500 ? SpanStatusCode.ERROR : SpanStatusCode.OK,
-      message: acrossApiError.message,
+      message: spanMessage,
     });
   }
 
