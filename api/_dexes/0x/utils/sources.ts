@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-01T06:23:05.851Z
+// Generated on 2025-08-14T14:52:02.130Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -146,6 +146,7 @@ export const SOURCES = {
       { key: "DeltaSwap", names: ["deltaswap"] },
       { key: "Equalizer", names: ["equalizer"] },
       { key: "Fluid", names: ["fluid"] },
+      { key: "Hydrex", names: ["hydrex"] },
       { key: "Infusion", names: ["infusion"] },
       { key: "IziSwap", names: ["iziswap"] },
       { key: "Kim_V4", names: ["kim_v4", "kim"] },
@@ -164,6 +165,7 @@ export const SOURCES = {
       { key: "Spark_PSM", names: ["spark_psm"] },
       { key: "SushiSwap", names: ["sushiswap"] },
       { key: "SushiSwap_V3", names: ["sushiswap_v3", "sushiswap"] },
+      { key: "Swaap_V2", names: ["swaap_v2", "swaap"] },
       { key: "SwapBased_V3", names: ["swapbased_v3", "swapbased"] },
       { key: "Synapse", names: ["synapse"] },
       { key: "Synthswap_V2", names: ["synthswap_v2", "synthswap"] },
@@ -365,6 +367,7 @@ export const ALL_SOURCES = [
   "fraxswap_v2",
   "gmx",
   "gmx_v1",
+  "hydrex",
   "hyperblast",
   "infusion",
   "inkyswap",

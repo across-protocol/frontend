@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-01T06:23:05.853Z
+// Generated on 2025-08-14T14:52:02.131Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -14,7 +14,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
       { key: "merkle", names: ["merkle"] },
     ],
     "10": [
@@ -26,11 +25,9 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "56": [
       { key: "dodo", names: ["dodo"] },
-      { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
@@ -38,7 +35,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "130": [
       { key: "enso", names: ["enso"] },
@@ -53,7 +49,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "232": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "288": [
@@ -67,7 +62,6 @@ export const SOURCES = {
       { key: "openocean", names: ["openocean"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "480": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "1135": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
@@ -76,7 +70,6 @@ export const SOURCES = {
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
     ],
     "8453": [
-      { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
@@ -84,7 +77,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "34443": [
       { key: "odos", names: ["odos"] },
@@ -101,7 +93,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "57073": [
       { key: "enso", names: ["enso"] },
@@ -115,15 +106,12 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
-    "60808": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "81457": [
       { key: "openocean", names: ["openocean"] },
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
     "534352": [
       { key: "odos", names: ["odos"] },
@@ -131,7 +119,6 @@ export const SOURCES = {
       { key: "kyberswap", names: ["kyberswap"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
     ],
   },
 } as {
@@ -152,7 +139,6 @@ export const ALL_SOURCES = [
   "lifidexaggregator",
   "merkle",
   "odos",
-  "okx",
   "openocean",
   "paraswap",
   "superswap",

@@ -13,6 +13,10 @@ import {
   SOURCES as LIFI_SOURCES,
   ALL_SOURCES as ALL_LIFI_SOURCES,
 } from "../_dexes/lifi/utils/sources";
+import {
+  SOURCES as UNISWAP_SOURCES,
+  ALL_SOURCES as ALL_UNISWAP_SOURCES,
+} from "../_dexes/uniswap/utils/sources";
 
 const SwapSourcesQueryParamsSchema = type({
   chainId: optional(positiveIntStr()),
@@ -60,9 +64,16 @@ class SwapSourcesHandler extends ApiHandler<
       const lifiSources = LIFI_SOURCES.sources[chainId].flatMap(
         (source) => source.names
       );
-      combinedSources = [...zeroXSources, ...lifiSources];
+      const uniswapSources = UNISWAP_SOURCES.sources[chainId].flatMap(
+        (source) => source.names
+      );
+      combinedSources = [...zeroXSources, ...lifiSources, ...uniswapSources];
     } else {
-      combinedSources = [...ALL_ZERO_X_SOURCES, ...ALL_LIFI_SOURCES];
+      combinedSources = [
+        ...ALL_ZERO_X_SOURCES,
+        ...ALL_LIFI_SOURCES,
+        ...ALL_UNISWAP_SOURCES,
+      ];
     }
 
     const uniqueSources = [...new Set(combinedSources)].sort();

@@ -8,7 +8,9 @@ import { ATTR_HTTP_RESPONSE_STATUS_CODE } from "@opentelemetry/semantic-conventi
 
 import { sendResponse } from "./_response_utils";
 
-type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
+export type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
+export type AcrossApiErrorCode =
+  (typeof AcrossErrorCode)[AcrossApiErrorCodeKey];
 
 type EthersErrorTransaction = {
   from: string;
@@ -248,13 +250,7 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
   constructor(
     args: {
       message: string;
-      code: (typeof AcrossErrorCode)[
-        | "SWAP_QUOTE_UNAVAILABLE"
-        | "SWAP_LIQUIDITY_INSUFFICIENT"
-        | "SWAP_TYPE_NOT_GUARANTEED"
-        | "AMOUNT_TOO_LOW"
-        | "AMOUNT_TOO_HIGH"
-        | "UPSTREAM_HTTP_ERROR"];
+      code: AcrossApiErrorCode;
     },
     opts?: ErrorOptions
   ) {
@@ -263,7 +259,8 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
         message: args.message,
         code: args.code,
         status:
-          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR
+          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR ||
+          args.code === AcrossErrorCode.UPSTREAM_RPC_ERROR
             ? HttpErrorToStatusCode.BAD_GATEWAY
             : HttpErrorToStatusCode.BAD_REQUEST,
       },
