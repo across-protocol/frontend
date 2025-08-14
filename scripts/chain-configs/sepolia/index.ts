@@ -17,7 +17,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://gateway.tenderly.co/public/sepolia",
-  tokens: ["WETH", "ETH", "USDC", "GRASS", "XYZ", "TATARA-USDC"],
+  tokens: ["WETH", "ETH", "USDC", "GRASS", "XYZ", "TATARA-USDC", "WBTC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

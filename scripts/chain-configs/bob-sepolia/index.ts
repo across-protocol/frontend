@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://bob-sepolia.rpc.gobob.xyz",
   blockTimeSeconds: 1,
-  tokens: ["ETH"],
+  tokens: ["ETH", "WETH", "WBTC"],
   enableCCTP: false,
 } as ChainConfig;
