@@ -159,7 +159,6 @@ export function useDepositTracking({
     },
     staleTime: Infinity,
     retry: true,
-    refetchInterval: 10_000,
     retryDelay: getRetryDelay(toChainId),
     enabled: !!depositQuery.data && depositQuery.data.status === "deposited",
   });
