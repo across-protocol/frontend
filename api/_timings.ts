@@ -29,15 +29,15 @@ const defineOrderings = (
   destinationChainId: string,
   symbol: string
 ) => [
-    { dest: destinationChainId, orig: sourceChainId, token: symbol },
-    { dest: destinationChainId, orig: sourceChainId, token: OTHER_TOKEN },
-    { dest: CHAIN_WILDCARD, orig: sourceChainId, token: symbol },
-    { dest: CHAIN_WILDCARD, orig: sourceChainId, token: OTHER_TOKEN },
-    { dest: destinationChainId, orig: CHAIN_WILDCARD, token: symbol },
-    { dest: destinationChainId, orig: CHAIN_WILDCARD, token: OTHER_TOKEN },
-    { dest: CHAIN_WILDCARD, orig: CHAIN_WILDCARD, token: symbol },
-    { dest: CHAIN_WILDCARD, orig: CHAIN_WILDCARD, token: OTHER_TOKEN },
-  ];
+  { dest: destinationChainId, orig: sourceChainId, token: symbol },
+  { dest: destinationChainId, orig: sourceChainId, token: OTHER_TOKEN },
+  { dest: CHAIN_WILDCARD, orig: sourceChainId, token: symbol },
+  { dest: CHAIN_WILDCARD, orig: sourceChainId, token: OTHER_TOKEN },
+  { dest: destinationChainId, orig: CHAIN_WILDCARD, token: symbol },
+  { dest: destinationChainId, orig: CHAIN_WILDCARD, token: OTHER_TOKEN },
+  { dest: CHAIN_WILDCARD, orig: CHAIN_WILDCARD, token: symbol },
+  { dest: CHAIN_WILDCARD, orig: CHAIN_WILDCARD, token: OTHER_TOKEN },
+];
 
 const DEFAULT_SECONDS_TO_FILL = 10; // 10 seconds
 
