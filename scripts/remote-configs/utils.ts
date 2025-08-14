@@ -50,7 +50,7 @@ export const fetchFillTimes = makeFetchRemoteConfig(
       destination_route_classification: string(),
       max_size_usd: string(),
       origin_route_classification: string(),
-      p75_fill_time_secs: string(),
+      p50_fill_time_secs: string(),
       token_liquidity_groups: string(),
     })
   ),
@@ -63,7 +63,7 @@ export const fetchExclusivityFillTimes = makeFetchRemoteConfig(
       destination_route_classification: string(),
       max_size_usd: string(),
       origin_route_classification: string(),
-      p75_fill_time_secs: string(),
+      p50_fill_time_secs: string(),
       token_liquidity_groups: string(),
     })
   ),
@@ -144,10 +144,10 @@ async function fetchRemoteConfigAndValidate<T>(
   const url = `${remoteBaseUrl}/${commitHash}/${remoteConfigFilePath}`;
   const headers = process.env.GH_TOKEN
     ? {
-        Authorization: `Basic ${Buffer.from(process.env.GH_TOKEN!).toString(
-          "base64"
-        )}`,
-      }
+      Authorization: `Basic ${Buffer.from(process.env.GH_TOKEN!).toString(
+        "base64"
+      )}`,
+    }
     : undefined;
   const res = await fetch(url, {
     headers: {
