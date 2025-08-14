@@ -83,6 +83,11 @@ export function getLifiStrategy(
               }
             : {};
 
+      // Improves latency as we care about speed. This configuration returns the first
+      // available quote with no delay.
+      // See https://docs.li.fi/guides/integration-tips/latency#selecting-timing-strategies
+      const swapStepTimingStrategies = "minWaitTime-0-1-300";
+
       const params = {
         fromChain: swap.chainId,
         toChain: swap.chainId,
@@ -90,6 +95,7 @@ export function getLifiStrategy(
         toToken: swap.tokenOut.address,
         fromAddress: swap.recipient,
         skipSimulation: true,
+        swapStepTimingStrategies,
         slippage: Math.floor(swap.slippageTolerance / 100),
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
