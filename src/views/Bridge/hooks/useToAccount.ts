@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { useConnection } from "hooks";
+import { useState, useCallback, useMemo } from "react";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useAddressType } from "hooks/useAddressType";
 
 export type ToAccount = {
@@ -9,37 +10,78 @@ export type ToAccount = {
 };
 
 export function useToAccount(toChainId?: number) {
-  const [customToAddress, setCustomToAddress] = useState<string | undefined>();
+  const [customToAddressEVM, setCustomToAddressEVM] = useState<
+    string | undefined
+  >();
+  const [customToAddressSVM, setCustomToAddressSVM] = useState<
+    string | undefined
+  >();
 
-  const { account: connectedAccount } = useConnection();
-  const connectedRecipientAccount = useAddressType(connectedAccount, toChainId);
-  const customRecipientAccount = useAddressType(customToAddress, toChainId);
+  const { account: connectedAccountEVM } = useConnectionEVM();
+  const { account: connectedAccountSVM } = useConnectionSVM();
 
-  const toAccount = useMemo<ToAccount | undefined>(() => {
-    if (customToAddress) {
+  const connectedRecipientAccountEVM = useAddressType(
+    connectedAccountEVM,
+    toChainId
+  );
+  const customRecipientAccountEVM = useAddressType(
+    customToAddressEVM,
+    toChainId
+  );
+
+  const toAccountEVM = useMemo<ToAccount | undefined>(() => {
+    if (customRecipientAccountEVM && customToAddressEVM) {
       return {
-        address: customToAddress,
-        isContract: customRecipientAccount === "contract",
-        is7702Delegate: customRecipientAccount === "7702Delegate",
+        address: customToAddressEVM,
+        isContract: customRecipientAccountEVM === "contract",
+        is7702Delegate: customRecipientAccountEVM === "7702Delegate",
       };
     }
-    if (connectedAccount) {
+    if (connectedRecipientAccountEVM && connectedAccountEVM) {
       return {
-        address: connectedAccount,
-        isContract: connectedRecipientAccount === "contract",
-        is7702Delegate: connectedRecipientAccount === "7702Delegate",
+        address: connectedAccountEVM,
+        isContract: connectedRecipientAccountEVM === "contract",
+        is7702Delegate: connectedRecipientAccountEVM === "7702Delegate",
       };
     }
     return undefined;
   }, [
-    connectedAccount,
-    connectedRecipientAccount,
-    customRecipientAccount,
-    customToAddress,
+    customToAddressEVM,
+    connectedAccountEVM,
+    connectedRecipientAccountEVM,
+    customRecipientAccountEVM,
   ]);
 
+  const toAccountSVM = useMemo<ToAccount | undefined>(() => {
+    if (customToAddressSVM) {
+      return {
+        address: customToAddressSVM,
+        isContract: false,
+        is7702Delegate: false,
+      };
+    }
+    if (connectedAccountSVM) {
+      return {
+        address: connectedAccountSVM.toBase58(),
+        isContract: false,
+        is7702Delegate: false,
+      };
+    }
+    return undefined;
+  }, [customToAddressSVM, connectedAccountSVM]);
+
+  const handleChangeToAddressEVM = useCallback((address: string) => {
+    setCustomToAddressEVM(address);
+  }, []);
+
+  const handleChangeToAddressSVM = useCallback((address: string) => {
+    setCustomToAddressSVM(address);
+  }, []);
+
   return {
-    toAccount,
-    setCustomToAddress,
+    toAccountEVM,
+    toAccountSVM,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
   };
 }

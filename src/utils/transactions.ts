@@ -1,3 +1,4 @@
+import { isSignature, Signature } from "@solana/kit";
 import {
   fixedPointAdjustment,
   gasMultiplierPerChain,
@@ -5,6 +6,7 @@ import {
 } from "./constants";
 import { Contract, ContractTransaction, Signer, providers } from "./ethers";
 import { parseUnits } from "./format";
+import { Hash, isHash } from "viem";
 
 /**
  * This function takes a raw transaction and a signer and returns the result of signing the transaction.
@@ -81,6 +83,14 @@ export function sendWithPaddedGas(
   return fn;
 }
 
+export function isValidTxHashEvm(txHash: string): txHash is Hash {
+  return isHash(txHash);
+}
+
+export function isValidTxHashSvm(txHash: string): txHash is Signature {
+  return isSignature(txHash);
+}
+
 export function isValidTxHash(txHash: string) {
-  return new RegExp(/^0x([A-Fa-f0-9]{64})$/).test(txHash);
+  return isValidTxHashEvm(txHash) || isValidTxHashSvm(txHash);
 }

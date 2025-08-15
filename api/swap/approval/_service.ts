@@ -1,3 +1,4 @@
+import * as sdk from "@across-protocol/sdk";
 import { ethers } from "ethers";
 import { Span } from "@opentelemetry/api";
 
@@ -227,8 +228,11 @@ export async function handleApprovalSwap(
     approvalSwapTx: {
       ...crossSwapTx,
       gas: originTxGas,
-      maxFeePerGas: originTxGasPrice?.maxFeePerGas,
-      maxPriorityFeePerGas: originTxGasPrice?.maxPriorityFeePerGas,
+      maxFeePerGas: (originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate)
+        ?.maxFeePerGas,
+      maxPriorityFeePerGas: (
+        originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
+      )?.maxPriorityFeePerGas,
     },
     allowance,
     balance,

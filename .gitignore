@@ -65,3 +65,7 @@ stats.*
 /blob-report/
 /playwright/.cache/
 .cache-synpress
+
+# Local development
+.yalc
+yalc.lock

@@ -1,8 +1,8 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { utils as sdkUtils } from "@across-protocol/sdk";
-
-import { utils } from "ethers";
 import { writeFileSync } from "fs";
+import { getAddress, isAddress as isEvmAddress } from "viem";
+import { utils as sdkUtils } from "@across-protocol/sdk";
+import { isAddress as isSvmAddress } from "@solana/kit";
 import * as prettier from "prettier";
 import path from "path";
 import * as chainConfigs from "./chain-configs";
@@ -12,6 +12,30 @@ import {
   enabledSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 import assert from "assert";
+
+// TODO: replace with Address utilities from sdk
+export function checksumAddress(address: string) {
+  if (isEvmAddress(address)) {
+    return getAddress(address);
+  }
+  if (isSvmAddress(address)) {
+    return address;
+  }
+  throw new Error("Invalid address");
+}
+
+export const nonEthChains = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.POLYGON_AMOY,
+  CHAIN_IDs.ALEPH_ZERO,
+  CHAIN_IDs.LENS_SEPOLIA,
+  CHAIN_IDs.SOLANA_DEVNET,
+  CHAIN_IDs.SOLANA,
+];
+
+export function isNonEthChain(chainId: number): boolean {
+  return nonEthChains.includes(chainId);
+}
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
   switch (tokenSymbol) {
@@ -56,7 +80,7 @@ const enabledRoutes = {
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
     pools: [],
     spokePoolVerifier: {
-      address: "0x630b76C7cA96164a5aCbC1105f8BA8B739C82570",
+      address: "0x3Fb9cED51E968594C87963a371Ed90c39519f65A",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
@@ -72,6 +96,9 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
+        CHAIN_IDs.ALEPH_ZERO,
+        CHAIN_IDs.SONEIUM,
+        CHAIN_IDs.UNICHAIN,
         CHAIN_IDs.BSC,
       ],
     },
@@ -279,6 +306,7 @@ function transformChainConfigs(
           !chainConfig.disabledRoutes?.find(
             (disabledRoute) =>
               toChainConfig.chainId === disabledRoute.toChainId &&
+              !disabledRoute.externalProjectId && // not external project routes
               (typeof token === "string"
                 ? token === disabledRoute.fromTokenSymbol
                 : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
@@ -331,21 +359,37 @@ function transformChainConfigs(
 
       const externalProjectId = externalProject.projectId;
 
+      // Filter disabled routes for external projects
+      const filteredAssociatedRoutes = associatedRoutes.filter(
+        (token) =>
+          !chainConfig.disabledRoutes?.find(
+            (disabledRoute) =>
+              externalProject.intermediaryChain === disabledRoute.toChainId &&
+              disabledRoute.externalProjectId === externalProjectId &&
+              (typeof token === "string"
+                ? token === disabledRoute.fromTokenSymbol
+                : token.inputTokenSymbol === disabledRoute.fromTokenSymbol) &&
+              (typeof token === "string"
+                ? token === disabledRoute.toTokenSymbol
+                : token.outputTokenSymbol === disabledRoute.toTokenSymbol)
+          )
+      );
+
       // Handle USDC swap tokens
       const usdcSwapTokens = [];
 
       const toChain = {
         chainId: externalProject.intermediaryChain,
         externalProjectId,
-        tokens: associatedRoutes,
+        tokens: filteredAssociatedRoutes,
         swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
-            associatedRoutes.some((token) =>
+            filteredAssociatedRoutes.some((token) =>
               typeof token === "string"
                 ? token === acrossInputTokenSymbol
                 : token.inputTokenSymbol === acrossInputTokenSymbol
             ) &&
-            associatedRoutes.some((token) =>
+            filteredAssociatedRoutes.some((token) =>
               typeof token === "string"
                 ? token === acrossOutputTokenSymbol
                 : token.outputTokenSymbol === acrossOutputTokenSymbol
@@ -548,15 +592,15 @@ async function generateRoutes(hubPoolChainId = 1) {
 
   const routeFileContent = {
     hubPoolChain: config.hubPoolChain,
-    hubPoolAddress: utils.getAddress(config.hubPoolAddress),
-    hubPoolWethAddress: utils.getAddress(config.hubPoolWethAddress),
-    acrossConfigStoreAddress: utils.getAddress(config.acrossConfigStoreAddress),
-    acrossTokenAddress: utils.getAddress(config.acrossTokenAddress),
-    acceleratingDistributorAddress: utils.getAddress(
+    hubPoolAddress: checksumAddress(config.hubPoolAddress),
+    hubPoolWethAddress: checksumAddress(config.hubPoolWethAddress),
+    acrossConfigStoreAddress: checksumAddress(config.acrossConfigStoreAddress),
+    acrossTokenAddress: checksumAddress(config.acrossTokenAddress),
+    acceleratingDistributorAddress: checksumAddress(
       config.acceleratingDistributorAddress
     ),
-    merkleDistributorAddress: utils.getAddress(config.merkleDistributorAddress),
-    claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
+    merkleDistributorAddress: checksumAddress(config.merkleDistributorAddress),
+    claimAndStakeAddress: checksumAddress(config.claimAndStakeAddress),
     swapAndBridgeAddresses: checksumAddressesOfNestedMap(
       config.swapAndBridgeAddresses as Record<string, Record<string, string>>
     ),
@@ -609,7 +653,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       const tokenInfo =
         TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
       return {
-        address: utils.getAddress(
+        address: checksumAddress(
           tokenInfo.addresses[chainConfig.chainId] as string
         ),
         symbol: tokenSymbol,
@@ -764,7 +808,7 @@ function transformToRoute(
     toChain: toChain.chainId,
     fromTokenAddress: inputToken.address,
     toTokenAddress: outputToken.address,
-    fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
+    fromSpokeAddress: checksumAddress(route.fromSpokeAddress),
     fromTokenSymbol: inputTokenSymbol,
     toTokenSymbol: outputTokenSymbol,
     isNative,
@@ -805,9 +849,9 @@ function getTokenBySymbol(
 
   return {
     chainId,
-    address: utils.getAddress(tokenAddress),
+    address: checksumAddress(tokenAddress),
     symbol: tokenSymbol,
-    l1TokenAddress: utils.getAddress(l1TokenAddress),
+    l1TokenAddress: checksumAddress(l1TokenAddress),
   };
 }
 
@@ -853,7 +897,7 @@ function getBridgedUsdcOrVariantSymbol(chainId: number) {
 
 function checksumAddressOfMap(map: Record<string, string>) {
   return Object.entries(map).reduce(
-    (acc, [key, value]) => ({ ...acc, [key]: utils.getAddress(value) }),
+    (acc, [key, value]) => ({ ...acc, [key]: checksumAddress(value) }),
     {}
   );
 }

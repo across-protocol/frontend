@@ -4,11 +4,7 @@ import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import { parseUnits } from "ethers/lib/utils";
 
-import {
-  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  DEFAULT_QUOTE_BLOCK_BUFFER,
-  CHAIN_IDs,
-} from "./_constants";
+import { DEFAULT_QUOTE_BLOCK_BUFFER, CHAIN_IDs } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -50,6 +46,7 @@ import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
 import { tracer } from "../instrumentation";
 import { sendResponse } from "./_response_utils";
+import { getDefaultRecipientAddress } from "./_recipient-address";
 
 const { BigNumber } = ethers;
 
@@ -111,8 +108,8 @@ const handler = async (
         amount: amountInput,
         timestamp,
         skipAmountLimit,
-        recipient,
-        relayer,
+        recipient: _recipient,
+        relayer: _relayer,
         message: _messageFromQuery,
       } = query;
       const { message: _messageFromBody } = body ?? {};
@@ -128,12 +125,25 @@ const handler = async (
         allowUnmatchedDecimals,
       } = validateChainAndTokenParams(query);
 
-      relayer = relayer
-        ? ethers.utils.getAddress(relayer)
-        : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-      recipient = recipient
-        ? ethers.utils.getAddress(recipient)
-        : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+      const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+
+      // We require a recipient for SVM destinations to prevent underquoting.
+      if (isDestinationSvm && !_recipient) {
+        throw new InvalidParamError({
+          message: "Recipient is required for SVM destinations",
+          param: "recipient",
+        });
+      }
+
+      const recipient = sdk.utils.toAddressType(
+        _recipient || getDefaultRecipientAddress(destinationChainId),
+        destinationChainId
+      );
+      const relayer = sdk.utils.toAddressType(
+        _relayer ||
+          getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        destinationChainId
+      );
       const depositWithMessage = sdk.utils.isDefined(message);
 
       // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
@@ -255,8 +265,10 @@ const handler = async (
           amountInput,
           // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
           // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-          depositWithMessage ? recipient : undefined,
-          depositWithMessage ? relayer : undefined,
+          depositWithMessage || isDestinationSvm
+            ? recipient.toNative()
+            : undefined,
+          depositWithMessage ? relayer.toNative() : undefined,
           depositWithMessage ? message : undefined,
           allowUnmatchedDecimals
         ),
