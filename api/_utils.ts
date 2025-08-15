@@ -65,6 +65,8 @@ import {
   AcrossErrorCode,
   TokenNotFoundError,
   UpstreamTimeoutError,
+  SimulationError,
+  compactAxiosError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
 import {
@@ -83,7 +85,6 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 
-export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler, toAddressType } = sdk.utils;
 export {
   getLogger,
@@ -98,6 +99,7 @@ export {
   getSpokePoolAddress,
   getSpokePool,
 };
+export { InputError, handleErrorCondition, compactAxiosError } from "./_errors";
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -1159,8 +1161,17 @@ export async function getBridgeQuoteForOutput(params: {
     let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
       undefined;
 
-    // 2. Adjust input amount to meet minOutputAmount
-    while (tries < maxTries) {
+    // 2. Use indicative quote if it meets minOutputAmount
+    const outputAmount = ConvertDecimals(
+      params.inputToken.decimals,
+      params.outputToken.decimals
+    )(adjustedInputAmount.sub(indicativeQuote.totalRelayFee.total));
+    if (outputAmount.gte(params.minOutputAmount)) {
+      finalQuote = indicativeQuote;
+    }
+
+    // 3. Adjust input amount to meet minOutputAmount
+    while (tries < maxTries && !finalQuote) {
       const inputAmounts = Array.from({ length: tryChunkSize }).map((_, i) => {
         const buffer = 0.001 * i;
         return addMarkupToAmount(
@@ -1190,10 +1201,6 @@ export async function getBridgeQuoteForOutput(params: {
           adjustedInputAmount = inputAmount;
           break;
         }
-      }
-
-      if (finalQuote) {
-        break;
       }
 
       adjustedInputAmount = inputAmounts[inputAmounts.length - 1];
@@ -1258,6 +1265,12 @@ export async function getBridgeQuoteForOutput(params: {
       const { response = { data: {} } } = err;
       // If upstream error is an AcrossApiError, we just return it
       if (response?.data?.type === "AcrossApiError") {
+        if (response.data.code === "SIMULATION_ERROR") {
+          throw new SimulationError({
+            message: response.data.message,
+            transaction: response.data.transaction,
+          });
+        }
         throw new AcrossApiError(
           {
             message: response.data.message,
@@ -1265,7 +1278,7 @@ export async function getBridgeQuoteForOutput(params: {
             code: response.data.code,
             param: response.data.param,
           },
-          { cause: err }
+          { cause: compactAxiosError(err) }
         );
       } else {
         const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
@@ -1275,7 +1288,7 @@ export async function getBridgeQuoteForOutput(params: {
             status: HttpErrorToStatusCode.BAD_GATEWAY,
             code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
           },
-          { cause: err }
+          { cause: compactAxiosError(err) }
         );
       }
     }

@@ -12,7 +12,12 @@ import {
   addMarkupToAmount,
   ConvertDecimals,
 } from "../_utils";
-import { CrossSwap, CrossSwapQuotes, QuoteFetchOpts } from "./types";
+import {
+  CrossSwap,
+  CrossSwapQuotes,
+  QuoteFetchOpts,
+  QuoteFetchStrategy,
+} from "./types";
 import {
   buildExactInputBridgeTokenMessage,
   buildExactOutputBridgeTokenMessage,
@@ -305,7 +310,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
       crossSwap,
       destinationSwapQuote: prioritizedStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
 
@@ -338,7 +343,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
     crossSwap,
     destinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
 
@@ -446,7 +451,7 @@ export async function getCrossSwapQuotesForOutputB2A(
       crossSwap: crossSwapWithAppFee,
       destinationSwapQuote: prioritizedStrategy.destinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
       appFee,
     }),
     forceExactOutput: true,
@@ -1079,7 +1084,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       destinationSwapQuote:
         prioritizedOriginStrategy.indicativeDestinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -1120,7 +1125,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     crossSwap,
     destinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
 
@@ -1175,10 +1180,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     const fetchFn = async () => {
       assertSources(destinationSources);
 
-      if (
-        crossSwapWithAppFee.strictTradeType &&
-        crossSwapWithAppFee.type === AMOUNT_TYPE.MIN_OUTPUT
-      ) {
+      if (crossSwapWithAppFee.strictTradeType) {
         result.destinationStrategy.assertSellEntireBalanceSupported();
       }
 
@@ -1244,7 +1246,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       crossSwap: crossSwapWithAppFee,
       destinationSwapQuote,
       bridgeableOutputToken,
-      routerAddress: destinationRouter.address,
+      router: destinationRouter,
     }),
   });
   assertMinOutputAmount(
@@ -1276,30 +1278,33 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         // if we want to be strict about the provided `tradeType`. The user can override
         // this behavior by setting `strictTradeType=false` in the query params.
         throwIfSellEntireBalanceUnsupported:
-          crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
-            ? false
-            : crossSwapWithAppFee.strictTradeType,
+          crossSwapWithAppFee.strictTradeType,
         quoteBuffer: QUOTE_BUFFER,
       }
     ),
     // 3.2. Get origin swap quote for any input token -> bridgeable input token
-    (async () => {
-      assertSources(originSources);
-      return originStrategy.fetchFn(
-        {
-          ...originSwap,
-          depositor: crossSwapWithAppFee.depositor,
-          amount: addMarkupToAmount(
-            bridgeQuote.inputAmount,
-            QUOTE_BUFFER
-          ).toString(),
+    executeStrategies(
+      [
+        async () => {
+          assertSources(originSources);
+          return originStrategy.fetchFn(
+            {
+              ...originSwap,
+              depositor: crossSwapWithAppFee.depositor,
+              amount: addMarkupToAmount(
+                bridgeQuote.inputAmount,
+                QUOTE_BUFFER
+              ).toString(),
+            },
+            TradeType.EXACT_OUTPUT,
+            {
+              sources: originSources,
+            }
+          );
         },
-        TradeType.EXACT_OUTPUT,
-        {
-          sources: originSources,
-        }
-      );
-    })(),
+      ],
+      strategies.prioritizationMode
+    ),
   ]);
   const appFee = calculateAppFee({
     outputAmount:
@@ -1315,7 +1320,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     crossSwap: crossSwapWithAppFee,
     destinationSwapQuote: finalDestinationSwapQuote,
     bridgeableOutputToken,
-    routerAddress: destinationRouter.address,
+    router: destinationRouter,
     appFee,
   });
   assertMinOutputAmount(
@@ -1417,17 +1422,19 @@ function _prepCrossSwapQuotesRetrievalA2A(
       const originStrategy =
         strategiesToUseForComparison === "origin"
           ? strategy
-          : (originStrategies.find(
-              (originStrategy) =>
-                originStrategy.strategyName === strategy.strategyName
-            ) ?? originStrategies[0]);
+          : getMatchingStrategy(
+              strategy,
+              originStrategies,
+              crossSwap.strictTradeType
+            );
       const destinationStrategy =
         strategiesToUseForComparison === "destination"
           ? strategy
-          : (destinationStrategies.find(
-              (destinationStrategy) =>
-                destinationStrategy.strategyName === strategy.strategyName
-            ) ?? destinationStrategies[0]);
+          : getMatchingStrategy(
+              strategy,
+              destinationStrategies,
+              crossSwap.strictTradeType
+            );
 
       const { swapAndBridge, originSwapInitialRecipient } =
         originStrategy.getOriginEntryPoints(originSwapChainId);
@@ -1483,6 +1490,51 @@ function _prepCrossSwapQuotesRetrievalA2A(
   });
 }
 
+function getMatchingStrategy(
+  baseStrategy: QuoteFetchStrategy,
+  otherStrategies: QuoteFetchStrategy[],
+  strictTradeType: boolean
+) {
+  // If strict trade type is enabled, we need to check if the matching strategy supports
+  // selling the entire balance.
+  return strictTradeType
+    ? // First check if other strategy with same name supports selling the entire balance.
+      (otherStrategies.find((otherStrategy) => {
+        const sameStrategy =
+          otherStrategy.strategyName === baseStrategy.strategyName;
+        let supportsSellEntireBalance = false;
+        try {
+          otherStrategy.assertSellEntireBalanceSupported();
+          supportsSellEntireBalance = true;
+        } catch (error) {
+          supportsSellEntireBalance = false;
+        }
+        return sameStrategy && supportsSellEntireBalance;
+      }) ??
+        // If no other strategy with same name supports selling the entire balance,
+        // check if any other strategy supports selling the entire balance.
+        otherStrategies.find((otherStrategy) => {
+          try {
+            otherStrategy.assertSellEntireBalanceSupported();
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }) ??
+        // If no other strategy supports selling the entire balance,
+        // return the first other strategy with same name.
+        otherStrategies.find((otherStrategy) => {
+          return otherStrategy.strategyName === baseStrategy.strategyName;
+        }) ??
+        // If no other strategy supports selling the entire balance,
+        // return the first other strategy.
+        otherStrategies[0])
+    : // If strict trade type is disabled, return the strategy with same name.
+      (otherStrategies.find((otherStrategy) => {
+        return otherStrategy.strategyName === baseStrategy.strategyName;
+      }) ?? otherStrategies[0]);
+}
+
 /**
  * Executes multiple strategy fetches based on configured prioritization mode.
  * @param strategyFetches - The strategy fetches to execute.
@@ -1522,17 +1574,34 @@ export async function executeStrategies<T>(
 
     // `priority-speed` mode
     const errors: Error[] = [];
-    let chunkStartIndex = 0;
+    // First fetch the priority chunk
     const priorityChunkSize = prioritizationMode.priorityChunkSize;
-    while (chunkStartIndex < strategyFetches.length) {
-      const chunkEndIndex = chunkStartIndex + priorityChunkSize;
-      const priorityFetches = strategyFetches.slice(
-        chunkStartIndex,
-        chunkEndIndex
+    const priorityChunkEndIndex = Math.min(
+      priorityChunkSize,
+      strategyFetches.length
+    );
+    const priorityFetches = strategyFetches.slice(0, priorityChunkEndIndex);
+    try {
+      const successfulFetch = await Promise.any(
+        priorityFetches.map((fetch) => fetch())
+      );
+      return successfulFetch;
+    } catch (error) {
+      if (error instanceof AggregateError) {
+        errors.push(...error.errors);
+      } else {
+        errors.push(error as Error);
+      }
+    }
+    // If the priority chunk failed, fetch all the remaining strategies
+    if (priorityChunkEndIndex < strategyFetches.length) {
+      const remainingFetches = strategyFetches.slice(
+        priorityChunkEndIndex,
+        strategyFetches.length
       );
       try {
         const successfulFetch = await Promise.any(
-          priorityFetches.map((fetch) => fetch())
+          remainingFetches.map((fetch) => fetch())
         );
         return successfulFetch;
       } catch (error) {
@@ -1541,7 +1610,6 @@ export async function executeStrategies<T>(
         } else {
           errors.push(error as Error);
         }
-        chunkStartIndex = chunkEndIndex;
       }
     }
     throw new AggregateError(errors);
@@ -1558,9 +1626,7 @@ export async function executeStrategies<T>(
               error.param === "includeSources")
         )
       ) {
-        throw new InvalidParamError({
-          message: "No available quotes for specified sources",
-        });
+        throw errors[0];
       }
 
       // If all quote fetches errored, we need to determine which error to propagate to the

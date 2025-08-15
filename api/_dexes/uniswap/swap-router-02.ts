@@ -13,7 +13,6 @@ import {
 import { floatToPercent } from "./utils/conversion";
 import {
   getUniswapClassicQuoteFromApi,
-  getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { RouterTradeAdapter } from "./utils/adapter";
@@ -192,7 +191,7 @@ async function fetchViaTradingApi(
   let swapQuote: SwapQuote;
   if (!opts.useIndicativeQuote) {
     const { quote } = await getUniswapClassicQuoteFromApi(
-      { ...swap, swapper: swap.recipient },
+      { ...swap, swapper: swap.recipient, protocols: ["V2", "V3"] },
       tradeType
     );
     const swapTx = buildSwapRouterSwapTx(swap, tradeType, quote);
@@ -346,8 +345,8 @@ function indicativeQuotePriceCache(
     let inputAmount: BigNumber;
     let outputAmount: BigNumber;
     if (quoteSource === "trading-api") {
-      const quote = await getUniswapClassicIndicativeQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
+      const { quote } = await getUniswapClassicQuoteFromApi(
+        { ...swap, swapper: swap.recipient, protocols: ["V2", "V3"] },
         tradeType
       );
       inputAmount = BigNumber.from(quote.input.amount);

@@ -427,7 +427,7 @@ export async function getERC20DestinationAction(testCase: {
           {
             value: testCase.params.amount,
             populateDynamically: true,
-            balanceSource: testCase.params.outputToken,
+            balanceSourceToken: testCase.params.outputToken,
           },
         ],
         value: "0",

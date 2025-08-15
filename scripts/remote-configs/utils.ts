@@ -17,6 +17,7 @@ import exclusivityFillTimesFallbackData from "../../src/data/examples/exclusivit
 import dynamicWeightsFallbackData from "../../src/data/examples/dynamic-weights.json";
 import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json";
 import exclusivityStrategyFallbackData from "../../src/data/examples/exclusivity-strategy.json";
+import exclusiveRelayerConfigsFallbackData from "../../src/data/examples/exclusive-relayers.json";
 import rpcProvidersFallbackData from "../../src/data/examples/rpc-providers.json";
 
 const GITHUB_HOST = process.env.GH_HOST ?? "raw.githubusercontent.com";
@@ -50,7 +51,8 @@ export const fetchFillTimes = makeFetchRemoteConfig(
       destination_route_classification: string(),
       max_size_usd: string(),
       origin_route_classification: string(),
-      p75_fill_time_secs: string(),
+      p50_fill_time_secs: optional(string()),
+      p75_fill_time_secs: optional(string()),
       token_liquidity_groups: string(),
     })
   ),
@@ -63,7 +65,8 @@ export const fetchExclusivityFillTimes = makeFetchRemoteConfig(
       destination_route_classification: string(),
       max_size_usd: string(),
       origin_route_classification: string(),
-      p75_fill_time_secs: string(),
+      p50_fill_time_secs: optional(string()),
+      p75_fill_time_secs: optional(string()),
       token_liquidity_groups: string(),
     })
   ),
@@ -79,7 +82,8 @@ export const fetchExclusiveRelayerConfigs = makeFetchRemoteConfig(
       balanceMultiplier: number(),
       maxFillSize: number(),
     })
-  )
+  ),
+  exclusiveRelayerConfigsFallbackData
 );
 
 export const fetchExclusiveRelayersDynamicWeights = makeFetchRemoteConfig(
