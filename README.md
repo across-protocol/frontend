@@ -64,7 +64,7 @@ E2E_MM_PASSWORD=
 E2E_INFURA_ID=
 ```
 
-To run the tests locally, first make sure to have a local dev sever running:
+To run the tests locally, first make sure to have a local dev server running:
 
 ```bash
 PORT=3000 yarn dev
@@ -94,7 +94,7 @@ The `src/ampli` directory can be refreshed with new tracking data by running the
 
 1. Run `yarn ampli login` to log in to Amplitude
 2. Run `yarn ampli pull web`
-   1. If Amplitude requests to create a new project, let it generate a `ampli.json` file.
+   1. If Amplitude requests to create a new project, let it generate an `ampli.json` file.
 
 ## Contributing
 
