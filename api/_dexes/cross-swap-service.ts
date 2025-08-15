@@ -1265,22 +1265,29 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
 
   const [finalDestinationSwapQuote, originSwapQuote] = await Promise.all([
     // 3.1. Get destination swap quote for bridgeable output token -> any token
-    destinationStrategy.fetchFn(
-      {
-        ...destinationSwap,
-        amount: bridgeQuote.outputAmount.toString(),
-      },
-      TradeType.EXACT_INPUT,
-      {
-        sources: destinationSources,
-        sellEntireBalance: true,
-        // `sellEntireBalance` is not supported by all swap strategies. We throw an error
-        // if we want to be strict about the provided `tradeType`. The user can override
-        // this behavior by setting `strictTradeType=false` in the query params.
-        throwIfSellEntireBalanceUnsupported:
-          crossSwapWithAppFee.strictTradeType,
-        quoteBuffer: QUOTE_BUFFER,
-      }
+    executeStrategies(
+      [
+        async () => {
+          return destinationStrategy.fetchFn(
+            {
+              ...destinationSwap,
+              amount: bridgeQuote.outputAmount.toString(),
+            },
+            TradeType.EXACT_INPUT,
+            {
+              sources: destinationSources,
+              sellEntireBalance: true,
+              // `sellEntireBalance` is not supported by all swap strategies. We throw an error
+              // if we want to be strict about the provided `tradeType`. The user can override
+              // this behavior by setting `strictTradeType=false` in the query params.
+              throwIfSellEntireBalanceUnsupported:
+                crossSwapWithAppFee.strictTradeType,
+              quoteBuffer: QUOTE_BUFFER,
+            }
+          );
+        },
+      ],
+      strategies.prioritizationMode
     ),
     // 3.2. Get origin swap quote for any input token -> bridgeable input token
     executeStrategies(
