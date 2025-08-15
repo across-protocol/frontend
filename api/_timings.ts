@@ -103,7 +103,7 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
         return destMatch && origMatch && tokenMatch && amountMatch;
       });
       if (matchedRoute) {
-        return matchedRoute.p50_fill_time_secs;
+        return matchedRoute.fill_time_secs;
       }
     }
     // Return default value if no match is found
@@ -114,17 +114,26 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
 function makeLookup(rawTimings: typeof timings) {
   return (
     rawTimings
-      .map((timing) => ({
-        p50_fill_time_secs: Number(timing.p50_fill_time_secs),
-        max_size_usd: parseUnits(timing.max_size_usd, 18),
-        destination_route_classification:
-          timing.destination_route_classification.split(","),
-        origin_route_classification:
-          timing.origin_route_classification?.split(","),
-        token_liquidity_groups: timing.token_liquidity_groups
-          .split(",")
-          .map((s) => s.toUpperCase()),
-      }))
+      .map(
+        (
+          timing: (typeof timings)[number] & {
+            p50_fill_time_secs?: string;
+            p75_fill_time_secs?: string;
+          }
+        ) => ({
+          fill_time_secs: Number(
+            timing.p75_fill_time_secs ?? timing.p50_fill_time_secs
+          ),
+          max_size_usd: parseUnits(timing.max_size_usd, 18),
+          destination_route_classification:
+            timing.destination_route_classification.split(","),
+          origin_route_classification:
+            timing.origin_route_classification?.split(","),
+          token_liquidity_groups: timing.token_liquidity_groups
+            .split(",")
+            .map((s) => s.toUpperCase()),
+        })
+      )
       // Sort by max_size_usd in ascending order to ensure that the smallest usdc rows
       // are checked first
       .toSorted((a, b) => bigNumberComparator(a.max_size_usd, b.max_size_usd))
