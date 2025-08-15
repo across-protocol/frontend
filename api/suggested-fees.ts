@@ -125,6 +125,16 @@ const handler = async (
         allowUnmatchedDecimals,
       } = validateChainAndTokenParams(query);
 
+      const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+
+      // We require a recipient for SVM destinations to prevent underquoting.
+      if (isDestinationSvm && !_recipient) {
+        throw new InvalidParamError({
+          message: "Recipient is required for SVM destinations",
+          param: "recipient",
+        });
+      }
+
       const recipient = sdk.utils.toAddressType(
         _recipient || getDefaultRecipientAddress(destinationChainId),
         destinationChainId
@@ -135,7 +145,6 @@ const handler = async (
         destinationChainId
       );
       const depositWithMessage = sdk.utils.isDefined(message);
-      const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
 
       // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
       const isDestinationOptInChain = OPT_IN_CHAINS.includes(
