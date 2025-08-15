@@ -48,8 +48,8 @@ const defineOrderings = (
 
 const DEFAULT_SECONDS_TO_FILL = 10; // 10 seconds
 
-const timingsLookup = makeLookup(timings);
-const exclusivityTimingsLookup = makeLookup(exclusivityTimings);
+const timingsLookup = makeLookup(timings as RawTimings);
+const exclusivityTimingsLookup = makeLookup(exclusivityTimings as RawTimings);
 
 /**
  * Resolve the estimated fill time seconds as returned by the /suggested-fees API and
