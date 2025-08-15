@@ -4,6 +4,13 @@ import exclusivityTimings from "../src/data/exclusivity-fill-times.json";
 import { parseUnits } from "ethers/lib/utils";
 import { CHAIN_IDs } from "./_constants";
 
+type RawTimings = Array<
+  (typeof timings)[number] & {
+    p50_fill_time_secs?: string;
+    p75_fill_time_secs?: string;
+  }
+>;
+
 const fillTimeOverrides: {
   [srcId: string]: {
     [dstId: string]: {
@@ -111,29 +118,22 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
   };
 }
 
-function makeLookup(rawTimings: typeof timings) {
+function makeLookup(rawTimings: RawTimings) {
   return (
     rawTimings
-      .map(
-        (
-          timing: (typeof timings)[number] & {
-            p50_fill_time_secs?: string;
-            p75_fill_time_secs?: string;
-          }
-        ) => ({
-          fill_time_secs: Number(
-            timing.p75_fill_time_secs ?? timing.p50_fill_time_secs
-          ),
-          max_size_usd: parseUnits(timing.max_size_usd, 18),
-          destination_route_classification:
-            timing.destination_route_classification.split(","),
-          origin_route_classification:
-            timing.origin_route_classification?.split(","),
-          token_liquidity_groups: timing.token_liquidity_groups
-            .split(",")
-            .map((s) => s.toUpperCase()),
-        })
-      )
+      .map((timing) => ({
+        fill_time_secs: Number(
+          timing.p75_fill_time_secs ?? timing.p50_fill_time_secs
+        ),
+        max_size_usd: parseUnits(timing.max_size_usd, 18),
+        destination_route_classification:
+          timing.destination_route_classification.split(","),
+        origin_route_classification:
+          timing.origin_route_classification?.split(","),
+        token_liquidity_groups: timing.token_liquidity_groups
+          .split(",")
+          .map((s) => s.toUpperCase()),
+      }))
       // Sort by max_size_usd in ascending order to ensure that the smallest usdc rows
       // are checked first
       .toSorted((a, b) => bigNumberComparator(a.max_size_usd, b.max_size_usd))
