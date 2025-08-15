@@ -24,6 +24,7 @@ const promotableBridgeRoutes = {
     logo: <SolanaLogo />,
     name: "Solana",
     path: "/solana",
+    token: "USDC",
   },
 };
 
@@ -84,8 +85,8 @@ export default function Banners({
         >
           {promotedBridgeRoute.logo}
           <Text size="lg" color="black-800" weight={500}>
-            {promotedBridgeRoute.name} is now live! Bridge to{" "}
-            {promotedBridgeRoute.name}
+            {promotedBridgeRoute.name} is now live! Bridge{" "}
+            {promotedBridgeRoute.token} to {promotedBridgeRoute.name}
           </Text>
           <ArrowRightIcon />
         </Banner>
