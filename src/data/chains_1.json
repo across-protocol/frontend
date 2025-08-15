@@ -587,6 +587,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       },
       {
+        "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
         "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
         "symbol": "WETH",
         "name": "Wrapped Ether",
@@ -699,6 +706,13 @@
         "name": "Across Protocol Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
+      },
+      {
+        "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       },
       {
         "address": "0xCF934E2402A5e072928a39a956964eb8F2B5B79C",
