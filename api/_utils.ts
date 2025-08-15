@@ -74,6 +74,7 @@ import {
   buildInternalCacheKey,
   getCachedValue,
   makeCacheGetterAndSetter,
+  providerRedisCache,
 } from "./_cache";
 import {
   MissingParamError,
@@ -1333,6 +1334,23 @@ export const getProvider = (
   return providerCache[cacheKey];
 };
 
+// For most chains, we can cache immediately.
+const DEFAULT_CACHE_BLOCK_DISTANCE = 0;
+
+// For chains that can reorg (mainnet and polygon), establish a buffer beyond which reorgs are rare.
+const CUSTOM_CACHE_BLOCK_DISTANCE: Record<number, number> = {
+  1: 2,
+  137: 10,
+};
+
+function getCacheBlockDistance(chainId: number) {
+  const cacheBlockDistance = CUSTOM_CACHE_BLOCK_DISTANCE[chainId];
+  if (!cacheBlockDistance) {
+    return DEFAULT_CACHE_BLOCK_DISTANCE;
+  }
+  return cacheBlockDistance;
+}
+
 /**
  * Resolves a provider from the `rpc-providers.json` configuration file.
  */
@@ -1362,8 +1380,10 @@ function getProviderFromConfigJson(
       3, // retries
       0.5, // delay
       5, // max. concurrency
-      "RPC_PROVIDER", // cache namespace
-      0 // disable RPC calls logging
+      `RPC_PROVIDER_${process.env.RPC_CACHE_NAMESPACE}`, // cache namespace
+      0, // disable RPC calls logging
+      providerRedisCache,
+      getCacheBlockDistance(chainId)
     );
   }
 
@@ -1372,8 +1392,10 @@ function getProviderFromConfigJson(
     chainId,
     3, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
-    "RPC_PROVIDER", // cache namespace
-    1 // disable RPC calls logging
+    `RPC_PROVIDER_${process.env.RPC_CACHE_NAMESPACE}`, // cache namespace
+    0, // disable RPC calls logging
+    providerRedisCache,
+    getCacheBlockDistance(chainId)
   );
 }
 
@@ -2901,4 +2923,28 @@ export function addTimeoutToPromise<T>(
     }, delay);
   });
   return Promise.race([promise, timeout]);
+}
+
+export type PooledToken = {
+  lpToken: string;
+  isEnabled: boolean;
+  lastLpFeeUpdate: BigNumber;
+  utilizedReserves: BigNumber;
+  liquidReserves: BigNumber;
+  undistributedLpFees: BigNumber;
+};
+
+// This logic is directly ported from the HubPool smart contract function by the same name.
+export function computeUtilizationPostRelay(
+  pooledToken: PooledToken,
+  amount: BigNumber
+) {
+  const flooredUtilizedReserves = pooledToken.utilizedReserves.gt(0)
+    ? pooledToken.utilizedReserves
+    : BigNumber.from(0);
+  const numerator = amount.add(flooredUtilizedReserves);
+  const denominator = pooledToken.liquidReserves.add(flooredUtilizedReserves);
+
+  if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
+  return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
 }
