@@ -15,8 +15,8 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
   },
   default: [
     get0xStrategy("SpokePoolPeriphery"),
-    getLifiStrategy("SpokePoolPeriphery"),
     getUniversalRouter02Strategy(),
+    getLifiStrategy("SpokePoolPeriphery"),
   ],
   chains: {
     [CHAIN_IDs.LENS]: [

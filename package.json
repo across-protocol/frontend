@@ -97,6 +97,7 @@
     "generate:swap-routes": "tsx scripts/generate-swap-routes.ts",
     "generate:swap-routes:mainnet": "yarn generate:swap-routes 1",
     "generate:swap-routes:testnet": "yarn generate:swap-routes 11155111",
+    "generate:dex-sources": "tsx scripts/generate-dex-sources.ts",
     "gas-prices": "tsx scripts/gas-prices.ts"
   },
   "lint-staged": {
@@ -111,6 +112,10 @@
     "scripts/generate-swap-routes.ts": [
       "tsx",
       "git add src/data/"
+    ],
+    "api/**/*.ts": [
+      "yarn generate:dex-sources",
+      "git add api/_dexes/*/utils/sources.ts"
     ]
   },
   "browserslist": {
