@@ -209,12 +209,12 @@ const ActionArg = refine(
   object({
     value: unknown(), // Will be validated at runtime
     populateDynamically: optional(boolean()),
-    balanceSource: optional(validEvmAddress()),
+    balanceSourceToken: optional(validEvmAddress()),
   }),
-  "balanceSource",
+  "balanceSourceToken",
   (argument) => {
-    if (argument.populateDynamically && !argument.balanceSource) {
-      return "balanceSource is required when populateDynamically is true";
+    if (argument.populateDynamically && !argument.balanceSourceToken) {
+      return "balanceSourceToken is required when populateDynamically is true";
     }
     return true;
   }
@@ -400,7 +400,7 @@ export function getWrappedCallForMakeCallWithBalance(
     .map((arg, index) => {
       if (arg.populateDynamically) {
         return {
-          token: arg.balanceSource,
+          token: arg.balanceSourceToken,
           // Arguments start at byte 4 (after the 4-byte function selector)
           // And each argument is 32 bytes long
           offset: 4 + index * 32,

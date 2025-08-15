@@ -35,7 +35,7 @@ type SwapQuoteResult = {
   amount: string;
   tradeType: string;
   appFeeRecipient?: string;
-  appFeePercent?: string;
+  appFee?: string;
   success: boolean;
   data?: any;
   error?: any;
@@ -108,9 +108,15 @@ const argsFromCli = yargs(hideBin(process.argv))
     description: "App fee recipient address",
     type: "string",
   })
-  .option("appFeePercent", {
+  .option("appFee", {
     alias: "afp",
     description: "App fee percentage (0-1, e.g., 0.01 for 1%)",
+    type: "string",
+  })
+  .option("includeSources", {
+    alias: "is",
+    description:
+      "Comma-separated list of sources to include in the output (e.g., 'uniswap_v3,uniswap_v2')",
     type: "string",
   })
   .help()
@@ -140,7 +146,8 @@ async function fetchSwapQuote(
     depositor: string;
     tradeType: string;
     appFeeRecipient?: string;
-    appFeePercent?: string;
+    appFee?: string;
+    includeSources?: string;
   }
 ): Promise<any> {
   const response = await axios.get(`${baseUrl}/api/swap/approval`, {
@@ -190,6 +197,7 @@ const defaultChains = [
   CHAIN_IDs.LENS,
   CHAIN_IDs.SONEIUM,
   CHAIN_IDs.ZK_SYNC,
+  CHAIN_IDs.ZORA,
   CHAIN_IDs.INK,
   CHAIN_IDs.MODE,
 ];
@@ -206,7 +214,8 @@ async function main() {
     depositor,
     tradeType,
     appFeeRecipient,
-    appFeePercent,
+    appFee,
+    includeSources,
   } = argsFromCli;
 
   console.log(`Starting swap quotes test with host: ${host}`);
@@ -220,7 +229,8 @@ async function main() {
   console.log(`Amount: ${amount}`);
   console.log(`Trade type: ${tradeType}`);
   console.log(`App fee recipient: ${appFeeRecipient || "none"}`);
-  console.log(`App fee percent: ${appFeePercent || "none"}`);
+  console.log(`App fee percent: ${appFee || "none"}`);
+  console.log(`Include sources: ${includeSources || "all"}`);
   console.log("\n");
 
   try {
@@ -335,10 +345,13 @@ async function main() {
                 depositor,
                 tradeType,
                 ...(appFeeRecipient &&
-                  appFeePercent && {
+                  appFee && {
                     appFeeRecipient,
-                    appFeePercent,
+                    appFee,
                   }),
+                ...(includeSources && {
+                  includeSources,
+                }),
               };
 
               const quoteData = await fetchSwapQuote(host, quoteParams);
@@ -353,7 +366,7 @@ async function main() {
                 amount: normalizedAmount,
                 tradeType,
                 appFeeRecipient,
-                appFeePercent,
+                appFee,
                 success: true,
                 data: quoteData,
               });
@@ -373,7 +386,7 @@ async function main() {
                 amount: normalizedAmount,
                 tradeType,
                 appFeeRecipient,
-                appFeePercent,
+                appFee,
                 success: false,
                 error: {
                   message: error.message || "Unknown error",
