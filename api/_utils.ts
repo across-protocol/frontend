@@ -1891,34 +1891,6 @@ export function getLimitCap(
   return ethers.utils.parseUnits(cap, decimals);
 }
 
-export async function tagReferrer(
-  dataHex: string,
-  referrerAddressOrENS: string
-) {
-  let referrerAddress: string | null;
-
-  if (ethers.utils.isAddress(referrerAddressOrENS)) {
-    referrerAddress = referrerAddressOrENS;
-  } else {
-    const provider = getProvider(HUB_POOL_CHAIN_ID);
-    referrerAddress = await provider.resolveName(referrerAddressOrENS);
-  }
-
-  if (!referrerAddress) {
-    throw new Error("Invalid referrer address or ENS name");
-  }
-
-  if (!ethers.utils.isHexString(dataHex)) {
-    throw new Error("Data must be a valid hex string");
-  }
-
-  return ethers.utils.hexConcat([
-    dataHex,
-    "0xd00dfeeddeadbeef",
-    referrerAddress,
-  ]);
-}
-
 export function tagDomain(dataHex: string, domainIdentifier: string): string {
   if (!ethers.utils.isHexString(dataHex)) {
     throw new Error("Data must be a valid hex string");
