@@ -1,7 +1,7 @@
 import { createClient, VercelKV } from "@vercel/kv";
 import { interfaces } from "@across-protocol/sdk";
 import { getEnvs } from "./_env";
-import { getLogger } from "./_utils";
+import { compactAxiosError, getLogger } from "./_utils";
 
 const {
   KV_REST_API_READ_ONLY_TOKEN,
@@ -117,7 +117,7 @@ export async function getCachedValue<T>(
     getLogger().error({
       at: "getCachedValue",
       message: "Error while calling redisCache.get",
-      error,
+      error: compactAxiosError(error as Error),
     });
   }
 
