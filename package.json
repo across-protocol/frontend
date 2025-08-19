@@ -197,6 +197,8 @@
   },
   "resolutions": {
     "babel-loader": "8.1.0",
+    "base-x": "4.0.0",
+    "bs58": "^5.0.0",
     "**/eccrypto/secp256k1": "3.8.1",
     "**/eth-crypto/secp256k1": "5.0.1",
     "**/libp2p-crypto/secp256k1": "4.0.4",
