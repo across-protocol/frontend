@@ -176,15 +176,7 @@ export class SVMStrategy implements IChainStrategy {
       };
     } catch (error) {
       console.error("Error fetching Solana fill:", error);
-
-      // Return filling status if we can't determine the fill
-      return {
-        fillTxHash: undefined,
-        fillTxTimestamp: undefined,
-        fillLog: undefined,
-        depositInfo,
-        status: "filling",
-      };
+      throw error;
     }
   }
 
