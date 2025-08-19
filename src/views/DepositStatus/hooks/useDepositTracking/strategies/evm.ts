@@ -272,17 +272,6 @@ export class EVMStrategy implements IChainStrategy {
         status: "filled",
       };
     } catch (error) {
-      if (error instanceof NoFilledRelayLogError) {
-        // If no fill found, return a filling status
-        return {
-          fillTxHash: undefined,
-          fillTxTimestamp: undefined,
-          depositInfo,
-          status: "filling",
-          fillLog: undefined,
-        };
-      }
-
       console.error("Error fetching EVM fill:", error);
       throw error;
     }
