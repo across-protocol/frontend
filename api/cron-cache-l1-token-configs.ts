@@ -1,11 +1,16 @@
 import { VercelResponse } from "@vercel/node";
 import { TypedVercelRequest } from "./_types";
+import * as sdk from "@across-protocol/sdk";
 
 import {
   HUB_POOL_CHAIN_ID,
   getLogger,
   handleErrorCondition,
   getL1TokenConfigCache,
+  callViaMulticall3,
+  getProvider,
+  ENABLED_ROUTES,
+  parseL1TokenConfigSafe,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
 
@@ -40,17 +45,33 @@ const handler = async (
       throw new Error("Mainnet chain not found");
     }
 
+    const provider = getProvider(HUB_POOL_CHAIN_ID);
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      ENABLED_ROUTES.acrossConfigStoreAddress,
+      provider
+    );
+
     const l1TokenAddresses = mainnetChain.inputTokens.map(
       (token) => token.address
     );
-    const setL1TokenConfigTasks = l1TokenAddresses.map((l1TokenAddress) => {
+    const multiCalls = l1TokenAddresses.map((l1TokenAddress) => ({
+      contract: configStoreClient.contract,
+      functionName: "l1TokenConfig",
+      args: [l1TokenAddress],
+    }));
+    const rawConfigs = await callViaMulticall3(provider, multiCalls);
+    const setL1TokenConfigTasks = rawConfigs.map(async (rawConfig, index) => {
+      const l1TokenAddress = l1TokenAddresses[index];
       try {
-        const l1TokenConfigCache = getL1TokenConfigCache(l1TokenAddress);
+        const parsedL1TokenConfig = parseL1TokenConfigSafe(String(rawConfig));
+        if (!parsedL1TokenConfig) {
+          return;
+        }
+        await getL1TokenConfigCache(l1TokenAddress).set(parsedL1TokenConfig);
         logger.info({
           at: "CronCacheL1TokenConfigs",
           message: `Caching L1 token config for ${l1TokenAddress}`,
         });
-        return l1TokenConfigCache.set();
       } catch (e) {
         logger.error({
           at: "CronCacheL1TokenConfigs",
