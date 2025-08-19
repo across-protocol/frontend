@@ -103,7 +103,17 @@ function SVMWalletContent() {
         }
         select(walletAdapter.name);
         walletAdapter.once("connect", () => {
+          console.log("connect");
           closeSidebar();
+        });
+        walletAdapter.addListener("disconnect", () => {
+          console.log("disconnect");
+        });
+        walletAdapter.addListener("error", (error) => {
+          console.log("error", error);
+        });
+        walletAdapter.addListener("readyStateChange", (readyState) => {
+          console.log("readyStateChange", readyState);
         });
       } catch (e) {
         console.error("Error connecting to Solana wallet", e);
