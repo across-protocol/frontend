@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-14T14:52:02.130Z
+// Generated on 2025-08-19T10:23:42.508Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
