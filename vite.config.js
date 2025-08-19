@@ -8,9 +8,18 @@ import EnvironmentPlugin from "vite-plugin-environment";
 import { visualizer } from "rollup-plugin-visualizer";
 import inject from "@rollup/plugin-inject";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: [".env.local", ".env"],
+});
+
+const IS_DEBUG = process.env.REACT_APP_DEBUG === "true";
 
 export default defineConfig({
   build: {
+    // convenience for local dev
+    minify: !IS_DEBUG,
     outDir: "build",
     commonjsOptions: {
       include: [],
