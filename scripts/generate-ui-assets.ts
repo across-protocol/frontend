@@ -21,8 +21,14 @@ async function generateUiAssets() {
   const externVarNames: string[] = [];
 
   for (const [chainKey, chainConfig] of Object.entries(chainConfigs)) {
-    const { chainId, logoPath, grayscaleLogoPath, name, fullName } =
-      chainConfig;
+    const {
+      chainId,
+      logoPath,
+      grayscaleLogoPath,
+      name,
+      fullName,
+      omitViemConfig,
+    } = chainConfig;
 
     // Copy logos into assets directory
     const assetFileNameBase = chainKey.toLowerCase().replace("_", "-");
@@ -69,9 +75,11 @@ async function generateUiAssets() {
         pollingInterval: ${(chainConfig.blockTimeSeconds || 15) * 1000},
       };
     `);
-    chainsFileContent.push(`
-      export const ${chainVarName}_viem = defineChain({
-        id: ${chainVarName}.chainId,
+    chainVarNames.push(chainVarName);
+    if (!omitViemConfig) {
+      chainsFileContent.push(`
+        export const ${chainVarName}_viem = defineChain({
+          id: ${chainVarName}.chainId,
         name: ${chainVarName}.name,
         nativeCurrency: {
           name: ${chainVarName}.nativeCurrencySymbol,
@@ -81,8 +89,8 @@ async function generateUiAssets() {
         rpcUrls: {
           default: {
             http: [
-              ${chainVarName}.rpcUrl,
               ${chainVarName}.customRpcUrl ? ${chainVarName}.customRpcUrl : [],
+              ${chainVarName}.rpcUrl,
             ].flat(),
           },
         },
@@ -92,10 +100,10 @@ async function generateUiAssets() {
             url: ${chainVarName}.explorerUrl,
           },
         },
-      });
-    `);
-    chainVarNames.push(chainVarName);
-    chainViemVarNames.push(chainVarName + "_viem");
+        });
+      `);
+      chainViemVarNames.push(chainVarName + "_viem");
+    }
   }
 
   // Process external project configs

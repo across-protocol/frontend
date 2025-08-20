@@ -4,7 +4,7 @@ import { useConnection } from "hooks";
 import { isDefined } from "utils";
 
 const Web3Subscribe = () => {
-  const { wallet } = useConnection();
+  const { connector } = useConnection();
   const [isCBWallet, setIsCBWallet] = useState(false);
   const [isSubscribed, setISubscribed] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -23,9 +23,9 @@ const Web3Subscribe = () => {
       (window as any)?.coinbaseWalletExtension?.connectionType ===
       "extension_connection_type";
 
-    const cbWalletSelected = wallet?.label === "Coinbase Wallet";
+    const cbWalletSelected = connector?.name === "Coinbase Wallet";
     setIsCBWallet(cbExtensionEnabled && cbWalletSelected);
-  }, [wallet]);
+  }, [connector]);
 
   useEffect(() => {
     (window as any)?.CBWSubscribe?.createSubscriptionUI({

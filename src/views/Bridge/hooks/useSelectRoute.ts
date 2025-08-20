@@ -8,7 +8,7 @@ import {
   similarTokensMap,
   externalProjectNameToId,
 } from "utils";
-import { useAmplitude, useConnection } from "hooks";
+import { useAmplitude } from "hooks";
 
 import {
   findNextBestRoute,
@@ -19,11 +19,16 @@ import {
   getTokenDefaultsForRoute,
   findEnabledRoute,
 } from "../utils";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 const initialRoute = getInitialRoute();
 
 export function useSelectRoute() {
-  const { chainId: walletChainId, isConnected } = useConnection();
+  const { chainId: chainIdEVM, isConnected: isConnectedEVM } =
+    useConnectionEVM();
+  const { chainId: chainIdSVM, isConnected: isConnectedSVM } =
+    useConnectionSVM();
   const [selectedRoute, setSelectedRoute] =
     useState<SelectedRoute>(getInitialRoute());
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
@@ -32,11 +37,16 @@ export function useSelectRoute() {
 
   // set default fromChain when user first connects
   useEffect(() => {
-    if (isConnected) {
-      setSelectedRoute(getInitialRoute({ fromChain: walletChainId }));
+    if (
+      // logical XOR, ie. only on first connection
+      (isConnectedEVM && !isConnectedSVM) ||
+      (!isConnectedEVM && isConnectedSVM)
+    ) {
+      const fromChain = isConnectedEVM ? chainIdEVM : chainIdSVM;
+      setSelectedRoute(getInitialRoute({ fromChain }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
+  }, [isConnectedEVM, isConnectedSVM]);
 
   useEffect(() => {
     if (isDefaultRouteTracked) {

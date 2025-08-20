@@ -203,7 +203,7 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const walletConnectProjectId =
   process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID!;
-export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const debug = Boolean(process.env.REACT_APP_DEBUG === "true");
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
@@ -641,5 +641,7 @@ export const hyperLiquidBridge2Address =
 export const acrossPlusMulticallHandler: Record<number, string> = {
   [CHAIN_IDs.ARBITRUM]: "0x924a9f036260DdD5808007E1AA95f08eD08aA569",
 };
+
+export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
 
 export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;

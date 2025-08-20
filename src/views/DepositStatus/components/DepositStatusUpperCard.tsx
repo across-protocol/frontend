@@ -15,7 +15,6 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
-import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
 
@@ -38,16 +37,12 @@ export function DepositStatusUpperCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
-  const { depositQuery, fillQuery } = useDepositTracking(
+  const { depositQuery, fillQuery, status } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload
-  );
-
-  void useIndexerDepositsTracking([
-    { originChainId: fromChainId, depositTxnHash: depositTxHash },
-  ]);
+    fromBridgePagePayload,
+  });
 
   const depositTxSentTime = fromBridgePagePayload?.timeSigned;
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
@@ -61,14 +56,6 @@ export function DepositStatusUpperCard({
     depositTxCompletedTime,
     fillTxCompletedTime
   );
-
-  const status = !depositTxCompletedTime
-    ? "depositing"
-    : depositQuery.data?.depositTxReceipt.status === 0
-      ? "deposit-reverted"
-      : !fillTxCompletedTime
-        ? "filling"
-        : "filled";
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
 
@@ -165,7 +152,7 @@ export function DepositStatusUpperCard({
           depositTxCompletedTimestampSeconds={depositTxCompletedTime}
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
-          fillTxHash={fillQuery.data?.fillTxHashes[0]}
+          fillTxHash={fillQuery.data?.fillTxHash}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

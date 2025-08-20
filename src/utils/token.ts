@@ -7,7 +7,9 @@ export async function getNativeBalance(
   chainId: ChainId,
   account: string,
   blockNumber: number | "latest" = "latest",
-  provider?: ethers.providers.JsonRpcProvider
+  provider?:
+    | ethers.providers.JsonRpcProvider
+    | ethers.providers.FallbackProvider
 ) {
   provider ??= getProvider(chainId);
   const balance = await provider.getBalance(account, blockNumber);
@@ -26,7 +28,9 @@ export async function getBalance(
   account: string,
   tokenAddress: string,
   blockNumber: number | "latest" = "latest",
-  provider?: ethers.providers.JsonRpcProvider
+  provider?:
+    | ethers.providers.JsonRpcProvider
+    | ethers.providers.FallbackProvider
 ): Promise<ethers.BigNumber> {
   provider ??= getProvider(chainId);
   const contract = ERC20__factory.connect(tokenAddress, provider);
