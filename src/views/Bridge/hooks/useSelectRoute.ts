@@ -39,8 +39,8 @@ export function useSelectRoute() {
   useEffect(() => {
     if (
       // logical XOR, ie. only on first connection
-      (isConnectedEVM || isConnectedSVM) &&
-      !(isConnectedEVM && isConnectedSVM)
+      (isConnectedEVM && !isConnectedSVM) ||
+      (!isConnectedEVM && isConnectedSVM)
     ) {
       const fromChain = isConnectedEVM ? chainIdEVM : chainIdSVM;
       setSelectedRoute(getInitialRoute({ fromChain }));
