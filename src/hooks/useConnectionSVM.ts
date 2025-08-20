@@ -3,6 +3,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 
 import { useSidebarContext } from "./useSidebarContext";
 import {
+  hubPoolChainId,
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
 } from "utils";
@@ -10,6 +11,7 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
+import { solana, solanaDevnet } from "constants/chains/configs";
 
 type WalletState =
   | "connecting"
@@ -71,6 +73,7 @@ export function useConnectionSVM() {
   );
 
   return {
+    chainId: hubPoolChainId === 1 ? solana.chainId : solanaDevnet.chainId,
     account: publicKey,
     select,
     state,
