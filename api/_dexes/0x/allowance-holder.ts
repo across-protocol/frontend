@@ -74,16 +74,8 @@ export function get0xStrategy(
         ).toString();
       }
       let swapAmount = swap.amount;
-      if (tradeType === TradeType.EXACT_OUTPUT) {
-        swapAmount = await estimateInputForExactOutput(
-          swap,
-          `${API_BASE_URL}/price`,
-          API_HEADERS
-        );
-      }
-
       const sources = opts?.sources;
-      const sourcesParams =
+      const sourcesParams: Record<string, string> | undefined =
         sources?.sourcesType === "exclude"
           ? {
               excludedSources: sources.sourcesKeys.join(","),
@@ -99,7 +91,17 @@ export function get0xStrategy(
                   )
                   .join(","),
               }
-            : {};
+            : undefined;
+
+      if (tradeType === TradeType.EXACT_OUTPUT) {
+        swapAmount = await estimateInputForExactOutput(
+          swap,
+          `${API_BASE_URL}/price`,
+          API_HEADERS,
+          SWAP_PROVIDER_NAME,
+          sourcesParams
+        );
+      }
 
       // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
       const response = await axios.get(

@@ -46,6 +46,10 @@ import {
 import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
 import axios, { AxiosRequestHeaders } from "axios";
 import { encodeActionCalls } from "../swap/_utils";
+import {
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../_errors";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -804,7 +808,9 @@ export function getOriginSwapEntryPoints(
 export async function estimateInputForExactOutput(
   swap: Swap,
   apiEndpoint: string,
-  apiHeaders: AxiosRequestHeaders
+  apiHeaders: AxiosRequestHeaders,
+  swapProvider: string,
+  sourcesParams?: Record<string, string>
 ): Promise<string> {
   const inputUnit = BigNumber.from(10).pow(swap.tokenIn.decimals);
 
@@ -817,10 +823,21 @@ export async function estimateInputForExactOutput(
       sellAmount: inputUnit.toString(),
       taker: swap.recipient,
       slippageBps: Math.floor(swap.slippageTolerance * 100),
+      ...sourcesParams,
     },
   });
 
   const inputUnitQuote = inputUnitResponse.data;
+  if (!inputUnitQuote.liquidityAvailable) {
+    throw new UpstreamSwapProviderError({
+      message: `${swapProvider}: No liquidity available for ${
+        swap.tokenIn.symbol
+      } -> ${swap.tokenOut.symbol} on chain ${swap.chainId}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.INSUFFICIENT_LIQUIDITY,
+      swapProvider,
+    });
+  }
+
   const inputUnitOutputAmount = BigNumber.from(inputUnitQuote.buyAmount);
 
   // Estimate the required input amount for the desired output

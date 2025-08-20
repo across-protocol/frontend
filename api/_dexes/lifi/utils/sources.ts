@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-20T07:50:34.533Z
+// Generated on 2025-08-21T13:59:28.114Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -40,6 +40,7 @@ export const SOURCES = {
       { key: "okx", names: ["okx"] },
     ],
     "130": [
+      { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
     ],
