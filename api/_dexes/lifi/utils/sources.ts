@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-19T17:58:21.186Z
+// Generated on 2025-08-20T19:19:37.700Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -115,6 +115,7 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
+    "60808": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "81457": [
       { key: "openocean", names: ["openocean"] },
       { key: "kyberswap", names: ["kyberswap"] },
