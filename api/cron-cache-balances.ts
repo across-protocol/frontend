@@ -35,14 +35,13 @@ const handler = async (
       throw new UnauthorizedError();
     }
 
-    const fullRelayers = getFullRelayers();
-
     // Skip cron job on testnet
     if (HUB_POOL_CHAIN_ID !== 1) {
       return;
     }
 
     for (const chain of mainnetChains) {
+      const fullRelayers = getFullRelayers(chain.chainId);
       const batchResult = await getBatchBalance(chain.chainId, fullRelayers, [
         ethers.constants.AddressZero,
         ...chain.outputTokens.map((token) => token.address),
