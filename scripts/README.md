@@ -3,7 +3,7 @@
 The folder `<ROOT>/scripts` contains multiple scripts that help generating code, data and e2e tests:
 
 - `generate-routes.ts`
-  - This scripts generates a static `routes_<HUB_CHAIN>_<HUB_ADDRESS>.json` in `src/data` that is used in the API and in the FE. The file contains information on configured contracts and enabled routes.
+  - This script generates a static `routes_<HUB_CHAIN>_<HUB_ADDRESS>.json` in `src/data` that is used in the API and in the FE. The file contains information on configured contracts and enabled routes.
 - `generate-chain-config.ts`
   - This script is used when adding support for a new chain. It scaffolds file in `scripts/chain-configs`.
 - `generate-ui-assets.ts`
