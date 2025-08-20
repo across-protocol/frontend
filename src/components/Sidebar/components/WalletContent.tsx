@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Connector, useAccount } from "wagmi";
 import { useWallet } from "@solana/wallet-adapter-react";
 import styled from "@emotion/styled";
@@ -95,6 +95,13 @@ function SVMWalletContent() {
   const { closeSidebar } = useSidebarContext();
   const { connected: isSolanaConnected } = useWallet();
 
+  useEffect(() => {
+    if (!connecting && isSolanaConnected) {
+      closeSidebar();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connecting, isSolanaConnected]);
+
   const handleClickSvmWallet = useCallback(
     async (walletAdapter: WalletAdapter) => {
       try {
@@ -102,14 +109,11 @@ function SVMWalletContent() {
           await disconnect();
         }
         select(walletAdapter.name);
-        walletAdapter.once("connect", () => {
-          closeSidebar();
-        });
       } catch (e) {
         console.error("Error connecting to Solana wallet", e);
       }
     },
-    [select, connected, disconnect, closeSidebar]
+    [select, connected, disconnect]
   );
 
   if (isSolanaConnected) {
