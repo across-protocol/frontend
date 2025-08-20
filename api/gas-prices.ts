@@ -46,10 +46,9 @@ const handler = async (
         })
         .filter(([, tokenAddress]) => tokenAddress !== undefined)
     );
+    // Override tokenSymbol to USDC for Solana
     chainIdsWithToken[CHAIN_IDs.SOLANA] =
-      TOKEN_SYMBOLS_MAP?.[
-        tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
-      ]?.addresses[CHAIN_IDs.SOLANA];
+      TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA];
     const gasData = await Promise.all(
       Object.entries(chainIdsWithToken).map(([chainId, tokenAddress]) => {
         const depositArgs = getDepositArgsForCachedGasDetails(
