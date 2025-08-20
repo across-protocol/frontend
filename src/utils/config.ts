@@ -367,15 +367,18 @@ export class ConfigClient {
       };
     });
   }
-  // returns token list in order specified by constants, but adds in token address for the chain specified
-  getRouteTokenList(chainId?: number): TokenList {
+  getListOfTokensWithLP(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
       this.filterRoutes({ fromChain: chainId }).map((route) => {
         return [route.fromTokenSymbol, route];
       })
     );
+    const tokensWithoutLP = [constants.TOKEN_SYMBOLS_MAP.CAKE.symbol];
     return constants.tokenList
-      .filter((token: constants.TokenInfo) => routeTable[token.symbol])
+      .filter(
+        (token: constants.TokenInfo) =>
+          routeTable[token.symbol] && !tokensWithoutLP.includes(token.symbol)
+      )
       .map((token: constants.TokenInfo) => {
         const { fromTokenAddress, isNative, l1TokenAddress } =
           routeTable[token.symbol];
@@ -407,11 +410,11 @@ export class ConfigClient {
         ];
       }
     );
-    return [...this.getRouteTokenList(chainId), ...exclusivePools];
+    return [...this.getListOfTokensWithLP(chainId), ...exclusivePools];
   }
   getStakingPoolTokenList(chainId?: number): TokenList {
     return [
-      ...this.getRouteTokenList(chainId),
+      ...this.getListOfTokensWithLP(chainId),
       ...constants.externalLPsForStaking[
         chainId || constants.hubPoolChainId
       ].map((token) => {
