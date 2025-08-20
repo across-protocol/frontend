@@ -12,7 +12,7 @@ import {
   resolveVercelEndpoint,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
-import { CHAIN_IDs } from "./_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { getDepositArgsForCachedGasDetails } from "./_gas";
 import { getEnvs } from "./_env";
 
@@ -123,7 +123,14 @@ const handler = async (
       Promise.all(
         mainnetChains
           .filter((chain) => chain.chainId !== CHAIN_IDs.LINEA)
-          .map((chain) => updateGasPricePromise(chain.chainId))
+          .map((chain) =>
+            chain.chainId === CHAIN_IDs.SOLANA
+              ? updateGasPricePromise(
+                  chain.chainId,
+                  TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA]
+                )
+              : updateGasPricePromise(chain.chainId)
+          )
       ),
       Promise.all(
         lineaDestinationRoutes().map((destinationToken) =>
