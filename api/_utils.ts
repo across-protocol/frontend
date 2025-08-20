@@ -2122,8 +2122,9 @@ export function isContractCache(chainId: number, address: string) {
       if (sdk.utils.chainIsSvm(chainId)) {
         return false;
       }
+      const addressType = toAddressType(address, chainId);
       const isDeployed = await sdk.utils.isContractDeployedToAddress(
-        address,
+        addressType.toEvmAddress(),
         getProvider(chainId)
       );
       return isDeployed;
