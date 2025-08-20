@@ -8,6 +8,7 @@
     "@across-protocol/contracts": "^4.0.9",
     "@across-protocol/sdk": "^4.3.17",
     "@amplitude/analytics-browser": "^2.3.5",
+    "@amplitude/plugin-session-replay-browser": "^1.21.1",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.14.0",
