@@ -428,13 +428,18 @@ export const getRouteDetails = (
   const l1TokenAddress =
     TOKEN_SYMBOLS_MAP[inputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
       .addresses[HUB_POOL_CHAIN_ID];
+  const noL1TokenError = new InvalidParamError({
+    message: "No L1 token found for given input token address",
+    param: "inputTokenAddress",
+  });
+  if (!l1TokenAddress) {
+    throw noL1TokenError;
+  }
+
   const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
-    throw new InvalidParamError({
-      message: "No L1 token found for given input token address",
-      param: "inputTokenAddress",
-    });
+    throw noL1TokenError;
   }
 
   outputTokenAddress ??=
