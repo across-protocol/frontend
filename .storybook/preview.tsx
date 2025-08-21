@@ -2,16 +2,13 @@ import { Preview } from "@storybook/react";
 import { MemoryRouter } from "react-router-dom";
 
 import { default as GlobalStyles } from "../src/components/GlobalStyles/GlobalStyles";
-import { OnboardContext, useOnboardManager } from "../src/hooks/useOnboard";
 
 const preview: Preview = {
   decorators: [
     (Story) => (
       <MemoryRouter initialEntries={["/"]}>
         <GlobalStyles />
-        <OnboardContext.Provider value={useOnboardManager()}>
-          <Story />
-        </OnboardContext.Provider>
+        <Story />
       </MemoryRouter>
     ),
   ],

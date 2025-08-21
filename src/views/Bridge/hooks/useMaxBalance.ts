@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber, constants, ethers, utils } from "ethers";
 
-import { useBalanceBySymbol, useConnection } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useBalance } from "hooks/useBalance";
 import {
   max,
   getProvider,
   gasExpenditureDeposit,
   gasMultiplierPerChain,
+  getEcosystem,
 } from "utils";
 import { SelectedRoute } from "../utils";
 
@@ -16,11 +19,15 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
       ? selectedRoute.swapTokenSymbol
       : selectedRoute.fromTokenSymbol;
 
-  const { balance } = useBalanceBySymbol(
-    balanceTokenSymbol,
-    selectedRoute.fromChain
-  );
-  const { account, signer } = useConnection();
+  const originChainEcosystem = getEcosystem(selectedRoute.fromChain);
+
+  const { account: accountEVM, signer } = useConnectionEVM();
+  const { account: accountSVM, provider: providerSVM } = useConnectionSVM();
+
+  const account =
+    originChainEcosystem === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  const { balance } = useBalance(balanceTokenSymbol, selectedRoute.fromChain);
 
   return useQuery({
     queryKey: [
@@ -33,21 +40,37 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
     queryFn: async () => {
       let maxBridgeAmount: BigNumber;
 
-      if (account && balance && signer) {
-        maxBridgeAmount =
-          balanceTokenSymbol !== "ETH"
-            ? balance
-            : // For ETH, we need to take the gas costs into account before setting the max. bridgable amount
-              await estimateGasCostsForDeposit(selectedRoute, signer).then(
-                (estimatedGasCosts) => max(balance.sub(estimatedGasCosts), 0)
-              );
+      if (account && balance) {
+        if (originChainEcosystem === "evm") {
+          // EVM logic: subtract gas costs for native tokens
+          if (signer) {
+            maxBridgeAmount =
+              balanceTokenSymbol !== "ETH"
+                ? balance
+                : // For ETH, we need to take the gas costs into account before setting the max. bridgable amount
+                  await estimateGasCostsForDeposit(selectedRoute, signer).then(
+                    (estimatedGasCosts) =>
+                      max(balance.sub(estimatedGasCosts), 0)
+                  );
+          } else {
+            maxBridgeAmount = constants.Zero;
+          }
+        } else {
+          // for SOL support, we need to estimate tx cost like above.
+          // for now we only support USDC
+          maxBridgeAmount = balance;
+        }
       } else {
         maxBridgeAmount = constants.Zero;
       }
 
       return maxBridgeAmount;
     },
-    enabled: Boolean(account && balance && signer),
+    enabled: Boolean(
+      account &&
+        balance &&
+        (originChainEcosystem === "evm" ? signer : providerSVM)
+    ),
     retry: true,
   });
 }
