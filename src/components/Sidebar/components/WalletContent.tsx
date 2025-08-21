@@ -4,6 +4,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import styled from "@emotion/styled";
 
 import { useSidebarContext } from "hooks/useSidebarContext";
+import { usePrevious } from "hooks/usePrevious";
 import { SidebarItem } from "./SidebarItem";
 import { Text } from "components/Text";
 
@@ -94,13 +95,13 @@ function SVMWalletContent() {
     useWalletsSorted();
   const { closeSidebar } = useSidebarContext();
   const { connected: isSolanaConnected } = useWallet();
+  const prevConnected = usePrevious(isSolanaConnected);
 
   useEffect(() => {
-    if (!connecting && isSolanaConnected) {
+    if (!prevConnected && isSolanaConnected) {
       closeSidebar();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connecting, isSolanaConnected]);
+  }, [prevConnected, isSolanaConnected, closeSidebar]);
 
   const handleClickSvmWallet = useCallback(
     async (walletAdapter: WalletAdapter) => {
