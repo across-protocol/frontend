@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-20T19:19:37.700Z
+// Generated on 2025-08-20T07:50:34.533Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {

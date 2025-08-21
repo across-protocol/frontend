@@ -125,6 +125,14 @@ export async function getCrossSwapQuotesForExactInputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
+  if (!crossSwap.refundOnOrigin) {
+    throw new InvalidParamError({
+      message:
+        "Query param 'refundOnOrigin' must be 'true' for same-asset bridge swaps.",
+      param: "refundOnOrigin",
+    });
+  }
+
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
@@ -180,6 +188,14 @@ export async function getCrossSwapQuotesForOutputB2B(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
+  if (!crossSwap.refundOnOrigin) {
+    throw new InvalidParamError({
+      message:
+        "Query param 'refundOnOrigin' must be 'true' for same-asset bridge swaps.",
+      param: "refundOnOrigin",
+    });
+  }
+
   // Use the first origin strategy since we don't need to fetch multiple origin quotes
   const originStrategy = getQuoteFetchStrategies(
     crossSwap.inputToken.chainId,
