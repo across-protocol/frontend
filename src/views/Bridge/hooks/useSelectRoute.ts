@@ -8,7 +8,7 @@ import {
   similarTokensMap,
   externalProjectNameToId,
 } from "utils";
-import { useAmplitude } from "hooks";
+import { useAmplitude, usePrevious } from "hooks";
 
 import {
   findNextBestRoute,
@@ -35,18 +35,17 @@ export function useSelectRoute() {
 
   const { addToAmpliQueue } = useAmplitude();
 
+  const anyConnected = isConnectedEVM || isConnectedSVM;
+  const previouslyConnected = usePrevious(anyConnected);
+
   // set default fromChain when user first connects
   useEffect(() => {
-    if (
-      // logical XOR, ie. only on first connection
-      (isConnectedEVM && !isConnectedSVM) ||
-      (!isConnectedEVM && isConnectedSVM)
-    ) {
+    if (!previouslyConnected && anyConnected) {
       const fromChain = isConnectedEVM ? chainIdEVM : chainIdSVM;
       setSelectedRoute(getInitialRoute({ fromChain }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnectedEVM, isConnectedSVM]);
+  }, [anyConnected, previouslyConnected]);
 
   useEffect(() => {
     if (isDefaultRouteTracked) {
