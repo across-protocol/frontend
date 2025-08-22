@@ -155,13 +155,11 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
     }
 
     let tx: providers.TransactionResponse;
-    const isExclusive =
-      depositArgs.exclusivityDeadline > 0 &&
-      depositArgs.exclusiveRelayer !== constants.AddressZero;
     const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
       await getSpokePoolAndVerifier(selectedRoute);
     const fillDeadline = transferQuote.quotedFees.fillDeadline;
-    if (shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier) {
+
+    if (shouldUseSpokePoolVerifier && spokePoolVerifier) {
       tx = await sendSpokePoolVerifierDepositTx(
         signer,
         {
