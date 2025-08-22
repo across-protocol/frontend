@@ -227,8 +227,8 @@ export type AcrossDepositArgs = {
   integratorId: string;
   inputTokenAddress: string;
   outputTokenAddress: string;
-  inputTokenSymbol?: string;
-  outputTokenSymbol?: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fillDeadline: number;
   exclusivityDeadline?: number;
   exclusiveRelayer?: string;
@@ -279,9 +279,7 @@ export async function sendSpokePoolVerifierDepositTx(
     amount: inputAmount,
     relayerFeePct,
     fromChain,
-    inputTokenAddress,
     toChain: destinationChainId,
-    outputTokenAddress: inputTokenAddress,
     inputTokenSymbol,
     outputTokenSymbol,
   });
@@ -343,9 +341,7 @@ export async function sendDepositTx(
     amount: inputAmount,
     relayerFeePct,
     fromChain,
-    inputTokenAddress,
     toChain: destinationChainId,
-    outputTokenAddress,
     inputTokenSymbol,
     outputTokenSymbol,
   });
@@ -392,7 +388,6 @@ export async function sendSwapAndBridgeTx(
     isNative,
     referrer,
     fillDeadline,
-    inputTokenAddress,
     outputTokenAddress,
     inputTokenSymbol,
     outputTokenSymbol,
@@ -445,9 +440,7 @@ export async function sendSwapAndBridgeTx(
     amount: inputAmount,
     relayerFeePct,
     fromChain,
-    inputTokenAddress,
     toChain: destinationChainId,
-    outputTokenAddress,
     inputTokenSymbol,
     outputTokenSymbol,
   });
@@ -578,33 +571,20 @@ function getDepositOutputAmount(
     | "amount"
     | "relayerFeePct"
     | "fromChain"
-    | "inputTokenAddress"
     | "toChain"
-    | "outputTokenAddress"
     | "inputTokenSymbol"
     | "outputTokenSymbol"
   >
 ) {
-  // Use token symbols if available, otherwise fall back to addresses
-  const inputToken = depositArgs.inputTokenSymbol
-    ? config.getTokenInfoBySymbol(
-        depositArgs.fromChain,
-        depositArgs.inputTokenSymbol
-      )
-    : config.getTokenInfoByAddress(
-        depositArgs.fromChain,
-        depositArgs.inputTokenAddress
-      );
+  const inputToken = config.getTokenInfoBySymbol(
+    depositArgs.fromChain,
+    depositArgs.inputTokenSymbol
+  );
 
-  const outputToken = depositArgs.outputTokenSymbol
-    ? config.getTokenInfoBySymbol(
-        depositArgs.toChain,
-        depositArgs.outputTokenSymbol
-      )
-    : config.getTokenInfoByAddress(
-        depositArgs.toChain,
-        depositArgs.outputTokenAddress
-      );
+  const outputToken = config.getTokenInfoBySymbol(
+    depositArgs.toChain,
+    depositArgs.outputTokenSymbol
+  );
 
   const inputAmount = depositArgs.amount;
   const relayerFeePct = depositArgs.relayerFeePct;

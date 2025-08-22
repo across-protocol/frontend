@@ -14,8 +14,8 @@ export type DepositArgs = {
   relayerFeePct: BigNumber;
   inputTokenAddress: string;
   outputTokenAddress: string;
-  inputTokenSymbol?: string;
-  outputTokenSymbol?: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fillDeadline: number;
   isNative: boolean;
   toAddress: string;
