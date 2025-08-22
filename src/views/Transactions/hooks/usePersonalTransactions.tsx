@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { useConnection } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { Deposit, useUserDeposits } from "hooks/useDeposits";
 
 import { usePageSize, useCurrentPage } from "./usePagination";
@@ -42,13 +43,15 @@ function usePaginatedUserDeposits(
   statusFilter: DepositStatusFilter,
   pageSize: number
 ) {
-  const { account } = useConnection();
+  const { account: accountEVM } = useConnectionEVM();
+  const { account: accountSVM } = useConnectionSVM();
+  const account = accountEVM || accountSVM;
   const { currentPage, setCurrentPage } = useCurrentPage();
   const depositsQuery = useUserDeposits(
     statusFilter,
     pageSize,
     currentPage * pageSize,
-    account
+    account as string
   );
   const end = depositsQuery.data
     ? depositsQuery.data!.deposits.length < pageSize
