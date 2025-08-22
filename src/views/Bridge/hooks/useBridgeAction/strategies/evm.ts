@@ -165,9 +165,6 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         {
           ...depositArgs,
           fillDeadline,
-          // drop exclusivity for native deposits
-          exclusivityDeadline: 0,
-          exclusiveRelayer: constants.AddressZero,
         },
         spokePool,
         spokePoolVerifier,
