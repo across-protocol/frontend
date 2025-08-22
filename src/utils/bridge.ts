@@ -227,6 +227,8 @@ export type AcrossDepositArgs = {
   integratorId: string;
   inputTokenAddress: string;
   outputTokenAddress: string;
+  inputTokenSymbol?: string;
+  outputTokenSymbol?: string;
   fillDeadline: number;
   exclusivityDeadline?: number;
   exclusiveRelayer?: string;
@@ -257,6 +259,8 @@ export async function sendSpokePoolVerifierDepositTx(
     fillDeadline,
     inputTokenAddress,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
@@ -278,6 +282,8 @@ export async function sendSpokePoolVerifierDepositTx(
     inputTokenAddress,
     toChain: destinationChainId,
     outputTokenAddress: inputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
   });
 
   const tx = await spokePoolVerifier.populateTransaction.deposit(
@@ -322,6 +328,8 @@ export async function sendDepositTx(
     fillDeadline,
     inputTokenAddress,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
@@ -338,6 +346,8 @@ export async function sendDepositTx(
     inputTokenAddress,
     toChain: destinationChainId,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
   });
 
   const signerAddress = await signer.getAddress();
@@ -384,6 +394,8 @@ export async function sendSwapAndBridgeTx(
     fillDeadline,
     inputTokenAddress,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     swapQuote,
@@ -436,6 +448,8 @@ export async function sendSwapAndBridgeTx(
     inputTokenAddress,
     toChain: destinationChainId,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
   });
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
@@ -567,16 +581,31 @@ function getDepositOutputAmount(
     | "inputTokenAddress"
     | "toChain"
     | "outputTokenAddress"
+    | "inputTokenSymbol"
+    | "outputTokenSymbol"
   >
 ) {
-  const inputToken = config.getTokenInfoByAddress(
-    depositArgs.fromChain,
-    depositArgs.inputTokenAddress
-  );
-  const outputToken = config.getTokenInfoByAddress(
-    depositArgs.toChain,
-    depositArgs.outputTokenAddress
-  );
+  // Use token symbols if available, otherwise fall back to addresses
+  const inputToken = depositArgs.inputTokenSymbol
+    ? config.getTokenInfoBySymbol(
+        depositArgs.fromChain,
+        depositArgs.inputTokenSymbol
+      )
+    : config.getTokenInfoByAddress(
+        depositArgs.fromChain,
+        depositArgs.inputTokenAddress
+      );
+
+  const outputToken = depositArgs.outputTokenSymbol
+    ? config.getTokenInfoBySymbol(
+        depositArgs.toChain,
+        depositArgs.outputTokenSymbol
+      )
+    : config.getTokenInfoByAddress(
+        depositArgs.toChain,
+        depositArgs.outputTokenAddress
+      );
+
   const inputAmount = depositArgs.amount;
   const relayerFeePct = depositArgs.relayerFeePct;
   const outputAmount = inputAmount.sub(

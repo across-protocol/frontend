@@ -232,6 +232,8 @@ function getDepositArgs(
     relayerFeePct: quotedFees.totalRelayFee.pct,
     inputTokenAddress: selectedRoute.fromTokenAddress,
     outputTokenAddress: selectedRoute.toTokenAddress,
+    inputTokenSymbol: selectedRoute.fromTokenSymbol,
+    outputTokenSymbol: selectedRoute.toTokenSymbol,
     fillDeadline: quotedFees.fillDeadline,
     isNative: selectedRoute.isNative,
     toAddress: recipient,
