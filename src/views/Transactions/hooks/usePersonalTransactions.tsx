@@ -45,13 +45,13 @@ function usePaginatedUserDeposits(
 ) {
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
-  const account = accountEVM || accountSVM;
+  const account = accountEVM || accountSVM?.toString();
   const { currentPage, setCurrentPage } = useCurrentPage();
   const depositsQuery = useUserDeposits(
     statusFilter,
     pageSize,
     currentPage * pageSize,
-    account as string
+    account
   );
   const end = depositsQuery.data
     ? depositsQuery.data!.deposits.length < pageSize
