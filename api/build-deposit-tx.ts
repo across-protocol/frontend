@@ -91,7 +91,7 @@ const handler = async (
 
     const spokePool = getSpokePool(originChainId);
 
-    const depositFee = ethers.BigNumber("100000000000000");
+    const depositFee = new ethers.BigNumber("100000000000000");
     const value = isNative
       ? inputAmount + depositFee
       : ethers.constants.Zero + depositFee;
