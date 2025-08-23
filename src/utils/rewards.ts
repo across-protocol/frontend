@@ -88,7 +88,7 @@ export function deriveNewStakingValues(
     ? fixedPointAdjustment
     : fractionOfMaxMultiplier;
 
-  // Use the fractional amount to resolve the new multplier that the user has at
+  // Use the fractional amount to resolve the new multiplier that the user has at
   // receiving additional % on their staking reward APY
   const updatedMultiplier =
     noStake || updatedTimeEstimateInSeconds.eq(0)
@@ -98,7 +98,7 @@ export function deriveNewStakingValues(
             .mul(origin.maxMultiplier.sub(fixedPointAdjustment))
             .div(fixedPointAdjustment)
         );
-  // Convert the new multplier into a percentage of it and the
+  // Convert the new multiplier into a percentage of it and the
   // maximum multiplier
   const updatedMultiplierPercentage = origin.maxMultiplier.eq(0)
     ? 0
