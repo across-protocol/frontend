@@ -92,9 +92,7 @@ const calculateUsdBalances = async (account: string) => {
             ),
           })
         );
-        if (
-          ![CHAIN_IDs.ALEPH_ZERO, CHAIN_IDs.POLYGON].includes(Number(chainId))
-        ) {
+        if (![CHAIN_IDs.POLYGON].includes(Number(chainId))) {
           const fn = async () => {
             return {
               fromChainId: Number(chainId),

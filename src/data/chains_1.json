@@ -1575,17 +1575,6 @@
     ]
   },
   {
-    "chainId": 41455,
-    "name": "Aleph Zero",
-    "publicRpcUrl": "https://rpc.alephzero.raas.gelato.cloud",
-    "explorerUrl": "https://evm-explorer.alephzero.org",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/aleph-zero/assets/logo.svg",
-    "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
-    "spokePoolBlock": 4240318,
-    "inputTokens": [],
-    "outputTokens": []
-  },
-  {
     "chainId": 57073,
     "name": "Ink",
     "publicRpcUrl": "https://rpc-gel.inkonchain.com",
