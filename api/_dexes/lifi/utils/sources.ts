@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-21T13:59:28.114Z
+// Generated on 2025-08-22T15:37:20.831Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -28,22 +28,6 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
-    "56": [
-      { key: "dodo", names: ["dodo"] },
-      { key: "enso", names: ["enso"] },
-      { key: "odos", names: ["odos"] },
-      { key: "1inch", names: ["1inch"] },
-      { key: "openocean", names: ["openocean"] },
-      { key: "kyberswap", names: ["kyberswap"] },
-      { key: "lifidexaggregator", names: ["lifidexaggregator"] },
-      { key: "sushiswap", names: ["sushiswap"] },
-      { key: "okx", names: ["okx"] },
-    ],
-    "130": [
-      { key: "paraswap", names: ["paraswap"] },
-      { key: "enso", names: ["enso"] },
-      { key: "lifidexaggregator", names: ["lifidexaggregator"] },
-    ],
     "137": [
       { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
@@ -55,7 +39,6 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
-    "232": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "288": [
       { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
@@ -116,7 +99,6 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
-    "60808": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "81457": [
       { key: "openocean", names: ["openocean"] },
       { key: "kyberswap", names: ["kyberswap"] },
@@ -145,7 +127,6 @@ export const SOURCES = {
 
 export const ALL_SOURCES = [
   "1inch",
-  "dodo",
   "enso",
   "kyberswap",
   "lifidexaggregator",
