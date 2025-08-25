@@ -22,20 +22,21 @@ const resource = resourceFromAttributes({
   "vercel.deployment_id": process.env.VERCEL_DEPLOYMENT_ID || "unknown",
 });
 
-const processor = new BatchSpanProcessor(new OTLPTraceExporter());
+const processor = new BatchSpanProcessor(new OTLPTraceExporter(), {
+  scheduledDelayMillis: 500,
+});
 
-// sdk
+const httpInstrumentation = new HttpInstrumentation({
+  disableIncomingRequestInstrumentation: true,
+});
+
 const sdk = new NodeSDK({
   resource,
   spanProcessors: [processor],
-  instrumentations: [
-    new HttpInstrumentation({
-      disableIncomingRequestInstrumentation: true,
-    }),
-  ],
+  instrumentations: [httpInstrumentation],
 });
 
 sdk.start();
 
 export const tracer = trace.getTracer("across-api");
-export { context, processor };
+export { context, processor, httpInstrumentation };

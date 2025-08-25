@@ -1,13 +1,8 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import { SpanStatusCode } from "@opentelemetry/api";
 
-import {
-  CHAIN_IDs,
-  CUSTOM_GAS_TOKENS,
-  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-} from "./_constants";
+import { CHAIN_IDs, CUSTOM_GAS_TOKENS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { assert, Infer, optional, string, type } from "superstruct";
 
@@ -31,7 +26,6 @@ import {
   maxBN,
   minBN,
   positiveIntStr,
-  sendResponse,
   validAddress,
   validateChainAndTokenParams,
   getCachedLatestBlock,
@@ -50,6 +44,9 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+import { getDefaultRecipientAddress } from "./_recipient-address";
+import { calcGasFeeDetails } from "./_gas";
+import { sendResponse } from "./_response_utils";
 import { tracer } from "../instrumentation";
 
 const LimitsQueryParamsSchema = type({
@@ -65,10 +62,15 @@ const LimitsQueryParamsSchema = type({
   allowUnmatchedDecimals: optional(boolStr()),
 });
 
+const LimitsBodySchema = type({
+  message: optional(string()),
+});
+
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
+type LimitsBody = Infer<typeof LimitsBodySchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<LimitsQueryParams>,
+  { query, body }: TypedVercelRequest<LimitsQueryParams, LimitsBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -87,6 +89,10 @@ const handler = async (
 
       assert(query, LimitsQueryParamsSchema);
 
+      if (body) {
+        assert(body, LimitsBodySchema);
+      }
+
       const {
         destinationChainId,
         resolvedOriginChainId: computedOriginChainId,
@@ -95,23 +101,34 @@ const handler = async (
         outputToken,
       } = validateChainAndTokenParams(query);
 
-      const fullRelayers = getFullRelayers();
-      const transferRestrictedRelayers = getTransferRestrictedRelayers(
-        destinationChainId,
-        l1Token.symbol
-      );
+      const fullRelayersL1 = getFullRelayers();
+      const fullRelayersDestinationChain = getFullRelayers(destinationChainId);
+      const transferRestrictedRelayersDestinationChain =
+        getTransferRestrictedRelayers(destinationChainId, l1Token.symbol);
 
       // Optional parameters that caller can use to specify specific deposit details with which
       // to compute limits.
-      let { amount: _amount, recipient, relayer, message } = query;
+      let {
+        amount: _amount,
+        recipient: _recipient,
+        relayer: _relayer,
+        message: _messageFromQuery,
+      } = query;
+      const { message: _messageFromBody } = body ?? {};
+
+      const message = _messageFromQuery || _messageFromBody;
+
       // Very small amount to simulate a fill of the deposit that should always be available in the relayer's balance.
       const simulationAmount = ethers.BigNumber.from("100");
-      recipient = recipient
-        ? ethers.utils.getAddress(recipient)
-        : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-      relayer = relayer
-        ? ethers.utils.getAddress(relayer)
-        : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
+      const recipient = sdk.utils.toAddressType(
+        _recipient || getDefaultRecipientAddress(destinationChainId),
+        destinationChainId
+      );
+      const relayer = sdk.utils.toAddressType(
+        _relayer ||
+          getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        destinationChainId
+      );
 
       // If the amount is not provided, we use the simulation amount throughout.
       const amount = BigNumber.from(_amount ?? simulationAmount);
@@ -126,9 +143,9 @@ const handler = async (
           });
         }
         await validateDepositMessage(
-          recipient,
+          recipient.toBytes32(),
           destinationChainId,
-          relayer,
+          relayer.toBytes32(),
           outputToken.address,
           ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
           message!
@@ -179,19 +196,31 @@ const handler = async (
       const simulationDepositArgs = {
         // For the purposes of estimating gas costs, we always use the small simulation amount.
         amount: simulationAmount,
-        inputToken: inputToken.address,
-        outputToken: outputToken.address,
-        recipientAddress: recipient,
+        inputToken: sdk.utils
+          .toAddressType(inputToken.address, computedOriginChainId)
+          .toBytes32(),
+        outputToken: sdk.utils
+          .toAddressType(outputToken.address, destinationChainId)
+          .toBytes32(),
+        recipientAddress: recipient.toBytes32(),
         originChainId: computedOriginChainId,
         destinationChainId,
         message,
+        relayerAddress: relayer.toBytes32(),
       };
+      // We only want to derive an unsigned fill txn from the deposit args if the
+      // destination chain is Linea or Solana:
+      // - Linea: Priority fee depends on the destination chain call data
+      // - Solana: Compute units estimation fails for missing values
+      const shouldUseUnsignedFillForGasPriceCache =
+        destinationChainId === CHAIN_IDs.LINEA ||
+        sdk.utils.chainIsSvm(destinationChainId);
 
       const [
         tokenPriceNative,
         _tokenPriceUsd,
         latestBlock,
-        { maxFeePerGas: gasPrice },
+        gasPriceEstimate,
         nativeGasCost,
       ] = await Promise.all([
         getCachedTokenPrice(
@@ -201,21 +230,19 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // We only want to derive an unsigned fill txn from the deposit args if the destination chain is Linea
-        // because only Linea's priority fee depends on the destination chain call data.
         latestGasPriceCache(
           destinationChainId,
-          CHAIN_IDs.LINEA === destinationChainId
+          shouldUseUnsignedFillForGasPriceCache
             ? simulationDepositArgs
             : undefined,
           {
-            relayerAddress: relayer,
+            relayerAddress: relayer.toBytes32(),
           }
         ).get(),
-        isMessageDefined
-          ? undefined // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        isMessageDefined || sdk.utils.chainIsSvm(destinationChainId)
+          ? undefined // Only use cached gas units if message is not defined and the destination is EVM, i.e. standard for standard bridges
           : getCachedNativeGasCost(simulationDepositArgs, {
-              relayerAddress: relayer,
+              relayerAddress: relayer.toBytes32(),
             }).get(),
       ]);
       const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
@@ -230,14 +257,14 @@ const handler = async (
         nativeGasCost && sdk.utils.chainIsOPStack(destinationChainId)
           ? // Only use cached gas units if message is not defined, i.e. standard for standard bridges
             getCachedOpStackL1DataFee(simulationDepositArgs, nativeGasCost, {
-              relayerAddress: relayer,
+              relayerAddress: relayer.toBytes32(),
             }).get()
           : undefined,
         callViaMulticall3(provider, multiCalls, {
           blockTag: latestBlock.number,
         }),
         Promise.all(
-          fullRelayers.map((relayer) =>
+          fullRelayersDestinationChain.map((relayer) =>
             getCachedTokenBalance(
               destinationChainId,
               relayer,
@@ -246,7 +273,7 @@ const handler = async (
           )
         ),
         Promise.all(
-          transferRestrictedRelayers.map((relayer) =>
+          transferRestrictedRelayersDestinationChain.map((relayer) =>
             getCachedTokenBalance(
               destinationChainId,
               relayer,
@@ -255,7 +282,7 @@ const handler = async (
           )
         ),
         Promise.all(
-          fullRelayers.map((relayer) =>
+          fullRelayersL1.map((relayer) =>
             destinationChainId === HUB_POOL_CHAIN_ID
               ? ethers.BigNumber.from("0")
               : getCachedTokenBalance(
@@ -266,19 +293,25 @@ const handler = async (
           )
         ),
       ]);
-      const tokenGasCost =
-        nativeGasCost && gasPrice
-          ? nativeGasCost
-              .mul(gasPrice)
-              .add(opStackL1GasCost ?? ethers.BigNumber.from("0"))
+      // Calculate gas fee details based on cached values
+      const gasFeeDetails =
+        nativeGasCost && gasPriceEstimate
+          ? calcGasFeeDetails({
+              gasPriceEstimate,
+              nativeGasCost,
+              opStackL1GasCost,
+            })
           : undefined;
+      const tokenGasCost = gasFeeDetails?.tokenGasCost;
+      const gasPrice = gasFeeDetails?.gasPrice;
+
       // This call should not make any additional RPC queries since we are passing in gasPrice, nativeGasCost
       // and tokenGasCost.
       const relayerFeeDetails = await getRelayerFeeDetails(
         // We need to pass in the true amount here so the returned percentages are correct.
         { ...simulationDepositArgs, amount: amount },
         tokenPriceNative,
-        relayer,
+        relayer.toBytes32(),
         gasPrice,
         nativeGasCost,
         tokenGasCost
@@ -402,8 +435,14 @@ const handler = async (
           tokenPriceUsd,
           inputToken
         );
+        const fullRelayersOriginChain = getFullRelayers(computedOriginChainId);
+        const transferRestrictedRelayersOriginChain =
+          getTransferRestrictedRelayers(computedOriginChainId, l1Token.symbol);
         const relayers = includeRelayerBalances
-          ? [...fullRelayers, ...transferRestrictedRelayers]
+          ? [
+              ...fullRelayersOriginChain,
+              ...transferRestrictedRelayersOriginChain,
+            ]
           : [];
         chainAvailableInputTokenAmountForDeposits =
           await getAvailableAmountForDeposits(
@@ -506,12 +545,12 @@ const handler = async (
           capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
           capitalFeePercent: relayerFeeDetails.capitalFeePercent,
         },
-        gasFeeDetails: tokenGasCost
+        gasFeeDetails: gasFeeDetails
           ? {
-              nativeGasCost: nativeGasCost!.toString(), // Should exist if tokenGasCost exists
-              opStackL1GasCost: opStackL1GasCost?.toString(),
-              gasPrice: gasPrice.toString(),
-              tokenGasCost: tokenGasCost.toString(),
+              nativeGasCost: gasFeeDetails.nativeGasCost.toString(),
+              opStackL1GasCost: gasFeeDetails.opStackL1GasCost?.toString(),
+              gasPrice: gasFeeDetails.gasPrice.toString(),
+              tokenGasCost: gasFeeDetails.tokenGasCost.toString(),
             }
           : undefined,
       };
@@ -520,10 +559,13 @@ const handler = async (
         message: "Response data",
         responseJson,
       });
-      span.setStatus({ code: SpanStatusCode.OK });
-      // Respond with a 200 status code and 1 second of cache time with
-      // 59s to keep serving the stale data while recomputing the cached value.
-      sendResponse(response, responseJson, 200, 1, 59);
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        cacheSeconds: 1,
+        staleWhileRevalidateSeconds: 59,
+      });
     } catch (error: unknown) {
       return handleErrorCondition("limits", response, logger, error, span);
     } finally {

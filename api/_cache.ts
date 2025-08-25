@@ -1,6 +1,7 @@
 import { createClient, VercelKV } from "@vercel/kv";
 import { interfaces } from "@across-protocol/sdk";
 import { getEnvs } from "./_env";
+import { compactAxiosError, getLogger } from "./_utils";
 
 const {
   KV_REST_API_READ_ONLY_TOKEN,
@@ -73,6 +74,17 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     }
     await this.client.del(key);
   }
+
+  pub(_channel: string, _message: string): Promise<number> {
+    throw new Error("pub: not supported");
+  }
+
+  async sub(
+    _channel: string,
+    _listener: (message: string, channel: string) => void
+  ): Promise<number> {
+    throw new Error("sub: not supported");
+  }
 }
 
 export const redisCache = new RedisCache();
@@ -98,7 +110,17 @@ export async function getCachedValue<T>(
   fetcher: () => Promise<T>,
   parser?: (value: T) => T
 ): Promise<T> {
-  const cachedValue = await redisCache.get<T>(key);
+  let cachedValue = null;
+  try {
+    cachedValue = await redisCache.get<T>(key);
+  } catch (error) {
+    getLogger().error({
+      at: "getCachedValue",
+      message: "Error while calling redisCache.get",
+      error: compactAxiosError(error as Error),
+    });
+  }
+
   if (cachedValue) {
     return parser ? parser(cachedValue) : cachedValue;
   }

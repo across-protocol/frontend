@@ -2,14 +2,9 @@ import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
-import { SpanStatusCode } from "@opentelemetry/api";
 import { parseUnits } from "ethers/lib/utils";
 
-import {
-  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  DEFAULT_QUOTE_BLOCK_BUFFER,
-  CHAIN_IDs,
-} from "./_constants";
+import { DEFAULT_QUOTE_BLOCK_BUFFER, CHAIN_IDs } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -48,7 +43,10 @@ import { getFillDeadline } from "./_fill-deadline";
 import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
+import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
 import { tracer } from "../instrumentation";
+import { sendResponse } from "./_response_utils";
+import { getDefaultRecipientAddress } from "./_recipient-address";
 
 const { BigNumber } = ethers;
 
@@ -67,21 +65,31 @@ const SuggestedFeesQueryParamsSchema = type({
   allowUnmatchedDecimals: optional(boolStr()),
 });
 
+const SuggestedFeesBodySchema = type({
+  message: optional(string()),
+});
+
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
+type SuggestedFeesBody = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
-  request: TypedVercelRequest<SuggestedFeesQueryParams>,
+  request: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedFeesBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const requestId = getRequestId(request);
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
     query: request.query,
+    body: request.body,
+    requestId,
   });
   return tracer.startActiveSpan("suggested-fees", async (span) => {
     try {
-      const { query } = request;
+      setRequestSpanAttributes(request, span, requestId);
+
+      const { query, body } = request;
       const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = getEnvs();
 
       const role = parseRole(request);
@@ -92,14 +100,21 @@ const handler = async (
 
       assert(query, SuggestedFeesQueryParamsSchema);
 
+      if (body) {
+        assert(body, SuggestedFeesBodySchema);
+      }
+
       let {
         amount: amountInput,
         timestamp,
         skipAmountLimit,
-        recipient,
-        relayer,
-        message,
+        recipient: _recipient,
+        relayer: _relayer,
+        message: _messageFromQuery,
       } = query;
+      const { message: _messageFromBody } = body ?? {};
+
+      const message = _messageFromQuery || _messageFromBody;
 
       const {
         l1Token,
@@ -110,12 +125,25 @@ const handler = async (
         allowUnmatchedDecimals,
       } = validateChainAndTokenParams(query);
 
-      relayer = relayer
-        ? ethers.utils.getAddress(relayer)
-        : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-      recipient = recipient
-        ? ethers.utils.getAddress(recipient)
-        : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+      const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+
+      // We require a recipient for SVM destinations to prevent underquoting.
+      if (isDestinationSvm && !_recipient) {
+        throw new InvalidParamError({
+          message: "Recipient is required for SVM destinations",
+          param: "recipient",
+        });
+      }
+
+      const recipient = sdk.utils.toAddressType(
+        _recipient || getDefaultRecipientAddress(destinationChainId),
+        destinationChainId
+      );
+      const relayer = sdk.utils.toAddressType(
+        _relayer ||
+          getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        destinationChainId
+      );
       const depositWithMessage = sdk.utils.isDefined(message);
 
       // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
@@ -237,8 +265,10 @@ const handler = async (
           amountInput,
           // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
           // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-          depositWithMessage ? recipient : undefined,
-          depositWithMessage ? relayer : undefined,
+          depositWithMessage || isDestinationSvm
+            ? recipient.toNative()
+            : undefined,
+          depositWithMessage ? relayer.toNative() : undefined,
           depositWithMessage ? message : undefined,
           allowUnmatchedDecimals
         ),
@@ -403,18 +433,28 @@ const handler = async (
       logger.info({
         at: "SuggestedFees",
         message: "Response data",
-        responseJson: JSON.stringify(responseJson, null, 2),
+        responseJson,
       });
 
-      // Only cache response if exclusivity is not set. This prevents race conditions where
-      // cached exclusivity data is returned for multiple deposits.
-      if (exclusiveRelayer === sdk.constants.ZERO_ADDRESS) {
-        response.setHeader("Cache-Control", "s-maxage=10");
-      }
-      span.setStatus({ code: SpanStatusCode.OK });
-      response.status(200).json(responseJson);
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        requestId,
+        // Only cache response if exclusivity is not set. This prevents race conditions where
+        // cached exclusivity data is returned for multiple deposits.
+        cacheSeconds:
+          exclusiveRelayer === sdk.constants.ZERO_ADDRESS ? 10 : undefined,
+      });
     } catch (error) {
-      return handleErrorCondition("suggested-fees", response, logger, error);
+      return handleErrorCondition(
+        "suggested-fees",
+        response,
+        logger,
+        error,
+        span,
+        requestId
+      );
     } finally {
       span.end();
     }

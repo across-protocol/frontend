@@ -5,6 +5,7 @@ import {
   fetchSwapQuotes,
   signAndWaitAllowanceFlow,
   signAndWaitPermitFlow,
+  argsFromCli,
 } from "./_swap-utils";
 
 async function swap() {
@@ -18,7 +19,7 @@ async function swap() {
 
     console.log("\nSwap quote:", JSON.stringify(swapQuote, null, 2));
 
-    if (process.env.DEV_WALLET_PK) {
+    if (process.env.DEV_WALLET_PK && !argsFromCli.skipTxExecution) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(swapQuote.swapTx.chainId)
       );

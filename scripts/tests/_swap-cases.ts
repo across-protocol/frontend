@@ -5,7 +5,7 @@ export const depositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 export const originChainId = CHAIN_IDs.OPTIMISM;
 export const destinationChainId = CHAIN_IDs.ARBITRUM;
 export const anyDestinationOutputTokens = {
-  [CHAIN_IDs.ARBITRUM]: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE
+  [CHAIN_IDs.ARBITRUM]: "0x4d224452801ACEd8B2F0aebE155379bb5D594381", // APE
 };
 
 export const MIN_OUTPUT_CASES = [
