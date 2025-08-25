@@ -85,10 +85,13 @@ export function get0xStrategy(
             sources?.sourcesType === "include"
             ? {
                 excludedSources: SOURCES.sources[swap.chainId]
-                  .map((s) => s.key)
                   .filter(
-                    (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
+                    ({ names }) =>
+                      !sources.sourcesNames?.some((sourceName) =>
+                        names.includes(sourceName)
+                      )
                   )
+                  .map(({ key }) => key)
                   .join(","),
               }
             : undefined;

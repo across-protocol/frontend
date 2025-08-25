@@ -56,8 +56,24 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
         assertSellEntireBalanceSupported();
       }
 
+      const classicProtocols = ["V2", "V3", "V4"];
+      const protocols =
+        opts?.sources?.sourcesType === "exclude"
+          ? classicProtocols.filter(
+              (protocol) => !opts.sources?.sourcesKeys.includes(protocol)
+            )
+          : opts?.sources?.sourcesType === "include"
+            ? classicProtocols.filter((protocol) =>
+                opts.sources?.sourcesKeys.includes(protocol)
+              )
+            : classicProtocols;
+
       const { quote } = await getUniswapClassicQuoteFromApi(
-        { ...swap, swapper: swap.recipient, protocols: ["V2", "V3", "V4"] },
+        {
+          ...swap,
+          swapper: swap.recipient,
+          protocols: protocols as ("V2" | "V3" | "V4")[],
+        },
         tradeType
       );
       const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
