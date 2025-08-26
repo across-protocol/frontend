@@ -1619,14 +1619,14 @@ export function getMatchingStrategy(params: {
     }),
     // 2. Any strategy that supports sell entire balance + valid sources
     createFilter({ supportsSellBalance: true, hasValidSources: true }),
-    // 3. Same name + valid sources (fallback when sell entire balance not available)
+    // 3. Same name + supports sell entire balance
+    createFilter({ sameName: true, supportsSellBalance: true }),
+    // 4. Any strategy that supports sell entire balance
+    createFilter({ supportsSellBalance: true }),
+    // 5. Same name + valid sources (fallback when sell entire balance not available)
     createFilter({ sameName: true, hasValidSources: true }),
     // 4. Any strategy with valid sources
     createFilter({ hasValidSources: true }),
-    // 5. Same name + supports sell entire balance
-    createFilter({ sameName: true, supportsSellBalance: true }),
-    // 6. Any strategy that supports sell entire balance
-    createFilter({ supportsSellBalance: true }),
     // 7. Same name
     createFilter({ sameName: true }),
     // 8. Last resort: first available strategy
