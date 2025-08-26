@@ -891,23 +891,20 @@ export function makeGetSources(sources: DexSources) {
     const sourcesData = Array.from(
       new Set(
         filteredSources.flatMap((source) => {
-          const sourceData = sources.sources[chainId].find((s) =>
+          const sourceData = sources.sources[chainId].filter((s) =>
             s.names.some((name) => name.toLowerCase() === source.toLowerCase())
           );
-          if (!sourceData) {
-            return [];
-          }
-          return {
-            key: sourceData.key,
-            names: sourceData.names,
-          };
+          return sourceData.map((s) => ({
+            key: s.key,
+            names: s.names,
+          }));
         })
       )
     );
 
     return {
       sourcesKeys: sourcesData.map((s) => s.key),
-      sourcesNames: sourcesData.flatMap((s) => s.names),
+      sourcesNames: Array.from(new Set(sourcesData.flatMap((s) => s.names))),
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };

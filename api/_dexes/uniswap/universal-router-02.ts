@@ -62,7 +62,8 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
           ? classicProtocols.filter(
               (protocol) => !opts.sources?.sourcesKeys.includes(protocol)
             )
-          : opts?.sources?.sourcesType === "include"
+          : opts?.sources?.sourcesType === "include" &&
+              opts.sources?.sourcesKeys?.length > 0
             ? classicProtocols.filter((protocol) =>
                 opts.sources?.sourcesKeys.includes(protocol)
               )
