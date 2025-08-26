@@ -1623,7 +1623,13 @@ export function getMatchingStrategy(params: {
     createFilter({ sameName: true, hasValidSources: true }),
     // 4. Any strategy with valid sources
     createFilter({ hasValidSources: true }),
-    // 5. Last resort: first available strategy
+    // 5. Same name + supports sell entire balance
+    createFilter({ sameName: true, supportsSellBalance: true }),
+    // 6. Any strategy that supports sell entire balance
+    createFilter({ supportsSellBalance: true }),
+    // 7. Same name
+    createFilter({ sameName: true }),
+    // 8. Last resort: first available strategy
     () => true,
   ];
 
@@ -1633,7 +1639,11 @@ export function getMatchingStrategy(params: {
     createFilter({ sameName: true, hasValidSources: true }),
     // 2. Any strategy with valid sources
     createFilter({ hasValidSources: true }),
-    // 3. Last resort: first available strategy
+    // 3. Same name
+    createFilter({ sameName: true }),
+    // 4. Any strategy
+    () => true,
+    // 5. Last resort: first available strategy
     () => true,
   ];
 

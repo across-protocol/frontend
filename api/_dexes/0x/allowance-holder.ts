@@ -143,6 +143,7 @@ export function get0xStrategy(
 
       if (
         sources?.sourcesType === "include" &&
+        sources.sourcesNames?.length > 0 &&
         !usedSources.every((source: string) =>
           sources.sourcesNames?.includes(source)
         )
