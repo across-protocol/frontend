@@ -469,13 +469,6 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
       },
       {
-        "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
-      },
-      {
         "address": "0x25788a1a171ec66Da6502f9975a15B609fF54CF6",
         "symbol": "POOL",
         "name": "PoolTogether",
@@ -546,13 +539,6 @@
         "name": "Across Protocol Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
-      },
-      {
-        "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       },
       {
         "address": "0x25788a1a171ec66Da6502f9975a15B609fF54CF6",

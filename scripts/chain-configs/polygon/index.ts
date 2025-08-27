@@ -18,7 +18,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://polygon.drpc.org",
-  tokens: ["DAI", "UMA", "WETH", "USDC", "WBTC", "BAL", "ACX", "USDT", "POOL"],
+  tokens: ["DAI", "UMA", "WETH", "USDC", "WBTC", "BAL", "ACX", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 5,
 } as ChainConfig;
