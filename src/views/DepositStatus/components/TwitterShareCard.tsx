@@ -18,12 +18,12 @@ export function TwitterShareCard({
   toChainId,
   fromBridgePagePayload,
 }: TwitterShareProps) {
-  const { depositQuery, fillQuery } = useDepositTracking(
+  const { depositQuery, fillQuery } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload
-  );
+    fromBridgePagePayload,
+  });
 
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
   const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
@@ -38,7 +38,7 @@ export function TwitterShareCard({
     !isDefined(fillTxElapsedSeconds) ||
     fillTxElapsedSeconds > SHARE_THRESHOLD_SECONDS
   ) {
-    return <></>;
+    return null;
   }
 
   const shareUrl = buildTwitterShareUrl({
