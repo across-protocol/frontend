@@ -1011,7 +1011,6 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     strategies,
     strategiesToUseForComparison: "origin",
     includeSources: crossSwap.includeSources,
-    excludeSources: crossSwap.excludeSources,
   });
 
   const originStrategyFetches = results.map((result) => {
@@ -1192,7 +1191,6 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     strategies,
     strategiesToUseForComparison: "destination",
     includeSources: crossSwapWithAppFee.includeSources,
-    excludeSources: crossSwapWithAppFee.excludeSources,
   });
 
   const destinationStrategyFetches = results.map((result) => {
@@ -1412,7 +1410,6 @@ function _prepCrossSwapQuotesRetrievalA2A(params: {
   strategies: QuoteFetchStrategies;
   strategiesToUseForComparison: "origin" | "destination";
   includeSources?: string[];
-  excludeSources?: string[];
 }): CrossSwapQuotesRetrievalA2AResult {
   const {
     crossSwap,
@@ -1569,10 +1566,6 @@ export function getMatchingStrategy(params: {
     chainId,
   } = params;
 
-  const baseStrategyHasSources = hasSources(baseStrategy, chainId, {
-    includeSources,
-  });
-
   // Helper to check if strategy matches source requirements
   const hasValidSources = (strategy: QuoteFetchStrategy): boolean => {
     const strategyHasSources = hasSources(strategy, chainId, {
@@ -1639,9 +1632,7 @@ export function getMatchingStrategy(params: {
     createFilter({ hasValidSources: true }),
     // 3. Same name
     createFilter({ sameName: true }),
-    // 4. Any strategy
-    () => true,
-    // 5. Last resort: first available strategy
+    // 4. Last resort: first available strategy
     () => true,
   ];
 

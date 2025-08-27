@@ -87,9 +87,9 @@ export function get0xStrategy(
             ? {
                 excludedSources: SOURCES.sources[swap.chainId]
                   .filter(
-                    ({ names }) =>
-                      !sources.sourcesNames.some((sourceName) =>
-                        names.includes(sourceName)
+                    ({ key }) =>
+                      !sources.sourcesKeys.some(
+                        (sourceKey) => key === sourceKey
                       )
                   )
                   .map(({ key }) => key)
