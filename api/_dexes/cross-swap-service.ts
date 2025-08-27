@@ -1578,9 +1578,7 @@ export function getMatchingStrategy(params: {
     const strategyHasSources = hasSources(strategy, chainId, {
       includeSources,
     });
-    return baseStrategyHasSources
-      ? baseStrategyHasSources && strategyHasSources
-      : strategyHasSources;
+    return strategyHasSources;
   };
 
   // Helper to create strategy filters
