@@ -124,6 +124,15 @@ export function createBridgeActionHook(strategy: BridgeActionStrategy) {
             ampli.depositNetworkMismatch(networkMismatchProperties);
           });
         };
+
+        // Before sending, fetch a new timestamp if it's on Mainnet or Polygon and use that for
+        // the exclusivity
+        const REORG_CHAIN_IDS = [1, 137, 534352];
+        if (REORG_CHAIN_IDS.includes(frozenDepositArgs.fromChain)) {
+          const currTimestampInSeconds = Math.floor(Date.now() / 1000);
+          frozenDepositArgs.exclusivityDeadline =
+            currTimestampInSeconds + frozenDepositArgs.exclusivityDeadline;
+        }
         const txHash = await strategy.sendDepositTx({
           depositArgs: frozenDepositArgs,
           transferQuote: frozenTransferQuote,
