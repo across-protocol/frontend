@@ -1,12 +1,11 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-21T13:59:28.114Z
+// Generated on 2025-08-27T05:06:53.826Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
   strategy: "lifi",
   sources: {
     "1": [
-      { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
@@ -92,13 +91,11 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
     ],
     "42161": [
-      { key: "paraswap", names: ["paraswap"] },
       { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
       { key: "kyberswap", names: ["kyberswap"] },
-      { key: "lifidexaggregator", names: ["lifidexaggregator"] },
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
