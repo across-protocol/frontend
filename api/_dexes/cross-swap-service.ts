@@ -1005,12 +1005,13 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   },
   strategies: QuoteFetchStrategies
 ): Promise<CrossSwapQuotes> {
-  const results = _prepCrossSwapQuotesRetrievalA2A(
+  const results = _prepCrossSwapQuotesRetrievalA2A({
     crossSwap,
     bridgeRoute,
     strategies,
-    "origin"
-  );
+    strategiesToUseForComparison: "origin",
+    includeSources: crossSwap.includeSources,
+  });
 
   const originStrategyFetches = results.map((result) => {
     const originSources = result.originStrategy.getSources(
@@ -1020,7 +1021,6 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
         includeSources: crossSwap.includeSources,
       }
     );
-
     const destinationSources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
       {
@@ -1028,10 +1028,18 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
         includeSources: crossSwap.includeSources,
       }
     );
+    const mergedSources = originSources
+      ? {
+          ...originSources,
+          sourcesKeys: [
+            ...(originSources?.sourcesKeys ?? []),
+            ...(destinationSources?.sourcesKeys ?? []),
+          ],
+        }
+      : undefined;
 
     const fetchFn = async () => {
-      assertSources(originSources);
-      assertSources(destinationSources);
+      assertSources(mergedSources);
 
       if (crossSwap.strictTradeType) {
         result.destinationStrategy.assertSellEntireBalanceSupported();
@@ -1177,14 +1185,22 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
       ? addMarkupToAmount(crossSwap.amount, crossSwap.appFeePercent)
       : crossSwap.amount,
   };
-  const results = _prepCrossSwapQuotesRetrievalA2A(
-    crossSwapWithAppFee,
+  const results = _prepCrossSwapQuotesRetrievalA2A({
+    crossSwap: crossSwapWithAppFee,
     bridgeRoute,
     strategies,
-    "destination"
-  );
+    strategiesToUseForComparison: "destination",
+    includeSources: crossSwapWithAppFee.includeSources,
+  });
 
   const destinationStrategyFetches = results.map((result) => {
+    const originSources = result.originStrategy.getSources(
+      result.originSwap.chainId,
+      {
+        excludeSources: crossSwapWithAppFee.excludeSources,
+        includeSources: crossSwapWithAppFee.includeSources,
+      }
+    );
     const destinationSources = result.destinationStrategy.getSources(
       result.destinationSwap.chainId,
       {
@@ -1192,9 +1208,18 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         includeSources: crossSwapWithAppFee.includeSources,
       }
     );
+    const mergedSources = originSources
+      ? {
+          ...originSources,
+          sourcesKeys: [
+            ...(originSources?.sourcesKeys ?? []),
+            ...(destinationSources?.sourcesKeys ?? []),
+          ],
+        }
+      : undefined;
 
     const fetchFn = async () => {
-      assertSources(destinationSources);
+      assertSources(mergedSources);
 
       if (crossSwapWithAppFee.strictTradeType) {
         result.destinationStrategy.assertSellEntireBalanceSupported();
@@ -1374,17 +1399,26 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
   };
 }
 
-function _prepCrossSwapQuotesRetrievalA2A(
-  crossSwap: CrossSwap,
+function _prepCrossSwapQuotesRetrievalA2A(params: {
+  crossSwap: CrossSwap;
   bridgeRoute: {
     fromTokenAddress: string;
     fromChain: number;
     toTokenAddress: string;
     toChain: number;
-  },
-  strategies: QuoteFetchStrategies,
-  strategiesToUseForComparison: "origin" | "destination" = "origin"
-): CrossSwapQuotesRetrievalA2AResult {
+  };
+  strategies: QuoteFetchStrategies;
+  strategiesToUseForComparison: "origin" | "destination";
+  includeSources?: string[];
+}): CrossSwapQuotesRetrievalA2AResult {
+  const {
+    crossSwap,
+    bridgeRoute,
+    strategies,
+    strategiesToUseForComparison,
+    includeSources,
+  } = params;
+
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
 
@@ -1445,19 +1479,23 @@ function _prepCrossSwapQuotesRetrievalA2A(
       const originStrategy =
         strategiesToUseForComparison === "origin"
           ? strategy
-          : getMatchingStrategy(
-              strategy,
-              originStrategies,
-              crossSwap.strictTradeType
-            );
+          : getMatchingStrategy({
+              baseStrategy: strategy,
+              otherStrategies: originStrategies,
+              strictTradeType: crossSwap.strictTradeType,
+              includeSources: includeSources,
+              chainId: originSwapChainId,
+            });
       const destinationStrategy =
         strategiesToUseForComparison === "destination"
           ? strategy
-          : getMatchingStrategy(
-              strategy,
-              destinationStrategies,
-              crossSwap.strictTradeType
-            );
+          : getMatchingStrategy({
+              baseStrategy: strategy,
+              otherStrategies: destinationStrategies,
+              strictTradeType: crossSwap.strictTradeType,
+              includeSources: includeSources,
+              chainId: destinationSwapChainId,
+            });
 
       const { swapAndBridge, originSwapInitialRecipient } =
         originStrategy.getOriginEntryPoints(originSwapChainId);
@@ -1513,49 +1551,106 @@ function _prepCrossSwapQuotesRetrievalA2A(
   });
 }
 
-function getMatchingStrategy(
-  baseStrategy: QuoteFetchStrategy,
-  otherStrategies: QuoteFetchStrategy[],
-  strictTradeType: boolean
-) {
-  // If strict trade type is enabled, we need to check if the matching strategy supports
-  // selling the entire balance.
-  return strictTradeType
-    ? // First check if other strategy with same name supports selling the entire balance.
-      (otherStrategies.find((otherStrategy) => {
-        const sameStrategy =
-          otherStrategy.strategyName === baseStrategy.strategyName;
-        let supportsSellEntireBalance = false;
-        try {
-          otherStrategy.assertSellEntireBalanceSupported();
-          supportsSellEntireBalance = true;
-        } catch (error) {
-          supportsSellEntireBalance = false;
-        }
-        return sameStrategy && supportsSellEntireBalance;
-      }) ??
-        // If no other strategy with same name supports selling the entire balance,
-        // check if any other strategy supports selling the entire balance.
-        otherStrategies.find((otherStrategy) => {
-          try {
-            otherStrategy.assertSellEntireBalanceSupported();
-            return true;
-          } catch (error) {
-            return false;
-          }
-        }) ??
-        // If no other strategy supports selling the entire balance,
-        // return the first other strategy with same name.
-        otherStrategies.find((otherStrategy) => {
-          return otherStrategy.strategyName === baseStrategy.strategyName;
-        }) ??
-        // If no other strategy supports selling the entire balance,
-        // return the first other strategy.
-        otherStrategies[0])
-    : // If strict trade type is disabled, return the strategy with same name.
-      (otherStrategies.find((otherStrategy) => {
-        return otherStrategy.strategyName === baseStrategy.strategyName;
-      }) ?? otherStrategies[0]);
+export function getMatchingStrategy(params: {
+  baseStrategy: QuoteFetchStrategy;
+  otherStrategies: QuoteFetchStrategy[];
+  strictTradeType: boolean;
+  includeSources?: string[];
+  chainId: number;
+}) {
+  const {
+    baseStrategy,
+    otherStrategies,
+    strictTradeType,
+    includeSources,
+    chainId,
+  } = params;
+
+  // Helper to check if strategy matches source requirements
+  const hasValidSources = (strategy: QuoteFetchStrategy): boolean => {
+    const strategyHasSources = hasSources(strategy, chainId, {
+      includeSources,
+    });
+    return strategyHasSources;
+  };
+
+  // Helper to create strategy filters
+  const createFilter = (requirements: {
+    sameName?: boolean;
+    supportsSellBalance?: boolean;
+    hasValidSources?: boolean;
+  }) => {
+    return (strategy: QuoteFetchStrategy): boolean => {
+      if (
+        requirements.sameName &&
+        strategy.strategyName !== baseStrategy.strategyName
+      ) {
+        return false;
+      }
+      if (
+        requirements.supportsSellBalance &&
+        !supportsSellEntireBalance(strategy)
+      ) {
+        return false;
+      }
+      if (requirements.hasValidSources && !hasValidSources(strategy)) {
+        return false;
+      }
+      return true;
+    };
+  };
+
+  // Define fallback priority for strict mode
+  const strictModeFallbacks = [
+    // 1. Same name + supports sell entire balance + valid sources
+    createFilter({
+      sameName: true,
+      supportsSellBalance: true,
+      hasValidSources: true,
+    }),
+    // 2. Any strategy that supports sell entire balance + valid sources
+    createFilter({ supportsSellBalance: true, hasValidSources: true }),
+    // 3. Same name + supports sell entire balance
+    createFilter({ sameName: true, supportsSellBalance: true }),
+    // 4. Any strategy that supports sell entire balance
+    createFilter({ supportsSellBalance: true }),
+    // 5. Same name + valid sources (fallback when sell entire balance not available)
+    createFilter({ sameName: true, hasValidSources: true }),
+    // 4. Any strategy with valid sources
+    createFilter({ hasValidSources: true }),
+    // 7. Same name
+    createFilter({ sameName: true }),
+    // 8. Last resort: first available strategy
+    () => true,
+  ];
+
+  // Define fallback priority for non-strict mode
+  const nonStrictModeFallbacks = [
+    // 1. Same name + valid sources
+    createFilter({ sameName: true, hasValidSources: true }),
+    // 2. Any strategy with valid sources
+    createFilter({ hasValidSources: true }),
+    // 3. Same name
+    createFilter({ sameName: true }),
+    // 4. Last resort: first available strategy
+    () => true,
+  ];
+
+  const fallbacks = strictTradeType
+    ? strictModeFallbacks
+    : nonStrictModeFallbacks;
+
+  // Try each fallback strategy in order of priority
+  for (const filter of fallbacks) {
+    const matchingStrategy = otherStrategies.find(filter);
+    if (matchingStrategy) {
+      return matchingStrategy;
+    }
+  }
+
+  // This should never happen as the last fallback always returns true,
+  // but included for safety
+  return otherStrategies[0];
 }
 
 /**
@@ -1669,8 +1764,34 @@ function assertSources(sources: QuoteFetchOpts["sources"]) {
     param:
       sources.sourcesType === "exclude" ? "excludeSources" : "includeSources",
     message:
-      "None of the provided sources are valid. Call the endpoint /swap/sources to get a list of valid sources.",
+      "Couldn't fetch swap quotes based on the provided sources. " +
+      "Call the endpoint /swap/sources?chainId=<CHAIN_ID> to get a list of valid sources.",
   });
+}
+
+function hasSources(
+  strategy: QuoteFetchStrategy,
+  chainId: number,
+  opts?: {
+    includeSources?: string[];
+    excludeSources?: string[];
+  }
+) {
+  try {
+    assertSources(strategy.getSources(chainId, opts));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function supportsSellEntireBalance(strategy: QuoteFetchStrategy) {
+  try {
+    strategy.assertSellEntireBalanceSupported();
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
