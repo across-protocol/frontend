@@ -12,23 +12,20 @@ import {
 } from "../types";
 import { ALLOWANCE_HOLDER_ADDRESS } from "./utils/addresses";
 import { getEnvs } from "../../_env";
-import {
-  estimateInputForExactOutput,
-  getOriginSwapEntryPoints,
-  makeGetSources,
-} from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
 import {
   compactAxiosError,
   UpstreamSwapProviderError,
   UPSTREAM_SWAP_PROVIDER_ERRORS,
 } from "../../_errors";
+import { estimateInputForExactOutput } from "./utils/utils";
 
 const { API_KEY_0X } = getEnvs();
 
-const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
+export const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
 
-const API_HEADERS = {
+export const API_HEADERS = {
   "Content-Type": "application/json",
   "0x-api-key": `${API_KEY_0X}`,
   "0x-version": "v2",
@@ -100,7 +97,7 @@ export function get0xStrategy(
       if (tradeType === TradeType.EXACT_OUTPUT) {
         swapAmount = await estimateInputForExactOutput(
           swap,
-          `${API_BASE_URL}/price`,
+          API_BASE_URL,
           API_HEADERS,
           SWAP_PROVIDER_NAME,
           sourcesParams
