@@ -154,7 +154,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
   .parseSync();
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
-export const { INDEXER_API_BASE_URL = "https://indexer.api.across.to/" } =
+export const { INDEXER_API_BASE_URL = "https://indexer.api.across.to" } =
   process.env;
 
 export function filterTestCases(
@@ -463,6 +463,7 @@ export async function getERC20DestinationAction(testCase: {
         args: [
           { value: ACROSS_DEV_WALLET_2 },
           {
+            value: testCase.params.amount,
             populateDynamically: true,
             balanceSourceToken: testCase.params.outputToken,
           },
