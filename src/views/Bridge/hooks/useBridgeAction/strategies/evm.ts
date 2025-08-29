@@ -330,7 +330,7 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
         amount
       );
 
-      // Create a txn calldata for transfering amount to recipient
+      // Create a txn calldata for transferring amount to recipient
       const erc20Interface = new utils.Interface([
         "function transfer(address to, uint256 amount) returns (bool)",
       ]);
