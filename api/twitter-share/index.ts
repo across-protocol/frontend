@@ -81,8 +81,8 @@ export default async function handler(
 
     response.setHeader(
       "Cache-Control",
-      `public, max-age=${60 * 60 * 24 * 7}, immutable`
-    ); // 1 week
+      `public, max-age=${60 * 60 * 24 * 30}, immutable`
+    ); // 1 month
     response.setHeader("Content-Type", "image/png");
 
     const stream = canvas.createPNGStream();
