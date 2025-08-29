@@ -994,6 +994,7 @@ export const getCachedTokenPrice = async (params: {
       if (fallbackResolver) {
         const response = await axios(`${baseUrl}`, {
           params: {
+            l1Token,
             tokenAddress,
             baseCurrency,
             chainId,
@@ -1010,6 +1011,7 @@ export const getCachedTokenPrice = async (params: {
   } else {
     const response = await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
       params: {
+        l1Token,
         tokenAddress,
         chainId,
         baseCurrency,
