@@ -26,10 +26,13 @@ export function TwitterShareModal({
     isCopying,
     success: copySuccess,
     error: copyError,
+    resetState,
   } = useCopyToClipboard({
-    onSuccess: () => console.log("Image copied to clipboard successfully!"),
-    onError: (error) =>
-      console.error("Failed to copy image to clipboard:", error),
+    onSuccess: () => setTimeout(() => resetState(), 1500),
+    onError: (error) => {
+      console.error("Failed to copy image to clipboard:", error);
+      setTimeout(() => resetState(), 1500);
+    },
   });
 
   const handleCopyToClipboard = async () => {
@@ -82,7 +85,11 @@ export function TwitterShareModal({
                 onClick={handleCopyToClipboard}
                 disabled={isImageLoading || isCopying}
               >
-                {copySuccess ? "COPIED ✅" : "COPY TO CLIPBOARD"}
+                {copySuccess
+                  ? "COPIED ✅"
+                  : copyError
+                    ? "COPY FAILED ❌"
+                    : "COPY TO CLIPBOARD"}
               </Button>
               <Text size="md">or</Text>
               <DownloadButton
@@ -123,7 +130,7 @@ const TwitterModal = styled(Modal)`
   gap: 0px;
 
   @media ${QUERIES.laptopAndUp} {
-    padding-bottom: 0px;
+    padding-bottom: 0px !important;
   }
 `;
 
