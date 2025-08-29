@@ -10,7 +10,6 @@ import {
   getLogger,
   getWrappedNativeTokenAddress,
   getTokenByAddress,
-  HUB_POOL_CHAIN_ID,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
@@ -166,37 +165,37 @@ export async function handleApprovalSwap(
         })
       : undefined,
     latestGasPriceCache(originChainId).get(),
-    getCachedTokenPrice(
-      inputToken.address,
-      "usd",
-      undefined,
-      inputToken.chainId,
-      "lifi"
-    ),
-    getCachedTokenPrice(
-      outputToken.address,
-      "usd",
-      undefined,
-      outputToken.chainId,
-      "lifi"
-    ),
+    getCachedTokenPrice({
+      symbol: inputToken.symbol,
+      tokenAddress: inputToken.address,
+      baseCurrency: "usd",
+      chainId: inputToken.chainId,
+      fallbackResolver: "lifi",
+    }),
+    getCachedTokenPrice({
+      symbol: inputToken.symbol,
+      tokenAddress: inputToken.address,
+      baseCurrency: "usd",
+      chainId: inputToken.chainId,
+      fallbackResolver: "lifi",
+    }),
     originChainGasToken
-      ? getCachedTokenPrice(
-          originChainGasToken.addresses[HUB_POOL_CHAIN_ID],
-          "usd"
-        )
+      ? getCachedTokenPrice({
+          symbol: originChainGasToken.symbol,
+          baseCurrency: "usd",
+        })
       : 0,
     destinationChainGasToken
-      ? getCachedTokenPrice(
-          destinationChainGasToken.addresses[HUB_POOL_CHAIN_ID],
-          "usd"
-        )
+      ? getCachedTokenPrice({
+          symbol: destinationChainGasToken.symbol,
+          baseCurrency: "usd",
+        })
       : 0,
     bridgeQuoteInputToken
-      ? getCachedTokenPrice(
-          bridgeQuoteInputToken.addresses[HUB_POOL_CHAIN_ID],
-          "usd"
-        )
+      ? getCachedTokenPrice({
+          symbol: bridgeQuoteInputToken.symbol,
+          baseCurrency: "usd",
+        })
       : 0,
   ]);
 
