@@ -7,9 +7,14 @@ import { COLORS, QUERIES } from "utils";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
 import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
 
-type TwitterShareModalProps = ModalProps & {};
+type TwitterShareModalProps = ModalProps & {
+  imageUrl: string;
+};
 
-export function TwitterShareModal(props: TwitterShareModalProps) {
+export function TwitterShareModal({
+  imageUrl,
+  ...props
+}: TwitterShareModalProps) {
   const { isMobile } = useCurrentBreakpoint();
 
   function handleCopyToClipboard() {}
@@ -30,7 +35,9 @@ export function TwitterShareModal(props: TwitterShareModalProps) {
       {...props}
     >
       <ModalContent>
-        <ImageContainer />
+        <ImageContainer>
+          <Image src={imageUrl} />
+        </ImageContainer>
         <TextColumn>
           <TextInnerColumn>
             <Text size="xl" color="white">
@@ -71,6 +78,11 @@ export function TwitterShareModal(props: TwitterShareModalProps) {
     </Modal>
   );
 }
+
+const Image = styled.img`
+  width: 100%;
+  height: 100%;
+`;
 
 const Button = styled(SecondaryButton)`
   height: 40px;
@@ -129,6 +141,7 @@ const ImageContainer = styled.div`
   border-radius: 8px;
   border: 1px solid rgba(224, 243, 255, 0.2);
   box-shadow: rgba(108, 249, 216, 0.15) 0px 0px 20px 3px;
+  overflow: hidden;
 `;
 
 const ModalContent = styled.div`

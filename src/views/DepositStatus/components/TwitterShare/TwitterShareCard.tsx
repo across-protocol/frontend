@@ -1,25 +1,29 @@
 import styled from "@emotion/styled";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
-import { isDefined, COLORS, QUERIES } from "utils";
+import {
+  isDefined,
+  COLORS,
+  QUERIES,
+  buildSearchParams,
+  resolveWebsiteUrl,
+} from "utils";
 import { DepositStatusLowerCardProps } from "views/DepositStatus/components/DepositStatusLowerCard";
 import { useDepositTracking } from "views/DepositStatus/hooks/useDepositTracking";
 
 import { SecondaryButton, Text } from "components";
 import { ReactComponent as ShareIcon } from "assets/icons/share.svg";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TwitterShareModal } from "./TwitterShareModal";
+import axios from "axios";
 
 const SHARE_THRESHOLD_SECONDS = 5; // only share if bridge is 5s or faster
 
 type TwitterShareProps = DepositStatusLowerCardProps;
 
-export function TwitterShareCard({
-  depositTxHash,
-  fromChainId,
-  toChainId,
-  fromBridgePagePayload,
-}: TwitterShareProps) {
+export function TwitterShareCard(props: TwitterShareProps) {
+  const { depositTxHash, fromChainId, toChainId, fromBridgePagePayload } =
+    props;
   const [showModal, setShowModal] = useState(false);
   const openModal = () => void setShowModal(true);
   const closeModal = () => void setShowModal(false);
@@ -39,11 +43,27 @@ export function TwitterShareCard({
     fillTxCompletedTime
   );
 
-  if (
-    !isDefined(fillTxCompletedTime) ||
-    !isDefined(fillTxElapsedSeconds) ||
-    fillTxElapsedSeconds > SHARE_THRESHOLD_SECONDS
-  ) {
+  const imageUrl = useMemo(() => {
+    if (
+      isDefined(fillTxElapsedSeconds) &&
+      fillTxElapsedSeconds <= SHARE_THRESHOLD_SECONDS
+    ) {
+      return `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams({
+        fill_time: fillTxElapsedSeconds,
+        from_chain: fromChainId,
+        to_chain: toChainId,
+      })}`;
+    }
+  }, [fillTxElapsedSeconds, fromChainId, toChainId]);
+
+  useEffect(() => {
+    if (imageUrl) {
+      // warm image endpoint
+      void axios.get(imageUrl);
+    }
+  }, [imageUrl]);
+
+  if (!imageUrl) {
     return null;
   }
 
@@ -68,7 +88,11 @@ export function TwitterShareCard({
       <Button size="md" textColor="aqua" onClick={openModal}>
         Share on <XIcon />
       </Button>
-      <TwitterShareModal isOpen={showModal} exitModalHandler={closeModal} />
+      <TwitterShareModal
+        imageUrl={imageUrl}
+        isOpen={showModal}
+        exitModalHandler={closeModal}
+      />
     </Card>
   );
 }

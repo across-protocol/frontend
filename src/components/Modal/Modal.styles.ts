@@ -2,7 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { QUERIESV2 } from "utils";
-import { ModalDirection, ModalProps } from "./Modal";
+import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`
   from {background-color: rgba(0, 0, 0, 0)}

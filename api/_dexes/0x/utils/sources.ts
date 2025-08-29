@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-19T10:24:43.693Z
+// Generated on 2025-08-29T17:20:25.893Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -158,6 +158,7 @@ export const SOURCES = {
       { key: "PancakeSwap_V2", names: ["pancakeswap_v2", "pancakeswap"] },
       { key: "PancakeSwap_V3", names: ["pancakeswap_v3", "pancakeswap"] },
       { key: "Pinto", names: ["pinto"] },
+      { key: "QuickSwap_V4", names: ["quickswap_v4", "quickswap"] },
       { key: "RocketSwap", names: ["rocketswap"] },
       { key: "SharkSwap_V2", names: ["sharkswap_v2", "sharkswap"] },
       { key: "SoSwap", names: ["soswap"] },
@@ -409,6 +410,7 @@ export const ALL_SOURCES = [
   "quickswap",
   "quickswap_v2",
   "quickswap_v3",
+  "quickswap_v4",
   "ramses",
   "ramses_v2",
   "reservoir",
