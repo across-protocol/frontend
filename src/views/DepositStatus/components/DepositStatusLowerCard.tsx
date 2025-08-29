@@ -9,7 +9,7 @@ import {
 import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
-import { TwitterShareCard } from "./TwitterShareCard";
+import { TwitterShareCard } from "./TwitterShare/TwitterShareCard";
 
 export type DepositStatusLowerCardProps = {
   depositTxHash: string;
