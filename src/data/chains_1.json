@@ -100,13 +100,6 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
       },
       {
-        "address": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-        "symbol": "WGHO",
-        "name": "Wrapped GHO Token",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
-      },
-      {
         "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
         "symbol": "CAKE",
         "name": "PancakeSwap Token",
@@ -205,13 +198,6 @@
         "name": "Lisk",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/lsk.svg"
-      },
-      {
-        "address": "0x1ff1dC3cB9eeDbC6Eb2d99C03b30A05cA625fB5a",
-        "symbol": "WGHO",
-        "name": "Wrapped GHO Token",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       },
       {
         "address": "0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898",
@@ -1733,68 +1719,6 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ]
-  },
-  {
-    "chainId": 232,
-    "name": "Lens",
-    "publicRpcUrl": "https://api.lens.matterhosted.dev",
-    "explorerUrl": "https://explorer.lens.xyz",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens/assets/logo.svg",
-    "spokePool": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
-    "spokePoolBlock": 193290,
-    "inputTokens": [
-      {
-        "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
-        "symbol": "WGHO",
-        "name": "Wrapped GHO Token",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
-      },
-      {
-        "address": "0xE5ecd226b3032910CEaa43ba92EE8232f8237553",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      }
-    ],
-    "outputTokens": [
-      {
-        "address": "0xE5ecd226b3032910CEaa43ba92EE8232f8237553",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0xE5ecd226b3032910CEaa43ba92EE8232f8237553",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      },
-      {
-        "address": "0x88F08E304EC4f90D644Cec3Fb69b8aD414acf884",
-        "symbol": "USDC",
-        "name": "USD Coin",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
-        "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
-        "symbol": "WGHO",
-        "name": "Wrapped GHO Token",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wgho.svg"
       }
     ]
   },
