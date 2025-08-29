@@ -49,6 +49,9 @@ import {
 } from "../_multicall-handler";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+import { resolveUsdPriceViaFallbackResolver } from "../coingecko";
+
+const PRICE_DIFFERENCE_TOLERANCE = 0.01;
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -574,7 +577,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
-export function calculateSwapFees(params: {
+export async function calculateSwapFees(params: {
   inputAmount: BigNumber;
   originSwapQuote?: SwapQuote;
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -602,8 +605,8 @@ export function calculateSwapFees(params: {
     appFee,
     originTxGas,
     originTxGasPrice,
-    inputTokenPriceUsd,
-    outputTokenPriceUsd,
+    inputTokenPriceUsd: _inputTokenPriceUsd,
+    outputTokenPriceUsd: _outputTokenPriceUsd,
     originNativePriceUsd,
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
@@ -616,17 +619,17 @@ export function calculateSwapFees(params: {
 
   try {
     if (
-      inputTokenPriceUsd === 0 ||
-      outputTokenPriceUsd === 0 ||
+      _inputTokenPriceUsd === 0 ||
+      _outputTokenPriceUsd === 0 ||
       originNativePriceUsd === 0 ||
       destinationNativePriceUsd === 0 ||
       bridgeQuoteInputTokenPriceUsd === 0
     ) {
       logger.debug({
         at: "calculateSwapFees",
-        message: "Error calculating swap fees from USD prices",
-        inputTokenPriceUsd,
-        outputTokenPriceUsd,
+        message: "Error calculating swap fees. Could not resolve USD prices.",
+        _inputTokenPriceUsd,
+        _outputTokenPriceUsd,
         originNativePriceUsd,
         destinationNativePriceUsd,
         bridgeQuoteInputTokenPriceUsd,
@@ -637,6 +640,51 @@ export function calculateSwapFees(params: {
     const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
     const outputToken =
       destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
+
+    const priceDifference = Math.abs(
+      _inputTokenPriceUsd - _outputTokenPriceUsd
+    );
+    const priceDifferencePercentage = priceDifference / _inputTokenPriceUsd;
+
+    let inputTokenPriceUsd = _inputTokenPriceUsd;
+    let outputTokenPriceUsd = _outputTokenPriceUsd;
+
+    if (
+      inputToken.symbol === outputToken.symbol &&
+      (priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
+        outputTokenPriceUsd > inputTokenPriceUsd)
+    ) {
+      [inputTokenPriceUsd, outputTokenPriceUsd] = await Promise.all([
+        resolveUsdPriceViaFallbackResolver({
+          address: inputToken.address,
+          chainId: inputToken.chainId,
+          fallbackResolver: "lifi",
+        }),
+        resolveUsdPriceViaFallbackResolver({
+          address: outputToken.address,
+          chainId: outputToken.chainId,
+          fallbackResolver: "lifi",
+        }),
+      ]);
+
+      if (
+        priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
+        outputTokenPriceUsd > inputTokenPriceUsd ||
+        outputTokenPriceUsd === 0 ||
+        inputTokenPriceUsd === 0
+      ) {
+        logger.debug({
+          at: "calculateSwapFees",
+          message:
+            "Error calculating swap fees. USD prices are not consistent.",
+          _inputTokenPriceUsd,
+          _outputTokenPriceUsd,
+          inputTokenPriceUsd,
+          outputTokenPriceUsd,
+        });
+        return {};
+      }
+    }
 
     const originGas =
       originTxGas && originTxGasPrice
@@ -799,7 +847,7 @@ function safeUsdToTokenAmount(
   );
 }
 
-export function buildBaseSwapResponseJson(params: {
+export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
@@ -931,7 +979,7 @@ export function buildBaseSwapResponseJson(params: {
             symbol: "WETH",
           }
         : refundToken,
-    fees: calculateSwapFees({
+    fees: await calculateSwapFees({
       inputAmount: params.inputAmount,
       originSwapQuote: params.originSwapQuote,
       bridgeQuote: params.bridgeQuote,
