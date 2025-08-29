@@ -348,8 +348,6 @@ export async function signAndWaitAllowanceFlow(params: {
       data: params.swapResponse.swapTx.data,
       value: params.swapResponse.swapTx.value,
       gasLimit: params.swapResponse.swapTx.gas,
-      maxFeePerGas: params.swapResponse.swapTx.maxFeePerGas,
-      maxPriorityFeePerGas: params.swapResponse.swapTx.maxPriorityFeePerGas,
     });
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
