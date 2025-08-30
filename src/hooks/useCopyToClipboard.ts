@@ -36,15 +36,14 @@ export function useCopyToClipboard(options?: CopyToClipboardOptions) {
         if (!navigator.clipboard || !navigator.clipboard.write) {
           throw new Error("Clipboard API not supported");
         }
-
-        const clipboardItems: Record<string, Blob> = {};
+        // https://developer.mozilla.org/en-US/docs/Web/API/ClipboardItem#constructor
+        const clipboardItems: Record<string, Blob> = {}; // MIME type as key, Blob as value
         const textParts: string[] = [];
 
-        // Process each item
         for (const item of items) {
+          // if content is remote, fetch it, store as blob
           if (item.remote) {
             try {
-              // Fetch remote content (assumed to be an image)
               const response = await fetch(item.content);
               if (!response.ok) {
                 throw new Error(
@@ -53,19 +52,18 @@ export function useCopyToClipboard(options?: CopyToClipboardOptions) {
               }
 
               const blob = await response.blob();
-              // Use the blob's MIME type for the clipboard
               clipboardItems[blob.type] = blob;
             } catch (fetchError) {
               // If remote fetch fails, add as text fallback
+              // TODO: validate this behaviour is what we want
               textParts.push(item.content);
             }
           } else {
-            // Local text content
             textParts.push(item.content);
           }
         }
 
-        // Add combined text content if we have any
+        // Combine all plan text content separated by newline.
         if (textParts.length > 0) {
           const combinedText = textParts.join("\n");
           clipboardItems["text/plain"] = new Blob([combinedText], {
@@ -73,7 +71,6 @@ export function useCopyToClipboard(options?: CopyToClipboardOptions) {
           });
         }
 
-        // Copy to clipboard
         await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
 
         setCopyState({

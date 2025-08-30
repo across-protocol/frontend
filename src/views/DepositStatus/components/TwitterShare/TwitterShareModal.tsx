@@ -9,6 +9,8 @@ import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
 import { useState } from "react";
 import { useDownload } from "hooks/useDownload";
 import { useCopyToClipboard } from "hooks/useCopyToClipboard";
+import { CopyButton } from "../CopyButton";
+import { css } from "@emotion/react";
 
 type TwitterShareModalProps = ModalProps & {
   imageUrl: string;
@@ -36,6 +38,7 @@ export function TwitterShareModal({
   });
 
   const handleCopyToClipboard = async () => {
+    // TODO: confirm copy
     const tweetText =
       "Bridged in seconds with @AcrossProtocol\nGo crosschain with @AcrossProtocol.\n\n #PoweredByIntents ⛺\n";
     await copyToClipboard([
@@ -80,17 +83,14 @@ export function TwitterShareModal({
             </Text>
             <Text size="md">Copy your Across flex image to clipboard.</Text>
             <ButtonRow>
-              <Button
+              <StyledCopyButton
                 size="md"
                 onClick={handleCopyToClipboard}
                 disabled={isImageLoading || isCopying}
-              >
-                {copySuccess
-                  ? "COPIED ✅"
-                  : copyError
-                    ? "COPY FAILED ❌"
-                    : "COPY TO CLIPBOARD"}
-              </Button>
+                copyState={
+                  copySuccess ? "success" : copyError ? "error" : "ready"
+                }
+              />
               <Text size="md">or</Text>
               <DownloadButton
                 size="md"
@@ -126,6 +126,29 @@ export function TwitterShareModal({
   );
 }
 
+const ButtonStyled = css`
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(108, 249, 216, 0.1);
+
+  &:hover:not(:disabled) {
+    border-color: ${COLORS.aqua};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const Button = styled(SecondaryButton)`
+  ${ButtonStyled}
+`;
+
+const StyledCopyButton = styled(CopyButton)`
+  ${ButtonStyled}
+`;
+
 const TwitterModal = styled(Modal)`
   gap: 0px;
 
@@ -156,21 +179,6 @@ const ImageContainer = styled.div`
 const Image = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const Button = styled(SecondaryButton)`
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid rgba(108, 249, 216, 0.1);
-
-  &:hover:not(:disabled) {
-    border-color: ${COLORS.aqua};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const DownloadButton = styled(SecondaryButton)`
