@@ -223,12 +223,16 @@ const handler = async (
         gasPriceEstimate,
         nativeGasCost,
       ] = await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
-          CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
-            sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedTokenPrice({
+          l1Token: l1Token.address,
+          baseCurrency:
+            CUSTOM_GAS_TOKENS[destinationChainId]?.toLowerCase() ??
+            sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase(),
+        }),
+        getCachedTokenPrice({
+          l1Token: l1Token.address,
+          baseCurrency: "usd",
+        }),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
         latestGasPriceCache(
           destinationChainId,
