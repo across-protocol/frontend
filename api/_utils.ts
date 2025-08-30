@@ -984,7 +984,6 @@ export const getCachedTokenPrice = async (params: {
         params: {
           symbol,
           baseCurrency,
-          chainId,
           date: historicalDateISO,
         },
         headers: getVercelHeaders(),
