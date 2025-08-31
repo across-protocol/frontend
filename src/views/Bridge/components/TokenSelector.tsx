@@ -5,7 +5,7 @@ import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-
 import { Selector } from "components";
 import { Text } from "components/Text";
 
-import { TokenInfo, getToken, tokenList } from "utils";
+import { TokenInfo, getToken, getTokenForChain, tokenList } from "utils";
 import { useBalancesBySymbols } from "hooks/useBalance";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
@@ -40,16 +40,19 @@ export function TokenSelector({
     toTokenSymbol,
     externalProjectId,
   } = selectedRoute;
+  const relevantChainId = isInputTokenSelector ? fromChain : toChain;
 
-  const selectedToken = getToken(
+  const selectedToken = getTokenForChain(
     isInputTokenSelector
       ? selectedRoute.type === "swap"
         ? selectedRoute.swapTokenSymbol
         : fromTokenSymbol
-      : toTokenSymbol
+      : toTokenSymbol,
+    relevantChainId
   );
+
   const tokenToDisplay = receiveTokenSymbol
-    ? getToken(receiveTokenSymbol)
+    ? getTokenForChain(receiveTokenSymbol, relevantChainId)
     : selectedToken;
 
   const orderedTokens: Array<
@@ -82,13 +85,14 @@ export function TokenSelector({
             )
             .map((t) => ({ ...t, disabled: true }))
         : []),
-    ];
+    ].map((t) => getTokenForChain(t.symbol, relevantChainId));
   }, [
     fromChain,
     toChain,
     fromTokenSymbol,
     isInputTokenSelector,
     externalProjectId,
+    relevantChainId,
   ]);
 
   const { balances } = useBalancesBySymbols({
