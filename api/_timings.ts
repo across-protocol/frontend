@@ -4,6 +4,13 @@ import exclusivityTimings from "../src/data/exclusivity-fill-times.json";
 import { parseUnits } from "ethers/lib/utils";
 import { CHAIN_IDs } from "./_constants";
 
+type RawTimings = Array<
+  (typeof timings)[number] & {
+    p50_fill_time_secs?: string;
+    p75_fill_time_secs?: string;
+  }
+>;
+
 const fillTimeOverrides: {
   [srcId: string]: {
     [dstId: string]: {
@@ -41,8 +48,8 @@ const defineOrderings = (
 
 const DEFAULT_SECONDS_TO_FILL = 10; // 10 seconds
 
-const timingsLookup = makeLookup(timings);
-const exclusivityTimingsLookup = makeLookup(exclusivityTimings);
+const timingsLookup = makeLookup(timings as RawTimings);
+const exclusivityTimingsLookup = makeLookup(exclusivityTimings as RawTimings);
 
 /**
  * Resolve the estimated fill time seconds as returned by the /suggested-fees API and
@@ -103,7 +110,7 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
         return destMatch && origMatch && tokenMatch && amountMatch;
       });
       if (matchedRoute) {
-        return matchedRoute.p50_fill_time_secs;
+        return matchedRoute.fill_time_secs;
       }
     }
     // Return default value if no match is found
@@ -111,11 +118,13 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
   };
 }
 
-function makeLookup(rawTimings: typeof timings) {
+function makeLookup(rawTimings: RawTimings) {
   return (
     rawTimings
       .map((timing) => ({
-        p50_fill_time_secs: Number(timing.p50_fill_time_secs),
+        fill_time_secs: Number(
+          timing.p75_fill_time_secs ?? timing.p50_fill_time_secs
+        ),
         max_size_usd: parseUnits(timing.max_size_usd, 18),
         destination_route_classification:
           timing.destination_route_classification.split(","),

@@ -8,7 +8,9 @@ import { ATTR_HTTP_RESPONSE_STATUS_CODE } from "@opentelemetry/semantic-conventi
 
 import { sendResponse } from "./_response_utils";
 
-type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
+export type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
+export type AcrossApiErrorCode =
+  (typeof AcrossErrorCode)[AcrossApiErrorCodeKey];
 
 type EthersErrorTransaction = {
   from: string;
@@ -248,13 +250,7 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
   constructor(
     args: {
       message: string;
-      code: (typeof AcrossErrorCode)[
-        | "SWAP_QUOTE_UNAVAILABLE"
-        | "SWAP_LIQUIDITY_INSUFFICIENT"
-        | "SWAP_TYPE_NOT_GUARANTEED"
-        | "AMOUNT_TOO_LOW"
-        | "AMOUNT_TOO_HIGH"
-        | "UPSTREAM_HTTP_ERROR"];
+      code: AcrossApiErrorCode;
     },
     opts?: ErrorOptions
   ) {
@@ -263,7 +259,8 @@ export class SwapQuoteUnavailableError extends AcrossApiError {
         message: args.message,
         code: args.code,
         status:
-          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR
+          args.code === AcrossErrorCode.UPSTREAM_HTTP_ERROR ||
+          args.code === AcrossErrorCode.UPSTREAM_RPC_ERROR
             ? HttpErrorToStatusCode.BAD_GATEWAY
             : HttpErrorToStatusCode.BAD_REQUEST,
       },
@@ -446,10 +443,30 @@ export function handleErrorCondition(
   if (span) {
     span.recordException(acrossApiError);
     span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, acrossApiError.status);
+
+    let spanMessage = acrossApiError.message;
+    if (acrossApiError.cause) {
+      let causeMessage: string;
+
+      if (Array.isArray(acrossApiError.cause)) {
+        causeMessage = acrossApiError.cause
+          .map((error) =>
+            error instanceof Error ? error.message : String(error)
+          )
+          .join("; ");
+      } else if (acrossApiError.cause instanceof Error) {
+        causeMessage = acrossApiError.cause.message;
+      } else {
+        causeMessage = String(acrossApiError.cause);
+      }
+
+      spanMessage += ` | Cause: ${causeMessage}`;
+    }
+
     span.setStatus({
       code:
         acrossApiError.status >= 500 ? SpanStatusCode.ERROR : SpanStatusCode.OK,
-      message: acrossApiError.message,
+      message: spanMessage,
     });
   }
 

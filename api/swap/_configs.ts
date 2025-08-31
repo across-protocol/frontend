@@ -10,13 +10,12 @@ import { QuoteFetchStrategies } from "../_dexes/utils";
 
 export const quoteFetchStrategies: QuoteFetchStrategies = {
   prioritizationMode: {
-    mode: "priority-speed",
-    priorityChunkSize: 1,
+    mode: "equal-speed",
   },
   default: [
     get0xStrategy("SpokePoolPeriphery"),
-    getLifiStrategy("SpokePoolPeriphery"),
     getUniversalRouter02Strategy(),
+    getLifiStrategy("SpokePoolPeriphery"),
   ],
   chains: {
     [CHAIN_IDs.LENS]: [

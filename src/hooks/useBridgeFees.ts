@@ -5,9 +5,16 @@ import {
   getBridgeFees,
   ChainId,
   getBridgeFeesWithExternalProjectId,
+  chainIsSvm,
 } from "utils";
 import { AxiosError } from "axios";
 import { UniversalSwapQuote } from "./useUniversalSwapQuote";
+
+const DEFAULT_SIMULATED_RECIPIENT_ADDRESS_EVM =
+  "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
+
+const DEFAULT_SIMULATED_RECIPIENT_ADDRESS_SVM =
+  "GsiZqCTNRi4T3qZrixFdmhXVeA4CSUzS7c44EQ7Rw1Tw";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
@@ -27,7 +34,7 @@ export function useBridgeFees(
   inputTokenSymbol: string,
   outputTokenSymbol: string,
   externalProjectId?: string,
-  recipientAddress?: string,
+  _recipientAddress?: string,
   isUniversalSwap?: boolean,
   universalSwapQuote?: UniversalSwapQuote
 ) {
@@ -38,6 +45,11 @@ export function useBridgeFees(
   const bridgeOutputTokenSymbol = didUniversalSwapLoad
     ? universalSwapQuote.steps.bridge.tokenOut.symbol
     : outputTokenSymbol;
+  const recipientAddress =
+    _recipientAddress ??
+    (chainIsSvm(toChainId)
+      ? DEFAULT_SIMULATED_RECIPIENT_ADDRESS_SVM
+      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS_EVM);
 
   const queryKey = bridgeFeesQueryKey(
     amount,
@@ -83,7 +95,7 @@ export function useBridgeFees(
         (error.response?.data?.message?.includes(
           "doesn't have enough funds to support this deposit"
         ) ||
-          error.response?.data.includes(
+          error.response?.data?.message?.includes(
             "Amount exceeds max. deposit limit for short delay"
           ))
       ) {

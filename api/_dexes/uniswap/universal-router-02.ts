@@ -15,35 +15,11 @@ import { parseUniswapError } from "./swap-router-02";
 import { compactAxiosError } from "../../_errors";
 import { UNIVERSAL_ROUTER_02_ADDRESS } from "./utils/addresses";
 import { TransferType } from "../../_spoke-pool-periphery";
+import { SOURCES } from "./utils/sources";
 
 const STRATEGY_NAME = "uniswap/universal-router-02";
 
-const SOURCE_NAMESPACE = "uniswap-api";
-
-const getSources = makeGetSources({
-  strategy: STRATEGY_NAME,
-  sources: Object.keys(UNIVERSAL_ROUTER_02_ADDRESS).reduce(
-    (acc, chainIdStr) => {
-      const chainId = Number(chainIdStr);
-      acc[chainId] = [
-        {
-          key: "V2",
-          names: [SOURCE_NAMESPACE, `${SOURCE_NAMESPACE}/v2`],
-        },
-        {
-          key: "V3",
-          names: [SOURCE_NAMESPACE, `${SOURCE_NAMESPACE}/v3`],
-        },
-        {
-          key: "V4",
-          names: [SOURCE_NAMESPACE, `${SOURCE_NAMESPACE}/v4`],
-        },
-      ];
-      return acc;
-    },
-    {} as Record<number, { key: string; names: string[] }[]>
-  ),
-});
+const getSources = makeGetSources(SOURCES);
 
 export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
@@ -80,8 +56,25 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
         assertSellEntireBalanceSupported();
       }
 
+      const classicProtocols = ["V2", "V3", "V4"];
+      const protocols =
+        opts?.sources?.sourcesType === "exclude"
+          ? classicProtocols.filter(
+              (protocol) => !opts.sources?.sourcesKeys.includes(protocol)
+            )
+          : opts?.sources?.sourcesType === "include" &&
+              opts.sources?.sourcesKeys?.length > 0
+            ? classicProtocols.filter((protocol) =>
+                opts.sources?.sourcesKeys.includes(protocol)
+              )
+            : classicProtocols;
+
       const { quote } = await getUniswapClassicQuoteFromApi(
-        { ...swap, swapper: swap.recipient, protocols: ["V2", "V3", "V4"] },
+        {
+          ...swap,
+          swapper: swap.recipient,
+          protocols: protocols as ("V2" | "V3" | "V4")[],
+        },
         tradeType
       );
       const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
@@ -108,12 +101,12 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
         swapTxns: [swapTx],
         swapProvider: {
           name: STRATEGY_NAME,
-          sources: [SOURCE_NAMESPACE],
+          sources: [SOURCES.strategy],
         },
       };
 
       getLogger().debug({
-        at: "uniswap/universal-router/fetchFn",
+        at: `${STRATEGY_NAME}/fetchFn`,
         message: "Swap quote",
         type:
           tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
@@ -129,7 +122,7 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
       return swapQuote;
     } catch (error) {
       getLogger().debug({
-        at: "uniswap/universal-router-02/fetchFn",
+        at: `${STRATEGY_NAME}/fetchFn`,
         message: "Error fetching quote",
         error: compactAxiosError(error as Error),
       });

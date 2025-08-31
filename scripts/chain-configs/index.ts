@@ -23,6 +23,8 @@ export { default as POLYGON_AMOY } from "./polygon-amoy";
 export { default as REDSTONE } from "./redstone";
 export { default as SCROLL } from "./scroll";
 export { default as SEPOLIA } from "./sepolia";
+export { default as SOLANA } from "./solana";
+export { default as SOLANA_DEVNET } from "./solana-devnet";
 export { default as SONEIUM } from "./soneium";
 export { default as TATARA } from "./tatara";
 export { default as UNICHAIN } from "./unichain";

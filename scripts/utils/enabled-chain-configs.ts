@@ -19,8 +19,8 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
-  chainConfigs.LENS,
   chainConfigs.BSC,
+  chainConfigs.SOLANA,
 ];
 
 export const enabledSepoliaChainConfigs = [
@@ -36,4 +36,5 @@ export const enabledSepoliaChainConfigs = [
   chainConfigs.UNICHAIN_SEPOLIA,
   chainConfigs.TATARA,
   chainConfigs.BOB_SEPOLIA,
+  chainConfigs.SOLANA_DEVNET,
 ];
