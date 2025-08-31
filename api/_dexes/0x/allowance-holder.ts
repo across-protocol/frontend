@@ -12,23 +12,20 @@ import {
 } from "../types";
 import { ALLOWANCE_HOLDER_ADDRESS } from "./utils/addresses";
 import { getEnvs } from "../../_env";
-import {
-  estimateInputForExactOutput,
-  getOriginSwapEntryPoints,
-  makeGetSources,
-} from "../utils";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
 import {
   compactAxiosError,
   UpstreamSwapProviderError,
   UPSTREAM_SWAP_PROVIDER_ERRORS,
 } from "../../_errors";
+import { estimateInputForExactOutput } from "./utils/utils";
 
 const { API_KEY_0X } = getEnvs();
 
-const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
+export const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
 
-const API_HEADERS = {
+export const API_HEADERS = {
   "Content-Type": "application/json",
   "0x-api-key": `${API_KEY_0X}`,
   "0x-version": "v2",
@@ -82,13 +79,17 @@ export function get0xStrategy(
             }
           : // We need to invert the include sources to be compatible with the API
             // because 0x doesn't support the `includeSources` parameter
-            sources?.sourcesType === "include"
+            sources?.sourcesType === "include" &&
+              sources.sourcesNames?.length > 0
             ? {
                 excludedSources: SOURCES.sources[swap.chainId]
-                  .map((s) => s.key)
                   .filter(
-                    (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
+                    ({ key }) =>
+                      !sources.sourcesKeys.some(
+                        (sourceKey) => key === sourceKey
+                      )
                   )
+                  .map(({ key }) => key)
                   .join(","),
               }
             : undefined;
@@ -96,7 +97,7 @@ export function get0xStrategy(
       if (tradeType === TradeType.EXACT_OUTPUT) {
         swapAmount = await estimateInputForExactOutput(
           swap,
-          `${API_BASE_URL}/price`,
+          API_BASE_URL,
           API_HEADERS,
           SWAP_PROVIDER_NAME,
           sourcesParams
@@ -139,6 +140,7 @@ export function get0xStrategy(
 
       if (
         sources?.sourcesType === "include" &&
+        sources.sourcesNames?.length > 0 &&
         !usedSources.every((source: string) =>
           sources.sourcesNames?.includes(source)
         )

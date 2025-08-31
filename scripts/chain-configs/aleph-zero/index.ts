@@ -19,6 +19,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.alephzero.raas.gelato.cloud",
   blockTimeSeconds: 6,
-  tokens: ["USDT", "WETH"],
+  tokens: [],
   enableCCTP: false,
 } as ChainConfig;

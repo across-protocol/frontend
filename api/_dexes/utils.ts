@@ -25,7 +25,6 @@ import {
   OriginEntryPoints,
   QuoteFetchStrategy,
   SupportedDex,
-  Swap,
   SwapQuote,
   Token,
   DexSources,
@@ -36,7 +35,6 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
-  addMarkupToAmount,
 } from "../_utils";
 import {
   getSpokePoolPeripheryAddress,
@@ -44,12 +42,7 @@ import {
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
 import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
-import axios, { AxiosRequestHeaders } from "axios";
 import { encodeActionCalls } from "../swap/_utils";
-import {
-  UPSTREAM_SWAP_PROVIDER_ERRORS,
-  UpstreamSwapProviderError,
-} from "../_errors";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -796,66 +789,6 @@ export function getOriginSwapEntryPoints(
   );
 }
 
-/**
- * Estimates the input amount required for an exact output amount by using the
- * a single unit amount of the input token as a reference.
- *
- * @param swap - The swap object containing the tokenIn, tokenOut, amount, and slippageTolerance.
- * @param apiEndpoint - The API endpoint to use for the swap.
- * @param apiHeaders - The headers to use for the API request.
- * @returns The required input amount.
- */
-export async function estimateInputForExactOutput(
-  swap: Swap,
-  apiEndpoint: string,
-  apiHeaders: AxiosRequestHeaders,
-  swapProvider: string,
-  sourcesParams?: Record<string, string>
-): Promise<string> {
-  const inputUnit = BigNumber.from(10).pow(swap.tokenIn.decimals);
-
-  const inputUnitResponse = await axios.get(apiEndpoint, {
-    headers: apiHeaders,
-    params: {
-      chainId: swap.chainId,
-      sellToken: swap.tokenIn.address,
-      buyToken: swap.tokenOut.address,
-      sellAmount: inputUnit.toString(),
-      taker: swap.recipient,
-      slippageBps: Math.floor(swap.slippageTolerance * 100),
-      ...sourcesParams,
-    },
-  });
-
-  const inputUnitQuote = inputUnitResponse.data;
-  if (!inputUnitQuote.liquidityAvailable) {
-    throw new UpstreamSwapProviderError({
-      message: `${swapProvider}: No liquidity available for ${
-        swap.tokenIn.symbol
-      } -> ${swap.tokenOut.symbol} on chain ${swap.chainId}`,
-      code: UPSTREAM_SWAP_PROVIDER_ERRORS.INSUFFICIENT_LIQUIDITY,
-      swapProvider,
-    });
-  }
-
-  const inputUnitOutputAmount = BigNumber.from(inputUnitQuote.buyAmount);
-
-  // Estimate the required input amount for the desired output
-  const desiredOutputAmount = BigNumber.from(swap.amount);
-  const requiredInputAmount = desiredOutputAmount
-    .mul(inputUnit)
-    .div(inputUnitOutputAmount);
-
-  // Consider slippage and add fixed buffer for price discrepancies between the input
-  // unit and the desired output amount
-  const buffer = 0.05; // 5%
-  const adjustedInputAmount = addMarkupToAmount(
-    requiredInputAmount,
-    swap.slippageTolerance / 100 + buffer
-  );
-  return adjustedInputAmount.toString();
-}
-
 export function isValidSource(
   _source: string,
   chainId: number,
@@ -891,23 +824,20 @@ export function makeGetSources(sources: DexSources) {
     const sourcesData = Array.from(
       new Set(
         filteredSources.flatMap((source) => {
-          const sourceData = sources.sources[chainId].find((s) =>
+          const sourceData = sources.sources[chainId].filter((s) =>
             s.names.some((name) => name.toLowerCase() === source.toLowerCase())
           );
-          if (!sourceData) {
-            return [];
-          }
-          return {
-            key: sourceData.key,
-            names: sourceData.names,
-          };
+          return sourceData.map((s) => ({
+            key: s.key,
+            names: s.names,
+          }));
         })
       )
     );
 
     return {
       sourcesKeys: sourcesData.map((s) => s.key),
-      sourcesNames: sourcesData.flatMap((s) => s.names),
+      sourcesNames: Array.from(new Set(sourcesData.flatMap((s) => s.names))),
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };

@@ -77,7 +77,8 @@ export function getLifiStrategy(
           ? {
               denyExchanges: sources.sourcesKeys,
             }
-          : sources?.sourcesType === "include"
+          : sources?.sourcesType === "include" &&
+              sources.sourcesKeys?.length > 0
             ? {
                 allowExchanges: sources.sourcesKeys,
               }
