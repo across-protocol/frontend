@@ -79,13 +79,17 @@ export function get0xStrategy(
             }
           : // We need to invert the include sources to be compatible with the API
             // because 0x doesn't support the `includeSources` parameter
-            sources?.sourcesType === "include"
+            sources?.sourcesType === "include" &&
+              sources.sourcesNames?.length > 0
             ? {
                 excludedSources: SOURCES.sources[swap.chainId]
-                  .map((s) => s.key)
                   .filter(
-                    (sourceKey) => !sources.sourcesKeys.includes(sourceKey)
+                    ({ key }) =>
+                      !sources.sourcesKeys.some(
+                        (sourceKey) => key === sourceKey
+                      )
                   )
+                  .map(({ key }) => key)
                   .join(","),
               }
             : undefined;
@@ -136,6 +140,7 @@ export function get0xStrategy(
 
       if (
         sources?.sourcesType === "include" &&
+        sources.sourcesNames?.length > 0 &&
         !usedSources.every((source: string) =>
           sources.sourcesNames?.includes(source)
         )

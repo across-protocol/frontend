@@ -2,6 +2,7 @@ import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
 import * as providerUtils from "./providers";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
 
@@ -459,10 +460,10 @@ export class ConfigClient {
         token,
         `Token not found on chain: ${chainId} and address ${address}`
       );
-      return token;
+      return this.applyChainSpecificTokenDisplay(token, chainId);
     }
 
-    return tokens[0];
+    return this.applyChainSpecificTokenDisplay(tokens[0], chainId);
   }
   getPoolTokenInfoByAddress(chainId: number, address: string): Token {
     return this.getTokenInfoByAddress(
@@ -476,14 +477,16 @@ export class ConfigClient {
     address: string
   ): Token | undefined {
     try {
-      return this.getTokenInfoByAddress(chainId, address);
+      const token = this.getTokenInfoByAddress(chainId, address);
+      return this.applyChainSpecificTokenDisplay(token, chainId);
     } catch (error) {
       return undefined;
     }
   }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   getTokenInfoBySymbolSafe(chainId: number, symbol: string): Token | undefined {
     try {
@@ -494,11 +497,13 @@ export class ConfigClient {
   }
   getStakingPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getStakingPoolTokenList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   getPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenPoolList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   _getTokenInfoBySymbol(
     chainId: number,
@@ -562,6 +567,28 @@ export class ConfigClient {
       console.error(err);
       return {};
     }
+  }
+
+  /**
+   * Determines if USDT should be displayed as USDT0 on the given chain
+   */
+  private shouldShowUsdt0ForChain(chainId: number): boolean {
+    return constants.chainsWithUsdt0Enabled.includes(chainId);
+  }
+
+  /**
+   * Applies chain-specific display modifications to a token
+   */
+  private applyChainSpecificTokenDisplay(token: Token, chainId: number): Token {
+    // Handle USDT -> USDT0 display for specific chains
+    if (token.symbol === "USDT" && this.shouldShowUsdt0ForChain(chainId)) {
+      return {
+        ...token,
+        displaySymbol: "USDT0",
+        logoURI: usdt0Logo,
+      };
+    }
+    return token;
   }
 }
 
