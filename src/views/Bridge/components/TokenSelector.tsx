@@ -5,7 +5,7 @@ import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-
 import { Selector } from "components";
 import { Text } from "components/Text";
 
-import { TokenInfo, getToken, getTokenForChain, tokenList } from "utils";
+import { TokenInfo, getTokenForChain, tokenList } from "utils";
 import { useBalancesBySymbols } from "hooks/useBalance";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
