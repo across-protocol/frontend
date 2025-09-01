@@ -30,7 +30,7 @@ export function CopyButton({
   onClick,
   ...props
 }: CopyButtonProps) {
-  const [displayText, setDisplayText] = useState(stateLabels[copyState]);
+  const [displayText, setDisplayText] = useState(stateLabels["ready"]);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
