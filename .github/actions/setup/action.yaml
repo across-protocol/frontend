@@ -18,3 +18,7 @@ runs:
 
     - run: yarn install --frozen-lockfile --ignore-scripts
       shell: bash
+      
+    - name: Build canvas package from source
+      run: npm rebuild canvas --build-from-source
+      shell: bash
