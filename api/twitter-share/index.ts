@@ -18,13 +18,13 @@ const TwitterShareParamsSchema = type({
 export type TwitterShareImageParams = Infer<typeof TwitterShareParamsSchema>;
 
 export const CANVAS = {
-  width: 352,
-  height: 352,
+  width: 800,
+  height: 800,
 };
 
 const chainLogoDimensions = {
-  x: 39,
-  y: 39,
+  x: 89,
+  y: 89,
 };
 
 export default async function handler(
@@ -63,8 +63,8 @@ export default async function handler(
     if (originChainLogo) {
       ctx.drawImage(
         originChainLogo,
-        80.11,
-        156.58,
+        182,
+        356,
         chainLogoDimensions.x,
         chainLogoDimensions.y
       );
@@ -72,8 +72,8 @@ export default async function handler(
     if (destinationChainLogo) {
       ctx.drawImage(
         destinationChainLogo,
-        233,
-        156.58,
+        529,
+        356,
         chainLogoDimensions.x,
         chainLogoDimensions.y
       );
