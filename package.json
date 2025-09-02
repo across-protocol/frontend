@@ -7,7 +7,7 @@
     "@across-protocol/constants": "^3.1.68",
     "@across-protocol/contracts": "^4.1.5",
     "@across-protocol/contracts-v4.1.1": "npm:@across-protocol/contracts@4.1.1",
-    "@across-protocol/sdk": "^4.3.54",
+    "@across-protocol/sdk": "^4.3.55",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@coral-xyz/borsh": "^0.30.1",
