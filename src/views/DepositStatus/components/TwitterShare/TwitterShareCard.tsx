@@ -48,13 +48,11 @@ export function TwitterShareCard(props: TwitterShareProps) {
       isDefined(fillTxElapsedSeconds) &&
       fillTxElapsedSeconds <= SHARE_THRESHOLD_SECONDS
     ) {
-      return `https://app-frontend-v3-git-feat-twitter-share-uma.vercel.app/api/twitter-share?${buildSearchParams(
-        {
-          fill_time: fillTxElapsedSeconds,
-          from_chain: fromChainId,
-          to_chain: toChainId,
-        }
-      )}`;
+      return `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams({
+        fill_time: fillTxElapsedSeconds,
+        from_chain: fromChainId,
+        to_chain: toChainId,
+      })}`;
     }
   }, [fillTxElapsedSeconds, fromChainId, toChainId]);
 
