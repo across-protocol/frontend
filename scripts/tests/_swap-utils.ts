@@ -4,6 +4,7 @@ import axios from "axios";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
+import { utils } from "@across-protocol/sdk";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { buildSearchParams } from "../../api/_utils";
@@ -153,6 +154,8 @@ export const argsFromCli = yargs(hideBin(process.argv))
   .parseSync();
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
+export const { INDEXER_API_BASE_URL = "https://indexer.api.across.to" } =
+  process.env;
 
 export function filterTestCases(
   testCases: {
@@ -349,8 +352,41 @@ export async function signAndWaitAllowanceFlow(params: {
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
     console.log("Tx mined");
+    const fillTxnRef = await trackFill(tx.hash);
+    if (fillTxnRef) {
+      console.log("Fill txn ref:", fillTxnRef);
+    } else {
+      console.log("Fill txn ref not found");
+    }
   } catch (e) {
     console.error("Tx reverted", e);
+  }
+}
+
+async function trackFill(txHash: string) {
+  const MAX_FILL_ATTEMPTS = 15;
+  // Wait 2 seconds before starting polling
+  await utils.delay(2);
+  for (let i = 0; i < MAX_FILL_ATTEMPTS; i++) {
+    try {
+      const response = await axios.get(
+        `${INDEXER_API_BASE_URL}/deposit/status`,
+        {
+          params: { depositTxnRef: txHash },
+        }
+      );
+      if (response.data.status === "filled") {
+        return response.data.fillTxnRef;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Deposit not found yet, continue trying
+      } else {
+        // Other error, re-throw
+        throw error;
+      }
+    }
+    await utils.delay(1);
   }
 }
 
