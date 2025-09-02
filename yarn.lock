@@ -21,16 +21,7 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.71.tgz#18009a026781e8e661d726e06fb3cbb0f1f42f4b"
   integrity sha512-e8TwCp2xC2ixXjX9TwQxWfzngBcf4nDv/NIKIOfEro7eobgoftEh1kDGacB2OIGDYorjeYhLRjY2EHzdam8wUQ==
 
-"@across-protocol/contracts@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-0.1.4.tgz#64b3d91e639d2bb120ea94ddef3d160967047fa5"
-  integrity sha512-y9FVRSFdPgEdGWBcf8rUmmzdYhzGdy0752HwpaAFtMJ1pn+HFgNaI0EZc/UudMKIPOkk+/BxPIHYPy7tKad5/A==
-  dependencies:
-    "@eth-optimism/contracts" "^0.5.5"
-    "@openzeppelin/contracts" "4.1.0"
-    "@uma/core" "^2.18.0"
-
-"@across-protocol/contracts@^4.1.1":
+"@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.1.tgz#91c8e0fc867911a17f21b2d79d586f95417cb912"
   integrity sha512-APyBXkNrP7VAbN2KzoO3h4VvGUGCgbz1OWACVAQ2/SWm3jMWmzHMOOtLeIqfmPTW0be7pkTbxnfR8hANMcicXw==
@@ -61,14 +52,55 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^4.3.47":
-  version "4.3.47"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.47.tgz#fc703d938f0b7c7d4b707c992e8d3654a4f2e4d9"
-  integrity sha512-6e4UERdahCywlEwhkmAjllgoFQW2j23t5Adj77Cb5aoNA8YoBleZbTkGFMMAGhbt/N3ukFIByPQpDSP6yo+Pbw==
+"@across-protocol/contracts@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-0.1.4.tgz#64b3d91e639d2bb120ea94ddef3d160967047fa5"
+  integrity sha512-y9FVRSFdPgEdGWBcf8rUmmzdYhzGdy0752HwpaAFtMJ1pn+HFgNaI0EZc/UudMKIPOkk+/BxPIHYPy7tKad5/A==
+  dependencies:
+    "@eth-optimism/contracts" "^0.5.5"
+    "@openzeppelin/contracts" "4.1.0"
+    "@uma/core" "^2.18.0"
+
+"@across-protocol/contracts@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.5.tgz#abb43fbb889b91eb291e918f9d0bb29e3657d5b3"
+  integrity sha512-ycbm5sIw7DO48ybLUg5e6LQq4XJNn9qqwuF1Xz7PPUIPYBV/7ZwGtb9VJKooVGbU149psCuCSo72j7wS/SEJgQ==
+  dependencies:
+    "@across-protocol/constants" "^3.1.69"
+    "@coral-xyz/anchor" "^0.31.1"
+    "@defi-wonderland/smock" "^2.3.4"
+    "@eth-optimism/contracts" "^0.5.40"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@openzeppelin/contracts" "4.9.6"
+    "@openzeppelin/contracts-upgradeable" "4.9.6"
+    "@openzeppelin/foundry-upgrades" "^0.4.0"
+    "@scroll-tech/contracts" "^0.1.0"
+    "@solana-developers/helpers" "^2.4.0"
+    "@solana-program/address-lookup-table" "^0.7.0"
+    "@solana-program/token" "^0.5.1"
+    "@solana/kit" "^2.1.0"
+    "@solana/spl-token" "^0.4.6"
+    "@solana/web3.js" "1.98.2"
+    "@types/yargs" "^17.0.33"
+    "@uma/common" "^2.37.3"
+    "@uma/contracts-node" "^0.4.17"
+    "@uma/core" "^2.61.0"
+    axios "^1.7.4"
+    bs58 "^6.0.0"
+    prettier-plugin-rust "^0.1.9"
+    yargs "^17.7.2"
+    zksync-web3 "^0.14.3"
+
+"@across-protocol/sdk@^4.3.55":
+  version "4.3.55"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.55.tgz#a4e9b98e585d7e97f762460d68489c385f326850"
+  integrity sha512-TIr+To+zzaokHTkNZUbi/ybRFMmvuVUdWO6CqzjYGvFMmC++DHdK6ZFJ74Wpv9uGhUqS8FjsN50DnsBJFTEH4A==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.71"
-    "@across-protocol/contracts" "^4.1.1"
+    "@across-protocol/contracts" "^4.1.5"
     "@coral-xyz/anchor" "^0.30.1"
     "@eth-optimism/sdk" "^3.3.1"
     "@ethersproject/bignumber" "^5.7.0"
@@ -78,6 +110,7 @@
     "@solana/kit" "^2.1.0"
     "@solana/web3.js" "^1.31.0"
     "@types/mocha" "^10.0.1"
+    "@types/node" "^24.3.0"
     "@uma/sdk" "^0.34.10"
     arweave "^1.14.4"
     async "^3.2.5"
@@ -4530,6 +4563,11 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.0.2.tgz#b1d03075e49290d06570b2fd42154d76c2a5d210"
   integrity sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==
 
+"@openzeppelin/foundry-upgrades@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/foundry-upgrades/-/foundry-upgrades-0.4.0.tgz#dfab3741e94971429789a37a9633be4f6a79344c"
+  integrity sha512-x9wxogNteR5rdDzh5d/XnINR+ncUdPsCLWud99ULCa1pNNqRVPYMadr6iEVmjdTEy/4keIgbHwLB0rw2zXiRyQ==
+
 "@particle-network/analytics@^1.0.1":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@particle-network/analytics/-/analytics-1.0.2.tgz#cbcff42618e1c3045ed52183278b1a7963ff40a7"
@@ -8681,6 +8719,13 @@
   version "12.20.55"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
   integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
+
+"@types/node@^24.3.0":
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.0.tgz#89b09f45cb9a8ee69466f18ee5864e4c3eb84dec"
+  integrity sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==
+  dependencies:
+    undici-types "~7.10.0"
 
 "@types/node@^8.0.0":
   version "8.10.66"
@@ -23933,6 +23978,11 @@ undici-types@~5.26.4:
   version "5.26.5"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
+
+undici-types@~7.10.0:
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.10.0.tgz#4ac2e058ce56b462b056e629cc6a02393d3ff350"
+  integrity sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==
 
 undici@5.28.4, undici@^5.14.0:
   version "5.28.4"
