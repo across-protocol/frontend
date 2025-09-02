@@ -314,7 +314,7 @@ async function resolvePriceBySymbol(params: {
   return { price, baseCurrency, isDerivedCurrency };
 }
 
-async function resolveUsdPriceViaFallbackResolver(params: {
+export async function resolveUsdPriceViaFallbackResolver(params: {
   address: string;
   chainId: number;
   fallbackResolver: string;
