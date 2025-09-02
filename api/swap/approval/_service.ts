@@ -1,5 +1,5 @@
 import * as sdk from "@across-protocol/sdk";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Span } from "@opentelemetry/api";
 
 import {
@@ -64,6 +64,7 @@ export async function handleApprovalSwap(
     appFeePercent,
     appFeeRecipient,
     strictTradeType,
+    skipChecks,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } =
@@ -125,12 +126,18 @@ export async function handleApprovalSwap(
   const inputAmount =
     originSwapQuote?.maximumAmountIn || bridgeQuote.inputAmount;
 
-  const { allowance, balance } = await getBalanceAndAllowance({
-    chainId: originChainId,
-    tokenAddress: inputTokenAddress,
-    owner: crossSwap.depositor,
-    spender: crossSwapTx.to,
-  });
+  let allowance = BigNumber.from(0);
+  let balance = BigNumber.from(0);
+  if (!skipChecks) {
+    const checks = await getBalanceAndAllowance({
+      chainId: originChainId,
+      tokenAddress: inputTokenAddress,
+      owner: crossSwap.depositor,
+      spender: crossSwapTx.to,
+    });
+    allowance = checks.allowance;
+    balance = checks.balance;
+  }
 
   const isSwapTxEstimationPossible =
     !skipOriginTxEstimation &&
