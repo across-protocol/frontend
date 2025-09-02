@@ -173,10 +173,10 @@ export async function handleApprovalSwap(
       fallbackResolver: "lifi",
     }),
     getCachedTokenPrice({
-      symbol: inputToken.symbol,
-      tokenAddress: inputToken.address,
+      symbol: outputToken.symbol,
+      tokenAddress: outputToken.address,
       baseCurrency: "usd",
-      chainId: inputToken.chainId,
+      chainId: outputToken.chainId,
       fallbackResolver: "lifi",
     }),
     originChainGasToken

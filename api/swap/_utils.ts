@@ -29,6 +29,7 @@ import {
   getWrappedNativeTokenAddress,
   paramToArray,
   getChainInfo,
+  getCachedTokenPrice,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -42,7 +43,6 @@ import {
 } from "../_multicall-handler";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
-import { resolveUsdPriceViaFallbackResolver } from "../coingecko";
 
 const PRICE_DIFFERENCE_TOLERANCE = 0.01;
 
@@ -566,13 +566,15 @@ export async function calculateSwapFees(params: {
         outputTokenPriceUsd > inputTokenPriceUsd)
     ) {
       [inputTokenPriceUsd, outputTokenPriceUsd] = await Promise.all([
-        resolveUsdPriceViaFallbackResolver({
-          address: inputToken.address,
+        getCachedTokenPrice({
+          symbol: inputToken.symbol,
+          tokenAddress: inputToken.address,
           chainId: inputToken.chainId,
           fallbackResolver: "lifi",
         }),
-        resolveUsdPriceViaFallbackResolver({
-          address: outputToken.address,
+        getCachedTokenPrice({
+          symbol: outputToken.symbol,
+          tokenAddress: outputToken.address,
           chainId: outputToken.chainId,
           fallbackResolver: "lifi",
         }),
