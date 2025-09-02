@@ -8,7 +8,7 @@ import { Alert, Text } from "components";
 import { Tooltip } from "components/Tooltip";
 
 import {
-  getToken,
+  getTokenForChain,
   GetBridgeFeesResult,
   QUERIESV2,
   chainIdToRewardsProgramName,
@@ -286,11 +286,20 @@ const BridgeForm = ({
         parsedAmount={parsedAmountInput}
         swapQuote={swapQuote}
         universalSwapQuote={universalSwapQuote}
-        inputToken={getToken(selectedRoute.fromTokenSymbol)}
-        outputToken={getToken(receiveTokenSymbol)}
+        inputToken={getTokenForChain(
+          selectedRoute.fromTokenSymbol,
+          selectedRoute.fromChain
+        )}
+        outputToken={getTokenForChain(
+          receiveTokenSymbol,
+          selectedRoute.toChain
+        )}
         swapToken={
           selectedRoute.type === "swap"
-            ? getToken(selectedRoute.swapTokenSymbol)
+            ? getTokenForChain(
+                selectedRoute.swapTokenSymbol,
+                selectedRoute.fromChain
+              )
             : undefined
         }
         onSetNewSlippage={onSetNewSlippage}
