@@ -68,12 +68,15 @@ export function TokenSelector({
           fromTokenSymbol,
           externalProjectId
         );
-    const orderedAvailableTokens = tokenList.filter((orderedToken) =>
-      availableTokens.find(
-        (availableToken) => availableToken.symbol === orderedToken.symbol
+    const orderedAvailableTokens = tokenList
+      .filter((orderedToken) =>
+        availableTokens.find(
+          (availableToken) => availableToken.symbol === orderedToken.symbol
+        )
       )
-    );
-    return [
+      .map((t) => getTokenForChain(t.symbol, relevantChainId));
+
+    const result = [
       ...orderedAvailableTokens,
       ...(isInputTokenSelector
         ? allTokens
@@ -83,9 +86,14 @@ export function TokenSelector({
                   (availableToken) => availableToken.symbol === t.symbol
                 )
             )
-            .map((t) => ({ ...t, disabled: true }))
+            .map((t) => ({
+              ...getTokenForChain(t.symbol, relevantChainId),
+              disabled: true,
+            }))
         : []),
-    ].map((t) => getTokenForChain(t.symbol, relevantChainId));
+    ];
+
+    return result;
   }, [
     fromChain,
     toChain,
