@@ -949,32 +949,79 @@ export const buildDepositForSimulation = (depositArgs: {
 
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
- * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @param tokenAddress The ERC20 token address of the coin to find the cached price of
+ * @param symbol The symbol of the coin to find the cached price of
  * @param baseCurrency The base currency to convert the token price to
- * @param date An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
+ * @param historicalDateISO An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
+ * @param chainId The chain id of the coin to find the cached price of
+ * @param fallbackResolver The fallback resolver to use if the price is not found
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (
-  l1Token: string,
-  baseCurrency: string = "eth",
-  historicalDateISO?: string,
-  chainId?: number,
-  fallbackResolver?: string
-): Promise<number> => {
-  return Number(
-    (
-      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+export const getCachedTokenPrice = async (params: {
+  l1Token?: string;
+  tokenAddress?: string;
+  symbol?: string;
+  baseCurrency?: string;
+  historicalDateISO?: string;
+  chainId?: number;
+  fallbackResolver?: string;
+}): Promise<number> => {
+  const {
+    l1Token,
+    tokenAddress,
+    symbol,
+    baseCurrency = "eth",
+    historicalDateISO,
+    chainId,
+    fallbackResolver,
+  } = params;
+  const baseUrl = `${resolveVercelEndpoint()}/api/coingecko`;
+  let price = 0;
+
+  if (symbol) {
+    try {
+      const response = await axios(`${baseUrl}`, {
         params: {
-          l1Token,
-          chainId,
+          symbol,
           baseCurrency,
           date: historicalDateISO,
-          fallbackResolver,
         },
         headers: getVercelHeaders(),
-      })
-    ).data.price
-  );
+      });
+      price = Number(response.data.price);
+    } catch (error) {
+      if (fallbackResolver) {
+        const response = await axios(`${baseUrl}`, {
+          params: {
+            l1Token,
+            tokenAddress,
+            baseCurrency,
+            chainId,
+            fallbackResolver,
+            date: historicalDateISO,
+          },
+          headers: getVercelHeaders(),
+        });
+        price = Number(response.data.price);
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    const response = await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+      params: {
+        l1Token,
+        tokenAddress,
+        chainId,
+        baseCurrency,
+        date: historicalDateISO,
+        fallbackResolver,
+      },
+      headers: getVercelHeaders(),
+    });
+    price = Number(response.data.price);
+  }
+  return price;
 };
 
 /**
@@ -1850,9 +1897,15 @@ export async function fetchStakingPool(
 
   const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
     acceleratingDistributor.rewardToken(),
-    getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
+    getCachedTokenPrice({
+      l1Token: poolUnderlyingTokenAddress,
+      baseCurrency: "usd",
+    }),
   ]);
-  const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");
+  const acxPriceInUSD = await getCachedTokenPrice({
+    tokenAddress: acrossTokenAddress,
+    baseCurrency: "usd",
+  });
 
   const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
 
@@ -1990,7 +2043,7 @@ export async function getBalancerV2TokenPrice(
     tokens.map(async (token: string, i: number): Promise<number> => {
       const tokenContract = ERC20__factory.connect(token, provider);
       const [price, decimals] = await Promise.all([
-        getCachedTokenPrice(token, "usd"),
+        getCachedTokenPrice({ l1Token: token, baseCurrency: "usd" }),
         tokenContract.decimals(),
       ]);
       const balance = parseFloat(

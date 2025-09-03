@@ -255,7 +255,10 @@ const handler = async (
         fillDeadline,
       ] = await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedTokenPrice({
+          l1Token: l1Token.address,
+          baseCurrency: "usd",
+        }),
         getCachedLimits(
           inputToken.address,
           outputToken.address,
