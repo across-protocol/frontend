@@ -484,7 +484,10 @@ export function getApprovalTxns(params: {
 export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((element) => {
-      if (element instanceof BigNumber) {
+      if (
+        element instanceof BigNumber ||
+        (element && typeof element === "object" && element._isBigNumber)
+      ) {
         return element.toString();
       }
       if (typeof element === "object" && element !== null) {
@@ -496,7 +499,10 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 
   return Object.fromEntries(
     Object.entries(value).map(([key, val]) => {
-      if (val instanceof BigNumber) {
+      if (
+        val instanceof BigNumber ||
+        (val && typeof val === "object" && val._isBigNumber)
+      ) {
         return [key, val.toString()];
       }
       if (typeof val === "object" && val !== null) {
