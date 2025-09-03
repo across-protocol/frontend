@@ -559,7 +559,7 @@ export interface PageViewedProperties {
    */
   gitCommitHash: string;
   /**
-   * Boolean if this is first time identifed user has visited page. Should be Null for anonymous users.
+   * Boolean if this is first time identified user has visited page. Should be Null for anonymous users.
    */
   isInitialPageView: boolean;
   origin: string;
@@ -874,11 +874,11 @@ export interface TransferDepositCompletedProperties {
   networkFeeNativeToken: string;
   networkFeeUsd: string;
   /**
-   * Latency for FE to recieve quote in millisec
+   * Latency for FE to receive quote in millisec
    */
   quoteLatencyMilliseconds: string;
   /**
-   * Timestamp the FE recieves quote (may be different from the event timestamp)
+   * Timestamp the FE receives quote (may be different from the event timestamp)
    */
   quoteTimestamp: string;
   /**
