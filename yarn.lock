@@ -26,16 +26,7 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.72.tgz#2c68f1aa382595a56880901e42f40f08aa4d11f3"
   integrity sha512-SHLpxlT49XHsNrzJLRY0B9/r3+xS6d1j3PkR+Jped4py5RUWXpB+qrhNp4wvUeN3wKGDrB+bSye+PejbVh+iJg==
 
-"@across-protocol/contracts@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-0.1.4.tgz#64b3d91e639d2bb120ea94ddef3d160967047fa5"
-  integrity sha512-y9FVRSFdPgEdGWBcf8rUmmzdYhzGdy0752HwpaAFtMJ1pn+HFgNaI0EZc/UudMKIPOkk+/BxPIHYPy7tKad5/A==
-  dependencies:
-    "@eth-optimism/contracts" "^0.5.5"
-    "@openzeppelin/contracts" "4.1.0"
-    "@uma/core" "^2.18.0"
-
-"@across-protocol/contracts@^4.1.1":
+"@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.1.tgz#91c8e0fc867911a17f21b2d79d586f95417cb912"
   integrity sha512-APyBXkNrP7VAbN2KzoO3h4VvGUGCgbz1OWACVAQ2/SWm3jMWmzHMOOtLeIqfmPTW0be7pkTbxnfR8hANMcicXw==
@@ -65,6 +56,15 @@
     prettier-plugin-rust "^0.1.9"
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
+
+"@across-protocol/contracts@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-0.1.4.tgz#64b3d91e639d2bb120ea94ddef3d160967047fa5"
+  integrity sha512-y9FVRSFdPgEdGWBcf8rUmmzdYhzGdy0752HwpaAFtMJ1pn+HFgNaI0EZc/UudMKIPOkk+/BxPIHYPy7tKad5/A==
+  dependencies:
+    "@eth-optimism/contracts" "^0.5.5"
+    "@openzeppelin/contracts" "4.1.0"
+    "@uma/core" "^2.18.0"
 
 "@across-protocol/contracts@^4.1.5":
   version "4.1.5"

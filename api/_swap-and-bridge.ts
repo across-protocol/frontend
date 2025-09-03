@@ -1,7 +1,9 @@
+// NOTE: SwapAndBridge and UniverslSwapAndBridge were removed in version 4.1.3 of the contracts repo
+// We need version 4.1.1 until we migrate to new SpokePoolPeriphery contracts.
 import {
   SwapAndBridge__factory,
   UniversalSwapAndBridge__factory,
-} from "@across-protocol/contracts";
+} from "@across-protocol/contracts-v4.1.1";
 
 import { ENABLED_ROUTES, getProvider } from "./_utils";
 

@@ -1742,8 +1742,8 @@
     "publicRpcUrl": "https://api.lens.matterhosted.dev",
     "explorerUrl": "https://explorer.lens.xyz",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lens/assets/logo.svg",
-    "spokePool": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
-    "spokePoolBlock": 193290,
+    "spokePool": "0xb234cA484866c811d0e6D3318866F583781ED045",
+    "spokePoolBlock": 4197027,
     "inputTokens": [
       {
         "address": "0x6bDc36E20D267Ff0dd6097799f82e78907105e2F",
