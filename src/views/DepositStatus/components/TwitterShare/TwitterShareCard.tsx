@@ -129,10 +129,6 @@ const TexColumn = styled.div`
   gap: 4px;
 `;
 
-const Highlight = styled.span`
-  color: ${COLORS["aqua"]};
-`;
-
 const Icon = styled(ShareIcon)`
   width: 35px;
   height: 35px;

@@ -3,11 +3,14 @@ import { LoadingSkeleton, SecondaryButton, Text } from "components";
 import Modal from "components/Modal";
 import { ModalProps } from "components/Modal/Modal";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
-import { COLORS, QUERIES, twitterParams } from "utils";
+import {
+  COLORS,
+  QUERIES,
+  twitterParams,
+  twitterShareContestActive,
+} from "utils";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
-import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
 import { useState } from "react";
-import { useDownload } from "hooks/useDownload";
 import { useCopyToClipboard } from "hooks/useCopyToClipboard";
 import { CopyButton } from "../CopyButton";
 import { css } from "@emotion/react";
@@ -46,12 +49,10 @@ export function TwitterShareModal({
     ]);
   };
 
-  const handleDownloadImage = useDownload(imageUrl, "across-bridge-share.png");
-
   return (
     <TwitterModal
       verticalLocation={{
-        tablet: "top",
+        tablet: "bottom",
         desktop: "top",
         mobile: "bottom",
       }}
@@ -61,6 +62,7 @@ export function TwitterShareModal({
       title={twitterParams.modalTitle}
       padding="normal"
       titleBorder
+      width={900}
       {...props}
     >
       <ModalContent>
@@ -90,14 +92,6 @@ export function TwitterShareModal({
                   copySuccess ? "success" : copyError ? "error" : "ready"
                 }
               />
-              <Text size="md">or</Text>
-              <DownloadButton
-                size="md"
-                onClick={handleDownloadImage}
-                disabled={isImageLoading}
-              >
-                <DownloadIcon width={16} height={16} color={COLORS["aqua"]} />
-              </DownloadButton>
             </ButtonRow>
           </TextInnerColumn>
 
@@ -119,11 +113,38 @@ export function TwitterShareModal({
               </Button>
             </ButtonRow>
           </TextInnerColumn>
+
+          {twitterShareContestActive && (
+            <TextInnerColumn>
+              <Text size="xl" color="white">
+                3. Follow{" "}
+                <Link href="https://x.com/AcrossProtocol" target="_blank">
+                  @AcrossProtocol
+                </Link>
+              </Text>
+              <Text size="md">
+                Winners will be announced at the end of each week. Make sure to
+                follow Across and turn on your notifications so you don't miss
+                it!
+              </Text>
+            </TextInnerColumn>
+          )}
         </TextColumn>
       </ModalContent>
     </TwitterModal>
   );
 }
+
+const Link = styled.a`
+  font-size: inherit;
+  color: ${COLORS.aqua};
+  text-decoration: none;
+  transition: opacity 0.1s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
 
 const ButtonStyled = css`
   height: 40px;
@@ -166,7 +187,7 @@ const Placeholder = styled(LoadingSkeleton)`
 const ImageContainer = styled.div`
   aspect-ratio: 1/1;
   width: 100%;
-  max-width: 350px;
+  max-width: 400px;
   border-radius: 8px;
   border: 1px solid rgba(224, 243, 255, 0.2);
   box-shadow: rgba(108, 249, 216, 0.15) 0px 0px 20px 3px;
@@ -178,29 +199,6 @@ const ImageContainer = styled.div`
 const Image = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const DownloadButton = styled(SecondaryButton)`
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0px !important;
-  border: 1px solid rgba(108, 249, 216, 0.1);
-
-  &:hover:not(:disabled) {
-    border-color: ${COLORS.aqua};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const DownloadIcon = styled(Download)`
-  color: ${COLORS["aqua"]};
 `;
 
 const XIcon = styled(X)`
@@ -243,11 +241,12 @@ const ModalContent = styled.div`
 
   @media ${QUERIES.laptopAndUp} {
     flex-direction: row;
+    padding: 0 var(--spacing);
   }
 `;
 
 const TextColumn = styled(Column)`
-  padding: var(--spacing);
+  padding: var(--spacing) 0;
   gap: var(--spacing);
   align-items: center;
   text-align: center;
@@ -264,5 +263,6 @@ const TextInnerColumn = styled(Column)`
 
   @media ${QUERIES.laptopAndUp} {
     align-items: flex-start;
+    padding: 0 var(--spacing);
   }
 `;
