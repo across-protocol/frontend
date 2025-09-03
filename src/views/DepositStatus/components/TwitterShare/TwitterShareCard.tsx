@@ -5,7 +5,8 @@ import {
   COLORS,
   QUERIES,
   buildSearchParams,
-  resolveWebsiteUrl,
+  twitterParams,
+  vercelApiBaseUrl,
 } from "utils";
 import { DepositStatusLowerCardProps } from "views/DepositStatus/components/DepositStatusLowerCard";
 import { useDepositTracking } from "views/DepositStatus/hooks/useDepositTracking";
@@ -48,7 +49,7 @@ export function TwitterShareCard(props: TwitterShareProps) {
       isDefined(fillTxElapsedSeconds) &&
       fillTxElapsedSeconds <= SHARE_THRESHOLD_SECONDS
     ) {
-      return `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams({
+      return `${vercelApiBaseUrl}/api/twitter-share?${buildSearchParams({
         fill_time: fillTxElapsedSeconds,
         from_chain: fromChainId,
         to_chain: toChainId,
@@ -75,13 +76,10 @@ export function TwitterShareCard(props: TwitterShareProps) {
         </LogoWrapper>
         <TexColumn>
           <Text size="md" color="white">
-            Share and win!
+            {twitterParams.cardTitle}
           </Text>
 
-          <Text size="sm">
-            Share your experience on X to enter this week's drawing for{" "}
-            <Highlight>1,000 ACX</Highlight> #PoweredByIntents
-          </Text>
+          <Text size="sm">{twitterParams.cardSubtitle}</Text>
         </TexColumn>
       </InnerRow>
 

@@ -3,7 +3,7 @@ import { LoadingSkeleton, SecondaryButton, Text } from "components";
 import Modal from "components/Modal";
 import { ModalProps } from "components/Modal/Modal";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
-import { COLORS, QUERIES } from "utils";
+import { COLORS, QUERIES, twitterParams } from "utils";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
 import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
 import { useState } from "react";
@@ -38,9 +38,8 @@ export function TwitterShareModal({
   });
 
   const handleCopyToClipboard = async () => {
-    // TODO: confirm copy
     const tweetText =
-      "Bridged in seconds with @AcrossProtocol\nGo crosschain with @AcrossProtocol.\n\n #PoweredByIntents ⛺\n";
+      "Check out how fast I just bridged with @AcrossProtocol\n #PoweredByIntents ⛺";
     await copyToClipboard([
       { content: tweetText },
       { content: imageUrl, remote: true },
@@ -59,7 +58,7 @@ export function TwitterShareModal({
       topYOffset={isMobile ? undefined : 112}
       bottomYOffset={isMobile ? 16 : undefined}
       exitOnOutsideClick
-      title="Share Your Bridge"
+      title={twitterParams.modalTitle}
       padding="normal"
       titleBorder
       {...props}

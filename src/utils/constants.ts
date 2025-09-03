@@ -226,6 +226,9 @@ export const AddressZero = ethers.constants.AddressZero;
 export const showV4LaunchBanner = Boolean(
   process.env.REACT_APP_SHOW_V4_BANNER === "true"
 );
+export const twitterShareContestActive = Boolean(
+  process.env.REACT_APP_TWITTER_SHARE_CONTEST_ACTIVE === "true"
+);
 
 assert(
   isSupportedChainId(hubPoolChainId),

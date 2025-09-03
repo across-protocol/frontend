@@ -1,26 +1,19 @@
-import { buildSearchParams, resolveWebsiteUrl } from "utils";
+import { twitterShareContestActive } from "utils";
 
-// https://developer.x.com/en/docs/x-for-websites/tweet-button/guides/web-intent
-export function buildTwitterShareUrl(params: {
-  time: number;
-  originChainId: number;
-  destinationChainId: number;
-}): string {
-  const hashTags: string[] = ["PoweredByIntents ⛺"]; // tags without "#"
-  const relatedAccounts = ["@AcrossProtocol"];
-  const imageUrl = `${resolveWebsiteUrl()}/api/twitter-share?${buildSearchParams(
-    {
-      s: params.time,
-      from: params.originChainId,
-      to: params.destinationChainId,
-    }
-  )}`;
-  const tweetText = `Bridged in seconds with @AcrossProtocol\nGo crosschain at ${imageUrl}\n\n`;
-  const twitterUrl = `https://twitter.com/intent/tweet?${buildSearchParams({
-    text: tweetText,
-    hashtags: hashTags.join(","),
-    related: relatedAccounts.join(","),
-  })}`;
+const contestActiveParams = {
+  cardTitle: "Win 1,000 ACX!",
+  cardSubtitle:
+    "Post your transaction speed on X for a chance to win this week's 1,000 ACX giveaway #PoweredByIntents",
+  modalTitle: "Share for a Chance to Win 1,000 ACX!",
+};
 
-  return twitterUrl;
-}
+const contestInactiveParams = {
+  cardTitle: "Wow, that was fast!",
+  cardSubtitle:
+    "Flex your transaction speed on X and show your friends how fast they can bridge with Across! #PoweredByIntents",
+  modalTitle: "Flex Your Speed",
+};
+
+export const twitterParams = twitterShareContestActive
+  ? contestActiveParams
+  : contestInactiveParams;
