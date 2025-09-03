@@ -338,13 +338,28 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
         value: action.value,
       };
     } else {
+      let iface: utils.Interface;
+      let functionName: string;
+
       const methodAbi = action.functionSignature;
       const positionalArgs = flattenArgs(action.args);
-      const iface = new utils.Interface([methodAbi]);
-      const functionName = iface.fragments[0].name;
       const populateArgsDynamically = action.args.some(
         (arg) => arg.populateDynamically
       );
+
+      try {
+        iface = new utils.Interface([methodAbi]);
+        functionName = iface.fragments[0].name;
+      } catch (err) {
+        throw new AbiEncodingError(
+          {
+            message: `Failed to encode function data for ABI '${methodAbi}'. Function signature may be invalid.`,
+          },
+          {
+            cause: `${err instanceof Error ? err.message : String(err)}`,
+          }
+        );
+      }
 
       try {
         const callData = iface.encodeFunctionData(functionName, positionalArgs);
