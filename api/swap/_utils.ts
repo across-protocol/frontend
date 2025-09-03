@@ -67,6 +67,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFee: optional(positiveFloatStr(1)),
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
+  skipChecks: optional(boolStr()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -96,12 +97,14 @@ export async function handleBaseSwapQueryParams(
     appFee,
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
+    skipChecks: _skipChecks = "false",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
   const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
+  const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
@@ -196,6 +199,7 @@ export async function handleBaseSwapQueryParams(
     appFeePercent: appFeeNum,
     appFeeRecipient,
     strictTradeType,
+    skipChecks,
   };
 }
 
