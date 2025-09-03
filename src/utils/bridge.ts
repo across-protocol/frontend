@@ -640,23 +640,18 @@ export async function sendTxn(
   signer: ethers.Signer,
   tx: Deferrable<TransactionRequest>
 ): Promise<TransactionResponse> {
-  if (originChain === CHAIN_IDs.MAINNET) {
-    console.log("signer", signer);
-    const txnHash = await (signer as any).sendUncheckedTransaction(tx);
-    return {
-      hash: String(txnHash),
-      confirmations: 0,
-      from: await signer.getAddress(),
-      nonce: 0,
-      gasLimit: BigNumber.from(0),
-      gasPrice: BigNumber.from(0),
-      data: "",
-      to: "",
-      value: BigNumber.from(0),
-      wait: async () => signer.provider!.getTransactionReceipt(txnHash),
-      chainId: originChain,
-    };
-  }
-
-  return signer.sendTransaction(tx);
+  const txnHash = await (signer as any).sendUncheckedTransaction(tx);
+  return {
+    hash: String(txnHash),
+    confirmations: 0,
+    from: await signer.getAddress(),
+    nonce: 0,
+    gasLimit: BigNumber.from(0),
+    gasPrice: BigNumber.from(0),
+    data: "",
+    to: "",
+    value: BigNumber.from(0),
+    wait: async () => signer.provider!.getTransactionReceipt(txnHash),
+    chainId: originChain,
+  };
 }
