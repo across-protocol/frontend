@@ -80,8 +80,7 @@ const handler = async (
     const destinationChainId = parseInt(destinationChainIdInput);
     const originChainId = parseInt(originChainIdInput);
     const isNative = isNativeBoolStr === "true";
-    const fillDeadline =
-      _fillDeadline ?? (await getFillDeadline(destinationChainId));
+    const fillDeadline = _fillDeadline ?? getFillDeadline(destinationChainId);
 
     if (originChainId === destinationChainId) {
       throw new InvalidParamError({

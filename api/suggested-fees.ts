@@ -252,7 +252,6 @@ const handler = async (
         [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
         tokenPriceUsd,
         limits,
-        fillDeadline,
       ] = await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
         getCachedTokenPrice({
@@ -275,8 +274,8 @@ const handler = async (
           depositWithMessage ? message : undefined,
           allowUnmatchedDecimals
         ),
-        getFillDeadline(destinationChainId),
       ]);
+      const fillDeadline = getFillDeadline(destinationChainId);
       const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
         limits;
       const quoteTimestamp = parseInt(_quoteTimestamp.toString());
