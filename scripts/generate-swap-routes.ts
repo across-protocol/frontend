@@ -44,6 +44,7 @@ const enabledSwapRoutes: {
         disabledOriginChains: [
           CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
           CHAIN_IDs.LINEA, // Not bridgeable
+          CHAIN_IDs.SOLANA, // Not available yet
         ],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
