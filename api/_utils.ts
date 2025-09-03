@@ -55,7 +55,6 @@ import {
   buildInternalCacheKey,
   getCachedValue,
   makeCacheGetterAndSetter,
-  providerRedisCache,
 } from "./_cache";
 import {
   MissingParamError,
