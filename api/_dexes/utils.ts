@@ -491,14 +491,11 @@ export async function extractSwapAndDepositDataStruct(
 }
 
 async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
+  const calls = [spokePool.interface.encodeFunctionData("fillDeadlineBuffer")];
 
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
+  const [fillDeadlineBuffer] = await spokePool.callStatic.multicall(calls);
+
+  return utils.getCurrentTime() + Number(fillDeadlineBuffer);
 }
 
 export function getQuoteFetchStrategies(
