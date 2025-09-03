@@ -1,5 +1,3 @@
-import * as sdk from "@across-protocol/sdk";
-
 import { DEFAULT_FILL_DEADLINE_BUFFER_SECONDS } from "./_constants";
 
 function getFillDeadlineBuffer(chainId: number) {
