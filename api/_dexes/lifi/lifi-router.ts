@@ -87,7 +87,7 @@ export function getLifiStrategy(
       // Improves latency as we care about speed. This configuration returns the first
       // available quote with 600ms delay.
       // See https://docs.li.fi/guides/integration-tips/latency#selecting-timing-strategies
-      const swapStepTimingStrategies = "minWaitTime-600-1-300";
+      const swapStepTimingStrategies = "minWaitTime-600-2-300";
 
       const params = {
         fromChain: swap.chainId,
