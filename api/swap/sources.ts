@@ -1,7 +1,9 @@
 import { type, string, Infer, array, optional } from "superstruct";
+import { CHAIN_IDs } from "@across-protocol/constants";
 import { positiveIntStr } from "../_utils";
 import { ApiHandler } from "../_base/api-handler";
 import { VercelAdapter } from "../_adapters/vercel-adapter";
+import { InvalidParamError } from "../_errors";
 
 import {
   SOURCES as ZERO_X_SOURCES,
@@ -11,6 +13,10 @@ import {
   SOURCES as LIFI_SOURCES,
   ALL_SOURCES as ALL_LIFI_SOURCES,
 } from "../_dexes/lifi/utils/sources";
+import {
+  SOURCES as UNISWAP_SOURCES,
+  ALL_SOURCES as ALL_UNISWAP_SOURCES,
+} from "../_dexes/uniswap/utils/sources";
 
 const SwapSourcesQueryParamsSchema = type({
   chainId: optional(positiveIntStr()),
@@ -46,15 +52,28 @@ class SwapSourcesHandler extends ApiHandler<
 
     if (chainIdParam) {
       const chainId = Number(chainIdParam);
+      if (!Object.values(CHAIN_IDs).includes(chainId)) {
+        throw new InvalidParamError({
+          message: `Invalid chain ID: ${chainId}`,
+          param: "chainId",
+        });
+      }
       const zeroXSources = ZERO_X_SOURCES.sources[chainId].flatMap(
         (source) => source.names
       );
       const lifiSources = LIFI_SOURCES.sources[chainId].flatMap(
         (source) => source.names
       );
-      combinedSources = [...zeroXSources, ...lifiSources];
+      const uniswapSources = UNISWAP_SOURCES.sources[chainId].flatMap(
+        (source) => source.names
+      );
+      combinedSources = [...zeroXSources, ...lifiSources, ...uniswapSources];
     } else {
-      combinedSources = [...ALL_ZERO_X_SOURCES, ...ALL_LIFI_SOURCES];
+      combinedSources = [
+        ...ALL_ZERO_X_SOURCES,
+        ...ALL_LIFI_SOURCES,
+        ...ALL_UNISWAP_SOURCES,
+      ];
     }
 
     const uniqueSources = [...new Set(combinedSources)].sort();

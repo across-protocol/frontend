@@ -2,6 +2,7 @@ import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
 import * as providerUtils from "./providers";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
 
@@ -22,6 +23,7 @@ import {
   SwapAndBridge__factory,
 } from "utils/typechain";
 import { SupportedDex } from "./serverless-api/prod/swap-quote";
+import { PublicKey } from "@solana/web3.js";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -136,6 +138,10 @@ export class ConfigClient {
     const address = this.spokeAddresses[chainId];
     assert(address, "Spoke pool not supported on chain: " + chainId);
     return address;
+  }
+  getSpokePoolProgramId(chainId: constants.ChainId): PublicKey {
+    const address = this.getSpokePoolAddress(chainId);
+    return new PublicKey(address);
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
@@ -367,15 +373,18 @@ export class ConfigClient {
       };
     });
   }
-  // returns token list in order specified by constants, but adds in token address for the chain specified
-  getRouteTokenList(chainId?: number): TokenList {
+  getListOfTokensWithLP(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
       this.filterRoutes({ fromChain: chainId }).map((route) => {
         return [route.fromTokenSymbol, route];
       })
     );
+    const tokensWithoutLP = [constants.TOKEN_SYMBOLS_MAP.CAKE.symbol];
     return constants.tokenList
-      .filter((token: constants.TokenInfo) => routeTable[token.symbol])
+      .filter(
+        (token: constants.TokenInfo) =>
+          routeTable[token.symbol] && !tokensWithoutLP.includes(token.symbol)
+      )
       .map((token: constants.TokenInfo) => {
         const { fromTokenAddress, isNative, l1TokenAddress } =
           routeTable[token.symbol];
@@ -407,11 +416,11 @@ export class ConfigClient {
         ];
       }
     );
-    return [...this.getRouteTokenList(chainId), ...exclusivePools];
+    return [...this.getListOfTokensWithLP(chainId), ...exclusivePools];
   }
   getStakingPoolTokenList(chainId?: number): TokenList {
     return [
-      ...this.getRouteTokenList(chainId),
+      ...this.getListOfTokensWithLP(chainId),
       ...constants.externalLPsForStaking[
         chainId || constants.hubPoolChainId
       ].map((token) => {
@@ -451,10 +460,10 @@ export class ConfigClient {
         token,
         `Token not found on chain: ${chainId} and address ${address}`
       );
-      return token;
+      return this.applyChainSpecificTokenDisplay(token, chainId);
     }
 
-    return tokens[0];
+    return this.applyChainSpecificTokenDisplay(tokens[0], chainId);
   }
   getPoolTokenInfoByAddress(chainId: number, address: string): Token {
     return this.getTokenInfoByAddress(
@@ -468,14 +477,16 @@ export class ConfigClient {
     address: string
   ): Token | undefined {
     try {
-      return this.getTokenInfoByAddress(chainId, address);
+      const token = this.getTokenInfoByAddress(chainId, address);
+      return this.applyChainSpecificTokenDisplay(token, chainId);
     } catch (error) {
       return undefined;
     }
   }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   getTokenInfoBySymbolSafe(chainId: number, symbol: string): Token | undefined {
     try {
@@ -486,11 +497,13 @@ export class ConfigClient {
   }
   getStakingPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getStakingPoolTokenList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   getPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenPoolList(chainId);
-    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    const token = this._getTokenInfoBySymbol(chainId, symbol, tokens);
+    return this.applyChainSpecificTokenDisplay(token, chainId);
   }
   _getTokenInfoBySymbol(
     chainId: number,
@@ -554,6 +567,28 @@ export class ConfigClient {
       console.error(err);
       return {};
     }
+  }
+
+  /**
+   * Determines if USDT should be displayed as USDT0 on the given chain
+   */
+  private shouldShowUsdt0ForChain(chainId: number): boolean {
+    return constants.chainsWithUsdt0Enabled.includes(chainId);
+  }
+
+  /**
+   * Applies chain-specific display modifications to a token
+   */
+  private applyChainSpecificTokenDisplay(token: Token, chainId: number): Token {
+    // Handle USDT -> USDT0 display for specific chains
+    if (token.symbol === "USDT" && this.shouldShowUsdt0ForChain(chainId)) {
+      return {
+        ...token,
+        displaySymbol: "USDT0",
+        logoURI: usdt0Logo,
+      };
+    }
+    return token;
   }
 }
 

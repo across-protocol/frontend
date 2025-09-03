@@ -50,23 +50,44 @@ export function getLifiStrategy(
 
   const getSources = makeGetSources(SOURCES);
 
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: "Option 'sellEntireBalance' is not supported by Li.Fi",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: SWAP_PROVIDER_NAME,
+    });
+  };
+
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
     opts?: QuoteFetchOpts
   ) => {
     try {
+      if (
+        opts?.sellEntireBalance &&
+        opts?.throwIfSellEntireBalanceUnsupported
+      ) {
+        assertSellEntireBalanceSupported();
+      }
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
           ? {
               denyExchanges: sources.sourcesKeys,
             }
-          : sources?.sourcesType === "include"
+          : sources?.sourcesType === "include" &&
+              sources.sourcesKeys?.length > 0
             ? {
                 allowExchanges: sources.sourcesKeys,
               }
             : {};
+
+      // Improves latency as we care about speed. This configuration returns the first
+      // available quote with 600ms delay.
+      // See https://docs.li.fi/guides/integration-tips/latency#selecting-timing-strategies
+      const swapStepTimingStrategies = "minWaitTime-600-2-300";
 
       const params = {
         fromChain: swap.chainId,
@@ -75,6 +96,7 @@ export function getLifiStrategy(
         toToken: swap.tokenOut.address,
         fromAddress: swap.recipient,
         skipSimulation: true,
+        swapStepTimingStrategies,
         slippage: Math.floor(swap.slippageTolerance / 100),
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
@@ -157,6 +179,7 @@ export function getLifiStrategy(
     getOriginEntryPoints,
     fetchFn,
     getSources,
+    assertSellEntireBalanceSupported,
   };
 }
 
@@ -220,4 +243,13 @@ export function parseLiFiError(error: unknown) {
       { cause: compactedError }
     );
   }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: SWAP_PROVIDER_NAME,
+    },
+    { cause: error }
+  );
 }

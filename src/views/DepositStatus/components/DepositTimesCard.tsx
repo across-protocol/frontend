@@ -16,6 +16,7 @@ import {
   isDefined,
   formatUSD,
   getToken,
+  getTokenForChain,
 } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
@@ -190,7 +191,7 @@ export function DepositTimesCard({
             <Text color="grey-400">Amount sent</Text>
             <TokenWrapper>
               <TokenFee
-                token={getToken(outputTokenSymbol)}
+                token={getTokenForChain(outputTokenSymbol, toChainId)}
                 amount={BigNumber.from(outputAmount)}
                 tokenChainId={toChainId}
                 tokenFirst
@@ -210,7 +211,7 @@ export function DepositTimesCard({
           fromChainId={fromChainId}
           toChainId={toChainId}
           inputToken={inputToken}
-          outputToken={getToken(outputTokenSymbol)}
+          outputToken={getTokenForChain(outputTokenSymbol, toChainId)}
           isSwap={isSwap}
           isUniversalSwap={isUniversalSwap}
           swapQuote={fromBridgePagePayload?.swapQuote}

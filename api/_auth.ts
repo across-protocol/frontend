@@ -8,7 +8,7 @@ export const Role = {
   OPT_IN_CHAINS: "opt-in-chains",
 };
 
-export function parseRole(req: TypedVercelRequest<unknown>) {
+export function parseRole(req: TypedVercelRequest<unknown, unknown>) {
   const xVercelProtectionBypass =
     req.headers?.["x-vercel-protection-bypass"] ||
     req.query?.["x-vercel-protection-bypass"];

@@ -1,9 +1,9 @@
 import axios, { AxiosError } from "axios";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
-import * as prettier from "prettier";
+import { mkdirSync, existsSync } from "fs";
 import path from "path";
 import { getEnvs } from "../api/_env";
 import { CHAIN_IDs } from "@across-protocol/constants";
+import { writeFileWithChangeDetection } from "./utils/codegen-utils";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -135,7 +135,7 @@ async function fetchLiFiSources(): Promise<DexSources> {
   return sources;
 }
 
-function generateSourcesFile(sources: DexSources, fileName: string): string {
+function generateSourcesCode(sources: DexSources): string {
   const allSources = Array.from(
     new Set([
       ...Object.values(sources.sources)
@@ -148,11 +148,7 @@ function generateSourcesFile(sources: DexSources, fileName: string): string {
     .map((source) => `  ${source}`)
     .join(",\n");
 
-  return `// Auto-generated file. Do not edit manually.
-// Generated on ${new Date().toISOString()}
-// This file contains available liquidity sources for ${fileName.includes("0x") ? "0x" : "LiFi"} DEX integration
-
-export const SOURCES = ${JSON.stringify(sources)} as {
+  return `export const SOURCES = ${JSON.stringify(sources)} as {
   strategy: string;
   sources: {
     [chainId: number]: {
@@ -204,25 +200,23 @@ async function generateDexSources() {
     ]);
 
     // Generate source files
-    const zeroXSourcesContent = generateSourcesFile(zeroXSources, "0x");
-    const lifiSourcesContent = generateSourcesFile(lifiSources, "lifi");
+    const zeroXCode = generateSourcesCode(zeroXSources);
+    const lifiCode = generateSourcesCode(lifiSources);
 
-    // Format and write files
     const zeroXPath = path.join(zeroXUtilsDir, "sources.ts");
     const lifiPath = path.join(lifiUtilsDir, "sources.ts");
 
-    writeFileSync(
+    // Write files with change detection
+    await writeFileWithChangeDetection(
       zeroXPath,
-      await prettier.format(zeroXSourcesContent, { parser: "typescript" })
+      "This file contains available liquidity sources for 0x DEX integration",
+      zeroXCode
     );
-
-    writeFileSync(
+    await writeFileWithChangeDetection(
       lifiPath,
-      await prettier.format(lifiSourcesContent, { parser: "typescript" })
+      "This file contains available liquidity sources for LiFi DEX integration",
+      lifiCode
     );
-
-    console.log(`✅ Generated 0x sources file: ${zeroXPath}`);
-    console.log(`✅ Generated LiFi sources file: ${lifiPath}`);
   } catch (error) {
     console.error("❌ Error generating DEX sources:", error);
     process.exit(1);

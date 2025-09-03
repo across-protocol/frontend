@@ -1,3 +1,4 @@
+import * as sdk from "@across-protocol/sdk";
 import { BigNumber, ethers } from "ethers";
 import { Span } from "@opentelemetry/api";
 
@@ -8,6 +9,7 @@ import {
   latestGasPriceCache,
   getLogger,
   getWrappedNativeTokenAddress,
+  getTokenByAddress,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
@@ -54,17 +56,22 @@ export async function handleApprovalSwap(
     refundAddress,
     recipient,
     depositor,
-    slippageTolerance,
+    slippageTolerance: _slippageTolerance, // DEPRECATED: slippage expressed as 0 <= slippage <= 100, 1 = 1%
+    slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1%
     excludeSources,
     includeSources,
     appFeePercent,
     appFeeRecipient,
+    strictTradeType,
+    skipChecks,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } =
     request.body && Object.keys(request.body).length > 0
       ? handleSwapBody(request.body, Number(request.query.destinationChainId))
       : { actions: [] };
+
+  const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -84,6 +91,7 @@ export async function handleApprovalSwap(
       embeddedActions: actions,
       appFeePercent,
       appFeeRecipient,
+      strictTradeType,
     },
     quoteFetchStrategies
   );
@@ -117,120 +125,86 @@ export async function handleApprovalSwap(
   const inputAmount =
     originSwapQuote?.maximumAmountIn || bridgeQuote.inputAmount;
 
-  const { allowance, balance } = await getBalanceAndAllowance({
-    chainId: originChainId,
-    tokenAddress: inputTokenAddress,
-    owner: crossSwap.depositor,
-    spender: crossSwapTx.to,
-  });
+  let allowance = BigNumber.from(0);
+  let balance = BigNumber.from(0);
+  if (!skipChecks) {
+    const checks = await getBalanceAndAllowance({
+      chainId: originChainId,
+      tokenAddress: inputTokenAddress,
+      owner: crossSwap.depositor,
+      spender: crossSwapTx.to,
+    });
+    allowance = checks.allowance;
+    balance = checks.balance;
+  }
 
   const isSwapTxEstimationPossible =
     !skipOriginTxEstimation &&
     allowance.gte(inputAmount) &&
     balance.gte(inputAmount);
+  const provider = getProvider(originChainId);
+  const originChainGasToken = getTokenByAddress(
+    getWrappedNativeTokenAddress(originChainId),
+    originChainId
+  );
+  const destinationChainGasToken = getTokenByAddress(
+    getWrappedNativeTokenAddress(destinationChainId),
+    destinationChainId
+  );
+  const bridgeQuoteInputToken = getTokenByAddress(
+    bridgeQuote.inputToken.address,
+    bridgeQuote.inputToken.chainId
+  );
 
-  let originTxGas: BigNumber | undefined;
-  let originTxGasPrice:
-    | {
-        maxFeePerGas: BigNumber;
-        maxPriorityFeePerGas: BigNumber;
-      }
-    | undefined;
-  let inputTokenPriceUsd: number;
-  let outputTokenPriceUsd: number;
-  let originNativePriceUsd: number;
-  let destinationNativePriceUsd: number;
-  let bridgeQuoteInputTokenPriceUsd: number;
-
-  if (isSwapTxEstimationPossible) {
-    const provider = getProvider(originChainId);
-    [
-      originTxGas,
-      originTxGasPrice,
-      inputTokenPriceUsd,
-      outputTokenPriceUsd,
-      originNativePriceUsd,
-      destinationNativePriceUsd,
-      bridgeQuoteInputTokenPriceUsd,
-    ] = await Promise.all([
-      provider.estimateGas({
-        ...crossSwapTx,
-        from: crossSwap.depositor,
-      }),
-      latestGasPriceCache(originChainId).get(),
-      getCachedTokenPrice(
-        inputToken.address,
-        "usd",
-        undefined,
-        inputToken.chainId
-      ),
-      getCachedTokenPrice(
-        outputToken.address,
-        "usd",
-        undefined,
-        outputToken.chainId
-      ),
-      getCachedTokenPrice(
-        getWrappedNativeTokenAddress(inputToken.chainId),
-        "usd",
-        undefined,
-        inputToken.chainId
-      ),
-      getCachedTokenPrice(
-        getWrappedNativeTokenAddress(outputToken.chainId),
-        "usd",
-        undefined,
-        outputToken.chainId
-      ),
-      getCachedTokenPrice(
-        bridgeQuote.inputToken.address,
-        "usd",
-        undefined,
-        bridgeQuote.inputToken.chainId
-      ),
-    ]);
-  } else {
-    [
-      originTxGasPrice,
-      inputTokenPriceUsd,
-      outputTokenPriceUsd,
-      originNativePriceUsd,
-      destinationNativePriceUsd,
-      bridgeQuoteInputTokenPriceUsd,
-    ] = await Promise.all([
-      latestGasPriceCache(originChainId).get(),
-      getCachedTokenPrice(
-        inputToken.address,
-        "usd",
-        undefined,
-        inputToken.chainId
-      ),
-      getCachedTokenPrice(
-        outputToken.address,
-        "usd",
-        undefined,
-        outputToken.chainId
-      ),
-      getCachedTokenPrice(
-        getWrappedNativeTokenAddress(inputToken.chainId),
-        "usd",
-        undefined,
-        inputToken.chainId
-      ),
-      getCachedTokenPrice(
-        getWrappedNativeTokenAddress(outputToken.chainId),
-        "usd",
-        undefined,
-        outputToken.chainId
-      ),
-      getCachedTokenPrice(
-        bridgeQuote.inputToken.address,
-        "usd",
-        undefined,
-        bridgeQuote.inputToken.chainId
-      ),
-    ]);
-  }
+  const [
+    originTxGas,
+    originTxGasPrice,
+    inputTokenPriceUsd,
+    outputTokenPriceUsd,
+    originNativePriceUsd,
+    destinationNativePriceUsd,
+    bridgeQuoteInputTokenPriceUsd,
+  ] = await Promise.all([
+    isSwapTxEstimationPossible
+      ? provider.estimateGas({
+          ...crossSwapTx,
+          from: crossSwap.depositor,
+        })
+      : undefined,
+    latestGasPriceCache(originChainId).get(),
+    getCachedTokenPrice({
+      symbol: inputToken.symbol,
+      tokenAddress: inputToken.address,
+      baseCurrency: "usd",
+      chainId: inputToken.chainId,
+      fallbackResolver: "lifi",
+    }),
+    getCachedTokenPrice({
+      symbol: outputToken.symbol,
+      tokenAddress: outputToken.address,
+      baseCurrency: "usd",
+      chainId: outputToken.chainId,
+      fallbackResolver: "lifi",
+    }),
+    originChainGasToken
+      ? getCachedTokenPrice({
+          symbol: originChainGasToken.symbol,
+          baseCurrency: "usd",
+        })
+      : 0,
+    destinationChainGasToken
+      ? getCachedTokenPrice({
+          symbol: destinationChainGasToken.symbol,
+          baseCurrency: "usd",
+        })
+      : 0,
+    bridgeQuoteInputToken
+      ? getCachedTokenPrice({
+          symbol: bridgeQuoteInputToken.symbol,
+          baseCurrency: "usd",
+        })
+      : 0,
+  ]);
 
   let approvalTxns:
     | {
@@ -260,8 +234,11 @@ export async function handleApprovalSwap(
     approvalSwapTx: {
       ...crossSwapTx,
       gas: originTxGas,
-      maxFeePerGas: originTxGasPrice?.maxFeePerGas,
-      maxPriorityFeePerGas: originTxGasPrice?.maxPriorityFeePerGas,
+      maxFeePerGas: (originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate)
+        ?.maxFeePerGas,
+      maxPriorityFeePerGas: (
+        originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
+      )?.maxPriorityFeePerGas,
     },
     allowance,
     balance,

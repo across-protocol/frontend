@@ -34,6 +34,8 @@ type SwapQuoteResult = {
   outputTokenSymbol: string;
   amount: string;
   tradeType: string;
+  appFeeRecipient?: string;
+  appFee?: string;
   success: boolean;
   data?: any;
   error?: any;
@@ -101,7 +103,24 @@ const argsFromCli = yargs(hideBin(process.argv))
     default: "exactInput",
     type: "string",
   })
+  .option("appFeeRecipient", {
+    alias: "afr",
+    description: "App fee recipient address",
+    type: "string",
+  })
+  .option("appFee", {
+    alias: "afp",
+    description: "App fee percentage (0-1, e.g., 0.01 for 1%)",
+    type: "string",
+  })
+  .option("includeSources", {
+    alias: "is",
+    description:
+      "Comma-separated list of sources to include in the output (e.g., 'uniswap_v3,uniswap_v2')",
+    type: "string",
+  })
   .help()
+  .strict()
   .parseSync();
 
 async function fetchSupportedChains(baseUrl: string): Promise<Chain[]> {
@@ -126,6 +145,9 @@ async function fetchSwapQuote(
     amount: string;
     depositor: string;
     tradeType: string;
+    appFeeRecipient?: string;
+    appFee?: string;
+    includeSources?: string;
   }
 ): Promise<any> {
   const response = await axios.get(`${baseUrl}/api/swap/approval`, {
@@ -175,6 +197,7 @@ const defaultChains = [
   CHAIN_IDs.LENS,
   CHAIN_IDs.SONEIUM,
   CHAIN_IDs.ZK_SYNC,
+  CHAIN_IDs.ZORA,
   CHAIN_IDs.INK,
   CHAIN_IDs.MODE,
 ];
@@ -190,6 +213,9 @@ async function main() {
     amount,
     depositor,
     tradeType,
+    appFeeRecipient,
+    appFee,
+    includeSources,
   } = argsFromCli;
 
   console.log(`Starting swap quotes test with host: ${host}`);
@@ -202,6 +228,9 @@ async function main() {
   console.log(`Max tokens: ${maxTokens}`);
   console.log(`Amount: ${amount}`);
   console.log(`Trade type: ${tradeType}`);
+  console.log(`App fee recipient: ${appFeeRecipient || "none"}`);
+  console.log(`App fee percent: ${appFee || "none"}`);
+  console.log(`Include sources: ${includeSources || "all"}`);
   console.log("\n");
 
   try {
@@ -265,14 +294,15 @@ async function main() {
         }
 
         const maxTokensToTest = Math.min(maxTokens, inputTokens.length);
-        const inputTokensToTest = inputTokens.slice(0, maxTokensToTest);
+        const shuffledInputTokens = inputTokens.sort(() => Math.random() - 0.5);
+        const inputTokensToTest = shuffledInputTokens.slice(0, maxTokensToTest);
 
         for (const inputToken of inputTokensToTest) {
-          console.log([
-            originChain.name,
-            destinationChain.name,
-            inputToken.symbol,
-          ]);
+          console.log({
+            originChain: originChain.name,
+            destinationChain: destinationChain.name,
+            inputToken: inputToken.symbol,
+          });
 
           // Calculate normalized amount based on token decimals
           const normalizedAmount = normalizeAmount(amount, inputToken.decimals);
@@ -314,6 +344,14 @@ async function main() {
                 amount: normalizedAmount,
                 depositor,
                 tradeType,
+                ...(appFeeRecipient &&
+                  appFee && {
+                    appFeeRecipient,
+                    appFee,
+                  }),
+                ...(includeSources && {
+                  includeSources,
+                }),
               };
 
               const quoteData = await fetchSwapQuote(host, quoteParams);
@@ -327,6 +365,8 @@ async function main() {
                 outputTokenSymbol: outputToken.symbol,
                 amount: normalizedAmount,
                 tradeType,
+                appFeeRecipient,
+                appFee,
                 success: true,
                 data: quoteData,
               });
@@ -345,12 +385,12 @@ async function main() {
                 outputTokenSymbol: outputToken.symbol,
                 amount: normalizedAmount,
                 tradeType,
+                appFeeRecipient,
+                appFee,
                 success: false,
                 error: {
                   message: error.message || "Unknown error",
-                  code: error.response?.data?.code || "UNKNOWN_ERROR",
-                  status: error.response?.data?.status,
-                  requestId: error.response?.data?.requestId,
+                  data: error.response?.data,
                 },
               });
             } finally {

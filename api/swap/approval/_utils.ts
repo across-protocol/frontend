@@ -2,7 +2,7 @@ import { PopulatedTransaction } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { CrossSwapQuotes } from "../../_dexes/types";
-import { tagIntegratorId } from "../../_integrator-id";
+import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import { getSpokePool } from "../../_utils";
 import {
   getSpokePoolPeriphery,
@@ -37,9 +37,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
 
     const swapAndDepositData = await extractSwapAndDepositDataStruct(
       crossSwapQuotes,
-      originRouter.name === "UniswapV3UniversalRouter"
-        ? TransferType.Transfer
-        : TransferType.Approval
+      originRouter.transferType ?? TransferType.Approval
     );
 
     if (originSwapEntryPoint.name === "SpokePoolPeriphery") {
@@ -233,11 +231,15 @@ export async function buildCrossSwapTxForAllowanceHolder(
       );
     }
   }
+  const txDataWithIntegratorId = integratorId
+    ? tagIntegratorId(integratorId, tx.data!)
+    : tx.data!;
+  const txDataWithSwapApiMarker = tagSwapApiMarker(txDataWithIntegratorId);
 
   return {
     from: crossSwapQuotes.crossSwap.depositor,
     to: toAddress,
-    data: integratorId ? tagIntegratorId(integratorId, tx.data!) : tx.data!,
+    data: txDataWithSwapApiMarker,
     value: tx.value,
   };
 }

@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as EditIcon } from "assets/icons/edit.svg";
 
-import { VoidHandler, shortenAddress } from "utils";
+import { VoidHandler, shortenAddress, getEcosystem } from "utils";
 import { Text } from "components";
 import { Tooltip } from "components/Tooltip";
 import { useEnsQuery } from "hooks/useEns";
@@ -9,28 +9,57 @@ import { useEnsQuery } from "hooks/useEns";
 import { ToAccount } from "../hooks/useToAccount";
 
 type Props = {
-  recipient: ToAccount;
+  recipient?: ToAccount;
+  toChainId: number;
   onClickChangeToAddress: VoidHandler;
 };
 
 export function RecipientRow(props: Props) {
-  const { data } = useEnsQuery(props.recipient.address);
+  const ecosystem = getEcosystem(props.toChainId);
+
+  const ensCols =
+    ecosystem === "evm" && props.recipient?.address ? (
+      <EnsData evmAddress={props.recipient?.address} />
+    ) : null;
+
+  const recipientAddress = props.recipient?.address;
+  const isRecipientSet = !!recipientAddress;
 
   return (
     <Wrapper>
       <Text color="grey-400">Address:</Text>
-      {data?.avatar && <img src={data.avatar} alt="avatar" />}
-      {data?.ensName && <Text>{data.ensName}</Text>}
+      {ensCols}
       <Tooltip
         tooltipId="recipient-address-bridge-form"
-        body={<Text size="xs">{props.recipient.address}</Text>}
+        body={
+          <Text size="xs">
+            {isRecipientSet
+              ? recipientAddress
+              : `Connect ${
+                  ecosystem === "evm" ? "an Ethereum" : "a Solana"
+                } wallet or manually set a valid recipient address`}
+          </Text>
+        }
       >
-        <Text color={data?.ensName ? "grey-400" : "light-200"}>
-          {shortenAddress(props.recipient.address, "...", 4)}
+        <Text color={"light-200"}>
+          {isRecipientSet
+            ? shortenAddress(recipientAddress, "...", 4)
+            : "Connect or set recipient"}
         </Text>
       </Tooltip>
       <EditIconStyled onClick={props.onClickChangeToAddress} />
     </Wrapper>
+  );
+}
+
+function EnsData(props: { evmAddress: string }) {
+  const { data } = useEnsQuery(props.evmAddress);
+
+  return (
+    <>
+      {data?.avatar && <img src={data.avatar} alt="avatar" />}
+      {data?.ensName && <Text>{data.ensName}</Text>}
+    </>
   );
 }
 

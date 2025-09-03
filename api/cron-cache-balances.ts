@@ -5,7 +5,7 @@ import { TypedVercelRequest } from "./_types";
 import { getEnvs } from "./_env";
 import {
   HUB_POOL_CHAIN_ID,
-  getBatchBalanceViaMulticall3,
+  getBatchBalance,
   getLogger,
   handleErrorCondition,
   latestBalanceCache,
@@ -15,6 +15,7 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
+
 import mainnetChains from "../src/data/chains_1.json";
 
 const { CRON_SECRET } = getEnvs();
@@ -34,22 +35,17 @@ const handler = async (
       throw new UnauthorizedError();
     }
 
-    const fullRelayers = getFullRelayers();
-
     // Skip cron job on testnet
     if (HUB_POOL_CHAIN_ID !== 1) {
       return;
     }
 
     for (const chain of mainnetChains) {
-      const batchResult = await getBatchBalanceViaMulticall3(
-        chain.chainId,
-        fullRelayers,
-        [
-          ethers.constants.AddressZero,
-          ...chain.outputTokens.map((token) => token.address),
-        ]
-      );
+      const fullRelayers = getFullRelayers(chain.chainId);
+      const batchResult = await getBatchBalance(chain.chainId, fullRelayers, [
+        ethers.constants.AddressZero,
+        ...chain.outputTokens.map((token) => token.address),
+      ]);
       await Promise.allSettled(
         chain.inputTokens.map(async (token) => {
           const transferRestrictedRelayers = getTransferRestrictedRelayers(

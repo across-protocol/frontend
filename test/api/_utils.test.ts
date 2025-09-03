@@ -4,7 +4,15 @@ import {
   getRouteDetails,
   validateChainAndTokenParams,
   ENABLED_ROUTES,
+  validEvmAddress,
+  validSvmAddress,
+  validAddress,
 } from "../../api/_utils";
+import { is } from "superstruct";
+
+const svmAddress = "9E8PWXZRJa7vBRvGZDmLxSJ4iAMmB4BS7FYUruHvnCPz";
+const evmAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+const junkAddress = "0xdeadbeef";
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -259,6 +267,40 @@ describe("_utils", () => {
             resolvedOriginChainId: route.fromChain,
           });
         });
+    });
+
+    describe("#validEvmAddress", () => {
+      test("Accepts valid EVM address", () => {
+        expect(is(evmAddress, validEvmAddress())).toBe(true);
+      });
+
+      test("Rejects invalid EVM address", () => {
+        expect(is(svmAddress, validEvmAddress())).toBe(false);
+        expect(is(junkAddress, validEvmAddress())).toBe(false);
+      });
+    });
+
+    describe("#validSvmAddress", () => {
+      test("Accepts valid SVM address", () => {
+        expect(is(svmAddress, validSvmAddress())).toBe(true);
+      });
+
+      test("Rejects invalid SVM address", () => {
+        expect(is(evmAddress, validSvmAddress())).toBe(false);
+        expect(is(junkAddress, validSvmAddress())).toBe(false);
+      });
+    });
+    describe("#validAddress", () => {
+      test("Accepts valid SVM address", () => {
+        expect(is(svmAddress, validAddress())).toBe(true);
+      });
+
+      test("Accepts valid EVM address", () => {
+        expect(is(evmAddress, validAddress())).toBe(true);
+      });
+      test("Rejects invalid addresses", () => {
+        expect(is(junkAddress, validAddress())).toBe(false);
+      });
     });
   });
 });

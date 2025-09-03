@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { utils } from "ethers";
+import { isAddress as isSvmAddress } from "@solana/kit";
 
 const RL_DISALLOW_LIST_URL = (addr: string) =>
   `https://blacklist.risklabs.foundation/api/check/${addr}`;
@@ -14,7 +16,7 @@ export const useDisallowList = (account: string | undefined) => {
     queryFn: async ({ queryKey }) => {
       const [, address] = queryKey;
 
-      if (!address) {
+      if (!address || !utils.isAddress(address) || isSvmAddress(address)) {
         return false;
       }
 

@@ -1,4 +1,6 @@
+import { ReadonlyUint8Array } from "@solana/kit";
 import { BigNumber, BigNumberish } from "ethers";
+import { Hex, toHex } from "viem";
 
 export function bigNumberifyObject<T>(obj: Record<string, unknown>): T {
   return Object.fromEntries(
@@ -23,4 +25,23 @@ export function isBigNumberish(value: unknown): value is BigNumberish {
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Converts a Uint8Array to a BigNumber
+ * @param array The Uint8Array to convert
+ * @returns A BigNumber representation of the array
+ */
+export function uint8ArrayToBigNumber(
+  array: Uint8Array | ReadonlyUint8Array
+): BigNumber {
+  return BigNumber.from(uin8ArrayToHex(array));
+}
+
+export function uin8ArrayToHex(array: Uint8Array | ReadonlyUint8Array): Hex {
+  return toHex(
+    Array.from(array)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("")
+  );
 }

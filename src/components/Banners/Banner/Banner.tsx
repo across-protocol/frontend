@@ -1,9 +1,19 @@
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { Wrapper } from "./Banner.styles";
+
 /**
  * React component that renders its children in a super header on top of the page.
  */
-const Banner = ({ children }: { children: React.ReactNode }) => {
+const Banner = ({
+  children,
+  type,
+  onClick,
+}: {
+  children: React.ReactNode;
+  type?: "info" | "success";
+  onClick?: () => void;
+}) => {
   const container = useRef(document.getElementById("banner"));
   // We create the "super-header" element and insert it into the DOM, if it does not exist already
   useLayoutEffect(() => {
@@ -20,8 +30,9 @@ const Banner = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
   return createPortal(
-    children,
-    // <Wrapper className={className}>{children}</Wrapper>,
+    <Wrapper type={type} onClick={onClick}>
+      {children}
+    </Wrapper>,
     container.current
   );
 };

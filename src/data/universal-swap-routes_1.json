@@ -18,7 +18,7 @@
     "toTokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "fromTokenSymbol": "GHO",
     "toTokenSymbol": "GHO",
-    "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+    "fromSpokeAddress": "0xb234cA484866c811d0e6D3318866F583781ED045",
     "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "type": "universal-swap",
     "isNative": false
@@ -30,7 +30,7 @@
     "toTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     "fromTokenSymbol": "GHO",
     "toTokenSymbol": "USDC",
-    "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+    "fromSpokeAddress": "0xb234cA484866c811d0e6D3318866F583781ED045",
     "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "type": "universal-swap",
     "isNative": false
@@ -42,7 +42,7 @@
     "toTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "fromTokenSymbol": "GHO",
     "toTokenSymbol": "USDT",
-    "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+    "fromSpokeAddress": "0xb234cA484866c811d0e6D3318866F583781ED045",
     "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "type": "universal-swap",
     "isNative": false
@@ -54,7 +54,7 @@
     "toTokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
     "fromTokenSymbol": "GHO",
     "toTokenSymbol": "DAI",
-    "fromSpokeAddress": "0xe7cb3e167e7475dE1331Cf6E0CEb187654619E12",
+    "fromSpokeAddress": "0xb234cA484866c811d0e6D3318866F583781ED045",
     "l1TokenAddress": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
     "type": "universal-swap",
     "isNative": false

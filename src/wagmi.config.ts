@@ -1,11 +1,5 @@
 import { http, createConfig, Transport } from "wagmi";
-import {
-  injected,
-  metaMask,
-  safe,
-  walletConnect,
-  coinbaseWallet,
-} from "wagmi/connectors";
+import { metaMask, walletConnect, coinbaseWallet } from "wagmi/connectors";
 
 import { chains_viem } from "constants/chains/configs";
 import { walletConnectProjectId } from "utils/constants";
@@ -26,13 +20,11 @@ export const wagmiConfig = createConfig({
     {} as Record<number, Transport>
   ),
   connectors: [
-    injected(),
     coinbaseWallet({
       appName: dappMetadata.name,
       appLogoUrl: dappMetadata.iconUrl,
     }),
     walletConnect({ projectId: walletConnectProjectId }),
-    safe(),
     metaMask({
       dappMetadata,
     }),

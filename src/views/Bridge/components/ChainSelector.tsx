@@ -9,13 +9,16 @@ import {
   capitalizeFirstLetter,
   getChainInfo,
   getToken,
+  isDefined,
   shortenAddress,
 } from "utils";
 
-import { useBalanceBySymbolPerChain, useConnection, zeroBalance } from "hooks";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { useBalanceBySymbolPerChain, zeroBalance } from "hooks/useBalance";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
-import { getSupportedChains } from "../utils";
+import { getSupportedChains, findEnabledRoute } from "../utils";
 import { externConfigs } from "constants/chains/configs";
 
 type Props = {
@@ -40,16 +43,23 @@ export function ChainSelector({
   // Get supported chains and filter based on external projects
   const availableChains = filterAvailableChains(fromOrTo, selectedRoute);
 
-  const { account, isConnected } = useConnection();
+  const { isConnected: isConnectedEVM } = useConnectionEVM();
+  const { isConnected: isConnectedSVM } = useConnectionSVM();
+
   const { balancesPerChain } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: availableChains.map((c) => c.chainId),
-    account,
   });
 
   const sortedChains = useMemo(
-    () => sortChains(availableChains, balancesPerChain, isConnected, isFrom),
-    [availableChains, balancesPerChain, isConnected, isFrom]
+    () =>
+      sortChains(
+        availableChains,
+        balancesPerChain,
+        isConnectedEVM || isConnectedSVM,
+        isFrom
+      ),
+    [availableChains, balancesPerChain, isConnectedEVM, isConnectedSVM, isFrom]
   );
 
   return (
@@ -58,7 +68,7 @@ export function ChainSelector({
         value: { chainId: chain.chainId, externalProjectId: chain.projectId },
         element: <ChainInfoElement chain={chain} />,
         suffix:
-          isConnected && isFrom ? (
+          (isConnectedEVM || isConnectedSVM) && isFrom ? (
             <Text size="lg" color="grey-400">
               {chain.balanceFormatted}
             </Text>
@@ -134,7 +144,7 @@ function ChainInfoElement({
 function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
   const isFrom = fromOrTo === "from";
   let chains = getSupportedChains(fromOrTo);
-  const { externalProjectId, fromChain } = selectedRoute;
+  const { externalProjectId, fromChain, fromTokenSymbol } = selectedRoute;
 
   if (externalProjectId && isFrom) {
     const { intermediaryChain } = externConfigs[externalProjectId];
@@ -145,7 +155,20 @@ function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
     chains = chains.filter(({ projectId }) => {
       if (!projectId) return true;
       const { intermediaryChain } = externConfigs[projectId];
-      return fromChain !== intermediaryChain;
+
+      // Don't allow selection of same chain as intermediary
+      if (fromChain === intermediaryChain) return false;
+
+      // For external projects, check if there's actually an enabled route
+      // from the current fromChain to this external project
+      const hasEnabledRoute = findEnabledRoute({
+        fromChain,
+        toChain: intermediaryChain,
+        externalProjectId: projectId,
+        inputTokenSymbol: fromTokenSymbol,
+      });
+
+      return isDefined(hasEnabledRoute);
     });
   }
 

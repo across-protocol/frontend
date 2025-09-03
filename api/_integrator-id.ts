@@ -1,6 +1,7 @@
 import { utils } from "ethers";
 
 export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
+export const SWAP_CALLDATA_MARKER = "0x73c0de";
 
 export function isValidIntegratorId(integratorId: string) {
   return (
@@ -26,4 +27,8 @@ export function tagIntegratorId(integratorId: string, txData: string) {
   return utils.hexlify(
     utils.concat([txData, DOMAIN_CALLDATA_DELIMITER, integratorId])
   );
+}
+
+export function tagSwapApiMarker(txData: string) {
+  return utils.hexlify(utils.concat([txData, SWAP_CALLDATA_MARKER]));
 }

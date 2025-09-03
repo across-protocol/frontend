@@ -1,6 +1,7 @@
 import { CHAIN_IDs } from "../_constants";
 import { getWrappedGhoStrategy } from "../_dexes/gho/wrapped-gho";
 import { getWghoMulticallStrategy } from "../_dexes/gho/multicall";
+import { getUniversalRouter02Strategy } from "../_dexes/uniswap/universal-router-02";
 import { getSwapRouter02Strategy } from "../_dexes/uniswap/swap-router-02";
 import { get0xStrategy } from "../_dexes/0x/allowance-holder";
 import { getLifiStrategy } from "../_dexes/lifi/lifi-router";
@@ -9,17 +10,16 @@ import { QuoteFetchStrategies } from "../_dexes/utils";
 
 export const quoteFetchStrategies: QuoteFetchStrategies = {
   prioritizationMode: {
-    mode: "priority-speed",
-    priorityChunkSize: 1,
+    mode: "equal-speed",
   },
   default: [
     get0xStrategy("SpokePoolPeriphery"),
+    getUniversalRouter02Strategy(),
     getLifiStrategy("SpokePoolPeriphery"),
-    getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api"),
   ],
   chains: {
     [CHAIN_IDs.LENS]: [
-      getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk-swap-quoter"),
+      getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
     ],
   },
   swapPairs: {
