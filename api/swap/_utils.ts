@@ -27,19 +27,13 @@ import {
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
-  getCachedTokenPrice,
   paramToArray,
   getChainInfo,
+  getCachedTokenPrice,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
-import {
-  CrossSwapFees,
-  CrossSwapQuotes,
-  SwapQuote,
-  Token,
-  AmountType,
-} from "../_dexes/types";
+import { CrossSwapQuotes, SwapQuote, Token, AmountType } from "../_dexes/types";
 import { AMOUNT_TYPE, AppFee, CrossSwapType } from "../_dexes/utils";
 import {
   encodeApproveCalldata,
@@ -49,7 +43,6 @@ import {
 } from "../_multicall-handler";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
-import { resolveUsdPriceViaFallbackResolver } from "../coingecko";
 
 const PRICE_DIFFERENCE_TOLERANCE = 0.01;
 
@@ -74,6 +67,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFee: optional(positiveFloatStr(1)),
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
+  skipChecks: optional(boolStr()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -103,12 +97,14 @@ export async function handleBaseSwapQueryParams(
     appFee,
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
+    skipChecks: _skipChecks = "false",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
   const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
+  const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
@@ -203,6 +199,7 @@ export async function handleBaseSwapQueryParams(
     appFeePercent: appFeeNum,
     appFeeRecipient,
     strictTradeType,
+    skipChecks,
   };
 }
 
@@ -484,92 +481,13 @@ export function getApprovalTxns(params: {
   return approvalTxns;
 }
 
-async function calculateSwapFee(
-  swapQuote: SwapQuote,
-  baseCurrency: string
-): Promise<Record<string, number>> {
-  const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
-  const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
-    getCachedTokenPrice(
-      tokenIn.address,
-      baseCurrency,
-      undefined,
-      tokenIn.chainId
-    ),
-    getCachedTokenPrice(
-      tokenOut.address,
-      baseCurrency,
-      undefined,
-      tokenOut.chainId
-    ),
-  ]);
-
-  const normalizedIn =
-    parseFloat(utils.formatUnits(expectedAmountIn, tokenIn.decimals)) *
-    inputTokenPriceBase;
-  const normalizedOut =
-    parseFloat(utils.formatUnits(expectedAmountOut, tokenOut.decimals)) *
-    outputTokenPriceBase;
-  return {
-    [baseCurrency]: normalizedIn - normalizedOut,
-  };
-}
-
-async function calculateBridgeFee(
-  bridgeQuote: CrossSwapQuotes["bridgeQuote"],
-  baseCurrency: string
-): Promise<Record<string, number>> {
-  const { inputToken, suggestedFees } = bridgeQuote;
-  const inputTokenPriceBase = await getCachedTokenPrice(
-    inputToken.address,
-    baseCurrency,
-    undefined,
-    inputToken.chainId
-  );
-  const normalizedFee =
-    parseFloat(
-      utils.formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
-    ) * inputTokenPriceBase;
-
-  return {
-    [baseCurrency]: normalizedFee,
-  };
-}
-
-export async function calculateCrossSwapFees(
-  crossSwapQuote: CrossSwapQuotes,
-  baseCurrency = "usd"
-): Promise<CrossSwapFees> {
-  const bridgeFeePromise = calculateBridgeFee(
-    crossSwapQuote.bridgeQuote,
-    baseCurrency
-  );
-
-  const originSwapFeePromise = crossSwapQuote?.originSwapQuote
-    ? calculateSwapFee(crossSwapQuote.originSwapQuote, baseCurrency)
-    : Promise.resolve(undefined);
-
-  const destinationSwapFeePromise = crossSwapQuote?.destinationSwapQuote
-    ? calculateSwapFee(crossSwapQuote.destinationSwapQuote, baseCurrency)
-    : Promise.resolve(undefined);
-
-  const [bridgeFees, originSwapFees, destinationSwapFees] = await Promise.all([
-    bridgeFeePromise,
-    originSwapFeePromise,
-    destinationSwapFeePromise,
-  ]);
-
-  return {
-    bridgeFees,
-    originSwapFees,
-    destinationSwapFees,
-  };
-}
-
 export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((element) => {
-      if (element instanceof BigNumber) {
+      if (
+        element instanceof BigNumber ||
+        (element && typeof element === "object" && element._isBigNumber)
+      ) {
         return element.toString();
       }
       if (typeof element === "object" && element !== null) {
@@ -581,7 +499,10 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 
   return Object.fromEntries(
     Object.entries(value).map(([key, val]) => {
-      if (val instanceof BigNumber) {
+      if (
+        val instanceof BigNumber ||
+        (val && typeof val === "object" && val._isBigNumber)
+      ) {
         return [key, val.toString()];
       }
       if (typeof val === "object" && val !== null) {
@@ -670,13 +591,15 @@ export async function calculateSwapFees(params: {
         outputTokenPriceUsd > inputTokenPriceUsd)
     ) {
       [inputTokenPriceUsd, outputTokenPriceUsd] = await Promise.all([
-        resolveUsdPriceViaFallbackResolver({
-          address: inputToken.address,
+        getCachedTokenPrice({
+          symbol: inputToken.symbol,
+          tokenAddress: inputToken.address,
           chainId: inputToken.chainId,
           fallbackResolver: "lifi",
         }),
-        resolveUsdPriceViaFallbackResolver({
-          address: outputToken.address,
+        getCachedTokenPrice({
+          symbol: outputToken.symbol,
+          tokenAddress: outputToken.address,
           chainId: outputToken.chainId,
           fallbackResolver: "lifi",
         }),

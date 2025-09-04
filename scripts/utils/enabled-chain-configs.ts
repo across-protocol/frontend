@@ -19,6 +19,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
+  chainConfigs.LENS,
   chainConfigs.BSC,
   chainConfigs.SOLANA,
 ];
