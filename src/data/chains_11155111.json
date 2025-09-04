@@ -49,6 +49,13 @@
         "name": "Grass",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0x9D15Db83680572C9a48826d51b733ea3B0957De3",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
       }
     ],
     "outputTokens": [
@@ -93,6 +100,13 @@
         "name": "Grass",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/grass.svg"
+      },
+      {
+        "address": "0x9D15Db83680572C9a48826d51b733ea3B0957De3",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
       }
     ]
   },
@@ -636,6 +650,61 @@
         "name": "Tatara USDC",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/tatara-usdc.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 808813,
+    "name": "BOB Sepolia",
+    "publicRpcUrl": "https://bob-sepolia.rpc.gobob.xyz",
+    "explorerUrl": "https://bob-sepolia.explorer.gobob.xyz",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/bob-sepolia/assets/logo.svg",
+    "spokePool": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    "spokePoolBlock": 15393172,
+    "inputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xAdCE1AB74C8e64c155953A8BdE37cBB06Cf7086D",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0xAdCE1AB74C8e64c155953A8BdE37cBB06Cf7086D",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
       }
     ]
   },
