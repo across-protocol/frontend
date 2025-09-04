@@ -5,6 +5,7 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
+import { Client } from "./_pool";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -647,7 +648,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
  */
 export const getHubPoolClient = () => {
   const hubPoolConfig = makeHubPoolClientConfig(HUB_POOL_CHAIN_ID);
-  return new sdk.pool.Client(
+  return new Client(
     hubPoolConfig,
     {
       provider: getProvider(HUB_POOL_CHAIN_ID),
