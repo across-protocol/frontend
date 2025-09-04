@@ -114,10 +114,6 @@
     "scripts/generate-swap-routes.ts": [
       "tsx",
       "git add src/data/"
-    ],
-    "api/**/*.ts": [
-      "yarn generate:dex-sources",
-      "git add api/_dexes/*/utils/sources.ts"
     ]
   },
   "browserslist": {
