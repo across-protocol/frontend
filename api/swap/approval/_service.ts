@@ -189,19 +189,28 @@ export async function handleApprovalSwap(
     originChainGasToken
       ? getCachedTokenPrice({
           symbol: originChainGasToken.symbol,
+          tokenAddress: originChainGasToken.addresses[originChainId],
           baseCurrency: "usd",
+          chainId: originChainId,
+          fallbackResolver: "lifi",
         })
       : 0,
     destinationChainGasToken
       ? getCachedTokenPrice({
           symbol: destinationChainGasToken.symbol,
+          tokenAddress: destinationChainGasToken.addresses[destinationChainId],
           baseCurrency: "usd",
+          chainId: destinationChainId,
+          fallbackResolver: "lifi",
         })
       : 0,
     bridgeQuoteInputToken
       ? getCachedTokenPrice({
           symbol: bridgeQuoteInputToken.symbol,
+          tokenAddress: bridgeQuoteInputToken.addresses[originChainId],
           baseCurrency: "usd",
+          chainId: originChainId,
+          fallbackResolver: "lifi",
         })
       : 0,
   ]);
