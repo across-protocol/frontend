@@ -8,9 +8,18 @@ dotenv.config({
 });
 
 const SWAP_API_BASE_URL =
-  process.env.E2E_TESTS_SWAP_API_BASE_URL || "https://app.across.to/api";
-const SWAP_API_URL = `${SWAP_API_BASE_URL}/swap/approval`;
+  process.env.E2E_TESTS_SWAP_API_BASE_URL || "https://app.across.to";
+const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const DEPOSITOR = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+
+const B2B_BASE_TEST_CASE = {
+  amount: ethers.utils.parseUnits("1", 6).toString(), // 1 USDC
+  inputToken: TOKEN_SYMBOLS_MAP.USDC,
+  outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  originChainId: CHAIN_IDs.OPTIMISM,
+  destinationChainId: CHAIN_IDs.ARBITRUM,
+  depositor: DEPOSITOR,
+};
 
 describe("/swap/approval e2e tests", () => {
   // Helper function to validate response structure
@@ -43,50 +52,26 @@ describe("/swap/approval e2e tests", () => {
     expect(response.data.minOutputAmount).toMatch(/^\d+$/);
 
     // Validate bridge step structure
-    expect(response.data.steps.bridge.inputAmount).toBeDefined();
-    expect(response.data.steps.bridge.outputAmount).toBeDefined();
+    expect(response.data.steps.bridge.inputAmount).toMatch(/^\d+$/);
+    expect(response.data.steps.bridge.outputAmount).toMatch(/^\d+$/);
     expect(response.data.steps.bridge.tokenIn).toBeDefined();
     expect(response.data.steps.bridge.tokenOut).toBeDefined();
     expect(response.data.steps.bridge.fees).toBeDefined();
 
     // Validate checks structure
-    expect(response.data.checks.allowance.actual).toBeDefined();
-    expect(response.data.checks.allowance.expected).toBeDefined();
-    expect(response.data.checks.balance.actual).toBeDefined();
-    expect(response.data.checks.balance.expected).toBeDefined();
+    expect(response.data.checks.allowance.actual).toMatch(/^\d+$/);
+    expect(response.data.checks.allowance.expected).toMatch(/^\d+$/);
+    expect(response.data.checks.balance.actual).toMatch(/^\d+$/);
+    expect(response.data.checks.balance.expected).toMatch(/^\d+$/);
   };
 
   // B2B specific checks
-  const validateB2BResponse = (response: any, inputParams: any) => {
+  const validateB2BResponse = (response: any, _inputParams: any) => {
     validateSwapApprovalResponse(response);
 
     expect(response.data.steps.originSwap).toBeUndefined();
     expect(response.data.steps.bridge).toBeDefined();
     expect(response.data.steps.destinationSwap).toBeUndefined();
-  };
-
-  // B2A specific checks
-  const validateB2AResponse = (response: any, inputParams: any) => {
-    validateSwapApprovalResponse(response);
-    expect(response.data.steps.originSwap).toBeDefined();
-    expect(response.data.steps.bridge).toBeUndefined();
-    expect(response.data.steps.destinationSwap).toBeDefined();
-  };
-
-  // A2B specific checks
-  const validateA2BResponse = (response: any, inputParams: any) => {
-    validateSwapApprovalResponse(response);
-    expect(response.data.steps.originSwap).toBeDefined();
-    expect(response.data.steps.bridge).toBeUndefined();
-    expect(response.data.steps.destinationSwap).toBeDefined();
-  };
-
-  // A2A specific checks
-  const validateA2AResponse = (response: any, inputParams: any) => {
-    validateSwapApprovalResponse(response);
-    expect(response.data.steps.originSwap).toBeDefined();
-    expect(response.data.steps.bridge).toBeDefined();
-    expect(response.data.steps.destinationSwap).toBeDefined();
   };
 
   const validateExactInputResponse = (response: any, inputParams: any) => {
@@ -101,6 +86,37 @@ describe("/swap/approval e2e tests", () => {
     expect(
       BigNumber.from(response.data.minOutputAmount).gte(inputParams.amount)
     ).toBe(true);
+  };
+
+  const testBaseTestCases = (
+    testCases: (typeof B2B_BASE_TEST_CASE)[],
+    tradeType: string,
+    swapTypeValidator: (response: any, inputParams: any) => void,
+    amountTypeValidator: (response: any, inputParams: any) => void
+  ) => {
+    testCases.forEach((testCase) => {
+      it(`should get valid swap quote for ${
+        testCase.inputToken.symbol
+      } (${testCase.originChainId}) -> ${
+        testCase.outputToken.symbol
+      } (${testCase.destinationChainId})`, async () => {
+        const response = await axios.get(SWAP_API_URL, {
+          params: {
+            amount: testCase.amount,
+            tradeType,
+            inputToken: testCase.inputToken.addresses[testCase.originChainId],
+            outputToken:
+              testCase.outputToken.addresses[testCase.destinationChainId],
+            originChainId: testCase.originChainId,
+            destinationChainId: testCase.destinationChainId,
+            depositor: testCase.depositor,
+          },
+        });
+        expect(response.status).toBe(200);
+        swapTypeValidator(response, testCase);
+        amountTypeValidator(response, testCase);
+      }, 30_000);
+    });
   };
 
   describe("Error handling", () => {
@@ -127,81 +143,31 @@ describe("/swap/approval e2e tests", () => {
   });
 
   describe("B2B", () => {
-    const baseTestCases = [
-      {
-        amount: ethers.utils.parseUnits("1", 6).toString(), // 1 USDC
-        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM], // USDC on Optimism
-        outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM], // USDC on Arbitrum
-        originChainId: CHAIN_IDs.OPTIMISM,
-        destinationChainId: CHAIN_IDs.ARBITRUM,
-        depositor: DEPOSITOR,
-      },
-    ];
-
     describe("exactInput", () => {
-      const testCases = baseTestCases.map((testCase) => ({
-        ...testCase,
-        tradeType: "exactInput",
-      }));
-
-      testCases.forEach((testCase) => {
-        it(`should get valid swap quote for ${
-          testCase.inputToken
-        } (${testCase.originChainId}) - ${
-          testCase.outputToken
-        } (${testCase.destinationChainId})`, async () => {
-          const response = await axios.get(SWAP_API_URL, {
-            params: testCase,
-          });
-          expect(response.status).toBe(200);
-          validateB2BResponse(response, testCase);
-          validateExactInputResponse(response, testCase);
-        });
-      }, 30_000);
-    });
-
-    describe("exactOutput", () => {
-      const testCases = baseTestCases.map((testCase) => ({
-        ...testCase,
-        tradeType: "exactOutput",
-      }));
-
-      testCases.forEach((testCase) => {
-        it(`should get valid swap quote for ${
-          testCase.inputToken
-        } (${testCase.originChainId}) - ${
-          testCase.outputToken
-        } (${testCase.destinationChainId})`, async () => {
-          const response = await axios.get(SWAP_API_URL, {
-            params: testCase,
-          });
-          expect(response.status).toBe(200);
-          validateB2BResponse(response, testCase);
-          validateExactOutputResponse(response, testCase);
-        });
-      }, 30_000);
+      testBaseTestCases(
+        [B2B_BASE_TEST_CASE],
+        "exactInput",
+        validateB2BResponse,
+        validateExactInputResponse
+      );
     });
 
     describe("minOutput", () => {
-      const testCases = baseTestCases.map((testCase) => ({
-        ...testCase,
-        tradeType: "minOutput",
-      }));
+      testBaseTestCases(
+        [B2B_BASE_TEST_CASE],
+        "minOutput",
+        validateB2BResponse,
+        validateMinOutputResponse
+      );
+    });
 
-      testCases.forEach((testCase) => {
-        it(`should get valid swap quote for ${
-          testCase.inputToken
-        } (${testCase.originChainId}) - ${
-          testCase.outputToken
-        } (${testCase.destinationChainId})`, async () => {
-          const response = await axios.get(SWAP_API_URL, {
-            params: testCase,
-          });
-          expect(response.status).toBe(200);
-          validateB2BResponse(response, testCase);
-          validateMinOutputResponse(response, testCase);
-        });
-      }, 30_000);
+    describe("exactOutput", () => {
+      testBaseTestCases(
+        [B2B_BASE_TEST_CASE],
+        "exactOutput",
+        validateB2BResponse,
+        validateExactOutputResponse
+      );
     });
   });
 });
