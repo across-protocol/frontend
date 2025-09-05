@@ -1880,8 +1880,8 @@
     "publicRpcUrl": "https://api.mainnet-beta.solana.com",
     "explorerUrl": "https://solscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/solana/assets/logo.svg",
-    "spokePool": "DLv3NggMiSaef97YCkew5xKUHDh13tVGZ7tydt3ZeAru",
-    "spokePoolBlock": 349354195,
+    "spokePool": "JAZWcGrpSWNPTBj8QtJ9UyQqhJCDhG9GJkDeMf5NQBiq",
+    "spokePoolBlock": 317101505,
     "inputTokens": [
       {
         "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",

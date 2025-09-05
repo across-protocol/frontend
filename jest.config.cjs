@@ -11,12 +11,10 @@ module.exports = {
     "^.+\\.svg$": "jest-transform-stub",
     "^.+\\.png$": "jest-transform-stub",
   },
+  // Only include test/api directory for API tests
+  testMatch: ["<rootDir>/test/api/**/*.test.{ts,tsx}"],
   moduleNameMapper: {
-    "^components/(.*)$": "<rootDir>/src/components/$1",
-    "^utils/(.*)$": "<rootDir>/src/utils/$1",
-    "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
-    "^assets/(.*)$": "<rootDir>/src/assets/$1",
-    "^data/(.*)$": "<rootDir>/src/data/$1",
+    // Only keep uuid mapping for API tests - remove frontend path mappings
     uuid: require.resolve("uuid"),
   },
 };
