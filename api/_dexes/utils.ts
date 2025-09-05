@@ -5,7 +5,6 @@ import {
   utils as ethersUtils,
 } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
@@ -42,6 +41,7 @@ import {
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
 import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
 
 export type CrossSwapType =
@@ -411,9 +411,7 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
-  const spokePool = getSpokePool(originChainId);
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
@@ -433,7 +431,10 @@ export async function extractDepositDataStruct(
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
     quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    fillDeadline: await getFillDeadline(spokePool),
+    fillDeadline: getFillDeadline(
+      destinationChainId,
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
+    ),
     exclusivityDeadline:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     exclusivityParameter:
@@ -488,17 +489,6 @@ export async function extractSwapAndDepositDataStruct(
     spokePool: spokePool.address,
     nonce: permitNonce || 0, // Only used for permit transfers
   };
-}
-
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 export function getQuoteFetchStrategies(
