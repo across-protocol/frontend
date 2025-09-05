@@ -1,16 +1,12 @@
 import assert from "assert";
-import * as uma from "./uma";
 import {
-  bnZero,
-  toBNWei,
-  fixedPointAdjustment,
-  calcPeriodicCompoundInterest,
-  calcApr,
-  BigNumber,
-  BigNumberish,
-  fromWei,
-} from "../utils";
-import { ethers, Signer } from "ethers";
+  contracts,
+  lpFeeCalculator,
+  typechain,
+  utils,
+} from "@across-protocol/sdk";
+import * as uma from "./uma";
+import { BigNumber, BigNumberish, ethers, Signer } from "ethers";
 import type { Overrides } from "@ethersproject/contracts";
 import {
   TransactionRequest,
@@ -21,15 +17,12 @@ import { Provider, Block } from "@ethersproject/providers";
 import set from "lodash/set";
 import get from "lodash/get";
 import has from "lodash/has";
-import { calculateInstantaneousRate, RateModel } from "../lpFeeCalculator";
-import { hubPool, acrossConfigStore } from "../contracts";
-import {
-  AcceleratingDistributor,
-  AcceleratingDistributor__factory,
-  MerkleDistributor,
-  MerkleDistributor__factory,
-  TypedEvent,
-} from "../typechain";
+
+type TypedEvent = typechain.TypedEvent;
+type AcceleratingDistributor = typeof AcceleratingDistributor__factory;
+type MerkleDistributor = typeof MerkleDistributor__factory;
+const { AcceleratingDistributor__factory, MerkleDistributor__factory } =
+  typechain;
 
 const { erc20 } = uma.clients;
 const { loop } = uma.utils;
@@ -129,7 +122,7 @@ export type PooledToken = {
 
 class PoolState {
   constructor(
-    private contract: hubPool.Instance,
+    private contract: contracts.hubPool.Instance,
     private address: string
   ) {}
   public async read(
@@ -177,10 +170,10 @@ export class PoolEventState {
   // maintain ordered unique list of events so we can calculate state
   private events: uma.SerializableEvent[] = [];
   constructor(
-    private contract: hubPool.Instance,
+    private contract: contracts.hubPool.Instance,
     private startBlock = 0
   ) {
-    this.iface = new ethers.utils.Interface(hubPool.Factory.abi);
+    this.iface = new ethers.utils.Interface(contracts.hubPool.Factory.abi);
   }
   private makeId = (params: EventIdParams): string => {
     return uma.oracle.utils.eventKey(params);
@@ -212,7 +205,7 @@ export class PoolEventState {
     endBlock: number,
     l1TokenAddress?: string,
     userAddress?: string
-  ): Promise<hubPool.EventState> {
+  ): Promise<contracts.hubPool.EventState> {
     const events = await Promise.all([
       ...(await this.contract.queryFilter(
         this.contract.filters.LiquidityAdded(
@@ -236,7 +229,7 @@ export class PoolEventState {
       )),
     ]);
     this.processEvents(events);
-    return hubPool.getEventState(this.events);
+    return contracts.hubPool.getEventState(this.events);
   }
   makeEventFromLog = (log: Log): uma.SerializableEvent => {
     const description = this.iface.parseLog(log);
@@ -259,14 +252,14 @@ export class PoolEventState {
     // save these events
     this.processEvents(events);
     // only process token receipt events, because we just want the l1 token involved with this transfer
-    const eventState = hubPool.getEventState(events);
+    const eventState = contracts.hubPool.getEventState(events);
     // event state is keyed by l1token address
     const l1Tokens = Object.keys(eventState);
     assert(l1Tokens.length, "Token not found from events");
     assert(l1Tokens.length === 1, "Multiple tokens found from events");
     return l1Tokens[0];
   }
-  readTxReceipt(receipt: TransactionReceipt): hubPool.EventState {
+  readTxReceipt(receipt: TransactionReceipt): contracts.hubPool.EventState {
     const events = receipt.logs
       .filter(
         (log) =>
@@ -275,7 +268,7 @@ export class PoolEventState {
       )
       .map(this.makeEventFromLog);
     this.processEvents(events);
-    return hubPool.getEventState(this.events);
+    return contracts.hubPool.getEventState(this.events);
   }
 }
 
@@ -381,7 +374,7 @@ class UserState {
 }
 
 export function calculateRemoval(amountWei: BigNumber, percentWei: BigNumber) {
-  const receive = amountWei.mul(percentWei).div(fixedPointAdjustment);
+  const receive = amountWei.mul(percentWei).div(utils.fixedPointAdjustment);
   const remain = amountWei.sub(receive);
   return {
     receive: receive.toString(),
@@ -397,7 +390,7 @@ export function previewRemoval(
   },
   percentFloat: number
 ) {
-  const percentWei = toBNWei(percentFloat);
+  const percentWei = utils.toBNWei(percentFloat);
   return {
     position: {
       ...calculateRemoval(BigNumber.from(values.totalDeposited), percentWei),
@@ -412,15 +405,15 @@ export function previewRemoval(
 }
 function joinUserState(
   poolState: Pool,
-  tokenEventState: hubPool.TokenEventState,
+  tokenEventState: contracts.hubPool.TokenEventState,
   userState: Awaited<ReturnType<UserState["read"]>>,
-  transferValue = bnZero,
-  cumulativeStakeBalance = bnZero,
-  cumulativeStakeClaimBalance = bnZero
+  transferValue = utils.bnZero,
+  cumulativeStakeBalance = utils.bnZero,
+  cumulativeStakeClaimBalance = utils.bnZero
 ): User {
   const positionValue = BigNumber.from(poolState.exchangeRateCurrent)
     .mul(userState.balanceOf.add(cumulativeStakeBalance))
-    .div(fixedPointAdjustment);
+    .div(utils.fixedPointAdjustment);
   const totalDeposited = BigNumber.from(
     tokenEventState?.tokenBalances[userState.address] || "0"
   ).add(cumulativeStakeClaimBalance);
@@ -438,7 +431,7 @@ function joinPoolState(
   poolState: Awaited<ReturnType<PoolState["read"]>>,
   latestBlock: Block,
   previousBlock: Block,
-  rateModel?: RateModel
+  rateModel?: lpFeeCalculator.RateModel
 ): Pool {
   const totalPoolSize = poolState.liquidReserves.add(
     poolState.utilizedReserves
@@ -450,13 +443,13 @@ function joinPoolState(
   const liquidityUtilizationCurrent =
     poolState.liquidityUtilizationCurrent.toString();
 
-  const estimatedApy = calcPeriodicCompoundInterest(
+  const estimatedApy = utils.calcPeriodicCompoundInterest(
     exchangeRatePrevious,
     exchangeRateCurrent,
     secondsElapsed,
     SECONDS_PER_YEAR
   );
-  const estimatedApr = calcApr(
+  const estimatedApr = utils.calcApr(
     exchangeRatePrevious,
     exchangeRateCurrent,
     secondsElapsed,
@@ -465,10 +458,11 @@ function joinPoolState(
   let projectedApr = "";
 
   if (rateModel) {
-    projectedApr = fromWei(
-      calculateInstantaneousRate(rateModel, liquidityUtilizationCurrent)
+    projectedApr = utils.fromWei(
+      lpFeeCalculator
+        .calculateInstantaneousRate(rateModel, liquidityUtilizationCurrent)
         .mul(liquidityUtilizationCurrent)
-        .div(fixedPointAdjustment)
+        .div(utils.fixedPointAdjustment)
     );
   }
 
@@ -491,12 +485,12 @@ function joinPoolState(
 }
 export class ReadPoolClient {
   private poolState: PoolState;
-  private contract: hubPool.Instance;
+  private contract: contracts.hubPool.Instance;
   constructor(
     private address: string,
     private provider: Provider
   ) {
-    this.contract = hubPool.connect(address, this.provider);
+    this.contract = contracts.hubPool.connect(address, this.provider);
     this.poolState = new PoolState(this.contract, this.address);
   }
   public read(tokenAddress: string, latestBlock: number) {
@@ -510,7 +504,7 @@ export function validateWithdraw(
 ) {
   const l1TokensToReturn = BigNumber.from(lpTokenAmount)
     .mul(pool.exchangeRateCurrent)
-    .div(fixedPointAdjustment);
+    .div(utils.fixedPointAdjustment);
   assert(
     BigNumber.from(l1TokensToReturn).gt("0"),
     "Must withdraw amount greater than 0"
@@ -527,7 +521,7 @@ export class Client {
     string,
     ReturnType<typeof TransactionManager>
   > = {};
-  private hubPool: hubPool.Instance;
+  private hubPool: contracts.hubPool.Instance;
   private acceleratingDistributor: AcceleratingDistributor;
   private merkleDistributor: MerkleDistributor;
   public readonly state: State = { pools: {}, users: {}, transactions: {} };
@@ -564,13 +558,16 @@ export class Client {
     this.erc20s[address] = erc20.connect(address, this.deps.provider);
     return this.erc20s[address];
   }
-  public getOrCreatePoolContract(): hubPool.Instance {
+  public getOrCreatePoolContract(): contracts.hubPool.Instance {
     return this.hubPool;
   }
   public createHubPoolContract(
     signerOrProvider: Signer | Provider
-  ): hubPool.Instance {
-    return hubPool.connect(this.config.hubPoolAddress, signerOrProvider);
+  ): contracts.hubPool.Instance {
+    return contracts.hubPool.connect(
+      this.config.hubPoolAddress,
+      signerOrProvider
+    );
   }
   private getOrCreatePoolEvents() {
     return this.poolEvents;
@@ -663,7 +660,7 @@ export class Client {
           )
         )
       )
-    ).reduce((prev, acc) => acc.add(prev), bnZero);
+    ).reduce((prev, acc) => acc.add(prev), utils.bnZero);
 
     // Get the cumulative balance of the user from the accelerating distributor contract.
     const { cumulativeBalance } =
@@ -717,17 +714,17 @@ export class Client {
       const exchangeRate = exchangeRateTable[transfer.blockNumber];
       if (transfer.args.to === userState.address) {
         return result.add(
-          transfer.args.value.mul(exchangeRate).div(fixedPointAdjustment)
+          transfer.args.value.mul(exchangeRate).div(utils.fixedPointAdjustment)
         );
       }
       if (transfer.args.from === userState.address) {
         return result.sub(
-          transfer.args.value.mul(exchangeRate).div(fixedPointAdjustment)
+          transfer.args.value.mul(exchangeRate).div(utils.fixedPointAdjustment)
         );
       }
       // we make sure to filter out any transfers where to/from is the same user
       return result;
-    }, bnZero);
+    }, utils.bnZero);
   }
   private getOrCreateTransactionManager(signer: Signer, address: string) {
     if (this.transactionManagers[address])
@@ -814,7 +811,7 @@ export class Client {
       l1TokenAmount,
       overrides
     );
-    const id = await txman.request(request);
+    const id = txman.request(request);
 
     this.state.transactions[id] = {
       id,
@@ -861,7 +858,7 @@ export class Client {
       false,
       overrides
     );
-    const id = await txman.request(request);
+    const id = txman.request(request);
 
     this.state.transactions[id] = {
       id,
@@ -894,7 +891,7 @@ export class Client {
       true,
       overrides
     );
-    const id = await txman.request(request);
+    const id = txman.request(request);
 
     this.state.transactions[id] = {
       id,
@@ -934,13 +931,13 @@ export class Client {
   private async updateAndEmitUser(
     userState: Awaited<ReturnType<UserState["read"]>>,
     poolState: Pool,
-    poolEventState: hubPool.EventState
+    poolEventState: contracts.hubPool.EventState
   ): Promise<void> {
     const { l1Token: l1TokenAddress, lpToken } = poolState;
     const { address: userAddress } = userState;
     const transferValue = this.config.hasArchive
       ? await this.calculateLpTransferValue(l1TokenAddress, userState)
-      : bnZero;
+      : utils.bnZero;
     const stakeData = await this.resolveStakingData(
       lpToken,
       l1TokenAddress,
@@ -1015,7 +1012,7 @@ export class Client {
       previousBlock.number
     );
 
-    let rateModel: RateModel | undefined = undefined;
+    let rateModel: lpFeeCalculator.RateModel | undefined = undefined;
     try {
       // Use the default rate model (i.e. not any of the routeRateModels to project the Pool's APR). This assumes
       // that the default rate model is the most often used, but this may change in future if many different
