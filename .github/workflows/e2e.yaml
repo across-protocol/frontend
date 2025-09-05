@@ -1,14 +1,15 @@
 name: E2E Tests
 
 on:
-  deployment_status:
+  repository_dispatch:
+    types:
+      - "vercel.deployment.success"
 
 jobs:
   e2e-tests:
     if: |
-      github.event_name == 'deployment_status' &&
-      github.event.deployment_status.state == 'success' &&
-      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
+      github.event_name == 'repository_dispatch' && 
+      contains(github.event.client_payload.url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,12 +21,12 @@ jobs:
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn synpress ./e2e/wallet-setup
         env:
-          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+          E2E_DAPP_URL: ${{ github.event.client_payload.url }}
       - name: Run tests
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn test:e2e:headful
         env:
-          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+          E2E_DAPP_URL: ${{ github.event.client_payload.url }}
       - name: Archive Playwright report
         uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -36,9 +37,8 @@ jobs:
           if-no-files-found: error
   e2e-api-tests:
     if: |
-      github.event_name == 'deployment_status' &&
-      github.event.deployment_status.state == 'success' &&
-      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
+      github.event_name == 'repository_dispatch' &&
+      contains(github.event.client_payload.url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,4 +48,4 @@ jobs:
         # https://synpress.io/docs/guides/ci#ci
         run: yarn test:e2e-api
         env:
-          E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.client_payload.url }}
