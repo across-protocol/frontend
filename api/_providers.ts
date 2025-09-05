@@ -12,7 +12,8 @@ import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 
 export type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
-const { RPC_HEADERS } = getEnvs();
+const { RPC_HEADERS, RPC_CACHE_NAMESPACE, DISABLE_PROVIDER_CACHING } =
+  getEnvs();
 
 export const providerCache: Record<string, providers.StaticJsonRpcProvider> =
   {};
@@ -121,6 +122,20 @@ function getProviderFromConfigJson(
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
   const headers = getProviderHeaders(chainId);
+  const providerConstructorParams: ConstructorParameters<
+    typeof sdk.providers.RetryProvider
+  >[0] = urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]);
+
+  const pctRpcCallsLogged = 0; // disable RPC calls logging
+
+  const cacheNamespace = RPC_CACHE_NAMESPACE
+    ? `RPC_PROVIDER_${RPC_CACHE_NAMESPACE}`
+    : "RPC_PROVIDER";
+  const disableProviderCaching = DISABLE_PROVIDER_CACHING === "true";
+  const providerCache = disableProviderCaching ? undefined : providerRedisCache;
+  const providerCacheBlockDistance = disableProviderCaching
+    ? undefined
+    : getCacheBlockDistance(chainId);
 
   if (urls.length === 0) {
     getLogger().warn({
@@ -131,29 +146,37 @@ function getProviderFromConfigJson(
   }
 
   if (!opts.useSpeedProvider) {
+    const quorum = 1; //  quorum can be 1 in the context of the API
+    const retries = 3;
+    const delay = 0.5;
+    const maxConcurrency = 5;
+
     return new sdk.providers.RetryProvider(
-      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
+      providerConstructorParams,
       chainId,
-      1, // quorum can be 1 in the context of the API
-      3, // retries
-      0.5, // delay
-      5, // max. concurrency
-      `RPC_PROVIDER_${process.env.RPC_CACHE_NAMESPACE}`, // cache namespace
-      0, // disable RPC calls logging
-      providerRedisCache,
-      getCacheBlockDistance(chainId)
+      quorum,
+      retries,
+      delay,
+      maxConcurrency,
+      cacheNamespace,
+      pctRpcCallsLogged,
+      providerCache,
+      providerCacheBlockDistance
     );
   }
 
+  const maxConcurrencySpeed = 3;
+  const maxConcurrencyRateLimit = 5;
+
   return new sdk.providers.SpeedProvider(
-    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
+    providerConstructorParams,
     chainId,
-    3, // max. concurrency used in `SpeedProvider`
-    5, // max. concurrency used in `RateLimitedProvider`
-    `RPC_PROVIDER_${process.env.RPC_CACHE_NAMESPACE}`, // cache namespace
-    0, // disable RPC calls logging
-    providerRedisCache,
-    getCacheBlockDistance(chainId)
+    maxConcurrencySpeed,
+    maxConcurrencyRateLimit,
+    cacheNamespace,
+    pctRpcCallsLogged,
+    providerCache,
+    providerCacheBlockDistance
   );
 }
 
