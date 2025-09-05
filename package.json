@@ -77,6 +77,7 @@
     "test:e2e:headful": "yarn pretest:e2e && playwright test",
     "test:e2e:headless": "yarn pretest:e2e && HEADLESS=true playwright test",
     "test:e2e:headless:ui": "yarn pretest:e2e && HEADLESS=true playwright test --ui",
+    "test:e2e-api": "jest e2e-api",
     "eject": "react-scripts eject",
     "format": "prettier --check src api e2e test",
     "format:fix": "prettier --write src api e2e test",
