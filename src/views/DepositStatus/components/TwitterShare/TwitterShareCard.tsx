@@ -5,9 +5,9 @@ import {
   COLORS,
   QUERIES,
   buildSearchParams,
-  twitterParams,
   vercelApiBaseUrl,
 } from "utils";
+import { useTwitter } from "hooks/useTwitter";
 import { DepositStatusLowerCardProps } from "views/DepositStatus/components/DepositStatusLowerCard";
 import { useDepositTracking } from "views/DepositStatus/hooks/useDepositTracking";
 
@@ -28,6 +28,8 @@ export function TwitterShareCard(props: TwitterShareProps) {
   const [showModal, setShowModal] = useState(false);
   const openModal = () => void setShowModal(true);
   const closeModal = () => void setShowModal(false);
+
+  const { twitterParams } = useTwitter();
 
   const { depositQuery, fillQuery } = useDepositTracking({
     depositTxHash,
