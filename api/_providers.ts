@@ -128,7 +128,7 @@ function getProviderFromConfigJson(
   return new sdk.providers.SpeedProvider(
     urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
     chainId,
-    3, // max. concurrency used in `SpeedProvider`
+    2, // max. concurrency used in `SpeedProvider`
     5, // max. concurrency used in `RateLimitedProvider`
     "RPC_PROVIDER", // cache namespace
     1 // disable RPC calls logging
