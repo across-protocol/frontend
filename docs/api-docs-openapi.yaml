@@ -957,16 +957,11 @@ paths:
                 status: filled
                 originChainId: 8453
                 depositId: '4406025'
-                depositTxHash: >-
-                  0x0e44727151684ef4cfe7744aad88007cf55b155a64f5f9047fb9d2fa53780967
                 depositTxnRef: >-
                   0x0e44727151684ef4cfe7744aad88007cf55b155a64f5f9047fb9d2fa53780967
-                fillTx: >-
-                  0x0e7b85f1c49c4c89f3b381f12a24d6838be16a41021ab16645bae9dcd1278238
                 fillTxnRef: >-
                   0x0e7b85f1c49c4c89f3b381f12a24d6838be16a41021ab16645bae9dcd1278238
                 destinationChainId: 137
-                depositRefundTxnHash: null
                 depositRefundTxnRef: null
                 actionsSucceeded: null,
                 pagination:
@@ -1240,9 +1235,9 @@ paths:
                   depositTxHash:
                     type: string
                     description: |
-                      Transaction hash of the deposit on the origin chain.
+                      DEPRECATED: Please use depositTxnRef instead. Transaction hash of the deposit on the origin chain.
                     x-gitbook-description-html: >-
-                      <p>Transaction hash of the deposit on the origin
+                      <p>DEPRECATED: Please use depositTxnRef instead. Transaction hash of the deposit on the origin
                       chain.</p>
                   depositBlockNumber:
                     type: integer
@@ -1332,6 +1327,13 @@ paths:
                     x-gitbook-description-html: >-
                       <p>USD price of the gas token on the destination chain at
                       the time of fill.</p>
+                  actionsSucceeded:
+                    type: string
+                    description: >
+                      Defines if the attached crosschain embedded actions succeeded.
+                    x-gitbook-description-html: >-
+                      <p>Defines if the attached crosschain embedded actions succeeded.
+                      </p>
                   swapTransactionHash:
                     type: string
                     nullable: true
@@ -1380,6 +1382,10 @@ paths:
                     description: |
                       Transaction hash of the actual fill transaction.
                     x-gitbook-description-html: <p>Transaction hash of the fill transaction.</p>
+                  fillTx:
+                    type: string
+                    description: |
+                      DEPRECATED: Please use fillTxnRef instead. Transaction hash of the actual fill transaction.                
                   speedups:
                     type: array
                     items:
@@ -1407,11 +1413,9 @@ paths:
                   messageHash: >-
                     0x0000000000000000000000000000000000000000000000000000000000000000
                   exclusiveRelayer: '0xCad97616f91872C02BA3553dB315Db4015cBE850'
-                  exclusivityDeadline: '2025-07-24T16:11:48.000Z'
+                  exclusivityDeadline: 'null'
                   fillDeadline: '2025-07-24T19:26:20.000Z'
                   quoteTimestamp: '2025-07-24T16:07:11.000Z'
-                  depositTxHash: >-
-                    0x92ffc5d69d00e14e79254f68adab030dd38119996501a88cac0da76557703d11
                   depositBlockNumber: 33292078
                   depositBlockTimestamp: '2025-07-24T16:11:43.000Z'
                   status: filled
@@ -1424,13 +1428,12 @@ paths:
                   fillGasFee: '2532354948000'
                   fillGasFeeUsd: '0.009488583742324977'
                   fillGasTokenPriceUsd: '3746.9406687316323'
+                  actionsSucceeded: null
                   swapTransactionHash: null
                   swapToken: null
                   swapTokenAmount: null
                   relayer: '0xCad97616f91872C02BA3553dB315Db4015cBE850'
                   fillBlockTimestamp: '2025-07-24T16:11:43.000Z'
-                  fillTx: >-
-                    0x7b98cebd7ee6e2f75fead81d73005cdf25149141c2045cb5f731b6d9c6b9c517
                   depositTxnRef: >-
                     0x92ffc5d69d00e14e79254f68adab030dd38119996501a88cac0da76557703d11
                   depositRefundTxnRef: null
