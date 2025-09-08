@@ -188,6 +188,22 @@ export function getCrossSwapTypes(params: {
   return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
+export function getBridgeQuoteRecipient(crossSwap: CrossSwap) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to use MultiCallHandler
+    return crossSwap.recipient;
+  }
+  return getMultiCallHandlerAddress(crossSwap.outputToken.chainId);
+}
+
+export function getBridgeQuoteMessage(crossSwap: CrossSwap, appFee?: AppFee) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to build a message
+    return undefined;
+  }
+  return buildExactInputBridgeTokenMessage(crossSwap, appFee);
+}
+
 export function buildExactInputBridgeTokenMessage(
   crossSwap: CrossSwap,
   appFee?: AppFee

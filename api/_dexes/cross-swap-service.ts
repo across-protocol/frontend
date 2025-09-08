@@ -23,6 +23,8 @@ import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
   calculateAppFee,
+  getBridgeQuoteMessage,
+  getBridgeQuoteRecipient,
   getCrossSwapTypes,
   getPreferredBridgeTokens,
   getQuoteFetchStrategies,
@@ -150,8 +152,8 @@ export async function getCrossSwapQuotesForExactInputB2B(
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
-    recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
-    message: buildExactInputBridgeTokenMessage(crossSwap),
+    recipient: getBridgeQuoteRecipient(crossSwap),
+    message: getBridgeQuoteMessage(crossSwap),
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -168,7 +170,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = buildExactInputBridgeTokenMessage(crossSwap, appFee);
+  bridgeQuote.message = getBridgeQuoteMessage(crossSwap, appFee);
 
   return {
     crossSwap,
