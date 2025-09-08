@@ -1,4 +1,4 @@
-name: E2E Tests
+name: UI E2E Tests
 
 on:
   repository_dispatch:
@@ -35,17 +35,3 @@ jobs:
           path: |
             playwright-report/
           if-no-files-found: error
-  e2e-api-tests:
-    if: |
-      github.event_name == 'repository_dispatch' &&
-      contains(github.event.client_payload.url, 'app-frontend-v3')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      # For now, we only need Chromium.
-      - name: Run API e2e tests
-        # https://synpress.io/docs/guides/ci#ci
-        run: yarn test:e2e-api
-        env:
-          E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.client_payload.url }}
