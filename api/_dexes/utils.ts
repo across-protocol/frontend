@@ -201,7 +201,18 @@ export function getBridgeQuoteMessage(crossSwap: CrossSwap, appFee?: AppFee) {
     // Until we support messages for SVM destinations, we don't need to build a message
     return undefined;
   }
-  return buildExactInputBridgeTokenMessage(crossSwap, appFee);
+  switch (crossSwap.type) {
+    case AMOUNT_TYPE.EXACT_INPUT:
+      return buildExactInputBridgeTokenMessage(crossSwap, appFee);
+    case AMOUNT_TYPE.EXACT_OUTPUT:
+      return buildExactOutputBridgeTokenMessage(
+        crossSwap,
+        crossSwap.amount,
+        appFee
+      );
+    case AMOUNT_TYPE.MIN_OUTPUT:
+      return buildMinOutputBridgeTokenMessage(crossSwap, appFee);
+  }
 }
 
 export function buildExactInputBridgeTokenMessage(

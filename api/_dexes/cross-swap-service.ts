@@ -219,11 +219,8 @@ export async function getCrossSwapQuotesForOutputB2B(
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: outputAmountWithAppFee,
-    recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
-    message:
-      crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
-        ? buildExactOutputBridgeTokenMessage(crossSwap, crossSwap.amount)
-        : buildMinOutputBridgeTokenMessage(crossSwap),
+    recipient: getBridgeQuoteRecipient(crossSwap),
+    message: getBridgeQuoteMessage(crossSwap),
     forceExactOutput: crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
@@ -237,15 +234,11 @@ export async function getCrossSwapQuotesForOutputB2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    bridgeQuote.message = buildMinOutputBridgeTokenMessage(crossSwap, appFee);
-  }
-  if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT && appFee.feeAmount.gt(0)) {
-    bridgeQuote.message = buildExactOutputBridgeTokenMessage(
-      crossSwap,
-      crossSwap.amount,
-      appFee
-    );
+  if (
+    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT ||
+    (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT && appFee.feeAmount.gt(0))
+  ) {
+    bridgeQuote.message = getBridgeQuoteMessage(crossSwap, appFee);
   }
 
   return {
