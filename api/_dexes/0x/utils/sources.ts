@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-27T05:06:53.664Z
+// Generated on 2025-09-09T17:33:00.971Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -193,7 +193,6 @@ export const SOURCES = {
       { key: "SwapMode_V3", names: ["swapmode_v3", "swapmode"] },
       { key: "Velodrome_V2_Mode", names: ["velodrome_v2_mode"] },
       { key: "Velodrome_V3", names: ["velodrome_v3", "velodrome"] },
-      { key: "Wrapped_MLT", names: ["wrapped_mlt"] },
     ],
     "42161": [
       { key: "0x_RFQ", names: ["0x_rfq"] },
@@ -488,7 +487,6 @@ export const ALL_SOURCES = [
   "worldswap",
   "worldswap_v2",
   "wrapped_blt",
-  "wrapped_mlt",
   "xfai",
   "yearn",
   "yearn_v3",

@@ -58,7 +58,8 @@ export type SupportedDex =
   | "gho-multicall3"
   | "wrapped-gho"
   | "lifi"
-  | "0x";
+  | "0x"
+  | "jupiter";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
