@@ -134,8 +134,12 @@ export function get0xStrategy(
         });
       }
 
-      const usedSources: string[] = quote.route.fills.map(
-        (fill: { source: string }) => fill.source.toLowerCase()
+      const usedSources: string[] = Array.from(
+        new Set(
+          quote.route.fills.map((fill: { source: string }) =>
+            fill.source.toLowerCase()
+          )
+        )
       );
 
       if (
