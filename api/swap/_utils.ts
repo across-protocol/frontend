@@ -108,18 +108,37 @@ export async function handleBaseSwapQueryParams(
   const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
+  const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
     : utils.getAddress(_inputTokenAddress);
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
-    : utils.getAddress(_outputTokenAddress);
+    : sdk.utils
+        .toAddressType(_outputTokenAddress, destinationChainId)
+        .toNative();
   const excludeSources = _excludeSources
     ? paramToArray(_excludeSources)
     : undefined;
   const includeSources = _includeSources
     ? paramToArray(_includeSources)
     : undefined;
+
+  if (isDestinationSvm) {
+    if (!recipient) {
+      throw new InvalidParamError({
+        param: "recipient",
+        message: "Recipient is required for SVM destinations",
+      });
+    }
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for SVM destinations",
+      });
+    }
+  }
 
   if (excludeSources && includeSources) {
     throw new InvalidParamError({
@@ -200,6 +219,7 @@ export async function handleBaseSwapQueryParams(
     appFeeRecipient,
     strictTradeType,
     skipChecks,
+    isDestinationSvm,
   };
 }
 

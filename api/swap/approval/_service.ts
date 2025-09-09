@@ -64,6 +64,7 @@ export async function handleApprovalSwap(
     appFeeRecipient,
     strictTradeType,
     skipChecks,
+    isDestinationSvm,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } =
@@ -92,6 +93,7 @@ export async function handleApprovalSwap(
       appFeePercent,
       appFeeRecipient,
       strictTradeType,
+      isDestinationSvm,
     },
     quoteFetchStrategies
   );

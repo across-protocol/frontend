@@ -1,7 +1,12 @@
+name: Setup Node.js and Dependencies
+description: Setup Node.js environment and other system dependencies
+
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
+    - name: Install canvas dependencies
+      run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+      shell: bash
 
     - uses: actions/setup-node@v4
       with:
@@ -10,4 +15,8 @@ runs:
         cache: yarn
 
     - run: yarn install --frozen-lockfile --ignore-scripts
+      shell: bash
+
+    - name: Build canvas package from source
+      run: npm rebuild canvas --build-from-source
       shell: bash
