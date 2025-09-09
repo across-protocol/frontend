@@ -46,6 +46,7 @@ export type CrossSwap = {
   appFeePercent?: number;
   appFeeRecipient?: string;
   strictTradeType: boolean;
+  isDestinationSvm?: boolean;
 };
 
 export type SupportedDex =
