@@ -8,11 +8,14 @@ on:
 jobs:
   e2e-tests:
     if: |
-      github.event_name == 'repository_dispatch' && 
-      contains(github.event.client_payload.url, 'app-frontend-v3')
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.project.name == 'app-frontend-v3'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha }}
+
       - uses: ./.github/actions/setup
       # For now, we only need Chromium.
       - name: Install Playwright Browsers
