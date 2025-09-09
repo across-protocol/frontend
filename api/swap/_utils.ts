@@ -115,9 +115,9 @@ export async function handleBaseSwapQueryParams(
     : utils.getAddress(_inputTokenAddress);
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
-    : isDestinationSvm
-      ? _outputTokenAddress
-      : utils.getAddress(_outputTokenAddress);
+    : sdk.utils
+        .toAddressType(_outputTokenAddress, destinationChainId)
+        .toNative();
   const excludeSources = _excludeSources
     ? paramToArray(_excludeSources)
     : undefined;
@@ -125,11 +125,19 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
-  if (isDestinationSvm && !recipient) {
-    throw new InvalidParamError({
-      param: "recipient",
-      message: "Recipient is required for SVM destinations",
-    });
+  if (isDestinationSvm) {
+    if (!recipient) {
+      throw new InvalidParamError({
+        param: "recipient",
+        message: "Recipient is required for SVM destinations",
+      });
+    }
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for SVM destinations",
+      });
+    }
   }
 
   if (excludeSources && includeSources) {

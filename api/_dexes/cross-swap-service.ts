@@ -19,9 +19,6 @@ import {
   QuoteFetchStrategy,
 } from "./types";
 import {
-  buildExactInputBridgeTokenMessage,
-  buildExactOutputBridgeTokenMessage,
-  buildMinOutputBridgeTokenMessage,
   calculateAppFee,
   getBridgeQuoteMessage,
   getBridgeQuoteRecipient,
@@ -710,8 +707,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     });
   }
 
-  const { originSwapChainId, destinationChainId, bridgeableInputToken } =
-    results[0];
+  const { originSwapChainId, bridgeableInputToken } = results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForOutput({
