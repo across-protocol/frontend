@@ -2,47 +2,62 @@ import { TradeType } from "@uniswap/sdk-core";
 import { BigNumber } from "ethers";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
-import { getSpokePoolAddress } from "../../_utils";
-import { QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
 import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+import {
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
+
+const SWAP_PROVIDER_NAME = "wrapped-gho";
 
 /**
  * Returns a swap quote fetch strategy for handling GHO/WGHO swaps.
  */
 export function getWrappedGhoStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
+    const address = WGHO_ADDRESS[chainId];
+    if (!address) {
+      throw new Error(`WGHO address not found for chain ${chainId}`);
+    }
     return {
-      address: WGHO_ADDRESS[chainId],
+      address,
       name: "WGHO",
     };
   };
 
-  const getOriginEntryPoints = (chainId: number) => {
-    return {
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("gho", chainId),
-        dex: "gho",
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
-      },
-    } as const;
+  const getOriginEntryPoints = (chainId: number) =>
+    getOriginSwapEntryPoints("SpokePoolPeriphery", chainId, SWAP_PROVIDER_NAME);
+
+  const getSources = makeGetSources({
+    strategy: SWAP_PROVIDER_NAME,
+    sources: {
+      [CHAIN_IDs.MAINNET]: [
+        { key: SWAP_PROVIDER_NAME, names: [SWAP_PROVIDER_NAME] },
+      ],
+    },
+  });
+
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: `Option 'sellEntireBalance' is not supported by ${SWAP_PROVIDER_NAME}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: SWAP_PROVIDER_NAME,
+    });
   };
 
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
-    opts: Partial<{
-      useIndicativeQuote: boolean;
-    }> = {
-      useIndicativeQuote: false,
-    }
+    opts?: QuoteFetchOpts
   ) => {
+    if (opts?.sellEntireBalance && opts?.throwIfSellEntireBalanceUnsupported) {
+      assertSellEntireBalanceSupported();
+    }
+
     const { tokenIn, tokenOut, amount, chainId, recipient } = swap;
 
     // Only support:
@@ -90,12 +105,16 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         expectedAmountIn: BigNumber.from(amount),
         slippageTolerance: swap.slippageTolerance,
         swapTxns,
+        swapProvider: {
+          name: SWAP_PROVIDER_NAME,
+          sources: ["wgho", SWAP_PROVIDER_NAME],
+        },
       };
     }
 
     // If we get here, we need to encode the calldata for the swap GHO -> Any via `SwapRouter02`.
     const swapRouter02Strategy = getSwapRouter02Strategy(
-      "UniversalSwapAndBridge",
+      "SpokePoolPeriphery",
       "trading-api"
     );
     const ghoSwap = {
@@ -146,12 +165,19 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
       slippageTolerance: swap.slippageTolerance,
       swapTxns,
+      swapProvider: {
+        name: SWAP_PROVIDER_NAME,
+        sources: ["wgho", SWAP_PROVIDER_NAME, "uniswap_v3"],
+      },
     };
   };
 
   return {
+    strategyName: SWAP_PROVIDER_NAME,
     getRouter,
     getOriginEntryPoints,
     fetchFn,
+    getSources,
+    assertSellEntireBalanceSupported,
   };
 }

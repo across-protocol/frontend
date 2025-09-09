@@ -42,8 +42,16 @@
   },
   "rewrites": [
     {
+      "source": "/api/deposit",
+      "destination": "https://indexer.api.across.to/deposit"
+    },
+    {
       "source": "/api/deposit/status",
       "destination": "https://indexer.api.across.to/deposit/status"
+    },
+    {
+      "source": "/api/deposits",
+      "destination": "https://indexer.api.across.to/deposits"
     }
   ],
   "redirects": [
@@ -54,6 +62,15 @@
     }
   ],
   "headers": [
+    {
+      "source": "/api/deposit(.*)",
+      "headers": [
+        {
+          "key": "CDN-Cache-Control",
+          "value": "max-age=0"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [

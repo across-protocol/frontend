@@ -36,7 +36,7 @@ export type Deposit = {
   message: string;
   amount: string;
   depositTxHash: string;
-  fillTxs: string[];
+  fillTx: string;
   speedUps: SpeedUpDepositTx[];
   depositRelayerFeePct: string;
   initialRelayerFeePct?: string;
@@ -141,7 +141,6 @@ export type IndexerDeposit = {
   swapTokenAmount: string;
   relayer: string;
   fillBlockTimestamp: string;
-  fillTransactionHash: string;
   fillTx: string;
   speedups: any[];
 };
@@ -222,7 +221,7 @@ async function getDeposits(
         status: params.status === "pending" ? "unfilled" : params.status,
         limit: params.limit,
         skip: params.offset,
-        depositor: params.address,
+        address: params.address,
       },
     }
   );

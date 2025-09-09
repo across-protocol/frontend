@@ -1,39 +1,58 @@
 import { VercelResponse } from "@vercel/node";
 
 import { TypedVercelRequest } from "../../_types";
-import { getLogger, handleErrorCondition, Profiler } from "../../_utils";
-import { BaseSwapQueryParams } from "../_utils";
+import { getLogger, handleErrorCondition } from "../../_utils";
+import { BaseSwapQueryParams, SwapBody } from "../_utils";
 import { handleApprovalSwap } from "./_service";
+import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
+import { sendResponse } from "../../_response_utils";
+import { tracer, processor } from "../../../instrumentation";
 
 const handler = async (
-  request: TypedVercelRequest<BaseSwapQueryParams>,
+  request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const requestId = getRequestId(request);
   logger.debug({
     at: "Swap/approval",
     message: "Query data",
     query: request.query,
+    body: request.body,
+    requestId,
   });
-  try {
-    const profiler = new Profiler({
-      at: "swap/approval",
-      logger: console,
-    });
-    const mark = profiler.start("e2e endpoint runtime");
+  return tracer.startActiveSpan("swap/approval", async (span) => {
+    try {
+      setRequestSpanAttributes(request, span, requestId);
 
-    const responseJson = await handleApprovalSwap(request);
+      const responseJson = await handleApprovalSwap(request, span);
 
-    mark.stop();
-    logger.debug({
-      at: "Swap/approval",
-      message: "Response data",
-      responseJson,
-    });
-    response.status(200).json(responseJson);
-  } catch (error: unknown) {
-    return handleErrorCondition("swap/approval", response, logger, error);
-  }
+      logger.debug({
+        at: "Swap/approval",
+        message: "Response data",
+        responseJson,
+      });
+
+      sendResponse({
+        response,
+        body: responseJson,
+        statusCode: 200,
+        requestId,
+      });
+    } catch (error: unknown) {
+      return handleErrorCondition(
+        "swap/approval",
+        response,
+        logger,
+        error,
+        span,
+        requestId
+      );
+    } finally {
+      span.end();
+      processor.forceFlush();
+    }
+  });
 };
 
 export default handler;

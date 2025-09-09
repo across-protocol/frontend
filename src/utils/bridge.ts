@@ -18,7 +18,12 @@ import { SpokePool, SpokePoolVerifier } from "./typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { ConvertDecimals } from "./convertdecimals";
 import { generateHyperLiquidPayload } from "./hyperliquid";
-import { isContractDeployedToAddress, toBytes32 } from "./sdk";
+import { isContractDeployedToAddress, toAddressType, toBytes32 } from "./sdk";
+import {
+  TransactionRequest,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
+import { Deferrable } from "@ethersproject/properties";
 
 const config = getConfig();
 
@@ -208,12 +213,11 @@ export const getConfirmationDepositTime = (
   };
 };
 
-export type AcrossDepositV3Args = {
+export type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
   amount: ethers.BigNumber;
-  tokenAddress: string;
   relayerFeePct: ethers.BigNumber;
   timestamp: ethers.BigNumber;
   message?: string;
@@ -223,6 +227,8 @@ export type AcrossDepositV3Args = {
   integratorId: string;
   inputTokenAddress: string;
   outputTokenAddress: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fillDeadline: number;
   exclusivityDeadline?: number;
   exclusiveRelayer?: string;
@@ -235,7 +241,7 @@ type NetworkMismatchHandler = (
 /**
  * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link AcrossDepositV3Args arguments} to pass to the deposit function of the bridge contract.
+ * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendSpokePoolVerifierDepositTx(
@@ -252,10 +258,13 @@ export async function sendSpokePoolVerifierDepositTx(
     referrer,
     fillDeadline,
     inputTokenAddress,
+    outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositV3Args,
+  }: AcrossDepositArgs,
   spokePool: SpokePool,
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
@@ -266,14 +275,21 @@ export async function sendSpokePoolVerifierDepositTx(
     );
   }
   const inputAmount = amount;
-  const outputAmount = inputAmount.sub(
-    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
-  );
+  const outputAmount = getDepositOutputAmount({
+    amount: inputAmount,
+    relayerFeePct,
+    fromChain,
+    toChain: destinationChainId,
+    inputTokenSymbol,
+    outputTokenSymbol,
+  });
+
   const tx = await spokePoolVerifier.populateTransaction.deposit(
     spokePool.address,
     toBytes32(recipient),
     toBytes32(inputTokenAddress),
     inputAmount,
+    toBytes32(outputTokenAddress),
     outputAmount,
     destinationChainId,
     toBytes32(exclusiveRelayer),
@@ -295,7 +311,7 @@ export async function sendSpokePoolVerifierDepositTx(
   );
 }
 
-export async function sendDepositV3Tx(
+export async function sendDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
@@ -310,10 +326,12 @@ export async function sendDepositV3Tx(
     fillDeadline,
     inputTokenAddress,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     integratorId,
-  }: AcrossDepositV3Args,
+  }: AcrossDepositArgs,
   spokePool: SpokePool,
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
@@ -323,28 +341,29 @@ export async function sendDepositV3Tx(
     amount: inputAmount,
     relayerFeePct,
     fromChain,
-    inputTokenAddress,
     toChain: destinationChainId,
-    outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
   });
 
+  const signerAddress = await signer.getAddress();
+
   const depositArgs = [
-    await signer.getAddress(),
-    recipient,
-    inputTokenAddress,
-    outputTokenAddress,
+    toAddressType(signerAddress, fromChain).toBytes32(),
+    toAddressType(recipient, destinationChainId).toBytes32(),
+    toAddressType(inputTokenAddress, fromChain).toBytes32(),
+    toAddressType(outputTokenAddress, destinationChainId).toBytes32(),
     inputAmount,
     outputAmount,
     destinationChainId,
-    exclusiveRelayer,
+    toAddressType(exclusiveRelayer, destinationChainId).toBytes32(),
     quoteTimestamp,
     fillDeadline,
     exclusivityDeadline,
     message,
     { value },
   ] as const;
-
-  const tx = await spokePool.populateTransaction.depositV3(...depositArgs);
+  const tx = await spokePool.populateTransaction.deposit(...depositArgs);
 
   return _tagRefAndSignTx(
     tx,
@@ -369,14 +388,15 @@ export async function sendSwapAndBridgeTx(
     isNative,
     referrer,
     fillDeadline,
-    inputTokenAddress,
     outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
     swapQuote,
     swapTokenAmount,
     integratorId,
-  }: AcrossDepositV3Args & {
+  }: AcrossDepositArgs & {
     swapTokenAmount: BigNumber;
     swapTokenAddress: string;
     swapQuote: SwapQuoteApiResponse;
@@ -420,9 +440,9 @@ export async function sendSwapAndBridgeTx(
     amount: inputAmount,
     relayerFeePct,
     fromChain,
-    inputTokenAddress,
     toChain: destinationChainId,
-    outputTokenAddress,
+    inputTokenSymbol,
+    outputTokenSymbol,
   });
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
@@ -541,28 +561,31 @@ async function _tagRefAndSignTx(
     );
   }
 
-  return signer.sendTransaction(tx);
+  // Use sendUncheckedTransaction to avoid waiting for the transaction to be mined
+  return sendTxn(originChainId, signer, tx);
 }
 
 function getDepositOutputAmount(
   depositArgs: Pick<
-    AcrossDepositV3Args,
+    AcrossDepositArgs,
     | "amount"
     | "relayerFeePct"
     | "fromChain"
-    | "inputTokenAddress"
     | "toChain"
-    | "outputTokenAddress"
+    | "inputTokenSymbol"
+    | "outputTokenSymbol"
   >
 ) {
-  const inputToken = config.getTokenInfoByAddress(
+  const inputToken = config.getTokenInfoBySymbol(
     depositArgs.fromChain,
-    depositArgs.inputTokenAddress
+    depositArgs.inputTokenSymbol
   );
-  const outputToken = config.getTokenInfoByAddress(
+
+  const outputToken = config.getTokenInfoBySymbol(
     depositArgs.toChain,
-    depositArgs.outputTokenAddress
+    depositArgs.outputTokenSymbol
   );
+
   const inputAmount = depositArgs.amount;
   const relayerFeePct = depositArgs.relayerFeePct;
   const outputAmount = inputAmount.sub(
@@ -572,4 +595,63 @@ function getDepositOutputAmount(
     inputToken.decimals,
     outputToken.decimals
   )(outputAmount);
+}
+
+/**
+ * Sends a transaction with optimized behavior for different chains.
+ *
+ * For mainnet, this function uses `sendUncheckedTransaction` to avoid the polling
+ * delay that occurs with the standard `sendTransaction` method. This is critical
+ * for user experience as mainnet transactions can take 10-13 seconds (or longer)
+ * to be included in a block, during which time the UI would be blocked waiting
+ * for confirmation.
+ *
+ * The standard `sendTransaction` method performs the following steps:
+ * 1. Sends the transaction via `sendUncheckedTransaction`
+ * 2. Polls the network for the transaction receipt
+ * 3. Waits for the transaction to be mined and included in a block
+ * 4. Returns the transaction response with full details
+ *
+ * This polling behavior is problematic for mainnet because:
+ * - Block times are ~12-15 seconds
+ * - Transactions may not be included in the next block
+ * - Network congestion can cause longer inclusion times
+ * - The UI becomes unresponsive during the polling period
+ *
+ * By using `sendUncheckedTransaction` directly for mainnet:
+ * - The transaction is sent immediately without waiting for confirmation
+ * - The UI can remain responsive and show appropriate loading states
+ * - Users can continue interacting with the application
+ * - Transaction status can be tracked separately via the returned hash
+ *
+ * For other chains (testnets, L2s, etc.), we use the standard `sendTransaction`
+ * method because:
+ * - Block times are typically much faster (1-2 seconds)
+ * - Network congestion is less of an issue
+ * - The polling delay is acceptable for better transaction confirmation
+ *
+ * @param originChain - The chain ID where the transaction is being sent
+ * @param signer - The ethers signer instance
+ * @param tx - The populated transaction to send
+ * @returns A promise that resolves to the transaction response
+ */
+export async function sendTxn(
+  originChain: number,
+  signer: ethers.Signer,
+  tx: Deferrable<TransactionRequest>
+): Promise<TransactionResponse> {
+  const txnHash = await (signer as any).sendUncheckedTransaction(tx);
+  return {
+    hash: String(txnHash),
+    confirmations: 0,
+    from: await signer.getAddress(),
+    nonce: 0,
+    gasLimit: BigNumber.from(0),
+    gasPrice: BigNumber.from(0),
+    data: "",
+    to: "",
+    value: BigNumber.from(0),
+    wait: async () => signer.provider!.getTransactionReceipt(txnHash),
+    chainId: originChain,
+  };
 }

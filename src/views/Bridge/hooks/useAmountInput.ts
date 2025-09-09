@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { BigNumber, utils } from "ethers";
 import { debounce } from "lodash-es";
 
-import { useAmplitude, useBalanceBySymbol, usePrevious } from "hooks";
+import { useAmplitude, usePrevious } from "hooks";
+import { useBalance } from "hooks/useBalance";
 import { getConfig, trackMaxButtonClicked } from "utils";
 
 import { SelectedRoute, areTokensInterchangeable } from "../utils";
@@ -23,10 +24,7 @@ export function useAmountInput(selectedRoute: SelectedRoute) {
       ? selectedRoute.swapTokenSymbol
       : selectedRoute.fromTokenSymbol;
 
-  const { balance } = useBalanceBySymbol(
-    amountTokenSymbol,
-    selectedRoute.fromChain
-  );
+  const { balance } = useBalance(amountTokenSymbol, selectedRoute.fromChain);
 
   const { data: maxBalance } = useMaxBalance(selectedRoute);
 

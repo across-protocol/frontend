@@ -3,24 +3,34 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
-import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
-import rollupNodePolyFill from "rollup-plugin-node-polyfills";
 import eslint from "vite-plugin-eslint";
 import EnvironmentPlugin from "vite-plugin-environment";
 import { visualizer } from "rollup-plugin-visualizer";
+import inject from "@rollup/plugin-inject";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: [".env.local", ".env"],
+});
+
+const IS_DEBUG = process.env.REACT_APP_DEBUG === "true";
 
 export default defineConfig({
   build: {
+    // convenience for local dev
+    minify: !IS_DEBUG,
     outDir: "build",
     commonjsOptions: {
       include: [],
     },
     rollupOptions: {
       maxParallelFileOps: 100,
-      plugins: [rollupNodePolyFill()],
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
+      plugins: [
+        inject({
+          "globalThis.Buffer": ["buffer", "Buffer"],
+        }),
+      ],
     },
   },
   plugins: [
@@ -39,26 +49,27 @@ export default defineConfig({
       brotliSize: true,
       filename: "bundle-size-analysis.json",
     }),
+    nodePolyfills({
+      include: ["buffer"],
+      globals: {
+        Buffer: true,
+      },
+    }),
   ],
   optimizeDeps: {
     disabled: false,
     include: [
-      "@web3-onboard/common",
       "@walletconnect/ethereum-provider",
       "rxjs",
       "rxjs/operators",
       "@across-protocol/contracts",
+      "@solana/wallet-adapter-base",
+      "@solana/web3.js",
     ],
     esbuildOptions: {
       define: {
         global: "globalThis",
       },
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          process: true,
-          buffer: true,
-        }),
-      ],
     },
   },
 });

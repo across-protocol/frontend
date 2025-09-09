@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
 import { QUERIESV2, trackMaxButtonClicked, getConfig } from "utils";
-import { useStakingPool, useAmplitude, useBalanceBySymbol } from "hooks";
+import { useStakingPool, useAmplitude } from "hooks";
+import { useBalance } from "hooks/useBalance";
 import { Text, AmountInput } from "components";
 
 import {
@@ -34,7 +35,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
     selectedToken.l1TokenAddress,
     selectedToken.symbol
   );
-  const balanceQuery = useBalanceBySymbol(
+  const balanceQuery = useBalance(
     selectedToken.symbol,
     config.getHubPoolChainId()
   );
@@ -83,6 +84,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onSuccess: () => {
             setAmount("");
             maxAmountsQuery.refetch();
+            stakingPoolQuery.refetch();
           },
         }
       );
@@ -97,6 +99,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onSuccess: () => {
             setAmount("");
             maxAmountsQuery.refetch();
+            stakingPoolQuery.refetch();
           },
         }
       );

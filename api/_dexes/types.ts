@@ -2,7 +2,9 @@ import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType } from "./utils";
+import { AmountType, AppFee, CrossSwapType } from "./utils";
+import { Action } from "../swap/_utils";
+import { TransferType } from "../_spoke-pool-periphery";
 
 export type { AmountType, CrossSwapType };
 
@@ -38,9 +40,24 @@ export type CrossSwap = {
   refundAddress?: string;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  excludeSources?: string[];
+  includeSources?: string[];
+  embeddedActions: Action[];
+  appFeePercent?: number;
+  appFeeRecipient?: string;
+  strictTradeType: boolean;
+  isDestinationSvm?: boolean;
 };
 
-export type SupportedDex = "1inch" | "uniswap" | "gho" | "gho-multicall3";
+export type SupportedDex =
+  | "1inch"
+  | "uniswap"
+  | "uniswap-v3/swap-router-02"
+  | "uniswap/universal-router-02"
+  | "gho-multicall3"
+  | "wrapped-gho"
+  | "lifi"
+  | "0x";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -64,6 +81,10 @@ export type SwapQuote = {
   }[];
   tokenIn: Token;
   tokenOut: Token;
+  swapProvider: {
+    name: string;
+    sources: string[];
+  };
 };
 
 export type CrossSwapQuotes = {
@@ -85,18 +106,15 @@ export type CrossSwapQuotes = {
     destinationRouter?: RouterContract;
     originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
+  appFee?: AppFee;
 };
 
-export type OriginSwapEntryPointContract =
-  | {
-      name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
-      address: string;
-    }
-  | {
-      name: "UniversalSwapAndBridge";
-      address: string;
-      dex: SupportedDex;
-    };
+export type OriginSwapEntryPointContract = {
+  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery";
+  address: string;
+  dex?: SupportedDex;
+};
+
 export type DepositEntryPointContract = {
   name: "SpokePoolPeriphery" | "SpokePool";
   address: string;
@@ -104,6 +122,7 @@ export type DepositEntryPointContract = {
 export type RouterContract = {
   name: string;
   address: string;
+  transferType?: TransferType;
 };
 
 export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
@@ -116,34 +135,140 @@ export type CrossSwapFees = {
   destinationSwapFees?: Record<string, number>;
 };
 
+export type GetSourcesFn = (
+  chainId: number,
+  opts?: {
+    excludeSources?: string[];
+    includeSources?: string[];
+  }
+) =>
+  | {
+      sourcesKeys: string[];
+      sourcesNames: string[];
+      sourcesType: "exclude" | "include";
+    }
+  | undefined;
+
+export type AssertSellEntireBalanceSupportedFn = () => void;
+
 export type QuoteFetchStrategy = {
+  strategyName: string;
   getRouter: (chainId: number) => {
     address: string;
     name: string;
+    transferType?: TransferType;
   };
-  getOriginEntryPoints: (chainId: number) => {
-    swapAndBridge:
-      | {
-          name: "UniversalSwapAndBridge";
-          address: string;
-          dex: "uniswap" | "1inch" | "gho" | "gho-multicall3";
-        }
-      | {
-          name: "SpokePoolPeripheryProxy" | "SpokePoolPeriphery";
-          address: string;
-        };
-    deposit: {
-      name: "SpokePoolPeriphery" | "SpokePool";
-      address: string;
-    };
-  };
+  getOriginEntryPoints: (chainId: number) => OriginEntryPoints;
   fetchFn: QuoteFetchFn;
+  getSources: GetSourcesFn;
+  assertSellEntireBalanceSupported: AssertSellEntireBalanceSupportedFn;
 };
+
+export type SwapRouter = ReturnType<QuoteFetchStrategy["getRouter"]>;
+export type OriginEntryPoint = ReturnType<
+  QuoteFetchStrategy["getOriginEntryPoints"]
+>;
 
 export type QuoteFetchFn = (
   swap: Swap,
   tradeType: TradeType,
-  opts?: Partial<{
-    useIndicativeQuote: boolean;
-  }>
+  opts?: QuoteFetchOpts
 ) => Promise<SwapQuote>;
+
+export type QuoteFetchOpts = Partial<{
+  useIndicativeQuote: boolean;
+  sources?: ReturnType<GetSourcesFn>;
+  sellEntireBalance?: boolean;
+  throwIfSellEntireBalanceUnsupported?: boolean;
+  quoteBuffer?: number;
+}>;
+
+export type OriginEntryPointContractName =
+  | "SpokePoolPeriphery"
+  | "UniversalSwapAndBridge";
+
+export type OriginEntryPoints = {
+  originSwapInitialRecipient: {
+    name: "UniversalSwapAndBridge" | "SwapProxy";
+    address: string;
+  };
+  swapAndBridge: OriginSwapEntryPointContract;
+  deposit: {
+    name: "SpokePoolPeriphery" | "SpokePool";
+    address: string;
+  };
+};
+export type DepositEntryPoint = OriginEntryPoints["deposit"];
+
+export type CrossSwapQuotesRetrievalB2AResult = {
+  destinationSwap: {
+    chainId: number;
+    tokenIn: Token;
+    tokenOut: Token;
+    recipient: string;
+    slippageTolerance: number;
+    type: AmountType;
+  };
+  originRouter: SwapRouter;
+  destinationRouter: SwapRouter;
+  depositEntryPoint: DepositEntryPoint;
+  bridgeableOutputToken: Token;
+  destinationSwapChainId: number;
+  destinationStrategy: QuoteFetchStrategy;
+  originStrategy: QuoteFetchStrategy;
+};
+
+export type CrossSwapQuotesRetrievalA2BResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: Token;
+    tokenOut: Token;
+    recipient: string;
+    slippageTolerance: number;
+    type: AmountType;
+  };
+  originStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationChainId: number;
+  bridgeableInputToken: Token;
+  originSwapEntryPoint: OriginSwapEntryPointContract;
+};
+
+export type CrossSwapQuotesRetrievalA2AResult = {
+  originSwap: {
+    chainId: number;
+    tokenIn: Token;
+    tokenOut: Token;
+    recipient: string;
+    slippageTolerance: number;
+    type: AmountType;
+  };
+  destinationSwap: {
+    chainId: number;
+    tokenIn: Token;
+    tokenOut: Token;
+    recipient: string;
+    slippageTolerance: number;
+    type: AmountType;
+  };
+  originStrategy: QuoteFetchStrategy;
+  originSwapChainId: number;
+  destinationSwapChainId: number;
+  bridgeableInputToken: Token;
+  bridgeableOutputToken: Token;
+  originSwapEntryPoint: OriginSwapEntryPointContract;
+  depositEntryPoint: DepositEntryPoint;
+  originRouter: SwapRouter;
+  destinationRouter: SwapRouter;
+  destinationStrategy: QuoteFetchStrategy;
+}[];
+
+export type DexSources = {
+  strategy: string;
+  sources: {
+    [chainId: number]: {
+      key: string; // Source key used by the DEX API
+      names: string[]; // Source names that match the key
+    }[];
+  };
+};

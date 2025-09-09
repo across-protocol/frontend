@@ -5,16 +5,16 @@ import { QUERIESV2, COLORS } from "utils";
 type ButtonSize = "lg" | "md" | "sm";
 type ButtonColor = keyof typeof COLORS;
 
-type BaseButtonProps = {
+type BaseButtonProps = React.ComponentPropsWithoutRef<"button"> & {
   size?: ButtonSize;
 };
 
-type PrimaryButtonProps = BaseButtonProps & {
+export type PrimaryButtonProps = BaseButtonProps & {
   backgroundColor?: ButtonColor;
   textColor?: ButtonColor;
 };
 
-type SecondaryButtonProps = BaseButtonProps & {
+export type SecondaryButtonProps = BaseButtonProps & {
   textColor?: ButtonColor;
   borderColor?: ButtonColor;
   hoveredBorderColor?: ButtonColor;

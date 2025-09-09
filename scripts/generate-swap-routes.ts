@@ -2,17 +2,16 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
 import { ethers } from "ethers";
-
 import {
   enabledMainnetChainConfigs,
   enabledSepoliaChainConfigs,
-} from "./generate-routes";
+} from "./utils/enabled-chain-configs";
 
 const enabledSwapRoutes: {
   [hubPoolChainId: number]: {
     [tokenInSymbol: string]: {
       all?: {
-        disabledOriginChains: number[];
+        disabledOriginChains?: number[];
         enabledDestinationChains: "all" | number[];
         enabledOutputTokens: string[];
       };
@@ -43,10 +42,31 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
       all: {
         disabledOriginChains: [
-          CHAIN_IDs.LINEA, // Not swappable on Uniswap V3
-          CHAIN_IDs.SCROLL, // Not swappable on Uniswap V3
-          CHAIN_IDs.UNICHAIN, // Not swappable on Uniswap V3
+          CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
+          CHAIN_IDs.LINEA, // Not bridgeable
+          CHAIN_IDs.SOLANA, // Not available yet
         ],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDbC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
+        enabledDestinationChains: [CHAIN_IDs.LENS],
+        enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDzC"].symbol]: {
+      all: {
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },
@@ -198,4 +218,11 @@ async function generateSwapRoutes(hubPoolChainId = 1) {
   );
 }
 
-generateSwapRoutes(Number(process.argv[2])).catch(console.error);
+const hubPoolChainId = process.argv[2];
+if (hubPoolChainId) {
+  generateSwapRoutes(Number(hubPoolChainId));
+} else {
+  Object.keys(enabledSwapRoutes).forEach((chainId) => {
+    generateSwapRoutes(Number(chainId));
+  });
+}

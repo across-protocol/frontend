@@ -1,9 +1,9 @@
 import { BigNumber, providers } from "ethers";
-import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
-import { toAddress as _toAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
+import { toAddressType as _toAddressType } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 
+export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
-export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   bnUint256Max,
   bnUint32Max,
@@ -19,12 +19,18 @@ export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
 export {
   toBytes32,
   compareAddressesSimple,
-  toAddress,
+  isContractDeployedToAddress,
+  toAddressType,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   getNativeTokenSymbol,
-  chainIsLens,
+  chainIsSvm,
+  chainIsEvm,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
+export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
+export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
+export { bigToU8a32 } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,
@@ -63,15 +69,15 @@ export async function getBlockForTimestamp(
   provider: providers.JsonRpcProvider,
   timestamp: number
 ) {
-  const blockFinder = new BlockFinder(provider);
+  const blockFinder = new EVMBlockFinder(provider);
   const { number: blockNumberForTimestamp } =
     await blockFinder.getBlockForTimestamp(timestamp);
   return blockNumberForTimestamp;
 }
 
-export function toAddressSafe(address: string) {
+export function toAddressSafe(address: string, chainId: number) {
   try {
-    return _toAddress(address);
+    return _toAddressType(address, chainId);
   } catch (e) {
     return address;
   }

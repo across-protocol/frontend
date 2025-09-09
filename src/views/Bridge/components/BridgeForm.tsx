@@ -5,6 +5,24 @@ import { Clock, Info } from "react-feather";
 import ExternalCardWrapper from "components/CardWrapper";
 import { PrimaryButton, SecondaryButton } from "components/Button";
 import { Alert, Text } from "components";
+import { Tooltip } from "components/Tooltip";
+
+import {
+  getTokenForChain,
+  GetBridgeFeesResult,
+  QUERIESV2,
+  chainIdToRewardsProgramName,
+  formatWeiPct,
+  rewardProgramsAvailable,
+  COLORS,
+  getEcosystem,
+} from "utils";
+import { VoidHandler } from "utils/types";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { BridgeLimits } from "hooks";
 
 import QuickSwap from "./QuickSwap";
 import { AmountInput } from "./AmountInput";
@@ -15,34 +33,20 @@ import { FeesCollapsible } from "./FeesCollapsible";
 import { RecipientRow } from "./RecipientRow";
 
 import {
-  getToken,
-  GetBridgeFeesResult,
-  QUERIESV2,
-  chainIdToRewardsProgramName,
-  formatWeiPct,
-  rewardProgramsAvailable,
-  COLORS,
-} from "utils";
-import { VoidHandler } from "utils/types";
-
-import {
   AmountInputError,
   SelectedRoute,
   calcSwapPriceImpact,
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { BridgeLimits, useConnection } from "hooks";
-import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
-import { Tooltip } from "components/Tooltip";
-import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
   amountInput: string;
   swapSlippage: number;
   parsedAmountInput?: BigNumber;
-  toAccount?: ToAccount;
+  toAccountEVM?: ToAccount;
+  toAccountSVM?: ToAccount;
 
   onChangeAmountInput: (input: string) => void;
   onClickMaxBalance: VoidHandler;
@@ -79,7 +83,8 @@ const BridgeForm = ({
   selectedRoute,
   parsedAmountInput,
   amountInput,
-  toAccount,
+  toAccountEVM,
+  toAccountSVM,
   swapSlippage,
 
   onClickMaxBalance,
@@ -108,13 +113,20 @@ const BridgeForm = ({
   isQuoteLoading,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
-  const { connect } = useConnection();
+  const { connect: connectEVM } = useConnectionEVM();
+  const { connect: connectSVM } = useConnectionSVM();
+
+  const destinationChainEcosystem = getEcosystem(selectedRoute.toChain);
+
+  const recipient =
+    destinationChainEcosystem === "evm" ? toAccountEVM : toAccountSVM;
 
   const receiveTokenSymbol = getReceiveTokenSymbol(
     selectedRoute.toChain,
     selectedRoute.fromTokenSymbol,
     selectedRoute.toTokenSymbol,
-    Boolean(toAccount?.isContract)
+    Boolean(recipient?.isContract),
+    Boolean(recipient?.is7702Delegate)
   );
 
   const swapPriceImpact =
@@ -131,6 +143,9 @@ const BridgeForm = ({
     utils
       .parseEther(String(negativePriceImpactWarningThreshold))
       .gt(swapPriceImpact);
+
+  const isRecipientSet =
+    destinationChainEcosystem === "evm" ? !!toAccountEVM : !!toAccountSVM;
 
   return (
     <CardWrapper>
@@ -221,11 +236,12 @@ const BridgeForm = ({
           />
         </TokenSelectorWrapper>
       </RowWrapper>
-      {toAccount && selectedRoute.externalProjectId !== "hyperliquid" && (
+      {isConnected && selectedRoute.externalProjectId !== "hyperliquid" && (
         <RowWrapper>
           <RecipientRow
             onClickChangeToAddress={onClickChangeToAddress}
-            recipient={toAccount}
+            recipient={recipient}
+            toChainId={selectedRoute.toChain}
           />
         </RowWrapper>
       )}
@@ -270,11 +286,20 @@ const BridgeForm = ({
         parsedAmount={parsedAmountInput}
         swapQuote={swapQuote}
         universalSwapQuote={universalSwapQuote}
-        inputToken={getToken(selectedRoute.fromTokenSymbol)}
-        outputToken={getToken(receiveTokenSymbol)}
+        inputToken={getTokenForChain(
+          selectedRoute.fromTokenSymbol,
+          selectedRoute.fromChain
+        )}
+        outputToken={getTokenForChain(
+          receiveTokenSymbol,
+          selectedRoute.toChain
+        )}
         swapToken={
           selectedRoute.type === "swap"
-            ? getToken(selectedRoute.swapTokenSymbol)
+            ? getTokenForChain(
+                selectedRoute.swapTokenSymbol,
+                selectedRoute.fromChain
+              )
             : undefined
         }
         onSetNewSlippage={onSetNewSlippage}
@@ -284,9 +309,11 @@ const BridgeForm = ({
         swapPriceImpact={swapPriceImpact}
         estimatedFillTimeSec={fees?.estimatedFillTimeSec}
       />
-      {!isConnected ? (
+      {!isConnected || !isRecipientSet ? (
         <StyledSecondaryButton
-          onClick={() => connect()}
+          onClick={() =>
+            destinationChainEcosystem === "evm" ? connectEVM() : connectSVM()
+          }
           data-cy="connect-wallet"
         >
           Connect Wallet

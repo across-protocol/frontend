@@ -1,0 +1,50 @@
+import { Address, Hex, padHex, toBytes, toHex, trim } from "viem";
+import {
+  getAddressDecoder,
+  getAddressEncoder,
+  isAddress as isSvmAddress,
+} from "@solana/kit";
+import { isAddress } from "ethers/lib/utils";
+import { arch, utils as sdkUtils } from "@across-protocol/sdk";
+
+// exports
+export { isSvmAddress };
+
+// utils
+export function isEvmAddress(value: string): value is Address {
+  return isAddress(value);
+}
+
+export function svmToHex(pubkey: string): Hex {
+  if (!isSvmAddress(pubkey)) {
+    throw new Error("Invalid SVM Address");
+  }
+  const bytes = getAddressEncoder().encode(pubkey);
+  return toHex(new Uint8Array(bytes));
+}
+
+export function hexToBase58(address: Address) {
+  if (!isEvmAddress(address)) {
+    throw new Error("Invalid EVM Address");
+  }
+  const bytes = trim(toBytes(address));
+  return getAddressDecoder().decode(bytes);
+}
+
+export function toBytes32(value: string) {
+  if (isSvmAddress(value)) {
+    // byte length already checked at this stage
+    return svmToHex(value);
+  }
+  if (isEvmAddress(value)) {
+    return padHex(value, {
+      size: 32,
+      dir: "left",
+    });
+  }
+  throw new Error("Invalid Address type. Must be valid EVM or SVM address");
+}
+
+export function toSolanaKitAddress(address: sdkUtils.Address) {
+  return arch.svm.toAddress(address);
+}

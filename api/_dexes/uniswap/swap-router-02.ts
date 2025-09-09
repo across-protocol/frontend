@@ -2,21 +2,17 @@ import { BigNumber, ethers } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
+import { getLogger, addMarkupToAmount } from "../../_utils";
 import {
-  getLogger,
-  getSpokePoolAddress,
-  addMarkupToAmount,
-} from "../../_utils";
-import { QuoteFetchStrategy, Swap, SwapQuote } from "../types";
-import {
-  getSpokePoolPeripheryAddress,
-  getSpokePoolPeripheryProxyAddress,
-} from "../../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
+  OriginEntryPointContractName,
+  QuoteFetchOpts,
+  QuoteFetchStrategy,
+  Swap,
+  SwapQuote,
+} from "../types";
 import { floatToPercent } from "./utils/conversion";
 import {
   getUniswapClassicQuoteFromApi,
-  getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { RouterTradeAdapter } from "./utils/adapter";
@@ -26,104 +22,128 @@ import {
   getUniswapQuoteWithSwapQuoterFromSdk,
   getUniswapQuoteWithSwapRouter02FromSdk,
 } from "./utils/v3-sdk";
+import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
+import {
+  compactAxiosError,
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
+import { AxiosError } from "axios";
 
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
+const STRATEGY_NAME = "uniswap-v3/swap-router-02";
+
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName:
-    | "SpokePoolPeriphery"
-    | "SpokePoolPeripheryProxy"
-    | "UniversalSwapAndBridge",
+  originSwapEntryPointContractName: OriginEntryPointContractName,
   quoteSource: QuoteSource = "trading-api"
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
+    const address = SWAP_ROUTER_02_ADDRESS[chainId];
+    if (!address) {
+      throw new Error(
+        `UniswapV3SwapRouter02 address not found for chain id ${chainId}`
+      );
+    }
     return {
-      address: SWAP_ROUTER_02_ADDRESS[chainId],
+      address: address,
       name: "UniswapV3SwapRouter02",
     };
   };
+
   const getOriginEntryPoints = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeripheryProxy") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeripheryProxy",
-          address: getSpokePoolPeripheryProxyAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
-      return {
-        swapAndBridge: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-        deposit: {
-          name: "SpokePoolPeriphery",
-          address: getSpokePoolPeripheryAddress(chainId),
-        },
-      } as const;
-    } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-      return {
-        swapAndBridge: {
-          name: "UniversalSwapAndBridge",
-          address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
-          dex: "uniswap",
-        },
-        deposit: {
-          name: "SpokePool",
-          address: getSpokePoolAddress(chainId),
-        },
-      } as const;
-    }
-    throw new Error(
-      `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+    return getOriginSwapEntryPoints(
+      originSwapEntryPointContractName,
+      chainId,
+      STRATEGY_NAME
     );
+  };
+
+  const getSources = makeGetSources({
+    strategy: STRATEGY_NAME,
+    sources: Object.keys(SWAP_ROUTER_02_ADDRESS).reduce(
+      (acc, chainIdStr) => {
+        const chainId = Number(chainIdStr);
+        acc[chainId] = [
+          {
+            key: STRATEGY_NAME,
+            names: ["uniswap_v3"],
+          },
+        ];
+        return acc;
+      },
+      {} as Record<number, { key: string; names: string[] }[]>
+    ),
+  });
+
+  const assertSellEntireBalanceSupported = () => {
+    throw new UpstreamSwapProviderError({
+      message: `Option 'sellEntireBalance' is not supported by ${STRATEGY_NAME}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: STRATEGY_NAME,
+    });
   };
 
   const fetchFn = async (
     swap: Swap,
     tradeType: TradeType,
-    opts: Partial<{
-      useIndicativeQuote: boolean;
-    }> = {
-      useIndicativeQuote: false,
-    }
+    opts?: QuoteFetchOpts
   ) => {
-    let swapQuote: SwapQuote;
+    try {
+      if (
+        opts?.sellEntireBalance &&
+        opts?.throwIfSellEntireBalanceUnsupported
+      ) {
+        assertSellEntireBalanceSupported();
+      }
 
-    if (quoteSource === "trading-api") {
-      swapQuote = await fetchViaTradingApi(swap, tradeType, opts);
-    } else if (["sdk-swap-quoter", "sdk-alpha-router"].includes(quoteSource)) {
-      swapQuote = await fetchViaSdk(swap, tradeType, opts, quoteSource);
-    } else {
-      throw new Error(`Cannot fetch quote from unknown source: ${quoteSource}`);
+      let swapQuote: SwapQuote;
+
+      if (quoteSource === "trading-api") {
+        swapQuote = await fetchViaTradingApi(swap, tradeType, opts);
+      } else if (
+        ["sdk-swap-quoter", "sdk-alpha-router"].includes(quoteSource)
+      ) {
+        swapQuote = await fetchViaSdk(swap, tradeType, opts, quoteSource);
+      } else {
+        throw new Error(
+          `Cannot fetch quote from unknown source: ${quoteSource}`
+        );
+      }
+
+      getLogger().debug({
+        at: "uniswap/swap-router-02/fetchFn",
+        message: "Swap quote",
+        quoteSource,
+        type:
+          tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
+        tokenIn: swapQuote.tokenIn.symbol,
+        tokenOut: swapQuote.tokenOut.symbol,
+        chainId: swap.chainId,
+        maximumAmountIn: swapQuote.maximumAmountIn.toString(),
+        minAmountOut: swapQuote.minAmountOut.toString(),
+        expectedAmountOut: swapQuote.expectedAmountOut.toString(),
+        expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+      });
+
+      return swapQuote;
+    } catch (error) {
+      getLogger().debug({
+        at: "uniswap/swap-router-02/fetchFn",
+        message: "Error fetching quote",
+        error: compactAxiosError(error as Error),
+      });
+      throw parseUniswapError(error);
     }
-
-    getLogger().debug({
-      at: "uniswap/swap-router-02/fetchFn",
-      message: "Swap quote",
-      quoteSource,
-      type:
-        tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
-      tokenIn: swapQuote.tokenIn.symbol,
-      tokenOut: swapQuote.tokenOut.symbol,
-      chainId: swap.chainId,
-      maximumAmountIn: swapQuote.maximumAmountIn.toString(),
-      minAmountOut: swapQuote.minAmountOut.toString(),
-      expectedAmountOut: swapQuote.expectedAmountOut.toString(),
-      expectedAmountIn: swapQuote.expectedAmountIn.toString(),
-    });
-
-    return swapQuote;
   };
 
   return {
+    strategyName: STRATEGY_NAME,
     getRouter,
     getOriginEntryPoints,
+    getSources,
     fetchFn,
+    assertSellEntireBalanceSupported,
   };
 }
 
@@ -171,7 +191,7 @@ async function fetchViaTradingApi(
   let swapQuote: SwapQuote;
   if (!opts.useIndicativeQuote) {
     const { quote } = await getUniswapClassicQuoteFromApi(
-      { ...swap, swapper: swap.recipient },
+      { ...swap, swapper: swap.recipient, protocols: ["V2", "V3"] },
       tradeType
     );
     const swapTx = buildSwapRouterSwapTx(swap, tradeType, quote);
@@ -196,6 +216,10 @@ async function fetchViaTradingApi(
       expectedAmountIn,
       slippageTolerance: quote.slippage,
       swapTxns: [swapTx],
+      swapProvider: {
+        name: "uniswap/api/swap-router-02",
+        sources: ["uniswap_v3"],
+      },
     };
   } else {
     const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
@@ -294,6 +318,10 @@ function buildIndicativeQuote(
         value: "0x0",
       },
     ],
+    swapProvider: {
+      name: "uniswap/api/swap-router-02",
+      sources: ["uniswap_v3"],
+    },
   };
 
   return swapQuote;
@@ -317,8 +345,8 @@ function indicativeQuotePriceCache(
     let inputAmount: BigNumber;
     let outputAmount: BigNumber;
     if (quoteSource === "trading-api") {
-      const quote = await getUniswapClassicIndicativeQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
+      const { quote } = await getUniswapClassicQuoteFromApi(
+        { ...swap, swapper: swap.recipient, protocols: ["V2", "V3"] },
         tradeType
       );
       inputAmount = BigNumber.from(quote.input.amount);
@@ -358,4 +386,67 @@ function indicativeQuotePriceCache(
     return pricePerTokenOut;
   };
   return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
+}
+
+export function parseUniswapError(error: unknown) {
+  if (error instanceof UpstreamSwapProviderError) {
+    return error;
+  }
+
+  if (error instanceof AxiosError) {
+    const compactedError = compactAxiosError(error);
+
+    if (!error.response?.data) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Unknown error",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+          swapProvider: STRATEGY_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    const { data, status } = error.response;
+
+    if (status >= 500) {
+      return new UpstreamSwapProviderError(
+        {
+          message: "Service unavailable",
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.SERVICE_UNAVAILABLE,
+          swapProvider: STRATEGY_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    if (status >= 400) {
+      return new UpstreamSwapProviderError(
+        {
+          message: data.message,
+          code: UPSTREAM_SWAP_PROVIDER_ERRORS.NO_POSSIBLE_ROUTE,
+          swapProvider: STRATEGY_NAME,
+        },
+        { cause: compactedError }
+      );
+    }
+
+    return new UpstreamSwapProviderError(
+      {
+        message: "Unknown error",
+        code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+        swapProvider: STRATEGY_NAME,
+      },
+      { cause: compactedError }
+    );
+  }
+
+  return new UpstreamSwapProviderError(
+    {
+      message: "Unknown error",
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.UNKNOWN_ERROR,
+      swapProvider: STRATEGY_NAME,
+    },
+    { cause: error }
+  );
 }

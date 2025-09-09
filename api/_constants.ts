@@ -290,6 +290,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "matic",
   "gho",
   "bnb",
+  "sol",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -298,6 +299,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
+  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
+  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -334,9 +337,6 @@ export const DEFI_LLAMA_POOL_LOOKUP: Record<string, string> = {
   "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3":
     "8f7b5b8c-09db-45e3-8938-f30115d34672",
 };
-
-export const DEFAULT_SIMULATED_RECIPIENT_ADDRESS =
-  "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
 
 export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
 
