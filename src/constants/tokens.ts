@@ -76,6 +76,7 @@ export const similarTokensMap: Record<string, string[]> = similarTokens.reduce(
 
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenLogos = {
+  VLR: unknownLogo, // xxx relocate before merging to prod
   ETH: ethLogo,
   WETH: wethLogo,
   MATIC: maticLogo,

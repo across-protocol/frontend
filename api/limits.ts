@@ -635,9 +635,9 @@ const parseAndConvertUsdToTokenUnits = (
   inputToken: TokenInfo
 ): BigNumber => {
   const usdValueInWei = ethers.utils.parseUnits(usdValue);
-  const tokenValueInWei = usdValueInWei
-    .mul(sdk.utils.fixedPointAdjustment)
-    .div(tokenPriceUsd);
+  const tokenValueInWei = tokenPriceUsd.eq(sdk.utils.bnZero)
+    ? sdk.utils.bnZero
+    : usdValueInWei.mul(sdk.utils.fixedPointAdjustment).div(tokenPriceUsd);
   const tokenValue = ConvertDecimals(18, inputToken.decimals)(tokenValueInWei);
   return sdk.utils.toBN(tokenValue);
 };

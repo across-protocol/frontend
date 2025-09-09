@@ -122,6 +122,11 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.5").toString(),
     cutoff: ethers.utils.parseUnits("1").toString(),
   },
+  VLR: {
+    lowerBound: ethers.utils.parseUnits("0.0000000000001").toString(),
+    upperBound: ethers.utils.parseUnits("0.00000000000011").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+  },
   WLD: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
@@ -293,8 +298,6 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
@@ -304,6 +307,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
 export const ENABLED_POOLS_UNDERLYING_TOKENS = [
+  TOKEN_SYMBOLS_MAP.VLR, // xxx relocate before merging to prod
   TOKEN_SYMBOLS_MAP.ETH,
   TOKEN_SYMBOLS_MAP.WETH,
   TOKEN_SYMBOLS_MAP.USDC,
