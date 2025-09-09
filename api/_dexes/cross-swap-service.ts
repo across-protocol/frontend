@@ -643,7 +643,6 @@ export async function getCrossSwapQuotesForExactInputA2B(
   const {
     originStrategy,
     originSwapChainId,
-    destinationChainId,
     bridgeableInputToken,
     originSwapEntryPoint,
   } = prioritizedStrategy.result;
@@ -653,8 +652,8 @@ export async function getCrossSwapQuotesForExactInputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
-    recipient: getMultiCallHandlerAddress(destinationChainId),
-    message: buildExactInputBridgeTokenMessage(crossSwap),
+    recipient: getBridgeQuoteRecipient(crossSwap),
+    message: getBridgeQuoteMessage(crossSwap),
   });
 
   if (bridgeQuote.outputAmount.lt(0)) {
@@ -671,7 +670,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isInputNative,
   });
-  bridgeQuote.message = buildExactInputBridgeTokenMessage(crossSwap, appFee);
+  bridgeQuote.message = getBridgeQuoteMessage(crossSwap, appFee);
 
   return {
     crossSwap,
@@ -719,14 +718,8 @@ export async function getCrossSwapQuotesForOutputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
-    recipient: getMultiCallHandlerAddress(destinationChainId),
-    message:
-      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
-        ? buildExactOutputBridgeTokenMessage(
-            crossSwapWithAppFee,
-            crossSwap.amount
-          )
-        : buildMinOutputBridgeTokenMessage(crossSwapWithAppFee),
+    recipient: getBridgeQuoteRecipient(crossSwapWithAppFee),
+    message: getBridgeQuoteMessage(crossSwapWithAppFee),
   });
 
   const strategyFetches = results.map((result) => {
@@ -782,14 +775,7 @@ export async function getCrossSwapQuotesForOutputA2B(
   });
 
   if (appFee.feeAmount.gt(0)) {
-    bridgeQuote.message =
-      crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT
-        ? buildExactOutputBridgeTokenMessage(
-            crossSwap,
-            crossSwap.amount,
-            appFee
-          )
-        : buildMinOutputBridgeTokenMessage(crossSwap, appFee);
+    bridgeQuote.message = getBridgeQuoteMessage(crossSwapWithAppFee, appFee);
   }
 
   return {
