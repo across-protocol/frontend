@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha }}
+
       - uses: ./.github/actions/setup
       # For now, we only need Chromium.
       - name: Run API e2e tests
