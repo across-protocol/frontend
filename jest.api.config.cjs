@@ -11,8 +11,10 @@ module.exports = {
     "^.+\\.svg$": "jest-transform-stub",
     "^.+\\.png$": "jest-transform-stub",
   },
-  // Only include test/api directory for API tests
-  testMatch: ["<rootDir>/test/api/**/*.test.{ts,tsx}"],
+  testMatch: [
+    "<rootDir>/test/api/**/*.test.{ts,tsx}",
+    "<rootDir>/e2e-api/**/*.test.{ts,tsx}",
+  ],
   moduleNameMapper: {
     // Only keep uuid mapping for API tests - remove frontend path mappings
     uuid: require.resolve("uuid"),
