@@ -3,6 +3,7 @@ import * as chainConfigs from "../chain-configs";
 export const enabledMainnetChainConfigs = [
   chainConfigs.MAINNET,
   chainConfigs.OPTIMISM,
+  chainConfigs.POLYGON,
   chainConfigs.ARBITRUM,
   chainConfigs.ZK_SYNC,
   chainConfigs.BASE,
