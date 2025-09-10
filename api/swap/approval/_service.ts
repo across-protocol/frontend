@@ -10,6 +10,7 @@ import {
   getLogger,
   getWrappedNativeTokenAddress,
   getTokenByAddress,
+  getBalance,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
@@ -65,6 +66,7 @@ export async function handleApprovalSwap(
     strictTradeType,
     skipChecks,
     isDestinationSvm,
+    isOriginSvm,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } =
@@ -94,6 +96,7 @@ export async function handleApprovalSwap(
       appFeeRecipient,
       strictTradeType,
       isDestinationSvm,
+      isOriginSvm,
     },
     quoteFetchStrategies
   );
@@ -130,20 +133,32 @@ export async function handleApprovalSwap(
   let allowance = BigNumber.from(0);
   let balance = BigNumber.from(0);
   if (!skipChecks) {
-    const checks = await getBalanceAndAllowance({
-      chainId: originChainId,
-      tokenAddress: inputTokenAddress,
-      owner: crossSwap.depositor,
-      spender: crossSwapTx.to,
-    });
-    allowance = checks.allowance;
-    balance = checks.balance;
+    if (crossSwapTx.ecosystem === "evm") {
+      const checks = await getBalanceAndAllowance({
+        chainId: originChainId,
+        tokenAddress: inputTokenAddress,
+        owner: crossSwap.depositor,
+        spender: crossSwapTx.to,
+      });
+      allowance = checks.allowance;
+      balance = checks.balance;
+    } else if (crossSwapTx.ecosystem === "svm") {
+      const _balance = await getBalance(
+        originChainId,
+        crossSwap.depositor,
+        inputTokenAddress
+      );
+      allowance = inputAmount;
+      balance = _balance;
+    }
   }
 
   const isSwapTxEstimationPossible =
     !skipOriginTxEstimation &&
     allowance.gte(inputAmount) &&
-    balance.gte(inputAmount);
+    balance.gte(inputAmount) &&
+    // Skipping estimation for SVM for now
+    crossSwapTx.ecosystem === "evm";
   const provider = getProvider(originChainId);
   const originChainGasToken = getTokenByAddress(
     getWrappedNativeTokenAddress(originChainId),
@@ -173,7 +188,9 @@ export async function handleApprovalSwap(
           from: crossSwap.depositor,
         })
       : undefined,
-    latestGasPriceCache(originChainId).get(),
+    isSwapTxEstimationPossible
+      ? latestGasPriceCache(originChainId).get()
+      : undefined,
     getCachedTokenPrice({
       symbol: inputToken.symbol,
       tokenAddress: inputToken.address,
@@ -226,7 +243,7 @@ export async function handleApprovalSwap(
     | undefined;
   // @TODO: Allow for just enough approval amount to be set.
   const approvalAmount = ethers.constants.MaxUint256;
-  if (allowance.lt(inputAmount)) {
+  if (allowance.lt(inputAmount) && crossSwapTx.ecosystem === "evm") {
     approvalTxns = getApprovalTxns({
       allowance,
       token: crossSwap.inputToken,
@@ -242,15 +259,19 @@ export async function handleApprovalSwap(
     destinationChainId,
     inputTokenAddress,
     inputAmount,
-    approvalSwapTx: {
-      ...crossSwapTx,
-      gas: originTxGas,
-      maxFeePerGas: (originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate)
-        ?.maxFeePerGas,
-      maxPriorityFeePerGas: (
-        originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
-      )?.maxPriorityFeePerGas,
-    },
+    approvalSwapTx:
+      crossSwapTx.ecosystem === "evm"
+        ? {
+            ...crossSwapTx,
+            gas: originTxGas,
+            maxFeePerGas: (
+              originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
+            )?.maxFeePerGas,
+            maxPriorityFeePerGas: (
+              originTxGasPrice as sdk.gasPriceOracle.EvmGasPriceEstimate
+            )?.maxPriorityFeePerGas,
+          }
+        : crossSwapTx,
     allowance,
     balance,
     approvalTxns,

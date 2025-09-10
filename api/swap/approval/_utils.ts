@@ -1,9 +1,22 @@
 import { PopulatedTransaction } from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import {
+  createNoopSigner,
+  address,
+  compileTransaction,
+  getBase64EncodedWireTransaction,
+  pipe,
+  appendTransactionMessageInstruction,
+} from "@solana/kit";
+import { getAddMemoInstruction } from "@solana-program/memo";
 
 import { CrossSwapQuotes } from "../../_dexes/types";
-import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
-import { getSpokePool } from "../../_utils";
+import {
+  assertValidIntegratorId,
+  tagIntegratorId,
+  tagSwapApiMarker,
+} from "../../_integrator-id";
+import { getSpokePool, getSpokePoolAddress, InputError } from "../../_utils";
 import {
   getSpokePoolPeriphery,
   TransferType,
@@ -13,8 +26,25 @@ import {
   extractSwapAndDepositDataStruct,
 } from "../../_dexes/utils";
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
+import { AcrossErrorCode } from "../../_errors";
+import { getSVMRpc } from "../../_providers";
+import { getFillDeadlineBuffer } from "../../_fill-deadline";
 
 export async function buildCrossSwapTxForAllowanceHolder(
+  crossSwapQuotes: CrossSwapQuotes,
+  integratorId?: string
+) {
+  const { crossSwap } = crossSwapQuotes;
+  const originChainId = crossSwap.inputToken.chainId;
+
+  if (sdk.utils.chainIsSvm(originChainId)) {
+    return _buildDepositTxForAllowanceHolderSvm(crossSwapQuotes, integratorId);
+  } else {
+    return _buildDepositTxForAllowanceHolderEvm(crossSwapQuotes, integratorId);
+  }
+}
+
+async function _buildDepositTxForAllowanceHolderEvm(
   crossSwapQuotes: CrossSwapQuotes,
   integratorId?: string
 ) {
@@ -237,9 +267,157 @@ export async function buildCrossSwapTxForAllowanceHolder(
   const txDataWithSwapApiMarker = tagSwapApiMarker(txDataWithIntegratorId);
 
   return {
+    chainId: originChainId,
     from: crossSwapQuotes.crossSwap.depositor,
     to: toAddress,
     data: txDataWithSwapApiMarker,
     value: tx.value,
+    ecosystem: "evm",
+  } as const;
+}
+
+async function _buildDepositTxForAllowanceHolderSvm(
+  crossSwapQuotes: CrossSwapQuotes,
+  integratorId?: string
+) {
+  const { originSwapQuote, crossSwap } = crossSwapQuotes;
+  const originChainId = crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwap.outputToken.chainId;
+
+  if (originSwapQuote) {
+    throw new InputError({
+      message: "Origin swaps not supported on SVM yet",
+      code: AcrossErrorCode.INVALID_PARAM,
+    });
+  }
+
+  const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
+  const depositor = address(
+    sdk.utils.toAddressType(crossSwap.depositor, originChainId).toBase58()
+  );
+  const recipient = address(
+    sdk.utils.toAddressType(crossSwap.recipient, destinationChainId).toBase58()
+  );
+  const inputToken = address(
+    sdk.utils
+      .toAddressType(crossSwap.inputToken.address, originChainId)
+      .toBase58()
+  );
+  const outputToken = address(
+    sdk.utils
+      .toAddressType(crossSwap.outputToken.address, destinationChainId)
+      .toBase58()
+  );
+  const inputAmount = BigInt(
+    crossSwapQuotes.bridgeQuote.inputAmount.toString()
+  );
+  const outputAmount = sdk.arch.svm.bigToU8a32(
+    crossSwapQuotes.bridgeQuote.outputAmount
+  );
+  const exclusiveRelayer = address(
+    sdk.utils
+      .toAddressType(
+        crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
+        destinationChainId
+      )
+      .toBase58()
+  );
+  const quoteTimestamp = crossSwapQuotes.bridgeQuote.suggestedFees.timestamp;
+  const fillDeadline =
+    sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
+  const exclusivityParameter =
+    crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
+  const message = Uint8Array.from(
+    Buffer.from(crossSwapQuotes.bridgeQuote.message ?? "0x", "hex")
+  );
+
+  const noopSigner = createNoopSigner(depositor);
+  const depositDataSeed: Parameters<
+    typeof sdk.arch.svm.getDepositDelegatePda
+  >[0] = {
+    depositor,
+    recipient,
+    inputToken,
+    outputToken,
+    inputAmount,
+    outputAmount,
+    destinationChainId: BigInt(destinationChainId),
+    exclusiveRelayer,
+    quoteTimestamp: BigInt(quoteTimestamp),
+    fillDeadline: BigInt(fillDeadline),
+    exclusivityParameter: BigInt(exclusivityParameter),
+    message,
   };
+
+  const depositDelegatePda = await sdk.arch.svm.getDepositDelegatePda(
+    depositDataSeed,
+    spokePoolProgramId
+  );
+  const statePda = await sdk.arch.svm.getStatePda(spokePoolProgramId);
+  const eventAuthorityPda =
+    await sdk.arch.svm.getEventAuthority(spokePoolProgramId);
+  const vaultPda = await sdk.arch.svm.getAssociatedTokenAddress(
+    sdk.utils.toAddressType(statePda, originChainId).forceSvmAddress(),
+    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+  );
+  const depositorTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
+    sdk.utils.toAddressType(depositor, originChainId).forceSvmAddress(),
+    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+  );
+  const tokenDecimals = crossSwapQuotes.bridgeQuote.inputToken.decimals;
+
+  const depositIx = await sdk.arch.svm.createDepositInstruction(
+    noopSigner,
+    getSVMRpc(originChainId),
+    {
+      signer: noopSigner,
+      state: statePda,
+      delegate: depositDelegatePda,
+      depositorTokenAccount: depositorTokenAccount,
+      vault: vaultPda,
+      eventAuthority: eventAuthorityPda,
+      program: spokePoolProgramId,
+      mint: inputToken,
+      depositor,
+      inputToken,
+      outputToken,
+      recipient,
+      inputAmount,
+      outputAmount,
+      destinationChainId,
+      exclusiveRelayer,
+      quoteTimestamp: Number(quoteTimestamp),
+      fillDeadline,
+      exclusivityParameter,
+      message,
+      // TODO: make `tokenProgram`, `associatedTokenProgram`, `systemProgram`
+      // dependent on `inputToken` somehow. For now we only support USDC and use
+      // default programs addresses of SDK.
+    },
+    tokenDecimals
+  );
+
+  if (integratorId) {
+    assertValidIntegratorId(integratorId);
+  }
+
+  const tx = pipe(depositIx, (tx) =>
+    integratorId
+      ? appendTransactionMessageInstruction(
+          getAddMemoInstruction({
+            memo: integratorId,
+          }),
+          tx
+        )
+      : tx
+  );
+  const compiledTx = compileTransaction(tx);
+  const base64EncodedWireTransaction =
+    getBase64EncodedWireTransaction(compiledTx);
+  return {
+    chainId: originChainId,
+    to: spokePoolProgramId,
+    data: base64EncodedWireTransaction,
+    ecosystem: "svm",
+  } as const;
 }

@@ -116,6 +116,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
       .option("integratorId", {
         alias: "i",
         description: "Integrator ID.",
+        type: "string",
       })
       .option("includeSources", {
         alias: "is",
@@ -218,6 +219,7 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -242,6 +244,7 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
     };
     console.log("Params:", params);
 
