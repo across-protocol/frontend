@@ -35,9 +35,8 @@ export async function buildCrossSwapTxForAllowanceHolder(
   integratorId?: string
 ) {
   const { crossSwap } = crossSwapQuotes;
-  const originChainId = crossSwap.inputToken.chainId;
 
-  if (sdk.utils.chainIsSvm(originChainId)) {
+  if (crossSwap.isOriginSvm) {
     return _buildDepositTxForAllowanceHolderSvm(crossSwapQuotes, integratorId);
   } else {
     return _buildDepositTxForAllowanceHolderEvm(crossSwapQuotes, integratorId);
