@@ -84,6 +84,7 @@ import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
+import { getSvmTokenInfo } from "./_svm-tokens";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -2554,13 +2555,8 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       };
     }
 
-    // FIXME: If the token is not found in the static token mapping, we need to resolve it dynamically for SVM chains
-    // Throwing an error for now as swaps on SVM are not supported yet.
     if (sdk.utils.chainIsSvm(chainId)) {
-      throw new InvalidParamError({
-        param: "address",
-        message: "Provided SVM token address is not supported yet.",
-      });
+      return await getSvmTokenInfo(address, chainId);
     }
 
     // ERC20 resolved dynamically
