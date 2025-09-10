@@ -2,7 +2,6 @@ import * as sdk from "@across-protocol/sdk";
 import { PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { ethers, providers } from "ethers";
 
-import { providerRedisCache } from "./_cache";
 import { getEnvs } from "./_env";
 import { getLogger } from "./_logger";
 
@@ -12,8 +11,7 @@ import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 
 export type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
-const { RPC_HEADERS, RPC_CACHE_NAMESPACE, DISABLE_PROVIDER_CACHING } =
-  getEnvs();
+const { RPC_HEADERS } = getEnvs();
 
 export const providerCache: Record<string, providers.StaticJsonRpcProvider> =
   {};
@@ -74,23 +72,6 @@ export function getProvider(
   return providerCache[cacheKey];
 }
 
-// For most chains, we can cache immediately.
-const DEFAULT_CACHE_BLOCK_DISTANCE = 0;
-
-// For chains that can reorg (mainnet and polygon), establish a buffer beyond which reorgs are rare.
-const CUSTOM_CACHE_BLOCK_DISTANCE: Record<number, number> = {
-  1: 2,
-  137: 10,
-};
-
-function getCacheBlockDistance(chainId: number) {
-  const cacheBlockDistance = CUSTOM_CACHE_BLOCK_DISTANCE[chainId];
-  if (!cacheBlockDistance) {
-    return DEFAULT_CACHE_BLOCK_DISTANCE;
-  }
-  return cacheBlockDistance;
-}
-
 /**
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
@@ -122,20 +103,6 @@ function getProviderFromConfigJson(
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
   const headers = getProviderHeaders(chainId);
-  const providerConstructorParams: ConstructorParameters<
-    typeof sdk.providers.RetryProvider
-  >[0] = urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]);
-
-  const pctRpcCallsLogged = 0; // disable RPC calls logging
-
-  const cacheNamespace = RPC_CACHE_NAMESPACE
-    ? `RPC_PROVIDER_${RPC_CACHE_NAMESPACE}`
-    : "RPC_PROVIDER";
-  const disableProviderCaching = DISABLE_PROVIDER_CACHING === "true";
-  const providerCache = disableProviderCaching ? undefined : providerRedisCache;
-  const providerCacheBlockDistance = disableProviderCaching
-    ? undefined
-    : getCacheBlockDistance(chainId);
 
   if (urls.length === 0) {
     getLogger().warn({
@@ -146,37 +113,25 @@ function getProviderFromConfigJson(
   }
 
   if (!opts.useSpeedProvider) {
-    const quorum = 1; //  quorum can be 1 in the context of the API
-    const retries = 3;
-    const delay = 0.5;
-    const maxConcurrency = 5;
-
     return new sdk.providers.RetryProvider(
-      providerConstructorParams,
+      urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
       chainId,
-      quorum,
-      retries,
-      delay,
-      maxConcurrency,
-      cacheNamespace,
-      pctRpcCallsLogged,
-      providerCache,
-      providerCacheBlockDistance
+      1, // quorum can be 1 in the context of the API
+      3, // retries
+      0.5, // delay
+      5, // max. concurrency
+      "RPC_PROVIDER", // cache namespace
+      0 // disable RPC calls logging
     );
   }
 
-  const maxConcurrencySpeed = 2;
-  const maxConcurrencyRateLimit = 5;
-
   return new sdk.providers.SpeedProvider(
-    providerConstructorParams,
+    urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]),
     chainId,
-    maxConcurrencySpeed,
-    maxConcurrencyRateLimit,
-    cacheNamespace,
-    pctRpcCallsLogged,
-    providerCache,
-    providerCacheBlockDistance
+    2, // max. concurrency used in `SpeedProvider`
+    5, // max. concurrency used in `RateLimitedProvider`
+    "RPC_PROVIDER", // cache namespace
+    1 // disable RPC calls logging
   );
 }
 
