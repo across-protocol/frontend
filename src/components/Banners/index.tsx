@@ -1,13 +1,14 @@
 import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
-import { Banner, SuperHeader, Text } from "components";
+import { Banner, SuperHeader, Text, ExternalLink } from "components";
 import {
   generalMaintenanceMessage,
   WrongNetworkError,
   disableDeposits,
   rewardsBannerWarning,
   showV4LaunchBanner,
+  COLORS,
 } from "utils";
 import AcrossV4Banner from "components/Banners/AcrossV4Banner";
 import RewardsWarningBanner from "components/Banners/RewardsWarningBanner";
@@ -91,9 +92,25 @@ export default function Banners({
           <ArrowRightIcon />
         </Banner>
       )}
+      <SuperHeader>
+        <Text color="black-800" size="lg">
+          Polygon deposits are temporarily paused due to network issues. Please
+          see the{" "}
+          <StyledLink
+            text="advisory"
+            href="https://status.polygon.technology/incidents/c8nc05x3qvmg"
+          />{" "}
+          for more details.
+        </Text>
+      </SuperHeader>
     </>
   );
 }
+
+const StyledLink = styled(ExternalLink)`
+  color: ${COLORS["black-800"]};
+  display: inline-flex;
+`;
 
 const RemoveErrorSpan = styled.span`
   cursor: pointer;
