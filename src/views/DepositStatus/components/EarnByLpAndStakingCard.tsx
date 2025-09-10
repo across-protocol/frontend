@@ -27,6 +27,7 @@ export function EarnByLpAndStakingCard({
   return (
     <EarnActionCard
       color="aqua"
+      backgroundVariant="b"
       title={
         <Text color="white">
           Earn{" "}

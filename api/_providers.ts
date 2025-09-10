@@ -165,7 +165,7 @@ function getProviderFromConfigJson(
     );
   }
 
-  const maxConcurrencySpeed = 3;
+  const maxConcurrencySpeed = 2;
   const maxConcurrencyRateLimit = 5;
 
   return new sdk.providers.SpeedProvider(

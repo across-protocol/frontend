@@ -93,6 +93,8 @@ type ModalWrapperType = {
 const minimumMargin = 32;
 
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
+  --padding-modal-content: ${({ padding }) =>
+    padding === "normal" ? "24px" : "16px"};
   max-height: ${({ height, topYOffset }) =>
     height
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
@@ -105,10 +107,10 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
+  gap: var(--padding-modal-content);
 
   margin: 0 auto;
-  padding: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
+  padding: var(--padding-modal-content);
 
   margin-top: ${({ topYOffset }) => topYOffset ?? 0}px;
   margin-bottom: ${({ bottomYOffset }) => bottomYOffset ?? 0}px;
@@ -148,4 +150,13 @@ export const Title = styled.p`
 
 export const StyledExitIcon = styled(CrossIcon)`
   cursor: pointer;
+`;
+
+export const ElementRowDivider = styled.div`
+  height: 1px;
+  min-height: 1px;
+  background: #34353b;
+
+  margin-left: calc(0px - var(--padding-modal-content));
+  width: calc(100% + (2 * var(--padding-modal-content)));
 `;

@@ -5,9 +5,17 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "@across-protocol/sdk";
+import {
+  KeyPairSigner,
+  getTransactionDecoder,
+  signTransaction,
+  sendTransactionWithoutConfirmingFactory,
+  getSignatureFromTransaction,
+} from "@solana/kit";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { buildSearchParams } from "../../api/_utils";
+import { getSVMRpc } from "../../api/_providers";
 import {
   MIN_OUTPUT_CASES,
   EXACT_OUTPUT_CASES,
@@ -81,15 +89,18 @@ export const argsFromCli = yargs(hideBin(process.argv))
       })
       .option("recipient", {
         alias: "r",
+        type: "string",
         description: "Recipient address.",
       })
       .option("depositor", {
         alias: "d",
         description: "Depositor address.",
+        type: "string",
         default: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       })
       .option("refundAddress", {
         alias: "ra",
+        type: "string",
         description: "Refund address.",
       })
       .option("refundOnOrigin", {
@@ -363,6 +374,33 @@ export async function signAndWaitAllowanceFlow(params: {
   }
 }
 
+export async function signAndWaitAllowanceFlowSvm(params: {
+  wallet: KeyPairSigner;
+  swapResponse: BaseSwapResponse;
+}) {
+  if (!params.swapResponse.swapTx || !("data" in params.swapResponse.swapTx)) {
+    throw new Error("No swap tx for allowance flow");
+  }
+
+  try {
+    const txBuffer = Buffer.from(params.swapResponse.swapTx.data, "base64");
+    const decodedTx = getTransactionDecoder().decode(txBuffer);
+    const signedTx = await signTransaction([params.wallet.keyPair], decodedTx);
+    const signature = getSignatureFromTransaction(signedTx);
+    console.log("Signed SVM tx:", signature.toString());
+
+    const sendTx = sendTransactionWithoutConfirmingFactory({
+      rpc: getSVMRpc(params.swapResponse.swapTx.chainId),
+    });
+    await sendTx(signedTx, { commitment: "confirmed" });
+    console.log("Tx sent and confirmed");
+
+    // TODO: track fill
+  } catch (e) {
+    console.error("Tx reverted", e);
+  }
+}
+
 async function trackFill(txHash: string) {
   const MAX_FILL_ATTEMPTS = 15;
   // Wait 2 seconds before starting polling
@@ -470,4 +508,19 @@ export async function getERC20DestinationAction(testCase: {
       },
     ],
   };
+}
+
+export function getSvmSignerSeed() {
+  const seedBytesStr = process.env.DEV_WALLET_KEY_PAIR_SVM;
+  if (!seedBytesStr) {
+    throw new Error(
+      "Can't get SVM signer seed. Set 'DEV_WALLET_KEY_PAIR_SVM' in .env.local"
+    );
+  }
+  const parsedSeedArray = seedBytesStr
+    .replace("[", "")
+    .replace("]", "")
+    .split(",")
+    .map((str) => parseInt(str));
+  return new Uint8Array(parsedSeedArray);
 }

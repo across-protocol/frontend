@@ -1610,6 +1610,16 @@ export function positiveIntStr() {
   });
 }
 
+export function intStringInRange(from: number, to: number) {
+  return define<string>("intStringInRange", (value) => {
+    return (
+      Number.isInteger(Number(value)) &&
+      Number(value) >= from &&
+      Number(value) <= to
+    );
+  });
+}
+
 export function positiveFloatStr(maxValue?: number) {
   return define<string>("positiveFloatStr", (value) => {
     return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
