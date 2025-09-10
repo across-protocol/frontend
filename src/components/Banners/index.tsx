@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
-import { Banner, SuperHeader, Text } from "components";
+import { Banner, SuperHeader, Text, ExternalLink } from "components";
 import {
   generalMaintenanceMessage,
   WrongNetworkError,
@@ -91,6 +91,17 @@ export default function Banners({
           <ArrowRightIcon />
         </Banner>
       )}
+      <SuperHeader>
+        <Text size="lg">
+          Polygon deposits are temporarily paused due to network issues. Please
+          see the{" "}
+          <ExternalLink
+            text="advisory"
+            href="https://status.polygon.technology/incidents/c8nc05x3qvmg"
+          />{" "}
+          for more details.
+        </Text>
+      </SuperHeader>
     </>
   );
 }
