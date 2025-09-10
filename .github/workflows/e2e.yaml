@@ -7,7 +7,7 @@ jobs:
   e2e-tests:
     if: |
       github.event.deployment_status.state == 'success' &&
-      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
+      contains(github.event.deployment_status.target_url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,12 +20,12 @@ jobs:
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn synpress ./e2e/wallet-setup
         env:
-          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+          E2E_DAPP_URL: ${{ github.event.deployment_status.target_url }}
       - name: Run tests
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn test:e2e:headful
         env:
-          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+          E2E_DAPP_URL: ${{ github.event.deployment_status.target_url }}
       - name: Archive Playwright report
         uses: actions/upload-artifact@v4
         if: success() || failure()
