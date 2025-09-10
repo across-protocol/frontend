@@ -96,6 +96,9 @@ export class ProviderRedisCache extends RedisCache {
     const value = await super.get<T>(key);
     if (typeof value === "string") {
       return ('"' + value + '"') as T;
+    } else if (typeof value === "object" && value !== null) {
+      // Convert object back to JSON string for the provider to parse
+      return JSON.stringify(value) as T;
     }
     return value;
   }
