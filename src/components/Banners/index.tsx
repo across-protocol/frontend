@@ -8,6 +8,7 @@ import {
   disableDeposits,
   rewardsBannerWarning,
   showV4LaunchBanner,
+  COLORS,
 } from "utils";
 import AcrossV4Banner from "components/Banners/AcrossV4Banner";
 import RewardsWarningBanner from "components/Banners/RewardsWarningBanner";
@@ -92,10 +93,10 @@ export default function Banners({
         </Banner>
       )}
       <SuperHeader>
-        <Text size="lg">
+        <Text color="black-800" size="lg">
           Polygon deposits are temporarily paused due to network issues. Please
           see the{" "}
-          <ExternalLink
+          <StyledLink
             text="advisory"
             href="https://status.polygon.technology/incidents/c8nc05x3qvmg"
           />{" "}
@@ -105,6 +106,11 @@ export default function Banners({
     </>
   );
 }
+
+const StyledLink = styled(ExternalLink)`
+  color: ${COLORS["black-800"]};
+  display: inline-flex;
+`;
 
 const RemoveErrorSpan = styled.span`
   cursor: pointer;
