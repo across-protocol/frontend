@@ -1,15 +1,13 @@
 name: API E2E Tests
 
 on:
-  repository_dispatch:
-    types:
-      - "vercel.deployment.success"
+  deployment_status:
 
 jobs:
   e2e-api-tests:
     if: |
-      github.event_name == 'repository_dispatch' &&
-      github.event.client_payload.project.name == 'app-frontend-v3'
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
