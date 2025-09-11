@@ -868,7 +868,7 @@ paths:
                        * pending: Deposit has not been filled yet.
                        * expired: Deposit has expired and will not be filled. Expired deposits will be refunded to the `depositor` on the `originChainId` in the next batch of repayments.
                        * refunded: Deposit has expired and the depositor has been successfully refunded on the originChain. 
-                       * slowFillRequested: Deposit has been made but no relayer has filled the intent, therefore Across' relayer fills the user's intent without requiring another relayer to front the capital.
+                       * slowFillRequested: Deposit has been made but no relayer has filled the intent, therefore Across fills the user's intent without requiring a relayer to front the capital.
                     x-gitbook-description-html: >-
                       <p>The status of the deposit.</p>
 
@@ -1265,7 +1265,7 @@ paths:
                     description: |
                       The status of the deposit fill lifecycle.
                     x-gitbook-description-html: <p>The status of the deposit fill lifecycle.</p>
-                  depositRefundTxnHash:
+                  depositRefundTxnRef:
                     type: string
                     nullable: true
                     description: >
@@ -1391,11 +1391,10 @@ paths:
                     items:
                       type: string
                     description: >
-                      List of transaction hashes representing optional speedup
-                      fills.
+                      List of transaction hashes representing optional speedups.
                     x-gitbook-description-html: >-
                       <p>List of transaction hashes representing optional
-                      speedup fills.</p>
+                      speedups.</p>
               example:
                 - id: 14503095
                   relayHash: >-
@@ -1419,7 +1418,7 @@ paths:
                   depositBlockNumber: 33292078
                   depositBlockTimestamp: '2025-07-24T16:11:43.000Z'
                   status: filled
-                  depositRefundTxnHash: null
+                  depositRefundTxnRef: null
                   swapTokenPriceUsd: null
                   swapFeeUsd: null
                   bridgeFeeUsd: '0.017884155707075979'
