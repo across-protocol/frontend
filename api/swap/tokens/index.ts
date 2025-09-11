@@ -1,15 +1,7 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import axios from "axios";
 import { constants } from "ethers";
-import {
-  type,
-  assert,
-  Infer,
-  optional,
-  string,
-  array,
-  union,
-} from "superstruct";
+import { type, assert, Infer, optional, array, union } from "superstruct";
 
 import {
   getLogger,
