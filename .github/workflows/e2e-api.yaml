@@ -6,8 +6,7 @@ on:
 jobs:
   e2e-api-tests:
     if: |
-      github.event.deployment_status.state == 'success' &&
-      contains(github.event.deployment_status.target_url, 'app-frontend-v3')
+      github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,4 +15,4 @@ jobs:
       - name: Run API e2e tests
         run: yarn test:e2e-api
         env:
-          E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.deployment_status.environment_url }}
