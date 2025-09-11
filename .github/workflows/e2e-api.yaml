@@ -16,4 +16,3 @@ jobs:
         run: yarn test:e2e-api
         env:
           E2E_TESTS_SWAP_API_BASE_URL: ${{ github.event.deployment_status.environment_url }}
-          TEST_MODE: e2e-api
