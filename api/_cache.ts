@@ -94,8 +94,14 @@ export const redisCache = new RedisCache();
 export class ProviderRedisCache extends RedisCache {
   async get<T>(key: string): Promise<T | null> {
     const value = await super.get<T>(key);
+    if (value === null || value === undefined) {
+      return null;
+    }
     if (typeof value === "string") {
       return ('"' + value + '"') as T;
+    } else if (typeof value === "object") {
+      // Convert object back to JSON string for the provider to parse
+      return JSON.stringify(value) as T;
     }
     return value;
   }
