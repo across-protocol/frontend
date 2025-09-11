@@ -7,7 +7,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.ARBITRUM,
   chainConfigs.ZK_SYNC,
   chainConfigs.BASE,
-  chainConfigs.LINEA,
+  // chainConfigs.LINEA,
   chainConfigs.MODE,
   chainConfigs.BLAST,
   chainConfigs.LISK,
