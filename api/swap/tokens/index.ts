@@ -1,8 +1,15 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import axios from "axios";
 import { constants } from "ethers";
+import { type, assert, Infer, optional, array, union } from "superstruct";
 
-import { getLogger, handleErrorCondition } from "../../_utils";
+import {
+  getLogger,
+  handleErrorCondition,
+  paramToArray,
+  positiveIntStr,
+} from "../../_utils";
+import { TypedVercelRequest } from "../../_types";
 
 import mainnetChains from "../../../src/data/chains_1.json";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
@@ -12,8 +19,14 @@ import { tracer, processor } from "../../../instrumentation";
 const chains = mainnetChains;
 const chainIds = chains.map((chain) => chain.chainId);
 
+const SwapTokensQueryParamsSchema = type({
+  chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
+});
+
+type SwapTokensQueryParams = Infer<typeof SwapTokensQueryParamsSchema>;
+
 export default async function handler(
-  request: VercelRequest,
+  request: TypedVercelRequest<SwapTokensQueryParams>,
   response: VercelResponse
 ) {
   const logger = getLogger();
@@ -27,22 +40,30 @@ export default async function handler(
     setRequestSpanAttributes(request, span, requestId);
 
     try {
+      const { query } = request;
+      assert(query, SwapTokensQueryParamsSchema);
+
+      const { chainId } = query;
+      const filteredChainIds = chainId
+        ? paramToArray(chainId)?.map(Number) || chainIds
+        : chainIds;
+
       const [uniswapTokensResponse, lifiTokensResponse] = await Promise.all([
         axios.get("https://tokens.uniswap.org"),
         axios.get("https://li.quest/v1/tokens"),
       ]);
       const nativeTokens = getNativeTokensFromLifiTokens(
         lifiTokensResponse.data,
-        chainIds
+        filteredChainIds
       );
       const pricesForLifiTokens = getPricesForLifiTokens(
         lifiTokensResponse.data,
-        chainIds
+        filteredChainIds
       );
 
       const responseJson = uniswapTokensResponse.data.tokens.reduce(
         (acc: any, token: any) => {
-          if (chainIds.includes(token.chainId)) {
+          if (filteredChainIds.includes(token.chainId)) {
             acc.push({
               chainId: token.chainId,
               address: token.address,
