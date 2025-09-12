@@ -66,12 +66,12 @@ export function getJupiterStrategy(
       const sourcesParams =
         sources?.sourcesType === "exclude"
           ? {
-              excludeDexes: sources.sourcesKeys,
+              excludeDexes: sources.sourcesKeys.join(","),
             }
           : sources?.sourcesType === "include" &&
               sources.sourcesKeys?.length > 0
             ? {
-                dexes: sources.sourcesKeys,
+                dexes: sources.sourcesKeys.join(","),
               }
             : {};
 
