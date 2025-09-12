@@ -75,7 +75,7 @@ export function getJupiterStrategy(
               }
             : {};
 
-      const quoteParams: any = {
+      const quoteParams = {
         inputMint: swap.tokenIn.address,
         outputMint: swap.tokenOut.address,
         amount: swap.amount,
