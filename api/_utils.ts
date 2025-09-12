@@ -2523,10 +2523,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
   }
 > {
   try {
-    if (!ethers.utils.isAddress(address)) {
+    if (!(ethers.utils.isAddress(address) || isSvmAddress(address))) {
       throw new InvalidParamError({
         param: "address",
-        message: '"Address" must be a valid ethereum address',
+        message: '"Address" must be a valid EVM or SVM address',
       });
     }
 
@@ -2537,7 +2537,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // ERC20 resolved statically
+    // Resolve token info statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
         token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
@@ -2552,6 +2552,15 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
         name: token.name,
         chainId,
       };
+    }
+
+    // FIXME: If the token is not found in the static token mapping, we need to resolve it dynamically for SVM chains
+    // Throwing an error for now as swaps on SVM are not supported yet.
+    if (sdk.utils.chainIsSvm(chainId)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: "Provided SVM token address is not supported yet.",
+      });
     }
 
     // ERC20 resolved dynamically

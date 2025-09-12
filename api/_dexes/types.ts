@@ -47,6 +47,7 @@ export type CrossSwap = {
   appFeeRecipient?: string;
   strictTradeType: boolean;
   isDestinationSvm?: boolean;
+  isOriginSvm?: boolean;
 };
 
 export type SupportedDex =
@@ -110,13 +111,13 @@ export type CrossSwapQuotes = {
 };
 
 export type OriginSwapEntryPointContract = {
-  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery";
+  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery" | "SvmSpoke";
   address: string;
   dex?: SupportedDex;
 };
 
 export type DepositEntryPointContract = {
-  name: "SpokePoolPeriphery" | "SpokePool";
+  name: "SpokePoolPeriphery" | "SpokePool" | "SvmSpoke";
   address: string;
 };
 export type RouterContract = {
@@ -189,12 +190,12 @@ export type OriginEntryPointContractName =
 
 export type OriginEntryPoints = {
   originSwapInitialRecipient: {
-    name: "UniversalSwapAndBridge" | "SwapProxy";
+    name: "UniversalSwapAndBridge" | "SwapProxy" | "SvmSpoke";
     address: string;
   };
   swapAndBridge: OriginSwapEntryPointContract;
   deposit: {
-    name: "SpokePoolPeriphery" | "SpokePool";
+    name: "SpokePoolPeriphery" | "SpokePool" | "SvmSpoke";
     address: string;
   };
 };
