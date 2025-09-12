@@ -79,7 +79,7 @@ export function getJupiterStrategy(
         inputMint: swap.tokenIn.address,
         outputMint: swap.tokenOut.address,
         amount: swap.amount,
-        slippageBps: swap.slippageTolerance * 100 * 100, // From decimal to percentage and then to bps
+        slippageBps: swap.slippageTolerance * 100, // From percentage to bps
         swapMode: tradeType === TradeType.EXACT_INPUT ? "ExactIn" : "ExactOut",
         ...sourcesParams,
         restrictIntermediateTokens: true,
