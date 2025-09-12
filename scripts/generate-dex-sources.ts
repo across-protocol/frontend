@@ -167,8 +167,6 @@ async function fetchJupiterSources(): Promise<DexSources> {
         key: source,
         names: Array.from(
           new Set([
-            // Lowercase source name
-            source.toLowerCase(),
             // Snake case source name
             source.toLowerCase().replace(/[\s.]+/g, "_"),
             // Source name without version number

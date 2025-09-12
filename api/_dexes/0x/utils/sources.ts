@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-09-09T17:33:00.971Z
+// Generated on 2025-09-12T16:07:26.238Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -19,6 +19,7 @@ export const SOURCES = {
       { key: "DeFi_Swap", names: ["defi_swap"] },
       { key: "Ekubo", names: ["ekubo"] },
       { key: "Fluid", names: ["fluid"] },
+      { key: "FluidLite", names: ["fluidlite"] },
       { key: "Fraxswap_V2", names: ["fraxswap_v2", "fraxswap"] },
       { key: "Integral", names: ["integral"] },
       { key: "Lido", names: ["lido"] },
@@ -363,6 +364,7 @@ export const ALL_SOURCES = [
   "fenix_cl",
   "fenix_v2",
   "fluid",
+  "fluidlite",
   "fraxswap",
   "fraxswap_v2",
   "gmx",
