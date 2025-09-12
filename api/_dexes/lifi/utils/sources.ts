@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-09-01T23:35:20.375Z
+// Generated on 2025-09-12T13:45:14.124Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -17,7 +17,6 @@ export const SOURCES = {
     ],
     "10": [
       { key: "paraswap", names: ["paraswap"] },
-      { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
@@ -27,7 +26,6 @@ export const SOURCES = {
     ],
     "56": [
       { key: "dodo", names: ["dodo"] },
-      { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
@@ -43,7 +41,6 @@ export const SOURCES = {
     ],
     "137": [
       { key: "paraswap", names: ["paraswap"] },
-      { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
@@ -57,7 +54,6 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
     ],
     "324": [
-      { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "1inch", names: ["1inch"] },
       { key: "openocean", names: ["openocean"] },
@@ -100,7 +96,6 @@ export const SOURCES = {
       { key: "superswap", names: ["superswap"] },
     ],
     "59144": [
-      { key: "enso", names: ["enso"] },
       { key: "odos", names: ["odos"] },
       { key: "openocean", names: ["openocean"] },
       { key: "kyberswap", names: ["kyberswap"] },

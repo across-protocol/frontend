@@ -162,13 +162,25 @@ async function fetchJupiterSources(): Promise<DexSources> {
       (name) => !JUPITER_SOURCES_TO_EXCLUDE.includes(name)
     );
 
-    const sourceEntries = filteredSources.map((name) => {
-      // Normalize the name: lowercase, replace spaces and special chars with underscores
-      const normalizedName = name.toLowerCase().replace(/[\s.]+/g, "_");
-
+    const sourceEntries = filteredSources.map((source) => {
       return {
-        key: name, // Keep original as key for Jupiter API
-        names: Array.from(new Set([name, name.toLowerCase(), normalizedName])),
+        key: source,
+        names: Array.from(
+          new Set([
+            // Lowercase source name
+            source.toLowerCase(),
+            // Snake case source name
+            source.toLowerCase().replace(/[\s.]+/g, "_"),
+            // Source name without version number
+            source
+              .replace(
+                /([A-Za-z\s]+)(?:[\s_]V\d+(?:\.\d+)?(?:[\s_]\d+)?)?$/gi,
+                "$1"
+              )
+              .trim()
+              .toLowerCase(),
+          ])
+        ),
       };
     });
 
