@@ -24,7 +24,9 @@ const JUPITER_ROUTER_ADDRESS = "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4";
 
 const getSources = makeGetSources(SOURCES);
 
-export function getJupiterStrategy(): QuoteFetchStrategy {
+export function getJupiterStrategy(
+  useSwapInstructions: boolean = false
+): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     if (!utils.chainIsSvm(chainId)) {
       throw new Error(`Jupiter not supported for chain id ${chainId}`);
@@ -93,7 +95,7 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
       // /swap: returns ready-to-send transaction
       // /swap-instructions: returns individual instructions
       // For now, we'll use the /swap endpoint but when we get to building the transaction, we'll use the /swap-instructions endpoint
-      const useSwapInstructions = false;
+
       let swapTxns;
       if (useSwapInstructions) {
         // Use swap-instructions endpoint (returns individual instructions)
@@ -138,7 +140,7 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
             quote.routePlan?.map((route: any) => route.swapInfo.label) || [],
         },
       };
-      console.log("Jupiter swap quote:", swapQuote);
+
       getLogger().debug({
         at: `${SWAP_PROVIDER_NAME}/fetchFn`,
         message: "Swap quote",
