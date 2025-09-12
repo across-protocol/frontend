@@ -39,7 +39,7 @@ export function getJupiterStrategy(
 
   // TODO: Fix this, set the appropriate origin entry points
   const getOriginEntryPoints = (chainId: number) =>
-    getOriginSwapEntryPoints("SpokePoolPeriphery", chainId, SWAP_PROVIDER_NAME);
+    getOriginSwapEntryPoints("SvmSpoke", chainId, SWAP_PROVIDER_NAME);
 
   const assertSellEntireBalanceSupported = () => {
     throw new UpstreamSwapProviderError({

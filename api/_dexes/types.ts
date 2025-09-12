@@ -187,7 +187,8 @@ export type QuoteFetchOpts = Partial<{
 
 export type OriginEntryPointContractName =
   | "SpokePoolPeriphery"
-  | "UniversalSwapAndBridge";
+  | "UniversalSwapAndBridge"
+  | "SvmSpoke";
 
 export type OriginEntryPoints = {
   originSwapInitialRecipient: {
