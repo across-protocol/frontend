@@ -25,6 +25,8 @@ export type { HubPool } from "@across-protocol/contracts/dist/typechain/contract
 export type {
   SpokePool,
   FilledV3RelayEvent,
+  FundsDepositedEvent,
+  FilledRelayEvent,
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 export type { SpokePoolVerifier } from "@across-protocol/contracts/dist/typechain/contracts/SpokePoolVerifier";
 export type { AcceleratingDistributor } from "@across-protocol/across-token/dist/typechain/AcceleratingDistributor";

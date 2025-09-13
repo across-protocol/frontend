@@ -23,9 +23,9 @@ import {
 import { isSignature } from "@solana/kit";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { Deposit } from "hooks/useDeposits";
-import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
+import { RelayData } from "utils/sdk";
 import { BigNumber } from "ethers";
-import { SvmSpokeClient } from "@across-protocol/contracts";
+import { RelayDataArgs } from "utils/codama";
 import { hexlify } from "ethers/lib/utils";
 import { isHex } from "viem";
 
@@ -322,9 +322,7 @@ export class SVMStrategy implements IChainStrategy {
   }
 
   // deposit could be from svm or evm
-  private formatRelayData(
-    relayData: RelayData | SvmSpokeClient.RelayDataArgs
-  ): RelayData {
+  private formatRelayData(relayData: RelayData | RelayDataArgs): RelayData {
     return {
       originChainId: Number(relayData.originChainId),
       depositor: toAddressType(

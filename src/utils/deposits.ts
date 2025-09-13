@@ -3,10 +3,7 @@ import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 
 import { TransactionReceipt } from "@ethersproject/providers";
-import {
-  FundsDepositedEvent,
-  FilledRelayEvent,
-} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
+import { FundsDepositedEvent, FilledRelayEvent } from "./typechain";
 import { getMessageHash, toAddressType } from "./sdk";
 
 export class NoFundsDepositedLogError extends Error {

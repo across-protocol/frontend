@@ -26,7 +26,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 
 import { AbstractBridgeActionStrategy } from "./abstract";
 import { ApproveTokensParams, DepositActionParams } from "./types";
-import { getDepositPda } from "@across-protocol/contracts/dist/src/svm/web3-v1";
+import { getDepositPda } from "@across-protocol/contracts/dist/src/svm/web3-v1/helpers";
 
 const u64Encoder = getU64Encoder();
 const config = getConfig();

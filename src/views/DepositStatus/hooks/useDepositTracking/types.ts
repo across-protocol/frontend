@@ -1,8 +1,4 @@
-import {
-  DepositEventFromSignature,
-  FillEventFromSignature,
-} from "@across-protocol/sdk/dist/esm/arch/svm";
-
+import { DepositEventFromSignature, FillEventFromSignature } from "utils/sdk";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 

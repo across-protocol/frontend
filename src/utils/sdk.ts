@@ -27,10 +27,19 @@ export {
   chainIsSvm,
   chainIsEvm,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
+
+// FIXME: All of the following exports import some dependencies that are not tree-shakable.
+// Find a way to optimize this.
 export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
 export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
 export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 export { bigToU8a32 } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
+
+export type { RelayData } from "@across-protocol/sdk/dist/esm/interfaces/SpokePool";
+export type {
+  FillEventFromSignature,
+  DepositEventFromSignature,
+} from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,
