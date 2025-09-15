@@ -187,7 +187,7 @@ async function resolvePriceByAddress(params: {
   if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
     throw new InvalidParamError({
       message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
-        SUPPORTED_CG_BASE_CURRENCIES
+        SUPPORTED_CG_BASE_CURRENCIES.union(SUPPORTED_CG_DERIVED_CURRENCIES)
       ).join(", ")}].`,
       param: "baseCurrency",
     });

@@ -286,6 +286,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "gho",
   "bnb",
   "sol",
+  "hype",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
