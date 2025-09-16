@@ -72,8 +72,20 @@ const handler = async (
     let isDerivedCurrency: boolean;
     let chainId: number;
 
+    if (
+      l1Token === "0x5555555555555555555555555555555555555555" ||
+      tokenAddress === "0x5555555555555555555555555555555555555555"
+    ) {
+      const resolvedPriceBySymbol = await resolvePriceBySymbol({
+        symbol: "hype",
+        baseCurrency: _baseCurrency,
+      });
+      price = resolvedPriceBySymbol.price;
+      baseCurrency = resolvedPriceBySymbol.baseCurrency;
+      isDerivedCurrency = resolvedPriceBySymbol.isDerivedCurrency;
+    }
     // If l1Token OR tokenAddress is provided, we need to resolve the price by address.
-    if (l1Token || tokenAddress) {
+    else if (l1Token || tokenAddress) {
       const address = l1Token ?? tokenAddress;
       if (!address) {
         throw new InvalidParamError({
