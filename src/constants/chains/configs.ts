@@ -499,7 +499,7 @@ export const bnbSmartChain_viem = defineChain({
 
 export const hyperEvm = {
   name: "HyperEVM",
-  fullName: "Hyperevm",
+  fullName: "HyperEVM",
   chainId: 999,
   logoURI: hyperEvmLogo,
   grayscaleLogoURI: hyperEvmGrayscaleLogo,
