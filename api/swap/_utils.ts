@@ -817,6 +817,7 @@ export async function buildBaseSwapResponseJson(params: {
   allowance: BigNumber;
   balance: BigNumber;
   approvalTxns?: {
+    chainId: number;
     to: string;
     data: string;
   }[];

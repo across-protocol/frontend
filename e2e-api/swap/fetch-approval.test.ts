@@ -1,16 +1,11 @@
-import dotenv from "dotenv";
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
-dotenv.config({
-  path: [".env.e2e", ".env.local", ".env"],
-});
+import { e2eConfig } from "../utils/config";
 
-const SWAP_API_BASE_URL =
-  process.env.E2E_TESTS_SWAP_API_BASE_URL || "https://app.across.to";
+const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
-const DEPOSITOR = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 
 const B2B_BASE_TEST_CASE = {
   amount: ethers.utils.parseUnits("1", 6).toString(), // 1 USDC
@@ -18,10 +13,10 @@ const B2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.ARBITRUM,
-  depositor: DEPOSITOR,
+  depositor: e2eConfig.addresses.depositor,
 };
 
-describe("/swap/approval e2e tests", () => {
+describe("GET /swap/approval", () => {
   // Helper function to validate response structure
   const validateSwapApprovalResponse = (response: any) => {
     expect(response.data).toBeDefined();
