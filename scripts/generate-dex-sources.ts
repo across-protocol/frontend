@@ -31,6 +31,10 @@ type LiFiSourcesResponse = {
 
 const LIFI_SOURCES_TO_EXCLUDE = ["0x"];
 
+const JUPITER_SOURCES_TO_EXCLUDE: string[] = [
+  // TODO: Add any Jupiter sources we want to exclude here
+];
+
 async function fetch0xSources(): Promise<DexSources> {
   const chains = Object.values(CHAIN_IDs);
   const sources: DexSources = {
@@ -135,6 +139,61 @@ async function fetchLiFiSources(): Promise<DexSources> {
   return sources;
 }
 
+async function fetchJupiterSources(): Promise<DexSources> {
+  const { CHAIN_IDs: chainIds } = await import("@across-protocol/constants");
+  const solanaChainId = chainIds.SOLANA;
+
+  const sources: DexSources = {
+    strategy: "jupiter",
+    sources: {},
+  };
+
+  try {
+    const response = await axios.get<Record<string, string>>(
+      "https://lite-api.jup.ag/swap/v1/program-id-to-label"
+    );
+
+    const programLabels = response.data;
+    const sourceNames = Object.values(programLabels);
+
+    console.log(`Jupiter: ✓ Fetched ${sourceNames.length} sources from API`);
+
+    const filteredSources = sourceNames.filter(
+      (name) => !JUPITER_SOURCES_TO_EXCLUDE.includes(name)
+    );
+
+    const sourceEntries = filteredSources.map((source) => {
+      return {
+        key: source,
+        names: Array.from(
+          new Set([
+            // Snake case source name
+            source.toLowerCase().replace(/[\s.]+/g, "_"),
+            // Source name without version number
+            source
+              .replace(
+                /([A-Za-z\s]+)(?:[\s_]V\d+(?:\.\d+)?(?:[\s_]\d+)?)?$/gi,
+                "$1"
+              )
+              .trim()
+              .toLowerCase(),
+          ])
+        ),
+      };
+    });
+
+    sources.sources[solanaChainId] = sourceEntries;
+
+    console.log(
+      `Jupiter: ✓ Generated ${filteredSources.length} sources for Solana mainnet`
+    );
+  } catch (error) {
+    console.error("Jupiter: Error fetching sources", error);
+  }
+
+  return sources;
+}
+
 function generateSourcesCode(sources: DexSources): string {
   const allSources = Array.from(
     new Set([
@@ -183,6 +242,13 @@ async function generateDexSources() {
     "lifi",
     "utils"
   );
+  const jupiterUtilsDir = path.join(
+    process.cwd(),
+    "api",
+    "_dexes",
+    "jupiter",
+    "utils"
+  );
 
   if (!existsSync(zeroXUtilsDir)) {
     mkdirSync(zeroXUtilsDir, { recursive: true });
@@ -192,19 +258,26 @@ async function generateDexSources() {
     mkdirSync(lifiUtilsDir, { recursive: true });
   }
 
+  if (!existsSync(jupiterUtilsDir)) {
+    mkdirSync(jupiterUtilsDir, { recursive: true });
+  }
+
   try {
-    // Fetch sources from both APIs
-    const [zeroXSources, lifiSources] = await Promise.all([
+    // Fetch sources
+    const [zeroXSources, lifiSources, jupiterSources] = await Promise.all([
       fetch0xSources(),
       fetchLiFiSources(),
+      fetchJupiterSources(),
     ]);
 
     // Generate source files
     const zeroXCode = generateSourcesCode(zeroXSources);
     const lifiCode = generateSourcesCode(lifiSources);
+    const jupiterCode = generateSourcesCode(jupiterSources);
 
     const zeroXPath = path.join(zeroXUtilsDir, "sources.ts");
     const lifiPath = path.join(lifiUtilsDir, "sources.ts");
+    const jupiterPath = path.join(jupiterUtilsDir, "sources.ts");
 
     // Write files with change detection
     await writeFileWithChangeDetection(
@@ -216,6 +289,11 @@ async function generateDexSources() {
       lifiPath,
       "This file contains available liquidity sources for LiFi DEX integration",
       lifiCode
+    );
+    await writeFileWithChangeDetection(
+      jupiterPath,
+      "This file contains available liquidity sources for Jupiter DEX integration",
+      jupiterCode
     );
   } catch (error) {
     console.error("❌ Error generating DEX sources:", error);

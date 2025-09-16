@@ -4,7 +4,7 @@ import { DEFAULT_FILL_DEADLINE_BUFFER_SECONDS } from "./_constants";
 import { getSpokePool } from "./_spoke-pool";
 import { getSVMRpc } from "./_providers";
 
-function getFillDeadlineBuffer(chainId: number) {
+export function getFillDeadlineBuffer(chainId: number) {
   const bufferFromEnv = (
     JSON.parse(process.env.FILL_DEADLINE_BUFFER_SECONDS || "{}") as Record<
       string,

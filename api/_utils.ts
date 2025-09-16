@@ -84,6 +84,7 @@ import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
+import { getSvmTokenInfo } from "./_svm-tokens";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -2523,10 +2524,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
   }
 > {
   try {
-    if (!ethers.utils.isAddress(address)) {
+    if (!(ethers.utils.isAddress(address) || isSvmAddress(address))) {
       throw new InvalidParamError({
         param: "address",
-        message: '"Address" must be a valid ethereum address',
+        message: '"Address" must be a valid EVM or SVM address',
       });
     }
 
@@ -2537,7 +2538,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // ERC20 resolved statically
+    // Resolve token info statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
         token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
@@ -2552,6 +2553,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
         name: token.name,
         chainId,
       };
+    }
+
+    if (sdk.utils.chainIsSvm(chainId)) {
+      return await getSvmTokenInfo(address, chainId);
     }
 
     // ERC20 resolved dynamically

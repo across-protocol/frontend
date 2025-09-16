@@ -11,10 +11,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.72":
-  version "3.1.72"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.72.tgz#2c68f1aa382595a56880901e42f40f08aa4d11f3"
-  integrity sha512-SHLpxlT49XHsNrzJLRY0B9/r3+xS6d1j3PkR+Jped4py5RUWXpB+qrhNp4wvUeN3wKGDrB+bSye+PejbVh+iJg==
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.74", "@across-protocol/constants@^3.1.75":
+  version "3.1.75"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.75.tgz#391fa034fd49bfdb8c32b47edd1f0e1ec6ac7948"
+  integrity sha512-kmdbi2+W9IFNFZSyizQP3YjWU5FcGOZx/kzLPsc8RGGuKGQzZ0AHAfezPY9tUH0283q7W011xgtyMJD2f215cQ==
 
 "@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
@@ -56,12 +56,12 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/contracts@^4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.5.tgz#abb43fbb889b91eb291e918f9d0bb29e3657d5b3"
-  integrity sha512-ycbm5sIw7DO48ybLUg5e6LQq4XJNn9qqwuF1Xz7PPUIPYBV/7ZwGtb9VJKooVGbU149psCuCSo72j7wS/SEJgQ==
+"@across-protocol/contracts@^4.1.5", "@across-protocol/contracts@^4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.6.tgz#c0b05f3aa3ddae85d7e995cd1f2690c35a23c354"
+  integrity sha512-Y6oBB9dfDPkdrjCsnxDi6b0AXmKXPNEoywsuXuB+0UhV7AsE36ssDbXzmmkm+0pT3RDsaH2QPd8a7Z8hh7LAqw==
   dependencies:
-    "@across-protocol/constants" "^3.1.69"
+    "@across-protocol/constants" "^3.1.74"
     "@coral-xyz/anchor" "^0.31.1"
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.40"
@@ -88,14 +88,14 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^4.3.57":
-  version "4.3.58"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.58.tgz#de49dbcae25a5d167e4cc73bdba3accd9ba25004"
-  integrity sha512-8CeB7hSw0EK+6zagNTmyeIpE1a+U4YMRzZr+nCQINxN994fhgQT/xoUNAagl2Wq+AqKXl2XlL4/10EbxQgbTxQ==
+"@across-protocol/sdk@^4.3.60":
+  version "4.3.60"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.60.tgz#daca7bca5468fdce85247908fcd58830133f664d"
+  integrity sha512-5hZ4CqsH08tvR6VV5L8TIfTIF6RqdJ6Y1hWksO2U4UtBGqAUN2rRuK4OD7mHQeyqvhnU8J9Rusk1V23JgIX7yg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants" "^3.1.72"
-    "@across-protocol/contracts" "^4.1.5"
+    "@across-protocol/constants" "^3.1.74"
+    "@across-protocol/contracts" "^4.1.6"
     "@coral-xyz/anchor" "^0.30.1"
     "@eth-optimism/sdk" "^3.3.1"
     "@ethersproject/bignumber" "^5.7.0"
@@ -6377,6 +6377,11 @@
   resolved "https://registry.yarnpkg.com/@solana-program/compute-budget/-/compute-budget-0.8.0.tgz#0930aca4de1170ed607d64d89375074930aa8b93"
   integrity sha512-qPKxdxaEsFxebZ4K5RPuy7VQIm/tfJLa1+Nlt3KNA8EYQkz9Xm8htdoEaXVrer9kpgzzp9R3I3Bh6omwCM06tQ==
 
+"@solana-program/memo@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@solana-program/memo/-/memo-0.8.0.tgz#8a37fd087f3e3fd0cecb2929eff1376c598991c5"
+  integrity sha512-sf70ts2ZY10qQUxu5cLPnNYiBcqxJ07p6g4zk2ALq/Ueg3Y4hNm9XbxzA7GmNquDeDGWmEJJaT2ElOWWS+sa8Q==
+
 "@solana-program/stake@^0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@solana-program/stake/-/stake-0.2.1.tgz#cc3367e5aa0258fa6599658b0ed48b02f86487a2"
@@ -9179,9 +9184,9 @@
     form-data "^4.0.4"
 
 "@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@^24.3.0":
-  version "24.3.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.1.tgz#b0a3fb2afed0ef98e8d7f06d46ef6349047709f3"
-  integrity sha512-3vXmQDXy+woz+gnrTvuvNrPzekOi+Ds0ReMxw0LzBiK3a+1k0kQn9f2NWk+lgD4rJehFUmYy2gMhJ2ZI+7YP9g==
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.0.tgz#89b09f45cb9a8ee69466f18ee5864e4c3eb84dec"
+  integrity sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==
   dependencies:
     undici-types "~7.10.0"
 
@@ -9201,9 +9206,9 @@
   integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
 
 "@types/node@^18.0.0":
-  version "18.19.124"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.124.tgz#6f49e4fab8274910691a900e8a14316cbf3c7a31"
-  integrity sha512-hY4YWZFLs3ku6D2Gqo3RchTd9VRCcrjqp/I0mmohYeUVA5Y8eCXKJEasHxLAJVZRJuQogfd1GiJ9lgogBgKeuQ==
+  version "18.18.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.18.7.tgz#bb3a7068dc4ba421b6968f2a259298b3a4e129e8"
+  integrity sha512-bw+lEsxis6eqJYW8Ql6+yTqkE6RuFtsQPSe5JxXbqYRFQEER5aJA9a5UH9igqDWm3X4iLHIKOHlnAXLM4mi7uQ==
   dependencies:
     undici-types "~5.26.4"
 
