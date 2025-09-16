@@ -16,7 +16,7 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.72", "@across-protocol/constants@^3.1.74":
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.74":
   version "3.1.74"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.74.tgz#692a0952191b5b1a86f0085ef9b7503e752adf6a"
   integrity sha512-ZuTSKjrEn5iKdAAKj913xDVN9Z92bpkxFoM5hSmom0UUoyWg1ogoloVTzaT/Pdu26drnq7F+ioU1oyYAreETxg==
@@ -61,7 +61,7 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/contracts@^4.1.5", "@across-protocol/contracts@^4.1.6":
+"@across-protocol/contracts@^4.1.6":
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.6.tgz#c0b05f3aa3ddae85d7e995cd1f2690c35a23c354"
   integrity sha512-Y6oBB9dfDPkdrjCsnxDi6b0AXmKXPNEoywsuXuB+0UhV7AsE36ssDbXzmmkm+0pT3RDsaH2QPd8a7Z8hh7LAqw==

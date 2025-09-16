@@ -168,6 +168,18 @@
     "isNative": false
   },
   {
+    "fromChain": 999,
+    "toChain": 232,
+    "fromTokenAddress": "0xb88339CB7199b77E23DB6E890353E22632Ba630f",
+    "toTokenAddress": "0x0000000000000000000000000000000000000000",
+    "fromTokenSymbol": "USDC",
+    "toTokenSymbol": "GHO",
+    "fromSpokeAddress": "0x35E63eA3eb0fb7A3bc543C71FB66412e1F6B0E04",
+    "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
     "fromChain": 10,
     "toChain": 232,
     "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
