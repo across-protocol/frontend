@@ -674,4 +674,8 @@ export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
 
 // temporary list, to show usdt0 symbol & icon.
 // once all chains have migrated we can remove this list and make upstream changes to USDT icons in @constants.
-export const chainsWithUsdt0Enabled = [CHAIN_IDs.POLYGON, CHAIN_IDs.ARBITRUM];
+export const chainsWithUsdt0Enabled = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.ARBITRUM,
+  CHAIN_IDs.HYPEREVM,
+];
