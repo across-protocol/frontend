@@ -182,16 +182,7 @@ async function resolvePriceByAddress(params: {
     params.baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
   ).toLowerCase();
 
-  // Confirm that the base Currency is supported by Coingecko
-  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
-  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
-    throw new InvalidParamError({
-      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
-        SUPPORTED_CG_BASE_CURRENCIES
-      ).join(", ")}].`,
-      param: "baseCurrency",
-    });
-  }
+  const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
 
   // Resolve the optional address lookup that maps one token's
   // contract address to another.
@@ -284,16 +275,7 @@ async function resolvePriceBySymbol(params: {
     });
   }
 
-  // Confirm that the base Currency is supported by Coingecko
-  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
-  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
-    throw new InvalidParamError({
-      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
-        SUPPORTED_CG_BASE_CURRENCIES
-      ).join(", ")}].`,
-      param: "baseCurrency",
-    });
-  }
+  const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
 
   const coingeckoClient = Coingecko.get(
     logger,
@@ -345,6 +327,20 @@ export async function resolveUsdPriceViaFallbackResolver(params: {
     message: "Invalid fallback resolver",
     param: "fallbackResolver",
   });
+}
+
+function assertValidBaseCurrency(baseCurrency: string) {
+  // Confirm that the base Currency is supported by Coingecko or can be derived by us
+  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
+    throw new InvalidParamError({
+      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
+        SUPPORTED_CG_BASE_CURRENCIES.union(SUPPORTED_CG_DERIVED_CURRENCIES)
+      ).join(", ")}].`,
+      param: "baseCurrency",
+    });
+  }
+  return { isDerivedCurrency };
 }
 
 export default handler;
