@@ -505,7 +505,7 @@ export const hyperEvm = {
   grayscaleLogoURI: hyperEvmGrayscaleLogo,
   logoSvg: hyperEvmLogoSvg,
   grayscaleLogoSvg: hyperEvmGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.hyperliquid.xyz",
+  rpcUrl: "https://rpc.hyperliquid.xyz/evm",
   explorerUrl: "https://hyperevmscan.io/",
   constructExplorerLink: (txHash: string) =>
     `${hyperEvm.explorerUrl}/tx/${txHash}`,

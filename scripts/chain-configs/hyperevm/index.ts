@@ -16,7 +16,7 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: chainInfoBase.publicRPC,
+  publicRpcUrl: "https://rpc.hyperliquid.xyz/evm",
   blockTimeSeconds: 1,
   tokens: ["USDC", "USDT"],
   enableCCTP: true,
