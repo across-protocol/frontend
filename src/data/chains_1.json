@@ -1900,5 +1900,46 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
+  },
+  {
+    "chainId": 999,
+    "name": "HyperEVM",
+    "publicRpcUrl": "https://rpc.hyperliquid.xyz",
+    "explorerUrl": "https://hyperevmscan.io/",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/hyperevm/assets/logo.svg",
+    "spokePool": "0x35E63eA3eb0fb7A3bc543C71FB66412e1F6B0E04",
+    "spokePoolBlock": 13937805,
+    "inputTokens": [
+      {
+        "address": "0xb88339CB7199b77E23DB6E890353E22632Ba630f",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0xb88339CB7199b77E23DB6E890353E22632Ba630f",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ]
   }
 ]
