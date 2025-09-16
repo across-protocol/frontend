@@ -41,6 +41,11 @@ import bnbSmartChainGrayscaleLogo from "assets/chain-logos/bsc-grayscale.svg";
 import { ReactComponent as bnbSmartChainLogoSvg } from "assets/chain-logos/bsc.svg";
 import { ReactComponent as bnbSmartChainGrayscaleLogoSvg } from "assets/chain-logos/bsc-grayscale.svg";
 
+import hyperEvmLogo from "assets/chain-logos/hyperevm.svg";
+import hyperEvmGrayscaleLogo from "assets/chain-logos/hyperevm-grayscale.svg";
+import { ReactComponent as hyperEvmLogoSvg } from "assets/chain-logos/hyperevm.svg";
+import { ReactComponent as hyperEvmGrayscaleLogoSvg } from "assets/chain-logos/hyperevm-grayscale.svg";
+
 import inkLogo from "assets/chain-logos/ink.svg";
 import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
 import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
@@ -479,8 +484,8 @@ export const bnbSmartChain_viem = defineChain({
   rpcUrls: {
     default: {
       http: [
-        bnbSmartChain.rpcUrl,
         bnbSmartChain.customRpcUrl ? bnbSmartChain.customRpcUrl : [],
+        bnbSmartChain.rpcUrl,
       ].flat(),
     },
   },
@@ -488,6 +493,47 @@ export const bnbSmartChain_viem = defineChain({
     default: {
       name: bnbSmartChain.name + " Explorer",
       url: bnbSmartChain.explorerUrl,
+    },
+  },
+});
+
+export const hyperEvm = {
+  name: "HyperEVM",
+  fullName: "Hyperevm",
+  chainId: 999,
+  logoURI: hyperEvmLogo,
+  grayscaleLogoURI: hyperEvmGrayscaleLogo,
+  logoSvg: hyperEvmLogoSvg,
+  grayscaleLogoSvg: hyperEvmGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.hyperliquid.xyz",
+  explorerUrl: "https://hyperevmscan.io/",
+  constructExplorerLink: (txHash: string) =>
+    `${hyperEvm.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "HYPE",
+  customRpcUrl: process.env.REACT_APP_CHAIN_999_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const hyperEvm_viem = defineChain({
+  id: hyperEvm.chainId,
+  name: hyperEvm.name,
+  nativeCurrency: {
+    name: hyperEvm.nativeCurrencySymbol,
+    symbol: hyperEvm.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        hyperEvm.customRpcUrl ? hyperEvm.customRpcUrl : [],
+        hyperEvm.rpcUrl,
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: hyperEvm.name + " Explorer",
+      url: hyperEvm.explorerUrl,
     },
   },
 });
@@ -1468,6 +1514,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   bnbSmartChain,
+  hyperEvm,
   ink,
   lens,
   lensSepolia,
@@ -1510,6 +1557,7 @@ export const chains_viem = [
   blast_viem,
   blastSepolia_viem,
   bnbSmartChain_viem,
+  hyperEvm_viem,
   ink_viem,
   lens_viem,
   lensSepolia_viem,
