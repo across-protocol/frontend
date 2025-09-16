@@ -299,6 +299,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
+  TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM],
+  TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
