@@ -299,12 +299,18 @@ async function _buildDepositTxForAllowanceHolderSvm(
   );
   const inputToken = address(
     sdk.utils
-      .toAddressType(crossSwap.inputToken.address, originChainId)
+      .toAddressType(
+        crossSwapQuotes.bridgeQuote.inputToken.address,
+        originChainId
+      )
       .toBase58()
   );
   const outputToken = address(
     sdk.utils
-      .toAddressType(crossSwap.outputToken.address, destinationChainId)
+      .toAddressType(
+        crossSwapQuotes.bridgeQuote.outputToken.address,
+        destinationChainId
+      )
       .toBase58()
   );
   const inputAmount = BigInt(
