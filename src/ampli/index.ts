@@ -203,7 +203,7 @@ export interface ClickedFollowOnXButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -219,7 +219,8 @@ export interface ClickedFollowOnXButtonProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ClickedShareOnXButtonProperties {
@@ -248,7 +249,7 @@ export interface ClickedShareOnXButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -264,7 +265,8 @@ export interface ClickedShareOnXButtonProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ClickedShareOnXCopyOrDownloadButtonProperties {
@@ -293,7 +295,7 @@ export interface ClickedShareOnXCopyOrDownloadButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -309,7 +311,8 @@ export interface ClickedShareOnXCopyOrDownloadButtonProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ClickedShareOnXctaProperties {
@@ -338,7 +341,7 @@ export interface ClickedShareOnXctaProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -354,7 +357,8 @@ export interface ClickedShareOnXctaProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ConnectWalletButtonClickedProperties {
@@ -405,7 +409,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -421,7 +425,8 @@ export interface ConnectWalletButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface CtaButtonClickedProperties {
@@ -450,7 +455,7 @@ export interface CtaButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -466,7 +471,8 @@ export interface CtaButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface DepositNetworkMismatchProperties {
@@ -526,7 +532,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -542,7 +548,8 @@ export interface DisconnectWalletButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface EarnByAddingLiquidityClickedProperties {
@@ -593,7 +600,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -609,7 +616,8 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface FromChainSelectedProperties {
@@ -654,7 +662,7 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -670,7 +678,8 @@ export interface MaxTokenAmountClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface MonitorDepositProgressClickedProperties {
@@ -714,7 +723,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -730,7 +739,8 @@ export interface MonitorDepositProgressClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface PageViewedProperties {
@@ -853,7 +863,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -869,7 +879,8 @@ export interface QuickSwapButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ToAccountChangedProperties {
@@ -960,7 +971,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -976,7 +987,8 @@ export interface TrackInExplorerClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface TransferDepositCompletedProperties {

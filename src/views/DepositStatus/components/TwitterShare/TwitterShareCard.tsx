@@ -17,6 +17,8 @@ import { ReactComponent as X } from "assets/icons/x-white.svg";
 import { useEffect, useMemo, useState } from "react";
 import { TwitterShareModal } from "./TwitterShareModal";
 import axios from "axios";
+import { useAmplitude } from "hooks";
+import { ampli } from "ampli";
 
 const SHARE_THRESHOLD_SECONDS = 5; // only share if bridge is 5s or faster
 
@@ -28,6 +30,8 @@ export function TwitterShareCard(props: TwitterShareProps) {
   const [showModal, setShowModal] = useState(false);
   const openModal = () => void setShowModal(true);
   const closeModal = () => void setShowModal(false);
+
+  const { addToAmpliQueue } = useAmplitude();
 
   const { twitterParams } = useTwitter();
 
@@ -85,7 +89,19 @@ export function TwitterShareCard(props: TwitterShareProps) {
         </TexColumn>
       </InnerRow>
 
-      <Button size="md" textColor="aqua" onClick={openModal}>
+      <Button
+        size="md"
+        textColor="aqua"
+        onClick={() => {
+          addToAmpliQueue(() => {
+            ampli.clickedShareOnXcta({
+              page: "depositStatusPage",
+              section: "xShare",
+            });
+          });
+          openModal();
+        }}
+      >
         Share on <XIcon />
       </Button>
       <TwitterShareModal
