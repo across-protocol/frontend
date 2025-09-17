@@ -191,7 +191,7 @@ export type OriginEntryPointContractName =
   | "SvmSpoke";
 
 export type OriginEntryPoints = {
-  originSwapInitialRecipient: {
+  originSwapInitialRecipient?: {
     name: "UniversalSwapAndBridge" | "SwapProxy" | "SvmSpoke";
     address: string;
   };
