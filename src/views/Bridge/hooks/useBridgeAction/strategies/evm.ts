@@ -9,6 +9,7 @@ import {
   sendSpokePoolVerifierDepositTx,
   sendDepositTx,
   sendSwapAndBridgeTx,
+  sendTxn,
   acrossPlusMulticallHandler,
   fixedPointAdjustment,
   generateHyperLiquidPayload,
@@ -197,7 +198,8 @@ export class EVMBridgeActionStrategy extends AbstractBridgeActionStrategy {
       throw new Error("'selectedRoute.type' must be 'universal-swap'");
     }
 
-    const tx = await signer.sendTransaction({
+    // Use optimized sendTxn for mainnet to avoid polling delays
+    const tx = await sendTxn(selectedRoute.fromChain, signer, {
       to: transferQuote.quotedUniversalSwap.swapTx.to,
       data: transferQuote.quotedUniversalSwap.swapTx.data,
       value: transferQuote.quotedUniversalSwap.swapTx.value,

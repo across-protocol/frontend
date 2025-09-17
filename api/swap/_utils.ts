@@ -27,19 +27,13 @@ import {
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
-  getCachedTokenPrice,
   paramToArray,
   getChainInfo,
+  getCachedTokenPrice,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
-import {
-  CrossSwapFees,
-  CrossSwapQuotes,
-  SwapQuote,
-  Token,
-  AmountType,
-} from "../_dexes/types";
+import { CrossSwapQuotes, SwapQuote, Token, AmountType } from "../_dexes/types";
 import { AMOUNT_TYPE, AppFee, CrossSwapType } from "../_dexes/utils";
 import {
   encodeApproveCalldata,
@@ -49,6 +43,8 @@ import {
 } from "../_multicall-handler";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+
+const PRICE_DIFFERENCE_TOLERANCE = 0.01;
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -71,6 +67,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFee: optional(positiveFloatStr(1)),
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
+  skipChecks: optional(boolStr()),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -100,27 +97,49 @@ export async function handleBaseSwapQueryParams(
     appFee,
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
+    skipChecks: _skipChecks = "false",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
   const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
+  const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
+  const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+  const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
+
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
-    : utils.getAddress(_inputTokenAddress);
+    : sdk.utils.toAddressType(_inputTokenAddress, originChainId).toNative();
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
-    : utils.getAddress(_outputTokenAddress);
+    : sdk.utils
+        .toAddressType(_outputTokenAddress, destinationChainId)
+        .toNative();
   const excludeSources = _excludeSources
     ? paramToArray(_excludeSources)
     : undefined;
   const includeSources = _includeSources
     ? paramToArray(_includeSources)
     : undefined;
+
+  if (isDestinationSvm) {
+    if (!recipient) {
+      throw new InvalidParamError({
+        param: "recipient",
+        message: "Recipient is required for SVM destinations",
+      });
+    }
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for SVM destinations",
+      });
+    }
+  }
 
   if (excludeSources && includeSources) {
     throw new InvalidParamError({
@@ -200,6 +219,9 @@ export async function handleBaseSwapQueryParams(
     appFeePercent: appFeeNum,
     appFeeRecipient,
     strictTradeType,
+    skipChecks,
+    isDestinationSvm,
+    isOriginSvm,
   };
 }
 
@@ -331,13 +353,28 @@ export function encodeActionCalls(actions: Action[], targetChainId: number) {
         value: action.value,
       };
     } else {
+      let iface: utils.Interface;
+      let functionName: string;
+
       const methodAbi = action.functionSignature;
       const positionalArgs = flattenArgs(action.args);
-      const iface = new utils.Interface([methodAbi]);
-      const functionName = iface.fragments[0].name;
       const populateArgsDynamically = action.args.some(
         (arg) => arg.populateDynamically
       );
+
+      try {
+        iface = new utils.Interface([methodAbi]);
+        functionName = iface.fragments[0].name;
+      } catch (err) {
+        throw new AbiEncodingError(
+          {
+            message: `Failed to encode function data for ABI '${methodAbi}'. Function signature may be invalid.`,
+          },
+          {
+            cause: `${err instanceof Error ? err.message : String(err)}`,
+          }
+        );
+      }
 
       try {
         const callData = iface.encodeFunctionData(functionName, positionalArgs);
@@ -466,92 +503,13 @@ export function getApprovalTxns(params: {
   return approvalTxns;
 }
 
-async function calculateSwapFee(
-  swapQuote: SwapQuote,
-  baseCurrency: string
-): Promise<Record<string, number>> {
-  const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
-  const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
-    getCachedTokenPrice(
-      tokenIn.address,
-      baseCurrency,
-      undefined,
-      tokenIn.chainId
-    ),
-    getCachedTokenPrice(
-      tokenOut.address,
-      baseCurrency,
-      undefined,
-      tokenOut.chainId
-    ),
-  ]);
-
-  const normalizedIn =
-    parseFloat(utils.formatUnits(expectedAmountIn, tokenIn.decimals)) *
-    inputTokenPriceBase;
-  const normalizedOut =
-    parseFloat(utils.formatUnits(expectedAmountOut, tokenOut.decimals)) *
-    outputTokenPriceBase;
-  return {
-    [baseCurrency]: normalizedIn - normalizedOut,
-  };
-}
-
-async function calculateBridgeFee(
-  bridgeQuote: CrossSwapQuotes["bridgeQuote"],
-  baseCurrency: string
-): Promise<Record<string, number>> {
-  const { inputToken, suggestedFees } = bridgeQuote;
-  const inputTokenPriceBase = await getCachedTokenPrice(
-    inputToken.address,
-    baseCurrency,
-    undefined,
-    inputToken.chainId
-  );
-  const normalizedFee =
-    parseFloat(
-      utils.formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
-    ) * inputTokenPriceBase;
-
-  return {
-    [baseCurrency]: normalizedFee,
-  };
-}
-
-export async function calculateCrossSwapFees(
-  crossSwapQuote: CrossSwapQuotes,
-  baseCurrency = "usd"
-): Promise<CrossSwapFees> {
-  const bridgeFeePromise = calculateBridgeFee(
-    crossSwapQuote.bridgeQuote,
-    baseCurrency
-  );
-
-  const originSwapFeePromise = crossSwapQuote?.originSwapQuote
-    ? calculateSwapFee(crossSwapQuote.originSwapQuote, baseCurrency)
-    : Promise.resolve(undefined);
-
-  const destinationSwapFeePromise = crossSwapQuote?.destinationSwapQuote
-    ? calculateSwapFee(crossSwapQuote.destinationSwapQuote, baseCurrency)
-    : Promise.resolve(undefined);
-
-  const [bridgeFees, originSwapFees, destinationSwapFees] = await Promise.all([
-    bridgeFeePromise,
-    originSwapFeePromise,
-    destinationSwapFeePromise,
-  ]);
-
-  return {
-    bridgeFees,
-    originSwapFees,
-    destinationSwapFees,
-  };
-}
-
 export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((element) => {
-      if (element instanceof BigNumber) {
+      if (
+        element instanceof BigNumber ||
+        (element && typeof element === "object" && element._isBigNumber)
+      ) {
         return element.toString();
       }
       if (typeof element === "object" && element !== null) {
@@ -563,7 +521,10 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 
   return Object.fromEntries(
     Object.entries(value).map(([key, val]) => {
-      if (val instanceof BigNumber) {
+      if (
+        val instanceof BigNumber ||
+        (val && typeof val === "object" && val._isBigNumber)
+      ) {
         return [key, val.toString()];
       }
       if (typeof val === "object" && val !== null) {
@@ -574,7 +535,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
-export function calculateSwapFees(params: {
+export async function calculateSwapFees(params: {
   inputAmount: BigNumber;
   originSwapQuote?: SwapQuote;
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -602,8 +563,8 @@ export function calculateSwapFees(params: {
     appFee,
     originTxGas,
     originTxGasPrice,
-    inputTokenPriceUsd,
-    outputTokenPriceUsd,
+    inputTokenPriceUsd: _inputTokenPriceUsd,
+    outputTokenPriceUsd: _outputTokenPriceUsd,
     originNativePriceUsd,
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
@@ -616,17 +577,17 @@ export function calculateSwapFees(params: {
 
   try {
     if (
-      inputTokenPriceUsd === 0 ||
-      outputTokenPriceUsd === 0 ||
+      _inputTokenPriceUsd === 0 ||
+      _outputTokenPriceUsd === 0 ||
       originNativePriceUsd === 0 ||
       destinationNativePriceUsd === 0 ||
       bridgeQuoteInputTokenPriceUsd === 0
     ) {
       logger.debug({
         at: "calculateSwapFees",
-        message: "Error calculating swap fees from USD prices",
-        inputTokenPriceUsd,
-        outputTokenPriceUsd,
+        message: "Error calculating swap fees. Could not resolve USD prices.",
+        _inputTokenPriceUsd,
+        _outputTokenPriceUsd,
         originNativePriceUsd,
         destinationNativePriceUsd,
         bridgeQuoteInputTokenPriceUsd,
@@ -637,6 +598,53 @@ export function calculateSwapFees(params: {
     const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
     const outputToken =
       destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
+
+    const priceDifference = Math.abs(
+      _inputTokenPriceUsd - _outputTokenPriceUsd
+    );
+    const priceDifferencePercentage = priceDifference / _inputTokenPriceUsd;
+
+    let inputTokenPriceUsd = _inputTokenPriceUsd;
+    let outputTokenPriceUsd = _outputTokenPriceUsd;
+
+    if (
+      inputToken.symbol === outputToken.symbol &&
+      (priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
+        outputTokenPriceUsd > inputTokenPriceUsd)
+    ) {
+      [inputTokenPriceUsd, outputTokenPriceUsd] = await Promise.all([
+        getCachedTokenPrice({
+          symbol: inputToken.symbol,
+          tokenAddress: inputToken.address,
+          chainId: inputToken.chainId,
+          fallbackResolver: "lifi",
+        }),
+        getCachedTokenPrice({
+          symbol: outputToken.symbol,
+          tokenAddress: outputToken.address,
+          chainId: outputToken.chainId,
+          fallbackResolver: "lifi",
+        }),
+      ]);
+
+      if (
+        priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
+        outputTokenPriceUsd > inputTokenPriceUsd ||
+        outputTokenPriceUsd === 0 ||
+        inputTokenPriceUsd === 0
+      ) {
+        logger.debug({
+          at: "calculateSwapFees",
+          message:
+            "Error calculating swap fees. USD prices are not consistent.",
+          _inputTokenPriceUsd,
+          _outputTokenPriceUsd,
+          inputTokenPriceUsd,
+          outputTokenPriceUsd,
+        });
+        return {};
+      }
+    }
 
     const originGas =
       originTxGas && originTxGasPrice
@@ -799,7 +807,7 @@ function safeUsdToTokenAmount(
   );
 }
 
-export function buildBaseSwapResponseJson(params: {
+export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
@@ -816,15 +824,22 @@ export function buildBaseSwapResponseJson(params: {
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   destinationSwapQuote?: SwapQuote;
   refundOnOrigin: boolean;
-  approvalSwapTx?: {
-    from: string;
-    to: string;
-    data: string;
-    value?: BigNumber;
-    gas?: BigNumber;
-    maxFeePerGas?: BigNumber;
-    maxPriorityFeePerGas?: BigNumber;
-  };
+  approvalSwapTx?:
+    | {
+        ecosystem: "evm";
+        from: string;
+        to: string;
+        data: string;
+        value?: BigNumber;
+        gas?: BigNumber;
+        maxFeePerGas?: BigNumber;
+        maxPriorityFeePerGas?: BigNumber;
+      }
+    | {
+        ecosystem: "svm";
+        data: string;
+        to: string;
+      };
   permitSwapTx?: any; // TODO: Add type
   appFeePercent?: number;
   appFee?: AppFee;
@@ -931,15 +946,21 @@ export function buildBaseSwapResponseJson(params: {
             symbol: "WETH",
           }
         : refundToken,
-    fees: calculateSwapFees({
+    fees: await calculateSwapFees({
       inputAmount: params.inputAmount,
       originSwapQuote: params.originSwapQuote,
       bridgeQuote: params.bridgeQuote,
       destinationSwapQuote: params.destinationSwapQuote,
       appFeePercent: params.appFeePercent,
       appFee: params.appFee,
-      originTxGas: params.approvalSwapTx?.gas,
-      originTxGasPrice: params.approvalSwapTx?.maxFeePerGas,
+      originTxGas:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.gas
+          : undefined,
+      originTxGasPrice:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.maxFeePerGas
+          : undefined,
       inputTokenPriceUsd: params.inputTokenPriceUsd,
       outputTokenPriceUsd: params.outputTokenPriceUsd,
       originNativePriceUsd: params.originNativePriceUsd,
@@ -959,20 +980,35 @@ export function buildBaseSwapResponseJson(params: {
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
-    swapTx: params.approvalSwapTx
-      ? {
-          simulationSuccess: !!params.approvalSwapTx.gas,
-          chainId: params.originChainId,
-          to: params.approvalSwapTx.to,
-          data: params.approvalSwapTx.data,
-          value: params.approvalSwapTx.value,
-          gas: params.approvalSwapTx.gas,
-          maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
-          maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
-        }
-      : params.permitSwapTx
-        ? params.permitSwapTx.swapTx
-        : undefined,
+    swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
   });
+}
+
+export function getSwapTx(
+  params: Parameters<typeof buildBaseSwapResponseJson>[0]
+) {
+  if (params.approvalSwapTx?.ecosystem === "evm") {
+    return {
+      simulationSuccess: !!params.approvalSwapTx.gas,
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+      value: params.approvalSwapTx.value,
+      gas: params.approvalSwapTx.gas,
+      maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
+      maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
+    };
+  }
+
+  if (params.approvalSwapTx?.ecosystem === "svm") {
+    return {
+      simulationSuccess: false, // TODO: Figure out if we should simulate the tx on SVM
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+    };
+  }
+
+  return params.permitSwapTx?.swapTx;
 }

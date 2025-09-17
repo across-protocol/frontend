@@ -4,6 +4,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { AccountContent } from "./AccountContent";
 import { SidebarItem } from "./SidebarItem";
+import { TermsOfServiceDisclaimer } from "./TermsOfServiceDisclaimer";
 
 const sidebarNavigationLinks = [
   {
@@ -98,6 +99,7 @@ export function NavigationContent() {
           href: item.link,
         }))}
       />
+      <TermsOfServiceDisclaimer />
     </>
   );
 }

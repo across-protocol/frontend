@@ -30,6 +30,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.UNICHAIN,
   CHAIN_IDs.SOLANA,
   CHAIN_IDs.BSC,
+  CHAIN_IDs.HYPEREVM,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

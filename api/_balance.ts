@@ -103,7 +103,9 @@ export async function getBatchBalanceViaMulticall3(
   balances: Record<string, Record<string, string>>;
 }> {
   const chainIdAsInt = Number(chainId);
-  const provider = getProvider(chainIdAsInt);
+  const provider = getProvider(chainIdAsInt, {
+    useSpeedProvider: true,
+  });
 
   const multicall3 = getMulticall3(chainIdAsInt, provider);
 

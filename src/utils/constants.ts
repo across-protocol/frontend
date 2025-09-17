@@ -14,6 +14,7 @@ import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -225,6 +226,9 @@ export const AddressZero = ethers.constants.AddressZero;
 export const showV4LaunchBanner = Boolean(
   process.env.REACT_APP_SHOW_V4_BANNER === "true"
 );
+export const twitterShareContestActive = Boolean(
+  process.env.REACT_APP_TWITTER_SHARE_CONTEST_ACTIVE === "true"
+);
 
 assert(
   isSupportedChainId(hubPoolChainId),
@@ -302,6 +306,28 @@ export const tokenTable = Object.fromEntries(
 export const getToken = (symbol: string): TokenInfo => {
   const token = tokenTable[symbol.toUpperCase()];
   assert(token, "No token found for symbol: " + symbol);
+  return token;
+};
+
+/**
+ * Gets token info with chain-specific display modifications (temporary for USDT0)
+ * This is a temporary function that will be removed once all chains migrate to USDT0
+ */
+export const getTokenForChain = (
+  symbol: string,
+  chainId: number
+): TokenInfo => {
+  const token = getToken(symbol);
+
+  // Handle USDT -> USDT0 display for specific chains
+  if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
+    return {
+      ...token,
+      displaySymbol: "USDT0",
+      logoURI: usdt0Logo,
+    };
+  }
+
   return token;
 };
 
@@ -645,3 +671,11 @@ export const acrossPlusMulticallHandler: Record<number, string> = {
 export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
 
 export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
+
+// temporary list, to show usdt0 symbol & icon.
+// once all chains have migrated we can remove this list and make upstream changes to USDT icons in @constants.
+export const chainsWithUsdt0Enabled = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.ARBITRUM,
+  CHAIN_IDs.HYPEREVM,
+];

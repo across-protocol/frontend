@@ -27,6 +27,8 @@ import {
   parseL1TokenConfigSafe,
   getL1TokenConfigCache,
   ConvertDecimals,
+  computeUtilizationPostRelay,
+  PooledToken,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -231,11 +233,8 @@ const handler = async (
         },
         {
           contract: hubPool,
-          functionName: "liquidityUtilizationPostRelay",
-          args: [
-            l1Token.address,
-            ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount),
-          ],
+          functionName: "pooledTokens",
+          args: [l1Token.address],
         },
         {
           contract: hubPool,
@@ -249,13 +248,15 @@ const handler = async (
       ];
 
       const [
-        [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
+        [currentUt, pooledToken, _quoteTimestamp, rawL1TokenConfig],
         tokenPriceUsd,
         limits,
-        fillDeadline,
       ] = await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedTokenPrice({
+          l1Token: l1Token.address,
+          baseCurrency: "usd",
+        }),
         getCachedLimits(
           inputToken.address,
           outputToken.address,
@@ -272,11 +273,19 @@ const handler = async (
           depositWithMessage ? message : undefined,
           allowUnmatchedDecimals
         ),
-        getFillDeadline(destinationChainId),
       ]);
+
+      const nextUt = computeUtilizationPostRelay(
+        pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
+        ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount)
+      );
+
       const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
         limits;
+
       const quoteTimestamp = parseInt(_quoteTimestamp.toString());
+
+      const fillDeadline = getFillDeadline(destinationChainId, quoteTimestamp);
 
       const amountInUsd = amount
         .mul(parseUnits(tokenPriceUsd.toString(), 18))

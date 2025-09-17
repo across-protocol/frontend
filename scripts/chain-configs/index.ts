@@ -1,4 +1,3 @@
-export { default as ALEPH_ZERO } from "./aleph-zero";
 export { default as ARBITRUM } from "./arbitrum";
 export { default as ARBITRUM_SEPOLIA } from "./arbitrum-sepolia";
 export { default as BASE } from "./base";
@@ -6,6 +5,7 @@ export { default as BASE_SEPOLIA } from "./base-sepolia";
 export { default as BLAST } from "./blast";
 export { default as BLAST_SEPOLIA } from "./blast-sepolia";
 export { default as BSC } from "./bsc";
+export { default as HYPEREVM } from "./hyperevm";
 export { default as INK } from "./ink";
 export { default as LENS } from "./lens";
 export { default as LENS_SEPOLIA } from "./lens-sepolia";

@@ -15,13 +15,13 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
-  chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
   chainConfigs.BSC,
   chainConfigs.SOLANA,
+  chainConfigs.HYPEREVM,
 ];
 
 export const enabledSepoliaChainConfigs = [

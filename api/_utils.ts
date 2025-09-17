@@ -84,6 +84,7 @@ import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
+import { getSvmTokenInfo } from "./_svm-tokens";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -949,32 +950,79 @@ export const buildDepositForSimulation = (depositArgs: {
 
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
- * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @param tokenAddress The ERC20 token address of the coin to find the cached price of
+ * @param symbol The symbol of the coin to find the cached price of
  * @param baseCurrency The base currency to convert the token price to
- * @param date An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
+ * @param historicalDateISO An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
+ * @param chainId The chain id of the coin to find the cached price of
+ * @param fallbackResolver The fallback resolver to use if the price is not found
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (
-  l1Token: string,
-  baseCurrency: string = "eth",
-  historicalDateISO?: string,
-  chainId?: number,
-  fallbackResolver?: string
-): Promise<number> => {
-  return Number(
-    (
-      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+export const getCachedTokenPrice = async (params: {
+  l1Token?: string;
+  tokenAddress?: string;
+  symbol?: string;
+  baseCurrency?: string;
+  historicalDateISO?: string;
+  chainId?: number;
+  fallbackResolver?: string;
+}): Promise<number> => {
+  const {
+    l1Token,
+    tokenAddress,
+    symbol,
+    baseCurrency = "eth",
+    historicalDateISO,
+    chainId,
+    fallbackResolver,
+  } = params;
+  const baseUrl = `${resolveVercelEndpoint()}/api/coingecko`;
+  let price = 0;
+
+  if (symbol) {
+    try {
+      const response = await axios(`${baseUrl}`, {
         params: {
-          l1Token,
-          chainId,
+          symbol,
           baseCurrency,
           date: historicalDateISO,
-          fallbackResolver,
         },
         headers: getVercelHeaders(),
-      })
-    ).data.price
-  );
+      });
+      price = Number(response.data.price);
+    } catch (error) {
+      if (fallbackResolver) {
+        const response = await axios(`${baseUrl}`, {
+          params: {
+            l1Token,
+            tokenAddress,
+            baseCurrency,
+            chainId,
+            fallbackResolver,
+            date: historicalDateISO,
+          },
+          headers: getVercelHeaders(),
+        });
+        price = Number(response.data.price);
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    const response = await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+      params: {
+        l1Token,
+        tokenAddress,
+        chainId,
+        baseCurrency,
+        date: historicalDateISO,
+        fallbackResolver,
+      },
+      headers: getVercelHeaders(),
+    });
+    price = Number(response.data.price);
+  }
+  return price;
 };
 
 /**
@@ -1563,6 +1611,16 @@ export function positiveIntStr() {
   });
 }
 
+export function intStringInRange(from: number, to: number) {
+  return define<string>("intStringInRange", (value) => {
+    return (
+      Number.isInteger(Number(value)) &&
+      Number(value) >= from &&
+      Number(value) <= to
+    );
+  });
+}
+
 export function positiveFloatStr(maxValue?: number) {
   return define<string>("positiveFloatStr", (value) => {
     return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
@@ -1850,9 +1908,15 @@ export async function fetchStakingPool(
 
   const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
     acceleratingDistributor.rewardToken(),
-    getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
+    getCachedTokenPrice({
+      l1Token: poolUnderlyingTokenAddress,
+      baseCurrency: "usd",
+    }),
   ]);
-  const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");
+  const acxPriceInUSD = await getCachedTokenPrice({
+    tokenAddress: acrossTokenAddress,
+    baseCurrency: "usd",
+  });
 
   const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
 
@@ -1990,7 +2054,7 @@ export async function getBalancerV2TokenPrice(
     tokens.map(async (token: string, i: number): Promise<number> => {
       const tokenContract = ERC20__factory.connect(token, provider);
       const [price, decimals] = await Promise.all([
-        getCachedTokenPrice(token, "usd"),
+        getCachedTokenPrice({ l1Token: token, baseCurrency: "usd" }),
         tokenContract.decimals(),
       ]);
       const balance = parseFloat(
@@ -2460,10 +2524,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
   }
 > {
   try {
-    if (!ethers.utils.isAddress(address)) {
+    if (!(ethers.utils.isAddress(address) || isSvmAddress(address))) {
       throw new InvalidParamError({
         param: "address",
-        message: '"Address" must be a valid ethereum address',
+        message: '"Address" must be a valid EVM or SVM address',
       });
     }
 
@@ -2474,7 +2538,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // ERC20 resolved statically
+    // Resolve token info statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
         token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
@@ -2489,6 +2553,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
         name: token.name,
         chainId,
       };
+    }
+
+    if (sdk.utils.chainIsSvm(chainId)) {
+      return await getSvmTokenInfo(address, chainId);
     }
 
     // ERC20 resolved dynamically
@@ -2621,4 +2689,28 @@ export function addTimeoutToPromise<T>(
     }, delay);
   });
   return Promise.race([promise, timeout]);
+}
+
+export type PooledToken = {
+  lpToken: string;
+  isEnabled: boolean;
+  lastLpFeeUpdate: BigNumber;
+  utilizedReserves: BigNumber;
+  liquidReserves: BigNumber;
+  undistributedLpFees: BigNumber;
+};
+
+// This logic is directly ported from the HubPool smart contract function by the same name.
+export function computeUtilizationPostRelay(
+  pooledToken: PooledToken,
+  amount: BigNumber
+) {
+  const flooredUtilizedReserves = pooledToken.utilizedReserves.gt(0)
+    ? pooledToken.utilizedReserves
+    : BigNumber.from(0);
+  const numerator = amount.add(flooredUtilizedReserves);
+  const denominator = pooledToken.liquidReserves.add(flooredUtilizedReserves);
+
+  if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
+  return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
 }

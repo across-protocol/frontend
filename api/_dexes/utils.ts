@@ -5,7 +5,6 @@ import {
   utils as ethersUtils,
 } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
@@ -42,7 +41,10 @@ import {
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
 import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
+import { InvalidParamError } from "../_errors";
+import { isEvmAddress, isSvmAddress } from "../_address";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -188,6 +190,33 @@ export function getCrossSwapTypes(params: {
   return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
+export function getBridgeQuoteRecipient(crossSwap: CrossSwap) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to use MultiCallHandler
+    return crossSwap.recipient;
+  }
+  return getMultiCallHandlerAddress(crossSwap.outputToken.chainId);
+}
+
+export function getBridgeQuoteMessage(crossSwap: CrossSwap, appFee?: AppFee) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to build a message
+    return undefined;
+  }
+  switch (crossSwap.type) {
+    case AMOUNT_TYPE.EXACT_INPUT:
+      return buildExactInputBridgeTokenMessage(crossSwap, appFee);
+    case AMOUNT_TYPE.EXACT_OUTPUT:
+      return buildExactOutputBridgeTokenMessage(
+        crossSwap,
+        crossSwap.amount,
+        appFee
+      );
+    case AMOUNT_TYPE.MIN_OUTPUT:
+      return buildMinOutputBridgeTokenMessage(crossSwap, appFee);
+  }
+}
+
 export function buildExactInputBridgeTokenMessage(
   crossSwap: CrossSwap,
   appFee?: AppFee
@@ -325,12 +354,49 @@ export function buildExactOutputBridgeTokenMessage(
           crossSwap.isOutputNative
             ? constants.AddressZero // ETH Transfer
             : crossSwap.outputToken.address, // ERC-20 Transfer
-          crossSwap.refundAddress ?? crossSwap.depositor
+          _getExactOutputDustRecipient(crossSwap)
         ),
         value: "0",
       },
     ],
   });
+}
+
+function _getExactOutputDustRecipient(crossSwap: CrossSwap) {
+  if (
+    crossSwap.isOriginSvm &&
+    crossSwap.strictTradeType &&
+    !crossSwap.refundAddress
+  ) {
+    throw new InvalidParamError({
+      param: "refundAddress,strictTradeType",
+      message:
+        "Param 'refundAddress' must be provided when 'strictTradeType' is true for transfers originating from SVM.",
+    });
+  }
+
+  const fallbackRecipient = crossSwap.isOriginSvm
+    ? crossSwap.recipient
+    : crossSwap.depositor;
+  const dustRecipient = crossSwap.refundAddress ?? fallbackRecipient;
+
+  if (crossSwap.isDestinationSvm) {
+    if (!isSvmAddress(dustRecipient)) {
+      throw new InvalidParamError({
+        param: "dustRecipient",
+        message: "Param 'dustRecipient' must be a valid SVM address.",
+      });
+    }
+  } else {
+    if (!isEvmAddress(dustRecipient)) {
+      throw new InvalidParamError({
+        param: "dustRecipient",
+        message: "Param 'dustRecipient' must be a valid EVM address.",
+      });
+    }
+  }
+
+  return dustRecipient;
 }
 
 /**
@@ -411,9 +477,7 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
-  const spokePool = getSpokePool(originChainId);
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
@@ -433,7 +497,10 @@ export async function extractDepositDataStruct(
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
     quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    fillDeadline: await getFillDeadline(spokePool),
+    fillDeadline: getFillDeadline(
+      destinationChainId,
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
+    ),
     exclusivityDeadline:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     exclusivityParameter:
@@ -488,17 +555,6 @@ export async function extractSwapAndDepositDataStruct(
     spokePool: spokePool.address,
     nonce: permitNonce || 0, // Only used for permit transfers
   };
-}
-
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 export function getQuoteFetchStrategies(
@@ -748,7 +804,23 @@ export function getOriginSwapEntryPoints(
   chainId: number,
   dex: SupportedDex
 ): OriginEntryPoints {
-  if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+  if (utils.chainIsSvm(chainId)) {
+    return {
+      originSwapInitialRecipient: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+      },
+      swapAndBridge: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+        dex,
+      },
+      deposit: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+      },
+    };
+  } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
     return {
       // The `SpokePoolPeriphery` contract is used to initiate an origin swap. It uses a
       // proxy-pattern for security reasons which requires us to use the `SwapProxy`
@@ -824,23 +896,20 @@ export function makeGetSources(sources: DexSources) {
     const sourcesData = Array.from(
       new Set(
         filteredSources.flatMap((source) => {
-          const sourceData = sources.sources[chainId].find((s) =>
+          const sourceData = sources.sources[chainId].filter((s) =>
             s.names.some((name) => name.toLowerCase() === source.toLowerCase())
           );
-          if (!sourceData) {
-            return [];
-          }
-          return {
-            key: sourceData.key,
-            names: sourceData.names,
-          };
+          return sourceData.map((s) => ({
+            key: s.key,
+            names: s.names,
+          }));
         })
       )
     );
 
     return {
       sourcesKeys: sourcesData.map((s) => s.key),
-      sourcesNames: sourcesData.flatMap((s) => s.names),
+      sourcesNames: Array.from(new Set(sourcesData.flatMap((s) => s.names))),
       sourcesType: opts?.excludeSources ? "exclude" : "include",
     } as const;
   };

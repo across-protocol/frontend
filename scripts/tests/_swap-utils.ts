@@ -4,9 +4,18 @@ import axios from "axios";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
+import { utils } from "@across-protocol/sdk";
+import {
+  KeyPairSigner,
+  getTransactionDecoder,
+  signTransaction,
+  sendTransactionWithoutConfirmingFactory,
+  getSignatureFromTransaction,
+} from "@solana/kit";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { buildSearchParams } from "../../api/_utils";
+import { getSVMRpc } from "../../api/_providers";
 import {
   MIN_OUTPUT_CASES,
   EXACT_OUTPUT_CASES,
@@ -80,15 +89,18 @@ export const argsFromCli = yargs(hideBin(process.argv))
       })
       .option("recipient", {
         alias: "r",
+        type: "string",
         description: "Recipient address.",
       })
       .option("depositor", {
         alias: "d",
         description: "Depositor address.",
+        type: "string",
         default: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       })
       .option("refundAddress", {
         alias: "ra",
+        type: "string",
         description: "Refund address.",
       })
       .option("refundOnOrigin", {
@@ -104,6 +116,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
       .option("integratorId", {
         alias: "i",
         description: "Integrator ID.",
+        type: "string",
       })
       .option("includeSources", {
         alias: "is",
@@ -153,6 +166,8 @@ export const argsFromCli = yargs(hideBin(process.argv))
   .parseSync();
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
+export const { INDEXER_API_BASE_URL = "https://indexer.api.across.to" } =
+  process.env;
 
 export function filterTestCases(
   testCases: {
@@ -204,6 +219,7 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -228,6 +244,7 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
     };
     console.log("Params:", params);
 
@@ -349,8 +366,68 @@ export async function signAndWaitAllowanceFlow(params: {
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
     console.log("Tx mined");
+    const fillTxnRef = await trackFill(tx.hash);
+    if (fillTxnRef) {
+      console.log("Fill txn ref:", fillTxnRef);
+    } else {
+      console.log("Fill txn ref not found");
+    }
   } catch (e) {
     console.error("Tx reverted", e);
+  }
+}
+
+export async function signAndWaitAllowanceFlowSvm(params: {
+  wallet: KeyPairSigner;
+  swapResponse: BaseSwapResponse;
+}) {
+  if (!params.swapResponse.swapTx || !("data" in params.swapResponse.swapTx)) {
+    throw new Error("No swap tx for allowance flow");
+  }
+
+  try {
+    const txBuffer = Buffer.from(params.swapResponse.swapTx.data, "base64");
+    const decodedTx = getTransactionDecoder().decode(txBuffer);
+    const signedTx = await signTransaction([params.wallet.keyPair], decodedTx);
+    const signature = getSignatureFromTransaction(signedTx);
+    console.log("Signed SVM tx:", signature.toString());
+
+    const sendTx = sendTransactionWithoutConfirmingFactory({
+      rpc: getSVMRpc(params.swapResponse.swapTx.chainId),
+    });
+    await sendTx(signedTx, { commitment: "confirmed" });
+    console.log("Tx sent and confirmed");
+
+    // TODO: track fill
+  } catch (e) {
+    console.error("Tx reverted", e);
+  }
+}
+
+async function trackFill(txHash: string) {
+  const MAX_FILL_ATTEMPTS = 15;
+  // Wait 2 seconds before starting polling
+  await utils.delay(2);
+  for (let i = 0; i < MAX_FILL_ATTEMPTS; i++) {
+    try {
+      const response = await axios.get(
+        `${INDEXER_API_BASE_URL}/deposit/status`,
+        {
+          params: { depositTxnRef: txHash },
+        }
+      );
+      if (response.data.status === "filled") {
+        return response.data.fillTxnRef;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Deposit not found yet, continue trying
+      } else {
+        // Other error, re-throw
+        throw error;
+      }
+    }
+    await utils.delay(1);
   }
 }
 
@@ -434,4 +511,19 @@ export async function getERC20DestinationAction(testCase: {
       },
     ],
   };
+}
+
+export function getSvmSignerSeed() {
+  const seedBytesStr = process.env.DEV_WALLET_KEY_PAIR_SVM;
+  if (!seedBytesStr) {
+    throw new Error(
+      "Can't get SVM signer seed. Set 'DEV_WALLET_KEY_PAIR_SVM' in .env.local"
+    );
+  }
+  const parsedSeedArray = seedBytesStr
+    .replace("[", "")
+    .replace("]", "")
+    .split(",")
+    .map((str) => parseInt(str));
+  return new Uint8Array(parsedSeedArray);
 }

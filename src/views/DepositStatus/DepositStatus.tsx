@@ -57,6 +57,7 @@ export default function DepositStatus() {
             externalProjectId={externalProjectId}
           />
           <DepositStatusLowerCard
+            depositTxHash={depositTxHash}
             fromChainId={Number(originChainId)}
             toChainId={Number(destinationChainId)}
             externalProjectId={externalProjectId}

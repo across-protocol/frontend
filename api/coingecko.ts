@@ -37,6 +37,7 @@ const {
 const CoingeckoQueryParamsSchema = type({
   l1Token: optional(validAddress()),
   tokenAddress: optional(validAddress()),
+  symbol: optional(string()),
   chainId: optional(positiveInt),
   baseCurrency: optional(string()),
   date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
@@ -60,33 +61,67 @@ const handler = async (
       l1Token,
       tokenAddress,
       chainId: _chainId,
+      symbol,
       baseCurrency: _baseCurrency,
       date: dateStr,
       fallbackResolver,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
 
-    let address = l1Token ?? tokenAddress;
-    if (!address) {
-      throw new InvalidParamError({
-        message: `Token Address is undefined. You must define either "l1Token", or "tokenAddress"`,
-        param: "l1Token, tokenAddress",
-      });
-    }
+    let price: number;
+    let baseCurrency: string;
+    let isDerivedCurrency: boolean;
+    let chainId: number;
 
-    let { price, baseCurrency, isDerivedCurrency, chainId } =
-      await resolvePrice({
+    // If l1Token OR tokenAddress is provided, we need to resolve the price by address.
+    if (l1Token || tokenAddress) {
+      const address = l1Token ?? tokenAddress;
+      if (!address) {
+        throw new InvalidParamError({
+          message: `Token Address is undefined. You must define either "l1Token", or "tokenAddress"`,
+          param: "l1Token, tokenAddress",
+        });
+      }
+      const resolvedPriceByAddress = await resolvePriceByAddress({
         address,
         chainId: _chainId,
         baseCurrency: _baseCurrency,
         dateStr,
       });
+      price = resolvedPriceByAddress.price;
+      baseCurrency = resolvedPriceByAddress.baseCurrency;
+      isDerivedCurrency = resolvedPriceByAddress.isDerivedCurrency;
+      chainId = resolvedPriceByAddress.chainId;
 
-    // If coingecko can't resolve price we use a fallback resolver
-    if (price === 0 && fallbackResolver && baseCurrency === "usd" && !dateStr) {
-      price = await resolveUsdPriceViaFallbackResolver({
-        address,
-        chainId,
-        fallbackResolver,
+      // If coingecko can't resolve price we use a fallback resolver
+      if (
+        price === 0 &&
+        fallbackResolver &&
+        baseCurrency === "usd" &&
+        !dateStr
+      ) {
+        price = await resolveUsdPriceViaFallbackResolver({
+          address,
+          chainId,
+          fallbackResolver,
+        });
+      }
+    }
+    // If symbol is provided, we need to resolve the price by symbol.
+    else if (symbol) {
+      const resolvedPriceBySymbol = await resolvePriceBySymbol({
+        symbol,
+        baseCurrency: _baseCurrency,
+        dateStr,
+      });
+      price = resolvedPriceBySymbol.price;
+      baseCurrency = resolvedPriceBySymbol.baseCurrency;
+      isDerivedCurrency = resolvedPriceBySymbol.isDerivedCurrency;
+    }
+    // If neither l1Token, tokenAddress, nor symbol is provided, we throw an error.
+    else {
+      throw new InvalidParamError({
+        message: "Either 'l1Token', 'tokenAddress', or 'symbol' is required.",
+        param: "l1Token, tokenAddress, symbol",
       });
     }
 
@@ -99,17 +134,9 @@ const handler = async (
         TOKEN_SYMBOLS_MAP[
           baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
         ];
-      let baseTokenAddress = baseToken.addresses[CHAIN_IDs.MAINNET];
-      let baseTokenChainId = chainId;
-      if (baseCurrency === "sol") {
-        baseTokenAddress = baseToken.addresses[CHAIN_IDs.SOLANA];
-        baseTokenChainId = CHAIN_IDs.SOLANA;
-      }
-      const { price: baseTokenPrice } = await resolvePrice({
-        address: baseTokenAddress,
-        chainId: baseTokenChainId,
+      const { price: baseTokenPrice } = await resolvePriceBySymbol({
+        symbol: baseToken.symbol,
         baseCurrency: "usd",
-        dateStr,
       });
       quotePrice = baseTokenPrice;
       quotePrecision = baseToken.decimals;
@@ -136,7 +163,7 @@ const handler = async (
 
 // Wrapping the price resolution in a separate function to avoid 508 LOOP_DETECTED errors for
 // derived currency price resolution.
-async function resolvePrice(params: {
+async function resolvePriceByAddress(params: {
   address: string;
   chainId?: number;
   baseCurrency?: string;
@@ -155,16 +182,7 @@ async function resolvePrice(params: {
     params.baseCurrency ?? (utils.chainIsSvm(chainId) ? "sol" : "eth")
   ).toLowerCase();
 
-  // Confirm that the base Currency is supported by Coingecko
-  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
-  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
-    throw new InvalidParamError({
-      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
-        SUPPORTED_CG_BASE_CURRENCIES
-      ).join(", ")}].`,
-      param: "baseCurrency",
-    });
-  }
+  const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
 
   // Resolve the optional address lookup that maps one token's
   // contract address to another.
@@ -215,7 +233,7 @@ async function resolvePrice(params: {
   // date is provided, fetch historical price. Otherwise, fetch
   // current price.
   else {
-    // // If derived, we need to convert to USD first.
+    // If derived, we need to convert to USD first.
     const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
     if (params.dateStr) {
       price = await coingeckoClient.getContractHistoricDayPrice(
@@ -241,7 +259,44 @@ async function resolvePrice(params: {
   return { price, baseCurrency, isDerivedCurrency, chainId };
 }
 
-async function resolveUsdPriceViaFallbackResolver(params: {
+async function resolvePriceBySymbol(params: {
+  symbol: string;
+  baseCurrency?: string;
+  dateStr?: string;
+}) {
+  const logger = getLogger();
+  const { symbol, baseCurrency = "usd", dateStr } = params;
+
+  if (dateStr) {
+    throw new InvalidParamError({
+      message:
+        "Can't fetch historical price by using 'symbol' query param. Use 'l1Token' or 'tokenAddress' instead.",
+      param: "date",
+    });
+  }
+
+  const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
+
+  const coingeckoClient = Coingecko.get(
+    logger,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    {
+      [CHAIN_IDs.SOLANA]: "solana",
+      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+    }
+  );
+
+  // If derived, we need to convert to USD first.
+  const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
+
+  const [, price] = await coingeckoClient.getCurrentPriceBySymbol(
+    symbol,
+    modifiedBaseCurrency
+  );
+  return { price, baseCurrency, isDerivedCurrency };
+}
+
+export async function resolveUsdPriceViaFallbackResolver(params: {
   address: string;
   chainId: number;
   fallbackResolver: string;
@@ -272,6 +327,20 @@ async function resolveUsdPriceViaFallbackResolver(params: {
     message: "Invalid fallback resolver",
     param: "fallbackResolver",
   });
+}
+
+function assertValidBaseCurrency(baseCurrency: string) {
+  // Confirm that the base Currency is supported by Coingecko or can be derived by us
+  const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+  if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
+    throw new InvalidParamError({
+      message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
+        SUPPORTED_CG_BASE_CURRENCIES.union(SUPPORTED_CG_DERIVED_CURRENCIES)
+      ).join(", ")}].`,
+      param: "baseCurrency",
+    });
+  }
+  return { isDerivedCurrency };
 }
 
 export default handler;

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-08-25T20:54:27.686Z
+// Generated on 2025-09-12T16:07:26.238Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -19,6 +19,7 @@ export const SOURCES = {
       { key: "DeFi_Swap", names: ["defi_swap"] },
       { key: "Ekubo", names: ["ekubo"] },
       { key: "Fluid", names: ["fluid"] },
+      { key: "FluidLite", names: ["fluidlite"] },
       { key: "Fraxswap_V2", names: ["fraxswap_v2", "fraxswap"] },
       { key: "Integral", names: ["integral"] },
       { key: "Lido", names: ["lido"] },
@@ -158,6 +159,7 @@ export const SOURCES = {
       { key: "PancakeSwap_V2", names: ["pancakeswap_v2", "pancakeswap"] },
       { key: "PancakeSwap_V3", names: ["pancakeswap_v3", "pancakeswap"] },
       { key: "Pinto", names: ["pinto"] },
+      { key: "QuickSwap_V4", names: ["quickswap_v4", "quickswap"] },
       { key: "RocketSwap", names: ["rocketswap"] },
       { key: "SharkSwap_V2", names: ["sharkswap_v2", "sharkswap"] },
       { key: "SoSwap", names: ["soswap"] },
@@ -192,7 +194,6 @@ export const SOURCES = {
       { key: "SwapMode_V3", names: ["swapmode_v3", "swapmode"] },
       { key: "Velodrome_V2_Mode", names: ["velodrome_v2_mode"] },
       { key: "Velodrome_V3", names: ["velodrome_v3", "velodrome"] },
-      { key: "Wrapped_MLT", names: ["wrapped_mlt"] },
     ],
     "42161": [
       { key: "0x_RFQ", names: ["0x_rfq"] },
@@ -363,6 +364,7 @@ export const ALL_SOURCES = [
   "fenix_cl",
   "fenix_v2",
   "fluid",
+  "fluidlite",
   "fraxswap",
   "fraxswap_v2",
   "gmx",
@@ -409,6 +411,7 @@ export const ALL_SOURCES = [
   "quickswap",
   "quickswap_v2",
   "quickswap_v3",
+  "quickswap_v4",
   "ramses",
   "ramses_v2",
   "reservoir",
@@ -486,7 +489,6 @@ export const ALL_SOURCES = [
   "worldswap",
   "worldswap_v2",
   "wrapped_blt",
-  "wrapped_mlt",
   "xfai",
   "yearn",
   "yearn_v3",
