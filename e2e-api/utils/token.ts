@@ -1,6 +1,13 @@
-import { Address, parseAbi, zeroAddress, PrivateKeyAccount } from "viem";
+import {
+  Address,
+  parseAbi,
+  zeroAddress,
+  PrivateKeyAccount,
+  encodeFunctionData,
+} from "viem";
 
 import { e2eConfig } from "./config";
+import { handleTevmError } from "./tevm";
 
 export async function getBalance(
   chainId: number,
@@ -32,15 +39,16 @@ export async function setAllowance(params: {
 }) {
   const { chainId, tokenAddress, spender, amount, wallet } = params;
   const client = e2eConfig.getClient(chainId);
-  const txHash = await client.writeContract({
-    address: tokenAddress,
-    abi: parseAbi(["function approve(address,uint256) returns (bool)"]),
-    functionName: "approve",
-    args: [spender, amount],
-    account: wallet,
+  await client.tevmCall({
+    from: wallet.address,
+    to: tokenAddress,
+    data: encodeFunctionData({
+      abi: parseAbi(["function approve(address,uint256) returns (bool)"]),
+      functionName: "approve",
+      args: [spender, amount],
+    }),
+    addToBlockchain: true,
+    onAfterMessage: handleTevmError,
   });
-  const receipt = await client.waitForTransactionReceipt({
-    hash: txHash,
-  });
-  return receipt;
+  await client.tevmMine({ blockCount: 1 });
 }

@@ -58,6 +58,7 @@
     "react-router-dom": "v5",
     "react-tooltip": "^5.18.0",
     "superstruct": "^0.15.4",
+    "tevm": "^1.0.0-next.147",
     "typescript": "^5.7.3",
     "viem": "^2.37.6",
     "wagmi": "^2.14.9"
@@ -179,7 +180,6 @@
     "prettier": "^3.4.2",
     "rollup-plugin-visualizer": "^5.12.0",
     "storybook": "^7.5.3",
-    "tevm": "^1.0.0-next.147",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.15.6",

@@ -1,9 +1,16 @@
 import * as sdk from "@across-protocol/sdk";
-import { Address, Hex, parseEventLogs } from "viem";
+import {
+  Address,
+  encodeFunctionData,
+  Hex,
+  parseEventLogs,
+  zeroAddress,
+} from "viem";
 
 import { e2eConfig, getSpokePoolAddress } from "./config";
 import { setAllowance } from "./token";
 import { SpokePoolAbi } from "./abis";
+import { handleTevmError } from "./tevm";
 
 import type { SubmittedTxReceipts } from "./deposit";
 
@@ -25,49 +32,93 @@ export async function executeFill(params: ExecuteFillParams) {
     .toAddressType(params.repaymentAddress ?? relayer.address, repaymentChainId)
     .toBytes32();
 
-  const spokeAddress = getSpokePoolAddress(destinationChainId);
+  const _spokeAddress = getSpokePoolAddress(destinationChainId);
+  const {
+    outputToken: _outputToken,
+    outputAmount,
+    exclusiveRelayer: _exclusiveRelayer,
+    depositor: _depositor,
+    recipient: _recipient,
+    inputToken: _inputToken,
+    inputAmount,
+    depositId,
+    fillDeadline,
+    exclusivityDeadline,
+    message,
+  } = depositEvent.args;
+  const depositor = sdk.utils.toAddressType(_depositor, originChainId);
+  const recipient = sdk.utils.toAddressType(_recipient, destinationChainId);
+  const inputToken = sdk.utils.toAddressType(_inputToken, originChainId);
+  const outputToken = sdk.utils.toAddressType(_outputToken, destinationChainId);
+  const spokeAddress = sdk.utils.toAddressType(
+    _spokeAddress,
+    destinationChainId
+  );
+  const exclusiveRelayer = sdk.utils.toAddressType(
+    _exclusiveRelayer,
+    destinationChainId
+  );
+  const isExclusiveRelayer = zeroAddress !== exclusiveRelayer.toEvmAddress();
 
-  const a = depositEvent.args;
+  if (!isExclusiveRelayer) {
+    // Set bridging funds for relayer
+    await destinationClient.tevmDeal({
+      erc20: outputToken.toEvmAddress() as Address,
+      account: e2eConfig.addresses.relayer,
+      amount: outputAmount,
+    });
+    await destinationClient.tevmMine({ blockCount: 1 });
+    // Approve destination SpokePool
+    await setAllowance({
+      chainId: destinationChainId,
+      tokenAddress: outputToken.toEvmAddress() as Address,
+      account: relayer.address,
+      spender: spokeAddress.toEvmAddress() as Address,
+      amount: BigInt(outputAmount.toString()),
+      wallet: relayer,
+    });
+  }
 
-  const approveReceipt = await setAllowance({
-    chainId: destinationChainId,
-    tokenAddress: sdk.utils
-      .toAddressType(a.outputToken, destinationChainId)
-      .toNative() as Address,
-    account: relayer.address,
-    spender: sdk.utils
-      .toAddressType(spokeAddress, destinationChainId)
-      .toNative() as Address,
-    amount: BigInt(a.outputAmount.toString()),
-    wallet: relayer,
+  // Fill relay
+  const fillCallResult = await destinationClient.tevmCall({
+    from: isExclusiveRelayer
+      ? (exclusiveRelayer.toEvmAddress() as Address)
+      : relayer.address,
+    to: spokeAddress.toEvmAddress() as Address,
+    addToBlockchain: true,
+    data: encodeFunctionData({
+      abi: SpokePoolAbi,
+      functionName: "fillRelay",
+      args: [
+        {
+          depositor: depositor.toBytes32() as Hex,
+          recipient: recipient.toBytes32() as Hex,
+          exclusiveRelayer: exclusiveRelayer.toBytes32() as Hex,
+          inputToken: inputToken.toBytes32() as Hex,
+          outputToken: outputToken.toBytes32() as Hex,
+          inputAmount,
+          outputAmount,
+          originChainId: BigInt(originChainId),
+          depositId,
+          fillDeadline,
+          exclusivityDeadline,
+          message,
+        },
+        BigInt(repaymentChainId),
+        repaymentAddressBytes32 as Hex,
+      ],
+    }),
+    onAfterMessage: handleTevmError,
   });
 
-  const fillTxHash = await destinationClient.writeContract({
-    address: spokeAddress as Address,
-    abi: SpokePoolAbi,
-    functionName: "fillRelay",
-    args: [
-      {
-        depositor: a.depositor,
-        recipient: a.recipient,
-        exclusiveRelayer: a.exclusiveRelayer,
-        inputToken: a.inputToken,
-        outputToken: a.outputToken,
-        inputAmount: a.inputAmount,
-        outputAmount: a.outputAmount,
-        originChainId: BigInt(originChainId),
-        depositId: a.depositId,
-        fillDeadline: a.fillDeadline,
-        exclusivityDeadline: a.exclusivityDeadline,
-        message: a.message,
-      },
-      BigInt(repaymentChainId),
-      repaymentAddressBytes32 as Hex,
-    ],
-    account: relayer,
-  });
+  await destinationClient.tevmMine({ blockCount: 1 });
+
+  if (!fillCallResult.txHash) {
+    throw new Error("Fill call failed");
+  }
+
   const fillReceipt = await destinationClient.waitForTransactionReceipt({
-    hash: fillTxHash,
+    hash: fillCallResult.txHash,
   });
 
   const fillEvents = parseEventLogs({
@@ -80,14 +131,5 @@ export async function executeFill(params: ExecuteFillParams) {
     throw new Error("No fill event found");
   }
 
-  if (fillEvents.length > 1) {
-    throw new Error("Multiple fill events found");
-  }
-
-  return {
-    destinationChainId,
-    fillReceipt,
-    approveReceipt,
-    fillEvent: fillEvents[0],
-  };
+  return { fillReceipt, fillEvents: fillEvents[0] };
 }

@@ -1,17 +1,9 @@
-import {
-  Address,
-  Hex,
-  parseEventLogs,
-  parseGwei,
-  serializeTransaction,
-  TransactionReceipt,
-  TransactionSerializable,
-  parseAbi,
-} from "viem";
+import { Address, Hex, parseEventLogs, TransactionReceipt } from "viem";
 
 import { e2eConfig } from "./config";
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { SpokePoolAbi } from "./abis";
+import { handleTevmError } from "./tevm";
 
 export type SwapQuoteResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
@@ -31,30 +23,25 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
   for (const tx of swapQuote.approvalTxns) {
     const signer = e2eConfig.getAccount("depositor");
     const client = e2eConfig.getClient(tx.chainId);
-    await client.tevmReady();
 
-    const txHash = await client.sendTransaction({
+    const approvalCallResult = await client.tevmCall({
       to: tx.to as Address,
       data: tx.data as Hex,
-      account: signer,
-      gas: 500_000n,
+      from: signer.address,
+      addToBlockchain: true,
+      onAfterMessage: handleTevmError,
     });
-    console.log("txHash", txHash);
-    await client.mine({ blocks: 1 });
-    const receipt = await client.waitForTransactionReceipt({
-      hash: txHash,
-    });
-    console.log("receipt", receipt);
+    await client.tevmMine({ blockCount: 1 });
 
-    const test = await client.readContract({
-      address: tx.to as Address,
-      abi: parseAbi(["function allowance(address,address) returns (uint256)"]),
-      functionName: "allowance",
-      args: [signer.address, swapQuote.swapTx.to as Address],
-    });
-    console.log("test", test);
+    if (!approvalCallResult.txHash) {
+      throw new Error("Approval call failed");
+    }
 
-    receipts.push(receipt);
+    const approvalReceipt = await client.waitForTransactionReceipt({
+      hash: approvalCallResult.txHash,
+    });
+
+    receipts.push(approvalReceipt);
   }
   return receipts;
 }
@@ -69,27 +56,25 @@ export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
   const { chainId } = swapQuote.swapTx;
   const depositor = e2eConfig.getAccount("depositor");
   const client = e2eConfig.getClient(chainId);
-  await client.tevmReady();
 
-  const txHash = await client.sendTransaction({
+  const swapCallResult = await client.tevmCall({
     to: swapQuote.swapTx.to as Address,
     data: swapQuote.swapTx.data as Hex,
     value: BigInt(swapQuote.swapTx.value || 0),
-    account: depositor,
-    gas: 1_000_000n,
+    from: depositor.address,
+    onAfterMessage: handleTevmError,
+    addToBlockchain: true,
   });
-  console.log("deposit tx hash", txHash);
+  await client.tevmMine({ blockCount: 1 });
 
-  await client.tevmMine();
-  const code = await client.getCode({
-    address: swapQuote.swapTx.to as Address,
-  });
-  console.log("code", code);
+  if (!swapCallResult.txHash) {
+    throw new Error("Swap call failed");
+  }
 
   const swapReceipt = await client.waitForTransactionReceipt({
-    hash: txHash,
+    hash: swapCallResult.txHash,
   });
-  console.log("deposit receipt", swapReceipt);
+
   const depositEvents = parseEventLogs({
     eventName: "FundsDeposited",
     abi: SpokePoolAbi,

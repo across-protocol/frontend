@@ -13,14 +13,42 @@ type TradeType = "exactInput" | "exactOutput" | "minOutput";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
-const TOKEN_FUND_AMOUNT = 1_000_000n; // Unparsed amount of tokens to fund the depositor and relayer
+const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
 
 const B2B_BASE_TEST_CASE = {
-  amount: parseUnits("1", 6), // 1 USDC
+  amounts: {
+    exactInput: parseUnits("1", 6), // 1 USDC
+    exactOutput: parseUnits("1", 6), // 1 USDC
+    minOutput: parseUnits("1", 6), // 1 USDC
+  },
   inputToken: TOKEN_SYMBOLS_MAP.USDC,
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  originChainId: CHAIN_IDs.BASE,
+  destinationChainId: CHAIN_IDs.OPTIMISM,
+};
+
+const B2A_BASE_TEST_CASE = {
+  amounts: {
+    exactInput: parseUnits("1", 6), // 1 USDC
+    exactOutput: parseUnits("1", 18), // 1 OP
+    minOutput: parseUnits("1", 18), // 1 OP
+  },
+  inputToken: TOKEN_SYMBOLS_MAP.USDC,
+  outputToken: TOKEN_SYMBOLS_MAP.OP,
+  originChainId: CHAIN_IDs.BASE,
+  destinationChainId: CHAIN_IDs.OPTIMISM,
+};
+
+const A2B_BASE_TEST_CASE = {
+  amounts: {
+    exactInput: parseUnits("1", 18), // 1 OP
+    exactOutput: parseUnits("1", 6), // 1 USDC
+    minOutput: parseUnits("1", 6), // 1 USDC
+  },
+  inputToken: TOKEN_SYMBOLS_MAP.OP,
+  outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.OPTIMISM,
-  destinationChainId: CHAIN_IDs.MAINNET,
+  destinationChainId: CHAIN_IDs.BASE,
 };
 
 describe("execute response of GET /swap/approval", () => {
@@ -32,10 +60,12 @@ describe("execute response of GET /swap/approval", () => {
     originChainId: number;
     destinationChainId: number;
     depositor: string;
+    recipient: string;
   }) {
     const response = await axios.get(SWAP_API_URL, {
       params: {
         ...params,
+        includeSources: "uniswap-api",
       },
     });
     expect(response.status).toBe(200);
@@ -45,7 +75,10 @@ describe("execute response of GET /swap/approval", () => {
 
   async function runEndToEnd(
     tradeType: TradeType,
-    testCase: typeof B2B_BASE_TEST_CASE,
+    testCase:
+      | typeof B2B_BASE_TEST_CASE
+      | typeof B2A_BASE_TEST_CASE
+      | typeof A2B_BASE_TEST_CASE,
     opts?: { freshDepositorWallet?: PrivateKeyAccount }
   ) {
     const {
@@ -53,11 +86,13 @@ describe("execute response of GET /swap/approval", () => {
       destinationChainId,
       inputToken,
       outputToken,
-      amount,
+      amounts,
     } = testCase;
+    const amount = amounts[tradeType];
     const depositor = opts?.freshDepositorWallet
       ? opts.freshDepositorWallet.address
       : e2eConfig.addresses.depositor;
+    const recipient = e2eConfig.addresses.recipient;
 
     const inputTokenAddress = inputToken.addresses[originChainId] as Address;
     const outputTokenAddress = outputToken.addresses[
@@ -65,25 +100,28 @@ describe("execute response of GET /swap/approval", () => {
     ] as Address;
     const originClient = e2eConfig.getClient(originChainId);
     const destinationClient = e2eConfig.getClient(destinationChainId);
+    await originClient.tevmReady();
+    await destinationClient.tevmReady();
 
     // Set funds for depositor
-    const dealReceipt = await originClient.tevmDeal({
+    await originClient.tevmDeal({
       erc20: inputTokenAddress,
       account: depositor,
-      amount: TOKEN_FUND_AMOUNT,
+      amount: parseUnits(TOKEN_FUND_AMOUNT.toString(), inputToken.decimals),
     });
-    console.log("dealReceipt", dealReceipt);
+    await originClient.tevmMine({ blockCount: 1 });
 
+    // Fetch swap quote
     const swapQuote = await fetchSwapQuote({
-      amount: testCase.amount.toString(),
+      amount: amount.toString(),
       tradeType,
       inputToken: inputTokenAddress,
       outputToken: outputTokenAddress,
       originChainId,
       destinationChainId,
       depositor,
+      recipient,
     });
-    console.log("swapQuote", swapQuote);
 
     // Balances BEFORE swap tx execution
     const inputTokenBalanceBefore = await getBalance(
@@ -94,42 +132,18 @@ describe("execute response of GET /swap/approval", () => {
     const outputTokenBalanceBefore = await getBalance(
       destinationChainId,
       outputTokenAddress,
-      depositor
+      recipient
     );
-    console.log("inputTokenBalanceBefore", inputTokenBalanceBefore);
-    console.log("outputTokenBalanceBefore", outputTokenBalanceBefore);
 
     // Execute swap tx
     const { approvalReceipts, swapReceipt, depositEvent } =
       await executeApprovalAndDeposit(swapQuote);
-    console.log("depositEvent", depositEvent);
-    console.log("swapReceipt", swapReceipt);
-    console.log("approvalReceipts", approvalReceipts);
-
-    // If `exclusiveRelayer` is set in the returned swap quote, we need to wait until the
-    // exclusivity period has passed before our mock relayer can fill the deposit.
-    const waitTimeBuffer = 60;
-    const waitTimeSeconds =
-      Math.max(swapQuote.expectedFillTime, 3) + waitTimeBuffer;
-    await destinationClient.setNextBlockTimestamp({
-      timestamp: BigInt(Math.floor(Date.now() / 1000) + waitTimeSeconds),
-    });
-    await destinationClient.mine({ blocks: 1 });
-
-    // Set bridging funds for relayer
-    await destinationClient.tevmDeal({
-      erc20: swapQuote.steps.bridge.tokenOut.address as Address,
-      account: e2eConfig.addresses.relayer,
-      amount: TOKEN_FUND_AMOUNT,
-    });
 
     // Fill the relay
-    const { fillReceipt, fillEvent } = await executeFill({
+    await executeFill({
       depositEvent,
       originChainId,
     });
-    console.log("fillEvent", fillEvent);
-    console.log("fillReceipt", fillReceipt);
 
     // Balances AFTER swap and fill executions
     const inputTokenBalanceAfter = await getBalance(
@@ -140,16 +154,28 @@ describe("execute response of GET /swap/approval", () => {
     const outputTokenBalanceAfter = await getBalance(
       destinationChainId,
       outputTokenAddress,
-      depositor
+      recipient
     );
 
     // Balance diffs
     const inputTokenBalanceDiff =
       inputTokenBalanceBefore - inputTokenBalanceAfter;
-    inputTokenBalanceAfter;
     const outputTokenBalanceDiff =
       outputTokenBalanceAfter - outputTokenBalanceBefore;
-    outputTokenBalanceBefore;
+
+    console.log(tradeType, {
+      inputTokenBalanceBefore,
+      inputTokenBalanceAfter,
+      inputTokenBalanceDiff,
+      outputTokenBalanceBefore,
+      outputTokenBalanceAfter,
+      outputTokenBalanceDiff,
+      amount,
+      quotedInputAmount: swapQuote.inputAmount,
+      quotedMaxInputAmount: swapQuote.maxInputAmount,
+      quotedOutputAmount: swapQuote.expectedOutputAmount,
+      quotedMinOutputAmount: swapQuote.minOutputAmount,
+    });
 
     // Sanity checks based on the trade type
     if (tradeType === "exactInput") {
@@ -158,14 +184,20 @@ describe("execute response of GET /swap/approval", () => {
         outputTokenBalanceDiff >= BigInt(swapQuote.minOutputAmount.toString())
       ).toBe(true);
     } else if (tradeType === "exactOutput") {
-      expect(outputTokenBalanceDiff === amount).toBe(true);
+      expect(outputTokenBalanceDiff).toEqual(amount);
       expect(
-        inputTokenBalanceDiff === BigInt(swapQuote.inputAmount.toString())
+        inputTokenBalanceDiff >= BigInt(swapQuote.inputAmount.toString())
+      ).toBe(true);
+      expect(
+        inputTokenBalanceDiff <= BigInt(swapQuote.maxInputAmount.toString())
       ).toBe(true);
     } else if (tradeType === "minOutput") {
       expect(outputTokenBalanceDiff >= amount).toBe(true);
       expect(
-        inputTokenBalanceDiff === BigInt(swapQuote.inputAmount.toString())
+        inputTokenBalanceDiff >= BigInt(swapQuote.inputAmount.toString())
+      ).toBe(true);
+      expect(
+        inputTokenBalanceDiff <= BigInt(swapQuote.maxInputAmount.toString())
       ).toBe(true);
     }
 
@@ -173,19 +205,17 @@ describe("execute response of GET /swap/approval", () => {
       approvalReceipts,
       swapReceipt,
       depositEvent,
-      fillReceipt,
-      fillEvent,
     };
   }
 
-  describe("B2B - existing configured depositor", () => {
+  describe("B2B", () => {
     describe("exactInput", () => {
       it("should fetch, execute deposit, and fill the relay", async () => {
         await runEndToEnd("exactInput", B2B_BASE_TEST_CASE);
       }, 180_000);
     });
 
-    describe.only("minOutput", () => {
+    describe("minOutput", () => {
       it("should fetch, execute deposit, and fill the relay", async () => {
         await runEndToEnd("minOutput", B2B_BASE_TEST_CASE);
       }, 180_000);
@@ -194,6 +224,46 @@ describe("execute response of GET /swap/approval", () => {
     describe("exactOutput", () => {
       it("should fetch, execute deposit, and fill the relay", async () => {
         await runEndToEnd("exactOutput", B2B_BASE_TEST_CASE);
+      }, 180_000);
+    });
+  });
+
+  describe("B2A", () => {
+    describe("exactInput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactInput", B2A_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("exactOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactOutput", B2A_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("minOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("minOutput", B2A_BASE_TEST_CASE);
+      }, 180_000);
+    });
+  });
+
+  describe("A2B", () => {
+    describe("exactInput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactInput", A2B_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("exactOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactOutput", A2B_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("minOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("minOutput", A2B_BASE_TEST_CASE);
       }, 180_000);
     });
   });
