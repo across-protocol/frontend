@@ -58,32 +58,32 @@ export async function executeFill(params: ExecuteFillParams) {
     _exclusiveRelayer,
     destinationChainId
   );
-  const isExclusiveRelayer = zeroAddress !== exclusiveRelayer.toEvmAddress();
+  const relayerAddressToUse =
+    zeroAddress === exclusiveRelayer.toEvmAddress()
+      ? (relayer.address as Address)
+      : (exclusiveRelayer.toEvmAddress() as Address);
 
-  if (!isExclusiveRelayer) {
-    // Set bridging funds for relayer
-    await destinationClient.tevmDeal({
-      erc20: outputToken.toEvmAddress() as Address,
-      account: e2eConfig.addresses.relayer,
-      amount: outputAmount,
-    });
-    await destinationClient.tevmMine({ blockCount: 1 });
-    // Approve destination SpokePool
-    await setAllowance({
-      chainId: destinationChainId,
-      tokenAddress: outputToken.toEvmAddress() as Address,
-      account: relayer.address,
-      spender: spokeAddress.toEvmAddress() as Address,
-      amount: BigInt(outputAmount.toString()),
-      wallet: relayer,
-    });
-  }
+  // Set bridging funds for relayer
+  await destinationClient.tevmDeal({
+    erc20: outputToken.toEvmAddress() as Address,
+    account: relayerAddressToUse,
+    amount: outputAmount,
+  });
+  await destinationClient.tevmMine({ blockCount: 1 });
+
+  // Approve destination SpokePool
+  await setAllowance({
+    chainId: destinationChainId,
+    tokenAddress: outputToken.toEvmAddress() as Address,
+    account: relayerAddressToUse,
+    spender: spokeAddress.toEvmAddress() as Address,
+    amount: BigInt(outputAmount.toString()),
+    from: relayerAddressToUse,
+  });
 
   // Fill relay
   const fillCallResult = await destinationClient.tevmCall({
-    from: isExclusiveRelayer
-      ? (exclusiveRelayer.toEvmAddress() as Address)
-      : relayer.address,
+    from: relayerAddressToUse,
     to: spokeAddress.toEvmAddress() as Address,
     addToBlockchain: true,
     data: encodeFunctionData({

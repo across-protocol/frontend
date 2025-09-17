@@ -1,10 +1,4 @@
-import {
-  Address,
-  parseAbi,
-  zeroAddress,
-  PrivateKeyAccount,
-  encodeFunctionData,
-} from "viem";
+import { Address, parseAbi, zeroAddress, encodeFunctionData } from "viem";
 
 import { e2eConfig } from "./config";
 import { handleTevmError } from "./tevm";
@@ -35,12 +29,12 @@ export async function setAllowance(params: {
   account: Address;
   spender: Address;
   amount: bigint;
-  wallet: PrivateKeyAccount;
+  from: Address;
 }) {
-  const { chainId, tokenAddress, spender, amount, wallet } = params;
+  const { chainId, tokenAddress, spender, amount, from } = params;
   const client = e2eConfig.getClient(chainId);
   await client.tevmCall({
-    from: wallet.address,
+    from,
     to: tokenAddress,
     data: encodeFunctionData({
       abi: parseAbi(["function approve(address,uint256) returns (bool)"]),
