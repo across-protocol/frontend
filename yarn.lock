@@ -13369,9 +13369,9 @@ cli-spinners@^2.2.0, cli-spinners@^2.5.0, cli-spinners@^2.7.0:
   integrity sha512-ywqV+5MmyL4E7ybXgKys4DugZbX0FC6LnwrhjuykIjnK9k8OQacQ7axGKnjDXWNhns0xot3bZI5h55H8yo9cJg==
 
 cli-spinners@^3.0.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-3.2.0.tgz#ad2532abb0aaed479ff0020aaa910e067f8aa675"
-  integrity sha512-pXftdQloMZzjCr3pCTIRniDcys6dDzgpgVhAHHk6TKBDbRuP1MkuetTF5KSv4YUutbOPa7+7ZrAJ2kVtbMqyXA==
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-3.2.1.tgz#2fe4f7852cd9a421f1bc379d6903173428c8457c"
+  integrity sha512-Xh+cRh7dzk9n7gYE+M1Lusy3yg5ADy9m6zOHqmcu9kSkWpo7ySWVUS3dXleR3konJOEOdHzsKjWkGed6g2eJuA==
 
 cli-table3@^0.5.0:
   version "0.5.1"
