@@ -123,8 +123,8 @@ const _defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("1").toString(),
   },
   VLR: {
-    lowerBound: ethers.utils.parseUnits("0.0000000000001").toString(),
-    upperBound: ethers.utils.parseUnits("0.00000000000011").toString(),
+    lowerBound: ethers.utils.parseUnits("0").toString(),
+    upperBound: ethers.utils.parseUnits("0").toString(),
     cutoff: ethers.utils.parseUnits("1000000").toString(),
   },
   WLD: {
