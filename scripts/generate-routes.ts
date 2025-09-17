@@ -31,6 +31,8 @@ export const nonEthChains = [
   CHAIN_IDs.LENS_SEPOLIA,
   CHAIN_IDs.SOLANA_DEVNET,
   CHAIN_IDs.SOLANA,
+  CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.HYPEREVM_TESTNET,
 ];
 
 export function isNonEthChain(chainId: number): boolean {

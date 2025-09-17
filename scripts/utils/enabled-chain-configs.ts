@@ -22,6 +22,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.LENS,
   chainConfigs.BSC,
   chainConfigs.SOLANA,
+  chainConfigs.HYPEREVM,
 ];
 
 export const enabledSepoliaChainConfigs = [

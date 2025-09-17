@@ -1,20 +1,15 @@
 name: UI E2E Tests
 
 on:
-  repository_dispatch:
-    types:
-      - "vercel.deployment.success"
+  deployment_status:
 
 jobs:
   e2e-tests:
     if: |
-      github.event_name == 'repository_dispatch' &&
-      github.event.client_payload.project.name == 'app-frontend-v3'
+      github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.git.sha }}
 
       - uses: ./.github/actions/setup
       # For now, we only need Chromium.
@@ -24,12 +19,12 @@ jobs:
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn synpress ./e2e/wallet-setup
         env:
-          E2E_DAPP_URL: ${{ github.event.client_payload.url }}
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
       - name: Run tests
         # https://synpress.io/docs/guides/ci#ci
         run: xvfb-run yarn test:e2e:headful
         env:
-          E2E_DAPP_URL: ${{ github.event.client_payload.url }}
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
       - name: Archive Playwright report
         uses: actions/upload-artifact@v4
         if: success() || failure()

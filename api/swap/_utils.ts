@@ -109,10 +109,11 @@ export async function handleBaseSwapQueryParams(
   const isInputNative = _inputTokenAddress === constants.AddressZero;
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+  const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
 
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
-    : utils.getAddress(_inputTokenAddress);
+    : sdk.utils.toAddressType(_inputTokenAddress, originChainId).toNative();
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
     : sdk.utils
@@ -220,6 +221,7 @@ export async function handleBaseSwapQueryParams(
     strictTradeType,
     skipChecks,
     isDestinationSvm,
+    isOriginSvm,
   };
 }
 
@@ -822,15 +824,22 @@ export async function buildBaseSwapResponseJson(params: {
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   destinationSwapQuote?: SwapQuote;
   refundOnOrigin: boolean;
-  approvalSwapTx?: {
-    from: string;
-    to: string;
-    data: string;
-    value?: BigNumber;
-    gas?: BigNumber;
-    maxFeePerGas?: BigNumber;
-    maxPriorityFeePerGas?: BigNumber;
-  };
+  approvalSwapTx?:
+    | {
+        ecosystem: "evm";
+        from: string;
+        to: string;
+        data: string;
+        value?: BigNumber;
+        gas?: BigNumber;
+        maxFeePerGas?: BigNumber;
+        maxPriorityFeePerGas?: BigNumber;
+      }
+    | {
+        ecosystem: "svm";
+        data: string;
+        to: string;
+      };
   permitSwapTx?: any; // TODO: Add type
   appFeePercent?: number;
   appFee?: AppFee;
@@ -944,8 +953,14 @@ export async function buildBaseSwapResponseJson(params: {
       destinationSwapQuote: params.destinationSwapQuote,
       appFeePercent: params.appFeePercent,
       appFee: params.appFee,
-      originTxGas: params.approvalSwapTx?.gas,
-      originTxGasPrice: params.approvalSwapTx?.maxFeePerGas,
+      originTxGas:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.gas
+          : undefined,
+      originTxGasPrice:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.maxFeePerGas
+          : undefined,
       inputTokenPriceUsd: params.inputTokenPriceUsd,
       outputTokenPriceUsd: params.outputTokenPriceUsd,
       originNativePriceUsd: params.originNativePriceUsd,
@@ -965,20 +980,35 @@ export async function buildBaseSwapResponseJson(params: {
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
-    swapTx: params.approvalSwapTx
-      ? {
-          simulationSuccess: !!params.approvalSwapTx.gas,
-          chainId: params.originChainId,
-          to: params.approvalSwapTx.to,
-          data: params.approvalSwapTx.data,
-          value: params.approvalSwapTx.value,
-          gas: params.approvalSwapTx.gas,
-          maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
-          maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
-        }
-      : params.permitSwapTx
-        ? params.permitSwapTx.swapTx
-        : undefined,
+    swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
   });
+}
+
+export function getSwapTx(
+  params: Parameters<typeof buildBaseSwapResponseJson>[0]
+) {
+  if (params.approvalSwapTx?.ecosystem === "evm") {
+    return {
+      simulationSuccess: !!params.approvalSwapTx.gas,
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+      value: params.approvalSwapTx.value,
+      gas: params.approvalSwapTx.gas,
+      maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
+      maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
+    };
+  }
+
+  if (params.approvalSwapTx?.ecosystem === "svm") {
+    return {
+      simulationSuccess: false, // TODO: Figure out if we should simulate the tx on SVM
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+    };
+  }
+
+  return params.permitSwapTx?.swapTx;
 }

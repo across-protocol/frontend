@@ -84,6 +84,7 @@ import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
+import { getSvmTokenInfo } from "./_svm-tokens";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -2523,10 +2524,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
   }
 > {
   try {
-    if (!ethers.utils.isAddress(address)) {
+    if (!(ethers.utils.isAddress(address) || isSvmAddress(address))) {
       throw new InvalidParamError({
         param: "address",
-        message: '"Address" must be a valid ethereum address',
+        message: '"Address" must be a valid EVM or SVM address',
       });
     }
 
@@ -2537,7 +2538,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // ERC20 resolved statically
+    // Resolve token info statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
         token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
@@ -2552,6 +2553,10 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
         name: token.name,
         chainId,
       };
+    }
+
+    if (sdk.utils.chainIsSvm(chainId)) {
+      return await getSvmTokenInfo(address, chainId);
     }
 
     // ERC20 resolved dynamically
@@ -2684,4 +2689,28 @@ export function addTimeoutToPromise<T>(
     }, delay);
   });
   return Promise.race([promise, timeout]);
+}
+
+export type PooledToken = {
+  lpToken: string;
+  isEnabled: boolean;
+  lastLpFeeUpdate: BigNumber;
+  utilizedReserves: BigNumber;
+  liquidReserves: BigNumber;
+  undistributedLpFees: BigNumber;
+};
+
+// This logic is directly ported from the HubPool smart contract function by the same name.
+export function computeUtilizationPostRelay(
+  pooledToken: PooledToken,
+  amount: BigNumber
+) {
+  const flooredUtilizedReserves = pooledToken.utilizedReserves.gt(0)
+    ? pooledToken.utilizedReserves
+    : BigNumber.from(0);
+  const numerator = amount.add(flooredUtilizedReserves);
+  const denominator = pooledToken.liquidReserves.add(flooredUtilizedReserves);
+
+  if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
+  return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
 }
