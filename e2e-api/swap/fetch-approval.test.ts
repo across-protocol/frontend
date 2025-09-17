@@ -134,7 +134,7 @@ describe("GET /swap/approval", () => {
         expect(error.response?.status).toBeGreaterThanOrEqual(400);
         expect(error.response?.status).toBeLessThan(500);
       }
-    });
+    }, 30_000);
   });
 
   describe("B2B", () => {

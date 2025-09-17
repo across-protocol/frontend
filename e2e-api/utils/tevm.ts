@@ -1,6 +1,7 @@
+import { EVMResult } from "@ethereumjs/evm";
 import { bytesToString } from "viem";
 
-export function handleTevmError(result: any, next: any) {
+export function handleTevmError(result: EVMResult, next: any) {
   if (result.execResult.exceptionError) {
     const error = result.execResult.exceptionError;
 
@@ -11,7 +12,8 @@ export function handleTevmError(result: any, next: any) {
       case "revert":
         console.error(
           "Transaction reverted:",
-          bytesToString(result.execResult.returnValue)
+          bytesToString(result.execResult.returnValue),
+          result.execResult.returnValue.toString()
         );
         break;
       case "invalid opcode":
