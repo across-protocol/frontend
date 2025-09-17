@@ -15,7 +15,6 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
-  chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,

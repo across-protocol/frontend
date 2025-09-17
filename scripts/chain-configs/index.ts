@@ -1,4 +1,3 @@
-export { default as ALEPH_ZERO } from "./aleph-zero";
 export { default as ARBITRUM } from "./arbitrum";
 export { default as ARBITRUM_SEPOLIA } from "./arbitrum-sepolia";
 export { default as BASE } from "./base";
