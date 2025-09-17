@@ -819,10 +819,6 @@ export function getOriginSwapEntryPoints(
 ): OriginEntryPoints {
   if (utils.chainIsSvm(chainId)) {
     return {
-      originSwapInitialRecipient: {
-        name: "SvmSpoke",
-        address: getSpokePoolAddress(chainId),
-      },
       swapAndBridge: {
         name: "SvmSpoke",
         address: getSpokePoolAddress(chainId),

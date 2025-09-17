@@ -84,7 +84,7 @@ export function getJupiterStrategy(
         ...sourcesParams,
         restrictIntermediateTokens: true,
         // @dev: We can use the following parameters if we face any limitations when building the transaction
-        // onlyDirectRoutes: true,
+        onlyDirectRoutes: true,
         // maxAccounts: 64,
       };
 
