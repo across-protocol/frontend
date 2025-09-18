@@ -375,25 +375,25 @@ export const LENS_CASES = [
 
 export const SOLANA_CASES = [
   // // B2B - exact input
-  // {
-  //   labels: ["SOLANA", "A2B", "EXACT_INPUT", "USDC - USDC"],
-  //   params: {
-  //     amount: ethers.utils.parseUnits("1", 6).toString(),
-  //     tradeType: "exactInput",
-  //     inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA],
-  //     originChainId: CHAIN_IDs.SOLANA,
-  //     outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-  //     destinationChainId,
-  //     depositor: svmDepositor,
-  //     recipient: evmDepositor,
-  //     refundAddress: evmDepositor
-  //   },
-  // },
+  {
+    labels: ["SOLANA", "A2B", "EXACT_INPUT", "USDC - USDC"],
+    params: {
+      amount: ethers.utils.parseUnits("1", 6).toString(),
+      tradeType: "exactInput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA],
+      originChainId: CHAIN_IDs.SOLANA,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
+      depositor: svmDepositor,
+      recipient: evmDepositor,
+      refundAddress: evmDepositor,
+    },
+  },
   // A2B - exact input
   {
     labels: ["SOLANA", "A2B", "EXACT_INPUT", "PENGU - USDC"],
     params: {
-      amount: ethers.utils.parseUnits("30", 6).toString(),
+      amount: ethers.utils.parseUnits("10", 6).toString(),
       tradeType: "exactInput",
       inputToken: anyDestinationOutputTokens[CHAIN_IDs.SOLANA],
       originChainId: CHAIN_IDs.SOLANA,
