@@ -22,7 +22,7 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
     ],
-    [CHAIN_IDs.SOLANA]: [getJupiterStrategy(true)],
+    [CHAIN_IDs.SOLANA]: [getJupiterStrategy()],
   },
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {

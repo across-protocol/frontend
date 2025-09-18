@@ -7,9 +7,9 @@ import {
   getBase64EncodedWireTransaction,
   pipe,
   appendTransactionMessageInstruction,
-  AccountRole,
+  fetchAddressesForLookupTables,
+  AddressesByLookupTableAddress,
 } from "@solana/kit";
-import type { Address } from "@solana/kit";
 import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
@@ -28,86 +28,10 @@ import {
   extractDepositDataStruct,
   extractSwapAndDepositDataStruct,
 } from "../../_dexes/utils";
+import { appendJupiterIxs } from "../../_dexes/jupiter/utils/transaction-builder";
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
 import { getSVMRpc } from "../../_providers";
 import { getFillDeadlineBuffer } from "../../_fill-deadline";
-
-// Jupiter API types
-interface JupiterInstructionAccount {
-  pubkey: string;
-  isSigner: boolean;
-  isWritable: boolean;
-}
-
-interface JupiterInstruction {
-  programId: string;
-  accounts: JupiterInstructionAccount[];
-  data: string;
-}
-
-interface JupiterSwapInstructionsResponse {
-  tokenLedgerInstruction?: JupiterInstruction;
-  computeBudgetInstructions: JupiterInstruction[];
-  setupInstructions: JupiterInstruction[];
-  swapInstruction: JupiterInstruction;
-  cleanupInstruction?: JupiterInstruction;
-  addressLookupTableAddresses: string[];
-  prioritizationFeeLamports?: number;
-  computeUnitLimit?: number;
-}
-
-// Helper function to fetch address lookup table accounts
-async function getAddressLookupTableAccounts(
-  rpcClient: any,
-  addresses: string[]
-) {
-  if (addresses.length === 0) return [];
-
-  try {
-    const lookupTableAccountsData = await Promise.all(
-      addresses.map(async (addr) => {
-        const response = await rpcClient.getAccountInfo(address(addr)).send();
-        if (response.value?.data) {
-          return {
-            address: address(addr),
-            data: response.value.data,
-          };
-        }
-        return null;
-      })
-    );
-
-    return lookupTableAccountsData
-      .filter((account) => account !== null)
-      .map((account) => ({
-        address: account!.address,
-        // The actual lookup table parsing would be done by the Solana SDK
-        // For now we just pass the raw data and let the compression function handle it
-        addresses: [] as Address[], // This gets populated by the decompile function
-      }));
-  } catch (error) {
-    console.warn("Failed to fetch address lookup table accounts:", error);
-    return [];
-  }
-}
-
-// Helper function to deserialize Jupiter instruction for @solana/kit
-function deserializeJupiterInstruction(instruction: JupiterInstruction) {
-  return {
-    programAddress: address(instruction.programId),
-    accounts: instruction.accounts.map((acc) => ({
-      address: address(acc.pubkey),
-      role: acc.isWritable
-        ? acc.isSigner
-          ? AccountRole.WRITABLE_SIGNER
-          : AccountRole.WRITABLE
-        : acc.isSigner
-          ? AccountRole.READONLY_SIGNER
-          : AccountRole.READONLY,
-    })),
-    data: new Uint8Array(Buffer.from(instruction.data, "base64")),
-  };
-}
 
 export async function buildCrossSwapTxForAllowanceHolder(
   crossSwapQuotes: CrossSwapQuotes,
@@ -363,40 +287,9 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const destinationChainId = crossSwap.outputToken.chainId;
   const rpcClient = getSVMRpc(originChainId);
 
-  // Parse and validate Jupiter instructions for A2B flows (if present)
-  let jupiterInstructionsResponse: JupiterSwapInstructionsResponse | null =
-    null;
-
-  if (originSwapQuote) {
-    try {
-      const rawData = originSwapQuote.swapTxns[0].data;
-      jupiterInstructionsResponse = JSON.parse(
-        rawData
-      ) as JupiterSwapInstructionsResponse;
-
-      // Validate required fields
-      if (!jupiterInstructionsResponse.swapInstruction) {
-        throw new Error("Missing required swapInstruction in Jupiter response");
-      }
-      if (
-        !Array.isArray(jupiterInstructionsResponse.computeBudgetInstructions)
-      ) {
-        jupiterInstructionsResponse.computeBudgetInstructions = [];
-      }
-      if (!Array.isArray(jupiterInstructionsResponse.setupInstructions)) {
-        jupiterInstructionsResponse.setupInstructions = [];
-      }
-      if (
-        !Array.isArray(jupiterInstructionsResponse.addressLookupTableAddresses)
-      ) {
-        jupiterInstructionsResponse.addressLookupTableAddresses = [];
-      }
-    } catch (error) {
-      throw new Error(
-        `Failed to parse Jupiter swap instructions: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
-  }
+  // Get Jupiter instructions for A2B flows (if present)
+  const jupiterIxs = originSwapQuote?.swapTxns[0].instructions;
+  const jupiterLookupTables = originSwapQuote?.swapTxns[0].lookupTables;
 
   // Build deposit instruction parameters
   const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
@@ -426,10 +319,10 @@ async function _buildDepositTxForAllowanceHolderSvm(
       .toBase58()
   );
 
-  // For A2B: use Jupiter swap expected output, for B2B: use bridge input amount
+  // For A2B: use swap expected output, for B2B: use bridge input amount
   const inputAmount = BigInt(
     originSwapQuote
-      ? originSwapQuote.expectedAmountOut.toString() // Fixed: use expectedAmountOut instead of minAmountOut
+      ? originSwapQuote.expectedAmountOut.toString()
       : crossSwapQuotes.bridgeQuote.inputAmount.toString()
   );
 
@@ -496,10 +389,10 @@ async function _buildDepositTxForAllowanceHolderSvm(
     inputAmount: inputAmount.toString(),
     tokenDecimals,
     depositorTokenAccount: depositorTokenAccount.toString(),
-    hasSwap: !!jupiterInstructionsResponse,
+    hasSwap: !!jupiterIxs,
   });
 
-  const depositInstruction = await sdk.arch.svm.createDepositInstruction(
+  const depositIx = await sdk.arch.svm.createDepositInstruction(
     noopSigner,
     rpcClient,
     {
@@ -531,119 +424,33 @@ async function _buildDepositTxForAllowanceHolderSvm(
     assertValidIntegratorId(integratorId);
   }
 
-  // Build transaction using @solana/kit patterns
-  // let tx = await createDefaultSvmTransaction(rpcClient, noopSigner);
   let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
 
-  // Fetch address lookup tables if present
-  let addressLookupTables: any[] = [];
-  if (
-    jupiterInstructionsResponse?.addressLookupTableAddresses &&
-    jupiterInstructionsResponse.addressLookupTableAddresses.length > 0
-  ) {
-    console.log(
-      "Fetching address lookup tables:",
-      jupiterInstructionsResponse.addressLookupTableAddresses.length
-    );
-    addressLookupTables = await getAddressLookupTableAccounts(
-      rpcClient,
-      jupiterInstructionsResponse.addressLookupTableAddresses
-    );
-    console.log("Fetched address lookup tables:", addressLookupTables.length);
-  }
-
-  // Build instructions in the correct order using pipe
   tx = pipe(
     tx,
-    // Add compute budget instructions first
-    (tx) => {
-      if (jupiterInstructionsResponse?.computeBudgetInstructions) {
-        return jupiterInstructionsResponse.computeBudgetInstructions.reduce(
-          (acc, instruction) =>
-            appendTransactionMessageInstruction(
-              deserializeJupiterInstruction(instruction),
-              acc
-            ),
-          tx
-        );
-      }
-      return tx;
-    },
-
-    // Add setup instructions (token account creation, etc.)
-    (tx) => {
-      if (jupiterInstructionsResponse?.setupInstructions) {
-        return jupiterInstructionsResponse.setupInstructions.reduce(
-          (acc, instruction) =>
-            appendTransactionMessageInstruction(
-              deserializeJupiterInstruction(instruction),
-              acc
-            ),
-          tx
-        );
-      }
-      return tx;
-    },
-
-    // Add token ledger instruction if present
-    (tx) => {
-      if (jupiterInstructionsResponse?.tokenLedgerInstruction) {
-        return appendTransactionMessageInstruction(
-          deserializeJupiterInstruction(
-            jupiterInstructionsResponse.tokenLedgerInstruction
-          ),
-          tx
-        );
-      }
-      return tx;
-    },
-
-    // Add the main swap instruction
-    (tx) => {
-      if (jupiterInstructionsResponse?.swapInstruction) {
-        return appendTransactionMessageInstruction(
-          deserializeJupiterInstruction(
-            jupiterInstructionsResponse.swapInstruction
-          ),
-          tx
-        );
-      }
-      return tx;
-    },
-
-    // Add cleanup instruction if present
-    (tx) => {
-      if (jupiterInstructionsResponse?.cleanupInstruction) {
-        return appendTransactionMessageInstruction(
-          deserializeJupiterInstruction(
-            jupiterInstructionsResponse.cleanupInstruction
-          ),
-          tx
-        );
-      }
-      return tx;
-    },
-
-    // Add all deposit instructions (there might be multiple)
-    (tx) => {
-      return depositInstruction.instructions.reduce(
+    // Add Jupiter swap instructions if present
+    (tx) => (jupiterIxs ? appendJupiterIxs(tx, jupiterIxs) : tx),
+    // Add all deposit instructions
+    (tx) =>
+      depositIx.instructions.reduce(
         (acc, instruction) =>
           appendTransactionMessageInstruction(instruction, acc),
         tx
-      );
-    },
-
+      ),
     // Add integrator memo if provided
-    (tx) => {
-      if (integratorId) {
-        return appendTransactionMessageInstruction(
-          getAddMemoInstruction({ memo: integratorId }),
-          tx
-        );
-      }
-      return tx;
-    }
+    (tx) =>
+      integratorId
+        ? appendTransactionMessageInstruction(
+            getAddMemoInstruction({ memo: integratorId }),
+            tx
+          )
+        : tx
   );
+
+  // Fetch address lookup tables if present to reduce txn size
+  const addressesByLookup: AddressesByLookupTableAddress = jupiterLookupTables
+    ? await fetchAddressesForLookupTables(jupiterLookupTables, rpcClient)
+    : {};
 
   // Debug transaction before compilation
   console.log("Transaction before compilation:", {
@@ -662,19 +469,27 @@ async function _buildDepositTxForAllowanceHolderSvm(
 
   // Compile transaction with address lookup table compression
   let compiledTx;
-  if (addressLookupTables.length > 0) {
+  const hasLookupTables = Object.keys(addressesByLookup).length > 0;
+
+  if (hasLookupTables) {
     console.log("Compressing transaction using address lookup tables");
     try {
-      // Use the compression function directly on the transaction message
       const compressedMessage =
         compressTransactionMessageUsingAddressLookupTables(
           tx,
-          addressLookupTables
+          addressesByLookup
         );
-
-      // Compile the compressed message
       compiledTx = compileTransaction(compressedMessage);
       console.log("Successfully compressed transaction with ALTs");
+
+      // Log compression savings
+      const uncompressedTx = compileTransaction(tx);
+      const uncompressedSize =
+        getBase64EncodedWireTransaction(uncompressedTx).length;
+      const compressedSize = getBase64EncodedWireTransaction(compiledTx).length;
+      console.log(
+        `Transaction size: ${compressedSize} bytes (saved ${uncompressedSize - compressedSize} bytes)`
+      );
     } catch (error) {
       console.warn(
         "Failed to compress transaction with ALTs, falling back to normal compilation:",

@@ -5,6 +5,8 @@ import { getSuggestedFees } from "../_utils";
 import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
+import type { JupiterSwapIxs } from "./jupiter/utils/api";
+import { Address } from "@solana/kit";
 
 export type { AmountType, CrossSwapType };
 
@@ -78,8 +80,11 @@ export type SwapQuote = {
   slippageTolerance: number;
   swapTxns: {
     to: string;
-    data: string;
+    data: string; // EVM calldata
     value: string;
+    // Optional SVM-specific fields
+    instructions?: JupiterSwapIxs;
+    lookupTables?: Address[];
   }[];
   tokenIn: Token;
   tokenOut: Token;
@@ -192,7 +197,7 @@ export type OriginEntryPointContractName =
   | "SvmSpoke";
 
 export type OriginEntryPoints = {
-  originSwapInitialRecipient?: {
+  originSwapInitialRecipient: {
     name: "UniversalSwapAndBridge" | "SwapProxy" | "SvmSpoke";
     address: string;
   };

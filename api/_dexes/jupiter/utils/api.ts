@@ -2,6 +2,30 @@ import axios from "axios";
 
 const JUPITER_BASE_URL = "https://lite-api.jup.ag/swap/v1";
 
+// Jupiter API types
+export type JupiterInstructionAccount = {
+  pubkey: string;
+  isSigner: boolean;
+  isWritable: boolean;
+};
+
+export type JupiterIx = {
+  programId: string;
+  accounts: JupiterInstructionAccount[];
+  data: string;
+};
+
+export type JupiterSwapIxs = {
+  tokenLedgerInstruction?: JupiterIx;
+  computeBudgetInstructions: JupiterIx[];
+  setupInstructions: JupiterIx[];
+  swapInstruction: JupiterIx;
+  cleanupInstruction?: JupiterIx;
+  addressLookupTableAddresses: string[];
+  prioritizationFeeLamports?: number;
+  computeUnitLimit?: number;
+};
+
 type SwapOptions = {
   dynamicComputeUnitLimit?: boolean;
   dynamicSlippage?: boolean;
@@ -35,7 +59,7 @@ export async function getJupiterSwapInstructions(
   quoteResponse: any,
   userPublicKey: string,
   options: SwapOptions = {}
-) {
+): Promise<JupiterSwapIxs> {
   const response = await axios.post(`${JUPITER_BASE_URL}/swap-instructions`, {
     quoteResponse,
     userPublicKey,
