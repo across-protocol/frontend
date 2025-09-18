@@ -139,7 +139,7 @@ export async function handleBaseSwapQueryParams(
     if (!recipient) {
       throw new InvalidParamError({
         param: "recipient",
-        message: "Recipient is required for SVM destinations or origins",
+        message: "Recipient is required for routes involving an SVM chain",
       });
     }
   }
