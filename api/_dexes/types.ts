@@ -5,7 +5,6 @@ import { getSuggestedFees } from "../_utils";
 import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
-import type { JupiterSwapIxs } from "./jupiter/utils/api";
 import { Address } from "@solana/kit";
 
 export type { AmountType, CrossSwapType };
@@ -83,7 +82,7 @@ export type SwapQuote = {
     data: string; // EVM calldata
     value: string;
     // Optional SVM-specific fields
-    instructions?: JupiterSwapIxs;
+    instructions?: Record<string, unknown>;
     lookupTables?: Address[];
   }[];
   tokenIn: Token;
