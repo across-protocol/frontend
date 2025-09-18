@@ -22,8 +22,7 @@ import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
-import useSound from "use-sound";
-import { useEffect } from "react";
+import { useSoundEffect } from "hooks/useSoundEffect";
 
 type Props = {
   depositTxHash: string;
@@ -66,22 +65,24 @@ export function DepositStatusUpperCard({
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
 
-  const [playWow] = useSound("/sounds/wow.mp3", { volume: 0.5 });
-  const [playTeleport] = useSound("/sounds/teleport.mp3", { volume: 0.5 });
-
-  // play sound effects on fill
-  useEffect(() => {
-    // if fill takes 5 seconds or less
-    if (status === "filled" && isDefined(fillTxElapsedSeconds)) {
-      if (fillTxElapsedSeconds <= 5) {
-        // fast
-        playWow();
-      } else {
-        // normal
-        playTeleport();
-      }
-    }
-  }, [status, fillTxElapsedSeconds]);
+  // fast
+  useSoundEffect(
+    "/sounds/wow.mp3",
+    Boolean(
+      status === "filled" &&
+        isDefined(fillTxElapsedSeconds) &&
+        fillTxElapsedSeconds <= 5
+    )
+  );
+  // slow
+  useSoundEffect(
+    "/sounds/teleport.mp3",
+    Boolean(
+      status === "filled" &&
+        isDefined(fillTxElapsedSeconds) &&
+        fillTxElapsedSeconds > 5
+    )
+  );
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
