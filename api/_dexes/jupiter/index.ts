@@ -1,7 +1,8 @@
-import { TradeType } from "@uniswap/sdk-core";
+import { AxiosError } from "axios";
 import { BigNumber } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { AxiosError } from "axios";
+import { address } from "@solana/kit";
+import { TradeType } from "@uniswap/sdk-core";
 
 import { getLogger } from "../../_utils";
 import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
@@ -12,11 +13,7 @@ import {
   UpstreamSwapProviderError,
 } from "../../_errors";
 import { SOURCES } from "./utils/sources";
-import {
-  getJupiterQuote,
-  getJupiterSwapTransaction,
-  getJupiterSwapInstructions,
-} from "./utils/api";
+import { getJupiterQuote, getJupiterSwapInstructions } from "./utils/api";
 
 const SWAP_PROVIDER_NAME = "jupiter";
 // From https://dev.jup.ag/docs/old/additional-topics/links-and-contract-addresses
@@ -24,9 +21,7 @@ const JUPITER_ROUTER_ADDRESS = "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4";
 
 const getSources = makeGetSources(SOURCES);
 
-export function getJupiterStrategy(
-  useSwapInstructions: boolean = false
-): QuoteFetchStrategy {
+export function getJupiterStrategy(): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
     if (!utils.chainIsSvm(chainId)) {
       throw new Error(`Jupiter not supported for chain id ${chainId}`);
@@ -37,7 +32,6 @@ export function getJupiterStrategy(
     };
   };
 
-  // TODO: Fix this, set the appropriate origin entry points
   const getOriginEntryPoints = (chainId: number) =>
     getOriginSwapEntryPoints("SvmSpoke", chainId, SWAP_PROVIDER_NAME);
 
@@ -82,48 +76,30 @@ export function getJupiterStrategy(
         slippageBps: swap.slippageTolerance * 100, // From percentage to bps
         swapMode: tradeType === TradeType.EXACT_INPUT ? "ExactIn" : "ExactOut",
         ...sourcesParams,
-        restrictIntermediateTokens: true,
         // @dev: We can use the following parameters if we face any limitations when building the transaction
+        restrictIntermediateTokens: true,
         onlyDirectRoutes: true,
         // maxAccounts: 64,
       };
 
-      // Get quote from Jupiter API
       const quote = await getJupiterQuote(quoteParams);
 
-      // Jupiter provides two endpoints for building the transaction:
-      // /swap: returns ready-to-send transaction
-      // /swap-instructions: returns individual instructions
-      // For now, we'll use the /swap endpoint but when we get to building the transaction, we'll use the /swap-instructions endpoint
+      const instructions = await getJupiterSwapInstructions(
+        quote,
+        swap.recipient
+      );
 
-      let swapTxns;
-      if (useSwapInstructions) {
-        // Use swap-instructions endpoint (returns individual instructions)
-        const instructions = await getJupiterSwapInstructions(
-          quote,
-          swap.recipient
-        );
-
-        // TODO: Build a proper Solana transaction here
-        swapTxns = [
-          {
-            to: JUPITER_ROUTER_ADDRESS,
-            data: JSON.stringify(instructions), // For now, just serialize instructions as JSON in the data field
-            value: "0",
-          },
-        ];
-      } else {
-        // Use swap endpoint for ready-to-send transaction
-        const swapData = await getJupiterSwapTransaction(quote, swap.recipient);
-
-        swapTxns = [
-          {
-            to: JUPITER_ROUTER_ADDRESS,
-            data: swapData.swapTransaction, // Base64 encoded transaction
-            value: "0",
-          },
-        ];
-      }
+      const swapTxns = [
+        {
+          to: JUPITER_ROUTER_ADDRESS,
+          data: "0x", // Placeholder for EVM compatibility
+          value: "0",
+          instructions, // Jupiter swap instructions
+          lookupTables: instructions.addressLookupTableAddresses.map((addr) =>
+            address(addr)
+          ),
+        },
+      ];
 
       const swapQuote = {
         tokenIn: swap.tokenIn,
