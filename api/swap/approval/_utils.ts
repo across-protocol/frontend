@@ -408,6 +408,9 @@ async function _buildDepositTxForAllowanceHolderSvm(
       fillDeadline,
       exclusivityParameter,
       message,
+      // TODO: make `tokenProgram`, `associatedTokenProgram`, `systemProgram`
+      // dependent on `inputToken` somehow. For now we only support USDC and use
+      // default programs addresses of SDK.
     },
     tokenDecimals
   );
@@ -422,16 +425,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const swapIxs = originSwapQuote?.swapTxns[0].instructions;
   const swapLookupTables = originSwapQuote?.swapTxns[0].lookupTables;
   const swapProvider = originSwapQuote?.swapProvider.name;
-  // Debug logging
-  console.log("SVM Transaction Debug Info:", {
-    originChainId,
-    depositor: depositor.toString(),
-    inputToken: inputToken.toString(),
-    inputAmount: inputAmount.toString(),
-    tokenDecimals,
-    depositorTokenAccount: depositorTokenAccount.toString(),
-    hasSwap: !!swapIxs,
-  });
 
   tx = pipe(
     tx,
@@ -468,51 +461,14 @@ async function _buildDepositTxForAllowanceHolderSvm(
     ? await fetchAddressesForLookupTables(swapLookupTables, rpcClient)
     : {};
 
-  // Debug transaction before compilation
-  console.log("Transaction before compilation:", {
-    instructionCount: tx.instructions.length,
-    instructions: tx.instructions.map((ix, i) => ({
-      index: i,
-      programAddress: ix.programAddress.toString(),
-      accountCount: ix.accounts?.length || 0,
-      accounts:
-        ix.accounts?.map((acc) => ({
-          address: acc.address.toString(),
-          role: acc.role,
-        })) || [],
-    })),
-  });
-
   // Compile transaction with address lookup table compression
-  let compiledTx;
   const hasLookupTables = Object.keys(addressesByLookup).length > 0;
 
+  let compiledTx;
   if (hasLookupTables) {
-    console.log("Compressing transaction using address lookup tables");
-    try {
-      const compressedMessage =
-        compressTransactionMessageUsingAddressLookupTables(
-          tx,
-          addressesByLookup
-        );
-      compiledTx = compileTransaction(compressedMessage);
-      console.log("Successfully compressed transaction with ALTs");
-
-      // Log compression savings
-      const uncompressedTx = compileTransaction(tx);
-      const uncompressedSize =
-        getBase64EncodedWireTransaction(uncompressedTx).length;
-      const compressedSize = getBase64EncodedWireTransaction(compiledTx).length;
-      console.log(
-        `Transaction size: ${compressedSize} bytes (saved ${uncompressedSize - compressedSize} bytes)`
-      );
-    } catch (error) {
-      console.warn(
-        "Failed to compress transaction with ALTs, falling back to normal compilation:",
-        error
-      );
-      compiledTx = compileTransaction(tx);
-    }
+    const compressedMessage =
+      compressTransactionMessageUsingAddressLookupTables(tx, addressesByLookup);
+    compiledTx = compileTransaction(compressedMessage);
   } else {
     compiledTx = compileTransaction(tx);
   }
