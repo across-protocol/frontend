@@ -28,6 +28,7 @@ import {
   extractDepositDataStruct,
   extractSwapAndDepositDataStruct,
 } from "../../_dexes/utils";
+import { JupiterSwapIxs } from "../../_dexes/jupiter/utils/api";
 import { appendJupiterIxs } from "../../_dexes/jupiter/utils/transaction-builder";
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
 import { getSVMRpc } from "../../_providers";
@@ -287,10 +288,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const destinationChainId = crossSwap.outputToken.chainId;
   const rpcClient = getSVMRpc(originChainId);
 
-  // Get Jupiter instructions for A2B flows (if present)
-  const jupiterIxs = originSwapQuote?.swapTxns[0].instructions;
-  const jupiterLookupTables = originSwapQuote?.swapTxns[0].lookupTables;
-
   // Build deposit instruction parameters
   const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
   const depositor = address(
@@ -342,9 +339,15 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
   const exclusivityParameter =
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
+  // TODO: This is broken and is setting always empty messages even if there's one
+  // Since including messages makes the transaction too big, we're not including them yet so this is ok
   const message = Uint8Array.from(
     Buffer.from(crossSwapQuotes.bridgeQuote.message ?? "0x", "hex")
   );
+  // Correct approach is this:
+  // const message = Uint8Array.from(
+  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x", "hex")
+  // );
 
   const noopSigner = createNoopSigner(depositor);
   const depositDataSeed: Parameters<
@@ -381,17 +384,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
   );
   const tokenDecimals = crossSwapQuotes.bridgeQuote.inputToken.decimals;
 
-  // Debug logging
-  console.log("SVM Transaction Debug Info:", {
-    originChainId,
-    depositor: depositor.toString(),
-    inputToken: inputToken.toString(),
-    inputAmount: inputAmount.toString(),
-    tokenDecimals,
-    depositorTokenAccount: depositorTokenAccount.toString(),
-    hasSwap: !!jupiterIxs,
-  });
-
   const depositIx = await sdk.arch.svm.createDepositInstruction(
     noopSigner,
     rpcClient,
@@ -426,10 +418,34 @@ async function _buildDepositTxForAllowanceHolderSvm(
 
   let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
 
+  // Get swap instructions for A2B flows (if present)
+  const swapIxs = originSwapQuote?.swapTxns[0].instructions;
+  const swapLookupTables = originSwapQuote?.swapTxns[0].lookupTables;
+  const swapProvider = originSwapQuote?.swapProvider.name;
+  // Debug logging
+  console.log("SVM Transaction Debug Info:", {
+    originChainId,
+    depositor: depositor.toString(),
+    inputToken: inputToken.toString(),
+    inputAmount: inputAmount.toString(),
+    tokenDecimals,
+    depositorTokenAccount: depositorTokenAccount.toString(),
+    hasSwap: !!swapIxs,
+  });
+
   tx = pipe(
     tx,
-    // Add Jupiter swap instructions if present
-    (tx) => (jupiterIxs ? appendJupiterIxs(tx, jupiterIxs) : tx),
+    // Add swap instructions if present
+    (tx) => {
+      if (!swapIxs) return tx;
+
+      switch (swapProvider) {
+        case "jupiter":
+          return appendJupiterIxs(tx, swapIxs as JupiterSwapIxs);
+        default:
+          throw new Error(`Unsupported SVM swap provider: ${swapProvider}`);
+      }
+    },
     // Add all deposit instructions
     (tx) =>
       depositIx.instructions.reduce(
@@ -448,8 +464,8 @@ async function _buildDepositTxForAllowanceHolderSvm(
   );
 
   // Fetch address lookup tables if present to reduce txn size
-  const addressesByLookup: AddressesByLookupTableAddress = jupiterLookupTables
-    ? await fetchAddressesForLookupTables(jupiterLookupTables, rpcClient)
+  const addressesByLookup: AddressesByLookupTableAddress = swapLookupTables
+    ? await fetchAddressesForLookupTables(swapLookupTables, rpcClient)
     : {};
 
   // Debug transaction before compilation
