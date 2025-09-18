@@ -339,12 +339,13 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
   const exclusivityParameter =
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
-  // TODO: This is broken and is setting always empty messages even if there's one
-  // Since including messages makes the transaction too big, we're not including them yet so this is ok
+  // TODO: Bug - message handling is broken and always uses empty messages
+  // Cannot fix yet because including actual messages would make transactions too large
+  // Future implementation should use: crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x"
   const message = Uint8Array.from(
     Buffer.from(crossSwapQuotes.bridgeQuote.message ?? "0x", "hex")
   );
-  // Correct approach is this:
+  // Correct approach (commented out due to size constraints):
   // const message = Uint8Array.from(
   //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x", "hex")
   // );
