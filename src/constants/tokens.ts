@@ -22,6 +22,7 @@ import wldLogo from "assets/token-logos/wld.svg";
 import unknownLogo from "assets/icons/question-circle.svg";
 import cakeLogo from "assets/token-logos/cake.svg";
 import bnbLogo from "assets/token-logos/bnb.svg";
+import vlrLogo from "assets/token-logos/vlr.svg";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
 
@@ -112,4 +113,5 @@ export const orderedTokenLogos = {
   CAKE: cakeLogo,
   BNB: bnbLogo,
   WBNB: bnbLogo,
+  VLR: vlrLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;

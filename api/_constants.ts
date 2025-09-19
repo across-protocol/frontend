@@ -122,6 +122,11 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.5").toString(),
     cutoff: ethers.utils.parseUnits("1").toString(),
   },
+  VLR: {
+    lowerBound: ethers.utils.parseUnits("0").toString(),
+    upperBound: ethers.utils.parseUnits("0").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+  },
   WLD: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
@@ -295,8 +300,6 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
@@ -322,6 +325,7 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.WGHO,
   TOKEN_SYMBOLS_MAP.LSK,
   TOKEN_SYMBOLS_MAP.WLD,
+  TOKEN_SYMBOLS_MAP.VLR,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;

@@ -29,6 +29,7 @@ export default {
     "USDT",
     "SNX",
     "POOL",
+    "VLR",
     "WLD",
   ],
   blockTimeSeconds: 2,
