@@ -817,6 +817,7 @@ export async function buildBaseSwapResponseJson(params: {
   allowance: BigNumber;
   balance: BigNumber;
   approvalTxns?: {
+    chainId: number;
     to: string;
     data: string;
   }[];
@@ -976,6 +977,11 @@ export async function buildBaseSwapResponseJson(params: {
       params.amountType === AMOUNT_TYPE.EXACT_INPUT
         ? params.amount
         : (params.originSwapQuote?.expectedAmountIn ??
+          params.bridgeQuote.inputAmount),
+    maxInputAmount:
+      params.amountType === AMOUNT_TYPE.EXACT_INPUT
+        ? params.amount
+        : (params.originSwapQuote?.maximumAmountIn ??
           params.bridgeQuote.inputAmount),
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
