@@ -98,7 +98,6 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        CHAIN_IDs.ALEPH_ZERO,
         CHAIN_IDs.SONEIUM,
         CHAIN_IDs.UNICHAIN,
         CHAIN_IDs.BSC,
