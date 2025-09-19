@@ -7,7 +7,12 @@ import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
-import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
+import {
+  COLORS,
+  NoFundsDepositedLogError,
+  getChainInfo,
+  isDefined,
+} from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -17,6 +22,7 @@ import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
+import { useSoundEffect } from "hooks/useSoundEffect";
 
 type Props = {
   depositTxHash: string;
@@ -58,6 +64,25 @@ export function DepositStatusUpperCard({
   );
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
+
+  // fast
+  useSoundEffect(
+    "/sounds/wow.mp3",
+    Boolean(
+      status === "filled" &&
+        isDefined(fillTxElapsedSeconds) &&
+        fillTxElapsedSeconds <= 5
+    )
+  );
+  // slow
+  useSoundEffect(
+    "/sounds/teleport.mp3",
+    Boolean(
+      status === "filled" &&
+        isDefined(fillTxElapsedSeconds) &&
+        fillTxElapsedSeconds > 5
+    )
+  );
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.

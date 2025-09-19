@@ -59,6 +59,7 @@
     "react-tooltip": "^5.18.0",
     "superstruct": "^0.15.4",
     "typescript": "^5.7.3",
+    "use-sound": "^5.0.0",
     "viem": "2.x",
     "wagmi": "^2.14.9"
   },
