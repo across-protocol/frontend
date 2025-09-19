@@ -127,16 +127,19 @@ export async function handleBaseSwapQueryParams(
     : undefined;
 
   if (isDestinationSvm) {
-    if (!recipient) {
-      throw new InvalidParamError({
-        param: "recipient",
-        message: "Recipient is required for SVM destinations",
-      });
-    }
     if (appFee || appFeeRecipient) {
       throw new InvalidParamError({
         param: "appFee, appFeeRecipient",
         message: "App fee is not supported for SVM destinations",
+      });
+    }
+  }
+
+  if (isOriginSvm || isDestinationSvm) {
+    if (!recipient) {
+      throw new InvalidParamError({
+        param: "recipient",
+        message: "Recipient is required for routes involving an SVM chain",
       });
     }
   }

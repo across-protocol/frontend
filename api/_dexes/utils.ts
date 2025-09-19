@@ -464,10 +464,13 @@ export function buildMinOutputBridgeTokenMessage(
   });
 }
 
-export function getFallbackRecipient(crossSwap: CrossSwap) {
+export function getFallbackRecipient(
+  crossSwap: CrossSwap,
+  destinationRecipient?: string
+) {
   return crossSwap.refundOnOrigin
     ? constants.AddressZero
-    : (crossSwap.refundAddress ?? crossSwap.depositor);
+    : (crossSwap.refundAddress ?? destinationRecipient ?? crossSwap.depositor);
 }
 
 export async function extractDepositDataStruct(
@@ -615,6 +618,10 @@ export function buildDestinationSwapCrossChainMessage({
       ? crossSwap.amount.sub(appFeeAmount)
       : destinationSwapQuote.minAmountOut.sub(appFeeAmount);
 
+  const destinationRecipient = crossSwap.isOriginSvm
+    ? crossSwap.recipient
+    : crossSwap.depositor;
+
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
   if (crossSwap.isOutputNative) {
@@ -684,7 +691,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           crossSwap.outputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -743,7 +750,7 @@ export function buildDestinationSwapCrossChainMessage({
         };
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getFallbackRecipient(crossSwap, destinationRecipient),
     actions: [
       routerTransferAction,
       // swap bridgeable output token -> cross swap output token
@@ -759,7 +766,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -771,7 +778,7 @@ export function buildDestinationSwapCrossChainMessage({
               target: multicallHandlerAddress,
               callData: encodeDrainCalldata(
                 crossSwap.outputToken.address,
-                crossSwap.refundAddress ?? crossSwap.depositor
+                crossSwap.refundAddress ?? destinationRecipient
               ),
               value: "0",
             },
