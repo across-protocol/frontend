@@ -3,6 +3,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { getLogger, handleErrorCondition } from "../../_utils";
 
 import mainnetChains from "../../../src/data/chains_1.json";
+import indirectChains from "../../../src/data/indirect_chains_1.json";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
@@ -23,7 +24,7 @@ export default async function handler(
   return tracer.startActiveSpan("swap/chains", async (span) => {
     setRequestSpanAttributes(request, span, requestId);
     try {
-      const responseJson = chains.map((chain) => ({
+      const responseJson = [...chains, ...indirectChains].map((chain) => ({
         chainId: chain.chainId,
         name: chain.name,
         publicRpcUrl: chain.publicRpcUrl,

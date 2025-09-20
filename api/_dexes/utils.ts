@@ -5,7 +5,6 @@ import {
   utils as ethersUtils,
 } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import {
@@ -35,6 +34,7 @@ import {
   getSpokePool,
   getSpokePoolAddress,
 } from "../_utils";
+import { CHAIN_IDs } from "../_constants";
 import {
   getSpokePoolPeripheryAddress,
   TransferType,
@@ -45,6 +45,7 @@ import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
 import { isEvmAddress, isSvmAddress } from "../_address";
+import { isIndirectDestinationRouteSupported } from "./utils-b2bi";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -104,6 +105,7 @@ export const AMOUNT_TYPE = {
 
 export const CROSS_SWAP_TYPE = {
   BRIDGEABLE_TO_BRIDGEABLE: "bridgeableToBridgeable",
+  BRIDGEABLE_TO_BRIDGEABLE_INDIRECT: "bridgeableToBridgeableIndirect",
   BRIDGEABLE_TO_ANY: "bridgeableToAny",
   ANY_TO_BRIDGEABLE: "anyToBridgeable",
   ANY_TO_ANY: "anyToAny",
@@ -159,6 +161,10 @@ export function getCrossSwapTypes(params: {
     )
   ) {
     return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
+  }
+
+  if (isIndirectDestinationRouteSupported(params)) {
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT];
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -480,7 +486,7 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
+  const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
@@ -923,6 +929,9 @@ export function makeGetSources(sources: DexSources) {
 }
 
 export function inferCrossSwapType(params: CrossSwapQuotes) {
+  if (params.indirectDestinationRoute) {
+    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT;
+  }
   return params.originSwapQuote && params.destinationSwapQuote
     ? CROSS_SWAP_TYPE.ANY_TO_ANY
     : params.originSwapQuote && !params.destinationSwapQuote
@@ -955,10 +964,14 @@ export function calculateAppFee(params: {
     feePercent.toString(),
     token.decimals
   );
+  console.log("feePercentBaseUnit", feePercentBaseUnit.toString());
+  console.log("outputAmount", outputAmount.toString());
+  console.log("token.decimals", token.decimals);
 
   const feeAmount = outputAmount
     .mul(feePercentBaseUnit)
     .div(ethersUtils.parseUnits("1", token.decimals));
+  console.log("feeAmount", feeAmount.toString());
 
   const feeActions = isNative
     ? [
