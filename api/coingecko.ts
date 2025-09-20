@@ -203,6 +203,7 @@ async function resolvePriceByAddress(params: {
     {
       [CHAIN_IDs.SOLANA]: "solana",
       [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+      [CHAIN_IDs.HYPERCORE]: "hyperliquid",
     }
   );
 

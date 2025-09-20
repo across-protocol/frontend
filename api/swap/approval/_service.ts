@@ -120,10 +120,14 @@ export async function handleApprovalSwap(
     destinationSwapQuote,
     crossSwap,
     appFee,
+    indirectDestinationRoute,
   } = crossSwapQuotes;
 
   const originChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
+  const intermediaryDestinationChainId =
+    indirectDestinationRoute?.intermediaryOutputToken.chainId ||
+    destinationChainId;
   const inputTokenAddress = isInputNative
     ? ethers.constants.AddressZero
     : crossSwap.inputToken.address;
@@ -165,8 +169,8 @@ export async function handleApprovalSwap(
     originChainId
   );
   const destinationChainGasToken = getTokenByAddress(
-    getWrappedNativeTokenAddress(destinationChainId),
-    destinationChainId
+    getWrappedNativeTokenAddress(intermediaryDestinationChainId),
+    intermediaryDestinationChainId
   );
   const bridgeQuoteInputToken = getTokenByAddress(
     bridgeQuote.inputToken.address,
@@ -198,13 +202,22 @@ export async function handleApprovalSwap(
       chainId: inputToken.chainId,
       fallbackResolver: "lifi",
     }),
-    getCachedTokenPrice({
-      symbol: outputToken.symbol,
-      tokenAddress: outputToken.address,
-      baseCurrency: "usd",
-      chainId: outputToken.chainId,
-      fallbackResolver: "lifi",
-    }),
+    indirectDestinationRoute
+      ? getCachedTokenPrice({
+          symbol: indirectDestinationRoute.intermediaryOutputToken.symbol,
+          tokenAddress:
+            indirectDestinationRoute.intermediaryOutputToken.address,
+          baseCurrency: "usd",
+          chainId: indirectDestinationRoute.intermediaryOutputToken.chainId,
+          fallbackResolver: "lifi",
+        })
+      : getCachedTokenPrice({
+          symbol: outputToken.symbol,
+          tokenAddress: outputToken.address,
+          baseCurrency: "usd",
+          chainId: outputToken.chainId,
+          fallbackResolver: "lifi",
+        }),
     originChainGasToken
       ? getCachedTokenPrice({
           symbol: originChainGasToken.symbol,
@@ -287,6 +300,7 @@ export async function handleApprovalSwap(
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
     crossSwapType,
+    indirectDestinationRoute,
     logger,
   });
 

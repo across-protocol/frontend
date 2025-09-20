@@ -1,4 +1,7 @@
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
+import {
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
+} from "@across-protocol/constants";
 import { writeFileSync } from "fs";
 import { getAddress, isAddress as isEvmAddress } from "viem";
 import { utils as sdkUtils } from "@across-protocol/sdk";
@@ -10,8 +13,27 @@ import * as externConfigs from "./extern-configs";
 import {
   enabledMainnetChainConfigs,
   enabledSepoliaChainConfigs,
+  enabledIndirectMainnetChainConfigs,
+  enabledIndirectSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 import assert from "assert";
+
+const TOKEN_SYMBOLS_MAP = {
+  ..._TOKEN_SYMBOLS_MAP,
+  // FIXME: Using local overrides for HyperCore until @across-protocol/constants is updated
+  "USDT-SPOT": {
+    name: "USDT (Spot)",
+    symbol: "USDT-SPOT",
+    decimals: 8,
+    addresses: {
+      [chainConfigs.HYPERCORE.chainId]:
+        "0x200000000000000000000000000000000000010c",
+      [CHAIN_IDs.MAINNET]: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    },
+    l1TokenDecimals: 6,
+    coingeckoId: _TOKEN_SYMBOLS_MAP.USDT.coingeckoId,
+  },
+};
 
 // TODO: replace with Address utilities from sdk
 export function checksumAddress(address: string) {
@@ -206,7 +228,8 @@ const enabledRoutes = {
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
-      enabledMainnetExternalProjects
+      enabledMainnetExternalProjects,
+      enabledIndirectMainnetChainConfigs
     ),
   },
   [CHAIN_IDs.SEPOLIA]: {
@@ -239,13 +262,18 @@ const enabledRoutes = {
     },
     spokePoolPeripheryAddresses: {},
     swapProxyAddresses: {},
-    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
+    routes: transformChainConfigs(
+      enabledSepoliaChainConfigs,
+      [],
+      enabledIndirectSepoliaChainConfigs
+    ),
   },
 } as const;
 
 function transformChainConfigs(
   enabledChainConfigs: typeof enabledMainnetChainConfigs,
-  enabledExternalProjects: typeof enabledMainnetExternalProjects
+  enabledExternalProjects: typeof enabledMainnetExternalProjects,
+  enabledIndirectChainConfigs: typeof enabledIndirectMainnetChainConfigs
 ) {
   const transformedChainConfigs: {
     fromChain: number;
@@ -700,6 +728,89 @@ async function generateRoutes(hubPoolChainId = 1) {
   writeFileSync(
     `./src/data/chains_${hubPoolChainId}.json`,
     await prettier.format(JSON.stringify(chainsFileContent, null, 2), {
+      parser: "json",
+    })
+  );
+
+  // helper file with INDIRECT chains
+  const indirectChainsFileContent = (
+    hubPoolChainId === CHAIN_IDs.MAINNET
+      ? enabledIndirectMainnetChainConfigs
+      : enabledIndirectSepoliaChainConfigs
+  ).map((chainConfig) => {
+    const [chainKey] =
+      Object.entries(chainConfigs).find(
+        ([, config]) => config.chainId === chainConfig.chainId
+      ) || [];
+    if (!chainKey) {
+      throw new Error(
+        `Could not find INDIRECTchain key for chain ${chainConfig.chainId}`
+      );
+    }
+    const assetsBaseUrl = `https://raw.githubusercontent.com/across-protocol/frontend/master`;
+    const getTokenInfo = (tokenSymbol: string) => {
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+      return {
+        address: checksumAddress(
+          tokenInfo.addresses[chainConfig.chainId] as string
+        ),
+        symbol: tokenSymbol,
+        name: tokenInfo.name,
+        decimals: tokenInfo.decimals,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
+      };
+    };
+    return {
+      chainId: chainConfig.chainId,
+      name: chainConfig.name,
+      publicRpcUrl: chainConfig.publicRpcUrl,
+      explorerUrl: chainConfig.blockExplorer,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
+      spokePool: chainConfig.spokePool.address,
+      spokePoolBlock: chainConfig.spokePool.blockNumber,
+      intermediaryChains: chainConfig.intermediaryChains,
+      inputTokens: chainConfig.tokens.flatMap((token) => {
+        try {
+          if (typeof token === "string") {
+            return getTokenInfo(token);
+          } else {
+            if (token.chainIds.includes(chainConfig.chainId)) {
+              return getTokenInfo(token.symbol);
+            }
+            return [];
+          }
+        } catch (e) {
+          console.warn(
+            `Could not find token info for ${token} on chain ${chainConfig.chainId}`
+          );
+          return [];
+        }
+      }),
+      outputTokens: (chainConfig.outputTokens ?? chainConfig.tokens).flatMap(
+        (token) => {
+          try {
+            if (typeof token === "string") {
+              return getTokenInfo(token);
+            } else {
+              if (token.chainIds.includes(chainConfig.chainId)) {
+                return getTokenInfo(token.symbol);
+              }
+              return [];
+            }
+          } catch (e) {
+            console.warn(
+              `Could not find token info for ${token} on chain ${chainConfig.chainId}`
+            );
+            return [];
+          }
+        }
+      ),
+    };
+  });
+  writeFileSync(
+    `./src/data/indirect_chains_${hubPoolChainId}.json`,
+    await prettier.format(JSON.stringify(indirectChainsFileContent, null, 2), {
       parser: "json",
     })
   );

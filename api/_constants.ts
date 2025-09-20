@@ -14,9 +14,41 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
-export const CHAINS = constants.PUBLIC_NETWORKS;
+// FIXME: Using local overrides for HyperCore until @across-protocol/constants is updated
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE: 1337,
+};
+export const TOKEN_SYMBOLS_MAP = {
+  ...constants.TOKEN_SYMBOLS_MAP,
+  "USDT-SPOT": {
+    name: "USDT",
+    symbol: "USDT-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x200000000000000000000000000000000000010C",
+      [CHAIN_IDs.HYPEREVM]:
+        constants.TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.HYPEREVM],
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.MAINNET],
+    },
+    l1TokenDecimals: 6,
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDT.coingeckoId,
+  },
+};
+export const CHAINS = {
+  ...constants.PUBLIC_NETWORKS,
+  [CHAIN_IDs.HYPERCORE]: {
+    name: "HyperCore",
+    family: constants.ChainFamily.NONE,
+    nativeToken: "HYPE",
+    publicRPC: "https://api.hyperliquid.xyz",
+    blockExplorer: "https://app.hyperliquid.xyz/explorer",
+    cctpDomain: constants.CCTP_NO_DOMAIN,
+    oftEid: constants.OFT_NO_EID,
+    hypDomainId: CHAIN_IDs.HYPERCORE,
+  },
+};
 
 export const maxRelayFeePct = 0.25;
 
@@ -305,6 +337,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -354,4 +387,5 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
   [CHAIN_IDs.HYPEREVM]: "HYPE",
+  [CHAIN_IDs.HYPERCORE]: "HYPE",
 };

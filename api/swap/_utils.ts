@@ -30,11 +30,23 @@ import {
   paramToArray,
   getChainInfo,
   getCachedTokenPrice,
+  ConvertDecimals,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
-import { CrossSwapQuotes, SwapQuote, Token, AmountType } from "../_dexes/types";
-import { AMOUNT_TYPE, AppFee, CrossSwapType } from "../_dexes/utils";
+import {
+  CrossSwapQuotes,
+  SwapQuote,
+  Token,
+  AmountType,
+  IndirectDestinationRoute,
+} from "../_dexes/types";
+import {
+  AMOUNT_TYPE,
+  AppFee,
+  CROSS_SWAP_TYPE,
+  CrossSwapType,
+} from "../_dexes/utils";
 import {
   encodeApproveCalldata,
   encodeDrainCalldata,
@@ -556,6 +568,7 @@ export async function calculateSwapFees(params: {
   minOutputAmountSansAppFees: BigNumber;
   originChainId: number;
   destinationChainId: number;
+  indirectDestinationRoute?: IndirectDestinationRoute;
   logger: Logger;
 }) {
   const {
@@ -575,6 +588,7 @@ export async function calculateSwapFees(params: {
     minOutputAmountSansAppFees,
     originChainId,
     destinationChainId,
+    indirectDestinationRoute,
     logger,
   } = params;
 
@@ -667,7 +681,10 @@ export async function calculateSwapFees(params: {
     const relayerTotal = bridgeFees.totalRelayFee;
 
     const originGasToken = getNativeTokenInfo(originChainId);
-    const destinationGasToken = getNativeTokenInfo(destinationChainId);
+    const destinationGasToken = getNativeTokenInfo(
+      indirectDestinationRoute?.intermediaryOutputToken.chainId ??
+        destinationChainId
+    );
 
     // Calculate USD amounts
     const originGasUsd =
@@ -696,7 +713,10 @@ export async function calculateSwapFees(params: {
       inputTokenPriceUsd;
     const outputMinAmountSansAppFeesUsd =
       parseFloat(
-        utils.formatUnits(minOutputAmountSansAppFees, outputToken.decimals)
+        utils.formatUnits(
+          minOutputAmountSansAppFees,
+          indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
+        )
       ) * outputTokenPriceUsd;
 
     const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
@@ -853,30 +873,19 @@ export async function buildBaseSwapResponseJson(params: {
   destinationNativePriceUsd: number;
   bridgeQuoteInputTokenPriceUsd: number;
   crossSwapType: CrossSwapType;
+  indirectDestinationRoute?: IndirectDestinationRoute;
   logger: Logger;
 }) {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
 
-  const minOutputAmount =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : (params.destinationSwapQuote?.minAmountOut ??
-        params.bridgeQuote.outputAmount);
-  const minOutputAmountSansAppFees =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : minOutputAmount.sub(params.appFee?.feeAmount ?? 0);
-  const expectedOutputAmount =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : (params.destinationSwapQuote?.expectedAmountOut ??
-        params.bridgeQuote.outputAmount);
-  const expectedOutputAmountSansAppFees =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : expectedOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+  const {
+    inputAmount,
+    maxInputAmount,
+    minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
+  } = getAmounts(params);
 
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
@@ -942,7 +951,9 @@ export async function buildBaseSwapResponseJson(params: {
     inputToken:
       params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
     outputToken:
-      params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
+      params.indirectDestinationRoute?.outputToken ??
+      params.destinationSwapQuote?.tokenOut ??
+      params.bridgeQuote.outputToken,
     refundToken:
       refundToken.symbol === "ETH"
         ? {
@@ -951,7 +962,7 @@ export async function buildBaseSwapResponseJson(params: {
           }
         : refundToken,
     fees: await calculateSwapFees({
-      inputAmount: params.inputAmount,
+      inputAmount,
       originSwapQuote: params.originSwapQuote,
       bridgeQuote: params.bridgeQuote,
       destinationSwapQuote: params.destinationSwapQuote,
@@ -974,24 +985,113 @@ export async function buildBaseSwapResponseJson(params: {
       minOutputAmountSansAppFees,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
+      indirectDestinationRoute: params.indirectDestinationRoute,
       logger: params.logger,
     }),
-    inputAmount:
-      params.amountType === AMOUNT_TYPE.EXACT_INPUT
-        ? params.amount
-        : (params.originSwapQuote?.expectedAmountIn ??
-          params.bridgeQuote.inputAmount),
-    maxInputAmount:
-      params.amountType === AMOUNT_TYPE.EXACT_INPUT
-        ? params.amount
-        : (params.originSwapQuote?.maximumAmountIn ??
-          params.bridgeQuote.inputAmount),
+    inputAmount,
+    maxInputAmount,
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
   });
+}
+
+function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
+  let inputAmount = BigNumber.from(0);
+  let maxInputAmount = BigNumber.from(0);
+  let minOutputAmount = BigNumber.from(0);
+  let expectedOutputAmount = BigNumber.from(0);
+
+  const appFeeAmount = params.appFee?.feeAmount ?? 0;
+
+  if (params.amountType === AMOUNT_TYPE.EXACT_INPUT) {
+    inputAmount = params.amount;
+    maxInputAmount = params.amount;
+
+    // If the cross swap type B2BI, we need to convert the output amounts to correct chain decimals
+    if (
+      params.crossSwapType ===
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT &&
+      params.indirectDestinationRoute
+    ) {
+      const { intermediaryOutputToken, outputToken } =
+        params.indirectDestinationRoute;
+      minOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+      expectedOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+    } else {
+      minOutputAmount =
+        params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount;
+      expectedOutputAmount =
+        params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount;
+    }
+  } else if (params.amountType === AMOUNT_TYPE.EXACT_OUTPUT) {
+    inputAmount =
+      params.originSwapQuote?.expectedAmountIn ??
+      params.bridgeQuote.inputAmount;
+    maxInputAmount =
+      params.originSwapQuote?.maximumAmountIn ?? params.bridgeQuote.inputAmount;
+    minOutputAmount = params.amount;
+    expectedOutputAmount = params.amount;
+  } else if (params.amountType === AMOUNT_TYPE.MIN_OUTPUT) {
+    inputAmount =
+      params.originSwapQuote?.expectedAmountIn ??
+      params.bridgeQuote.inputAmount;
+    maxInputAmount =
+      params.originSwapQuote?.maximumAmountIn ?? params.bridgeQuote.inputAmount;
+
+    // If the cross swap type B2BI, we need to convert the output amounts to correct chain decimals
+    if (
+      params.crossSwapType ===
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT &&
+      params.indirectDestinationRoute
+    ) {
+      const { intermediaryOutputToken, outputToken } =
+        params.indirectDestinationRoute;
+      minOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+      expectedOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+    } else {
+      minOutputAmount =
+        params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount;
+      expectedOutputAmount =
+        params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount;
+    }
+  }
+
+  const minOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? minOutputAmount
+      : minOutputAmount.sub(appFeeAmount);
+  const expectedOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? expectedOutputAmount
+      : expectedOutputAmount.sub(appFeeAmount);
+
+  return {
+    inputAmount,
+    maxInputAmount,
+    minOutputAmount,
+    expectedOutputAmount,
+    minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
+  };
 }
 
 export function getSwapTx(

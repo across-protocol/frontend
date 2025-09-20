@@ -109,6 +109,7 @@ export type CrossSwapQuotes = {
     originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
   appFee?: AppFee;
+  indirectDestinationRoute?: IndirectDestinationRoute;
 };
 
 export type OriginSwapEntryPointContract = {
@@ -274,4 +275,10 @@ export type DexSources = {
       names: string[]; // Source names that match the key
     }[];
   };
+};
+
+export type IndirectDestinationRoute = {
+  inputToken: Token;
+  intermediaryOutputToken: Token;
+  outputToken: Token;
 };
