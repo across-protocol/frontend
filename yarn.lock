@@ -16,10 +16,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.74", "@across-protocol/constants@^3.1.75":
-  version "3.1.75"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.75.tgz#391fa034fd49bfdb8c32b47edd1f0e1ec6ac7948"
-  integrity sha512-kmdbi2+W9IFNFZSyizQP3YjWU5FcGOZx/kzLPsc8RGGuKGQzZ0AHAfezPY9tUH0283q7W011xgtyMJD2f215cQ==
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.74", "@across-protocol/constants@^3.1.77":
+  version "3.1.77"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.77.tgz#0d57db8676a7eaf4541b2cc9143d95e8d753c0af"
+  integrity sha512-zRRTFAKhLgAA1QBJsbG5KautFczW0NV0N2hPW8dIn3cyC+pvYBU8FBb3gQ2Vp9b++kg1Gk1rSpMVMKKnjUBtOA==
 
 "@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
@@ -4298,7 +4298,7 @@
   dependencies:
     "@noble/hashes" "1.7.1"
 
-"@noble/curves@1.8.2", "@noble/curves@~1.8.1":
+"@noble/curves@1.8.2", "@noble/curves@^1.0.0", "@noble/curves@^1.1.0", "@noble/curves@^1.4.2", "@noble/curves@^1.6.0", "@noble/curves@^1.8.0", "@noble/curves@~1.8.1":
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.8.2.tgz#8f24c037795e22b90ae29e222a856294c1d9ffc7"
   integrity sha512-vnI7V6lFNe0tLAuJMu+2sX+FcL14TaCWy1qiczg1VwRmPrpQCdq5ESXQMqUc2tluRNf6irBXrWbl1mGN8uaU/g==
@@ -4312,14 +4312,14 @@
   dependencies:
     "@noble/hashes" "1.8.0"
 
-"@noble/curves@1.9.1", "@noble/curves@^1.0.0", "@noble/curves@^1.1.0", "@noble/curves@^1.4.2", "@noble/curves@^1.6.0", "@noble/curves@^1.8.0", "@noble/curves@~1.9.0":
+"@noble/curves@1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.9.1.tgz#9654a0bc6c13420ae252ddcf975eaf0f58f0a35c"
   integrity sha512-k11yZxZg+t+gWvBbIswW0yoJlu8cHOC7dhunwOzoWH/mXGBiYyR4YY6hAEK/3EUs4UpB8la1RfdRpeGsFHkWsA==
   dependencies:
     "@noble/hashes" "1.8.0"
 
-"@noble/curves@^1.9.0":
+"@noble/curves@^1.9.0", "@noble/curves@~1.9.0":
   version "1.9.7"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.9.7.tgz#79d04b4758a43e4bca2cbdc62e7771352fa6b951"
   integrity sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==
