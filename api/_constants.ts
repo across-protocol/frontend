@@ -293,6 +293,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "bnb",
   "sol",
   "hype",
+  "xpl",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -305,6 +306,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
