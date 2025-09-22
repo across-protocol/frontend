@@ -100,6 +100,7 @@ export default function ChainTokenSelectorModal({
       exitOnOutsideClick
       width={720}
       height={800}
+      titleBorder
     >
       <InnerWrapper>
         <ChainWrapper>

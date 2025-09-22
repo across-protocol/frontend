@@ -26,6 +26,8 @@ type SwapTransaction = {
   chainId: number;
   to: string;
   data: string;
+  value?: string;
+  gas?: string;
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
 };
@@ -73,7 +75,7 @@ const useSwapQuote = ({
         `${vercelApiBaseUrl}/api/swap/approval`,
         {
           params: {
-            tradeType: isInputAmount ? "exactInput" : "exactOutput",
+            tradeType: isInputAmount ? "exactInput" : "minOutput",
             inputToken: origin?.address,
             outputToken: destination?.address,
             originChainId: origin?.chainId,
