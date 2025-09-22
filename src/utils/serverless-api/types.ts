@@ -6,6 +6,8 @@ import { PoolsApiCall } from "./prod/pools";
 import { SwapQuoteApiCall } from "./prod/swap-quote";
 import { PoolsUserApiCall } from "./prod/pools-user";
 import { SwapApprovalApiCall } from "./prod/swap-approval";
+import { SwapChainsApiCall } from "./prod/swap-chains";
+import { SwapTokensApiCall } from "./prod/swap-tokens";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -24,6 +26,8 @@ export type ServerlessAPIEndpoints = {
   poolsUser: PoolsUserApiCall;
   swapQuote: SwapQuoteApiCall;
   swapApproval: SwapApprovalApiCall;
+  swapChains: SwapChainsApiCall;
+  swapTokens: SwapTokensApiCall;
 };
 
 export type RewardsApiFunction =
@@ -111,3 +115,21 @@ export type BridgeLimitFunction = (
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ) => Promise<BridgeLimitInterface>;
+
+export type SwapChain = {
+  chainId: number;
+  name: string;
+  publicRpcUrl: string;
+  explorerUrl: string;
+  logoUrl: string;
+};
+
+export type SwapToken = {
+  chainId: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUrl?: string;
+  priceUsd: string | null;
+};
