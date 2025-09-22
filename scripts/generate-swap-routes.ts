@@ -4,6 +4,7 @@ import * as prettier from "prettier";
 import { ethers } from "ethers";
 import {
   enabledMainnetChainConfigs,
+  enabledIndirectMainnetChainConfigs,
   enabledSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 
@@ -71,6 +72,11 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
+      // TODO: Enable once FE is able to handle USDT-SPOT and HyperCore
+      // all: {
+      //   enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
+      //   enabledOutputTokens: ["USDT-SPOT"],
+      // },
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
@@ -89,7 +95,7 @@ const enabledSwapRoutes: {
 async function generateSwapRoutes(hubPoolChainId = 1) {
   const enabledChains =
     hubPoolChainId === 1
-      ? enabledMainnetChainConfigs
+      ? [...enabledMainnetChainConfigs, ...enabledIndirectMainnetChainConfigs]
       : enabledSepoliaChainConfigs;
 
   const swapRoutes: any[] = [];
