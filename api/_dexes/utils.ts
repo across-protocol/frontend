@@ -964,14 +964,10 @@ export function calculateAppFee(params: {
     feePercent.toString(),
     token.decimals
   );
-  console.log("feePercentBaseUnit", feePercentBaseUnit.toString());
-  console.log("outputAmount", outputAmount.toString());
-  console.log("token.decimals", token.decimals);
 
   const feeAmount = outputAmount
     .mul(feePercentBaseUnit)
     .div(ethersUtils.parseUnits("1", token.decimals));
-  console.log("feeAmount", feeAmount.toString());
 
   const feeActions = isNative
     ? [

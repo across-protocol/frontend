@@ -111,7 +111,6 @@ function getCrossSwapQuoteForAmountType(
     isInputNative: Boolean(crossSwap.isInputNative),
     isOutputNative: Boolean(crossSwap.isOutputNative),
   });
-  console.log("crossSwapTypes", crossSwapTypes);
 
   const crossSwaps = crossSwapTypes.map((crossSwapType) => {
     const handler = typeToHandler[crossSwapType];

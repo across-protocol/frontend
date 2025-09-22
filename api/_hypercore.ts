@@ -44,7 +44,6 @@ export function encodeSendRawActionCalldata(action: string) {
     CORE_WRITER_EVM_ADDRESS,
     CORE_WRITER_ABI
   );
-  console.log("action", coreWriter.interface);
   return coreWriter.interface.encodeFunctionData("sendRawAction", [action]);
 }
 
@@ -55,9 +54,6 @@ export function getSpotSendBytesForTransferOnCore(params: {
 }) {
   const { recipientAddress, tokenSystemAddress, amount } = params;
   const tokenIndex = parseInt(tokenSystemAddress.replace("0x20", ""), 16);
-  console.log("tokenIndex", tokenIndex);
-  console.log("recipientAddress", recipientAddress);
-  console.log("amount", amount.toString());
   const transferOnCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64", "uint64"],
     [recipientAddress, tokenIndex, amount]
