@@ -13,7 +13,7 @@
       {
         "address": "0x200000000000000000000000000000000000010C",
         "symbol": "USDT-SPOT",
-        "name": "USDT (Spot)",
+        "name": "Tether USD",
         "decimals": 8,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt-spot.svg"
       }

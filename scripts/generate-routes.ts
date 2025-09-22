@@ -1,7 +1,4 @@
-import {
-  CHAIN_IDs,
-  TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
-} from "@across-protocol/constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { writeFileSync } from "fs";
 import { getAddress, isAddress as isEvmAddress } from "viem";
 import { utils as sdkUtils } from "@across-protocol/sdk";
@@ -17,23 +14,6 @@ import {
   enabledIndirectSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 import assert from "assert";
-
-const TOKEN_SYMBOLS_MAP = {
-  ..._TOKEN_SYMBOLS_MAP,
-  // FIXME: Using local overrides for HyperCore until @across-protocol/constants is updated
-  "USDT-SPOT": {
-    name: "USDT (Spot)",
-    symbol: "USDT-SPOT",
-    decimals: 8,
-    addresses: {
-      [chainConfigs.HYPERCORE.chainId]:
-        "0x200000000000000000000000000000000000010c",
-      [CHAIN_IDs.MAINNET]: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    },
-    l1TokenDecimals: 6,
-    coingeckoId: _TOKEN_SYMBOLS_MAP.USDT.coingeckoId,
-  },
-};
 
 // TODO: replace with Address utilities from sdk
 export function checksumAddress(address: string) {
