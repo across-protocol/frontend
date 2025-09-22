@@ -45,7 +45,7 @@ export function makeE2EConfig() {
         common: base,
         fork: {
           transport: http(rpcUrls[base.id])({}),
-          blockTag: 35647395n,
+          blockTag: "safe",
         },
         miningConfig: {
           type: "manual",
@@ -55,7 +55,7 @@ export function makeE2EConfig() {
         common: optimism,
         fork: {
           transport: http(rpcUrls[optimism.id])({}),
-          blockTag: 141249762n,
+          blockTag: "safe",
         },
         miningConfig: {
           type: "manual",
