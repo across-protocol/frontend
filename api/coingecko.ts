@@ -46,6 +46,14 @@ const CoingeckoQueryParamsSchema = type({
 
 type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
 
+// This tells our SDK's Coingecko client to use a different platform ID for certain chains.
+const CG_CUSTOM_PLATFORM_ID_MAP = {
+  [CHAIN_IDs.SOLANA]: "solana",
+  [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+  [CHAIN_IDs.PLASMA]: "plasma",
+  [CHAIN_IDs.HYPERCORE]: "hyperliquid",
+};
+
 const handler = async (
   { query }: TypedVercelRequest<CoingeckoQueryParams>,
   response: VercelResponse
@@ -200,11 +208,7 @@ async function resolvePriceByAddress(params: {
   const coingeckoClient = Coingecko.get(
     logger,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    {
-      [CHAIN_IDs.SOLANA]: "solana",
-      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
-      [CHAIN_IDs.HYPERCORE]: "hyperliquid",
-    }
+    CG_CUSTOM_PLATFORM_ID_MAP
   );
 
   // We want to compute price and return to caller.
@@ -281,10 +285,7 @@ async function resolvePriceBySymbol(params: {
   const coingeckoClient = Coingecko.get(
     logger,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    {
-      [CHAIN_IDs.SOLANA]: "solana",
-      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
-    }
+    CG_CUSTOM_PLATFORM_ID_MAP
   );
 
   // If derived, we need to convert to USD first.
