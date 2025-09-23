@@ -24,6 +24,8 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.HYPEREVM,
 ];
 
+export const enabledIndirectMainnetChainConfigs = [chainConfigs.HYPERCORE];
+
 export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
   chainConfigs.BASE_SEPOLIA,
@@ -38,3 +40,5 @@ export const enabledSepoliaChainConfigs = [
   chainConfigs.TATARA,
   chainConfigs.SOLANA_DEVNET,
 ];
+
+export const enabledIndirectSepoliaChainConfigs = [];
