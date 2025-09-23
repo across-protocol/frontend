@@ -31,7 +31,6 @@ import {
   getChainInfo,
   getCachedTokenPrice,
   ConvertDecimals,
-  isInputTokenBridgeable,
   isOutputTokenBridgeable,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
@@ -140,63 +139,33 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
-  if (isDestinationSvm) {
-    // This also has to throw for origin svm
-    if (appFee || appFeeRecipient) {
-      throw new InvalidParamError({
-        param: "appFee, appFeeRecipient",
-        message: "App fee is not supported for SVM destinations",
-      });
-    }
-  }
-
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
         param: "recipient",
-        message: "Recipient is required for routes involving an SVM chain",
+        message: "Recipient is required for routes involving Solana",
       });
     }
-  }
 
-  // Restrict SVM ↔ EVM combinations for A2A and specific B2A flows
-  if (isOriginSvm && !isDestinationSvm) {
-    // SVM to EVM: Block A2A and A2B flows
-    const inputBridgeable = isInputTokenBridgeable(
-      inputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for routes involving Solana",
+      });
+    }
+
+    // Restrict SVM ↔ EVM combinations that require a destination swap
     const outputBridgeable = isOutputTokenBridgeable(
       outputTokenAddress,
       originChainId,
       destinationChainId
     );
 
-    if (!inputBridgeable || (inputBridgeable && !outputBridgeable)) {
+    if (!outputBridgeable) {
       throw new InvalidParamError({
         param: "originChainId, destinationChainId",
         message:
-          "SVM to EVM swaps are only supported for bridgeable-to-bridgeable token pairs",
-      });
-    }
-  } else if (!isOriginSvm && isDestinationSvm) {
-    // EVM to SVM: Block A2A flows only
-    const inputBridgeable = isInputTokenBridgeable(
-      inputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
-    const outputBridgeable = isOutputTokenBridgeable(
-      outputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
-
-    if (!inputBridgeable && !outputBridgeable) {
-      throw new InvalidParamError({
-        param: "originChainId, destinationChainId",
-        message: "EVM to SVM any-to-any swaps are not supported",
+          "Destination swaps are not supported for routes involving Solana",
       });
     }
   }
