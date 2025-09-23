@@ -36,6 +36,11 @@ import bnbSmartChainGrayscaleLogo from "assets/chain-logos/bsc-grayscale.svg";
 import { ReactComponent as bnbSmartChainLogoSvg } from "assets/chain-logos/bsc.svg";
 import { ReactComponent as bnbSmartChainGrayscaleLogoSvg } from "assets/chain-logos/bsc-grayscale.svg";
 
+import hyperCoreLogo from "assets/chain-logos/hypercore.svg";
+import hyperCoreGrayscaleLogo from "assets/chain-logos/hypercore-grayscale.svg";
+import { ReactComponent as hyperCoreLogoSvg } from "assets/chain-logos/hypercore.svg";
+import { ReactComponent as hyperCoreGrayscaleLogoSvg } from "assets/chain-logos/hypercore-grayscale.svg";
+
 import hyperEvmLogo from "assets/chain-logos/hyperevm.svg";
 import hyperEvmGrayscaleLogo from "assets/chain-logos/hyperevm-grayscale.svg";
 import { ReactComponent as hyperEvmLogoSvg } from "assets/chain-logos/hyperevm.svg";
@@ -455,6 +460,23 @@ export const bnbSmartChain_viem = defineChain({
     },
   },
 });
+
+export const hyperCore = {
+  name: "HyperCore",
+  fullName: "HyperCore",
+  chainId: 1337,
+  logoURI: hyperCoreLogo,
+  grayscaleLogoURI: hyperCoreGrayscaleLogo,
+  logoSvg: hyperCoreLogoSvg,
+  grayscaleLogoSvg: hyperCoreGrayscaleLogoSvg,
+  rpcUrl: "https://api.hyperliquid.xyz",
+  explorerUrl: "https://app.hyperliquid.xyz/explorer",
+  constructExplorerLink: (txHash: string) =>
+    `${hyperCore.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "HYPE",
+  customRpcUrl: process.env.REACT_APP_CHAIN_1337_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
 
 export const hyperEvm = {
   name: "HyperEVM",
@@ -1513,6 +1535,7 @@ export const chainConfigs = [
   blast,
   blastSepolia,
   bnbSmartChain,
+  hyperCore,
   hyperEvm,
   ink,
   lens,
