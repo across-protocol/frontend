@@ -891,6 +891,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     minOutputAmount: crossSwapWithAppFee.amount,
     recipient: getBridgeQuoteRecipient(crossSwapWithAppFee),
     message: getBridgeQuoteMessage(crossSwapWithAppFee),
+    forceExactOutput: crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
   const strategyFetches = results.map((result) => {

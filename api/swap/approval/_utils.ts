@@ -294,6 +294,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.toAddressType(crossSwap.depositor, originChainId).toBase58()
   );
   const recipient = address(
+    // FIXME: When we support messages, recipient must be the MulticallHandler
     sdk.utils.toAddressType(crossSwap.recipient, destinationChainId).toBase58()
   );
 
@@ -339,13 +340,10 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
   const exclusivityParameter =
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
-  // TODO: Bug - message handling is broken and always uses empty messages
-  // Cannot fix yet because including actual messages would make transactions too large
-  // Future implementation should use: crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x"
-  const message = Uint8Array.from(
-    Buffer.from(crossSwapQuotes.bridgeQuote.message ?? "0x", "hex")
-  );
-  // Correct approach (commented out due to size constraints):
+  // FIXME: Temporarily hardcoding empty messages.
+  // Fix when we have a workaround for transaction size limitations
+  const message = Uint8Array.from(Buffer.from("", "hex"));
+  // Future implementation should use:
   // const message = Uint8Array.from(
   //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x", "hex")
   // );

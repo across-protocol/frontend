@@ -105,7 +105,12 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
         tokenIn: swap.tokenIn,
         tokenOut: swap.tokenOut,
         maximumAmountIn: BigNumber.from(quote.inAmount),
-        minAmountOut: BigNumber.from(quote.otherAmountThreshold),
+        // Note: when using exact output, otherAmountThreshold is expressed in inputToken
+        minAmountOut: BigNumber.from(
+          tradeType === TradeType.EXACT_OUTPUT
+            ? quote.outAmount
+            : quote.otherAmountThreshold
+        ),
         expectedAmountOut: BigNumber.from(quote.outAmount),
         expectedAmountIn: BigNumber.from(quote.inAmount),
         slippageTolerance: quote.slippageBps / 100, // Convert back to percentage

@@ -71,7 +71,11 @@ export async function handleApprovalSwap(
 
   const { actions } =
     request.body && Object.keys(request.body).length > 0
-      ? handleSwapBody(request.body, Number(request.query.destinationChainId))
+      ? handleSwapBody(
+          request.body,
+          Number(request.query.destinationChainId),
+          Number(request.query.originChainId)
+        )
       : { actions: [] };
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;

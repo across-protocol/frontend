@@ -31,6 +31,8 @@ import {
   getChainInfo,
   getCachedTokenPrice,
   ConvertDecimals,
+  isInputTokenBridgeable,
+  isOutputTokenBridgeable,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -139,6 +141,7 @@ export async function handleBaseSwapQueryParams(
     : undefined;
 
   if (isDestinationSvm) {
+    // This also has to throw for origin svm
     if (appFee || appFeeRecipient) {
       throw new InvalidParamError({
         param: "appFee, appFeeRecipient",
@@ -152,6 +155,48 @@ export async function handleBaseSwapQueryParams(
       throw new InvalidParamError({
         param: "recipient",
         message: "Recipient is required for routes involving an SVM chain",
+      });
+    }
+  }
+
+  // Restrict SVM ↔ EVM combinations for A2A and specific B2A flows
+  if (isOriginSvm && !isDestinationSvm) {
+    // SVM to EVM: Block A2A and A2B flows
+    const inputBridgeable = isInputTokenBridgeable(
+      inputTokenAddress,
+      originChainId,
+      destinationChainId
+    );
+    const outputBridgeable = isOutputTokenBridgeable(
+      outputTokenAddress,
+      originChainId,
+      destinationChainId
+    );
+
+    if (!inputBridgeable || (inputBridgeable && !outputBridgeable)) {
+      throw new InvalidParamError({
+        param: "originChainId, destinationChainId",
+        message:
+          "SVM to EVM swaps are only supported for bridgeable-to-bridgeable token pairs",
+      });
+    }
+  } else if (!isOriginSvm && isDestinationSvm) {
+    // EVM to SVM: Block A2A flows only
+    const inputBridgeable = isInputTokenBridgeable(
+      inputTokenAddress,
+      originChainId,
+      destinationChainId
+    );
+    const outputBridgeable = isOutputTokenBridgeable(
+      outputTokenAddress,
+      originChainId,
+      destinationChainId
+    );
+
+    if (!inputBridgeable && !outputBridgeable) {
+      throw new InvalidParamError({
+        param: "originChainId, destinationChainId",
+        message: "EVM to SVM any-to-any swaps are not supported",
       });
     }
   }
@@ -281,7 +326,25 @@ const SwapBody = type({
 
 export type SwapBody = Infer<typeof SwapBody>;
 
-export function handleSwapBody(body: SwapBody, destinationChainId: number) {
+export function handleSwapBody(
+  body: SwapBody,
+  destinationChainId: number,
+  originChainId: number
+) {
+  // Disable actions when origin or destination is SVM
+  if (
+    sdk.utils.chainIsSvm(originChainId) ||
+    sdk.utils.chainIsSvm(destinationChainId)
+  ) {
+    if (body.actions && body.actions.length > 0) {
+      throw new InvalidParamError({
+        param: "actions",
+        message:
+          "Actions are not supported when origin or destination chain is SVM",
+      });
+    }
+  }
+
   // Validate rules for each action. We have to validate the input before default values are applied.
   body.actions?.forEach((action, index) => {
     // 1. Validate that value is provided when populateCallValueDynamically is false or omitted
