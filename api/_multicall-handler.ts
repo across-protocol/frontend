@@ -5,9 +5,9 @@ export function getMultiCallHandlerAddress(chainId: number) {
   const addressFromSdk = utils.getDeployedAddress(
     "MulticallHandler",
     chainId,
-    false
+    true
   );
-  return addressFromSdk;
+  return addressFromSdk!;
 }
 
 export function buildMulticallHandlerMessage(params: {
