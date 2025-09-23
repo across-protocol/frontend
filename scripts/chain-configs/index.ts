@@ -17,6 +17,7 @@ export { default as MODE } from "./mode";
 export { default as MODE_SEPOLIA } from "./mode-sepolia";
 export { default as OPTIMISM } from "./optimism";
 export { default as OPTIMISM_SEPOLIA } from "./optimism-sepolia";
+export { default as PLASMA } from "./plasma";
 export { default as POLYGON } from "./polygon";
 export { default as POLYGON_AMOY } from "./polygon-amoy";
 export { default as REDSTONE } from "./redstone";
