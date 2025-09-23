@@ -1,11 +1,11 @@
 import { BigNumber } from "ethers";
+import { Address } from "@solana/kit";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
 import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
-import { Address } from "@solana/kit";
 
 export type { AmountType, CrossSwapType };
 

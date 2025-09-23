@@ -163,9 +163,9 @@ export async function handleBaseSwapQueryParams(
 
     if (!outputBridgeable) {
       throw new InvalidParamError({
-        param: "originChainId, destinationChainId",
+        param: "outputToken",
         message:
-          "Destination swaps are not supported for routes involving Solana",
+          "Destination swaps are not supported yet for routes involving Solana.",
       });
     }
   }
@@ -308,8 +308,7 @@ export function handleSwapBody(
     if (body.actions && body.actions.length > 0) {
       throw new InvalidParamError({
         param: "actions",
-        message:
-          "Actions are not supported when origin or destination chain is SVM",
+        message: "Actions are not supported yet for routes involving Solana.",
       });
     }
   }

@@ -1,7 +1,6 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { ethers } from "ethers";
 
-export const refundAddress = "0x718648C8c531F91b528A7757dD2bE813c3940608";
 export const evmDepositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 export const svmDepositor = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
 export const originChainId = CHAIN_IDs.OPTIMISM;

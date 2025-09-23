@@ -298,7 +298,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.toAddressType(crossSwap.recipient, destinationChainId).toBase58()
   );
 
-  // For A2B: use Jupiter swap output token, for B2B: use original input token
   const inputToken = address(
     sdk.utils
       .toAddressType(
@@ -307,7 +306,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
       )
       .toBase58()
   );
-
   const outputToken = address(
     sdk.utils
       .toAddressType(
@@ -316,14 +314,12 @@ async function _buildDepositTxForAllowanceHolderSvm(
       )
       .toBase58()
   );
-
   // For A2B: use swap expected output, for B2B: use bridge input amount
   const inputAmount = BigInt(
     originSwapQuote
       ? originSwapQuote.expectedAmountOut.toString()
       : crossSwapQuotes.bridgeQuote.inputAmount.toString()
   );
-
   const outputAmount = sdk.arch.svm.bigToU8a32(
     crossSwapQuotes.bridgeQuote.outputAmount
   );
@@ -345,7 +341,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const message = Uint8Array.from(Buffer.from("", "hex"));
   // Future implementation should use:
   // const message = Uint8Array.from(
-  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "0x", "hex")
+  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "", "hex")
   // );
 
   const noopSigner = createNoopSigner(depositor);

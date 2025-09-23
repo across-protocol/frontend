@@ -1022,7 +1022,7 @@ function _prepCrossSwapQuotesRetrievalA2B(
         tokenOut: bridgeableInputToken,
         recipient: crossSwap.isOriginSvm
           ? crossSwap.depositor
-          : originSwapInitialRecipient!.address,
+          : originSwapInitialRecipient.address,
         slippageTolerance: crossSwap.slippageTolerance,
         type: crossSwap.type,
       };
@@ -1670,7 +1670,7 @@ function _prepCrossSwapQuotesRetrievalA2A(params: {
         tokenOut: bridgeableInputToken,
         recipient: crossSwap.isOriginSvm
           ? crossSwap.depositor
-          : originSwapInitialRecipient!.address,
+          : originSwapInitialRecipient.address,
         slippageTolerance: crossSwap.slippageTolerance,
         type: crossSwap.type,
       };
