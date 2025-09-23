@@ -357,4 +357,5 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
   [CHAIN_IDs.HYPEREVM]: "HYPE",
+  [CHAIN_IDs.PLASMA]: "XPL",
 };

@@ -31,6 +31,7 @@ const { Coingecko } = coingecko;
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
+  REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS,
   BALANCER_V2_TOKENS,
 } = getEnvs();
 
@@ -269,7 +270,12 @@ async function resolvePriceBySymbol(params: {
   dateStr?: string;
 }) {
   const logger = getLogger();
-  const { symbol, baseCurrency = "usd", dateStr } = params;
+  const { symbol: _symbol, baseCurrency = "usd", dateStr } = params;
+
+  const redirectedLookupSymbols: Record<string, string> =
+    REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS !== undefined
+      ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS)
+      : {};
 
   if (dateStr) {
     throw new InvalidParamError({
@@ -278,6 +284,10 @@ async function resolvePriceBySymbol(params: {
       param: "date",
     });
   }
+
+  const symbol = String(
+    redirectedLookupSymbols[_symbol.toLowerCase()] ?? _symbol
+  ).toUpperCase();
 
   const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
 
