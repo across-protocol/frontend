@@ -135,7 +135,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     strategies
   );
 
-  const { bridgeQuote } = await bridge.getQuoteExactInput({
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
@@ -260,7 +260,7 @@ export async function getCrossSwapQuotesForExactInputB2BI(
   )(crossSwap.amount);
 
   // 1. We fetch a quote from inputToken.chainId -> intermediaryOutputToken.chainId
-  const { bridgeQuote } = await bridge.getQuoteExactInput({
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: crossSwap.inputToken,
     outputToken: indirectDestinationRoute.intermediaryOutputToken,
     exactInputAmount: crossSwap.amount,
@@ -489,7 +489,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
   } = prioritizedStrategy.result;
 
   // 2. Get bridge quote for bridgeable input token -> any token with exact input amount.
-  const { bridgeQuote } = await bridge.getQuoteExactInput({
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: crossSwap.inputToken,
     outputToken: bridgeableOutputToken,
     exactInputAmount: crossSwap.amount,
@@ -827,7 +827,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
   } = prioritizedStrategy.result;
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
-  const { bridgeQuote } = await bridge.getQuoteExactInput({
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
@@ -1263,7 +1263,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
   } = prioritizedOriginStrategy.result;
 
   // 3. Get bridge quote for bridgeable input token -> bridgeable output token
-  const { bridgeQuote } = await bridge.getQuoteExactInput({
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
     exactInputAmount: prioritizedOriginStrategy.originSwapQuote.minAmountOut,

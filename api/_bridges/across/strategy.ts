@@ -42,7 +42,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       return getBridgeQuoteMessage(crossSwap, appFee);
     },
 
-    getQuoteExactInput: async ({
+    getQuoteForExactInput: async ({
       inputToken,
       outputToken,
       exactInputAmount,

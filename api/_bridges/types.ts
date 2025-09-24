@@ -71,7 +71,7 @@ export type BridgeStrategy = {
     appFee?: AppFee
   ) => string | undefined;
 
-  getQuoteExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
+  getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
     contracts?: BridgeContracts;
   }>;
