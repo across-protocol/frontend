@@ -3,6 +3,7 @@ import {
   GetExactInputBridgeQuoteParams,
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
+  OriginTx,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
 import {
@@ -13,8 +14,11 @@ import { buildCrossSwapTxForAllowanceHolder } from "../../swap/approval/_utils";
 import {
   getBridgeQuoteRecipient,
   getBridgeQuoteMessage,
+  getCrossSwapTypes,
 } from "../../_dexes/utils";
 import { AppFee } from "../../_dexes/utils";
+import { Token } from "../../_dexes/types";
+import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -33,6 +37,24 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
   return {
     name,
     capabilities,
+
+    originTxNeedsAllowance: true,
+
+    getCrossSwapTypes: (params: {
+      inputToken: Token;
+      outputToken: Token;
+      isInputNative: boolean;
+      isOutputNative: boolean;
+    }) => {
+      return getCrossSwapTypes({
+        inputToken: params.inputToken.address,
+        originChainId: params.inputToken.chainId,
+        outputToken: params.outputToken.address,
+        destinationChainId: params.outputToken.chainId,
+        isInputNative: params.isInputNative,
+        isOutputNative: params.isOutputNative,
+      });
+    },
 
     getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
       return getBridgeQuoteRecipient(crossSwap);
@@ -56,7 +78,21 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         recipient,
         message,
       });
-      return { bridgeQuote };
+
+      if (bridgeQuote.outputAmount.lt(0)) {
+        throw new SwapAmountTooLowForBridgeFeesError({
+          bridgeAmount: exactInputAmount.toString(),
+          bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
+        });
+      }
+
+      return {
+        bridgeQuote: {
+          ...bridgeQuote,
+          estimatedFillTimeSec: bridgeQuote.suggestedFees.estimatedFillTimeSec,
+          provider: name,
+        },
+      };
     },
 
     getQuoteForOutput: async ({
@@ -75,7 +111,13 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         message,
         forceExactOutput,
       });
-      return { bridgeQuote };
+      return {
+        bridgeQuote: {
+          ...bridgeQuote,
+          estimatedFillTimeSec: bridgeQuote.suggestedFees.estimatedFillTimeSec,
+          provider: name,
+        },
+      };
     },
 
     buildTxForAllowanceHolder: async (params: {

@@ -290,6 +290,12 @@ async function _buildDepositTxForAllowanceHolderSvm(
     });
   }
 
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not build deposit tx on SVM for non-Across bridge quotes"
+    );
+  }
+
   const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
   const depositor = address(
     sdk.utils.toAddressType(crossSwap.depositor, originChainId).toBase58()

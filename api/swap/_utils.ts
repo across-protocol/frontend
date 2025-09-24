@@ -674,11 +674,11 @@ export async function calculateSwapFees(params: {
       parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
       appFeeTokenPriceUsd;
 
-    const bridgeFees = bridgeQuote.suggestedFees;
-    const relayerCapital = bridgeFees.relayerCapitalFee;
-    const destinationGas = bridgeFees.relayerGasFee;
-    const lpFee = bridgeFees.lpFee;
-    const relayerTotal = bridgeFees.totalRelayFee;
+    const bridgeFees = getBridgeFees(bridgeQuote);
+    const relayerCapital = bridgeFees.relayerCapital;
+    const destinationGas = bridgeFees.relayerGas;
+    const lpFee = bridgeFees.lp;
+    const relayerTotal = bridgeFees.totalRelay;
 
     const originGasToken = getNativeTokenInfo(originChainId);
     const destinationGasToken = getNativeTokenInfo(
@@ -887,6 +887,8 @@ export async function buildBaseSwapResponseJson(params: {
     expectedOutputAmountSansAppFees,
   } = getAmounts(params);
 
+  const bridgeFees = getBridgeFees(params.bridgeQuote);
+
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
@@ -929,12 +931,7 @@ export async function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
-        fees: {
-          totalRelay: params.bridgeQuote.suggestedFees.totalRelayFee,
-          relayerCapital: params.bridgeQuote.suggestedFees.relayerCapitalFee,
-          relayerGas: params.bridgeQuote.suggestedFees.relayerGasFee,
-          lp: params.bridgeQuote.suggestedFees.lpFee,
-        },
+        fees: bridgeFees,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -992,7 +989,7 @@ export async function buildBaseSwapResponseJson(params: {
     maxInputAmount,
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
-    expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
+    expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
   });
@@ -1120,4 +1117,33 @@ export function getSwapTx(
   }
 
   return params.permitSwapTx?.swapTx;
+}
+
+function getBridgeFees(bridgeQuote: CrossSwapQuotes["bridgeQuote"]) {
+  if (bridgeQuote.provider === "across") {
+    return {
+      totalRelay: bridgeQuote.suggestedFees.totalRelayFee,
+      relayerCapital: bridgeQuote.suggestedFees.relayerCapitalFee,
+      relayerGas: bridgeQuote.suggestedFees.relayerGasFee,
+      lp: bridgeQuote.suggestedFees.lpFee,
+    };
+  }
+  return {
+    totalRelay: {
+      pct: "0",
+      total: "0",
+    },
+    relayerCapital: {
+      pct: "0",
+      total: "0",
+    },
+    relayerGas: {
+      pct: "0",
+      total: "0",
+    },
+    lp: {
+      pct: "0",
+      total: "0",
+    },
+  };
 }

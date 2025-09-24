@@ -98,8 +98,16 @@ export type CrossSwapQuotes = {
     inputAmount: BigNumber;
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
-    suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
-  };
+    estimatedFillTimeSec: number;
+  } & (
+    | {
+        provider: "across";
+        suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
+      }
+    | {
+        provider: "hypercore";
+      }
+  );
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
   contracts: {
