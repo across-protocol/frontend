@@ -85,6 +85,4 @@ export type BridgeStrategy = {
     quotes: CrossSwapQuotes;
     integratorId?: string;
   }) => Promise<OriginTx>;
-
-  getAllowanceSpender?(quotes: CrossSwapQuotes): string | undefined;
 };
