@@ -108,6 +108,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
     slippageTolerance: swap.slippageTolerance,
     swapTxns: [
       {
+        ecosystem: "evm" as const,
         to: swapRouter02Address,
         data: methodParameters.calldata,
         value: methodParameters.value,
@@ -184,6 +185,7 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
     slippageTolerance: swap.slippageTolerance,
     swapTxns: [
       {
+        ecosystem: "evm" as const,
         to: route.methodParameters.to,
         data: route.methodParameters.calldata,
         value: route.methodParameters.value,

@@ -123,11 +123,13 @@ export function getLifiStrategy(
 
       const swapTx = opts?.useIndicativeQuote
         ? {
+            ecosystem: "evm" as const,
             to: "0x0",
             data: "0x0",
             value: "0x0",
           }
         : {
+            ecosystem: "evm" as const,
             to: quote.transactionRequest.to,
             data: quote.transactionRequest.data,
             value: quote.transactionRequest.value,

@@ -71,20 +71,37 @@ export type OriginSwapQuoteAndCalldata = {
   slippage: number;
 };
 
+export type EvmSwapTxn = {
+  ecosystem: "evm";
+  to: string;
+  data: string;
+  value: string;
+};
+
+export type SvmSwapTxn = {
+  ecosystem: "svm";
+  to: string;
+  instructions?: Record<string, unknown>;
+  lookupTables?: Address[];
+};
+
+export type SwapTxn = EvmSwapTxn | SvmSwapTxn;
+
+export function isEvmSwapTxn(swapTxn: SwapTxn): swapTxn is EvmSwapTxn {
+  return swapTxn.ecosystem === "evm";
+}
+
+export function isSvmSwapTxn(swapTxn: SwapTxn): swapTxn is SvmSwapTxn {
+  return swapTxn.ecosystem === "svm";
+}
+
 export type SwapQuote = {
   maximumAmountIn: BigNumber;
   minAmountOut: BigNumber;
   expectedAmountOut: BigNumber;
   expectedAmountIn: BigNumber;
   slippageTolerance: number;
-  swapTxns: {
-    to: string;
-    data: string; // EVM calldata
-    value: string;
-    // Optional SVM-specific fields
-    instructions?: Record<string, unknown>;
-    lookupTables?: Address[];
-  }[];
+  swapTxns: (EvmSwapTxn | SvmSwapTxn)[];
   tokenIn: Token;
   tokenOut: Token;
   swapProvider: {

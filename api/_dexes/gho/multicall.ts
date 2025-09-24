@@ -6,7 +6,7 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "../../_constants";
 import { getMulticall3, getMulticall3Address } from "../../_utils";
-import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap, EvmSwapTxn } from "../types";
 import { getWghoContract } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
@@ -136,9 +136,10 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       );
     }
     // 2.2. Perform the Stable -> GHO swap via `SwapRouter02`
+    const swapTxn = ghoSwapQuote.swapTxns[0] as EvmSwapTxn;
     const swapCall = {
-      callData: ghoSwapQuote.swapTxns[0].data,
-      target: ghoSwapQuote.swapTxns[0].to,
+      callData: swapTxn.data,
+      target: swapTxn.to,
     };
 
     // 3. Perform wrap via `WGHO`
@@ -167,6 +168,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       wrapCall,
     ];
     const aggregateTx = {
+      ecosystem: "evm" as const,
       data: multicall3.interface.encodeFunctionData("aggregate", [calls]),
       to: getRouter(chainId).address,
       value: "0",

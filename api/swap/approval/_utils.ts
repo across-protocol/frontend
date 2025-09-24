@@ -13,7 +13,7 @@ import {
 import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-import { CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwapQuotes, EvmSwapTxn, isSvmSwapTxn } from "../../_dexes/types";
 import {
   assertValidIntegratorId,
   tagIntegratorId,
@@ -133,10 +133,11 @@ async function _buildDepositTxForAllowanceHolderEvm(
           "Expected exactly 1 swap transaction for origin swap via `UniversalSwapAndBridge`"
         );
       }
+      const swapTxn = originSwapQuote.swapTxns[0] as EvmSwapTxn;
       tx = await universalSwapAndBridge.populateTransaction.swapAndBridge(
         originSwapQuote.tokenIn.address,
         originSwapQuote.tokenOut.address,
-        originSwapQuote.swapTxns[0].data,
+        swapTxn.data,
         originSwapQuote.maximumAmountIn,
         originSwapQuote.minAmountOut,
         {
@@ -417,8 +418,11 @@ async function _buildDepositTxForAllowanceHolderSvm(
   let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
 
   // Get swap instructions for A2B flows (if present)
-  const swapIxs = originSwapQuote?.swapTxns[0].instructions;
-  const swapLookupTables = originSwapQuote?.swapTxns[0].lookupTables;
+  const swapTxn = originSwapQuote?.swapTxns[0];
+  const swapIxs =
+    swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.instructions : undefined;
+  const swapLookupTables =
+    swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.lookupTables : undefined;
   const swapProvider = originSwapQuote?.swapProvider.name;
 
   tx = pipe(

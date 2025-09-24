@@ -91,9 +91,8 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
 
       const swapTxns = [
         {
+          ecosystem: "svm" as const,
           to: JUPITER_ROUTER_ADDRESS,
-          data: "0x", // Placeholder for EVM compatibility
-          value: "0",
           instructions, // Jupiter swap instructions
           lookupTables: instructions.addressLookupTableAddresses.map((addr) =>
             address(addr)

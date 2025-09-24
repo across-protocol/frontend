@@ -157,6 +157,7 @@ export function buildUniversalRouterSwapTx(
     useRouterBalance: true,
   });
   return {
+    ecosystem: "evm" as const,
     data: calldata,
     value,
     to: UNIVERSAL_ROUTER_02_ADDRESS[swap.chainId],
