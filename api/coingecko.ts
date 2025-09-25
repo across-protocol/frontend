@@ -184,7 +184,8 @@ async function resolvePriceByAddress(params: {
     params.chainId ??
     (isEvmAddress(params.address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
   const chainId =
-    coinGeckoAssetPlatformLookup[params.address] ?? fallbackChainId;
+    coinGeckoAssetPlatformLookup[params.address.toLowerCase()] ??
+    fallbackChainId;
 
   let address = utils.toAddressType(params.address, chainId).toNative();
   const baseCurrency = (
