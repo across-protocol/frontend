@@ -72,11 +72,10 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
-      // TODO: Enable once FE is able to handle USDT-SPOT and HyperCore
-      // all: {
-      //   enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
-      //   enabledOutputTokens: ["USDT-SPOT"],
-      // },
+      all: {
+        enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
+        enabledOutputTokens: ["USDT-SPOT"],
+      },
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
