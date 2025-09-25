@@ -101,6 +101,11 @@ import optimismSepoliaGrayscaleLogo from "assets/chain-logos/optimism-sepolia-gr
 import { ReactComponent as optimismSepoliaLogoSvg } from "assets/chain-logos/optimism-sepolia.svg";
 import { ReactComponent as optimismSepoliaGrayscaleLogoSvg } from "assets/chain-logos/optimism-sepolia-grayscale.svg";
 
+import plasmaLogo from "assets/chain-logos/plasma.svg";
+import plasmaGrayscaleLogo from "assets/chain-logos/plasma-grayscale.svg";
+import { ReactComponent as plasmaLogoSvg } from "assets/chain-logos/plasma.svg";
+import { ReactComponent as plasmaGrayscaleLogoSvg } from "assets/chain-logos/plasma-grayscale.svg";
+
 import polygonLogo from "assets/chain-logos/polygon.svg";
 import polygonGrayscaleLogo from "assets/chain-logos/polygon-grayscale.svg";
 import { ReactComponent as polygonLogoSvg } from "assets/chain-logos/polygon.svg";
@@ -946,6 +951,47 @@ export const optimismSepolia_viem = defineChain({
   },
 });
 
+export const plasma = {
+  name: "Plasma",
+  fullName: "Plasma",
+  chainId: 9745,
+  logoURI: plasmaLogo,
+  grayscaleLogoURI: plasmaGrayscaleLogo,
+  logoSvg: plasmaLogoSvg,
+  grayscaleLogoSvg: plasmaGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.plasma.to",
+  explorerUrl: "https://plasmascan.to",
+  constructExplorerLink: (txHash: string) =>
+    `${plasma.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "XPL",
+  customRpcUrl: process.env.REACT_APP_CHAIN_9745_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const plasma_viem = defineChain({
+  id: plasma.chainId,
+  name: plasma.name,
+  nativeCurrency: {
+    name: plasma.nativeCurrencySymbol,
+    symbol: plasma.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        plasma.customRpcUrl ? plasma.customRpcUrl : [],
+        plasma.rpcUrl,
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: plasma.name + " Explorer",
+      url: plasma.explorerUrl,
+    },
+  },
+});
+
 export const polygon = {
   name: "Polygon",
   fullName: "Polygon Network",
@@ -1502,6 +1548,7 @@ export const chainConfigs = [
   modeSepolia,
   optimism,
   optimismSepolia,
+  plasma,
   polygon,
   polygonAmoy,
   redstone,
@@ -1544,6 +1591,7 @@ export const chains_viem = [
   modeSepolia_viem,
   optimism_viem,
   optimismSepolia_viem,
+  plasma_viem,
   polygon_viem,
   polygonAmoy_viem,
   redstone_viem,
