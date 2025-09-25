@@ -209,6 +209,7 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  "0x6100E367285b01F48D07953803A2d8dCA5D19873": CHAIN_IDs.PLASMA,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
