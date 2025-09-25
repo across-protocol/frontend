@@ -3,7 +3,6 @@ import {
   GetExactInputBridgeQuoteParams,
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
-  OriginTx,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
 import {

@@ -9,6 +9,7 @@ import {
   getLogger,
   addMarkupToAmount,
   ConvertDecimals,
+  getSpokePoolAddress,
 } from "../_utils";
 import {
   calculateAppFee,
@@ -45,6 +46,7 @@ import {
   CrossSwapQuotesRetrievalB2AResult,
 } from "./types";
 import { BridgeStrategy } from "../_bridges/types";
+import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
@@ -134,13 +136,10 @@ function getCrossSwapQuoteForAmountType(
 
 export async function getCrossSwapQuotesForExactInputB2B(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies,
+  _strategies: QuoteFetchStrategies,
   bridge: BridgeStrategy
 ): Promise<CrossSwapQuotes> {
-  const { originStrategy } = _prepCrossSwapQuotesRetrievalB2B(
-    crossSwap,
-    strategies
-  );
+  const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
   const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: crossSwap.inputToken,
@@ -172,9 +171,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     bridgeQuote,
     originSwapQuote: undefined,
     contracts: {
-      depositEntryPoint: originStrategy.getOriginEntryPoints(
-        crossSwap.inputToken.chainId
-      ).deposit,
+      depositEntryPoint,
     },
     appFee,
   };
@@ -182,13 +179,10 @@ export async function getCrossSwapQuotesForExactInputB2B(
 
 export async function getCrossSwapQuotesForOutputB2B(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies,
+  _strategies: QuoteFetchStrategies,
   bridge: BridgeStrategy
 ): Promise<CrossSwapQuotes> {
-  const { originStrategy } = _prepCrossSwapQuotesRetrievalB2B(
-    crossSwap,
-    strategies
-  );
+  const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
   const outputAmountWithAppFee = crossSwap.appFeePercent
     ? addMarkupToAmount(crossSwap.amount, crossSwap.appFeePercent)
@@ -226,9 +220,7 @@ export async function getCrossSwapQuotesForOutputB2B(
     bridgeQuote,
     originSwapQuote: undefined,
     contracts: {
-      depositEntryPoint: originStrategy.getOriginEntryPoints(
-        crossSwap.inputToken.chainId
-      ).deposit,
+      depositEntryPoint,
     },
     appFee,
   };
@@ -236,13 +228,10 @@ export async function getCrossSwapQuotesForOutputB2B(
 
 export async function getCrossSwapQuotesForExactInputB2BI(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies,
+  _strategies: QuoteFetchStrategies,
   bridge: BridgeStrategy
 ): Promise<CrossSwapQuotes> {
-  const { originStrategy } = _prepCrossSwapQuotesRetrievalB2B(
-    crossSwap,
-    strategies
-  );
+  const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
   const indirectDestinationRoutes = getIndirectDestinationRoutes({
     originChainId: crossSwap.inputToken.chainId,
@@ -304,9 +293,7 @@ export async function getCrossSwapQuotesForExactInputB2BI(
     bridgeQuote,
     originSwapQuote: undefined,
     contracts: {
-      depositEntryPoint: originStrategy.getOriginEntryPoints(
-        crossSwap.inputToken.chainId
-      ).deposit,
+      depositEntryPoint,
     },
     appFee,
     indirectDestinationRoute,
@@ -315,13 +302,10 @@ export async function getCrossSwapQuotesForExactInputB2BI(
 
 export async function getCrossSwapQuotesForOutputB2BI(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies,
+  _strategies: QuoteFetchStrategies,
   bridge: BridgeStrategy
 ): Promise<CrossSwapQuotes> {
-  const { originStrategy } = _prepCrossSwapQuotesRetrievalB2B(
-    crossSwap,
-    strategies
-  );
+  const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
   const indirectDestinationRoutes = getIndirectDestinationRoutes({
     originChainId: crossSwap.inputToken.chainId,
@@ -391,19 +375,14 @@ export async function getCrossSwapQuotesForOutputB2BI(
     bridgeQuote,
     originSwapQuote: undefined,
     contracts: {
-      depositEntryPoint: originStrategy.getOriginEntryPoints(
-        crossSwap.inputToken.chainId
-      ).deposit,
+      depositEntryPoint,
     },
     appFee,
     indirectDestinationRoute,
   };
 }
 
-function _prepCrossSwapQuotesRetrievalB2B(
-  crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies
-) {
+function _prepCrossSwapQuotesRetrievalB2B(crossSwap: CrossSwap) {
   if (!crossSwap.refundOnOrigin) {
     throw new InvalidParamError({
       message:
@@ -412,21 +391,27 @@ function _prepCrossSwapQuotesRetrievalB2B(
     });
   }
 
-  // Use the first origin strategy since we don't need to fetch multiple origin quotes
-  const originStrategy = getQuoteFetchStrategies(
+  const spokePoolPeripheryAddress = getSpokePoolPeripheryAddress(
     crossSwap.inputToken.chainId,
-    crossSwap.inputToken.symbol,
-    crossSwap.inputToken.symbol,
-    strategies
-  ).at(0);
-  if (!originStrategy) {
-    throw new InvalidParamError({
-      message: `Failed to fetch swap quote: no origin strategy found for ${crossSwap.inputToken.symbol}`,
-    });
-  }
+    false
+  );
+  const spokePoolAddress = getSpokePoolAddress(
+    crossSwap.inputToken.chainId,
+    false
+  );
+
+  const depositEntryPoint = spokePoolPeripheryAddress
+    ? ({
+        name: "SpokePoolPeriphery",
+        address: spokePoolPeripheryAddress,
+      } as const)
+    : ({
+        name: crossSwap.isOriginSvm ? "SvmSpoke" : "SpokePool",
+        address: spokePoolAddress,
+      } as const);
 
   return {
-    originStrategy,
+    depositEntryPoint,
     originSwapChainId: crossSwap.inputToken.chainId,
     destinationChainId: crossSwap.outputToken.chainId,
   };

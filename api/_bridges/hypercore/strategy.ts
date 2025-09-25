@@ -5,19 +5,14 @@ import {
   GetExactInputBridgeQuoteParams,
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
-  OriginTx,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
-import { ConvertDecimals, getMulticall3, getProvider } from "../../_utils";
+import { ConvertDecimals } from "../../_utils";
 import { CROSS_SWAP_TYPE } from "../../_dexes/utils";
 import { AppFee } from "../../_dexes/utils";
 import { Token } from "../../_dexes/types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
-import {
-  CORE_WRITER_EVM_ADDRESS,
-  encodeTransferOnCoreCalldata,
-} from "../../_hypercore";
 import { encodeTransferCalldata } from "../../_multicall-handler";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 
@@ -66,6 +61,19 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
     return false;
   };
 
+  const assertSupportedRoute = (params: {
+    inputToken: Token;
+    outputToken: Token;
+  }) => {
+    if (!isRouteSupported(params)) {
+      throw new InvalidParamError({
+        message: `HyperEVM -> HyperCore: Route ${
+          params.inputToken.symbol
+        } -> ${params.outputToken.symbol} is not supported`,
+      });
+    }
+  };
+
   return {
     name,
     capabilities,
@@ -96,16 +104,13 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       return "0x";
     },
 
-    getQuoteExactInput: async ({
+    getQuoteForExactInput: async ({
       inputToken,
       outputToken,
       exactInputAmount,
     }: GetExactInputBridgeQuoteParams) => {
-      if (!isRouteSupported({ inputToken, outputToken })) {
-        throw new InvalidParamError({
-          message: "HyperCore: Can not get bridge quote for unsupported route",
-        });
-      }
+      assertSupportedRoute({ inputToken, outputToken });
+
       const outputAmount = ConvertDecimals(
         inputToken.decimals,
         outputToken.decimals
@@ -129,11 +134,7 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       outputToken,
       minOutputAmount,
     }: GetOutputBridgeQuoteParams) => {
-      if (!isRouteSupported({ inputToken, outputToken })) {
-        throw new InvalidParamError({
-          message: "HyperCore: Can not get bridge quote for unsupported route",
-        });
-      }
+      assertSupportedRoute({ inputToken, outputToken });
 
       const inputAmount = ConvertDecimals(
         outputToken.decimals,
@@ -165,21 +166,23 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         appFee,
       } = params.quotes;
 
-      const multicall3 = getMulticall3(
-        crossSwap.inputToken.chainId,
-        getProvider(crossSwap.inputToken.chainId)
-      );
-
-      if (!multicall3) {
+      if (appFee?.feeAmount.gt(0)) {
         throw new InvalidParamError({
-          message: "HyperCore: No Multicall3 deployed on input token chain",
+          message: "HyperEVM -> HyperCore: App fee is not supported",
+        });
+      }
+
+      if (crossSwap.depositor !== crossSwap.recipient) {
+        throw new InvalidParamError({
+          message:
+            "HyperEVM -> HyperCore: Depositor and recipient must be the same",
         });
       }
 
       if (originSwapQuote || destinationSwapQuote) {
         throw new InvalidParamError({
           message:
-            "HyperCore: Can not build tx for origin swap or destination swap",
+            "HyperEVM -> HyperCore: Can not build tx for origin swap or destination swap",
         });
       }
 
@@ -189,67 +192,23 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       // TODO: Add support for HyperCore -> HyperEVM route
       if (!isToHyperCore) {
         throw new InvalidParamError({
-          message:
-            "HyperCore: Can not build tx for HyperCore -> HyperEVM route",
+          message: "HyperCore -> HyperEVM: Route not supported yet",
         });
       }
 
-      const calls = [
-        // Transfer HyperEVM tokens from sender to HyperCore
-        {
-          target: crossSwap.inputToken.address,
-          callData: encodeTransferCalldata(
-            crossSwap.outputToken.address,
-            bridgeQuote.outputAmount
-          ),
-        },
-      ];
-
-      const appFeeAmount = appFee
-        ? ConvertDecimals(
-            appFee.feeToken.decimals,
-            crossSwap.outputToken.decimals
-          )(appFee.feeAmount)
-        : BigNumber.from(0);
-
-      if (appFeeAmount.gt(0) && crossSwap.appFeeRecipient) {
-        // Send app fee to app fee recipient if specified
-        calls.push({
-          target: CORE_WRITER_EVM_ADDRESS,
-          callData: encodeTransferOnCoreCalldata({
-            recipientAddress: crossSwap.appFeeRecipient,
-            tokenSystemAddress: crossSwap.outputToken.address, // System address on HyperCore
-            amount: appFeeAmount,
-          }),
-        });
-      }
-
-      // Send output amount to recipient
-      const outputAmount = bridgeQuote.outputAmount.sub(appFeeAmount);
-      calls.push({
-        target: CORE_WRITER_EVM_ADDRESS,
-        callData: encodeTransferOnCoreCalldata({
-          recipientAddress: crossSwap.recipient,
-          tokenSystemAddress: crossSwap.outputToken.address, // System address on HyperCore
-          amount: outputAmount,
-        }),
-      });
-
-      const tx = await multicall3.populateTransaction.aggregate(
-        calls.map((call) => ({
-          target: call.target,
-          callData: call.callData,
-        }))
+      const data = encodeTransferCalldata(
+        crossSwap.outputToken.address, // System address on HyperCore
+        bridgeQuote.inputAmount // in HyperEVM decimals
       );
       const txDataWithIntegratorId = params.integratorId
-        ? tagIntegratorId(params.integratorId, tx.data!)
-        : tx.data!;
+        ? tagIntegratorId(params.integratorId, data)
+        : data;
       const txDataWithSwapApiMarker = tagSwapApiMarker(txDataWithIntegratorId);
 
       return {
         chainId: crossSwap.inputToken.chainId,
         from: crossSwap.depositor,
-        to: multicall3.address,
+        to: crossSwap.inputToken.address, // HyperEVM address
         data: txDataWithSwapApiMarker,
         value: BigNumber.from(0),
         ecosystem: "evm",
