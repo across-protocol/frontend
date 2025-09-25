@@ -257,6 +257,7 @@ function buildSwapRouterSwapTx(
     options
   );
   return {
+    ecosystem: "evm" as const,
     data: calldata,
     value,
     to: SWAP_ROUTER_02_ADDRESS[swap.chainId],
@@ -313,6 +314,7 @@ function buildIndicativeQuote(
     slippageTolerance: swap.slippageTolerance,
     swapTxns: [
       {
+        ecosystem: "evm" as const,
         to: "0x0",
         data: "0x0",
         value: "0x0",

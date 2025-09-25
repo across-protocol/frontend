@@ -2,7 +2,7 @@ import { TradeType } from "@uniswap/sdk-core";
 import { BigNumber } from "ethers";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
-import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap, EvmSwapTxn } from "../types";
 import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
@@ -74,11 +74,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
     }
 
     const wgho = getWghoContract(chainId);
-    const swapTxns: {
-      data: string;
-      value: string;
-      to: string;
-    }[] = [];
+    const swapTxns: EvmSwapTxn[] = [];
 
     // Depending on the swap route, we need to encode different calldata
     // - L1 GHO -> L1 WGHO : encode `depositFor`
@@ -89,6 +85,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         ? wgho.interface.encodeFunctionData("depositFor", [recipient, amount])
         : wgho.interface.encodeFunctionData("withdrawTo", [recipient, amount]);
     swapTxns.push({
+      ecosystem: "evm" as const,
       data: swapTx1Calldata,
       value: "0",
       to: wgho.address,
@@ -136,6 +133,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
     );
     // Encode approval calldata for the swap via `SwapRouter02`.
     swapTxns.push({
+      ecosystem: "evm" as const,
       data: encodeApproveCalldata(
         swapRouter02Strategy.getRouter(chainId).address,
         ghoSwapQuote.maximumAmountIn
@@ -150,10 +148,12 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       );
     }
     // Encode the swap calldata via `SwapRouter02`.
+    const swapTxn = ghoSwapQuote.swapTxns[0] as EvmSwapTxn;
     swapTxns.push({
-      data: ghoSwapQuote.swapTxns[0].data,
-      value: ghoSwapQuote.swapTxns[0].value,
-      to: ghoSwapQuote.swapTxns[0].to,
+      ecosystem: "evm" as const,
+      data: swapTxn.data,
+      value: swapTxn.value,
+      to: swapTxn.to,
     });
 
     return {

@@ -7,16 +7,19 @@ import {
   getBase64EncodedWireTransaction,
   pipe,
   appendTransactionMessageInstruction,
+  fetchAddressesForLookupTables,
+  AddressesByLookupTableAddress,
 } from "@solana/kit";
+import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-import { CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwapQuotes, EvmSwapTxn, isSvmSwapTxn } from "../../_dexes/types";
 import {
   assertValidIntegratorId,
   tagIntegratorId,
   tagSwapApiMarker,
 } from "../../_integrator-id";
-import { getSpokePool, getSpokePoolAddress, InputError } from "../../_utils";
+import { getSpokePool, getSpokePoolAddress } from "../../_utils";
 import {
   getSpokePoolPeriphery,
   TransferType,
@@ -25,8 +28,9 @@ import {
   extractDepositDataStruct,
   extractSwapAndDepositDataStruct,
 } from "../../_dexes/utils";
+import { JupiterSwapIxs } from "../../_dexes/jupiter/utils/api";
+import { appendJupiterIxs } from "../../_dexes/jupiter/utils/transaction-builder";
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
-import { AcrossErrorCode } from "../../_errors";
 import { getSVMRpc } from "../../_providers";
 import { getFillDeadlineBuffer } from "../../_fill-deadline";
 
@@ -129,10 +133,11 @@ async function _buildDepositTxForAllowanceHolderEvm(
           "Expected exactly 1 swap transaction for origin swap via `UniversalSwapAndBridge`"
         );
       }
+      const swapTxn = originSwapQuote.swapTxns[0] as EvmSwapTxn;
       tx = await universalSwapAndBridge.populateTransaction.swapAndBridge(
         originSwapQuote.tokenIn.address,
         originSwapQuote.tokenOut.address,
-        originSwapQuote.swapTxns[0].data,
+        swapTxn.data,
         originSwapQuote.maximumAmountIn,
         originSwapQuote.minAmountOut,
         {
@@ -282,21 +287,18 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const { originSwapQuote, crossSwap } = crossSwapQuotes;
   const originChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
+  const rpcClient = getSVMRpc(originChainId);
 
-  if (originSwapQuote) {
-    throw new InputError({
-      message: "Origin swaps not supported on SVM yet",
-      code: AcrossErrorCode.INVALID_PARAM,
-    });
-  }
-
+  // Build deposit instruction parameters
   const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
   const depositor = address(
     sdk.utils.toAddressType(crossSwap.depositor, originChainId).toBase58()
   );
   const recipient = address(
+    // FIXME: When we support messages, recipient must be the MulticallHandler
     sdk.utils.toAddressType(crossSwap.recipient, destinationChainId).toBase58()
   );
+
   const inputToken = address(
     sdk.utils
       .toAddressType(
@@ -313,8 +315,11 @@ async function _buildDepositTxForAllowanceHolderSvm(
       )
       .toBase58()
   );
+  // For A2B: use swap expected output, for B2B: use bridge input amount
   const inputAmount = BigInt(
-    crossSwapQuotes.bridgeQuote.inputAmount.toString()
+    originSwapQuote
+      ? originSwapQuote.expectedAmountOut.toString()
+      : crossSwapQuotes.bridgeQuote.inputAmount.toString()
   );
   const outputAmount = sdk.arch.svm.bigToU8a32(
     crossSwapQuotes.bridgeQuote.outputAmount
@@ -332,9 +337,13 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
   const exclusivityParameter =
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
-  const message = Uint8Array.from(
-    Buffer.from(crossSwapQuotes.bridgeQuote.message ?? "0x", "hex")
-  );
+  // FIXME: Temporarily hardcoding empty messages.
+  // Fix when we have a workaround for transaction size limitations
+  const message = Uint8Array.from(Buffer.from("", "hex"));
+  // Future implementation should use:
+  // const message = Uint8Array.from(
+  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "", "hex")
+  // );
 
   const noopSigner = createNoopSigner(depositor);
   const depositDataSeed: Parameters<
@@ -373,7 +382,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
 
   const depositIx = await sdk.arch.svm.createDepositInstruction(
     noopSigner,
-    getSVMRpc(originChainId),
+    rpcClient,
     {
       signer: noopSigner,
       state: statePda,
@@ -406,19 +415,66 @@ async function _buildDepositTxForAllowanceHolderSvm(
     assertValidIntegratorId(integratorId);
   }
 
-  const tx = pipe(depositIx, (tx) =>
-    integratorId
-      ? appendTransactionMessageInstruction(
-          getAddMemoInstruction({
-            memo: integratorId,
-          }),
-          tx
-        )
-      : tx
+  let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
+
+  // Get swap instructions for A2B flows (if present)
+  const swapTxn = originSwapQuote?.swapTxns[0];
+  const swapIxs =
+    swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.instructions : undefined;
+  const swapLookupTables =
+    swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.lookupTables : undefined;
+  const swapProvider = originSwapQuote?.swapProvider.name;
+
+  tx = pipe(
+    tx,
+    // Add swap instructions if present
+    (tx) => {
+      if (!swapIxs) return tx;
+
+      switch (swapProvider) {
+        case "jupiter":
+          return appendJupiterIxs(tx, swapIxs as JupiterSwapIxs);
+        default:
+          throw new Error(`Unsupported SVM swap provider: ${swapProvider}`);
+      }
+    },
+    // Add all deposit instructions
+    (tx) =>
+      depositIx.instructions.reduce(
+        (acc, instruction) =>
+          appendTransactionMessageInstruction(instruction, acc),
+        tx
+      ),
+    // Add integrator memo if provided
+    (tx) =>
+      integratorId
+        ? appendTransactionMessageInstruction(
+            getAddMemoInstruction({ memo: integratorId }),
+            tx
+          )
+        : tx
   );
-  const compiledTx = compileTransaction(tx);
+
+  // Fetch address lookup tables if present to reduce txn size
+  const addressesByLookup: AddressesByLookupTableAddress = swapLookupTables
+    ? await fetchAddressesForLookupTables(swapLookupTables, rpcClient)
+    : {};
+
+  // Compile transaction with address lookup table compression
+  const hasLookupTables = Object.keys(addressesByLookup).length > 0;
+
+  let compiledTx;
+  if (hasLookupTables) {
+    const compressedMessage =
+      compressTransactionMessageUsingAddressLookupTables(tx, addressesByLookup);
+    compiledTx = compileTransaction(compressedMessage);
+  } else {
+    compiledTx = compileTransaction(tx);
+  }
+
   const base64EncodedWireTransaction =
     getBase64EncodedWireTransaction(compiledTx);
+
   return {
     chainId: originChainId,
     to: spokePoolProgramId,
