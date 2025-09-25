@@ -28,7 +28,6 @@ import {
   getIndirectDestinationRoutes,
 } from "./utils-b2bi";
 import {
-  SwapAmountTooLowForBridgeFeesError,
   InvalidParamError,
   getSwapQuoteUnavailableError,
   SwapQuoteUnavailableError,
@@ -148,13 +147,6 @@ export async function getCrossSwapQuotesForExactInputB2B(
     recipient: bridge.getBridgeQuoteRecipient(crossSwap),
     message: bridge.getBridgeQuoteMessage(crossSwap),
   });
-
-  if (bridgeQuote.provider === "across" && bridgeQuote.outputAmount.lt(0)) {
-    throw new SwapAmountTooLowForBridgeFeesError({
-      bridgeAmount: crossSwap.amount.toString(),
-      bridgeFee: bridgeQuote.suggestedFees.totalRelayFee.total.toString(),
-    });
-  }
 
   const appFee = calculateAppFee({
     outputAmount: bridgeQuote.outputAmount,
