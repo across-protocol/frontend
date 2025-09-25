@@ -12,7 +12,6 @@ import {
   getTokenByAddress,
   getBalance,
 } from "../../_utils";
-import { buildCrossSwapTxForAllowanceHolder } from "./_utils";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -25,6 +24,7 @@ import { getBalanceAndAllowance } from "../../_erc20";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
 import { inferCrossSwapType } from "../../_dexes/utils";
 import { quoteFetchStrategies } from "../_configs";
+import { getBridgeStrategy } from "../../_bridges";
 import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
 
@@ -80,6 +80,12 @@ export async function handleApprovalSwap(
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
+  // TODO: Extend the strategy selection based on more sophisticated logic when we start
+  // implementing burn/mint bridges.
+  const bridgeStrategy = getBridgeStrategy({
+    originChainId: inputToken.chainId,
+    destinationChainId: outputToken.chainId,
+  });
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
       amount,
@@ -102,7 +108,8 @@ export async function handleApprovalSwap(
       isDestinationSvm,
       isOriginSvm,
     },
-    quoteFetchStrategies
+    quoteFetchStrategies,
+    bridgeStrategy
   );
   const crossSwapType = inferCrossSwapType(crossSwapQuotes);
   logger.debug({
@@ -113,10 +120,10 @@ export async function handleApprovalSwap(
     crossSwapQuotes,
   });
 
-  const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
-    crossSwapQuotes,
-    integratorId
-  );
+  const crossSwapTx = await bridgeStrategy.buildTxForAllowanceHolder({
+    quotes: crossSwapQuotes,
+    integratorId,
+  });
 
   const {
     originSwapQuote,

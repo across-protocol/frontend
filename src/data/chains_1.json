@@ -1972,5 +1972,32 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ]
+  },
+  {
+    "chainId": 9745,
+    "name": "Plasma",
+    "publicRpcUrl": "https://rpc.plasma.to",
+    "explorerUrl": "https://plasmascan.to",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/plasma/assets/logo.svg",
+    "spokePool": "0x50039fAEfebef707cFD94D6d462fE6D10B39207a",
+    "spokePoolBlock": 1710028,
+    "inputTokens": [
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ]
   }
 ]
