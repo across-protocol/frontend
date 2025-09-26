@@ -530,21 +530,22 @@ export const ChainType = {
 export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
 
 export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  const universalSwapRoutes = config.getUniversalSwapRoutes();
+  const bridgeRoutes = config.getRoutes();
+  const allRoutes = bridgeRoutes.concat(universalSwapRoutes);
+
   let chainIds: number[] = [];
 
   switch (chainType) {
     case ChainType.FROM:
-      chainIds = enabledRoutes.map((route) => route.fromChain);
+      chainIds = allRoutes.map((route) => route.fromChain);
       break;
     case ChainType.TO:
-      chainIds = enabledRoutes.map((route) => route.toChain);
+      chainIds = allRoutes.map((route) => route.toChain);
       break;
     case ChainType.ALL:
     default:
-      chainIds = enabledRoutes.flatMap((route) => [
-        route.fromChain,
-        route.toChain,
-      ]);
+      chainIds = allRoutes.flatMap((route) => [route.fromChain, route.toChain]);
       break;
   }
 
