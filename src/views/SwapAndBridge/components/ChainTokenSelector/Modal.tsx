@@ -74,6 +74,7 @@ export default function ChainTokenSelectorModal({
   const displayedChains = useMemo(() => {
     return Object.fromEntries(
       Object.entries(crossChainRoutes.data || {}).filter(([chainId]) => {
+        // why ar we filtering out Boba?
         if ([288].includes(Number(chainId))) {
           return false;
         }

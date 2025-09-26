@@ -2,6 +2,7 @@ import { MAINNET_CHAIN_IDs } from "@across-protocol/constants";
 import { useQuery } from "@tanstack/react-query";
 import getApiEndpoint from "utils/serverless-api";
 import { SwapChain, SwapToken } from "utils/serverless-api/types";
+import { getConfig } from "utils/config";
 
 export type LifiToken = {
   chainId: number;
@@ -12,9 +13,9 @@ export type LifiToken = {
   priceUSD: string;
   coinKey: string;
   logoURI: string;
+  routeSource: "bridge" | "swap" | "both";
 };
 
-// TODO: Currently stubbed and will need to be added to the swap API
 export default function useAvailableCrosschainRoutes() {
   return useQuery({
     queryKey: ["availableCrosschainRoutes"],
@@ -27,7 +28,8 @@ export default function useAvailableCrosschainRoutes() {
 
       const allowedChainIds = new Set<number>(Object.values(MAINNET_CHAIN_IDs));
 
-      const tokenByChain = (tokens as SwapToken[]).reduce(
+      // 1) Build swap token map by chain
+      const swapTokensByChain = (tokens as SwapToken[]).reduce(
         (acc, token) => {
           if (!allowedChainIds.has(token.chainId)) {
             return acc;
@@ -41,6 +43,7 @@ export default function useAvailableCrosschainRoutes() {
             logoURI: token.logoUrl || "",
             priceUSD: token.priceUsd || "0",
             coinKey: token.symbol,
+            routeSource: "swap",
           };
           if (!acc[token.chainId]) {
             acc[token.chainId] = [];
@@ -51,14 +54,71 @@ export default function useAvailableCrosschainRoutes() {
         {} as Record<number, Array<LifiToken>>
       );
 
-      // Ensure chains with no tokens are present as empty arrays
-      (chains as SwapChain[]).forEach((c) => {
-        if (allowedChainIds.has(c.chainId) && !tokenByChain[c.chainId]) {
-          tokenByChain[c.chainId] = [];
-        }
-      });
+      // 2) Build bridge token map by origin chain from generated routes
+      const config = getConfig();
+      const enabledRoutes = config.getEnabledRoutes();
+      const bridgeOriginChains = Array.from(
+        new Set(enabledRoutes.map((r) => r.fromChain))
+      );
 
-      return tokenByChain;
+      const bridgeTokensByChain = bridgeOriginChains.reduce(
+        (acc, fromChainId) => {
+          if (!allowedChainIds.has(fromChainId)) {
+            return acc;
+          }
+          const reachable = config.filterReachableTokens(fromChainId);
+          const lifiTokens: LifiToken[] = reachable.map((t) => ({
+            chainId: fromChainId,
+            address: t.address,
+            name: t.name,
+            symbol: t.displaySymbol || t.symbol,
+            decimals: t.decimals,
+            logoURI: t.logoURI || "",
+            // We do not have price data from the routes; default to 0
+            priceUSD: "0",
+            coinKey: t.symbol,
+            routeSource: "bridge",
+          }));
+          acc[fromChainId] = lifiTokens;
+          return acc;
+        },
+        {} as Record<number, Array<LifiToken>>
+      );
+
+      // 3) Merge swap and bridge tokens, de-duplicating by address (case-insensitive)
+      const chainIdsInSwap = new Set(
+        (chains as SwapChain[]).map((c) => c.chainId)
+      );
+      const chainIdsInBridge = new Set(
+        Object.keys(bridgeTokensByChain).map(Number)
+      );
+      const chainIds = Array.from(
+        new Set([...chainIdsInSwap, ...chainIdsInBridge])
+      ).filter((id) => allowedChainIds.has(id));
+
+      const blendedByChain: Record<number, Array<LifiToken>> = {};
+      for (const chainId of chainIds) {
+        const mapByAddr = new Map<string, LifiToken>();
+        // Prefer swap tokens first (they include price)
+        (swapTokensByChain[chainId] || []).forEach((t) => {
+          mapByAddr.set(t.address.toLowerCase(), t);
+        });
+        // Add bridge tokens, merging routeSource when duplicate
+        (bridgeTokensByChain[chainId] || []).forEach((t) => {
+          const key = t.address.toLowerCase();
+          const existing = mapByAddr.get(key);
+          if (!existing) {
+            mapByAddr.set(key, t);
+          } else {
+            // Merge: if token exists from swap, mark as both
+            mapByAddr.set(key, { ...existing, routeSource: "both" });
+          }
+        });
+
+        blendedByChain[chainId] = Array.from(mapByAddr.values());
+      }
+
+      return blendedByChain;
     },
   });
 }
