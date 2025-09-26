@@ -31,6 +31,7 @@ import {
   getChainInfo,
   getCachedTokenPrice,
   ConvertDecimals,
+  isOutputTokenBridgeable,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -138,20 +139,33 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
-  if (isDestinationSvm) {
-    if (appFee || appFeeRecipient) {
-      throw new InvalidParamError({
-        param: "appFee, appFeeRecipient",
-        message: "App fee is not supported for SVM destinations",
-      });
-    }
-  }
-
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
         param: "recipient",
-        message: "Recipient is required for routes involving an SVM chain",
+        message: "Recipient is required for routes involving Solana",
+      });
+    }
+
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for routes involving Solana",
+      });
+    }
+
+    // Restrict SVM ↔ EVM combinations that require a destination swap
+    const outputBridgeable = isOutputTokenBridgeable(
+      outputTokenAddress,
+      originChainId,
+      destinationChainId
+    );
+
+    if (!outputBridgeable) {
+      throw new InvalidParamError({
+        param: "outputToken",
+        message:
+          "Destination swaps are not supported yet for routes involving Solana.",
       });
     }
   }
@@ -281,7 +295,24 @@ const SwapBody = type({
 
 export type SwapBody = Infer<typeof SwapBody>;
 
-export function handleSwapBody(body: SwapBody, destinationChainId: number) {
+export function handleSwapBody(
+  body: SwapBody,
+  destinationChainId: number,
+  originChainId: number
+) {
+  // Disable actions when origin or destination is SVM
+  if (
+    sdk.utils.chainIsSvm(originChainId) ||
+    sdk.utils.chainIsSvm(destinationChainId)
+  ) {
+    if (body.actions && body.actions.length > 0) {
+      throw new InvalidParamError({
+        param: "actions",
+        message: "Actions are not supported yet for routes involving Solana.",
+      });
+    }
+  }
+
   // Validate rules for each action. We have to validate the input before default values are applied.
   body.actions?.forEach((action, index) => {
     // 1. Validate that value is provided when populateCallValueDynamically is false or omitted

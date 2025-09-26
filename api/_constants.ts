@@ -26,6 +26,8 @@ export const TOKEN_SYMBOLS_MAP = {
   },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
+export const TOKEN_EQUIVALENCE_REMAPPING =
+  constants.TOKEN_EQUIVALENCE_REMAPPING;
 
 export const maxRelayFeePct = 0.25;
 
@@ -218,6 +220,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
+    CHAIN_IDs.PLASMA,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
