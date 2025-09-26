@@ -11,7 +11,7 @@ import {
   SwapQuote,
 } from "../types";
 import { getEnvs } from "../../_env";
-import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
+import { LIFI_DIAMOND_ADDRESS } from "./utils/addresses";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
 import {
@@ -35,13 +35,15 @@ export function getLifiStrategy(
   originSwapEntryPointContractName: OriginEntryPointContractName
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
-    const address = LIFI_ROUTER_ADDRESS[chainId];
+    const address = LIFI_DIAMOND_ADDRESS[chainId];
     if (!address) {
-      throw new Error(`LI.FI router address not found for chain id ${chainId}`);
+      throw new Error(
+        `'LiFiDiamond' address not found for chain id ${chainId}`
+      );
     }
     return {
       address,
-      name: "LifiRouter",
+      name: "LiFiDiamond",
     };
   };
 
