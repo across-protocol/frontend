@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 
 import { CrossSwap, CrossSwapQuotes, Token } from "../_dexes/types";
 import { AppFee, CrossSwapType } from "../_dexes/utils";
+import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
@@ -92,4 +93,25 @@ export type BridgeStrategy = {
     quotes: CrossSwapQuotes;
     integratorId?: string;
   }) => Promise<OriginTx>;
+};
+
+export type BridgeStrategyData =
+  | {
+      canFillInstantly: boolean;
+      isUtilizationHigh: boolean;
+      isUsdcToUsdc: boolean;
+      isLargeDeposit: boolean;
+      isFastCctpEligible: boolean;
+      isLineaSource: boolean;
+      isInThreshold: boolean;
+    }
+  | undefined;
+
+export type BridgeStrategyDataParams = {
+  inputToken: { address: string; chainId: number };
+  outputToken: { address: string; chainId: number };
+  amount: BigNumber;
+  recipient?: string;
+  depositor: string;
+  logger: Logger;
 };

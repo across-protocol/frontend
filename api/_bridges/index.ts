@@ -1,6 +1,6 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { BridgeStrategiesConfig } from "./types";
+import { BridgeStrategiesConfig, BridgeStrategyData } from "./types";
 import { CHAIN_IDs } from "../_constants";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
@@ -16,16 +16,47 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   // TODO: Add CCTP routes when ready
 };
 
-// TODO: Extend the strategy selection based on more sophisticated logic when we start
-// implementing burn/mint bridges.
 export function getBridgeStrategy({
   originChainId,
   destinationChainId,
+  bridgeStrategyData,
 }: {
   originChainId: number;
   destinationChainId: number;
+  bridgeStrategyData: BridgeStrategyData;
 }) {
-  const fromToChainOverride =
-    bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
-  return fromToChainOverride ?? bridgeStrategies.default;
+  if (!bridgeStrategyData) {
+    const fromToChainOverride =
+      bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
+    return fromToChainOverride ?? bridgeStrategies.default;
+  }
+  if (!bridgeStrategyData.isUsdcToUsdc) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUtilizationHigh) {
+    return getCctpBridgeStrategy();
+  }
+  if (bridgeStrategyData.isLineaSource) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isFastCctpEligible) {
+    if (bridgeStrategyData.isInThreshold) {
+      return getAcrossBridgeStrategy();
+    }
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      return getCctpBridgeStrategy();
+    }
+  }
+  if (bridgeStrategyData.canFillInstantly) {
+    return getAcrossBridgeStrategy();
+  } else {
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      // Use OFT bridge if not CCTP
+      return getCctpBridgeStrategy();
+    }
+  }
 }
