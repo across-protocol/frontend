@@ -138,7 +138,7 @@ export type CrossSwapQuotes = {
         suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
       }
     | {
-        provider: "hypercore";
+        provider: "hypercore" | "cctp";
       }
   );
   destinationSwapQuote?: SwapQuote;
