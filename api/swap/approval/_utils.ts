@@ -452,7 +452,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
         getAddMemoInstruction({
           memo: integratorId
             ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
-            : (integratorId ?? ""),
+            : SWAP_CALLDATA_MARKER,
         }),
         tx
       )
