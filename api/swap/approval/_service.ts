@@ -11,7 +11,12 @@ import {
   getWrappedNativeTokenAddress,
   getTokenByAddress,
   getBalance,
+  getCachedLimits,
+  getHubPool,
+  callViaMulticall3,
+  HUB_POOL_CHAIN_ID,
 } from "../../_utils";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -29,6 +34,203 @@ import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
 
 const logger = getLogger();
+
+/**
+ * Fetches bridge limits and utilization data in parallel to determine strategy requirements
+ */
+async function getBridgeStrategyData({
+  inputToken,
+  outputToken,
+  amount,
+  recipient,
+  depositor,
+}: {
+  inputToken: { address: string; chainId: number };
+  outputToken: { address: string; chainId: number };
+  amount: BigNumber;
+  recipient?: string;
+  depositor: string;
+}): Promise<{
+  canFillInstantly: boolean;
+  isUtilizationHigh: boolean;
+  isUsdcToUsdc: boolean;
+  isLargeDeposit: boolean;
+  isFastCctpEligible: boolean;
+  isLineaSource: boolean;
+}> {
+  const startTime = Date.now();
+  logger.debug({
+    at: "getBridgeStrategyData",
+    message: "Starting bridge strategy data fetch",
+    inputToken: inputToken.address,
+    outputToken: outputToken.address,
+    amount: amount.toString(),
+  });
+
+  try {
+    // Get token details for symbol and decimals first
+    const inputTokenDetails = getTokenByAddress(
+      inputToken.address,
+      inputToken.chainId
+    );
+    if (!inputTokenDetails) {
+      throw new Error(
+        `Input token not found for address ${inputToken.address}`
+      );
+    }
+
+    // Get L1 token address using TOKEN_SYMBOLS_MAP logic
+    const l1TokenAddress =
+      TOKEN_SYMBOLS_MAP[
+        inputTokenDetails.symbol as keyof typeof TOKEN_SYMBOLS_MAP
+      ]?.addresses[HUB_POOL_CHAIN_ID];
+    if (!l1TokenAddress) {
+      throw new Error(
+        `L1 token not found for symbol ${inputTokenDetails.symbol}`
+      );
+    }
+
+    const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+    if (!l1Token) {
+      throw new Error(
+        `L1 token details not found for address ${l1TokenAddress}`
+      );
+    }
+
+    // Fetch limits, utilization data, and token price in parallel
+    const parallelStartTime = Date.now();
+    const [limits, pooledTokenData, inputTokenPriceUsd] = await Promise.all([
+      // Get bridge limits
+      getCachedLimits(
+        inputToken.address,
+        outputToken.address,
+        inputToken.chainId,
+        outputToken.chainId,
+        amount.toString(),
+        recipient || depositor
+      ),
+      // Get utilization data from HubPool
+      (async () => {
+        const provider = getProvider(HUB_POOL_CHAIN_ID);
+        const hubPool = getHubPool(provider);
+
+        const multicallOutput = await callViaMulticall3(provider, [
+          {
+            contract: hubPool,
+            functionName: "sync",
+            args: [l1TokenAddress],
+          },
+          {
+            contract: hubPool,
+            functionName: "pooledTokens",
+            args: [l1TokenAddress],
+          },
+        ]);
+
+        return multicallOutput[1]; // pooledTokens data
+      })(),
+      // Get input token price
+      getCachedTokenPrice({
+        tokenAddress: inputToken.address,
+        chainId: inputToken.chainId,
+      }),
+    ]);
+    const parallelExecutionTime = Date.now() - parallelStartTime;
+
+    logger.debug({
+      at: "getBridgeStrategyData",
+      message: "Completed parallel data fetch",
+      parallelExecutionTimeMs: parallelExecutionTime,
+    });
+
+    // Check if we can fill instantly
+    const maxDepositInstant = BigNumber.from(limits.maxDepositInstant);
+    const canFillInstantly = amount.lte(maxDepositInstant);
+
+    // Check if utilization is high (>80%)
+    const { liquidReserves, utilizedReserves } = pooledTokenData;
+    const utilizationThreshold = sdk.utils.fixedPointAdjustment
+      .mul(80)
+      .div(100); // 80%
+
+    // Calculate current utilization percentage
+    const currentUtilization = utilizedReserves
+      .mul(sdk.utils.fixedPointAdjustment)
+      .div(liquidReserves.add(utilizedReserves));
+
+    const isUtilizationHigh = currentUtilization.gt(utilizationThreshold);
+
+    // Get output token details
+    const outputTokenDetails = getTokenByAddress(
+      outputToken.address,
+      outputToken.chainId
+    );
+
+    // Check if input and output tokens are both USDC
+    const isUsdcToUsdc =
+      inputTokenDetails?.symbol === "USDC" &&
+      outputTokenDetails?.symbol === "USDC";
+
+    // Check if deposit is > 1M USD
+    const depositAmountUsd =
+      parseFloat(
+        ethers.utils.formatUnits(amount, inputTokenDetails?.decimals || 18)
+      ) * inputTokenPriceUsd;
+    const isLargeDeposit = depositAmountUsd > 1_000_000; // 1M USD
+
+    // Check if eligible for Fast CCTP (Polygon, BSC, Solana) and deposit > 10K USD
+    const fastCctpChains = [CHAIN_IDs.POLYGON, CHAIN_IDs.BSC, CHAIN_IDs.SOLANA];
+    const isFastCctpChain =
+      fastCctpChains.includes(inputToken.chainId) ||
+      fastCctpChains.includes(outputToken.chainId);
+    const isFastCctpEligible = isFastCctpChain && depositAmountUsd > 10_000; // 10K USD
+
+    // Check if Linea is the source chain
+    const isLineaSource = inputToken.chainId === CHAIN_IDs.LINEA;
+
+    const executionTime = Date.now() - startTime;
+    logger.debug({
+      at: "getBridgeStrategyData",
+      message: "Successfully completed bridge strategy data fetch",
+      executionTimeMs: executionTime,
+      results: {
+        canFillInstantly,
+        isUtilizationHigh,
+        isUsdcToUsdc,
+        isLargeDeposit,
+        isFastCctpEligible,
+        isLineaSource,
+      },
+    });
+
+    return {
+      canFillInstantly,
+      isUtilizationHigh,
+      isUsdcToUsdc,
+      isLargeDeposit,
+      isFastCctpEligible,
+      isLineaSource,
+    };
+  } catch (error) {
+    const executionTime = Date.now() - startTime;
+    logger.warn({
+      at: "getBridgeStrategyData",
+      message: "Failed to fetch bridge strategy data, using defaults",
+      executionTimeMs: executionTime,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    // Return safe defaults on error
+    return {
+      canFillInstantly: false,
+      isUtilizationHigh: false,
+      isUsdcToUsdc: false,
+      isLargeDeposit: false,
+      isFastCctpEligible: false,
+      isLineaSource: false,
+    };
+  }
+}
 
 export async function handleApprovalSwap(
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
@@ -79,6 +281,22 @@ export async function handleApprovalSwap(
       : { actions: [] };
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;
+
+  // Get bridge strategy data (limits and utilization) in parallel
+  const {
+    canFillInstantly,
+    isUtilizationHigh,
+    isUsdcToUsdc,
+    isLargeDeposit,
+    isFastCctpEligible,
+    isLineaSource,
+  } = await getBridgeStrategyData({
+    inputToken,
+    outputToken,
+    amount,
+    recipient,
+    depositor,
+  });
 
   // TODO: Extend the strategy selection based on more sophisticated logic when we start
   // implementing burn/mint bridges.
