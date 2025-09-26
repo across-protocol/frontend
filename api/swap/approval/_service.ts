@@ -27,6 +27,7 @@ import { quoteFetchStrategies } from "../_configs";
 import { getBridgeStrategy } from "../../_bridges";
 import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
+import { getBridgeStrategyData } from "../../_bridges/utils";
 
 const logger = getLogger();
 
@@ -79,11 +80,20 @@ export async function handleApprovalSwap(
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
-  // TODO: Extend the strategy selection based on more sophisticated logic when we start
-  // implementing burn/mint bridges.
+  // Get bridge strategy data
+  const bridgeStrategyData = await getBridgeStrategyData({
+    inputToken,
+    outputToken,
+    amount,
+    recipient,
+    depositor,
+    logger,
+  });
+
   const bridgeStrategy = getBridgeStrategy({
     originChainId: inputToken.chainId,
     destinationChainId: outputToken.chainId,
+    bridgeStrategyData,
   });
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
