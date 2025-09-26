@@ -125,6 +125,7 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
           minOutputAmount: outputAmount,
           estimatedFillTimeSec: 0,
           provider: name,
+          fees: getZeroBridgeFees(inputToken),
         },
       };
     },
@@ -150,6 +151,7 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
           minOutputAmount,
           estimatedFillTimeSec: 0,
           provider: name,
+          fees: getZeroBridgeFees(inputToken),
         },
       };
     },
@@ -213,6 +215,32 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         value: BigNumber.from(0),
         ecosystem: "evm",
       };
+    },
+  };
+}
+
+function getZeroBridgeFees(inputToken: Token) {
+  const zeroBN = BigNumber.from(0);
+  return {
+    totalRelay: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    relayerCapital: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    relayerGas: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    lp: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
     },
   };
 }

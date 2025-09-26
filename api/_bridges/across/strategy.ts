@@ -8,6 +8,7 @@ import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
 import {
   getBridgeQuoteForExactInput,
   getBridgeQuoteForOutput,
+  getSuggestedFees,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "../../swap/approval/_utils";
 import {
@@ -18,6 +19,7 @@ import {
 import { AppFee } from "../../_dexes/utils";
 import { Token } from "../../_dexes/types";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
+import { BigNumber } from "ethers";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -33,6 +35,34 @@ const capabilities: BridgeCapabilities = {
 };
 
 export function getAcrossBridgeStrategy(): BridgeStrategy {
+  const extractFees = (
+    feesFromApi: Awaited<ReturnType<typeof getSuggestedFees>>,
+    bridgeFeesToken: Token
+  ) => {
+    return {
+      totalRelay: {
+        total: BigNumber.from(feesFromApi.totalRelayFee.total),
+        pct: BigNumber.from(feesFromApi.totalRelayFee.pct),
+        token: bridgeFeesToken,
+      },
+      relayerCapital: {
+        total: BigNumber.from(feesFromApi.relayerCapitalFee.total),
+        pct: BigNumber.from(feesFromApi.relayerCapitalFee.pct),
+        token: bridgeFeesToken,
+      },
+      relayerGas: {
+        total: BigNumber.from(feesFromApi.relayerGasFee.total),
+        pct: BigNumber.from(feesFromApi.relayerGasFee.pct),
+        token: bridgeFeesToken,
+      },
+      lp: {
+        total: BigNumber.from(feesFromApi.lpFee.total),
+        pct: BigNumber.from(feesFromApi.lpFee.pct),
+        token: bridgeFeesToken,
+      },
+    };
+  };
+
   return {
     name,
     capabilities,
@@ -90,6 +120,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
           ...bridgeQuote,
           estimatedFillTimeSec: bridgeQuote.suggestedFees.estimatedFillTimeSec,
           provider: name,
+          fees: extractFees(bridgeQuote.suggestedFees, inputToken),
         },
       };
     },
@@ -115,6 +146,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
           ...bridgeQuote,
           estimatedFillTimeSec: bridgeQuote.suggestedFees.estimatedFillTimeSec,
           provider: name,
+          fees: extractFees(bridgeQuote.suggestedFees, inputToken),
         },
       };
     },

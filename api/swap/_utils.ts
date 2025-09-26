@@ -705,7 +705,7 @@ export async function calculateSwapFees(params: {
       parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
       appFeeTokenPriceUsd;
 
-    const bridgeFees = getBridgeFees(bridgeQuote);
+    const bridgeFees = bridgeQuote.fees;
     const relayerCapital = bridgeFees.relayerCapital;
     const destinationGas = bridgeFees.relayerGas;
     const lpFee = bridgeFees.lp;
@@ -918,8 +918,6 @@ export async function buildBaseSwapResponseJson(params: {
     expectedOutputAmountSansAppFees,
   } = getAmounts(params);
 
-  const bridgeFees = getBridgeFees(params.bridgeQuote);
-
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
@@ -962,7 +960,7 @@ export async function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
-        fees: bridgeFees,
+        fees: params.bridgeQuote.fees,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -1148,33 +1146,4 @@ export function getSwapTx(
   }
 
   return params.permitSwapTx?.swapTx;
-}
-
-function getBridgeFees(bridgeQuote: CrossSwapQuotes["bridgeQuote"]) {
-  if (bridgeQuote.provider === "across") {
-    return {
-      totalRelay: bridgeQuote.suggestedFees.totalRelayFee,
-      relayerCapital: bridgeQuote.suggestedFees.relayerCapitalFee,
-      relayerGas: bridgeQuote.suggestedFees.relayerGasFee,
-      lp: bridgeQuote.suggestedFees.lpFee,
-    };
-  }
-  return {
-    totalRelay: {
-      pct: "0",
-      total: "0",
-    },
-    relayerCapital: {
-      pct: "0",
-      total: "0",
-    },
-    relayerGas: {
-      pct: "0",
-      total: "0",
-    },
-    lp: {
-      pct: "0",
-      total: "0",
-    },
-  };
 }

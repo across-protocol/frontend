@@ -110,6 +110,12 @@ export type SwapQuote = {
   };
 };
 
+type FeeComponent = {
+  total: BigNumber;
+  pct: BigNumber;
+  token: Token;
+};
+
 export type CrossSwapQuotes = {
   crossSwap: CrossSwap;
   bridgeQuote: {
@@ -120,6 +126,12 @@ export type CrossSwapQuotes = {
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
     estimatedFillTimeSec: number;
+    fees: {
+      totalRelay: FeeComponent;
+      relayerCapital: FeeComponent;
+      relayerGas: FeeComponent;
+      lp: FeeComponent;
+    };
   } & (
     | {
         provider: "across";
