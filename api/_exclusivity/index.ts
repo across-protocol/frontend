@@ -8,7 +8,7 @@ type BigNumber = ethers.BigNumber;
 const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS, CHAIN_IDs } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
-const REORG_CHAINS = [CHAIN_IDs.MAINNET, CHAIN_IDs.POLYGON, CHAIN_IDs.SCROLL];
+// const REORG_CHAINS = [CHAIN_IDs.MAINNET, CHAIN_IDs.POLYGON, CHAIN_IDs.SCROLL];
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -58,11 +58,10 @@ export async function selectExclusiveRelayer(
   );
 
   if (relayers.length > 0) {
-    // Only get the latest block if we are doing an exclusive relay and on a chain which re-orgs.
-    if (REORG_CHAINS.includes(originChainId)) {
-      const currentBlock = await getCachedLatestBlock(originChainId);
-      exclusivityPeriodSec += currentBlock.timestamp;
-    }
+    // if (REORG_CHAINS.includes(originChainId)) {
+    //   const currentBlock = await getCachedLatestBlock(originChainId);
+    //   exclusivityPeriodSec += currentBlock.timestamp;
+    // }
 
     exclusiveRelayer = selectorFn(relayers);
     exclusivityPeriod =
