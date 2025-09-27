@@ -5,7 +5,8 @@ import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS } from "utils";
+import { COLORS, formatUSD, getConfig } from "utils";
+import { useTokenConversion } from "hooks/useTokenConversion";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
@@ -215,42 +216,102 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const state = getButtonState();
 
   // Calculate display values from swapQuote
+  // Resolve conversion helpers outside memo to respect hooks rules
+  const bridgeTokenSymbol =
+    (swapQuote as any)?.steps?.bridge?.tokenOut?.symbol ||
+    outputToken?.symbol ||
+    "ETH";
+  const destinationNativeSymbol = getConfig().getNativeTokenInfo(
+    outputToken?.chainId || 1
+  ).symbol;
+  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
+    useTokenConversion(inputToken?.symbol || "ETH", "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
+    useTokenConversion(bridgeTokenSymbol, "usd");
+  const { convertTokenToBaseCurrency: convertDestinationNativeToUsd } =
+    useTokenConversion(destinationNativeSymbol, "usd");
+
   const displayValues = React.useMemo(() => {
+    const toBN = (v: any) => {
+      try {
+        return BigNumber.from(v ?? 0);
+      } catch {
+        return BigNumber.from(0);
+      }
+    };
+
+    const formatUsdString = (v?: BigNumber) => {
+      if (!v) return "-";
+      try {
+        return `$${formatUSD(v)}`;
+      } catch {
+        return "-";
+      }
+    };
+
     if (!swapQuote || !inputToken || !outputToken) {
       return {
-        fee: "$0.05",
-        time: "~2 min",
-        bridgeFee: "$0.01",
-        destinationGasFee: "$0",
-        extraFee: "$0.04",
+        fee: "-",
+        time: "-",
+        bridgeFee: "-",
+        destinationGasFee: "-",
+        extraFee: "-",
         route: "Across V4",
-        estimatedTime: "~2 secs",
-        netFee: "$0.05",
+        estimatedTime: "-",
+        netFee: "-",
       };
     }
 
-    // Calculate fees based on swapQuote data
-    // This is a placeholder - you'd calculate actual fees from the quote
-    const bridgeFee = "$0.01";
-    const destinationGasFee = "$0";
-    const extraFee = "$0.04";
-    const netFee = "$0.05";
+    const fees = (swapQuote as any)?.steps?.bridge?.fees || {};
+    const relayerCapitalTotal = toBN(fees?.relayerCapital?.total);
+    const lpTotal = toBN(fees?.lp?.total);
+    const relayerGasTotal = toBN(fees?.relayerGas?.total);
+
+    // Convert components to USD
+    const bridgeFeeTokenAmount = relayerCapitalTotal.add(lpTotal);
+    const bridgeFeeUsd = convertBridgeTokenToUsd(bridgeFeeTokenAmount);
+    const gasFeeUsd = convertDestinationNativeToUsd(relayerGasTotal);
+
+    // Approximate swap fee in USD if we have user input and bridge input
+    const bridgeInputAmount = toBN(
+      (swapQuote as any)?.steps?.bridge?.inputAmount
+    );
+    const inputAmountUsd = convertInputTokenToUsd(amount ?? BigNumber.from(0));
+    const bridgeInputUsd = convertBridgeTokenToUsd(bridgeInputAmount);
+    const swapFeeUsd =
+      inputAmountUsd && bridgeInputUsd && inputAmountUsd.gt(bridgeInputUsd)
+        ? inputAmountUsd.sub(bridgeInputUsd)
+        : BigNumber.from(0);
+
+    const netFeeUsd = (bridgeFeeUsd || BigNumber.from(0))
+      .add(gasFeeUsd || BigNumber.from(0))
+      .add(swapFeeUsd || BigNumber.from(0));
 
     // Format time from expectedFillTime (in seconds)
-    const timeInMinutes = Math.ceil(swapQuote.expectedFillTime / 60);
+    const timeInMinutes = Math.ceil(
+      ((swapQuote as any).expectedFillTime || 0) / 60
+    );
     const time = timeInMinutes < 1 ? "~30 sec" : `~${timeInMinutes} min`;
 
     return {
-      fee: netFee,
+      fee: formatUsdString(netFeeUsd),
       time,
-      bridgeFee,
-      destinationGasFee,
-      extraFee,
+      bridgeFee: formatUsdString(bridgeFeeUsd),
+      destinationGasFee: formatUsdString(gasFeeUsd),
+      extraFee: formatUsdString(swapFeeUsd),
       route: "Across V4",
       estimatedTime: timeInMinutes < 1 ? "~30 secs" : `~${timeInMinutes} mins`,
-      netFee,
+      netFee: formatUsdString(netFeeUsd),
     };
-  }, [swapQuote, inputToken, outputToken]);
+  }, [
+    swapQuote,
+    inputToken,
+    outputToken,
+    amount,
+    convertInputTokenToUsd,
+    convertBridgeTokenToUsd,
+    convertDestinationNativeToUsd,
+  ]);
 
   // Handle confirmation
   const handleConfirm = async () => {
@@ -266,12 +327,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   };
 
-  // Compute target height based on state and expansion
-  let targetHeight = 88;
-  if (state === "readyToConfirm") {
-    targetHeight = expanded ? 300 : 128;
-  }
-
   // Render state-specific content
   let content: React.ReactNode = null;
   switch (state) {
@@ -281,14 +336,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           <motion.div
             key="expandable-label-section-outer"
             initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0, height: expanded ? 204 : 32 }}
-            exit={{ opacity: 0, y: -16, height: 32 }}
-            transition={
-              expanded
-                ? { type: "spring", stiffness: 300, damping: 24 }
-                : { type: "spring", stiffness: 300, damping: 40 }
-            }
-            style={{ height: expanded ? 204 : 32, overflow: "hidden" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{ overflow: "hidden" }}
           >
             <ExpandableLabelSection
               fee={displayValues.fee}
@@ -557,14 +608,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   return (
     <Container
       state={state}
-      animate={{ height: targetHeight }}
+      layout
       initial={false}
-      transition={
-        targetHeight < 300
-          ? { type: "spring", stiffness: 300, damping: 40 }
-          : { type: "spring", stiffness: 300, damping: 30 }
-      }
-      style={{ height: targetHeight }}
+      transition={{ type: "spring", stiffness: 300, damping: 40 }}
     >
       {content}
     </Container>
@@ -663,7 +709,7 @@ const StyledChevronDown = styled(ChevronDownIcon)<{ expanded: boolean }>`
 const ExpandableContent = styled.div<{ expanded: boolean }>`
   overflow: hidden;
   transition: all 0.3s ease;
-  max-height: ${({ expanded }) => (expanded ? "160px" : "0")};
+  max-height: ${({ expanded }) => (expanded ? "500px" : "0")};
   margin-top: ${({ expanded }) => (expanded ? "8px" : "0")};
 `;
 
@@ -673,7 +719,7 @@ const StyledButton = styled.button<{
   fullHeight?: boolean;
 }>`
   width: 100%;
-  height: ${({ fullHeight }) => (fullHeight ? "100%" : "64px")};
+  height: 64px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 16px;

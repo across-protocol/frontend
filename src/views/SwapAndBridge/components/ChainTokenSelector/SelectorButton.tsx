@@ -114,6 +114,10 @@ const Wrapper = styled.div`
   background: rgba(224, 243, 255, 0.05);
 
   cursor: pointer;
+
+  &:hover {
+    background: rgba(224, 243, 255, 0.1);
+  }
 `;
 
 const VerticalDivider = styled.div`
@@ -156,6 +160,7 @@ const TokenName = styled.div`
 
 const SelectTokenName = styled(TokenName)`
   color: ${COLORS["aqua"]};
+  padding-inline: 8px;
 `;
 
 const ChainName = styled.div`
