@@ -487,6 +487,11 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not extract 'BaseDepositDataStruct' for non-Across bridge quotes"
+    );
+  }
   const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =

@@ -31,12 +31,23 @@ export async function getSvmSpokeState(
   return state;
 }
 
-export function getSpokePoolAddress(chainId: number): string {
+export function getSpokePoolAddress(
+  chainId: number,
+  throwIfNotFound = true
+): string {
   if (sdk.utils.chainIsSvm(chainId)) {
-    return sdk.utils.getDeployedAddress("SvmSpoke", chainId) as string;
+    return sdk.utils.getDeployedAddress(
+      "SvmSpoke",
+      chainId,
+      throwIfNotFound
+    ) as string;
   }
   switch (chainId) {
     default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId) as string;
+      return sdk.utils.getDeployedAddress(
+        "SpokePool",
+        chainId,
+        throwIfNotFound
+      ) as string;
   }
 }

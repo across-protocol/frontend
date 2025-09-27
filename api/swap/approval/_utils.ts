@@ -290,6 +290,12 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const destinationChainId = crossSwap.outputToken.chainId;
   const rpcClient = getSVMRpc(originChainId);
 
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not build deposit tx on SVM for non-Across bridge quotes"
+    );
+  }
+
   // Build deposit instruction parameters
   const spokePoolProgramId = address(getSpokePoolAddress(originChainId));
   const depositor = address(
