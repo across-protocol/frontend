@@ -239,7 +239,10 @@ const TokenInput = ({
           disabled={shouldUpdate && isUpdateLoading}
         />
         <TokenAmountInputEstimatedUsd>
-          {estimatedUsdAmount && <>Value: ~${estimatedUsdAmount}</>}
+          <ValueRow>
+            <ArrowsCross width={16} height={16} />{" "}
+            <span>Value: ${estimatedUsdAmount ?? "0.00"}</span>
+          </ValueRow>
         </TokenAmountInputEstimatedUsd>
         {validationError && (
           <TokenAmountInputValidationError>
@@ -282,6 +285,18 @@ const TokenInput = ({
     </TokenInputWrapper>
   );
 };
+
+const ValueRow = styled.div`
+  font-size: 16px;
+  span {
+    margin-left: 4px;
+  }
+  span,
+  svg {
+    display: inline-block;
+    vertical-align: middle;
+  }
+`;
 
 const TokenAmountStack = styled.div`
   display: flex;
@@ -326,27 +341,30 @@ const TokenAmountInputEstimatedUsd = styled.div`
   font-size: 14px;
   font-weight: 400;
   line-height: 130%;
+  opacity: 0.5;
 `;
 
 const TokenAmountInputValidationError = styled.div`
   color: #f96c6c;
   font-family: Barlow;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 130%;
   margin-top: 4px;
 `;
 
 const TokenInputWrapper = styled.div`
   display: flex;
-  height: 132px;
-  padding: 16px;
+  min-height: 148px;
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
-  border-radius: 12px;
   background: transparent;
   position: relative;
+  padding: 24px;
+  border-radius: 24px;
+  background: ${COLORS["black-700"]};
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 `;
 
 const BalanceSelectorWrapper = styled.div`
@@ -361,12 +379,8 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   align-self: stretch;
-  padding: 12px;
-  border-radius: 24px;
-  background: ${COLORS["black-700"]};
-  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 `;
 
 const QuickSwapButton = styled.button`
