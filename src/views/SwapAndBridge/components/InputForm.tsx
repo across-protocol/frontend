@@ -224,7 +224,7 @@ const TokenInput = ({
     <TokenInputWrapper>
       <TokenAmountStack>
         <TokenAmountInputTitle>
-          {isOrigin ? "Sell" : "Buy"}
+          {isOrigin ? "From" : "To"}
         </TokenAmountInputTitle>
         <TokenAmountInput
           placeholder="0.00"
@@ -294,19 +294,20 @@ const TokenAmountStack = styled.div`
 `;
 
 const TokenAmountInputTitle = styled.div`
-  color: ${() => COLORS.aqua};
+  color: ${COLORS.aqua};
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 130%;
 `;
 
-const TokenAmountInput = styled.input`
-  color: #e0f3ff;
+const TokenAmountInput = styled.input<{ value: string }>`
   font-family: Barlow;
   font-size: 48px;
   font-weight: 300;
   line-height: 120%;
   letter-spacing: -1.92px;
+  width: 100%;
+  color: ${(value) => (value ? COLORS.aqua : COLORS["light-200"])};
 
   outline: none;
   border: none;
@@ -320,7 +321,7 @@ const TokenAmountInput = styled.input`
 `;
 
 const TokenAmountInputEstimatedUsd = styled.div`
-  color: #e0f3ff;
+  color: ${COLORS["light-200"]};
   font-family: Barlow;
   font-size: 14px;
   font-weight: 400;
@@ -344,8 +345,7 @@ const TokenInputWrapper = styled.div`
   align-items: center;
   align-self: stretch;
   border-radius: 12px;
-  border: 1px solid rgba(224, 243, 255, 0.05);
-  background: #2d2e32;
+  background: transparent;
   position: relative;
 `;
 
@@ -357,7 +357,6 @@ const BalanceSelectorWrapper = styled.div`
 
 const Wrapper = styled.div`
   position: relative;
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -366,8 +365,7 @@ const Wrapper = styled.div`
   align-self: stretch;
   padding: 12px;
   border-radius: 24px;
-  border: 1px solid rgba(224, 243, 255, 0.05);
-  background: #34353b;
+  background: ${COLORS["black-700"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 `;
 
@@ -382,7 +380,7 @@ const QuickSwapButton = styled.button`
   gap: 8px;
   border-radius: 32px;
   border: 1px solid #4c4e57;
-  background: #34353b;
+  background: ${COLORS["black-700"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 

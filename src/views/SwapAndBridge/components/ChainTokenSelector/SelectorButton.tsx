@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
-import TokenMask from "assets/mask/token-mask.svg";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import ChainTokenSelectorModal from "./Modal";
 
@@ -24,13 +23,14 @@ type Props = {
   onSelect?: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
   marginBottom?: string;
+  className?: string;
 };
 
 export default function SelectorButton({
   onSelect,
   selectedToken,
   isOriginToken,
-  marginBottom,
+  className,
 }: Props) {
   const [displayModal, setDisplayModal] = useState(false);
 
@@ -52,18 +52,15 @@ export default function SelectorButton({
   if (!selectedToken) {
     return (
       <>
-        <SelectWrapper
-          onClick={() => setDisplayModal(true)}
-          marginBottom={marginBottom}
-        >
+        <Wrapper className={className} onClick={() => setDisplayModal(true)}>
           <NamesStack>
-            <SelectTokenName>Select a token</SelectTokenName>
+            <SelectTokenName>Select token</SelectTokenName>
           </NamesStack>
           <VerticalDivider />
           <ChevronStack>
             <ChevronDown />
           </ChevronStack>
-        </SelectWrapper>
+        </Wrapper>
         <ChainTokenSelectorModal
           onSelect={setSelectedToken}
           displayModal={displayModal}
@@ -78,14 +75,12 @@ export default function SelectorButton({
 
   return (
     <>
-      <Wrapper
-        onClick={() => setDisplayModal(true)}
-        marginBottom={marginBottom}
-      >
+      <Wrapper className={className} onClick={() => setDisplayModal(true)}>
         <TokenStack>
           <TokenImg src={selectedToken.symbolUri} />
           <ChainImg src={chain.logoURI} />
         </TokenStack>
+        <VerticalDivider />
         <NamesStack>
           <TokenName>{selectedToken.symbol}</TokenName>
           <ChainName>{chain.name}</ChainName>
@@ -105,36 +100,28 @@ export default function SelectorButton({
   );
 }
 
-const Wrapper = styled.div<{ marginBottom?: string }>`
+const Wrapper = styled.div`
+  --height: 48px;
+  --padding: 8px;
+  height: var(--height);
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: ${({ marginBottom }) => marginBottom || "0"};
 
-  border-radius: 8px;
-  border: 1px solid #3f4247;
-  background: #e0f3ff0d;
-  padding: 8px 12px;
-
-  height: 64px;
-
-  gap: 12px;
-  width: 184px;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 243, 255, 0.05);
+  background: rgba(224, 243, 255, 0.05);
 
   cursor: pointer;
 `;
 
-const SelectWrapper = styled(Wrapper)`
-  height: 48px;
-`;
-
 const VerticalDivider = styled.div`
   width: 1px;
-  height: calc(100% + 16px);
+  height: calc(100% - (var(--padding) * 2));
+  margin-top: var(--padding);
 
-  margin-top: -8px;
-
-  background: #3f4247;
+  background: rgba(224, 243, 255, 0.05);
 `;
 
 const ChevronStack = styled.div`
@@ -142,13 +129,15 @@ const ChevronStack = styled.div`
   align-items: center;
   justify-content: center;
   height: 100%;
+  width: var(--height);
 `;
 
 const NamesStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
-
+  gap: 2px;
+  padding-inline: var(--padding);
+  white-space: nowrap;
   height: 100%;
 
   flex-grow: 1;
@@ -174,33 +163,36 @@ const ChainName = styled.div`
   line-height: 12px;
   font-weight: 400;
   color: #e0f3ff;
+  opacity: 0.5;
 `;
 
 const TokenStack = styled.div`
-  width: 32px;
-  height: 48px;
+  height: 100%;
+  width: var(--height);
+  padding-inline: var(--padding);
   position: relative;
-
   flex-grow: 0;
 `;
 
 const TokenImg = styled.img`
+  border-radius: 50%;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 32px;
-  height: 32px;
+  top: var(--padding);
+  left: var(--padding);
+  width: calc(var(--height) * 0.66);
+  height: calc(var(--height) * 0.66);
   z-index: 1;
-
-  mask: url(${TokenMask}) no-repeat center center;
 `;
 
 const ChainImg = styled.img`
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: ${COLORS["grey-600"]};
   position: absolute;
-  bottom: 0;
-  left: 4.5px;
-  width: 24px;
-  height: 24px;
+  bottom: calc(var(--padding) / 2);
+  right: calc(var(--padding) / 2);
+  width: 30%;
+  height: 30%;
   z-index: 2;
 `;
 
