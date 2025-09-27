@@ -1,7 +1,9 @@
 "use client";
 import { ButtonHTMLAttributes } from "react";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
+import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
+import { ReactComponent as Info } from "assets/icons/info.svg";
+import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
@@ -28,7 +30,8 @@ export type BridgeButtonState =
   | "awaitingAmountInput"
   | "readyToConfirm"
   | "submitting"
-  | "wrongNetwork";
+  | "wrongNetwork"
+  | "loadingQuote";
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -39,15 +42,6 @@ interface ConfirmationButtonProps
   isQuoteLoading: boolean;
   onConfirm?: () => void;
 }
-
-const stateLabels: Record<BridgeButtonState, string> = {
-  notConnected: "Connect Wallet",
-  awaitingTokenSelection: "Select Token",
-  awaitingAmountInput: "Input Amount",
-  readyToConfirm: "Confirm Swap",
-  submitting: "Submitting...",
-  wrongNetwork: "Switch Network",
-};
 
 // Expandable label section component
 const ExpandableLabelSection: React.FC<
@@ -146,7 +140,7 @@ const ExpandableLabelSection: React.FC<
 // Core button component, used by all states
 const ButtonCore: React.FC<
   ConfirmationButtonProps & {
-    label: string;
+    label: React.ReactNode;
     loading?: boolean;
     aqua?: boolean;
     state: BridgeButtonState;
@@ -171,16 +165,13 @@ const ButtonCore: React.FC<
   >
     <AnimatePresence mode="wait" initial={false}>
       <motion.span
-        key={label || (loading ? "spinner" : "")}
+        key={state}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ type: "spring", stiffness: 300, damping: 24 }}
       >
-        <ButtonContent>
-          {loading && <StyledLoadingIcon aqua={aqua} />}
-          {!loading && label}
-        </ButtonContent>
+        <ButtonContent>{label}</ButtonContent>
       </motion.span>
     </AnimatePresence>
   </StyledButton>
@@ -210,6 +201,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     if (!inputToken || !outputToken) return "awaitingTokenSelection";
     if (!amount || amount.lte(0)) return "awaitingAmountInput";
     if (isWrongNetwork) return "wrongNetwork";
+    if (isQuoteLoading) return "loadingQuote";
     return "readyToConfirm";
   };
 
@@ -287,11 +279,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       .add(gasFeeUsd || BigNumber.from(0))
       .add(swapFeeUsd || BigNumber.from(0));
 
-    // Format time from expectedFillTime (in seconds)
-    const timeInMinutes = Math.ceil(
-      ((swapQuote as any).expectedFillTime || 0) / 60
-    );
-    const time = timeInMinutes < 1 ? "~30 sec" : `~${timeInMinutes} min`;
+    const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
+    const underOneMinute = totalSeconds < 60;
+    const time = underOneMinute
+      ? `~${Math.max(1, Math.round(totalSeconds))} secs`
+      : `~${Math.ceil(totalSeconds / 60)} min`;
 
     return {
       fee: formatUsdString(netFeeUsd),
@@ -300,7 +292,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       destinationGasFee: formatUsdString(gasFeeUsd),
       extraFee: formatUsdString(swapFeeUsd),
       route: "Across V4",
-      estimatedTime: timeInMinutes < 1 ? "~30 secs" : `~${timeInMinutes} mins`,
+      estimatedTime: time,
       netFee: formatUsdString(netFeeUsd),
     };
   }, [
@@ -325,6 +317,26 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const stateLabels: Record<BridgeButtonState, React.ReactNode> = {
+    notConnected: (
+      <>
+        <Wallet />
+        <span>Connect Wallet</span>
+      </>
+    ),
+    awaitingTokenSelection: "Select Token",
+    awaitingAmountInput: "Input Amount",
+    readyToConfirm: "Confirm Swap",
+    submitting: "Submitting...",
+    wrongNetwork: "Switch Network",
+    loadingQuote: (
+      <>
+        <StyledLoadingIcon />
+        <span>Finalizing Quote</span>
+      </>
+    ),
   };
 
   // Render state-specific content
@@ -377,97 +389,16 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </DetailRow>
                   <DetailRow>
                     <DetailLeft>
-                      <InfoIcon
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g opacity="0.5">
-                          <path
-                            d="M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.16699 7.3335H8.00033V10.8335"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.99967 4.9165C8.22981 4.9165 8.41634 5.10305 8.41634 5.33317C8.41634 5.56329 8.22981 5.74984 7.99967 5.74984C7.76954 5.74984 7.58301 5.56329 7.58301 5.33317C7.58301 5.10305 7.76954 4.9165 7.99967 4.9165Z"
-                            fill="#E0F3FF"
-                            stroke="#E0F3FF"
-                            strokeWidth="0.166667"
-                          />
-                        </g>
-                      </InfoIcon>
+                      <SmallInfoIcon />
                       <span>Est. Time</span>
                     </DetailLeft>
                     <span>{displayValues.estimatedTime}</span>
                   </DetailRow>
                   <DetailRow>
                     <DetailLeft>
-                      <InfoIcon
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g opacity="0.5">
-                          <path
-                            d="M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.16699 7.3335H8.00033V10.8335"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.99967 4.9165C8.22981 4.9165 8.41634 5.10305 8.41634 5.33317C8.41634 5.56329 8.22981 5.74984 7.99967 5.74984C7.76954 5.74984 7.58301 5.56329 7.58301 5.33317C7.58301 5.10305 7.76954 4.9165 7.99967 4.9165Z"
-                            fill="#E0F3FF"
-                            stroke="#E0F3FF"
-                            strokeWidth="0.166667"
-                          />
-                        </g>
-                      </InfoIcon>
+                      <SmallInfoIcon />
                       <span>Net Fee</span>
-                      <InfoIcon
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g opacity="0.5">
-                          <path
-                            d="M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.16699 7.3335H8.00033V10.8335"
-                            stroke="#E0F3FF"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7.99967 4.9165C8.22981 4.9165 8.41634 5.10305 8.41634 5.33317C8.41634 5.56329 8.22981 5.74984 7.99967 5.74984C7.76954 5.74984 7.58301 5.56329 7.58301 5.33317C7.58301 5.10305 7.76954 4.9165 7.99967 4.9165Z"
-                            fill="#E0F3FF"
-                            stroke="#E0F3FF"
-                            strokeWidth="0.166667"
-                          />
-                        </g>
-                      </InfoIcon>
+                      <SmallInfoIcon />
                     </DetailLeft>
                     <span>{displayValues.netFee}</span>
                   </DetailRow>
@@ -588,7 +519,25 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         <ButtonCore
           {...props}
           state={state}
-          label=""
+          label={stateLabels.submitting}
+          loading
+          aqua
+          inputToken={inputToken}
+          outputToken={outputToken}
+          amount={amount}
+          swapQuote={swapQuote}
+          isQuoteLoading={isQuoteLoading}
+          onConfirm={onConfirm}
+          fullHeight={true}
+        />
+      );
+      break;
+    case "loadingQuote":
+      content = (
+        <ButtonCore
+          {...props}
+          state={state}
+          label={stateLabels.loadingQuote}
           loading
           aqua
           inputToken={inputToken}
@@ -608,7 +557,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   return (
     <Container
       state={state}
-      layout
       initial={false}
       transition={{ type: "spring", stiffness: 300, damping: 40 }}
     >
@@ -708,7 +656,9 @@ const StyledChevronDown = styled(ChevronDownIcon)<{ expanded: boolean }>`
 
 const ExpandableContent = styled.div<{ expanded: boolean }>`
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    margin-top 0.3s ease;
   max-height: ${({ expanded }) => (expanded ? "500px" : "0")};
   margin-top: ${({ expanded }) => (expanded ? "8px" : "0")};
 `;
@@ -756,11 +706,11 @@ const ButtonContent = styled.span`
   gap: 8px;
 `;
 
-const StyledLoadingIcon = styled(LoadingIcon)<{ aqua?: boolean }>`
+const StyledLoadingIcon = styled(LoadingIcon)`
   width: 16px;
   height: 16px;
   animation: spin 1s linear infinite;
-  color: ${({ aqua }) => (aqua ? COLORS.aqua : "#000000")};
+  color: inherit;
 
   @keyframes spin {
     from {
@@ -773,7 +723,7 @@ const StyledLoadingIcon = styled(LoadingIcon)<{ aqua?: boolean }>`
 `;
 
 const ButtonContainer = styled.div<{ expanded: boolean }>`
-  margin-top: ${({ expanded }) => (expanded ? "24px" : "0")};
+  flex: 0 0 auto;
 `;
 
 const ExpandedDetails = styled.div`
@@ -807,7 +757,7 @@ const RouteIcon = styled.svg`
   height: 20px;
 `;
 
-const InfoIcon = styled.svg`
+const InfoIconSvg = styled.svg`
   width: 20px;
   height: 20px;
 `;
@@ -840,6 +790,11 @@ const FeeBreakdownLabel = styled.span`
 
 const FeeBreakdownValue = styled.span`
   color: #e0f3ff;
+`;
+
+const SmallInfoIcon = styled(Info)`
+  width: 16px;
+  height: 16px;
 `;
 
 export default ConfirmationButton;
