@@ -1339,18 +1339,18 @@ paths:
                     nullable: true
                     description: >
                       Transaction hash for any token swap conducted on the
-                      destination chain.
+                      origin chain.
                     x-gitbook-description-html: >-
                       <p>Transaction hash for any token swap conducted on the
-                      destination chain.</p>
+                      origin chain.</p>
                   swapToken:
                     type: string
                     nullable: true
                     description: >
-                      Token address used in a swap on the destination chain, if
+                      Token address used in a swap on the origin chain, if
                       any.
                     x-gitbook-description-html: >-
-                      <p>Token address used in a swap on the destination chain,
+                      <p>Token address used in a swap on the origin chain,
                       if any.</p>
                   swapTokenAmount:
                     type: string
