@@ -11,6 +11,8 @@ import { useCopyToClipboard } from "hooks/useCopyToClipboard";
 import { CopyButton } from "../CopyButton";
 import { css } from "@emotion/react";
 import { useDownload } from "hooks/useDownload";
+import { useAmplitude } from "hooks";
+import { ampli } from "ampli";
 
 type TwitterShareModalProps = ModalProps & {
   imageUrl: string;
@@ -23,6 +25,7 @@ export function TwitterShareModal({
   const { twitterParams, copyConfig, shareConfig, tweetText, isLaptopAndUp } =
     useTwitter();
   const [isImageLoading, setIsImageLoading] = useState(true);
+  const { addToAmpliQueue } = useAmplitude();
 
   const {
     copyToClipboard,
@@ -39,13 +42,31 @@ export function TwitterShareModal({
   });
 
   const handleCopyToClipboard = async () => {
+    addToAmpliQueue(() => {
+      ampli.clickedShareOnXCopyOrDownloadButton({
+        page: "depositStatusPage",
+        section: "xShare",
+      });
+    });
     await copyToClipboard([
       { content: tweetText },
       { content: imageUrl, remote: true },
     ]);
   };
 
-  const handleDownloadImage = useDownload(imageUrl, "across-bridge-share.png");
+  const handleDownloadImageBase = useDownload(
+    imageUrl,
+    "across-bridge-share.png"
+  );
+  const handleDownloadImage = () => {
+    addToAmpliQueue(() => {
+      ampli.clickedShareOnXCopyOrDownloadButton({
+        page: "depositStatusPage",
+        section: "xShare",
+      });
+    });
+    handleDownloadImageBase();
+  };
 
   return (
     <TwitterModal
@@ -114,6 +135,12 @@ export function TwitterShareModal({
                 size="md"
                 textColor="aqua"
                 onClick={() => {
+                  addToAmpliQueue(() => {
+                    ampli.clickedShareOnXButton({
+                      page: "depositStatusPage",
+                      section: "xShare",
+                    });
+                  });
                   window.open(shareConfig.twitterUrl, "_blank");
                 }}
               >
@@ -126,7 +153,18 @@ export function TwitterShareModal({
             <TextInnerColumn>
               <Text size="xl" color="white">
                 3. Follow{" "}
-                <Link href="https://x.com/AcrossProtocol" target="_blank">
+                <Link
+                  href="https://x.com/AcrossProtocol"
+                  target="_blank"
+                  onClick={() => {
+                    addToAmpliQueue(() => {
+                      ampli.clickedFollowOnXButton({
+                        page: "depositStatusPage",
+                        section: "xShare",
+                      });
+                    });
+                  }}
+                >
                   @AcrossProtocol
                 </Link>
               </Text>
