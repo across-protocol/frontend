@@ -81,7 +81,9 @@ export default function BalanceSelector({
             ))}
         </AnimatePresence>
       </PillsContainer>
-      <BalanceText>Balance: {formattedBalance}</BalanceText>
+      <BalanceText>
+        <span>Balance:</span> {formattedBalance}
+      </BalanceText>
     </BalanceWrapper>
   );
 }
@@ -91,19 +93,30 @@ const BalanceWrapper = styled.div`
   align-items: center;
   gap: 12px;
   margin-top: 8px;
+  position: relative;
+  justify-content: flex-end;
+  margin-left: auto;
 `;
 
-const BalanceText = styled.span`
-  color: ${() => COLORS.aqua};
+const BalanceText = styled.div`
+  color: ${COLORS.white};
+  opacity: 1;
   font-size: 14px;
   font-weight: 400;
   line-height: 130%;
+
+  span {
+    opacity: 0.5;
+  }
 `;
 
 const PillsContainer = styled.div`
+  --spacing: 4px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing);
+  position: absolute;
+  right: calc(100% + (var(--spacing) * 2));
 
   .pill {
     display: flex;
@@ -114,6 +127,7 @@ const PillsContainer = styled.div`
     justify-content: center;
     font-size: 12px;
     font-weight: 600;
+    border: 1px solid rgba(224, 243, 255, 0.5);
     background-color: rgba(224, 243, 255, 0.05);
     color: rgba(224, 243, 255, 0.5);
     cursor: pointer;

@@ -250,14 +250,15 @@ const TokenInput = ({
           </TokenAmountInputValidationError>
         )}
       </TokenAmountStack>
-      <SelectorButton
-        onSelect={setToken}
-        isOriginToken={isOrigin}
-        marginBottom={token ? "24px" : "0px"}
-        selectedToken={token}
-      />
-      {token && (
-        <BalanceSelectorWrapper>
+      <TokenSelectorColumn>
+        <SelectorButton
+          onSelect={setToken}
+          isOriginToken={isOrigin}
+          marginBottom={token ? "24px" : "0px"}
+          selectedToken={token}
+        />
+
+        {token && (
           <BalanceSelector
             balance={token.balance}
             disableHover={!isOrigin}
@@ -280,11 +281,18 @@ const TokenInput = ({
               }
             }}
           />
-        </BalanceSelectorWrapper>
-      )}
+        )}
+      </TokenSelectorColumn>
     </TokenInputWrapper>
   );
 };
+
+const TokenSelectorColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+`;
 
 const ValueRow = styled.div`
   font-size: 16px;
@@ -365,12 +373,6 @@ const TokenInputWrapper = styled.div`
   border-radius: 24px;
   background: ${COLORS["black-700"]};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
-`;
-
-const BalanceSelectorWrapper = styled.div`
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
 `;
 
 const Wrapper = styled.div`
