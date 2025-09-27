@@ -1,4 +1,4 @@
-import { PopulatedTransaction } from "ethers";
+import { PopulatedTransaction, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import {
   createNoopSigner,
@@ -16,6 +16,7 @@ import { getAddMemoInstruction } from "@solana-program/memo";
 import { CrossSwapQuotes, EvmSwapTxn, isSvmSwapTxn } from "../../_dexes/types";
 import {
   assertValidIntegratorId,
+  SWAP_CALLDATA_MARKER,
   tagIntegratorId,
   tagSwapApiMarker,
 } from "../../_integrator-id";
@@ -445,14 +446,16 @@ async function _buildDepositTxForAllowanceHolderSvm(
           appendTransactionMessageInstruction(instruction, acc),
         tx
       ),
-    // Add integrator memo if provided
+    // Add integrator memo if provided and Swap API marker
     (tx) =>
-      integratorId
-        ? appendTransactionMessageInstruction(
-            getAddMemoInstruction({ memo: integratorId }),
-            tx
-          )
-        : tx
+      appendTransactionMessageInstruction(
+        getAddMemoInstruction({
+          memo: integratorId
+            ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
+            : SWAP_CALLDATA_MARKER,
+        }),
+        tx
+      )
   );
 
   // Fetch address lookup tables if present to reduce txn size
