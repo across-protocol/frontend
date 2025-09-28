@@ -101,36 +101,7 @@ const TokenInput = ({
 }) => {
   const [amountString, setAmountString] = useState<string>("");
   const [justTyped, setJustTyped] = useState(false);
-  const [validationError, setValidationError] = useState<string | undefined>(
-    undefined
-  );
-
-  const getValidationErrorText = useCallback(
-    (error?: AmountInputError) => {
-      if (!error || !token) return undefined;
-      const validationErrorTextMap: Record<AmountInputError, string> = {
-        [AmountInputError.INSUFFICIENT_BALANCE]:
-          "Insufficient balance to process this transfer.",
-        [AmountInputError.PAUSED_DEPOSITS]:
-          "[INPUT_TOKEN] deposits are temporarily paused.",
-        [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-          "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
-        [AmountInputError.INVALID]:
-          "Only positive numbers are allowed as an input.",
-        [AmountInputError.AMOUNT_TOO_LOW]:
-          "The amount you are trying to bridge is too low.",
-        [AmountInputError.PRICE_IMPACT_TOO_HIGH]:
-          "Price impact is too high. Check back later when liquidity is restored.",
-        [AmountInputError.SWAP_QUOTE_UNAVAILABLE]:
-          "Swap quote temporarily unavailable. Please try again later.",
-      };
-
-      return validationErrorTextMap[error]
-        .replace("[INPUT_TOKEN]", token.symbol)
-        .replace("[MAX_DEPOSIT]", "");
-    },
-    [token]
-  );
+  const [validationError] = useState<string | undefined>(undefined);
 
   // Handle user input changes
   useEffect(() => {
@@ -141,39 +112,12 @@ const TokenInput = ({
     try {
       if (!token) {
         setAmount(null);
-        setValidationError(undefined);
         return;
       }
       const parsed = utils.parseUnits(amountString, token.decimals);
-      if (isOrigin) {
-        if (parsed.lt(0)) {
-          setValidationError(getValidationErrorText(AmountInputError.INVALID));
-          setAmount(null);
-          return;
-        }
-        if (token.balance && parsed.gt(token.balance)) {
-          setValidationError(
-            getValidationErrorText(AmountInputError.INSUFFICIENT_BALANCE)
-          );
-        } else {
-          setValidationError(undefined);
-        }
-      } else {
-        if (parsed.lt(0)) {
-          setValidationError(getValidationErrorText(AmountInputError.INVALID));
-          setAmount(null);
-          return;
-        }
-        setValidationError(undefined);
-      }
       setAmount(parsed);
     } catch (e) {
       setAmount(null);
-      if (amountString !== "") {
-        setValidationError(getValidationErrorText(AmountInputError.INVALID));
-      } else {
-        setValidationError(undefined);
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amountString]);
@@ -195,7 +139,6 @@ const TokenInput = ({
       setAmountString(
         formatUnitsWithMaxFractions(expectedAmount, token.decimals)
       );
-      setValidationError(undefined);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -244,11 +187,6 @@ const TokenInput = ({
             <span>Value: ${estimatedUsdAmount ?? "0.00"}</span>
           </ValueRow>
         </TokenAmountInputEstimatedUsd>
-        {validationError && (
-          <TokenAmountInputValidationError>
-            {validationError}
-          </TokenAmountInputValidationError>
-        )}
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton
@@ -269,15 +207,6 @@ const TokenInput = ({
                 setAmountString(
                   formatUnitsWithMaxFractions(amount, token.decimals)
                 );
-                if (isOrigin && token.balance && amount.gt(token.balance)) {
-                  setValidationError(
-                    getValidationErrorText(
-                      AmountInputError.INSUFFICIENT_BALANCE
-                    )
-                  );
-                } else {
-                  setValidationError(undefined);
-                }
               }
             }}
           />
@@ -350,15 +279,6 @@ const TokenAmountInputEstimatedUsd = styled.div`
   font-weight: 400;
   line-height: 130%;
   opacity: 0.5;
-`;
-
-const TokenAmountInputValidationError = styled.div`
-  color: #f96c6c;
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 130%;
-  margin-top: 4px;
 `;
 
 const TokenInputWrapper = styled.div`

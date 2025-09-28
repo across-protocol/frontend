@@ -82,8 +82,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
-    // invalid or empty amount
-    if (!amount || amount.lte(0)) {
+    // invalid amount (allow empty/no amount without error)
+    if (amount && amount.lte(0)) {
       errorType = AmountInputError.INVALID;
     }
     // balance check for origin-side inputs

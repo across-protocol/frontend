@@ -21,6 +21,8 @@ export default function SwapAndBridge() {
     expectedInputAmount,
     expectedOutputAmount,
     onConfirm,
+    validationError,
+    validationWarning,
   } = useSwapAndBridge();
   const history = useHistory();
 
@@ -55,6 +57,8 @@ export default function SwapAndBridge() {
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
           onConfirm={handleConfirm}
+          validationError={validationError}
+          validationWarning={validationWarning}
         />
       </Wrapper>
     </LayoutV2>
