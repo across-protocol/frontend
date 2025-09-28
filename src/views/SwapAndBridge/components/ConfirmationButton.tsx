@@ -12,6 +12,7 @@ import { useTokenConversion } from "hooks/useTokenConversion";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
+import { AmountInputError } from "../../Bridge/utils";
 
 type SwapQuoteResponse = {
   checks: object;
@@ -41,6 +42,8 @@ interface ConfirmationButtonProps
   swapQuote: SwapQuoteResponse | null;
   isQuoteLoading: boolean;
   onConfirm?: () => void;
+  validationError?: AmountInputError;
+  validationWarning?: AmountInputError;
 }
 
 // Expandable label section component
@@ -51,88 +54,168 @@ const ExpandableLabelSection: React.FC<
     expanded: boolean;
     onToggle: () => void;
     visible: boolean;
+    state: BridgeButtonState;
+    validationError?: AmountInputError;
+    validationWarning?: AmountInputError;
   }>
-> = ({ fee, time, expanded, onToggle, visible, children }) => {
-  return (
-    <AnimatePresence initial={false}>
-      {visible && (
-        <motion.div
-          key="expandable-label-section"
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ type: "spring", stiffness: 300, damping: 24 }}
-        >
-          <ExpandableLabelButton
-            type="button"
-            onClick={onToggle}
-            aria-expanded={expanded}
-          >
-            <ExpandableLabelLeft>
-              <ShieldIcon
+> = ({ fee, time, expanded, onToggle, state, children }) => {
+  // Render state-specific content
+  let content: React.ReactNode = null;
+  switch (state) {
+    case "notConnected":
+      content = (
+        <>
+          <ExpandableLabelLeft>
+            <ShieldIcon
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.63107 1.42901C7.87053 1.34918 8.12947 1.34918 8.36893 1.42901L13.2023 3.04012C13.6787 3.19892 14 3.64474 14 4.14692V7.94133C14 9.7662 13.211 11.1131 12.0941 12.1729C10.9961 13.2147 9.56027 13.9981 8.2374 14.7117C8.0892 14.7917 7.9108 14.7917 7.7626 14.7117C6.43971 13.9981 5.00387 13.2147 3.90584 12.1729C2.78901 11.1131 2 9.7662 2 7.94133V4.14692C2 3.64475 2.32133 3.19892 2.79773 3.04012L7.63107 1.42901ZM10.1869 6.68686C10.3821 6.49162 10.3821 6.17504 10.1869 5.97978C9.9916 5.78452 9.67507 5.78452 9.4798 5.97978L7.33333 8.1262L6.52022 7.31313C6.32496 7.11786 6.00837 7.11786 5.81311 7.31313C5.61785 7.5084 5.61785 7.82493 5.81311 8.0202L6.9798 9.18686C7.07353 9.28066 7.20073 9.33333 7.33333 9.33333C7.46593 9.33333 7.59313 9.28066 7.68687 9.18686L10.1869 6.68686Z"
+                fill="#6CF9D8"
+              />
+            </ShieldIcon>
+            <FastSecureText>Fast & Secure</FastSecureText>
+          </ExpandableLabelLeft>
+          <ExpandableLabelRight>
+            <FeeTimeItem>
+              <GasIcon
                 width="16"
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M7.63107 1.42901C7.87053 1.34918 8.12947 1.34918 8.36893 1.42901L13.2023 3.04012C13.6787 3.19892 14 3.64474 14 4.14692V7.94133C14 9.7662 13.211 11.1131 12.0941 12.1729C10.9961 13.2147 9.56027 13.9981 8.2374 14.7117C8.0892 14.7917 7.9108 14.7917 7.7626 14.7117C6.43971 13.9981 5.00387 13.2147 3.90584 12.1729C2.78901 11.1131 2 9.7662 2 7.94133V4.14692C2 3.64475 2.32133 3.19892 2.79773 3.04012L7.63107 1.42901ZM10.1869 6.68686C10.3821 6.49162 10.3821 6.17504 10.1869 5.97978C9.9916 5.78452 9.67507 5.78452 9.4798 5.97978L7.33333 8.1262L6.52022 7.31313C6.32496 7.11786 6.00837 7.11786 5.81311 7.31313C5.61785 7.5084 5.61785 7.82493 5.81311 8.0202L6.9798 9.18686C7.07353 9.28066 7.20073 9.33333 7.33333 9.33333C7.46593 9.33333 7.59313 9.28066 7.68687 9.18686L10.1869 6.68686Z"
-                  fill="#6CF9D8"
-                />
-              </ShieldIcon>
-              <FastSecureText>Fast & Secure</FastSecureText>
-            </ExpandableLabelLeft>
-            <ExpandableLabelRight>
-              <FeeTimeItem>
-                <GasIcon
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g opacity="0.5">
-                    <path
-                      d="M9.49967 13.5H10.1663M9.49967 13.5V6.5M9.49967 13.5H2.49967M9.49967 6.5V3.16667C9.49967 2.79848 9.20121 2.5 8.83301 2.5H3.16634C2.79815 2.5 2.49967 2.79848 2.49967 3.16667V13.5M9.49967 6.5H11.1663C11.5345 6.5 11.833 6.79847 11.833 7.16667V10.8333C11.833 11.2015 12.1315 11.5 12.4997 11.5H13.4997C13.8679 11.5 14.1663 11.2015 14.1663 10.8333V5.63024C14.1663 5.44125 14.0861 5.26114 13.9457 5.13471L12.4997 3.83333M2.49967 13.5H1.83301M7.49967 6.5H4.49967"
-                      stroke="#E0F3FF"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </GasIcon>
-                {fee}
-              </FeeTimeItem>
-              <Divider />
-              <FeeTimeItem>
-                <TimeIcon
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g opacity="0.5">
-                    <path
-                      d="M7.99967 5.16683V8.00016L9.83301 9.8335M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
-                      stroke="#E0F3FF"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </TimeIcon>
-                {time}
-              </FeeTimeItem>
-            </ExpandableLabelRight>
-            <StyledChevronDown expanded={expanded} />
-          </ExpandableLabelButton>
-          <ExpandableContent expanded={expanded}>
-            {expanded && children}
-          </ExpandableContent>
-        </motion.div>
-      )}
+                <g opacity="0.5">
+                  <path
+                    d="M9.49967 13.5H10.1663M9.49967 13.5V6.5M9.49967 13.5H2.49967M9.49967 6.5V3.16667C9.49967 2.79848 9.20121 2.5 8.83301 2.5H3.16634C2.79815 2.5 2.49967 2.79848 2.49967 3.16667V13.5M9.49967 6.5H11.1663C11.5345 6.5 11.833 6.79847 11.833 7.16667V10.8333C11.833 11.2015 12.1315 11.5 12.4997 11.5H13.4997C13.8679 11.5 14.1663 11.2015 14.1663 10.8333V5.63024C14.1663 5.44125 14.0861 5.26114 13.9457 5.13471L12.4997 3.83333M2.49967 13.5H1.83301M7.49967 6.5H4.49967"
+                    stroke="#E0F3FF"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </GasIcon>
+              {fee}
+            </FeeTimeItem>
+            <Divider />
+            <FeeTimeItem>
+              <TimeIcon
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g opacity="0.5">
+                  <path
+                    d="M7.99967 5.16683V8.00016L9.83301 9.8335M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
+                    stroke="#E0F3FF"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </TimeIcon>
+              {time}
+            </FeeTimeItem>
+          </ExpandableLabelRight>
+        </>
+      );
+      break;
+
+    case "readyToConfirm":
+      content = (
+        <>
+          <ExpandableLabelLeft>
+            <ShieldIcon
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.63107 1.42901C7.87053 1.34918 8.12947 1.34918 8.36893 1.42901L13.2023 3.04012C13.6787 3.19892 14 3.64474 14 4.14692V7.94133C14 9.7662 13.211 11.1131 12.0941 12.1729C10.9961 13.2147 9.56027 13.9981 8.2374 14.7117C8.0892 14.7917 7.9108 14.7917 7.7626 14.7117C6.43971 13.9981 5.00387 13.2147 3.90584 12.1729C2.78901 11.1131 2 9.7662 2 7.94133V4.14692C2 3.64475 2.32133 3.19892 2.79773 3.04012L7.63107 1.42901ZM10.1869 6.68686C10.3821 6.49162 10.3821 6.17504 10.1869 5.97978C9.9916 5.78452 9.67507 5.78452 9.4798 5.97978L7.33333 8.1262L6.52022 7.31313C6.32496 7.11786 6.00837 7.11786 5.81311 7.31313C5.61785 7.5084 5.61785 7.82493 5.81311 8.0202L6.9798 9.18686C7.07353 9.28066 7.20073 9.33333 7.33333 9.33333C7.46593 9.33333 7.59313 9.28066 7.68687 9.18686L10.1869 6.68686Z"
+                fill="#6CF9D8"
+              />
+            </ShieldIcon>
+            <FastSecureText>Fast & Secure</FastSecureText>
+          </ExpandableLabelLeft>
+          <ExpandableLabelRight>
+            <FeeTimeItem>
+              <GasIcon
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g opacity="0.5">
+                  <path
+                    d="M9.49967 13.5H10.1663M9.49967 13.5V6.5M9.49967 13.5H2.49967M9.49967 6.5V3.16667C9.49967 2.79848 9.20121 2.5 8.83301 2.5H3.16634C2.79815 2.5 2.49967 2.79848 2.49967 3.16667V13.5M9.49967 6.5H11.1663C11.5345 6.5 11.833 6.79847 11.833 7.16667V10.8333C11.833 11.2015 12.1315 11.5 12.4997 11.5H13.4997C13.8679 11.5 14.1663 11.2015 14.1663 10.8333V5.63024C14.1663 5.44125 14.0861 5.26114 13.9457 5.13471L12.4997 3.83333M2.49967 13.5H1.83301M7.49967 6.5H4.49967"
+                    stroke="#E0F3FF"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </GasIcon>
+              {fee}
+            </FeeTimeItem>
+            <Divider />
+            <FeeTimeItem>
+              <TimeIcon
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g opacity="0.5">
+                  <path
+                    d="M7.99967 5.16683V8.00016L9.83301 9.8335M14.1663 8.00016C14.1663 11.4059 11.4054 14.1668 7.99967 14.1668C4.59392 14.1668 1.83301 11.4059 1.83301 8.00016C1.83301 4.59441 4.59392 1.8335 7.99967 1.8335C11.4054 1.8335 14.1663 4.59441 14.1663 8.00016Z"
+                    stroke="#E0F3FF"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </TimeIcon>
+              {time}
+            </FeeTimeItem>
+          </ExpandableLabelRight>
+          <StyledChevronDown expanded={expanded} />
+        </>
+      );
+      break;
+    default:
+      break;
+  }
+  return (
+    <AnimatePresence initial={false}>
+      <motion.div
+        key="expandable-label-section"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+      >
+        <ExpandableLabelButton
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          disabled={state !== "readyToConfirm"}
+        >
+          {content}
+        </ExpandableLabelButton>
+        <ExpandableContent expanded={expanded}>
+          {expanded && children}
+        </ExpandableContent>
+      </motion.div>
     </AnimatePresence>
   );
 };
@@ -142,24 +225,14 @@ const ButtonCore: React.FC<
   ConfirmationButtonProps & {
     label: React.ReactNode;
     loading?: boolean;
-    aqua?: boolean;
     state: BridgeButtonState;
     fullHeight?: boolean;
   }
-> = ({
-  label,
-  loading,
-  disabled,
-  aqua,
-  state,
-  onConfirm,
-  onClick,
-  fullHeight,
-}) => (
+> = ({ label, loading, disabled, state, onConfirm, onClick, fullHeight }) => (
   <StyledButton
     disabled={disabled || loading}
     onClick={state === "readyToConfirm" ? onConfirm : onClick}
-    aqua={aqua}
+    aqua={typeof (null as any) === "undefined" ? undefined : undefined}
     loading={loading}
     fullHeight={fullHeight}
   >
@@ -184,6 +257,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   swapQuote,
   isQuoteLoading,
   onConfirm,
+  validationError,
+  validationWarning,
   ...props
 }) => {
   const { account, connect } = useConnection();
@@ -339,12 +414,28 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     ),
   };
 
-  // Render state-specific content
-  let content: React.ReactNode = null;
-  switch (state) {
-    case "readyToConfirm":
-      content = (
-        <>
+  // Map visual and behavior from state
+  const isExpandable = state === "readyToConfirm";
+  const buttonLabel = stateLabels[state];
+  const buttonLoading = state === "loadingQuote" || state === "submitting";
+  const buttonDisabled =
+    state === "awaitingTokenSelection" ||
+    state === "awaitingAmountInput" ||
+    state === "loadingQuote" ||
+    state === "submitting";
+
+  const clickHandler =
+    state === "notConnected"
+      ? () => connect()
+      : state === "wrongNetwork"
+        ? () => isWrongNetworkHandler()
+        : undefined;
+
+  // Render unified group driven by state
+  const content = (
+    <>
+      <AnimatePresence initial={false}>
+        {isExpandable && (
           <motion.div
             key="expandable-label-section-outer"
             initial={{ opacity: 0, y: -16 }}
@@ -359,6 +450,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               expanded={expanded}
               onToggle={() => setExpanded((e) => !e)}
               visible={true}
+              state={state}
+              validationError={validationError}
+              validationWarning={validationWarning}
             >
               {expanded ? (
                 <ExpandedDetails>
@@ -426,133 +520,27 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               ) : null}
             </ExpandableLabelSection>
           </motion.div>
-          <ButtonContainer expanded={expanded}>
-            <ButtonCore
-              {...props}
-              state={state}
-              label={stateLabels.readyToConfirm}
-              loading={isQuoteLoading}
-              onConfirm={handleConfirm}
-              inputToken={inputToken}
-              outputToken={outputToken}
-              amount={amount}
-              swapQuote={swapQuote}
-              isQuoteLoading={isQuoteLoading}
-              fullHeight={false}
-            />
-          </ButtonContainer>
-        </>
-      );
-      break;
-    case "notConnected":
-      content = (
+        )}
+      </AnimatePresence>
+      <ButtonContainer expanded={expanded}>
         <ButtonCore
           {...props}
           state={state}
-          label={stateLabels.notConnected}
-          aqua
+          label={buttonLabel}
+          loading={buttonLoading}
+          disabled={buttonDisabled}
+          onConfirm={handleConfirm}
           inputToken={inputToken}
           outputToken={outputToken}
           amount={amount}
           swapQuote={swapQuote}
           isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-          onClick={() => connect()}
+          fullHeight={state !== "readyToConfirm"}
+          onClick={clickHandler}
         />
-      );
-      break;
-    case "wrongNetwork":
-      content = (
-        <ButtonCore
-          {...props}
-          state={state}
-          label={stateLabels.wrongNetwork}
-          aqua
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
-          swapQuote={swapQuote}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-          onClick={() => isWrongNetworkHandler()}
-        />
-      );
-      break;
-    case "awaitingTokenSelection":
-      content = (
-        <ButtonCore
-          {...props}
-          state={state}
-          label={stateLabels.awaitingTokenSelection}
-          aqua
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
-          swapQuote={swapQuote}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-        />
-      );
-      break;
-    case "awaitingAmountInput":
-      content = (
-        <ButtonCore
-          {...props}
-          state={state}
-          label={stateLabels.awaitingAmountInput}
-          aqua
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
-          swapQuote={swapQuote}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-        />
-      );
-      break;
-    case "submitting":
-      content = (
-        <ButtonCore
-          {...props}
-          state={state}
-          label={stateLabels.submitting}
-          loading
-          aqua
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
-          swapQuote={swapQuote}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-        />
-      );
-      break;
-    case "loadingQuote":
-      content = (
-        <ButtonCore
-          {...props}
-          state={state}
-          label={stateLabels.loadingQuote}
-          loading
-          aqua
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
-          swapQuote={swapQuote}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          fullHeight={true}
-        />
-      );
-      break;
-    default:
-      content = null;
-  }
+      </ButtonContainer>
+    </>
+  );
 
   return (
     <Container
