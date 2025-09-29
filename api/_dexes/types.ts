@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+import { Address } from "@solana/kit";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
@@ -70,23 +71,49 @@ export type OriginSwapQuoteAndCalldata = {
   slippage: number;
 };
 
+export type EvmSwapTxn = {
+  ecosystem: "evm";
+  to: string;
+  data: string;
+  value: string;
+};
+
+export type SvmSwapTxn = {
+  ecosystem: "svm";
+  to: string;
+  instructions?: Record<string, unknown>;
+  lookupTables?: Address[];
+};
+
+export type SwapTxn = EvmSwapTxn | SvmSwapTxn;
+
+export function isEvmSwapTxn(swapTxn: SwapTxn): swapTxn is EvmSwapTxn {
+  return swapTxn.ecosystem === "evm";
+}
+
+export function isSvmSwapTxn(swapTxn: SwapTxn): swapTxn is SvmSwapTxn {
+  return swapTxn.ecosystem === "svm";
+}
+
 export type SwapQuote = {
   maximumAmountIn: BigNumber;
   minAmountOut: BigNumber;
   expectedAmountOut: BigNumber;
   expectedAmountIn: BigNumber;
   slippageTolerance: number;
-  swapTxns: {
-    to: string;
-    data: string;
-    value: string;
-  }[];
+  swapTxns: (EvmSwapTxn | SvmSwapTxn)[];
   tokenIn: Token;
   tokenOut: Token;
   swapProvider: {
     name: string;
     sources: string[];
   };
+};
+
+type FeeComponent = {
+  total: BigNumber;
+  pct: BigNumber;
+  token: Token;
 };
 
 export type CrossSwapQuotes = {
@@ -98,8 +125,22 @@ export type CrossSwapQuotes = {
     inputAmount: BigNumber;
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
-    suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
-  };
+    estimatedFillTimeSec: number;
+    fees: {
+      totalRelay: FeeComponent;
+      relayerCapital: FeeComponent;
+      relayerGas: FeeComponent;
+      lp: FeeComponent;
+    };
+  } & (
+    | {
+        provider: "across";
+        suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
+      }
+    | {
+        provider: "hypercore";
+      }
+  );
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
   contracts: {

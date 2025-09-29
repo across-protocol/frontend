@@ -18,6 +18,7 @@ import {
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
   SUPPORTED_CG_DERIVED_CURRENCIES,
+  TOKEN_EQUIVALENCE_REMAPPING,
   TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
@@ -184,7 +185,8 @@ async function resolvePriceByAddress(params: {
     params.chainId ??
     (isEvmAddress(params.address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
   const chainId =
-    coinGeckoAssetPlatformLookup[params.address] ?? fallbackChainId;
+    coinGeckoAssetPlatformLookup[params.address.toLowerCase()] ??
+    fallbackChainId;
 
   let address = utils.toAddressType(params.address, chainId).toNative();
   const baseCurrency = (
@@ -287,7 +289,9 @@ async function resolvePriceBySymbol(params: {
   }
 
   const symbol = String(
-    redirectedLookupSymbols[_symbol.toLowerCase()] ?? _symbol
+    redirectedLookupSymbols[_symbol.toLowerCase()] ??
+      TOKEN_EQUIVALENCE_REMAPPING[_symbol.toLowerCase()] ??
+      _symbol
   ).toUpperCase();
 
   const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);

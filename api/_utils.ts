@@ -49,6 +49,7 @@ import {
   graphAPIKey,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
+  TOKEN_EQUIVALENCE_REMAPPING,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
@@ -1678,8 +1679,12 @@ export function getLimitCap(
   decimals: number,
   toChainId: number
 ) {
+  const equivalentSymbol = TOKEN_EQUIVALENCE_REMAPPING[symbol] ?? symbol;
   const cap =
-    [`LIMIT_CAP_${symbol}_${toChainId}`, `LIMIT_CAP_${symbol}`]
+    [
+      `LIMIT_CAP_${equivalentSymbol}_${toChainId}`,
+      `LIMIT_CAP_${equivalentSymbol}`,
+    ]
       .map((key) => getEnvs()[key])
       .find((value) => value !== undefined) ?? undefined;
 

@@ -26,6 +26,7 @@ import {
   SwapQuote,
   Token,
   DexSources,
+  isEvmSwapTxn,
 } from "./types";
 import {
   isInputTokenBridgeable,
@@ -486,6 +487,11 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not extract 'BaseDepositDataStruct' for non-Across bridge quotes"
+    );
+  }
   const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
@@ -557,7 +563,10 @@ export async function extractSwapAndDepositDataStruct(
     swapToken: originSwapQuote.tokenIn.address,
     swapTokenAmount: originSwapQuote.maximumAmountIn,
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-    routerCalldata: originSwapQuote.swapTxns[0].data,
+    routerCalldata:
+      originSwapQuote.swapTxns[0].ecosystem === "evm"
+        ? originSwapQuote.swapTxns[0].data
+        : "",
     exchange: originRouter.address,
     transferType,
     enableProportionalAdjustment: true,
@@ -596,6 +605,13 @@ export function buildDestinationSwapCrossChainMessage({
   };
   appFee?: AppFee;
 }) {
+  // Ensure all swapTxns are EVM ecosystem since this function handles only EVM messages
+  if (!destinationSwapQuote.swapTxns.every(isEvmSwapTxn)) {
+    throw new Error(
+      "buildDestinationSwapCrossChainMessage only supports EVM swap transactions"
+    );
+  }
+
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
   const multicallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId

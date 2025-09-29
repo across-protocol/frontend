@@ -166,11 +166,13 @@ export function get0xStrategy(
 
       const swapTx = opts?.useIndicativeQuote
         ? {
+            ecosystem: "evm" as const,
             to: "0x0",
             data: "0x0",
             value: "0x0",
           }
         : {
+            ecosystem: "evm" as const,
             to: quote.transaction.to,
             data: quote.transaction.data,
             value: quote.transaction.value,
