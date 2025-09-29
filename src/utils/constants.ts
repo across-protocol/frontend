@@ -106,6 +106,9 @@ export const tokenList = [
     } else if (symbol === "USDT-BNB") {
       name = "Tether USD (BNB)";
       displaySymbol = "USDT";
+    } else if (symbol === "USDT-SPOT") {
+      name = "Tether USD (SPOT)";
+      displaySymbol = "USDT";
     }
 
     return {

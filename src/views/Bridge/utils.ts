@@ -833,14 +833,18 @@ export function getTokensForFeesCalc(params: {
           params.universalSwapQuote.steps.bridge.tokenIn.symbol
         )
       : inputToken;
-  const outputToken =
+  const _outputToken =
     params.isUniversalSwap && params.universalSwapQuote
-      ? config.getTokenInfoBySymbol(
-          params.toChainId,
-          params.universalSwapQuote.steps.destinationSwap?.tokenOut.symbol ||
-            params.universalSwapQuote.steps.bridge.tokenOut.symbol
-        )
-      : params.outputToken;
+      ? params.universalSwapQuote.steps.destinationSwap?.tokenOut ||
+        params.universalSwapQuote.steps.bridge.tokenOut
+      : {
+          ...params.outputToken,
+          chainId: params.toChainId,
+        };
+  const outputToken = config.getTokenInfoBySymbol(
+    _outputToken.chainId,
+    _outputToken.symbol
+  );
   return {
     inputToken,
     outputToken,

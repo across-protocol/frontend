@@ -73,7 +73,7 @@ export function DepositTimesCard({
   const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
-  const { inputToken, bridgeToken } = getTokensForFeesCalc({
+  const { inputToken, bridgeToken, outputToken } = getTokensForFeesCalc({
     inputToken: getToken(inputTokenSymbol),
     outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
     isUniversalSwap: isUniversalSwap,
@@ -89,7 +89,7 @@ export function DepositTimesCard({
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
-  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+  } = useTokenConversion(outputToken.symbol || inputTokenSymbol, "usd");
 
   const { outputAmountUsd } =
     calcFeesForEstimatedTable({
