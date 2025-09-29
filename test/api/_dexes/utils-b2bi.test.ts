@@ -1,8 +1,8 @@
-import { getIndirectDestinationRoutes } from "../../../api/_dexes/utils-b2bi";
+import { getIndirectDestinationRoute } from "../../../api/_dexes/utils-b2bi";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 
 describe("_dexes/utils-b2bi", () => {
-  describe("#getIndirectDestinationRoutes()", () => {
+  describe("#getIndirectDestinationRoute()", () => {
     test("Optimism USDT -> Arbitrum USDT - should return empty array", () => {
       const params = {
         originChainId: CHAIN_IDs.OPTIMISM,
@@ -10,8 +10,8 @@ describe("_dexes/utils-b2bi", () => {
         inputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.OPTIMISM],
         outputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes).toEqual([]);
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toEqual(undefined);
     });
 
     test("Optimism USDT -> HyperCore USDT - should return indirect destination routes", () => {
@@ -22,24 +22,22 @@ describe("_dexes/utils-b2bi", () => {
         outputToken:
           TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes.length).toEqual(1);
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.symbol
-      ).toEqual("USDT");
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.chainId
-      ).toEqual(CHAIN_IDs.HYPEREVM);
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.decimals
-      ).toEqual(6);
-      expect(indirectDestinationRoutes[0].outputToken.symbol).toEqual(
-        "USDT-SPOT"
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toBeTruthy();
+      expect(indirectDestinationRoute!.intermediaryOutputToken.symbol).toEqual(
+        "USDT"
       );
-      expect(indirectDestinationRoutes[0].outputToken.chainId).toEqual(
+      expect(indirectDestinationRoute!.intermediaryOutputToken.chainId).toEqual(
+        CHAIN_IDs.HYPEREVM
+      );
+      expect(
+        indirectDestinationRoute!.intermediaryOutputToken.decimals
+      ).toEqual(6);
+      expect(indirectDestinationRoute!.outputToken.symbol).toEqual("USDT-SPOT");
+      expect(indirectDestinationRoute!.outputToken.chainId).toEqual(
         CHAIN_IDs.HYPERCORE
       );
-      expect(indirectDestinationRoutes[0].outputToken.decimals).toEqual(8);
+      expect(indirectDestinationRoute!.outputToken.decimals).toEqual(8);
     });
 
     test("BSC USDT -> HyperCore USDT - should return indirect destination routes", () => {
@@ -50,31 +48,27 @@ describe("_dexes/utils-b2bi", () => {
         outputToken:
           TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes.length).toEqual(1);
-      expect(indirectDestinationRoutes[0].inputToken.symbol).toEqual(
-        "USDT-BNB"
-      );
-      expect(indirectDestinationRoutes[0].inputToken.chainId).toEqual(
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toBeTruthy();
+      expect(indirectDestinationRoute!.inputToken.symbol).toEqual("USDT-BNB");
+      expect(indirectDestinationRoute!.inputToken.chainId).toEqual(
         CHAIN_IDs.BSC
       );
-      expect(indirectDestinationRoutes[0].inputToken.decimals).toEqual(18);
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.symbol
-      ).toEqual("USDT");
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.chainId
-      ).toEqual(CHAIN_IDs.HYPEREVM);
-      expect(
-        indirectDestinationRoutes[0].intermediaryOutputToken.decimals
-      ).toEqual(6);
-      expect(indirectDestinationRoutes[0].outputToken.symbol).toEqual(
-        "USDT-SPOT"
+      expect(indirectDestinationRoute!.inputToken.decimals).toEqual(18);
+      expect(indirectDestinationRoute!.intermediaryOutputToken.symbol).toEqual(
+        "USDT"
       );
-      expect(indirectDestinationRoutes[0].outputToken.chainId).toEqual(
+      expect(indirectDestinationRoute!.intermediaryOutputToken.chainId).toEqual(
+        CHAIN_IDs.HYPEREVM
+      );
+      expect(
+        indirectDestinationRoute!.intermediaryOutputToken.decimals
+      ).toEqual(6);
+      expect(indirectDestinationRoute!.outputToken.symbol).toEqual("USDT-SPOT");
+      expect(indirectDestinationRoute!.outputToken.chainId).toEqual(
         CHAIN_IDs.HYPERCORE
       );
-      expect(indirectDestinationRoutes[0].outputToken.decimals).toEqual(8);
+      expect(indirectDestinationRoute!.outputToken.decimals).toEqual(8);
     });
 
     test("HyperEVM USDT -> HyperCore USDT - should return indirect destination routes", () => {
@@ -85,8 +79,8 @@ describe("_dexes/utils-b2bi", () => {
         outputToken:
           TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes).toEqual([]);
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toBeTruthy();
     });
   });
 });
