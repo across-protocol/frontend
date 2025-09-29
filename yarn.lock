@@ -16,17 +16,7 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.77":
-  version "3.1.77"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.77.tgz#0d57db8676a7eaf4541b2cc9143d95e8d753c0af"
-  integrity sha512-zRRTFAKhLgAA1QBJsbG5KautFczW0NV0N2hPW8dIn3cyC+pvYBU8FBb3gQ2Vp9b++kg1Gk1rSpMVMKKnjUBtOA==
-
-"@across-protocol/constants@^3.1.78":
-  version "3.1.79"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.79.tgz#674363af1e5ee177ad8962c7dec075b21c14e222"
-  integrity sha512-7CnAkskCXCcEWNJrOC6xDzO6bfJXdNrzVfNsBsVvUGMPBn144yuBYwnLb0uIaYdZB6fX1O8bHqWsLxPxVTMx8A==
-
-"@across-protocol/constants@^3.1.80":
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.77", "@across-protocol/constants@^3.1.78", "@across-protocol/constants@^3.1.80":
   version "3.1.80"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.80.tgz#a1515f9c8ca19a5a7c2e709da08c1d1f3ac01b28"
   integrity sha512-/MtvKygLNoxTFAIOU6FmR4TeEeueL1hyoWit9BtL0RVyXZ1h3zvNr58TYxcoXIFF8Vb+yizyACX32b+bdk7fGg==
