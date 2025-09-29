@@ -1,5 +1,4 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
-import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import { BridgeStrategiesConfig } from "./types";
 import { CHAIN_IDs } from "../_constants";
