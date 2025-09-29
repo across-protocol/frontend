@@ -25,6 +25,7 @@ const B2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  appFee: 0.01, // 1% app fee
 };
 
 const B2A_BASE_TEST_CASE = {
@@ -37,6 +38,7 @@ const B2A_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.OP,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  appFee: 0.01, // 1% app fee
 };
 
 const A2B_BASE_TEST_CASE = {
@@ -49,6 +51,7 @@ const A2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  appFee: 0.01, // 1% app fee
 };
 
 describe("execute response of GET /swap/approval", () => {
@@ -61,6 +64,8 @@ describe("execute response of GET /swap/approval", () => {
     destinationChainId: number;
     depositor: string;
     recipient: string;
+    appFee?: number;
+    appFeeRecipient?: string;
   }) {
     const response = await axios.get(SWAP_API_URL, {
       params: {
@@ -87,12 +92,14 @@ describe("execute response of GET /swap/approval", () => {
       inputToken,
       outputToken,
       amounts,
+      appFee,
     } = testCase;
     const amount = amounts[tradeType];
     const depositor = opts?.freshDepositorWallet
       ? opts.freshDepositorWallet.address
       : e2eConfig.addresses.depositor;
     const recipient = e2eConfig.addresses.recipient;
+    const appFeeRecipient = e2eConfig.addresses.appFeeRecipient;
 
     const inputTokenAddress = inputToken.addresses[originChainId] as Address;
     const outputTokenAddress = outputToken.addresses[
@@ -121,6 +128,8 @@ describe("execute response of GET /swap/approval", () => {
       destinationChainId,
       depositor,
       recipient,
+      appFee,
+      appFeeRecipient,
     });
 
     // Balances BEFORE swap tx execution
@@ -133,6 +142,14 @@ describe("execute response of GET /swap/approval", () => {
       destinationChainId,
       outputTokenAddress,
       recipient
+    );
+
+    // App fee recipient balance tracking
+    let appFeeRecipientBalanceBefore = 0n;
+    appFeeRecipientBalanceBefore = await getBalance(
+      destinationChainId,
+      outputTokenAddress,
+      appFeeRecipient as Address
     );
 
     // Execute swap tx
@@ -157,11 +174,21 @@ describe("execute response of GET /swap/approval", () => {
       recipient
     );
 
+    // App fee recipient balance tracking
+    let appFeeRecipientBalanceAfter = 0n;
+    appFeeRecipientBalanceAfter = await getBalance(
+      destinationChainId,
+      outputTokenAddress,
+      appFeeRecipient as Address
+    );
+
     // Balance diffs
     const inputTokenBalanceDiff =
       inputTokenBalanceBefore - inputTokenBalanceAfter;
     const outputTokenBalanceDiff =
       outputTokenBalanceAfter - outputTokenBalanceBefore;
+    const appFeeRecipientBalanceDiff =
+      appFeeRecipientBalanceAfter - appFeeRecipientBalanceBefore;
 
     console.log(tradeType, {
       inputTokenBalanceBefore,
@@ -170,6 +197,9 @@ describe("execute response of GET /swap/approval", () => {
       outputTokenBalanceBefore,
       outputTokenBalanceAfter,
       outputTokenBalanceDiff,
+      appFeeRecipientBalanceBefore,
+      appFeeRecipientBalanceAfter,
+      appFeeRecipientBalanceDiff,
       amount,
       quotedInputAmount: swapQuote.inputAmount,
       quotedMaxInputAmount: swapQuote.maxInputAmount,
@@ -179,26 +209,39 @@ describe("execute response of GET /swap/approval", () => {
 
     // Sanity checks based on the trade type
     if (tradeType === "exactInput") {
-      expect(inputTokenBalanceDiff === amount).toBe(true);
-      expect(
-        outputTokenBalanceDiff >= BigInt(swapQuote.minOutputAmount.toString())
-      ).toBe(true);
+      expect(inputTokenBalanceDiff).toEqual(amount);
+      expect(outputTokenBalanceDiff).toBeGreaterThanOrEqual(
+        BigInt(swapQuote.minOutputAmount.toString())
+      );
+      const expectedFee =
+        (BigInt(swapQuote.minOutputAmount.toString()) *
+          BigInt(Math.floor(appFee * 1e18))) /
+        (BigInt(1e18) + BigInt(Math.floor(appFee * 1e18)));
+      expect(appFeeRecipientBalanceDiff).toBeGreaterThanOrEqual(expectedFee);
     } else if (tradeType === "exactOutput") {
       expect(outputTokenBalanceDiff).toEqual(amount);
-      expect(
-        inputTokenBalanceDiff >= BigInt(swapQuote.inputAmount.toString())
-      ).toBe(true);
-      expect(
-        inputTokenBalanceDiff <= BigInt(swapQuote.maxInputAmount.toString())
-      ).toBe(true);
+      expect(inputTokenBalanceDiff).toBeGreaterThanOrEqual(
+        BigInt(swapQuote.inputAmount.toString())
+      );
+      expect(inputTokenBalanceDiff).toBeLessThanOrEqual(
+        BigInt(swapQuote.maxInputAmount.toString())
+      );
+      const expectedFee =
+        (amount * BigInt(Math.floor(appFee * 1e18))) / BigInt(1e18);
+      expect(appFeeRecipientBalanceDiff).toBeGreaterThanOrEqual(expectedFee);
     } else if (tradeType === "minOutput") {
-      expect(outputTokenBalanceDiff >= amount).toBe(true);
-      expect(
-        inputTokenBalanceDiff >= BigInt(swapQuote.inputAmount.toString())
-      ).toBe(true);
-      expect(
-        inputTokenBalanceDiff <= BigInt(swapQuote.maxInputAmount.toString())
-      ).toBe(true);
+      expect(outputTokenBalanceDiff).toBeGreaterThanOrEqual(
+        BigInt(swapQuote.minOutputAmount.toString())
+      );
+      expect(inputTokenBalanceDiff).toBeGreaterThanOrEqual(
+        BigInt(swapQuote.inputAmount.toString())
+      );
+      expect(inputTokenBalanceDiff).toBeLessThanOrEqual(
+        BigInt(swapQuote.maxInputAmount.toString())
+      );
+      const expectedFee =
+        (amount * BigInt(Math.floor(appFee * 1e18))) / BigInt(1e18);
+      expect(appFeeRecipientBalanceDiff).toBeGreaterThanOrEqual(expectedFee);
     }
 
     return {
