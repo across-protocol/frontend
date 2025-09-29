@@ -80,6 +80,8 @@ export type SwapApprovalApiResponse = {
   expectedOutputAmount: string;
   minOutputAmount: string;
   expectedFillTime: number;
+  inputToken: SwapApiToken;
+  outputToken: SwapApiToken;
   swapTx: {
     simulationSuccess: boolean;
     chainId: number;
@@ -194,6 +196,8 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         : undefined,
     },
     refundToken: result.refundToken,
+    inputToken: result.inputToken,
+    outputToken: result.outputToken,
     inputAmount: BigNumber.from(result.inputAmount),
     expectedOutputAmount: BigNumber.from(result.expectedOutputAmount),
     minOutputAmount: BigNumber.from(result.minOutputAmount),

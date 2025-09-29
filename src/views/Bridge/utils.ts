@@ -775,7 +775,7 @@ function calcUniversalSwapFeeUsd(params: {
     return BigNumber.from(0);
   }
   const parsedAmount = BigNumber.from(params.parsedAmount || 0);
-  const { steps } = params.universalSwapQuote;
+  const { steps, expectedOutputAmount } = params.universalSwapQuote;
   const parsedInputAmountUsd =
     params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
   const originSwapFeeUsd = parsedInputAmountUsd.sub(
@@ -786,10 +786,9 @@ function calcUniversalSwapFeeUsd(params: {
     params.convertBridgeTokenToUsd(steps.bridge.outputAmount) ||
     BigNumber.from(0)
   ).sub(
-    params.convertOutputTokenToUsd(
-      steps.destinationSwap?.outputAmount || steps.bridge.outputAmount
-    ) || BigNumber.from(0)
+    params.convertOutputTokenToUsd(expectedOutputAmount) || BigNumber.from(0)
   );
+
   return originSwapFeeUsd.add(destinationSwapFeeUsd);
 }
 
@@ -835,8 +834,7 @@ export function getTokensForFeesCalc(params: {
       : inputToken;
   const _outputToken =
     params.isUniversalSwap && params.universalSwapQuote
-      ? params.universalSwapQuote.steps.destinationSwap?.tokenOut ||
-        params.universalSwapQuote.steps.bridge.tokenOut
+      ? params.universalSwapQuote.outputToken
       : {
           ...params.outputToken,
           chainId: params.toChainId,
