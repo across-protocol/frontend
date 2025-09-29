@@ -36,7 +36,6 @@ export async function handleApprovalSwap(
 ) {
   // This handler supports both GET and POST requests.
   // For GET requests, we expect the body to be empty.
-  // TODO: Allow only POST requests
   if (request.method !== "POST" && request.body) {
     throw new InputError({
       message: "POST method required when request.body is provided",
