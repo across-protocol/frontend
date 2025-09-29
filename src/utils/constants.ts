@@ -22,6 +22,7 @@ import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import { Deposit } from "hooks/useDeposits";
 
+import indirectChains from "data/indirect_chains_1.json";
 import {
   ChainId,
   ChainInfo,
@@ -57,6 +58,14 @@ export {
   interchangeableTokensMap,
   similarTokensMap,
 };
+
+export const INDIRECT_CHAINS = indirectChains.reduce(
+  (acc, chain) => {
+    acc[chain.chainId] = chain;
+    return acc;
+  },
+  {} as Record<number, (typeof indirectChains)[number]>
+);
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {

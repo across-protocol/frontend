@@ -3,7 +3,7 @@ import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
-import { indexerApiBaseUrl } from "utils/constants";
+import { indexerApiBaseUrl, INDIRECT_CHAINS } from "utils/constants";
 import axios from "axios";
 import {
   IChainStrategy,
@@ -68,6 +68,13 @@ export class EVMStrategy implements IChainStrategy {
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
     }
+
+    let fillChainId = this.chainId;
+
+    if (INDIRECT_CHAINS[this.chainId]) {
+      fillChainId = INDIRECT_CHAINS[this.chainId].intermediaryChain;
+    }
+
     try {
       // First try the rewards API
       const { data } = await axios.get<{
@@ -83,7 +90,7 @@ export class EVMStrategy implements IChainStrategy {
 
       if (data?.status === "filled" && data.fillTx) {
         // Get fill transaction details
-        const provider = getProvider(this.chainId);
+        const provider = getProvider(fillChainId);
         const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
         const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
 
@@ -91,7 +98,7 @@ export class EVMStrategy implements IChainStrategy {
 
         if (!parsedFIllLog) {
           throw new Error(
-            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${this.chainId}`
+            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
           );
         }
 
@@ -108,7 +115,7 @@ export class EVMStrategy implements IChainStrategy {
             ),
             outputToken: toAddressType(
               parsedFIllLog.args.outputToken,
-              Number(this.chainId)
+              Number(fillChainId)
             ),
             depositor: toAddressType(
               parsedFIllLog.args.depositor,
@@ -116,17 +123,17 @@ export class EVMStrategy implements IChainStrategy {
             ),
             recipient: toAddressType(
               parsedFIllLog.args.recipient,
-              Number(this.chainId)
+              Number(fillChainId)
             ),
             exclusiveRelayer: toAddressType(
               parsedFIllLog.args.exclusiveRelayer,
-              Number(this.chainId)
+              Number(fillChainId)
             ),
             relayer: toAddressType(
               parsedFIllLog.args.relayer,
-              Number(this.chainId)
+              Number(fillChainId)
             ),
-            destinationChainId: this.chainId,
+            destinationChainId: fillChainId,
             fillTimestamp: fillTxBlock.timestamp,
             blockNumber: parsedFIllLog.blockNumber,
             txnRef: parsedFIllLog.transactionHash,
@@ -143,7 +150,7 @@ export class EVMStrategy implements IChainStrategy {
                 ),
               updatedRecipient: toAddressType(
                 parsedFIllLog.args.relayExecutionInfo.updatedRecipient,
-                this.chainId
+                fillChainId
               ),
               updatedOutputAmount:
                 parsedFIllLog.args.relayExecutionInfo.updatedOutputAmount,
@@ -159,14 +166,14 @@ export class EVMStrategy implements IChainStrategy {
 
     // If API approach didn't work, find the fill on-chain
     try {
-      const provider = getProvider(this.chainId);
+      const provider = getProvider(fillChainId);
       const blockForTimestamp = await getBlockForTimestamp(
         provider,
         depositInfo.depositTimestamp
       );
 
       const config = getConfig();
-      const destinationSpokePool = config.getSpokePool(this.chainId);
+      const destinationSpokePool = config.getSpokePool(fillChainId);
       const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all(
         [
           destinationSpokePool.queryFilter(
@@ -205,7 +212,7 @@ export class EVMStrategy implements IChainStrategy {
       const filledRelayEvent = filledRelayEvents?.[0];
 
       if (!filledRelayEvent) {
-        throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
       const messageHash =
         "messageHash" in filledRelayEvent.args
@@ -232,7 +239,7 @@ export class EVMStrategy implements IChainStrategy {
           ),
           outputToken: toAddressType(
             filledRelayEvent.args.outputToken,
-            Number(this.chainId)
+            Number(fillChainId)
           ),
           depositor: toAddressType(
             filledRelayEvent.args.depositor,
@@ -240,18 +247,18 @@ export class EVMStrategy implements IChainStrategy {
           ),
           recipient: toAddressType(
             filledRelayEvent.args.recipient,
-            Number(this.chainId)
+            Number(fillChainId)
           ),
           exclusiveRelayer: toAddressType(
             filledRelayEvent.args.exclusiveRelayer,
-            Number(this.chainId)
+            Number(fillChainId)
           ),
           relayer: toAddressType(
             filledRelayEvent.args.relayer,
-            Number(this.chainId)
+            Number(fillChainId)
           ),
           messageHash,
-          destinationChainId: this.chainId,
+          destinationChainId: fillChainId,
           fillTimestamp: fillTxBlock.timestamp,
           blockNumber: filledRelayEvent.blockNumber,
           txnRef: filledRelayEvent.transactionHash,

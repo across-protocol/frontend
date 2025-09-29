@@ -14,12 +14,10 @@ export default {
   publicRpcUrl: "https://api.hyperliquid.xyz",
   blockExplorer: "https://app.hyperliquid.xyz/explorer",
   blockTimeSeconds: 1,
-  tokens: [],
-  inputTokens: [],
-  outputTokens: ["USDT-SPOT"],
+  tokens: ["USDT-SPOT"],
   enableCCTP: false,
   omitViemConfig: true,
   nativeToken: "HYPE",
   // HyperCore can only be reached via HyperEVM as an intermediary chain.
-  intermediaryChains: [CHAIN_IDs.HYPEREVM],
+  intermediaryChain: CHAIN_IDs.HYPEREVM,
 } as ChainConfig;
