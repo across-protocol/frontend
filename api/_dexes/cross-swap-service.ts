@@ -811,7 +811,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     token: crossSwap.outputToken,
     appFeePercent: crossSwap.appFeePercent,
     appFeeRecipient: crossSwap.appFeeRecipient,
-    isNative: crossSwap.isInputNative,
+    isNative: crossSwap.isOutputNative,
   });
   bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
 
