@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 
 import { CrossSwap, CrossSwapQuotes, Token } from "../_dexes/types";
-import { AppFee } from "../_dexes/utils";
+import { AppFee, CrossSwapType } from "../_dexes/utils";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
@@ -64,6 +64,15 @@ export type BridgeStrategy = {
   name: string;
   capabilities: BridgeCapabilities;
 
+  originTxNeedsAllowance?: boolean;
+
+  getCrossSwapTypes: (params: {
+    inputToken: Token;
+    outputToken: Token;
+    isInputNative: boolean;
+    isOutputNative: boolean;
+  }) => CrossSwapType[];
+
   getBridgeQuoteRecipient: (crossSwap: CrossSwap) => string;
 
   getBridgeQuoteMessage: (
@@ -73,12 +82,10 @@ export type BridgeStrategy = {
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
-    contracts?: BridgeContracts;
   }>;
 
   getQuoteForOutput: (params: GetOutputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
-    contracts?: BridgeContracts;
   }>;
 
   buildTxForAllowanceHolder: (params: {
