@@ -56,13 +56,11 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         supportedToken.addresses[params.inputToken.chainId]?.toLowerCase() ===
         params.inputToken.address.toLowerCase()
     );
-
     const isOutputTokenSupported = CCTP_SUPPORTED_TOKENS.some(
       (supportedToken) =>
         supportedToken.addresses[params.outputToken.chainId]?.toLowerCase() ===
         params.outputToken.address.toLowerCase()
     );
-
     if (!isInputTokenSupported || !isOutputTokenSupported) {
       return false;
     }
@@ -74,7 +72,6 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     const isDestinationChainSupported = CCTP_SUPPORTED_CHAINS.includes(
       params.outputToken.chainId
     );
-
     if (!isOriginChainSupported || !isDestinationChainSupported) {
       return false;
     }
