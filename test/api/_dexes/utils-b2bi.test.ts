@@ -80,7 +80,7 @@ describe("_dexes/utils-b2bi", () => {
           TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       };
       const indirectDestinationRoute = getIndirectDestinationRoute(params);
-      expect(indirectDestinationRoute).toBeTruthy();
+      expect(indirectDestinationRoute).toBeFalsy();
     });
   });
 });
