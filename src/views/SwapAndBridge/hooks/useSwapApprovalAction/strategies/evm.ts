@@ -7,7 +7,7 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     super(evmConnection);
   }
 
-  private get signer() {
+  private getSigner() {
     const { signer } = this.evmConnection;
     if (!signer) {
       throw new Error("No signer available");
@@ -28,19 +28,25 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     await this.evmConnection.setChain(requiredChainId);
   }
 
-  async swap(approvalData: SwapApprovalData): Promise<string> {
-    const signer = this.signer;
+  async approve(approvalData: SwapApprovalData): Promise<boolean> {
+    const signer = this.getSigner();
     // approvals first
     const approvals: ApprovalTxn[] = approvalData.approvalTxns || [];
     for (const approval of approvals) {
       await this.switchNetwork(approval.chainId);
+      await this.assertCorrectNetwork(approval.chainId);
       await signer.sendTransaction({
         to: approval.to,
         data: approval.data,
         chainId: approval.chainId,
       });
     }
-    // then final swap
+    return true;
+  }
+
+  async swap(approvalData: SwapApprovalData): Promise<string> {
+    const signer = this.getSigner();
+
     const swapTx: SwapTx = approvalData.swapTx;
     await this.switchNetwork(swapTx.chainId);
     await this.assertCorrectNetwork(swapTx.chainId);
@@ -55,5 +61,15 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
       gasLimit: swapTx.gas as any,
     });
     return tx.hash;
+  }
+
+  async execute(approvalData: SwapApprovalData): Promise<string> {
+    try {
+      await this.approve(approvalData);
+      return await this.swap(approvalData);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 }

@@ -9,7 +9,7 @@ export abstract class AbstractSwapApprovalActionStrategy
   abstract isConnected(): boolean;
   abstract isWrongNetwork(requiredChainId: number): boolean;
   abstract switchNetwork(requiredChainId: number): Promise<void>;
-  abstract swap(approvalData: any): Promise<string>;
+  abstract execute(approvalData: any): Promise<string>;
 
   async assertCorrectNetwork(requiredChainId: number) {
     const currentChainId = this.evmConnection.chainId;

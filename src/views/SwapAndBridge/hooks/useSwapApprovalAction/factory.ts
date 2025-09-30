@@ -16,7 +16,7 @@ export function createSwapApprovalActionHook(
     const action = useMutation({
       mutationFn: async () => {
         if (!approvalData) throw new Error("Missing approval data");
-        const txHash = await strategy.swap(approvalData);
+        const txHash = await strategy.execute(approvalData);
         return txHash;
       },
     });

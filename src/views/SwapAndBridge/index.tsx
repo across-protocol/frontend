@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { InputForm } from "./components/InputForm";
 import ConfirmationButton from "./components/ConfirmationButton";
 import { useHistory } from "react-router-dom";
-import useSwapAndBridge from "./hooks/useSwapAndBridge";
+import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
 
 export default function SwapAndBridge() {
   const {
@@ -23,6 +23,10 @@ export default function SwapAndBridge() {
     onConfirm,
     validationError,
     validationWarning,
+    buttonState,
+    buttonDisabled,
+    buttonLoading,
+    buttonLabel,
   } = useSwapAndBridge();
   const history = useHistory();
 
@@ -59,6 +63,10 @@ export default function SwapAndBridge() {
           onConfirm={handleConfirm}
           validationError={validationError}
           validationWarning={validationWarning}
+          buttonState={buttonState}
+          buttonDisabled={buttonDisabled}
+          buttonLoading={buttonLoading}
+          buttonLabel={buttonLabel}
         />
       </Wrapper>
     </LayoutV2>

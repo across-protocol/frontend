@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import { BigNumber } from "ethers";
-import axios from "axios";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
@@ -9,6 +8,8 @@ import {
   useSwapApprovalAction,
   SwapApprovalData,
 } from "./useSwapApprovalAction";
+import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
+import { BridgeButtonState } from "../components/ConfirmationButton";
 
 export type UseSwapAndBridgeReturn = {
   inputToken: EnrichedTokenSelect | null;
@@ -30,10 +31,16 @@ export type UseSwapAndBridgeReturn = {
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
 
+  // Button state information
+  buttonState: BridgeButtonState;
+  buttonDisabled: boolean;
+  buttonLoading: boolean;
+  buttonLabel: string;
+
+  // Legacy properties
   isConnected: boolean;
   isWrongNetwork: boolean;
   isSubmitting: boolean;
-  buttonDisabled: boolean;
   onConfirm: () => Promise<string>;
 };
 
@@ -80,32 +87,12 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     approvalData
   );
 
-  const validation = useMemo(() => {
-    let errorType: AmountInputError | undefined = undefined;
-    // invalid amount (allow empty/no amount without error)
-    if (amount && amount.lte(0)) {
-      errorType = AmountInputError.INVALID;
-    }
-    // balance check for origin-side inputs
-    if (!errorType && isAmountOrigin && inputToken?.balance) {
-      if (amount && amount.gt(inputToken.balance)) {
-        errorType = AmountInputError.INSUFFICIENT_BALANCE;
-      }
-    }
-    // backend availability
-    if (!errorType && error && axios.isAxiosError(error)) {
-      const code = (error.response?.data as any)?.code as string | undefined;
-      if (code === "AMOUNT_TOO_LOW") {
-        errorType = AmountInputError.AMOUNT_TOO_LOW;
-      } else if (code === "SWAP_QUOTE_UNAVAILABLE") {
-        errorType = AmountInputError.SWAP_QUOTE_UNAVAILABLE;
-      }
-    }
-    return {
-      error: errorType,
-      warn: undefined as AmountInputError | undefined,
-    };
-  }, [amount, isAmountOrigin, inputToken, error]);
+  const validation = useValidateSwapAndBridge(
+    amount,
+    isAmountOrigin,
+    inputToken,
+    error
+  );
 
   const expectedInputAmount = useMemo(() => {
     return swapQuote?.inputAmount?.toString();
@@ -119,6 +106,31 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     const txHash = await approvalAction.buttonActionHandler();
     return txHash as string;
   }, [approvalAction]);
+
+  // Button state logic
+  const buttonState: BridgeButtonState = useMemo(() => {
+    if (isQuoteLoading) return "loadingQuote";
+    if (!approvalAction.isConnected) return "notConnected";
+    if (approvalAction.isButtonActionLoading) return "submitting";
+    if (!inputToken || !outputToken) return "awaitingTokenSelection";
+    if (!amount || amount.lte(0)) return "awaitingAmountInput";
+    if (validation.error) return "validationError";
+    return "readyToConfirm";
+  }, [
+    approvalAction.isButtonActionLoading,
+    approvalAction.isConnected,
+    inputToken,
+    outputToken,
+    amount,
+    isQuoteLoading,
+    validation.error,
+  ]);
+
+  const buttonLoading = useMemo(() => {
+    return buttonState === "loadingQuote" || buttonState === "submitting";
+  }, [buttonState]);
+
+  const buttonLabel = buttonLabels[buttonState];
 
   return {
     inputToken,
@@ -140,9 +152,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     validationError: validation.error,
     validationWarning: validation.warn,
 
-    isConnected: approvalAction.isConnected,
-    isWrongNetwork: approvalAction.isWrongNetwork,
-    isSubmitting: approvalAction.isButtonActionLoading,
+    // Button state information
+    buttonState,
     buttonDisabled:
       approvalAction.buttonDisabled ||
       !!validation.error ||
@@ -150,8 +161,24 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
       !outputToken ||
       !amount ||
       amount.lte(0),
+    buttonLoading,
+    buttonLabel,
+
+    // Legacy properties
+    isConnected: approvalAction.isConnected,
+    isWrongNetwork: approvalAction.isWrongNetwork,
+    isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
   };
 }
 
-export default useSwapAndBridge;
+const buttonLabels: Record<BridgeButtonState, string> = {
+  notConnected: "Connect Wallet",
+  awaitingTokenSelection: "Select a token",
+  awaitingAmountInput: "Enter an amount",
+  readyToConfirm: "Confirm Swap",
+  submitting: "Confirming...",
+  wrongNetwork: "Switch network and confirm transaction",
+  loadingQuote: "Finalizing quote",
+  validationError: "Confirm Swap",
+};

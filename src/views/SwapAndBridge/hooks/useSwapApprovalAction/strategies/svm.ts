@@ -23,6 +23,11 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     await this.svmConnection.connect();
   }
 
+  // stubbed  for now
+  approve(approvalData: SwapApprovalData): boolean {
+    return true;
+  }
+
   async swap(approvalData: SwapApprovalData): Promise<string> {
     if (!this.svmConnection.wallet?.adapter) {
       throw new Error("Wallet needs to be connected");
@@ -33,5 +38,10 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
       Buffer.from(swapTx.data, "base64")
     );
     return sig;
+  }
+
+  async execute(approvalData: SwapApprovalData): Promise<string> {
+    this.approve(approvalData);
+    return this.swap(approvalData);
   }
 }

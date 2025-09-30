@@ -28,5 +28,5 @@ export type SwapApprovalActionStrategy = {
   isConnected(): boolean;
   isWrongNetwork(requiredChainId: number): boolean;
   switchNetwork(requiredChainId: number): Promise<void>;
-  swap(approvalData: SwapApprovalData): Promise<string>;
+  execute(approvalData: SwapApprovalData): Promise<string>;
 };
