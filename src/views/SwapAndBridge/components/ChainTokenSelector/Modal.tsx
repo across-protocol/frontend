@@ -75,7 +75,17 @@ export default function ChainTokenSelectorModal({
     });
 
     // Return ordering top 100 tokens ordering highest balanceUsd to lowest (fallback alphabetical)
+    // Push disabled tokens to the bottom
     const sortedTokens = enrichedTokens.slice(0, 100).sort((a, b) => {
+      // First, sort by disabled status - disabled tokens go to bottom
+      const aDisabled = a.isReachable === false;
+      const bDisabled = b.isReachable === false;
+
+      if (aDisabled !== bDisabled) {
+        return aDisabled ? 1 : -1;
+      }
+
+      // Then sort by balance (for enabled tokens) or alphabetically (for disabled tokens)
       if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
         return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
       }
@@ -105,6 +115,11 @@ export default function ChainTokenSelectorModal({
           return false;
         }
 
+        // Filter out the chain of the other token (same chain can't be both input and output)
+        if (otherToken && Number(chainId) === otherToken.chainId) {
+          return false;
+        }
+
         const keywords = [
           String(chainId),
           getChainInfo(Number(chainId)).name.toLowerCase().replace(" ", ""),
@@ -126,6 +141,23 @@ export default function ChainTokenSelectorModal({
         }
 
         return [chainId, { tokens, isDisabled }];
+      })
+      // Sort chains to push disabled ones to the bottom
+      .sort(([chainIdA, chainDataA], [chainIdB, chainDataB]) => {
+        const aDisabled = (chainDataA as { tokens: any; isDisabled: boolean })
+          .isDisabled;
+        const bDisabled = (chainDataB as { tokens: any; isDisabled: boolean })
+          .isDisabled;
+
+        // First, sort by disabled status - disabled chains go to bottom
+        if (aDisabled !== bDisabled) {
+          return aDisabled ? 1 : -1;
+        }
+
+        // Then sort alphabetically by chain name
+        const chainInfoA = getChainInfo(Number(chainIdA));
+        const chainInfoB = getChainInfo(Number(chainIdB));
+        return chainInfoA.name.localeCompare(chainInfoB.name);
       });
 
     return Object.fromEntries(chainsWithDisabledState);
