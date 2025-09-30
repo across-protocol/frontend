@@ -68,9 +68,26 @@ export default function ChainTokenSelectorModal({
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
+      // Determine if token should be disabled based on new requirements:
+      // Only disable tokens if the token is NOT a swap token AND it is not reachable via a bridge route
+      let shouldDisable = false;
+      if (routeToken) {
+        // If it's a swap token, never disable it
+        if (routeToken.routeSource === "swap") {
+          shouldDisable = false;
+        } else {
+          // If it's not a swap token, disable it only if it's not reachable via bridge
+          shouldDisable = routeToken.isReachable === false;
+        }
+      } else {
+        // If no route token found, disable it (not available for any routes)
+        shouldDisable = true;
+      }
+
       return {
         ...token,
-        isReachable: routeToken?.isReachable,
+        isReachable: !shouldDisable,
+        routeSource: routeToken?.routeSource || "bridge", // Default to bridge if not found
       };
     });
 
@@ -129,32 +146,13 @@ export default function ChainTokenSelectorModal({
         );
       })
       .map(([chainId, tokens]) => {
-        let isDisabled = false;
-
-        // If there's an other token selected, check if this chain has any reachable tokens
-        if (otherToken) {
-          const tokensOnChain = tokens || [];
-          const hasReachableTokens = tokensOnChain.some(
-            (token) => token.isReachable !== false
-          );
-          isDisabled = !hasReachableTokens;
-        }
+        // Never disable chains - requirement 1
+        const isDisabled = false;
 
         return [chainId, { tokens, isDisabled }];
       })
-      // Sort chains to push disabled ones to the bottom
-      .sort(([chainIdA, chainDataA], [chainIdB, chainDataB]) => {
-        const aDisabled = (chainDataA as { tokens: any; isDisabled: boolean })
-          .isDisabled;
-        const bDisabled = (chainDataB as { tokens: any; isDisabled: boolean })
-          .isDisabled;
-
-        // First, sort by disabled status - disabled chains go to bottom
-        if (aDisabled !== bDisabled) {
-          return aDisabled ? 1 : -1;
-        }
-
-        // Then sort alphabetically by chain name
+      // Sort chains alphabetically by name (no need to sort by disabled status since none are disabled)
+      .sort(([chainIdA], [chainIdB]) => {
         const chainInfoA = getChainInfo(Number(chainIdA));
         const chainInfoB = getChainInfo(Number(chainIdB));
         return chainInfoA.name.localeCompare(chainInfoB.name);
