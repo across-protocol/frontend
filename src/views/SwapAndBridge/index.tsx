@@ -53,6 +53,7 @@ export default function SwapAndBridge() {
           isQuoteLoading={isQuoteLoading}
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}
+          validationError={validationError}
         />
         <ConfirmationButton
           inputToken={inputToken}

@@ -9,6 +9,7 @@ import { ReactComponent as Route } from "assets/icons/route.svg";
 import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Gas } from "assets/icons/gas.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
+import { ReactComponent as Warning } from "assets/icons/warning_triangle.svg";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,7 +88,7 @@ const ExpandableLabelSection: React.FC<
     content = (
       <>
         <ValidationText>
-          <Info color="inherit" width="20px" height="20px" />
+          <Warning color="inherit" width="20px" height="20px" />
           <span>{validationErrorTextMap[validationError]}</span>
         </ValidationText>
       </>

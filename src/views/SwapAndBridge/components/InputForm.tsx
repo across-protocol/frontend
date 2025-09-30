@@ -7,6 +7,7 @@ import styled from "@emotion/styled";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
+import { AmountInputError } from "views/Bridge/utils";
 
 export const InputForm = ({
   inputToken,
@@ -19,6 +20,7 @@ export const InputForm = ({
   isQuoteLoading,
   expectedOutputAmount,
   expectedInputAmount,
+  validationError,
 }: {
   inputToken: EnrichedTokenSelect | null;
   setInputToken: (token: EnrichedTokenSelect | null) => void;
@@ -34,6 +36,7 @@ export const InputForm = ({
 
   isAmountOrigin: boolean;
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
+  validationError: AmountInputError | undefined;
 }) => {
   const quickSwap = useCallback(() => {
     const origin = inputToken;
@@ -59,6 +62,9 @@ export const InputForm = ({
         expectedAmount={expectedInputAmount}
         shouldUpdate={!isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
+        insufficientInputBalance={
+          validationError === AmountInputError.INSUFFICIENT_BALANCE
+        }
       />
       <QuickSwapButtonWrapper>
         <QuickSwapButton onClick={quickSwap}>
@@ -89,6 +95,7 @@ const TokenInput = ({
   expectedAmount,
   shouldUpdate,
   isUpdateLoading,
+  insufficientInputBalance = false,
 }: {
   setToken: (token: EnrichedTokenSelect) => void;
   token: EnrichedTokenSelect | null;
@@ -97,6 +104,7 @@ const TokenInput = ({
   expectedAmount: string | undefined;
   shouldUpdate: boolean;
   isUpdateLoading: boolean;
+  insufficientInputBalance?: boolean;
 }) => {
   const [amountString, setAmountString] = useState<string>("");
   const [justTyped, setJustTyped] = useState(false);
@@ -178,6 +186,7 @@ const TokenInput = ({
             }
           }}
           disabled={shouldUpdate && isUpdateLoading}
+          error={insufficientInputBalance}
         />
         <TokenAmountInputEstimatedUsd>
           <ValueRow>
@@ -199,6 +208,7 @@ const TokenInput = ({
             balance={token.balance}
             disableHover={!isOrigin}
             decimals={token.decimals}
+            error={insufficientInputBalance}
             setAmount={(amount) => {
               if (amount) {
                 setAmount(amount);
@@ -250,14 +260,18 @@ const TokenAmountInputTitle = styled.div`
   line-height: 130%;
 `;
 
-const TokenAmountInput = styled.input<{ value: string }>`
+const TokenAmountInput = styled.input<{
+  value: string;
+  error: boolean;
+}>`
   font-family: Barlow;
   font-size: 48px;
   font-weight: 300;
   line-height: 120%;
   letter-spacing: -1.92px;
   width: 100%;
-  color: ${(value) => (value ? COLORS.aqua : COLORS["light-200"])};
+  color: ${({ value, error }) =>
+    error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
 
   outline: none;
   border: none;

@@ -9,6 +9,7 @@ type BalanceSelectorProps = {
   decimals: number;
   setAmount: (amount: BigNumber | null) => void;
   disableHover?: boolean;
+  error?: boolean;
 };
 
 export default function BalanceSelector({
@@ -16,6 +17,7 @@ export default function BalanceSelector({
   decimals,
   setAmount,
   disableHover,
+  error = false,
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
   if (!balance || balance.lte(0)) return null;
@@ -81,7 +83,7 @@ export default function BalanceSelector({
             ))}
         </AnimatePresence>
       </PillsContainer>
-      <BalanceText>
+      <BalanceText error={error}>
         <span>Balance:</span> {formattedBalance}
       </BalanceText>
     </BalanceWrapper>
@@ -98,15 +100,17 @@ const BalanceWrapper = styled.div`
   margin-left: auto;
 `;
 
-const BalanceText = styled.div`
-  color: ${COLORS.white};
+const BalanceText = styled.div<{ error?: boolean }>`
+  color: ${({ error }) => (error ? COLORS.error : COLORS.white)};
   opacity: 1;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 130%;
 
   span {
     opacity: 0.5;
+    color: ${COLORS.white};
+    font-weight: 400;
   }
 `;
 
