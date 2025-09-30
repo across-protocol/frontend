@@ -7,7 +7,6 @@ import styled from "@emotion/styled";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { AmountInputError } from "../../Bridge/utils";
 
 export const InputForm = ({
   inputToken,
@@ -101,7 +100,6 @@ const TokenInput = ({
 }) => {
   const [amountString, setAmountString] = useState<string>("");
   const [justTyped, setJustTyped] = useState(false);
-  const [validationError] = useState<string | undefined>(undefined);
 
   // Handle user input changes
   useEffect(() => {

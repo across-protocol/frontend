@@ -24,7 +24,7 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
   }
 
   // stubbed  for now
-  approve(approvalData: SwapApprovalData): boolean {
+  approve(_approvalData: SwapApprovalData): boolean {
     return true;
   }
 

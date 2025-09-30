@@ -87,7 +87,7 @@ const ExpandableLabelSection: React.FC<
     content = (
       <>
         <ValidationText>
-          <Info color="inherit" width="1em" height="1em" />
+          <Info color="inherit" width="20px" height="20px" />
           <span>{validationErrorTextMap[validationError]}</span>
         </ValidationText>
       </>
@@ -193,7 +193,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   outputToken,
   amount,
   swapQuote,
-  isQuoteLoading,
   onConfirm,
   validationError,
   validationWarning,
@@ -333,7 +332,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               <ExpandedDetails>
                 <DetailRow>
                   <DetailLeft>
-                    <Route width="16px" height="16px" />
+                    <Route width="20px" height="20px" />
                     <span>Route</span>
                   </DetailLeft>
                   <DetailRight>
@@ -454,11 +453,6 @@ const ExpandableLabelLeft = styled.span`
   justify-content: flex-start;
 `;
 
-const ShieldIcon = styled.svg`
-  width: 16px;
-  height: 16px;
-`;
-
 const FastSecureText = styled.span`
   color: ${COLORS.aqua};
 `;
@@ -481,16 +475,6 @@ const FeeTimeItem = styled.span`
   display: flex;
   align-items: center;
   gap: 4px;
-`;
-
-const GasIcon = styled.svg`
-  width: 16px;
-  height: 16px;
-`;
-
-const TimeIcon = styled.svg`
-  width: 16px;
-  height: 16px;
 `;
 
 const Divider = styled.span`
@@ -610,16 +594,6 @@ const DetailRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-`;
-
-const RouteIcon = styled.svg`
-  width: 20px;
-  height: 20px;
-`;
-
-const InfoIconSvg = styled.svg`
-  width: 20px;
-  height: 20px;
 `;
 
 const RouteDot = styled.span`
