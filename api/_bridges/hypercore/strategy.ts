@@ -15,6 +15,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
 import { encodeTransferCalldata } from "../../_multicall-handler";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
+import { accountExistsOnHyperCore } from "../../_hypercore";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -195,6 +196,16 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       if (!isToHyperCore) {
         throw new InvalidParamError({
           message: "HyperCore -> HyperEVM: Route not supported yet",
+        });
+      }
+
+      const depositorExists = await accountExistsOnHyperCore({
+        account: crossSwap.depositor,
+      });
+
+      if (!depositorExists) {
+        throw new InvalidParamError({
+          message: "Depositor is not initialized on HyperCore",
         });
       }
 
