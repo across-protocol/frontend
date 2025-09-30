@@ -30,6 +30,7 @@ export type UseSwapAndBridgeReturn = {
 
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
+  validationErrorFormatted?: string | undefined;
 
   // Button state information
   buttonState: BridgeButtonState;
@@ -148,7 +149,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isQuoteLoading,
     expectedInputAmount,
     expectedOutputAmount,
-
+    validationErrorFormatted: validation.errorFormatted,
     validationError: validation.error,
     validationWarning: validation.warn,
 

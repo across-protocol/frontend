@@ -23,6 +23,7 @@ export default function SwapAndBridge() {
     onConfirm,
     validationError,
     validationWarning,
+    validationErrorFormatted,
     buttonState,
     buttonDisabled,
     buttonLoading,
@@ -64,6 +65,7 @@ export default function SwapAndBridge() {
           onConfirm={handleConfirm}
           validationError={validationError}
           validationWarning={validationWarning}
+          validationErrorFormatted={validationErrorFormatted}
           buttonState={buttonState}
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}

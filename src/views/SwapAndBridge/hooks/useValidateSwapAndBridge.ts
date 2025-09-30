@@ -4,10 +4,12 @@ import axios from "axios";
 
 import { AmountInputError } from "../../Bridge/utils";
 import { EnrichedTokenSelect } from "../components/ChainTokenSelector/SelectorButton";
+import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
 
 export type ValidationResult = {
   error?: AmountInputError;
   warn?: AmountInputError;
+  errorFormatted?: string;
 };
 
 export function useValidateSwapAndBridge(
@@ -40,8 +42,25 @@ export function useValidateSwapAndBridge(
     return {
       error: errorType,
       warn: undefined as AmountInputError | undefined,
+      errorFormatted: getValidationErrorText({
+        validationError: errorType,
+        inputToken,
+      }),
     };
   }, [amount, isAmountOrigin, inputToken, error]);
 
   return validation;
+}
+
+function getValidationErrorText(props: {
+  validationError?: AmountInputError;
+  inputToken: EnrichedTokenSelect | null;
+}): string | undefined {
+  if (!props.validationError) {
+    return;
+  }
+  return validationErrorTextMap[props.validationError]?.replace(
+    "[INPUT_TOKEN]",
+    props.inputToken!.symbol
+  );
 }

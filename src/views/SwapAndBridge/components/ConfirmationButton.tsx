@@ -7,7 +7,7 @@ import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Route } from "assets/icons/route.svg";
 import { ReactComponent as Shield } from "assets/icons/shield.svg";
-import { ReactComponent as Gas } from "assets/icons/gas.svg";
+import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle.svg";
 
@@ -19,7 +19,6 @@ import { useTokenConversion } from "hooks/useTokenConversion";
 import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
 import { AmountInputError } from "../../Bridge/utils";
-import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
 
 type SwapQuoteResponse = {
   checks: object;
@@ -52,6 +51,7 @@ interface ConfirmationButtonProps
   onConfirm?: () => void;
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
+  validationErrorFormatted?: string;
   // External state props
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
@@ -71,6 +71,7 @@ const ExpandableLabelSection: React.FC<
     hasQuote: boolean;
     validationError?: AmountInputError;
     validationWarning?: AmountInputError;
+    validationErrorFormatted?: string;
   }>
 > = ({
   fee,
@@ -81,15 +82,16 @@ const ExpandableLabelSection: React.FC<
   children,
   hasQuote,
   validationError,
+  validationErrorFormatted,
 }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
-  if (validationError) {
+  if (validationError && validationErrorFormatted) {
     content = (
       <>
         <ValidationText>
           <Warning color="inherit" width="20px" height="20px" />
-          <span>{validationErrorTextMap[validationError]}</span>
+          <span>{validationErrorFormatted}</span>
         </ValidationText>
       </>
     );
@@ -102,7 +104,7 @@ const ExpandableLabelSection: React.FC<
         </ExpandableLabelLeft>
         <ExpandableLabelRight>
           <FeeTimeItem>
-            <Gas width="16" height="16" />
+            <Dollar width="16" height="16" />
             {fee}
           </FeeTimeItem>
           <Divider />
@@ -197,6 +199,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   onConfirm,
   validationError,
   validationWarning,
+  validationErrorFormatted,
   buttonState,
   buttonDisabled,
   buttonLoading,
@@ -327,6 +330,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
             state={state}
             validationError={validationError}
             validationWarning={validationWarning}
+            validationErrorFormatted={validationErrorFormatted}
             hasQuote={!!swapQuote}
           >
             {expanded && state === "readyToConfirm" ? (
@@ -343,14 +347,14 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 </DetailRow>
                 <DetailRow>
                   <DetailLeft>
-                    <SmallInfoIcon />
+                    <Time width="16px" height="16px" />
                     <span>Est. Time</span>
                   </DetailLeft>
                   <span>{displayValues.estimatedTime}</span>
                 </DetailRow>
                 <DetailRow>
                   <DetailLeft>
-                    <SmallInfoIcon />
+                    <Dollar width="16px" height="16px" />
                     <span>Net Fee</span>
                     <SmallInfoIcon />
                   </DetailLeft>
