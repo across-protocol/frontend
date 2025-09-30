@@ -1,12 +1,8 @@
 import { BigNumber, ethers } from "ethers";
 import { LimitsResponse } from "../_types";
 import * as sdk from "@across-protocol/sdk";
-import {
-  getTokenByAddress,
-  getCachedLimits,
-  HUB_POOL_CHAIN_ID,
-} from "../_utils";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
+import { getCachedLimits, ConvertDecimals } from "../_utils";
+import { CHAIN_IDs } from "../_constants";
 import {
   BridgeStrategyData,
   BridgeStrategyDataParams,
@@ -35,80 +31,43 @@ export async function getBridgeStrategyData({
   inputToken,
   outputToken,
   amount,
+  amountType,
   recipient,
   depositor,
   logger,
 }: BridgeStrategyDataParams): Promise<BridgeStrategyData> {
-  logger.debug({
-    at: "getBridgeStrategyData",
-    message: "Starting bridge strategy data fetch",
-    inputToken: inputToken.address,
-    outputToken: outputToken.address,
-    amount: amount.toString(),
-  });
-
   try {
-    // Get token details for symbol and decimals first
-    const inputTokenDetails = getTokenByAddress(
+    const limits = await getCachedLimits(
       inputToken.address,
-      inputToken.chainId
+      outputToken.address,
+      inputToken.chainId,
+      outputToken.chainId,
+      recipient || depositor
     );
-    if (!inputTokenDetails) {
-      throw new Error(
-        `Input token not found for address ${inputToken.address}`
-      );
-    }
 
-    // Get L1 token address using TOKEN_SYMBOLS_MAP logic
-    const l1TokenAddress =
-      TOKEN_SYMBOLS_MAP[
-        inputTokenDetails.symbol as keyof typeof TOKEN_SYMBOLS_MAP
-      ]?.addresses[HUB_POOL_CHAIN_ID];
-    if (!l1TokenAddress) {
-      throw new Error(
-        `L1 token not found for symbol ${inputTokenDetails.symbol}`
-      );
+    // Convert amount to input token decimals if it's in output token decimals
+    let amountInInputTokenDecimals = amount;
+    if (amountType === "exactOutput" || amountType === "minOutput") {
+      amountInInputTokenDecimals = ConvertDecimals(
+        outputToken.decimals,
+        inputToken.decimals
+      )(amount);
     }
-
-    const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
-    if (!l1Token) {
-      throw new Error(
-        `L1 token details not found for address ${l1TokenAddress}`
-      );
-    }
-
-    const inputUnit = BigNumber.from(10).pow(inputTokenDetails.decimals);
-    const limits =
-      // Get bridge limits
-      await getCachedLimits(
-        inputToken.address,
-        outputToken.address,
-        inputToken.chainId,
-        outputToken.chainId,
-        inputUnit.toString(),
-        recipient || depositor
-      );
 
     // Check if we can fill instantly
     const maxDepositInstant = BigNumber.from(limits.maxDepositInstant);
-    const canFillInstantly = amount.lte(maxDepositInstant);
+    const canFillInstantly = amountInInputTokenDecimals.lte(maxDepositInstant);
 
+    // Check if bridge is fully utilized
     const isUtilizationHigh = isFullyUtilized(limits);
-
-    // Get output token details
-    const outputTokenDetails = getTokenByAddress(
-      outputToken.address,
-      outputToken.chainId
-    );
 
     // Check if input and output tokens are both USDC
     const isUsdcToUsdc =
-      inputTokenDetails?.symbol === "USDC" &&
-      outputTokenDetails?.symbol === "USDC";
+      inputToken.symbol === "USDC" && outputToken.symbol === "USDC";
 
-    // Check if deposit is > 1M USD
+    // Check if deposit is > 1M USD or within Across threshold
     const depositAmountUsd = parseFloat(
-      ethers.utils.formatUnits(amount, inputTokenDetails?.decimals || 18)
+      ethers.utils.formatUnits(amountInInputTokenDecimals, inputToken.decimals)
     );
     const isInThreshold = depositAmountUsd <= 10_000; // 10K USD
     const isLargeDeposit = depositAmountUsd > 1_000_000; // 1M USD
@@ -122,19 +81,6 @@ export async function getBridgeStrategyData({
 
     // Check if Linea is the source chain
     const isLineaSource = inputToken.chainId === CHAIN_IDs.LINEA;
-
-    logger.debug({
-      at: "getBridgeStrategyData",
-      message: "Successfully completed bridge strategy data fetch",
-      results: {
-        canFillInstantly,
-        isUtilizationHigh,
-        isUsdcToUsdc,
-        isLargeDeposit,
-        isFastCctpEligible,
-        isLineaSource,
-      },
-    });
 
     return {
       canFillInstantly,
