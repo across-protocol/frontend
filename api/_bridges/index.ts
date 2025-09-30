@@ -1,7 +1,13 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { BridgeStrategiesConfig } from "./types";
+import {
+  BridgeStrategiesConfig,
+  BridgeStrategy,
+  GetBridgeStrategyParams,
+} from "./types";
 import { CHAIN_IDs } from "../_constants";
+import { getCctpBridgeStrategy } from "./cctp/strategy";
+import { getBridgeStrategyData } from "./utils";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -13,16 +19,73 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   // TODO: Add CCTP routes when ready
 };
 
-// TODO: Extend the strategy selection based on more sophisticated logic when we start
-// implementing burn/mint bridges.
-export function getBridgeStrategy({
+export const availableBridgeStrategies = [
+  getAcrossBridgeStrategy(),
+  getHyperCoreBridgeStrategy(),
+  getCctpBridgeStrategy(),
+];
+
+export async function getBridgeStrategy({
   originChainId,
   destinationChainId,
-}: {
-  originChainId: number;
-  destinationChainId: number;
-}) {
+  inputToken,
+  outputToken,
+  amount,
+  amountType,
+  recipient,
+  depositor,
+  logger,
+}: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
-  return fromToChainOverride ?? bridgeStrategies.default;
+  if (fromToChainOverride) {
+    return fromToChainOverride;
+  }
+  const supportedBridgeStrategies = availableBridgeStrategies.filter(
+    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
+  );
+  if (supportedBridgeStrategies.length === 1) {
+    return supportedBridgeStrategies[0];
+  }
+  const bridgeStrategyData = await getBridgeStrategyData({
+    inputToken,
+    outputToken,
+    amount,
+    amountType,
+    recipient,
+    depositor,
+    logger,
+  });
+  if (!bridgeStrategyData) {
+    return bridgeStrategies.default;
+  }
+  if (!bridgeStrategyData.isUsdcToUsdc) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUtilizationHigh) {
+    return getCctpBridgeStrategy();
+  }
+  if (bridgeStrategyData.isLineaSource) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isFastCctpEligible) {
+    if (bridgeStrategyData.isInThreshold) {
+      return getAcrossBridgeStrategy();
+    }
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      return getCctpBridgeStrategy();
+    }
+  }
+  if (bridgeStrategyData.canFillInstantly) {
+    return getAcrossBridgeStrategy();
+  } else {
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      // Use OFT bridge if not CCTP
+      return getCctpBridgeStrategy();
+    }
+  }
 }

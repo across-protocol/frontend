@@ -227,6 +227,8 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         ecosystem: "evm",
       };
     },
+
+    isRouteSupported,
   };
 }
 
