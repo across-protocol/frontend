@@ -15,7 +15,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
 import { encodeTransferCalldata } from "../../_multicall-handler";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
-import { getBalanceOnHyperCore } from "../../_hypercore";
+import { accountExistsOnHyperCore } from "../../_hypercore";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -199,14 +199,13 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         });
       }
 
-      const depositorBalance = await getBalanceOnHyperCore({
+      const depositorExists = await accountExistsOnHyperCore({
         account: crossSwap.depositor,
-        tokenSystemAddress: crossSwap.outputToken.address,
       });
 
-      if (depositorBalance.eq(0)) {
+      if (!depositorExists) {
         throw new InvalidParamError({
-          message: "Depositor does not have a balance on HyperCore",
+          message: "Depositor is not initialized on HyperCore",
         });
       }
 

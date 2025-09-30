@@ -7,6 +7,10 @@ import { CHAIN_IDs } from "./_constants";
 export const CORE_BALANCE_SYSTEM_PRECOMPILE =
   "0x0000000000000000000000000000000000000801";
 
+// Contract used to check if an account exists on Hypercore.
+export const CORE_USER_EXISTS_PRECOMPILE_ADDRESS =
+  "0x0000000000000000000000000000000000000810";
+
 // CoreWriter contract on EVM that can be used to interact with Hypercore.
 export const CORE_WRITER_EVM_ADDRESS =
   "0x3333333333333333333333333333333333333333";
@@ -85,4 +89,21 @@ export async function getBalanceOnHyperCore(params: {
     queryResult
   );
   return BigNumber.from(decodedQueryResult[0].toString());
+}
+
+export async function accountExistsOnHyperCore(params: { account: string }) {
+  const provider = getProvider(CHAIN_IDs.HYPEREVM);
+  const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
+    ["address"],
+    [params.account]
+  );
+  const queryResult = await provider.call({
+    to: CORE_USER_EXISTS_PRECOMPILE_ADDRESS,
+    data: balanceCoreCalldata,
+  });
+  const decodedQueryResult = ethers.utils.defaultAbiCoder.decode(
+    ["bool"],
+    queryResult
+  );
+  return Boolean(decodedQueryResult[0]);
 }

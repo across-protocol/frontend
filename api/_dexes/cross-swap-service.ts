@@ -46,7 +46,7 @@ import {
 } from "./types";
 import { BridgeStrategy } from "../_bridges/types";
 import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
-import { getBalanceOnHyperCore } from "../_hypercore";
+import { accountExistsOnHyperCore } from "../_hypercore";
 import { CHAIN_IDs } from "../_constants";
 import { BigNumber } from "ethers";
 
@@ -253,28 +253,26 @@ export async function getCrossSwapQuotesForExactInputB2BI(
   // If destination chain is HyperCore, we need to check if the app fee recipient and recipient
   // have initialized balances on HyperCore.
   if (crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE) {
-    const [appFeeRecipientBalance, recipientBalance] = await Promise.all([
+    const [appFeeRecipientExists, recipientExists] = await Promise.all([
       crossSwap.appFeeRecipient
-        ? getBalanceOnHyperCore({
+        ? accountExistsOnHyperCore({
             account: crossSwap.appFeeRecipient,
-            tokenSystemAddress: indirectDestinationRoute.outputToken.address,
           })
         : BigNumber.from(0),
-      getBalanceOnHyperCore({
+      accountExistsOnHyperCore({
         account: crossSwap.recipient,
-        tokenSystemAddress: indirectDestinationRoute.outputToken.address,
       }),
     ]);
 
-    if (crossSwap.appFeeRecipient && appFeeRecipientBalance.eq(0)) {
+    if (crossSwap.appFeeRecipient && !appFeeRecipientExists) {
       throw new InvalidParamError({
-        message: "App fee recipient does not have a balance on HyperCore",
+        message: "App fee recipient is not initialized on HyperCore",
       });
     }
 
-    if (recipientBalance.eq(0)) {
+    if (!recipientExists) {
       throw new InvalidParamError({
-        message: "Recipient does not have a balance on HyperCore",
+        message: "Recipient is not initialized on HyperCore",
       });
     }
   }
