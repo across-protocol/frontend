@@ -896,7 +896,7 @@ export function isValidSource(
   sources: DexSources
 ) {
   const sourceToCheck = _source.toLowerCase();
-  return sources.sources[chainId].some((source) =>
+  return sources.sources[chainId]?.some((source) =>
     source.names.includes(sourceToCheck)
   );
 }

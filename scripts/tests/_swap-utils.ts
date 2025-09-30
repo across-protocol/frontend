@@ -277,11 +277,7 @@ export async function fetchSwapQuotes() {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
       console.log("Body:", JSON.stringify(body, null, 2));
-      const response = await axios.post(
-        `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-        body,
-        { params: testCase.params }
-      );
+      const response = await axios.post(url, body, { params: testCase.params });
       swapQuotes.push(response.data as BaseSwapResponse);
     }
   }

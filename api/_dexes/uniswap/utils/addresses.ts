@@ -47,7 +47,7 @@ export const QUOTER_CONTRACT_ADDRESS = {
 };
 
 // https://api-docs.uniswap.org/guides/supported_chains
-// https://github.com/Uniswap/sdks/blob/6413af9bcda811c76157e14d6e0ff6924e1959f2/sdks/universal-router-sdk/src/utils/constants.ts#L21
+// https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/utils/constants.ts
 export const UNIVERSAL_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ARBITRUM]: "0xa51afafe0263b40edaef0df8781ea9aa03e381a3",
   [CHAIN_IDs.BASE]: "0x6ff5693b99212da76ad316178a184ab56d299b43",
