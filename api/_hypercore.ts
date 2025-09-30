@@ -67,7 +67,7 @@ export async function getBalanceOnHyperCore(params: {
   account: string;
   tokenSystemAddress: string;
 }) {
-  const provider = getProvider(CHAIN_IDs.HYPERCORE);
+  const provider = getProvider(CHAIN_IDs.HYPEREVM);
   const tokenIndex = parseInt(
     params.tokenSystemAddress.replace("0x20", ""),
     16
