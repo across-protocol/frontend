@@ -3,6 +3,7 @@ import { ExternalProjectConfig } from "../types";
 
 export default {
   name: "Hyperliquid",
+  fullName: "Hyperliquid (Perps)",
   projectId: "hyperliquid",
   explorer: "https://arbiscan.io",
   logoPath: "./assets/logo.svg",

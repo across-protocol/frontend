@@ -4,7 +4,7 @@ import { ChainConfig } from "../types";
 export default {
   chainId: 1337, // Arbitrary chain id for HyperCore
   name: "HyperCore",
-  fullName: "HyperCore",
+  fullName: "Hyperliquid (Spot)",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {

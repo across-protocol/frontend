@@ -463,7 +463,7 @@ export const bnbSmartChain_viem = defineChain({
 
 export const hyperCore = {
   name: "HyperCore",
-  fullName: "HyperCore",
+  fullName: "Hyperliquid (Spot)",
   chainId: 1337,
   logoURI: hyperCoreLogo,
   grayscaleLogoURI: hyperCoreGrayscaleLogo,
@@ -1516,7 +1516,7 @@ export const zora_viem = defineChain({
 
 export const hyperliquid = {
   name: "Hyperliquid",
-  fullName: "Hyperliquid",
+  fullName: "Hyperliquid (Perps)",
   projectId: "hyperliquid",
   logoURI: hyperliquidLogo,
   grayscaleLogoURI: hyperliquidGrayscaleLogo,
