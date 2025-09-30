@@ -19,6 +19,7 @@ import { useTokenConversion } from "hooks/useTokenConversion";
 import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
 import { AmountInputError } from "../../Bridge/utils";
+import { Tooltip } from "components/Tooltip";
 
 type SwapQuoteResponse = {
   checks: object;
@@ -356,7 +357,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <DetailLeft>
                     <Dollar width="16px" height="16px" />
                     <span>Net Fee</span>
-                    <SmallInfoIcon />
+                    <Tooltip
+                      tooltipId="ConfirmationButton - net fee"
+                      body="Total fees less any reward, in USD"
+                    >
+                      <Info width="16px" height="16px" />
+                    </Tooltip>
                   </DetailLeft>
                   <span>{displayValues.netFee}</span>
                 </DetailRow>
