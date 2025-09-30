@@ -10,6 +10,7 @@ import {
   hubPoolChainId,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
+import useAvailableCrosschainRoutes from "./useAvailableCrosschainRoutes";
 
 const config = getConfig();
 
@@ -18,7 +19,42 @@ export function useTokenConversion(
   baseCurrency: string,
   historicalDateISO?: string
 ) {
-  const token = getToken(symbol);
+  const availableCrosschainRoutes = useAvailableCrosschainRoutes();
+
+  // Try to get token from constants first, fallback to swap API data
+  let token;
+  try {
+    token = getToken(symbol);
+  } catch (error) {
+    // If token not found in constants, try to find it in swap API data
+    const swapTokens = availableCrosschainRoutes.data;
+    if (swapTokens) {
+      // Search across all chains for a token with matching symbol
+      for (const chainId of Object.keys(swapTokens)) {
+        const tokensOnChain = swapTokens[Number(chainId)];
+        const foundToken = tokensOnChain.find(
+          (t) => t.symbol.toUpperCase() === symbol.toUpperCase()
+        );
+        if (foundToken) {
+          // Convert LifiToken to TokenInfo format
+          token = {
+            symbol: foundToken.symbol,
+            name: foundToken.name,
+            decimals: foundToken.decimals,
+            addresses: { [foundToken.chainId]: foundToken.address },
+            mainnetAddress: foundToken.address, // Use the found address as mainnet address
+            logoURI: foundToken.logoURI,
+          };
+          break;
+        }
+      }
+    }
+
+    // If still not found, re-throw the original error
+    if (!token) {
+      throw error;
+    }
+  }
 
   // If the token is OP, we need to use the address of the token on Optimism
   const l1Token =

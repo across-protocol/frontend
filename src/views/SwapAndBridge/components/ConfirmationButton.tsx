@@ -342,7 +342,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                     <span>Route</span>
                   </DetailLeft>
                   <DetailRight>
-                    <RouteDot />
+                    <Across width="20px" height="20px" />
                     <span>{displayValues.route}</span>
                   </DetailRight>
                 </DetailRow>
@@ -607,15 +607,6 @@ const DetailRight = styled.div`
   gap: 8px;
 `;
 
-const RouteDot = styled.span`
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background: ${COLORS.aqua};
-  border-radius: 50%;
-  opacity: 0.8;
-`;
-
 const FeeBreakdown = styled.div`
   padding-left: 24px;
   border-left: 1px solid rgba(224, 243, 255, 0.1);
@@ -635,11 +626,6 @@ const FeeBreakdownLabel = styled.span`
 
 const FeeBreakdownValue = styled.span`
   color: #e0f3ff;
-`;
-
-const SmallInfoIcon = styled(Info)`
-  width: 16px;
-  height: 16px;
 `;
 
 export default ConfirmationButton;

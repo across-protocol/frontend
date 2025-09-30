@@ -1,8 +1,7 @@
-import { MAINNET_CHAIN_IDs } from "@across-protocol/constants";
 import { useQuery } from "@tanstack/react-query";
-import getApiEndpoint from "utils/serverless-api";
-import { SwapChain, SwapToken } from "utils/serverless-api/types";
 import { getConfig } from "utils/config";
+import { useSwapChains } from "./useSwapChains";
+import { useSwapTokens } from "./useSwapTokens";
 
 export type LifiToken = {
   chainId: number;
@@ -13,27 +12,19 @@ export type LifiToken = {
   priceUSD: string;
   coinKey: string;
   logoURI: string;
-  routeSource: "bridge" | "swap" | "both";
+  routeSource: "bridge" | "swap";
 };
 
 export default function useAvailableCrosschainRoutes() {
+  const swapChainsQuery = useSwapChains();
+  const swapTokensQuery = useSwapTokens();
+
   return useQuery({
     queryKey: ["availableCrosschainRoutes"],
     queryFn: async () => {
-      const api = getApiEndpoint();
-      const [chains, tokens] = await Promise.all([
-        api.swapChains(),
-        api.swapTokens(),
-      ]);
-
-      const allowedChainIds = new Set<number>(Object.values(MAINNET_CHAIN_IDs));
-
       // 1) Build swap token map by chain
-      const swapTokensByChain = (tokens as SwapToken[]).reduce(
+      const swapTokensByChain = (swapTokensQuery.data || []).reduce(
         (acc, token) => {
-          if (!allowedChainIds.has(token.chainId)) {
-            return acc;
-          }
           const mapped: LifiToken = {
             chainId: token.chainId,
             address: token.address,
@@ -63,9 +54,6 @@ export default function useAvailableCrosschainRoutes() {
 
       const bridgeTokensByChain = bridgeOriginChains.reduce(
         (acc, fromChainId) => {
-          if (!allowedChainIds.has(fromChainId)) {
-            return acc;
-          }
           const reachable = config.filterReachableTokens(fromChainId);
           const lifiTokens: LifiToken[] = reachable.map((t) => ({
             chainId: fromChainId,
@@ -85,40 +73,40 @@ export default function useAvailableCrosschainRoutes() {
         {} as Record<number, Array<LifiToken>>
       );
 
-      // 3) Merge swap and bridge tokens, de-duplicating by address (case-insensitive)
+      // 3) Combine swap and bridge tokens, deduplicating by address
       const chainIdsInSwap = new Set(
-        (chains as SwapChain[]).map((c) => c.chainId)
+        (swapChainsQuery.data || []).map((c) => c.chainId)
       );
       const chainIdsInBridge = new Set(
         Object.keys(bridgeTokensByChain).map(Number)
       );
       const chainIds = Array.from(
         new Set([...chainIdsInSwap, ...chainIdsInBridge])
-      ).filter((id) => allowedChainIds.has(id));
+      );
 
-      const blendedByChain: Record<number, Array<LifiToken>> = {};
+      const combinedByChain: Record<number, Array<LifiToken>> = {};
       for (const chainId of chainIds) {
-        const mapByAddr = new Map<string, LifiToken>();
-        // Prefer swap tokens first (they include price)
-        (swapTokensByChain[chainId] || []).forEach((t) => {
-          mapByAddr.set(t.address.toLowerCase(), t);
-        });
-        // Add bridge tokens, merging routeSource when duplicate
-        (bridgeTokensByChain[chainId] || []).forEach((t) => {
-          const key = t.address.toLowerCase();
-          const existing = mapByAddr.get(key);
-          if (!existing) {
-            mapByAddr.set(key, t);
-          } else {
-            // Merge: if token exists from swap, mark as both
-            mapByAddr.set(key, { ...existing, routeSource: "both" });
-          }
+        const swapTokens = swapTokensByChain[chainId] || [];
+        const bridgeTokens = bridgeTokensByChain[chainId] || [];
+
+        // Deduplicate by address (case-insensitive), preferring swap tokens for price data
+        const tokenMap = new Map<string, LifiToken>();
+
+        // Add bridge tokens first
+        bridgeTokens.forEach((token) => {
+          tokenMap.set(token.address.toLowerCase(), token);
         });
 
-        blendedByChain[chainId] = Array.from(mapByAddr.values());
+        // Add swap tokens, overriding bridge tokens if same address (swap has price data)
+        swapTokens.forEach((token) => {
+          tokenMap.set(token.address.toLowerCase(), token);
+        });
+
+        combinedByChain[chainId] = Array.from(tokenMap.values());
       }
 
-      return blendedByChain;
+      return combinedByChain;
     },
+    enabled: swapChainsQuery.isSuccess && swapTokensQuery.isSuccess,
   });
 }
