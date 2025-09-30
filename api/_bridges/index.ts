@@ -10,6 +10,7 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPERCORE]: getHyperCoreBridgeStrategy(),
     },
   },
+  // TODO: Add CCTP routes when ready
 };
 
 // TODO: Extend the strategy selection based on more sophisticated logic when we start
