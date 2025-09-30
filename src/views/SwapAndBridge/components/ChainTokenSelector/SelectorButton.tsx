@@ -22,6 +22,7 @@ type Props = {
   selectedToken: EnrichedTokenSelect | null;
   onSelect?: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
+  otherToken?: EnrichedTokenSelect | null; // The currently selected token on the other side
   marginBottom?: string;
   className?: string;
 };
@@ -30,6 +31,7 @@ export default function SelectorButton({
   onSelect,
   selectedToken,
   isOriginToken,
+  otherToken,
   className,
 }: Props) {
   const [displayModal, setDisplayModal] = useState(false);
@@ -66,6 +68,7 @@ export default function SelectorButton({
           displayModal={displayModal}
           setDisplayModal={setDisplayModal}
           isOriginToken={isOriginToken}
+          otherToken={otherToken}
         />
       </>
     );
@@ -95,6 +98,7 @@ export default function SelectorButton({
         displayModal={displayModal}
         setDisplayModal={setDisplayModal}
         isOriginToken={isOriginToken}
+        otherToken={otherToken}
       />
     </>
   );

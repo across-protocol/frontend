@@ -65,6 +65,7 @@ export const InputForm = ({
         insufficientInputBalance={
           validationError === AmountInputError.INSUFFICIENT_BALANCE
         }
+        otherToken={outputToken}
       />
       <QuickSwapButtonWrapper>
         <QuickSwapButton onClick={quickSwap}>
@@ -82,6 +83,7 @@ export const InputForm = ({
         expectedAmount={expectedOutputAmount}
         shouldUpdate={isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
+        otherToken={inputToken}
       />
     </Wrapper>
   );
@@ -96,6 +98,7 @@ const TokenInput = ({
   shouldUpdate,
   isUpdateLoading,
   insufficientInputBalance = false,
+  otherToken,
 }: {
   setToken: (token: EnrichedTokenSelect) => void;
   token: EnrichedTokenSelect | null;
@@ -105,6 +108,7 @@ const TokenInput = ({
   shouldUpdate: boolean;
   isUpdateLoading: boolean;
   insufficientInputBalance?: boolean;
+  otherToken?: EnrichedTokenSelect | null;
 }) => {
   const [amountString, setAmountString] = useState<string>("");
   const [justTyped, setJustTyped] = useState(false);
@@ -201,6 +205,7 @@ const TokenInput = ({
           isOriginToken={isOrigin}
           marginBottom={token ? "24px" : "0px"}
           selectedToken={token}
+          otherToken={otherToken}
         />
 
         {token && (

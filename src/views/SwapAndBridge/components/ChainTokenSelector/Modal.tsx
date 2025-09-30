@@ -22,6 +22,7 @@ import { BigNumber } from "ethers";
 type Props = {
   onSelect: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
+  otherToken?: EnrichedTokenSelect | null; // The currently selected token on the other side
 
   displayModal: boolean;
   setDisplayModal: (displayModal: boolean) => void;
@@ -32,10 +33,21 @@ export default function ChainTokenSelectorModal({
   displayModal,
   setDisplayModal,
   onSelect,
+  otherToken,
 }: Props) {
   const balances = useEnrichedCrosschainBalances();
 
-  const crossChainRoutes = useAvailableCrosschainRoutes();
+  const crossChainRoutes = useAvailableCrosschainRoutes(
+    otherToken
+      ? {
+          [isOriginToken ? "outputToken" : "inputToken"]: {
+            chainId: otherToken.chainId,
+            address: otherToken.address,
+            symbol: otherToken.symbol,
+          },
+        }
+      : undefined
+  );
 
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
 
@@ -48,8 +60,22 @@ export default function ChainTokenSelectorModal({
     if (tokens.length === 0 && selectedChain === null) {
       tokens = Object.values(balances).flatMap((t) => t);
     }
+
+    // Enrich tokens with reachability information from the hook
+    const enrichedTokens = tokens.map((token) => {
+      // Find the corresponding token in crossChainRoutes to check isReachable
+      const routeToken = crossChainRoutes.data?.[token.chainId]?.find(
+        (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
+      );
+
+      return {
+        ...token,
+        isReachable: routeToken?.isReachable,
+      };
+    });
+
     // Return ordering top 100 tokens ordering highest balanceUsd to lowest (fallback alphabetical)
-    const sortedTokens = tokens.slice(0, 100).sort((a, b) => {
+    const sortedTokens = enrichedTokens.slice(0, 100).sort((a, b) => {
       if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
         return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
       }
@@ -69,11 +95,11 @@ export default function ChainTokenSelectorModal({
         keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
       );
     });
-  }, [selectedChain, balances, tokenSearch]);
+  }, [selectedChain, balances, tokenSearch, otherToken, crossChainRoutes.data]);
 
   const displayedChains = useMemo(() => {
-    return Object.fromEntries(
-      Object.entries(crossChainRoutes.data || {}).filter(([chainId]) => {
+    const chainsWithDisabledState = Object.entries(crossChainRoutes.data || {})
+      .filter(([chainId]) => {
         // why ar we filtering out Boba?
         if ([288].includes(Number(chainId))) {
           return false;
@@ -87,8 +113,23 @@ export default function ChainTokenSelectorModal({
           keyword.toLowerCase().includes(chainSearch.toLowerCase())
         );
       })
-    );
-  }, [chainSearch, crossChainRoutes.data]);
+      .map(([chainId, tokens]) => {
+        let isDisabled = false;
+
+        // If there's an other token selected, check if this chain has any reachable tokens
+        if (otherToken) {
+          const tokensOnChain = tokens || [];
+          const hasReachableTokens = tokensOnChain.some(
+            (token) => token.isReachable !== false
+          );
+          isDisabled = !hasReachableTokens;
+        }
+
+        return [chainId, { tokens, isDisabled }];
+      });
+
+    return Object.fromEntries(chainsWithDisabledState);
+  }, [chainSearch, crossChainRoutes.data, otherToken]);
 
   return (
     <Modal
@@ -118,11 +159,14 @@ export default function ChainTokenSelectorModal({
               isSelected={selectedChain === null}
               onClick={() => setSelectedChain(null)}
             />
-            {Object.entries(displayedChains).map(([chainId]) => (
+            {Object.entries(displayedChains).map(([chainId, chainData]) => (
               <ChainEntry
                 key={chainId}
                 chainId={Number(chainId)}
                 isSelected={selectedChain === Number(chainId)}
+                isDisabled={
+                  (chainData as { tokens: any; isDisabled: boolean }).isDisabled
+                }
                 onClick={() => setSelectedChain(Number(chainId))}
               />
             ))}
@@ -168,10 +212,12 @@ const ChainEntry = ({
   chainId,
   isSelected,
   onClick,
+  isDisabled = false,
 }: {
   chainId: number | null;
   isSelected: boolean;
   onClick: () => void;
+  isDisabled?: boolean;
 }) => {
   const chainInfo = chainId
     ? getChainInfo(chainId)
@@ -180,7 +226,11 @@ const ChainEntry = ({
         name: "All",
       };
   return (
-    <EntryItem isSelected={isSelected} onClick={onClick}>
+    <EntryItem
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      onClick={isDisabled ? undefined : onClick}
+    >
       <ChainItemImage src={chainInfo.logoURI} alt={chainInfo.name} />
       <ChainItemName>{chainInfo.name}</ChainItemName>
       {isSelected && <ChainItemCheckmark />}
@@ -198,8 +248,14 @@ const TokenEntry = ({
   onClick: () => void;
 }) => {
   const hasBalance = token.balance.gt(0) && token.balanceUsd > 0.01;
+  const isDisabled = token.isReachable === false;
+
   return (
-    <EntryItem isSelected={isSelected} onClick={onClick}>
+    <EntryItem
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      onClick={isDisabled ? undefined : onClick}
+    >
       <TokenItemImage token={token} />
       <TokenNameSymbolWrapper>
         <TokenName>{token.name}</TokenName>
@@ -351,7 +407,7 @@ const ListWrapper = styled.div`
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 `;
 
-const EntryItem = styled.div<{ isSelected: boolean }>`
+const EntryItem = styled.div<{ isSelected: boolean; isDisabled?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -369,13 +425,18 @@ const EntryItem = styled.div<{ isSelected: boolean }>`
   background: ${({ isSelected }) =>
     isSelected ? COLORS["aqua-5"] : "transparent"};
 
-  cursor: pointer;
+  cursor: ${({ isDisabled }) => (isDisabled ? "not-allowed" : "pointer")};
+  opacity: ${({ isDisabled }) => (isDisabled ? 0.5 : 1)};
 
-  transition: background 0.2s ease-in-out;
+  transition:
+    background 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
 
   &:hover {
-    background: ${({ isSelected }) =>
-      isSelected ? COLORS["aqua-15"] : COLORS["grey-400-15"]};
+    background: ${({ isSelected, isDisabled }) => {
+      if (isDisabled) return "transparent";
+      return isSelected ? COLORS["aqua-15"] : COLORS["grey-400-15"];
+    }};
   }
 `;
 

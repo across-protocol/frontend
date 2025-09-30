@@ -13,14 +13,28 @@ export type LifiToken = {
   coinKey: string;
   logoURI: string;
   routeSource: "bridge" | "swap";
+  isReachable?: boolean; // Added to mark if token is reachable from the other token
 };
 
-export default function useAvailableCrosschainRoutes() {
+export type TokenInfo = {
+  chainId: number;
+  address: string;
+  symbol: string;
+};
+
+export type RouteFilterParams = {
+  inputToken?: TokenInfo | null;
+  outputToken?: TokenInfo | null;
+};
+
+export default function useAvailableCrosschainRoutes(
+  filterParams?: RouteFilterParams
+) {
   const swapChainsQuery = useSwapChains();
   const swapTokensQuery = useSwapTokens();
 
   return useQuery({
-    queryKey: ["availableCrosschainRoutes"],
+    queryKey: ["availableCrosschainRoutes", filterParams],
     queryFn: async () => {
       // 1) Build swap token map by chain
       const swapTokensByChain = (swapTokensQuery.data || []).reduce(
@@ -103,6 +117,54 @@ export default function useAvailableCrosschainRoutes() {
         });
 
         combinedByChain[chainId] = Array.from(tokenMap.values());
+      }
+
+      // 4) Apply route filtering if filterParams are provided
+      if (filterParams?.inputToken || filterParams?.outputToken) {
+        const config = getConfig();
+        const otherToken = filterParams.inputToken || filterParams.outputToken;
+        const isFilteringForInput = !!filterParams.inputToken;
+
+        // Mark tokens as reachable/unreachable based on route validation
+        for (const chainId of Object.keys(combinedByChain)) {
+          combinedByChain[Number(chainId)] = combinedByChain[
+            Number(chainId)
+          ].map((token) => {
+            const fromChain = isFilteringForInput
+              ? Number(chainId)
+              : otherToken!.chainId;
+            const toChain = isFilteringForInput
+              ? otherToken!.chainId
+              : Number(chainId);
+            const fromTokenSymbol = isFilteringForInput
+              ? token.symbol
+              : otherToken!.symbol;
+            const toTokenSymbol = isFilteringForInput
+              ? otherToken!.symbol
+              : token.symbol;
+
+            let isReachable = true;
+
+            // For same chain (swap), always reachable
+            if (fromChain === toChain) {
+              isReachable = true;
+            } else {
+              // For bridge, check if there's an explicit bridge route
+              const bridgeRoutes = config.filterRoutes({
+                fromChain,
+                toChain,
+                fromTokenSymbol,
+                toTokenSymbol,
+              });
+              isReachable = bridgeRoutes.length > 0;
+            }
+
+            return {
+              ...token,
+              isReachable,
+            };
+          });
+        }
       }
 
       return combinedByChain;
