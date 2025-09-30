@@ -1,7 +1,13 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { BridgeStrategiesConfig, BridgeStrategyData } from "./types";
+import {
+  BridgeStrategiesConfig,
+  BridgeStrategy,
+  GetBridgeStrategyParams,
+} from "./types";
 import { CHAIN_IDs } from "../_constants";
+import { getCctpBridgeStrategy } from "./cctp/strategy";
+import { getBridgeStrategyData } from "./utils";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -16,19 +22,45 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   // TODO: Add CCTP routes when ready
 };
 
-export function getBridgeStrategy({
+export const availableBridgeStrategies = [
+  getAcrossBridgeStrategy(),
+  getHyperCoreBridgeStrategy(),
+  getCctpBridgeStrategy(),
+];
+
+export async function getBridgeStrategy({
   originChainId,
   destinationChainId,
-  bridgeStrategyData,
-}: {
-  originChainId: number;
-  destinationChainId: number;
-  bridgeStrategyData: BridgeStrategyData;
-}) {
+  inputToken,
+  outputToken,
+  amount,
+  amountType,
+  recipient,
+  depositor,
+  logger,
+}: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const fromToChainOverride =
+    bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
+  if (fromToChainOverride) {
+    return fromToChainOverride;
+  }
+  const supportedBridgeStrategies = availableBridgeStrategies.filter(
+    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
+  );
+  if (supportedBridgeStrategies.length === 1) {
+    return supportedBridgeStrategies[0];
+  }
+  const bridgeStrategyData = await getBridgeStrategyData({
+    inputToken,
+    outputToken,
+    amount,
+    amountType,
+    recipient,
+    depositor,
+    logger,
+  });
   if (!bridgeStrategyData) {
-    const fromToChainOverride =
-      bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
-    return fromToChainOverride ?? bridgeStrategies.default;
+    return bridgeStrategies.default;
   }
   if (!bridgeStrategyData.isUsdcToUsdc) {
     return getAcrossBridgeStrategy();

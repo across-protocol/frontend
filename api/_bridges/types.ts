@@ -93,6 +93,11 @@ export type BridgeStrategy = {
     quotes: CrossSwapQuotes;
     integratorId?: string;
   }) => Promise<OriginTx>;
+
+  isRouteSupported: (params: {
+    inputToken: Token;
+    outputToken: Token;
+  }) => boolean;
 };
 
 export type BridgeStrategyData =
@@ -108,10 +113,16 @@ export type BridgeStrategyData =
   | undefined;
 
 export type BridgeStrategyDataParams = {
-  inputToken: { address: string; chainId: number };
-  outputToken: { address: string; chainId: number };
+  inputToken: Token;
+  outputToken: Token;
   amount: BigNumber;
+  amountType: "exactInput" | "exactOutput" | "minOutput";
   recipient?: string;
   depositor: string;
   logger: Logger;
 };
+
+export type GetBridgeStrategyParams = {
+  originChainId: number;
+  destinationChainId: number;
+} & BridgeStrategyDataParams;

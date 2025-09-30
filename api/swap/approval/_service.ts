@@ -27,7 +27,6 @@ import { quoteFetchStrategies } from "../_configs";
 import { getBridgeStrategy } from "../../_bridges";
 import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
-import { getBridgeStrategyData } from "../../_bridges/utils";
 
 const logger = getLogger();
 
@@ -80,21 +79,18 @@ export async function handleApprovalSwap(
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
-  // Get bridge strategy data
-  const bridgeStrategyData = await getBridgeStrategyData({
+  const bridgeStrategy = await getBridgeStrategy({
+    originChainId: inputToken.chainId,
+    destinationChainId: outputToken.chainId,
     inputToken,
     outputToken,
     amount,
+    amountType,
     recipient,
     depositor,
     logger,
   });
 
-  const bridgeStrategy = getBridgeStrategy({
-    originChainId: inputToken.chainId,
-    destinationChainId: outputToken.chainId,
-    bridgeStrategyData,
-  });
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
       amount,
