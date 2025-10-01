@@ -84,8 +84,6 @@ export function useBridge() {
     route: selectedRoute,
   });
 
-  console.log("showHyperliquidWarning", showHyperliquidWarning);
-
   const {
     quotedFees,
     quotedSwap,
