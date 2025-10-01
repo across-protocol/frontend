@@ -79,6 +79,18 @@ export async function swapApprovalApiCall(
       decimals: 18,
       symbol: params.inputToken,
     },
+    inputToken: {
+      address: params.inputToken,
+      chainId: params.originChainId,
+      decimals: 18,
+      symbol: params.inputToken,
+    },
+    outputToken: {
+      address: params.outputToken,
+      chainId: params.destinationChainId,
+      decimals: 18,
+      symbol: params.outputToken,
+    },
     inputAmount: BigNumber.from(params.amount),
     expectedOutputAmount: BigNumber.from(params.amount),
     minOutputAmount: BigNumber.from(params.amount),

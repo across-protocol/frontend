@@ -45,6 +45,12 @@ export function useBridgeFees(
   const bridgeOutputTokenSymbol = didUniversalSwapLoad
     ? universalSwapQuote.steps.bridge.tokenOut.symbol
     : outputTokenSymbol;
+  const bridgeOriginChainId = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenIn.chainId
+    : fromChainId;
+  const bridgeDestinationChainId = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenOut.chainId
+    : toChainId;
   const recipientAddress =
     _recipientAddress ??
     (chainIsSvm(toChainId)
@@ -55,8 +61,8 @@ export function useBridgeFees(
     amount,
     bridgeInputTokenSymbol,
     bridgeOutputTokenSymbol,
-    fromChainId,
-    toChainId,
+    bridgeOriginChainId,
+    bridgeDestinationChainId,
     externalProjectId,
     recipientAddress
   );

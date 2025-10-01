@@ -21,6 +21,7 @@ import {
   TokenInfo,
   isNonEthChain,
   isStablecoin,
+  ChainId,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -455,8 +456,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (selectedToChain === ChainId.HYPERCORE &&
+            route.externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   const swapTokens = swapRoutes
@@ -471,8 +474,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (route.toChain === ChainId.HYPERCORE &&
+            externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(
@@ -530,21 +535,22 @@ export const ChainType = {
 export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
 
 export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  const universalSwapRoutes = config.getUniversalSwapRoutes();
+  const bridgeRoutes = config.getRoutes();
+  const allRoutes = bridgeRoutes.concat(universalSwapRoutes);
+
   let chainIds: number[] = [];
 
   switch (chainType) {
     case ChainType.FROM:
-      chainIds = enabledRoutes.map((route) => route.fromChain);
+      chainIds = allRoutes.map((route) => route.fromChain);
       break;
     case ChainType.TO:
-      chainIds = enabledRoutes.map((route) => route.toChain);
+      chainIds = allRoutes.map((route) => route.toChain);
       break;
     case ChainType.ALL:
     default:
-      chainIds = enabledRoutes.flatMap((route) => [
-        route.fromChain,
-        route.toChain,
-      ]);
+      chainIds = allRoutes.flatMap((route) => [route.fromChain, route.toChain]);
       break;
   }
 
@@ -774,7 +780,7 @@ function calcUniversalSwapFeeUsd(params: {
     return BigNumber.from(0);
   }
   const parsedAmount = BigNumber.from(params.parsedAmount || 0);
-  const { steps } = params.universalSwapQuote;
+  const { steps, expectedOutputAmount } = params.universalSwapQuote;
   const parsedInputAmountUsd =
     params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
   const originSwapFeeUsd = parsedInputAmountUsd.sub(
@@ -785,10 +791,9 @@ function calcUniversalSwapFeeUsd(params: {
     params.convertBridgeTokenToUsd(steps.bridge.outputAmount) ||
     BigNumber.from(0)
   ).sub(
-    params.convertOutputTokenToUsd(
-      steps.destinationSwap?.outputAmount || steps.bridge.outputAmount
-    ) || BigNumber.from(0)
+    params.convertOutputTokenToUsd(expectedOutputAmount) || BigNumber.from(0)
   );
+
   return originSwapFeeUsd.add(destinationSwapFeeUsd);
 }
 
@@ -832,14 +837,17 @@ export function getTokensForFeesCalc(params: {
           params.universalSwapQuote.steps.bridge.tokenIn.symbol
         )
       : inputToken;
-  const outputToken =
+  const _outputToken =
     params.isUniversalSwap && params.universalSwapQuote
-      ? config.getTokenInfoBySymbol(
-          params.toChainId,
-          params.universalSwapQuote.steps.destinationSwap?.tokenOut.symbol ||
-            params.universalSwapQuote.steps.bridge.tokenOut.symbol
-        )
-      : params.outputToken;
+      ? params.universalSwapQuote.outputToken
+      : {
+          ...params.outputToken,
+          chainId: params.toChainId,
+        };
+  const outputToken = config.getTokenInfoBySymbol(
+    _outputToken.chainId,
+    _outputToken.symbol
+  );
   return {
     inputToken,
     outputToken,

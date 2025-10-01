@@ -210,8 +210,7 @@ const enabledRoutes = {
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
-      enabledMainnetExternalProjects,
-      enabledIndirectMainnetChainConfigs
+      enabledMainnetExternalProjects
     ),
   },
   [CHAIN_IDs.SEPOLIA]: {
@@ -244,18 +243,13 @@ const enabledRoutes = {
     },
     spokePoolPeripheryAddresses: {},
     swapProxyAddresses: {},
-    routes: transformChainConfigs(
-      enabledSepoliaChainConfigs,
-      [],
-      enabledIndirectSepoliaChainConfigs
-    ),
+    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
 
 function transformChainConfigs(
   enabledChainConfigs: typeof enabledMainnetChainConfigs,
-  enabledExternalProjects: typeof enabledMainnetExternalProjects,
-  enabledIndirectChainConfigs: typeof enabledIndirectMainnetChainConfigs
+  enabledExternalProjects: typeof enabledMainnetExternalProjects
 ) {
   const transformedChainConfigs: {
     fromChain: number;
@@ -726,7 +720,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       ) || [];
     if (!chainKey) {
       throw new Error(
-        `Could not find INDIRECTchain key for chain ${chainConfig.chainId}`
+        `Could not find indirect chain key for chain ${chainConfig.chainId}`
       );
     }
     const assetsBaseUrl = `https://raw.githubusercontent.com/across-protocol/frontend/master`;
@@ -751,7 +745,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
-      intermediaryChains: chainConfig.intermediaryChains,
+      intermediaryChain: chainConfig.intermediaryChain,
       inputTokens: chainConfig.tokens.flatMap((token) => {
         try {
           if (typeof token === "string") {
@@ -769,25 +763,23 @@ async function generateRoutes(hubPoolChainId = 1) {
           return [];
         }
       }),
-      outputTokens: (chainConfig.outputTokens ?? chainConfig.tokens).flatMap(
-        (token) => {
-          try {
-            if (typeof token === "string") {
-              return getTokenInfo(token);
-            } else {
-              if (token.chainIds.includes(chainConfig.chainId)) {
-                return getTokenInfo(token.symbol);
-              }
-              return [];
+      outputTokens: chainConfig.tokens.flatMap((token) => {
+        try {
+          if (typeof token === "string") {
+            return getTokenInfo(token);
+          } else {
+            if (token.chainIds.includes(chainConfig.chainId)) {
+              return getTokenInfo(token.symbol);
             }
-          } catch (e) {
-            console.warn(
-              `Could not find token info for ${token} on chain ${chainConfig.chainId}`
-            );
             return [];
           }
+        } catch (e) {
+          console.warn(
+            `Could not find token info for ${token} on chain ${chainConfig.chainId}`
+          );
+          return [];
         }
-      ),
+      }),
     };
   });
   writeFileSync(

@@ -16,6 +16,7 @@ import {
   rewardProgramsAvailable,
   COLORS,
   getEcosystem,
+  getBridgeUrlWithQueryParams,
 } from "utils";
 import { VoidHandler } from "utils/types";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
@@ -39,6 +40,7 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -73,6 +75,7 @@ export type BridgeFormProps = {
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   isQuoteLoading: boolean;
+  showHyperliquidWarning?: boolean;
 };
 
 // If swap price impact is lower than this threshold, show a warning
@@ -111,6 +114,7 @@ const BridgeForm = ({
   validationError,
   validationWarning,
   isQuoteLoading,
+  showHyperliquidWarning,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
   const { connect: connectEVM } = useConnectionEVM();
@@ -273,6 +277,27 @@ const BridgeForm = ({
           </Alert>
         </Tooltip>
       )}
+      {showHyperliquidWarning && (
+        <Alert status="warn" alignIcon="center">
+          <HyperliquidWarningTextContainer>
+            <Text color="white">Account Required</Text>
+            <Text color="warning">
+              You must initialize an account for this recipient address on
+              Hyperliquid before bridging.{" "}
+              <InternalLink
+                href={getBridgeUrlWithQueryParams({
+                  fromChainId: selectedRoute.fromChain,
+                  toChainId: CHAIN_IDs.ARBITRUM,
+                  inputTokenSymbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+                  externalProjectId: "hyperliquid",
+                })}
+              >
+                Bridge USDC to Hyperliquid
+              </InternalLink>
+            </Text>
+          </HyperliquidWarningTextContainer>
+        </Alert>
+      )}
       <FeesCollapsible
         isQuoteLoading={isQuoteLoading}
         fromChainId={selectedRoute.fromChain}
@@ -332,6 +357,16 @@ const BridgeForm = ({
 };
 
 export default BridgeForm;
+
+const InternalLink = styled.a`
+  color: inherit;
+  display: inline;
+  transition: opacity 150ms ease-in-out;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
 
 const CardWrapper = styled(ExternalCardWrapper)`
   width: 100%;
@@ -473,4 +508,10 @@ const PriceImpactTooltipBody = styled.div`
     height: 16px;
     width: 16px;
   }
+`;
+
+const HyperliquidWarningTextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;

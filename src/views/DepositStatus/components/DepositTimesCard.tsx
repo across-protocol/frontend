@@ -73,7 +73,7 @@ export function DepositTimesCard({
   const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
-  const { inputToken, bridgeToken } = getTokensForFeesCalc({
+  const { inputToken, bridgeToken, outputToken } = getTokensForFeesCalc({
     inputToken: getToken(inputTokenSymbol),
     outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
     isUniversalSwap: isUniversalSwap,
@@ -89,7 +89,7 @@ export function DepositTimesCard({
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
-  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+  } = useTokenConversion(outputToken.symbol || inputTokenSymbol, "usd");
 
   const { outputAmountUsd } =
     calcFeesForEstimatedTable({
@@ -262,12 +262,12 @@ function CheckIconExplorerLink({
     return <CheckIcon />;
   }
 
+  const explorerUrl = chainInfo.intermediaryChain
+    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
+    : chainInfo.constructExplorerLink(txHash);
+
   return (
-    <a
-      href={chainInfo.constructExplorerLink(txHash)}
-      target="_blank"
-      rel="noreferrer"
-    >
+    <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
   );
