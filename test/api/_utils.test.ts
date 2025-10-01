@@ -7,6 +7,7 @@ import {
   validEvmAddress,
   validSvmAddress,
   validAddress,
+  getTokenByAddress,
 } from "../../api/_utils";
 import { is } from "superstruct";
 
@@ -107,6 +108,35 @@ describe("_utils", () => {
         },
       });
     });
+  });
+
+  describe("#getTokenByAddress()", () => {
+    for (const chainId of Object.values(CHAIN_IDs)) {
+      if (typeof chainId !== "number") continue;
+
+      const weth = TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
+      const eth = TOKEN_SYMBOLS_MAP.ETH.addresses[chainId];
+
+      if (weth && eth && weth.toLowerCase() === eth.toLowerCase()) {
+        test(`should return WETH for chain ${chainId} when both ETH and WETH have the same address`, () => {
+          const token = getTokenByAddress(weth, chainId);
+          expect(token?.symbol).toBe("WETH");
+        });
+      } else {
+        if (weth) {
+          test(`should return WETH for chain ${chainId}`, () => {
+            const token = getTokenByAddress(weth, chainId);
+            expect(token?.symbol).toBe("WETH");
+          });
+        }
+        if (eth) {
+          test(`should return ETH for chain ${chainId}`, () => {
+            const token = getTokenByAddress(eth, chainId);
+            expect(token?.symbol).toBe("ETH");
+          });
+        }
+      }
+    }
   });
 
   describe("#validateChainAndTokenParams()", () => {

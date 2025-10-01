@@ -562,6 +562,14 @@ export const getTokenByAddress = (
       }
     }
 
+    // Due to a misconfiguration in the constants file, the WETH address is sometimes associated with both the ETH and WETH symbols.
+    // This is problematic because the SDK will not be able to resolve the correct token if ETH is picked up first.
+    // To fix this, we will check if there is a WETH match and prioritize it over the ETH match.
+    const wethMatch = matches.find(([symbol]) => symbol === "WETH");
+    if (wethMatch) {
+      return wethMatch[1];
+    }
+
     return matches[0][1];
   } catch (error) {
     return undefined;
