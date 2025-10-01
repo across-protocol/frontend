@@ -6,11 +6,17 @@ type Props = {
   searchTopic: string;
   search: string;
   setSearch: (search: string) => void;
+  className?: string;
 };
 
-export default function Searchbar({ searchTopic, search, setSearch }: Props) {
+export default function Searchbar({
+  searchTopic,
+  search,
+  setSearch,
+  className,
+}: Props) {
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       <StyledSearchIcon />
       <Input
         placeholder={`Search ${searchTopic}s`}

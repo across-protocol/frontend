@@ -13,10 +13,12 @@ import {
   getChainInfo,
   parseUnits,
 } from "utils";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ReactComponent as CheckmarkCircle } from "assets/icons/checkmark-circle.svg";
+import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import useEnrichedCrosschainBalances from "hooks/useEnrichedCrosschainBalances";
+import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 
 type Props = {
@@ -36,6 +38,7 @@ export default function ChainTokenSelectorModal({
   otherToken,
 }: Props) {
   const balances = useEnrichedCrosschainBalances();
+  const { isMobile } = useCurrentBreakpoint();
 
   const crossChainRoutes = useAvailableCrosschainRoutes(
     otherToken
@@ -50,9 +53,18 @@ export default function ChainTokenSelectorModal({
   );
 
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
+  const [mobileStep, setMobileStep] = useState<"chain" | "token">("chain");
 
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
+
+  // Reset mobile step when modal opens/closes
+  useEffect(() => {
+    if (displayModal) {
+      setMobileStep("chain");
+      setSelectedChain(null);
+    }
+  }, [displayModal]);
 
   const displayedTokens = useMemo(() => {
     let tokens = selectedChain ? (balances[selectedChain] ?? []) : [];
@@ -161,33 +173,220 @@ export default function ChainTokenSelectorModal({
     return Object.fromEntries(chainsWithDisabledState);
   }, [chainSearch, crossChainRoutes.data, otherToken]);
 
+  return isMobile ? (
+    <MobileModal
+      isOriginToken={isOriginToken}
+      displayModal={displayModal}
+      setDisplayModal={setDisplayModal}
+      mobileStep={mobileStep}
+      setMobileStep={setMobileStep}
+      selectedChain={selectedChain}
+      chainSearch={chainSearch}
+      setChainSearch={setChainSearch}
+      tokenSearch={tokenSearch}
+      setTokenSearch={setTokenSearch}
+      displayedChains={displayedChains}
+      displayedTokens={displayedTokens}
+      onChainSelect={(chainId) => {
+        setSelectedChain(chainId);
+        setMobileStep("token");
+      }}
+      onTokenSelect={onSelect}
+    />
+  ) : (
+    <DesktopModal
+      isOriginToken={isOriginToken}
+      displayModal={displayModal}
+      setDisplayModal={setDisplayModal}
+      selectedChain={selectedChain}
+      chainSearch={chainSearch}
+      setChainSearch={setChainSearch}
+      tokenSearch={tokenSearch}
+      setTokenSearch={setTokenSearch}
+      displayedChains={displayedChains}
+      displayedTokens={displayedTokens}
+      onChainSelect={setSelectedChain}
+      onTokenSelect={onSelect}
+    />
+  );
+}
+
+// Mobile Modal Component
+const MobileModal = ({
+  isOriginToken,
+  displayModal,
+  setDisplayModal,
+  mobileStep,
+  setMobileStep,
+  selectedChain,
+  chainSearch,
+  setChainSearch,
+  tokenSearch,
+  setTokenSearch,
+  displayedChains,
+  displayedTokens,
+  onChainSelect,
+  onTokenSelect,
+}: {
+  isOriginToken: boolean;
+  displayModal: boolean;
+  setDisplayModal: (display: boolean) => void;
+  mobileStep: "chain" | "token";
+  setMobileStep: (step: "chain" | "token") => void;
+  selectedChain: number | null;
+  chainSearch: string;
+  setChainSearch: (search: string) => void;
+  tokenSearch: string;
+  setTokenSearch: (search: string) => void;
+  displayedChains: any;
+  displayedTokens: any[];
+  onChainSelect: (chainId: number | null) => void;
+  onTokenSelect: (token: EnrichedTokenSelect) => void;
+}) => {
   return (
     <Modal
+      verticalLocation="bottom"
       title={
-        <Title>Select {isOriginToken ? "Origin" : "Destination"} Token</Title>
+        <TitleWrapper>
+          {mobileStep === "token" && (
+            <BackButton
+              onClick={() => {
+                setMobileStep("chain");
+                setTokenSearch(""); // Clear token search when going back
+              }}
+            >
+              <ChevronRight />
+            </BackButton>
+          )}
+          <Title>
+            {mobileStep === "chain"
+              ? `Select ${isOriginToken ? "Origin" : "Destination"} Chain`
+              : `Select ${isOriginToken ? "Origin" : "Destination"} Token`}
+          </Title>
+        </TitleWrapper>
       }
       isOpen={displayModal}
       padding="thin"
       exitModalHandler={() => setDisplayModal(false)}
       exitOnOutsideClick
-      width={720}
+      width={400}
+      height={600}
+      titleBorder
+    >
+      <MobileLayout
+        mobileStep={mobileStep}
+        selectedChain={selectedChain}
+        chainSearch={chainSearch}
+        setChainSearch={setChainSearch}
+        tokenSearch={tokenSearch}
+        setTokenSearch={setTokenSearch}
+        displayedChains={displayedChains}
+        displayedTokens={displayedTokens}
+        onChainSelect={onChainSelect}
+        onTokenSelect={onTokenSelect}
+        onModalClose={() => setDisplayModal(false)}
+      />
+    </Modal>
+  );
+};
+
+// Desktop Modal Component
+const DesktopModal = ({
+  isOriginToken,
+  displayModal,
+  setDisplayModal,
+  selectedChain,
+  chainSearch,
+  setChainSearch,
+  tokenSearch,
+  setTokenSearch,
+  displayedChains,
+  displayedTokens,
+  onChainSelect,
+  onTokenSelect,
+}: {
+  isOriginToken: boolean;
+  displayModal: boolean;
+  setDisplayModal: (display: boolean) => void;
+  selectedChain: number | null;
+  chainSearch: string;
+  setChainSearch: (search: string) => void;
+  tokenSearch: string;
+  setTokenSearch: (search: string) => void;
+  displayedChains: any;
+  displayedTokens: any[];
+  onChainSelect: (chainId: number | null) => void;
+  onTokenSelect: (token: EnrichedTokenSelect) => void;
+}) => {
+  return (
+    <Modal
+      verticalLocation="middle"
+      title={`Select ${isOriginToken ? "Origin" : "Destination"} Token`}
+      isOpen={displayModal}
+      padding="thin"
+      exitModalHandler={() => setDisplayModal(false)}
+      exitOnOutsideClick
+      width={1100}
       height={800}
       titleBorder
     >
-      <InnerWrapper>
-        <ChainWrapper>
-          <SearchWrapper>
-            <Searchbar
-              search={chainSearch}
-              setSearch={setChainSearch}
-              searchTopic="Chain"
-            />
-          </SearchWrapper>
+      <DesktopLayout
+        selectedChain={selectedChain}
+        chainSearch={chainSearch}
+        setChainSearch={setChainSearch}
+        tokenSearch={tokenSearch}
+        setTokenSearch={setTokenSearch}
+        displayedChains={displayedChains}
+        displayedTokens={displayedTokens}
+        onChainSelect={onChainSelect}
+        onTokenSelect={onTokenSelect}
+        onModalClose={() => setDisplayModal(false)}
+      />
+    </Modal>
+  );
+};
+
+// Mobile Layout Component - 2-step process
+const MobileLayout = ({
+  mobileStep,
+  selectedChain,
+  chainSearch,
+  setChainSearch,
+  tokenSearch,
+  setTokenSearch,
+  displayedChains,
+  displayedTokens,
+  onChainSelect,
+  onTokenSelect,
+  onModalClose,
+}: {
+  mobileStep: "chain" | "token";
+  selectedChain: number | null;
+  chainSearch: string;
+  setChainSearch: (search: string) => void;
+  tokenSearch: string;
+  setTokenSearch: (search: string) => void;
+  displayedChains: any;
+  displayedTokens: any[];
+  onChainSelect: (chainId: number | null) => void;
+  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onModalClose: () => void;
+}) => {
+  return (
+    <MobileInnerWrapper>
+      {mobileStep === "chain" ? (
+        // Step 1: Chain Selection
+        <MobileChainWrapper>
+          <SearchBarStyled
+            search={chainSearch}
+            setSearch={setChainSearch}
+            searchTopic="Chain"
+          />
           <ListWrapper>
             <ChainEntry
               chainId={null}
               isSelected={selectedChain === null}
-              onClick={() => setSelectedChain(null)}
+              onClick={() => onChainSelect(null)}
             />
             {Object.entries(displayedChains).map(([chainId, chainData]) => (
               <ChainEntry
@@ -197,20 +396,19 @@ export default function ChainTokenSelectorModal({
                 isDisabled={
                   (chainData as { tokens: any; isDisabled: boolean }).isDisabled
                 }
-                onClick={() => setSelectedChain(Number(chainId))}
+                onClick={() => onChainSelect(Number(chainId))}
               />
             ))}
           </ListWrapper>
-        </ChainWrapper>
-        <VerticalDivider />
-        <TokenWrapper>
-          <SearchWrapper>
-            <Searchbar
-              searchTopic="Token"
-              search={tokenSearch}
-              setSearch={setTokenSearch}
-            />
-          </SearchWrapper>
+        </MobileChainWrapper>
+      ) : (
+        // Step 2: Token Selection
+        <MobileTokenWrapper>
+          <SearchBarStyled
+            searchTopic="Token"
+            search={tokenSearch}
+            setSearch={setTokenSearch}
+          />
           <ListWrapper>
             {displayedTokens.map((token) => (
               <TokenEntry
@@ -218,7 +416,7 @@ export default function ChainTokenSelectorModal({
                 token={token}
                 isSelected={false}
                 onClick={() => {
-                  onSelect({
+                  onTokenSelect({
                     chainId: token.chainId,
                     symbolUri: token.logoURI,
                     symbol: token.symbol,
@@ -227,16 +425,100 @@ export default function ChainTokenSelectorModal({
                     priceUsd: parseUnits(token.priceUSD, 18),
                     decimals: token.decimals,
                   });
-                  setDisplayModal(false);
+                  onModalClose();
                 }}
               />
             ))}
           </ListWrapper>
-        </TokenWrapper>
-      </InnerWrapper>
-    </Modal>
+        </MobileTokenWrapper>
+      )}
+    </MobileInnerWrapper>
   );
-}
+};
+
+// Desktop Layout Component - Side-by-side columns
+const DesktopLayout = ({
+  selectedChain,
+  chainSearch,
+  setChainSearch,
+  tokenSearch,
+  setTokenSearch,
+  displayedChains,
+  displayedTokens,
+  onChainSelect,
+  onTokenSelect,
+  onModalClose,
+}: {
+  selectedChain: number | null;
+  chainSearch: string;
+  setChainSearch: (search: string) => void;
+  tokenSearch: string;
+  setTokenSearch: (search: string) => void;
+  displayedChains: any;
+  displayedTokens: any[];
+  onChainSelect: (chainId: number | null) => void;
+  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onModalClose: () => void;
+}) => {
+  return (
+    <DesktopInnerWrapper>
+      <DesktopChainWrapper>
+        <SearchBarStyled
+          search={chainSearch}
+          setSearch={setChainSearch}
+          searchTopic="Chain"
+        />
+        <ListWrapper>
+          <ChainEntry
+            chainId={null}
+            isSelected={selectedChain === null}
+            onClick={() => onChainSelect(null)}
+          />
+          {Object.entries(displayedChains).map(([chainId, chainData]) => (
+            <ChainEntry
+              key={chainId}
+              chainId={Number(chainId)}
+              isSelected={selectedChain === Number(chainId)}
+              isDisabled={
+                (chainData as { tokens: any; isDisabled: boolean }).isDisabled
+              }
+              onClick={() => onChainSelect(Number(chainId))}
+            />
+          ))}
+        </ListWrapper>
+      </DesktopChainWrapper>
+      <VerticalDivider />
+      <DesktopTokenWrapper>
+        <SearchBarStyled
+          searchTopic="Token"
+          search={tokenSearch}
+          setSearch={setTokenSearch}
+        />
+        <ListWrapper>
+          {displayedTokens.map((token) => (
+            <TokenEntry
+              key={token.address + token.chainId}
+              token={token}
+              isSelected={false}
+              onClick={() => {
+                onTokenSelect({
+                  chainId: token.chainId,
+                  symbolUri: token.logoURI,
+                  symbol: token.symbol,
+                  address: token.address,
+                  balance: token.balance,
+                  priceUsd: parseUnits(token.priceUSD, 18),
+                  decimals: token.decimals,
+                });
+                onModalClose();
+              }}
+            />
+          ))}
+        </ListWrapper>
+      </DesktopTokenWrapper>
+    </DesktopInnerWrapper>
+  );
+};
 
 const ChainEntry = ({
   chainId,
@@ -320,6 +602,10 @@ const TokenItemImage = ({ token }: { token: LifiToken }) => {
   );
 };
 
+const SearchBarStyled = styled(Searchbar)`
+  flex-shrink: 0;
+`;
+
 const TokenItemImageWrapper = styled.div`
   width: 32px;
   height: 32px;
@@ -354,25 +640,94 @@ const TokenItemChainImage = styled.img`
   right: 0;
 `;
 
-const InnerWrapper = styled.div`
+// Mobile Layout Styled Components
+const MobileInnerWrapper = styled.div`
   width: 100%;
-  height: 100%;
+  height: 600px; /* Constrain height to enable scrolling */
+  display: flex;
+  flex-direction: column;
+`;
 
+const MobileChainWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+`;
+
+const MobileTokenWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+`;
+
+// Desktop Layout Styled Components
+const DesktopInnerWrapper = styled.div`
+  width: 100%;
+  height: 800px;
   display: flex;
   flex-direction: row;
   gap: 12px;
 `;
 
+const DesktopChainWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  min-width: 230px;
+`;
+
+const DesktopTokenWrapper = styled.div`
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+`;
+
 const VerticalDivider = styled.div`
   width: 1px;
-
-  height: 400px;
-
   margin: -16px 0;
-
   background-color: #3f4247;
-
   flex-shrink: 0;
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--Base-bright-gray, #e0f3ff);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s ease-in-out;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    transform: rotate(180deg); /* Rotate chevron-right to make it point left */
+  }
 `;
 
 const Title = styled.div`
@@ -386,35 +741,13 @@ const Title = styled.div`
   line-height: 130%; /* 26px */
 `;
 
-const ChainWrapper = styled.div`
-  width: calc(33% - 0.5px);
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const TokenWrapper = styled.div`
-  width: calc(67% - 0.5px);
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const SearchWrapper = styled.div`
-  padding: 0px 8px;
-`;
-
 const ListWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-
-  overflow-y: scroll;
-  max-height: 300px;
+  overflow-y: auto;
+  flex: 1; /* Take up remaining space in parent */
+  min-height: 0; /* Allow flex child to shrink below content size */
 
   &::-webkit-scrollbar {
     width: 8px;
