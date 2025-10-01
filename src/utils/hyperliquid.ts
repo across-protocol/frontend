@@ -3,6 +3,7 @@ import { CHAIN_IDs } from "@across-protocol/constants";
 import { BigNumber, Contract, providers, Signer, utils } from "ethers";
 import { compareAddressesSimple } from "./sdk";
 import { getToken, hyperLiquidBridge2Address } from "./constants";
+import { getProvider } from "./providers";
 
 export function isHyperLiquidBoundDeposit(deposit: Deposit) {
   if (deposit.destinationChainId !== CHAIN_IDs.ARBITRUM || !deposit.message) {
@@ -105,4 +106,25 @@ export async function generateHyperLiquidPayload(
   ]);
 
   return iface.encodeFunctionData("batchedDepositWithPermit", [[deposit]]);
+}
+
+// Contract used to check if an account exists on Hypercore.
+const CORE_USER_EXISTS_PRECOMPILE_ADDRESS =
+  "0x0000000000000000000000000000000000000810";
+
+export async function accountExistsOnHyperCore(params: { account: string }) {
+  const provider = getProvider(CHAIN_IDs.HYPEREVM);
+  const balanceCoreCalldata = utils.defaultAbiCoder.encode(
+    ["address"],
+    [params.account]
+  );
+  const queryResult = await provider.call({
+    to: CORE_USER_EXISTS_PRECOMPILE_ADDRESS,
+    data: balanceCoreCalldata,
+  });
+  const decodedQueryResult = utils.defaultAbiCoder.decode(
+    ["bool"],
+    queryResult
+  );
+  return Boolean(decodedQueryResult[0]);
 }

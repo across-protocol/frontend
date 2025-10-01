@@ -73,6 +73,7 @@ export type BridgeFormProps = {
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   isQuoteLoading: boolean;
+  showHyperliquidWarning?: boolean;
 };
 
 // If swap price impact is lower than this threshold, show a warning
@@ -111,6 +112,7 @@ const BridgeForm = ({
   validationError,
   validationWarning,
   isQuoteLoading,
+  showHyperliquidWarning,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
   const { connect: connectEVM } = useConnectionEVM();
@@ -272,6 +274,17 @@ const BridgeForm = ({
             </PriceImpactTextContainer>
           </Alert>
         </Tooltip>
+      )}
+      {showHyperliquidWarning && (
+        <Alert status="warn" alignIcon="center">
+          <HyperliquidWarningTextContainer>
+            <Text color="white">Account Required</Text>
+            <Text color="warning">
+              You must initialize an account for this recipient address on
+              Hyperliquid before bridging.
+            </Text>
+          </HyperliquidWarningTextContainer>
+        </Alert>
       )}
       <FeesCollapsible
         isQuoteLoading={isQuoteLoading}
@@ -473,4 +486,10 @@ const PriceImpactTooltipBody = styled.div`
     height: 16px;
     width: 16px;
   }
+`;
+
+const HyperliquidWarningTextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;

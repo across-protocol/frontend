@@ -13,6 +13,7 @@ import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
 import { useAmountInput } from "./useAmountInput";
 import { validateBridgeAmount } from "../utils";
+import { useMustInitializeHyperliquid } from "hooks/useMustInitializeHyperliquid";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
@@ -77,6 +78,13 @@ export function useBridge() {
     recipient?.address
   );
   const { data: transferQuote } = transferQuoteQuery;
+
+  const { data: showHyperliquidWarning } = useMustInitializeHyperliquid({
+    account: recipient?.address,
+    route: selectedRoute,
+  });
+
+  console.log("showHyperliquidWarning", showHyperliquidWarning);
 
   const {
     quotedFees,
@@ -193,5 +201,6 @@ export function useBridge() {
     handleSelectOutputToken,
     handleSetNewSlippage: setSwapSlippage,
     isQuoteLoading: isQuoteUpdating,
+    showHyperliquidWarning,
   };
 }
