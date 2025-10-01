@@ -94,7 +94,7 @@ const performStakingActionBuilderFn = (
     const acceleratingDistributor = getConfig()
       .getAcceleratingDistributor()
       .connect(signer);
-    // Check if this wallet has permissions to interract with the
+    // Check if this wallet has permissions to interact with the
     // AcceleratingDistibutor function regarding staking/unstaking
     // with the provided LP Token
     if (innerApprovalRequired) {
