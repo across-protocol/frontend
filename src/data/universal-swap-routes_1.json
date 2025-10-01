@@ -420,18 +420,6 @@
     "isNative": false
   },
   {
-    "fromChain": 999,
-    "toChain": 1337,
-    "fromTokenAddress": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-    "toTokenAddress": "0x200000000000000000000000000000000000010C",
-    "fromTokenSymbol": "USDT",
-    "toTokenSymbol": "USDT-SPOT",
-    "fromSpokeAddress": "0x35E63eA3eb0fb7A3bc543C71FB66412e1F6B0E04",
-    "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    "type": "universal-swap",
-    "isNative": false
-  },
-  {
     "fromChain": 9745,
     "toChain": 1337,
     "fromTokenAddress": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
@@ -439,6 +427,18 @@
     "fromTokenSymbol": "USDT",
     "toTokenSymbol": "USDT-SPOT",
     "fromSpokeAddress": "0x50039fAEfebef707cFD94D6d462fE6D10B39207a",
+    "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "type": "universal-swap",
+    "isNative": false
+  },
+  {
+    "fromChain": 56,
+    "toChain": 1337,
+    "fromTokenAddress": "0x55d398326f99059fF775485246999027B3197955",
+    "toTokenAddress": "0x200000000000000000000000000000000000010C",
+    "fromTokenSymbol": "USDT-BNB",
+    "toTokenSymbol": "USDT-SPOT",
+    "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
     "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "type": "universal-swap",
     "isNative": false

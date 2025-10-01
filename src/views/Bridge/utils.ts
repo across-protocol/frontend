@@ -21,6 +21,7 @@ import {
   TokenInfo,
   isNonEthChain,
   isStablecoin,
+  ChainId,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -455,8 +456,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (selectedToChain === ChainId.HYPERCORE &&
+            route.externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   const swapTokens = swapRoutes
@@ -471,8 +474,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (route.toChain === ChainId.HYPERCORE &&
+            externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(

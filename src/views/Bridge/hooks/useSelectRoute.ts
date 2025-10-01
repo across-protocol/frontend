@@ -7,6 +7,7 @@ import {
   trackQuickSwap,
   similarTokensMap,
   externalProjectNameToId,
+  ChainId,
 } from "utils";
 import { useAmplitude, usePrevious } from "hooks";
 
@@ -66,19 +67,30 @@ export function useSelectRoute() {
 
   const handleSelectInputToken = useCallback(
     (inputOrSwapTokenSymbol: string) => {
-      const baseFilter = {
+      let baseFilter = {
         fromChain: selectedRoute.fromChain,
         toChain: selectedRoute.toChain,
         outputTokenSymbol: getOutputTokenSymbol(
           inputOrSwapTokenSymbol,
-          selectedRoute.toTokenAddress
+          selectedRoute.toTokenSymbol
         ),
+        externalProjectId: selectedRoute.externalProjectId,
       };
+      if (selectedRoute.externalProjectId === "hyperliquid") {
+        baseFilter.toChain = ChainId.HYPERCORE;
+        baseFilter.externalProjectId = undefined;
+      } else if (selectedRoute.toChain === ChainId.HYPERCORE) {
+        baseFilter.toChain = ChainId.ARBITRUM;
+        baseFilter.externalProjectId = "hyperliquid";
+      }
       const _route =
-        findNextBestRoute(["inputTokenSymbol", "fromChain", "toChain"], {
-          ...baseFilter,
-          inputTokenSymbol: inputOrSwapTokenSymbol,
-        }) ||
+        findNextBestRoute(
+          ["inputTokenSymbol", "fromChain", "toChain", "externalProjectId"],
+          {
+            ...baseFilter,
+            inputTokenSymbol: inputOrSwapTokenSymbol,
+          }
+        ) ||
         findNextBestRoute(["swapTokenSymbol", "fromChain", "toChain"], {
           ...baseFilter,
           swapTokenSymbol: inputOrSwapTokenSymbol,

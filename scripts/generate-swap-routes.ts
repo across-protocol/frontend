@@ -73,12 +73,19 @@ const enabledSwapRoutes: {
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
       all: {
+        disabledOriginChains: [CHAIN_IDs.HYPEREVM],
         enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
         enabledOutputTokens: ["USDT-SPOT"],
       },
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
+      },
+    },
+    [TOKEN_SYMBOLS_MAP["USDT-BNB"].symbol]: {
+      [CHAIN_IDs.BSC]: {
+        enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
+        enabledOutputTokens: ["USDT-SPOT"],
       },
     },
     [TOKEN_SYMBOLS_MAP.DAI.symbol]: {

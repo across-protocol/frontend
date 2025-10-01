@@ -463,7 +463,7 @@ export const bnbSmartChain_viem = defineChain({
 
 export const hyperCore = {
   name: "HyperCore",
-  fullName: "Hyperliquid (Spot)",
+  fullName: "Hyperliquid",
   chainId: 1337,
   logoURI: hyperCoreLogo,
   grayscaleLogoURI: hyperCoreGrayscaleLogo,
@@ -476,6 +476,7 @@ export const hyperCore = {
   nativeCurrencySymbol: "HYPE",
   customRpcUrl: process.env.REACT_APP_CHAIN_1337_CUSTOM_RPC_URL,
   pollingInterval: 1000,
+  intermediaryChain: 999,
 };
 
 export const hyperEvm = {
@@ -1516,7 +1517,7 @@ export const zora_viem = defineChain({
 
 export const hyperliquid = {
   name: "Hyperliquid",
-  fullName: "Hyperliquid (Perps)",
+  fullName: "Hyperliquid",
   projectId: "hyperliquid",
   logoURI: hyperliquidLogo,
   grayscaleLogoURI: hyperliquidGrayscaleLogo,
