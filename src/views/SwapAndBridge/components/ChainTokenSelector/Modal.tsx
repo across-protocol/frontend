@@ -37,8 +37,8 @@ type ChainData = {
 };
 
 type DisplayedChains = {
-  popular: Record<number, ChainData>;
-  all: Record<number, ChainData>;
+  popular: [string, ChainData][];
+  all: [string, ChainData][];
 };
 
 type EnrichedToken = LifiToken & {
@@ -196,7 +196,9 @@ export default function ChainTokenSelectorModal({
   }, [selectedChain, balances, tokenSearch, otherToken, crossChainRoutes.data]);
 
   const displayedChains = useMemo(() => {
-    const chainsWithDisabledState = Object.entries(crossChainRoutes.data || {})
+    const chainsWithDisabledState: [string, ChainData][] = Object.entries(
+      crossChainRoutes.data || {}
+    )
       .filter(([chainId]) => {
         // why ar we filtering out Boba?
         if ([288].includes(Number(chainId))) {
@@ -218,7 +220,7 @@ export default function ChainTokenSelectorModal({
             tokens,
             isDisabled: otherToken && Number(chainId) === otherToken.chainId, // same chain can't be both input and output
           },
-        ];
+        ] as [string, ChainData];
       });
 
     // Separate popular chains from all chains
@@ -248,8 +250,8 @@ export default function ChainTokenSelectorModal({
     );
 
     return {
-      popular: Object.fromEntries(popularChainsData),
-      all: Object.fromEntries(allChainsData),
+      popular: popularChainsData,
+      all: allChainsData,
     };
   }, [chainSearch, crossChainRoutes.data, otherToken]);
 
@@ -470,26 +472,24 @@ const MobileLayout = ({
             />
 
             {/* Popular Chains Section */}
-            {Object.keys(displayedChains.popular).length > 0 && (
+            {displayedChains.popular.length > 0 && (
               <>
                 <SectionHeader>Popular Chains</SectionHeader>
-                {Object.entries(displayedChains.popular).map(
-                  ([chainId, chainData]) => (
-                    <ChainEntry
-                      key={chainId}
-                      chainId={Number(chainId)}
-                      isSelected={selectedChain === Number(chainId)}
-                      isDisabled={chainData.isDisabled}
-                      onClick={() => onChainSelect(Number(chainId))}
-                    />
-                  )
-                )}
+                {displayedChains.popular.map(([chainId, chainData]) => (
+                  <ChainEntry
+                    key={chainId}
+                    chainId={Number(chainId)}
+                    isSelected={selectedChain === Number(chainId)}
+                    isDisabled={chainData.isDisabled}
+                    onClick={() => onChainSelect(Number(chainId))}
+                  />
+                ))}
               </>
             )}
 
             {/* All Chains Section */}
             <SectionHeader>All Chains</SectionHeader>
-            {Object.entries(displayedChains.all).map(([chainId, chainData]) => (
+            {displayedChains.all.map(([chainId, chainData]) => (
               <ChainEntry
                 key={chainId}
                 chainId={Number(chainId)}
@@ -603,26 +603,24 @@ const DesktopLayout = ({
           />
 
           {/* Popular Chains Section */}
-          {Object.keys(displayedChains.popular).length > 0 && (
+          {displayedChains.popular.length > 0 && (
             <>
               <SectionHeader>Popular Chains</SectionHeader>
-              {Object.entries(displayedChains.popular).map(
-                ([chainId, chainData]) => (
-                  <ChainEntry
-                    key={chainId}
-                    chainId={Number(chainId)}
-                    isSelected={selectedChain === Number(chainId)}
-                    isDisabled={chainData.isDisabled}
-                    onClick={() => onChainSelect(Number(chainId))}
-                  />
-                )
-              )}
+              {displayedChains.popular.map(([chainId, chainData]) => (
+                <ChainEntry
+                  key={chainId}
+                  chainId={Number(chainId)}
+                  isSelected={selectedChain === Number(chainId)}
+                  isDisabled={chainData.isDisabled}
+                  onClick={() => onChainSelect(Number(chainId))}
+                />
+              ))}
             </>
           )}
 
           {/* All Chains Section */}
           <SectionHeader>All Chains</SectionHeader>
-          {Object.entries(displayedChains.all).map(([chainId, chainData]) => (
+          {displayedChains.all.map(([chainId, chainData]) => (
             <ChainEntry
               key={chainId}
               chainId={Number(chainId)}
