@@ -7,6 +7,7 @@ import useAvailableCrosschainRoutes, {
   LifiToken,
 } from "hooks/useAvailableCrosschainRoutes";
 import {
+  CHAIN_IDs,
   COLORS,
   formatUnitsWithMaxFractions,
   formatUSD,
@@ -20,6 +21,14 @@ import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import useEnrichedCrosschainBalances from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
+
+const popularChains = [
+  CHAIN_IDs.MAINNET,
+  CHAIN_IDs.BASE,
+  CHAIN_IDs.OPTIMISM,
+  CHAIN_IDs.ARBITRUM,
+  CHAIN_IDs.POLYGON,
+];
 
 type Props = {
   onSelect: (token: EnrichedTokenSelect) => void;
@@ -103,25 +112,8 @@ export default function ChainTokenSelectorModal({
       };
     });
 
-    // Return ordering top 100 tokens ordering highest balanceUsd to lowest (fallback alphabetical)
-    // Push disabled tokens to the bottom
-    const sortedTokens = enrichedTokens.slice(0, 100).sort((a, b) => {
-      // First, sort by disabled status - disabled tokens go to bottom
-      const aDisabled = a.isReachable === false;
-      const bDisabled = b.isReachable === false;
-
-      if (aDisabled !== bDisabled) {
-        return aDisabled ? 1 : -1;
-      }
-
-      // Then sort by balance (for enabled tokens) or alphabetically (for disabled tokens)
-      if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
-        return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-      }
-      return b.balanceUsd - a.balanceUsd;
-    });
-
-    return sortedTokens.filter((t) => {
+    // Filter by search first
+    const filteredTokens = enrichedTokens.filter((t) => {
       if (tokenSearch === "") {
         return true;
       }
@@ -134,6 +126,50 @@ export default function ChainTokenSelectorModal({
         keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
       );
     });
+
+    // Separate tokens with balance from tokens without balance
+    const tokensWithBalance = filteredTokens.filter(
+      (token) => token.balance.gt(0) && token.balanceUsd > 0.01
+    );
+    const tokensWithoutBalance = filteredTokens.filter(
+      (token) => token.balance.eq(0) || token.balanceUsd <= 0.01
+    );
+
+    // Sort tokens with balance by balanceUsd (highest first), then alphabetically
+    const sortedTokensWithBalance = tokensWithBalance.sort((a, b) => {
+      // First, sort by disabled status - disabled tokens go to bottom
+      const aDisabled = a.isReachable === false;
+      const bDisabled = b.isReachable === false;
+
+      if (aDisabled !== bDisabled) {
+        return aDisabled ? 1 : -1;
+      }
+
+      // Then sort by balance
+      if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+        return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+      }
+      return b.balanceUsd - a.balanceUsd;
+    });
+
+    // Sort tokens without balance alphabetically, with disabled tokens at bottom
+    const sortedTokensWithoutBalance = tokensWithoutBalance.sort((a, b) => {
+      // First, sort by disabled status - disabled tokens go to bottom
+      const aDisabled = a.isReachable === false;
+      const bDisabled = b.isReachable === false;
+
+      if (aDisabled !== bDisabled) {
+        return aDisabled ? 1 : -1;
+      }
+
+      // Then sort alphabetically
+      return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+    });
+
+    return {
+      withBalance: sortedTokensWithBalance.slice(0, 50), // Limit to 50 tokens with balance
+      withoutBalance: sortedTokensWithoutBalance.slice(0, 50), // Limit to 50 tokens without balance
+    };
   }, [selectedChain, balances, tokenSearch, otherToken, crossChainRoutes.data]);
 
   const displayedChains = useMemo(() => {
@@ -162,15 +198,38 @@ export default function ChainTokenSelectorModal({
         const isDisabled = false;
 
         return [chainId, { tokens, isDisabled }];
-      })
-      // Sort chains alphabetically by name (no need to sort by disabled status since none are disabled)
-      .sort(([chainIdA], [chainIdB]) => {
+      });
+
+    // Separate popular chains from all chains
+    const popularChainsData: typeof chainsWithDisabledState = [];
+
+    chainsWithDisabledState.forEach((entry) => {
+      const [chainId] = entry;
+      if (popularChains.includes(Number(chainId))) {
+        popularChainsData.push(entry);
+      }
+    });
+
+    // Sort popular chains by the order they appear in popularChains array
+    popularChainsData.sort(([chainIdA], [chainIdB]) => {
+      const indexA = popularChains.indexOf(Number(chainIdA));
+      const indexB = popularChains.indexOf(Number(chainIdB));
+      return indexA - indexB;
+    });
+
+    // Combine all chains for the "All Chains" section (sorted alphabetically)
+    const allChainsData = [...chainsWithDisabledState].sort(
+      ([chainIdA], [chainIdB]) => {
         const chainInfoA = getChainInfo(Number(chainIdA));
         const chainInfoB = getChainInfo(Number(chainIdB));
         return chainInfoA.name.localeCompare(chainInfoB.name);
-      });
+      }
+    );
 
-    return Object.fromEntries(chainsWithDisabledState);
+    return {
+      popular: Object.fromEntries(popularChainsData),
+      all: Object.fromEntries(allChainsData),
+    };
   }, [chainSearch, crossChainRoutes.data, otherToken]);
 
   return isMobile ? (
@@ -239,7 +298,10 @@ const MobileModal = ({
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
   displayedChains: any;
-  displayedTokens: any[];
+  displayedTokens: {
+    withBalance: any[];
+    withoutBalance: any[];
+  };
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
 }) => {
@@ -314,7 +376,10 @@ const DesktopModal = ({
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
   displayedChains: any;
-  displayedTokens: any[];
+  displayedTokens: {
+    withBalance: any[];
+    withoutBalance: any[];
+  };
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
 }) => {
@@ -367,7 +432,10 @@ const MobileLayout = ({
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
   displayedChains: any;
-  displayedTokens: any[];
+  displayedTokens: {
+    withBalance: any[];
+    withoutBalance: any[];
+  };
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
   onModalClose: () => void;
@@ -388,7 +456,31 @@ const MobileLayout = ({
               isSelected={selectedChain === null}
               onClick={() => onChainSelect(null)}
             />
-            {Object.entries(displayedChains).map(([chainId, chainData]) => (
+
+            {/* Popular Chains Section */}
+            {Object.keys(displayedChains.popular).length > 0 && (
+              <>
+                <SectionHeader>Popular Chains</SectionHeader>
+                {Object.entries(displayedChains.popular).map(
+                  ([chainId, chainData]) => (
+                    <ChainEntry
+                      key={chainId}
+                      chainId={Number(chainId)}
+                      isSelected={selectedChain === Number(chainId)}
+                      isDisabled={
+                        (chainData as { tokens: any; isDisabled: boolean })
+                          .isDisabled
+                      }
+                      onClick={() => onChainSelect(Number(chainId))}
+                    />
+                  )
+                )}
+              </>
+            )}
+
+            {/* All Chains Section */}
+            <SectionHeader>All Chains</SectionHeader>
+            {Object.entries(displayedChains.all).map(([chainId, chainData]) => (
               <ChainEntry
                 key={chainId}
                 chainId={Number(chainId)}
@@ -410,7 +502,35 @@ const MobileLayout = ({
             setSearch={setTokenSearch}
           />
           <ListWrapper>
-            {displayedTokens.map((token) => (
+            {/* Your Tokens Section */}
+            {displayedTokens.withBalance.length > 0 && (
+              <>
+                <SectionHeader>Your Tokens</SectionHeader>
+                {displayedTokens.withBalance.map((token) => (
+                  <TokenEntry
+                    key={token.address + token.chainId}
+                    token={token}
+                    isSelected={false}
+                    onClick={() => {
+                      onTokenSelect({
+                        chainId: token.chainId,
+                        symbolUri: token.logoURI,
+                        symbol: token.symbol,
+                        address: token.address,
+                        balance: token.balance,
+                        priceUsd: parseUnits(token.priceUSD, 18),
+                        decimals: token.decimals,
+                      });
+                      onModalClose();
+                    }}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* All Tokens Section */}
+            <SectionHeader>All Tokens</SectionHeader>
+            {displayedTokens.withoutBalance.map((token) => (
               <TokenEntry
                 key={token.address + token.chainId}
                 token={token}
@@ -455,7 +575,10 @@ const DesktopLayout = ({
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
   displayedChains: any;
-  displayedTokens: any[];
+  displayedTokens: {
+    withBalance: any[];
+    withoutBalance: any[];
+  };
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
   onModalClose: () => void;
@@ -474,7 +597,31 @@ const DesktopLayout = ({
             isSelected={selectedChain === null}
             onClick={() => onChainSelect(null)}
           />
-          {Object.entries(displayedChains).map(([chainId, chainData]) => (
+
+          {/* Popular Chains Section */}
+          {Object.keys(displayedChains.popular).length > 0 && (
+            <>
+              <SectionHeader>Popular Chains</SectionHeader>
+              {Object.entries(displayedChains.popular).map(
+                ([chainId, chainData]) => (
+                  <ChainEntry
+                    key={chainId}
+                    chainId={Number(chainId)}
+                    isSelected={selectedChain === Number(chainId)}
+                    isDisabled={
+                      (chainData as { tokens: any; isDisabled: boolean })
+                        .isDisabled
+                    }
+                    onClick={() => onChainSelect(Number(chainId))}
+                  />
+                )
+              )}
+            </>
+          )}
+
+          {/* All Chains Section */}
+          <SectionHeader>All Chains</SectionHeader>
+          {Object.entries(displayedChains.all).map(([chainId, chainData]) => (
             <ChainEntry
               key={chainId}
               chainId={Number(chainId)}
@@ -495,7 +642,35 @@ const DesktopLayout = ({
           setSearch={setTokenSearch}
         />
         <ListWrapper>
-          {displayedTokens.map((token) => (
+          {/* Your Tokens Section */}
+          {displayedTokens.withBalance.length > 0 && (
+            <>
+              <SectionHeader>Your Tokens</SectionHeader>
+              {displayedTokens.withBalance.map((token) => (
+                <TokenEntry
+                  key={token.address + token.chainId}
+                  token={token}
+                  isSelected={false}
+                  onClick={() => {
+                    onTokenSelect({
+                      chainId: token.chainId,
+                      symbolUri: token.logoURI,
+                      symbol: token.symbol,
+                      address: token.address,
+                      balance: token.balance,
+                      priceUsd: parseUnits(token.priceUSD, 18),
+                      decimals: token.decimals,
+                    });
+                    onModalClose();
+                  }}
+                />
+              ))}
+            </>
+          )}
+
+          {/* All Tokens Section */}
+          <SectionHeader>All Tokens</SectionHeader>
+          {displayedTokens.withoutBalance.map((token) => (
             <TokenEntry
               key={token.address + token.chainId}
               token={token}
@@ -748,6 +923,7 @@ const ListWrapper = styled.div`
   overflow-y: auto;
   flex: 1; /* Take up remaining space in parent */
   min-height: 0; /* Allow flex child to shrink below content size */
+  padding-bottom: 32px; /* Add padding to prevent clipping of last item */
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -900,4 +1076,14 @@ const TokenBalanceUsd = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
   opacity: 0.5;
+`;
+
+const SectionHeader = styled.div`
+  color: var(--Base-bright-gray, #e0f3ff);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 130%;
+  opacity: 0.7;
+  padding: 8px 0px 4px 0px;
+  letter-spacing: 0.5px;
 `;

@@ -1,10 +1,14 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
+
 import {
   CHAIN_IDs,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
 } from "@across-protocol/constants";
+
+export { CHAIN_IDs } from "@across-protocol/constants";
+
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
