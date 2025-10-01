@@ -30,6 +30,29 @@ const popularChains = [
   CHAIN_IDs.POLYGON,
 ];
 
+// Type definitions for better typing
+type ChainData = {
+  tokens: LifiToken[];
+  isDisabled: boolean;
+};
+
+type DisplayedChains = {
+  popular: Record<number, ChainData>;
+  all: Record<number, ChainData>;
+};
+
+type EnrichedToken = LifiToken & {
+  balance: BigNumber;
+  balanceUsd: number;
+  isReachable?: boolean;
+  routeSource: "bridge" | "swap";
+};
+
+type DisplayedTokens = {
+  withBalance: EnrichedToken[];
+  withoutBalance: EnrichedToken[];
+};
+
 type Props = {
   onSelect: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
@@ -180,11 +203,6 @@ export default function ChainTokenSelectorModal({
           return false;
         }
 
-        // Filter out the chain of the other token (same chain can't be both input and output)
-        if (otherToken && Number(chainId) === otherToken.chainId) {
-          return false;
-        }
-
         const keywords = [
           String(chainId),
           getChainInfo(Number(chainId)).name.toLowerCase().replace(" ", ""),
@@ -194,10 +212,13 @@ export default function ChainTokenSelectorModal({
         );
       })
       .map(([chainId, tokens]) => {
-        // Never disable chains - requirement 1
-        const isDisabled = false;
-
-        return [chainId, { tokens, isDisabled }];
+        return [
+          chainId,
+          {
+            tokens,
+            isDisabled: otherToken && Number(chainId) === otherToken.chainId, // same chain can't be both input and output
+          },
+        ];
       });
 
     // Separate popular chains from all chains
@@ -297,11 +318,8 @@ const MobileModal = ({
   setChainSearch: (search: string) => void;
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
-  displayedChains: any;
-  displayedTokens: {
-    withBalance: any[];
-    withoutBalance: any[];
-  };
+  displayedChains: DisplayedChains;
+  displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
 }) => {
@@ -375,11 +393,8 @@ const DesktopModal = ({
   setChainSearch: (search: string) => void;
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
-  displayedChains: any;
-  displayedTokens: {
-    withBalance: any[];
-    withoutBalance: any[];
-  };
+  displayedChains: DisplayedChains;
+  displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
 }) => {
@@ -431,11 +446,8 @@ const MobileLayout = ({
   setChainSearch: (search: string) => void;
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
-  displayedChains: any;
-  displayedTokens: {
-    withBalance: any[];
-    withoutBalance: any[];
-  };
+  displayedChains: DisplayedChains;
+  displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
   onModalClose: () => void;
@@ -467,10 +479,7 @@ const MobileLayout = ({
                       key={chainId}
                       chainId={Number(chainId)}
                       isSelected={selectedChain === Number(chainId)}
-                      isDisabled={
-                        (chainData as { tokens: any; isDisabled: boolean })
-                          .isDisabled
-                      }
+                      isDisabled={chainData.isDisabled}
                       onClick={() => onChainSelect(Number(chainId))}
                     />
                   )
@@ -485,9 +494,7 @@ const MobileLayout = ({
                 key={chainId}
                 chainId={Number(chainId)}
                 isSelected={selectedChain === Number(chainId)}
-                isDisabled={
-                  (chainData as { tokens: any; isDisabled: boolean }).isDisabled
-                }
+                isDisabled={chainData.isDisabled}
                 onClick={() => onChainSelect(Number(chainId))}
               />
             ))}
@@ -574,11 +581,8 @@ const DesktopLayout = ({
   setChainSearch: (search: string) => void;
   tokenSearch: string;
   setTokenSearch: (search: string) => void;
-  displayedChains: any;
-  displayedTokens: {
-    withBalance: any[];
-    withoutBalance: any[];
-  };
+  displayedChains: DisplayedChains;
+  displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedTokenSelect) => void;
   onModalClose: () => void;
@@ -608,10 +612,7 @@ const DesktopLayout = ({
                     key={chainId}
                     chainId={Number(chainId)}
                     isSelected={selectedChain === Number(chainId)}
-                    isDisabled={
-                      (chainData as { tokens: any; isDisabled: boolean })
-                        .isDisabled
-                    }
+                    isDisabled={chainData.isDisabled}
                     onClick={() => onChainSelect(Number(chainId))}
                   />
                 )
@@ -626,9 +627,7 @@ const DesktopLayout = ({
               key={chainId}
               chainId={Number(chainId)}
               isSelected={selectedChain === Number(chainId)}
-              isDisabled={
-                (chainData as { tokens: any; isDisabled: boolean }).isDisabled
-              }
+              isDisabled={chainData.isDisabled}
               onClick={() => onChainSelect(Number(chainId))}
             />
           ))}
