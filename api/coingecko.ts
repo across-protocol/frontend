@@ -289,8 +289,8 @@ async function resolvePriceBySymbol(params: {
   }
 
   const symbol = String(
-    redirectedLookupSymbols[_symbol.toLowerCase()] ??
-      TOKEN_EQUIVALENCE_REMAPPING[_symbol.toLowerCase()] ??
+    redirectedLookupSymbols[_symbol.toUpperCase()] ??
+      TOKEN_EQUIVALENCE_REMAPPING[_symbol.toUpperCase()] ??
       _symbol
   ).toUpperCase();
 
