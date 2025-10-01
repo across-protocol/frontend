@@ -8,9 +8,10 @@ import {
   isDefined,
   getConfig,
   hubPoolChainId,
+  TokenInfo,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
-import useAvailableCrosschainRoutes from "./useAvailableCrosschainRoutes";
+import { useSwapTokens } from "./useSwapTokens";
 
 const config = getConfig();
 
@@ -19,51 +20,50 @@ export function useTokenConversion(
   baseCurrency: string,
   historicalDateISO?: string
 ) {
-  const availableCrosschainRoutes = useAvailableCrosschainRoutes();
+  const { data: swapTokens } = useSwapTokens();
 
   // Try to get token from constants first, fallback to swap API data
-  let token;
+  let token: TokenInfo | undefined;
   try {
     token = getToken(symbol);
   } catch (error) {
     // If token not found in constants, try to find it in swap API data
-    const swapTokens = availableCrosschainRoutes.data;
     if (swapTokens) {
       // Search across all chains for a token with matching symbol
-      for (const chainId of Object.keys(swapTokens)) {
-        const tokensOnChain = swapTokens[Number(chainId)];
-        const foundToken = tokensOnChain.find(
-          (t) => t.symbol.toUpperCase() === symbol.toUpperCase()
-        );
-        if (foundToken) {
-          // Convert LifiToken to TokenInfo format
-          token = {
-            symbol: foundToken.symbol,
-            name: foundToken.name,
-            decimals: foundToken.decimals,
-            addresses: { [foundToken.chainId]: foundToken.address },
-            mainnetAddress: foundToken.address, // Use the found address as mainnet address
-            logoURI: foundToken.logoURI,
-          };
-          break;
-        }
+      const foundToken = swapTokens.find(
+        (t) => t.symbol.toUpperCase() === symbol.toUpperCase()
+      );
+      if (foundToken) {
+        // Convert SwapToken to TokenInfo format
+        token = {
+          symbol: foundToken.symbol,
+          name: foundToken.name,
+          decimals: foundToken.decimals,
+          addresses: { [foundToken.chainId]: foundToken.address },
+          mainnetAddress: foundToken.address, // Use the found address as mainnet address
+          logoURI: foundToken.logoUrl || "", // Use logoUrl from SwapToken
+        };
       }
-    }
 
-    // If still not found, re-throw the original error
-    if (!token) {
+      // If still not found, re-throw the original error
+      if (!token) {
+        throw error;
+      }
+    } else {
+      // If swapTokens is not available, re-throw the original error
+      console.error(`Unable to resolve token info for symbol ${symbol}`);
       throw error;
     }
   }
 
   // If the token is OP, we need to use the address of the token on Optimism
   const l1Token =
-    token.symbol === "OP"
+    token?.symbol === "OP"
       ? TOKEN_SYMBOLS_MAP["OP"].addresses[10]
-      : token.mainnetAddress!;
+      : token?.mainnetAddress;
 
   const query = useCoingeckoPrice(
-    l1Token,
+    l1Token || "",
     baseCurrency,
     historicalDateISO,
     isDefined(l1Token)
@@ -74,7 +74,9 @@ export function useTokenConversion(
       const price = query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
@@ -91,7 +93,9 @@ export function useTokenConversion(
       const price = query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
