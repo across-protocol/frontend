@@ -16,6 +16,7 @@ import {
   rewardProgramsAvailable,
   COLORS,
   getEcosystem,
+  getBridgeUrlWithQueryParams,
 } from "utils";
 import { VoidHandler } from "utils/types";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
@@ -39,6 +40,7 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -281,7 +283,17 @@ const BridgeForm = ({
             <Text color="white">Account Required</Text>
             <Text color="warning">
               You must initialize an account for this recipient address on
-              Hyperliquid before bridging.
+              Hyperliquid before bridging.{" "}
+              <InternalLink
+                href={getBridgeUrlWithQueryParams({
+                  fromChainId: selectedRoute.fromChain,
+                  toChainId: CHAIN_IDs.ARBITRUM,
+                  inputTokenSymbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+                  externalProjectId: "hyperliquid",
+                })}
+              >
+                Bridge USDC to Hyperliquid
+              </InternalLink>
             </Text>
           </HyperliquidWarningTextContainer>
         </Alert>
@@ -345,6 +357,16 @@ const BridgeForm = ({
 };
 
 export default BridgeForm;
+
+const InternalLink = styled.a`
+  color: inherit;
+  display: inline;
+  transition: opacity 150ms ease-in-out;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
 
 const CardWrapper = styled(ExternalCardWrapper)`
   width: 100%;
