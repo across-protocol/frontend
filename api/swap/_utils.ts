@@ -160,14 +160,6 @@ export async function handleBaseSwapQueryParams(
       originChainId,
       destinationChainId
     );
-
-    if (!outputBridgeable) {
-      throw new InvalidParamError({
-        param: "outputToken",
-        message:
-          "Destination swaps are not supported yet for routes involving Solana.",
-      });
-    }
   }
 
   if (excludeSources && includeSources) {
