@@ -277,11 +277,10 @@ const handler = async (
       ]);
 
       span.setAttributes(
-        getLimitsSpanAttributes(
-          limits,
-          { ...inputToken, chainId: Number(computedOriginChainId) },
-          tokenPriceUsd
-        )
+        await getLimitsSpanAttributes(limits, {
+          ...inputToken,
+          chainId: Number(computedOriginChainId),
+        })
       );
 
       const nextUt = computeUtilizationPostRelay(

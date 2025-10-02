@@ -2722,7 +2722,7 @@ export function computeUtilizationPostRelay(
   return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
 }
 
-export function getLimitsSpanAttributes(
+export async function getLimitsSpanAttributes(
   limits: {
     minDeposit: string;
     maxDeposit: string;
@@ -2730,11 +2730,15 @@ export function getLimitsSpanAttributes(
     maxDepositShortDelay: string;
   },
   inputToken: Token,
-  tokenPriceUsd: number
+  { fetchTokenPrice } = { fetchTokenPrice: getCachedTokenPrice }
 ) {
   const { minDeposit, maxDeposit, maxDepositInstant, maxDepositShortDelay } =
     limits;
-
+  const tokenPriceUsd = await fetchTokenPrice({
+    tokenAddress: inputToken.address,
+    symbol: inputToken.symbol,
+    baseCurrency: "usd",
+  });
   const attributes: Record<string, string | number> = {};
 
   const limitsToProcess = {
