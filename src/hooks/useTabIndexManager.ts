@@ -19,6 +19,7 @@ export const useTabIndexManager = (
     }
 
     const modalElement = containerRef.current;
+    const tabIndicesMap = originalTabIndices.current;
 
     // Only target elements that are naturally focusable
     const focusableElements = document.querySelectorAll(
@@ -33,21 +34,21 @@ export const useTabIndexManager = (
       }
 
       const currentTabIndex = element.getAttribute("tabindex");
-      originalTabIndices.current.set(element, currentTabIndex);
+      tabIndicesMap.set(element, currentTabIndex);
       element.setAttribute("tabindex", "-1");
     });
 
     // Cleanup function
     return () => {
       // Restore original tabindex values
-      originalTabIndices.current.forEach((originalTabIndex, element) => {
+      tabIndicesMap.forEach((originalTabIndex, element) => {
         if (originalTabIndex === null) {
           element.removeAttribute("tabindex");
         } else {
           element.setAttribute("tabindex", originalTabIndex);
         }
       });
-      originalTabIndices.current.clear();
+      tabIndicesMap.clear();
     };
   }, [isActive, containerRef]);
 };

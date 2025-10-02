@@ -193,7 +193,7 @@ export default function ChainTokenSelectorModal({
       withBalance: sortedTokensWithBalance.slice(0, 50), // Limit to 50 tokens with balance
       withoutBalance: sortedTokensWithoutBalance.slice(0, 50), // Limit to 50 tokens without balance
     };
-  }, [selectedChain, balances, tokenSearch, otherToken, crossChainRoutes.data]);
+  }, [selectedChain, balances, tokenSearch, crossChainRoutes.data]);
 
   const displayedChains = useMemo(() => {
     const chainsWithDisabledState: [string, ChainData][] = Object.entries(
@@ -969,10 +969,6 @@ const EntryItem = styled.div<{ isSelected: boolean; isDisabled?: boolean }>`
 
   cursor: ${({ isDisabled }) => (isDisabled ? "not-allowed" : "pointer")};
   opacity: ${({ isDisabled }) => (isDisabled ? 0.5 : 1)};
-
-  transition:
-    background 0.2s ease-in-out,
-    opacity 0.2s ease-in-out;
 
   &:hover {
     background: ${({ isSelected, isDisabled }) => {
