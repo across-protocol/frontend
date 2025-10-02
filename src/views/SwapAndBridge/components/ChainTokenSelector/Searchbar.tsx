@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { ReactComponent as ProductIcon } from "assets/icons/product.svg";
+import { COLORS } from "utils";
 
 type Props = {
   searchTopic: string;
@@ -34,14 +35,19 @@ const Wrapper = styled.div`
   padding: 0px 12px;
   align-items: center;
   gap: 8px;
-
   flex-direction: row;
   justify-content: space-between;
 
   border-radius: 8px;
-  background: rgba(224, 243, 255, 0.05);
+  background: transparent;
 
   width: 100%;
+
+  &:hover,
+  &:active,
+  &:focus-visible {
+    background: rgba(224, 243, 255, 0.05);
+  }
 `;
 
 const StyledSearchIcon = styled(SearchIcon)`
@@ -67,6 +73,12 @@ const Input = styled.input`
 
   &::placeholder {
     color: #e0f3ff4d;
+  }
+
+  &:hover,
+  &:active,
+  &:focus-visible {
+    color: ${COLORS.aqua};
   }
 
   background: transparent;
