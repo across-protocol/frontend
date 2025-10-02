@@ -40,5 +40,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      - name: Start dev server
+        run: yarn dev:api &
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for server to start..."
+          for i in {1..20}; do
+            if curl -s http://localhost:3000/api/available-routes > /dev/null; then
+              echo "Server is up!"
+              break
+            fi
+            sleep 1
+          done
       - name: API tests
         run: yarn test-api
+      - name: Stop dev server
+        if: always()
+        run: kill $(lsof -t -i:3000) || true
