@@ -2730,10 +2730,9 @@ export async function getLimitsSpanAttributes(
     maxDepositShortDelay: string;
   },
   inputToken: Token,
-  { fetchTokenPrice } = { fetchTokenPrice: getCachedTokenPrice }
+  options?: { fetchTokenPrice?: typeof getCachedTokenPrice }
 ) {
-  const { minDeposit, maxDeposit, maxDepositInstant, maxDepositShortDelay } =
-    limits;
+  const fetchTokenPrice = options?.fetchTokenPrice || getCachedTokenPrice;
   const tokenPriceUsd = await fetchTokenPrice({
     tokenAddress: inputToken.address,
     symbol: inputToken.symbol,
@@ -2741,14 +2740,7 @@ export async function getLimitsSpanAttributes(
   });
   const attributes: Record<string, string | number> = {};
 
-  const limitsToProcess = {
-    minDeposit,
-    maxDeposit,
-    maxDepositInstant,
-    maxDepositShortDelay,
-  };
-
-  for (const [key, value] of Object.entries(limitsToProcess)) {
+  for (const [key, value] of Object.entries(limits)) {
     const valueBn = BigNumber.from(value);
     const valueUsd = valueBn
       .mul(parseUnits(tokenPriceUsd.toString(), 18))

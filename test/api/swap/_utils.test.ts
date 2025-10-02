@@ -353,7 +353,6 @@ describe("getLimitsSpanAttributes", () => {
     };
 
     const attributes = await getLimitsSpanAttributes(wethLimits, wethToken);
-
     expect(typeof attributes["limits.minDeposit.token"]).toBe("number");
     expect(attributes["limits.minDeposit.token"]).toBeGreaterThan(0);
     expect(typeof attributes["limits.minDeposit.usd"]).toBe("number");
