@@ -39,6 +39,7 @@ export type ModalProps = {
 
   children?: React.ReactNode;
   titleBorder?: boolean;
+  className?: string;
 };
 
 const Modal = ({
@@ -54,6 +55,7 @@ const Modal = ({
   topYOffset,
   bottomYOffset,
   padding,
+  className,
   "data-cy": dataCy,
   titleBorder = false,
 }: ModalProps) => {
@@ -150,6 +152,7 @@ const Modal = ({
             topYOffset={topYOffset}
             bottomYOffset={bottomYOffset}
             padding={padding ?? "normal"}
+            className={className}
           >
             <TitleAndExitWrapper>
               {typeof title === "string" ? (

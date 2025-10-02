@@ -12,6 +12,7 @@ type WrapperType = {
   reverseAnimation?: boolean;
   direction: ModalDirection;
 };
+
 export const Wrapper = styled.div<WrapperType>`
   position: fixed;
   top: 0;
@@ -27,7 +28,7 @@ export const Wrapper = styled.div<WrapperType>`
 
   z-index: 99998;
 
-  animation: ${fadeBackground} 0.5s linear;
+  animation: ${fadeBackground} 0.3s linear;
   animation-fill-mode: forwards;
 
   opacity: ${({ reverseAnimation }) => (reverseAnimation ? 0 : 1)};
@@ -99,7 +100,6 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
       : "calc(100svh - 64px)"};
   max-width: ${({ width }) => width ?? 800}px;
-
   height: fit-content;
   width: calc(100% - 32px);
 
@@ -116,7 +116,7 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   background: #202024;
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
-  border-radius: 16px;
+  border-radius: 24px;
 
   position: relative;
 

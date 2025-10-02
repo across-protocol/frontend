@@ -105,6 +105,10 @@ const globalStyles = css`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
   }
+  button {
+    border: none;
+    background-color: none;
+  }
   html,
   body {
     min-height: 100vh;
