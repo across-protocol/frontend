@@ -2552,10 +2552,6 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // Resolve token info statically
-    // It's possible for both ETH and WETH to be associated with the same address in TOKEN_SYMBOLS_MAP.
-    // Since the address refers to an ERC20 contract, the correct token is WETH, not the native ETH.
-    // This logic ensures we prioritize WETH in case of such ambiguity.
     const token = getTokenByAddress(address, chainId);
 
     if (token) {
