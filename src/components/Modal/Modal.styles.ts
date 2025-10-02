@@ -1,7 +1,6 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
-import { QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils";
 import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`
@@ -148,10 +147,6 @@ export const Title = styled.p`
   }
 `;
 
-export const StyledExitIcon = styled(CrossIcon)`
-  cursor: pointer;
-`;
-
 export const ElementRowDivider = styled.div`
   height: 1px;
   min-height: 1px;
@@ -159,4 +154,23 @@ export const ElementRowDivider = styled.div`
 
   margin-left: calc(0px - var(--padding-modal-content));
   width: calc(100% + (2 * var(--padding-modal-content)));
+`;
+
+export const CloseButton = styled.button`
+  border: none;
+  background-color: transparent;
+  display: inline-flex;
+  outline: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${COLORS["grey-400-15"]};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${COLORS.aqua};
+  }
 `;

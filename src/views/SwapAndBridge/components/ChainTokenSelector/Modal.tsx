@@ -1,7 +1,7 @@
 import Modal from "components/Modal";
 import { EnrichedTokenSelect } from "./SelectorButton";
 import styled from "@emotion/styled";
-import Searchbar from "./Searchbar";
+import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
 import useAvailableCrosschainRoutes, {
   LifiToken,
@@ -591,11 +591,14 @@ const DesktopLayout = ({
     <DesktopInnerWrapper>
       <DesktopChainWrapper>
         <SearchBarStyled
+          inputProps={{
+            tabIndex: 2,
+          }}
           search={chainSearch}
           setSearch={setChainSearch}
           searchTopic="Chain"
         />
-        <ListWrapper>
+        <ListWrapper tabIndex={-1}>
           <ChainEntry
             chainId={null}
             isSelected={selectedChain === null}
@@ -634,11 +637,14 @@ const DesktopLayout = ({
       <VerticalDivider />
       <DesktopTokenWrapper>
         <SearchBarStyled
+          inputProps={{
+            tabIndex: 3,
+          }}
           searchTopic="Token"
           search={tokenSearch}
           setSearch={setTokenSearch}
         />
-        <ListWrapper>
+        <ListWrapper tabIndex={-1}>
           {/* Your Tokens Section */}
           {displayedTokens.withBalance.length > 0 && (
             <>

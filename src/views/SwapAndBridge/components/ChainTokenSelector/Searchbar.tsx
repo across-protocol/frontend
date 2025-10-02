@@ -2,32 +2,38 @@ import styled from "@emotion/styled";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { ReactComponent as ProductIcon } from "assets/icons/product.svg";
 import { COLORS } from "utils";
+import React from "react";
 
 type Props = {
   searchTopic: string;
   search: string;
   setSearch: (search: string) => void;
   className?: string;
+  inputProps?: React.ComponentPropsWithoutRef<"input">;
 };
 
-export default function Searchbar({
+export const Searchbar = ({
   searchTopic,
   search,
   setSearch,
   className,
-}: Props) {
+  inputProps,
+}: Props) => {
   return (
     <Wrapper className={className}>
       <StyledSearchIcon />
       <Input
+        id={`search-${searchTopic}`}
+        name={`search-${searchTopic}`}
         placeholder={`Search ${searchTopic}s`}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        {...inputProps}
       />
       {search ? <StyledProductIcon onClick={() => setSearch("")} /> : <div />}
     </Wrapper>
   );
-}
+};
 
 const Wrapper = styled.div`
   display: flex;
@@ -44,9 +50,12 @@ const Wrapper = styled.div`
   width: 100%;
 
   &:hover,
-  &:active,
-  &:focus-visible {
+  &:active {
     background: rgba(224, 243, 255, 0.05);
+  }
+
+  &:focus-within {
+    background: rgba(224, 243, 255, 0.1);
   }
 `;
 
