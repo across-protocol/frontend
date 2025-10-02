@@ -2553,11 +2553,22 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
     }
 
     // Resolve token info statically
-    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+    // It's possible for both ETH and WETH to be associated with the same address in TOKEN_SYMBOLS_MAP.
+    // Since the address refers to an ERC20 contract, the correct token is WETH, not the native ETH.
+    // This logic ensures we prioritize WETH in case of such ambiguity.
+    const tokens = Object.values(TOKEN_SYMBOLS_MAP).filter((token) =>
       Boolean(
         token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
       )
     );
+
+    let token;
+    if (tokens.length > 1) {
+      const wethToken = tokens.find((t) => t.symbol === "WETH");
+      token = wethToken || tokens[0];
+    } else {
+      token = tokens[0];
+    }
 
     if (token) {
       return {
