@@ -1,5 +1,7 @@
 import { BigNumber } from "ethers";
 import { stringifyBigNumProps } from "../../../api/swap/_utils";
+import { getLimitsSpanAttributes } from "../../../api/_utils";
+import { Token } from "../../../api/_dexes/types";
 
 describe("stringifyBigNumProps", () => {
   describe("BigNumber detection and conversion", () => {
@@ -224,6 +226,41 @@ describe("stringifyBigNumProps", () => {
       expect(result.checks.allowance.expected).toBe("689821235147287");
       expect(result.checks.balance.actual).toBe("689821235147287");
       expect(result.checks.balance.expected).toBe("689821235147287");
+    });
+  });
+});
+
+describe("getLimitsSpanAttributes", () => {
+  it("should return the correct attributes", () => {
+    const limits = {
+      minDeposit: "1000000000000000000",
+      maxDeposit: "100000000000000000000",
+      maxDepositInstant: "10000000000000000000",
+      maxDepositShortDelay: "50000000000000000000",
+    };
+    const inputToken: Token = {
+      address: "0x123",
+      symbol: "TST",
+      decimals: 18,
+      chainId: 1,
+    };
+    const tokenPriceUsd = 1.5;
+
+    const attributes = getLimitsSpanAttributes(
+      limits,
+      inputToken,
+      tokenPriceUsd
+    );
+
+    expect(attributes).toEqual({
+      "limits.minDeposit.token": 1,
+      "limits.minDeposit.usd": 1.5,
+      "limits.maxDeposit.token": 100,
+      "limits.maxDeposit.usd": 150,
+      "limits.maxDepositInstant.token": 10,
+      "limits.maxDepositInstant.usd": 15,
+      "limits.maxDepositShortDelay.token": 50,
+      "limits.maxDepositShortDelay.usd": 75,
     });
   });
 });

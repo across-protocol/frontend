@@ -10,8 +10,10 @@ import {
   BalancerSDK,
   BalancerNetworkConfig,
 } from "@balancer-labs/sdk";
-import axios, { AxiosError, AxiosRequestHeaders } from "axios";
 import { BigNumber, BigNumberish, ethers, providers, utils } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+
 import {
   assert,
   coerce,
@@ -2718,4 +2720,43 @@ export function computeUtilizationPostRelay(
 
   if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
   return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
+}
+
+export function getLimitsSpanAttributes(
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+  },
+  inputToken: Token,
+  tokenPriceUsd: number
+) {
+  const { minDeposit, maxDeposit, maxDepositInstant, maxDepositShortDelay } =
+    limits;
+
+  const attributes: Record<string, string | number> = {};
+
+  const limitsToProcess = {
+    minDeposit,
+    maxDeposit,
+    maxDepositInstant,
+    maxDepositShortDelay,
+  };
+
+  for (const [key, value] of Object.entries(limitsToProcess)) {
+    const valueBn = BigNumber.from(value);
+    const valueUsd = valueBn
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
+      .div(parseUnits("1", inputToken.decimals));
+
+    attributes[`limits.${key}.token`] = parseFloat(
+      ethers.utils.formatUnits(valueBn, inputToken.decimals)
+    );
+    attributes[`limits.${key}.usd`] = parseFloat(
+      ethers.utils.formatUnits(valueUsd, 18)
+    );
+  }
+
+  return attributes;
 }
