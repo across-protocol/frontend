@@ -282,7 +282,6 @@ const handler = async (
           ...inputToken,
           chainId: Number(computedOriginChainId),
         });
-        logger.info("Tokens", tokens);
         logger.debug({
           at: "SuggestedFees",
           message: `Tokens: ${JSON.stringify(tokens)}`,
