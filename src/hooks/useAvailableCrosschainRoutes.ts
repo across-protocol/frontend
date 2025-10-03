@@ -143,13 +143,13 @@ export default function useAvailableCrosschainRoutes(
               ? otherToken!.symbol
               : token.symbol;
 
-            let isReachable = true;
+            let isReachable = false;
 
-            // For same chain (swap), always reachable
+            // For same chain, not reachable (no swaps allowed on same chain)
             if (fromChain === toChain) {
-              isReachable = true;
+              isReachable = false;
             } else {
-              // For bridge, check if there's an explicit bridge route
+              // For different chains, check if there's an explicit bridge route
               const bridgeRoutes = config.filterRoutes({
                 fromChain,
                 toChain,
