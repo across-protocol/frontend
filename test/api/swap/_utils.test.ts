@@ -338,6 +338,7 @@ describe("getLimitsSpanAttributes", () => {
   });
 
   it("should return valid attributes with real prices", async () => {
+    console.log("Starting Test");
     const wethToken: Token = {
       address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       symbol: "WETH",
@@ -351,7 +352,7 @@ describe("getLimitsSpanAttributes", () => {
       maxDepositInstant: "10000000000000000000", // 10 WETH
       maxDepositShortDelay: "50000000000000000000", // 50 WETH
     };
-
+    console.log("Making call");
     const attributes = await getLimitsSpanAttributes(wethLimits, wethToken);
     expect(typeof attributes["limits.minDeposit.token"]).toBe("number");
     expect(attributes["limits.minDeposit.token"]).toBeGreaterThan(0);
