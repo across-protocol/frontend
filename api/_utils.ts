@@ -980,6 +980,7 @@ export const getCachedTokenPrice = async (params: {
     fallbackResolver,
   } = params;
   const baseUrl = `${resolveVercelEndpoint()}/api/coingecko`;
+  console.log("Base URL:", baseUrl);
   let price = 0;
 
   if (symbol) {
