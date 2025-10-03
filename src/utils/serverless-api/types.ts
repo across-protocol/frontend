@@ -8,6 +8,7 @@ import { PoolsUserApiCall } from "./prod/pools-user";
 import { SwapApprovalApiCall } from "./prod/swap-approval";
 import { SwapChainsApiCall } from "./prod/swap-chains";
 import { SwapTokensApiCall } from "./prod/swap-tokens";
+import { UserTokenBalancesCall } from "./prod/user-token-balances";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -28,6 +29,7 @@ export type ServerlessAPIEndpoints = {
   swapApproval: SwapApprovalApiCall;
   swapChains: SwapChainsApiCall;
   swapTokens: SwapTokensApiCall;
+  userTokenBalances: UserTokenBalancesCall;
 };
 
 export type RewardsApiFunction =
@@ -133,3 +135,22 @@ export type SwapToken = {
   logoUrl?: string;
   priceUsd: string | null;
 };
+
+export interface UserTokenBalance {
+  address: string;
+  balance: string;
+}
+
+export interface ChainBalances {
+  chainId: string;
+  balances: UserTokenBalance[];
+}
+
+export interface UserTokenBalancesResponse {
+  account: string;
+  balances: ChainBalances[];
+}
+
+export type UserTokenBalancesApiCall = (
+  account: string
+) => Promise<UserTokenBalancesResponse>;

@@ -2,12 +2,12 @@ import { useMemo } from "react";
 import useAvailableCrosschainRoutes, {
   LifiToken,
 } from "./useAvailableCrosschainRoutes";
-import useTokenBalancesOnChain from "./useTokenBalancesOnChain";
+import { useUserTokenBalances } from "./useUserTokenBalances";
 import { compareAddressesSimple } from "utils";
 import { BigNumber, utils } from "ethers";
 
 export default function useEnrichedCrosschainBalances() {
-  const tokenBalances = useTokenBalancesOnChain();
+  const tokenBalances = useUserTokenBalances();
   const availableCrosschainRoutes = useAvailableCrosschainRoutes();
 
   return useMemo(() => {
@@ -18,8 +18,8 @@ export default function useEnrichedCrosschainBalances() {
 
     return chains.reduce(
       (acc, chainId) => {
-        const balancesForChain = tokenBalances.data?.find(
-          (t) => t.chainId === Number(chainId)
+        const balancesForChain = tokenBalances.data?.balances.find(
+          (t) => t.chainId === String(chainId)
         );
 
         const tokens = availableCrosschainRoutes.data![Number(chainId)];
@@ -30,14 +30,21 @@ export default function useEnrichedCrosschainBalances() {
             );
             return {
               ...t,
-              balance: balance?.balance ?? BigNumber.from(0),
+              balance: balance?.balance
+                ? BigNumber.from(balance.balance)
+                : BigNumber.from(0),
               balanceUsd:
                 balance?.balance && t
-                  ? Number(utils.formatUnits(balance.balance, t.decimals)) *
-                    Number(t.priceUSD)
+                  ? Number(
+                      utils.formatUnits(
+                        BigNumber.from(balance.balance),
+                        t.decimals
+                      )
+                    ) * Number(t.priceUSD)
                   : 0,
             };
           })
+          // TODO: consider removing
           // Filter out tokens that don't have a logoURI
           .filter((t) => t.logoURI !== undefined);
 
