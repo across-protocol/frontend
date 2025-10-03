@@ -282,9 +282,22 @@ const handler = async (
           ...inputToken,
           chainId: Number(computedOriginChainId),
         });
-        console.log("Tokens", tokens);
+        logger.info("Tokens", tokens);
+        logger.debug({
+          at: "SuggestedFees",
+          message: `Tokens: ${JSON.stringify(tokens)}`,
+          query: request.query,
+          body: request.body,
+          requestId,
+        });
       } catch (e) {
-        console.log("Error fetching limits: ", JSON.stringify(e));
+        logger.error({
+          at: "SuggestedFees",
+          message: `Error fetching limits: ${JSON.stringify(e)}`,
+          query: request.query,
+          body: request.body,
+          requestId,
+        });
       }
 
       // setLimitsSpanAttributes(
