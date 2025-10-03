@@ -71,6 +71,10 @@ function roundAmountToSharedDecimals(
 
 /**
  * Internal helper to get OFT quote from contracts
+ * @note This function is designed for input-based quotes (specify input amount, get output amount).
+ * Currently works for both input-based and output-based flows because supported tokens (USDT, WBTC) have 0 OFT fees.
+ * If we ever add tokens with non-zero OFT fees, we need to refactor this function to handle output-based quotes.
+ *
  * @param inputToken source token
  * @param outputToken destination token
  * @param inputAmount amount to send
