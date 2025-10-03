@@ -231,7 +231,7 @@ describe("stringifyBigNumProps", () => {
 });
 
 describe("getLimitsSpanAttributes", () => {
-  it("should return the correct attributes with mocked prices", async () => {
+  test("should return the correct attributes with mocked prices", async () => {
     const mockGetCachedTokenPrice = async (params: {
       symbol?: string;
     }): Promise<number> => {
@@ -337,7 +337,7 @@ describe("getLimitsSpanAttributes", () => {
     });
   });
 
-  it("should return valid attributes with real prices", async () => {
+  test("should return valid attributes with real prices", async () => {
     console.log("Starting Test");
     const wethToken: Token = {
       address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
