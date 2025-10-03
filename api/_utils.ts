@@ -88,6 +88,7 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
+import { Span } from "@opentelemetry/api";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -2740,7 +2741,7 @@ export async function getLimitsSpanAttributes(
     chainId: inputToken.chainId,
     fallbackResolver: "lifi",
   });
-  const attributes: Record<string, string | number> = {};
+  const attributes: Record<string, number> = {};
 
   for (const [key, value] of Object.entries(limits)) {
     const valueBn = BigNumber.from(value);
@@ -2756,4 +2757,13 @@ export async function getLimitsSpanAttributes(
     );
   }
   return attributes;
+}
+
+export function setLimitsSpanAttributes(
+  limits: Record<string, number>,
+  span: Span
+) {
+  for (const [key, value] of Object.entries(limits)) {
+    span.setAttribute(key, value.toString());
+  }
 }

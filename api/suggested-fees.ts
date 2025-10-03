@@ -30,6 +30,7 @@ import {
   computeUtilizationPostRelay,
   PooledToken,
   getLimitsSpanAttributes,
+  setLimitsSpanAttributes,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -276,12 +277,18 @@ const handler = async (
         ),
       ]);
 
-      // span.setAttributes(
+      await getLimitsSpanAttributes(limits, {
+        ...inputToken,
+        chainId: Number(computedOriginChainId),
+      });
+
+      // setLimitsSpanAttributes(
       //   await getLimitsSpanAttributes(limits, {
       //     ...inputToken,
       //     chainId: Number(computedOriginChainId),
-      //   })
-      // );
+      //   }),
+      //   span
+      //   )
 
       const nextUt = computeUtilizationPostRelay(
         pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
