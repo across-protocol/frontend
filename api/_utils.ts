@@ -2755,6 +2755,5 @@ export async function getLimitsSpanAttributes(
       ethers.utils.formatUnits(valueUsd, 18)
     );
   }
-
   return attributes;
 }
