@@ -276,12 +276,12 @@ const handler = async (
         ),
       ]);
 
-      span.setAttributes(
-        await getLimitsSpanAttributes(limits, {
-          ...inputToken,
-          chainId: Number(computedOriginChainId),
-        })
-      );
+      // span.setAttributes(
+      //   await getLimitsSpanAttributes(limits, {
+      //     ...inputToken,
+      //     chainId: Number(computedOriginChainId),
+      //   })
+      // );
 
       const nextUt = computeUtilizationPostRelay(
         pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
