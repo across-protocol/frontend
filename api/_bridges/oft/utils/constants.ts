@@ -14,11 +14,10 @@ export const OFT_MESSENGERS: Record<
     [CHAIN_IDs.MAINNET]: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
     [CHAIN_IDs.ARBITRUM]: "0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92",
     [CHAIN_IDs.POLYGON]: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
-    [CHAIN_IDs.OPTIMISM]: "0xF03b4d9AC1D5d1E7c4cEf54C2A313b9fe051A0aD",
     // [CHAIN_IDs.UNICHAIN]: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3", // TODO: Enable when we have intents support for Unichain USDT
     // [CHAIN_IDs.INK]: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65", // TODO: Enable when we have intents support for Ink USDT
     [CHAIN_IDs.HYPEREVM]: "0x904861a24F30EC96ea7CFC3bE9EA4B476d237e98",
-    [CHAIN_IDs.PLASMA]: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+    [CHAIN_IDs.PLASMA]: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
   },
   // Source: https://docs.layerzero.network/v2/deployments & https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list?symbols=WBTC
   //  NOTE: Enable when we have intents support for Soneium, Unichain and BSC
