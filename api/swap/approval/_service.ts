@@ -36,7 +36,6 @@ export async function handleApprovalSwap(
 ) {
   // This handler supports both GET and POST requests.
   // For GET requests, we expect the body to be empty.
-  // TODO: Allow only POST requests
   if (request.method !== "POST" && request.body) {
     throw new InputError({
       message: "POST method required when request.body is provided",
@@ -148,7 +147,10 @@ export async function handleApprovalSwap(
   let allowance = BigNumber.from(0);
   let balance = BigNumber.from(0);
   if (!skipChecks) {
-    if (crossSwapTx.ecosystem === "evm") {
+    if (
+      crossSwapTx.ecosystem === "evm" &&
+      bridgeStrategy.originTxNeedsAllowance
+    ) {
       const checks = await getBalanceAndAllowance({
         chainId: originChainId,
         tokenAddress: inputTokenAddress,
@@ -157,7 +159,11 @@ export async function handleApprovalSwap(
       });
       allowance = checks.allowance;
       balance = checks.balance;
-    } else if (crossSwapTx.ecosystem === "svm") {
+    } else if (
+      crossSwapTx.ecosystem === "svm" ||
+      (crossSwapTx.ecosystem === "evm" &&
+        !bridgeStrategy.originTxNeedsAllowance)
+    ) {
       const _balance = await getBalance(
         originChainId,
         crossSwap.depositor,

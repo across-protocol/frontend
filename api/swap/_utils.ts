@@ -705,11 +705,11 @@ export async function calculateSwapFees(params: {
       parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
       appFeeTokenPriceUsd;
 
-    const bridgeFees = bridgeQuote.suggestedFees;
-    const relayerCapital = bridgeFees.relayerCapitalFee;
-    const destinationGas = bridgeFees.relayerGasFee;
-    const lpFee = bridgeFees.lpFee;
-    const relayerTotal = bridgeFees.totalRelayFee;
+    const bridgeFees = bridgeQuote.fees;
+    const relayerCapital = bridgeFees.relayerCapital;
+    const destinationGas = bridgeFees.relayerGas;
+    const lpFee = bridgeFees.lp;
+    const relayerTotal = bridgeFees.totalRelay;
 
     const originGasToken = getNativeTokenInfo(originChainId);
     const destinationGasToken = getNativeTokenInfo(
@@ -960,12 +960,7 @@ export async function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
-        fees: {
-          totalRelay: params.bridgeQuote.suggestedFees.totalRelayFee,
-          relayerCapital: params.bridgeQuote.suggestedFees.relayerCapitalFee,
-          relayerGas: params.bridgeQuote.suggestedFees.relayerGasFee,
-          lp: params.bridgeQuote.suggestedFees.lpFee,
-        },
+        fees: params.bridgeQuote.fees,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -1023,7 +1018,7 @@ export async function buildBaseSwapResponseJson(params: {
     maxInputAmount,
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
-    expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
+    expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
   });

@@ -110,6 +110,12 @@ export type SwapQuote = {
   };
 };
 
+type FeeComponent = {
+  total: BigNumber;
+  pct: BigNumber;
+  token: Token;
+};
+
 export type CrossSwapQuotes = {
   crossSwap: CrossSwap;
   bridgeQuote: {
@@ -119,8 +125,22 @@ export type CrossSwapQuotes = {
     inputAmount: BigNumber;
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
-    suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
-  };
+    estimatedFillTimeSec: number;
+    fees: {
+      totalRelay: FeeComponent;
+      relayerCapital: FeeComponent;
+      relayerGas: FeeComponent;
+      lp: FeeComponent;
+    };
+  } & (
+    | {
+        provider: "across";
+        suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
+      }
+    | {
+        provider: "hypercore" | "cctp";
+      }
+  );
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
   contracts: {
