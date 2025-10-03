@@ -980,7 +980,6 @@ export const getCachedTokenPrice = async (params: {
     fallbackResolver,
   } = params;
   const baseUrl = `${resolveVercelEndpoint()}/api/coingecko`;
-  console.log("Base URL:", baseUrl);
   let price = 0;
 
   if (symbol) {
@@ -2734,7 +2733,6 @@ export async function getLimitsSpanAttributes(
   options?: { fetchTokenPrice?: typeof getCachedTokenPrice }
 ) {
   const fetchTokenPrice = options?.fetchTokenPrice || getCachedTokenPrice;
-  console.log("Starting fetch");
   const tokenPriceUsd = await fetchTokenPrice({
     tokenAddress: inputToken.address,
     symbol: inputToken.symbol,
@@ -2742,7 +2740,6 @@ export async function getLimitsSpanAttributes(
     chainId: inputToken.chainId,
     fallbackResolver: "lifi",
   });
-  console.log("Finished fetch");
   const attributes: Record<string, string | number> = {};
 
   for (const [key, value] of Object.entries(limits)) {
