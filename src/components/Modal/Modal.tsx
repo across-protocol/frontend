@@ -1,14 +1,16 @@
 import usePageScrollLock from "hooks/usePageScrollLock";
+import { useTabIndexManager } from "hooks/useTabIndexManager";
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
+  CloseButton,
   ElementRowDivider,
   ModalContentWrapper,
-  StyledExitIcon,
   Title,
   TitleAndExitWrapper,
   Wrapper,
 } from "./Modal.styles";
+import { ReactComponent as ExitIcon } from "assets/icons/cross.svg";
 
 type ModalDirectionOrientation = "middle" | "top" | "bottom";
 export type ModalDirection = {
@@ -37,6 +39,7 @@ export type ModalProps = {
 
   children?: React.ReactNode;
   titleBorder?: boolean;
+  className?: string;
 };
 
 const Modal = ({
@@ -52,6 +55,7 @@ const Modal = ({
   topYOffset,
   bottomYOffset,
   padding,
+  className,
   "data-cy": dataCy,
   titleBorder = false,
 }: ModalProps) => {
@@ -76,6 +80,9 @@ const Modal = ({
   const exitAnimationTimeoutId = useRef<number>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
   const { lockScroll, unlockScroll } = usePageScrollLock();
+
+  // Manage tab indices when modal is open - only elements inside modal will be focusable
+  useTabIndexManager(!!isOpen, modalContentRef);
 
   const offModalClickHandler = (event: React.MouseEvent<HTMLElement>) => {
     if (
@@ -145,6 +152,7 @@ const Modal = ({
             topYOffset={topYOffset}
             bottomYOffset={bottomYOffset}
             padding={padding ?? "normal"}
+            className={className}
           >
             <TitleAndExitWrapper>
               {typeof title === "string" ? (
@@ -153,7 +161,12 @@ const Modal = ({
                 <div>{title}</div>
               )}
 
-              <StyledExitIcon onClick={() => externalModalExitHandler()} />
+              <CloseButton
+                tabIndex={1}
+                onClick={() => externalModalExitHandler()}
+              >
+                <ExitIcon />
+              </CloseButton>
             </TitleAndExitWrapper>
             {titleBorder && <ElementRowDivider />}
             {children}

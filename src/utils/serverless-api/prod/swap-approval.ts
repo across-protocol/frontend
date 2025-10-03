@@ -30,6 +30,7 @@ export type SwapApprovalApiResponse = {
     };
   };
   approvalTxns: {
+    chainId: number;
     to: string;
     data: string;
   }[];
@@ -41,6 +42,10 @@ export type SwapApprovalApiResponse = {
       outputAmount: string;
       minOutputAmount: string;
       maxInputAmount: string;
+      swapProvider: {
+        name: string;
+        sources: string[];
+      };
     };
     bridge: {
       inputAmount: string;
@@ -73,6 +78,10 @@ export type SwapApprovalApiResponse = {
       maxInputAmount: string;
       outputAmount: string;
       minOutputAmount: string;
+      swapProvider: {
+        name: string;
+        sources: string[];
+      };
     };
   };
   refundToken: SwapApiToken;
@@ -85,7 +94,7 @@ export type SwapApprovalApiResponse = {
     chainId: number;
     to: string;
     data: string;
-    value: string;
+    value?: string;
     gas?: string;
     maxFeePerGas?: string;
     maxPriorityFeePerGas?: string;
@@ -146,6 +155,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
             maxInputAmount: BigNumber.from(
               result.steps.originSwap.maxInputAmount
             ),
+            swapProvider: result.steps.originSwap.swapProvider,
           }
         : undefined,
       bridge: {
@@ -190,6 +200,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
             minOutputAmount: BigNumber.from(
               result.steps.destinationSwap.minOutputAmount
             ),
+            swapProvider: result.steps.destinationSwap.swapProvider,
           }
         : undefined,
     },
@@ -203,7 +214,9 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
       chainId: result.swapTx.chainId,
       to: result.swapTx.to,
       data: result.swapTx.data,
-      value: BigNumber.from(result.swapTx.value || "0"),
+      value: result.swapTx.value
+        ? BigNumber.from(result.swapTx.value)
+        : undefined,
       gas: result.swapTx.gas ? BigNumber.from(result.swapTx.gas) : undefined,
       maxFeePerGas: result.swapTx.maxFeePerGas
         ? BigNumber.from(result.swapTx.maxFeePerGas)
