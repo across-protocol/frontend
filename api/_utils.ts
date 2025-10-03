@@ -10,8 +10,10 @@ import {
   BalancerSDK,
   BalancerNetworkConfig,
 } from "@balancer-labs/sdk";
-import axios, { AxiosError, AxiosRequestHeaders } from "axios";
 import { BigNumber, BigNumberish, ethers, providers, utils } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+
 import {
   assert,
   coerce,
@@ -86,6 +88,7 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
+import { Span } from "@opentelemetry/api";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -2718,4 +2721,49 @@ export function computeUtilizationPostRelay(
 
   if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
   return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
+}
+
+export async function getLimitsSpanAttributes(
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+  },
+  inputToken: Token,
+  options?: { fetchTokenPrice?: typeof getCachedTokenPrice }
+) {
+  const fetchTokenPrice = options?.fetchTokenPrice || getCachedTokenPrice;
+  const tokenPriceUsd = await fetchTokenPrice({
+    tokenAddress: inputToken.address,
+    symbol: inputToken.symbol,
+    baseCurrency: "usd",
+    chainId: inputToken.chainId,
+    fallbackResolver: "lifi",
+  });
+  const attributes: Record<string, number> = {};
+
+  for (const [key, value] of Object.entries(limits)) {
+    const valueBn = BigNumber.from(value);
+    const valueUsd = valueBn
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
+      .div(parseUnits("1", inputToken.decimals));
+
+    attributes[`limits.${key}.token`] = parseFloat(
+      ethers.utils.formatUnits(valueBn, inputToken.decimals)
+    );
+    attributes[`limits.${key}.usd`] = parseFloat(
+      ethers.utils.formatUnits(valueUsd, 18)
+    );
+  }
+  return attributes;
+}
+
+export function setLimitsSpanAttributes(
+  limits: Record<string, number>,
+  span: Span
+) {
+  for (const [key, value] of Object.entries(limits)) {
+    span.setAttribute(key, value.toString());
+  }
 }

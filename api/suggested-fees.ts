@@ -29,6 +29,8 @@ import {
   ConvertDecimals,
   computeUtilizationPostRelay,
   PooledToken,
+  getLimitsSpanAttributes,
+  setLimitsSpanAttributes,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -274,6 +276,22 @@ const handler = async (
           allowUnmatchedDecimals
         ),
       ]);
+
+      setLimitsSpanAttributes(
+        await getLimitsSpanAttributes(
+          {
+            maxDeposit: limits.maxDeposit,
+            maxDepositInstant: limits.maxDepositInstant,
+            minDeposit: limits.minDeposit,
+            maxDepositShortDelay: limits.recommendedDepositInstant,
+          },
+          {
+            ...inputToken,
+            chainId: Number(computedOriginChainId),
+          }
+        ),
+        span
+      );
 
       const nextUt = computeUtilizationPostRelay(
         pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
