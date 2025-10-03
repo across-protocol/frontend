@@ -277,35 +277,21 @@ const handler = async (
         ),
       ]);
 
-      try {
-        const tokens = await getLimitsSpanAttributes(limits, {
-          ...inputToken,
-          chainId: Number(computedOriginChainId),
-        });
-        logger.info({
-          at: "SuggestedFees",
-          message: `Tokens: ${JSON.stringify(tokens)}`,
-          query: request.query,
-          body: request.body,
-          requestId,
-        });
-      } catch (e) {
-        logger.info({
-          at: "SuggestedFees",
-          message: `Error fetching limits: ${JSON.stringify(e)}`,
-          query: request.query,
-          body: request.body,
-          requestId,
-        });
-      }
-
-      // setLimitsSpanAttributes(
-      //   await getLimitsSpanAttributes(limits, {
-      //     ...inputToken,
-      //     chainId: Number(computedOriginChainId),
-      //   }),
-      //   span
-      //   )
+      setLimitsSpanAttributes(
+        await getLimitsSpanAttributes(
+          {
+            maxDeposit: limits.maxDeposit,
+            maxDepositInstant: limits.maxDepositInstant,
+            minDeposit: limits.minDeposit,
+            maxDepositShortDelay: limits.recommendedDepositInstant,
+          },
+          {
+            ...inputToken,
+            chainId: Number(computedOriginChainId),
+          }
+        ),
+        span
+      );
 
       const nextUt = computeUtilizationPostRelay(
         pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
