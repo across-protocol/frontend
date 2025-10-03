@@ -44,6 +44,7 @@ const capabilities: BridgeCapabilities = {
  * Rounds the token amount down to the correct precision for OFT transfer.
  * The last (tokenDecimals - sharedDecimals) digits must be zero to prevent contract-side rounding.
  * Shared decimals is OFT's precision model where tokens use a common decimal precision across all chains.
+ * Docs: https://docs.layerzero.network/v2/concepts/technical-reference/oft-reference?utm_source=chatgpt.com#1-transferring-value-across-different-vms
  * @param amount amount to round
  * @param tokenSymbol symbol of the token we need to round decimals for
  * @param tokenDecimals decimals of the token
