@@ -365,11 +365,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       );
 
       // Get recipient address
-      const recipient =
-        crossSwap.recipient &&
-        crossSwap.recipient !== ethers.constants.AddressZero
-          ? crossSwap.recipient
-          : crossSwap.depositor;
+      const recipient = crossSwap.recipient;
 
       // Create SendParam struct
       const sendParam = createSendParamStruct({
@@ -396,7 +392,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       const callData = iface.encodeFunctionData("send", [
         sendParam,
         messagingFee, // MessagingFee struct
-        crossSwap.depositor, // refundAddress
+        crossSwap.refundAddress ?? crossSwap.depositor, // refundAddress
       ]);
 
       // Handle integrator ID and swap API marker tagging

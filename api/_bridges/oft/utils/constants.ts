@@ -3,8 +3,7 @@ import { CHAIN_IDs, CHAINS } from "../../../_constants";
 import { InvalidParamError } from "../../../_errors";
 import { toBytes32 } from "../../../_address";
 
-// OFT contract addresses per token per chain
-// These are the OFT adapter/upgradeable contract addresses that implement LayerZero OFT interface
+// OFT messenger contract addresses per token per chain
 export const OFT_MESSENGERS: Record<
   string,
   Record<number, string | undefined>
@@ -60,7 +59,7 @@ export const getOftOriginConfirmations = (chainId: number): number => {
   return OFT_ORIGIN_CONFIRMATIONS[chainId] ?? DEFAULT_OFT_ORIGIN_CONFIRMATIONS;
 };
 
-// Get OFT contract address for a specific token on a specific chain
+// Get OFT messenger contract address for a specific token on a specific chain
 export const getOftMessengerForToken = (
   tokenSymbol: string,
   chainId: number
