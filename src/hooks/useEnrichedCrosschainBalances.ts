@@ -11,21 +11,21 @@ export default function useEnrichedCrosschainBalances() {
   const availableCrosschainRoutes = useAvailableCrosschainRoutes();
 
   return useMemo(() => {
-    if (availableCrosschainRoutes.isLoading) {
+    if (availableCrosschainRoutes.isLoading || tokenBalances.isLoading) {
       return {};
     }
     const chains = Object.keys(availableCrosschainRoutes.data || {});
 
     return chains.reduce(
       (acc, chainId) => {
-        const balancesForChain = tokenBalances.find(
-          (t) => t.isSuccess && t.data.chainId === Number(chainId)
+        const balancesForChain = tokenBalances.data?.find(
+          (t) => t.chainId === Number(chainId)
         );
 
         const tokens = availableCrosschainRoutes.data![Number(chainId)];
         const enrichedTokens = tokens
           .map((t) => {
-            const balance = balancesForChain?.data?.balances.find((b) =>
+            const balance = balancesForChain?.balances.find((b) =>
               compareAddressesSimple(b.address, t.address)
             );
             return {

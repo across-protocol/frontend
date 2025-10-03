@@ -1,68 +1,57 @@
 import { useConnection } from "./useConnection";
-import { CHAIN_IDs, MAINNET_CHAIN_IDs } from "@across-protocol/constants";
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
-const CHAIN_TO_ALCHEMY = {
-  [CHAIN_IDs.MAINNET]: "eth-mainnet",
-  [CHAIN_IDs.OPTIMISM]: "opt-mainnet",
-  [CHAIN_IDs.POLYGON]: "polygon-mainnet",
-  [CHAIN_IDs.BASE]: "base-mainnet",
-  [CHAIN_IDs.LINEA]: "linea-mainnet",
-  [CHAIN_IDs.ARBITRUM]: "arb-mainnet",
+type TokenBalance = {
+  address: string;
+  balance: BigNumber;
 };
 
-// TODO: delete this, move to serverless /batch-account-balance
-const getAlchemyRpcUrl = (chainId: number) => {
-  const chain = CHAIN_TO_ALCHEMY[chainId];
-  return `https://${chain}.g.alchemy.com/v2/${process.env.REACT_APP_ALCHEMY_KEY}`;
+type ChainBalances = {
+  chainId: number;
+  balances: TokenBalance[];
+};
+
+type UserTokenBalancesResponse = {
+  account: string;
+  balances: Array<{
+    chainId: string;
+    balances: Array<{
+      address: string;
+      balance: string;
+    }>;
+  }>;
 };
 
 export default function useTokenBalancesOnChain() {
   const { account } = useConnection();
-  const chainIdsAvailable = Object.values(MAINNET_CHAIN_IDs)
-    .sort((a, b) => a - b)
-    .filter((chainId) => !!CHAIN_TO_ALCHEMY[chainId]);
 
-  return useQueries({
-    queries: chainIdsAvailable.map((chainId) => ({
-      queryKey: ["tokenBalancesOnChain", chainId],
-      enabled: account !== undefined,
-      queryFn: async () => {
-        const rpcUrl = getAlchemyRpcUrl(chainId);
+  return useQuery({
+    queryKey: ["userTokenBalances", account],
+    queryFn: async (): Promise<ChainBalances[]> => {
+      const response = await fetch(
+        `/api/user-token-balances?account=${account}`
+      );
 
-        const balances = await fetch(rpcUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: 1,
-            method: "alchemy_getTokenBalances",
-            params: [account],
-          }),
-        });
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch token balances: ${response.statusText}`
+        );
+      }
 
-        const data = await balances.json();
+      const data: UserTokenBalancesResponse = await response.json();
 
-        return {
-          chainId,
-          balances: (
-            data.result.tokenBalances as {
-              contractAddress: string;
-              tokenBalance: string;
-            }[]
-          )
-            .filter(
-              (t) => !!t.tokenBalance && BigNumber.from(t.tokenBalance).gt(0)
-            )
-            .map((t) => ({
-              address: t.contractAddress,
-              balance: BigNumber.from(t.tokenBalance),
-            })),
-        };
-      },
-    })),
+      // Convert string balances back to BigNumber and transform the response
+      return data.balances.map(({ chainId, balances }) => ({
+        chainId: Number(chainId),
+        balances: balances.map(({ address, balance }) => ({
+          address,
+          balance: BigNumber.from(balance ?? "0"),
+        })),
+      }));
+    },
+    enabled: !!account,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    staleTime: 3 * 60 * 1000, // Consider data stale after 3 minutes
   });
 }
