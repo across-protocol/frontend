@@ -43,6 +43,7 @@ const capabilities: BridgeCapabilities = {
 /**
  * Rounds the token amount down to the correct precision for OFT transfer.
  * The last (tokenDecimals - sharedDecimals) digits must be zero to prevent contract-side rounding.
+ * Shared decimals is OFT's precision model where tokens use a common decimal precision across all chains.
  * @param amount amount to round
  * @param tokenSymbol symbol of the token we need to round decimals for
  * @param tokenDecimals decimals of the token
@@ -126,8 +127,9 @@ async function getQuote(params: {
   const [, , oftReceipt] = oftQuoteResult;
   const nativeFee = BigNumber.from(messagingFee.nativeFee);
 
-  // amountReceivedLD is in origin chain decimals, convert to output token decimals
+  // LD = Local Decimals - amounts in the input token's decimal precision
   const amountReceivedLD = BigNumber.from(oftReceipt.amountReceivedLD);
+  // Convert amountReceivedLD to output token decimals
   const outputAmount = ConvertDecimals(
     inputToken.decimals,
     outputToken.decimals
