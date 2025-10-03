@@ -308,7 +308,7 @@ export const validateDepositMessage = async (
     const isRecipientAContract =
       getStaticIsContract(destinationChainId, recipient) ||
       (await isContractCache(destinationChainId, recipient).get());
-    if (!isRecipientAContract) {
+    if (!isRecipientAContract && sdk.utils.chainIsEvm(destinationChainId)) {
       throw new InvalidParamError({
         message: "Recipient must be a contract when a message is provided",
         param: "recipient",
