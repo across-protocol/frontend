@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-09-12T16:07:26.238Z
+// Generated on 2025-09-29T08:09:29.218Z
 // This file contains available liquidity sources for 0x DEX integration
 
 export const SOURCES = {
@@ -76,6 +76,7 @@ export const SOURCES = {
       { key: "Maverick_V2", names: ["maverick_v2", "maverick"] },
       { key: "Nomiswap_Stable", names: ["nomiswap_stable"] },
       { key: "Orion_V2", names: ["orion_v2", "orion"] },
+      { key: "PancakeSwap_Infinity_CL", names: ["pancakeswap_infinity_cl"] },
       { key: "PancakeSwap_Stable", names: ["pancakeswap_stable"] },
       { key: "PancakeSwap_V2", names: ["pancakeswap_v2", "pancakeswap"] },
       { key: "PancakeSwap_V3", names: ["pancakeswap_v3", "pancakeswap"] },
@@ -181,6 +182,14 @@ export const SOURCES = {
       { key: "WOOFi_V2", names: ["woofi_v2", "woofi"] },
       { key: "Wrapped_BLT", names: ["wrapped_blt"] },
     ],
+    "9745": [
+      { key: "0x_RFQ", names: ["0x_rfq"] },
+      { key: "Balancer_V3", names: ["balancer_v3", "balancer"] },
+      { key: "Curve", names: ["curve"] },
+      { key: "DYORSwap", names: ["dyorswap"] },
+      { key: "Fluid", names: ["fluid"] },
+      { key: "Uniswap_V3", names: ["uniswap_v3", "uniswap"] },
+    ],
     "34443": [
       { key: "Balancer_V2", names: ["balancer_v2", "balancer"] },
       { key: "DackieSwap_V3", names: ["dackieswap_v3", "dackieswap"] },
@@ -238,6 +247,7 @@ export const SOURCES = {
     "59144": [
       { key: "Dyson", names: ["dyson"] },
       { key: "EchoDEX_V3", names: ["echodex_v3", "echodex"] },
+      { key: "Etherex", names: ["etherex"] },
       { key: "IziSwap", names: ["iziswap"] },
       { key: "Lynex", names: ["lynex"] },
       { key: "Nile", names: ["nile"] },
@@ -360,6 +370,7 @@ export const ALL_SOURCES = [
   "echodex_v3",
   "ekubo",
   "equalizer",
+  "etherex",
   "fenix",
   "fenix_cl",
   "fenix_v2",
@@ -402,6 +413,7 @@ export const ALL_SOURCES = [
   "orion_v2",
   "overnight",
   "pancakeswap",
+  "pancakeswap_infinity_cl",
   "pancakeswap_stable",
   "pancakeswap_v2",
   "pancakeswap_v3",

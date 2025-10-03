@@ -487,6 +487,11 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not extract 'BaseDepositDataStruct' for non-Across bridge quotes"
+    );
+  }
   const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
@@ -891,7 +896,7 @@ export function isValidSource(
   sources: DexSources
 ) {
   const sourceToCheck = _source.toLowerCase();
-  return sources.sources[chainId].some((source) =>
+  return sources.sources[chainId]?.some((source) =>
     source.names.includes(sourceToCheck)
   );
 }
