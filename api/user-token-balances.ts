@@ -21,43 +21,111 @@ const fetchTokenBalancesForChain = async (
   chainId: number;
   balances: Array<{ address: string; balance: string }>;
 }> => {
+  const logger = getLogger();
   const rpcUrl = getAlchemyRpcFromConfigJson(chainId);
 
   if (!rpcUrl) {
-    throw new Error(`No Alchemy RPC URL found for chain ${chainId}`);
+    logger.warn({
+      at: "fetchTokenBalancesForChain",
+      message: "No Alchemy RPC URL found for chain, returning empty balances",
+      chainId,
+    });
+    return {
+      chainId,
+      balances: [],
+    };
   }
 
-  const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  try {
+    const requestBody = {
       jsonrpc: "2.0",
       id: 1,
       method: "alchemy_getTokenBalances",
       params: [account],
-    }),
-  });
+    };
 
-  const data = await response.json();
+    logger.debug({
+      at: "fetchTokenBalancesForChain",
+      message: "Making request to Alchemy API",
+      chainId,
+      account,
+      rpcUrl,
+    });
 
-  const balances = (
-    data.result.tokenBalances as {
-      contractAddress: string;
-      tokenBalance: string;
-    }[]
-  )
-    .filter((t) => !!t.tokenBalance && BigNumber.from(t.tokenBalance).gt(0))
-    .map((t) => ({
-      address: t.contractAddress,
-      balance: BigNumber.from(t.tokenBalance).toString(),
-    }));
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-  return {
-    chainId,
-    balances,
-  };
+    if (!response.ok) {
+      logger.warn({
+        at: "fetchTokenBalancesForChain",
+        message: "HTTP error from Alchemy API, returning empty balances",
+        chainId,
+        status: response.status,
+        statusText: response.statusText,
+      });
+      return {
+        chainId,
+        balances: [],
+      };
+    }
+
+    const data = await response.json();
+
+    logger.debug({
+      at: "fetchTokenBalancesForChain",
+      message: "Received response from Alchemy API",
+      chainId,
+      responseData: data,
+    });
+
+    // Validate the response structure
+    if (!data || !data.result || !data.result.tokenBalances) {
+      logger.warn({
+        at: "fetchTokenBalancesForChain",
+        message: "Invalid response from Alchemy API, returning empty balances",
+        chainId,
+        responseData: data,
+      });
+      return {
+        chainId,
+        balances: [],
+      };
+    }
+
+    const balances = (
+      data.result.tokenBalances as {
+        contractAddress: string;
+        tokenBalance: string;
+      }[]
+    )
+      .filter((t) => !!t.tokenBalance && BigNumber.from(t.tokenBalance).gt(0))
+      .map((t) => ({
+        address: t.contractAddress,
+        balance: BigNumber.from(t.tokenBalance).toString(),
+      }));
+
+    return {
+      chainId,
+      balances,
+    };
+  } catch (error) {
+    logger.warn({
+      at: "fetchTokenBalancesForChain",
+      message:
+        "Error fetching token balances from Alchemy API, returning empty balances",
+      chainId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      chainId,
+      balances: [],
+    };
+  }
 };
 
 const handler = async (
