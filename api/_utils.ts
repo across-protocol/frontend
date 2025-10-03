@@ -2739,6 +2739,7 @@ export async function getLimitsSpanAttributes(
     tokenAddress: inputToken.address,
     symbol: inputToken.symbol,
     baseCurrency: "usd",
+    chainId: inputToken.chainId,
     fallbackResolver: "lifi",
   });
   console.log("Finished fetch");
