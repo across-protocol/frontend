@@ -2733,25 +2733,20 @@ export async function getLimitsSpanAttributes(
   inputToken: Token,
   options?: { fetchTokenPrice?: typeof getCachedTokenPrice }
 ) {
-  console.log("getLimitsSpanAttributes Start: ", limits, inputToken);
   const fetchTokenPrice = options?.fetchTokenPrice || getCachedTokenPrice;
-  let tokenPriceUsd = 1;
-  try {
-    tokenPriceUsd = await fetchTokenPrice({
-      tokenAddress: inputToken.address,
-      symbol: inputToken.symbol,
-      baseCurrency: "usd",
-      fallbackResolver: "lifi",
-    });
-  } catch (e) {
-    console.error("getLimitsSpanAttributes Error: ", e);
-  }
+  const tokenPriceUsd = await fetchTokenPrice({
+    tokenAddress: inputToken.address,
+    symbol: inputToken.symbol,
+    baseCurrency: "usd",
+    chainId: inputToken.chainId,
+    fallbackResolver: "lifi",
+  });
   const attributes: Record<string, number> = {};
 
   for (const [key, value] of Object.entries(limits)) {
     const valueBn = BigNumber.from(value);
     const valueUsd = valueBn
-      .mul(parseUnits(tokenPriceUsd?.toString(), 18))
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
       .div(parseUnits("1", inputToken.decimals));
 
     attributes[`limits.${key}.token`] = parseFloat(

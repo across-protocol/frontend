@@ -277,10 +277,15 @@ const handler = async (
         ),
       ]);
 
-      await getLimitsSpanAttributes(limits, {
-        ...inputToken,
-        chainId: Number(computedOriginChainId),
-      });
+      try {
+        const tokens = await getLimitsSpanAttributes(limits, {
+          ...inputToken,
+          chainId: Number(computedOriginChainId),
+        });
+        console.log("Tokens", tokens);
+      } catch (e) {
+        console.log("Error fetching limits: ", JSON.stringify(e));
+      }
 
       // setLimitsSpanAttributes(
       //   await getLimitsSpanAttributes(limits, {
