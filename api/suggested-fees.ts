@@ -282,7 +282,7 @@ const handler = async (
           ...inputToken,
           chainId: Number(computedOriginChainId),
         });
-        logger.debug({
+        logger.info({
           at: "SuggestedFees",
           message: `Tokens: ${JSON.stringify(tokens)}`,
           query: request.query,
@@ -290,7 +290,7 @@ const handler = async (
           requestId,
         });
       } catch (e) {
-        logger.error({
+        logger.info({
           at: "SuggestedFees",
           message: `Error fetching limits: ${JSON.stringify(e)}`,
           query: request.query,
