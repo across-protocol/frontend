@@ -15,6 +15,17 @@ import mainnetChains from "../../../src/data/chains_1.json";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
+import { CHAIN_IDs } from "../../_constants";
+
+type Token = {
+  chainId: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUrl: string;
+  priceUsd: string | null;
+};
 
 const chains = mainnetChains;
 const chainIds = chains.map((chain) => chain.chainId);
@@ -48,49 +59,41 @@ export default async function handler(
         ? paramToArray(chainId)?.map(Number) || chainIds
         : chainIds;
 
-      const [uniswapTokensResponse, lifiTokensResponse] = await Promise.all([
-        axios.get("https://tokens.uniswap.org"),
-        axios.get("https://li.quest/v1/tokens"),
-      ]);
-      const nativeTokens = getNativeTokensFromLifiTokens(
-        lifiTokensResponse.data,
-        filteredChainIds
-      );
+      const [uniswapTokensResponse, lifiTokensResponse, jupiterTokensResponse] =
+        await Promise.all([
+          axios.get("https://tokens.uniswap.org"),
+          axios.get("https://li.quest/v1/tokens"),
+          axios.get("https://lite-api.jup.ag/tokens/v2/toporganicscore/24h"),
+        ]);
       const pricesForLifiTokens = getPricesForLifiTokens(
         lifiTokensResponse.data,
         filteredChainIds
       );
 
-      const responseJson = uniswapTokensResponse.data.tokens.reduce(
-        (acc: any, token: any) => {
-          if (filteredChainIds.includes(token.chainId)) {
-            acc.push({
-              chainId: token.chainId,
-              address: token.address,
-              name: token.name,
-              symbol: token.symbol,
-              decimals: token.decimals,
-              logoUrl: token.logoURI,
-              priceUsd:
-                pricesForLifiTokens[token.chainId]?.[token.address] || null,
-            });
-          }
-          return acc;
-        },
-        []
-      );
+      const responseJson: Token[] = [];
 
-      responseJson.push(
-        ...nativeTokens.map((token: any) => ({
-          chainId: token.chainId,
-          address: token.address,
-          name: token.name,
-          symbol: token.symbol,
-          decimals: token.decimals,
-          logoUrl: token.logoURI,
-          priceUsd: pricesForLifiTokens[token.chainId]?.[token.address] || null,
-        }))
+      // Add Uniswap tokens
+      const uniswapTokens = getUniswapTokens(
+        uniswapTokensResponse.data,
+        filteredChainIds,
+        pricesForLifiTokens
       );
+      responseJson.push(...uniswapTokens);
+
+      // Add native tokens from LiFi
+      const nativeTokens = getNativeTokensFromLifiTokens(
+        lifiTokensResponse.data,
+        filteredChainIds,
+        pricesForLifiTokens
+      );
+      responseJson.push(...nativeTokens);
+
+      // Add Jupiter tokens
+      const jupiterTokens = getJupiterTokens(
+        jupiterTokensResponse.data,
+        filteredChainIds
+      );
+      responseJson.push(...jupiterTokens);
 
       logger.debug({
         at: "swap/tokens",
@@ -121,19 +124,49 @@ export default async function handler(
   });
 }
 
+function getUniswapTokens(
+  uniswapResponse: any,
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): Token[] {
+  return uniswapResponse.tokens.reduce((acc: Token[], token: any) => {
+    if (chainIds.includes(token.chainId)) {
+      acc.push({
+        chainId: token.chainId,
+        address: token.address,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        logoUrl: token.logoURI,
+        priceUsd: pricesForLifiTokens[token.chainId]?.[token.address] || null,
+      });
+    }
+    return acc;
+  }, []);
+}
+
 function getNativeTokensFromLifiTokens(
   lifiTokensResponse: any,
-  chainIds: number[]
-) {
-  return chainIds.reduce((acc, chainId) => {
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): Token[] {
+  return chainIds.reduce((acc: Token[], chainId) => {
     const nativeToken = lifiTokensResponse?.tokens?.[chainId]?.find(
       (token: any) => token.address === constants.AddressZero
     );
     if (nativeToken) {
-      acc.push(nativeToken);
+      acc.push({
+        chainId,
+        address: nativeToken.address,
+        name: nativeToken.name,
+        symbol: nativeToken.symbol,
+        decimals: nativeToken.decimals,
+        logoUrl: nativeToken.logoURI,
+        priceUsd: pricesForLifiTokens[chainId]?.[nativeToken.address] || null,
+      });
     }
     return acc;
-  }, [] as any[]);
+  }, []);
 }
 
 function getPricesForLifiTokens(lifiTokensResponse: any, chainIds: number[]) {
@@ -153,4 +186,28 @@ function getPricesForLifiTokens(lifiTokensResponse: any, chainIds: number[]) {
     },
     {} as Record<number, Record<string, string>>
   ); // chainId -> tokenAddress -> price
+}
+
+function getJupiterTokens(
+  jupiterTokensResponse: any[],
+  chainIds: number[]
+): Token[] {
+  if (!chainIds.includes(CHAIN_IDs.SOLANA)) {
+    return [];
+  }
+
+  return jupiterTokensResponse.reduce((acc: Token[], token: any) => {
+    if (token.organicScoreLabel === "high") {
+      acc.push({
+        chainId: CHAIN_IDs.SOLANA,
+        address: token.id,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        logoUrl: token.icon,
+        priceUsd: token.usdPrice?.toString() || null,
+      });
+    }
+    return acc;
+  }, []);
 }
