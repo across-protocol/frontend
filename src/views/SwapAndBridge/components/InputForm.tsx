@@ -67,11 +67,9 @@ export const InputForm = ({
         }
         otherToken={outputToken}
       />
-      <QuickSwapButtonWrapper>
-        <QuickSwapButton onClick={quickSwap}>
-          <ArrowsCross />
-        </QuickSwapButton>
-      </QuickSwapButtonWrapper>
+      <QuickSwapButton onClick={quickSwap}>
+        <ArrowsCross width="12px" height="12px" />
+      </QuickSwapButton>
       <TokenInput
         setToken={setOutputToken}
         token={outputToken}
@@ -324,28 +322,26 @@ const Wrapper = styled.div`
 
 const QuickSwapButton = styled.button`
   display: flex;
-  width: 48px;
+  width: 40px;
   height: 32px;
-
-  padding: 0px 16px;
+  position: absolute;
+  left: calc(50% - 20px);
+  top: calc(50% - 16px);
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  border-radius: 32px;
-  border: 1px solid #4c4e57;
   background: ${COLORS["black-700"]};
-  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  border: 3px solid ${COLORS["black-800"]};
+  border-radius: 12px;
+  z-index: 4;
   cursor: pointer;
 
   & * {
     flex-shrink: 0;
   }
-`;
 
-const QuickSwapButtonWrapper = styled.div`
-  position: absolute;
-  left: calc(50% - 24px);
-  top: calc(50% - 16px);
-
-  z-index: 4;
+  &:hover {
+    svg {
+      color: white;
+    }
+  }
 `;
