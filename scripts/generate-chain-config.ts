@@ -21,7 +21,7 @@ async function generateChainConfig(chainName: string) {
         blockNumber: getDeployedBlockNumber("SpokePool", chainId),
       },
       chainId,
-      publicRpcUrl: TODO,
+      publicRpcUrl: chainInfoBase.publicRPC,
       blockTimeSeconds: 15,
       tokens: [],
       enableCCTP: false,
