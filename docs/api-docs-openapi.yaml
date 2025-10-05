@@ -1712,10 +1712,10 @@ paths:
                     example: bridgeableToAny
                     x-enum-descriptions: |
                         - bridgeableToBridgeable: Both input and output tokens are bridgeable
+                        - bridgeableToBridgeableIndirect: Specific case of `bridgeableToBridgeable`, where we route funds from any EVM to HyperCore (via HyperEVM) 
                         - bridgeableToAny: Input token is bridgeable, output token is any token
                         - anyToBridgeable: Input token is any token, output token is bridgeable
                         - anyToAny: Both input and output tokens are any tokens (not bridgeable)
-                        - bridgeableToBridgeableIndirect: Specific case where we route funds from any EVM to HyperCore (via HyperEVM) 
                     x-gitbook-description-html: <p>Type of cross-swap operation.</p>
                   amountType:
                     type: string
