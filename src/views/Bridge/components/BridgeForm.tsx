@@ -279,10 +279,10 @@ const BridgeForm = ({
         <Alert status="warn" alignIcon="center">
           <HyperliquidWarningTextContainer>
             <Text color="white">
-              You must initialize an account for this recipient address on
-              Hyperliquid before bridging.{" "}
+              You must initialize this account on Hyperliquid before bridging
+              USDT0.{" "}
               <InlineButton onClick={() => onSelectInputToken("USDC")}>
-                Bridge USDC to Hyperliquid
+                Bridge USDC to initialize.
               </InlineButton>
             </Text>
           </HyperliquidWarningTextContainer>
