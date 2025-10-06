@@ -126,7 +126,6 @@ describe("getLimitsSpanAttributes", () => {
       maxDepositShortDelay: "50000000000000000000", // 50 WETH
     };
     const attributes = await getLimitsSpanAttributes(wethLimits, wethToken);
-    console.log(attributes);
     expect(typeof attributes["limits.minDeposit.token"]).toBe("number");
     expect(attributes["limits.minDeposit.token"]).toBeGreaterThan(0);
     expect(typeof attributes["limits.minDeposit.usd"]).toBe("number");
