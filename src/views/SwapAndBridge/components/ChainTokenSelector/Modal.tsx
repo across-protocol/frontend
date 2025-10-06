@@ -17,10 +17,12 @@ import {
 import { useMemo, useState, useEffect } from "react";
 import { ReactComponent as CheckmarkCircle } from "assets/icons/checkmark-circle.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
+import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import useEnrichedCrosschainBalances from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
+import { Text } from "components";
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -489,6 +491,9 @@ const MobileLayout = ({
 
             {/* All Chains Section */}
             <SectionHeader>All Chains</SectionHeader>
+            {!displayedChains.all.length && chainSearch && (
+              <EmptySearchResults query={chainSearch} />
+            )}
             {displayedChains.all.map(([chainId, chainData]) => (
               <ChainEntry
                 key={chainId}
@@ -510,6 +515,9 @@ const MobileLayout = ({
           />
           <ListWrapper>
             {/* Your Tokens Section */}
+            {!displayedTokens.withBalance.length && tokenSearch && (
+              <EmptySearchResults query={tokenSearch} />
+            )}
             {displayedTokens.withBalance.length > 0 && (
               <>
                 <SectionHeader>Your Tokens</SectionHeader>
@@ -623,6 +631,9 @@ const DesktopLayout = ({
 
           {/* All Chains Section */}
           <SectionHeader>All Chains</SectionHeader>
+          {!displayedChains.all.length && chainSearch && (
+            <EmptySearchResults query={chainSearch} />
+          )}
           {displayedChains.all.map(([chainId, chainData]) => (
             <ChainEntry
               key={chainId}
@@ -646,6 +657,9 @@ const DesktopLayout = ({
         />
         <ListWrapper tabIndex={-1}>
           {/* Your Tokens Section */}
+          {!displayedTokens.withBalance.length && tokenSearch && (
+            <EmptySearchResults query={tokenSearch} />
+          )}
           {displayedTokens.withBalance.length > 0 && (
             <>
               <SectionHeader>Your Tokens</SectionHeader>
@@ -673,6 +687,9 @@ const DesktopLayout = ({
 
           {/* All Tokens Section */}
           <SectionHeader>All Tokens</SectionHeader>
+          {!displayedTokens.withoutBalance.length && tokenSearch && (
+            <EmptySearchResults query={tokenSearch} />
+          )}
           {displayedTokens.withoutBalance.map((token) => (
             <TokenEntry
               key={token.address + token.chainId}
@@ -779,6 +796,30 @@ const TokenItemImage = ({ token }: { token: LifiToken }) => {
     </TokenItemImageWrapper>
   );
 };
+
+const EmptySearchResults = ({
+  className,
+  query,
+}: {
+  query: string;
+  className?: string;
+}) => {
+  return (
+    <SearchResultsWrapper className={className}>
+      <SearchResults width={88} height={88} />
+      <Text>No results for {query}</Text>
+    </SearchResultsWrapper>
+  );
+};
+
+const SearchResultsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  color: white;
+  padding: 24px;
+`;
 
 const SearchBarStyled = styled(Searchbar)`
   flex-shrink: 0;
