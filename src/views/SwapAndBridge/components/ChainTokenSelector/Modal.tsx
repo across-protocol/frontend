@@ -92,10 +92,10 @@ export default function ChainTokenSelectorModal({
 
   // Reset mobile step when modal opens/closes
   useEffect(() => {
-    if (displayModal) {
-      setMobileStep("chain");
-      setSelectedChain(null);
-    }
+    setMobileStep("chain");
+    setChainSearch("");
+    setTokenSearch("");
+    setSelectedChain(null);
   }, [displayModal]);
 
   const displayedTokens = useMemo(() => {
