@@ -3,6 +3,21 @@ import { CHAIN_IDs, CHAINS } from "../../../_constants";
 import { InvalidParamError } from "../../../_errors";
 import { toBytes32 } from "../../../_address";
 
+// LayerZero Endpoint V2 addresses per chain
+export const V2_ENDPOINTS: Record<number, string | undefined> = {
+  [CHAIN_IDs.MAINNET]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.ARBITRUM]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.BASE]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.BSC]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.HYPEREVM]: "0x3A73033C0b1407574C76BdBAc67f126f6b4a9AA9",
+  [CHAIN_IDs.INK]: "0xca29f3A6f966Cb2fc0dE625F8f325c0C46dbE958",
+  [CHAIN_IDs.OPTIMISM]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.PLASMA]: "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B",
+  [CHAIN_IDs.POLYGON]: "0x1a44076050125825900e736c501f859c50fE728c",
+  [CHAIN_IDs.SONEIUM]: "0x4bcb6a963a9563c33569d7a512d35754221f3a19",
+  [CHAIN_IDs.UNICHAIN]: "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B",
+};
+
 // OFT messenger contract addresses per token per chain
 export const OFT_MESSENGERS: Record<
   string,
@@ -12,11 +27,11 @@ export const OFT_MESSENGERS: Record<
   USDT: {
     [CHAIN_IDs.MAINNET]: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
     [CHAIN_IDs.ARBITRUM]: "0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92",
+    [CHAIN_IDs.HYPEREVM]: "0x904861a24F30EC96ea7CFC3bE9EA4B476d237e98",
+    // [CHAIN_IDs.INK]: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65", // TODO: Enable when we have intents support for Ink USDT
+    [CHAIN_IDs.PLASMA]: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
     [CHAIN_IDs.POLYGON]: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
     // [CHAIN_IDs.UNICHAIN]: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3", // TODO: Enable when we have intents support for Unichain USDT
-    // [CHAIN_IDs.INK]: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65", // TODO: Enable when we have intents support for Ink USDT
-    [CHAIN_IDs.HYPEREVM]: "0x904861a24F30EC96ea7CFC3bE9EA4B476d237e98",
-    [CHAIN_IDs.PLASMA]: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
   },
   // Source: https://docs.layerzero.network/v2/deployments & https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list?symbols=WBTC
   //  NOTE: Enable when we have intents support for Soneium, Unichain and BSC
@@ -253,6 +268,15 @@ export const OFT_ABI = [
     type: "function",
   },
 ];
+
+// Minimal ABI for LayerZero EndpointV2
+export const ENDPOINT_ABI = [
+  "function getSendLibrary(address oapp, uint32 dstEid) view returns (address)",
+  "function getConfig(address oapp, address lib, uint32 eid, uint32 configType) view returns (bytes)",
+];
+
+// ConfigType 2 corresponds to ULN/DVN settings
+export const CONFIG_TYPE_ULN = 2;
 
 export type SendParamStruct = {
   dstEid: number;

@@ -16,13 +16,17 @@ import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals, getProvider } from "../../_utils";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import {
-  OFT_MESSENGERS,
   getOftMessengerForToken,
-  OFT_ABI,
   createSendParamStruct,
   getOftOriginConfirmations,
+  getOftEndpointId,
   DEFAULT_OFT_REQUIRED_DVNS,
+  CONFIG_TYPE_ULN,
+  ENDPOINT_ABI,
+  OFT_ABI,
+  OFT_MESSENGERS,
   OFT_SHARED_DECIMALS,
+  V2_ENDPOINTS,
 } from "./utils/constants";
 import * as chainConfigs from "../../../scripts/chain-configs";
 
@@ -69,6 +73,61 @@ function roundAmountToSharedDecimals(
     return amount.sub(remainder);
   }
   return amount;
+}
+
+/**
+ * Fetches the number of required DVN signatures for a specific OFT route
+ * @param originChainId source chain ID
+ * @param destinationChainId destination chain ID
+ * @param tokenSymbol token being bridged
+ * @returns total number of required DVN signatures (requiredDVNs + optionalThreshold)
+ */
+async function getRequiredDVNCount(
+  originChainId: number,
+  destinationChainId: number,
+  tokenSymbol: string
+): Promise<number> {
+  try {
+    const endpointAddress = V2_ENDPOINTS[originChainId];
+    if (!endpointAddress) {
+      return DEFAULT_OFT_REQUIRED_DVNS;
+    }
+
+    const oappAddress = getOftMessengerForToken(tokenSymbol, originChainId);
+    const dstEid = getOftEndpointId(destinationChainId);
+    const provider = getProvider(originChainId);
+
+    const endpoint = new Contract(endpointAddress, ENDPOINT_ABI, provider);
+
+    // Step 1: Find the send library used for this route
+    const libAddress = await endpoint.getSendLibrary(oappAddress, dstEid);
+
+    // Step 2: Get DVN config for this route
+    const ulnConfigBytes = await endpoint.getConfig(
+      oappAddress,
+      libAddress,
+      dstEid,
+      CONFIG_TYPE_ULN
+    );
+
+    // Step 3: Decode the UlnConfig struct directly
+    const ulnConfigStructType = [
+      "tuple(uint64 confirmations, uint8 requiredDVNCount, uint8 optionalDVNCount, uint8 optionalDVNThreshold, address[] requiredDVNs, address[] optionalDVNs)",
+    ];
+    const decoded = ethers.utils.defaultAbiCoder.decode(
+      ulnConfigStructType,
+      ulnConfigBytes
+    )[0];
+
+    const requiredDVNs = decoded.requiredDVNs.length;
+    const optionalThreshold = decoded.optionalDVNThreshold;
+
+    return requiredDVNs + optionalThreshold;
+  } catch (error) {
+    console.error("Error fetching required DVN count", error);
+    // Fall back to default if fetching fails
+    return DEFAULT_OFT_REQUIRED_DVNS;
+  }
 }
 
 /**
@@ -152,14 +211,22 @@ async function getQuote(params: {
  * OFT (Omnichain Fungible Token) bridge strategy
  */
 export function getOftBridgeStrategy(): BridgeStrategy {
-  const getEstimatedFillTime = (
+  const getEstimatedFillTime = async (
     originChainId: number,
-    destinationChainId: number
-  ): number => {
+    destinationChainId: number,
+    tokenSymbol: string
+  ): Promise<number> => {
     const DEFAULT_BLOCK_TIME_SECONDS = 5;
 
     // Get source chain required confirmations
     const originConfirmations = getOftOriginConfirmations(originChainId);
+
+    // Get dynamic DVN count for this specific route
+    const requiredDVNs = await getRequiredDVNCount(
+      originChainId,
+      destinationChainId,
+      tokenSymbol
+    );
 
     // Get origin and destination block times from chain configs
     const originChainConfig = Object.values(chainConfigs).find(
@@ -176,8 +243,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     // Total time ≈ (originBlockTime × originConfirmations) + (destinationBlockTime × (2 + numberOfDVNs))
     // Source: https://docs.layerzero.network/v2/faq#what-is-the-estimated-delivery-time-for-a-layerzero-message
     const originTime = originBlockTime * originConfirmations;
-    const destinationTime =
-      destinationBlockTime * (2 + DEFAULT_OFT_REQUIRED_DVNS);
+    const destinationTime = destinationBlockTime * (2 + requiredDVNs);
     const totalTime = originTime + destinationTime;
 
     return totalTime;
@@ -256,12 +322,20 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     }: GetExactInputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const { inputAmount, outputAmount } = await getQuote({
-        inputToken,
-        outputToken,
-        inputAmount: exactInputAmount,
-        recipient: recipient!,
-      });
+      const [{ inputAmount, outputAmount }, estimatedFillTimeSec] =
+        await Promise.all([
+          getQuote({
+            inputToken,
+            outputToken,
+            inputAmount: exactInputAmount,
+            recipient: recipient!,
+          }),
+          getEstimatedFillTime(
+            inputToken.chainId,
+            outputToken.chainId,
+            inputToken.symbol
+          ),
+        ]);
 
       return {
         bridgeQuote: {
@@ -270,10 +344,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
           inputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(
-            inputToken.chainId,
-            outputToken.chainId
-          ),
+          estimatedFillTimeSec,
           provider: name,
           fees: getOftBridgeFees(inputToken),
         },
@@ -296,13 +367,21 @@ export function getOftBridgeStrategy(): BridgeStrategy {
         inputToken.decimals
       )(minOutputAmount);
 
-      // Step 4: Get quote from OFT contracts to calculate fees
-      const { inputAmount, outputAmount } = await getQuote({
-        inputToken,
-        outputToken,
-        inputAmount: minOutputInInputDecimals,
-        recipient: recipient!,
-      });
+      // Get quote from OFT contracts and estimated fill time in parallel
+      const [{ inputAmount, outputAmount }, estimatedFillTimeSec] =
+        await Promise.all([
+          getQuote({
+            inputToken,
+            outputToken,
+            inputAmount: minOutputInInputDecimals,
+            recipient: recipient!,
+          }),
+          getEstimatedFillTime(
+            inputToken.chainId,
+            outputToken.chainId,
+            inputToken.symbol
+          ),
+        ]);
 
       // OFT precision limitations may prevent delivering the exact minimum amount
       // We validate against the rounded amount (maximum possible given shared decimals)
@@ -320,10 +399,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
           inputAmount,
           outputAmount,
           minOutputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(
-            inputToken.chainId,
-            outputToken.chainId
-          ),
+          estimatedFillTimeSec,
           provider: name,
           fees: getOftBridgeFees(inputToken),
         },
