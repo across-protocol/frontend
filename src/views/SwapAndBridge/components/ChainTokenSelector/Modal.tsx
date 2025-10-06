@@ -13,6 +13,7 @@ import {
   formatUSD,
   getChainInfo,
   parseUnits,
+  TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { useMemo, useState, useEffect } from "react";
 import { ReactComponent as CheckmarkCircle } from "assets/icons/checkmark-circle.svg";
@@ -27,9 +28,17 @@ import { Text } from "components";
 const popularChains = [
   CHAIN_IDs.MAINNET,
   CHAIN_IDs.BASE,
-  CHAIN_IDs.OPTIMISM,
+  CHAIN_IDs.UNICHAIN,
   CHAIN_IDs.ARBITRUM,
-  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.SOLANA,
+];
+
+const popularTokens = [
+  TOKEN_SYMBOLS_MAP.USDC.symbol,
+  TOKEN_SYMBOLS_MAP.USDT.symbol,
+  TOKEN_SYMBOLS_MAP.ETH.symbol,
+  TOKEN_SYMBOLS_MAP.WETH.symbol,
+  TOKEN_SYMBOLS_MAP.WBTC.symbol,
 ];
 
 // Type definitions for better typing
@@ -51,8 +60,8 @@ type EnrichedToken = LifiToken & {
 };
 
 type DisplayedTokens = {
-  withBalance: EnrichedToken[];
-  withoutBalance: EnrichedToken[];
+  popular: EnrichedToken[];
+  all: EnrichedToken[];
 };
 
 type Props = {
@@ -86,7 +95,9 @@ export default function ChainTokenSelectorModal({
       : undefined
   );
 
-  const [selectedChain, setSelectedChain] = useState<number | null>(null);
+  const [selectedChain, setSelectedChain] = useState<number | null>(
+    popularChains[0]
+  );
   const [mobileStep, setMobileStep] = useState<"chain" | "token">("chain");
 
   const [tokenSearch, setTokenSearch] = useState("");
@@ -97,7 +108,7 @@ export default function ChainTokenSelectorModal({
     setMobileStep("chain");
     setChainSearch("");
     setTokenSearch("");
-    setSelectedChain(null);
+    setSelectedChain(popularChains[0]);
   }, [displayModal]);
 
   const displayedTokens = useMemo(() => {
@@ -152,48 +163,53 @@ export default function ChainTokenSelectorModal({
       );
     });
 
-    // Separate tokens with balance from tokens without balance
-    const tokensWithBalance = filteredTokens.filter(
-      (token) => token.balance.gt(0) && token.balanceUsd > 0.01
+    // Separate popular tokens from all tokens
+    const popularTokensList = filteredTokens.filter((token) =>
+      popularTokens.includes(token.symbol)
     );
-    const tokensWithoutBalance = filteredTokens.filter(
-      (token) => token.balance.eq(0) || token.balanceUsd <= 0.01
+    const allTokensList = filteredTokens.filter(
+      (token) => !popularTokens.includes(token.symbol)
     );
 
-    // Sort tokens with balance by balanceUsd (highest first), then alphabetically
-    const sortedTokensWithBalance = tokensWithBalance.sort((a, b) => {
-      // First, sort by disabled status - disabled tokens go to bottom
-      const aDisabled = a.isReachable === false;
-      const bDisabled = b.isReachable === false;
+    // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
+    const sortTokens = (tokens: EnrichedToken[]) => {
+      return tokens.sort((a, b) => {
+        // First, sort by disabled status - disabled tokens go to bottom
+        const aDisabled = a.isReachable === false;
+        const bDisabled = b.isReachable === false;
 
-      if (aDisabled !== bDisabled) {
-        return aDisabled ? 1 : -1;
-      }
+        if (aDisabled !== bDisabled) {
+          return aDisabled ? 1 : -1;
+        }
 
-      // Then sort by balance
-      if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+        // Then sort by balance - tokens with balance go to top
+        const aHasBalance = a.balance.gt(0) && a.balanceUsd > 0.01;
+        const bHasBalance = b.balance.gt(0) && b.balanceUsd > 0.01;
+
+        if (aHasBalance !== bHasBalance) {
+          return aHasBalance ? -1 : 1;
+        }
+
+        // If both have balance or both don't have balance, sort by balance amount
+        if (aHasBalance && bHasBalance) {
+          if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+            return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+          }
+          return b.balanceUsd - a.balanceUsd;
+        }
+
+        // If neither has balance, sort alphabetically
         return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-      }
-      return b.balanceUsd - a.balanceUsd;
-    });
+      });
+    };
 
-    // Sort tokens without balance alphabetically, with disabled tokens at bottom
-    const sortedTokensWithoutBalance = tokensWithoutBalance.sort((a, b) => {
-      // First, sort by disabled status - disabled tokens go to bottom
-      const aDisabled = a.isReachable === false;
-      const bDisabled = b.isReachable === false;
-
-      if (aDisabled !== bDisabled) {
-        return aDisabled ? 1 : -1;
-      }
-
-      // Then sort alphabetically
-      return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-    });
+    // Sort both sections
+    const sortedPopularTokens = sortTokens(popularTokensList);
+    const sortedAllTokens = sortTokens(allTokensList);
 
     return {
-      withBalance: sortedTokensWithBalance.slice(0, 50), // Limit to 50 tokens with balance
-      withoutBalance: sortedTokensWithoutBalance.slice(0, 50), // Limit to 50 tokens without balance
+      popular: sortedPopularTokens.slice(0, 50), // Limit to 50 popular tokens
+      all: sortedAllTokens.slice(0, 50), // Limit to 50 all tokens
     };
   }, [selectedChain, balances, tokenSearch, crossChainRoutes.data]);
 
@@ -514,14 +530,11 @@ const MobileLayout = ({
             setSearch={setTokenSearch}
           />
           <ListWrapper>
-            {/* Your Tokens Section */}
-            {!displayedTokens.withBalance.length && tokenSearch && (
-              <EmptySearchResults query={tokenSearch} />
-            )}
-            {displayedTokens.withBalance.length > 0 && (
+            {/* Popular Tokens Section */}
+            {displayedTokens.popular.length > 0 && (
               <>
-                <SectionHeader>Your Tokens</SectionHeader>
-                {displayedTokens.withBalance.map((token) => (
+                <SectionHeader>Popular Tokens</SectionHeader>
+                {displayedTokens.popular.map((token) => (
                   <TokenEntry
                     key={token.address + token.chainId}
                     token={token}
@@ -544,26 +557,33 @@ const MobileLayout = ({
             )}
 
             {/* All Tokens Section */}
-            <SectionHeader>All Tokens</SectionHeader>
-            {displayedTokens.withoutBalance.map((token) => (
-              <TokenEntry
-                key={token.address + token.chainId}
-                token={token}
-                isSelected={false}
-                onClick={() => {
-                  onTokenSelect({
-                    chainId: token.chainId,
-                    symbolUri: token.logoURI,
-                    symbol: token.symbol,
-                    address: token.address,
-                    balance: token.balance,
-                    priceUsd: parseUnits(token.priceUSD, 18),
-                    decimals: token.decimals,
-                  });
-                  onModalClose();
-                }}
-              />
-            ))}
+            {!displayedTokens.all.length && tokenSearch && (
+              <EmptySearchResults query={tokenSearch} />
+            )}
+            {displayedTokens.all.length > 0 && (
+              <>
+                <SectionHeader>All Tokens</SectionHeader>
+                {displayedTokens.all.map((token) => (
+                  <TokenEntry
+                    key={token.address + token.chainId}
+                    token={token}
+                    isSelected={false}
+                    onClick={() => {
+                      onTokenSelect({
+                        chainId: token.chainId,
+                        symbolUri: token.logoURI,
+                        symbol: token.symbol,
+                        address: token.address,
+                        balance: token.balance,
+                        priceUsd: parseUnits(token.priceUSD, 18),
+                        decimals: token.decimals,
+                      });
+                      onModalClose();
+                    }}
+                  />
+                ))}
+              </>
+            )}
           </ListWrapper>
         </MobileTokenWrapper>
       )}
@@ -656,14 +676,11 @@ const DesktopLayout = ({
           setSearch={setTokenSearch}
         />
         <ListWrapper tabIndex={-1}>
-          {/* Your Tokens Section */}
-          {!displayedTokens.withBalance.length && tokenSearch && (
-            <EmptySearchResults query={tokenSearch} />
-          )}
-          {displayedTokens.withBalance.length > 0 && (
+          {/* Popular Tokens Section */}
+          {displayedTokens.popular.length > 0 && (
             <>
-              <SectionHeader>Your Tokens</SectionHeader>
-              {displayedTokens.withBalance.map((token) => (
+              <SectionHeader>Popular Tokens</SectionHeader>
+              {displayedTokens.popular.map((token) => (
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
@@ -686,29 +703,33 @@ const DesktopLayout = ({
           )}
 
           {/* All Tokens Section */}
-          <SectionHeader>All Tokens</SectionHeader>
-          {!displayedTokens.withoutBalance.length && tokenSearch && (
+          {!displayedTokens.all.length && tokenSearch && (
             <EmptySearchResults query={tokenSearch} />
           )}
-          {displayedTokens.withoutBalance.map((token) => (
-            <TokenEntry
-              key={token.address + token.chainId}
-              token={token}
-              isSelected={false}
-              onClick={() => {
-                onTokenSelect({
-                  chainId: token.chainId,
-                  symbolUri: token.logoURI,
-                  symbol: token.symbol,
-                  address: token.address,
-                  balance: token.balance,
-                  priceUsd: parseUnits(token.priceUSD, 18),
-                  decimals: token.decimals,
-                });
-                onModalClose();
-              }}
-            />
-          ))}
+          {displayedTokens.all.length > 0 && (
+            <>
+              <SectionHeader>All Tokens</SectionHeader>
+              {displayedTokens.all.map((token) => (
+                <TokenEntry
+                  key={token.address + token.chainId}
+                  token={token}
+                  isSelected={false}
+                  onClick={() => {
+                    onTokenSelect({
+                      chainId: token.chainId,
+                      symbolUri: token.logoURI,
+                      symbol: token.symbol,
+                      address: token.address,
+                      balance: token.balance,
+                      priceUsd: parseUnits(token.priceUSD, 18),
+                      decimals: token.decimals,
+                    });
+                    onModalClose();
+                  }}
+                />
+              ))}
+            </>
+          )}
         </ListWrapper>
       </DesktopTokenWrapper>
     </DesktopInnerWrapper>
