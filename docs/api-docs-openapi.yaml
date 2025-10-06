@@ -819,9 +819,7 @@ paths:
           in: query
           required: false
           description: >
-            The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with
-            originChainId. depositTxHash is not required when using this
-            parameter.
+            The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with originChainId. depositTxnRef is not required when using this parameter.
           schema:
             type: integer
             minimum: 0
@@ -829,15 +827,12 @@ paths:
             default:
               value: 1349975
           x-gitbook-description-html: >-
-            <p>The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with
-            originChainId. depositTxHash is not required when using this
-            parameter.</p>
+            <p>The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with originChainId. depositTxnRef is not required when using this parameter.</p>
         - name: depositTxnRef
           in: query
-          required: false
+          required: true
           description: >
-            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this,
-            you donot need the above parameters. 
+            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this, you donot need the other parameters (i.e. originChainId and depositId). 
           schema:
             type: string
           examples:
