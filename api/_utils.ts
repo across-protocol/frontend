@@ -86,6 +86,7 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
+import { isNativeCurrency } from "./_dexes/uniswap/utils/adapter";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -518,6 +519,105 @@ export const getRouteDetails = (
     },
     resolvedOriginChainId,
   };
+};
+
+export const getNativeToken = (
+  chainId: number
+):
+  | {
+      decimals: number;
+      symbol: string;
+      name: string;
+      nativeChainId: number;
+      chainToWrappedAddresses: Record<number, string>;
+      coingeckoId: string;
+    }
+  | undefined => {
+  const nativeTokenSymbol: string = sdk.utils
+    .getNativeTokenSymbol(chainId)
+    .toLowerCase();
+  const nativeToken: {
+    decimals: number;
+    symbol: string;
+    name: string;
+    addresses: Record<number, string>;
+    coingeckoId: string;
+  } = TOKEN_SYMBOLS_MAP[nativeTokenSymbol];
+
+  if (!nativeToken) {
+    return undefined;
+  }
+
+  return {
+    ...nativeToken,
+    nativeChainId: chainId,
+    chainToWrappedAddresses: nativeToken.addresses,
+  };
+};
+
+export const getNonNativeToken = (
+  chainId: number,
+  tokenAddress: string
+):
+  | {
+      decimals: number;
+      symbol: string;
+      name: string;
+      nativeChainId: number;
+      chainToWrappedAddresses: Record<number, string>;
+    }
+  | undefined => {
+  try {
+    const parsedTokenAddress = toAddressType(tokenAddress, chainId ?? 1);
+    tokenAddress = parsedTokenAddress.toNative();
+
+    const matches =
+      Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, value]) => {
+        const addresses = (value as { addresses: Record<number, string> })
+          .addresses;
+        return chainId
+          ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
+          : Object.values(addresses).some(
+              (address) => address.toLowerCase() === tokenAddress.toLowerCase()
+            );
+      }) || [];
+
+    if (matches.length === 0) {
+      return undefined;
+    }
+
+    const ambiguousTokens = ["USDC", "USDT"];
+    const wrappedTokens = [
+      "WETH",
+      "WBNB",
+      "WMATIC",
+      "WHYPE",
+      "TATARA-WBTC",
+      "WAZERO",
+      "WBNB",
+      "WGHO",
+      "WGRASS",
+      "WSOL",
+      "WXPL",
+    ];
+    if (matches.length > 1) {
+      const wrappedToken = matches.find(
+        ([symbol]) =>
+          wrappedTokens.includes(symbol) || ambiguousTokens.includes(symbol)
+      );
+      if (wrappedToken) {
+        return {
+          ...wrappedToken[1],
+          nativeChainId: chainId,
+          chainToWrappedAddresses: wrappedToken[1].addresses,
+        };
+      }
+    }
+
+    return matches[0][1];
+  } catch (error) {
+    return undefined;
+  }
 };
 
 export const getTokenByAddress = (
@@ -2532,11 +2632,17 @@ export async function getCachedTokenInfo(params: TokenOptions) {
 }
 
 // find decimals and symbol for any token address on any chain we support
-export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
-  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals"> & {
-    chainId: number;
-  }
-> {
+export async function getTokenInfo({
+  chainId,
+  address,
+}: TokenOptions): Promise<{
+  symbol: string;
+  name: string;
+  address: string;
+  decimals: number;
+  chainId: number;
+  chainToAddress: Record<number, string>;
+}> {
   try {
     if (!(ethers.utils.isAddress(address) || isSvmAddress(address))) {
       throw new InvalidParamError({
@@ -2552,20 +2658,26 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    const token = getTokenByAddress(address, chainId);
+    const token = isNativeCurrency(address)
+      ? getNativeToken(chainId)
+      : getTokenByAddress(address, chainId);
 
     if (token) {
       return {
         decimals: token.decimals,
         symbol: token.symbol,
-        address: token.addresses[chainId],
+        address: token.address,
+        chainToAddress: token.addresses,
         name: token.name,
         chainId,
       };
     }
 
     if (sdk.utils.chainIsSvm(chainId)) {
-      return await getSvmTokenInfo(address, chainId);
+      return {
+        ...(await getSvmTokenInfo(address, chainId)),
+        chainToAddress: { [chainId]: address },
+      };
     }
 
     // ERC20 resolved dynamically
@@ -2602,6 +2714,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       symbol,
       name,
       chainId,
+      chainToAddress: { [chainId]: address },
     };
   } catch (error) {
     throw new TokenNotFoundError({
