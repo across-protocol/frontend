@@ -3,7 +3,6 @@ import {
   ERC20__factory,
   HubPool__factory,
 } from "@across-protocol/contracts/dist/typechain";
-import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
@@ -282,93 +281,6 @@ export const validateChainAndTokenParams = (
     allowUnmatchedDecimals,
   };
 };
-
-export const validateDepositMessage = async (
-  recipient: string,
-  destinationChainId: number,
-  relayer: string,
-  outputTokenAddress: string,
-  amountInput: BigNumber,
-  message: string
-) => {
-  if (!sdk.utils.isMessageEmpty(message)) {
-    if (!ethers.utils.isHexString(message)) {
-      throw new InvalidParamError({
-        message: "Message must be a hex string",
-        param: "message",
-      });
-    }
-    if (message.length % 2 !== 0) {
-      // Our message encoding is a hex string, so we need to check that the length is even.
-      throw new InvalidParamError({
-        message: "Message must be an even hex string",
-        param: "message",
-      });
-    }
-    const isRecipientAContract =
-      getStaticIsContract(destinationChainId, recipient) ||
-      (await isContractCache(destinationChainId, recipient).get());
-    if (!isRecipientAContract && sdk.utils.chainIsEvm(destinationChainId)) {
-      throw new InvalidParamError({
-        message: "Recipient must be a contract when a message is provided",
-        param: "recipient",
-      });
-    } else {
-      // If we're in this case, it's likely that we're going to have to simulate the execution of
-      // a complex message handling from the specified relayer to the specified recipient by calling
-      // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
-      // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
-      // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
-      // support this deposit.
-      const balanceOfToken = await getCachedTokenBalance(
-        destinationChainId,
-        relayer,
-        outputTokenAddress
-      );
-      if (balanceOfToken.lt(amountInput)) {
-        throw new InvalidParamError({
-          message:
-            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-            ` for help, please reach out to https://discord.across.to`,
-          param: "relayer",
-        });
-      }
-    }
-  }
-};
-
-function getStaticIsContract(chainId: number, address: string) {
-  const addressType = toAddressType(address, chainId);
-  let comparableAddress = address;
-
-  if (sdk.utils.chainIsSvm(chainId)) {
-    try {
-      comparableAddress = addressType.toBase58();
-    } catch (error) {
-      // noop
-    }
-  } else {
-    if (addressType.isEVM()) {
-      comparableAddress = addressType.toEvmAddress();
-    }
-  }
-
-  const deployedAcrossContract = Object.values(
-    (
-      acrossDeployments as {
-        [chainId: number]: {
-          [contractName: string]: {
-            address: string;
-          };
-        };
-      }
-    )[chainId]
-  ).find(
-    (contract) =>
-      contract.address.toLowerCase() === comparableAddress.toLowerCase()
-  );
-  return !!deployedAcrossContract;
-}
 
 export function getChainInfo(chainId: number) {
   const chainInfo = CHAINS[chainId];
@@ -1431,27 +1343,6 @@ export function getRoutesByChainIds(
       originChainId === fromChain && destinationChainId === toChain
   );
 }
-
-/**
- * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
- * native currency will be returned.
- * @param chainId The blockchain Id to query against
- * @param account A valid Web3 wallet address
- * @param token The valid ERC20 token address on the given `chainId`.
- * @returns A promise that resolves to the BigNumber of the balance
- */
-export const getCachedTokenBalance = async (
-  chainId: string | number,
-  account: string,
-  token: string
-): Promise<BigNumber> => {
-  const balance = await latestBalanceCache({
-    chainId: Number(chainId),
-    tokenAddress: token,
-    address: account,
-  }).get();
-  return balance;
-};
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
