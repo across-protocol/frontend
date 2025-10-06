@@ -57,7 +57,7 @@ export function getSpotSendBytesForTransferOnCore(params: {
   amount: BigNumber;
 }) {
   const { recipientAddress, tokenSystemAddress, amount } = params;
-  const tokenIndex = parseInt(tokenSystemAddress.replace("0x20", ""), 16);
+  const tokenIndex = getTokenIndex(tokenSystemAddress);
   const transferOnCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64", "uint64"],
     [recipientAddress, tokenIndex, amount]
@@ -72,10 +72,7 @@ export async function getBalanceOnHyperCore(params: {
   tokenSystemAddress: string;
 }) {
   const provider = getProvider(CHAIN_IDs.HYPEREVM);
-  const tokenIndex = parseInt(
-    params.tokenSystemAddress.replace("0x20", ""),
-    16
-  );
+  const tokenIndex = getTokenIndex(params.tokenSystemAddress);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64"],
     [params.account, tokenIndex]
@@ -106,4 +103,8 @@ export async function accountExistsOnHyperCore(params: { account: string }) {
     queryResult
   );
   return Boolean(decodedQueryResult[0]);
+}
+
+function getTokenIndex(tokenSystemAddress: string) {
+  return parseInt(tokenSystemAddress.replace("0x20", ""), 16);
 }

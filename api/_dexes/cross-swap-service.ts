@@ -46,7 +46,7 @@ import {
 } from "./types";
 import { BridgeStrategy } from "../_bridges/types";
 import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
-import { accountExistsOnHyperCore } from "../_hypercore";
+import { accountExistsOnHyperCore, getBalanceOnHyperCore } from "../_hypercore";
 import { CHAIN_IDs } from "../_constants";
 import { BigNumber } from "ethers";
 
@@ -251,28 +251,43 @@ export async function getCrossSwapQuotesForExactInputB2BI(
   )(crossSwap.amount);
 
   // If destination chain is HyperCore, we need to check if the app fee recipient and recipient
-  // have initialized balances on HyperCore.
+  // have initialized accounts on HyperCore. We also need to check if the system address has enough
+  // capacity.
   if (crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE) {
-    const [appFeeRecipientExists, recipientExists] = await Promise.all([
-      crossSwap.appFeeRecipient
-        ? accountExistsOnHyperCore({
-            account: crossSwap.appFeeRecipient,
-          })
-        : BigNumber.from(0),
-      accountExistsOnHyperCore({
-        account: crossSwap.recipient,
-      }),
-    ]);
+    const [appFeeRecipientExists, recipientExists, systemAddressCapacity] =
+      await Promise.all([
+        crossSwap.appFeeRecipient
+          ? accountExistsOnHyperCore({
+              account: crossSwap.appFeeRecipient,
+            })
+          : BigNumber.from(0),
+        accountExistsOnHyperCore({
+          account: crossSwap.recipient,
+        }),
+        getBalanceOnHyperCore({
+          account: crossSwap.outputToken.address, // system address on HyperCore
+          tokenSystemAddress: crossSwap.outputToken.address,
+        }),
+      ]);
 
     if (crossSwap.appFeeRecipient && !appFeeRecipientExists) {
       throw new InvalidParamError({
         message: "App fee recipient is not initialized on HyperCore",
+        param: "appFeeRecipient",
       });
     }
 
     if (!recipientExists) {
       throw new InvalidParamError({
         message: "Recipient is not initialized on HyperCore",
+        param: "recipient",
+      });
+    }
+
+    if (systemAddressCapacity.lt(bridgeableOutputAmount)) {
+      throw new InvalidParamError({
+        message: "System address on HyperCore does not have enough capacity",
+        param: "amount",
       });
     }
   }
