@@ -288,7 +288,8 @@ const handler = async (
           {
             ...inputToken,
             chainId: Number(computedOriginChainId),
-          }
+          },
+          tokenPriceUsd
         ),
         span
       );

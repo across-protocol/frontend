@@ -2731,16 +2731,8 @@ export async function getLimitsSpanAttributes(
     maxDepositShortDelay: string;
   },
   inputToken: Token,
-  options?: { fetchTokenPrice?: typeof getCachedTokenPrice }
+  tokenPriceUsd: number
 ) {
-  const fetchTokenPrice = options?.fetchTokenPrice || getCachedTokenPrice;
-  const tokenPriceUsd = await fetchTokenPrice({
-    tokenAddress: inputToken.address,
-    symbol: inputToken.symbol,
-    baseCurrency: "usd",
-    chainId: inputToken.chainId,
-    fallbackResolver: "lifi",
-  });
   const attributes: Record<string, number> = {};
 
   for (const [key, value] of Object.entries(limits)) {
