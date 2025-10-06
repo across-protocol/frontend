@@ -109,6 +109,9 @@ describe("getLimitsSpanAttributes", () => {
   });
 
   test("should return valid attributes with real prices", async () => {
+    const original_env_variable =
+      process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE;
+    process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE = "https://across.to";
     const wethToken: Token = {
       address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       symbol: "WETH",
@@ -145,5 +148,6 @@ describe("getLimitsSpanAttributes", () => {
     expect(attributes["limits.maxDepositShortDelay.token"]).toBeGreaterThan(0);
     expect(typeof attributes["limits.maxDepositShortDelay.usd"]).toBe("number");
     expect(attributes["limits.maxDepositShortDelay.usd"]).toBeGreaterThan(0);
+    process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE = original_env_variable;
   });
 });
