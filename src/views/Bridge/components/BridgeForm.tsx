@@ -16,7 +16,6 @@ import {
   rewardProgramsAvailable,
   COLORS,
   getEcosystem,
-  getBridgeUrlWithQueryParams,
 } from "utils";
 import { VoidHandler } from "utils/types";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
@@ -40,7 +39,6 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -280,20 +278,12 @@ const BridgeForm = ({
       {showHyperliquidWarning && (
         <Alert status="warn" alignIcon="center">
           <HyperliquidWarningTextContainer>
-            <Text color="white">Account Required</Text>
-            <Text color="warning">
+            <Text color="white">
               You must initialize an account for this recipient address on
               Hyperliquid before bridging.{" "}
-              <InternalLink
-                href={getBridgeUrlWithQueryParams({
-                  fromChainId: selectedRoute.fromChain,
-                  toChainId: CHAIN_IDs.ARBITRUM,
-                  inputTokenSymbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
-                  externalProjectId: "hyperliquid",
-                })}
-              >
+              <InlineButton onClick={() => onSelectInputToken("USDC")}>
                 Bridge USDC to Hyperliquid
-              </InternalLink>
+              </InlineButton>
             </Text>
           </HyperliquidWarningTextContainer>
         </Alert>
@@ -358,8 +348,8 @@ const BridgeForm = ({
 
 export default BridgeForm;
 
-const InternalLink = styled.a`
-  color: inherit;
+const InlineButton = styled.button`
+  text-decoration: underline;
   display: inline;
   transition: opacity 150ms ease-in-out;
 

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { AlertStatusType } from "./Alert";
-import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info_filled.svg";
 import { ReactComponent as QuestionIcon } from "assets/icons/question-circle.svg";
 import { QUERIESV2 } from "utils";
 
@@ -14,9 +14,9 @@ const AlertColors: Record<
     borderColor: "#3e4047",
   },
   warn: {
-    bgColor: "rgba(249, 210, 108, 0.05)",
-    fontColor: "#f9d26c",
-    borderColor: "rgba(249, 210, 108, 0.1)",
+    bgColor: "rgba(255, 149, 0, 0.05)",
+    fontColor: "#FF9500",
+    borderColor: "rgba(255, 149, 0, 0.5)",
   },
   danger: {
     bgColor: "rgba(249, 108, 108, 0.05)",
@@ -93,9 +93,7 @@ export const StyledQuestionIcon = styled(QuestionIcon)<IncludeStatusType>`
 export const StyledInfoIcon = styled(InfoIcon)<IncludeStatusType>`
   flex-shrink: 0;
 
-  & path {
-    stroke: ${({ status }) => AlertColors[status].fontColor};
-  }
+  color: ${({ status }) => AlertColors[status].fontColor};
 
   height: 24px;
   width: 24px;
