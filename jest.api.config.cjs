@@ -18,5 +18,7 @@ module.exports = {
   moduleNameMapper: {
     // Only keep uuid mapping for API tests - remove frontend path mappings
     uuid: require.resolve("uuid"),
+    "^api/(.*)$": "<rootDir>/api/$1",
+    "^src/(.*)$": "<rootDir>/src/$1",
   },
 };
