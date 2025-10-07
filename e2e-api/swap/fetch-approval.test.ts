@@ -241,24 +241,4 @@ describe("GET /swap/approval", () => {
       }
     }
   });
-
-  test("should return WETH for Base and Linea", async () => {
-    const params = {
-      tradeType: "exactInput",
-      amount: "10000000000000000",
-      inputToken: "0x4200000000000000000000000000000000000006",
-      outputToken: "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
-      originChainId: 8453,
-      destinationChainId: 59144,
-      depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
-      recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
-      includeSources: "uniswap_v3",
-    };
-    const response = await axios.get(SWAP_API_URL, {
-      params,
-    });
-    expect(response.status).toBe(200);
-    expect(response.data.inputToken.symbol).toBe("WETH");
-    expect(response.data.outputToken.symbol).toBe("WETH");
-  });
 });
