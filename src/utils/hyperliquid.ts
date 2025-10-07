@@ -6,6 +6,10 @@ import { getToken, hyperLiquidBridge2Address } from "./constants";
 import { getProvider } from "./providers";
 
 export function isHyperLiquidBoundDeposit(deposit: Deposit) {
+  if (deposit.actionsTargetChainId === CHAIN_IDs.HYPERCORE) {
+    return true;
+  }
+
   if (deposit.destinationChainId !== CHAIN_IDs.ARBITRUM || !deposit.message) {
     return false;
   }
