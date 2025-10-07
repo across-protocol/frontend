@@ -167,10 +167,9 @@ describe("GET /swap/approval", () => {
     });
   });
 
-  describe("Wrapped and Ambiguous Tokens", () => {
+  describe("Wrapped Tokens", () => {
+    jest.setTimeout(30000);
     const tokensToTest = [
-      "USDC",
-      "USDT",
       "WETH",
       "WBNB",
       "WMATIC",
@@ -188,7 +187,6 @@ describe("GET /swap/approval", () => {
         (r) =>
           r.fromTokenSymbol === tokenSymbol || r.toTokenSymbol === tokenSymbol
       );
-
       if (route) {
         test(`should return ${tokenSymbol} for ${route.fromChain} to ${route.toChain}`, async () => {
           const params = {
@@ -207,7 +205,39 @@ describe("GET /swap/approval", () => {
           expect(response.status).toBe(200);
           expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
           expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
-        });
+        }, 5000);
+      }
+    }
+  });
+
+  describe("Ambiguous Tokens", () => {
+    jest.setTimeout(30000);
+    const tokensToTest = ["USDC", "USDT"];
+
+    for (const tokenSymbol of tokensToTest) {
+      const route = ENABLED_ROUTES.routes.find(
+        (r) =>
+          r.fromTokenSymbol === tokenSymbol || r.toTokenSymbol === tokenSymbol
+      );
+      if (route) {
+        test(`should return ${tokenSymbol} for ${route.fromChain} to ${route.toChain}`, async () => {
+          const params = {
+            tradeType: "exactInput",
+            amount: "1000000",
+            inputToken: route.fromTokenAddress,
+            outputToken: route.toTokenAddress,
+            originChainId: route.fromChain,
+            destinationChainId: route.toChain,
+            depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+            recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+          };
+          const response = await axios.get(SWAP_API_URL, {
+            params,
+          });
+          expect(response.status).toBe(200);
+          expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
+          expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
+        }, 5000);
       }
     }
   });

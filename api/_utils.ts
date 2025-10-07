@@ -567,8 +567,7 @@ export const getTokenByAddress = (
     if (matches.length > 1) {
       const token = matches.find(
         ([symbol]) =>
-          wrappedTokens.includes(symbol) ||
-          (ambiguousTokens.includes(symbol) && chainId === HUB_POOL_CHAIN_ID)
+          wrappedTokens.includes(symbol) || ambiguousTokens.includes(symbol)
       );
       if (token) {
         return token[1];
