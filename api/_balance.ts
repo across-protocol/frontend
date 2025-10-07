@@ -9,22 +9,21 @@ import { toSolanaKitAddress } from "./_address";
 import { buildInternalCacheKey, makeCacheGetterAndSetter } from "./_cache";
 
 /**
- * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
- * native currency will be returned.
- * @param chainId The blockchain Id to query against
- * @param account A valid Web3 wallet address
- * @param token The valid ERC20 token address on the given `chainId`.
+ * Resolves the cached balance of a given ERC20 token at a provided address.
+ * @param chainId The chain id to query against
+ * @param accountAddress A valid EVM or SVM wallet address
+ * @param tokenAddress A valid EVM or SVM token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export async function getCachedTokenBalance(
   chainId: string | number,
-  account: string,
-  token: string
+  accountAddress: string,
+  tokenAddress: string
 ): Promise<BigNumber> {
   const balance = await latestBalanceCache({
     chainId: Number(chainId),
-    tokenAddress: token,
-    address: account,
+    tokenAddress: tokenAddress,
+    address: accountAddress,
   }).get();
   return balance;
 }

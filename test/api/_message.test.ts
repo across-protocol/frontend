@@ -82,8 +82,6 @@ describe("api/_message", () => {
           handlerMessage
         );
 
-        console.log("Valid gas forwarding message:", message);
-
         // Mock isContractCache to return false (not a contract)
         mockIsContractCacheGet.mockResolvedValue(false);
 
@@ -112,8 +110,6 @@ describe("api/_message", () => {
           accounts,
           handlerMessage
         );
-
-        console.log("Message with non-empty handler_message:", message);
 
         mockIsContractCacheGet.mockResolvedValue(false);
 
@@ -156,8 +152,6 @@ describe("api/_message", () => {
           handlerMessage
         );
 
-        console.log("Message with 0 accounts:", messageNoAccounts);
-
         mockIsContractCacheGet.mockResolvedValue(false);
 
         await expect(
@@ -182,8 +176,6 @@ describe("api/_message", () => {
           accountsTwo,
           handlerMessage
         );
-
-        console.log("Message with 2 accounts:", messageTwoAccounts);
 
         await expect(
           validateDepositMessage({
@@ -212,8 +204,6 @@ describe("api/_message", () => {
           accounts,
           handlerMessage
         );
-
-        console.log("Message with value_amount = 0:", message);
 
         mockIsContractCacheGet.mockResolvedValue(false);
 
@@ -244,8 +234,6 @@ describe("api/_message", () => {
           accounts,
           handlerMessage
         );
-
-        console.log("Message with 1 SOL value_amount:", message);
 
         mockIsContractCacheGet.mockResolvedValue(false);
 
