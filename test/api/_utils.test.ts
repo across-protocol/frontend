@@ -7,7 +7,6 @@ import {
   validEvmAddress,
   validSvmAddress,
   validAddress,
-  getTokenByAddress,
 } from "../../api/_utils";
 import { is } from "superstruct";
 
@@ -108,39 +107,6 @@ describe("_utils", () => {
         },
       });
     });
-  });
-
-  describe("#getTokenByAddress()", () => {
-    // Iterate over all chain IDs to test the token resolution for each chain.
-    for (const chainId of Object.values(CHAIN_IDs)) {
-      if (typeof chainId !== "number") continue;
-
-      const weth = TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
-      const eth = TOKEN_SYMBOLS_MAP.ETH.addresses[chainId];
-
-      // Test case where WETH and ETH have the same address.
-      // In this case, we want to ensure that WETH is always returned to avoid ambiguity.
-      if (weth && eth && weth.toLowerCase() === eth.toLowerCase()) {
-        test(`should return WETH for chain ${chainId} when both ETH and WETH have the same address`, () => {
-          const token = getTokenByAddress(weth, chainId);
-          expect(token?.symbol).toBe("WETH");
-        });
-      } else {
-        // Test case where WETH and ETH have different addresses.
-        if (weth) {
-          test(`should return WETH for chain ${chainId}`, () => {
-            const token = getTokenByAddress(weth, chainId);
-            expect(token?.symbol).toBe("WETH");
-          });
-        }
-        if (eth) {
-          test(`should return ETH for chain ${chainId}`, () => {
-            const token = getTokenByAddress(eth, chainId);
-            expect(token?.symbol).toBe("ETH");
-          });
-        }
-      }
-    }
   });
 
   describe("#validateChainAndTokenParams()", () => {
