@@ -2624,7 +2624,7 @@ export function getLimitsSpanAttributes(
   inputToken: Token,
   tokenPriceUsd: number
 ) {
-  const attributes: Record<string, number> = {};
+  const attributes: Record<string, number | string> = {};
 
   for (const [key, value] of Object.entries(limits)) {
     const valueBn = BigNumber.from(value);
@@ -2639,11 +2639,14 @@ export function getLimitsSpanAttributes(
       ethers.utils.formatUnits(valueUsd, 18)
     );
   }
+  attributes["token.address"] = inputToken.address;
+  attributes["token.chainId"] = inputToken.chainId;
+  attributes["token.symbol"] = inputToken.symbol;
   return attributes;
 }
 
 export function setLimitsSpanAttributes(
-  limits: Record<string, number>,
+  limits: Record<string, number | string>,
   span: Span
 ) {
   for (const [key, value] of Object.entries(limits)) {
