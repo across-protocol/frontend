@@ -421,13 +421,14 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       // OFT validations
       if (appFee?.feeAmount.gt(0)) {
         throw new InvalidParamError({
-          message: "OFT: App fee handling not implemented yet",
+          message: "App fee is not supported for OFT bridge transfers",
         });
       }
 
       if (originSwapQuote || destinationSwapQuote) {
         throw new InvalidParamError({
-          message: "OFT: Origin/destination swaps not implemented yet",
+          message:
+            "Origin/destination swaps are not supported for OFT bridge transfers",
         });
       }
 
