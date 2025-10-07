@@ -36,14 +36,18 @@ const sdk = new NodeSDK({
   instrumentations: [httpInstrumentation],
 });
 
-if (
+const isVercelCI = process.env.VERCEL_CI === "1" || process.env.CI === "1";
+const isDeployedEnv =
   process.env.VERCEL_ENV === "production" ||
-  process.env.VERCEL_ENV === "preview"
-) {
+  process.env.VERCEL_ENV === "preview";
+
+// Start the SDK only when deployed and NOT during the CI build process.
+if (isDeployedEnv && !isVercelCI) {
   sdk.start();
   console.log(
     `OpenTelemetry SDK started for Vercel env: ${process.env.VERCEL_ENV}`
   );
 }
+
 export const tracer = trace.getTracer("across-api");
 export { context, processor, httpInstrumentation };
