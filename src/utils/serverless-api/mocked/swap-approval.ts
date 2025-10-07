@@ -38,6 +38,7 @@ export async function swapApprovalApiCall(
     steps: {
       originSwap: undefined,
       bridge: {
+        provider: "across",
         inputAmount: BigNumber.from("0"),
         outputAmount: BigNumber.from("0"),
         tokenIn: {
