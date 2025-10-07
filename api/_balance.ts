@@ -3,9 +3,30 @@ import * as sdk from "@across-protocol/sdk";
 import { ERC20__factory } from "@across-protocol/contracts/dist/typechain";
 
 import { getSvmProvider, getProvider } from "./_providers";
-import { BLOCK_TAG_LAG } from "./_constants";
+import { BLOCK_TAG_LAG, CHAIN_IDs } from "./_constants";
 import { getMulticall3, callViaMulticall3 } from "./_multicall";
 import { toSolanaKitAddress } from "./_address";
+import { buildInternalCacheKey, makeCacheGetterAndSetter } from "./_cache";
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address.
+ * @param chainId The chain id to query against
+ * @param accountAddress A valid EVM or SVM wallet address
+ * @param tokenAddress A valid EVM or SVM token address on the given `chainId`.
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export async function getCachedTokenBalance(
+  chainId: string | number,
+  accountAddress: string,
+  tokenAddress: string
+): Promise<BigNumber> {
+  const balance = await latestBalanceCache({
+    chainId: Number(chainId),
+    tokenAddress: tokenAddress,
+    address: accountAddress,
+  }).get();
+  return balance;
+}
 
 /**
  * Resolves the balance of a given token at a provided address.
@@ -198,4 +219,23 @@ export async function getBatchSvmBalance(
     blockNumber: blockTag,
     balances,
   };
+}
+
+export function latestBalanceCache(params: {
+  chainId: number;
+  tokenAddress: string;
+  address: string;
+}) {
+  const { chainId, tokenAddress, address } = params;
+  const ttlPerChain = {
+    default: 60,
+    [CHAIN_IDs.MAINNET]: 60,
+  };
+
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("latestBalance", tokenAddress, chainId, address),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    () => getBalance(chainId, address, tokenAddress),
+    (bnFromCache) => BigNumber.from(bnFromCache)
+  );
 }

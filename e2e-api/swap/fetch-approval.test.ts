@@ -1,8 +1,7 @@
-import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
-import { e2eConfig } from "../utils/config";
+import { e2eConfig, axiosInstance } from "../utils/config";
 import { ENABLED_ROUTES } from "../../api/_utils";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
@@ -96,7 +95,7 @@ describe("GET /swap/approval", () => {
       } (${testCase.originChainId}) -> ${
         testCase.outputToken.symbol
       } (${testCase.destinationChainId})`, async () => {
-        const response = await axios.get(SWAP_API_URL, {
+        const response = await axiosInstance.get(SWAP_API_URL, {
           params: {
             amount: testCase.amount,
             tradeType,
@@ -118,7 +117,7 @@ describe("GET /swap/approval", () => {
   describe("Error handling", () => {
     it("should throw 400 for invalid parameters", async () => {
       try {
-        await axios.get(SWAP_API_URL, {
+        await axiosInstance.get(SWAP_API_URL, {
           params: {
             amount: "invalid",
             tradeType: "exactInput",
@@ -199,7 +198,7 @@ describe("GET /swap/approval", () => {
             depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
             recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
           };
-          const response = await axios.get(SWAP_API_URL, {
+          const response = await axiosInstance.get(SWAP_API_URL, {
             params,
           });
           expect(response.status).toBe(200);
@@ -231,7 +230,7 @@ describe("GET /swap/approval", () => {
             depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
             recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
           };
-          const response = await axios.get(SWAP_API_URL, {
+          const response = await axiosInstance.get(SWAP_API_URL, {
             params,
           });
           expect(response.status).toBe(200);
