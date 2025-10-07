@@ -46,9 +46,10 @@ import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
-import { tracer } from "../instrumentation";
+import { tracer as defaultTracer } from "../instrumentation";
 import { sendResponse } from "./_response_utils";
 import { getDefaultRecipientAddress } from "./_recipient-address";
+import { Tracer } from "@opentelemetry/api";
 
 const { BigNumber } = ethers;
 
@@ -76,10 +77,12 @@ type SuggestedFeesBody = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
   request: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedFeesBody>,
-  response: VercelResponse
+  response: VercelResponse,
+  services?: { tracer: Tracer }
 ) => {
   const logger = getLogger();
   const requestId = getRequestId(request);
+  const tracer = services?.tracer || defaultTracer;
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",

@@ -36,7 +36,14 @@ const sdk = new NodeSDK({
   instrumentations: [httpInstrumentation],
 });
 
-sdk.start();
-
+if (
+  process.env.VERCEL_ENV === "production" ||
+  process.env.VERCEL_ENV === "preview"
+) {
+  sdk.start();
+  console.log(
+    `OpenTelemetry SDK started for Vercel env: ${process.env.VERCEL_ENV}`
+  );
+}
 export const tracer = trace.getTracer("across-api");
 export { context, processor, httpInstrumentation };

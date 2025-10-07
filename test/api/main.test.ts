@@ -5,6 +5,12 @@ import poolsHandler from "../../api/pools";
 import coingeckoHandler from "../../api/coingecko";
 import availableRouteHandler from "../../api/available-routes";
 import { TypedVercelRequest } from "../../api/_types";
+import { trace } from "@opentelemetry/api";
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
 process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
 process.env.REACT_APP_GOOGLE_SERVICE_ACCOUNT = "{}";
@@ -26,13 +32,31 @@ describe("API Test", () => {
   // we want to test that the handler is importing all files and building correctly. We don't attempt to trigger 200
   // successful responses because its difficult to replicate the production server.
   let request = { query: {} as any };
+  // 1. Initialize the SDK
+  const exporter = new InMemorySpanExporter();
+  const spanProcessor = new SimpleSpanProcessor(exporter);
+  const provider = new NodeTracerProvider({ spanProcessors: [spanProcessor] });
+  provider.register();
+
+  beforeAll(() => {
+    trace.setGlobalTracerProvider(provider);
+  });
+
+  afterAll(async () => {
+    trace.disable(); // Resets the global provider to a no-op
+    await provider.shutdown();
+  });
 
   beforeEach(() => {
+    exporter.reset();
     response = getMockedResponse();
   });
 
   test("limits has no load-time errors", async () => {
-    await limitsHandler(request as TypedVercelRequest<any, any>, response);
+    const tracer = trace.getTracer("test-tracer");
+    await limitsHandler(request as TypedVercelRequest<any, any>, response, {
+      tracer,
+    });
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining(/At path: destinationChainId/)
@@ -40,7 +64,10 @@ describe("API Test", () => {
   });
 
   test("suggested-fees has no load-time errors", async () => {
-    await feesHandler(request as TypedVercelRequest<any, any>, response);
+    const tracer = trace.getTracer("test-tracer");
+    await feesHandler(request as TypedVercelRequest<any, any>, response, {
+      tracer,
+    });
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining(/At path: amount/)
