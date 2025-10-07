@@ -1435,7 +1435,6 @@ paths:
                   fillBlockTimestamp: '2025-07-24T16:11:43.000Z'
                   depositTxnRef: >-
                     0x92ffc5d69d00e14e79254f68adab030dd38119996501a88cac0da76557703d11
-                  depositRefundTxnRef: null
                   fillTxnRef: >-
                     0x7b98cebd7ee6e2f75fead81d73005cdf25149141c2045cb5f731b6d9c6b9c517
                   speedups: []
@@ -1708,13 +1707,14 @@ paths:
                         - How to handle the swap flow (input/output token logic)
                         - Which quote-fetching functions to call
                         - How responses and errors are formatted
-                    enum: ["BRIDGEABLE_TO_BRIDGEABLE","BRIDGEABLE_TO_ANY", "ANY_TO_BRIDGEABLE" , "ANY_TO_ANY"]
+                    enum: ["bridgeableToBridgeable", "bridgeableToBridgeableIndirect", "bridgeableToAny", "anyToBridgeable" , "anyToAny"]
                     example: bridgeableToAny
                     x-enum-descriptions: |
-                        - BRIDGEABLE_TO_BRIDGEABLE: Both input and output tokens are bridgeable
-                        - BRIDGEABLE_TO_ANY: Input token is bridgeable, output token is any token
-                        - ANY_TO_BRIDGEABLE: Input token is any token, output token is bridgeable
-                        - ANY_TO_ANY: Both input and output tokens are any tokens (not bridgeable)
+                        - bridgeableToBridgeable: Both input and output tokens are bridgeable
+                        - bridgeableToBridgeableIndirect: Specific case of `bridgeableToBridgeable`, where we route funds from any EVM to HyperCore (via HyperEVM) 
+                        - bridgeableToAny: Input token is bridgeable, output token is any token
+                        - anyToBridgeable: Input token is any token, output token is bridgeable
+                        - anyToAny: Both input and output tokens are any tokens (not bridgeable)
                     x-gitbook-description-html: <p>Type of cross-swap operation.</p>
                   amountType:
                     type: string
