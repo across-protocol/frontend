@@ -491,6 +491,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
 }
 
 // TODO: Include messageFee and oftFee in the fees structure
+// https://linear.app/uma/issue/ACX-4499/add-oft-fees-to-swap-api-response
 function getOftBridgeFees(inputToken: Token) {
   const zeroBN = BigNumber.from(0);
   return {
