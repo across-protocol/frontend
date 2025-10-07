@@ -1,11 +1,13 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { ethers } from "ethers";
 
-export const depositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+export const evmDepositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+export const svmDepositor = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
 export const originChainId = CHAIN_IDs.OPTIMISM;
 export const destinationChainId = CHAIN_IDs.ARBITRUM;
 export const anyDestinationOutputTokens = {
-  [CHAIN_IDs.ARBITRUM]: "0x4d224452801ACEd8B2F0aebE155379bb5D594381", // APE
+  [CHAIN_IDs.ARBITRUM]: "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34", // USDe
+  [CHAIN_IDs.SOLANA]: "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv", // PENGU
 };
 
 export const MIN_OUTPUT_CASES = [
@@ -19,7 +21,7 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -31,20 +33,20 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: ethers.constants.AddressZero,
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // B2A - destination swap
   {
-    labels: ["B2A", "MIN_OUTPUT", "USDC - APE"],
+    labels: ["B2A", "MIN_OUTPUT", "USDC - USDe"],
     params: {
-      amount: ethers.utils.parseUnits("3", 18).toString(),
+      amount: ethers.utils.parseUnits("1", 18).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
       outputToken: anyDestinationOutputTokens[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // A2B - origin swap
@@ -59,7 +61,7 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -71,7 +73,7 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -83,7 +85,7 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -95,7 +97,7 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: ethers.constants.AddressZero,
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -107,12 +109,12 @@ export const MIN_OUTPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // A2A - origin swap and destination swap
   {
-    labels: ["A2A", "MIN_OUTPUT", "bridged USDC - APE"],
+    labels: ["A2A", "MIN_OUTPUT", "bridged USDC - USDe"],
     params: {
       amount: ethers.utils.parseUnits("1", 18).toString(),
       tradeType: "minOutput",
@@ -120,9 +122,9 @@ export const MIN_OUTPUT_CASES = [
         TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
         TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
       originChainId,
-      outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
+      outputToken: anyDestinationOutputTokens[destinationChainId], // USDe
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
 ];
@@ -146,7 +148,7 @@ export const EXACT_INPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -158,33 +160,33 @@ export const EXACT_INPUT_CASES = [
       originChainId,
       outputToken: ethers.constants.AddressZero,
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // B2A - destination swap
   {
-    labels: ["B2A", "EXACT_INPUT", "USDC - APE"],
+    labels: ["B2A", "EXACT_INPUT", "USDC - USDe"],
     params: {
-      amount: ethers.utils.parseUnits("3", 6).toString(),
+      amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "exactInput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
       outputToken: anyDestinationOutputTokens[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // A2B - origin swap
   {
     labels: ["A2B", "EXACT_INPUT", "USDC - Native ETH"],
     params: {
-      amount: ethers.utils.parseUnits("3", 6).toString(),
+      amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "exactInput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
       outputToken: ethers.constants.AddressZero,
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   {
@@ -196,12 +198,12 @@ export const EXACT_INPUT_CASES = [
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // A2A - origin swap and destination swap
   {
-    labels: ["A2A", "EXACT_INPUT", "bridged USDC - APE"],
+    labels: ["A2A", "EXACT_INPUT", "bridged USDC - USDe"],
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "exactInput",
@@ -211,7 +213,7 @@ export const EXACT_INPUT_CASES = [
       originChainId,
       outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
       destinationChainId,
-      depositor,
+      depositor: evmDepositor,
     },
   },
 ];
@@ -229,7 +231,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.MAINNET,
       outputToken: TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.LENS],
       destinationChainId: CHAIN_IDs.LENS,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // L1 GHO -> Lens GHO => any-to-bridgeable, i.e. origin swap (GHO->WGHO) + bridge and unwrap
@@ -244,7 +246,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.MAINNET,
       outputToken: ethers.constants.AddressZero, // Indicates native input token on Lens,
       destinationChainId: CHAIN_IDs.LENS,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // L1 USDC -> Lens GHO => any-to-bridgeable, i.e. origin swap (USDC->WGHO) + bridge and unwrap
@@ -259,7 +261,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.MAINNET,
       outputToken: ethers.constants.AddressZero, // Indicates native input token on Lens,
       destinationChainId: CHAIN_IDs.LENS,
-      depositor,
+      depositor: evmDepositor,
       recipient: "0x52A79C01f10e6Ea89dED5c3f42F3a0EC362ed090",
     },
   },
@@ -275,7 +277,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.LENS,
       outputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
       destinationChainId: CHAIN_IDs.MAINNET,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Lens GHO -> L1 GHO => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO)
@@ -290,7 +292,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.LENS,
       outputToken: TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
       destinationChainId: CHAIN_IDs.MAINNET,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Lens GHO -> L1 USDC => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO->USDC)
@@ -305,7 +307,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.LENS,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
       destinationChainId: CHAIN_IDs.MAINNET,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Optimism USDC -> Lens GHO => bridgeable-to-any, i.e. bridge + destination swap (USDC->WGHO) + unwrap
@@ -320,7 +322,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.OPTIMISM,
       outputToken: ethers.constants.AddressZero, // Indicates native output token GHO on Lens
       destinationChainId: CHAIN_IDs.LENS,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Optimism DAI -> Lens GHO => any-to-any, i.e. origin swap (DAI->USDC) + destination swap (USDC->WGHO) + unwrap
@@ -335,7 +337,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.OPTIMISM,
       outputToken: ethers.constants.AddressZero, // Indicates native output token GHO on Lens
       destinationChainId: CHAIN_IDs.LENS,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Lens GHO -> L1 USDC => bridgeable-to-any, i.e. bridge + destination swap (WGHO->GHO->USDC)
@@ -350,7 +352,7 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.LENS,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
       destinationChainId: CHAIN_IDs.MAINNET,
-      depositor,
+      depositor: evmDepositor,
     },
   },
   // Lens GHO -> Optimism USDC => bridgeable-to-any, i.e. origin swap () + destination swap (WGHO->GHO->USDC)
@@ -365,7 +367,40 @@ export const LENS_CASES = [
       originChainId: CHAIN_IDs.LENS,
       outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
       destinationChainId: CHAIN_IDs.OPTIMISM,
-      depositor,
+      depositor: evmDepositor,
+    },
+  },
+];
+
+export const SOLANA_CASES = [
+  // // B2B - exact input
+  {
+    labels: ["SOLANA", "A2B", "EXACT_INPUT", "USDC - USDC"],
+    params: {
+      amount: ethers.utils.parseUnits("1", 6).toString(),
+      tradeType: "exactInput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA],
+      originChainId: CHAIN_IDs.SOLANA,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
+      depositor: svmDepositor,
+      recipient: evmDepositor,
+      refundAddress: evmDepositor,
+    },
+  },
+  // A2B - exact input
+  {
+    labels: ["SOLANA", "A2B", "EXACT_INPUT", "PENGU - USDC"],
+    params: {
+      amount: ethers.utils.parseUnits("10", 6).toString(),
+      tradeType: "exactInput",
+      inputToken: anyDestinationOutputTokens[CHAIN_IDs.SOLANA],
+      originChainId: CHAIN_IDs.SOLANA,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
+      depositor: svmDepositor,
+      recipient: evmDepositor,
+      refundAddress: evmDepositor,
     },
   },
 ];

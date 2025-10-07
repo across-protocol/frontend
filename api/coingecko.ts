@@ -18,6 +18,7 @@ import {
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
   SUPPORTED_CG_DERIVED_CURRENCIES,
+  TOKEN_EQUIVALENCE_REMAPPING,
   TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
@@ -31,6 +32,7 @@ const { Coingecko } = coingecko;
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
+  REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS,
   BALANCER_V2_TOKENS,
 } = getEnvs();
 
@@ -45,6 +47,14 @@ const CoingeckoQueryParamsSchema = type({
 });
 
 type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
+
+// This tells our SDK's Coingecko client to use a different platform ID for certain chains.
+const CG_CUSTOM_PLATFORM_ID_MAP = {
+  [CHAIN_IDs.SOLANA]: "solana",
+  [CHAIN_IDs.SOLANA_DEVNET]: "solana",
+  [CHAIN_IDs.PLASMA]: "plasma",
+  [CHAIN_IDs.HYPERCORE]: "hyperliquid",
+};
 
 const handler = async (
   { query }: TypedVercelRequest<CoingeckoQueryParams>,
@@ -175,7 +185,8 @@ async function resolvePriceByAddress(params: {
     params.chainId ??
     (isEvmAddress(params.address) ? CHAIN_IDs.MAINNET : CHAIN_IDs.SOLANA);
   const chainId =
-    coinGeckoAssetPlatformLookup[params.address] ?? fallbackChainId;
+    coinGeckoAssetPlatformLookup[params.address.toLowerCase()] ??
+    fallbackChainId;
 
   let address = utils.toAddressType(params.address, chainId).toNative();
   const baseCurrency = (
@@ -200,10 +211,7 @@ async function resolvePriceByAddress(params: {
   const coingeckoClient = Coingecko.get(
     logger,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    {
-      [CHAIN_IDs.SOLANA]: "solana",
-      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
-    }
+    CG_CUSTOM_PLATFORM_ID_MAP
   );
 
   // We want to compute price and return to caller.
@@ -265,7 +273,12 @@ async function resolvePriceBySymbol(params: {
   dateStr?: string;
 }) {
   const logger = getLogger();
-  const { symbol, baseCurrency = "usd", dateStr } = params;
+  const { symbol: _symbol, baseCurrency = "usd", dateStr } = params;
+
+  const redirectedLookupSymbols: Record<string, string> =
+    REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS !== undefined
+      ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS)
+      : {};
 
   if (dateStr) {
     throw new InvalidParamError({
@@ -275,15 +288,18 @@ async function resolvePriceBySymbol(params: {
     });
   }
 
+  const symbol = String(
+    redirectedLookupSymbols[_symbol.toUpperCase()] ??
+      TOKEN_EQUIVALENCE_REMAPPING[_symbol.toUpperCase()] ??
+      _symbol
+  ).toUpperCase();
+
   const { isDerivedCurrency } = assertValidBaseCurrency(baseCurrency);
 
   const coingeckoClient = Coingecko.get(
     logger,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    {
-      [CHAIN_IDs.SOLANA]: "solana",
-      [CHAIN_IDs.SOLANA_DEVNET]: "solana",
-    }
+    CG_CUSTOM_PLATFORM_ID_MAP
   );
 
   // If derived, we need to convert to USD first.

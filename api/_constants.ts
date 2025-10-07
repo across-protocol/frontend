@@ -15,8 +15,19 @@ const {
 } = getEnvs();
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+export const TOKEN_SYMBOLS_MAP = {
+  ...constants.TOKEN_SYMBOLS_MAP,
+  WHYPE: {
+    ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
+      [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+    },
+  },
+};
 export const CHAINS = constants.PUBLIC_NETWORKS;
+export const TOKEN_EQUIVALENCE_REMAPPING =
+  constants.TOKEN_EQUIVALENCE_REMAPPING;
 
 export const maxRelayFeePct = 0.25;
 
@@ -122,6 +133,11 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.5").toString(),
     cutoff: ethers.utils.parseUnits("1").toString(),
   },
+  VLR: {
+    lowerBound: ethers.utils.parseUnits("0").toString(),
+    upperBound: ethers.utils.parseUnits("0").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+  },
   WLD: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
@@ -204,6 +220,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
+    CHAIN_IDs.PLASMA,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
@@ -288,6 +306,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "bnb",
   "sol",
   "hype",
+  "xpl",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -295,13 +314,14 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
   ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -322,13 +342,13 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.WGHO,
   TOKEN_SYMBOLS_MAP.LSK,
   TOKEN_SYMBOLS_MAP.WLD,
+  TOKEN_SYMBOLS_MAP.VLR,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
 
 export const MULTICALL3_ADDRESS = "0xcA11bde05977b3631167028862bE2a173976CA11";
 export const MULTICALL3_ADDRESS_OVERRIDES = {
-  [CHAIN_IDs.ALEPH_ZERO]: "0x3CA11702f7c0F28e0b4e03C31F7492969862C569",
   [CHAIN_IDs.LENS]: "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
   [CHAIN_IDs.ZK_SYNC]: "0xF9cda624FBC7e059355ce98a31693d299FACd963",
 };
@@ -351,4 +371,6 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
   [CHAIN_IDs.HYPEREVM]: "HYPE",
+  [CHAIN_IDs.PLASMA]: "XPL",
+  [CHAIN_IDs.HYPERCORE]: "HYPE",
 };

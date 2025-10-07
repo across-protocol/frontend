@@ -10,6 +10,8 @@ import * as externConfigs from "./extern-configs";
 import {
   enabledMainnetChainConfigs,
   enabledSepoliaChainConfigs,
+  enabledIndirectMainnetChainConfigs,
+  enabledIndirectSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 import assert from "assert";
 
@@ -98,10 +100,10 @@ const enabledRoutes = {
         CHAIN_IDs.ZORA,
         CHAIN_IDs.WORLD_CHAIN,
         CHAIN_IDs.INK,
-        CHAIN_IDs.ALEPH_ZERO,
         CHAIN_IDs.SONEIUM,
         CHAIN_IDs.UNICHAIN,
         CHAIN_IDs.BSC,
+        CHAIN_IDs.PLASMA,
       ],
     },
     // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
@@ -168,6 +170,7 @@ const enabledRoutes = {
       [CHAIN_IDs.BASE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.BLAST]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.BSC]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.HYPEREVM]: "0xF1BF00D947267Da5cC63f8c8A60568c59FA31bCb",
       [CHAIN_IDs.INK]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.LENS]: "0x8A8cA9c4112c67b7Dae7dF7E89EA45D592362107",
       [CHAIN_IDs.LINEA]: "0xE0BCff426509723B18D6b2f0D8F4602d143bE3e0",
@@ -175,6 +178,7 @@ const enabledRoutes = {
       [CHAIN_IDs.MAINNET]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.MODE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.OPTIMISM]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.PLASMA]: "0xF1BF00D947267Da5cC63f8c8A60568c59FA31bCb",
       [CHAIN_IDs.POLYGON]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.REDSTONE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.SCROLL]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
@@ -189,6 +193,7 @@ const enabledRoutes = {
       [CHAIN_IDs.BASE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.BLAST]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.BSC]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.HYPEREVM]: "0xdC49fD0a3A7d44969E818452Af93C46d5C8099a4",
       [CHAIN_IDs.INK]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.LENS]: "0xda16F0B16bC38825e225E4bB5E272833f3EcacB8",
       [CHAIN_IDs.LINEA]: "0xAFa3f221e677aE796Deb45db31089375Cbc4cC07",
@@ -196,6 +201,7 @@ const enabledRoutes = {
       [CHAIN_IDs.MAINNET]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.MODE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.OPTIMISM]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.PLASMA]: "0xdC49fD0a3A7d44969E818452Af93C46d5C8099a4",
       [CHAIN_IDs.POLYGON]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.REDSTONE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.SCROLL]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
@@ -207,7 +213,8 @@ const enabledRoutes = {
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
-      enabledMainnetExternalProjects
+      enabledMainnetExternalProjects,
+      enabledIndirectMainnetChainConfigs
     ),
   },
   [CHAIN_IDs.SEPOLIA]: {
@@ -240,13 +247,18 @@ const enabledRoutes = {
     },
     spokePoolPeripheryAddresses: {},
     swapProxyAddresses: {},
-    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
+    routes: transformChainConfigs(
+      enabledSepoliaChainConfigs,
+      [],
+      enabledIndirectSepoliaChainConfigs
+    ),
   },
 } as const;
 
 function transformChainConfigs(
   enabledChainConfigs: typeof enabledMainnetChainConfigs,
-  enabledExternalProjects: typeof enabledMainnetExternalProjects
+  enabledExternalProjects: typeof enabledMainnetExternalProjects,
+  enabledIndirectChainConfigs: typeof enabledIndirectMainnetChainConfigs
 ) {
   const transformedChainConfigs: {
     fromChain: number;
@@ -701,6 +713,89 @@ async function generateRoutes(hubPoolChainId = 1) {
   writeFileSync(
     `./src/data/chains_${hubPoolChainId}.json`,
     await prettier.format(JSON.stringify(chainsFileContent, null, 2), {
+      parser: "json",
+    })
+  );
+
+  // helper file with INDIRECT chains
+  const indirectChainsFileContent = (
+    hubPoolChainId === CHAIN_IDs.MAINNET
+      ? enabledIndirectMainnetChainConfigs
+      : enabledIndirectSepoliaChainConfigs
+  ).map((chainConfig) => {
+    const [chainKey] =
+      Object.entries(chainConfigs).find(
+        ([, config]) => config.chainId === chainConfig.chainId
+      ) || [];
+    if (!chainKey) {
+      throw new Error(
+        `Could not find INDIRECTchain key for chain ${chainConfig.chainId}`
+      );
+    }
+    const assetsBaseUrl = `https://raw.githubusercontent.com/across-protocol/frontend/master`;
+    const getTokenInfo = (tokenSymbol: string) => {
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+      return {
+        address: checksumAddress(
+          tokenInfo.addresses[chainConfig.chainId] as string
+        ),
+        symbol: tokenSymbol,
+        name: tokenInfo.name,
+        decimals: tokenInfo.decimals,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
+      };
+    };
+    return {
+      chainId: chainConfig.chainId,
+      name: chainConfig.name,
+      publicRpcUrl: chainConfig.publicRpcUrl,
+      explorerUrl: chainConfig.blockExplorer,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
+      spokePool: chainConfig.spokePool.address,
+      spokePoolBlock: chainConfig.spokePool.blockNumber,
+      intermediaryChains: chainConfig.intermediaryChains,
+      inputTokens: chainConfig.tokens.flatMap((token) => {
+        try {
+          if (typeof token === "string") {
+            return getTokenInfo(token);
+          } else {
+            if (token.chainIds.includes(chainConfig.chainId)) {
+              return getTokenInfo(token.symbol);
+            }
+            return [];
+          }
+        } catch (e) {
+          console.warn(
+            `Could not find token info for ${token} on chain ${chainConfig.chainId}`
+          );
+          return [];
+        }
+      }),
+      outputTokens: (chainConfig.outputTokens ?? chainConfig.tokens).flatMap(
+        (token) => {
+          try {
+            if (typeof token === "string") {
+              return getTokenInfo(token);
+            } else {
+              if (token.chainIds.includes(chainConfig.chainId)) {
+                return getTokenInfo(token.symbol);
+              }
+              return [];
+            }
+          } catch (e) {
+            console.warn(
+              `Could not find token info for ${token} on chain ${chainConfig.chainId}`
+            );
+            return [];
+          }
+        }
+      ),
+    };
+  });
+  writeFileSync(
+    `./src/data/indirect_chains_${hubPoolChainId}.json`,
+    await prettier.format(JSON.stringify(indirectChainsFileContent, null, 2), {
       parser: "json",
     })
   );

@@ -5,7 +5,6 @@ import {
   utils as ethersUtils,
 } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import {
@@ -27,6 +26,7 @@ import {
   SwapQuote,
   Token,
   DexSources,
+  isEvmSwapTxn,
 } from "./types";
 import {
   isInputTokenBridgeable,
@@ -35,6 +35,7 @@ import {
   getSpokePool,
   getSpokePoolAddress,
 } from "../_utils";
+import { CHAIN_IDs } from "../_constants";
 import {
   getSpokePoolPeripheryAddress,
   TransferType,
@@ -45,6 +46,7 @@ import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
 import { isEvmAddress, isSvmAddress } from "../_address";
+import { isIndirectDestinationRouteSupported } from "./utils-b2bi";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -104,6 +106,7 @@ export const AMOUNT_TYPE = {
 
 export const CROSS_SWAP_TYPE = {
   BRIDGEABLE_TO_BRIDGEABLE: "bridgeableToBridgeable",
+  BRIDGEABLE_TO_BRIDGEABLE_INDIRECT: "bridgeableToBridgeableIndirect",
   BRIDGEABLE_TO_ANY: "bridgeableToAny",
   ANY_TO_BRIDGEABLE: "anyToBridgeable",
   ANY_TO_ANY: "anyToAny",
@@ -159,6 +162,10 @@ export function getCrossSwapTypes(params: {
     )
   ) {
     return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
+  }
+
+  if (isIndirectDestinationRouteSupported(params)) {
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT];
   }
 
   const inputBridgeable = isInputTokenBridgeable(
@@ -464,10 +471,13 @@ export function buildMinOutputBridgeTokenMessage(
   });
 }
 
-export function getFallbackRecipient(crossSwap: CrossSwap) {
+export function getFallbackRecipient(
+  crossSwap: CrossSwap,
+  destinationRecipient?: string
+) {
   return crossSwap.refundOnOrigin
     ? constants.AddressZero
-    : (crossSwap.refundAddress ?? crossSwap.depositor);
+    : (crossSwap.refundAddress ?? destinationRecipient ?? crossSwap.depositor);
 }
 
 export async function extractDepositDataStruct(
@@ -477,7 +487,12 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not extract 'BaseDepositDataStruct' for non-Across bridge quotes"
+    );
+  }
+  const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
@@ -548,7 +563,10 @@ export async function extractSwapAndDepositDataStruct(
     swapToken: originSwapQuote.tokenIn.address,
     swapTokenAmount: originSwapQuote.maximumAmountIn,
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-    routerCalldata: originSwapQuote.swapTxns[0].data,
+    routerCalldata:
+      originSwapQuote.swapTxns[0].ecosystem === "evm"
+        ? originSwapQuote.swapTxns[0].data
+        : "",
     exchange: originRouter.address,
     transferType,
     enableProportionalAdjustment: true,
@@ -587,6 +605,13 @@ export function buildDestinationSwapCrossChainMessage({
   };
   appFee?: AppFee;
 }) {
+  // Ensure all swapTxns are EVM ecosystem since this function handles only EVM messages
+  if (!destinationSwapQuote.swapTxns.every(isEvmSwapTxn)) {
+    throw new Error(
+      "buildDestinationSwapCrossChainMessage only supports EVM swap transactions"
+    );
+  }
+
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
   const multicallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId
@@ -614,6 +639,10 @@ export function buildDestinationSwapCrossChainMessage({
     crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
       ? crossSwap.amount.sub(appFeeAmount)
       : destinationSwapQuote.minAmountOut.sub(appFeeAmount);
+
+  const destinationRecipient = crossSwap.isOriginSvm
+    ? crossSwap.recipient
+    : crossSwap.depositor;
 
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
@@ -684,7 +713,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           crossSwap.outputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -743,7 +772,7 @@ export function buildDestinationSwapCrossChainMessage({
         };
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getFallbackRecipient(crossSwap, destinationRecipient),
     actions: [
       routerTransferAction,
       // swap bridgeable output token -> cross swap output token
@@ -759,7 +788,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -771,7 +800,7 @@ export function buildDestinationSwapCrossChainMessage({
               target: multicallHandlerAddress,
               callData: encodeDrainCalldata(
                 crossSwap.outputToken.address,
-                crossSwap.refundAddress ?? crossSwap.depositor
+                crossSwap.refundAddress ?? destinationRecipient
               ),
               value: "0",
             },
@@ -867,7 +896,7 @@ export function isValidSource(
   sources: DexSources
 ) {
   const sourceToCheck = _source.toLowerCase();
-  return sources.sources[chainId].some((source) =>
+  return sources.sources[chainId]?.some((source) =>
     source.names.includes(sourceToCheck)
   );
 }
@@ -916,6 +945,9 @@ export function makeGetSources(sources: DexSources) {
 }
 
 export function inferCrossSwapType(params: CrossSwapQuotes) {
+  if (params.indirectDestinationRoute) {
+    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT;
+  }
   return params.originSwapQuote && params.destinationSwapQuote
     ? CROSS_SWAP_TYPE.ANY_TO_ANY
     : params.originSwapQuote && !params.destinationSwapQuote

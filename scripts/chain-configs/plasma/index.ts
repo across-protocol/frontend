@@ -4,12 +4,11 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.ALEPH_ZERO;
+const chainId = CHAIN_IDs.PLASMA;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  fullName: "Aleph Zero",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -17,8 +16,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://rpc.alephzero.raas.gelato.cloud",
-  blockTimeSeconds: 6,
-  tokens: [],
+  publicRpcUrl: chainInfoBase.publicRPC,
+  blockTimeSeconds: 1,
+  tokens: ["USDT"],
   enableCCTP: false,
 } as ChainConfig;

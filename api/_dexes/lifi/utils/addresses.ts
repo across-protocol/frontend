@@ -1,7 +1,8 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 
-// Taken from here: https://github.com/lifinance/contracts/tree/main/deployments
-export const LIFI_ROUTER_ADDRESS = {
+// `LiFiDiamond` contract address taken from here:
+// https://github.com/lifinance/contracts/tree/main/deployments
+export const LIFI_DIAMOND_ADDRESS = {
   [CHAIN_IDs.MAINNET]: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
   [CHAIN_IDs.OPTIMISM]: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
   [CHAIN_IDs.ARBITRUM]: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
@@ -18,4 +19,6 @@ export const LIFI_ROUTER_ADDRESS = {
   [CHAIN_IDs.LISK]: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE",
   [CHAIN_IDs.INK]: "0x864b314D4C5a0399368609581d3E8933a63b9232",
   [CHAIN_IDs.ZK_SYNC]: "0x341e94069f53234fE6DabeF707aD424830525715",
+  [CHAIN_IDs.HYPEREVM]: "0x0a0758d937d1059c356D4714e57F5df0239bce1A",
+  [CHAIN_IDs.PLASMA]: "0x026F252016A7C47CDEf1F05a3Fc9E20C92a49C37",
 };

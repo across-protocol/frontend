@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit manually.
-// Generated on 2025-09-12T13:45:14.124Z
+// Generated on 2025-09-29T08:09:29.301Z
 // This file contains available liquidity sources for LiFi DEX integration
 
 export const SOURCES = {
@@ -61,6 +61,16 @@ export const SOURCES = {
       { key: "okx", names: ["okx"] },
     ],
     "480": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
+    "999": [
+      { key: "enso", names: ["enso"] },
+      { key: "openocean", names: ["openocean"] },
+      { key: "kyberswap", names: ["kyberswap"] },
+      { key: "bebop", names: ["bebop"] },
+      { key: "liquidswap", names: ["liquidswap"] },
+      { key: "hyperbloom", names: ["hyperbloom"] },
+      { key: "oogaboogameta", names: ["oogaboogameta"] },
+      { key: "hyperflow", names: ["hyperflow"] },
+    ],
     "1135": [{ key: "lifidexaggregator", names: ["lifidexaggregator"] }],
     "1868": [
       { key: "enso", names: ["enso"] },
@@ -75,6 +85,7 @@ export const SOURCES = {
       { key: "sushiswap", names: ["sushiswap"] },
       { key: "okx", names: ["okx"] },
     ],
+    "9745": [{ key: "kyberswap", names: ["kyberswap"] }],
     "34443": [
       { key: "odos", names: ["odos"] },
       { key: "openocean", names: ["openocean"] },
@@ -129,13 +140,18 @@ export const SOURCES = {
 
 export const ALL_SOURCES = [
   "1inch",
+  "bebop",
   "dodo",
   "enso",
+  "hyperbloom",
+  "hyperflow",
   "kyberswap",
   "lifidexaggregator",
+  "liquidswap",
   "merkle",
   "odos",
   "okx",
+  "oogaboogameta",
   "openocean",
   "paraswap",
   "superswap",

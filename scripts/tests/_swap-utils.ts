@@ -21,6 +21,7 @@ import {
   EXACT_OUTPUT_CASES,
   EXACT_INPUT_CASES,
   LENS_CASES,
+  SOLANA_CASES,
 } from "./_swap-cases";
 
 dotenv.config({
@@ -261,6 +262,7 @@ export async function fetchSwapQuotes() {
       ...EXACT_OUTPUT_CASES,
       ...EXACT_INPUT_CASES,
       ...LENS_CASES,
+      ...SOLANA_CASES,
     ];
     const filteredTestCases = filterTestCases(testCases, filterString);
 
@@ -275,11 +277,7 @@ export async function fetchSwapQuotes() {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
       console.log("Body:", JSON.stringify(body, null, 2));
-      const response = await axios.post(
-        `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-        body,
-        { params: testCase.params }
-      );
+      const response = await axios.post(url, body, { params: testCase.params });
       swapQuotes.push(response.data as BaseSwapResponse);
     }
   }
@@ -397,8 +395,12 @@ export async function signAndWaitAllowanceFlowSvm(params: {
     });
     await sendTx(signedTx, { commitment: "confirmed" });
     console.log("Tx sent and confirmed");
-
-    // TODO: track fill
+    const fillTxnRef = await trackFill(signature.toString());
+    if (fillTxnRef) {
+      console.log("Fill txn ref:", fillTxnRef);
+    } else {
+      console.log("Fill txn ref not found");
+    }
   } catch (e) {
     console.error("Tx reverted", e);
   }

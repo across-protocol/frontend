@@ -682,4 +682,5 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.POLYGON,
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.PLASMA,
 ];

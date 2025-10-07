@@ -49,6 +49,7 @@ import {
   graphAPIKey,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
+  TOKEN_EQUIVALENCE_REMAPPING,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
@@ -559,6 +560,15 @@ export const getTokenByAddress = (
       if (token) {
         return token[1];
       }
+    }
+
+    // For some chains, the same address is associated with both the ETH and WETH symbols in the constants file.
+    // See: https://www.npmjs.com/package/@across-protocol/constants
+    // This can cause issues when resolving the token.
+    // To fix this, we will check if there is a WETH match and prioritize it over the ETH match.
+    const wethMatch = matches.find(([symbol]) => symbol === "WETH");
+    if (wethMatch) {
+      return wethMatch[1];
     }
 
     return matches[0][1];
@@ -1678,8 +1688,12 @@ export function getLimitCap(
   decimals: number,
   toChainId: number
 ) {
+  const equivalentSymbol = TOKEN_EQUIVALENCE_REMAPPING[symbol] ?? symbol;
   const cap =
-    [`LIMIT_CAP_${symbol}_${toChainId}`, `LIMIT_CAP_${symbol}`]
+    [
+      `LIMIT_CAP_${equivalentSymbol}_${toChainId}`,
+      `LIMIT_CAP_${equivalentSymbol}`,
+    ]
       .map((key) => getEnvs()[key])
       .find((value) => value !== undefined) ?? undefined;
 
@@ -2538,12 +2552,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
-    // Resolve token info statically
-    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
-      Boolean(
-        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
-      )
-    );
+    const token = getTokenByAddress(address, chainId);
 
     if (token) {
       return {
