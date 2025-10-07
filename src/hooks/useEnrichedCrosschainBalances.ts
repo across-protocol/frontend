@@ -6,7 +6,7 @@ import { useUserTokenBalances } from "./useUserTokenBalances";
 import { compareAddressesSimple } from "utils";
 import { BigNumber, utils } from "ethers";
 
-export default function useEnrichedCrosschainBalances() {
+export function useEnrichedCrosschainBalances() {
   const tokenBalances = useUserTokenBalances();
   const availableCrosschainRoutes = useAvailableCrosschainRoutes();
 
@@ -49,13 +49,13 @@ export default function useEnrichedCrosschainBalances() {
           .filter((t) => t.logoURI !== undefined);
 
         // Sort high to low balanceUsd
-        const orderedEnrichedTokens = enrichedTokens.sort(
+        const sortedByBalance = enrichedTokens.sort(
           (a, b) => b.balanceUsd - a.balanceUsd
         );
 
         return {
           ...acc,
-          [Number(chainId)]: orderedEnrichedTokens,
+          [Number(chainId)]: sortedByBalance,
         };
       },
       {} as Record<

@@ -20,7 +20,7 @@ import { ReactComponent as CheckmarkCircle } from "assets/icons/checkmark-circle
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
-import useEnrichedCrosschainBalances from "hooks/useEnrichedCrosschainBalances";
+import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 import { Text } from "components";

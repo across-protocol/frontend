@@ -10,6 +10,7 @@ import {
 } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export type UseSwapAndBridgeReturn = {
   inputToken: EnrichedTokenSelect | null;
@@ -55,6 +56,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   const [amount, setAmount] = useState<BigNumber | null>(null);
   const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
 
+  const debouncedAmount = useDebounce(amount, 300);
+
   const quickSwap = useCallback(() => {
     setInputToken((prevInput) => {
       const prevOut = outputToken;
@@ -71,7 +74,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   } = useSwapQuote({
     origin: inputToken ? inputToken : null,
     destination: outputToken ? outputToken : null,
-    amount: amount,
+    amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
   });
 

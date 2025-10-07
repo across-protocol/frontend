@@ -66,6 +66,7 @@ export const InputForm = ({
           validationError === AmountInputError.INSUFFICIENT_BALANCE
         }
         otherToken={outputToken}
+        disabled={!outputToken || !outputToken}
       />
       <QuickSwapButton onClick={quickSwap}>
         <ArrowsCross width="12px" height="12px" />
@@ -82,6 +83,7 @@ export const InputForm = ({
         shouldUpdate={isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
         otherToken={inputToken}
+        disabled={!outputToken || !outputToken}
       />
     </Wrapper>
   );
@@ -97,6 +99,7 @@ const TokenInput = ({
   isUpdateLoading,
   insufficientInputBalance = false,
   otherToken,
+  disabled,
 }: {
   setToken: (token: EnrichedTokenSelect) => void;
   token: EnrichedTokenSelect | null;
@@ -106,6 +109,7 @@ const TokenInput = ({
   shouldUpdate: boolean;
   isUpdateLoading: boolean;
   insufficientInputBalance?: boolean;
+  disabled?: boolean;
   otherToken?: EnrichedTokenSelect | null;
 }) => {
   const [amountString, setAmountString] = useState<string>("");
@@ -171,6 +175,11 @@ const TokenInput = ({
     }
   }, [amountString, token]);
 
+  const inputDisabled = (() => {
+    if (disabled) return true;
+    return Boolean(shouldUpdate && isUpdateLoading);
+  })();
+
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
@@ -187,7 +196,7 @@ const TokenInput = ({
               setAmountString(value);
             }
           }}
-          disabled={shouldUpdate && isUpdateLoading}
+          disabled={inputDisabled}
           error={insufficientInputBalance}
         />
         <TokenAmountInputEstimatedUsd>
