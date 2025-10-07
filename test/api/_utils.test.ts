@@ -143,6 +143,55 @@ describe("_utils", () => {
     }
   });
 
+  describe("#getTokenByAddress()", () => {
+    it("should return undefined for an invalid address", () => {
+      const token = getTokenByAddress("0xInvalidAddress");
+      expect(token).toBeUndefined();
+    });
+
+    it("should correctly resolve ambiguous tokens like USDC", () => {
+      const arbitrumUsdcAddress = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+      const token = getTokenByAddress(arbitrumUsdcAddress, 42161);
+      expect(token).toBeDefined();
+      expect(token?.symbol).toBe("USDC");
+    });
+
+    it("should handle wrapped and ambiguous tokens correctly from TOKEN_SYMBOL_MAP", () => {
+      const ambiguousTokens = ["USDC", "USDT"];
+      const wrappedTokens = [
+        "WETH",
+        "WBNB",
+        "WMATIC",
+        "WHYPE",
+        "TATARA-WBTC",
+        "WAZERO",
+        "WBNB",
+        "WGHO",
+        "WGRASS",
+        "WSOL",
+        "WXPL",
+      ];
+      const tokensToTest = [...ambiguousTokens, ...wrappedTokens];
+
+      for (const symbol of tokensToTest) {
+        const tokenInfo =
+          TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
+        if (tokenInfo) {
+          for (const chainId in tokenInfo.addresses) {
+            const numericChainId = Number(chainId);
+            const address =
+              tokenInfo.addresses[
+                numericChainId as keyof typeof tokenInfo.addresses
+              ];
+            const token = getTokenByAddress(address, numericChainId);
+            expect(token).toBeDefined();
+            expect(token?.symbol).toBe(symbol);
+          }
+        }
+      }
+    });
+  });
+
   describe("#validateChainAndTokenParams()", () => {
     test("throw if 'destinationChainId' is not provided", () => {
       expect(() => validateChainAndTokenParams({})).toThrowError(

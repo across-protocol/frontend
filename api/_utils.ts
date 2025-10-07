@@ -574,15 +574,6 @@ export const getTokenByAddress = (
       }
     }
 
-    // For some chains, the same address is associated with both the ETH and WETH symbols in the constants file.
-    // See: https://www.npmjs.com/package/@across-protocol/constants
-    // This can cause issues when resolving the token.
-    // To fix this, we will check if there is a WETH match and prioritize it over the ETH match.
-    const wethMatch = matches.find(([symbol]) => symbol === "WETH");
-    if (wethMatch) {
-      return wethMatch[1];
-    }
-
     return matches[0][1];
   } catch (error) {
     return undefined;
