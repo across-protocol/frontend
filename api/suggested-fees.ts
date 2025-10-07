@@ -278,7 +278,7 @@ const handler = async (
       ]);
 
       setLimitsSpanAttributes(
-        await getLimitsSpanAttributes(
+        getLimitsSpanAttributes(
           {
             maxDeposit: limits.maxDeposit,
             maxDepositInstant: limits.maxDepositInstant,

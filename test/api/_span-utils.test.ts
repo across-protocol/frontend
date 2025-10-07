@@ -28,7 +28,7 @@ describe("getLimitsSpanAttributes", () => {
     const wEthTokenPriceUsd = 4000;
     const acxTokenPriceUsd = 0.1;
 
-    const wbtcAttributes = await getLimitsSpanAttributes(
+    const wbtcAttributes = getLimitsSpanAttributes(
       {
         minDeposit: "1000000", // 0.01 WBTC
         maxDeposit: "100000000", // 1 WBTC
@@ -57,7 +57,7 @@ describe("getLimitsSpanAttributes", () => {
       maxDepositShortDelay: "50000000000000000000", // 50 WETH
     };
 
-    const wethAttributes = await getLimitsSpanAttributes(
+    const wethAttributes = getLimitsSpanAttributes(
       wethLimits,
       wethToken,
       wEthTokenPriceUsd
@@ -81,7 +81,7 @@ describe("getLimitsSpanAttributes", () => {
       maxDepositShortDelay: "50000000000000000000", // 50 ACX
     };
 
-    const acxAttributes = await getLimitsSpanAttributes(
+    const acxAttributes = getLimitsSpanAttributes(
       acxLimits,
       acxToken,
       acxTokenPriceUsd

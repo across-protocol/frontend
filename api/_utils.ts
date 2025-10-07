@@ -2723,7 +2723,7 @@ export function computeUtilizationPostRelay(
   return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
 }
 
-export async function getLimitsSpanAttributes(
+export function getLimitsSpanAttributes(
   limits: {
     minDeposit: string;
     maxDeposit: string;
