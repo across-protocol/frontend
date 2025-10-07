@@ -205,13 +205,13 @@ describe("GET /swap/approval", () => {
           expect(response.status).toBe(200);
           expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
           expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
-        }, 5000);
+        }, 10000);
       }
     }
   });
 
   describe("Ambiguous Tokens", () => {
-    jest.setTimeout(30000);
+    jest.setTimeout(100000);
     const tokensToTest = ["USDC", "USDT"];
 
     for (const tokenSymbol of tokensToTest) {
@@ -237,7 +237,7 @@ describe("GET /swap/approval", () => {
           expect(response.status).toBe(200);
           expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
           expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
-        }, 5000);
+        }, 10000);
       }
     }
   });
