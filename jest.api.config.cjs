@@ -4,6 +4,7 @@ module.exports = {
   setupFiles: ["<rootDir>/setup.jest.ts"],
   preset: "ts-jest",
   testEnvironment: "node",
+  detectOpenHandles: true,
   moduleDirectories: ["node_modules", "<rootDir>"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transform: {
