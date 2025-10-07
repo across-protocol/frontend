@@ -32,7 +32,7 @@ describe("API Test", () => {
   // we want to test that the handler is importing all files and building correctly. We don't attempt to trigger 200
   // successful responses because its difficult to replicate the production server.
   let request = { query: {} as any };
-  // 1. Initialize the SDK
+
   const exporter = new InMemorySpanExporter();
   const spanProcessor = new SimpleSpanProcessor(exporter);
   const provider = new NodeTracerProvider({ spanProcessors: [spanProcessor] });
