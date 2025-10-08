@@ -43,6 +43,7 @@ const Wrapper = styled.div`
   gap: 8px;
   flex-direction: row;
   justify-content: space-between;
+  border: 2px solid transparent;
 
   border-radius: 8px;
   background: transparent;
@@ -52,6 +53,9 @@ const Wrapper = styled.div`
   &:hover,
   &:active {
     background: rgba(224, 243, 255, 0.05);
+  }
+  &:has(:focus-visible) {
+    border-color: ${COLORS.aqua};
   }
 
   &:focus-within {

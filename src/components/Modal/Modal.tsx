@@ -6,6 +6,9 @@ import {
   CloseButton,
   ElementRowDivider,
   ModalContentWrapper,
+  ModalHeader,
+  ModalContent,
+  ModalFooter,
   Title,
   TitleAndExitWrapper,
   Wrapper,
@@ -156,23 +159,27 @@ const Modal = ({
             padding={padding ?? "normal"}
             className={className}
           >
-            <TitleAndExitWrapper>
-              {typeof title === "string" ? (
-                <Title>{title}</Title>
-              ) : (
-                <div>{title}</div>
-              )}
+            <ModalHeader>
+              <TitleAndExitWrapper>
+                {typeof title === "string" ? (
+                  <Title>{title}</Title>
+                ) : (
+                  <div>{title}</div>
+                )}
 
-              <CloseButton
-                tabIndex={1}
-                onClick={() => externalModalExitHandler()}
-              >
-                <ExitIcon />
-              </CloseButton>
-            </TitleAndExitWrapper>
-            {titleBorder && <ElementRowDivider />}
-            {children}
-            {footer}
+                <CloseButton
+                  tabIndex={1}
+                  onClick={() => externalModalExitHandler()}
+                >
+                  <ExitIcon />
+                </CloseButton>
+              </TitleAndExitWrapper>
+              {titleBorder && <ElementRowDivider />}
+            </ModalHeader>
+
+            <ModalContent>{children}</ModalContent>
+
+            {footer && <ModalFooter>{footer}</ModalFooter>}
           </ModalContentWrapper>
         </Wrapper>,
         container.current

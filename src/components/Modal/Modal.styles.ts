@@ -95,21 +95,19 @@ const minimumMargin = 32;
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
   --padding-modal-content: ${({ padding }) =>
     padding === "normal" ? "24px" : "16px"};
-  max-height: ${({ height, topYOffset }) =>
+  height: ${({ height, topYOffset }) =>
     height
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
       : "calc(100svh - 64px)"};
   max-width: ${({ width }) => width ?? 800}px;
-  height: fit-content;
   width: calc(100% - 32px);
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--padding-modal-content);
 
   margin: 0 auto;
-  padding: var(--padding-modal-content);
+  padding: 0;
 
   margin-top: ${({ topYOffset }) => topYOffset ?? 0}px;
   margin-bottom: ${({ bottomYOffset }) => bottomYOffset ?? 0}px;
@@ -131,7 +129,7 @@ export const TitleAndExitWrapper = styled.div`
   align-items: center;
 
   gap: 12px;
-  padding: 0px;
+  padding-bottom: var(--padding-modal-content);
 
   width: 100%;
 `;
@@ -173,4 +171,33 @@ export const CloseButton = styled.button`
   &:focus-visible {
     outline: 2px solid ${COLORS.aqua};
   }
+`;
+
+export const ModalHeader = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #202024;
+  padding: var(--padding-modal-content);
+  padding-bottom: 0;
+  flex-shrink: 0;
+  width: 100%;
+`;
+
+export const ModalContent = styled.div`
+  flex: 1;
+  overflow: hidden;
+  padding: var(--padding-modal-content);
+  min-height: 0;
+  width: 100%;
+`;
+
+export const ModalFooter = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #202024;
+  padding: var(--padding-modal-content);
+  padding-top: 0;
+  flex-shrink: 0;
 `;

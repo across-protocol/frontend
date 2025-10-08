@@ -25,6 +25,7 @@ import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalanc
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 import { Text } from "components";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -601,6 +602,7 @@ const DesktopLayout = ({
   onTokenSelect: (token: EnrichedTokenSelect) => void;
   onModalClose: () => void;
 }) => {
+  useHotkeys("esc", () => onModalClose());
   return (
     <DesktopInnerWrapper>
       <DesktopChainWrapper>
@@ -985,9 +987,9 @@ const ListWrapper = styled.div`
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
-  flex: 1; /* Take up remaining space in parent */
-  min-height: 0; /* Allow flex child to shrink below content size */
-  padding-bottom: calc(32px + 56px * 2);
+  flex: 1;
+  min-height: 0;
+  padding-bottom: calc(56px * 2 + 23px); // account for footer
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -1025,6 +1027,7 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
   gap: 8px;
 
   border-radius: 8px;
+  border: 2px solid transparent;
   background: ${({ isSelected }) =>
     isSelected ? COLORS["aqua-5"] : "transparent"};
 
@@ -1036,6 +1039,11 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
       if (isDisabled) return "transparent";
       return isSelected ? COLORS["aqua-15"] : COLORS["grey-400-15"];
     }};
+  }
+
+  :focus-visible {
+    outline: none;
+    border-color: ${COLORS.aqua};
   }
 `;
 
