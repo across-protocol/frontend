@@ -195,8 +195,8 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE;
 
       const errorMessagePrefix = isToHyperCore
-        ? "HyperCore -> HyperEVM"
-        : "HyperEVM -> HyperCore";
+        ? "HyperEVM -> HyperCore"
+        : "HyperCore -> HyperEVM";
 
       if (appFee?.feeAmount.gt(0)) {
         throw new InvalidParamError({
