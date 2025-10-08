@@ -8,6 +8,7 @@ import useAvailableCrosschainRoutes, {
 } from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
+  ChainInfo,
   COLORS,
   formatUnitsWithMaxFractions,
   formatUSD,
@@ -41,15 +42,13 @@ const popularTokens = [
   TOKEN_SYMBOLS_MAP.WBTC.symbol,
 ];
 
-// Type definitions for better typing
-type ChainData = {
-  tokens: LifiToken[];
+type ChainData = ChainInfo & {
   isDisabled: boolean;
 };
 
 type DisplayedChains = {
-  popular: [string, ChainData][];
-  all: [string, ChainData][];
+  popular: ChainData[];
+  all: ChainData[];
 };
 
 type EnrichedToken = LifiToken & {
@@ -214,63 +213,51 @@ export default function ChainTokenSelectorModal({
   }, [selectedChain, balances, tokenSearch, crossChainRoutes.data]);
 
   const displayedChains = useMemo(() => {
-    const chainsWithDisabledState: [string, ChainData][] = Object.entries(
-      crossChainRoutes.data || {}
-    )
-      .filter(([chainId]) => {
-        // why ar we filtering out Boba?
-        if ([288].includes(Number(chainId))) {
+    const chainsWithDisabledState = Object.keys(crossChainRoutes.data || {})
+      .map((chainId) => getChainInfo(Number(chainId)))
+      .filter((chainInfo) => {
+        // TODO: check why we are filtering out Boba?
+        if (chainInfo.chainId === 288) {
           return false;
         }
 
         const keywords = [
-          String(chainId),
-          getChainInfo(Number(chainId)).name.toLowerCase().replace(" ", ""),
+          String(chainInfo.chainId),
+          chainInfo.name.toLowerCase().replace(" ", ""),
         ];
         return keywords.some((keyword) =>
           keyword.toLowerCase().includes(chainSearch.toLowerCase())
         );
       })
-      .map(([chainId, tokens]) => {
-        return [
-          chainId,
-          {
-            tokens,
-            isDisabled: otherToken && Number(chainId) === otherToken.chainId, // same chain can't be both input and output
-          },
-        ] as [string, ChainData];
+      .map((chainInfo) => {
+        return {
+          ...chainInfo,
+          isDisabled:
+            otherToken && Number(chainInfo.chainId) === otherToken.chainId, // same chain can't be both input and output
+        };
       });
 
     // Separate popular chains from all chains
-    const popularChainsData: typeof chainsWithDisabledState = [];
+    const popularChainsData = chainsWithDisabledState
+      .filter((chain) => popularChains.includes(chain.chainId))
+      .sort((chainA, chainB) => {
+        const indexA = popularChains.indexOf(Number(chainA.chainId));
+        const indexB = popularChains.indexOf(Number(chainB.chainId));
+        return indexA - indexB;
+      });
 
-    chainsWithDisabledState.forEach((entry) => {
-      const [chainId] = entry;
-      if (popularChains.includes(Number(chainId))) {
-        popularChainsData.push(entry);
-      }
-    });
-
-    // Sort popular chains by the order they appear in popularChains array
-    popularChainsData.sort(([chainIdA], [chainIdB]) => {
-      const indexA = popularChains.indexOf(Number(chainIdA));
-      const indexB = popularChains.indexOf(Number(chainIdB));
-      return indexA - indexB;
-    });
-
-    // Combine all chains for the "All Chains" section (sorted alphabetically)
-    const allChainsData = [...chainsWithDisabledState].sort(
-      ([chainIdA], [chainIdB]) => {
-        const chainInfoA = getChainInfo(Number(chainIdA));
-        const chainInfoB = getChainInfo(Number(chainIdB));
+    const allChainsData = chainsWithDisabledState
+      .filter((chain) => !popularChains.includes(chain.chainId))
+      .sort((chainA, chainB) => {
+        const chainInfoA = getChainInfo(Number(chainA.chainId));
+        const chainInfoB = getChainInfo(Number(chainB.chainId));
         return chainInfoA.name.localeCompare(chainInfoB.name);
-      }
-    );
+      });
 
     return {
       popular: popularChainsData,
       all: allChainsData,
-    };
+    } as DisplayedChains;
   }, [chainSearch, crossChainRoutes.data, otherToken]);
 
   return isMobile ? (
@@ -493,12 +480,12 @@ const MobileLayout = ({
             {displayedChains.popular.length > 0 && (
               <>
                 <SectionHeader>Popular Chains</SectionHeader>
-                {displayedChains.popular.map(([chainId, chainData]) => (
+                {displayedChains.popular.map(({ chainId, isDisabled }) => (
                   <ChainEntry
                     key={chainId}
                     chainId={Number(chainId)}
                     isSelected={selectedChain === Number(chainId)}
-                    isDisabled={chainData.isDisabled}
+                    isDisabled={isDisabled}
                     onClick={() => onChainSelect(Number(chainId))}
                   />
                 ))}
@@ -510,12 +497,12 @@ const MobileLayout = ({
             {!displayedChains.all.length && chainSearch && (
               <EmptySearchResults query={chainSearch} />
             )}
-            {displayedChains.all.map(([chainId, chainData]) => (
+            {displayedChains.all.map(({ chainId, isDisabled }) => (
               <ChainEntry
                 key={chainId}
                 chainId={Number(chainId)}
                 isSelected={selectedChain === Number(chainId)}
-                isDisabled={chainData.isDisabled}
+                isDisabled={isDisabled}
                 onClick={() => onChainSelect(Number(chainId))}
               />
             ))}
@@ -637,12 +624,12 @@ const DesktopLayout = ({
           {displayedChains.popular.length > 0 && (
             <>
               <SectionHeader>Popular Chains</SectionHeader>
-              {displayedChains.popular.map(([chainId, chainData]) => (
+              {displayedChains.popular.map(({ chainId, isDisabled }) => (
                 <ChainEntry
                   key={chainId}
                   chainId={Number(chainId)}
                   isSelected={selectedChain === Number(chainId)}
-                  isDisabled={chainData.isDisabled}
+                  isDisabled={isDisabled}
                   onClick={() => onChainSelect(Number(chainId))}
                 />
               ))}
@@ -654,12 +641,12 @@ const DesktopLayout = ({
           {!displayedChains.all.length && chainSearch && (
             <EmptySearchResults query={chainSearch} />
           )}
-          {displayedChains.all.map(([chainId, chainData]) => (
+          {displayedChains.all.map(({ chainId, isDisabled }) => (
             <ChainEntry
               key={chainId}
               chainId={Number(chainId)}
               isSelected={selectedChain === Number(chainId)}
-              isDisabled={chainData.isDisabled}
+              isDisabled={isDisabled}
               onClick={() => onChainSelect(Number(chainId))}
             />
           ))}
