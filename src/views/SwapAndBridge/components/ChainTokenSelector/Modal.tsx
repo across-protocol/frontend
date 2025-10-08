@@ -67,7 +67,6 @@ type Props = {
   onSelect: (token: EnrichedTokenSelect) => void;
   isOriginToken: boolean;
   otherToken?: EnrichedTokenSelect | null; // The currently selected token on the other side
-
   displayModal: boolean;
   setDisplayModal: (displayModal: boolean) => void;
 };
@@ -719,6 +718,20 @@ const DesktopLayout = ({
           )}
         </ListWrapper>
       </DesktopTokenWrapper>
+      <KeyboardShortcutsSection>
+        <KeyboardShortcutsTitle>
+          Use shortcuts for fast navigation
+        </KeyboardShortcutsTitle>
+        <KeyboardLegendItem>
+          Next item<Key>tab</Key>
+        </KeyboardLegendItem>
+        <KeyboardLegendItem>
+          Select<Key>return</Key>
+        </KeyboardLegendItem>
+        <KeyboardLegendItem>
+          Close<Key>esc</Key>
+        </KeyboardLegendItem>
+      </KeyboardShortcutsSection>
     </DesktopInnerWrapper>
   );
 };
@@ -960,7 +973,6 @@ const BackButton = styled.button`
 const Title = styled.div`
   overflow: hidden;
   color: var(--Base-bright-gray, #e0f3ff);
-
   font-family: Barlow;
   font-size: 20px;
   font-style: normal;
@@ -975,7 +987,7 @@ const ListWrapper = styled.div`
   overflow-y: auto;
   flex: 1; /* Take up remaining space in parent */
   min-height: 0; /* Allow flex child to shrink below content size */
-  padding-bottom: 32px; /* Add padding to prevent clipping of last item */
+  padding-bottom: calc(32px + 56px * 2);
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -998,10 +1010,10 @@ const ListWrapper = styled.div`
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 `;
 
-const EntryItem = styled.div<{ isSelected: boolean; isDisabled?: boolean }>`
+const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
 
   width: 100%;
   flex-shrink: 0;
@@ -1030,7 +1042,6 @@ const EntryItem = styled.div<{ isSelected: boolean; isDisabled?: boolean }>`
 const ChainItemImage = styled.img`
   width: 32px;
   height: 32px;
-
   flex-shrink: 0;
 `;
 
@@ -1044,13 +1055,12 @@ const ChainItemName = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 130%; /* 20.8px */
-
-  width: 100%;
 `;
 
 const ChainItemCheckmark = styled(CheckmarkCircle)`
   width: 20px;
   height: 20px;
+  margin-left: auto;
 `;
 
 const TokenNameSymbolWrapper = styled.div`
@@ -1103,6 +1113,7 @@ const TokenBalanceStack = styled.div`
   align-items: flex-end;
 
   gap: 4px;
+  margin-left: auto;
 `;
 
 const TokenBalance = styled.div`
@@ -1134,4 +1145,45 @@ const SectionHeader = styled.div`
   opacity: 0.7;
   padding: 8px 0px 4px 0px;
   letter-spacing: 0.5px;
+`;
+
+const KeyboardShortcutsTitle = styled.span`
+  margin-right: auto;
+`;
+
+const KeyboardShortcutsSection = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 56px;
+  width: 100%;
+  border-top: 1px solid #34353b;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding-inline: 24px;
+  margin-top: auto;
+  color: #e0f3ff7f;
+  background: #202024;
+`;
+
+const KeyboardLegendItem = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const Key = styled.div`
+  height: 24px;
+  border: 1px solid #34353b;
+  border-radius: 4px;
+  padding-inline: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: rgba(224, 243, 255, 0.4);
 `;

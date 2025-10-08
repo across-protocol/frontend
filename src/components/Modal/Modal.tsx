@@ -38,6 +38,7 @@ export type ModalProps = {
   bottomYOffset?: number;
 
   children?: React.ReactNode;
+  footer?: React.ReactNode;
   titleBorder?: boolean;
   className?: string;
 };
@@ -51,6 +52,7 @@ const Modal = ({
   exitModalHandler: externalModalExitHandler,
   disableExitOverride,
   children,
+  footer,
   verticalLocation: _verticalLocation,
   topYOffset,
   bottomYOffset,
@@ -170,6 +172,7 @@ const Modal = ({
             </TitleAndExitWrapper>
             {titleBorder && <ElementRowDivider />}
             {children}
+            {footer}
           </ModalContentWrapper>
         </Wrapper>,
         container.current

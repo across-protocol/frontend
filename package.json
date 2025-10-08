@@ -55,6 +55,7 @@
     "react": "v18",
     "react-dom": "v18",
     "react-feather": "^2.0.9",
+    "react-hotkeys-hook": "^5.1.0",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "v5",
     "react-tooltip": "^5.18.0",
