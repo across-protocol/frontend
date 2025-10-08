@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 
 import {
   BridgeStrategy,
@@ -20,6 +21,8 @@ import {
   getCctpTokenMessengerAddress,
   getCctpDomainId,
   encodeDepositForBurn,
+  buildSolanaDepositForBurnInstructionData,
+  CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA,
 } from "./utils/constants";
 
 const name = "cctp";
@@ -206,13 +209,38 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       const originChainId = crossSwap.inputToken.chainId;
       const destinationChainId = crossSwap.outputToken.chainId;
 
-      // Get CCTP contract address for origin chain
-      const tokenMessengerAddress = getCctpTokenMessengerAddress(originChainId);
-
       // Get CCTP domain IDs
       const destinationDomain = getCctpDomainId(destinationChainId);
 
-      // Get burn token address (USDC on origin chain)
+      // Check if origin is Solana
+      const isOriginSolana = sdk.utils.chainIsSvm(originChainId);
+
+      if (isOriginSolana) {
+        // Handle Solana origin chain
+        const instructionJson = await buildSolanaDepositForBurnInstructionData({
+          amount: bridgeQuote.inputAmount,
+          destinationDomain,
+          mintRecipient: crossSwap.recipient,
+          destinationCaller: ethers.constants.AddressZero,
+          maxFee: BigNumber.from(0),
+          minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.standard,
+          depositor: crossSwap.depositor,
+          inputToken: crossSwap.inputToken.address,
+          originChainId,
+          destinationChainId,
+        });
+
+        // Note: Integrator ID tagging for Solana can be added via memo instruction if needed
+        return {
+          chainId: originChainId,
+          to: CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA,
+          data: instructionJson,
+          ecosystem: "svm" as const,
+        };
+      }
+
+      // Handle EVM origin chain
+      const tokenMessengerAddress = getCctpTokenMessengerAddress(originChainId);
       const burnTokenAddress = crossSwap.inputToken.address;
 
       // Encode the depositForBurn call
@@ -221,9 +249,9 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         destinationDomain,
         mintRecipient: crossSwap.recipient,
         burnToken: burnTokenAddress,
-        destinationCaller: ethers.constants.AddressZero, // Anyone can finalize the message on domain when this is set to bytes32(0)
-        maxFee: BigNumber.from(0), // maxFee set to 0 so this will be a "standard" speed transfer
-        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.standard, // Hardcoded minFinalityThreshold value for standard transfer
+        destinationCaller: ethers.constants.AddressZero,
+        maxFee: BigNumber.from(0),
+        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.standard,
       });
 
       // Handle integrator ID and swap API marker tagging
@@ -237,7 +265,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         from: crossSwap.depositor,
         to: tokenMessengerAddress,
         data: callDataWithMarkers,
-        value: BigNumber.from(0), // No native value for USDC burns
+        value: BigNumber.from(0),
         ecosystem: "evm" as const,
       };
     },
