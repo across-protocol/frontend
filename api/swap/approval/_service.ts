@@ -367,6 +367,25 @@ function setSpanAttributes(
     responseJson.expectedOutputAmount.toString()
   );
 
+  // Bridge step attributes
+  span.setAttribute(
+    "swap.bridge.route",
+    [
+      responseJson.steps.bridge.tokenIn.symbol,
+      responseJson.steps.bridge.tokenOut.symbol,
+    ].join(" -> ")
+  );
+  span.setAttribute("swap.bridge.provider", responseJson.steps.bridge.provider);
+  span.setAttribute(
+    "swap.bridge.inputAmount",
+    responseJson.steps.bridge.inputAmount.toString()
+  );
+  span.setAttribute(
+    "swap.bridge.outputAmount",
+    responseJson.steps.bridge.outputAmount.toString()
+  );
+
+  // Origin swap step attributes
   if (responseJson.steps.originSwap) {
     span.setAttribute(
       "swap.originSwap.route",
@@ -383,8 +402,25 @@ function setSpanAttributes(
       "swap.originSwap.swapProvider.sources",
       responseJson.steps.originSwap.swapProvider.sources
     );
+    span.setAttribute(
+      "swap.originSwap.inputAmount",
+      responseJson.steps.originSwap.inputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.originSwap.outputAmount",
+      responseJson.steps.originSwap.outputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.originSwap.minOutputAmount",
+      responseJson.steps.originSwap.maxInputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.originSwap.maxInputAmount",
+      responseJson.steps.originSwap.minOutputAmount.toString()
+    );
   }
 
+  // Destination swap step attributes
   if (responseJson.steps.destinationSwap) {
     span.setAttribute(
       "swap.destinationSwap.route",
@@ -400,6 +436,22 @@ function setSpanAttributes(
     span.setAttribute(
       "swap.destinationSwap.swapProvider.sources",
       responseJson.steps.destinationSwap.swapProvider.sources
+    );
+    span.setAttribute(
+      "swap.destinationSwap.inputAmount",
+      responseJson.steps.destinationSwap.inputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.destinationSwap.outputAmount",
+      responseJson.steps.destinationSwap.outputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.destinationSwap.minOutputAmount",
+      responseJson.steps.destinationSwap.maxInputAmount.toString()
+    );
+    span.setAttribute(
+      "swap.destinationSwap.maxInputAmount",
+      responseJson.steps.destinationSwap.minOutputAmount.toString()
     );
   }
 }
