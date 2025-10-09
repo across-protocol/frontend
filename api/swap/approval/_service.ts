@@ -88,7 +88,6 @@ export async function handleApprovalSwap(
     amountType,
     recipient,
     depositor,
-    logger,
   });
 
   const crossSwapQuotes = await getCrossSwapQuotes(

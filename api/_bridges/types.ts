@@ -119,7 +119,7 @@ export type BridgeStrategyDataParams = {
   amountType: "exactInput" | "exactOutput" | "minOutput";
   recipient?: string;
   depositor: string;
-  logger: Logger;
+  logger?: Logger;
 };
 
 export type GetBridgeStrategyParams = {

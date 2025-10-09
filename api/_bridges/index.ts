@@ -3,6 +3,7 @@ import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
+  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
 } from "./types";
 import { CHAIN_IDs } from "../_constants";
@@ -37,7 +38,6 @@ export async function getBridgeStrategy({
   amountType,
   recipient,
   depositor,
-  logger,
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
@@ -50,6 +50,27 @@ export async function getBridgeStrategy({
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
+  if (supportedBridgeStrategies.includes(getCctpBridgeStrategy())) {
+    return routeStrategyForCctp({
+      inputToken,
+      outputToken,
+      amount,
+      amountType,
+      recipient,
+      depositor,
+    });
+  }
+  return getAcrossBridgeStrategy();
+}
+
+async function routeStrategyForCctp({
+  inputToken,
+  outputToken,
+  amount,
+  amountType,
+  recipient,
+  depositor,
+}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
   const bridgeStrategyData = await getBridgeStrategyData({
     inputToken,
     outputToken,
@@ -57,7 +78,6 @@ export async function getBridgeStrategy({
     amountType,
     recipient,
     depositor,
-    logger,
   });
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
@@ -87,7 +107,6 @@ export async function getBridgeStrategy({
     if (bridgeStrategyData.isLargeDeposit) {
       return getAcrossBridgeStrategy();
     } else {
-      // Use OFT bridge if not CCTP
       return getCctpBridgeStrategy();
     }
   }
