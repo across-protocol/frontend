@@ -56,7 +56,7 @@ export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
   const { chainId } = swapQuote.swapTx;
   const depositor = e2eConfig.getAccount("depositor");
   const client = e2eConfig.getClient(chainId);
-  await client.tevmReady();
+
   const swapCallResult = await client.tevmCall({
     to: swapQuote.swapTx.to as Address,
     data: swapQuote.swapTx.data as Hex,
