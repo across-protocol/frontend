@@ -52,14 +52,17 @@ export type Props = {
 export function FeesCollapsible(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { inputToken, bridgeToken, outputToken } = getTokensForFeesCalc(props);
+  const { inputToken, bridgeTokenIn, bridgeTokenOut, outputToken } =
+    getTokensForFeesCalc(props);
 
   const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
     useTokenConversion(inputToken.symbol, "usd");
   const {
-    convertTokenToBaseCurrency: convertBridgeTokenToUsd,
-    convertBaseCurrencyToToken: convertUsdToBridgeToken,
-  } = useTokenConversion(bridgeToken.symbol, "usd");
+    convertTokenToBaseCurrency: convertBridgeTokenInToUsd,
+    convertBaseCurrencyToToken: convertUsdToBridgeTokenIn,
+  } = useTokenConversion(bridgeTokenIn.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenOutToUsd } =
+    useTokenConversion(bridgeTokenOut.symbol, "usd");
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
@@ -75,7 +78,8 @@ export function FeesCollapsible(props: Props) {
     calcFeesForEstimatedTable({
       ...props,
       convertInputTokenToUsd,
-      convertBridgeTokenToUsd,
+      convertBridgeTokenInToUsd,
+      convertBridgeTokenOutToUsd,
       convertOutputTokenToUsd,
     }) || {};
   const outputAmount = convertUsdToOutputToken(outputAmountUsd);
@@ -89,13 +93,13 @@ export function FeesCollapsible(props: Props) {
       ));
 
   const estimatedRewards = useEstimatedRewards(
-    bridgeToken,
+    bridgeTokenIn,
     props.toChainId,
     isSwap,
-    convertUsdToBridgeToken(parsedAmountUsd),
-    convertUsdToBridgeToken(gasFeeUsd),
-    convertUsdToBridgeToken(bridgeFeeUsd),
-    convertUsdToBridgeToken(swapFeeUsd)
+    convertUsdToBridgeTokenIn(parsedAmountUsd),
+    convertUsdToBridgeTokenIn(gasFeeUsd),
+    convertUsdToBridgeTokenIn(bridgeFeeUsd),
+    convertUsdToBridgeTokenIn(swapFeeUsd)
   );
 
   const doesAmountExceedMaxDeposit =
