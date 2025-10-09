@@ -141,9 +141,7 @@ describe("_utils", () => {
         }
       }
     }
-  });
 
-  describe("#getTokenByAddress()", () => {
     it("should return undefined for an invalid address", () => {
       const token = getTokenByAddress("0xInvalidAddress");
       expect(token).toBeUndefined();
