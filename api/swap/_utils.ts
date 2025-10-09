@@ -710,12 +710,24 @@ export async function calculateSwapFees(params: {
     const destinationGas = bridgeFees.relayerGas;
     const lpFee = bridgeFees.lp;
     const relayerTotal = bridgeFees.totalRelay;
+    const bridgeFee = bridgeFees.bridgeFee;
 
     const originGasToken = getNativeTokenInfo(originChainId);
     const destinationGasToken = getNativeTokenInfo(
       indirectDestinationRoute?.intermediaryOutputToken.chainId ??
         destinationChainId
     );
+
+    // Get USD price for bridge fee token (usually native token for OFT)
+    const bridgeFeeTokenPriceUsd =
+      bridgeFee.token.chainId === originChainId &&
+      bridgeFee.token.symbol === originGasToken.symbol
+        ? originNativePriceUsd
+        : await getCachedTokenPrice({
+            symbol: bridgeFee.token.symbol,
+            tokenAddress: bridgeFee.token.address,
+            chainId: bridgeFee.token.chainId,
+          });
 
     // Calculate USD amounts
     const originGasUsd =
@@ -739,6 +751,9 @@ export async function calculateSwapFees(params: {
       parseFloat(
         utils.formatUnits(relayerTotal.total, bridgeQuote.inputToken.decimals)
       ) * bridgeQuoteInputTokenPriceUsd;
+    const bridgeFeeUsd =
+      parseFloat(utils.formatUnits(bridgeFee.total, bridgeFee.token.decimals)) *
+      bridgeFeeTokenPriceUsd;
     const inputAmountUsd =
       parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
       inputTokenPriceUsd;
@@ -814,6 +829,16 @@ export async function calculateSwapFees(params: {
         ),
         token: bridgeQuote.inputToken,
       },
+      bridgeFee: {
+        amount: bridgeFee.total,
+        amountUsd: ethers.utils.formatEther(
+          ethers.utils.parseEther(bridgeFeeUsd.toFixed(18))
+        ),
+        pct: ethers.utils.parseEther(
+          (bridgeFeeUsd / inputAmountUsd).toFixed(18)
+        ),
+        token: bridgeFee.token,
+      },
       app: {
         amount: appFeeAmount,
         amountUsd: ethers.utils.formatEther(
@@ -833,7 +858,7 @@ export async function calculateSwapFees(params: {
   }
 }
 
-function getNativeTokenInfo(chainId: number): Token {
+export function getNativeTokenInfo(chainId: number): Token {
   const chainInfo = getChainInfo(chainId);
   const token =
     TOKEN_SYMBOLS_MAP[chainInfo.nativeToken as keyof typeof TOKEN_SYMBOLS_MAP];

@@ -297,5 +297,10 @@ function getZeroBridgeFees(inputToken: Token) {
       total: zeroBN,
       token: inputToken,
     },
+    bridgeFee: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
   };
 }
