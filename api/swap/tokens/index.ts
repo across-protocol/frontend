@@ -12,6 +12,7 @@ import {
 import { TypedVercelRequest } from "../../_types";
 
 import mainnetChains from "../../../src/data/chains_1.json";
+import indirectChains from "../../../src/data/indirect_chains_1.json";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
@@ -28,7 +29,22 @@ type Token = {
 };
 
 const chains = mainnetChains;
-const chainIds = chains.map((chain) => chain.chainId);
+const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
+
+// List of tokens that are statically defined locally. Currently, this list is used for
+// indirect chain tokens, e.g. USDT-SPOT on HyperCore.
+const staticTokens = indirectChains.flatMap((chain) =>
+  chain.outputTokens.map((token) => ({
+    chainId: chain.chainId,
+    address: token.address,
+    name: token.name,
+    symbol: token.symbol,
+    decimals: token.decimals,
+    logoUrl: token.logoUrl,
+    // TODO: Add more generic price resolution logic for static tokens
+    priceUsd: token.symbol === "USDT-SPOT" ? "1" : null,
+  }))
+);
 
 const SwapTokensQueryParamsSchema = type({
   chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
@@ -94,6 +110,10 @@ export default async function handler(
         filteredChainIds
       );
       responseJson.push(...jupiterTokens);
+
+      // Add static tokens
+      const staticTokens = getStaticTokens(filteredChainIds);
+      responseJson.push(...staticTokens);
 
       logger.debug({
         at: "swap/tokens",
@@ -210,4 +230,8 @@ function getJupiterTokens(
     }
     return acc;
   }, []);
+}
+
+function getStaticTokens(chainIds: number[]): Token[] {
+  return staticTokens.filter((token) => chainIds.includes(token.chainId));
 }
