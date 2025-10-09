@@ -478,41 +478,18 @@ export const getTokenByAddress = (
       "WSOL",
       "WXPL",
     ];
-    const logger = getLogger();
-    logger.info({
-      at: "getTokenByAddress",
-      message: `getTokenByAddress: Resolved token address ${tokenAddress} to symbol ${matches.map(([symbol]) => symbol).join(", ")}`,
-      tokenAddress,
-      chainId,
-    });
+
     if (matches.length > 1) {
-      logger.info({
-        at: "getTokenByAddress",
-        message: `getTokenByAddress: More than one token matched the address ${tokenAddress}. Attempting to disambiguate.`,
-        tokenAddress,
-        chainId,
-      });
       // Prefer wrapped tokens or ambiguous tokens if multiple matches
       const token = matches.find(
         ([symbol]) =>
           wrappedTokens.includes(symbol) || ambiguousTokens.includes(symbol)
       );
-      logger.info({
-        at: "getTokenByAddress",
-        message: `getTokenByAddress: Disambiguated token address ${tokenAddress} to symbol ${token ? token[0] : "none"}`,
-        tokenAddress,
-        chainId,
-      });
       if (token) {
         return token[1];
       }
     }
-    logger.info({
-      at: "getTokenByAddress",
-      message: `getTokenByAddress: Unambiguously resolved token address ${tokenAddress} to symbol ${matches}`,
-      tokenAddress,
-      chainId,
-    });
+
     return matches[0][1];
   } catch (error) {
     console.log(error);

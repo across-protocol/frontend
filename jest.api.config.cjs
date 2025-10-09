@@ -5,18 +5,12 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   detectOpenHandles: true,
- 
   moduleDirectories: ["node_modules", "<rootDir>"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transform: {
-    "^.+\.tsx?$": [
-      "ts-jest",
-      {
-        "tsconfig": "<rootDir>/tsconfig.json"
-      }
-    ],
-    "^.+\.svg$": "jest-transform-stub",
-    "^.+\.png$": "jest-transform-stub",
+    "^.+\\.tsx?$": "ts-jest",
+    "^.+\\.svg$": "jest-transform-stub",
+    "^.+\\.png$": "jest-transform-stub",
   },
   testMatch: [
     "<rootDir>/test/api/**/*.test.{ts,tsx}",

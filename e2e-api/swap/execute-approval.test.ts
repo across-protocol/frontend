@@ -163,19 +163,19 @@ describe("execute response of GET /swap/approval", () => {
     const outputTokenBalanceDiff =
       outputTokenBalanceAfter - outputTokenBalanceBefore;
 
-    console.log(tradeType, {
-      inputTokenBalanceBefore,
-      inputTokenBalanceAfter,
-      inputTokenBalanceDiff,
-      outputTokenBalanceBefore,
-      outputTokenBalanceAfter,
-      outputTokenBalanceDiff,
-      amount,
-      quotedInputAmount: swapQuote.inputAmount,
-      quotedMaxInputAmount: swapQuote.maxInputAmount,
-      quotedOutputAmount: swapQuote.expectedOutputAmount,
-      quotedMinOutputAmount: swapQuote.minOutputAmount,
-    });
+    // console.log(tradeType, {
+    //   inputTokenBalanceBefore,
+    //   inputTokenBalanceAfter,
+    //   inputTokenBalanceDiff,
+    //   outputTokenBalanceBefore,
+    //   outputTokenBalanceAfter,
+    //   outputTokenBalanceDiff,
+    //   amount,
+    //   quotedInputAmount: swapQuote.inputAmount,
+    //   quotedMaxInputAmount: swapQuote.maxInputAmount,
+    //   quotedOutputAmount: swapQuote.expectedOutputAmount,
+    //   quotedMinOutputAmount: swapQuote.minOutputAmount,
+    // });
 
     // Sanity checks based on the trade type
     if (tradeType === "exactInput") {
