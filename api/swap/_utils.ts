@@ -581,6 +581,44 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
+/**
+ * Helper function to format fee components with consistent structure
+ * @param amount - Fee amount in token units (BigNumber)
+ * @param amountUsd - Fee amount in USD
+ * @param token - Token information
+ * @param inputAmountUsd - Total input amount in USD (for percentage calculation). Omit to exclude pct field.
+ * @returns Formatted fee object with amount, amountUsd, pct (if inputAmountUsd provided), and token
+ */
+function formatFeeComponent(params: {
+  amount: BigNumber;
+  amountUsd: number;
+  token: Token;
+  inputAmountUsd?: number;
+}) {
+  const { amount, amountUsd, token, inputAmountUsd } = params;
+
+  const result: {
+    amount: BigNumber;
+    amountUsd: string;
+    pct?: BigNumber;
+    token: Token;
+  } = {
+    amount,
+    amountUsd: ethers.utils.formatEther(
+      ethers.utils.parseEther(amountUsd.toFixed(18))
+    ),
+    token,
+  };
+
+  if (inputAmountUsd !== undefined) {
+    result.pct = ethers.utils.parseEther(
+      (amountUsd / inputAmountUsd).toFixed(18)
+    );
+  }
+
+  return result;
+}
+
 export async function calculateSwapFees(params: {
   inputAmount: BigNumber;
   originSwapQuote?: SwapQuote;
@@ -718,10 +756,12 @@ export async function calculateSwapFees(params: {
         destinationChainId
     );
 
-    // Get USD price for bridge fee token (usually native token for OFT)
-    const bridgeFeeTokenPriceUsd =
-      bridgeFee.token.chainId === originChainId &&
-      bridgeFee.token.symbol === originGasToken.symbol
+    // Get USD price for bridge fee token
+    // Skip price fetch if bridge fee is zero
+    const bridgeFeeTokenPriceUsd = bridgeFee.total.isZero()
+      ? 0
+      : bridgeFee.token.chainId === originChainId &&
+          bridgeFee.token.symbol === originGasToken.symbol
         ? originNativePriceUsd
         : await getCachedTokenPrice({
             symbol: bridgeFee.token.symbol,
@@ -772,81 +812,57 @@ export async function calculateSwapFees(params: {
       .div(sdk.utils.fixedPointAdjustment);
 
     return {
-      total: {
+      total: formatFeeComponent({
         amount: totalFeeAmount,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(totalFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(totalFeePct.toFixed(18)),
+        amountUsd: totalFeeUsd,
         token: inputToken,
-      },
-      originGas: {
+        inputAmountUsd,
+      }),
+      originGas: formatFeeComponent({
         amount: originGas,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(originGasUsd.toFixed(18))
-        ),
+        amountUsd: originGasUsd,
         token: originGasToken,
-      },
-      destinationGas: {
+      }),
+      destinationGas: formatFeeComponent({
         amount: safeUsdToTokenAmount(
           destinationGasUsd,
           destinationNativePriceUsd,
           destinationGasToken.decimals
         ),
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(destinationGasUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (destinationGasUsd / inputAmountUsd).toFixed(18)
-        ),
+        amountUsd: destinationGasUsd,
         token: destinationGasToken,
-      },
-      relayerCapital: {
+        inputAmountUsd,
+      }),
+      relayerCapital: formatFeeComponent({
         amount: relayerCapital.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(relayerCapitalUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (relayerCapitalUsd / inputAmountUsd).toFixed(18)
-        ),
+        amountUsd: relayerCapitalUsd,
         token: bridgeQuote.inputToken,
-      },
-      lpFee: {
+        inputAmountUsd,
+      }),
+      lpFee: formatFeeComponent({
         amount: lpFee.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(lpFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther((lpFeeUsd / inputAmountUsd).toFixed(18)),
+        amountUsd: lpFeeUsd,
         token: bridgeQuote.inputToken,
-      },
-      relayerTotal: {
+        inputAmountUsd,
+      }),
+      relayerTotal: formatFeeComponent({
         amount: relayerTotal.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (relayerTotalUsd / inputAmountUsd).toFixed(18)
-        ),
+        amountUsd: relayerTotalUsd,
         token: bridgeQuote.inputToken,
-      },
-      bridgeFee: {
+        inputAmountUsd,
+      }),
+      bridgeFee: formatFeeComponent({
         amount: bridgeFee.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(bridgeFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (bridgeFeeUsd / inputAmountUsd).toFixed(18)
-        ),
+        amountUsd: bridgeFeeUsd,
         token: bridgeFee.token,
-      },
-      app: {
+        inputAmountUsd,
+      }),
+      app: formatFeeComponent({
         amount: appFeeAmount,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(appFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther((appFeeUsd / inputAmountUsd).toFixed(18)),
+        amountUsd: appFeeUsd,
         token: appFeeToken,
-      },
+        inputAmountUsd,
+      }),
     };
   } catch (error) {
     logger.debug({
