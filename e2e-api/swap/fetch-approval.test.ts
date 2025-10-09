@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
-import { e2eConfig, axiosInstance, axiosInstance } from "../utils/config";
+import { e2eConfig, axiosInstance } from "../utils/config";
 import { ENABLED_ROUTES } from "../../api/_utils";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
