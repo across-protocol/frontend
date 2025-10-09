@@ -401,10 +401,10 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
     tokenMint.forceSvmAddress()
   );
 
-  // Generate a new keypair for the MessageSent event account.
-  // CCTP V2 stores MessageSent events in on-chain accounts (not logs) for reliable message storage.
-  // This account is created client-side and costs ~0.0038 SOL in rent paid by the depositor.
-  // The rent can be reclaimed after 5 days by calling reclaim_event_account.
+  // Generate a keypair for the MessageSent event account (CCTP V2 requirement).
+  // Unlike EVM chains that use event logs, Solana CCTP stores events in on-chain accounts for persistence.
+  // This account costs ~0.0038 SOL in rent (paid by depositor), reclaimable after 5 days via reclaim_event_account.
+  // We partially sign the transaction with this keypair and the depositor adds their signature before submission.
   // Docs: https://developers.circle.com/cctp/solana-programs#tokenmessengerminterv2
   const eventDataKeypair = await generateKeyPairSigner();
 
