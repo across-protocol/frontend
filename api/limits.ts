@@ -47,7 +47,8 @@ import { calcGasFeeDetails } from "./_gas";
 import { sendResponse } from "./_response_utils";
 import { getCachedTokenBalance } from "./_balance";
 import { validateDepositMessage } from "./_message";
-import { tracer } from "../instrumentation";
+import { tracer as defaultTracer } from "../instrumentation";
+import { Tracer } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -71,9 +72,11 @@ type LimitsBody = Infer<typeof LimitsBodySchema>;
 
 const handler = async (
   { query, body }: TypedVercelRequest<LimitsQueryParams, LimitsBody>,
-  response: VercelResponse
+  response: VercelResponse,
+  services?: { tracer: Tracer }
 ) => {
   const logger = getLogger();
+  const tracer = services?.tracer || defaultTracer;
   logger.debug({
     at: "Limits",
     message: "Query data",
