@@ -1,7 +1,7 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 import axios from "axios";
 import { externConfigs } from "constants/chains/configs";
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 import {
   Route,
