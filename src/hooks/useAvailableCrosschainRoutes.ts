@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getConfig } from "utils/config";
-import { useSwapChains } from "./useSwapChains";
+import { getSwapChains } from "utils/getSwapChains";
 import { useSwapTokens } from "./useSwapTokens";
 
 export type LifiToken = {
@@ -30,12 +30,14 @@ export type RouteFilterParams = {
 export default function useAvailableCrosschainRoutes(
   filterParams?: RouteFilterParams
 ) {
-  const swapChainsQuery = useSwapChains();
   const swapTokensQuery = useSwapTokens();
 
   return useQuery({
     queryKey: ["availableCrosschainRoutes", filterParams],
     queryFn: async () => {
+      // Get chains statically instead of from API
+      const swapChains = getSwapChains();
+
       // 1) Build swap token map by chain
       const swapTokensByChain = (swapTokensQuery.data || []).reduce(
         (acc, token) => {
@@ -88,9 +90,7 @@ export default function useAvailableCrosschainRoutes(
       );
 
       // 3) Combine swap and bridge tokens, deduplicating by address
-      const chainIdsInSwap = new Set(
-        (swapChainsQuery.data || []).map((c) => c.chainId)
-      );
+      const chainIdsInSwap = new Set(swapChains.map((c) => c.chainId));
       const chainIdsInBridge = new Set(
         Object.keys(bridgeTokensByChain).map(Number)
       );
@@ -169,6 +169,6 @@ export default function useAvailableCrosschainRoutes(
 
       return combinedByChain;
     },
-    enabled: swapChainsQuery.isSuccess && swapTokensQuery.isSuccess,
+    enabled: swapTokensQuery.isSuccess,
   });
 }
