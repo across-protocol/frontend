@@ -7,6 +7,7 @@ import { BLOCK_TAG_LAG, CHAIN_IDs } from "./_constants";
 import { getMulticall3, callViaMulticall3 } from "./_multicall";
 import { toSolanaKitAddress } from "./_address";
 import { buildInternalCacheKey, makeCacheGetterAndSetter } from "./_cache";
+import { getBalanceOnHyperCore } from "./_hypercore";
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address.
@@ -46,6 +47,14 @@ export async function getBalance(
   }
   const parsedAccount = sdk.utils.toAddressType(account, Number(chainId));
   const parsedToken = sdk.utils.toAddressType(token, Number(chainId));
+
+  if (Number(chainId) === CHAIN_IDs.HYPERCORE) {
+    return getBalanceOnHyperCore({
+      account: parsedAccount.toNative(),
+      tokenSystemAddress: parsedToken.toNative(),
+    });
+  }
+
   return sdk.utils.getTokenBalance(
     parsedAccount.toNative(),
     parsedToken.toNative(),

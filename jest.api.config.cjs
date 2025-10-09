@@ -4,6 +4,7 @@ module.exports = {
   setupFiles: ["<rootDir>/setup.jest.ts"],
   preset: "ts-jest",
   testEnvironment: "node",
+  detectOpenHandles: true,
   moduleDirectories: ["node_modules", "<rootDir>"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transform: {
@@ -18,5 +19,7 @@ module.exports = {
   moduleNameMapper: {
     // Only keep uuid mapping for API tests - remove frontend path mappings
     uuid: require.resolve("uuid"),
+    "^api/(.*)$": "<rootDir>/api/$1",
+    "^src/(.*)$": "<rootDir>/src/$1",
   },
 };
