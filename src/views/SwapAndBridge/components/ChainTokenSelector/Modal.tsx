@@ -152,6 +152,9 @@ export default function ChainTokenSelectorModal({
       if (tokenSearch === "") {
         return true;
       }
+      if (t.chainId !== selectedChain) {
+        return false;
+      }
       const keywords = [
         t.symbol.toLowerCase().replaceAll(" ", ""),
         t.name.toLowerCase().replaceAll(" ", ""),
@@ -493,19 +496,25 @@ const MobileLayout = ({
             )}
 
             {/* All Chains Section */}
-            <SectionHeader>All Chains</SectionHeader>
-            {!displayedChains.all.length && chainSearch && (
-              <EmptySearchResults query={chainSearch} />
+
+            {displayedChains.all.length > 0 && (
+              <>
+                <SectionHeader>All Chains</SectionHeader>
+                {displayedChains.all.map(({ chainId, isDisabled }) => (
+                  <ChainEntry
+                    key={chainId}
+                    chainId={Number(chainId)}
+                    isSelected={selectedChain === Number(chainId)}
+                    isDisabled={isDisabled}
+                    onClick={() => onChainSelect(Number(chainId))}
+                  />
+                ))}
+              </>
             )}
-            {displayedChains.all.map(({ chainId, isDisabled }) => (
-              <ChainEntry
-                key={chainId}
-                chainId={Number(chainId)}
-                isSelected={selectedChain === Number(chainId)}
-                isDisabled={isDisabled}
-                onClick={() => onChainSelect(Number(chainId))}
-              />
-            ))}
+
+            {!displayedChains.all.length &&
+              !displayedChains.popular.length &&
+              chainSearch && <EmptySearchResults query={chainSearch} />}
           </ListWrapper>
         </MobileChainWrapper>
       ) : (
@@ -544,9 +553,7 @@ const MobileLayout = ({
             )}
 
             {/* All Tokens Section */}
-            {!displayedTokens.all.length && tokenSearch && (
-              <EmptySearchResults query={tokenSearch} />
-            )}
+
             {displayedTokens.all.length > 0 && (
               <>
                 <SectionHeader>All Tokens</SectionHeader>
@@ -571,6 +578,9 @@ const MobileLayout = ({
                 ))}
               </>
             )}
+            {!displayedTokens.all.length &&
+              !displayedTokens.popular.length &&
+              tokenSearch && <EmptySearchResults query={tokenSearch} />}
           </ListWrapper>
         </MobileTokenWrapper>
       )}
@@ -638,19 +648,23 @@ const DesktopLayout = ({
           )}
 
           {/* All Chains Section */}
-          <SectionHeader>All Chains</SectionHeader>
-          {!displayedChains.all.length && chainSearch && (
-            <EmptySearchResults query={chainSearch} />
+          {displayedChains.all.length > 0 && (
+            <>
+              <SectionHeader>All Chains</SectionHeader>
+              {displayedChains.all.map(({ chainId, isDisabled }) => (
+                <ChainEntry
+                  key={chainId}
+                  chainId={Number(chainId)}
+                  isSelected={selectedChain === Number(chainId)}
+                  isDisabled={isDisabled}
+                  onClick={() => onChainSelect(Number(chainId))}
+                />
+              ))}
+            </>
           )}
-          {displayedChains.all.map(({ chainId, isDisabled }) => (
-            <ChainEntry
-              key={chainId}
-              chainId={Number(chainId)}
-              isSelected={selectedChain === Number(chainId)}
-              isDisabled={isDisabled}
-              onClick={() => onChainSelect(Number(chainId))}
-            />
-          ))}
+          {!displayedChains.all.length &&
+            !displayedChains.popular.length &&
+            chainSearch && <EmptySearchResults query={chainSearch} />}
         </ListWrapper>
       </DesktopChainWrapper>
       <VerticalDivider />
@@ -691,9 +705,6 @@ const DesktopLayout = ({
           )}
 
           {/* All Tokens Section */}
-          {!displayedTokens.all.length && tokenSearch && (
-            <EmptySearchResults query={tokenSearch} />
-          )}
           {displayedTokens.all.length > 0 && (
             <>
               <SectionHeader>All Tokens</SectionHeader>
@@ -718,6 +729,9 @@ const DesktopLayout = ({
               ))}
             </>
           )}
+          {!displayedTokens.all.length &&
+            !displayedTokens.popular.length &&
+            tokenSearch && <EmptySearchResults query={tokenSearch} />}
         </ListWrapper>
       </DesktopTokenWrapper>
       <KeyboardShortcutsSection>
