@@ -478,6 +478,7 @@ export const getTokenByAddress = (
       "WSOL",
       "WXPL",
     ];
+    const logger = getLogger();
     logger.info({
       at: "getTokenByAddress",
       message: `getTokenByAddress: Resolved token address ${tokenAddress} to symbol ${matches.map(([symbol]) => symbol).join(", ")}`,
@@ -508,12 +509,13 @@ export const getTokenByAddress = (
     }
     logger.info({
       at: "getTokenByAddress",
-      message: `getTokenByAddress: Unambiguously resolved token address ${tokenAddress} to symbol ${matches[0][0]}`,
+      message: `getTokenByAddress: Unambiguously resolved token address ${tokenAddress} to symbol ${matches}`,
       tokenAddress,
       chainId,
     });
     return matches[0][1];
   } catch (error) {
+    console.log(error);
     return undefined;
   }
 };
