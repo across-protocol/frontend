@@ -492,7 +492,6 @@ export const getTokenByAddress = (
 
     return matches[0][1];
   } catch (error) {
-    console.log(error);
     return undefined;
   }
 };
