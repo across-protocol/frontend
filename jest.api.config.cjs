@@ -5,6 +5,11 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   detectOpenHandles: true,
+  globals: {
+    "ts-jest": {
+      tsconfig: "<rootDir>/tsconfig.json",
+    },
+  },
   moduleDirectories: ["node_modules", "<rootDir>"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transform: {
