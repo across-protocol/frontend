@@ -2622,7 +2622,8 @@ export function getLimitsSpanAttributes(
     maxDepositShortDelay: string;
   },
   inputToken: Token,
-  tokenPriceUsd: number
+  tokenPriceUsd: number,
+  destinationChainId: number
 ) {
   const attributes: Record<string, number | string> = {};
 
@@ -2639,9 +2640,10 @@ export function getLimitsSpanAttributes(
       ethers.utils.formatUnits(valueUsd, 18)
     );
   }
-  attributes["token.address"] = inputToken.address;
-  attributes["token.chainId"] = inputToken.chainId;
-  attributes["token.symbol"] = inputToken.symbol;
+  attributes["limits.token.address"] = inputToken.address;
+  attributes["limits.token.originChainId"] = inputToken.chainId;
+  attributes["limits.token.symbol"] = inputToken.symbol;
+  attributes["limits.token.destinationChainId"] = destinationChainId;
   return attributes;
 }
 

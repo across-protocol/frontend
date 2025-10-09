@@ -27,6 +27,7 @@ describe("getLimitsSpanAttributes", () => {
     const wBtcTokenPriceUsd = 100000;
     const wEthTokenPriceUsd = 4000;
     const acxTokenPriceUsd = 0.1;
+    const destinationChainId = 2;
 
     const wbtcAttributes = getLimitsSpanAttributes(
       {
@@ -36,7 +37,8 @@ describe("getLimitsSpanAttributes", () => {
         maxDepositShortDelay: "50000000", // 0.5 WBTC
       },
       wbtcToken,
-      wBtcTokenPriceUsd
+      wBtcTokenPriceUsd,
+      destinationChainId
     );
 
     expect(wbtcAttributes).toEqual({
@@ -48,9 +50,10 @@ describe("getLimitsSpanAttributes", () => {
       "limits.maxDepositInstant.usd": 10000,
       "limits.maxDepositShortDelay.token": 0.5,
       "limits.maxDepositShortDelay.usd": 50000,
-      "token.address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "token.chainId": 1,
-      "token.symbol": "WBTC",
+      "limits.token.address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "limits.token.originChainId": 1,
+      "limits.token.symbol": "WBTC",
+      "limits.token.destinationChainId": 2,
     });
 
     const wethLimits = {
@@ -63,7 +66,8 @@ describe("getLimitsSpanAttributes", () => {
     const wethAttributes = getLimitsSpanAttributes(
       wethLimits,
       wethToken,
-      wEthTokenPriceUsd
+      wEthTokenPriceUsd,
+      destinationChainId
     );
 
     expect(wethAttributes).toEqual({
@@ -75,9 +79,10 @@ describe("getLimitsSpanAttributes", () => {
       "limits.maxDepositInstant.usd": 40000,
       "limits.maxDepositShortDelay.token": 50,
       "limits.maxDepositShortDelay.usd": 200000,
-      "token.address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-      "token.chainId": 1,
-      "token.symbol": "WETH",
+      "limits.token.address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "limits.token.originChainId": 1,
+      "limits.token.symbol": "WETH",
+      "limits.token.destinationChainId": 2,
     });
 
     const acxLimits = {
@@ -90,7 +95,8 @@ describe("getLimitsSpanAttributes", () => {
     const acxAttributes = getLimitsSpanAttributes(
       acxLimits,
       acxToken,
-      acxTokenPriceUsd
+      acxTokenPriceUsd,
+      destinationChainId
     );
 
     expect(acxAttributes).toEqual({
@@ -102,9 +108,10 @@ describe("getLimitsSpanAttributes", () => {
       "limits.maxDepositInstant.usd": 1,
       "limits.maxDepositShortDelay.token": 50,
       "limits.maxDepositShortDelay.usd": 5,
-      "token.address": "0x44108f0223a3c3028f5fe7aec7f9bb2e66bef82f",
-      "token.chainId": 1,
-      "token.symbol": "ACX",
+      "limits.token.address": "0x44108f0223a3c3028f5fe7aec7f9bb2e66bef82f",
+      "limits.token.originChainId": 1,
+      "limits.token.symbol": "ACX",
+      "limits.token.destinationChainId": 2,
     });
   });
 });
