@@ -54,6 +54,9 @@ export function useDepositTracking({
   const account =
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
 
+  const { universalSwapQuote } = fromBridgePagePayload || {};
+  const bridgeProvider = universalSwapQuote?.steps.bridge.provider || "across";
+
   // Create appropriate strategy for the source chain
   const { depositStrategy, fillStrategy } = useMemo(
     () => createChainStrategies(fromChainId, toChainId),
@@ -62,14 +65,14 @@ export function useDepositTracking({
 
   // Query for deposit information
   const depositQuery = useQuery({
-    queryKey: ["deposit", depositTxHash, fromChainId, account],
+    queryKey: ["deposit", depositTxHash, fromChainId, account, bridgeProvider],
     queryFn: async () => {
       // On some L2s the tx is mined too fast for the animation to show, so we add a delay
       await wait(1_000);
 
       try {
         // Use the strategy to get deposit information through the normalized interface
-        return depositStrategy.getDeposit(depositTxHash);
+        return depositStrategy.getDeposit(depositTxHash, bridgeProvider);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
         if (e instanceof NoFundsDepositedLogError) {
@@ -146,6 +149,7 @@ export function useDepositTracking({
       depositTxHash,
       fromChainId,
       toChainId,
+      bridgeProvider,
     ],
     queryFn: async () => {
       const depositInfo = depositQuery.data;
@@ -155,7 +159,7 @@ export function useDepositTracking({
       }
       logRelayData(depositInfo.depositLog);
       // Use the strategy to get fill information through the normalized interface
-      return await fillStrategy.getFill(depositInfo);
+      return await fillStrategy.getFill(depositInfo, bridgeProvider);
     },
     staleTime: Infinity,
     retry: true,
