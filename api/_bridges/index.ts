@@ -23,10 +23,9 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   // TODO: Add CCTP routes when ready
 };
 
-export const availableBridgeStrategies = [
+export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  getHyperCoreBridgeStrategy(),
-  getCctpBridgeStrategy(),
+  // TODO: Add CCTP bridge strategy when ready
 ];
 
 export async function getBridgeStrategy({
@@ -44,13 +43,17 @@ export async function getBridgeStrategy({
   if (fromToChainOverride) {
     return fromToChainOverride;
   }
-  const supportedBridgeStrategies = availableBridgeStrategies.filter(
+  const supportedBridgeStrategies = routableBridgeStrategies.filter(
     (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
   );
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
-  if (supportedBridgeStrategies.includes(getCctpBridgeStrategy())) {
+  if (
+    supportedBridgeStrategies.some(
+      (strategy) => strategy.name === getCctpBridgeStrategy().name
+    )
+  ) {
     return routeStrategyForCctp({
       inputToken,
       outputToken,

@@ -31,7 +31,27 @@ export function isFullyUtilized(limits: LimitsResponse): boolean {
 }
 
 /**
- * Fetches bridge limits and utilization data in parallel to determine strategy requirements
+ * Fetches bridge limits and utilization data to determine routing strategy requirements.
+ * Analyzes various factors including utilization rates, deposit amounts, token types,
+ * and chain-specific eligibility to determine the optimal bridge strategy.
+ *
+ * @param params - The bridge strategy data parameters
+ * @param params.inputToken - The input token for the bridge transaction
+ * @param params.outputToken - The output token for the bridge transaction
+ * @param params.amount - The amount to bridge (in wei)
+ * @param params.amountType - The type of amount (exactInput, exactOutput, minOutput)
+ * @param params.recipient - The recipient address (optional)
+ * @param params.depositor - The depositor address
+ * @param params.logger - Optional logger instance for error reporting
+ * @returns Promise resolving to bridge strategy data or undefined if fetch fails
+ * @returns Returns object containing strategy flags:
+ *   - canFillInstantly: Whether the bridge can fill the deposit instantly
+ *   - isUtilizationHigh: Whether bridge utilization is above 80% threshold
+ *   - isUsdcToUsdc: Whether both input and output tokens are USDC
+ *   - isLargeDeposit: Whether deposit amount exceeds 1M USD threshold
+ *   - isInThreshold: Whether deposit is within 10K USD Across threshold
+ *   - isFastCctpEligible: Whether eligible for Fast CCTP on supported chains
+ *   - isLineaSource: Whether the source chain is Linea
  */
 export async function getBridgeStrategyData({
   inputToken,
