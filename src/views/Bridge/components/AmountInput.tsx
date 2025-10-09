@@ -6,9 +6,9 @@ import { AmountInputError, SelectedRoute } from "../utils";
 import { formatUnitsWithMaxFractions, getToken } from "utils";
 import { BridgeLimits } from "hooks";
 
-const validationErrorTextMap: Record<AmountInputError, string> = {
+export const validationErrorTextMap: Record<AmountInputError, string> = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
-    "Insufficient balance to process this transfer.",
+    "Not enough [INPUT_TOKEN] to process this transfer.",
   [AmountInputError.PAUSED_DEPOSITS]:
     "[INPUT_TOKEN] deposits are temporarily paused.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
