@@ -73,7 +73,6 @@ const enabledSwapRoutes: {
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
       all: {
-        disabledOriginChains: [CHAIN_IDs.HYPEREVM],
         enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
         enabledOutputTokens: ["USDT-SPOT"],
       },

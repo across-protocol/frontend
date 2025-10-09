@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
 import { UniversalSwapQuote } from "./useUniversalSwapQuote";
 
@@ -53,7 +53,8 @@ export function useBridgeLimits(
     bridgeInputTokenSymbol,
     bridgeOutputTokenSymbol,
     bridgeOriginChainId,
-    bridgeDestinationChainId
+    bridgeDestinationChainId,
+    didUniversalSwapLoad ? universalSwapQuote.steps.bridge.provider : "across"
   );
   const { data: limits, ...delegated } = useQuery({
     queryKey,
@@ -64,6 +65,7 @@ export function useBridgeLimits(
         outputTokenSymbolToQuery,
         fromChainIdToQuery,
         toChainIdToQuery,
+        bridgeProviderToQuery,
       ] = queryKey;
 
       if (
@@ -73,6 +75,15 @@ export function useBridgeLimits(
         !toChainIdToQuery
       ) {
         throw new Error("Bridge limits query not enabled");
+      }
+
+      if (bridgeProviderToQuery === "hypercore") {
+        return {
+          minDeposit: BigNumber.from(0),
+          maxDeposit: BigNumber.from(ethers.constants.MaxUint256),
+          maxDepositInstant: BigNumber.from(ethers.constants.MaxUint256),
+          maxDepositShortDelay: BigNumber.from(ethers.constants.MaxUint256),
+        };
       }
 
       return getApiEndpoint().limits(

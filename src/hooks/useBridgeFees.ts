@@ -16,6 +16,41 @@ const DEFAULT_SIMULATED_RECIPIENT_ADDRESS_EVM =
 const DEFAULT_SIMULATED_RECIPIENT_ADDRESS_SVM =
   "GsiZqCTNRi4T3qZrixFdmhXVeA4CSUzS7c44EQ7Rw1Tw";
 
+const EMPTY_BRIDGE_FEES = {
+  totalRelayFee: {
+    total: BigNumber.from(0),
+    pct: BigNumber.from(0),
+  },
+  lpFee: {
+    total: BigNumber.from(0),
+    pct: BigNumber.from(0),
+  },
+  relayerGasFee: {
+    total: BigNumber.from(0),
+    pct: BigNumber.from(0),
+  },
+  relayerCapitalFee: {
+    total: BigNumber.from(0),
+    pct: BigNumber.from(0),
+  },
+  quoteTimestamp: BigNumber.from(0),
+  quoteTimestampInMs: BigNumber.from(0),
+  quoteLatency: BigNumber.from(0),
+  quoteBlock: BigNumber.from(0),
+  limits: {
+    maxDepositInstant: BigNumber.from(ethers.constants.MaxUint256),
+    maxDeposit: BigNumber.from(ethers.constants.MaxUint256),
+    maxDepositShortDelay: BigNumber.from(ethers.constants.MaxUint256),
+    minDeposit: BigNumber.from(0),
+    recommendedDepositInstant: BigNumber.from(ethers.constants.MaxUint256),
+  },
+  estimatedFillTimeSec: 1,
+  exclusiveRelayer: ethers.constants.AddressZero,
+  exclusivityDeadline: 0,
+  fillDeadline: 0,
+  isAmountTooLow: false,
+};
+
 /**
  * This hook calculates the bridge fees for a given token and amount.
  * @param amount - The amount to check bridge fees for.
@@ -63,6 +98,7 @@ export function useBridgeFees(
     bridgeOutputTokenSymbol,
     bridgeOriginChainId,
     bridgeDestinationChainId,
+    didUniversalSwapLoad ? universalSwapQuote.steps.bridge.provider : "across",
     externalProjectId,
     recipientAddress
   );
@@ -76,9 +112,14 @@ export function useBridgeFees(
         amountToQuery,
         fromChainIdToQuery,
         toChainIdToQuery,
+        bridgeProviderToQuery,
         externalProjectIdToQuery,
         recipientAddressToQuery,
       ] = queryKey;
+
+      if (bridgeProviderToQuery === "hypercore") {
+        return EMPTY_BRIDGE_FEES;
+      }
 
       const feeArgs = {
         amount: BigNumber.from(amountToQuery),

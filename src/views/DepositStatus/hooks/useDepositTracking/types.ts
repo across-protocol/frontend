@@ -66,9 +66,13 @@ export interface IChainStrategy {
   /**
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
+   * @param bridgeProvider Bridge provider
    * @returns Normalized deposit information
    */
-  getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
+  getDeposit(
+    txIdOrSignature: string,
+    bridgeProvider?: string
+  ): Promise<DepositInfo>;
 
   /**
    * Get fill information for a deposit
@@ -76,7 +80,10 @@ export interface IChainStrategy {
    * @param toChainId Destination chain ID
    * @returns Normalized fill information
    */
-  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+  getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider?: string
+  ): Promise<FillInfo>;
 
   /**
    * Convert deposit information to local storage format

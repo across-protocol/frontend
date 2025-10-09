@@ -1,5 +1,9 @@
 import { getProvider } from "utils/providers";
 import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
+import {
+  getDepositByTxHashToHyperCore,
+  getFillForDepositToHyperCore,
+} from "utils/hyperevm";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
@@ -26,11 +30,18 @@ export class EVMStrategy implements IChainStrategy {
   /**
    * Get deposit information from an EVM transaction hash
    * @param txHash EVM transaction hash
+   * @param bridgeProvider Bridge provider
    * @returns Deposit information
    */
-  async getDeposit(txHash: string): Promise<DepositInfo> {
+  async getDeposit(
+    txHash: string,
+    bridgeProvider = "across"
+  ): Promise<DepositInfo> {
     try {
-      const deposit = await getDepositByTxHash(txHash, this.chainId);
+      const deposit =
+        bridgeProvider === "across"
+          ? await getDepositByTxHash(txHash, this.chainId)
+          : await getDepositByTxHashToHyperCore(txHash, this.chainId);
 
       // Create a normalized response
       if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
@@ -59,14 +70,21 @@ export class EVMStrategy implements IChainStrategy {
   /**
    * Get fill information for a deposit
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
+   * @param bridgeProvider Bridge provider
    * @returns Fill information
    */
-  async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
+  async getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider = "across"
+  ): Promise<FillInfo> {
     const depositId = depositInfo.depositLog?.depositId;
     const originChainId = depositInfo.depositLog.originChainId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
+    }
+
+    if (bridgeProvider === "hypercore") {
+      return getFillForDepositToHyperCore(depositInfo);
     }
 
     let fillChainId = this.chainId;

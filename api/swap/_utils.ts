@@ -961,6 +961,7 @@ export async function buildBaseSwapResponseJson(params: {
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
         fees: params.bridgeQuote.fees,
+        provider: params.bridgeQuote.provider,
       },
       destinationSwap: params.destinationSwapQuote
         ? {

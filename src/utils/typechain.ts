@@ -33,3 +33,4 @@ export type {
   TypedEvent,
   TypedEventFilter,
 } from "@across-protocol/contracts/dist/typechain/common";
+export type { TransferEvent } from "@across-protocol/contracts/dist/typechain/@openzeppelin/contracts/token/ERC20/ERC20";

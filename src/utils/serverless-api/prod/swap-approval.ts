@@ -35,6 +35,10 @@ export type SwapApprovalApiResponse = {
   }[];
   steps: {
     originSwap?: {
+      provider: {
+        name: string;
+        sources: string[];
+      };
       tokenIn: SwapApiToken;
       tokenOut: SwapApiToken;
       inputAmount: string;
@@ -43,6 +47,7 @@ export type SwapApprovalApiResponse = {
       maxInputAmount: string;
     };
     bridge: {
+      provider: string;
       inputAmount: string;
       outputAmount: string;
       tokenIn: SwapApiToken;
@@ -67,6 +72,10 @@ export type SwapApprovalApiResponse = {
       };
     };
     destinationSwap?: {
+      provider: {
+        name: string;
+        sources: string[];
+      };
       tokenIn: SwapApiToken;
       tokenOut: SwapApiToken;
       inputAmount: string;
@@ -138,6 +147,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
     steps: {
       originSwap: result.steps.originSwap
         ? {
+            provider: result.steps.originSwap.provider,
             tokenIn: result.steps.originSwap.tokenIn,
             tokenOut: result.steps.originSwap.tokenOut,
             inputAmount: BigNumber.from(result.steps.originSwap.inputAmount),
@@ -151,6 +161,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
           }
         : undefined,
       bridge: {
+        provider: result.steps.bridge.provider || "across",
         inputAmount: BigNumber.from(result.steps.bridge.inputAmount),
         outputAmount: BigNumber.from(result.steps.bridge.outputAmount),
         tokenIn: result.steps.bridge.tokenIn,
@@ -178,6 +189,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
       },
       destinationSwap: result.steps.destinationSwap
         ? {
+            provider: result.steps.destinationSwap.provider,
             tokenIn: result.steps.destinationSwap.tokenIn,
             tokenOut: result.steps.destinationSwap.tokenOut,
             inputAmount: BigNumber.from(

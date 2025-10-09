@@ -32,6 +32,7 @@ export function balanceQueryKey(
  * @param amount  The amount to check bridge fees for.
  * @param fromChainId The origin chain of this bridge action
  * @param toChainId The destination chain of this bridge action
+ * @param bridgeProvider The bridge provider to check bridge fees for.
  * @param externalProjectId The external project id to check bridge fees for.
  * @param recipientAddress The recipient address to check bridge fees for.
  * @returns An array of query keys for @tanstack/react-query `useQuery` hook.
@@ -42,6 +43,7 @@ export function bridgeFeesQueryKey(
   outputToken: string,
   fromChainId: ChainId,
   toChainId: ChainId,
+  bridgeProvider: string,
   externalProjectId?: string,
   recipientAddress?: string
 ) {
@@ -52,6 +54,7 @@ export function bridgeFeesQueryKey(
     amount.toString(),
     fromChainId,
     toChainId,
+    bridgeProvider,
     externalProjectId,
     recipientAddress,
   ] as const;
@@ -61,7 +64,8 @@ export function bridgeLimitsQueryKey(
   inputToken?: string,
   outputToken?: string,
   fromChainId?: ChainId,
-  toChainId?: ChainId
+  toChainId?: ChainId,
+  bridgeProvider?: string
 ) {
   return [
     "bridgeLimits",
@@ -69,6 +73,7 @@ export function bridgeLimitsQueryKey(
     outputToken,
     fromChainId,
     toChainId,
+    bridgeProvider,
   ] as const;
 }
 
