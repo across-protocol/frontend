@@ -3,13 +3,13 @@ import * as sdk from "@across-protocol/sdk";
 import { createMemoryClient, http, PREFUNDED_ACCOUNTS } from "tevm";
 import { optimism, base } from "tevm/common";
 import axios from "axios";
-import http from "http";
+import nodeHttp from "http";
 import https from "https";
 
 dotenv.config({ path: [".env.e2e", ".env.local", ".env"] });
 
 export const axiosInstance = axios.create({
-  httpAgent: new http.Agent({ keepAlive: false }),
+  httpAgent: new nodeHttp.Agent({ keepAlive: false }),
   httpsAgent: new https.Agent({ keepAlive: false }),
 });
 
