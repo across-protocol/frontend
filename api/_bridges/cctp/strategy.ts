@@ -40,7 +40,6 @@ import {
   getCctpDomainId,
   encodeDepositForBurn,
   buildSolanaDepositForBurnInstructionData,
-  CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA,
 } from "./utils/constants";
 import {
   buildCctpTxHyperEvmToHyperCore,
