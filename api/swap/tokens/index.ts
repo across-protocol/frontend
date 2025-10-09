@@ -29,7 +29,7 @@ type Token = {
 };
 
 const chains = mainnetChains;
-const chainIds = chains.map((chain) => chain.chainId);
+const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
 
 // List of tokens that are statically defined locally. Currently, this list is used for
 // indirect chain tokens, e.g. USDT-SPOT on HyperCore.
