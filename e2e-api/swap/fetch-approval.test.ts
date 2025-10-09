@@ -201,6 +201,9 @@ describe("GET /swap/approval", () => {
           const response = await axiosInstance.get(SWAP_API_URL, {
             params,
           });
+          console.log("Request Params:", JSON.stringify(params, null, 2));
+          console.log("Response Data:", JSON.stringify(response.data, null, 2));
+          console.log("URL:", SWAP_API_URL);
           expect(response.status).toBe(200);
           expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
           expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
