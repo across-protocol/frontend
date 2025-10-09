@@ -1,9 +1,9 @@
 import { BigNumber, ethers } from "ethers";
 import { CCTP_NO_DOMAIN } from "@across-protocol/constants";
+import { TokenMessengerMinterV2Client } from "@across-protocol/contracts";
 import * as sdk from "@across-protocol/sdk";
 import {
   address,
-  getProgramDerivedAddress,
   generateKeyPairSigner,
   getBase64EncodedWireTransaction,
   pipe,
@@ -12,15 +12,9 @@ import {
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
   createNoopSigner,
-  addSignersToInstruction,
   partiallySignTransaction,
   compileTransaction,
-  AccountRole,
 } from "@solana/kit";
-import { getStructEncoder } from "@solana/codecs-data-structures";
-import { getU32Encoder, getU64Encoder } from "@solana/codecs-numbers";
-import { getUtf8Encoder } from "@solana/codecs-strings";
-import { getAddressEncoder } from "@solana/addresses";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP, CHAINS } from "../../../_constants";
 import { InvalidParamError } from "../../../_errors";
 import { toBytes32 } from "../../../_address";
@@ -70,6 +64,22 @@ export const getCctpTokenMessengerAddress = (chainId: number): string => {
   return (
     CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES[chainId] ||
     DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS
+  );
+};
+
+// Source: https://developers.circle.com/cctp/evm-smart-contracts
+const DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS =
+  "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64";
+
+// Source: https://developers.circle.com/cctp/solana-programs
+const CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.SOLANA]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+};
+
+export const getCctpMessageTransmitterAddress = (chainId: number): string => {
+  return (
+    CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId] ||
+    DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS
   );
 };
 
@@ -159,81 +169,6 @@ export const CCTP_FILL_TIME_ESTIMATES: Record<number, number> = {
 // Solana CCTP Constants and Helpers
 // ============================================================================
 
-// Solana CCTP V2 Program IDs
-// Source: https://developers.circle.com/cctp/solana-programs
-export const CCTP_MESSAGE_TRANSMITTER_V2_SOLANA =
-  "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC";
-export const CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA =
-  "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe";
-
-// Solana system programs
-const SYSTEM_PROGRAM_ID = "11111111111111111111111111111111";
-const TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-
-// Anchor discriminator for deposit_for_burn instruction
-// Computed from sha256("global:deposit_for_burn").slice(0, 8)
-const DEPOSIT_FOR_BURN_DISCRIMINATOR = new Uint8Array([
-  0xd7, 0x3c, 0x3d, 0x2e, 0x72, 0x37, 0x80, 0xb0,
-]);
-
-/**
- * Encodes the Solana CCTP V2 depositForBurn instruction data
- */
-export function encodeSolanaDepositForBurnData(params: {
-  amount: BigNumber;
-  destinationDomain: number;
-  mintRecipient: string; // EVM or SVM address
-  destinationCaller: string; // EVM or SVM address, use ethers.constants.AddressZero for "any"
-  maxFee: BigNumber;
-  minFinalityThreshold: number;
-  originChainId: number;
-  destinationChainId: number;
-}): Uint8Array {
-  // Convert addresses to bytes32 (handles both EVM and SVM addresses)
-  const mintRecipientBytes32 = toBytes32(params.mintRecipient);
-  const destinationCallerBytes32 = toBytes32(params.destinationCaller);
-
-  // Convert bytes32 hex to Solana address format using SDK
-  const mintRecipientAddr = sdk.utils
-    .toAddressType(mintRecipientBytes32, params.destinationChainId)
-    .toBase58();
-  const destinationCallerAddr = sdk.utils
-    .toAddressType(destinationCallerBytes32, params.destinationChainId)
-    .toBase58();
-
-  // Convert to Solana Kit address type
-  const mintRecipientSolana = address(mintRecipientAddr);
-  const destinationCallerSolana = address(destinationCallerAddr);
-
-  // Encode the instruction parameters
-  const paramsEncoder = getStructEncoder([
-    ["amount", getU64Encoder()],
-    ["destinationDomain", getU32Encoder()],
-    ["mintRecipient", getAddressEncoder()],
-    ["destinationCaller", getAddressEncoder()],
-    ["maxFee", getU64Encoder()],
-    ["minFinalityThreshold", getU32Encoder()],
-  ]);
-
-  const encodedParams = paramsEncoder.encode({
-    amount: BigInt(params.amount.toString()),
-    destinationDomain: params.destinationDomain,
-    mintRecipient: mintRecipientSolana,
-    destinationCaller: destinationCallerSolana,
-    maxFee: BigInt(params.maxFee.toString()),
-    minFinalityThreshold: params.minFinalityThreshold,
-  });
-
-  // Combine discriminator + encoded params
-  const instructionData = new Uint8Array(
-    DEPOSIT_FOR_BURN_DISCRIMINATOR.length + encodedParams.length
-  );
-  instructionData.set(DEPOSIT_FOR_BURN_DISCRIMINATOR, 0);
-  instructionData.set(encodedParams, DEPOSIT_FOR_BURN_DISCRIMINATOR.length);
-
-  return instructionData;
-}
-
 /**
  * Builds Solana CCTP depositForBurn transaction (partially signed with event account)
  * Returns a base64-encoded transaction that has been partially signed with the messageSentEventData keypair.
@@ -269,45 +204,68 @@ export async function buildSolanaDepositForBurnInstructionData(params: {
     params.originChainId
   );
 
-  console.log("tokenMintAddr", tokenMintAddr);
-  console.log(
-    "tokenMintAddr.forceSvmAddress()",
-    tokenMintAddr.forceSvmAddress()
-  );
-  console.log("depositorAddr", depositorAddr);
-  console.log(
-    "depositorAddr.forceSvmAddress()",
-    depositorAddr.forceSvmAddress()
-  );
-  console.log("inputToken", address(params.inputToken));
   const depositorTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
     depositorAddr.forceSvmAddress(),
     tokenMintAddr.forceSvmAddress()
-    // address(params.inputToken)
   );
 
   // Generate a new keypair signer for the messageSentEventData account
   const eventDataKeypair = await generateKeyPairSigner();
 
+  // Get CCTP program addresses
+  const tokenMessengerAddress = getCctpTokenMessengerAddress(
+    params.originChainId
+  );
+  const messageTransmitterAddress = getCctpMessageTransmitterAddress(
+    params.originChainId
+  );
+
   // Get CCTP deposit accounts from SDK helper
   const cctpAccounts = await sdk.arch.svm.getCCTPDepositAccounts(
     params.originChainId,
     params.destinationDomain,
-    address(CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA),
-    address(CCTP_MESSAGE_TRANSMITTER_V2_SOLANA)
+    address(tokenMessengerAddress),
+    address(messageTransmitterAddress)
   );
 
-  // Encode instruction data
-  const instructionData = encodeSolanaDepositForBurnData({
-    amount: params.amount,
-    destinationDomain: params.destinationDomain,
-    mintRecipient: params.mintRecipient,
-    destinationCaller: params.destinationCaller,
-    maxFee: params.maxFee,
-    minFinalityThreshold: params.minFinalityThreshold,
-    originChainId: params.originChainId,
-    destinationChainId: params.destinationChainId,
-  });
+  // Convert addresses to Solana Kit address format for instruction parameters
+  const mintRecipientBytes32 = toBytes32(params.mintRecipient);
+  const destinationCallerBytes32 = toBytes32(params.destinationCaller);
+
+  const mintRecipientAddr = sdk.utils
+    .toAddressType(mintRecipientBytes32, params.destinationChainId)
+    .toBase58();
+  const destinationCallerAddr = sdk.utils
+    .toAddressType(destinationCallerBytes32, params.destinationChainId)
+    .toBase58();
+
+  // Create signers
+  const depositorAddress = address(params.depositor);
+  const depositorSigner = createNoopSigner(depositorAddress);
+
+  // Use the TokenMessenger client to build the instruction
+  const depositInstruction =
+    await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync({
+      owner: depositorSigner,
+      eventRentPayer: depositorSigner,
+      senderAuthorityPda: cctpAccounts.tokenMessengerMinterSenderAuthority,
+      burnTokenAccount: depositorTokenAccount,
+      messageTransmitter: cctpAccounts.messageTransmitter,
+      tokenMessenger: cctpAccounts.tokenMessenger,
+      remoteTokenMessenger: cctpAccounts.remoteTokenMessenger,
+      tokenMinter: cctpAccounts.tokenMinter,
+      localToken: cctpAccounts.localToken,
+      burnTokenMint: address(burnTokenMint),
+      messageSentEventData: eventDataKeypair,
+      eventAuthority: cctpAccounts.cctpEventAuthority,
+      program: address(tokenMessengerAddress),
+      amount: BigInt(params.amount.toString()),
+      destinationDomain: params.destinationDomain,
+      mintRecipient: address(mintRecipientAddr),
+      destinationCaller: address(destinationCallerAddr),
+      maxFee: BigInt(params.maxFee.toString()),
+      minFinalityThreshold: params.minFinalityThreshold,
+    });
 
   // Get Solana provider to fetch recent blockhash
   const provider = getSvmProvider(params.originChainId);
@@ -315,165 +273,6 @@ export async function buildSolanaDepositForBurnInstructionData(params: {
     .createRpcClient()
     .getLatestBlockhash()
     .send();
-
-  // Convert depositor to Solana Kit address and create a noop signer (user will sign on frontend)
-  const depositorAddress = address(params.depositor);
-  const depositorSigner = createNoopSigner(depositorAddress);
-  console.log("depositorSigner", depositorSigner);
-  const programAddress = address(CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA);
-
-  // Derive denylist account PDA for the depositor
-  // Note: The denylist PDA is owned by the Token Messenger Minter program, not Message Transmitter
-  const utf8Encoder = getUtf8Encoder();
-  const addressEncoder = getAddressEncoder();
-
-  const [denylistAccount] = await getProgramDerivedAddress({
-    programAddress: programAddress, // Use Token Messenger Minter program
-    seeds: [
-      utf8Encoder.encode("denylist_account"),
-      addressEncoder.encode(depositorAddress),
-    ],
-  });
-
-  console.log("Derived denylist account:", denylistAccount);
-
-  // Build the CCTP deposit instruction using accounts from SDK
-  // Account order matches the IDL DepositForBurn instruction
-  let depositInstruction = {
-    programAddress,
-    accounts: [
-      // 0. owner (signer)
-      {
-        address: depositorAddress,
-        role: AccountRole.READONLY_SIGNER, // AccountRole.READONLY_SIGNER
-      },
-      // 1. event_rent_payer (signer, writable)
-      {
-        address: depositorAddress,
-        role: AccountRole.WRITABLE_SIGNER, // AccountRole.WRITABLE_SIGNER
-      },
-      // 2. sender_authority_pda
-      {
-        address: cctpAccounts.tokenMessengerMinterSenderAuthority,
-        role: AccountRole.READONLY,
-      },
-      // 3. burn_token_account (writable)
-      {
-        address: depositorTokenAccount,
-        role: 1, // AccountRole.WRITABLE
-      },
-      // 4. denylist_account
-      {
-        address: denylistAccount,
-        role: 0, // AccountRole.READONLY
-      },
-      // 5. message_transmitter (writable)
-      {
-        address: cctpAccounts.messageTransmitter,
-        role: 1,
-      },
-      // 5. token_messenger
-      {
-        address: cctpAccounts.tokenMessenger,
-        role: 0,
-      },
-      // 6. remote_token_messenger
-      {
-        address: cctpAccounts.remoteTokenMessenger,
-        role: 0,
-      },
-      // 7. token_minter
-      {
-        address: cctpAccounts.tokenMinter,
-        role: 0,
-      },
-      // 8. local_token (writable)
-      {
-        address: cctpAccounts.localToken,
-        role: 1,
-      },
-      // 9. burn_token_mint (writable)
-      {
-        address: address(burnTokenMint),
-        role: 1,
-      },
-      // 10. message_sent_event_data (writable, signer) - newly generated keypair
-      {
-        address: eventDataKeypair.address,
-        role: 3,
-      },
-      // 11. message_transmitter_program
-      {
-        address: address(CCTP_MESSAGE_TRANSMITTER_V2_SOLANA),
-        role: 0,
-      },
-      // 12. token_messenger_minter_program
-      {
-        address: programAddress,
-        role: 0,
-      },
-      // 13. token_program
-      {
-        address: address(TOKEN_PROGRAM_ID),
-        role: 0,
-      },
-      // 14. system_program
-      {
-        address: address(SYSTEM_PROGRAM_ID),
-        role: 0,
-      },
-      // 15. event_authority
-      {
-        address: cctpAccounts.cctpEventAuthority,
-        role: 0,
-      },
-      // 16. program
-      {
-        address: programAddress,
-        role: 0,
-      },
-    ],
-    data: instructionData,
-  };
-
-  // Log accounts with their hardcoded name
-  const accounts = [
-    "owner",
-    "event_rent_payer",
-    "sender_authority_pda",
-    "burn_token_account",
-    "denylist_account",
-    "message_transmitter",
-    "token_messenger",
-    "remote_token_messenger",
-    "token_minter",
-    "local_token",
-    "burn_token_mint",
-    "message_sent_event_data",
-    "message_transmitter_program",
-    "token_messenger_minter_program",
-    "token_program",
-    "system_program",
-    "event_authority",
-    "program",
-  ];
-  console.log(
-    "depositInstruction accounts",
-    depositInstruction.accounts.map((acc, index) => ({
-      name: accounts[index],
-      address: acc.address,
-      role: acc.role,
-    }))
-  );
-
-  console.log("depositInstruction", depositInstruction);
-
-  // Add the event keypair signer to the instruction
-  // The depositor noop signer will be handled at the transaction message level
-  depositInstruction = addSignersToInstruction(
-    [eventDataKeypair],
-    depositInstruction
-  );
 
   // Build the transaction message
   const txMessage = pipe(
@@ -495,7 +294,6 @@ export async function buildSolanaDepositForBurnInstructionData(params: {
 
   // Partially sign the transaction with only the event data keypair
   // The depositor will sign on the frontend before submitting
-  // Note: partiallySignTransaction expects (keyPairs, transaction) where keyPairs is CryptoKeyPair[]
   const partiallySignedTx = await partiallySignTransaction(
     [eventDataKeypair.keyPair],
     compiledTx

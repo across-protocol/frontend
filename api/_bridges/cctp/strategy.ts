@@ -22,7 +22,6 @@ import {
   getCctpDomainId,
   encodeDepositForBurn,
   buildSolanaDepositForBurnInstructionData,
-  CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA,
 } from "./utils/constants";
 
 const name = "cctp";
@@ -233,7 +232,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         // Note: Integrator ID tagging for Solana can be added via memo instruction if needed
         return {
           chainId: originChainId,
-          to: CCTP_TOKEN_MESSENGER_MINTER_V2_SOLANA,
+          to: getCctpTokenMessengerAddress(originChainId),
           data: instructionJson,
           ecosystem: "svm" as const,
         };
