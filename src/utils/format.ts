@@ -300,6 +300,10 @@ export function formatUSD(value: BigNumberish): string {
   return numeral(Number(formattedString).toFixed(2)).format("0,0.00");
 }
 
+export function formatUSDString(value: string, decimals = 2): string {
+  return `$${numeral(Number(value).toFixed(decimals)).format("0,0.00")}`;
+}
+
 /**
  * A fault-tolerant version of `parseUnits` that will attempt to parse
  * a string while being mindful of truncation.

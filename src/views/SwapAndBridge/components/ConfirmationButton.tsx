@@ -14,23 +14,13 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle.svg";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSD, getConfig } from "utils";
+import { COLORS, formatUSDString, getConfig, isDefined } from "utils";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
 import styled from "@emotion/styled";
 import { AmountInputError } from "../../Bridge/utils";
 import { Tooltip } from "components/Tooltip";
-
-type SwapQuoteResponse = {
-  checks: object;
-  steps: object;
-  refundToken: object;
-  inputAmount: string;
-  expectedOutputAmount: string;
-  minOutputAmount: string;
-  expectedFillTime: number;
-  swapTx: object;
-};
+import { SwapApprovalApiResponse } from "utils/serverless-api/prod/swap-approval";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -47,7 +37,7 @@ interface ConfirmationButtonProps
   inputToken: EnrichedTokenSelect | null;
   outputToken: EnrichedTokenSelect | null;
   amount: BigNumber | null;
-  swapQuote: SwapQuoteResponse | null;
+  swapQuote: SwapApprovalApiResponse | null;
   isQuoteLoading: boolean;
   onConfirm?: () => void;
   validationError?: AmountInputError;
@@ -212,75 +202,29 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
-  const bridgeTokenSymbol =
-    (swapQuote as any)?.steps?.bridge?.tokenOut?.symbol ||
-    outputToken?.symbol ||
-    "ETH";
-  const destinationNativeSymbol = getConfig().getNativeTokenInfo(
-    outputToken?.chainId || 1
-  ).symbol;
-  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
-    useTokenConversion(inputToken?.symbol || "ETH", "usd");
-  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
-    useTokenConversion(bridgeTokenSymbol, "usd");
-  const { convertTokenToBaseCurrency: convertDestinationNativeToUsd } =
-    useTokenConversion(destinationNativeSymbol, "usd");
 
   const displayValues = React.useMemo(() => {
-    const toBN = (v: any) => {
-      try {
-        return BigNumber.from(v ?? 0);
-      } catch {
-        return BigNumber.from(0);
-      }
-    };
-
-    const formatUsdString = (v?: BigNumber) => {
-      if (!v) return "-";
-      try {
-        return `$${formatUSD(v)}`;
-      } catch {
-        return "-";
-      }
-    };
-
     if (!swapQuote || !inputToken || !outputToken) {
       return {
         fee: "-",
         time: "-",
         bridgeFee: "-",
-        destinationGasFee: "-",
-        extraFee: "-",
+        gasFee: "-",
+        swapFee: "-",
         route: "Across V4",
         estimatedTime: "-",
         netFee: "-",
       };
     }
 
-    const fees = (swapQuote as any)?.steps?.bridge?.fees || {};
-    const relayerCapitalTotal = toBN(fees?.relayerCapital?.total);
-    const lpTotal = toBN(fees?.lp?.total);
-    const relayerGasTotal = toBN(fees?.relayerGas?.total);
-
-    // Convert components to USD
-    const bridgeFeeTokenAmount = relayerCapitalTotal.add(lpTotal);
-    const bridgeFeeUsd = convertBridgeTokenToUsd(bridgeFeeTokenAmount);
-    const gasFeeUsd = convertDestinationNativeToUsd(relayerGasTotal);
-
-    // Approximate swap fee in USD if we have user input and bridge input
-    const bridgeInputAmount = toBN(
-      (swapQuote as any)?.steps?.bridge?.inputAmount
-    );
-    const inputAmountUsd = convertInputTokenToUsd(amount ?? BigNumber.from(0));
-    const bridgeInputUsd = convertBridgeTokenToUsd(bridgeInputAmount);
-    const swapFeeUsd =
-      inputAmountUsd && bridgeInputUsd && inputAmountUsd.gt(bridgeInputUsd)
-        ? inputAmountUsd.sub(bridgeInputUsd)
-        : BigNumber.from(0);
-
-    const netFeeUsd = (bridgeFeeUsd || BigNumber.from(0))
-      .add(gasFeeUsd || BigNumber.from(0))
-      .add(swapFeeUsd || BigNumber.from(0));
+    // Get fees from the top-level fees object (new structure)
+    const bridgeFeesUsd = swapQuote.fees.relayerTotal.amountUsd;
+    const gasFeeUsd = (
+      Number(swapQuote.fees.originGas.amountUsd) +
+      Number(swapQuote.fees.destinationGas.amountUsd)
+    ).toString();
+    const swapFeeUsd = swapQuote.fees.swap?.amountUsd;
+    const totalFeeUsd = swapQuote.fees.total.amountUsd;
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -289,24 +233,15 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
     return {
-      fee: formatUsdString(netFeeUsd),
+      fee: formatUSDString(totalFeeUsd),
       time,
-      bridgeFee: formatUsdString(bridgeFeeUsd),
-      destinationGasFee: formatUsdString(gasFeeUsd),
-      extraFee: formatUsdString(swapFeeUsd),
+      bridgeFee: formatUSDString(bridgeFeesUsd),
+      gasFee: formatUSDString(gasFeeUsd),
+      swapFee: swapFeeUsd ? formatUSDString(swapFeeUsd) : undefined,
       route: "Across V4",
       estimatedTime: time,
-      netFee: formatUsdString(netFeeUsd),
     };
-  }, [
-    swapQuote,
-    inputToken,
-    outputToken,
-    amount,
-    convertInputTokenToUsd,
-    convertBridgeTokenToUsd,
-    convertDestinationNativeToUsd,
-  ]);
+  }, [swapQuote, inputToken, outputToken, amount]);
 
   const clickHandler = onConfirm;
 
@@ -374,17 +309,19 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                     </FeeBreakdownValue>
                   </FeeBreakdownRow>
                   <FeeBreakdownRow>
-                    <FeeBreakdownLabel>Destination Gas Fee</FeeBreakdownLabel>
+                    <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
                     <FeeBreakdownValue>
-                      {displayValues.destinationGasFee}
+                      {displayValues.gasFee}
                     </FeeBreakdownValue>
                   </FeeBreakdownRow>
-                  <FeeBreakdownRow>
-                    <FeeBreakdownLabel>Extra Fee</FeeBreakdownLabel>
-                    <FeeBreakdownValue>
-                      {displayValues.extraFee}
-                    </FeeBreakdownValue>
-                  </FeeBreakdownRow>
+                  {isDefined(displayValues.swapFee) && (
+                    <FeeBreakdownRow>
+                      <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
+                      <FeeBreakdownValue>
+                        {displayValues.swapFee}
+                      </FeeBreakdownValue>
+                    </FeeBreakdownRow>
+                  )}
                 </FeeBreakdown>
               </ExpandedDetails>
             ) : null}

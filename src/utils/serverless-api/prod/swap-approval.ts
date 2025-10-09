@@ -99,6 +99,101 @@ export type SwapApprovalApiResponse = {
     maxFeePerGas?: string;
     maxPriorityFeePerGas?: string;
   };
+  fees: {
+    total: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    originGas: {
+      amount: string;
+      amountUsd: string;
+      token: {
+        chainId: number;
+        address: string;
+        decimals: number;
+        symbol: string;
+      };
+    };
+    destinationGas: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        chainId: number;
+        address: string;
+        decimals: number;
+        symbol: string;
+      };
+    };
+    relayerCapital: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    lpFee: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    relayerTotal: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    app: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    swap?: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+  };
 };
 
 export type SwapApprovalApiQueryParams = {
