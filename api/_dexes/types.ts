@@ -131,6 +131,7 @@ export type CrossSwapQuotes = {
       relayerCapital: FeeComponent;
       relayerGas: FeeComponent;
       lp: FeeComponent;
+      bridgeFee: FeeComponent;
     };
   } & (
     | {
