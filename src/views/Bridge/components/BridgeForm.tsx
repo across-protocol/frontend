@@ -73,6 +73,7 @@ export type BridgeFormProps = {
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   isQuoteLoading: boolean;
+  showHyperliquidWarning?: boolean;
 };
 
 // If swap price impact is lower than this threshold, show a warning
@@ -111,6 +112,7 @@ const BridgeForm = ({
   validationError,
   validationWarning,
   isQuoteLoading,
+  showHyperliquidWarning,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
   const { connect: connectEVM } = useConnectionEVM();
@@ -273,6 +275,19 @@ const BridgeForm = ({
           </Alert>
         </Tooltip>
       )}
+      {showHyperliquidWarning && (
+        <Alert status="warn" alignIcon="center">
+          <HyperliquidWarningTextContainer>
+            <Text color="white">
+              You must initialize this account on Hyperliquid before bridging
+              USDT0.{" "}
+              <InlineButton onClick={() => onSelectInputToken("USDC")}>
+                Bridge USDC to initialize.
+              </InlineButton>
+            </Text>
+          </HyperliquidWarningTextContainer>
+        </Alert>
+      )}
       <FeesCollapsible
         isQuoteLoading={isQuoteLoading}
         fromChainId={selectedRoute.fromChain}
@@ -332,6 +347,16 @@ const BridgeForm = ({
 };
 
 export default BridgeForm;
+
+const InlineButton = styled.button`
+  text-decoration: underline;
+  display: inline;
+  transition: opacity 150ms ease-in-out;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
 
 const CardWrapper = styled(ExternalCardWrapper)`
   width: 100%;
@@ -473,4 +498,10 @@ const PriceImpactTooltipBody = styled.div`
     height: 16px;
     width: 16px;
   }
+`;
+
+const HyperliquidWarningTextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;

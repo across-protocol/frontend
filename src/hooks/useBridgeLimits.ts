@@ -43,11 +43,17 @@ export function useBridgeLimits(
   const bridgeOutputTokenSymbol = didUniversalSwapLoad
     ? universalSwapQuote.steps.bridge.tokenOut.symbol
     : outputTokenSymbol;
+  const bridgeOriginChainId = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenIn.chainId
+    : fromChainId;
+  const bridgeDestinationChainId = didUniversalSwapLoad
+    ? universalSwapQuote.steps.bridge.tokenOut.chainId
+    : toChainId;
   const queryKey = bridgeLimitsQueryKey(
     bridgeInputTokenSymbol,
     bridgeOutputTokenSymbol,
-    fromChainId,
-    toChainId
+    bridgeOriginChainId,
+    bridgeDestinationChainId
   );
   const { data: limits, ...delegated } = useQuery({
     queryKey,
