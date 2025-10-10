@@ -148,7 +148,10 @@ describe("_utils", () => {
     });
 
     it("should correctly resolve ambiguous tokens like USDC", () => {
-      const arbitrumUsdcAddress = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+      const usdcAddresses = TOKEN_SYMBOLS_MAP.USDC.addresses;
+      const arbitrumChainId = CHAIN_IDs.ARBITRUM;
+      const arbitrumUsdcAddress = usdcAddresses[arbitrumChainId];
+
       const token = getTokenByAddress(arbitrumUsdcAddress, 42161);
       expect(token).toBeDefined();
       expect(token?.symbol).toBe("USDC");
