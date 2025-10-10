@@ -11,7 +11,6 @@ import {
   HUB_POOL_CHAIN_ID,
   callViaMulticall3,
   ConvertDecimals,
-  getCachedTokenBalance,
   getCachedTokenPrice,
   getHubPool,
   getLimitsBufferMultiplier,
@@ -30,7 +29,6 @@ import {
   validateChainAndTokenParams,
   getCachedLatestBlock,
   parsableBigNumberString,
-  validateDepositMessage,
   latestGasPriceCache,
   getCachedNativeGasCost,
   getCachedOpStackL1DataFee,
@@ -47,7 +45,10 @@ import {
 import { getDefaultRecipientAddress } from "./_recipient-address";
 import { calcGasFeeDetails } from "./_gas";
 import { sendResponse } from "./_response_utils";
-import { tracer } from "../instrumentation";
+import { getCachedTokenBalance } from "./_balance";
+import { validateDepositMessage } from "./_message";
+import { tracer as defaultTracer } from "../instrumentation";
+import { Tracer } from "@opentelemetry/api";
 
 const LimitsQueryParamsSchema = type({
   token: optional(validAddress()),
@@ -71,9 +72,11 @@ type LimitsBody = Infer<typeof LimitsBodySchema>;
 
 const handler = async (
   { query, body }: TypedVercelRequest<LimitsQueryParams, LimitsBody>,
-  response: VercelResponse
+  response: VercelResponse,
+  services?: { tracer: Tracer }
 ) => {
   const logger = getLogger();
+  const tracer = services?.tracer || defaultTracer;
   logger.debug({
     at: "Limits",
     message: "Query data",
@@ -142,14 +145,17 @@ const handler = async (
             param: "amount",
           });
         }
-        await validateDepositMessage(
-          recipient.toBytes32(),
+        await validateDepositMessage({
+          recipient: recipient.toBytes32(),
           destinationChainId,
-          relayer.toBytes32(),
-          outputToken.address,
-          ConvertDecimals(inputToken.decimals, outputToken.decimals)(amount),
-          message!
-        );
+          relayer: relayer.toBytes32(),
+          outputTokenAddress: outputToken.address,
+          amountInput: ConvertDecimals(
+            inputToken.decimals,
+            outputToken.decimals
+          )(amount),
+          message: message!,
+        });
       }
 
       let minDepositUsdForDestinationChainId = Number(

@@ -46,6 +46,9 @@ import {
 } from "./types";
 import { BridgeStrategy } from "../_bridges/types";
 import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
+import { accountExistsOnHyperCore } from "../_hypercore";
+import { CHAIN_IDs } from "../_constants";
+import { BigNumber } from "ethers";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
@@ -246,6 +249,33 @@ export async function getCrossSwapQuotesForExactInputB2BI(
     crossSwap.inputToken.decimals,
     indirectDestinationRoute.intermediaryOutputToken.decimals
   )(crossSwap.amount);
+
+  // If destination chain is HyperCore, we need to check if the app fee recipient and recipient
+  // have initialized balances on HyperCore.
+  if (crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE) {
+    const [appFeeRecipientExists, recipientExists] = await Promise.all([
+      crossSwap.appFeeRecipient
+        ? accountExistsOnHyperCore({
+            account: crossSwap.appFeeRecipient,
+          })
+        : BigNumber.from(0),
+      accountExistsOnHyperCore({
+        account: crossSwap.recipient,
+      }),
+    ]);
+
+    if (crossSwap.appFeeRecipient && !appFeeRecipientExists) {
+      throw new InvalidParamError({
+        message: "App fee recipient is not initialized on HyperCore",
+      });
+    }
+
+    if (!recipientExists) {
+      throw new InvalidParamError({
+        message: "Recipient is not initialized on HyperCore",
+      });
+    }
+  }
 
   // 1. We fetch a quote from inputToken.chainId -> intermediaryOutputToken.chainId
   const { bridgeQuote } = await bridge.getQuoteForExactInput({

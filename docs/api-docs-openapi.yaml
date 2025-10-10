@@ -819,9 +819,7 @@ paths:
           in: query
           required: false
           description: >
-            The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with
-            originChainId. depositTxHash is not required when using this
-            parameter.
+            The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with originChainId. depositTxnRef is not required when using this parameter.
           schema:
             type: integer
             minimum: 0
@@ -829,15 +827,12 @@ paths:
             default:
               value: 1349975
           x-gitbook-description-html: >-
-            <p>The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with
-            originChainId. depositTxHash is not required when using this
-            parameter.</p>
+            <p>The deposit id that is emitted from the FundsDeposited event. This must be used in conjunction with originChainId. depositTxnRef is not required when using this parameter.</p>
         - name: depositTxnRef
           in: query
-          required: false
+          required: true
           description: >
-            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this,
-            you donot need the above parameters. 
+            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this, you donot need the other parameters (i.e. originChainId and depositId). 
           schema:
             type: string
           examples:
@@ -1339,18 +1334,18 @@ paths:
                     nullable: true
                     description: >
                       Transaction hash for any token swap conducted on the
-                      destination chain.
+                      origin chain.
                     x-gitbook-description-html: >-
                       <p>Transaction hash for any token swap conducted on the
-                      destination chain.</p>
+                      origin chain.</p>
                   swapToken:
                     type: string
                     nullable: true
                     description: >
-                      Token address used in a swap on the destination chain, if
+                      Token address used in a swap on the origin chain, if
                       any.
                     x-gitbook-description-html: >-
-                      <p>Token address used in a swap on the destination chain,
+                      <p>Token address used in a swap on the origin chain,
                       if any.</p>
                   swapTokenAmount:
                     type: string
@@ -1435,7 +1430,6 @@ paths:
                   fillBlockTimestamp: '2025-07-24T16:11:43.000Z'
                   depositTxnRef: >-
                     0x92ffc5d69d00e14e79254f68adab030dd38119996501a88cac0da76557703d11
-                  depositRefundTxnRef: null
                   fillTxnRef: >-
                     0x7b98cebd7ee6e2f75fead81d73005cdf25149141c2045cb5f731b6d9c6b9c517
                   speedups: []
@@ -1708,13 +1702,14 @@ paths:
                         - How to handle the swap flow (input/output token logic)
                         - Which quote-fetching functions to call
                         - How responses and errors are formatted
-                    enum: ["BRIDGEABLE_TO_BRIDGEABLE","BRIDGEABLE_TO_ANY", "ANY_TO_BRIDGEABLE" , "ANY_TO_ANY"]
+                    enum: ["bridgeableToBridgeable", "bridgeableToBridgeableIndirect", "bridgeableToAny", "anyToBridgeable" , "anyToAny"]
                     example: bridgeableToAny
                     x-enum-descriptions: |
-                        - BRIDGEABLE_TO_BRIDGEABLE: Both input and output tokens are bridgeable
-                        - BRIDGEABLE_TO_ANY: Input token is bridgeable, output token is any token
-                        - ANY_TO_BRIDGEABLE: Input token is any token, output token is bridgeable
-                        - ANY_TO_ANY: Both input and output tokens are any tokens (not bridgeable)
+                        - bridgeableToBridgeable: Both input and output tokens are bridgeable
+                        - bridgeableToBridgeableIndirect: Specific case of `bridgeableToBridgeable`, where we route funds from any EVM to HyperCore (via HyperEVM) 
+                        - bridgeableToAny: Input token is bridgeable, output token is any token
+                        - anyToBridgeable: Input token is any token, output token is bridgeable
+                        - anyToAny: Both input and output tokens are any tokens (not bridgeable)
                     x-gitbook-description-html: <p>Type of cross-swap operation.</p>
                   amountType:
                     type: string
@@ -1784,6 +1779,11 @@ paths:
                         type: object
                         description: Bridge step information.
                         properties:
+                          provider:
+                            type: string
+                            description: Name of the bridge provider.
+                            example: 'across'
+                            x-gitbook-description-html: <p>Name of the bridge provider.</p>
                           inputAmount:
                             type: string
                             description: Amount of input token.
