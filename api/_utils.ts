@@ -52,7 +52,12 @@ import {
   relayerFeeCapitalCostConfig,
   TOKEN_EQUIVALENCE_REMAPPING,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
+import {
+  LimitsResponse,
+  PoolStateOfUser,
+  PoolStateResult,
+  TokenInfo,
+} from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -958,21 +963,7 @@ export const getCachedLimits = async (
   relayer?: string,
   message?: string,
   allowUnmatchedDecimals?: boolean
-): Promise<{
-  minDeposit: string;
-  maxDeposit: string;
-  maxDepositInstant: string;
-  maxDepositShortDelay: string;
-  recommendedDepositInstant: string;
-  relayerFeeDetails: {
-    relayFeeTotal: string;
-    relayFeePercent: string;
-    capitalFeePercent: string;
-    capitalFeeTotal: string;
-    gasFeePercent: string;
-    gasFeeTotal: string;
-  };
-}> => {
+): Promise<LimitsResponse> => {
   const messageTooLong = isMessageTooLong(message ?? "");
 
   const params = {

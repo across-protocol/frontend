@@ -79,12 +79,17 @@ export async function handleApprovalSwap(
 
   const slippageTolerance = _slippageTolerance ?? slippage * 100;
 
-  // TODO: Extend the strategy selection based on more sophisticated logic when we start
-  // implementing burn/mint bridges.
-  const bridgeStrategy = getBridgeStrategy({
+  const bridgeStrategy = await getBridgeStrategy({
     originChainId: inputToken.chainId,
     destinationChainId: outputToken.chainId,
+    inputToken,
+    outputToken,
+    amount,
+    amountType,
+    recipient,
+    depositor,
   });
+
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
       amount,

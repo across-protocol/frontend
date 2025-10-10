@@ -332,7 +332,8 @@ const handler = async (
         relayerFeeDetails,
       });
 
-      const { liquidReserves: _liquidReserves } = multicallOutput[1];
+      const { liquidReserves: _liquidReserves, utilizedReserves } =
+        multicallOutput[1];
       const [liteChainIdsEncoded] = multicallOutput[2];
       const [poolRebalanceRouteOrigin] = multicallOutput[3];
       const [poolRebalanceRouteDestination] = multicallOutput[4];
@@ -563,6 +564,10 @@ const handler = async (
               tokenGasCost: gasFeeDetails.tokenGasCost.toString(),
             }
           : undefined,
+        reserves: {
+          liquidReserves: String(_liquidReserves),
+          utilizedReserves: String(utilizedReserves),
+        },
       };
       logger.debug({
         at: "Limits",
