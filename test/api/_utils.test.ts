@@ -158,11 +158,9 @@ describe("_utils", () => {
       const ambiguousTokens = ["USDC", "USDT"];
       const wrappedTokens = [
         "WETH",
-        "WBNB",
         "WMATIC",
         "WHYPE",
         "TATARA-WBTC",
-        "WAZERO",
         "WBNB",
         "WGHO",
         "WGRASS",
