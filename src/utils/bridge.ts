@@ -546,7 +546,7 @@ async function _tagRefAndSignTx(
 
   // Last test to ensure that the tx is valid and that the signer
   // is connected to the correct chain.
-  // NOTE: I think this is a good candiate for using an RPC call
+  // NOTE: I think this is a good candidate for using an RPC call
   //       to get the chainId of the signer.
   const signerChainId = await signer.getChainId();
   if (signerChainId !== originChainId) {
