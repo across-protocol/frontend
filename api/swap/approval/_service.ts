@@ -412,11 +412,11 @@ function setSpanAttributes(
     );
     span.setAttribute(
       "swap.originSwap.minOutputAmount",
-      responseJson.steps.originSwap.maxInputAmount.toString()
+      responseJson.steps.originSwap.minOutputAmount.toString()
     );
     span.setAttribute(
       "swap.originSwap.maxInputAmount",
-      responseJson.steps.originSwap.minOutputAmount.toString()
+      responseJson.steps.originSwap.maxInputAmount.toString()
     );
   }
 
@@ -447,11 +447,11 @@ function setSpanAttributes(
     );
     span.setAttribute(
       "swap.destinationSwap.minOutputAmount",
-      responseJson.steps.destinationSwap.maxInputAmount.toString()
+      responseJson.steps.destinationSwap.minOutputAmount.toString()
     );
     span.setAttribute(
       "swap.destinationSwap.maxInputAmount",
-      responseJson.steps.destinationSwap.minOutputAmount.toString()
+      responseJson.steps.destinationSwap.maxInputAmount.toString()
     );
   }
 }
