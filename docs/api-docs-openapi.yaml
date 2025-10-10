@@ -1779,6 +1779,11 @@ paths:
                         type: object
                         description: Bridge step information.
                         properties:
+                          provider:
+                            type: string
+                            description: Name of the bridge provider.
+                            example: 'across'
+                            x-gitbook-description-html: <p>Name of the bridge provider.</p>
                           inputAmount:
                             type: string
                             description: Amount of input token.
