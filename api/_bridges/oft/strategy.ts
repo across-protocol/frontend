@@ -487,6 +487,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
         ecosystem: "evm" as const,
       };
     },
+    isRouteSupported,
   };
 }
 
