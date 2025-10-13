@@ -14,6 +14,7 @@ type TradeType = "exactInput" | "exactOutput" | "minOutput";
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
+const SLIPPAGE = 0.05; // 5% slippage
 
 const B2B_BASE_TEST_CASE = {
   amounts: {
@@ -25,6 +26,7 @@ const B2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  slippage: SLIPPAGE,
 };
 
 const B2A_BASE_TEST_CASE = {
@@ -37,6 +39,7 @@ const B2A_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.OP,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  slippage: SLIPPAGE,
 };
 
 const A2B_BASE_TEST_CASE = {
@@ -49,6 +52,7 @@ const A2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  slippage: SLIPPAGE,
 };
 
 describe("execute response of GET /swap/approval", () => {
@@ -61,6 +65,7 @@ describe("execute response of GET /swap/approval", () => {
     destinationChainId: number;
     depositor: string;
     recipient: string;
+    slippage: number;
   }) {
     const response = await axios.get(SWAP_API_URL, {
       params: {
@@ -87,6 +92,7 @@ describe("execute response of GET /swap/approval", () => {
       inputToken,
       outputToken,
       amounts,
+      slippage,
     } = testCase;
     const amount = amounts[tradeType];
     const depositor = opts?.freshDepositorWallet
@@ -121,6 +127,7 @@ describe("execute response of GET /swap/approval", () => {
       destinationChainId,
       depositor,
       recipient,
+      slippage,
     });
 
     // Balances BEFORE swap tx execution
