@@ -18,14 +18,22 @@ export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
 };
-export const TOKEN_SYMBOLS_MAP = {
-  ...constants.TOKEN_SYMBOLS_MAP,
-  WHYPE: {
-    ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
-      [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
-    },
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+TOKEN_SYMBOLS_MAP.USDC = {
+  ...constants.TOKEN_SYMBOLS_MAP.USDC,
+  addresses: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+    [CHAIN_IDs.HYPERCORE]:
+      constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM],
+    [CHAIN_IDs.HYPERCORE_TESTNET]:
+      constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  },
+};
+TOKEN_SYMBOLS_MAP.WHYPE = {
+  ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
+  addresses: {
+    ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
+    [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
   },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
