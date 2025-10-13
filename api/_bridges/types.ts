@@ -10,7 +10,6 @@ export type BridgeStrategiesConfig = {
       [toChainId: number]: BridgeStrategy;
     };
   };
-  // TODO: This probably needs to be more refined to be more granular.
   inputTokens?: {
     [inputTokenSymbol: string]: {
       [fromChainId: number]: {
