@@ -2210,7 +2210,7 @@ paths:
                         x-gitbook-description-html: <p>Total relayer fees.</p>
                       bridgeFee:
                         type: object
-                        description: Bridge-specific fee paid charged by the bridge provider.
+                        description: Bridge-specific fee charged by the bridge provider.
                         properties:
                           amount:
                             type: string
@@ -2231,7 +2231,7 @@ paths:
                                 type: string
                               chainId:
                                 type: integer
-                        x-gitbook-description-html: <p>Bridge-specific fee paid charged by the bridge provider.</p>
+                        x-gitbook-description-html: <p>Bridge-specific fee charged by the bridge provider.</p>
                       app:
                         type: object
                         description: Application fees.
