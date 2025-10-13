@@ -21,23 +21,13 @@ export function isHyperEvmToHyperCoreRoute(params: {
   inputToken: Token;
   outputToken: Token;
 }) {
-  // Mainnet route
-  if (
-    params.inputToken.chainId === CHAIN_IDs.HYPEREVM &&
-    params.outputToken.chainId === CHAIN_IDs.HYPERCORE
-  ) {
-    return true;
-  }
-
-  // Testnet route
-  if (
-    params.inputToken.chainId === CHAIN_IDs.HYPEREVM_TESTNET &&
-    params.outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET
-  ) {
-    return true;
-  }
-
-  return false;
+  // Mainnet or testnet route
+  return (
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE) ||
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM_TESTNET &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET)
+  );
 }
 
 export function buildCctpTxHyperEvmToHyperCore(params: {
