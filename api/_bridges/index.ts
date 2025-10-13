@@ -25,7 +25,7 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  // TODO: Add CCTP bridge strategy when ready
+  getCctpBridgeStrategy(),
 ];
 
 export async function getBridgeStrategy({
