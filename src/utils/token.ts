@@ -1,6 +1,15 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
 
-import { getProvider, ChainId, getConfig, getChainInfo } from "utils";
+import {
+  getProvider,
+  ChainId,
+  getConfig,
+  getChainInfo,
+  fixedPointAdjustment,
+  parseUnits,
+} from "utils";
 import { ERC20__factory } from "utils/typechain";
 
 export async function getNativeBalance(
@@ -74,4 +83,34 @@ export function getExplorerLinkForToken(
   tokenChainId: number
 ) {
   return `${getChainInfo(tokenChainId).explorerUrl}/address/${tokenAddress}`;
+}
+
+/**
+ * Converts a token amount to USD value
+ * @param tokenAmount - The token amount as a string (decimal format)
+ * @param token - The token object containing price and decimals
+ * @returns The USD value as a BigNumber (18 decimals)
+ */
+export function convertTokenToUSD(
+  tokenAmount: string,
+  token: LifiToken
+): BigNumber {
+  const tokenScaled = parseUnits(tokenAmount, 18);
+  const priceScaled = parseUnits(token.priceUSD, 18);
+  return tokenScaled.mul(priceScaled).div(fixedPointAdjustment);
+}
+
+/**
+ * Converts a USD amount to token amount
+ * @param usdAmount - The USD amount as a string (decimal format)
+ * @param token - The token object containing price and decimals
+ * @returns The token amount as a BigNumber
+ */
+export function convertUSDToToken(
+  usdAmount: string,
+  token: LifiToken
+): BigNumber {
+  const usdScaled = parseUnits(usdAmount, 18);
+  const priceScaled = parseUnits(token.priceUSD, 18);
+  return usdScaled.mul(fixedPointAdjustment).div(priceScaled);
 }

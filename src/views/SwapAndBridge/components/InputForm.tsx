@@ -1,13 +1,14 @@
-import { COLORS, formatUnitsWithMaxFractions, formatUSD } from "utils";
-import SelectorButton, {
-  EnrichedTokenSelect,
-} from "./ChainTokenSelector/SelectorButton";
+import { COLORS, formatUSD, formatUSDString } from "utils";
+import SelectorButton from "./ChainTokenSelector/SelectorButton";
+import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import BalanceSelector from "./BalanceSelector";
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { BigNumber, utils } from "ethers";
+import { useCallback } from "react";
+import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { AmountInputError } from "views/Bridge/utils";
+import { useTokenInput } from "hooks";
+import { formatUnits } from "ethers/lib/utils";
 
 export const InputForm = ({
   inputToken,
@@ -22,11 +23,11 @@ export const InputForm = ({
   expectedInputAmount,
   validationError,
 }: {
-  inputToken: EnrichedTokenSelect | null;
-  setInputToken: (token: EnrichedTokenSelect | null) => void;
+  inputToken: EnrichedToken | null;
+  setInputToken: (token: EnrichedToken | null) => void;
 
-  outputToken: EnrichedTokenSelect | null;
-  setOutputToken: (token: EnrichedTokenSelect | null) => void;
+  outputToken: EnrichedToken | null;
+  setOutputToken: (token: EnrichedToken | null) => void;
 
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
@@ -101,8 +102,8 @@ const TokenInput = ({
   otherToken,
   disabled,
 }: {
-  setToken: (token: EnrichedTokenSelect) => void;
-  token: EnrichedTokenSelect | null;
+  setToken: (token: EnrichedToken) => void;
+  token: EnrichedToken | null;
   setAmount: (amount: BigNumber | null) => void;
   isOrigin: boolean;
   expectedAmount: string | undefined;
@@ -110,74 +111,34 @@ const TokenInput = ({
   isUpdateLoading: boolean;
   insufficientInputBalance?: boolean;
   disabled?: boolean;
-  otherToken?: EnrichedTokenSelect | null;
+  otherToken?: EnrichedToken | null;
 }) => {
-  const [amountString, setAmountString] = useState<string>("");
-  const [justTyped, setJustTyped] = useState(false);
-
-  // Handle user input changes
-  useEffect(() => {
-    if (!justTyped) {
-      return;
-    }
-    setJustTyped(false);
-    try {
-      if (!token) {
-        setAmount(null);
-        return;
-      }
-      const parsed = utils.parseUnits(amountString, token.decimals);
-      setAmount(parsed);
-    } catch (e) {
-      setAmount(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amountString]);
-
-  // Reset amount when token changes
-  useEffect(() => {
-    if (token) {
-      setAmountString("");
-    }
-  }, [token]);
-
-  // Handle quote updates - only update the field that should receive the quote
-  useEffect(() => {
-    if (shouldUpdate && isUpdateLoading) {
-      setAmountString("");
-    }
-
-    if (expectedAmount && token && shouldUpdate) {
-      setAmountString(
-        formatUnitsWithMaxFractions(expectedAmount, token.decimals)
-      );
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expectedAmount, isUpdateLoading]);
-
-  const estimatedUsdAmount = useMemo(() => {
-    try {
-      const amount = utils.parseUnits(amountString, token!.decimals);
-      if (!token) {
-        return null;
-      }
-      const priceAsNumeric = Number(utils.formatUnits(token.priceUsd, 18));
-      const amountAsNumeric = Number(utils.formatUnits(amount, token.decimals));
-      const estimatedUsdAmountNumeric = amountAsNumeric * priceAsNumeric;
-      const estimatedUsdAmount = utils.parseUnits(
-        estimatedUsdAmountNumeric.toString(),
-        18
-      );
-      return formatUSD(estimatedUsdAmount);
-    } catch (e) {
-      return null;
-    }
-  }, [amountString, token]);
+  const {
+    amountString,
+    unit,
+    convertedAmount,
+    toggleUnit,
+    handleInputChange,
+    handleBalanceClick,
+  } = useTokenInput({
+    token,
+    setAmount,
+    expectedAmount,
+    shouldUpdate,
+    isUpdateLoading,
+  });
 
   const inputDisabled = (() => {
     if (disabled) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
+  })();
+
+  const formattedConvertedAmount = (() => {
+    if (!convertedAmount) return "0.00";
+    if (unit === "token") {
+      return "$" + formatUSD(convertedAmount);
+    }
+    return formatUnits(convertedAmount, 18) + token?.symbol;
   })();
 
   return (
@@ -189,20 +150,16 @@ const TokenInput = ({
         <TokenAmountInput
           placeholder="0.00"
           value={amountString}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value === "" || /^\d*\.?\d*$/.test(value)) {
-              setJustTyped(true);
-              setAmountString(value);
-            }
-          }}
+          onChange={(e) => handleInputChange(e.target.value)}
           disabled={inputDisabled}
           error={insufficientInputBalance}
         />
         <TokenAmountInputEstimatedUsd>
           <ValueRow>
-            <ArrowsCross width={16} height={16} />{" "}
-            <span>Value: ${estimatedUsdAmount ?? "0.00"}</span>
+            <UnitToggleButton onClick={toggleUnit}>
+              <ArrowsCross width={16} height={16} />{" "}
+              <span>Value: {formattedConvertedAmount}</span>
+            </UnitToggleButton>
           </ValueRow>
         </TokenAmountInputEstimatedUsd>
       </TokenAmountStack>
@@ -223,10 +180,7 @@ const TokenInput = ({
             error={insufficientInputBalance}
             setAmount={(amount) => {
               if (amount) {
-                setAmount(amount);
-                setAmountString(
-                  formatUnitsWithMaxFractions(amount, token.decimals)
-                );
+                handleBalanceClick(amount, token.decimals);
               }
             }}
           />
@@ -254,6 +208,8 @@ const ValueRow = styled.div`
     vertical-align: middle;
   }
 `;
+
+const UnitToggleButton = styled.button``;
 
 const TokenAmountStack = styled.div`
   display: flex;

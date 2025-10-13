@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import axios from "axios";
 
 import { AmountInputError } from "../../Bridge/utils";
-import { EnrichedTokenSelect } from "../components/ChainTokenSelector/SelectorButton";
+import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
 import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
 
 export type ValidationResult = {
@@ -15,7 +15,7 @@ export type ValidationResult = {
 export function useValidateSwapAndBridge(
   amount: BigNumber | null,
   isAmountOrigin: boolean,
-  inputToken: EnrichedTokenSelect | null,
+  inputToken: EnrichedToken | null,
   error: any
 ): ValidationResult {
   const validation = useMemo(() => {
@@ -54,7 +54,7 @@ export function useValidateSwapAndBridge(
 
 function getValidationErrorText(props: {
   validationError?: AmountInputError;
-  inputToken: EnrichedTokenSelect | null;
+  inputToken: EnrichedToken | null;
 }): string | undefined {
   if (!props.validationError) {
     return;

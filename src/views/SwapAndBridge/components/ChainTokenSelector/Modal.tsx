@@ -1,5 +1,4 @@
 import Modal from "components/Modal";
-import { EnrichedTokenSelect } from "./SelectorButton";
 import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
@@ -52,7 +51,7 @@ type DisplayedChains = {
   all: ChainData[];
 };
 
-type EnrichedToken = LifiToken & {
+export type EnrichedToken = LifiToken & {
   balance: BigNumber;
   balanceUsd: number;
   isReachable?: boolean;
@@ -65,9 +64,9 @@ type DisplayedTokens = {
 };
 
 type Props = {
-  onSelect: (token: EnrichedTokenSelect) => void;
+  onSelect: (token: EnrichedToken) => void;
   isOriginToken: boolean;
-  otherToken?: EnrichedTokenSelect | null; // The currently selected token on the other side
+  otherToken?: EnrichedToken | null; // The currently selected token on the other side
   displayModal: boolean;
   setDisplayModal: (displayModal: boolean) => void;
 };
@@ -331,7 +330,7 @@ const MobileModal = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onTokenSelect: (token: EnrichedToken) => void;
 }) => {
   return (
     <Modal
@@ -406,7 +405,7 @@ const DesktopModal = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onTokenSelect: (token: EnrichedToken) => void;
 }) => {
   return (
     <Modal
@@ -459,7 +458,7 @@ const MobileLayout = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onTokenSelect: (token: EnrichedToken) => void;
   onModalClose: () => void;
 }) => {
   return (
@@ -536,15 +535,7 @@ const MobileLayout = ({
                     token={token}
                     isSelected={false}
                     onClick={() => {
-                      onTokenSelect({
-                        chainId: token.chainId,
-                        symbolUri: token.logoURI,
-                        symbol: token.symbol,
-                        address: token.address,
-                        balance: token.balance,
-                        priceUsd: parseUnits(token.priceUSD, 18),
-                        decimals: token.decimals,
-                      });
+                      onTokenSelect(token);
                       onModalClose();
                     }}
                   />
@@ -563,15 +554,7 @@ const MobileLayout = ({
                     token={token}
                     isSelected={false}
                     onClick={() => {
-                      onTokenSelect({
-                        chainId: token.chainId,
-                        symbolUri: token.logoURI,
-                        symbol: token.symbol,
-                        address: token.address,
-                        balance: token.balance,
-                        priceUsd: parseUnits(token.priceUSD, 18),
-                        decimals: token.decimals,
-                      });
+                      onTokenSelect(token);
                       onModalClose();
                     }}
                   />
@@ -609,7 +592,7 @@ const DesktopLayout = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedTokenSelect) => void;
+  onTokenSelect: (token: EnrichedToken) => void;
   onModalClose: () => void;
 }) => {
   useHotkeys("esc", () => onModalClose());
@@ -688,15 +671,7 @@ const DesktopLayout = ({
                   token={token}
                   isSelected={false}
                   onClick={() => {
-                    onTokenSelect({
-                      chainId: token.chainId,
-                      symbolUri: token.logoURI,
-                      symbol: token.symbol,
-                      address: token.address,
-                      balance: token.balance,
-                      priceUsd: parseUnits(token.priceUSD, 18),
-                      decimals: token.decimals,
-                    });
+                    onTokenSelect(token);
                     onModalClose();
                   }}
                 />
@@ -714,15 +689,7 @@ const DesktopLayout = ({
                   token={token}
                   isSelected={false}
                   onClick={() => {
-                    onTokenSelect({
-                      chainId: token.chainId,
-                      symbolUri: token.logoURI,
-                      symbol: token.symbol,
-                      address: token.address,
-                      balance: token.balance,
-                      priceUsd: parseUnits(token.priceUSD, 18),
-                      decimals: token.decimals,
-                    });
+                    onTokenSelect(token);
                     onModalClose();
                   }}
                 />

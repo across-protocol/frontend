@@ -107,7 +107,9 @@ const globalStyles = css`
   }
   button {
     border: none;
-    background-color: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
   }
   html,
   body {

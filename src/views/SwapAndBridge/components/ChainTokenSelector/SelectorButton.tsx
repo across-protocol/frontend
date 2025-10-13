@@ -3,26 +3,13 @@ import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import ChainTokenSelectorModal from "./Modal";
-
-export type TokenSelect = {
-  chainId: number;
-  symbolUri: string;
-  symbol: string;
-  address: string;
-};
-
-export type EnrichedTokenSelect = TokenSelect & {
-  priceUsd: BigNumber;
-  balance: BigNumber;
-  decimals: number;
-};
+import ChainTokenSelectorModal, { EnrichedToken } from "./Modal";
 
 type Props = {
-  selectedToken: EnrichedTokenSelect | null;
-  onSelect?: (token: EnrichedTokenSelect) => void;
+  selectedToken: EnrichedToken | null;
+  onSelect?: (token: EnrichedToken) => void;
   isOriginToken: boolean;
-  otherToken?: EnrichedTokenSelect | null; // The currently selected token on the other side
+  otherToken?: EnrichedToken | null; // The currently selected token on the other side
   marginBottom?: string;
   className?: string;
 };
@@ -44,7 +31,7 @@ export default function SelectorButton({
   }, [selectedToken]);
 
   const setSelectedToken = useCallback(
-    (token: EnrichedTokenSelect) => {
+    (token: EnrichedToken) => {
       onSelect?.(token);
       setDisplayModal(false);
     },
@@ -80,7 +67,7 @@ export default function SelectorButton({
     <>
       <Wrapper className={className} onClick={() => setDisplayModal(true)}>
         <TokenStack>
-          <TokenImg src={selectedToken.symbolUri} />
+          <TokenImg src={selectedToken.logoURI} />
           <ChainImg src={chain.logoURI} />
         </TokenStack>
         <VerticalDivider />

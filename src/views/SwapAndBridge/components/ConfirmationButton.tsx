@@ -15,7 +15,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
-import { EnrichedTokenSelect } from "./ChainTokenSelector/SelectorButton";
+import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import styled from "@emotion/styled";
 import { AmountInputError } from "../../Bridge/utils";
 import { Tooltip } from "components/Tooltip";
@@ -33,8 +33,8 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  inputToken: EnrichedTokenSelect | null;
-  outputToken: EnrichedTokenSelect | null;
+  inputToken: EnrichedToken | null;
+  outputToken: EnrichedToken | null;
   amount: BigNumber | null;
   swapQuote: SwapApprovalApiResponse | null;
   isQuoteLoading: boolean;
