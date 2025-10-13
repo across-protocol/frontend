@@ -63,5 +63,10 @@ export function useEnrichedCrosschainBalances() {
         Array<LifiToken & { balance: BigNumber; balanceUsd: number }>
       >
     );
-  }, [availableCrosschainRoutes, tokenBalances]);
+  }, [
+    availableCrosschainRoutes.data,
+    availableCrosschainRoutes.isLoading,
+    tokenBalances.data,
+    tokenBalances.isLoading,
+  ]);
 }

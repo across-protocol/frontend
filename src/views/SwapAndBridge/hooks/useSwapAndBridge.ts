@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
@@ -11,6 +11,7 @@ import {
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useDefaultRoute } from "./useDefaultRoute";
 
 export type UseSwapAndBridgeReturn = {
   inputToken: EnrichedToken | null;
@@ -53,6 +54,34 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
 
   const debouncedAmount = useDebounce(amount, 300);
+  const defaultRoute = useDefaultRoute();
+
+  useEffect(() => {
+    if (defaultRoute.inputToken && defaultRoute.outputToken) {
+      setInputToken((prev) => {
+        // Only update if token is different (avoid unnecessary re-renders)
+        if (
+          !prev ||
+          prev.address !== defaultRoute.inputToken!.address ||
+          prev.chainId !== defaultRoute.inputToken!.chainId
+        ) {
+          return defaultRoute.inputToken;
+        }
+        return prev;
+      });
+      setOutputToken((prev) => {
+        // Only update if token is different (avoid unnecessary re-renders)
+        if (
+          !prev ||
+          prev.address !== defaultRoute.outputToken!.address ||
+          prev.chainId !== defaultRoute.outputToken!.chainId
+        ) {
+          return defaultRoute.outputToken;
+        }
+        return prev;
+      });
+    }
+  }, [defaultRoute]);
 
   const quickSwap = useCallback(() => {
     setInputToken((prevInput) => {
@@ -130,7 +159,24 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     return buttonState === "loadingQuote" || buttonState === "submitting";
   }, [buttonState]);
 
-  const buttonLabel = buttonLabels[buttonState];
+  const buttonLabel = useMemo(() => buttonLabels[buttonState], [buttonState]);
+
+  const buttonDisabled = useMemo(
+    () =>
+      approvalAction.buttonDisabled ||
+      !!validation.error ||
+      !inputToken ||
+      !outputToken ||
+      !amount ||
+      amount.lte(0),
+    [
+      approvalAction.buttonDisabled,
+      validation.error,
+      inputToken,
+      outputToken,
+      amount,
+    ]
+  );
 
   return {
     inputToken,
@@ -154,13 +200,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
     // Button state information
     buttonState,
-    buttonDisabled:
-      approvalAction.buttonDisabled ||
-      !!validation.error ||
-      !inputToken ||
-      !outputToken ||
-      !amount ||
-      amount.lte(0),
+    buttonDisabled,
     buttonLoading,
     buttonLabel,
 
