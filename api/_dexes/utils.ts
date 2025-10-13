@@ -497,6 +497,15 @@ export async function extractDepositDataStruct(
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
     crossSwapQuotes.crossSwap.depositor;
+
+  const outputAmount =
+    crossSwapQuotes.crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT &&
+    crossSwapQuotes.appFee
+      ? crossSwapQuotes.bridgeQuote.outputAmount.add(
+          crossSwapQuotes.appFee.feeAmount
+        )
+      : crossSwapQuotes.bridgeQuote.outputAmount;
+
   const baseDepositData = {
     depositor: crossSwapQuotes.crossSwap.refundOnOrigin
       ? refundAddress
@@ -507,7 +516,7 @@ export async function extractDepositDataStruct(
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
-    outputAmount: crossSwapQuotes.bridgeQuote.outputAmount,
+    outputAmount,
     destinationChainId,
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,

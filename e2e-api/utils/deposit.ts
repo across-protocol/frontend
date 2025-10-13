@@ -1,9 +1,16 @@
-import { Address, Hex, parseEventLogs, TransactionReceipt } from "viem";
+import {
+  Address,
+  Hex,
+  parseEventLogs,
+  TransactionReceipt,
+  PrivateKeyAccount,
+} from "viem";
 
 import { e2eConfig } from "./config";
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { SpokePoolAbi } from "./abis";
 import { handleTevmError } from "./tevm";
+import { getBalance } from "./token";
 
 export type SwapQuoteResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
@@ -13,7 +20,11 @@ export type SubmittedTxReceipts = Awaited<
   ReturnType<typeof executeApprovalAndDeposit>
 >;
 
-async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
+async function executeApprovalTxnsIfAny(
+  swapQuote: SwapQuoteResponse,
+  signer: `0x${string}`,
+  client: ReturnType<typeof e2eConfig.getClient>
+): Promise<TransactionReceipt[]> {
   const receipts: TransactionReceipt[] = [];
   if (!swapQuote.approvalTxns || swapQuote.approvalTxns.length === 0) {
     return receipts;
@@ -21,13 +32,10 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
 
   // Send approvals per their declared chain
   for (const tx of swapQuote.approvalTxns) {
-    const signer = e2eConfig.getAccount("depositor");
-    const client = e2eConfig.getClient(tx.chainId);
-
     const approvalCallResult = await client.tevmCall({
       to: tx.to as Address,
       data: tx.data as Hex,
-      from: signer.address,
+      from: signer,
       addToBlockchain: true,
       onAfterMessage: handleTevmError,
     });
@@ -46,26 +54,29 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
   return receipts;
 }
 
-export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
-  const approvalReceipts = await executeApprovalTxnsIfAny(swapQuote);
+export async function executeApprovalAndDeposit(
+  swapQuote: SwapQuoteResponse,
+  depositor: `0x${string}`,
+  client: ReturnType<typeof e2eConfig.getClient>
+) {
+  const approvalReceipts = await executeApprovalTxnsIfAny(
+    swapQuote,
+    depositor,
+    client
+  );
 
   if (!swapQuote.swapTx) {
     throw new Error("swapQuote.swapTx is required");
   }
-
-  const { chainId } = swapQuote.swapTx;
-  const depositor = e2eConfig.getAccount("depositor");
-  const client = e2eConfig.getClient(chainId);
-
   const swapCallResult = await client.tevmCall({
     to: swapQuote.swapTx.to as Address,
     data: swapQuote.swapTx.data as Hex,
     value: BigInt(swapQuote.swapTx.value || 0),
-    from: depositor.address,
+    from: depositor,
     onAfterMessage: handleTevmError,
     addToBlockchain: true,
   });
-  await client.tevmMine({ blockCount: 1 });
+  await client.tevmMine({ blockCount: 5 });
 
   if (!swapCallResult.txHash) {
     throw new Error("Swap call failed");
@@ -88,6 +99,6 @@ export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
   if (depositEvents.length > 1) {
     throw new Error("Multiple deposit events found");
   }
-
+  console.log("Deposit event:", depositEvents);
   return { approvalReceipts, swapReceipt, depositEvent: depositEvents[0] };
 }
