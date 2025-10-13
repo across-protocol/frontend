@@ -138,7 +138,7 @@ const TokenInput = ({
     if (unit === "token") {
       return "$" + formatUSD(convertedAmount);
     }
-    return formatUnits(convertedAmount, 18) + token?.symbol;
+    return `${formatUnits(convertedAmount, 18)} ${token?.symbol}`;
   })();
 
   return (

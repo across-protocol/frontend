@@ -75,12 +75,22 @@ export function useTokenInput({
     }
 
     if (expectedAmount && token && shouldUpdate) {
-      // TODO: handle converted amount
-      setAmountString(
-        formatUnitsWithMaxFractions(expectedAmount, token.decimals)
-      );
+      if (unit === "token") {
+        // Display as token amount
+        setAmountString(
+          formatUnitsWithMaxFractions(expectedAmount, token.decimals)
+        );
+      } else {
+        // Display as USD amount - convert token to USD
+        const tokenAmountFormatted = formatUnitsWithMaxFractions(
+          expectedAmount,
+          token.decimals
+        );
+        const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
+        setAmountString(utils.formatUnits(usdValue, 18));
+      }
     }
-  }, [expectedAmount, isUpdateLoading, shouldUpdate, token]);
+  }, [expectedAmount, isUpdateLoading, shouldUpdate, token, unit]);
 
   // Set converted value for display
   useEffect(() => {
