@@ -45,7 +45,7 @@ export function getSpokePoolAddress(chainId: number): string {
 
 export function makeE2EConfig() {
   return (() => {
-    const [depositor, relayer, recipient] = PREFUNDED_ACCOUNTS;
+    const [depositor, relayer, recipient, appFeeRecipient] = PREFUNDED_ACCOUNTS;
 
     const rpcUrls = buildRpcUrlMapFromEnv();
     const nodes = {
@@ -110,6 +110,7 @@ export function makeE2EConfig() {
         depositor: depositor.address,
         relayer: relayer.address,
         recipient: recipient.address,
+        appFeeRecipient: appFeeRecipient.address,
       },
     };
   })();

@@ -3,12 +3,14 @@ import {
   Address,
   encodeFunctionData,
   Hex,
+  parseAbi,
   parseEventLogs,
   zeroAddress,
+  maxUint256,
 } from "viem";
 
 import { e2eConfig, getSpokePoolAddress } from "./config";
-import { setAllowance } from "./token";
+import { getBalance, setAllowance } from "./token";
 import { SpokePoolAbi } from "./abis";
 import { handleTevmError } from "./tevm";
 
@@ -17,19 +19,21 @@ import type { SubmittedTxReceipts } from "./deposit";
 export type ExecuteFillParams = {
   depositEvent: SubmittedTxReceipts["depositEvent"];
   originChainId: number;
+  relayer: string;
   repaymentChainId?: number;
   repaymentAddress?: string;
 };
 
-export async function executeFill(params: ExecuteFillParams) {
-  const { depositEvent, originChainId } = params;
+export async function executeFill(
+  params: ExecuteFillParams,
+  destinationChainClient: ReturnType<typeof e2eConfig.getClient>
+) {
+  const { depositEvent, originChainId, relayer } = params;
   const destinationChainId = Number(depositEvent.args.destinationChainId);
-  const destinationClient = e2eConfig.getClient(destinationChainId);
-  const relayer = e2eConfig.getAccount("relayer");
 
   const repaymentChainId = params.repaymentChainId ?? destinationChainId;
   const repaymentAddressBytes32 = sdk.utils
-    .toAddressType(params.repaymentAddress ?? relayer.address, repaymentChainId)
+    .toAddressType(params.repaymentAddress ?? relayer, repaymentChainId)
     .toBytes32();
 
   const _spokeAddress = getSpokePoolAddress(destinationChainId);
@@ -60,29 +64,51 @@ export async function executeFill(params: ExecuteFillParams) {
   );
   const relayerAddressToUse =
     zeroAddress === exclusiveRelayer.toEvmAddress()
-      ? (relayer.address as Address)
+      ? (relayer as Address)
       : (exclusiveRelayer.toEvmAddress() as Address);
 
   // Set bridging funds for relayer
-  await destinationClient.tevmDeal({
+  await destinationChainClient.tevmDeal({
     erc20: outputToken.toEvmAddress() as Address,
     account: relayerAddressToUse,
-    amount: outputAmount,
+    amount: outputAmount * 100n,
   });
-  await destinationClient.tevmMine({ blockCount: 1 });
+  await destinationChainClient.tevmMine({ blockCount: 5 });
 
   // Approve destination SpokePool
   await setAllowance({
-    chainId: destinationChainId,
     tokenAddress: outputToken.toEvmAddress() as Address,
     account: relayerAddressToUse,
     spender: spokeAddress.toEvmAddress() as Address,
-    amount: BigInt(outputAmount.toString()),
+    amount: maxUint256,
     from: relayerAddressToUse,
+    client: destinationChainClient,
   });
 
+  const relayerBalance = await getBalance(
+    outputToken.toEvmAddress() as Address,
+    relayerAddressToUse,
+    destinationChainClient
+  );
+  console.log("Relayer balance before fill:", relayerBalance);
+  console.log("Relayer address:", relayerAddressToUse);
+
+  // DIAGNOSTIC: Check allowance right before fill
+  const allowance = await destinationChainClient.readContract({
+    address: outputToken.toEvmAddress() as Address,
+    abi: parseAbi([
+      "function allowance(address, address) view returns (uint256)",
+    ]),
+    functionName: "allowance",
+    args: [relayerAddressToUse, spokeAddress.toEvmAddress() as Address],
+  });
+  console.log(`Allowance for SpokePool before fill: ${allowance}`);
+
+  // Mitigate race condition
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
   // Fill relay
-  const fillCallResult = await destinationClient.tevmCall({
+  const fillCallResult = await destinationChainClient.tevmCall({
     from: relayerAddressToUse,
     to: spokeAddress.toEvmAddress() as Address,
     addToBlockchain: true,
@@ -111,13 +137,13 @@ export async function executeFill(params: ExecuteFillParams) {
     onAfterMessage: handleTevmError,
   });
 
-  await destinationClient.tevmMine({ blockCount: 1 });
+  await destinationChainClient.tevmMine({ blockCount: 5 });
 
   if (!fillCallResult.txHash) {
     throw new Error("Fill call failed");
   }
 
-  const fillReceipt = await destinationClient.waitForTransactionReceipt({
+  const fillReceipt = await destinationChainClient.waitForTransactionReceipt({
     hash: fillCallResult.txHash,
   });
 

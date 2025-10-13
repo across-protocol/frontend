@@ -1,14 +1,13 @@
 import { Address, parseAbi, zeroAddress, encodeFunctionData } from "viem";
 
-import { e2eConfig } from "./config";
+import { E2EConfig } from "./config";
 import { handleTevmError } from "./tevm";
 
 export async function getBalance(
-  chainId: number,
   tokenAddress: Address,
-  accountAddress: Address
+  accountAddress: Address,
+  client: ReturnType<E2EConfig["getClient"]>
 ) {
-  const client = e2eConfig.getClient(chainId);
   if (zeroAddress === tokenAddress) {
     return client.getBalance({
       address: accountAddress,
@@ -24,16 +23,15 @@ export async function getBalance(
 }
 
 export async function setAllowance(params: {
-  chainId: number;
   tokenAddress: Address;
   account: Address;
   spender: Address;
   amount: bigint;
   from: Address;
+  client: ReturnType<E2EConfig["getClient"]>;
 }) {
-  const { chainId, tokenAddress, spender, amount, from } = params;
-  const client = e2eConfig.getClient(chainId);
-  await client.tevmCall({
+  const { tokenAddress, spender, amount, from, client } = params;
+  const approvalCallResult = await client.tevmCall({
     from,
     to: tokenAddress,
     data: encodeFunctionData({
@@ -44,5 +42,13 @@ export async function setAllowance(params: {
     addToBlockchain: true,
     onAfterMessage: handleTevmError,
   });
-  await client.tevmMine({ blockCount: 1 });
+  await client.tevmMine({ blockCount: 5 });
+
+  if (!approvalCallResult.txHash) {
+    throw new Error("Approval call failed to produce a transaction hash");
+  }
+
+  await client.waitForTransactionReceipt({
+    hash: approvalCallResult.txHash,
+  });
 }
