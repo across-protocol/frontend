@@ -14,7 +14,10 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE_TESTNET: 13372,
+};
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
   WHYPE: {
