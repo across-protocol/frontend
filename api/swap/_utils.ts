@@ -595,6 +595,7 @@ function formatFeeComponent(params: {
   token: Token;
   inputAmountUsd?: number;
 }) {
+  const DEFAULT_PRECISION = 18;
   const { amount, amountUsd, token, inputAmountUsd } = params;
 
   const result: {
@@ -605,14 +606,14 @@ function formatFeeComponent(params: {
   } = {
     amount,
     amountUsd: ethers.utils.formatEther(
-      ethers.utils.parseEther(amountUsd.toFixed(18))
+      ethers.utils.parseEther(amountUsd.toFixed(DEFAULT_PRECISION))
     ),
     token,
   };
 
   if (inputAmountUsd !== undefined) {
     result.pct = ethers.utils.parseEther(
-      (amountUsd / inputAmountUsd).toFixed(18)
+      (amountUsd / inputAmountUsd).toFixed(DEFAULT_PRECISION)
     );
   }
 
