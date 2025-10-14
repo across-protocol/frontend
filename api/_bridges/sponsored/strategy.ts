@@ -31,6 +31,10 @@ export function getSponsoredBridgeStrategy(): BridgeStrategy {
 
     originTxNeedsAllowance: true,
 
+    isRouteSupported: (params: { inputToken: Token; outputToken: Token }) => {
+      throw new Error("TODO");
+    },
+
     getCrossSwapTypes: (params: {
       inputToken: Token;
       outputToken: Token;
