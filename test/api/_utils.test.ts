@@ -147,11 +147,16 @@ describe("_utils", () => {
       expect(token).toBeUndefined();
     });
 
-    it("should correctly resolve ambiguous tokens like USDC", () => {
-      const arbitrumUsdcAddress = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
-      const token = getTokenByAddress(arbitrumUsdcAddress, 42161);
+    it("should correctly resolve ambiguous tokens like USDC and USDT", () => {
+      const mainnetUsdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+      const token = getTokenByAddress(mainnetUsdcAddress, 1);
       expect(token).toBeDefined();
       expect(token?.symbol).toBe("USDC");
+
+      const mainnetUsdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+      const tokenUsdt = getTokenByAddress(mainnetUsdtAddress, 1);
+      expect(tokenUsdt).toBeDefined();
+      expect(tokenUsdt?.symbol).toBe("USDT");
     });
 
     it("should handle wrapped and ambiguous tokens correctly from TOKEN_SYMBOL_MAP", () => {
