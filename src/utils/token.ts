@@ -1,5 +1,4 @@
-import { BigNumber, ethers, utils } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { BigNumber, ethers } from "ethers";
 import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
 
 import {
@@ -7,7 +6,6 @@ import {
   ChainId,
   getConfig,
   getChainInfo,
-  fixedPointAdjustment,
   parseUnits,
 } from "utils";
 import { ERC20__factory } from "utils/typechain";
