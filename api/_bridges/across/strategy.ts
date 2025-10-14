@@ -161,5 +161,9 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       );
       return tx;
     },
+
+    isRouteSupported: () => {
+      return true;
+    },
   };
 }

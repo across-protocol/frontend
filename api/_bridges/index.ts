@@ -1,9 +1,14 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { BridgeStrategiesConfig } from "./types";
+import {
+  BridgeStrategiesConfig,
+  BridgeStrategy,
+  BridgeStrategyDataParams,
+  GetBridgeStrategyParams,
+} from "./types";
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
-import { Token } from "../_dexes/types";
+import { getBridgeStrategyData } from "./utils";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -25,23 +30,104 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       },
     },
   },
-  // TODO: Add CCTP routes when ready
 };
 
-// TODO: Extend the strategy selection based on more sophisticated logic when we start
-// implementing burn/mint bridges.
-export function getBridgeStrategy({
+export const routableBridgeStrategies = [
+  getAcrossBridgeStrategy(),
+  // TODO: Add CCTP bridge strategy when ready
+];
+
+export async function getBridgeStrategy({
+  originChainId,
+  destinationChainId,
   inputToken,
   outputToken,
-}: {
-  inputToken: Token;
-  outputToken: Token;
-}) {
-  const fromToChainOverride =
-    bridgeStrategies.fromToChains?.[inputToken.chainId]?.[outputToken.chainId];
+  amount,
+  amountType,
+  recipient,
+  depositor,
+}: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const inputTokenOverride =
-    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[inputToken.chainId]?.[
-      outputToken.chainId
+    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
+      destinationChainId
     ];
-  return inputTokenOverride ?? fromToChainOverride ?? bridgeStrategies.default;
+  if (inputTokenOverride) {
+    return inputTokenOverride;
+  }
+
+  const fromToChainOverride =
+    bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
+  if (fromToChainOverride) {
+    return fromToChainOverride;
+  }
+  const supportedBridgeStrategies = routableBridgeStrategies.filter(
+    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
+  );
+  if (supportedBridgeStrategies.length === 1) {
+    return supportedBridgeStrategies[0];
+  }
+  if (
+    supportedBridgeStrategies.some(
+      (strategy) => strategy.name === getCctpBridgeStrategy().name
+    )
+  ) {
+    return routeStrategyForCctp({
+      inputToken,
+      outputToken,
+      amount,
+      amountType,
+      recipient,
+      depositor,
+    });
+  }
+  return getAcrossBridgeStrategy();
+}
+
+async function routeStrategyForCctp({
+  inputToken,
+  outputToken,
+  amount,
+  amountType,
+  recipient,
+  depositor,
+}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
+  const bridgeStrategyData = await getBridgeStrategyData({
+    inputToken,
+    outputToken,
+    amount,
+    amountType,
+    recipient,
+    depositor,
+  });
+  if (!bridgeStrategyData) {
+    return bridgeStrategies.default;
+  }
+  if (!bridgeStrategyData.isUsdcToUsdc) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUtilizationHigh) {
+    return getCctpBridgeStrategy();
+  }
+  if (bridgeStrategyData.isLineaSource) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isFastCctpEligible) {
+    if (bridgeStrategyData.isInThreshold) {
+      return getAcrossBridgeStrategy();
+    }
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      return getCctpBridgeStrategy();
+    }
+  }
+  if (bridgeStrategyData.canFillInstantly) {
+    return getAcrossBridgeStrategy();
+  } else {
+    if (bridgeStrategyData.isLargeDeposit) {
+      return getAcrossBridgeStrategy();
+    } else {
+      return getCctpBridgeStrategy();
+    }
+  }
 }
