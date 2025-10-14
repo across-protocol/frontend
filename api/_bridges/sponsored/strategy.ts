@@ -79,10 +79,5 @@ export function getSponsoredBridgeStrategy(): BridgeStrategy {
     }) => {
       throw new Error("TODO");
     },
-
-    isRouteSupported: () => {
-      // TODO: Implementation pending
-      return false;
-    },
   };
 }
