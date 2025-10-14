@@ -20,7 +20,16 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPEREVM]: getHyperCoreBridgeStrategy(),
     },
   },
-  // TODO: Add CCTP routes when ready
+  inputTokens: {
+    USDC: {
+      [CHAIN_IDs.HYPEREVM]: {
+        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.HYPEREVM_TESTNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+    },
+  },
 };
 
 export const routableBridgeStrategies = [
@@ -38,6 +47,14 @@ export async function getBridgeStrategy({
   recipient,
   depositor,
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const inputTokenOverride =
+    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
+      destinationChainId
+    ];
+  if (inputTokenOverride) {
+    return inputTokenOverride;
+  }
+
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {

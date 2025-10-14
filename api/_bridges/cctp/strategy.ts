@@ -21,6 +21,10 @@ import {
   getCctpDomainId,
   encodeDepositForBurn,
 } from "./utils/constants";
+import {
+  buildCctpTxHyperEvmToHyperCore,
+  isHyperEvmToHyperCoreRoute,
+} from "./utils/hypercore";
 
 const name = "cctp";
 
@@ -205,6 +209,15 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
 
       const originChainId = crossSwap.inputToken.chainId;
       const destinationChainId = crossSwap.outputToken.chainId;
+
+      if (
+        isHyperEvmToHyperCoreRoute({
+          inputToken: crossSwap.inputToken,
+          outputToken: crossSwap.outputToken,
+        })
+      ) {
+        return buildCctpTxHyperEvmToHyperCore(params);
+      }
 
       // Get CCTP contract address for origin chain
       const tokenMessengerAddress = getCctpTokenMessengerAddress(originChainId);
