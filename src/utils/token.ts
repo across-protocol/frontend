@@ -95,9 +95,9 @@ export function convertTokenToUSD(
   tokenAmount: string,
   token: LifiToken
 ): BigNumber {
-  const tokenScaled = parseUnits(tokenAmount, 18);
-  const priceScaled = parseUnits(token.priceUSD, 18);
-  return tokenScaled.mul(priceScaled).div(fixedPointAdjustment);
+  const tokenScaled = parseUnits(tokenAmount, token.decimals);
+  const priceScaled = parseUnits(token.priceUSD, token.decimals);
+  return tokenScaled.mul(priceScaled).div(parseUnits("1", token.decimals));
 }
 
 /**
@@ -110,7 +110,7 @@ export function convertUSDToToken(
   usdAmount: string,
   token: LifiToken
 ): BigNumber {
-  const usdScaled = parseUnits(usdAmount, 18);
-  const priceScaled = parseUnits(token.priceUSD, 18);
-  return usdScaled.mul(fixedPointAdjustment).div(priceScaled);
+  const usdScaled = parseUnits(usdAmount, token.decimals);
+  const priceScaled = parseUnits(token.priceUSD, token.decimals);
+  return usdScaled.mul(parseUnits("1", token.decimals)).div(priceScaled);
 }

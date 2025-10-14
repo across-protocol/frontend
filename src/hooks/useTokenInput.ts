@@ -87,7 +87,7 @@ export function useTokenInput({
           token.decimals
         );
         const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-        setAmountString(utils.formatUnits(usdValue, 18));
+        setAmountString(utils.formatUnits(usdValue, token.decimals));
       }
     }
   }, [expectedAmount, isUpdateLoading, shouldUpdate, token, unit]);
@@ -116,7 +116,7 @@ export function useTokenInput({
       // Convert token amount to USD string for display
       if (amountString && token && convertedAmount) {
         try {
-          const a = utils.formatUnits(convertedAmount, 18);
+          const a = utils.formatUnits(convertedAmount, token.decimals);
           setAmountString(a);
         } catch (e) {
           setAmountString("0");
@@ -128,7 +128,7 @@ export function useTokenInput({
       // Convert USD amount to token string for display
       if (amountString && token && convertedAmount) {
         try {
-          const a = utils.formatUnits(convertedAmount, 18);
+          const a = utils.formatUnits(convertedAmount, token.decimals);
           setAmountString(a);
         } catch (e) {
           setAmountString("0");

@@ -295,8 +295,8 @@ export function humanReadableNumber(num: number, decimals = 0): string {
  * @returns A string formatted as USD. A number with 2 decimal places.
  * @note USD only has 2 decimal places of precision, so this will round to the nearest cent.
  */
-export function formatUSD(value: BigNumberish): string {
-  const formattedString = ethers.utils.formatUnits(value, 18);
+export function formatUSD(value: BigNumberish, decimals = 18): string {
+  const formattedString = ethers.utils.formatUnits(value, decimals);
   return numeral(Number(formattedString).toFixed(2)).format("0,0.00");
 }
 

@@ -136,9 +136,9 @@ const TokenInput = ({
   const formattedConvertedAmount = (() => {
     if (!convertedAmount) return "0.00";
     if (unit === "token") {
-      return "$" + formatUSD(convertedAmount);
+      return "$" + formatUSD(convertedAmount, token?.decimals);
     }
-    return `${formatUnits(convertedAmount, 18)} ${token?.symbol}`;
+    return `${formatUnits(convertedAmount, token?.decimals)} ${token?.symbol}`;
   })();
 
   return (
