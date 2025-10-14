@@ -27,8 +27,14 @@ import { quoteFetchStrategies } from "../_configs";
 import { getBridgeStrategy } from "../../_bridges";
 import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
+import { CHAIN_IDs } from "../../_constants";
 
 const logger = getLogger();
+
+// Allows us to redirect the gas price cache chain ID to the mainnet chain ID for testnet chains
+const gasPriceCacheChainIdRedirects: Record<number, number> = {
+  [CHAIN_IDs.HYPEREVM_TESTNET]: CHAIN_IDs.HYPEREVM,
+};
 
 export async function handleApprovalSwap(
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
@@ -82,8 +88,8 @@ export async function handleApprovalSwap(
   // TODO: Extend the strategy selection based on more sophisticated logic when we start
   // implementing burn/mint bridges.
   const bridgeStrategy = getBridgeStrategy({
-    originChainId: inputToken.chainId,
-    destinationChainId: outputToken.chainId,
+    inputToken,
+    outputToken,
   });
   const crossSwapQuotes = await getCrossSwapQuotes(
     {
@@ -216,7 +222,9 @@ export async function handleApprovalSwap(
   ] = await Promise.all([
     getOriginTxGas(),
     crossSwapTx.ecosystem === "evm"
-      ? latestGasPriceCache(originTxChainId).get()
+      ? latestGasPriceCache(
+          gasPriceCacheChainIdRedirects[originTxChainId] ?? originTxChainId
+        ).get()
       : undefined,
     getCachedTokenPrice({
       symbol: inputToken.symbol,
