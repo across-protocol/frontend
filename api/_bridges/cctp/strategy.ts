@@ -42,7 +42,9 @@ import {
 } from "./utils/constants";
 import {
   buildCctpTxHyperEvmToHyperCore,
+  getAmountToHyperCore,
   isHyperEvmToHyperCoreRoute,
+  isToHyperCore,
 } from "./utils/hypercore";
 
 const name = "cctp";
@@ -148,15 +150,23 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       inputToken,
       outputToken,
       exactInputAmount,
-      recipient: _recipient,
+      recipient,
       message: _message,
     }: GetExactInputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const outputAmount = ConvertDecimals(
-        inputToken.decimals,
-        outputToken.decimals
-      )(exactInputAmount);
+      const outputAmount = isToHyperCore(outputToken.chainId)
+        ? await getAmountToHyperCore({
+            inputToken,
+            outputToken,
+            inputOrOutput: "input",
+            amount: exactInputAmount,
+            recipient,
+          })
+        : ConvertDecimals(
+            inputToken.decimals,
+            outputToken.decimals
+          )(exactInputAmount);
 
       return {
         bridgeQuote: {
@@ -177,15 +187,23 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       outputToken,
       minOutputAmount,
       forceExactOutput: _forceExactOutput,
-      recipient: _recipient,
+      recipient,
       message: _message,
     }: GetOutputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const inputAmount = ConvertDecimals(
-        outputToken.decimals,
-        inputToken.decimals
-      )(minOutputAmount);
+      const inputAmount = isToHyperCore(outputToken.chainId)
+        ? await getAmountToHyperCore({
+            inputToken,
+            outputToken,
+            inputOrOutput: "output",
+            amount: minOutputAmount,
+            recipient,
+          })
+        : ConvertDecimals(
+            outputToken.decimals,
+            inputToken.decimals
+          )(minOutputAmount);
 
       return {
         bridgeQuote: {

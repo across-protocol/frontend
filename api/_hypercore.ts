@@ -91,8 +91,18 @@ export async function getBalanceOnHyperCore(params: {
   return BigNumber.from(decodedQueryResult[0].toString());
 }
 
-export async function accountExistsOnHyperCore(params: { account: string }) {
-  const provider = getProvider(CHAIN_IDs.HYPEREVM);
+export async function accountExistsOnHyperCore(params: {
+  account: string;
+  chainId?: number;
+}) {
+  const chainId = params.chainId ?? CHAIN_IDs.HYPEREVM;
+
+  if (![CHAIN_IDs.HYPEREVM, CHAIN_IDs.HYPEREVM_TESTNET].includes(chainId)) {
+    throw new Error("Can't check account existence on non-HyperCore chain");
+  }
+
+  const provider = getProvider(chainId);
+
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address"],
     [params.account]
