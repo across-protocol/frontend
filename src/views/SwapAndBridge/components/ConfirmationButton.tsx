@@ -470,13 +470,11 @@ const StyledButton = styled.button<{
   color: ${({ aqua }) => (aqua ? "#2D2E33" : "#E0F3FF")};
 
   &:not(:disabled):hover {
-    ${({ aqua }) =>
+    box-shadow: ${({ aqua }) =>
       aqua
-        ? `background: rgba(108, 249, 216, 0.1);`
+        ? `0 0 10px 0 var(--Transparency-Bright-Gray-bright-gray-50, rgba(224, 243, 255, 0.50)) inset, 0 0 4px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 2px 12px 1px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 4px 24px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20))`
         : `
-        box-shadow: 0 0 16px 0 ${COLORS.aqua};
-        background: ${COLORS.aqua};
-      `}
+      `};
   }
 
   &:not(:disabled):focus {
