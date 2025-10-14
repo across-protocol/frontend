@@ -241,6 +241,8 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         ecosystem: "evm" as const,
       };
     },
+
+    isRouteSupported,
   };
 }
 
