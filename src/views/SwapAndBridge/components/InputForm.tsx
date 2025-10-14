@@ -1,4 +1,4 @@
-import { COLORS, formatUSD, formatUSDString } from "utils";
+import { COLORS, formatUSD } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import BalanceSelector from "./BalanceSelector";
@@ -6,6 +6,7 @@ import styled from "@emotion/styled";
 import { useCallback } from "react";
 import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
+import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
 import { useTokenInput } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
@@ -70,7 +71,7 @@ export const InputForm = ({
         disabled={!outputToken || !outputToken}
       />
       <QuickSwapButton onClick={quickSwap}>
-        <ArrowsCross width="12px" height="12px" />
+        <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
       <TokenInput
         setToken={setOutputToken}
@@ -297,8 +298,8 @@ const Wrapper = styled.div`
 
 const QuickSwapButton = styled.button`
   display: flex;
-  width: 40px;
-  height: 32px;
+  width: 46px;
+  height: 38px;
   position: absolute;
   left: calc(50% - 20px);
   top: calc(50% - 16px);
@@ -306,7 +307,7 @@ const QuickSwapButton = styled.button`
   align-items: center;
   background: ${COLORS["black-700"]};
   border: 3px solid ${COLORS["black-800"]};
-  border-radius: 12px;
+  border-radius: 15px;
   z-index: 4;
   cursor: pointer;
 
