@@ -92,17 +92,19 @@ const ExpandableLabelSection: React.FC<
           <Shield width="16" height="16" />
           <FastSecureText>Fast & Secure</FastSecureText>
         </ExpandableLabelLeft>
-        <ExpandableLabelRight>
-          <FeeTimeItem>
-            <Dollar width="16" height="16" />
-            {fee}
-          </FeeTimeItem>
-          <Divider />
-          <FeeTimeItem>
-            <Time width="16" height="16" />
-            {time}
-          </FeeTimeItem>
-        </ExpandableLabelRight>
+        {!expanded && (
+          <ExpandableLabelRight>
+            <FeeTimeItem>
+              <Dollar width="16" height="16" />
+              {fee}
+            </FeeTimeItem>
+            <Divider />
+            <FeeTimeItem>
+              <Time width="16" height="16" />
+              {time}
+            </FeeTimeItem>
+          </ExpandableLabelRight>
+        )}
         <StyledChevronDown expanded={expanded} />
       </>
     );
