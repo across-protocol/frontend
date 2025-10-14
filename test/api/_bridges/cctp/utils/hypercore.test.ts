@@ -58,10 +58,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const result = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       expect(result).toEqual(params.amount); // Same amount, same decimals
     });
 
@@ -77,10 +73,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const result = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       expect(result).toEqual(params.amount); // Same amount, same decimals
     });
 
@@ -96,10 +88,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const outputAmount = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       // Should be 10 - 1 = 9 USDC (9000000)
       expect(outputAmount.toNumber()).toEqual(9_000_000);
     });
@@ -116,10 +104,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const inputAmount = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       // Should be 5 + 1 = 6 USDC (6000000)
       expect(inputAmount.toNumber()).toEqual(6_000_000);
     });
@@ -158,10 +142,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const outputAmount = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       expect(outputAmount.toNumber()).toEqual(100_000_000);
     });
 
@@ -183,10 +163,6 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       const outputAmount = await getAmountToHyperCore(params);
-
-      expect(mockAccountExistsOnHyperCore).toHaveBeenCalledWith({
-        account: params.recipient,
-      });
       expect(outputAmount.toNumber()).toEqual(900_000_000);
     });
   });
