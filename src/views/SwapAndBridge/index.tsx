@@ -41,7 +41,7 @@ export default function SwapAndBridge() {
   }, [onConfirm, inputToken, outputToken]);
 
   return (
-    <LayoutV2 maxWidth={720}>
+    <LayoutV2 maxWidth={600}>
       <Wrapper>
         <InputForm
           inputToken={inputToken}
