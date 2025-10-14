@@ -80,7 +80,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
 
-  gap: 16px;
+  gap: 8px;
 
   align-items: center;
   justify-content: center;

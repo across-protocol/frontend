@@ -209,7 +209,17 @@ const ValueRow = styled.div`
   }
 `;
 
-const UnitToggleButton = styled.button``;
+const UnitToggleButton = styled.button`
+  color: var(--color-neutrals-light-200);
+
+  &:hover:not(:disabled) {
+    color: var(--color-interface-white);
+  }
+
+  svg {
+    color: inherit;
+  }
+`;
 
 const TokenAmountStack = styled.div`
   display: flex;
