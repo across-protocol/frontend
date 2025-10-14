@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";

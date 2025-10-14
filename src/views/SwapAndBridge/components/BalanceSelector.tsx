@@ -12,7 +12,7 @@ type BalanceSelectorProps = {
   error?: boolean;
 };
 
-export default function BalanceSelector({
+export function BalanceSelector({
   balance,
   decimals,
   setAmount,
@@ -64,7 +64,7 @@ export default function BalanceSelector({
                   type: "spring",
                   stiffness: 400,
                   damping: 28,
-                  delay: index * 0.07,
+                  delay: (percentages.length - 1 - index) * 0.07,
                 }}
                 whileHover={{
                   scale: 1.05,
@@ -120,7 +120,8 @@ const PillsContainer = styled.div`
   align-items: center;
   gap: var(--spacing);
   position: absolute;
-  right: calc(100% + (var(--spacing) * 2));
+  right: 100%;
+  padding-right: calc(var(--spacing) * 2);
 
   .pill {
     display: flex;

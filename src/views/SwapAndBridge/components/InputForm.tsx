@@ -1,7 +1,7 @@
 import { COLORS, formatUSD } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
-import BalanceSelector from "./BalanceSelector";
+import { BalanceSelector } from "./BalanceSelector";
 import styled from "@emotion/styled";
 import { useCallback } from "react";
 import { BigNumber } from "ethers";
