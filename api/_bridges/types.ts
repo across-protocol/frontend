@@ -11,6 +11,13 @@ export type BridgeStrategiesConfig = {
       [toChainId: number]: BridgeStrategy;
     };
   };
+  inputTokens?: {
+    [inputTokenSymbol: string]: {
+      [fromChainId: number]: {
+        [toChainId: number]: BridgeStrategy;
+      };
+    };
+  };
 };
 
 export type BridgeCapabilities = {
