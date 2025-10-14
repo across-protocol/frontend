@@ -45,6 +45,7 @@ export async function getAmountToHyperCore(params: {
 
   const recipientExists = await accountExistsOnHyperCore({
     account: recipient,
+    chainId: inputToken.chainId,
   });
 
   if (recipientExists) {
@@ -62,9 +63,9 @@ export async function getAmountToHyperCore(params: {
   // If provided amount is `inputAmount`, subtract account creation fee and return required output amount
   if (inputOrOutput === "input") {
     const outputAmount = amount.sub(accountCreationFee);
-    if (outputAmount.lt(0)) {
+    if (outputAmount.lte(0)) {
       throw new InvalidParamError({
-        message: "CCTP: Account creation fee is greater than amount",
+        message: "CCTP: Amount must exceed account creation fee",
         param: "amount",
       });
     }

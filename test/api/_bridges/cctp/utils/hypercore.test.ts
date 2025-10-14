@@ -136,7 +136,7 @@ describe("bridges/cctp/utils/hypercore", () => {
       };
 
       await expect(getAmountToHyperCore(params)).rejects.toThrow(
-        "CCTP: Account creation fee is greater than amount"
+        "CCTP: Amount must exceed account creation fee"
       );
     });
 
