@@ -94,7 +94,10 @@ export function useTokenInput({
 
   // Set converted value for display
   useEffect(() => {
-    if (!token || !amountString) return;
+    if (!token || !amountString) {
+      setConvertedAmount(undefined);
+      return;
+    }
     try {
       if (unit === "token") {
         // User typed token amount - convert to USD for display
