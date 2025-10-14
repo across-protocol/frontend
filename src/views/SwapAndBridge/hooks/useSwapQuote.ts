@@ -43,7 +43,10 @@ const useSwapQuote = ({
       depositor,
       recipient,
     ],
-    queryFn: async (): Promise<SwapApprovalApiResponse> => {
+    queryFn: async (): Promise<SwapApprovalApiResponse | undefined> => {
+      if (Number(amount) <= 0) {
+        return undefined;
+      }
       if (!origin || !destination || !amount || !depositor) {
         throw new Error("Missing required swap quote parameters");
       }

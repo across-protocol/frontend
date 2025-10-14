@@ -47,11 +47,26 @@ export function useTokenInput({
         setAmount(null);
         return;
       }
+      // If the input is empty or effectively zero, set amount to null
+      if (!amountString || !Number(amountString)) {
+        setAmount(null);
+        return;
+      }
       if (unit === "token") {
         const parsed = utils.parseUnits(amountString, token.decimals);
+        // If parsed amount is zero or negative, set to null
+        if (parsed.lte(0)) {
+          setAmount(null);
+          return;
+        }
         setAmount(parsed);
       } else {
         const tokenValue = convertUSDToToken(amountString, token);
+        // If converted value is zero or negative, set to null
+        if (tokenValue.lte(0)) {
+          setAmount(null);
+          return;
+        }
         setAmount(tokenValue);
       }
     } catch (e) {
@@ -74,20 +89,27 @@ export function useTokenInput({
       setAmountString("");
     }
 
-    if (expectedAmount && token && shouldUpdate) {
-      if (unit === "token") {
-        // Display as token amount
-        setAmountString(
-          formatUnitsWithMaxFractions(expectedAmount, token.decimals)
-        );
+    if (shouldUpdate && token) {
+      // Clear the field when there's no expected amount and not loading
+      if (!expectedAmount && !isUpdateLoading) {
+        setAmountString("");
       } else {
-        // Display as USD amount - convert token to USD
-        const tokenAmountFormatted = formatUnitsWithMaxFractions(
-          expectedAmount,
-          token.decimals
-        );
-        const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-        setAmountString(utils.formatUnits(usdValue, token.decimals));
+        if (expectedAmount) {
+          if (unit === "token") {
+            // Display as token amount
+            setAmountString(
+              formatUnitsWithMaxFractions(expectedAmount, token.decimals)
+            );
+          } else {
+            // Display as USD amount - convert token to USD
+            const tokenAmountFormatted = formatUnitsWithMaxFractions(
+              expectedAmount,
+              token.decimals
+            );
+            const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
+            setAmountString(utils.formatUnits(usdValue, token.decimals));
+          }
+        }
       }
     }
   }, [expectedAmount, isUpdateLoading, shouldUpdate, token, unit]);
