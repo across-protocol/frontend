@@ -147,14 +147,18 @@ describe("_utils", () => {
       expect(token).toBeUndefined();
     });
 
-    it("should correctly resolve ambiguous tokens like USDC and USDT", () => {
-      const mainnetUsdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-      const token = getTokenByAddress(mainnetUsdcAddress, 1);
+    it("should correctly resolve ambiguous tokens like USDC", () => {
+      const usdcAddresses = TOKEN_SYMBOLS_MAP.USDC.addresses;
+      const mainnetChainId = CHAIN_IDs.MAINNET;
+      const arbitrumUsdcAddress = usdcAddresses[mainnetChainId];
+
+      const token = getTokenByAddress(arbitrumUsdcAddress, mainnetChainId);
       expect(token).toBeDefined();
       expect(token?.symbol).toBe("USDC");
 
-      const mainnetUsdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-      const tokenUsdt = getTokenByAddress(mainnetUsdtAddress, 1);
+      const usdtAddresses = TOKEN_SYMBOLS_MAP.USDT.addresses;
+      const mainnetUsdtAddress = usdtAddresses[mainnetChainId];
+      const tokenUsdt = getTokenByAddress(mainnetUsdtAddress, mainnetChainId);
       expect(tokenUsdt).toBeDefined();
       expect(tokenUsdt?.symbol).toBe("USDT");
     });
@@ -163,11 +167,9 @@ describe("_utils", () => {
       const ambiguousTokens = ["USDC", "USDT"];
       const wrappedTokens = [
         "WETH",
-        "WBNB",
         "WMATIC",
         "WHYPE",
         "TATARA-WBTC",
-        "WAZERO",
         "WBNB",
         "WGHO",
         "WGRASS",

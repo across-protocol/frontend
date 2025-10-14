@@ -174,7 +174,6 @@ describe("GET /swap/approval", () => {
       "WMATIC",
       "WHYPE",
       "TATARA-WBTC",
-      "WAZERO",
       "WGHO",
       "WGRASS",
       "WSOL",
