@@ -937,7 +937,7 @@ const BackButton = styled.button`
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.2s ease-in-out;
@@ -955,7 +955,7 @@ const BackButton = styled.button`
 
 const Title = styled.div`
   overflow: hidden;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   font-family: Barlow;
   font-size: 20px;
   font-style: normal;
@@ -1036,7 +1036,7 @@ const ChainItemImage = styled.img`
 
 const ChainItemName = styled.div`
   overflow: hidden;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
   /* Body/Medium */
   font-family: Barlow;
@@ -1065,7 +1065,7 @@ const TokenNameSymbolWrapper = styled.div`
 
 const TokenName = styled.div`
   overflow: hidden;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   /* Body/Medium */
   font-family: Barlow;
   font-size: 16px;
@@ -1081,7 +1081,7 @@ const TokenName = styled.div`
 
 const TokenSymbol = styled.div`
   overflow: hidden;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
   /* Body/X Small */
   font-family: Barlow;
@@ -1106,7 +1106,7 @@ const TokenBalanceStack = styled.div`
 `;
 
 const TokenBalance = styled.div`
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   /* Body/Small */
   font-family: Barlow;
   font-size: 14px;
@@ -1116,7 +1116,7 @@ const TokenBalance = styled.div`
 `;
 
 const TokenBalanceUsd = styled.div`
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   /* Body/X Small */
   font-family: Barlow;
   font-size: 12px;
@@ -1127,7 +1127,7 @@ const TokenBalanceUsd = styled.div`
 `;
 
 const SectionHeader = styled.div`
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   font-size: 14px;
   font-weight: 400;
   line-height: 130%;

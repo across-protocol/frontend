@@ -20,6 +20,11 @@ export const validationErrorTextMap: Record<AmountInputError, string> = {
     "Price impact is too high. Check back later when liquidity is restored.",
   [AmountInputError.SWAP_QUOTE_UNAVAILABLE]:
     "Swap quote temporarily unavailable. Please try again later.",
+  [AmountInputError.NO_INPUT_TOKEN_SELECTED]:
+    "Select an input token to continue",
+  [AmountInputError.NO_OUTPUT_TOKEN_SELECTED]:
+    "Select an output token to continue",
+  [AmountInputError.NO_AMOUNT_ENTERED]: "Enter an amount to continue",
 };
 
 type Props = {

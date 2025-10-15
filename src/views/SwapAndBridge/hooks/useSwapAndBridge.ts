@@ -12,6 +12,8 @@ import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useDefaultRoute } from "./useDefaultRoute";
+import { useConnection } from "hooks";
+import { useHistory } from "react-router-dom";
 
 export type UseSwapAndBridgeReturn = {
   inputToken: EnrichedToken | null;
@@ -44,7 +46,7 @@ export type UseSwapAndBridgeReturn = {
   isConnected: boolean;
   isWrongNetwork: boolean;
   isSubmitting: boolean;
-  onConfirm: () => Promise<string>;
+  onConfirm: () => Promise<void>;
 };
 
 export function useSwapAndBridge(): UseSwapAndBridgeReturn {
@@ -55,6 +57,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const debouncedAmount = useDebounce(amount, 300);
   const defaultRoute = useDefaultRoute();
+  const { connect } = useConnection();
+  const history = useHistory();
 
   useEffect(() => {
     if (defaultRoute.inputToken && defaultRoute.outputToken) {
@@ -120,6 +124,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     amount,
     isAmountOrigin,
     inputToken,
+    outputToken,
     error
   );
 
@@ -132,9 +137,29 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [swapQuote]);
 
   const onConfirm = useCallback(async () => {
+    // If not connected, open the wallet connection modal
+    if (!approvalAction.isConnected) {
+      connect({ trackSection: "bridgeForm" });
+      return;
+    }
+
+    // Otherwise, proceed with the transaction
     const txHash = await approvalAction.buttonActionHandler();
-    return txHash as string;
-  }, [approvalAction]);
+    // Only navigate if we got a transaction hash (not empty string from wallet connection)
+    if (txHash) {
+      history.push(
+        `/bridge/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
+      );
+    }
+  }, [
+    approvalAction,
+    connect,
+    history,
+    inputToken?.chainId,
+    inputToken?.symbol,
+    outputToken?.chainId,
+    outputToken?.symbol,
+  ]);
 
   // Button state logic
   const buttonState: BridgeButtonState = useMemo(() => {
@@ -214,11 +239,11 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
 const buttonLabels: Record<BridgeButtonState, string> = {
   notConnected: "Connect Wallet",
-  awaitingTokenSelection: "Select a token",
-  awaitingAmountInput: "Enter an amount",
+  awaitingTokenSelection: "Confirm Swap",
+  awaitingAmountInput: "Confirm Swap",
   readyToConfirm: "Confirm Swap",
   submitting: "Confirming...",
-  wrongNetwork: "Switch network and confirm transaction",
-  loadingQuote: "Finalizing quote",
+  wrongNetwork: "Confirm Swap",
+  loadingQuote: "Finalizing quote...",
   validationError: "Confirm Swap",
 };

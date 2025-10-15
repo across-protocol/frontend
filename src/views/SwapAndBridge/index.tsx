@@ -1,9 +1,7 @@
 import { LayoutV2 } from "components";
 import styled from "@emotion/styled";
-import { useCallback } from "react";
 import { InputForm } from "./components/InputForm";
 import ConfirmationButton from "./components/ConfirmationButton";
-import { useHistory } from "react-router-dom";
 import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
 
 export default function SwapAndBridge() {
@@ -20,7 +18,6 @@ export default function SwapAndBridge() {
     isQuoteLoading,
     expectedInputAmount,
     expectedOutputAmount,
-    onConfirm,
     validationError,
     validationWarning,
     validationErrorFormatted,
@@ -28,17 +25,8 @@ export default function SwapAndBridge() {
     buttonDisabled,
     buttonLoading,
     buttonLabel,
+    onConfirm,
   } = useSwapAndBridge();
-  const history = useHistory();
-
-  // Handle confirmation (placeholder for now)
-  const handleConfirm = useCallback(async () => {
-    const txHash = await onConfirm();
-    history.push(
-      `/bridge/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onConfirm, inputToken, outputToken]);
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -62,7 +50,7 @@ export default function SwapAndBridge() {
           amount={amount}
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
-          onConfirm={handleConfirm}
+          onConfirm={onConfirm}
           validationError={validationError}
           validationWarning={validationWarning}
           validationErrorFormatted={validationErrorFormatted}

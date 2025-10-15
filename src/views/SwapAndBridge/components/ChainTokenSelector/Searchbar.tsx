@@ -81,7 +81,7 @@ const StyledProductIcon = styled(ProductIcon)`
 
 const Input = styled.input`
   overflow: hidden;
-  color: var(--Base-bright-gray, #e0f3ff);
+  color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
 
   &::placeholder {

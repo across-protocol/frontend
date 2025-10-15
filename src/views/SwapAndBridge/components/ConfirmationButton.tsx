@@ -38,7 +38,7 @@ interface ConfirmationButtonProps
   amount: BigNumber | null;
   swapQuote: SwapApprovalApiResponse | null;
   isQuoteLoading: boolean;
-  onConfirm?: () => void;
+  onConfirm?: () => Promise<void>;
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   validationErrorFormatted?: string;
@@ -76,7 +76,9 @@ const ExpandableLabelSection: React.FC<
 }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
-  if (validationError && validationErrorFormatted) {
+
+  // Show validation messages for all non-ready states
+  if (state !== "readyToConfirm" && validationErrorFormatted) {
     content = (
       <>
         <ValidationText>
@@ -85,30 +87,30 @@ const ExpandableLabelSection: React.FC<
         </ValidationText>
       </>
     );
-  } else if (hasQuote) {
+  } else if (state === "readyToConfirm" && hasQuote) {
+    // Only show quote details when ready to confirm
     content = (
       <>
         <ExpandableLabelLeft>
           <Shield width="16" height="16" />
           <FastSecureText>Fast & Secure</FastSecureText>
         </ExpandableLabelLeft>
-        {!expanded && (
-          <ExpandableLabelRight>
-            <FeeTimeItem>
-              <Dollar width="16" height="16" />
-              {fee}
-            </FeeTimeItem>
-            <Divider />
-            <FeeTimeItem>
-              <Time width="16" height="16" />
-              {time}
-            </FeeTimeItem>
-          </ExpandableLabelRight>
-        )}
+        <ExpandableLabelRight>
+          <FeeTimeItem>
+            <Dollar width="16" height="16" />
+            {fee}
+          </FeeTimeItem>
+          <Divider />
+          <FeeTimeItem>
+            <Time width="16" height="16" />
+            {time}
+          </FeeTimeItem>
+        </ExpandableLabelRight>
         <StyledChevronDown expanded={expanded} />
       </>
     );
   } else {
+    // Default state - show Across V4 branding
     content = (
       <>
         <ExpandableLabelLeft>
@@ -139,9 +141,7 @@ const ExpandableLabelSection: React.FC<
         >
           {content}
         </ExpandableLabelButton>
-        <ExpandableContent expanded={expanded}>
-          {expanded && children}
-        </ExpandableContent>
+        <ExpandableContent expanded={expanded}>{children}</ExpandableContent>
       </motion.div>
     </AnimatePresence>
   );
@@ -159,7 +159,7 @@ const ButtonCore: React.FC<{
   <StyledButton
     disabled={disabled || loading}
     onClick={onClick}
-    aqua={state !== "validationError"}
+    aqua={!disabled}
     loading={loading}
     fullHeight={fullHeight}
   >
@@ -244,7 +244,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     };
   }, [swapQuote, inputToken, outputToken, amount]);
 
-  const clickHandler = onConfirm;
+  // When notConnected, make button clickable so it can open wallet modal
+  const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
 
   // Render unified group driven by state
   const content = (
@@ -334,9 +335,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           state={state}
           label={buttonLabel}
           loading={buttonLoading}
-          disabled={buttonDisabled}
+          disabled={isButtonDisabled}
           fullHeight={state !== "readyToConfirm"}
-          onClick={clickHandler}
+          onClick={onConfirm}
         />
       </ButtonContainer>
     </>
@@ -344,7 +345,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   return (
     <Container
-      state={state}
+      disabled={isButtonDisabled}
       initial={false}
       transition={{ type: "spring", stiffness: 300, damping: 40 }}
     >
@@ -364,18 +365,16 @@ const ValidationText = styled.div`
 `;
 
 // Styled components
-const Container = styled(motion.div)<{ state: BridgeButtonState }>`
-  background: ${({ state }) =>
-    state === "validationError"
-      ? COLORS["grey-400-5"]
-      : "rgba(108, 249, 216, 0.1)"};
+const Container = styled(motion.div)<{ disabled: boolean }>`
+  background: ${({ disabled }) =>
+    disabled ? COLORS["grey-400-5"] : "rgba(108, 249, 216, 0.1)"};
   border-radius: 24px;
   display: flex;
   flex-direction: column;
   padding: 8px 12px 12px 12px;
   width: 100%;
   overflow: hidden;
-  gap: ${({ state }) => (state === "readyToConfirm" ? "8px" : "0")};
+  gap: ${({ disabled }) => (disabled ? "0px" : "8px")};
 `;
 
 const ExpandableLabelButton = styled.button`

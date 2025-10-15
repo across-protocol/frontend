@@ -16,17 +16,31 @@ export function useValidateSwapAndBridge(
   amount: BigNumber | null,
   isAmountOrigin: boolean,
   inputToken: EnrichedToken | null,
+  outputToken: EnrichedToken | null,
   error: any
 ): ValidationResult {
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
-    // invalid amount (allow empty/no amount without error)
-    if (amount && amount.lte(0)) {
+
+    // Check if input token is selected
+    if (!inputToken) {
+      errorType = AmountInputError.NO_INPUT_TOKEN_SELECTED;
+    }
+    // Check if output token is selected
+    else if (!outputToken) {
+      errorType = AmountInputError.NO_OUTPUT_TOKEN_SELECTED;
+    }
+    // Check if amount is entered
+    else if (!amount || amount.isZero()) {
+      errorType = AmountInputError.NO_AMOUNT_ENTERED;
+    }
+    // invalid amount
+    else if (amount.lte(0)) {
       errorType = AmountInputError.INVALID;
     }
     // balance check for origin-side inputs
-    if (!errorType && isAmountOrigin && inputToken?.balance) {
-      if (amount && amount.gt(inputToken.balance)) {
+    else if (isAmountOrigin && inputToken?.balance) {
+      if (amount.gt(inputToken.balance)) {
         errorType = AmountInputError.INSUFFICIENT_BALANCE;
       }
     }
@@ -45,9 +59,10 @@ export function useValidateSwapAndBridge(
       errorFormatted: getValidationErrorText({
         validationError: errorType,
         inputToken,
+        outputToken,
       }),
     };
-  }, [amount, isAmountOrigin, inputToken, error]);
+  }, [amount, isAmountOrigin, inputToken, outputToken, error]);
 
   return validation;
 }
@@ -55,12 +70,13 @@ export function useValidateSwapAndBridge(
 function getValidationErrorText(props: {
   validationError?: AmountInputError;
   inputToken: EnrichedToken | null;
+  outputToken: EnrichedToken | null;
 }): string | undefined {
   if (!props.validationError) {
     return;
   }
   return validationErrorTextMap[props.validationError]?.replace(
     "[INPUT_TOKEN]",
-    props.inputToken!.symbol
+    props.inputToken?.symbol ?? ""
   );
 }

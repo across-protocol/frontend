@@ -90,7 +90,7 @@ export default function SelectorButton({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.button`
   --height: 48px;
   --padding: 8px;
   height: var(--height);
@@ -133,6 +133,7 @@ const NamesStack = styled.div`
   padding-inline: var(--padding);
   white-space: nowrap;
   height: 100%;
+  min-width: 72px;
 
   flex-grow: 1;
 
@@ -141,11 +142,10 @@ const NamesStack = styled.div`
 `;
 
 const TokenName = styled.div`
-  font-size: 16px;
-  line-height: 16px;
-
+  font-size: 14px;
+  line-height: 100%;
   font-weight: 600;
-  color: #e0f3ff;
+  color: var(--base-bright-gray, #e0f3ff);
 `;
 
 const SelectTokenName = styled(TokenName)`
@@ -154,10 +154,10 @@ const SelectTokenName = styled(TokenName)`
 `;
 
 const ChainName = styled.div`
-  font-size: 12px;
-  line-height: 12px;
+  font-size: 14px;
   font-weight: 400;
-  color: #e0f3ff;
+  line-height: 100%;
+  color: var(--base-bright-gray, #e0f3ff);
   opacity: 0.5;
 `;
 
