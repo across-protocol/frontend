@@ -43,6 +43,11 @@ export const OFT_MESSENGERS: Record<
   // }
 };
 
+// OFT composer contract addresses per token on hypercore
+export const HYPERCORE_OFT_COMPOSER_ADDRESSES: Record<string, string> = {
+  USDT: "0x80123ab57c9bc0c452d6c18f92a653a4ee2e7585",
+};
+
 // Shared decimals for OFT tokens across chains
 // These are the decimal precision values that are consistent across all chains for each token
 export const OFT_SHARED_DECIMALS: Record<string, number> = {
@@ -293,6 +298,7 @@ export const createSendParamStruct = (params: {
   toAddress: string;
   amountLD: BigNumber;
   minAmountLD: BigNumber;
+  composeMsg?: string;
 }): SendParamStruct => {
   const dstEid = getOftEndpointId(params.destinationChainId);
   return {
@@ -301,7 +307,7 @@ export const createSendParamStruct = (params: {
     amountLD: params.amountLD,
     minAmountLD: params.minAmountLD,
     extraOptions: "0x",
-    composeMsg: "0x",
+    composeMsg: params.composeMsg ?? "0x",
     oftCmd: "0x",
   };
 };

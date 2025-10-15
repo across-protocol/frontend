@@ -28,8 +28,10 @@ import {
   OFT_MESSENGERS,
   OFT_SHARED_DECIMALS,
   V2_ENDPOINTS,
+  HYPERCORE_OFT_COMPOSER_ADDRESSES,
 } from "./utils/constants";
 import * as chainConfigs from "../../../scripts/chain-configs";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 const name = "oft";
 
@@ -170,13 +172,17 @@ async function getQuote(params: {
     inputToken.symbol,
     inputToken.decimals
   );
-
+  const { toAddress, composeMsg } =
+    outputToken.chainId === CHAIN_IDs.HYPERCORE
+      ? getHyperLiquidComposerMessage(recipient, outputToken.symbol)
+      : { toAddress: recipient, composeMsg: "0x" };
   // Create SendParam struct for quoting
   const sendParam = createSendParamStruct({
     destinationChainId: outputToken.chainId,
-    toAddress: recipient,
+    toAddress,
     amountLD: roundedInputAmount,
     minAmountLD: roundedInputAmount,
+    composeMsg,
   });
 
   // Get quote from OFT contract
@@ -261,15 +267,22 @@ export function getOftBridgeStrategy(): BridgeStrategy {
 
     // Token must be supported by OFT
     const oftMessengerContract = OFT_MESSENGERS[params.inputToken.symbol];
-    if (!oftMessengerContract) {
-      return false;
+    const oftComposerContract =
+      HYPERCORE_OFT_COMPOSER_ADDRESSES[params.outputToken.symbol];
+    if (oftMessengerContract) {
+      // Both chains must have OFT contracts configured for the token
+      return Boolean(
+        oftMessengerContract[params.inputToken.chainId] &&
+          oftMessengerContract[params.outputToken.chainId]
+      );
+    } else if (oftComposerContract) {
+      // The oft transfer is sending OFT directly to hyperCore via the composer contract
+      return Boolean(
+        oftComposerContract[params.inputToken.chainId] &&
+          oftComposerContract[params.outputToken.chainId]
+      );
     }
-
-    // Both chains must have OFT contracts configured for the token
-    return Boolean(
-      oftMessengerContract[params.inputToken.chainId] &&
-        oftMessengerContract[params.outputToken.chainId]
-    );
+    return false;
   };
 
   const assertSupportedRoute = (params: {
@@ -278,7 +291,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
   }) => {
     if (!isRouteSupported(params)) {
       throw new InvalidParamError({
-        message: `OFT: Route ${params.inputToken.symbol} -> ${params.outputToken.symbol} is not supported`,
+        message: `OFT: Route ${params.inputToken.symbol} -> ${params.outputToken.symbol} is not supported for bridging from ${params.inputToken.chainId} to ${params.outputToken.chainId}`,
       });
     }
   };
@@ -455,14 +468,21 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       );
 
       // Get recipient address
-      const recipient = crossSwap.recipient;
+      const { toAddress, composeMsg } =
+        destinationChainId === CHAIN_IDs.HYPERCORE
+          ? getHyperLiquidComposerMessage(
+              crossSwap.recipient!,
+              crossSwap.outputToken.symbol
+            )
+          : { toAddress: crossSwap.recipient!, composeMsg: "0x" };
 
       // Create SendParam struct
       const sendParam = createSendParamStruct({
         destinationChainId,
-        toAddress: recipient,
+        toAddress,
         amountLD: bridgeQuote.inputAmount,
         minAmountLD: bridgeQuote.minOutputAmount,
+        composeMsg,
       });
 
       // Get messaging fee quote
@@ -538,4 +558,33 @@ function getOftBridgeFees(params: {
       token: nativeToken,
     },
   };
+}
+
+function getHyperLiquidComposerMessage(
+  recipient: string,
+  tokenSymbol: string
+): {
+  composeMsg: string;
+  toAddress: string;
+} {
+  // The `composeMsg` is the payload for the HyperLiquidComposer.
+  // The composer contract's `decodeMessage` function expects: abi.decode(_composeMessage, (uint256, address))
+  // See: https://github.com/LayerZero-Labs/devtools/blob/ed399e9e57e00848910628a2f89b958c11f63162/packages/hyperliquid-composer/contracts/HyperLiquidComposer.sol#L104
+  const composeMsg = ethers.utils.defaultAbiCoder.encode(
+    ["uint256", "address"],
+    [
+      0, // `minMsgValue` is 0 as we are not sending native HYPE tokens.
+      recipient, // `to` is the final user's address on Hyperliquid L1.
+    ]
+  );
+  if (!HYPERCORE_OFT_COMPOSER_ADDRESSES[tokenSymbol]) {
+    throw new InvalidParamError({
+      message: `OFT: No Hyperliquid Composer contract configured for token ${tokenSymbol}`,
+    });
+  }
+  // When composing a message for Hyperliquid, the recipient of the OFT `send` call
+  // is always the Hyperliquid Composer contract on HyperEVM.
+  const toAddress = HYPERCORE_OFT_COMPOSER_ADDRESSES[tokenSymbol];
+
+  return { composeMsg, toAddress };
 }

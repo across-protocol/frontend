@@ -22,6 +22,7 @@ import {
   EXACT_INPUT_CASES,
   LENS_CASES,
   SOLANA_CASES,
+  USDT_OFT_CASES,
 } from "./_swap-cases";
 
 dotenv.config({
@@ -258,11 +259,12 @@ export async function fetchSwapQuotes() {
     // Args are provided via test case filter
     const filterString = (argsFromCli.filter as string) || "";
     const testCases = [
-      ...MIN_OUTPUT_CASES,
-      ...EXACT_OUTPUT_CASES,
-      ...EXACT_INPUT_CASES,
-      ...LENS_CASES,
-      ...SOLANA_CASES,
+      ...USDT_OFT_CASES,
+      // ...MIN_OUTPUT_CASES,
+      // ...EXACT_OUTPUT_CASES,
+      // ...EXACT_INPUT_CASES,
+      // ...LENS_CASES,
+      // ...SOLANA_CASES,
     ];
     const filteredTestCases = filterTestCases(testCases, filterString);
 
@@ -360,6 +362,8 @@ export async function signAndWaitAllowanceFlow(params: {
       data: params.swapResponse.swapTx.data,
       value: params.swapResponse.swapTx.value,
       gasLimit: params.swapResponse.swapTx.gas,
+      maxFeePerGas: params.swapResponse.swapTx.maxFeePerGas,
+      maxPriorityFeePerGas: params.swapResponse.swapTx.maxPriorityFeePerGas,
     });
     console.log("Tx hash: ", tx.hash);
     await tx.wait();

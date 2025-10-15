@@ -9,6 +9,7 @@ import {
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getBridgeStrategyData } from "./utils";
+import { getOftBridgeStrategy } from "./oft/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -38,6 +39,8 @@ export async function getBridgeStrategy({
   recipient,
   depositor,
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  return getOftBridgeStrategy();
+
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {
@@ -63,7 +66,7 @@ export async function getBridgeStrategy({
       depositor,
     });
   }
-  return getAcrossBridgeStrategy();
+  return getOftBridgeStrategy();
 }
 
 async function routeStrategyForCctp({
