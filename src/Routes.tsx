@@ -149,6 +149,18 @@ const Routes: React.FC = () => {
             path="/bridge-and-swap/:depositTxHash"
             component={DepositStatus}
           />
+          <Redirect exact from="/bridge" to="/bridge-and-swap" />
+          <Route
+            path="/bridge/:depositTxHash"
+            render={({ match, location: routeLocation }) => (
+              <Redirect
+                to={{
+                  pathname: `/bridge-and-swap/${match.params.depositTxHash}`,
+                  search: routeLocation.search,
+                }}
+              />
+            )}
+          />
           <Redirect
             exact
             path="/"
