@@ -1,32 +1,18 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import { getSupportedBridgeStrategies } from "../../../api/_bridges/index";
-import { Token } from "../../../api/_dexes/types";
 
 describe("api/_bridges/index", () => {
   describe("#getSupportedBridgeStrategies()", () => {
-    // Helper to create a mock token
-    const createMockToken = (
-      symbol: string,
-      chainId: number,
-      address: string
-    ): Token => ({
-      address,
-      chainId,
-      symbol,
-      decimals: 6,
-    });
-
-    const usdcOptimism = createMockToken(
-      "USDC",
-      CHAIN_IDs.OPTIMISM,
-      TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM]
-    );
-
-    const usdcArbitrum = createMockToken(
-      "USDC",
-      CHAIN_IDs.ARBITRUM,
-      TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM]
-    );
+    const usdcOptimism = {
+      ...TOKEN_SYMBOLS_MAP.USDC,
+      chainId: CHAIN_IDs.OPTIMISM,
+      address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+    };
+    const usdcArbitrum = {
+      ...TOKEN_SYMBOLS_MAP.USDC,
+      chainId: CHAIN_IDs.ARBITRUM,
+      address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+    };
 
     describe("basic routing preference tests", () => {
       test("should return both across and cctp strategies for USDC with 'default' routing preference", () => {
