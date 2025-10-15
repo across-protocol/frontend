@@ -150,9 +150,9 @@ describe("_utils", () => {
     it("should correctly resolve ambiguous tokens like USDC", () => {
       const usdcAddresses = TOKEN_SYMBOLS_MAP.USDC.addresses;
       const mainnetChainId = CHAIN_IDs.MAINNET;
-      const arbitrumUsdcAddress = usdcAddresses[mainnetChainId];
+      const mainnetUsdcAddress = usdcAddresses[mainnetChainId];
 
-      const token = getTokenByAddress(arbitrumUsdcAddress, mainnetChainId);
+      const token = getTokenByAddress(mainnetUsdcAddress, mainnetChainId);
       expect(token).toBeDefined();
       expect(token?.symbol).toBe("USDC");
 
