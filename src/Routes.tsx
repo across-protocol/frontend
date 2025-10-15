@@ -145,7 +145,10 @@ const Routes: React.FC = () => {
             }}
           />
           <Route exact path="/bridge-and-swap" component={SwapAndBridge} />
-          <Route path="/bridge/:depositTxHash" component={DepositStatus} />
+          <Route
+            path="/bridge-and-swap/:depositTxHash"
+            component={DepositStatus}
+          />
           <Redirect
             exact
             path="/"

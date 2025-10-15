@@ -148,7 +148,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     // Only navigate if we got a transaction hash (not empty string from wallet connection)
     if (txHash) {
       history.push(
-        `/bridge/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
+        `/bridge-and-swap/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
       );
     }
   }, [
