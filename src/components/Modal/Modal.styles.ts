@@ -184,9 +184,9 @@ export const ModalHeader = styled.div`
   width: 100%;
 `;
 
-export const ModalContent = styled.div`
+export const ModalContent = styled.div<{ noScroll?: boolean }>`
   flex: 1;
-  overflow: hidden;
+  overflow: ${({ noScroll }) => (noScroll ? "hidden" : "hidden scroll")};
   padding: var(--padding-modal-content);
   min-height: 0;
   width: 100%;

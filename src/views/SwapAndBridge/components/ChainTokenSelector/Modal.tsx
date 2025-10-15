@@ -361,6 +361,7 @@ const MobileModal = ({
       width={400}
       height={600}
       titleBorder
+      noScroll
     >
       <MobileLayout
         mobileStep={mobileStep}

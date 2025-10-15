@@ -39,7 +39,7 @@ export type ModalProps = {
   topYOffset?: number;
   "data-cy"?: string;
   bottomYOffset?: number;
-
+  noScroll?: boolean;
   children?: React.ReactNode;
   footer?: React.ReactNode;
   titleBorder?: boolean;
@@ -63,6 +63,7 @@ const Modal = ({
   className,
   "data-cy": dataCy,
   titleBorder = false,
+  noScroll = false,
 }: ModalProps) => {
   const verticalLocation: ModalDirection | undefined =
     typeof _verticalLocation === "string"
