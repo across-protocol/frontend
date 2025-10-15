@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { getConfig } from "utils/config";
-import { getSwapChains } from "utils/getSwapChains";
 import { useSwapTokens } from "./useSwapTokens";
 
 export type LifiToken = {
@@ -35,11 +33,8 @@ export default function useAvailableCrosschainRoutes(
   return useQuery({
     queryKey: ["availableCrosschainRoutes", filterParams],
     queryFn: async () => {
-      // Get chains statically instead of from API
-      const swapChains = getSwapChains();
-
-      // 1) Build swap token map by chain
-      const swapTokensByChain = (swapTokensQuery.data || []).reduce(
+      // Build token map by chain from API tokens
+      const tokensByChain = (swapTokensQuery.data || []).reduce(
         (acc, token) => {
           const mapped: LifiToken = {
             chainId: token.chainId,
@@ -61,113 +56,27 @@ export default function useAvailableCrosschainRoutes(
         {} as Record<number, Array<LifiToken>>
       );
 
-      // 2) Build bridge token map by origin chain from generated routes
-      const config = getConfig();
-      const enabledRoutes = config.getEnabledRoutes();
-      const bridgeOriginChains = Array.from(
-        new Set(enabledRoutes.map((r) => r.fromChain))
-      );
-
-      const bridgeTokensByChain = bridgeOriginChains.reduce(
-        (acc, fromChainId) => {
-          const reachable = config.filterReachableTokens(fromChainId);
-          const lifiTokens: LifiToken[] = reachable.map((t) => ({
-            chainId: fromChainId,
-            address: t.address,
-            name: t.name,
-            symbol: t.displaySymbol || t.symbol,
-            decimals: t.decimals,
-            logoURI: t.logoURI || "",
-            // We do not have price data from the routes; default to 0
-            priceUSD: "0",
-            coinKey: t.symbol,
-            routeSource: "bridge",
-          }));
-          acc[fromChainId] = lifiTokens;
-          return acc;
-        },
-        {} as Record<number, Array<LifiToken>>
-      );
-
-      // 3) Combine swap and bridge tokens, deduplicating by address
-      const chainIdsInSwap = new Set(swapChains.map((c) => c.chainId));
-      const chainIdsInBridge = new Set(
-        Object.keys(bridgeTokensByChain).map(Number)
-      );
-      const chainIds = Array.from(
-        new Set([...chainIdsInSwap, ...chainIdsInBridge])
-      );
-
-      const combinedByChain: Record<number, Array<LifiToken>> = {};
-      for (const chainId of chainIds) {
-        const swapTokens = swapTokensByChain[chainId] || [];
-        const bridgeTokens = bridgeTokensByChain[chainId] || [];
-
-        // Deduplicate by address (case-insensitive), preferring swap tokens for price data
-        const tokenMap = new Map<string, LifiToken>();
-
-        // Add bridge tokens first
-        bridgeTokens.forEach((token) => {
-          tokenMap.set(token.address.toLowerCase(), token);
-        });
-
-        // Add swap tokens, overriding bridge tokens if same address (swap has price data)
-        swapTokens.forEach((token) => {
-          tokenMap.set(token.address.toLowerCase(), token);
-        });
-
-        combinedByChain[chainId] = Array.from(tokenMap.values());
-      }
-
-      // 4) Apply route filtering if filterParams are provided
+      // Apply route filtering if filterParams are provided
       if (filterParams?.inputToken || filterParams?.outputToken) {
-        const config = getConfig();
         const otherToken = filterParams.inputToken || filterParams.outputToken;
-        const isFilteringForInput = !!filterParams.inputToken;
 
-        // Mark tokens as reachable/unreachable based on route validation
-        for (const chainId of Object.keys(combinedByChain)) {
-          combinedByChain[Number(chainId)] = combinedByChain[
-            Number(chainId)
-          ].map((token) => {
-            const fromChain = isFilteringForInput
-              ? Number(chainId)
-              : otherToken!.chainId;
-            const toChain = isFilteringForInput
-              ? otherToken!.chainId
-              : Number(chainId);
-            const fromTokenSymbol = isFilteringForInput
-              ? token.symbol
-              : otherToken!.symbol;
-            const toTokenSymbol = isFilteringForInput
-              ? otherToken!.symbol
-              : token.symbol;
+        // Mark tokens as unreachable if they're on the same chain as the filter token
+        for (const chainId of Object.keys(tokensByChain)) {
+          tokensByChain[Number(chainId)] = tokensByChain[Number(chainId)].map(
+            (token) => {
+              // For same chain, not reachable (no swaps allowed on same chain)
+              const isReachable = Number(chainId) !== otherToken!.chainId;
 
-            let isReachable = false;
-
-            // For same chain, not reachable (no swaps allowed on same chain)
-            if (fromChain === toChain) {
-              isReachable = false;
-            } else {
-              // For different chains, check if there's an explicit bridge route
-              const bridgeRoutes = config.filterRoutes({
-                fromChain,
-                toChain,
-                fromTokenSymbol,
-                toTokenSymbol,
-              });
-              isReachable = bridgeRoutes.length > 0;
+              return {
+                ...token,
+                isReachable,
+              };
             }
-
-            return {
-              ...token,
-              isReachable,
-            };
-          });
+          );
         }
       }
 
-      return combinedByChain;
+      return tokensByChain;
     },
     enabled: swapTokensQuery.isSuccess,
   });

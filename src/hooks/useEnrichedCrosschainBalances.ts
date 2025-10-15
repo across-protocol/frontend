@@ -23,30 +23,29 @@ export function useEnrichedCrosschainBalances() {
         );
 
         const tokens = availableCrosschainRoutes.data![Number(chainId)];
-        const enrichedTokens = tokens
-          .map((t) => {
-            const balance = balancesForChain?.balances.find((b) =>
-              compareAddressesSimple(b.address, t.address)
-            );
-            return {
-              ...t,
-              balance: balance?.balance
-                ? BigNumber.from(balance.balance)
-                : BigNumber.from(0),
-              balanceUsd:
-                balance?.balance && t
-                  ? Number(
-                      utils.formatUnits(
-                        BigNumber.from(balance.balance),
-                        t.decimals
-                      )
-                    ) * Number(t.priceUSD)
-                  : 0,
-            };
-          })
-          // TODO: consider removing
-          // Filter out tokens that don't have a logoURI
-          .filter((t) => t.logoURI !== undefined);
+        const enrichedTokens = tokens.map((t) => {
+          const balance = balancesForChain?.balances.find((b) =>
+            compareAddressesSimple(b.address, t.address)
+          );
+          return {
+            ...t,
+            balance: balance?.balance
+              ? BigNumber.from(balance.balance)
+              : BigNumber.from(0),
+            balanceUsd:
+              balance?.balance && t
+                ? Number(
+                    utils.formatUnits(
+                      BigNumber.from(balance.balance),
+                      t.decimals
+                    )
+                  ) * Number(t.priceUSD)
+                : 0,
+          };
+        });
+        // // TODO: consider removing
+        // // Filter out tokens that don't have a logoURI
+        // .filter((t) => t.logoURI !== undefined);
 
         // Sort high to low balanceUsd
         const sortedByBalance = enrichedTokens.sort(

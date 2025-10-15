@@ -78,20 +78,8 @@ export default function ChainTokenSelectorModal({
   onSelect,
   otherToken,
 }: Props) {
-  const balances = useEnrichedCrosschainBalances();
+  const crossChainRoutes = useEnrichedCrosschainBalances();
   const { isMobile } = useCurrentBreakpoint();
-
-  const crossChainRoutes = useAvailableCrosschainRoutes(
-    otherToken
-      ? {
-          [isOriginToken ? "outputToken" : "inputToken"]: {
-            chainId: otherToken.chainId,
-            address: otherToken.address,
-            symbol: otherToken.symbol,
-          },
-        }
-      : undefined
-  );
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
     popularChains[0]
@@ -110,16 +98,16 @@ export default function ChainTokenSelectorModal({
   }, [displayModal]);
 
   const displayedTokens = useMemo(() => {
-    let tokens = selectedChain ? (balances[selectedChain] ?? []) : [];
+    let tokens = selectedChain ? (crossChainRoutes[selectedChain] ?? []) : [];
 
     if (tokens.length === 0 && selectedChain === null) {
-      tokens = Object.values(balances).flatMap((t) => t);
+      tokens = Object.values(crossChainRoutes).flatMap((t) => t);
     }
 
     // Enrich tokens with reachability information from the hook
     const enrichedTokens = tokens.map((token) => {
       // Find the corresponding token in crossChainRoutes to check isReachable
-      const routeToken = crossChainRoutes.data?.[token.chainId]?.find(
+      const routeToken = crossChainRoutes?.[token.chainId]?.find(
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
@@ -151,7 +139,8 @@ export default function ChainTokenSelectorModal({
       if (tokenSearch === "") {
         return true;
       }
-      if (t.chainId !== selectedChain) {
+      // When a specific chain is selected, only show tokens from that chain
+      if (selectedChain !== null && t.chainId !== selectedChain) {
         return false;
       }
       const keywords = [
@@ -163,14 +152,6 @@ export default function ChainTokenSelectorModal({
         keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
       );
     });
-
-    // Separate popular tokens from all tokens
-    const popularTokensList = filteredTokens.filter((token) =>
-      popularTokens.includes(token.symbol)
-    );
-    const allTokensList = filteredTokens.filter(
-      (token) => !popularTokens.includes(token.symbol)
-    );
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedToken[]) => {
@@ -204,18 +185,35 @@ export default function ChainTokenSelectorModal({
       });
     };
 
+    // When "all chains" is selected, don't separate popular tokens
+    if (selectedChain === null) {
+      const sortedAllTokens = sortTokens(filteredTokens);
+      return {
+        popular: [], // No popular section for all chains
+        all: sortedAllTokens,
+      };
+    }
+
+    // When a specific chain is selected, separate popular tokens from all tokens
+    const popularTokensList = filteredTokens.filter((token) =>
+      popularTokens.includes(token.symbol)
+    );
+    const allTokensList = filteredTokens.filter(
+      (token) => !popularTokens.includes(token.symbol)
+    );
+
     // Sort both sections
     const sortedPopularTokens = sortTokens(popularTokensList);
     const sortedAllTokens = sortTokens(allTokensList);
 
     return {
-      popular: sortedPopularTokens.slice(0, 50), // Limit to 50 popular tokens
-      all: sortedAllTokens.slice(0, 50), // Limit to 50 all tokens
+      popular: sortedPopularTokens,
+      all: sortedAllTokens,
     };
-  }, [selectedChain, balances, tokenSearch, crossChainRoutes.data]);
+  }, [selectedChain, crossChainRoutes, tokenSearch]);
 
   const displayedChains = useMemo(() => {
-    const chainsWithDisabledState = Object.keys(crossChainRoutes.data || {})
+    const chainsWithDisabledState = Object.keys(crossChainRoutes || {})
       .map((chainId) => getChainInfo(Number(chainId)))
       .filter((chainInfo) => {
         // TODO: check why we are filtering out Boba?
@@ -260,7 +258,7 @@ export default function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes.data, otherToken]);
+  }, [chainSearch, crossChainRoutes, otherToken]);
 
   return isMobile ? (
     <MobileModal
