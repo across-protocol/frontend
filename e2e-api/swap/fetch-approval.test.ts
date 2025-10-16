@@ -2,6 +2,7 @@ import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
 import { e2eConfig, axiosInstance } from "../utils/config";
+import { ENABLED_ROUTES } from "../../api/_utils";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
@@ -163,5 +164,79 @@ describe("GET /swap/approval", () => {
         validateExactOutputResponse
       );
     });
+  });
+
+  describe("Wrapped Tokens", () => {
+    jest.setTimeout(30000);
+    const tokensToTest = [
+      "WETH",
+      "WBNB",
+      "WMATIC",
+      "WHYPE",
+      "TATARA-WBTC",
+      "WGHO",
+      "WGRASS",
+      "WSOL",
+      "WXPL",
+    ];
+
+    for (const tokenSymbol of tokensToTest) {
+      const route = ENABLED_ROUTES.routes.find(
+        (r) =>
+          r.fromTokenSymbol === tokenSymbol || r.toTokenSymbol === tokenSymbol
+      );
+      if (route) {
+        test(`should return ${tokenSymbol} for ${route.fromChain} to ${route.toChain}`, async () => {
+          const params = {
+            tradeType: "exactInput",
+            amount: "10000000000000000",
+            inputToken: route.fromTokenAddress,
+            outputToken: route.toTokenAddress,
+            originChainId: route.fromChain,
+            destinationChainId: route.toChain,
+            depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+            recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+          };
+          const response = await axiosInstance.get(SWAP_API_URL, {
+            params,
+          });
+          expect(response.status).toBe(200);
+          expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
+          expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
+        }, 10000);
+      }
+    }
+  });
+
+  describe("Ambiguous Tokens", () => {
+    jest.setTimeout(100000);
+    const tokensToTest = ["USDC", "USDT"];
+
+    for (const tokenSymbol of tokensToTest) {
+      const route = ENABLED_ROUTES.routes.find(
+        (r) =>
+          r.fromTokenSymbol === tokenSymbol || r.toTokenSymbol === tokenSymbol
+      );
+      if (route) {
+        test(`should return ${tokenSymbol} for ${route.fromChain} to ${route.toChain}`, async () => {
+          const params = {
+            tradeType: "exactInput",
+            amount: "1000000",
+            inputToken: route.fromTokenAddress,
+            outputToken: route.toTokenAddress,
+            originChainId: route.fromChain,
+            destinationChainId: route.toChain,
+            depositor: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+            recipient: "0xB8034521BB1a343D556e5005680B3F17FFc74BeD",
+          };
+          const response = await axiosInstance.get(SWAP_API_URL, {
+            params,
+          });
+          expect(response.status).toBe(200);
+          expect(response.data.inputToken.symbol).toBe(route.fromTokenSymbol);
+          expect(response.data.outputToken.symbol).toBe(route.toTokenSymbol);
+        }, 10000);
+      }
+    }
   });
 });
