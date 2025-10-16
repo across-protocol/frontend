@@ -22,7 +22,7 @@ import {
   EXACT_INPUT_CASES,
   LENS_CASES,
   SOLANA_CASES,
-  USDT_OFT_CASES,
+  USDT_OFT_COMPOSER_CASE,
 } from "./_swap-cases";
 
 dotenv.config({
@@ -259,12 +259,12 @@ export async function fetchSwapQuotes() {
     // Args are provided via test case filter
     const filterString = (argsFromCli.filter as string) || "";
     const testCases = [
-      ...USDT_OFT_CASES,
-      // ...MIN_OUTPUT_CASES,
-      // ...EXACT_OUTPUT_CASES,
-      // ...EXACT_INPUT_CASES,
-      // ...LENS_CASES,
-      // ...SOLANA_CASES,
+      ...USDT_OFT_COMPOSER_CASE,
+      ...MIN_OUTPUT_CASES,
+      ...EXACT_OUTPUT_CASES,
+      ...EXACT_INPUT_CASES,
+      ...LENS_CASES,
+      ...SOLANA_CASES,
     ];
     const filteredTestCases = filterTestCases(testCases, filterString);
 

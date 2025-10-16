@@ -103,6 +103,7 @@ export const getOftMessengerForToken = (
 
 // Get OFT endpoint ID for a chain
 export const getOftEndpointId = (chainId: number): number => {
+  chainId = chainId === CHAIN_IDs.HYPERCORE ? CHAIN_IDs.HYPEREVM : chainId; // Use HyperEVM's OFT EID for Hypercore. They share the same EID.
   const chainInfo = CHAINS[chainId];
   if (!chainInfo || !chainInfo.oftEid) {
     throw new InvalidParamError({
@@ -299,6 +300,7 @@ export const createSendParamStruct = (params: {
   amountLD: BigNumber;
   minAmountLD: BigNumber;
   composeMsg?: string;
+  extraOptions?: string;
 }): SendParamStruct => {
   const dstEid = getOftEndpointId(params.destinationChainId);
   return {
@@ -306,7 +308,7 @@ export const createSendParamStruct = (params: {
     to: toBytes32(params.toAddress),
     amountLD: params.amountLD,
     minAmountLD: params.minAmountLD,
-    extraOptions: "0x",
+    extraOptions: params.extraOptions ?? "0x",
     composeMsg: params.composeMsg ?? "0x",
     oftCmd: "0x",
   };
