@@ -78,13 +78,21 @@ type CctpFeeConfig = {
 };
 
 /**
- * Queries Circle API to fetch fees for the specified finality threshold
- * Returns fee structure breakdown for caller to calculate actual fees
+ * Queries Circle API to fetch CCTP fees for the specified finality threshold.
+ *
+ * Transfer fee: Variable fee in basis points of the transfer amount, collected at minting time.
+ * - 0 bps for standard transfers (finality threshold > 1000)
+ * - Varies by origin chain for fast transfers (finality threshold ≤ 1000)
+ * - See: https://developers.circle.com/cctp/technical-guide#cctp-v2-fees
+ *
+ * Forward fee: Fixed fee in token units charged when routing through CCTP forwarder (e.g., to HyperCore).
+ * - Applies only to forwarded transfers via depositForBurnWithHook
+ * - Returned in token decimals (e.g., 6 decimals for USDC)
  *
  * @param inputToken - Input token with chainId
  * @param outputToken - Output token with chainId
- * @param minFinalityThreshold - The finality threshold to use (1000 for fast, 2000 for standard)
- * @returns Fee breakdown: transferFeeBps, forwardFee (in input token decimals), and minFinalityThreshold
+ * @param minFinalityThreshold - Finality threshold: 1000 for fast, 2000 for standard
+ * @returns transferFeeBps (basis points) and forwardFee (in token units)
  */
 export async function getCctpFees(params: {
   inputToken: Token;
