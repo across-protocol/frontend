@@ -38,44 +38,28 @@ export function isToHyperCore(destinationChainId: number) {
 export function encodeForwardHookData(
   hypercoreMintRecipient: string
 ): Uint8Array {
-  const hookDataDefaultLen = 32;
-  const hookDataHyperCoreDepositLen = hookDataDefaultLen + 20;
+  const hookDataBuffer = new Uint8Array(52);
 
-  const hookDataBuffer = new Uint8Array(
-    hypercoreMintRecipient ? hookDataHyperCoreDepositLen : hookDataDefaultLen
-  );
-
-  // Base hook data: is the hex representation of:
-  // - "cctp-forward" magic bytespadded to 24 bytes
+  // Base hook data is the hex representation of:
+  // - "cctp-forward" padded to 24 bytes
   // - 4 bytes for version (0x00000000)
-  // - 4 bytes for data length (0x00000000)
+  // - 4 bytes for data length (0x00000014 = 20 in big-endian)
   const baseHookData =
-    "636374702d666f72776172640000000000000000000000000000000000000000";
-  const baseBytes = Buffer.from(baseHookData, "hex");
-  hookDataBuffer.set(baseBytes, 0);
+    "636374702d666f72776172640000000000000000000000000000000000000014";
+  hookDataBuffer.set(Buffer.from(baseHookData, "hex"), 0);
 
-  // If requesting a deposit to HyperCore, add dataLength and recipient address
-  if (hypercoreMintRecipient) {
-    // Write dataLength = 20 at bytes 28-31 (big-endian uint32)
-    const dataLengthView = new DataView(
-      hookDataBuffer.buffer,
-      hookDataBuffer.byteOffset
-    );
-    dataLengthView.setUint32(28, 20, false); // false = big-endian
-
-    // Write the 20-byte recipient address at byte 32
-    const recipientBytes = Buffer.from(
-      hypercoreMintRecipient.replace("0x", ""),
-      "hex"
-    );
-    if (recipientBytes.length !== 20) {
-      throw new InvalidParamError({
-        message: `Invalid HyperCore recipient address length: expected 20 bytes, got ${recipientBytes.length}`,
-        param: "hypercoreMintRecipient",
-      });
-    }
-    hookDataBuffer.set(recipientBytes, 32);
+  // Write the 20-byte recipient address at byte 32
+  const recipientBytes = Buffer.from(
+    hypercoreMintRecipient.replace("0x", ""),
+    "hex"
+  );
+  if (recipientBytes.length !== 20) {
+    throw new InvalidParamError({
+      message: `Invalid HyperCore recipient address length: expected 20 bytes, got ${recipientBytes.length}`,
+      param: "hypercoreMintRecipient",
+    });
   }
+  hookDataBuffer.set(recipientBytes, 32);
 
   return hookDataBuffer;
 }
@@ -171,7 +155,6 @@ export async function getAmountToHyperCore(params: {
 
   const recipientExists = await accountExistsOnHyperCore({
     account: recipient,
-    chainId: outputToken.chainId,
   });
 
   if (recipientExists) {
