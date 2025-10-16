@@ -232,7 +232,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
 
       const destinationIsHyperCore = isToHyperCore(outputToken.chainId);
 
-      // Step 1: Calculate how much needs to arrive on destination after HyperCore account creation fee (if applicable)
+      // Calculate how much needs to arrive on destination after HyperCore account creation fee (if applicable)
       // For HyperCore: minOutputAmount + accountCreationFee (if needed)
       // For other chains: just minOutputAmount
       const amountToArriveOnDestination = destinationIsHyperCore
@@ -248,7 +248,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
             inputToken.decimals
           )(minOutputAmount);
 
-      // Step 2: Calculate how much to send from origin to cover CCTP fees
+      // Calculate how much to send from origin to cover CCTP fees
       let inputAmount: BigNumber;
       let maxFee = BigNumber.from(0);
 
@@ -264,6 +264,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         // inputAmount - (inputAmount * bps / 10000) - forwardFee = amountToArriveOnDestination
         // Rearranging: inputAmount * (1 - bps/10000) = amountToArriveOnDestination + forwardFee
         // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
+        // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
         const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
         inputAmount = amountToArriveOnDestination
           .add(forwardFee)
