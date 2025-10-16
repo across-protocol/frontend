@@ -19,6 +19,7 @@ export const CCTP_SUPPORTED_CHAINS = [
   // Testnets
   CHAIN_IDs.HYPEREVM_TESTNET,
   CHAIN_IDs.HYPERCORE_TESTNET,
+  CHAIN_IDs.SOLANA_DEVNET,
 ];
 
 export const CCTP_SUPPORTED_TOKENS = [TOKEN_SYMBOLS_MAP.USDC];
@@ -46,6 +47,7 @@ const DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS =
 // Source: https://developers.circle.com/cctp/solana-programs
 const CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES: Record<number, string> = {
   [CHAIN_IDs.SOLANA]: "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
+  [CHAIN_IDs.SOLANA_DEVNET]: "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
 };
 
 export const getCctpTokenMessengerAddress = (chainId: number): string => {
@@ -62,6 +64,7 @@ const DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS =
 // Source: https://developers.circle.com/cctp/solana-programs
 const CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES: Record<number, string> = {
   [CHAIN_IDs.SOLANA]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+  [CHAIN_IDs.SOLANA_DEVNET]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
 };
 
 export const getCctpMessageTransmitterAddress = (chainId: number): string => {
@@ -69,6 +72,23 @@ export const getCctpMessageTransmitterAddress = (chainId: number): string => {
     CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId] ||
     DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS
   );
+};
+
+// CCTP Forwarder contract addresses
+// This contract receives CCTP transfers and forwards them to HyperCore
+const CCTP_FORWARDER_ADDRESSES: Record<number, string> = {
+  [CHAIN_IDs.HYPEREVM]: "0x02e39ecb8368b41bf68ff99ff351ac9864e5e2a2",
+  [CHAIN_IDs.HYPEREVM_TESTNET]: "0x02e39ecb8368b41bf68ff99ff351ac9864e5e2a2",
+};
+
+export const getCctpForwarderAddress = (chainId: number): string => {
+  const forwarderAddress = CCTP_FORWARDER_ADDRESSES[chainId];
+  if (!forwarderAddress) {
+    throw new InvalidParamError({
+      message: `CCTP forwarder address not found for chain ID ${chainId}`,
+    });
+  }
+  return forwarderAddress;
 };
 
 // CCTP TokenMessenger depositForBurn ABI

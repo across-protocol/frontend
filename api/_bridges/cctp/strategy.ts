@@ -33,18 +33,22 @@ import { getSVMRpc } from "../../_providers";
 import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
-  CCTP_FINALITY_THRESHOLDS,
   CCTP_FILL_TIME_ESTIMATES,
+  CCTP_FINALITY_THRESHOLDS,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
   getCctpDomainId,
+  getCctpForwarderAddress,
   encodeDepositForBurn,
 } from "./utils/constants";
+import { CHAIN_IDs } from "../../_constants";
 import {
   buildCctpTxHyperEvmToHyperCore,
   getAmountToHyperCore,
   isHyperEvmToHyperCoreRoute,
   isToHyperCore,
+  encodeForwardHookData,
+  getCctpFees,
 } from "./utils/hypercore";
 
 const name = "cctp";
@@ -115,6 +119,16 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }
   };
 
+  /**
+   * Determines the appropriate CCTP finality threshold for a route.
+   * When going to HyperCore we use fast finality, all others use standard.
+   */
+  const getFinalityThreshold = (destinationChainId: number): number => {
+    return isToHyperCore(destinationChainId)
+      ? CCTP_FINALITY_THRESHOLDS.fast
+      : CCTP_FINALITY_THRESHOLDS.standard;
+  };
+
   return {
     name,
     capabilities,
@@ -155,18 +169,42 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }: GetExactInputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const outputAmount = isToHyperCore(outputToken.chainId)
-        ? await getAmountToHyperCore({
-            inputToken,
-            outputToken,
-            inputOrOutput: "input",
-            amount: exactInputAmount,
-            recipient,
-          })
-        : ConvertDecimals(
-            inputToken.decimals,
-            outputToken.decimals
-          )(exactInputAmount);
+      let maxFee = BigNumber.from(0);
+      let outputAmount: BigNumber;
+      if (isToHyperCore(outputToken.chainId)) {
+        // Query CCTP fee configuration for HyperCore destinations
+        const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
+        const { transferFeeBps, forwardFee } = await getCctpFees({
+          inputToken,
+          outputToken,
+          minFinalityThreshold,
+        });
+
+        // Calculate actual fee:
+        // transferFee = input * (bps / 10000)
+        // maxFee = transferFee + forwardFee
+        const transferFee = exactInputAmount.mul(transferFeeBps).div(10000);
+        maxFee = transferFee.add(forwardFee);
+
+        // First subtract the CCTP fee from input
+        const remainingInputAmount = exactInputAmount.sub(maxFee);
+
+        // Then calculate HyperCore output (accounting for account creation fee if needed)
+        outputAmount = await getAmountToHyperCore({
+          inputToken,
+          outputToken,
+          inputOrOutput: "input",
+          amount: remainingInputAmount,
+          recipient,
+        });
+      } else {
+        // Standard conversion after fees
+        const inputAfterFee = exactInputAmount.sub(maxFee);
+        outputAmount = ConvertDecimals(
+          inputToken.decimals,
+          outputToken.decimals
+        )(inputAfterFee);
+      }
 
       return {
         bridgeQuote: {
@@ -177,7 +215,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           minOutputAmount: outputAmount,
           estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
           provider: name,
-          fees: getCctpBridgeFees(inputToken),
+          fees: getCctpBridgeFees(inputToken, maxFee),
         },
       };
     },
@@ -192,7 +230,12 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }: GetOutputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const inputAmount = isToHyperCore(outputToken.chainId)
+      const destinationIsHyperCore = isToHyperCore(outputToken.chainId);
+
+      // Step 1: Calculate how much needs to arrive on destination after HyperCore account creation fee (if applicable)
+      // For HyperCore: minOutputAmount + accountCreationFee (if needed)
+      // For other chains: just minOutputAmount
+      const amountToArriveOnDestination = destinationIsHyperCore
         ? await getAmountToHyperCore({
             inputToken,
             outputToken,
@@ -205,6 +248,36 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
             inputToken.decimals
           )(minOutputAmount);
 
+      // Step 2: Calculate how much to send from origin to cover CCTP fees
+      let inputAmount: BigNumber;
+      let maxFee = BigNumber.from(0);
+
+      if (destinationIsHyperCore) {
+        const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
+        const { transferFeeBps, forwardFee } = await getCctpFees({
+          inputToken,
+          outputToken,
+          minFinalityThreshold,
+        });
+
+        // Solve for required input based on the following equation:
+        // inputAmount - (inputAmount * bps / 10000) - forwardFee = amountToArriveOnDestination
+        // Rearranging: inputAmount * (1 - bps/10000) = amountToArriveOnDestination + forwardFee
+        // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
+        const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
+        inputAmount = amountToArriveOnDestination
+          .add(forwardFee)
+          .mul(10000)
+          .div(bpsFactor);
+
+        // Calculate total CCTP fee (transfer fee + forward fee)
+        const transferFee = inputAmount.mul(transferFeeBps).div(10000);
+        maxFee = transferFee.add(forwardFee);
+      } else {
+        // Standard non-HyperCore route (no CCTP fees for now)
+        inputAmount = amountToArriveOnDestination;
+      }
+
       return {
         bridgeQuote: {
           inputToken,
@@ -214,7 +287,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           minOutputAmount,
           estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
           provider: name,
-          fees: getCctpBridgeFees(inputToken),
+          fees: getCctpBridgeFees(inputToken, maxFee),
         },
       };
     },
@@ -257,9 +330,20 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         return buildCctpTxHyperEvmToHyperCore(params);
       }
 
-      // Get CCTP domain IDs
-      const destinationDomain = getCctpDomainId(destinationChainId);
+      // When going to HyperCore, we need to route through HyperEVM's CCTP domain
+      const isDestinationHyperCore = isToHyperCore(destinationChainId);
+      const destinationChainIdForCctp = isDestinationHyperCore
+        ? CHAIN_IDs.HYPEREVM
+        : destinationChainId;
+
+      // Get CCTP domain IDs and addresses
+      const destinationDomain = getCctpDomainId(destinationChainIdForCctp);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
+
+      // Read CCTP fees from the bridge quote (pre-calculated during quote generation)
+      const maxFee = bridgeQuote.fees.bridgeFee.total;
+      // Get the appropriate finality threshold for the destination
+      const minFinalityThreshold = getFinalityThreshold(destinationChainId);
 
       // depositForBurn input parameters
       const depositForBurnParams = {
@@ -267,8 +351,8 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         destinationDomain,
         mintRecipient: crossSwap.recipient,
         destinationCaller: ethers.constants.AddressZero, // Anyone can finalize the message on domain when this is set to bytes32(0)
-        maxFee: BigNumber.from(0), // maxFee set to 0 so this will be a "standard" speed transfer
-        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.standard, // Hardcoded minFinalityThreshold value for standard transfer
+        maxFee,
+        minFinalityThreshold,
       };
 
       if (crossSwap.isOriginSvm) {
@@ -276,7 +360,8 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           crossSwapQuotes: params.quotes,
           integratorId: params.integratorId,
           originChainId,
-          destinationChainId,
+          destinationChainId, // Actual destination
+          intermediaryChainId: destinationChainIdForCctp, // Intermediary chain for routes that use a forwarder
           tokenMessenger,
           depositForBurnParams,
         });
@@ -296,7 +381,10 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
   };
 }
 
-function getCctpBridgeFees(inputToken: Token) {
+function getCctpBridgeFees(
+  inputToken: Token,
+  maxFee: BigNumber = BigNumber.from(0)
+) {
   const zeroBN = BigNumber.from(0);
   return {
     totalRelay: {
@@ -321,7 +409,7 @@ function getCctpBridgeFees(inputToken: Token) {
     },
     bridgeFee: {
       pct: zeroBN,
-      total: zeroBN,
+      total: maxFee,
       token: inputToken,
     },
   };
@@ -385,6 +473,7 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
   integratorId?: string;
   originChainId: number;
   destinationChainId: number;
+  intermediaryChainId: number;
   tokenMessenger: string;
   depositForBurnParams: {
     amount: BigNumber;
@@ -404,28 +493,49 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
     integratorId,
     originChainId,
     destinationChainId,
+    intermediaryChainId,
     tokenMessenger,
     depositForBurnParams,
   } = params;
   const { crossSwap } = crossSwapQuotes;
+
+  const destinationIsHyperCore = isToHyperCore(destinationChainId);
 
   // Get message transmitter address
   const messageTransmitter = getCctpMessageTransmitterAddress(originChainId);
 
   // Convert addresses to Solana Kit address format for instruction parameters.
   const depositor = sdk.utils.toAddressType(crossSwap.depositor, originChainId);
-  const mintRecipient = sdk.utils.toAddressType(
-    depositForBurnParams.mintRecipient,
-    destinationChainId
-  );
-  const destinationCaller = sdk.utils.toAddressType(
-    depositForBurnParams.destinationCaller,
-    destinationChainId
-  );
   const tokenMint = sdk.utils.toAddressType(
     crossSwap.inputToken.address,
     originChainId
   );
+
+  // Determine mint recipient and destination caller
+  // When going to HyperCore, route through the CCTP Forwarder contract on the intermediary chain (HyperEVM)
+  let mintRecipient: sdk.utils.Address;
+  let destinationCaller: sdk.utils.Address;
+
+  if (destinationIsHyperCore) {
+    const forwarderAddress = getCctpForwarderAddress(intermediaryChainId);
+    mintRecipient = sdk.utils.toAddressType(
+      forwarderAddress,
+      intermediaryChainId
+    );
+    destinationCaller = sdk.utils.toAddressType(
+      forwarderAddress,
+      intermediaryChainId
+    );
+  } else {
+    mintRecipient = sdk.utils.toAddressType(
+      depositForBurnParams.mintRecipient,
+      destinationChainId
+    );
+    destinationCaller = sdk.utils.toAddressType(
+      depositForBurnParams.destinationCaller,
+      destinationChainId
+    );
+  }
 
   // Address class handles intermediate conversions internally (e.g., EVM address -> bytes32 -> base58).
   const mintRecipientAddress = address(mintRecipient.toBase58());
@@ -459,226 +569,40 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
   // Create signers
   const depositorSigner = createNoopSigner(depositorAddress);
 
-  // Use the TokenMessenger client to build the instruction
-  const depositInstruction =
-    await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync({
-      owner: depositorSigner,
-      eventRentPayer: depositorSigner,
-      senderAuthorityPda: cctpAccounts.tokenMessengerMinterSenderAuthority,
-      burnTokenAccount: depositorTokenAccount,
-      messageTransmitter: cctpAccounts.messageTransmitter,
-      tokenMessenger: cctpAccounts.tokenMessenger,
-      remoteTokenMessenger: cctpAccounts.remoteTokenMessenger,
-      tokenMinter: cctpAccounts.tokenMinter,
-      localToken: cctpAccounts.localToken,
-      burnTokenMint: tokenMintAddress,
-      messageSentEventData: eventDataKeypair,
-      eventAuthority: cctpAccounts.cctpEventAuthority,
-      program: tokenMessengerAddress,
-      amount: BigInt(depositForBurnParams.amount.toString()),
-      destinationDomain: depositForBurnParams.destinationDomain,
-      mintRecipient: mintRecipientAddress,
-      destinationCaller: destinationCallerAddress,
-      maxFee: BigInt(depositForBurnParams.maxFee.toString()),
-      minFinalityThreshold: depositForBurnParams.minFinalityThreshold,
-    });
-
-  // Build the transaction message using SDK helper
-  const rpcClient = getSVMRpc(originChainId);
-  let tx = await sdk.arch.svm.createDefaultTransaction(
-    rpcClient,
-    depositorSigner
-  );
-
-  // Add the deposit instruction
-  tx = appendTransactionMessageInstruction(depositInstruction, tx);
-
-  // Add integrator memo if provided and Swap API marker
-  tx = appendTransactionMessageInstruction(
-    getAddMemoInstruction({
-      memo: integratorId
-        ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
-        : SWAP_CALLDATA_MARKER,
-    }),
-    tx
-  );
-
-  // Compile the transaction message
-  const compiledTx = compileTransaction(tx);
-
-  // Partially sign the transaction with only the event data keypair
-  // The depositor will also sign before submitting
-  const partiallySignedTx = await partiallySignTransaction(
-    [eventDataKeypair.keyPair],
-    compiledTx
-  );
-
-  // Encode the partially signed transaction
-  const base64EncodedTx = getBase64EncodedWireTransaction(partiallySignedTx);
-
-  return {
-    chainId: originChainId,
-    to: tokenMessengerAddress,
-    data: base64EncodedTx,
-    ecosystem: "svm" as const,
+  // Common parameters for both depositForBurn and depositForBurnWithHook
+  const depositInstructionParams = {
+    owner: depositorSigner,
+    eventRentPayer: depositorSigner,
+    senderAuthorityPda: cctpAccounts.tokenMessengerMinterSenderAuthority,
+    burnTokenAccount: depositorTokenAccount,
+    messageTransmitter: cctpAccounts.messageTransmitter,
+    tokenMessenger: cctpAccounts.tokenMessenger,
+    remoteTokenMessenger: cctpAccounts.remoteTokenMessenger,
+    tokenMinter: cctpAccounts.tokenMinter,
+    localToken: cctpAccounts.localToken,
+    burnTokenMint: tokenMintAddress,
+    messageSentEventData: eventDataKeypair,
+    eventAuthority: cctpAccounts.cctpEventAuthority,
+    program: tokenMessengerAddress,
+    amount: BigInt(depositForBurnParams.amount.toString()),
+    destinationDomain: depositForBurnParams.destinationDomain,
+    mintRecipient: mintRecipientAddress,
+    destinationCaller: destinationCallerAddress,
+    maxFee: BigInt(depositForBurnParams.maxFee.toString()),
+    minFinalityThreshold: depositForBurnParams.minFinalityThreshold,
   };
-}
-
-/**
- * Builds CCTP deposit transaction for EVM chains
- */
-async function _buildCctpTxForAllowanceHolderEvm(params: {
-  crossSwapQuotes: CrossSwapQuotes;
-  integratorId?: string;
-  originChainId: number;
-  destinationChainId: number;
-  tokenMessenger: string;
-  depositForBurnParams: {
-    amount: BigNumber;
-    destinationDomain: number;
-    mintRecipient: string;
-    destinationCaller: string;
-    maxFee: BigNumber;
-    minFinalityThreshold: number;
-  };
-}) {
-  const {
-    crossSwapQuotes,
-    integratorId,
-    originChainId,
-    tokenMessenger,
-    depositForBurnParams,
-  } = params;
-  const { crossSwap } = crossSwapQuotes;
-  const burnTokenAddress = crossSwap.inputToken.address;
-
-  // Encode the depositForBurn call
-  const callData = encodeDepositForBurn({
-    ...depositForBurnParams,
-    burnToken: burnTokenAddress,
-  });
-
-  // Handle integrator ID and swap API marker tagging
-  const callDataWithIntegratorId = integratorId
-    ? tagIntegratorId(integratorId, callData)
-    : callData;
-  const callDataWithMarkers = tagSwapApiMarker(callDataWithIntegratorId);
-
-  return {
-    chainId: originChainId,
-    from: crossSwap.depositor,
-    to: tokenMessenger,
-    data: callDataWithMarkers,
-    value: BigNumber.from(0),
-    ecosystem: "evm" as const,
-  };
-}
-
-/**
- * Builds CCTP deposit transaction for Solana
- */
-async function _buildCctpTxForAllowanceHolderSvm(params: {
-  crossSwapQuotes: CrossSwapQuotes;
-  integratorId?: string;
-  originChainId: number;
-  destinationChainId: number;
-  tokenMessenger: string;
-  depositForBurnParams: {
-    amount: BigNumber;
-    destinationDomain: number;
-    mintRecipient: string;
-    destinationCaller: string;
-    maxFee: BigNumber;
-    minFinalityThreshold: number;
-  };
-}) {
-  if (params.integratorId) {
-    assertValidIntegratorId(params.integratorId);
-  }
-
-  const {
-    crossSwapQuotes,
-    integratorId,
-    originChainId,
-    destinationChainId,
-    tokenMessenger,
-    depositForBurnParams,
-  } = params;
-  const { crossSwap } = crossSwapQuotes;
-
-  // Get message transmitter address
-  const messageTransmitter = getCctpMessageTransmitterAddress(originChainId);
-
-  // Convert addresses to Solana Kit address format for instruction parameters.
-  const depositor = sdk.utils.toAddressType(crossSwap.depositor, originChainId);
-  const mintRecipient = sdk.utils.toAddressType(
-    depositForBurnParams.mintRecipient,
-    destinationChainId
-  );
-  const destinationCaller = sdk.utils.toAddressType(
-    depositForBurnParams.destinationCaller,
-    destinationChainId
-  );
-  const tokenMint = sdk.utils.toAddressType(
-    crossSwap.inputToken.address,
-    originChainId
-  );
-
-  // Address class handles intermediate conversions internally (e.g., EVM address -> bytes32 -> base58).
-  const mintRecipientAddress = address(mintRecipient.toBase58());
-  const destinationCallerAddress = address(destinationCaller.toBase58());
-  const tokenMessengerAddress = address(tokenMessenger);
-  const messageTransmitterAddress = address(messageTransmitter);
-  const tokenMintAddress = address(tokenMint.toBase58());
-  const depositorAddress = address(depositor.toBase58());
-
-  // Get depositor's USDC token account
-  const depositorTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
-    depositor.forceSvmAddress(),
-    tokenMint.forceSvmAddress()
-  );
-
-  // Generate a new keypair for the MessageSent event account.
-  // CCTP V2 stores MessageSent events in on-chain accounts (not logs) for reliable message storage.
-  // This account is created client-side and costs ~0.0038 SOL in rent paid by the depositor.
-  // The rent can be reclaimed after 5 days by calling reclaim_event_account.
-  // Docs: https://developers.circle.com/cctp/solana-programs#tokenmessengerminterv2
-  const eventDataKeypair = await generateKeyPairSigner();
-
-  // Get CCTP deposit accounts
-  const cctpAccounts = await sdk.arch.svm.getCCTPDepositAccounts(
-    originChainId,
-    depositForBurnParams.destinationDomain,
-    tokenMessengerAddress,
-    messageTransmitterAddress
-  );
-
-  // Create signers
-  const depositorSigner = createNoopSigner(depositorAddress);
 
   // Use the TokenMessenger client to build the instruction
-  const depositInstruction =
-    await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync({
-      owner: depositorSigner,
-      eventRentPayer: depositorSigner,
-      senderAuthorityPda: cctpAccounts.tokenMessengerMinterSenderAuthority,
-      burnTokenAccount: depositorTokenAccount,
-      messageTransmitter: cctpAccounts.messageTransmitter,
-      tokenMessenger: cctpAccounts.tokenMessenger,
-      remoteTokenMessenger: cctpAccounts.remoteTokenMessenger,
-      tokenMinter: cctpAccounts.tokenMinter,
-      localToken: cctpAccounts.localToken,
-      burnTokenMint: tokenMintAddress,
-      messageSentEventData: eventDataKeypair,
-      eventAuthority: cctpAccounts.cctpEventAuthority,
-      program: tokenMessengerAddress,
-      amount: BigInt(depositForBurnParams.amount.toString()),
-      destinationDomain: depositForBurnParams.destinationDomain,
-      mintRecipient: mintRecipientAddress,
-      destinationCaller: destinationCallerAddress,
-      maxFee: BigInt(depositForBurnParams.maxFee.toString()),
-      minFinalityThreshold: depositForBurnParams.minFinalityThreshold,
-    });
+  const depositInstruction = destinationIsHyperCore
+    ? await TokenMessengerMinterV2Client.getDepositForBurnWithHookInstructionAsync(
+        {
+          ...depositInstructionParams,
+          hookData: encodeForwardHookData(crossSwap.recipient),
+        }
+      )
+    : await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync(
+        depositInstructionParams
+      );
 
   // Build the transaction message using SDK helper
   const rpcClient = getSVMRpc(originChainId);
