@@ -79,7 +79,7 @@ describe("OFT Strategy", () => {
           originIndex++
         ) {
           for (
-            let destinationIndex = i + 1;
+            let destinationIndex = originIndex + 1;
             destinationIndex < supportedChains.length;
             destinationIndex++
           ) {
