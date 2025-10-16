@@ -46,6 +46,7 @@ export async function getBridgeStrategy({
   amountType,
   recipient,
   depositor,
+  routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const inputTokenOverride =
     bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
@@ -60,9 +61,13 @@ export async function getBridgeStrategy({
   if (fromToChainOverride) {
     return fromToChainOverride;
   }
-  const supportedBridgeStrategies = routableBridgeStrategies.filter(
-    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
-  );
+
+  const supportedBridgeStrategies = getSupportedBridgeStrategies({
+    inputToken,
+    outputToken,
+    routingPreference,
+  });
+
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
@@ -81,6 +86,37 @@ export async function getBridgeStrategy({
     });
   }
   return getAcrossBridgeStrategy();
+}
+
+export function getSupportedBridgeStrategies({
+  inputToken,
+  outputToken,
+  routingPreference,
+}: {
+  inputToken: GetBridgeStrategyParams["inputToken"];
+  outputToken: GetBridgeStrategyParams["outputToken"];
+  routingPreference: string;
+}) {
+  const routingPreferenceFilter = (strategyName: string) => {
+    // If default routing preference, don't filter based on name
+    if (routingPreference === "default") {
+      return true;
+    }
+
+    // If native routing preference, filter out 'across' bridge strategy
+    if (routingPreference === "native") {
+      return strategyName !== "across";
+    }
+
+    // Else use across bridge strategy
+    return strategyName === "across";
+  };
+  const supportedBridgeStrategies = routableBridgeStrategies.filter(
+    (strategy) =>
+      strategy.isRouteSupported({ inputToken, outputToken }) &&
+      routingPreferenceFilter(strategy.name)
+  );
+  return supportedBridgeStrategies;
 }
 
 async function routeStrategyForCctp({
