@@ -134,16 +134,17 @@ export async function getRequiredDVNCount(
 }
 
 /**
- * Internal helper to get OFT quote from contracts
- * @note This function is designed for input-based quotes (specify input amount, get output amount).
+ * Internal helper to get OFT quote from contracts.
+ * This function is designed for input-based quotes (specify input amount, get output amount).
  * Currently works for both input-based and output-based flows because supported tokens (USDT, WBTC) have 0 OFT fees.
  * If we ever add tokens with non-zero OFT fees, we need to refactor this function to handle output-based quotes.
  *
- * @param inputToken source token
- * @param outputToken destination token
- * @param inputAmount amount to send
- * @param recipient recipient address
- * @returns quote data including output amount and fees
+ * @param params The parameters for getting the quote.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @param params.inputAmount The input amount.
+ * @param params.recipient The recipient address.
+ * @returns A promise that resolves with the quote data, including input amount, output amount, native fee, and OFT fee amount.
  */
 export async function getQuote(params: {
   inputToken: Token;
@@ -218,6 +219,16 @@ export async function getQuote(params: {
   };
 }
 
+/**
+ * Builds the transaction data for an OFT bridge transfer.
+ * This function takes the quotes and other parameters and constructs the transaction data for sending an OFT.
+ * It also handles the special case of sending to Hyperliquid, where a custom message is composed.
+ *
+ * @param params The parameters for building the transaction.
+ * @param params.quotes The quotes for the cross-swap, including the bridge quote.
+ * @param params.integratorId The ID of the integrator.
+ * @returns A promise that resolves with the transaction data.
+ */
 export async function buildOftTx(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
@@ -311,6 +322,17 @@ export async function buildOftTx(params: {
   };
 }
 
+/**
+ * Estimates the fill time for an OFT bridge transfer.
+ * The estimation is based on the origin and destination chain block times, the number of origin confirmations, and the number of required DVN signatures.
+ * The formula is: `(originBlockTime * originConfirmations) + (destinationBlockTime * (2 + numberOfDVNs))`
+ * See: https://docs.layerzero.network/v2/faq#what-is-the-estimated-delivery-time-for-a-layerzero-message
+ *
+ * @param originChainId The origin chain ID.
+ * @param destinationChainId The destination chain ID.
+ * @param tokenSymbol The symbol of the token being bridged.
+ * @returns A promise that resolves with the estimated fill time in seconds.
+ */
 export async function getEstimatedFillTime(
   originChainId: number,
   destinationChainId: number,
@@ -349,6 +371,16 @@ export async function getEstimatedFillTime(
   return totalTime;
 }
 
+/**
+ * Checks if a route is supported for OFT bridging.
+ * A route is supported if the input and output tokens are the same, and the token is configured for OFT on both the origin and destination chains.
+ * It also checks for the special case of bridging to Hyperliquid, where the output token is on the Hypercore chain.
+ *
+ * @param params The parameters for checking the route.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @returns True if the route is supported, false otherwise.
+ */
 export function isRouteSupported(params: {
   inputToken: Token;
   outputToken: Token;
@@ -379,6 +411,15 @@ export function isRouteSupported(params: {
   return false;
 }
 
+/**
+ * Asserts that a route is supported for OFT bridging.
+ * Throws an error if the route is not supported.
+ *
+ * @param params The parameters for checking the route.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @throws {InvalidParamError} If the route is not supported.
+ */
 function assertSupportedRoute(params: {
   inputToken: Token;
   outputToken: Token;
@@ -390,6 +431,17 @@ function assertSupportedRoute(params: {
   }
 }
 
+/**
+ * Gets a quote for an OFT bridge transfer with a specified output amount.
+ * This function is used when the user wants to receive a specific amount of tokens on the destination chain.
+ *
+ * @param params The parameters for getting the quote.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @param params.minOutputAmount The minimum output amount.
+ * @param params.recipient The recipient address.
+ * @returns A promise that resolves with the quote data.
+ */
 async function getOftQuoteForOutput(params: GetOutputBridgeQuoteParams) {
   const { inputToken, outputToken, minOutputAmount } = params;
   assertSupportedRoute({ inputToken, outputToken });
@@ -446,7 +498,15 @@ async function getOftQuoteForOutput(params: GetOutputBridgeQuoteParams) {
 }
 
 /**
- * OFT (Omnichain Fungible Token) bridge strategy
+ * Determines the cross-swap type for an OFT bridge transfer.
+ * For OFT, the only supported type is `BRIDGEABLE_TO_BRIDGEABLE`, which means that the tokens are the same on both the origin and destination chains.
+ *
+ * @param params The parameters for determining the cross-swap type.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @param params.isInputNative A boolean indicating if the input token is native.
+ * @param params.isOutputNative A boolean indicating if the output token is native.
+ * @returns An array of supported cross-swap types.
  */
 export function getOftCrossSwapTypes(params: {
   inputToken: Token;
@@ -465,6 +525,18 @@ export function getOftCrossSwapTypes(params: {
   return [];
 }
 
+/**
+ * Gets a quote for an OFT bridge transfer with a specified exact input amount.
+ * This function is used when the user wants to send a specific amount of tokens from the origin chain.
+ *
+ * @param params The parameters for getting the quote.
+ * @param params.inputToken The input token.
+ * @param params.outputToken The output token.
+ * @param params.exactInputAmount The exact input amount.
+ * @param params.recipient The recipient address.
+ * @param params.message An optional message to be sent with the transfer.
+ * @returns A promise that resolves with the quote data.
+ */
 export async function getOftQuoteForExactInput({
   inputToken,
   outputToken,
@@ -509,6 +581,12 @@ export async function getOftQuoteForExactInput({
   };
 }
 
+/**
+ * Gets the OFT bridge strategy.
+ * This function returns the bridge strategy object for OFT, which includes all the necessary functions for quoting, building transactions, and checking for supported routes.
+ *
+ * @returns The OFT bridge strategy.
+ */
 export function getOftBridgeStrategy(): BridgeStrategy {
   return {
     name,
@@ -528,6 +606,16 @@ export function getOftBridgeStrategy(): BridgeStrategy {
   };
 }
 
+/**
+ * Gets the OFT bridge fees.
+ * For OFT transfers, the fees are simple. There is only a bridge fee, which is the native fee for the messaging layer.
+ *
+ * @param params The parameters for getting the fees.
+ * @param params.inputToken The input token.
+ * @param params.nativeFee The native fee.
+ * @param params.nativeToken The native token.
+ * @returns The OFT bridge fees.
+ */
 function getOftBridgeFees(params: {
   inputToken: Token;
   nativeFee: BigNumber;
@@ -564,6 +652,16 @@ function getOftBridgeFees(params: {
   };
 }
 
+/**
+ * Composes the message for a Hyperliquid transfer.
+ * This function creates the `composeMsg` and `extraOptions` for a Hyperliquid transfer.
+ * The `composeMsg` is the payload for the HyperLiquidComposer, and the `extraOptions` is a custom-packed struct required by the legacy V1-style integration that the Hyperliquid Composer uses.
+ * See: https://docs.layerzero.network/v2/developers/hyperliquid/hyperliquid-concepts
+ *
+ * @param recipient The recipient address on Hyperliquid.
+ * @param tokenSymbol The symbol of the token being transferred.
+ * @returns An object containing the `composeMsg`, `toAddress`, and `extraOptions`.
+ */
 export function getHyperLiquidComposerMessage(
   recipient: string,
   tokenSymbol: string
