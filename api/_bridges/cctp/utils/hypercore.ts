@@ -65,6 +65,39 @@ export function encodeForwardHookData(
 }
 
 /**
+ * Encodes forward hook data for CCTP EVM -> HyperCore routing.
+ *
+ * @param hypercoreMintRecipient address of the recipient on HyperCore
+ * @returns Hex string of encoded hook data for EVM
+ */
+export function encodeForwardHookDataForEvm(
+  hypercoreMintRecipient: string
+): string {
+  const hookDataBuffer = Buffer.alloc(52);
+
+  // Base hook data: magic bytes ("cctp-forward") + version (0) + data length (20)
+  const baseHookData =
+    "0x636374702d666f72776172640000000000000000000000000000000000000014";
+  hookDataBuffer.write(baseHookData.slice(2), 0, "hex");
+
+  // Write the HyperCore mint recipient address at byte offset 32
+  const recipientWithoutPrefix = hypercoreMintRecipient.startsWith("0x")
+    ? hypercoreMintRecipient.slice(2)
+    : hypercoreMintRecipient;
+
+  if (recipientWithoutPrefix.length !== 40) {
+    throw new InvalidParamError({
+      message: `Invalid HyperCore recipient address: expected 40 hex chars, got ${recipientWithoutPrefix.length}`,
+      param: "hypercoreMintRecipient",
+    });
+  }
+
+  hookDataBuffer.write(recipientWithoutPrefix, 32, "hex");
+
+  return "0x" + hookDataBuffer.toString("hex");
+}
+
+/**
  * CCTP fee configuration type from Circle API
  */
 type CctpFeeConfig = {
@@ -259,4 +292,31 @@ export function buildCctpTxHyperEvmToHyperCore(params: {
     value: BigNumber.from(0),
     ecosystem: "evm" as const,
   };
+}
+
+/**
+ * Check if this is an EVM (non-HyperEVM, non-Solana) → HyperCore route
+ * These routes use depositForBurnWithHook with CCTP Forwarder
+ */
+export function isEvmToHyperCoreRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  // Check if destination is HyperCore (mainnet or testnet)
+  const isDestinationHyperCore = isToHyperCore(params.outputToken.chainId);
+
+  // Exclude HyperEVM → HyperCore (has special CoreWallet flow)
+  if (isHyperEvmToHyperCoreRoute(params)) {
+    return false;
+  }
+
+  // Check if source is EVM (not Solana or other non-EVM chains)
+  const isSourceEvm = ![
+    CHAIN_IDs.SOLANA,
+    CHAIN_IDs.SOLANA_DEVNET,
+    CHAIN_IDs.HYPERCORE,
+    CHAIN_IDs.HYPERCORE_TESTNET,
+  ].includes(params.inputToken.chainId);
+
+  return isDestinationHyperCore && isSourceEvm;
 }
