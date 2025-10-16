@@ -406,7 +406,7 @@ export const SOLANA_CASES = [
 ];
 
 export const USDT_OFT_COMPOSER_CASE = [
-  // Polygon -> Arbitrum USDT
+  // Arbitrum -> HYPERCORE USDT
   {
     labels: ["OFT", "B2B", "EXACT_INPUT", "USDT - USDT", "POLYGON - ARBITRUM"],
     params: {

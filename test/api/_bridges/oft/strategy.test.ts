@@ -73,18 +73,26 @@ describe("OFT Strategy", () => {
         );
         if (supportedChains.length < 2) continue;
 
-        for (let i = 0; i < supportedChains.length; i++) {
-          for (let j = i + 1; j < supportedChains.length; j++) {
+        for (
+          let originIndex = 0;
+          originIndex < supportedChains.length;
+          originIndex++
+        ) {
+          for (
+            let destinationIndex = i + 1;
+            destinationIndex < supportedChains.length;
+            destinationIndex++
+          ) {
             const params = {
               inputToken: {
                 symbol: tokenSymbol,
-                chainId: supportedChains[i],
+                chainId: supportedChains[originIndex],
                 address: "0x1",
                 decimals: 18,
               },
               outputToken: {
                 symbol: tokenSymbol,
-                chainId: supportedChains[j],
+                chainId: supportedChains[destinationIndex],
                 address: "0x1",
                 decimals: 18,
               },
