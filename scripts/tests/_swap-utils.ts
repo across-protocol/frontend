@@ -259,7 +259,6 @@ export async function fetchSwapQuotes() {
     // Args are provided via test case filter
     const filterString = (argsFromCli.filter as string) || "";
     const testCases = [
-      ...USDT_OFT_COMPOSER_CASE,
       ...MIN_OUTPUT_CASES,
       ...EXACT_OUTPUT_CASES,
       ...EXACT_INPUT_CASES,
