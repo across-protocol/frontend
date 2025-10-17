@@ -135,7 +135,7 @@ export async function getRequiredDVNCount(
 
 /**
  * Internal helper to get OFT quote from contracts.
- * This function is designed for input-based quotes (specify input amount, get output amount).
+ * @note This function is designed for input-based quotes (specify input amount, get output amount).
  * Currently works for both input-based and output-based flows because supported tokens (USDT, WBTC) have 0 OFT fees.
  * If we ever add tokens with non-zero OFT fees, we need to refactor this function to handle output-based quotes.
  *
@@ -265,6 +265,8 @@ export async function buildOftTx(params: {
   );
 
   // Get recipient address
+  // If sending to Hyperliquid, compose the special message to contact the Hyperliquid Composer
+  // This includes setting the toAddress to the Composer contract address and creating the composeMsg and extraOptions
   const { toAddress, composeMsg, extraOptions } =
     destinationChainId === CHAIN_IDs.HYPERCORE
       ? getHyperLiquidComposerMessage(
@@ -514,15 +516,12 @@ export function getOftCrossSwapTypes(params: {
   isInputNative: boolean;
   isOutputNative: boolean;
 }) {
-  if (
-    isRouteSupported({
-      inputToken: params.inputToken,
-      outputToken: params.outputToken,
-    })
-  ) {
-    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
-  }
-  return [];
+  return isRouteSupported({
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
+  })
+    ? [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE]
+    : [];
 }
 
 /**
@@ -698,12 +697,12 @@ export function getHyperLiquidComposerMessage(
    * special instructions and, most importantly, pre-pay for the gas required to execute a transaction on the
    * destination chain.
    *
-   * Think of it as a "secret handshake" or a special delivery form. A standard transaction might fail, but one
+   * One can think of it as a "secret handshake" or a special delivery form. A standard transaction might fail, but one
    * with the correct `extraOptions` is recognized and processed by the destination contract.
    *
    * ## Why This Specific Value: `0x00030100130300000000000000000000000000000000ea60`
    *
-   * This value is not a standard gas payment; it's a custom-packed 26-byte struct required by the legacy V1-style
+   * This value is not a standard gas payment; it's a custom-packed 26-byte struct required by the
    * integration that the Hyperliquid Composer uses. On-chain analysis of successful transactions proves this is the
    * only format the contract will accept.
    * Examples here: https://polygonscan.com/tx/0x3b96ab9962692d173cd6851fc8308fce3ff0eb56209298a632cef9333cfe3f3f
@@ -732,8 +731,8 @@ export function getHyperLiquidComposerMessage(
    * is the primary evidence.
    *
    * - **Conceptual Documentation:** While the *specific* value is custom to Hyperliquid, the *concept* of using
-   * `extraOptions` to provide gas comes from the LayerZero V1 protocol's "Adapter Parameters."
-   * See V2 Docs: https://docs.layerzero.network/v2/tools/sdks/options
+   * `extraOptions` to provide gas comes from the LayerZero protocol's "Adapter Parameters."
+   * See Docs: https://docs.layerzero.network/v2/tools/sdks/options
    *
    */
 

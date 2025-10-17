@@ -17,24 +17,9 @@ import { Token } from "../../../../api/_dexes/types";
 import { ethers, BigNumber } from "ethers";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { getRpcUrlsFromConfigJson } from "../../../../api/_providers";
+import { TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 
 describe("OFT Strategy", () => {
-  beforeAll(() => {
-    const arbitrumRpcs = getRpcUrlsFromConfigJson(CHAIN_IDs.ARBITRUM);
-    const polygonRpcs = getRpcUrlsFromConfigJson(CHAIN_IDs.POLYGON);
-
-    if (arbitrumRpcs.length === 0) {
-      console.warn(
-        "Skipping OFT Strategy tests: No RPC URL found for Arbitrum"
-      );
-      return;
-    }
-
-    if (polygonRpcs.length === 0) {
-      console.warn("Skipping OFT Strategy tests: No RPC URL found for Polygon");
-      return;
-    }
-  });
   describe("getHyperLiquidComposerMessage", () => {
     const recipient = "0x0000000000000000000000000000000000000001";
     const tokenSymbol = "USDT";
@@ -71,6 +56,7 @@ describe("OFT Strategy", () => {
         const supportedChains = Object.keys(OFT_MESSENGERS[tokenSymbol]).map(
           Number
         );
+        // Need at least two supported chains to form a route
         if (supportedChains.length < 2) continue;
 
         for (
@@ -105,6 +91,7 @@ describe("OFT Strategy", () => {
 
     it("should return false if tokens are different", () => {
       const tokenSymbols = Object.keys(OFT_MESSENGERS);
+      // Need at least two supported tokens to form a route
       if (tokenSymbols.length < 2) return;
 
       const tokenA = tokenSymbols[0];
@@ -163,6 +150,7 @@ describe("OFT Strategy", () => {
           const supportedChains = Object.keys(OFT_MESSENGERS[tokenSymbol]).map(
             Number
           );
+          // Needs at least one supported chain for the token symbol to form a route to Hypercore
           if (supportedChains.length === 0) continue;
 
           const supportedChain = supportedChains[0];
@@ -218,17 +206,24 @@ describe("OFT Strategy", () => {
   });
 
   const arbitrumUSDT: Token = {
-    address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
     symbol: "USDT",
     decimals: 6,
     chainId: CHAIN_IDs.ARBITRUM,
   };
 
   const polygonUSDT: Token = {
-    address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
     symbol: "USDT",
     decimals: 6,
     chainId: CHAIN_IDs.POLYGON,
+  };
+
+  const hyperCoreUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.HYPERCORE],
+    symbol: "USDT",
+    decimals: 6,
+    chainId: CHAIN_IDs.HYPERCORE,
   };
 
   const unsupportedToken: Token = {
@@ -250,6 +245,17 @@ describe("OFT Strategy", () => {
       expect(result).toEqual([CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE]);
     });
 
+    it("should return BRIDGEABLE_TO_BRIDGEABLE if route is supported", () => {
+      const result = getOftCrossSwapTypes({
+        inputToken: polygonUSDT,
+        outputToken: hyperCoreUSDT,
+        isInputNative: false,
+        isOutputNative: false,
+      });
+
+      expect(result).toEqual([CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE]);
+    });
+
     it("should return an empty array if route is not supported", () => {
       const result = getOftCrossSwapTypes({
         inputToken: arbitrumUSDT,
@@ -264,20 +270,37 @@ describe("OFT Strategy", () => {
 
   describe("getRequiredDVNCount", () => {
     it("should return the DVN count for a valid route", async () => {
-      const dvnCount = await getRequiredDVNCount(
-        CHAIN_IDs.ARBITRUM,
-        CHAIN_IDs.POLYGON,
-        "USDT"
-      );
-      expect(dvnCount).toBeGreaterThan(0);
+      expect(
+        await getRequiredDVNCount(CHAIN_IDs.ARBITRUM, CHAIN_IDs.POLYGON, "USDT")
+      ).toBeGreaterThan(0);
+
+      expect(
+        await getRequiredDVNCount(
+          CHAIN_IDs.ARBITRUM,
+          CHAIN_IDs.HYPERCORE,
+          "USDT"
+        )
+      ).toBeGreaterThan(0);
     }, 30000);
   });
 
   describe("getQuote", () => {
     it("should return a valid quote", async () => {
-      const result = await getQuote({
+      let result = await getQuote({
         inputToken: arbitrumUSDT,
         outputToken: polygonUSDT,
+        inputAmount: BigNumber.from(1000),
+        recipient: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+      });
+
+      expect(result.inputAmount).toEqual(BigNumber.from(1000));
+      expect(result.outputAmount).toBeDefined();
+      expect(result.nativeFee).toBeDefined();
+      expect(result.oftFeeAmount).toBeDefined();
+
+      result = await getQuote({
+        inputToken: arbitrumUSDT,
+        outputToken: hyperCoreUSDT,
         inputAmount: BigNumber.from(1000),
         recipient: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       });
@@ -291,20 +314,42 @@ describe("OFT Strategy", () => {
 
   describe("getEstimatedFillTime", () => {
     it("should calculate the estimated fill time correctly", async () => {
-      const result = await getEstimatedFillTime(
-        CHAIN_IDs.ARBITRUM,
-        CHAIN_IDs.POLYGON,
-        "USDT"
-      );
-      expect(result).toBeGreaterThan(0);
+      expect(
+        await getEstimatedFillTime(
+          CHAIN_IDs.ARBITRUM,
+          CHAIN_IDs.POLYGON,
+          "USDT"
+        )
+      ).toBeGreaterThan(0);
+
+      expect(
+        await getEstimatedFillTime(
+          CHAIN_IDs.ARBITRUM,
+          CHAIN_IDs.HYPERCORE,
+          "USDT"
+        )
+      ).toBeGreaterThan(0);
     });
   });
 
   describe("getOftQuoteForExactInput", () => {
     it("should return a valid quote for an exact input amount", async () => {
-      const result = await getOftQuoteForExactInput({
+      let result = await getOftQuoteForExactInput({
         inputToken: arbitrumUSDT,
         outputToken: polygonUSDT,
+        exactInputAmount: BigNumber.from(1000),
+        recipient: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+      });
+
+      expect(result.bridgeQuote.inputAmount).toEqual(BigNumber.from(1000));
+      expect(result.bridgeQuote.outputAmount).toBeDefined();
+      expect(result.bridgeQuote.minOutputAmount).toBeDefined();
+      expect(result.bridgeQuote.estimatedFillTimeSec).toBeGreaterThan(0);
+      expect(result.bridgeQuote.provider).toBe("oft");
+
+      result = await getOftQuoteForExactInput({
+        inputToken: arbitrumUSDT,
+        outputToken: hyperCoreUSDT,
         exactInputAmount: BigNumber.from(1000),
         recipient: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       });
