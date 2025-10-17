@@ -251,7 +251,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   // Render unified group driven by state
   const content = (
     <>
-      <AnimatePresence initial={true}>
+      <AnimatePresence initial={false}>
         <motion.div
           key="expandable-label-section-outer"
           initial={{ opacity: 0, y: -16 }}
@@ -272,62 +272,58 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
             validationErrorFormatted={validationErrorFormatted}
             hasQuote={!!swapQuote}
           >
-            {expanded && state === "readyToConfirm" ? (
-              <ExpandedDetails>
-                <DetailRow>
-                  <DetailLeft>
-                    <Route width="20px" height="20px" />
-                    <span>Route</span>
-                  </DetailLeft>
-                  <DetailRight>
-                    <Across width="20px" height="20px" />
-                    <span>{displayValues.route}</span>
-                  </DetailRight>
-                </DetailRow>
-                <DetailRow>
-                  <DetailLeft>
-                    <Time width="16px" height="16px" />
-                    <span>Est. Time</span>
-                  </DetailLeft>
-                  <span>{displayValues.estimatedTime}</span>
-                </DetailRow>
-                <DetailRow>
-                  <DetailLeft>
-                    <Dollar width="16px" height="16px" />
-                    <span>Net Fee</span>
-                    <Tooltip
-                      tooltipId="ConfirmationButton - net fee"
-                      body="Total fees less any reward, in USD"
-                    >
-                      <Info width="16px" height="16px" />
-                    </Tooltip>
-                  </DetailLeft>
-                  <span>{displayValues.netFee}</span>
-                </DetailRow>
-                <FeeBreakdown>
+            <ExpandedDetails>
+              <DetailRow>
+                <DetailLeft>
+                  <Route width="20px" height="20px" />
+                  <span>Route</span>
+                </DetailLeft>
+                <DetailRight>
+                  <Across width="20px" height="20px" />
+                  <span>{displayValues.route}</span>
+                </DetailRight>
+              </DetailRow>
+              <DetailRow>
+                <DetailLeft>
+                  <Time width="16px" height="16px" />
+                  <span>Est. Time</span>
+                </DetailLeft>
+                <span>{displayValues.estimatedTime}</span>
+              </DetailRow>
+              <DetailRow>
+                <DetailLeft>
+                  <Dollar width="16px" height="16px" />
+                  <span>Net Fee</span>
+                  <Tooltip
+                    tooltipId="ConfirmationButton - net fee"
+                    body="Total fees less any reward, in USD"
+                  >
+                    <Info width="16px" height="16px" />
+                  </Tooltip>
+                </DetailLeft>
+                <span>{displayValues.netFee}</span>
+              </DetailRow>
+              <FeeBreakdown>
+                <FeeBreakdownRow>
+                  <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
+                  <FeeBreakdownValue>
+                    {displayValues.bridgeFee}
+                  </FeeBreakdownValue>
+                </FeeBreakdownRow>
+                <FeeBreakdownRow>
+                  <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
+                  <FeeBreakdownValue>{displayValues.gasFee}</FeeBreakdownValue>
+                </FeeBreakdownRow>
+                {isDefined(displayValues.swapFee) && (
                   <FeeBreakdownRow>
-                    <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
+                    <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
                     <FeeBreakdownValue>
-                      {displayValues.bridgeFee}
+                      {displayValues.swapFee}
                     </FeeBreakdownValue>
                   </FeeBreakdownRow>
-                  <FeeBreakdownRow>
-                    <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
-                    <FeeBreakdownValue>
-                      {displayValues.gasFee}
-                    </FeeBreakdownValue>
-                  </FeeBreakdownRow>
-                  {isDefined(displayValues.swapFee) && (
-                    <FeeBreakdownRow>
-                      <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
-                      <FeeBreakdownValue>
-                        {displayValues.swapFee}
-                      </FeeBreakdownValue>
-                    </FeeBreakdownRow>
-                  )}
-                </FeeBreakdown>
-              </ExpandedDetails>
-            ) : null}
+                )}
+              </FeeBreakdown>
+            </ExpandedDetails>
           </ExpandableLabelSection>
         </motion.div>
       </AnimatePresence>
