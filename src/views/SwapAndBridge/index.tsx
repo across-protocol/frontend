@@ -1,7 +1,7 @@
 import { LayoutV2 } from "components";
 import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
-import ConfirmationButton from "./components/ConfirmationButton";
+import { ConfirmationButton } from "./components/ConfirmationButton";
 import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
 
 export default function SwapAndBridge() {

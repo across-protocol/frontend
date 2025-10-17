@@ -127,25 +127,45 @@ const ExpandableLabelSection: React.FC<
   }
 
   return (
-    <AnimatePresence initial={false}>
-      <motion.div
-        key="expandable-label-section"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+    <>
+      <ExpandableLabelButton
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        disabled={state !== "readyToConfirm"}
       >
-        <ExpandableLabelButton
-          type="button"
-          onClick={onToggle}
-          aria-expanded={expanded}
-          disabled={state !== "readyToConfirm"}
-        >
-          {content}
-        </ExpandableLabelButton>
-        <ExpandableContent expanded={expanded}>{children}</ExpandableContent>
-      </motion.div>
-    </AnimatePresence>
+        {content}
+      </ExpandableLabelButton>
+      <AnimatePresence initial={false} mode="wait">
+        {expanded && (
+          <motion.div
+            key="expandable-content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                mass: 0.8,
+              },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: {
+                duration: 0.2,
+                ease: "easeInOut",
+              },
+            }}
+            style={{ overflow: "hidden", willChange: "height, opacity" }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
@@ -165,23 +185,13 @@ const ButtonCore: React.FC<{
     loading={loading}
     fullHeight={fullHeight}
   >
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.span
-        key={state}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      >
-        <ButtonContent>
-          {loading && <StyledLoadingIcon />}
-          {state === "notConnected" && (
-            <Wallet width={16} height={16} color="inherit" />
-          )}
-          {label}
-        </ButtonContent>
-      </motion.span>
-    </AnimatePresence>
+    <ButtonContent>
+      {loading && <StyledLoadingIcon />}
+      {state === "notConnected" && (
+        <Wallet width={16} height={16} color="inherit" />
+      )}
+      {label}
+    </ButtonContent>
   </StyledButton>
 );
 
@@ -250,105 +260,80 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   // Render unified group driven by state
   const content = (
-    <>
-      <AnimatePresence initial={false}>
-        <motion.div
-          key="expandable-label-section-outer"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          style={{ overflow: "hidden" }}
-        >
-          <ExpandableLabelSection
-            fee={displayValues.fee}
-            time={displayValues.time}
-            expanded={expanded}
-            onToggle={() => setExpanded((e) => !e)}
-            visible={true}
-            state={state}
-            validationError={validationError}
-            validationWarning={validationWarning}
-            validationErrorFormatted={validationErrorFormatted}
-            hasQuote={!!swapQuote}
-          >
-            <ExpandedDetails>
-              <DetailRow>
-                <DetailLeft>
-                  <Route width="20px" height="20px" />
-                  <span>Route</span>
-                </DetailLeft>
-                <DetailRight>
-                  <Across width="20px" height="20px" />
-                  <span>{displayValues.route}</span>
-                </DetailRight>
-              </DetailRow>
-              <DetailRow>
-                <DetailLeft>
-                  <Time width="16px" height="16px" />
-                  <span>Est. Time</span>
-                </DetailLeft>
-                <span>{displayValues.estimatedTime}</span>
-              </DetailRow>
-              <DetailRow>
-                <DetailLeft>
-                  <Dollar width="16px" height="16px" />
-                  <span>Net Fee</span>
-                  <Tooltip
-                    tooltipId="ConfirmationButton - net fee"
-                    body="Total fees less any reward, in USD"
-                  >
-                    <Info width="16px" height="16px" />
-                  </Tooltip>
-                </DetailLeft>
-                <span>{displayValues.netFee}</span>
-              </DetailRow>
-              <FeeBreakdown>
-                <FeeBreakdownRow>
-                  <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
-                  <FeeBreakdownValue>
-                    {displayValues.bridgeFee}
-                  </FeeBreakdownValue>
-                </FeeBreakdownRow>
-                <FeeBreakdownRow>
-                  <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
-                  <FeeBreakdownValue>{displayValues.gasFee}</FeeBreakdownValue>
-                </FeeBreakdownRow>
-                {isDefined(displayValues.swapFee) && (
-                  <FeeBreakdownRow>
-                    <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
-                    <FeeBreakdownValue>
-                      {displayValues.swapFee}
-                    </FeeBreakdownValue>
-                  </FeeBreakdownRow>
-                )}
-              </FeeBreakdown>
-            </ExpandedDetails>
-          </ExpandableLabelSection>
-        </motion.div>
-      </AnimatePresence>
-      <ButtonContainer expanded={expanded}>
-        <ButtonCore
-          state={state}
-          label={buttonLabel}
-          loading={buttonLoading}
-          disabled={isButtonDisabled}
-          fullHeight={state !== "readyToConfirm"}
-          onClick={onConfirm}
-        />
-      </ButtonContainer>
-    </>
+    <AnimatePresence initial={false} mode="wait">
+      <ExpandableLabelSection
+        fee={displayValues.fee}
+        time={displayValues.time}
+        expanded={expanded}
+        onToggle={() => setExpanded((e) => !e)}
+        visible={true}
+        state={state}
+        validationError={validationError}
+        validationWarning={validationWarning}
+        validationErrorFormatted={validationErrorFormatted}
+        hasQuote={!!swapQuote}
+      >
+        <ExpandedDetails>
+          <DetailRow>
+            <DetailLeft>
+              <Route width="20px" height="20px" />
+              <span>Route</span>
+            </DetailLeft>
+            <DetailRight>
+              <Across width="20px" height="20px" />
+              <span>{displayValues.route}</span>
+            </DetailRight>
+          </DetailRow>
+          <DetailRow>
+            <DetailLeft>
+              <Time width="16px" height="16px" />
+              <span>Est. Time</span>
+            </DetailLeft>
+            <span>{displayValues.estimatedTime}</span>
+          </DetailRow>
+          <DetailRow>
+            <DetailLeft>
+              <Dollar width="16px" height="16px" />
+              <span>Net Fee</span>
+              <Tooltip
+                tooltipId="ConfirmationButton - net fee"
+                body="Total fees less any reward, in USD"
+              >
+                <Info width="16px" height="16px" />
+              </Tooltip>
+            </DetailLeft>
+            <span>{displayValues.netFee}</span>
+          </DetailRow>
+          <FeeBreakdown>
+            <FeeBreakdownRow>
+              <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
+              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
+            </FeeBreakdownRow>
+            <FeeBreakdownRow>
+              <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
+              <FeeBreakdownValue>{displayValues.gasFee}</FeeBreakdownValue>
+            </FeeBreakdownRow>
+            {isDefined(displayValues.swapFee) && (
+              <FeeBreakdownRow>
+                <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
+                <FeeBreakdownValue>{displayValues.swapFee}</FeeBreakdownValue>
+              </FeeBreakdownRow>
+            )}
+          </FeeBreakdown>
+        </ExpandedDetails>
+      </ExpandableLabelSection>
+      <ButtonCore
+        state={state}
+        label={buttonLabel}
+        loading={buttonLoading}
+        disabled={isButtonDisabled}
+        fullHeight={state !== "readyToConfirm"}
+        onClick={onConfirm}
+      />
+    </AnimatePresence>
   );
 
-  return (
-    <Container
-      disabled={isButtonDisabled}
-      initial={false}
-      transition={{ type: "spring", stiffness: 300, damping: 40 }}
-    >
-      {content}
-    </Container>
-  );
+  return <Container disabled={isButtonDisabled}>{content}</Container>;
 };
 
 const ValidationText = styled.div`
@@ -371,7 +356,6 @@ const Container = styled(motion.div)<{ disabled: boolean }>`
   padding: 8px 12px 12px 12px;
   width: 100%;
   overflow: hidden;
-  gap: ${({ disabled }) => (disabled ? "0px" : "8px")};
 `;
 
 const ExpandableLabelButton = styled.button`
@@ -380,6 +364,7 @@ const ExpandableLabelButton = styled.button`
   justify-content: space-between;
   width: 100%;
   padding: 8px;
+  padding-bottom: 16px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -433,20 +418,11 @@ const StyledChevronDown = styled(ChevronDownIcon)<{ expanded: boolean }>`
   width: 20px;
   height: 20px;
   margin-left: 12px;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
   cursor: pointer;
   color: #e0f3ff;
   transform: ${({ expanded }) =>
     expanded ? "rotate(180deg)" : "rotate(0deg)"};
-`;
-
-const ExpandableContent = styled.div<{ expanded: boolean }>`
-  overflow: hidden;
-  transition:
-    max-height 0.3s ease,
-    margin-top 0.3s ease;
-  max-height: ${({ expanded }) => (expanded ? "500px" : "0")};
-  margin-top: ${({ expanded }) => (expanded ? "8px" : "0")};
 `;
 
 const StyledButton = styled.button<{
@@ -459,7 +435,11 @@ const StyledButton = styled.button<{
   border-radius: 12px;
   font-weight: 600;
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    opacity 0.3s ease;
   border: none;
   cursor: pointer;
 
@@ -509,10 +489,6 @@ const StyledLoadingIcon = styled(LoadingIcon)`
   }
 `;
 
-const ButtonContainer = styled.div<{ expanded: boolean }>`
-  flex: 0 0 auto;
-`;
-
 const ExpandedDetails = styled.div`
   color: #e0f3ff;
   font-size: 14px;
@@ -559,5 +535,3 @@ const FeeBreakdownLabel = styled.span`
 const FeeBreakdownValue = styled.span`
   color: #e0f3ff;
 `;
-
-export default ConfirmationButton;
