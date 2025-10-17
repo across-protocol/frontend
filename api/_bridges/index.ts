@@ -28,6 +28,12 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPEREVM_TESTNET]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
+      [CHAIN_IDs.SOLANA]: {
+        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.SOLANA_DEVNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
     },
   },
 };
