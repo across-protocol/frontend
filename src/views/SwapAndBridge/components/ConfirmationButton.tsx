@@ -95,17 +95,19 @@ const ExpandableLabelSection: React.FC<
           <Shield width="16" height="16" />
           <FastSecureText>Fast & Secure</FastSecureText>
         </ExpandableLabelLeft>
-        <ExpandableLabelRight>
-          <FeeTimeItem>
-            <Dollar width="16" height="16" />
-            {fee}
-          </FeeTimeItem>
-          <Divider />
-          <FeeTimeItem>
-            <Time width="16" height="16" />
-            {time}
-          </FeeTimeItem>
-        </ExpandableLabelRight>
+        {!expanded && (
+          <ExpandableLabelRight>
+            <FeeTimeItem>
+              <Dollar width="16" height="16" />
+              {fee}
+            </FeeTimeItem>
+            <Divider />
+            <FeeTimeItem>
+              <Time width="16" height="16" />
+              {time}
+            </FeeTimeItem>
+          </ExpandableLabelRight>
+        )}
         <StyledChevronDown expanded={expanded} />
       </>
     );
@@ -218,7 +220,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    // Get fees from the top-level fees object (new structure)
     const bridgeFeesUsd = swapQuote.fees.relayerTotal.amountUsd;
     const gasFeeUsd = (
       Number(swapQuote.fees.originGas.amountUsd) +
