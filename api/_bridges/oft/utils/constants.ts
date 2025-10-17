@@ -43,9 +43,9 @@ export const OFT_MESSENGERS: Record<
   // }
 };
 
-// OFT composer contract addresses per token on hypercore
-export const HYPERCORE_OFT_COMPOSER_ADDRESSES: Record<string, string> = {
-  USDT: "0x80123ab57c9bc0c452d6c18f92a653a4ee2e7585",
+// OFT composer contract addresses per token on hyperEVM
+export const HYPEREVM_OFT_COMPOSER_ADDRESSES: Record<string, string> = {
+  "USDT-SPOT": "0x80123ab57c9bc0c452d6c18f92a653a4ee2e7585",
 };
 
 // Shared decimals for OFT tokens across chains

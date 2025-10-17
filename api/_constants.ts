@@ -24,16 +24,6 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
     },
   },
-  USDT: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDT,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
-      // HyperCore does not have a USDT address, USDT is stored on HyperEVM
-      // The USDT balance is mirrored to HyperCore from HyperEVM
-      // To allow for query parameters to use USDT on HyperCore, we add the USDT address on HyperEVM here
-      [CHAIN_IDs.HYPERCORE]: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-    },
-  },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
 export const TOKEN_EQUIVALENCE_REMAPPING =

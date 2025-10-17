@@ -9,11 +9,11 @@ import {
   buildOftTx,
 } from "../../../../api/_bridges/oft/strategy";
 import {
-  HYPERCORE_OFT_COMPOSER_ADDRESSES,
+  HYPEREVM_OFT_COMPOSER_ADDRESSES,
   OFT_MESSENGERS,
 } from "../../../../api/_bridges/oft/utils/constants";
 import { CHAIN_IDs } from "@across-protocol/constants";
-import { Token } from "../../../../api/_dexes/types";
+import { CrossSwapQuotes, Token } from "../../../../api/_dexes/types";
 import { ethers, BigNumber } from "ethers";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { getRpcUrlsFromConfigJson } from "../../../../api/_providers";
@@ -22,7 +22,7 @@ import { TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 describe("OFT Strategy", () => {
   describe("getHyperLiquidComposerMessage", () => {
     const recipient = "0x0000000000000000000000000000000000000001";
-    const tokenSymbol = "USDT";
+    const tokenSymbol = "USDT-SPOT";
 
     it("should return the correct message for HyperLiquid", () => {
       const { composeMsg, toAddress, extraOptions } =
@@ -34,7 +34,7 @@ describe("OFT Strategy", () => {
       );
 
       expect(composeMsg).toBe(expectedComposeMsg);
-      expect(toAddress).toBe(HYPERCORE_OFT_COMPOSER_ADDRESSES[tokenSymbol]);
+      expect(toAddress).toBe(HYPEREVM_OFT_COMPOSER_ADDRESSES[tokenSymbol]);
       expect(extraOptions).toBe(
         "0x00030100130300000000000000000000000000000000ea60"
       );
@@ -145,7 +145,7 @@ describe("OFT Strategy", () => {
     });
 
     it("should return true for supported routes to Hypercore", () => {
-      for (const tokenSymbol in HYPERCORE_OFT_COMPOSER_ADDRESSES) {
+      for (const tokenSymbol in HYPEREVM_OFT_COMPOSER_ADDRESSES) {
         if (OFT_MESSENGERS[tokenSymbol]) {
           const supportedChains = Object.keys(OFT_MESSENGERS[tokenSymbol]).map(
             Number
@@ -175,7 +175,7 @@ describe("OFT Strategy", () => {
 
     it("should return false for unsupported routes to Hypercore", () => {
       const allOftSymbols = Object.keys(OFT_MESSENGERS);
-      const hypercoreSymbols = Object.keys(HYPERCORE_OFT_COMPOSER_ADDRESSES);
+      const hypercoreSymbols = Object.keys(HYPEREVM_OFT_COMPOSER_ADDRESSES);
       const unsupportedSymbol = allOftSymbols.find(
         (s) => !hypercoreSymbols.includes(s)
       );
@@ -220,9 +220,9 @@ describe("OFT Strategy", () => {
   };
 
   const hyperCoreUSDT: Token = {
-    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.HYPERCORE],
-    symbol: "USDT",
-    decimals: 6,
+    address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+    symbol: "USDT-SPOT",
+    decimals: 8,
     chainId: CHAIN_IDs.HYPERCORE,
   };
 
@@ -364,24 +364,19 @@ describe("OFT Strategy", () => {
 
   describe("buildOftTx", () => {
     it("should build a valid transaction", async () => {
-      const quotes = {
+      const quotes: CrossSwapQuotes = {
         crossSwap: {
-          amount: {
-            type: "BigNumber",
-            hex: "0x0f4240",
-          },
+          amount: BigNumber.from("0x0f4240"),
           inputToken: {
             decimals: 6,
             symbol: "USDT",
             address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-            name: "Tether USD",
             chainId: 42161,
           },
           outputToken: {
-            decimals: 6,
-            symbol: "USDT",
-            address: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-            name: "Tether USD",
+            decimals: 8,
+            symbol: "USDT-SPOT",
+            address: "0x200000000000000000000000000000000000010C",
             chainId: 1337,
           },
           depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
@@ -401,17 +396,15 @@ describe("OFT Strategy", () => {
             decimals: 6,
             symbol: "USDT",
             address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-            name: "Tether USD",
             chainId: 42161,
           },
           outputToken: {
-            decimals: 6,
-            symbol: "USDT",
-            address: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-            name: "Tether USD",
+            decimals: 8,
+            symbol: "USDT-SPOT",
+            address: "0x200000000000000000000000000000000000010C",
             chainId: 1337,
           },
-          inputAmount: BigNumber.from("0x0f4240"),
+          inputAmount: BigNumber.from("0x2710"),
           outputAmount: BigNumber.from("0x0f4240"),
           minOutputAmount: BigNumber.from("0x0f4240"),
           estimatedFillTimeSec: 24,
@@ -424,7 +417,6 @@ describe("OFT Strategy", () => {
                 decimals: 6,
                 symbol: "USDT",
                 address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                name: "Tether USD",
                 chainId: 42161,
               },
             },
@@ -435,7 +427,6 @@ describe("OFT Strategy", () => {
                 decimals: 6,
                 symbol: "USDT",
                 address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                name: "Tether USD",
                 chainId: 42161,
               },
             },
@@ -446,7 +437,6 @@ describe("OFT Strategy", () => {
                 decimals: 6,
                 symbol: "USDT",
                 address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                name: "Tether USD",
                 chainId: 42161,
               },
             },
@@ -457,13 +447,12 @@ describe("OFT Strategy", () => {
                 decimals: 6,
                 symbol: "USDT",
                 address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                name: "Tether USD",
                 chainId: 42161,
               },
             },
             bridgeFee: {
               pct: BigNumber.from("0x00"),
-              total: BigNumber.from("0x9fbde11cfaf7"),
+              total: BigNumber.from("0x1522fe82c8c1"),
               token: {
                 chainId: 42161,
                 address: "0x0000000000000000000000000000000000000000",
@@ -483,15 +472,14 @@ describe("OFT Strategy", () => {
         appFee: {
           feeAmount: BigNumber.from("0x00"),
           feeToken: {
-            decimals: 6,
-            symbol: "USDT",
-            address: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-            name: "Tether USD",
+            decimals: 8,
+            symbol: "USDT-SPOT",
+            address: "0x200000000000000000000000000000000000010C",
             chainId: 1337,
           },
           feeActions: [],
         },
-      } as any;
+      };
 
       const result = await buildOftTx({ quotes });
       expect(result).toBeDefined();

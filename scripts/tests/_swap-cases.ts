@@ -408,13 +408,20 @@ export const SOLANA_CASES = [
 export const USDT_OFT_COMPOSER_CASE = [
   // Arbitrum -> HYPERCORE USDT
   {
-    labels: ["OFT", "B2B", "EXACT_INPUT", "USDT - USDT", "POLYGON - ARBITRUM"],
+    labels: [
+      "OFT",
+      "B2B",
+      "EXACT_INPUT",
+      "USDT - USDT-SPOT",
+      "ARBITRUM - HYPERCORE",
+    ],
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
       originChainId: CHAIN_IDs.ARBITRUM,
-      outputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.HYPEREVM],
+      outputToken:
+        TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       destinationChainId: CHAIN_IDs.HYPERCORE,
       depositor: evmDepositor,
       // skipOriginTxEstimation: true,

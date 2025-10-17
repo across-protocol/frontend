@@ -28,7 +28,7 @@ import {
   OFT_MESSENGERS,
   OFT_SHARED_DECIMALS,
   V2_ENDPOINTS,
-  HYPERCORE_OFT_COMPOSER_ADDRESSES,
+  HYPEREVM_OFT_COMPOSER_ADDRESSES,
 } from "./utils/constants";
 import * as chainConfigs from "../../../scripts/chain-configs";
 import { CHAIN_IDs } from "@across-protocol/constants";
@@ -195,7 +195,6 @@ export async function getQuote(params: {
     oftMessengerContract.quoteSend(sendParam, false), // false = pay in native token
     oftMessengerContract.quoteOFT(sendParam),
   ]);
-
   const [, , oftReceipt] = oftQuoteResult;
   const nativeFee = BigNumber.from(messagingFee.nativeFee);
 
@@ -279,6 +278,12 @@ export async function buildOftTx(params: {
           extraOptions: "0x",
         };
 
+  const roundedInputAmount = roundAmountToSharedDecimals(
+    bridgeQuote.inputAmount,
+    bridgeQuote.inputToken.symbol,
+    bridgeQuote.inputToken.decimals
+  );
+
   // Create SendParam struct
   const sendParam = createSendParamStruct({
     destinationChainId:
@@ -286,8 +291,8 @@ export async function buildOftTx(params: {
         ? CHAIN_IDs.HYPEREVM
         : destinationChainId,
     toAddress,
-    amountLD: bridgeQuote.inputAmount,
-    minAmountLD: bridgeQuote.minOutputAmount,
+    amountLD: roundedInputAmount,
+    minAmountLD: roundedInputAmount,
     composeMsg,
     extraOptions,
   });
@@ -300,7 +305,6 @@ export async function buildOftTx(params: {
     provider
   );
   const messagingFee = await oftMessengerContract.quoteSend(sendParam, false);
-
   // Encode the send call
   const iface = new ethers.utils.Interface(OFT_ABI);
   const callData = iface.encodeFunctionData("send", [
@@ -388,7 +392,10 @@ export function isRouteSupported(params: {
   outputToken: Token;
 }) {
   // Both tokens must be the same
-  if (params.inputToken.symbol !== params.outputToken.symbol) {
+  if (
+    params.inputToken.symbol !== params.outputToken.symbol &&
+    params.outputToken.symbol !== `${params.inputToken.symbol}-SPOT`
+  ) {
     return false;
   }
 
@@ -401,7 +408,7 @@ export function isRouteSupported(params: {
       return true;
     }
     const oftComposerContract =
-      HYPERCORE_OFT_COMPOSER_ADDRESSES[params.outputToken.symbol];
+      HYPEREVM_OFT_COMPOSER_ADDRESSES[params.outputToken.symbol];
     if (
       params.outputToken.chainId === CHAIN_IDs.HYPERCORE &&
       oftComposerContract
@@ -679,14 +686,14 @@ export function getHyperLiquidComposerMessage(
       recipient, // `to` is the final user's address on Hyperliquid L1.
     ]
   );
-  if (!HYPERCORE_OFT_COMPOSER_ADDRESSES[tokenSymbol]) {
+  if (!HYPEREVM_OFT_COMPOSER_ADDRESSES[tokenSymbol]) {
     throw new InvalidParamError({
       message: `OFT: No Hyperliquid Composer contract configured for token ${tokenSymbol}`,
     });
   }
   // When composing a message for Hyperliquid, the recipient of the OFT `send` call
   // is always the Hyperliquid Composer contract on HyperEVM.
-  const toAddress = HYPERCORE_OFT_COMPOSER_ADDRESSES[tokenSymbol];
+  const toAddress = HYPEREVM_OFT_COMPOSER_ADDRESSES[tokenSymbol];
 
   /**
    * @notice Explanation of the custom `extraOptions` payload for the Hyperliquid Composer.
