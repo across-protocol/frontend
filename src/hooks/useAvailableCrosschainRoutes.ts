@@ -11,7 +11,6 @@ export type LifiToken = {
   coinKey: string;
   logoURI: string;
   routeSource: "bridge" | "swap";
-  isReachable?: boolean; // Added to mark if token is reachable from the other token
 };
 
 export type TokenInfo = {
@@ -55,26 +54,6 @@ export default function useAvailableCrosschainRoutes(
         },
         {} as Record<number, Array<LifiToken>>
       );
-
-      // Apply route filtering if filterParams are provided
-      if (filterParams?.inputToken || filterParams?.outputToken) {
-        const otherToken = filterParams.inputToken || filterParams.outputToken;
-
-        // Mark tokens as unreachable if they're on the same chain as the filter token
-        for (const chainId of Object.keys(tokensByChain)) {
-          tokensByChain[Number(chainId)] = tokensByChain[Number(chainId)].map(
-            (token) => {
-              // For same chain, not reachable (no swaps allowed on same chain)
-              const isReachable = Number(chainId) !== otherToken!.chainId;
-
-              return {
-                ...token,
-                isReachable,
-              };
-            }
-          );
-        }
-      }
 
       return tokensByChain;
     },

@@ -54,7 +54,6 @@ type DisplayedChains = {
 export type EnrichedToken = LifiToken & {
   balance: BigNumber;
   balanceUsd: number;
-  isReachable?: boolean;
   routeSource: "bridge" | "swap";
 };
 
@@ -104,32 +103,15 @@ export default function ChainTokenSelectorModal({
       tokens = Object.values(crossChainRoutes).flatMap((t) => t);
     }
 
-    // Enrich tokens with reachability information from the hook
+    // Enrich tokens with route source information
     const enrichedTokens = tokens.map((token) => {
-      // Find the corresponding token in crossChainRoutes to check isReachable
+      // Find the corresponding token in crossChainRoutes to get route source
       const routeToken = crossChainRoutes?.[token.chainId]?.find(
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
-      // Determine if token should be disabled based on new requirements:
-      // Only disable tokens if the token is NOT a swap token AND it is not reachable via a bridge route
-      let shouldDisable = false;
-      if (routeToken) {
-        // If it's a swap token, never disable it
-        if (routeToken.routeSource === "swap") {
-          shouldDisable = false;
-        } else {
-          // If it's not a swap token, disable it only if it's not reachable via bridge
-          shouldDisable = routeToken.isReachable === false;
-        }
-      } else {
-        // If no route token found, disable it (not available for any routes)
-        shouldDisable = true;
-      }
-
       return {
         ...token,
-        isReachable: !shouldDisable,
         routeSource: routeToken?.routeSource || "bridge", // Default to bridge if not found
       };
     });
@@ -156,15 +138,7 @@ export default function ChainTokenSelectorModal({
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedToken[]) => {
       return tokens.sort((a, b) => {
-        // First, sort by disabled status - disabled tokens go to bottom
-        const aDisabled = a.isReachable === false;
-        const bDisabled = b.isReachable === false;
-
-        if (aDisabled !== bDisabled) {
-          return aDisabled ? 1 : -1;
-        }
-
-        // Then sort by balance - tokens with balance go to top
+        // Sort by balance - tokens with balance go to top
         const aHasBalance = a.balance.gt(0) && a.balanceUsd > 0.01;
         const bHasBalance = b.balance.gt(0) && b.balanceUsd > 0.01;
 
@@ -758,14 +732,9 @@ const TokenEntry = ({
   onClick: () => void;
 }) => {
   const hasBalance = token.balance.gt(0) && token.balanceUsd > 0.01;
-  const isDisabled = token.isReachable === false;
 
   return (
-    <EntryItem
-      isSelected={isSelected}
-      isDisabled={isDisabled}
-      onClick={isDisabled ? undefined : onClick}
-    >
+    <EntryItem isSelected={isSelected} isDisabled={false} onClick={onClick}>
       <TokenItemImage token={token} />
       <TokenNameSymbolWrapper>
         <TokenName>{token.name}</TokenName>
