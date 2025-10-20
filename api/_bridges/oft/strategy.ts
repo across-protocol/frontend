@@ -742,7 +742,6 @@ export function getHyperLiquidComposerMessage(
    * See Docs: https://docs.layerzero.network/v2/tools/sdks/options
    *
    */
-
   const extraOptions = "0x00030100130300000000000000000000000000000000ea60";
 
   return { composeMsg, toAddress, extraOptions };
