@@ -50,7 +50,6 @@ import {
   isEvmToHyperCoreRoute,
   isToHyperCore,
   encodeForwardHookData,
-  encodeForwardHookDataForEvm,
   getCctpFees,
 } from "./utils/hypercore";
 
@@ -463,7 +462,7 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
     // For EVM → HyperCore: use depositForBurnWithHook with CCTP Forwarder
     // Use intermediaryChainId (HyperEVM) to get the forwarder address
     const forwarderAddress = getCctpForwarderAddress(intermediaryChainId);
-    const hookData = encodeForwardHookDataForEvm(crossSwap.recipient);
+    const hookData = encodeForwardHookData(crossSwap.recipient);
 
     callData = encodeDepositForBurnWithHook({
       amount: depositForBurnParams.amount,
@@ -631,7 +630,12 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
     ? await TokenMessengerMinterV2Client.getDepositForBurnWithHookInstructionAsync(
         {
           ...depositInstructionParams,
-          hookData: encodeForwardHookData(crossSwap.recipient),
+          hookData: new Uint8Array(
+            Buffer.from(
+              encodeForwardHookData(crossSwap.recipient).slice(2),
+              "hex"
+            )
+          ),
         }
       )
     : await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync(

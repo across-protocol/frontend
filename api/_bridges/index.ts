@@ -22,34 +22,6 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   },
   inputTokens: {
     USDC: {
-      // EVM → HyperCore routes (mainnet)
-      [CHAIN_IDs.MAINNET]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.ARBITRUM]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.BASE]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.OPTIMISM]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.POLYGON]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.HYPEREVM]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.INK]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.UNICHAIN]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      [CHAIN_IDs.WORLD_CHAIN]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
       // Testnet routes
       [CHAIN_IDs.HYPEREVM_TESTNET]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),

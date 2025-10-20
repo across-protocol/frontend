@@ -30,61 +30,32 @@ export function isToHyperCore(destinationChainId: number) {
 }
 
 /**
- * Encodes forward hook data for CCTP Solana -> HyperCore routing.
+ * Encodes forward hook data for CCTP -> HyperCore routing.
+ * Works for both EVM and Solana ecosystems.
  *
- * @param hypercoreMintRecipient address of the recipient on HyperCore
- * @returns Uint8Array containing the encoded hook data
- */
-export function encodeForwardHookData(
-  hypercoreMintRecipient: string
-): Uint8Array {
-  const hookDataBuffer = new Uint8Array(52);
-
-  // Base hook data is the hex representation of:
-  // - "cctp-forward" padded to 24 bytes
-  // - 4 bytes for version (0x00000000)
-  // - 4 bytes for data length (0x00000014 = 20 in big-endian)
-  const baseHookData =
-    "636374702d666f72776172640000000000000000000000000000000000000014";
-  hookDataBuffer.set(Buffer.from(baseHookData, "hex"), 0);
-
-  // Write the 20-byte recipient address at byte 32
-  const recipientBytes = Buffer.from(
-    hypercoreMintRecipient.replace("0x", ""),
-    "hex"
-  );
-  if (recipientBytes.length !== 20) {
-    throw new InvalidParamError({
-      message: `Invalid HyperCore recipient address length: expected 20 bytes, got ${recipientBytes.length}`,
-      param: "hypercoreMintRecipient",
-    });
-  }
-  hookDataBuffer.set(recipientBytes, 32);
-
-  return hookDataBuffer;
-}
-
-/**
- * Encodes forward hook data for CCTP EVM -> HyperCore routing.
+ * Hook data structure (52 bytes):
+ * - Bytes 0-23: "cctp-forward" magic string padded to 24 bytes
+ * - Bytes 24-27: Version (0x00000000)
+ * - Bytes 28-31: Data length (0x00000014 = 20 bytes in big-endian)
+ * - Bytes 32-51: 20-byte HyperCore recipient address
  *
- * @param hypercoreMintRecipient address of the recipient on HyperCore
- * @returns Hex string of encoded hook data for EVM
+ * @param hypercoreMintRecipient address of the recipient on HyperCore (with or without 0x prefix)
+ * @returns Hex string (0x-prefixed) containing the 52-byte encoded hook data
  */
-export function encodeForwardHookDataForEvm(
-  hypercoreMintRecipient: string
-): string {
+export function encodeForwardHookData(hypercoreMintRecipient: string): string {
   const hookDataBuffer = Buffer.alloc(52);
 
-  // Base hook data: magic bytes ("cctp-forward") + version (0) + data length (20)
+  // Base hook data: "cctp-forward" (24 bytes) + version (4 bytes) + length (4 bytes)
   const baseHookData =
-    "0x636374702d666f72776172640000000000000000000000000000000000000014";
-  hookDataBuffer.write(baseHookData.slice(2), 0, "hex");
+    "636374702d666f72776172640000000000000000000000000000000000000014";
+  hookDataBuffer.write(baseHookData, 0, "hex");
 
-  // Write the HyperCore mint recipient address at byte offset 32
+  // Extract recipient address without 0x prefix
   const recipientWithoutPrefix = hypercoreMintRecipient.startsWith("0x")
     ? hypercoreMintRecipient.slice(2)
     : hypercoreMintRecipient;
 
+  // Validate recipient address is exactly 20 bytes (40 hex characters)
   if (recipientWithoutPrefix.length !== 40) {
     throw new InvalidParamError({
       message: `Invalid HyperCore recipient address: expected 40 hex chars, got ${recipientWithoutPrefix.length}`,
@@ -92,6 +63,7 @@ export function encodeForwardHookDataForEvm(
     });
   }
 
+  // Write the 20-byte recipient address at byte offset 32
   hookDataBuffer.write(recipientWithoutPrefix, 32, "hex");
 
   return "0x" + hookDataBuffer.toString("hex");
