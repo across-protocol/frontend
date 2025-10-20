@@ -12,28 +12,26 @@ type Props = {
   inputProps?: React.ComponentPropsWithoutRef<"input">;
 };
 
-export const Searchbar = ({
-  searchTopic,
-  search,
-  setSearch,
-  className,
-  inputProps,
-}: Props) => {
-  return (
-    <Wrapper className={className}>
-      <StyledSearchIcon />
-      <Input
-        id={`search-${searchTopic}`}
-        name={`search-${searchTopic}`}
-        placeholder={`Search ${searchTopic}s`}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        {...inputProps}
-      />
-      {search ? <StyledProductIcon onClick={() => setSearch("")} /> : <div />}
-    </Wrapper>
-  );
-};
+export const Searchbar = React.forwardRef<HTMLInputElement, Props>(
+  ({ searchTopic, search, setSearch, className, inputProps }, ref) => {
+    Searchbar.displayName = "Searchbar";
+    return (
+      <Wrapper className={className}>
+        <StyledSearchIcon />
+        <Input
+          ref={ref}
+          id={`search-${searchTopic}`}
+          name={`search-${searchTopic}`}
+          placeholder={`Search ${searchTopic}s`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          {...inputProps}
+        />
+        {search ? <StyledProductIcon onClick={() => setSearch("")} /> : <div />}
+      </Wrapper>
+    );
+  }
+);
 
 const Wrapper = styled.div`
   display: flex;

@@ -260,7 +260,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   // Render unified group driven by state
   const content = (
-    <AnimatePresence initial={false} mode="wait">
+    <>
       <ExpandableLabelSection
         fee={displayValues.fee}
         time={displayValues.time}
@@ -330,7 +330,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         fullHeight={state !== "readyToConfirm"}
         onClick={onConfirm}
       />
-    </AnimatePresence>
+    </>
   );
 
   return <Container disabled={isButtonDisabled}>{content}</Container>;

@@ -2,9 +2,7 @@ import Modal from "components/Modal";
 import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
-import useAvailableCrosschainRoutes, {
-  LifiToken,
-} from "hooks/useAvailableCrosschainRoutes";
+import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
   ChainInfo,
@@ -15,8 +13,8 @@ import {
   parseUnits,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
-import { useMemo, useState, useEffect } from "react";
-import { ReactComponent as CheckmarkCircle } from "assets/icons/checkmark-circle.svg";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
@@ -391,6 +389,7 @@ const DesktopModal = ({
       width={1100}
       height={800}
       titleBorder
+      noScroll
     >
       <DesktopLayout
         selectedChain={selectedChain}
@@ -434,12 +433,25 @@ const MobileLayout = ({
   onTokenSelect: (token: EnrichedToken) => void;
   onModalClose: () => void;
 }) => {
+  const chainSearchInputRef = useRef<HTMLInputElement>(null);
+  const tokenSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus chain search input when modal opens or when navigating back to chain step
+  useEffect(() => {
+    if (mobileStep === "chain") {
+      chainSearchInputRef.current?.focus();
+    } else if (mobileStep === "token") {
+      tokenSearchInputRef.current?.focus();
+    }
+  }, [mobileStep]);
+
   return (
     <MobileInnerWrapper>
       {mobileStep === "chain" ? (
         // Step 1: Chain Selection
         <MobileChainWrapper>
           <SearchBarStyled
+            ref={chainSearchInputRef}
             search={chainSearch}
             setSearch={setChainSearch}
             searchTopic="Chain"
@@ -568,11 +580,25 @@ const DesktopLayout = ({
   onTokenSelect: (token: EnrichedToken) => void;
   onModalClose: () => void;
 }) => {
+  const chainSearchInputRef = useRef<HTMLInputElement>(null);
+  const tokenSearchInputRef = useRef<HTMLInputElement>(null);
   useHotkeys("esc", () => onModalClose());
+
+  // Focus chain search input when component mounts
+  useEffect(() => {
+    chainSearchInputRef.current?.focus();
+  }, []);
+
+  function handleSelectChain(chainId: number | null): void {
+    onChainSelect(chainId);
+    tokenSearchInputRef.current?.focus();
+  }
+
   return (
     <DesktopInnerWrapper>
       <DesktopChainWrapper>
         <SearchBarStyled
+          ref={chainSearchInputRef}
           inputProps={{
             tabIndex: 2,
           }}
@@ -584,7 +610,7 @@ const DesktopLayout = ({
           <ChainEntry
             chainId={null}
             isSelected={selectedChain === null}
-            onClick={() => onChainSelect(null)}
+            onClick={() => handleSelectChain(null)}
           />
 
           {/* Popular Chains Section */}
@@ -594,10 +620,10 @@ const DesktopLayout = ({
               {displayedChains.popular.map(({ chainId, isDisabled }) => (
                 <ChainEntry
                   key={chainId}
-                  chainId={Number(chainId)}
-                  isSelected={selectedChain === Number(chainId)}
+                  chainId={chainId}
+                  isSelected={selectedChain === chainId}
                   isDisabled={isDisabled}
-                  onClick={() => onChainSelect(Number(chainId))}
+                  onClick={() => handleSelectChain(chainId)}
                 />
               ))}
             </>
@@ -610,10 +636,10 @@ const DesktopLayout = ({
               {displayedChains.all.map(({ chainId, isDisabled }) => (
                 <ChainEntry
                   key={chainId}
-                  chainId={Number(chainId)}
-                  isSelected={selectedChain === Number(chainId)}
+                  chainId={chainId}
+                  isSelected={selectedChain === chainId}
                   isDisabled={isDisabled}
-                  onClick={() => onChainSelect(Number(chainId))}
+                  onClick={() => handleSelectChain(chainId)}
                 />
               ))}
             </>
@@ -629,6 +655,7 @@ const DesktopLayout = ({
           inputProps={{
             tabIndex: 3,
           }}
+          ref={tokenSearchInputRef}
           searchTopic="Token"
           search={tokenSearch}
           setSearch={setTokenSearch}
@@ -800,9 +827,7 @@ const SearchBarStyled = styled(Searchbar)`
 const TokenItemImageWrapper = styled.div`
   width: 32px;
   height: 32px;
-
   flex-shrink: 0;
-
   position: relative;
 `;
 
@@ -1014,7 +1039,7 @@ const ChainItemName = styled.div`
   line-height: 130%; /* 20.8px */
 `;
 
-const ChainItemCheckmark = styled(CheckmarkCircle)`
+const ChainItemCheckmark = styled(CheckmarkCircleFilled)`
   width: 20px;
   height: 20px;
   margin-left: auto;

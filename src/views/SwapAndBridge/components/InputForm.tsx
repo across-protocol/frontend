@@ -3,7 +3,7 @@ import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import { BalanceSelector } from "./BalanceSelector";
 import styled from "@emotion/styled";
-import { useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
@@ -114,6 +114,9 @@ const TokenInput = ({
   disabled?: boolean;
   otherToken?: EnrichedToken | null;
 }) => {
+  const amountInputRef = useRef<HTMLInputElement>(null);
+  const hasAutoFocusedRef = useRef(false);
+
   const {
     amountString,
     unit,
@@ -134,6 +137,19 @@ const TokenInput = ({
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
+  useEffect(() => {
+    // Focus origin token amount input when it first becomes enabled
+    if (
+      isOrigin &&
+      !inputDisabled &&
+      !hasAutoFocusedRef.current &&
+      amountInputRef.current
+    ) {
+      amountInputRef.current.focus();
+      hasAutoFocusedRef.current = true;
+    }
+  }, [isOrigin, inputDisabled]);
+
   const formattedConvertedAmount = (() => {
     if (!convertedAmount) return "0.00";
     if (unit === "token") {
@@ -149,6 +165,7 @@ const TokenInput = ({
           {isOrigin ? "From" : "To"}
         </TokenAmountInputTitle>
         <TokenAmountInput
+          ref={amountInputRef}
           placeholder="0.00"
           value={amountString}
           onChange={(e) => handleInputChange(e.target.value)}

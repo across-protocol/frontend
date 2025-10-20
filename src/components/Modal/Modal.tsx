@@ -178,7 +178,7 @@ const Modal = ({
               {titleBorder && <ElementRowDivider />}
             </ModalHeader>
 
-            <ModalContent>{children}</ModalContent>
+            <ModalContent noScroll={noScroll}>{children}</ModalContent>
 
             {footer && <ModalFooter>{footer}</ModalFooter>}
           </ModalContentWrapper>
