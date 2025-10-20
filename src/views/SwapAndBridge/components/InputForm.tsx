@@ -183,14 +183,23 @@ const TokenInput = ({
         <TokenAmountInputTitle>
           {isOrigin ? "From" : "To"}
         </TokenAmountInputTitle>
-        <TokenAmountInput
-          ref={amountInputRef}
-          placeholder="0.00"
+
+        <TokenAmountInputWrapper
+          showPrefix={unit === "usd"}
           value={amountString}
-          onChange={(e) => handleInputChange(e.target.value)}
-          disabled={inputDisabled}
           error={insufficientInputBalance}
-        />
+        >
+          <TokenAmountInput
+            id={`${isOrigin ? "origin" : "destination"}-token-input`}
+            name={`${isOrigin ? "origin" : "destination"}-token-input`}
+            ref={amountInputRef}
+            placeholder="0.00"
+            value={amountString}
+            onChange={(e) => handleInputChange(e.target.value)}
+            disabled={inputDisabled}
+            error={insufficientInputBalance}
+          />
+        </TokenAmountInputWrapper>
         <TokenAmountInputEstimatedUsd>
           <ValueRow>
             <UnitToggleButton onClick={toggleUnit}>
@@ -275,27 +284,60 @@ const TokenAmountInputTitle = styled.div`
   line-height: 130%;
 `;
 
-const TokenAmountInput = styled.input<{
+const TokenAmountInputWrapper = styled.div<{
+  showPrefix: boolean;
   value: string;
   error: boolean;
 }>`
-  font-family: Barlow;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+
   font-size: 48px;
   font-weight: 300;
   line-height: 120%;
   letter-spacing: -1.92px;
-  width: 100%;
+
   color: ${({ value, error }) =>
     error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
 
+  &:focus-within {
+    font-size: 48px;
+  }
+
+  ${({ showPrefix }) =>
+    showPrefix &&
+    `
+    &::before {
+      content: "$";
+      margin-right: 4px;
+      flex-shrink: 0;
+      font-size: 48px;
+      font-weight: 300;
+      line-height: 120%;
+      letter-spacing: -1.92px;
+    }
+  `}
+`;
+
+const TokenAmountInput = styled.input<{
+  value: string;
+  error: boolean;
+}>`
+  width: 100%;
   outline: none;
   border: none;
   background: transparent;
-
+  font: inherit;
+  font-size: inherit;
+  color: ${({ value, error }) =>
+    error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
   flex-shrink: 0;
 
   &:focus {
     font-size: 48px;
+    outline: none;
   }
 `;
 
