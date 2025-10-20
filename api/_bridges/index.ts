@@ -3,12 +3,11 @@ import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
-  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
 } from "./types";
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
-import { getBridgeStrategyData } from "./utils";
+import { routeStrategyForCctp } from "./cctp/utils/routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -128,53 +127,4 @@ export function getSupportedBridgeStrategies({
       routingPreferenceFilter(strategy.name)
   );
   return supportedBridgeStrategies;
-}
-
-async function routeStrategyForCctp({
-  inputToken,
-  outputToken,
-  amount,
-  amountType,
-  recipient,
-  depositor,
-}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
-  const bridgeStrategyData = await getBridgeStrategyData({
-    inputToken,
-    outputToken,
-    amount,
-    amountType,
-    recipient,
-    depositor,
-  });
-  if (!bridgeStrategyData) {
-    return bridgeStrategies.default;
-  }
-  if (!bridgeStrategyData.isUsdcToUsdc) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUtilizationHigh) {
-    return getCctpBridgeStrategy();
-  }
-  if (bridgeStrategyData.isLineaSource) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isFastCctpEligible) {
-    if (bridgeStrategyData.isInThreshold) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getCctpBridgeStrategy();
-    }
-  }
-  if (bridgeStrategyData.canFillInstantly) {
-    return getAcrossBridgeStrategy();
-  } else {
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getCctpBridgeStrategy();
-    }
-  }
 }
