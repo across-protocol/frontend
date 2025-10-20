@@ -15,6 +15,7 @@ import {
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals, getProvider } from "../../_utils";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
+import { getNativeTokenInfo } from "../../swap/_utils";
 import {
   getOftMessengerForToken,
   createSendParamStruct,
@@ -322,7 +323,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     }: GetExactInputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const [{ inputAmount, outputAmount }, estimatedFillTimeSec] =
+      const [{ inputAmount, outputAmount, nativeFee }, estimatedFillTimeSec] =
         await Promise.all([
           getQuote({
             inputToken,
@@ -337,6 +338,8 @@ export function getOftBridgeStrategy(): BridgeStrategy {
           ),
         ]);
 
+      const nativeToken = getNativeTokenInfo(inputToken.chainId);
+
       return {
         bridgeQuote: {
           inputToken,
@@ -346,7 +349,11 @@ export function getOftBridgeStrategy(): BridgeStrategy {
           minOutputAmount: outputAmount,
           estimatedFillTimeSec,
           provider: name,
-          fees: getOftBridgeFees(inputToken),
+          fees: getOftBridgeFees({
+            inputToken,
+            nativeFee,
+            nativeToken,
+          }),
         },
       };
     },
@@ -368,7 +375,7 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       )(minOutputAmount);
 
       // Get quote from OFT contracts and estimated fill time in parallel
-      const [{ inputAmount, outputAmount }, estimatedFillTimeSec] =
+      const [{ inputAmount, outputAmount, nativeFee }, estimatedFillTimeSec] =
         await Promise.all([
           getQuote({
             inputToken,
@@ -392,6 +399,8 @@ export function getOftBridgeStrategy(): BridgeStrategy {
       );
       assertMinOutputAmount(outputAmount, roundedMinOutputAmount);
 
+      const nativeToken = getNativeTokenInfo(inputToken.chainId);
+
       return {
         bridgeQuote: {
           inputToken,
@@ -401,7 +410,11 @@ export function getOftBridgeStrategy(): BridgeStrategy {
           minOutputAmount,
           estimatedFillTimeSec,
           provider: name,
-          fees: getOftBridgeFees(inputToken),
+          fees: getOftBridgeFees({
+            inputToken,
+            nativeFee,
+            nativeToken,
+          }),
         },
       };
     },
@@ -491,9 +504,12 @@ export function getOftBridgeStrategy(): BridgeStrategy {
   };
 }
 
-// TODO: Include messageFee and oftFee in the fees structure
-// https://linear.app/uma/issue/ACX-4499/add-oft-fees-to-swap-api-response
-function getOftBridgeFees(inputToken: Token) {
+function getOftBridgeFees(params: {
+  inputToken: Token;
+  nativeFee: BigNumber;
+  nativeToken: Token;
+}) {
+  const { inputToken, nativeFee, nativeToken } = params;
   const zeroBN = BigNumber.from(0);
   return {
     totalRelay: {
@@ -515,6 +531,11 @@ function getOftBridgeFees(inputToken: Token) {
       pct: zeroBN,
       total: zeroBN,
       token: inputToken,
+    },
+    bridgeFee: {
+      pct: zeroBN,
+      total: nativeFee,
+      token: nativeToken,
     },
   };
 }
