@@ -158,6 +158,16 @@ export async function getL2OrderBookForPair(params: {
     coin,
   });
 
+  if (!response.data) {
+    throw new Error(
+      `Hyperliquid API: Unexpected L2OrderBook value '${response.data}'`
+    );
+  }
+
+  if (response.data?.levels.length < 2) {
+    throw new Error("Hyperliquid API: Unexpected L2OrderBook 'levels' length");
+  }
+
   return response.data;
 }
 
