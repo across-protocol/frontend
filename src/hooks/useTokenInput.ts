@@ -107,7 +107,8 @@ export function useTokenInput({
               token.decimals
             );
             const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-            setAmountString(utils.formatUnits(usdValue, token.decimals));
+            // convertTokenToUSD returns in 18 decimal precision
+            setAmountString(utils.formatUnits(usdValue, 18));
           }
         }
       }
@@ -131,6 +132,7 @@ export function useTokenInput({
         setConvertedAmount(tokenValue);
       }
     } catch (e) {
+      // getting an underflow error here
       setConvertedAmount(undefined);
     }
   }, [token, amountString, unit]);
@@ -141,7 +143,8 @@ export function useTokenInput({
       // Convert token amount to USD string for display
       if (amountString && token && convertedAmount) {
         try {
-          const a = utils.formatUnits(convertedAmount, token.decimals);
+          // convertedAmount is USD value in 18 decimals
+          const a = utils.formatUnits(convertedAmount, 18);
           setAmountString(a);
         } catch (e) {
           setAmountString("0");
@@ -153,6 +156,7 @@ export function useTokenInput({
       // Convert USD amount to token string for display
       if (amountString && token && convertedAmount) {
         try {
+          // convertedAmount is token value in token's native decimals
           const a = utils.formatUnits(convertedAmount, token.decimals);
           setAmountString(a);
         } catch (e) {

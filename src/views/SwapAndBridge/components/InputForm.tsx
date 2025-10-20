@@ -157,8 +157,10 @@ const TokenInput = ({
   const formattedConvertedAmount = (() => {
     if (!convertedAmount) return "0.00";
     if (unit === "token") {
-      return "$" + formatUSD(convertedAmount, token?.decimals);
+      // convertTokenToUSD returns in 18 decimal precision
+      return "$" + formatUSD(convertedAmount);
     }
+    // convertUSDToToken returns in token's native decimals
     return `${formatUnits(convertedAmount, token?.decimals)} ${token?.symbol}`;
   })();
 

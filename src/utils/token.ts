@@ -83,6 +83,26 @@ export function getExplorerLinkForToken(
   return `${getChainInfo(tokenChainId).explorerUrl}/address/${tokenAddress}`;
 }
 
+// Standard precision for intermediate calculations (matches Ethereum wei)
+const PRECISION = 18;
+
+/**
+ * Limits a decimal string to a maximum number of decimal places without losing precision
+ * @param value - The decimal string to limit
+ * @param maxDecimals - Maximum number of decimal places
+ * @returns The limited string
+ */
+function limitDecimals(value: string, maxDecimals: number): string {
+  const parts = value.split(".");
+  if (parts.length === 1) {
+    return value; // No decimal point
+  }
+  if (parts[1].length <= maxDecimals) {
+    return value; // Within limits
+  }
+  return parts[0] + "." + parts[1].substring(0, maxDecimals);
+}
+
 /**
  * Converts a token amount to USD value
  * @param tokenAmount - The token amount as a string (decimal format)
@@ -93,22 +113,37 @@ export function convertTokenToUSD(
   tokenAmount: string,
   token: LifiToken
 ): BigNumber {
-  const tokenScaled = parseUnits(tokenAmount, token.decimals);
-  const priceScaled = parseUnits(token.priceUSD, token.decimals);
-  return tokenScaled.mul(priceScaled).div(parseUnits("1", token.decimals));
+  // Use 18 decimals for maximum precision in calculations
+  const normalizedAmount = limitDecimals(tokenAmount, PRECISION);
+  const tokenScaled = parseUnits(normalizedAmount, PRECISION);
+  const priceScaled = parseUnits(token.priceUSD, PRECISION);
+  return tokenScaled.mul(priceScaled).div(parseUnits("1", PRECISION));
 }
 
 /**
  * Converts a USD amount to token amount
  * @param usdAmount - The USD amount as a string (decimal format)
  * @param token - The token object containing price and decimals
- * @returns The token amount as a BigNumber
+ * @returns The token amount as a BigNumber (in token's native decimals)
  */
 export function convertUSDToToken(
   usdAmount: string,
   token: LifiToken
 ): BigNumber {
-  const usdScaled = parseUnits(usdAmount, token.decimals);
-  const priceScaled = parseUnits(token.priceUSD, token.decimals);
-  return usdScaled.mul(parseUnits("1", token.decimals)).div(priceScaled);
+  // Use 18 decimals for maximum precision in calculations
+  const normalizedAmount = limitDecimals(usdAmount, PRECISION);
+  const usdScaled = parseUnits(normalizedAmount, PRECISION);
+  const priceScaled = parseUnits(token.priceUSD, PRECISION);
+  const result18Dec = usdScaled
+    .mul(parseUnits("1", PRECISION))
+    .div(priceScaled);
+
+  // Convert from 18 decimals to token's native decimals
+  const decimalDiff = PRECISION - token.decimals;
+  if (decimalDiff > 0) {
+    return result18Dec.div(BigNumber.from(10).pow(decimalDiff));
+  } else if (decimalDiff < 0) {
+    return result18Dec.mul(BigNumber.from(10).pow(-decimalDiff));
+  }
+  return result18Dec;
 }
