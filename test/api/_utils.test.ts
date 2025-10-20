@@ -147,6 +147,20 @@ describe("_utils", () => {
       expect(token).toBeUndefined();
     });
 
+    it("should return the native token for a zero address", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainId = CHAIN_IDs.MAINNET;
+      const token = getTokenByAddress(zeroAddress, chainId);
+      expect(token).toBeDefined();
+      expect(token?.symbol).toBe("ETH");
+    });
+
+    it("should return undefined for a zero address without a chainId", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const token = getTokenByAddress(zeroAddress);
+      expect(token).toBeUndefined();
+    });
+
     it("should correctly resolve ambiguous tokens like USDC", () => {
       const usdcAddresses = TOKEN_SYMBOLS_MAP.USDC.addresses;
       const mainnetChainId = CHAIN_IDs.MAINNET;
