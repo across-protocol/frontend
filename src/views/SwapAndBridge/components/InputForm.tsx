@@ -4,12 +4,12 @@ import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import { BalanceSelector } from "./BalanceSelector";
 import { QuoteWarning } from "./QuoteWarning";
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
-import { useTokenInput } from "hooks";
+import { useTokenInput, UnitType } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 
 export const InputForm = ({
@@ -43,6 +43,9 @@ export const InputForm = ({
   validationError: AmountInputError | undefined;
   quoteWarningMessage: string | null;
 }) => {
+  // Shared unit state for both inputs
+  const [unit, setUnit] = useState<UnitType>("token");
+
   const quickSwap = useCallback(() => {
     const origin = inputToken;
     const destination = outputToken;
@@ -72,6 +75,8 @@ export const InputForm = ({
         }
         otherToken={outputToken}
         disabled={!outputToken || !outputToken}
+        unit={unit}
+        setUnit={setUnit}
       />
       <QuickSwapButton onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
@@ -89,6 +94,8 @@ export const InputForm = ({
         isUpdateLoading={isQuoteLoading}
         otherToken={inputToken}
         disabled={!outputToken || !outputToken}
+        unit={unit}
+        setUnit={setUnit}
       />
       {/* <QuoteWarning message={quoteWarningMessage} /> */}
     </Wrapper>
@@ -106,6 +113,8 @@ const TokenInput = ({
   insufficientInputBalance = false,
   otherToken,
   disabled,
+  unit,
+  setUnit,
 }: {
   setToken: (token: EnrichedToken) => void;
   token: EnrichedToken | null;
@@ -117,13 +126,15 @@ const TokenInput = ({
   insufficientInputBalance?: boolean;
   disabled?: boolean;
   otherToken?: EnrichedToken | null;
+  unit: UnitType;
+  setUnit: (unit: UnitType) => void;
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
   const {
     amountString,
-    unit,
+    unit: hookUnit,
     convertedAmount,
     toggleUnit,
     handleInputChange,
@@ -134,6 +145,8 @@ const TokenInput = ({
     expectedAmount,
     shouldUpdate,
     isUpdateLoading,
+    unit,
+    setUnit,
   });
 
   const inputDisabled = (() => {

@@ -12,6 +12,9 @@ type UseTokenInputProps = {
   expectedAmount: string | undefined;
   shouldUpdate: boolean;
   isUpdateLoading: boolean;
+  // Optional: Allow unit state to be controlled from parent
+  unit?: UnitType;
+  setUnit?: (unit: UnitType) => void;
 };
 
 type UseTokenInputReturn = {
@@ -30,11 +33,17 @@ export function useTokenInput({
   expectedAmount,
   shouldUpdate,
   isUpdateLoading,
+  unit: externalUnit,
+  setUnit: externalSetUnit,
 }: UseTokenInputProps): UseTokenInputReturn {
   const [amountString, setAmountString] = useState<string>("");
-  const [unit, setUnit] = useState<UnitType>("token");
+  const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
   const [justTyped, setJustTyped] = useState(false);
+
+  // Use external unit if provided, otherwise use internal state
+  const unit = externalUnit ?? internalUnit;
+  const setUnit = externalSetUnit ?? setInternalUnit;
 
   // Handle user input changes - propagate to parent
   useEffect(() => {
@@ -166,7 +175,7 @@ export function useTokenInput({
         }
       }
     }
-  }, [unit, amountString, token, convertedAmount]);
+  }, [unit, amountString, token, convertedAmount, setUnit]);
 
   // Handle input field changes
   const handleInputChange = useCallback((value: string) => {
