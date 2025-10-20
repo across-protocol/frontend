@@ -21,7 +21,7 @@ import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
-import { Text } from "components";
+import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
 
 const popularChains = [
@@ -831,7 +831,7 @@ const TokenItemImageWrapper = styled.div`
   position: relative;
 `;
 
-const TokenItemTokenImage = styled.img`
+const TokenItemTokenImage = styled(TokenImage)`
   width: 100%;
   height: 100%;
 
@@ -846,7 +846,7 @@ const TokenItemTokenImage = styled.img`
   mask-position: center;
 `;
 
-const TokenItemChainImage = styled.img`
+const TokenItemChainImage = styled(TokenImage)`
   width: 12px;
   height: 12px;
 

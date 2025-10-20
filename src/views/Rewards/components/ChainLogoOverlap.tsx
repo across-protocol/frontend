@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
+import { TokenImage } from "components/TokenImage";
 import { COLORS, getChainInfo, rewardProgramTypes } from "utils";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 
@@ -14,7 +15,9 @@ const ChainLogoOverlap = ({ program }: { program: rewardProgramTypes }) => {
   }
 
   const tooltipTitle = `${rewardTokenSymbol} Reward eligible routes`;
-  const tooltipIcon = <ChainTooltipIcon src={token.logoURI} />;
+  const tooltipIcon = (
+    <ChainTooltipIcon src={token.logoURI} alt={token.symbol} />
+  );
 
   return (
     <ChainOverlapWrapper
@@ -39,6 +42,7 @@ const ChainLogoOverlap = ({ program }: { program: rewardProgramTypes }) => {
         <ChainLogo
           key={chain}
           src={getChainInfo(chain).logoURI}
+          alt={getChainInfo(chain).name}
           zIndex={idx + 1}
         />
       ))}
@@ -53,7 +57,7 @@ const ChainOverlapWrapper = styled(Tooltip)`
   align-items: flex-start;
 `;
 
-const ChainLogo = styled.img<{ zIndex: number }>`
+const ChainLogo = styled(TokenImage)<{ zIndex: number }>`
   height: 18px;
   width: 18px;
   border-radius: 50%;
@@ -62,7 +66,7 @@ const ChainLogo = styled.img<{ zIndex: number }>`
   margin-left: -10px;
 `;
 
-const ChainTooltipIcon = styled.img`
+const ChainTooltipIcon = styled(TokenImage)`
   width: 16px;
   height: 16px;
 

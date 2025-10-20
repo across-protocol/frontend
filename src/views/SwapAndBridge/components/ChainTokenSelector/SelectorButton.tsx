@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
+import { TokenImage } from "components/TokenImage";
 import ChainTokenSelectorModal, { EnrichedToken } from "./Modal";
 
 type Props = {
@@ -66,8 +67,8 @@ export default function SelectorButton({
     <>
       <Wrapper className={className} onClick={() => setDisplayModal(true)}>
         <TokenStack>
-          <TokenImg src={selectedToken.logoURI} />
-          <ChainImg src={chain.logoURI} />
+          <TokenImg src={selectedToken.logoURI} alt={selectedToken.symbol} />
+          <ChainImg src={chain.logoURI} alt={chain.name} />
         </TokenStack>
         <VerticalDivider />
         <NamesStack>
@@ -169,7 +170,7 @@ const TokenStack = styled.div`
   flex-grow: 0;
 `;
 
-const TokenImg = styled.img`
+const TokenImg = styled(TokenImage)`
   border-radius: 50%;
   position: absolute;
   top: var(--padding);
@@ -179,7 +180,7 @@ const TokenImg = styled.img`
   z-index: 1;
 `;
 
-const ChainImg = styled.img`
+const ChainImg = styled(TokenImage)`
   border-radius: 50%;
   border: 1px solid transparent;
   background: ${COLORS["grey-600"]};

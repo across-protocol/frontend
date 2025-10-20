@@ -26,6 +26,7 @@ export default function SwapAndBridge() {
     buttonLoading,
     buttonLabel,
     onConfirm,
+    quoteWarningMessage,
   } = useSwapAndBridge();
 
   return (
@@ -43,6 +44,7 @@ export default function SwapAndBridge() {
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}
           validationError={validationError}
+          quoteWarningMessage={quoteWarningMessage}
         />
         <ConfirmationButton
           inputToken={inputToken}

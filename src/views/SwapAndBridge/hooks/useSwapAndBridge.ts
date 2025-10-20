@@ -14,6 +14,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useDefaultRoute } from "./useDefaultRoute";
 import { useConnection } from "hooks";
 import { useHistory } from "react-router-dom";
+import { getQuoteWarningMessage } from "utils";
 
 export type UseSwapAndBridgeReturn = {
   inputToken: EnrichedToken | null;
@@ -47,6 +48,8 @@ export type UseSwapAndBridgeReturn = {
   isWrongNetwork: boolean;
   isSubmitting: boolean;
   onConfirm: () => Promise<void>;
+  quoteError: Error | null;
+  quoteWarningMessage: string | null;
 };
 
 export function useSwapAndBridge(): UseSwapAndBridgeReturn {
@@ -203,6 +206,11 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     ]
   );
 
+  const quoteWarningMessage = useMemo(
+    () => getQuoteWarningMessage(error),
+    [error]
+  );
+
   return {
     inputToken,
     outputToken,
@@ -234,6 +242,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isWrongNetwork: approvalAction.isWrongNetwork,
     isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
+    quoteError: error,
+    quoteWarningMessage,
   };
 }
 

@@ -2,6 +2,7 @@ import { COLORS, formatUSD } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import { BalanceSelector } from "./BalanceSelector";
+import { QuoteWarning } from "./QuoteWarning";
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BigNumber } from "ethers";
@@ -23,6 +24,7 @@ export const InputForm = ({
   expectedOutputAmount,
   expectedInputAmount,
   validationError,
+  quoteWarningMessage,
 }: {
   inputToken: EnrichedToken | null;
   setInputToken: (token: EnrichedToken | null) => void;
@@ -39,6 +41,7 @@ export const InputForm = ({
   isAmountOrigin: boolean;
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
   validationError: AmountInputError | undefined;
+  quoteWarningMessage: string | null;
 }) => {
   const quickSwap = useCallback(() => {
     const origin = inputToken;
@@ -87,6 +90,7 @@ export const InputForm = ({
         otherToken={inputToken}
         disabled={!outputToken || !outputToken}
       />
+      {/* <QuoteWarning message={quoteWarningMessage} /> */}
     </Wrapper>
   );
 };

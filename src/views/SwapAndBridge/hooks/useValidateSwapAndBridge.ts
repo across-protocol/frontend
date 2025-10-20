@@ -1,10 +1,15 @@
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { AmountInputError } from "../../Bridge/utils";
 import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
 import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
+
+type AcrossApiErrorResponse = {
+  code?: string;
+  message?: string;
+};
 
 export type ValidationResult = {
   error?: AmountInputError;
@@ -17,7 +22,7 @@ export function useValidateSwapAndBridge(
   isAmountOrigin: boolean,
   inputToken: EnrichedToken | null,
   outputToken: EnrichedToken | null,
-  error: any
+  error: Error | null
 ): ValidationResult {
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
@@ -46,7 +51,8 @@ export function useValidateSwapAndBridge(
     }
     // backend availability
     if (!errorType && error && axios.isAxiosError(error)) {
-      const code = (error.response?.data as any)?.code as string | undefined;
+      const axiosError = error as AxiosError<AcrossApiErrorResponse>;
+      const code = axiosError.response?.data?.code;
       if (code === "AMOUNT_TOO_LOW") {
         errorType = AmountInputError.AMOUNT_TOO_LOW;
       } else if (code === "SWAP_QUOTE_UNAVAILABLE") {
