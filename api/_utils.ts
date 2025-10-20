@@ -471,12 +471,23 @@ export const getTokenByAddress = (
     }
 
     const ambiguousTokens = ["USDC", "USDT"];
-    const isAmbiguous =
-      matches.length > 1 &&
-      matches.some(([symbol]) => ambiguousTokens.includes(symbol));
-    if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
-      const token = matches.find(([symbol]) =>
-        ambiguousTokens.includes(symbol)
+    const wrappedTokens = [
+      "WETH",
+      "WMATIC",
+      "WHYPE",
+      "TATARA-WBTC",
+      "WBNB",
+      "WGHO",
+      "WGRASS",
+      "WSOL",
+      "WXPL",
+    ];
+
+    if (matches.length > 1) {
+      // Prefer wrapped tokens or ambiguous tokens if multiple matches
+      const token = matches.find(
+        ([symbol]) =>
+          wrappedTokens.includes(symbol) || ambiguousTokens.includes(symbol)
       );
       if (token) {
         return token[1];
