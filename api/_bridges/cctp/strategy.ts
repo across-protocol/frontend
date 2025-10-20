@@ -40,12 +40,14 @@ import {
   getCctpDomainId,
   getCctpForwarderAddress,
   encodeDepositForBurn,
+  encodeDepositForBurnWithHook,
 } from "./utils/constants";
 import { CHAIN_IDs } from "../../_constants";
 import {
   buildCctpTxHyperEvmToHyperCore,
   getAmountToHyperCore,
   isHyperEvmToHyperCoreRoute,
+  isEvmToHyperCoreRoute,
   isToHyperCore,
   encodeForwardHookData,
   getCctpFees,
@@ -322,6 +324,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       const originChainId = crossSwap.inputToken.chainId;
       const destinationChainId = crossSwap.outputToken.chainId;
 
+      // Handle HyperEVM → HyperCore with special CoreWallet flow
       if (
         isHyperEvmToHyperCoreRoute({
           inputToken: crossSwap.inputToken,
@@ -371,7 +374,8 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           crossSwapQuotes: params.quotes,
           integratorId: params.integratorId,
           originChainId,
-          destinationChainId,
+          destinationChainId, // Actual destination
+          intermediaryChainId: destinationChainIdForCctp, // Intermediary chain for routes that use a forwarder
           tokenMessenger,
           depositForBurnParams,
         });
@@ -424,6 +428,7 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
   integratorId?: string;
   originChainId: number;
   destinationChainId: number;
+  intermediaryChainId: number;
   tokenMessenger: string;
   depositForBurnParams: {
     amount: BigNumber;
@@ -438,17 +443,44 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
     crossSwapQuotes,
     integratorId,
     originChainId,
+    intermediaryChainId,
     tokenMessenger,
     depositForBurnParams,
   } = params;
   const { crossSwap } = crossSwapQuotes;
   const burnTokenAddress = crossSwap.inputToken.address;
 
-  // Encode the depositForBurn call
-  const callData = encodeDepositForBurn({
-    ...depositForBurnParams,
-    burnToken: burnTokenAddress,
+  // Check if this is an EVM → HyperCore route (needs depositForBurnWithHook)
+  const isEvmToHyperCore = isEvmToHyperCoreRoute({
+    inputToken: crossSwap.inputToken,
+    outputToken: crossSwap.outputToken,
   });
+
+  let callData: string;
+
+  if (isEvmToHyperCore) {
+    // For EVM → HyperCore: use depositForBurnWithHook with CCTP Forwarder
+    // Use intermediaryChainId (HyperEVM) to get the forwarder address
+    const forwarderAddress = getCctpForwarderAddress(intermediaryChainId);
+    const hookData = encodeForwardHookData(crossSwap.recipient);
+
+    callData = encodeDepositForBurnWithHook({
+      amount: depositForBurnParams.amount,
+      destinationDomain: depositForBurnParams.destinationDomain,
+      mintRecipient: forwarderAddress,
+      burnToken: burnTokenAddress,
+      destinationCaller: forwarderAddress,
+      maxFee: depositForBurnParams.maxFee,
+      minFinalityThreshold: depositForBurnParams.minFinalityThreshold,
+      hookData,
+    });
+  } else {
+    // Standard CCTP route: use depositForBurn
+    callData = encodeDepositForBurn({
+      ...depositForBurnParams,
+      burnToken: burnTokenAddress,
+    });
+  }
 
   // Handle integrator ID and swap API marker tagging
   const callDataWithIntegratorId = integratorId
@@ -598,7 +630,12 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
     ? await TokenMessengerMinterV2Client.getDepositForBurnWithHookInstructionAsync(
         {
           ...depositInstructionParams,
-          hookData: encodeForwardHookData(crossSwap.recipient),
+          hookData: new Uint8Array(
+            Buffer.from(
+              encodeForwardHookData(crossSwap.recipient).slice(2),
+              "hex"
+            )
+          ),
         }
       )
     : await TokenMessengerMinterV2Client.getDepositForBurnInstructionAsync(

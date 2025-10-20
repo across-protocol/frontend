@@ -30,38 +30,43 @@ export function isToHyperCore(destinationChainId: number) {
 }
 
 /**
- * Encodes forward hook data for CCTP Solana -> HyperCore routing.
+ * Encodes forward hook data for CCTP -> HyperCore routing.
+ * Works for both EVM and Solana ecosystems.
  *
- * @param hypercoreMintRecipient address of the recipient on HyperCore
- * @returns Uint8Array containing the encoded hook data
+ * Hook data structure (52 bytes):
+ * - Bytes 0-23: "cctp-forward" magic string padded to 24 bytes
+ * - Bytes 24-27: Version (0x00000000)
+ * - Bytes 28-31: Data length (0x00000014 = 20 bytes in big-endian)
+ * - Bytes 32-51: 20-byte HyperCore recipient address
+ *
+ * @param hypercoreMintRecipient address of the recipient on HyperCore (with or without 0x prefix)
+ * @returns Hex string (0x-prefixed) containing the 52-byte encoded hook data
  */
-export function encodeForwardHookData(
-  hypercoreMintRecipient: string
-): Uint8Array {
-  const hookDataBuffer = new Uint8Array(52);
+export function encodeForwardHookData(hypercoreMintRecipient: string): string {
+  const hookDataBuffer = Buffer.alloc(52);
 
-  // Base hook data is the hex representation of:
-  // - "cctp-forward" padded to 24 bytes
-  // - 4 bytes for version (0x00000000)
-  // - 4 bytes for data length (0x00000014 = 20 in big-endian)
+  // Base hook data: "cctp-forward" (24 bytes) + version (4 bytes) + length (4 bytes)
   const baseHookData =
     "636374702d666f72776172640000000000000000000000000000000000000014";
-  hookDataBuffer.set(Buffer.from(baseHookData, "hex"), 0);
+  hookDataBuffer.write(baseHookData, 0, "hex");
 
-  // Write the 20-byte recipient address at byte 32
-  const recipientBytes = Buffer.from(
-    hypercoreMintRecipient.replace("0x", ""),
-    "hex"
-  );
-  if (recipientBytes.length !== 20) {
+  // Extract recipient address without 0x prefix
+  const recipientWithoutPrefix = hypercoreMintRecipient.startsWith("0x")
+    ? hypercoreMintRecipient.slice(2)
+    : hypercoreMintRecipient;
+
+  // Validate recipient address is exactly 20 bytes (40 hex characters)
+  if (recipientWithoutPrefix.length !== 40) {
     throw new InvalidParamError({
-      message: `Invalid HyperCore recipient address length: expected 20 bytes, got ${recipientBytes.length}`,
+      message: `Invalid HyperCore recipient address: expected 40 hex chars, got ${recipientWithoutPrefix.length}`,
       param: "hypercoreMintRecipient",
     });
   }
-  hookDataBuffer.set(recipientBytes, 32);
 
-  return hookDataBuffer;
+  // Write the 20-byte recipient address at byte offset 32
+  hookDataBuffer.write(recipientWithoutPrefix, 32, "hex");
+
+  return "0x" + hookDataBuffer.toString("hex");
 }
 
 /**
@@ -259,4 +264,31 @@ export function buildCctpTxHyperEvmToHyperCore(params: {
     value: BigNumber.from(0),
     ecosystem: "evm" as const,
   };
+}
+
+/**
+ * Check if this is an EVM (non-HyperEVM, non-Solana) → HyperCore route
+ * These routes use depositForBurnWithHook with CCTP Forwarder
+ */
+export function isEvmToHyperCoreRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  // Check if destination is HyperCore (mainnet or testnet)
+  const isDestinationHyperCore = isToHyperCore(params.outputToken.chainId);
+
+  // Exclude HyperEVM → HyperCore (has special CoreWallet flow)
+  if (isHyperEvmToHyperCoreRoute(params)) {
+    return false;
+  }
+
+  // Check if source is EVM (not Solana or other non-EVM chains)
+  const isSourceEvm = ![
+    CHAIN_IDs.SOLANA,
+    CHAIN_IDs.SOLANA_DEVNET,
+    CHAIN_IDs.HYPERCORE,
+    CHAIN_IDs.HYPERCORE_TESTNET,
+  ].includes(params.inputToken.chainId);
+
+  return isDestinationHyperCore && isSourceEvm;
 }

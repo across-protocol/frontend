@@ -22,12 +22,17 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   },
   inputTokens: {
     USDC: {
-      [CHAIN_IDs.HYPEREVM]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
+      // Testnet routes
       [CHAIN_IDs.HYPEREVM_TESTNET]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
+      [CHAIN_IDs.SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      // SVM → HyperCore routes
       [CHAIN_IDs.SOLANA]: {
         [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
       },
