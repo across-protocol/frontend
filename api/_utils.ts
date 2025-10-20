@@ -2448,11 +2448,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
     }
 
     // Resolve token info statically
-    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
-      Boolean(
-        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
-      )
-    );
+    const token = getTokenByAddress(address, chainId);
 
     if (token) {
       return {
