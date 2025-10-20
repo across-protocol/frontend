@@ -12,6 +12,7 @@ import { Token } from "../../../../api/_dexes/types";
 import { ethers } from "ethers";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
+import { assert } from "console";
 
 describe("OFT Strategy", () => {
   describe("getHyperLiquidComposerMessage", () => {
@@ -63,18 +64,27 @@ describe("OFT Strategy", () => {
             destinationIndex < supportedChains.length;
             destinationIndex++
           ) {
+            const tokens =
+              TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+            assert(
+              tokens,
+              `Token ${tokenSymbol} not found in TOKEN_SYMBOLS_MAP`
+            );
+
+            const originChainId = supportedChains[originIndex];
+            const destinationChainId = supportedChains[destinationIndex];
             const params = {
               inputToken: {
                 symbol: tokenSymbol,
-                chainId: supportedChains[originIndex],
-                address: "0x1",
-                decimals: 18,
+                chainId: originChainId,
+                address: tokens.addresses[originChainId],
+                decimals: tokens.decimals,
               },
               outputToken: {
                 symbol: tokenSymbol,
-                chainId: supportedChains[destinationIndex],
-                address: "0x1",
-                decimals: 18,
+                chainId: destinationChainId,
+                address: tokens.addresses[destinationChainId],
+                decimals: tokens.decimals,
               },
             };
             expect(isRouteSupported(params)).toBe(true);
@@ -199,35 +209,34 @@ describe("OFT Strategy", () => {
     });
   });
 
-  const arbitrumUSDT: Token = {
-    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
-    symbol: "USDT",
-    decimals: 6,
-    chainId: CHAIN_IDs.ARBITRUM,
-  };
-
-  const polygonUSDT: Token = {
-    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
-    symbol: "USDT",
-    decimals: 6,
-    chainId: CHAIN_IDs.POLYGON,
-  };
-
-  const hyperCoreUSDT: Token = {
-    address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
-    symbol: "USDT-SPOT",
-    decimals: 8,
-    chainId: CHAIN_IDs.HYPERCORE,
-  };
-
-  const unsupportedToken: Token = {
-    address: "0x123",
-    symbol: "UNSUPPORTED",
-    decimals: 18,
-    chainId: CHAIN_IDs.ARBITRUM,
-  };
-
   describe("getOftCrossSwapTypes", () => {
+    const arbitrumUSDT: Token = {
+      address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
+      symbol: "USDT",
+      decimals: 6,
+      chainId: CHAIN_IDs.ARBITRUM,
+    };
+
+    const polygonUSDT: Token = {
+      address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
+      symbol: "USDT",
+      decimals: 6,
+      chainId: CHAIN_IDs.POLYGON,
+    };
+
+    const hyperCoreUSDT: Token = {
+      address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+      symbol: "USDT-SPOT",
+      decimals: 8,
+      chainId: CHAIN_IDs.HYPERCORE,
+    };
+
+    const unsupportedToken: Token = {
+      address: "0x123",
+      symbol: "UNSUPPORTED",
+      decimals: 18,
+      chainId: CHAIN_IDs.ARBITRUM,
+    };
     it("should return BRIDGEABLE_TO_BRIDGEABLE if route is supported", () => {
       const result = getOftCrossSwapTypes({
         inputToken: arbitrumUSDT,
