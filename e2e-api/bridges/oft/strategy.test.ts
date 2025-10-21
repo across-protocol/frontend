@@ -49,8 +49,8 @@ describe("OFT Strategy", () => {
   });
 
   describe("getQuote", () => {
-    it("should return a valid quote", async () => {
-      let result = await getQuote({
+    it("should return a valid quote from Arbitrum to Polygon", async () => {
+      const result = await getQuote({
         inputToken: arbitrumUSDT,
         outputToken: polygonUSDT,
         inputAmount: BigNumber.from(1000),
@@ -61,8 +61,10 @@ describe("OFT Strategy", () => {
       expect(result.outputAmount).toBeDefined();
       expect(result.nativeFee).toBeDefined();
       expect(result.oftFeeAmount).toBeDefined();
+    }, 30000);
 
-      result = await getQuote({
+    it("should return a valid quote from Arbitrum to Hyperlane", async () => {
+      const result = await getQuote({
         inputToken: arbitrumUSDT,
         outputToken: hyperCoreUSDT,
         inputAmount: BigNumber.from(1000),
