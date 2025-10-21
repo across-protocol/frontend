@@ -19,7 +19,7 @@ import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import styled from "@emotion/styled";
 import { AmountInputError } from "../../Bridge/utils";
 import { Tooltip } from "components/Tooltip";
-import { SwapApprovalApiResponse } from "utils/serverless-api/prod/swap-approval";
+import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -36,7 +36,7 @@ interface ConfirmationButtonProps
   inputToken: EnrichedToken | null;
   outputToken: EnrichedToken | null;
   amount: BigNumber | null;
-  swapQuote: SwapApprovalApiResponse | null;
+  swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
   validationError?: AmountInputError;

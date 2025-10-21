@@ -320,5 +320,60 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         ? BigNumber.from(result.swapTx.maxPriorityFeePerGas)
         : undefined,
     },
+    fees: {
+      total: {
+        amount: BigNumber.from(result.fees.total.amount),
+        amountUsd: result.fees.total.amountUsd,
+        pct: result.fees.total.pct,
+        token: result.fees.total.token,
+      },
+      originGas: {
+        amount: BigNumber.from(result.fees.originGas.amount),
+        amountUsd: result.fees.originGas.amountUsd,
+        token: result.fees.originGas.token,
+      },
+      destinationGas: {
+        amount: BigNumber.from(result.fees.destinationGas.amount),
+        amountUsd: result.fees.destinationGas.amountUsd,
+        pct: result.fees.destinationGas.pct,
+        token: result.fees.destinationGas.token,
+      },
+      relayerCapital: {
+        amount: BigNumber.from(result.fees.relayerCapital.amount),
+        amountUsd: result.fees.relayerCapital.amountUsd,
+        pct: result.fees.relayerCapital.pct,
+        token: result.fees.relayerCapital.token,
+      },
+      lpFee: {
+        amount: BigNumber.from(result.fees.lpFee.amount),
+        amountUsd: result.fees.lpFee.amountUsd,
+        pct: result.fees.lpFee.pct,
+        token: result.fees.lpFee.token,
+      },
+      relayerTotal: {
+        amount: BigNumber.from(result.fees.relayerTotal.amount),
+        amountUsd: result.fees.relayerTotal.amountUsd,
+        pct: result.fees.relayerTotal.pct,
+        token: result.fees.relayerTotal.token,
+      },
+      app: {
+        amount: BigNumber.from(result.fees.app.amount),
+        amountUsd: result.fees.app.amountUsd,
+        pct: result.fees.app.pct,
+        token: result.fees.app.token,
+      },
+      swap: result.fees.swap
+        ? {
+            amount: BigNumber.from(result.fees.swap.amount),
+            amountUsd: result.fees.swap.amountUsd,
+            pct: result.fees.swap.pct,
+            token: result.fees.swap.token,
+          }
+        : undefined,
+    },
   };
 }
+
+export type SwapApprovalApiCallReturnType = Awaited<
+  ReturnType<typeof swapApprovalApiCall>
+>;

@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
-import { vercelApiBaseUrl } from "utils";
 import {
   SwapApiToken,
+  swapApprovalApiCall,
+  SwapApprovalApiCallReturnType,
   SwapApprovalApiQueryParams,
-  SwapApprovalApiResponse,
 } from "utils/serverless-api/prod/swap-approval";
 
 type SwapQuoteParams = {
@@ -43,7 +42,7 @@ const useSwapQuote = ({
       depositor,
       recipient,
     ],
-    queryFn: async (): Promise<SwapApprovalApiResponse | undefined> => {
+    queryFn: async (): Promise<SwapApprovalApiCallReturnType | undefined> => {
       if (Number(amount) <= 0) {
         return undefined;
       }
@@ -66,17 +65,17 @@ const useSwapQuote = ({
         ...(refundAddress ? { refundAddress } : {}),
       };
 
-      const { data } = await axios.get(
-        `${vercelApiBaseUrl}/api/swap/approval`,
-        {
-          params,
-        }
-      );
+      const data = await swapApprovalApiCall(params);
       return data;
     },
     enabled:
       !!origin?.address && !!destination?.address && !!amount && !!depositor,
-    refetchInterval: 5_000,
+    retry: 2,
+
+    refetchInterval(query) {
+      // only refetch if data
+      return query.state.status === "success" ? 10_000 : false;
+    },
   });
 
   return { data, isLoading, error };
