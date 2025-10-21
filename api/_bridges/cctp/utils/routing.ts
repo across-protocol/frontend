@@ -10,37 +10,33 @@ import { getLogger } from "../../../_utils";
 
 type RoutingRule = {
   name: string;
-  priority: number;
   shouldApply: (data: NonNullable<BridgeStrategyData>) => boolean;
   getStrategy: () => BridgeStrategy;
   reason: string;
 };
 
+// Priority-ordered routing rules for CCTP
 const ROUTING_RULES: RoutingRule[] = [
   {
     name: "non-usdc-route",
-    priority: 1,
     shouldApply: (data) => !data.isUsdcToUsdc,
     getStrategy: getAcrossBridgeStrategy,
     reason: "Non-USDC pairs always use Across",
   },
   {
     name: "high-utilization",
-    priority: 2,
     shouldApply: (data) => data.isUtilizationHigh,
     getStrategy: getCctpBridgeStrategy,
     reason: "High utilization (>80%) routes to CCTP",
   },
   {
     name: "linea-exclusion",
-    priority: 3,
     shouldApply: (data) => data.isLineaSource,
     getStrategy: getAcrossBridgeStrategy,
     reason: "Linea source chain uses Across",
   },
   {
     name: "fast-cctp-small-deposit",
-    priority: 4,
     shouldApply: (data) =>
       data.isFastCctpEligible && !data.isInThreshold && !data.isLargeDeposit,
     getStrategy: getCctpBridgeStrategy,
@@ -49,7 +45,6 @@ const ROUTING_RULES: RoutingRule[] = [
   },
   {
     name: "fast-cctp-threshold-or-large",
-    priority: 5,
     shouldApply: (data) =>
       data.isFastCctpEligible && (data.isInThreshold || data.isLargeDeposit),
     getStrategy: getAcrossBridgeStrategy,
@@ -58,21 +53,18 @@ const ROUTING_RULES: RoutingRule[] = [
   },
   {
     name: "instant-fill",
-    priority: 6,
     shouldApply: (data) => data.canFillInstantly,
     getStrategy: getAcrossBridgeStrategy,
     reason: "Instant fills always use Across for speed",
   },
   {
     name: "large-deposit-fallback",
-    priority: 7,
     shouldApply: (data) => data.isLargeDeposit,
     getStrategy: getAcrossBridgeStrategy,
     reason: "Large deposits (>$1M) use Across for better liquidity",
   },
   {
     name: "default-cctp",
-    priority: 8,
     shouldApply: () => true,
     getStrategy: getCctpBridgeStrategy,
     reason: "Default to CCTP for standard USDC routes",
