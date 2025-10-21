@@ -44,6 +44,7 @@ export type ModalProps = {
   footer?: React.ReactNode;
   titleBorder?: boolean;
   className?: string;
+  closeButtonTabIndex?: number;
 };
 
 const Modal = ({
@@ -64,6 +65,7 @@ const Modal = ({
   "data-cy": dataCy,
   titleBorder = false,
   noScroll = false,
+  closeButtonTabIndex = 999999, // should default to being last
 }: ModalProps) => {
   const verticalLocation: ModalDirection | undefined =
     typeof _verticalLocation === "string"
@@ -169,7 +171,7 @@ const Modal = ({
                 )}
 
                 <CloseButton
-                  tabIndex={1}
+                  tabIndex={closeButtonTabIndex}
                   onClick={() => externalModalExitHandler()}
                 >
                   <ExitIcon />

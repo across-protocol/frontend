@@ -390,6 +390,7 @@ const DesktopModal = ({
       height={800}
       titleBorder
       noScroll
+      closeButtonTabIndex={99999}
     >
       <DesktopLayout
         selectedChain={selectedChain}
@@ -594,13 +595,26 @@ const DesktopLayout = ({
     tokenSearchInputRef.current?.focus();
   }
 
+  /**
+   * Tab order strategy for keyboard navigation:
+   * - Chain search: tabIndex 1 (always focused first)
+   * - Chain items: tabIndex 2-9999 range
+   *   - "All Chains" entry: 2
+   *   - Popular chains: 3+
+   *   - All chains: follow after popular
+   * - Token search: tabIndex 10000
+   * - Token items: tabIndex 10001+ range
+   *   - Popular tokens: 10001+
+   *   - All tokens: follow after popular
+   * - Close button: tabIndex 99999 (always last)
+   */
   return (
     <DesktopInnerWrapper>
       <DesktopChainWrapper>
         <SearchBarStyled
           ref={chainSearchInputRef}
           inputProps={{
-            tabIndex: 2,
+            tabIndex: 1,
           }}
           search={chainSearch}
           setSearch={setChainSearch}
@@ -611,19 +625,21 @@ const DesktopLayout = ({
             chainId={null}
             isSelected={selectedChain === null}
             onClick={() => handleSelectChain(null)}
+            tabIndex={2}
           />
 
           {/* Popular Chains Section */}
           {displayedChains.popular.length > 0 && (
             <>
               <SectionHeader>Popular Chains</SectionHeader>
-              {displayedChains.popular.map(({ chainId, isDisabled }) => (
+              {displayedChains.popular.map(({ chainId, isDisabled }, index) => (
                 <ChainEntry
                   key={chainId}
                   chainId={chainId}
                   isSelected={selectedChain === chainId}
                   isDisabled={isDisabled}
                   onClick={() => handleSelectChain(chainId)}
+                  tabIndex={3 + index}
                 />
               ))}
             </>
@@ -633,13 +649,14 @@ const DesktopLayout = ({
           {displayedChains.all.length > 0 && (
             <>
               <SectionHeader>All Chains</SectionHeader>
-              {displayedChains.all.map(({ chainId, isDisabled }) => (
+              {displayedChains.all.map(({ chainId, isDisabled }, index) => (
                 <ChainEntry
                   key={chainId}
                   chainId={chainId}
                   isSelected={selectedChain === chainId}
                   isDisabled={isDisabled}
                   onClick={() => handleSelectChain(chainId)}
+                  tabIndex={3 + displayedChains.popular.length + index}
                 />
               ))}
             </>
@@ -653,7 +670,7 @@ const DesktopLayout = ({
       <DesktopTokenWrapper>
         <SearchBarStyled
           inputProps={{
-            tabIndex: 3,
+            tabIndex: 10000,
           }}
           ref={tokenSearchInputRef}
           searchTopic="Token"
@@ -665,7 +682,7 @@ const DesktopLayout = ({
           {displayedTokens.popular.length > 0 && (
             <>
               <SectionHeader>Popular Tokens</SectionHeader>
-              {displayedTokens.popular.map((token) => (
+              {displayedTokens.popular.map((token, index) => (
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
@@ -674,6 +691,7 @@ const DesktopLayout = ({
                     onTokenSelect(token);
                     onModalClose();
                   }}
+                  tabIndex={10001 + index}
                 />
               ))}
             </>
@@ -683,7 +701,7 @@ const DesktopLayout = ({
           {displayedTokens.all.length > 0 && (
             <>
               <SectionHeader>All Tokens</SectionHeader>
-              {displayedTokens.all.map((token) => (
+              {displayedTokens.all.map((token, index) => (
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
@@ -692,6 +710,7 @@ const DesktopLayout = ({
                     onTokenSelect(token);
                     onModalClose();
                   }}
+                  tabIndex={10001 + displayedTokens.popular.length + index}
                 />
               ))}
             </>
@@ -724,11 +743,13 @@ const ChainEntry = ({
   isSelected,
   onClick,
   isDisabled = false,
+  tabIndex,
 }: {
   chainId: number | null;
   isSelected: boolean;
   onClick: () => void;
   isDisabled?: boolean;
+  tabIndex?: number;
 }) => {
   const chainInfo = chainId
     ? getChainInfo(chainId)
@@ -741,6 +762,7 @@ const ChainEntry = ({
       isSelected={isSelected}
       isDisabled={isDisabled}
       onClick={isDisabled ? undefined : onClick}
+      tabIndex={tabIndex}
     >
       <ChainItemImage src={chainInfo.logoURI} alt={chainInfo.name} />
       <ChainItemName>{chainInfo.name}</ChainItemName>
@@ -753,15 +775,22 @@ const TokenEntry = ({
   token,
   isSelected,
   onClick,
+  tabIndex,
 }: {
   token: LifiToken & { balanceUsd: number; balance: BigNumber };
   isSelected: boolean;
   onClick: () => void;
+  tabIndex?: number;
 }) => {
   const hasBalance = token.balance.gt(0) && token.balanceUsd > 0.01;
 
   return (
-    <EntryItem isSelected={isSelected} isDisabled={false} onClick={onClick}>
+    <EntryItem
+      isSelected={isSelected}
+      isDisabled={false}
+      onClick={onClick}
+      tabIndex={tabIndex}
+    >
       <TokenItemImage token={token} />
       <TokenNameSymbolWrapper>
         <TokenName>{token.name}</TokenName>
