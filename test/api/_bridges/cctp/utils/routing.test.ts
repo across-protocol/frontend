@@ -54,7 +54,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
 
       it("should prioritize non-USDC rule over high utilization", async () => {
@@ -71,7 +71,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -90,7 +90,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
 
       it("should prioritize high utilization over Linea exclusion", async () => {
@@ -107,7 +107,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
     });
 
@@ -126,7 +126,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -145,7 +145,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
 
       it("should not apply for deposits within threshold", async () => {
@@ -162,7 +162,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
 
       it("should not apply for large deposits", async () => {
@@ -179,7 +179,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -198,7 +198,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
 
       it("should return Across for very large deposits (>$1M) on fast CCTP chains", async () => {
@@ -215,7 +215,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -234,7 +234,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -253,7 +253,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
     });
 
@@ -272,25 +272,25 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
     });
 
     describe("Edge cases and fallbacks", () => {
-      it("should return Across when bridge strategy data is undefined", async () => {
+      it("should return null when bridge strategy data is undefined", async () => {
         mockedGetBridgeStrategyData.mockResolvedValue(undefined);
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result).toBeNull();
       });
 
-      it("should handle getBridgeStrategyData errors by returning undefined", async () => {
+      it("should return null when getBridgeStrategyData errors", async () => {
         mockedGetBridgeStrategyData.mockResolvedValue(undefined);
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result).toBeNull();
       });
     });
 
@@ -309,7 +309,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
 
       it("should prioritize high utilization over lower priority rules", async () => {
@@ -326,7 +326,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
 
       it("should prioritize Linea exclusion over fast CCTP rules", async () => {
@@ -343,7 +343,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("across");
+        expect(result?.name).toBe("across");
       });
 
       it("should prioritize fast CCTP rules over instant fill", async () => {
@@ -360,7 +360,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
 
         const result = await routeStrategyForCctp(baseParams);
 
-        expect(result.name).toBe("cctp");
+        expect(result?.name).toBe("cctp");
       });
     });
   });

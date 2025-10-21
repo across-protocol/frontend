@@ -4,19 +4,15 @@ import {
   BridgeStrategy,
   BridgeStrategyData,
   BridgeStrategyDataParams,
+  RoutingRule,
 } from "../../types";
 import { getBridgeStrategyData } from "../../utils";
 import { getLogger } from "../../../_utils";
 
-type RoutingRule = {
-  name: string;
-  shouldApply: (data: NonNullable<BridgeStrategyData>) => boolean;
-  getStrategy: () => BridgeStrategy;
-  reason: string;
-};
+type CctpRoutingRule = RoutingRule<NonNullable<BridgeStrategyData>>;
 
 // Priority-ordered routing rules for CCTP
-const ROUTING_RULES: RoutingRule[] = [
+const CCTP_ROUTING_RULES: CctpRoutingRule[] = [
   {
     name: "non-usdc-route",
     shouldApply: (data) => !data.isUsdcToUsdc,
@@ -75,47 +71,49 @@ const ROUTING_RULES: RoutingRule[] = [
  * Determines the optimal bridge strategy (CCTP vs Across) for a given route.
  *
  * @param params - Bridge strategy data parameters including tokens, amounts, and addresses
- * @returns The selected bridge strategy
+ * @returns The selected bridge strategy, or null to pass to next routing function
  */
 export async function routeStrategyForCctp(
   params: BridgeStrategyDataParams
-): Promise<BridgeStrategy> {
+): Promise<BridgeStrategy | null> {
   const logger = getLogger();
   const bridgeStrategyData = await getBridgeStrategyData(params);
 
   if (!bridgeStrategyData) {
-    logger.warn({
+    logger.debug({
       at: "routeStrategyForCctp",
-      message: "Failed to fetch bridge strategy data, using default",
+      message: "Failed to fetch bridge strategy data, passing to next router",
       inputToken: params.inputToken.symbol,
       outputToken: params.outputToken.symbol,
     });
-    return getAcrossBridgeStrategy();
+    return null;
   }
 
-  const applicableRule = ROUTING_RULES.find((rule) =>
+  const applicableRule = CCTP_ROUTING_RULES.find((rule) =>
     rule.shouldApply(bridgeStrategyData)
   );
 
   if (!applicableRule) {
     logger.error({
       at: "routeStrategyForCctp",
-      message: "No routing rule matched, using Across fallback",
+      message: "No routing rule matched (unexpected), passing to next router",
       bridgeStrategyData,
     });
-    return getAcrossBridgeStrategy();
+    return null;
   }
+
+  const strategy = applicableRule.getStrategy();
 
   logger.debug({
     at: "routeStrategyForCctp",
     message: "Bridge routing decision",
     rule: applicableRule.name,
     reason: applicableRule.reason,
-    strategy: applicableRule.getStrategy().name,
+    strategy: strategy?.name || "null",
     inputToken: params.inputToken.symbol,
     outputToken: params.outputToken.symbol,
     bridgeStrategyData,
   });
 
-  return applicableRule.getStrategy();
+  return strategy;
 }
