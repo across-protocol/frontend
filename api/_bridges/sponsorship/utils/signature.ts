@@ -13,11 +13,11 @@ let sponsorshipSigner: ethers.Wallet | undefined;
 export const getSponsorshipSigner = (): ethers.Wallet => {
   if (sponsorshipSigner) return sponsorshipSigner;
 
-  const { sponsorshipSignerPrivateKey } = getEnvs();
-  if (!sponsorshipSignerPrivateKey) {
+  const { SPONSORSHIP_SIGNER_PRIVATE_KEY } = getEnvs();
+  if (!SPONSORSHIP_SIGNER_PRIVATE_KEY) {
     throw new Error("SPONSORSHIP_SIGNER_PRIVATE_KEY is not set");
   }
-  sponsorshipSigner = new ethers.Wallet(sponsorshipSignerPrivateKey);
+  sponsorshipSigner = new ethers.Wallet(SPONSORSHIP_SIGNER_PRIVATE_KEY);
   return sponsorshipSigner;
 };
 

@@ -24,7 +24,7 @@ describe("CCTP Signature", () => {
   beforeEach(() => {
     // Before each test, mock the return value of getEnvs to provide our test private key.
     (getEnvs as jest.Mock).mockReturnValue({
-      sponsorshipSignerPrivateKey: TEST_PRIVATE_KEY,
+      SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
     });
   });
 
