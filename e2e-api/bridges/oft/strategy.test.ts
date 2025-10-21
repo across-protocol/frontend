@@ -130,6 +130,26 @@ describe("OFT Strategy", () => {
 
   describe("buildOftTx", () => {
     it("should build a valid transaction", async () => {
+      /**
+       * NOTE: This test uses hardcoded hex values and specific token addresses from a real,
+       * successful cross-chain transaction to Hyperliquid's Composer contract.
+       *
+       * REASONING:
+       * 1. These values were captured from an actual API quote that successfully completed
+       *    an on-chain cross-chain transfer using the Hyperliquid Composer contract.
+       * 2. The hex format (e.g., "0x0f4240" instead of BigNumber.from(1000000)) preserves
+       *    the exact representation from the logged request to avoid any potential differences
+       *    in serialization or conversion that could affect the transaction structure.
+       * 3. The specific token addresses and chain IDs represent the real Arbitrum USDT to
+       *    HyperCore USDT-SPOT route that was validated on-chain.
+       * 4. Since CI tests cannot verify the actual cross-chain transfer completion, maintaining
+       *    the exact request structure from a known-working transaction provides the highest
+       *    confidence that buildOftTx produces valid transaction data.
+       * 5. The Hyperliquid Composer integration uses a very specific `extraOptions` format
+       *    (see strategy.ts for details), and any deviation in the request structure could
+       *    potentially result in a transaction that builds successfully but fails on-chain.
+       *
+       */
       const quotes: CrossSwapQuotes = {
         crossSwap: {
           amount: BigNumber.from("0x0f4240"),
