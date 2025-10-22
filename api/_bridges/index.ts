@@ -49,6 +49,7 @@ export const routableBridgeStrategies = [
   getCctpBridgeStrategy(),
 ];
 
+// Priority-ordered routing strategies
 const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
   routeStrategyForSponsorship,
   routeStrategyForCctp,

@@ -72,7 +72,7 @@ export async function routeStrategyForSponsorship(
   const eligibilityData = await getSponsorshipEligibilityData(params);
 
   if (!eligibilityData) {
-    logger.debug({
+    logger.warn({
       at: "routeStrategyForSponsorship",
       message: "Failed to fetch sponsorship eligibility data",
       inputToken: params.inputToken.symbol,
@@ -86,7 +86,7 @@ export async function routeStrategyForSponsorship(
   );
 
   if (!applicableRule) {
-    logger.error({
+    logger.warn({
       at: "routeStrategyForSponsorship",
       message:
         "No sponsorship rule matched (unexpected), passing to next router",

@@ -80,7 +80,7 @@ export async function routeStrategyForCctp(
   const bridgeStrategyData = await getBridgeStrategyData(params);
 
   if (!bridgeStrategyData) {
-    logger.debug({
+    logger.warn({
       at: "routeStrategyForCctp",
       message: "Failed to fetch bridge strategy data, passing to next router",
       inputToken: params.inputToken.symbol,
@@ -94,7 +94,7 @@ export async function routeStrategyForCctp(
   );
 
   if (!applicableRule) {
-    logger.error({
+    logger.warn({
       at: "routeStrategyForCctp",
       message: "No routing rule matched (unexpected), passing to next router",
       bridgeStrategyData,
