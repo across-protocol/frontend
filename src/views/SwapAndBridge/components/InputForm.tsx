@@ -11,6 +11,7 @@ import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
 import { useTokenInput, UnitType } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
+import ChangeAccountModal from "views/Bridge/components/ChangeAccountModal";
 
 export const InputForm = ({
   inputToken,
@@ -25,6 +26,11 @@ export const InputForm = ({
   expectedInputAmount,
   validationError,
   quoteWarningMessage,
+  toAccountEVM,
+  toAccountSVM,
+  handleChangeToAddressEVM,
+  handleChangeToAddressSVM,
+  destinationChainEcosystem,
 }: {
   inputToken: EnrichedToken | null;
   setInputToken: (token: EnrichedToken | null) => void;
@@ -42,6 +48,12 @@ export const InputForm = ({
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
   validationError: AmountInputError | undefined;
   quoteWarningMessage: string | null;
+
+  toAccountEVM?: { address: string };
+  toAccountSVM?: { address: string };
+  handleChangeToAddressEVM: (account: string) => void;
+  handleChangeToAddressSVM: (account: string) => void;
+  destinationChainEcosystem: "evm" | "svm";
 }) => {
   // Shared unit state for both inputs
   const [unit, setUnit] = useState<UnitType>("token");
@@ -77,6 +89,11 @@ export const InputForm = ({
         disabled={!outputToken || !outputToken}
         unit={unit}
         setUnit={setUnit}
+        toAccountEVM={toAccountEVM}
+        toAccountSVM={toAccountSVM}
+        handleChangeToAddressEVM={handleChangeToAddressEVM}
+        handleChangeToAddressSVM={handleChangeToAddressSVM}
+        destinationChainEcosystem={destinationChainEcosystem}
       />
       <QuickSwapButton onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
@@ -96,6 +113,11 @@ export const InputForm = ({
         disabled={!outputToken || !outputToken}
         unit={unit}
         setUnit={setUnit}
+        toAccountEVM={toAccountEVM}
+        toAccountSVM={toAccountSVM}
+        handleChangeToAddressEVM={handleChangeToAddressEVM}
+        handleChangeToAddressSVM={handleChangeToAddressSVM}
+        destinationChainEcosystem={destinationChainEcosystem}
       />
       {/* <QuoteWarning message={quoteWarningMessage} /> */}
     </Wrapper>
@@ -115,6 +137,11 @@ const TokenInput = ({
   disabled,
   unit,
   setUnit,
+  toAccountEVM,
+  toAccountSVM,
+  handleChangeToAddressEVM,
+  handleChangeToAddressSVM,
+  destinationChainEcosystem,
 }: {
   setToken: (token: EnrichedToken) => void;
   token: EnrichedToken | null;
@@ -128,13 +155,17 @@ const TokenInput = ({
   otherToken?: EnrichedToken | null;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
+  toAccountEVM?: { address: string };
+  toAccountSVM?: { address: string };
+  handleChangeToAddressEVM: (account: string) => void;
+  handleChangeToAddressSVM: (account: string) => void;
+  destinationChainEcosystem: "evm" | "svm";
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
   const {
     amountString,
-    unit: hookUnit,
     convertedAmount,
     toggleUnit,
     handleInputChange,
@@ -182,6 +213,17 @@ const TokenInput = ({
       <TokenAmountStack>
         <TokenAmountInputTitle>
           {isOrigin ? "From" : "To"}
+          {!isOrigin && (
+            <>
+              <ChangeAccountModal
+                currentAccountEVM={toAccountEVM?.address}
+                currentAccountSVM={toAccountSVM?.address}
+                onChangeAccountEVM={handleChangeToAddressEVM}
+                onChangeAccountSVM={handleChangeToAddressSVM}
+                destinationChainEcosystem={destinationChainEcosystem}
+              />
+            </>
+          )}
         </TokenAmountInputTitle>
 
         <TokenAmountInputWrapper
@@ -278,10 +320,27 @@ const TokenAmountStack = styled.div`
 `;
 
 const TokenAmountInputTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: ${COLORS.aqua};
   font-size: 16px;
   font-weight: 500;
   line-height: 130%;
+`;
+
+const ChangeRecipientButton = styled.button`
+  color: ${COLORS["light-200"]};
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: underline;
+  opacity: 0.7;
+  margin-left: 8px;
+
+  &:hover {
+    opacity: 1;
+    color: ${COLORS.aqua};
+  }
 `;
 
 const TokenAmountInputWrapper = styled.div<{

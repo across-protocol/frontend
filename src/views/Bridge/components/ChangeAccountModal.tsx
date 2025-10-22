@@ -7,13 +7,14 @@ import { Modal, Text } from "components";
 import { PrimaryButton, UnstyledButton } from "components/Button";
 import { Input, InputGroup } from "components/Input";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
+import { ReactComponent as PencilIcon } from "assets/icons/pencil.svg";
+
 import { ampli } from "ampli";
 import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
+import { shortenAddress } from "utils";
 
 type ChangeAccountModalProps = {
-  displayModal: boolean;
-  onCloseModal: () => void;
   currentAccountEVM?: string;
   currentAccountSVM?: string;
   onChangeAccountEVM: (account: string) => void;
@@ -22,24 +23,26 @@ type ChangeAccountModalProps = {
 };
 
 const ChangeAccountModal = ({
-  displayModal,
-  onCloseModal,
   currentAccountEVM,
   currentAccountSVM,
   onChangeAccountEVM,
   onChangeAccountSVM,
   destinationChainEcosystem,
 }: ChangeAccountModalProps) => {
-  const [userInput, setUserInput] = useState(
+  const currentRecipient =
     destinationChainEcosystem === "evm"
       ? currentAccountEVM || ""
-      : currentAccountSVM || ""
-  );
+      : currentAccountSVM || "";
+
+  const [displayModal, setDisplayModal] = useState(false);
+  const [userInput, setUserInput] = useState(currentRecipient);
   const [validInput, setValidInput] = useState(false);
 
   const { isBlocked, isLoading } = useDisallowList(userInput);
 
   const { addToAmpliQueue } = useAmplitude();
+
+  const onCloseModal = () => setDisplayModal(false);
 
   useEffect(() => {
     if (displayModal) {
@@ -105,55 +108,92 @@ const ChangeAccountModal = ({
   const validationLevel = !validInput && !!userInput ? "error" : "valid";
 
   return (
-    <Modal
-      title="Send to"
-      exitModalHandler={handleClickCancel}
-      isOpen={displayModal}
-      width={550}
-      height={900}
-      exitOnOutsideClick
-    >
-      <Wrapper>
-        <InnerWrapper>
-          <InputGroup validationLevel={validationLevel}>
-            <Input
-              validationLevel={validationLevel}
-              value={userInput}
-              onChange={(t) => setUserInput(t.target.value)}
-            />
-            <CrossIconWrapper onClick={handleClickClear}>
-              <StyledCrossIcon />
-            </CrossIconWrapper>
-          </InputGroup>
-          <ButtonWrapper>
-            <CancelButton onClick={handleClickCancel}>
-              <Text size="lg" weight={500}>
-                Cancel
-              </Text>
-            </CancelButton>
-            <SaveButton
-              disabled={!validInput && !!userInput}
-              onClick={handleClickSave}
-            >
-              <Text size="lg" weight={500} color="dark-grey">
-                Save
-              </Text>
-            </SaveButton>
-          </ButtonWrapper>
-        </InnerWrapper>
-        <Text size="md" color="grey-400">
-          Note that only{" "}
-          <UnderlinedText>
-            {destinationChainEcosystem === "evm" ? "Ethereum" : "Solana"}
-          </UnderlinedText>{" "}
-          addresses are valid.
-        </Text>
-      </Wrapper>
-    </Modal>
+    <>
+      <Trigger onClick={() => setDisplayModal(true)}>
+        {shortenAddress(currentRecipient, "..", 4)}
+        <PencilIcon color="inherit" width="16px" height="16px" />
+      </Trigger>
+
+      <Modal
+        title="Destination Address"
+        exitModalHandler={handleClickCancel}
+        verticalLocation="middle"
+        isOpen={displayModal}
+        width={550}
+        exitOnOutsideClick
+        titleBorder
+      >
+        <Wrapper>
+          <InnerWrapper>
+            <SubHeading>Wallet Address</SubHeading>
+            <InputGroup validationLevel={validationLevel}>
+              <Input
+                validationLevel={validationLevel}
+                value={userInput}
+                onChange={(t) => setUserInput(t.target.value)}
+              />
+              <CrossIconWrapper onClick={handleClickClear}>
+                <StyledCrossIcon />
+              </CrossIconWrapper>
+            </InputGroup>
+            <ButtonWrapper>
+              <CancelButton onClick={handleClickCancel}>
+                <Text size="lg" weight={500}>
+                  Cancel
+                </Text>
+              </CancelButton>
+              <SaveButton
+                disabled={!validInput && !!userInput}
+                onClick={handleClickSave}
+              >
+                <Text size="lg" weight={500} color="dark-grey">
+                  Save
+                </Text>
+              </SaveButton>
+            </ButtonWrapper>
+          </InnerWrapper>
+          <Text size="md" color="grey-400">
+            Note that only{" "}
+            <UnderlinedText>
+              {destinationChainEcosystem === "evm" ? "Ethereum" : "Solana"}
+            </UnderlinedText>{" "}
+            addresses are valid.
+          </Text>
+        </Wrapper>
+      </Modal>
+    </>
   );
 };
 
 export default ChangeAccountModal;
+
+const Trigger = styled.button`
+  color: var(--base-bright-gray, #e0f3ff);
+
+  /* Body/Small */
+  font-family: Barlow;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const SubHeading = styled.div`
+  color: var(--base-bright-gray, #e0f3ff);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  opacity: 0.5;
+`;
 
 const InnerWrapper = styled.div`
   display: flex;

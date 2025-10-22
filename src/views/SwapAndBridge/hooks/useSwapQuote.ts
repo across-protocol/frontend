@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
-import { useConnection } from "hooks";
 import {
   SwapApiToken,
   swapApprovalApiCall,
@@ -13,7 +12,8 @@ type SwapQuoteParams = {
   destination: SwapApiToken | null;
   amount: BigNumber | null;
   isInputAmount: boolean;
-  recipient?: string;
+  depositor: string | undefined;
+  recipient: string | undefined;
   integratorId?: string;
   refundAddress?: string;
   refundOnOrigin?: boolean;
@@ -28,10 +28,10 @@ const useSwapQuote = ({
   recipient,
   integratorId,
   refundAddress,
+  depositor,
   refundOnOrigin = true,
   slippageTolerance = 1,
 }: SwapQuoteParams) => {
-  const { account: depositor } = useConnection();
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "swap-quote",

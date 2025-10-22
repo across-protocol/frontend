@@ -583,7 +583,7 @@ const DesktopLayout = ({
 }) => {
   const chainSearchInputRef = useRef<HTMLInputElement>(null);
   const tokenSearchInputRef = useRef<HTMLInputElement>(null);
-  useHotkeys("esc", () => onModalClose());
+  useHotkeys("esc", () => onModalClose(), { enableOnFormTags: true });
 
   // Focus chain search input when component mounts
   useEffect(() => {

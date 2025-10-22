@@ -95,7 +95,7 @@ const minimumMargin = 32;
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
   --padding-modal-content: ${({ padding }) =>
     padding === "normal" ? "24px" : "16px"};
-  height: ${({ height, topYOffset }) =>
+  max-height: ${({ height, topYOffset }) =>
     height
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
       : "calc(100svh - 64px)"};
