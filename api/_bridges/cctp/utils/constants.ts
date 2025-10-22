@@ -124,6 +124,22 @@ export const getCctpForwarderAddress = (chainId: number): string => {
   return forwarderAddress;
 };
 
+// Source: https://developers.circle.com/cctp/evm-smart-contracts
+const DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS =
+  "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64";
+
+// Source: https://developers.circle.com/cctp/solana-programs
+const CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.SOLANA]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+};
+
+export const getCctpMessageTransmitterAddress = (chainId: number): string => {
+  return (
+    CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId] ||
+    DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS
+  );
+};
+
 // CCTP TokenMessenger depositForBurn ABI
 const CCTP_DEPOSIT_FOR_BURN_ABI = {
   inputs: [

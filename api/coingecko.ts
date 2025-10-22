@@ -56,6 +56,11 @@ const CG_CUSTOM_PLATFORM_ID_MAP = {
   [CHAIN_IDs.HYPERCORE]: "hyperliquid",
 };
 
+// Override the base token symbol for base tokens.
+const BASE_TOKEN_SYMBOL_OVERRIDES: Record<string, string> = {
+  MATIC: "POL",
+};
+
 const handler = async (
   { query }: TypedVercelRequest<CoingeckoQueryParams>,
   response: VercelResponse
@@ -140,10 +145,11 @@ const handler = async (
     let quotePrice = 1.0;
     let quotePrecision = 18;
     if (isDerivedCurrency) {
+      const baseTokenSymbol =
+        BASE_TOKEN_SYMBOL_OVERRIDES[baseCurrency.toUpperCase()] ??
+        baseCurrency.toUpperCase();
       const baseToken =
-        TOKEN_SYMBOLS_MAP[
-          baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
-        ];
+        TOKEN_SYMBOLS_MAP[baseTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
       const { price: baseTokenPrice } = await resolvePriceBySymbol({
         symbol: baseToken.symbol,
         baseCurrency: "usd",

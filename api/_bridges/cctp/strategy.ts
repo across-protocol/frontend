@@ -423,7 +423,7 @@ function getCctpBridgeFees(
 /**
  * Builds CCTP deposit transaction for EVM chains
  */
-async function _buildCctpTxForAllowanceHolderEvm(params: {
+export async function _buildCctpTxForAllowanceHolderEvm(params: {
   crossSwapQuotes: CrossSwapQuotes;
   integratorId?: string;
   originChainId: number;
@@ -475,9 +475,32 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
       hookData,
     });
   } else {
+    // For transfers going to Solana, mintRecipient must be the recipient's token account, not their wallet
+    let mintRecipient = depositForBurnParams.mintRecipient;
+
+    if (crossSwap.isDestinationSvm) {
+      const destinationChainId = crossSwap.outputToken.chainId;
+      // Derive the recipient's token account address for the destination token
+      const recipientWallet = sdk.utils.toAddressType(
+        depositForBurnParams.mintRecipient,
+        destinationChainId
+      );
+      const destinationTokenMint = sdk.utils.toAddressType(
+        crossSwap.outputToken.address,
+        destinationChainId
+      );
+      const recipientTokenAccount =
+        await sdk.arch.svm.getAssociatedTokenAddress(
+          recipientWallet.forceSvmAddress(),
+          destinationTokenMint.forceSvmAddress()
+        );
+      mintRecipient = recipientTokenAccount;
+    }
+
     // Standard CCTP route: use depositForBurn
     callData = encodeDepositForBurn({
       ...depositForBurnParams,
+      mintRecipient,
       burnToken: burnTokenAddress,
     });
   }
