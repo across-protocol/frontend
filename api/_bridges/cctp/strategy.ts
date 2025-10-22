@@ -297,7 +297,7 @@ function getCctpBridgeFees(inputToken: Token) {
 /**
  * Builds CCTP deposit transaction for EVM chains
  */
-async function _buildCctpTxForAllowanceHolderEvm(params: {
+export async function _buildCctpTxForAllowanceHolderEvm(params: {
   crossSwapQuotes: CrossSwapQuotes;
   integratorId?: string;
   originChainId: number;
@@ -323,11 +323,10 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
   const burnTokenAddress = crossSwap.inputToken.address;
   const destinationChainId = crossSwap.outputToken.chainId;
 
-  // For Solana destinations, mintRecipient must be the recipient's token account, not wallet
+  // For transfers going to Solana, mintRecipient must be the recipient's token account, not their wallet
   let mintRecipient = depositForBurnParams.mintRecipient;
-  const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
 
-  if (isDestinationSvm) {
+  if (crossSwap.isDestinationSvm) {
     // Derive the recipient's token account address for the destination token
     const recipientWallet = sdk.utils.toAddressType(
       depositForBurnParams.mintRecipient,
@@ -341,7 +340,6 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
       recipientWallet.forceSvmAddress(),
       destinationTokenMint.forceSvmAddress()
     );
-    // Convert the Solana token account address to bytes32 format for EVM depositForBurn
     mintRecipient = recipientTokenAccount;
   }
 
