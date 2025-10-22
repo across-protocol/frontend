@@ -28,12 +28,18 @@ jest.mock("@across-protocol/sdk", () => {
   };
 });
 
-// Mock CCTP utilities
-jest.mock("../../../../api/_bridges/cctp/utils/constants", () => ({
-  encodeDepositForBurn: jest.fn(
-    (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
-  ),
-}));
+// Mock only the specific functions we need to mock
+jest.mock("../../../../api/_bridges/cctp/utils/constants", () => {
+  const actual = jest.requireActual(
+    "../../../../api/_bridges/cctp/utils/constants"
+  );
+  return {
+    ...actual,
+    encodeDepositForBurn: jest.fn(
+      (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
+    ),
+  };
+});
 
 jest.mock("../../../../api/_integrator-id", () => ({
   tagSwapApiMarker: jest.fn((data) => data),
