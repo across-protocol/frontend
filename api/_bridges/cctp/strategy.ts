@@ -321,10 +321,34 @@ async function _buildCctpTxForAllowanceHolderEvm(params: {
   } = params;
   const { crossSwap } = crossSwapQuotes;
   const burnTokenAddress = crossSwap.inputToken.address;
+  const destinationChainId = crossSwap.outputToken.chainId;
+
+  // For Solana destinations, mintRecipient must be the recipient's token account, not wallet
+  let mintRecipient = depositForBurnParams.mintRecipient;
+  const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+
+  if (isDestinationSvm) {
+    // Derive the recipient's token account address for the destination token
+    const recipientWallet = sdk.utils.toAddressType(
+      depositForBurnParams.mintRecipient,
+      destinationChainId
+    );
+    const destinationTokenMint = sdk.utils.toAddressType(
+      crossSwap.outputToken.address,
+      destinationChainId
+    );
+    const recipientTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
+      recipientWallet.forceSvmAddress(),
+      destinationTokenMint.forceSvmAddress()
+    );
+    // Convert the Solana token account address to bytes32 format for EVM depositForBurn
+    mintRecipient = recipientTokenAccount;
+  }
 
   // Encode the depositForBurn call
   const callData = encodeDepositForBurn({
     ...depositForBurnParams,
+    mintRecipient,
     burnToken: burnTokenAddress,
   });
 
