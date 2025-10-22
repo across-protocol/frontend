@@ -455,6 +455,16 @@ export const getTokenByAddress = (
   | undefined => {
   try {
     const parsedTokenAddress = toAddressType(tokenAddress, chainId ?? 1);
+    // If the address is the zero address, it means the user is looking for the native token info.
+    if (parsedTokenAddress.isZeroAddress()) {
+      if (chainId) {
+        const nativeTokenSymbol = getChainInfo(chainId).nativeToken;
+        return TOKEN_SYMBOLS_MAP[
+          nativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+      }
+      return undefined;
+    }
     tokenAddress = parsedTokenAddress.toNative();
 
     const matches =
