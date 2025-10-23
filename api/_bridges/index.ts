@@ -4,10 +4,12 @@ import {
   BridgeStrategiesConfig,
   BridgeStrategy,
   GetBridgeStrategyParams,
+  RouteStrategyFunction,
 } from "./types";
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { routeStrategyForCctp } from "./cctp/utils/routing";
+import { routeStrategyForSponsorship } from "./sponsored/utils/routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -47,6 +49,12 @@ export const routableBridgeStrategies = [
   getCctpBridgeStrategy(),
 ];
 
+// Priority-ordered routing strategies
+const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
+  routeStrategyForSponsorship,
+  routeStrategyForCctp,
+];
+
 export async function getBridgeStrategy({
   originChainId,
   destinationChainId,
@@ -81,12 +89,9 @@ export async function getBridgeStrategy({
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
-  if (
-    supportedBridgeStrategies.some(
-      (strategy) => strategy.name === getCctpBridgeStrategy().name
-    )
-  ) {
-    return routeStrategyForCctp({
+
+  for (const routeStrategy of ROUTING_STRATEGIES) {
+    const strategy = await routeStrategy({
       inputToken,
       outputToken,
       amount,
@@ -94,7 +99,15 @@ export async function getBridgeStrategy({
       recipient,
       depositor,
     });
+
+    if (
+      strategy &&
+      supportedBridgeStrategies.some((s) => s.name === strategy.name)
+    ) {
+      return strategy;
+    }
   }
+
   return getAcrossBridgeStrategy();
 }
 
