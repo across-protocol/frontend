@@ -28,19 +28,19 @@ export function isIndirectDestinationRouteSupported(params: {
   inputToken: string;
   outputToken: string;
 }) {
-  return getIndirectDestinationRoutes(params).length > 0;
+  return !!getIndirectDestinationRoute(params);
 }
 
-export function getIndirectDestinationRoutes(params: {
+export function getIndirectDestinationRoute(params: {
   originChainId: number;
   destinationChainId: number;
   inputToken: string;
   outputToken: string;
-}): IndirectDestinationRoute[] {
+}): IndirectDestinationRoute | undefined {
   const indirectChainDestination = indirectChains.find(
     (chain) =>
       chain.chainId === params.destinationChainId &&
-      chain.intermediaryChains &&
+      chain.intermediaryChain &&
       chain.outputTokens.some(
         (token) =>
           token.address.toLowerCase() === params.outputToken.toLowerCase()
@@ -48,107 +48,92 @@ export function getIndirectDestinationRoutes(params: {
   );
 
   if (!indirectChainDestination) {
-    return [];
+    return;
   }
 
-  const indirectDestinationRoutes =
-    indirectChainDestination.intermediaryChains.flatMap(
-      (_intermediaryChainId) => {
-        // Check if the indirect destination chain has token enabled
-        const isIntermediaryOutputTokenEnabled =
-          indirectChainDestination.outputTokens.some(
-            (token) => token.address === params.outputToken
-          );
-        if (!isIntermediaryOutputTokenEnabled) {
-          return [];
-        }
+  const intermediaryChainId = indirectChainDestination.intermediaryChain;
 
-        // Check if input token is known
-        const inputToken = getTokenByAddress(
-          params.inputToken,
-          params.originChainId
-        );
-        if (!inputToken) {
-          return [];
-        }
-
-        // Check if the indirect destination chain supports the intermediary chain
-        const indirectOutputToken = getTokenByAddress(
-          params.outputToken,
-          params.destinationChainId
-        );
-        if (!indirectOutputToken) {
-          return [];
-        }
-
-        // Check if L1 token is known
-        const l1TokenAddress =
-          TOKEN_SYMBOLS_MAP[inputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
-            ?.addresses[HUB_POOL_CHAIN_ID];
-        if (!l1TokenAddress) {
-          return [];
-        }
-        const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
-        if (!l1Token) {
-          return [];
-        }
-
-        // Check if intermediary output token is known
-        const intermediaryOutputTokenAddress =
-          l1Token.addresses[_intermediaryChainId];
-        if (!intermediaryOutputTokenAddress) {
-          return [];
-        }
-        const intermediaryOutputToken = getTokenByAddress(
-          intermediaryOutputTokenAddress,
-          _intermediaryChainId
-        );
-        if (!intermediaryOutputToken) {
-          return [];
-        }
-
-        // Check if there is a route from the origin chain to the intermediary chain
-        if (
-          !isRouteEnabled(
-            params.originChainId,
-            _intermediaryChainId,
-            params.inputToken,
-            intermediaryOutputTokenAddress
-          )
-        ) {
-          return [];
-        }
-
-        return {
-          inputToken: {
-            symbol: inputToken.symbol,
-            name: inputToken.name,
-            decimals: inputToken.decimals,
-            address: inputToken.addresses[params.originChainId],
-            chainId: params.originChainId,
-            coingeckoId: inputToken.coingeckoId,
-          },
-          intermediaryOutputToken: {
-            symbol: intermediaryOutputToken.symbol,
-            name: intermediaryOutputToken.name,
-            decimals: intermediaryOutputToken.decimals,
-            address: intermediaryOutputToken.addresses[_intermediaryChainId],
-            chainId: _intermediaryChainId,
-            coingeckoId: intermediaryOutputToken.coingeckoId,
-          },
-          outputToken: {
-            symbol: indirectOutputToken.symbol,
-            name: indirectOutputToken.name,
-            decimals: indirectOutputToken.decimals,
-            address: indirectOutputToken.addresses[params.destinationChainId],
-            chainId: params.destinationChainId,
-            coingeckoId: indirectOutputToken.coingeckoId,
-          },
-        };
-      }
+  // Check if the indirect destination chain has token enabled
+  const isIntermediaryOutputTokenEnabled =
+    indirectChainDestination.outputTokens.some(
+      (token) => token.address === params.outputToken
     );
+  if (!isIntermediaryOutputTokenEnabled) {
+    return;
+  }
 
-  return indirectDestinationRoutes;
+  // Check if input token is known
+  const inputToken = getTokenByAddress(params.inputToken, params.originChainId);
+  if (!inputToken) {
+    return;
+  }
+
+  // Check if the indirect destination chain supports the intermediary chain
+  const indirectOutputToken = getTokenByAddress(
+    params.outputToken,
+    params.destinationChainId
+  );
+  if (!indirectOutputToken) {
+    return;
+  }
+
+  // Check if L1 token is known
+  const l1TokenAddress =
+    TOKEN_SYMBOLS_MAP[inputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
+      ?.addresses[HUB_POOL_CHAIN_ID];
+  if (!l1TokenAddress) {
+    return;
+  }
+  const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+  if (!l1Token) {
+    return;
+  }
+
+  // Check if intermediary output token is known
+  const intermediaryOutputTokenAddress = l1Token.addresses[intermediaryChainId];
+  if (!intermediaryOutputTokenAddress) {
+    return;
+  }
+  const intermediaryOutputToken = getTokenByAddress(
+    intermediaryOutputTokenAddress,
+    indirectChainDestination.intermediaryChain
+  );
+  if (!intermediaryOutputToken) {
+    return;
+  }
+
+  // Check if there is a route from the origin chain to the intermediary chain
+  if (
+    !isRouteEnabled(
+      params.originChainId,
+      intermediaryChainId,
+      params.inputToken,
+      intermediaryOutputTokenAddress
+    )
+  ) {
+    return;
+  }
+
+  return {
+    inputToken: {
+      symbol: inputToken.symbol,
+      decimals: inputToken.decimals,
+      address: inputToken.addresses[params.originChainId],
+      chainId: params.originChainId,
+    },
+    intermediaryOutputToken: {
+      symbol: intermediaryOutputToken.symbol,
+      decimals: intermediaryOutputToken.decimals,
+      address: intermediaryOutputToken.addresses[intermediaryChainId],
+      chainId: intermediaryChainId,
+    },
+    outputToken: {
+      symbol: indirectOutputToken.symbol,
+      decimals: indirectOutputToken.decimals,
+      address: indirectOutputToken.addresses[params.destinationChainId],
+      chainId: params.destinationChainId,
+    },
+  };
 }
 
 export function getIndirectBridgeQuoteMessage(
@@ -227,7 +212,7 @@ function _buildIndirectBridgeQuoteMessageToHyperCore(
 function _buildBridgeQuoteMessageToHyperCore(
   crossSwap: CrossSwap,
   bridgeableOutputAmount: BigNumber,
-  indirectDestinationRoute: ReturnType<typeof getIndirectDestinationRoutes>[0],
+  indirectDestinationRoute: IndirectDestinationRoute,
   appFee?: AppFee
 ) {
   const {

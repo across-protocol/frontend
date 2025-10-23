@@ -125,4 +125,19 @@ export const reset = css`
     border-collapse: collapse;
     border-spacing: 0;
   }
+
+  button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    outline: none;
+  }
 `;
