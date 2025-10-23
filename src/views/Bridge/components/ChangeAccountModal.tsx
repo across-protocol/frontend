@@ -126,6 +126,7 @@ export const ChangeAccountModal = ({
 
           <InputGroup validationLevel={validationLevel}>
             <Input
+              spellCheck={false}
               ref={inputRef}
               validationLevel={validationLevel}
               value={userInput}

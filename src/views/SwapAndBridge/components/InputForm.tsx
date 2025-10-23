@@ -304,20 +304,6 @@ const TokenAmountInputTitle = styled.div`
   line-height: 130%;
 `;
 
-const ChangeRecipientButton = styled.button`
-  color: ${COLORS["light-200"]};
-  font-size: 14px;
-  font-weight: 400;
-  text-decoration: underline;
-  opacity: 0.7;
-  margin-left: 8px;
-
-  &:hover {
-    opacity: 1;
-    color: ${COLORS.aqua};
-  }
-`;
-
 const TokenAmountInputWrapper = styled.div<{
   showPrefix: boolean;
   value: string;
