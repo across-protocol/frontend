@@ -103,11 +103,16 @@ export function getQuoteWarningMessage(error: Error | null): string | null {
       return "This route is currently unavailable. Try different chains or tokens.";
 
     case "INVALID_PARAM":
-      // Show the specific message for invalid params if available
-      if (message) {
-        return message;
+      // return "Invalid parameters. Please check your input and try again.";
+      if (!message) {
+        return "Unable to get a quote at this time. Please try again.";
       }
-      return "Invalid parameters. Please check your input and try again.";
+      if (
+        message?.includes("doesn't have enough funds to support this deposit")
+      ) {
+        return "Amount too high. Try a smaller amount.";
+      }
+      return message;
 
     // Upstream service errors - be more generic
     case "UPSTREAM_HTTP_ERROR":

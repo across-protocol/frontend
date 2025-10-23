@@ -63,6 +63,7 @@ const ExpandableLabelSection: React.FC<
     validationError?: AmountInputError;
     validationWarning?: AmountInputError;
     validationErrorFormatted?: string;
+    quoteWarningMessage?: string | null;
   }>
 > = ({
   fee,
@@ -74,12 +75,23 @@ const ExpandableLabelSection: React.FC<
   hasQuote,
   validationError,
   validationErrorFormatted,
+  quoteWarningMessage,
 }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
   // Show validation messages for all non-ready states
-  if (state !== "readyToConfirm" && validationErrorFormatted) {
+  if (quoteWarningMessage) {
+    // Show quote warning message when ready to confirm but there's a warning
+    content = (
+      <>
+        <ValidationText>
+          <Warning color="inherit" width="20px" height="20px" />
+          <span>{quoteWarningMessage}</span>
+        </ValidationText>
+      </>
+    );
+  } else if (state !== "readyToConfirm" && validationErrorFormatted) {
     content = (
       <>
         <ValidationText>
@@ -202,6 +214,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   amount,
   swapQuote,
   onConfirm,
+  quoteWarningMessage,
   validationError,
   validationWarning,
   validationErrorFormatted,
@@ -272,6 +285,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         validationError={validationError}
         validationWarning={validationWarning}
         validationErrorFormatted={validationErrorFormatted}
+        quoteWarningMessage={quoteWarningMessage}
         hasQuote={!!swapQuote}
       >
         <ExpandedDetails>
