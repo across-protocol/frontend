@@ -323,6 +323,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "sol",
   "hype",
   "xpl",
+  "pol",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -384,6 +385,8 @@ export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hour
 
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
+  [CHAIN_IDs.POLYGON]: "POL",
+  [CHAIN_IDs.POLYGON_AMOY]: "POL",
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
   [CHAIN_IDs.HYPEREVM]: "HYPE",

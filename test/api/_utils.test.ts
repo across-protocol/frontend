@@ -7,12 +7,19 @@ import {
   validEvmAddress,
   validSvmAddress,
   validAddress,
+  getTokenByAddress,
+  getChainInfo,
 } from "../../api/_utils";
 import { is } from "superstruct";
 
 const svmAddress = "9E8PWXZRJa7vBRvGZDmLxSJ4iAMmB4BS7FYUruHvnCPz";
 const evmAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 const junkAddress = "0xdeadbeef";
+
+jest.mock("../../api/_utils", () => ({
+  ...jest.requireActual("../../api/_utils"),
+  getChainInfo: jest.fn(),
+}));
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -106,6 +113,128 @@ describe("_utils", () => {
           symbol: TOKEN_SYMBOLS_MAP.DAI.symbol,
         },
       });
+    });
+  });
+
+  describe("#getTokenByAddress()", () => {
+    // Iterate over all chain IDs to test the token resolution for each chain.
+    for (const chainId of Object.values(CHAIN_IDs)) {
+      if (typeof chainId !== "number") continue;
+
+      const weth = TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
+      const eth = TOKEN_SYMBOLS_MAP.ETH.addresses[chainId];
+
+      // Test case where WETH and ETH have the same address.
+      // In this case, we want to ensure that WETH is always returned to avoid ambiguity.
+      if (weth && eth && weth.toLowerCase() === eth.toLowerCase()) {
+        test(`should return WETH for chain ${chainId} when both ETH and WETH have the same address`, () => {
+          const token = getTokenByAddress(weth, chainId);
+          expect(token?.symbol).toBe("WETH");
+        });
+      } else {
+        // Test case where WETH and ETH have different addresses.
+        if (weth) {
+          test(`should return WETH for chain ${chainId}`, () => {
+            const token = getTokenByAddress(weth, chainId);
+            expect(token?.symbol).toBe("WETH");
+          });
+        }
+        if (eth) {
+          test(`should return ETH for chain ${chainId}`, () => {
+            const token = getTokenByAddress(eth, chainId);
+            expect(token?.symbol).toBe("ETH");
+          });
+        }
+      }
+    }
+
+    it("should return undefined for an invalid address", () => {
+      const token = getTokenByAddress("0xInvalidAddress");
+      expect(token).toBeUndefined();
+    });
+
+    it("should return the native token for a zero address", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainId = CHAIN_IDs.MAINNET;
+      const token = getTokenByAddress(zeroAddress, chainId);
+      expect(token).toBeDefined();
+      expect(token?.symbol).toBe("ETH");
+    });
+
+    it("should return undefined for a zero address without a chainId", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const token = getTokenByAddress(zeroAddress);
+      expect(token).toBeUndefined();
+    });
+
+    it("should return undefined for a zero address on a chain with no native token in map", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainIdWithNoNativeToken = 99999; // A chain that doesn't exist
+      const token = getTokenByAddress(zeroAddress, chainIdWithNoNativeToken);
+      expect(token).toBeUndefined();
+    });
+
+    it("should return undefined for a zero address if the native token is not in the token map", () => {
+      // This test mocks the CHAINS constant to simulate a chain with a native token that does not exist in the TOKEN_SYMBOLS_MAP.
+      jest.mock("../../api/_constants", () => ({
+        ...jest.requireActual("../../api/_constants"),
+        CHAINS: { 99999: { nativeToken: "DUMMY" } },
+      }));
+
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainId = 99999;
+
+      const token = getTokenByAddress(zeroAddress, chainId);
+      expect(token).toBeUndefined();
+    });
+
+    it("should correctly resolve ambiguous tokens like USDC", () => {
+      const usdcAddresses = TOKEN_SYMBOLS_MAP.USDC.addresses;
+      const mainnetChainId = CHAIN_IDs.MAINNET;
+      const mainnetUsdcAddress = usdcAddresses[mainnetChainId];
+
+      const token = getTokenByAddress(mainnetUsdcAddress, mainnetChainId);
+      expect(token).toBeDefined();
+      expect(token?.symbol).toBe("USDC");
+
+      const usdtAddresses = TOKEN_SYMBOLS_MAP.USDT.addresses;
+      const mainnetUsdtAddress = usdtAddresses[mainnetChainId];
+      const tokenUsdt = getTokenByAddress(mainnetUsdtAddress, mainnetChainId);
+      expect(tokenUsdt).toBeDefined();
+      expect(tokenUsdt?.symbol).toBe("USDT");
+    });
+
+    it("should handle wrapped and ambiguous tokens correctly from TOKEN_SYMBOL_MAP", () => {
+      const ambiguousTokens = ["USDC", "USDT"];
+      const wrappedTokens = [
+        "WETH",
+        "WMATIC",
+        "WHYPE",
+        "TATARA-WBTC",
+        "WBNB",
+        "WGHO",
+        "WGRASS",
+        "WSOL",
+        "WXPL",
+      ];
+      const tokensToTest = [...ambiguousTokens, ...wrappedTokens];
+
+      for (const symbol of tokensToTest) {
+        const tokenInfo =
+          TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
+        if (tokenInfo) {
+          for (const chainId in tokenInfo.addresses) {
+            const numericChainId = Number(chainId);
+            const address =
+              tokenInfo.addresses[
+                numericChainId as keyof typeof tokenInfo.addresses
+              ];
+            const token = getTokenByAddress(address, numericChainId);
+            expect(token).toBeDefined();
+            expect(token?.symbol).toBe(symbol);
+          }
+        }
+      }
     });
   });
 

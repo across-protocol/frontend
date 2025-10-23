@@ -19,6 +19,8 @@ export default {
   publicRpcUrl: "https://rpc.blast.io",
   blockTimeSeconds: 2,
   tokens: ["WETH", "ETH", "USDB", "WBTC"],
+  // Only allow USDB and WBTC as input tokens (from this chain)
+  inputTokens: ["USDB", "WBTC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
