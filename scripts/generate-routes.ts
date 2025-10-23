@@ -315,7 +315,9 @@ function transformChainConfigs(
       }
 
       const tokens = processTokenRoutes(chainConfig, toChainConfig);
-      const filteredTokens = tokens.filter(
+
+      // First, filter based on the pre-existing disabledRoutes config (chain-specific route disabling)
+      const tokensAfterDisabledRoutesFilter = tokens.filter(
         (token) =>
           !chainConfig.disabledRoutes?.find(
             (disabledRoute) =>
@@ -329,6 +331,50 @@ function transformChainConfigs(
                 : token.outputTokenSymbol === disabledRoute.toTokenSymbol)
           )
       );
+
+      // Then, filter based on inputTokens/outputTokens (directional token control)
+      // If inputTokens is specified, only allow those tokens from this chain
+      // If outputTokens is specified, only allow those tokens to the destination chain
+      const filteredTokens = tokensAfterDisabledRoutesFilter.filter((token) => {
+        const inputTokenSymbol =
+          typeof token === "string" ? token : token.inputTokenSymbol;
+        const outputTokenSymbol =
+          typeof token === "string" ? token : token.outputTokenSymbol;
+
+        // Check if the input token is allowed from the origin chain
+        if (chainConfig.inputTokens) {
+          const inputTokenAllowed = chainConfig.inputTokens.some(
+            (allowedToken) => {
+              const symbol =
+                typeof allowedToken === "string"
+                  ? allowedToken
+                  : allowedToken.symbol;
+              return symbol === inputTokenSymbol;
+            }
+          );
+          if (!inputTokenAllowed) {
+            return false;
+          }
+        }
+
+        // Check if the output token is allowed to the destination chain
+        if (toChainConfig.outputTokens) {
+          const outputTokenAllowed = toChainConfig.outputTokens.some(
+            (allowedToken) => {
+              const symbol =
+                typeof allowedToken === "string"
+                  ? allowedToken
+                  : allowedToken.symbol;
+              return symbol === outputTokenSymbol;
+            }
+          );
+          if (!outputTokenAllowed) {
+            return false;
+          }
+        }
+
+        return true;
+      });
 
       // Handle USDC swap tokens
       const usdcSwapTokens =
