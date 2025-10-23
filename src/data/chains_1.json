@@ -1170,20 +1170,6 @@
     "spokePoolBlock": 5574280,
     "inputTokens": [
       {
-        "address": "0x4300000000000000000000000000000000000004",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x4300000000000000000000000000000000000004",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      },
-      {
         "address": "0x4300000000000000000000000000000000000003",
         "symbol": "USDB",
         "name": "USDB",

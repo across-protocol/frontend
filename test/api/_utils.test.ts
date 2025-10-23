@@ -8,12 +8,18 @@ import {
   validSvmAddress,
   validAddress,
   getTokenByAddress,
+  getChainInfo,
 } from "../../api/_utils";
 import { is } from "superstruct";
 
 const svmAddress = "9E8PWXZRJa7vBRvGZDmLxSJ4iAMmB4BS7FYUruHvnCPz";
 const evmAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 const junkAddress = "0xdeadbeef";
+
+jest.mock("../../api/_utils", () => ({
+  ...jest.requireActual("../../api/_utils"),
+  getChainInfo: jest.fn(),
+}));
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -144,6 +150,41 @@ describe("_utils", () => {
 
     it("should return undefined for an invalid address", () => {
       const token = getTokenByAddress("0xInvalidAddress");
+      expect(token).toBeUndefined();
+    });
+
+    it("should return the native token for a zero address", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainId = CHAIN_IDs.MAINNET;
+      const token = getTokenByAddress(zeroAddress, chainId);
+      expect(token).toBeDefined();
+      expect(token?.symbol).toBe("ETH");
+    });
+
+    it("should return undefined for a zero address without a chainId", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const token = getTokenByAddress(zeroAddress);
+      expect(token).toBeUndefined();
+    });
+
+    it("should return undefined for a zero address on a chain with no native token in map", () => {
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainIdWithNoNativeToken = 99999; // A chain that doesn't exist
+      const token = getTokenByAddress(zeroAddress, chainIdWithNoNativeToken);
+      expect(token).toBeUndefined();
+    });
+
+    it("should return undefined for a zero address if the native token is not in the token map", () => {
+      // This test mocks the CHAINS constant to simulate a chain with a native token that does not exist in the TOKEN_SYMBOLS_MAP.
+      jest.mock("../../api/_constants", () => ({
+        ...jest.requireActual("../../api/_constants"),
+        CHAINS: { 99999: { nativeToken: "DUMMY" } },
+      }));
+
+      const zeroAddress = constants.ZERO_ADDRESS;
+      const chainId = 99999;
+
+      const token = getTokenByAddress(zeroAddress, chainId);
       expect(token).toBeUndefined();
     });
 

@@ -3,12 +3,13 @@ import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
-  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
+  RouteStrategyFunction,
 } from "./types";
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
-import { getBridgeStrategyData } from "./utils";
+import { routeStrategyForCctp } from "./cctp/utils/routing";
+import { routeStrategyForSponsorship } from "./sponsored/utils/routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -20,12 +21,38 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPEREVM]: getHyperCoreBridgeStrategy(),
     },
   },
-  // TODO: Add CCTP routes when ready
+  inputTokens: {
+    USDC: {
+      // Testnet routes
+      [CHAIN_IDs.HYPEREVM_TESTNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      // SVM → HyperCore routes
+      [CHAIN_IDs.SOLANA]: {
+        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.SOLANA_DEVNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+    },
+  },
 };
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  // TODO: Add CCTP bridge strategy when ready
+  getCctpBridgeStrategy(),
+];
+
+// Priority-ordered routing strategies
+const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
+  routeStrategyForSponsorship,
+  routeStrategyForCctp,
 ];
 
 export async function getBridgeStrategy({
@@ -37,24 +64,34 @@ export async function getBridgeStrategy({
   amountType,
   recipient,
   depositor,
+  routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const inputTokenOverride =
+    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
+      destinationChainId
+    ];
+  if (inputTokenOverride) {
+    return inputTokenOverride;
+  }
+
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {
     return fromToChainOverride;
   }
-  const supportedBridgeStrategies = routableBridgeStrategies.filter(
-    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
-  );
+
+  const supportedBridgeStrategies = getSupportedBridgeStrategies({
+    inputToken,
+    outputToken,
+    routingPreference,
+  });
+
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
-  if (
-    supportedBridgeStrategies.some(
-      (strategy) => strategy.name === getCctpBridgeStrategy().name
-    )
-  ) {
-    return routeStrategyForCctp({
+
+  for (const routeStrategy of ROUTING_STRATEGIES) {
+    const strategy = await routeStrategy({
       inputToken,
       outputToken,
       amount,
@@ -62,55 +99,45 @@ export async function getBridgeStrategy({
       recipient,
       depositor,
     });
+
+    if (
+      strategy &&
+      supportedBridgeStrategies.some((s) => s.name === strategy.name)
+    ) {
+      return strategy;
+    }
   }
+
   return getAcrossBridgeStrategy();
 }
 
-async function routeStrategyForCctp({
+export function getSupportedBridgeStrategies({
   inputToken,
   outputToken,
-  amount,
-  amountType,
-  recipient,
-  depositor,
-}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
-  const bridgeStrategyData = await getBridgeStrategyData({
-    inputToken,
-    outputToken,
-    amount,
-    amountType,
-    recipient,
-    depositor,
-  });
-  if (!bridgeStrategyData) {
-    return bridgeStrategies.default;
-  }
-  if (!bridgeStrategyData.isUsdcToUsdc) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUtilizationHigh) {
-    return getCctpBridgeStrategy();
-  }
-  if (bridgeStrategyData.isLineaSource) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isFastCctpEligible) {
-    if (bridgeStrategyData.isInThreshold) {
-      return getAcrossBridgeStrategy();
+  routingPreference,
+}: {
+  inputToken: GetBridgeStrategyParams["inputToken"];
+  outputToken: GetBridgeStrategyParams["outputToken"];
+  routingPreference: string;
+}) {
+  const routingPreferenceFilter = (strategyName: string) => {
+    // If default routing preference, don't filter based on name
+    if (routingPreference === "default") {
+      return true;
     }
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getCctpBridgeStrategy();
+
+    // If native routing preference, filter out 'across' bridge strategy
+    if (routingPreference === "native") {
+      return strategyName !== "across";
     }
-  }
-  if (bridgeStrategyData.canFillInstantly) {
-    return getAcrossBridgeStrategy();
-  } else {
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getCctpBridgeStrategy();
-    }
-  }
+
+    // Else use across bridge strategy
+    return strategyName === "across";
+  };
+  const supportedBridgeStrategies = routableBridgeStrategies.filter(
+    (strategy) =>
+      strategy.isRouteSupported({ inputToken, outputToken }) &&
+      routingPreferenceFilter(strategy.name)
+  );
+  return supportedBridgeStrategies;
 }

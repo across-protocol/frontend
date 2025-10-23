@@ -5,9 +5,11 @@ import { InvalidParamError } from "../../../_errors";
 import { toBytes32 } from "../../../_address";
 
 export const CCTP_SUPPORTED_CHAINS = [
+  // Mainnets
   CHAIN_IDs.MAINNET,
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.BASE,
+  CHAIN_IDs.HYPERCORE,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.INK,
   CHAIN_IDs.OPTIMISM,
@@ -15,6 +17,17 @@ export const CCTP_SUPPORTED_CHAINS = [
   CHAIN_IDs.SOLANA,
   CHAIN_IDs.UNICHAIN,
   CHAIN_IDs.WORLD_CHAIN,
+  // Testnets
+  CHAIN_IDs.SEPOLIA,
+  CHAIN_IDs.ARBITRUM_SEPOLIA,
+  CHAIN_IDs.BASE_SEPOLIA,
+  CHAIN_IDs.HYPEREVM_TESTNET,
+  CHAIN_IDs.HYPERCORE_TESTNET,
+  CHAIN_IDs.INK_SEPOLIA,
+  CHAIN_IDs.OPTIMISM_SEPOLIA,
+  CHAIN_IDs.POLYGON_AMOY,
+  CHAIN_IDs.SOLANA_DEVNET,
+  CHAIN_IDs.UNICHAIN_SEPOLIA,
 ];
 
 export const CCTP_SUPPORTED_TOKENS = [TOKEN_SYMBOLS_MAP.USDC];
@@ -39,32 +52,76 @@ export const CCTP_FINALITY_THRESHOLDS = {
 const DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS =
   "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d";
 
+const DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS_TESTNET =
+  "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA";
+
 // Source: https://developers.circle.com/cctp/solana-programs
 const CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES: Record<number, string> = {
   [CHAIN_IDs.SOLANA]: "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
+  [CHAIN_IDs.SOLANA_DEVNET]: "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
+};
+
+// Helper to determine if a chain is an EVM testnet
+// Only includes testnet versions of CCTP-supported chains
+// Excludes HyperEVM, HyperCore, Solana testnets as they have special handling
+const isEvmTestnetChain = (chainId: number): boolean => {
+  return [
+    CHAIN_IDs.SEPOLIA,
+    CHAIN_IDs.ARBITRUM_SEPOLIA,
+    CHAIN_IDs.BASE_SEPOLIA,
+    CHAIN_IDs.INK_SEPOLIA,
+    CHAIN_IDs.OPTIMISM_SEPOLIA,
+    CHAIN_IDs.POLYGON_AMOY,
+    CHAIN_IDs.UNICHAIN_SEPOLIA,
+  ].includes(chainId);
 };
 
 export const getCctpTokenMessengerAddress = (chainId: number): string => {
-  return (
-    CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES[chainId] ||
-    DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS
-  );
+  if (CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES[chainId]) {
+    return CCTP_TOKEN_MESSENGER_ADDRESS_OVERRIDES[chainId];
+  }
+  return isEvmTestnetChain(chainId)
+    ? DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS_TESTNET
+    : DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS;
 };
 
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
 const DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS =
   "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64";
 
+const DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS_TESTNET =
+  "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275";
+
 // Source: https://developers.circle.com/cctp/solana-programs
 const CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES: Record<number, string> = {
   [CHAIN_IDs.SOLANA]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+  [CHAIN_IDs.SOLANA_DEVNET]: "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
 };
 
 export const getCctpMessageTransmitterAddress = (chainId: number): string => {
-  return (
-    CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId] ||
-    DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS
-  );
+  if (CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId]) {
+    return CCTP_MESSAGE_TRANSMITTER_ADDRESS_OVERRIDES[chainId];
+  }
+  return isEvmTestnetChain(chainId)
+    ? DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS_TESTNET
+    : DEFAULT_CCTP_MESSAGE_TRANSMITTER_ADDRESS;
+};
+
+// CCTP Forwarder contract addresses
+// These contracts receive CCTP transfers and forward them to HyperCore
+const CCTP_FORWARDER_ADDRESSES: Record<number, string> = {
+  [CHAIN_IDs.HYPEREVM]: "0x02e39ECb8368b41bF68FF99ff351aC9864e5E2a2",
+  [CHAIN_IDs.HYPEREVM_TESTNET]: "0x02e39ECb8368b41bF68FF99ff351aC9864e5E2a2",
+};
+
+export const getCctpForwarderAddress = (chainId: number): string => {
+  const forwarderAddress = CCTP_FORWARDER_ADDRESSES[chainId];
+  if (!forwarderAddress) {
+    throw new InvalidParamError({
+      message: `CCTP forwarder address not found for chain ID ${chainId}`,
+    });
+  }
+  return forwarderAddress;
 };
 
 // CCTP TokenMessenger depositForBurn ABI
@@ -131,6 +188,82 @@ export const encodeDepositForBurn = (params: {
     toBytes32(params.destinationCaller),
     params.maxFee,
     params.minFinalityThreshold,
+  ]);
+};
+
+// CCTP TokenMessengerV2 depositForBurnWithHook ABI
+const CCTP_DEPOSIT_FOR_BURN_WITH_HOOK_ABI = {
+  inputs: [
+    {
+      internalType: "uint256",
+      name: "amount",
+      type: "uint256",
+    },
+    {
+      internalType: "uint32",
+      name: "destinationDomain",
+      type: "uint32",
+    },
+    {
+      internalType: "bytes32",
+      name: "mintRecipient",
+      type: "bytes32",
+    },
+    {
+      internalType: "address",
+      name: "burnToken",
+      type: "address",
+    },
+    {
+      internalType: "bytes32",
+      name: "destinationCaller",
+      type: "bytes32",
+    },
+    {
+      internalType: "uint256",
+      name: "maxFee",
+      type: "uint256",
+    },
+    {
+      internalType: "uint32",
+      name: "minFinalityThreshold",
+      type: "uint32",
+    },
+    {
+      internalType: "bytes",
+      name: "hookData",
+      type: "bytes",
+    },
+  ],
+  name: "depositForBurnWithHook",
+  outputs: [],
+  stateMutability: "nonpayable",
+  type: "function",
+};
+
+export const encodeDepositForBurnWithHook = (params: {
+  amount: BigNumber;
+  destinationDomain: number;
+  mintRecipient: string;
+  burnToken: string;
+  destinationCaller: string;
+  maxFee: BigNumber;
+  minFinalityThreshold: number;
+  hookData: string;
+}): string => {
+  const iface = new ethers.utils.Interface([
+    CCTP_DEPOSIT_FOR_BURN_WITH_HOOK_ABI,
+  ]);
+
+  return iface.encodeFunctionData("depositForBurnWithHook", [
+    params.amount,
+    params.destinationDomain,
+    toBytes32(params.mintRecipient),
+    params.burnToken,
+    toBytes32(params.destinationCaller),
+    params.maxFee,
+    params.minFinalityThreshold,
+    params.hookData,
   ]);
 };
 

@@ -305,6 +305,7 @@ export async function buildOftTx(params: {
     provider
   );
   const messagingFee = await oftMessengerContract.quoteSend(sendParam, false);
+
   // Encode the send call
   const iface = new ethers.utils.Interface(OFT_ABI);
   const callData = iface.encodeFunctionData("send", [
@@ -452,6 +453,7 @@ function assertSupportedRoute(params: {
  * @returns A promise that resolves with the quote data.
  */
 async function getOftQuoteForOutput(params: GetOutputBridgeQuoteParams) {
+  
   const { inputToken, outputToken, minOutputAmount } = params;
   assertSupportedRoute({ inputToken, outputToken });
 

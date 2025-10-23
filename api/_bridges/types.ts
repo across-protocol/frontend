@@ -11,6 +11,13 @@ export type BridgeStrategiesConfig = {
       [toChainId: number]: BridgeStrategy;
     };
   };
+  inputTokens?: {
+    [inputTokenSymbol: string]: {
+      [fromChainId: number]: {
+        [toChainId: number]: BridgeStrategy;
+      };
+    };
+  };
 };
 
 export type BridgeCapabilities = {
@@ -125,4 +132,16 @@ export type BridgeStrategyDataParams = {
 export type GetBridgeStrategyParams = {
   originChainId: number;
   destinationChainId: number;
+  routingPreference?: string;
 } & BridgeStrategyDataParams;
+
+export type RoutingRule<TEligibilityData> = {
+  name: string;
+  shouldApply: (data: TEligibilityData) => boolean;
+  getStrategy: () => BridgeStrategy | null;
+  reason: string;
+};
+
+export type RouteStrategyFunction = (
+  params: BridgeStrategyDataParams
+) => Promise<BridgeStrategy | null>;

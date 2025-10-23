@@ -14,18 +14,34 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
-export const TOKEN_SYMBOLS_MAP = {
-  ...constants.TOKEN_SYMBOLS_MAP,
-  WHYPE: {
-    ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
-      [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
-    },
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE_TESTNET: 13372,
+};
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+TOKEN_SYMBOLS_MAP.USDC = {
+  ...constants.TOKEN_SYMBOLS_MAP.USDC,
+  addresses: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+    [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+    [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2000000000000000000000000000000000000000",
   },
 };
-export const CHAINS = constants.PUBLIC_NETWORKS;
+TOKEN_SYMBOLS_MAP.WHYPE = {
+  ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
+  addresses: {
+    ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
+    [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+    [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2222222222222222222222222222222222222222",
+  },
+};
+export const CHAINS = {
+  ...constants.PUBLIC_NETWORKS,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: {
+    ...constants.PUBLIC_NETWORKS[CHAIN_IDs.HYPERCORE],
+    chainId: CHAIN_IDs.HYPERCORE_TESTNET,
+  },
+};
 export const TOKEN_EQUIVALENCE_REMAPPING =
   constants.TOKEN_EQUIVALENCE_REMAPPING;
 
@@ -307,6 +323,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "sol",
   "hype",
   "xpl",
+  "pol",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -368,6 +385,8 @@ export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hour
 
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
+  [CHAIN_IDs.POLYGON]: "POL",
+  [CHAIN_IDs.POLYGON_AMOY]: "POL",
   [CHAIN_IDs.LENS]: "GHO",
   [CHAIN_IDs.BSC]: "BNB",
   [CHAIN_IDs.HYPEREVM]: "HYPE",

@@ -12,6 +12,7 @@ import {
 import { BigNumber, BigNumberish, ethers, providers, utils } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+import { http } from "viem";
 
 import {
   assert,
@@ -454,6 +455,16 @@ export const getTokenByAddress = (
   | undefined => {
   try {
     const parsedTokenAddress = toAddressType(tokenAddress, chainId ?? 1);
+    // If the address is the zero address, it means the user is looking for the native token info.
+    if (parsedTokenAddress.isZeroAddress()) {
+      if (chainId) {
+        const nativeTokenSymbol = getChainInfo(chainId).nativeToken;
+        return TOKEN_SYMBOLS_MAP[
+          nativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+      }
+      return undefined;
+    }
     tokenAddress = parsedTokenAddress.toNative();
 
     const matches =
@@ -2339,6 +2350,12 @@ export async function getGasPriceEstimate(
       );
     }
   }
+  // We use viem for gas price estimation on Linea and need to pass a custom transport
+  // with our configured RPCs if possible.
+  const viemTransport =
+    chainId === CHAIN_IDs.LINEA && getRpcUrlsFromConfigJson(chainId).length > 0
+      ? http(getRpcUrlsFromConfigJson(chainId)[0])
+      : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(
     relayerFeeCalculatorQueries.provider as Parameters<
       typeof sdk.gasPriceOracle.getGasPriceEstimate
@@ -2348,6 +2365,7 @@ export async function getGasPriceEstimate(
       unsignedTx: unsignedFillTx,
       baseFeeMultiplier,
       priorityFeeMultiplier,
+      transport: viemTransport,
     }
   );
 }
