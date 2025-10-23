@@ -453,7 +453,6 @@ function assertSupportedRoute(params: {
  * @returns A promise that resolves with the quote data.
  */
 async function getOftQuoteForOutput(params: GetOutputBridgeQuoteParams) {
-  
   const { inputToken, outputToken, minOutputAmount } = params;
   assertSupportedRoute({ inputToken, outputToken });
 
