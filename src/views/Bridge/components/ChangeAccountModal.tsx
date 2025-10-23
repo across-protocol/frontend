@@ -160,6 +160,7 @@ export const ChangeAccountModal = ({
 };
 
 const ResetButton = styled.button`
+  font-size: 14px;
   color: ${COLORS.aqua};
   padding-block: 0px;
 `;

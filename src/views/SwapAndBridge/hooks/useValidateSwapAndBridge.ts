@@ -1,15 +1,9 @@
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
-import axios, { AxiosError } from "axios";
 
 import { AmountInputError } from "../../Bridge/utils";
 import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
 import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
-
-type AcrossApiErrorResponse = {
-  code?: string;
-  message?: string;
-};
 
 export type ValidationResult = {
   error?: AmountInputError;
@@ -21,8 +15,7 @@ export function useValidateSwapAndBridge(
   amount: BigNumber | null,
   isAmountOrigin: boolean,
   inputToken: EnrichedToken | null,
-  outputToken: EnrichedToken | null,
-  error: Error | null
+  outputToken: EnrichedToken | null
 ): ValidationResult {
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
@@ -49,16 +42,16 @@ export function useValidateSwapAndBridge(
         errorType = AmountInputError.INSUFFICIENT_BALANCE;
       }
     }
-    // backend availability
-    if (!errorType && error && axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<AcrossApiErrorResponse>;
-      const code = axiosError.response?.data?.code;
-      if (code === "AMOUNT_TOO_LOW") {
-        errorType = AmountInputError.AMOUNT_TOO_LOW;
-      } else if (code === "SWAP_QUOTE_UNAVAILABLE") {
-        errorType = AmountInputError.SWAP_QUOTE_UNAVAILABLE;
-      }
-    }
+    // // backend availability
+    // if (!errorType && error && axios.isAxiosError(error)) {
+    //   const axiosError = error as AxiosError<AcrossApiErrorResponse>;
+    //   const code = axiosError.response?.data?.code;
+    //   if (code === "AMOUNT_TOO_LOW") {
+    //     errorType = AmountInputError.AMOUNT_TOO_LOW;
+    //   } else if (code === "SWAP_QUOTE_UNAVAILABLE") {
+    //     errorType = AmountInputError.SWAP_QUOTE_UNAVAILABLE;
+    //   }
+    // }
     return {
       error: errorType,
       warn: undefined as AmountInputError | undefined,
@@ -68,7 +61,7 @@ export function useValidateSwapAndBridge(
         outputToken,
       }),
     };
-  }, [amount, isAmountOrigin, inputToken, outputToken, error]);
+  }, [amount, isAmountOrigin, inputToken, outputToken]);
 
   return validation;
 }

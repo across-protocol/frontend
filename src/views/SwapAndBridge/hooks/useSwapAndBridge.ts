@@ -123,7 +123,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   const {
     data: swapQuote,
     isLoading: isQuoteLoading,
-    error,
+    error: quoteError,
   } = useSwapQuote({
     origin: inputToken ? inputToken : null,
     destination: outputToken ? outputToken : null,
@@ -150,8 +150,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     amount,
     isAmountOrigin,
     inputToken,
-    outputToken,
-    error
+    outputToken
   );
 
   const expectedInputAmount = useMemo(() => {
@@ -196,6 +195,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   // Button state logic
   const buttonState: BridgeButtonState = useMemo(() => {
     if (isQuoteLoading) return "loadingQuote";
+    if (quoteError) return "quoteError";
     if (!approvalAction.isConnected) return "notConnected";
     if (approvalAction.isButtonActionLoading) return "submitting";
     if (!inputToken || !outputToken) return "awaitingTokenSelection";
@@ -203,12 +203,13 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     if (validation.error) return "validationError";
     return "readyToConfirm";
   }, [
-    approvalAction.isButtonActionLoading,
+    isQuoteLoading,
+    quoteError,
     approvalAction.isConnected,
+    approvalAction.isButtonActionLoading,
     inputToken,
     outputToken,
     amount,
-    isQuoteLoading,
     validation.error,
   ]);
 
@@ -235,10 +236,9 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     ]
   );
 
-  const quoteWarningMessage = useMemo(
-    () => getQuoteWarningMessage(error),
-    [error]
-  );
+  const quoteWarningMessage = useMemo(() => {
+    return getQuoteWarningMessage(quoteError);
+  }, [quoteError]);
 
   return {
     inputToken,
@@ -274,7 +274,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isWrongNetwork: approvalAction.isWrongNetwork,
     isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
-    quoteError: error,
+    quoteError,
     quoteWarningMessage,
   };
 }
@@ -284,6 +284,7 @@ const buttonLabels: Record<BridgeButtonState, string> = {
   awaitingTokenSelection: "Confirm Swap",
   awaitingAmountInput: "Confirm Swap",
   readyToConfirm: "Confirm Swap",
+  quoteError: "Confirm Swap",
   submitting: "Confirming...",
   wrongNetwork: "Confirm Swap",
   loadingQuote: "Finalizing quote...",

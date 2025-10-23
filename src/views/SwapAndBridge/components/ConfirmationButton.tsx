@@ -29,7 +29,8 @@ export type BridgeButtonState =
   | "submitting"
   | "wrongNetwork"
   | "loadingQuote"
-  | "validationError";
+  | "validationError"
+  | "quoteError";
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -81,7 +82,7 @@ const ExpandableLabelSection: React.FC<
   let content: React.ReactNode = null;
 
   // Show validation messages for all non-ready states
-  if (quoteWarningMessage) {
+  if (quoteWarningMessage && state === "quoteError") {
     // Show quote warning message when ready to confirm but there's a warning
     content = (
       <>
