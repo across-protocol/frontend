@@ -43,6 +43,11 @@ export const OFT_MESSENGERS: Record<
   // }
 };
 
+// OFT composer contract addresses per token on hyperEVM
+export const HYPEREVM_OFT_COMPOSER_ADDRESSES: Record<string, string> = {
+  "USDT-SPOT": "0x80123ab57c9bc0c452d6c18f92a653a4ee2e7585",
+};
+
 // Shared decimals for OFT tokens across chains
 // These are the decimal precision values that are consistent across all chains for each token
 export const OFT_SHARED_DECIMALS: Record<string, number> = {
@@ -98,6 +103,7 @@ export const getOftMessengerForToken = (
 
 // Get OFT endpoint ID for a chain
 export const getOftEndpointId = (chainId: number): number => {
+  chainId = chainId === CHAIN_IDs.HYPERCORE ? CHAIN_IDs.HYPEREVM : chainId; // Use HyperEVM's OFT EID for Hypercore. They share the same EID.
   const chainInfo = CHAINS[chainId];
   if (!chainInfo || !chainInfo.oftEid) {
     throw new InvalidParamError({
@@ -293,6 +299,8 @@ export const createSendParamStruct = (params: {
   toAddress: string;
   amountLD: BigNumber;
   minAmountLD: BigNumber;
+  composeMsg?: string;
+  extraOptions?: string;
 }): SendParamStruct => {
   const dstEid = getOftEndpointId(params.destinationChainId);
   return {
@@ -300,8 +308,8 @@ export const createSendParamStruct = (params: {
     to: toBytes32(params.toAddress),
     amountLD: params.amountLD,
     minAmountLD: params.minAmountLD,
-    extraOptions: "0x",
-    composeMsg: "0x",
+    extraOptions: params.extraOptions ?? "0x",
+    composeMsg: params.composeMsg ?? "0x",
     oftCmd: "0x",
   };
 };
