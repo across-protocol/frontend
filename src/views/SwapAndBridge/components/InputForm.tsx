@@ -2,16 +2,16 @@ import { COLORS, formatUSD } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import { BalanceSelector } from "./BalanceSelector";
-import { QuoteWarning } from "./QuoteWarning";
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
 import { useTokenInput, UnitType } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
-import ChangeAccountModal from "views/Bridge/components/ChangeAccountModal";
+import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
+import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
 
 export const InputForm = ({
   inputToken,
@@ -25,11 +25,7 @@ export const InputForm = ({
   expectedOutputAmount,
   expectedInputAmount,
   validationError,
-  quoteWarningMessage,
-  toAccountEVM,
-  toAccountSVM,
-  handleChangeToAddressEVM,
-  handleChangeToAddressSVM,
+  toAccountManagement,
   destinationChainEcosystem,
 }: {
   inputToken: EnrichedToken | null;
@@ -47,12 +43,7 @@ export const InputForm = ({
   isAmountOrigin: boolean;
   setIsAmountOrigin: (isAmountOrigin: boolean) => void;
   validationError: AmountInputError | undefined;
-  quoteWarningMessage: string | null;
-
-  toAccountEVM?: { address: string };
-  toAccountSVM?: { address: string };
-  handleChangeToAddressEVM: (account: string) => void;
-  handleChangeToAddressSVM: (account: string) => void;
+  toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: "evm" | "svm";
 }) => {
   // Shared unit state for both inputs
@@ -89,10 +80,7 @@ export const InputForm = ({
         disabled={!outputToken || !outputToken}
         unit={unit}
         setUnit={setUnit}
-        toAccountEVM={toAccountEVM}
-        toAccountSVM={toAccountSVM}
-        handleChangeToAddressEVM={handleChangeToAddressEVM}
-        handleChangeToAddressSVM={handleChangeToAddressSVM}
+        toAccountManagement={toAccountManagement}
         destinationChainEcosystem={destinationChainEcosystem}
       />
       <QuickSwapButton onClick={quickSwap}>
@@ -113,13 +101,9 @@ export const InputForm = ({
         disabled={!outputToken || !outputToken}
         unit={unit}
         setUnit={setUnit}
-        toAccountEVM={toAccountEVM}
-        toAccountSVM={toAccountSVM}
-        handleChangeToAddressEVM={handleChangeToAddressEVM}
-        handleChangeToAddressSVM={handleChangeToAddressSVM}
+        toAccountManagement={toAccountManagement}
         destinationChainEcosystem={destinationChainEcosystem}
       />
-      {/* <QuoteWarning message={quoteWarningMessage} /> */}
     </Wrapper>
   );
 };
@@ -137,10 +121,7 @@ const TokenInput = ({
   disabled,
   unit,
   setUnit,
-  toAccountEVM,
-  toAccountSVM,
-  handleChangeToAddressEVM,
-  handleChangeToAddressSVM,
+  toAccountManagement,
   destinationChainEcosystem,
 }: {
   setToken: (token: EnrichedToken) => void;
@@ -155,10 +136,7 @@ const TokenInput = ({
   otherToken?: EnrichedToken | null;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
-  toAccountEVM?: { address: string };
-  toAccountSVM?: { address: string };
-  handleChangeToAddressEVM: (account: string) => void;
-  handleChangeToAddressSVM: (account: string) => void;
+  toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: "evm" | "svm";
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -216,10 +194,7 @@ const TokenInput = ({
           {!isOrigin && (
             <>
               <ChangeAccountModal
-                currentAccountEVM={toAccountEVM?.address}
-                currentAccountSVM={toAccountSVM?.address}
-                onChangeAccountEVM={handleChangeToAddressEVM}
-                onChangeAccountSVM={handleChangeToAddressSVM}
+                toAccountManagement={toAccountManagement}
                 destinationChainEcosystem={destinationChainEcosystem}
               />
             </>

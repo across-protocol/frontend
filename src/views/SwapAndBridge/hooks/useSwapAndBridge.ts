@@ -29,12 +29,13 @@ export type UseSwapAndBridgeReturn = {
   setAmount: (a: BigNumber | null) => void;
   isAmountOrigin: boolean;
   setIsAmountOrigin: (v: boolean) => void;
-
+  // route
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
   expectedOutputAmount?: string;
-
+  destinationChainEcosystem: "svm" | "evm";
+  // validation
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   validationErrorFormatted?: string | undefined;
@@ -46,11 +47,7 @@ export type UseSwapAndBridgeReturn = {
   buttonLabel: string;
 
   // Account management
-  toAccountEVM: ReturnType<typeof useToAccount>["toAccountEVM"];
-  toAccountSVM: ReturnType<typeof useToAccount>["toAccountSVM"];
-  handleChangeToAddressEVM: (account: string) => void;
-  handleChangeToAddressSVM: (account: string) => void;
-  destinationChainEcosystem: "evm" | "svm";
+  toAccountManagement: ReturnType<typeof useToAccount>;
 
   // Legacy properties
   isConnected: boolean;
@@ -72,24 +69,10 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const history = useHistory();
 
-  const {
-    isConnected: isConnectedEVM,
-    chainId: walletChainIdEVM,
-    account: accountEVM,
-    connect: connectEVM,
-  } = useConnectionEVM();
-  const {
-    isConnected: isConnectedSVM,
-    account: accountSVM,
-    connect: connectSVM,
-  } = useConnectionSVM();
+  const { account: accountEVM, connect: connectEVM } = useConnectionEVM();
+  const { account: accountSVM, connect: connectSVM } = useConnectionSVM();
 
-  const {
-    toAccountEVM,
-    toAccountSVM,
-    handleChangeToAddressEVM,
-    handleChangeToAddressSVM,
-  } = useToAccount(outputToken?.chainId);
+  const toAccountManagement = useToAccount(outputToken?.chainId);
 
   const originChainEcosystem = inputToken?.chainId
     ? getEcosystem(inputToken?.chainId)
@@ -100,11 +83,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const depositor =
     originChainEcosystem === "evm" ? accountEVM : accountSVM?.toBase58();
-  const recipient =
-    destinationChainEcosystem === "evm" ? toAccountEVM : toAccountSVM;
-
-  console.log("depositor", depositor);
-  console.log("recipient", recipient?.address);
 
   useEffect(() => {
     if (defaultRoute.inputToken && defaultRoute.outputToken) {
@@ -152,7 +130,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
     depositor,
-    recipient: recipient?.address,
+    recipient: toAccountManagement.currentRecipientAccount,
   });
 
   const approvalData: SwapApprovalData | undefined = useMemo(() => {
@@ -289,12 +267,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     buttonLabel,
 
     // Account management
-    toAccountEVM,
-    toAccountSVM,
-    handleChangeToAddressEVM,
-    handleChangeToAddressSVM,
+    toAccountManagement,
     destinationChainEcosystem,
-
     // Legacy properties
     isConnected: approvalAction.isConnected,
     isWrongNetwork: approvalAction.isWrongNetwork,

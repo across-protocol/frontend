@@ -39,6 +39,7 @@ interface ConfirmationButtonProps
   swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
+  quoteWarningMessage: string | null;
   validationError?: AmountInputError;
   validationWarning?: AmountInputError;
   validationErrorFormatted?: string;

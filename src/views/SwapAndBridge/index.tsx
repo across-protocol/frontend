@@ -27,11 +27,8 @@ export default function SwapAndBridge() {
     buttonLabel,
     onConfirm,
     quoteWarningMessage,
-    toAccountEVM,
-    toAccountSVM,
-    handleChangeToAddressEVM,
-    handleChangeToAddressSVM,
     destinationChainEcosystem,
+    toAccountManagement,
   } = useSwapAndBridge();
 
   return (
@@ -49,12 +46,8 @@ export default function SwapAndBridge() {
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}
           validationError={validationError}
-          quoteWarningMessage={quoteWarningMessage}
-          toAccountEVM={toAccountEVM}
-          toAccountSVM={toAccountSVM}
-          handleChangeToAddressEVM={handleChangeToAddressEVM}
-          handleChangeToAddressSVM={handleChangeToAddressSVM}
           destinationChainEcosystem={destinationChainEcosystem}
+          toAccountManagement={toAccountManagement}
         />
         <ConfirmationButton
           inputToken={inputToken}
@@ -63,6 +56,7 @@ export default function SwapAndBridge() {
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
           onConfirm={onConfirm}
+          quoteWarningMessage={quoteWarningMessage}
           validationError={validationError}
           validationWarning={validationWarning}
           validationErrorFormatted={validationErrorFormatted}

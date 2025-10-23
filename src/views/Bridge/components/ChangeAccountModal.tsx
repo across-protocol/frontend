@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { isAddress as isSvmAddress } from "@solana/kit";
 
 import { Modal, Text } from "components";
-import { PrimaryButton, UnstyledButton } from "components/Button";
+import { PrimaryButton } from "components/Button";
 import { Input, InputGroup } from "components/Input";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { ReactComponent as PencilIcon } from "assets/icons/pencil.svg";
@@ -12,33 +12,31 @@ import { ReactComponent as PencilIcon } from "assets/icons/pencil.svg";
 import { ampli } from "ampli";
 import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
-import { shortenAddress } from "utils";
+import { COLORS, shortenAddress } from "utils";
+import { useHotkeys } from "react-hotkeys-hook";
+import { ToAccountManagement } from "../hooks/useToAccount";
 
 type ChangeAccountModalProps = {
-  currentAccountEVM?: string;
-  currentAccountSVM?: string;
-  onChangeAccountEVM: (account: string) => void;
-  onChangeAccountSVM: (account: string) => void;
+  toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: "evm" | "svm";
 };
 
-const ChangeAccountModal = ({
-  currentAccountEVM,
-  currentAccountSVM,
-  onChangeAccountEVM,
-  onChangeAccountSVM,
+export const ChangeAccountModal = ({
+  toAccountManagement,
   destinationChainEcosystem,
 }: ChangeAccountModalProps) => {
-  const currentRecipient =
-    destinationChainEcosystem === "evm"
-      ? currentAccountEVM || ""
-      : currentAccountSVM || "";
-
+  const {
+    currentRecipientAccount,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
+    defaultRecipientAccount,
+  } = toAccountManagement;
+  const inputRef = useRef<HTMLInputElement>(null);
   const [displayModal, setDisplayModal] = useState(false);
-  const [userInput, setUserInput] = useState(currentRecipient);
+  const [userInput, setUserInput] = useState(currentRecipientAccount ?? "");
   const [validInput, setValidInput] = useState(false);
 
-  const { isBlocked, isLoading } = useDisallowList(userInput);
+  const { isBlocked, isLoading } = useDisallowList(userInput ?? "");
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -46,18 +44,10 @@ const ChangeAccountModal = ({
 
   useEffect(() => {
     if (displayModal) {
-      setUserInput(
-        destinationChainEcosystem === "evm"
-          ? currentAccountEVM || ""
-          : currentAccountSVM || ""
-      );
+      inputRef.current?.focus();
+      setUserInput(currentRecipientAccount ?? "");
     }
-  }, [
-    currentAccountEVM,
-    currentAccountSVM,
-    displayModal,
-    destinationChainEcosystem,
-  ]);
+  }, [displayModal, currentRecipientAccount]);
 
   useEffect(() => {
     if (isLoading) {
@@ -72,21 +62,14 @@ const ChangeAccountModal = ({
         ? isValidAddressEVM
         : isValidAddressSVM
     );
-  }, [
-    currentAccountEVM,
-    currentAccountSVM,
-    userInput,
-    isBlocked,
-    isLoading,
-    destinationChainEcosystem,
-  ]);
+  }, [userInput, isBlocked, isLoading, destinationChainEcosystem]);
 
   const handleClickSave = () => {
     if (validInput || userInput === "") {
       if (destinationChainEcosystem === "evm") {
-        onChangeAccountEVM(userInput);
+        handleChangeToAddressEVM(userInput);
       } else {
-        onChangeAccountSVM(userInput);
+        handleChangeToAddressSVM(userInput);
       }
       addToAmpliQueue(() => {
         ampli.toAccountChanged({
@@ -107,10 +90,16 @@ const ChangeAccountModal = ({
 
   const validationLevel = !validInput && !!userInput ? "error" : "valid";
 
+  useHotkeys("esc", () => onCloseModal(), { enableOnFormTags: true });
+
+  if (!currentRecipientAccount) {
+    return;
+  }
+
   return (
     <>
       <Trigger onClick={() => setDisplayModal(true)}>
-        {shortenAddress(currentRecipient, "..", 4)}
+        {shortenAddress(currentRecipientAccount, "..", 4)}
         <PencilIcon color="inherit" width="16px" height="16px" />
       </Trigger>
 
@@ -119,53 +108,66 @@ const ChangeAccountModal = ({
         exitModalHandler={handleClickCancel}
         verticalLocation="middle"
         isOpen={displayModal}
-        width={550}
+        width={480}
         exitOnOutsideClick
         titleBorder
       >
         <Wrapper>
-          <InnerWrapper>
+          <RowSpaced>
             <SubHeading>Wallet Address</SubHeading>
-            <InputGroup validationLevel={validationLevel}>
-              <Input
-                validationLevel={validationLevel}
-                value={userInput}
-                onChange={(t) => setUserInput(t.target.value)}
-              />
-              <CrossIconWrapper onClick={handleClickClear}>
-                <StyledCrossIcon />
-              </CrossIconWrapper>
-            </InputGroup>
-            <ButtonWrapper>
-              <CancelButton onClick={handleClickCancel}>
-                <Text size="lg" weight={500}>
-                  Cancel
-                </Text>
-              </CancelButton>
-              <SaveButton
-                disabled={!validInput && !!userInput}
-                onClick={handleClickSave}
+            {userInput !== defaultRecipientAccount && (
+              <ResetButton
+                onClick={() => setUserInput(defaultRecipientAccount ?? "")}
               >
-                <Text size="lg" weight={500} color="dark-grey">
-                  Save
-                </Text>
-              </SaveButton>
-            </ButtonWrapper>
-          </InnerWrapper>
-          <Text size="md" color="grey-400">
+                Reset to Default
+              </ResetButton>
+            )}
+          </RowSpaced>
+
+          <InputGroup validationLevel={validationLevel}>
+            <Input
+              ref={inputRef}
+              validationLevel={validationLevel}
+              value={userInput}
+              onChange={(t) => setUserInput(t.target.value)}
+            />
+            <CrossIconWrapper onClick={handleClickClear}>
+              <StyledCrossIcon />
+            </CrossIconWrapper>
+          </InputGroup>
+          <Warning>
             Note that only{" "}
-            <UnderlinedText>
+            <BoldText>
               {destinationChainEcosystem === "evm" ? "Ethereum" : "Solana"}
-            </UnderlinedText>{" "}
+            </BoldText>{" "}
             addresses are valid.
-          </Text>
+          </Warning>
+          <ButtonWrapper>
+            <SaveButton
+              disabled={!validInput && !!userInput}
+              onClick={handleClickSave}
+            >
+              <Text size="lg" weight={500} color="dark-grey">
+                Save
+              </Text>
+            </SaveButton>
+          </ButtonWrapper>
         </Wrapper>
       </Modal>
     </>
   );
 };
 
-export default ChangeAccountModal;
+const ResetButton = styled.button`
+  color: ${COLORS.aqua};
+  padding-block: 0px;
+`;
+
+const RowSpaced = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
 
 const Trigger = styled.button`
   color: var(--base-bright-gray, #e0f3ff);
@@ -187,27 +189,27 @@ const Trigger = styled.button`
 `;
 
 const SubHeading = styled.div`
-  color: var(--base-bright-gray, #e0f3ff);
+  color: var(--shades-Neutrals-neutral-400, #869099);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
-  opacity: 0.5;
 `;
 
-const InnerWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0px;
-  gap: 24px;
-  width: 100%;
+const Warning = styled.span`
+  color: var(--shades-Neutrals-neutral-400, #869099);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  margin-top: 4px;
+  margin-bottom: 12px;
 `;
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
   justify-content: flex-start;
   align-items: center;
 
@@ -234,8 +236,8 @@ const StyledCrossIcon = styled(CrossIcon)`
   flex-shrink: 0;
 `;
 
-const UnderlinedText = styled.span`
-  text-decoration: underline;
+const BoldText = styled.span`
+  font-weight: 500;
   color: #e0f3ff;
 `;
 
@@ -246,27 +248,6 @@ const ButtonWrapper = styled.div`
   padding: 0px;
   gap: 16px;
   width: 100%;
-`;
-
-const CancelButton = styled(UnstyledButton)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  width: 100%;
-  height: 64px;
-
-  border: 1px solid #9daab3;
-  border-radius: 12px;
-  background: transparent;
-
-  cursor: pointer;
-
-  &:hover {
-    color: #e0f3ff;
-    border-color: #e0f3ff;
-  }
 `;
 
 const SaveButton = styled(PrimaryButton)`
