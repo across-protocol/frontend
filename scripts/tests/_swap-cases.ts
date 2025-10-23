@@ -424,7 +424,6 @@ export const USDT_OFT_COMPOSER_CASE = [
         TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       destinationChainId: CHAIN_IDs.HYPERCORE,
       depositor: evmDepositor,
-      // skipOriginTxEstimation: true,
     },
   },
 ];

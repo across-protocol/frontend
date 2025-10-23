@@ -131,15 +131,12 @@ describe("OFT Strategy", () => {
   describe("buildOftTx", () => {
     it("should build a valid transaction", async () => {
       /**
-       * NOTE: This test uses hardcoded hex values and specific token addresses from a real,
+       * NOTE: This test uses values and specific token addresses from a real,
        * successful cross-chain transaction to Hyperliquid's Composer contract.
        *
        * REASONING:
        * 1. These values were captured from an actual API quote that successfully completed
        *    an on-chain cross-chain transfer using the Hyperliquid Composer contract.
-       * 2. The hex format (e.g., "0x0f4240" instead of BigNumber.from(1000000)) preserves
-       *    the exact representation from the logged request to avoid any potential differences
-       *    in serialization or conversion that could affect the transaction structure.
        * 3. The specific token addresses and chain IDs represent the real Arbitrum USDT to
        *    HyperCore USDT-SPOT route that was validated on-chain.
        * 4. Since CI tests cannot verify the actual cross-chain transfer completion, maintaining
@@ -152,7 +149,7 @@ describe("OFT Strategy", () => {
        */
       const quotes: CrossSwapQuotes = {
         crossSwap: {
-          amount: BigNumber.from("0x0f4240"),
+          amount: BigNumber.from(1000000),
           inputToken: {
             decimals: 6,
             symbol: "USDT",
@@ -190,15 +187,15 @@ describe("OFT Strategy", () => {
             address: "0x200000000000000000000000000000000000010C",
             chainId: 1337,
           },
-          inputAmount: BigNumber.from("0x2710"),
-          outputAmount: BigNumber.from("0x0f4240"),
-          minOutputAmount: BigNumber.from("0x0f4240"),
+          inputAmount: BigNumber.from(10000),
+          outputAmount: BigNumber.from(1000000),
+          minOutputAmount: BigNumber.from(1000000),
           estimatedFillTimeSec: 24,
           provider: "oft",
           fees: {
             totalRelay: {
-              pct: BigNumber.from("0x00"),
-              total: BigNumber.from("0x00"),
+              pct: BigNumber.from(0),
+              total: BigNumber.from(0),
               token: {
                 decimals: 6,
                 symbol: "USDT",
@@ -207,8 +204,8 @@ describe("OFT Strategy", () => {
               },
             },
             relayerCapital: {
-              pct: BigNumber.from("0x00"),
-              total: BigNumber.from("0x00"),
+              pct: BigNumber.from(0),
+              total: BigNumber.from(0),
               token: {
                 decimals: 6,
                 symbol: "USDT",
@@ -217,8 +214,8 @@ describe("OFT Strategy", () => {
               },
             },
             relayerGas: {
-              pct: BigNumber.from("0x00"),
-              total: BigNumber.from("0x00"),
+              pct: BigNumber.from(0),
+              total: BigNumber.from(0),
               token: {
                 decimals: 6,
                 symbol: "USDT",
@@ -227,8 +224,8 @@ describe("OFT Strategy", () => {
               },
             },
             lp: {
-              pct: BigNumber.from("0x00"),
-              total: BigNumber.from("0x00"),
+              pct: BigNumber.from(0),
+              total: BigNumber.from(0),
               token: {
                 decimals: 6,
                 symbol: "USDT",
@@ -237,7 +234,7 @@ describe("OFT Strategy", () => {
               },
             },
             bridgeFee: {
-              pct: BigNumber.from("0x00"),
+              pct: BigNumber.from(0),
               total: BigNumber.from("0x1522fe82c8c1"),
               token: {
                 chainId: 42161,
@@ -256,7 +253,7 @@ describe("OFT Strategy", () => {
           },
         },
         appFee: {
-          feeAmount: BigNumber.from("0x00"),
+          feeAmount: BigNumber.from(0),
           feeToken: {
             decimals: 8,
             symbol: "USDT-SPOT",
