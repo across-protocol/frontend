@@ -17,6 +17,12 @@ import {
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
 import {
+  getEventEmitterAddress,
+  isEventEmitterDeployed,
+  encodeSwapMetadata,
+  encodeEmitDataCalldata,
+} from "../_event-emitter";
+import {
   CrossSwap,
   CrossSwapQuotes,
   OriginEntryPointContractName,
@@ -771,10 +777,31 @@ export function buildDestinationSwapCrossChainMessage({
           value: "0",
         };
 
+  // Build event emitter action if the contract is deployed on this chain
+  const eventEmitterActions: Action[] = [];
+  if (isEventEmitterDeployed(destinationSwapChainId) && !isIndicativeQuote) {
+    const eventEmitterAddress = getEventEmitterAddress(destinationSwapChainId)!;
+    const metadata = encodeSwapMetadata({
+      version: 1,
+      swapTokenAddress: crossSwap.outputToken.address,
+      swapTokenAmount: destinationSwapQuote.minAmountOut,
+      recipient: crossSwap.recipient,
+      appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+      swapProvider: destinationSwapQuote.swapProvider.name,
+    });
+    eventEmitterActions.push({
+      target: eventEmitterAddress,
+      callData: encodeEmitDataCalldata(metadata),
+      value: "0",
+    });
+  }
+
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap, destinationRecipient),
     actions: [
       routerTransferAction,
+      // emit destination swap metadata event
+      ...eventEmitterActions,
       // swap bridgeable output token -> cross swap output token
       ...swapActions,
       // unwrap weth if output token is native
