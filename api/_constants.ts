@@ -377,3 +377,24 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.PLASMA]: "XPL",
   [CHAIN_IDs.HYPERCORE]: "HYPE",
 };
+
+export const STABLE_COIN_SYMBOLS = Array.from(
+  new Set([
+    ...sdkConstants.STABLE_COIN_SYMBOLS,
+    "USDe",
+    "USDS",
+    "USDf",
+    "USDTB",
+    "PYUSD",
+    "USD1",
+    "USDF",
+    "BFUSD",
+    "FDUSD",
+    "USDG",
+    "RLUSD",
+    "USD0",
+    "TUSD",
+    "USDD",
+    "EURC",
+  ])
+);
