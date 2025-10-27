@@ -24,20 +24,36 @@ describe("Event Emitter Module", () => {
   });
 
   describe("isEventEmitterDeployed", () => {
-    it("should return false for zero address", () => {
+    it("should return true for deployed chains", () => {
       const deployed = isEventEmitterDeployed(CHAIN_IDs.MAINNET);
-      expect(deployed).toBe(false);
+      expect(deployed).toBe(true);
     });
 
-    it("should return true for non-zero address", () => {
-      // Temporarily set a non-zero address
-      ACROSS_EVENT_EMITTER_ADDRESS[CHAIN_IDs.ARBITRUM] =
-        "0x1111111111111111111111111111111111111111";
-      const deployed = isEventEmitterDeployed(CHAIN_IDs.ARBITRUM);
-      expect(deployed).toBe(true);
-      // Reset
-      ACROSS_EVENT_EMITTER_ADDRESS[CHAIN_IDs.ARBITRUM] =
+    it("should return true for all supported chains with deployed contracts", () => {
+      const testChains = [
+        CHAIN_IDs.OPTIMISM,
+        CHAIN_IDs.ARBITRUM,
+        CHAIN_IDs.BASE,
+        CHAIN_IDs.POLYGON,
+      ];
+
+      testChains.forEach((chainId) => {
+        const deployed = isEventEmitterDeployed(chainId);
+        expect(deployed).toBe(true);
+      });
+    });
+
+    it("should return false for zero address", () => {
+      // Temporarily set zero address to test the function logic
+      const originalAddress = ACROSS_EVENT_EMITTER_ADDRESS[CHAIN_IDs.MAINNET];
+      ACROSS_EVENT_EMITTER_ADDRESS[CHAIN_IDs.MAINNET] =
         ethers.constants.AddressZero;
+
+      const deployed = isEventEmitterDeployed(CHAIN_IDs.MAINNET);
+      expect(deployed).toBe(false);
+
+      // Restore original address
+      ACROSS_EVENT_EMITTER_ADDRESS[CHAIN_IDs.MAINNET] = originalAddress;
     });
 
     it("should return false for unknown chain ID", () => {
