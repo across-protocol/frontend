@@ -80,7 +80,7 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
         inputMint: swap.tokenIn.address,
         outputMint: swap.tokenOut.address,
         amount: swap.amount,
-        slippageBps: slippageTolerance * 100, // From percentage to bps
+        slippageBps: Math.round(slippageTolerance * 100), // From percentage to bps, needs to be an integer
         swapMode: tradeType === TradeType.EXACT_INPUT ? "ExactIn" : "ExactOut",
         ...sourcesParams,
         // @dev: We can use the following parameters if we face any limitations when building the transaction

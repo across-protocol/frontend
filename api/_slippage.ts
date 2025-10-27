@@ -27,18 +27,42 @@ const MAJOR_TOKEN_SYMBOLS_BY_CHAIN: {
   ),
 };
 
+/**
+ * Returns the slippage tolerance value. If the slippage tolerance is "auto",
+ * the function will return the resolved auto slippage value. If the slippage tolerance
+ * is a number, the function will return the slippage tolerance value.
+ * @param params.tokenIn - The input token object.
+ * @param params.tokenOut - The output token object
+ * @param params.slippageTolerance - The slippage tolerance expressed as 0 <= slippage <= 100, where 1 = 1%.
+ * @returns The slippage tolerance value expressed as 0 <= slippage <= 100, where 1 = 1%. Max. decimals is 2.
+ */
 export function getSlippage(params: {
   tokenIn: Token;
   tokenOut: Token;
   slippageTolerance: number | "auto";
 }) {
-  if (params.slippageTolerance === "auto") {
-    return resolveAutoSlippage({
-      tokenIn: params.tokenIn,
-      tokenOut: params.tokenOut,
-    });
+  const resolvedSlippage =
+    params.slippageTolerance === "auto"
+      ? resolveAutoSlippage({
+          tokenIn: params.tokenIn,
+          tokenOut: params.tokenOut,
+        })
+      : params.slippageTolerance;
+  const parsedSlippage = parseFloat(resolvedSlippage.toFixed(2));
+
+  if (isNaN(parsedSlippage)) {
+    throw new Error("Invalid slippage tolerance value");
   }
-  return params.slippageTolerance;
+
+  if (parsedSlippage > 100) {
+    throw new Error("Slippage tolerance value exceeds 100%");
+  }
+
+  if (parsedSlippage < 0) {
+    throw new Error("Slippage tolerance value is less than 0%");
+  }
+
+  return parsedSlippage;
 }
 
 /**

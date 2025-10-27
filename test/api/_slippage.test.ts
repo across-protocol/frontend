@@ -39,6 +39,35 @@ describe("api/_slippage", () => {
       expect(result).toBe(2.5);
     });
 
+    test("should return the provided slippage tolerance with 2 decimals", () => {
+      const result = getSlippage({
+        tokenIn: wethMainnet,
+        tokenOut: usdcMainnet,
+        slippageTolerance: 2.5123456789,
+      });
+      expect(result).toBe(2.51);
+    });
+
+    test("should throw an error when the slippage tolerance is invalid", () => {
+      expect(() =>
+        getSlippage({
+          tokenIn: wethMainnet,
+          tokenOut: usdcMainnet,
+          slippageTolerance: -0.5,
+        })
+      ).toThrow("Slippage tolerance value is less than 0%");
+    });
+
+    test("should throw an error when the slippage tolerance exceeds 100%", () => {
+      expect(() =>
+        getSlippage({
+          tokenIn: wethMainnet,
+          tokenOut: usdcMainnet,
+          slippageTolerance: 100.5,
+        })
+      ).toThrow("Slippage tolerance value exceeds 100%");
+    });
+
     test("should return the auto slippage value for stable coin pair", () => {
       const result = getSlippage({
         tokenIn: usdcMainnet,
