@@ -11,6 +11,7 @@ const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
 // See: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#perpetuals-vs-spot
 const L2_ORDER_BOOK_COIN_MAP: Record<string, string> = {
   "USDH/USDC": "@230",
+  "USDT/USDC": "@166",
 };
 
 // Contract used to query Hypercore balances from EVM
