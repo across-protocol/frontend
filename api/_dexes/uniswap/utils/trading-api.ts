@@ -26,7 +26,7 @@ export type UniswapClassicQuoteFromApi = {
 
 export type UniswapParamForApi = Omit<Swap, "type" | "slippageTolerance"> & {
   swapper: string;
-  slippageTolerance?: number;
+  slippageTolerance?: number | "auto";
   protocols?: ("V2" | "V3" | "V4")[];
 };
 
@@ -52,6 +52,18 @@ export async function getUniswapClassicQuoteFromApi(
     swap.swapper === getMulticall3Address(swap.tokenIn.chainId);
   const dummySwapperAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 
+  // Uniswap API supports auto slippage via the `autoSlippage` parameter. Therefore, we
+  // don't need to resolve the slippage via our own logic.
+  const slippageParams =
+    swap.slippageTolerance === "auto"
+      ? {
+          // https://api-docs.uniswap.org/api-reference/swapping/quote#body-slippage-tolerance
+          autoSlippage: "DEFAULT",
+        }
+      : {
+          slippageTolerance: swap.slippageTolerance,
+        };
+
   const response = await axios.post<{
     requestId: string;
     routing: "CLASSIC";
@@ -66,12 +78,11 @@ export async function getUniswapClassicQuoteFromApi(
       tokenIn: swap.tokenIn.address,
       tokenOut: swap.tokenOut.address,
       swapper: shouldUseDummySwapper ? dummySwapperAddress : swap.swapper,
-      slippageTolerance: swap.slippageTolerance,
-      autoSlippage: swap.slippageTolerance ? undefined : "DEFAULT",
       amount: swap.amount,
       urgency: "urgent",
       protocols: swap.protocols || ["V2", "V3", "V4"],
       routingPreference: "FASTEST",
+      ...slippageParams,
     },
     {
       headers: {

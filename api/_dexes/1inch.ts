@@ -3,6 +3,7 @@ import axios from "axios";
 import { Swap, OriginSwapQuoteAndCalldata } from "./types";
 import { getSwapAndBridgeAddress } from "../_swap-and-bridge";
 import { getEnvs } from "../_env";
+import { getSlippage } from "../_slippage";
 
 const { ONEINCH_API_KEY } = getEnvs();
 
@@ -16,12 +17,18 @@ export async function get1inchQuoteForOriginSwapExactInput(
     accept: "application/json",
   };
 
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+  });
+
   const swapParams = {
     src: swap.tokenIn.address,
     dst: swap.tokenOut.address,
     amount: swap.amount,
     from: swapAndBridgeAddress,
-    slippage: swap.slippageTolerance,
+    slippage: slippageTolerance,
     disableEstimate: true,
     allowPartialFill: false,
     receiver: swapAndBridgeAddress,
@@ -47,6 +54,6 @@ export async function get1inchQuoteForOriginSwapExactInput(
     value: response.data.tx.value,
     swapAndBridgeAddress,
     dex: "1inch",
-    slippage: swap.slippageTolerance,
+    slippage: slippageTolerance,
   };
 }

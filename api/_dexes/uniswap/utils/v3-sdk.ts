@@ -28,6 +28,7 @@ import {
   SWAP_ROUTER_02_ADDRESS,
   POOL_ADDRESS,
 } from "./addresses";
+import { getSlippage } from "../../../_slippage";
 
 type SwapParam = Omit<Swap, "type">;
 
@@ -35,7 +36,15 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
   swap: SwapParam,
   tradeType: TradeType
 ): Promise<SwapQuote> {
-  const options = getOptions(swap);
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+  });
+  const options = getOptions({
+    recipient: swap.recipient,
+    slippageTolerance,
+  });
 
   const poolInfo = await getPoolInfo(swap);
   const tokenA = new Token(
@@ -105,7 +114,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
       uncheckedTrade.inputAmount.toExact(),
       swap.tokenIn.decimals
     ),
-    slippageTolerance: swap.slippageTolerance,
+    slippageTolerance,
     swapTxns: [
       {
         ecosystem: "evm" as const,
@@ -127,7 +136,16 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
   swap: SwapParam,
   tradeType: TradeType
 ): Promise<SwapQuote> {
-  const { router, options } = getSwapRouter02AndOptions(swap);
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+  });
+  const { router, options } = getSwapRouter02AndOptions({
+    chainId: swap.chainId,
+    recipient: swap.recipient,
+    slippageTolerance,
+  });
 
   const amountCurrency =
     tradeType === TradeType.EXACT_INPUT ? swap.tokenIn : swap.tokenOut;
@@ -182,7 +200,7 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
       route.trade.inputAmount.toExact(),
       swap.tokenIn.decimals
     ),
-    slippageTolerance: swap.slippageTolerance,
+    slippageTolerance,
     swapTxns: [
       {
         ecosystem: "evm" as const,

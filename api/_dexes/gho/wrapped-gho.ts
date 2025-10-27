@@ -11,6 +11,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const SWAP_PROVIDER_NAME = "wrapped-gho";
 
@@ -60,6 +61,12 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
 
     const { tokenIn, tokenOut, amount, chainId, recipient } = swap;
 
+    const slippageTolerance = getSlippage({
+      tokenIn: swap.tokenIn,
+      tokenOut: swap.tokenOut,
+      slippageTolerance: swap.slippageTolerance,
+    });
+
     // Only support:
     // - L1 GHO -> L1 WGHO
     // - L1 WGHO -> L1 GHO
@@ -100,7 +107,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         minAmountOut: BigNumber.from(amount),
         expectedAmountOut: BigNumber.from(amount),
         expectedAmountIn: BigNumber.from(amount),
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns,
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -163,7 +170,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       minAmountOut: ghoSwapQuote.minAmountOut,
       expectedAmountOut: ghoSwapQuote.expectedAmountOut,
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
-      slippageTolerance: swap.slippageTolerance,
+      slippageTolerance,
       swapTxns,
       swapProvider: {
         name: SWAP_PROVIDER_NAME,

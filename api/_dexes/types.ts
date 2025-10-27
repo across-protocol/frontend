@@ -7,6 +7,8 @@ import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
 
+export type SlippageTolerance = number | "auto";
+
 export type { AmountType, CrossSwapType };
 
 export type Token = {
@@ -23,7 +25,7 @@ export type Swap = {
   amount: string;
   depositor?: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   isInputNative?: boolean;
   isOutputNative?: boolean;
@@ -35,7 +37,7 @@ export type CrossSwap = {
   outputToken: Token;
   depositor: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   refundOnOrigin: boolean;
   refundAddress?: string;
@@ -252,7 +254,7 @@ export type CrossSwapQuotesRetrievalB2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originRouter: SwapRouter;
@@ -270,7 +272,7 @@ export type CrossSwapQuotesRetrievalA2BResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
@@ -286,7 +288,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   destinationSwap: {
@@ -294,7 +296,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;

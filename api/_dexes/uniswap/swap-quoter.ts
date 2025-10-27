@@ -25,6 +25,7 @@ import { Swap } from "../types";
 import { getSwapAndBridgeAddress } from "../../_swap-and-bridge";
 import { getProdToken } from "./utils/tokens";
 import { callViaMulticall3, getProvider } from "../../_utils";
+import { getSlippage } from "../../_slippage";
 
 // https://docs.uniswap.org/contracts/v3/reference/deployments/
 const POOL_FACTORY_CONTRACT_ADDRESS = {
@@ -52,6 +53,12 @@ export async function getUniswapQuoteWithSwapQuoter(swap: SwapParam) {
 
   const initialTokenIn = { ...swap.tokenIn };
   const initialTokenOut = { ...swap.tokenOut };
+
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+  });
 
   // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
   // for testnet tokens.
@@ -93,7 +100,7 @@ export async function getUniswapQuoteWithSwapQuoter(swap: SwapParam) {
   const options: SwapOptions = {
     slippageTolerance: new Percent(
       // max. slippage decimals is 2
-      Number(swap.slippageTolerance.toFixed(2)) * 100,
+      Number(slippageTolerance.toFixed(2)) * 100,
       10_000
     ),
     // 20 minutes from the current Unix time
