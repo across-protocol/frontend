@@ -84,7 +84,7 @@ export async function estimateInputForExactOutput(
     swap.tokenOut.address,
     inputUnit.toString(),
     swap.recipient,
-    Math.floor(slippageTolerance * 100),
+    slippageTolerance * 100,
     apiBaseUrl,
     apiHeaders,
     sourcesParams

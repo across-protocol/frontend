@@ -122,7 +122,7 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.floor(slippageTolerance * 100),
+            slippageBps: slippageTolerance * 100,
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },

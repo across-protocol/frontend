@@ -106,7 +106,7 @@ export function getLifiStrategy(
         fromAddress: swap.recipient,
         skipSimulation: true,
         swapStepTimingStrategies,
-        slippage: Math.floor(slippageTolerance / 100),
+        slippage: slippageTolerance / 100,
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
           : { toAmount: swap.amount }),
