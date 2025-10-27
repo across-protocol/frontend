@@ -155,11 +155,11 @@ To manually trigger the workflow:
 4.  You will see an input field to provide the deployment URL you want to test against.
 5.  Click the "Run workflow" button to start the workflow.
 
+You can find the Vercel deployments here: https://vercel.com/uma/app-frontend-v3/deployments
+
 ### Manual Tests
 
 There are also manual tests that you can run. These tests will perform actual executions of swaps or bridging and are thus not suited for CI triggered testing.
-
-You can find the Vercel deployments here: https://vercel.com/uma/app-frontend-v3/deployments
 
 **Prerequisites**
 
@@ -169,7 +169,7 @@ You can find the Vercel deployments here: https://vercel.com/uma/app-frontend-v3
     DEV_WALLET_PRIVATE_KEY=****************************************************************
     ```
 
-2.  Update the `rpc-providers.json` file in `/src/data/rpc-providers.json` with your Alchemy key for the providers. You can also get this from Keeper.
+2.  [OPTIONAL] Update the `rpc-providers.json` file in `/src/data/rpc-providers.json` with your Alchemy key for the providers. You can also get this from Keeper. This step is optional but will improve reliability and speed of the tests.
 
 3.  Start the local development server:
 
@@ -179,24 +179,66 @@ You can find the Vercel deployments here: https://vercel.com/uma/app-frontend-v3
 
 **Running the Tests**
 
-You can run two test scripts:
+To run the manual tests, you use the `yarn tsx scripts/tests/swap.ts` command, which accepts various options and subcommands.
 
-1.  To run a default set of tests:
+#### Options for `swap.ts` (base command)
 
-    ```bash
-    yarn tsx scripts/tests/swap.ts
-    ```
+These options apply directly to the `swap.ts` command without any subcommand.
 
-2.  To run specific test cases:
+| Option                     | Alias | Description                           | Default                     |
+| -------------------------- | ----- | ------------------------------------- | --------------------------- |
+| `--includeDestinationAction` | `da`  | Include destination action.           | `false`                     |
+| `--host`                   | `h`   | Host to use for the API               | `http://localhost:3000`     |
+| `--flowType`               | `ft`  | Flow type.                            | `approval`                  |
+| `--skipTxExecution`        | `ste` | Skip tx execution.                    | `false`                     |
 
-    ```bash
-    yarn tsx scripts/tests/swap.ts test-cases
-    ```
+#### Options for `swap.ts args` (run with custom arguments)
 
-    You can customize which tests to run by editing the `scripts/tests/_swap-utils.ts` and `scripts/tests/_swap-cases.ts` files.
+Use this subcommand to run a single test with custom parameters.
 
-    -   In `scripts/tests/_swap-utils.ts`, you can filter test cases by label.
-    -   In `scripts/tests/_swap-cases.ts`, you can edit or add new swap or bridging tests.
+Example:
+```bash
+yarn tsx ./scripts/tests/swap.ts args --originChainId 1 --destinationChainId 42161 --inputToken 0xaf88d065e77c8cC2239327C5EDb3A432268e5831 --outputToken 0xaf88d065e77c8cC2239327C5EDb3A432268e5831 --amount 1000000
+```
+
+| Option                 | Alias | Description                                         | Default                                                |
+| ---------------------- | ----- | --------------------------------------------------- | ------------------------------------------------------ |
+| `originChainId`        | `oc`  | Origin chain ID.                                    | `10`                                                   |
+| `destinationChainId`   | `dc`  | Destination chain ID.                               | `8453`                                                 |
+| `inputToken`           | `it`  | Input token address.                                | `0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85`           |
+| `outputToken`          | `ot`  | Output token address.                               | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`           |
+| `amount`               | `a`   | Amount of input token.                              | `1000000`                                              |
+| `slippage`             | `s`   | Slippage tolerance. 0 <= slippage <= 1, 0.01 = 1%   |                                                        |
+| `tradeType`            | `tt`  | Trade type.                                         | `exactInput`                                           |
+| `recipient`            | `r`   | Recipient address.                                  |                                                        |
+| `depositor`            | `d`   | Depositor address.                                  | `0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D`           |
+| `refundAddress`        | `ra`  | Refund address.                                     |                                                        |
+| `refundOnOrigin`       | `ro`  | Refund on origin.                                   | `false`                                                |
+| `skipOriginTxEstimation` | `sote`| Skip origin tx estimation.                        | `false`                                                |
+| `integratorId`         | `i`   | Integrator ID.                                      |                                                        |
+| `includeSources`       | `is`  | Comma-separated list of sources to include.         |                                                        |
+| `excludeSources`       | `es`  | Comma-separated list of sources to exclude.         |                                                        |
+| `appFee`               | `apf` | App fee percent. 0 <= appFee <= 1, 0.01 = 1%        |                                                        |
+| `appFeeRecipient`      | `apr` | App fee recipient.                                  |                                                        |
+| `strictTradeType`      | `stt` | Strict trade type.                                  | `true`                                                 |
+
+#### Options for `swap.ts test-cases` (run predefined test cases)
+
+Use this subcommand to run predefined test cases from `scripts/tests/_swap-cases.ts`.
+
+Example:
+```bash
+yarn tsx scripts/tests/swap.ts test-cases --filter "B2B,MIN_OUTPUT"
+```
+
+| Option                     | Alias | Description                                                               | Default                     |
+| -------------------------- | ----- | ------------------------------------------------------------------------- | --------------------------- |
+| `--filter`                 | `f`   | Filter predefined test cases in `scripts/tests/_swap-cases.ts` by comma-separated list of labels. |                             |
+
+You can customize which tests to run by editing the `scripts/tests/_swap-utils.ts` and `scripts/tests/_swap-cases.ts` files.
+
+-   In `scripts/tests/_swap-utils.ts`, you can filter test cases by label.
+-   In `scripts/tests/_swap-cases.ts`, you can edit or add new swap or bridging tests.
 
 ## Pull Data from Amplitude
 
