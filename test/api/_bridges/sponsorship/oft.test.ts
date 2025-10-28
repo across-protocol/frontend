@@ -1,6 +1,4 @@
 import { ethers, utils } from "ethers";
-import { recoverMessageAddress } from "viem";
-import { hexToBytes } from "viem";
 
 import { getEnvs } from "../../../../api/_env";
 import {
@@ -52,11 +50,8 @@ describe("OFT Signature", () => {
 
     // Recover the address from the signature and the hash.
     // This simulates the on-chain validation by checking if the signature was created by the expected signer.
-    // The OFT contract expects an EIP-191 compliant signature, so we use `recoverMessageAddress`.
-    const recoveredAddress = await recoverMessageAddress({
-      message: { raw: hexToBytes(hash as `0x${string}`) },
-      signature: signature as `0x${string}`,
-    });
+    // The OFT contract uses ECDSA.recover(digest, signature) which expects a signature over the raw digest.
+    const recoveredAddress = utils.recoverAddress(hash, signature);
 
     // Assert that the recovered address matches the address of our test wallet.
     expect(recoveredAddress).toEqual(TEST_WALLET.address);
