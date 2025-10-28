@@ -45,6 +45,7 @@ export type UseSwapAndBridgeReturn = {
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel: string;
+  walletTypeToConnect?: "evm" | "svm"; // Which wallet type needs to be connected
 
   // Account management
   toAccountManagement: ReturnType<typeof useToAccount>;
@@ -69,8 +70,16 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const history = useHistory();
 
-  const { account: accountEVM, connect: connectEVM } = useConnectionEVM();
-  const { account: accountSVM, connect: connectSVM } = useConnectionSVM();
+  const {
+    account: accountEVM,
+    connect: connectEVM,
+    isConnected: isConnectedEVM,
+  } = useConnectionEVM();
+  const {
+    account: accountSVM,
+    connect: connectSVM,
+    isConnected: isConnectedSVM,
+  } = useConnectionSVM();
 
   const toAccountManagement = useToAccount(outputToken?.chainId);
 
@@ -83,6 +92,27 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const depositor =
     originChainEcosystem === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  // Check if origin wallet is connected
+  const isOriginConnected =
+    originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
+
+  // Check if destination recipient is set (appropriate wallet connected for destination ecosystem)
+  const isRecipientSet =
+    destinationChainEcosystem === "evm"
+      ? !!toAccountManagement.toAccountEVM
+      : !!toAccountManagement.toAccountSVM;
+
+  // Determine which wallet type needs to be connected (if any)
+  const walletTypeToConnect: "evm" | "svm" | undefined = (() => {
+    if (!isOriginConnected) {
+      return originChainEcosystem;
+    }
+    if (!isRecipientSet) {
+      return destinationChainEcosystem;
+    }
+    return undefined;
+  })();
 
   useEffect(() => {
     if (defaultRoute.inputToken && defaultRoute.outputToken) {
@@ -162,13 +192,25 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [swapQuote]);
 
   const onConfirm = useCallback(async () => {
-    // If not connected, open the wallet connection modal
-    if (!approvalAction.isConnected) {
+    // If origin wallet is not connected, connect it first
+    if (!isOriginConnected) {
       if (originChainEcosystem === "evm") {
         connectEVM({ trackSection: "bridgeForm" });
         return;
       } else {
         connectSVM({ trackSection: "bridgeForm" });
+        return;
+      }
+    }
+
+    // If destination recipient is not set, connect the destination wallet
+    if (!isRecipientSet) {
+      if (destinationChainEcosystem === "evm") {
+        connectEVM({ trackSection: "bridgeForm" });
+        return;
+      } else {
+        connectSVM({ trackSection: "bridgeForm" });
+        return;
       }
     }
 
@@ -181,13 +223,16 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
       );
     }
   }, [
+    isOriginConnected,
+    isRecipientSet,
+    originChainEcosystem,
+    destinationChainEcosystem,
     approvalAction,
     connectEVM,
     connectSVM,
     history,
     inputToken?.chainId,
     inputToken?.symbol,
-    originChainEcosystem,
     outputToken?.chainId,
     outputToken?.symbol,
   ]);
@@ -196,7 +241,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   const buttonState: BridgeButtonState = useMemo(() => {
     if (isQuoteLoading) return "loadingQuote";
     if (quoteError) return "quoteError";
-    if (!approvalAction.isConnected) return "notConnected";
+    if (!isOriginConnected || !isRecipientSet) return "notConnected";
     if (approvalAction.isButtonActionLoading) return "submitting";
     if (!inputToken || !outputToken) return "awaitingTokenSelection";
     if (!amount || amount.lte(0)) return "awaitingAmountInput";
@@ -205,7 +250,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [
     isQuoteLoading,
     quoteError,
-    approvalAction.isConnected,
+    isOriginConnected,
+    isRecipientSet,
     approvalAction.isButtonActionLoading,
     inputToken,
     outputToken,
@@ -217,7 +263,14 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     return buttonState === "loadingQuote" || buttonState === "submitting";
   }, [buttonState]);
 
-  const buttonLabel = useMemo(() => buttonLabels[buttonState], [buttonState]);
+  const buttonLabel = useMemo(() => {
+    if (buttonState === "notConnected" && walletTypeToConnect) {
+      return walletTypeToConnect === "evm"
+        ? "Connect EVM Wallet"
+        : "Connect SVM Wallet";
+    }
+    return buttonLabels[buttonState];
+  }, [buttonState, walletTypeToConnect]);
 
   const buttonDisabled = useMemo(
     () =>
@@ -265,12 +318,13 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     buttonDisabled,
     buttonLoading,
     buttonLabel,
+    walletTypeToConnect,
 
     // Account management
     toAccountManagement,
     destinationChainEcosystem,
     // Legacy properties
-    isConnected: approvalAction.isConnected,
+    isConnected: isOriginConnected && isRecipientSet,
     isWrongNetwork: approvalAction.isWrongNetwork,
     isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
