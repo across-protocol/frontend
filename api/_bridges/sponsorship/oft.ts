@@ -1,5 +1,5 @@
 import { BigNumberish, utils } from "ethers";
-import { signMessageWithSponsor } from "./utils";
+import { signDigestWithSponsor } from "./utils";
 
 /**
  * Represents the signed parameters of a sponsored OFT quote.
@@ -52,6 +52,7 @@ export const createOftSignature = async (
   quote: SignedQuoteParams
 ): Promise<{ signature: string; hash: string }> => {
   // ABI-encode all parameters and hash the result to create the digest to be signed.
+  // Note: actionData is hashed before encoding to match the contract's behavior
   const encodedData = utils.defaultAbiCoder.encode(
     [
       "uint32",
@@ -66,7 +67,7 @@ export const createOftSignature = async (
       "uint256",
       "uint256",
       "uint8",
-      "bytes",
+      "bytes32",
     ],
     [
       quote.srcEid,
@@ -81,12 +82,12 @@ export const createOftSignature = async (
       quote.lzReceiveGasLimit,
       quote.lzComposeGasLimit,
       quote.executionMode,
-      quote.actionData,
+      utils.keccak256(quote.actionData),
     ]
   );
 
   const hash = utils.keccak256(encodedData);
-  // The OFT contract expects an EIP-191 compliant signature, so we sign the prefixed hash of the digest.
-  const signature = await signMessageWithSponsor(utils.arrayify(hash));
+  // The OFT contract uses ECDSA.recover(digest, signature) which expects a signature over the raw digest.
+  const signature = signDigestWithSponsor(hash);
   return { signature, hash };
 };

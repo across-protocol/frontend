@@ -37,7 +37,8 @@ export const signDigestWithSponsor = (digest: string): string => {
 
 /**
  * Signs a message with the sponsorship signer.
- * This is used for OFT signatures where the contract expects a signature on the EIP-191 prefixed hash.
+ * This adds the EIP-191 prefix to the message before signing.
+ * Use this when the contract expects `toEthSignedMessageHash().recover()`.
  * @param {Uint8Array} message The message to sign.
  * @returns {Promise<string>} The signature string.
  */
