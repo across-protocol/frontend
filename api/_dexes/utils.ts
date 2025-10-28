@@ -18,7 +18,6 @@ import {
 } from "../_multicall-handler";
 import {
   getEventEmitterAddress,
-  isEventEmitterDeployed,
   encodeSwapMetadata,
   encodeEmitDataCalldata,
   SwapType,

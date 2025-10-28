@@ -54,16 +54,6 @@ export function getEventEmitterAddress(chainId: number): string {
 }
 
 /**
- * Check if AcrossEventEmitter is deployed on a given chain
- * @param chainId The chain ID
- * @returns True if the contract is deployed (non-zero address), false otherwise
- */
-export function isEventEmitterDeployed(chainId: number): boolean {
-  const address = getEventEmitterAddress(chainId);
-  return !!address && address !== ethers.constants.AddressZero;
-}
-
-/**
  * Encodes metadata for destination swap events
  * @param version Metadata version (1 byte)
  * @param type Swap type (EXACT_INPUT or EXACT_OUTPUT) (1 byte)
@@ -108,6 +98,13 @@ export function encodeSwapMetadata(params: {
   const abiCoder = ethers.utils.defaultAbiCoder;
 
   // Encode the metadata as a packed bytes structure
+  // Convert slippage to basis points if it's a decimal (e.g., 0.005 -> 50 bps, or 0.5 -> 50 if already in %)
+  // Check if it's already in basis points (>= 1) or needs conversion
+  const slippageBps =
+    typeof slippage === "number" && slippage < 1
+      ? Math.round(slippage * 10000)
+      : slippage;
+
   const encoded = abiCoder.encode(
     [
       "uint8",
@@ -130,7 +127,7 @@ export function encodeSwapMetadata(params: {
       ethers.BigNumber.from(expectedAmount),
       ethers.BigNumber.from(minAmount),
       swapProvider,
-      ethers.BigNumber.from(slippage),
+      ethers.BigNumber.from(slippageBps),
       autoSlippage,
       recipient,
       appFeeRecipient,
