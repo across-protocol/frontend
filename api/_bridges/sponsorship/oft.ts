@@ -19,6 +19,25 @@ export interface SignedQuoteParams {
   finalToken: string;
   lzReceiveGasLimit: BigNumberish;
   lzComposeGasLimit: BigNumberish;
+  executionMode: number;
+  actionData: string;
+}
+
+/**
+ * Represents the unsigned parameters of a sponsored OFT quote.
+ * These parameters are not part of the signature but are still required for the deposit call.
+ */
+export interface UnsignedQuoteParams {
+  maxUserSlippageBps: BigNumberish;
+  refundRecipient: string;
+}
+
+/**
+ * Complete quote structure matching the contract's Quote struct
+ */
+export interface SponsoredOFTQuote {
+  signedParams: SignedQuoteParams;
+  unsignedParams: UnsignedQuoteParams;
 }
 
 /**
@@ -46,6 +65,8 @@ export const createOftSignature = async (
       "bytes32",
       "uint256",
       "uint256",
+      "uint8",
+      "bytes",
     ],
     [
       quote.srcEid,
@@ -59,6 +80,8 @@ export const createOftSignature = async (
       quote.finalToken,
       quote.lzReceiveGasLimit,
       quote.lzComposeGasLimit,
+      quote.executionMode,
+      quote.actionData,
     ]
   );
 
