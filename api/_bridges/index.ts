@@ -9,7 +9,7 @@ import {
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { routeStrategyForCctp } from "./cctp/utils/routing";
-import { routeStrategyForSponsorship } from "./sponsored/utils/routing";
+import { routeStrategyForSponsorship } from "./oft-sponsored/utils/routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),

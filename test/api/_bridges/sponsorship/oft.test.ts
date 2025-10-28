@@ -43,6 +43,8 @@ describe("OFT Signature", () => {
       finalToken: randomAddress(),
       lzReceiveGasLimit: "200000",
       lzComposeGasLimit: "400000",
+      executionMode: 0,
+      actionData: "0x",
     };
 
     // Create the signature and get the hash that was signed.
