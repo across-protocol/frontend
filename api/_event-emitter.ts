@@ -16,7 +16,6 @@ export enum SwapType {
 export enum SwapSide {
   ORIGIN_SWAP = 0,
   DESTINATION_SWAP = 1,
-  ORIGIN_AND_DESTINATION_SWAPS = 2,
 }
 
 // AcrossEventEmitter contract addresses per chain
@@ -54,15 +53,17 @@ export function getEventEmitterAddress(chainId: number): string {
 }
 
 /**
- * Encodes metadata for destination swap events
+ * Encodes metadata for swap events
  * @param version Metadata version (1 byte)
- * @param type Swap type (EXACT_INPUT or EXACT_OUTPUT) (1 byte)
- * @param side Swap side (NO_SWAP, DESTINATION_SWAP_ONLY, or BOTH_SWAPS) (1 byte)
- * @param address The token being swapped to (32 bytes)
- * @param expectedAmount The expected amount out from the swap (32 bytes)
- * @param minAmount The minimum amount out from the swap (32 bytes)
+ * @param type Swap type (EXACT_INPUT, MIN_OUTPUT, or EXACT_OUTPUT) (1 byte)
+ * @param side Swap side (ORIGIN_SWAP or DESTINATION_SWAP) (1 byte)
+ * @param address The token address (32 bytes)
+ * @param maximumAmountIn The maximum amount in (32 bytes)
+ * @param minAmountOut The minimum amount out (32 bytes)
+ * @param expectedAmountOut The expected amount out (32 bytes)
+ * @param expectedAmountIn The expected amount in (32 bytes)
  * @param swapProvider The name of the swap provider (UTF-8 encoded, variable length)
- * @param slippage The slippage tolerance (basis points, 32 bytes)
+ * @param slippage The slippage tolerance in percentage (0-100, converted to basis points, 32 bytes)
  * @param autoSlippage Whether auto slippage was used (1 byte)
  * @param recipient The final recipient address (32 bytes)
  * @param appFeeRecipient The app fee recipient address (32 bytes, zero address if no app fee)
@@ -73,8 +74,10 @@ export function encodeSwapMetadata(params: {
   type: SwapType;
   side: SwapSide;
   address: string;
-  expectedAmount: ethers.BigNumberish;
-  minAmount: ethers.BigNumberish;
+  maximumAmountIn: ethers.BigNumberish;
+  minAmountOut: ethers.BigNumberish;
+  expectedAmountOut: ethers.BigNumberish;
+  expectedAmountIn: ethers.BigNumberish;
   swapProvider: string;
   slippage: ethers.BigNumberish;
   autoSlippage: boolean;
@@ -86,8 +89,10 @@ export function encodeSwapMetadata(params: {
     type,
     side,
     address,
-    expectedAmount,
-    minAmount,
+    maximumAmountIn,
+    minAmountOut,
+    expectedAmountOut,
+    expectedAmountIn,
     swapProvider,
     slippage,
     autoSlippage,
@@ -98,11 +103,10 @@ export function encodeSwapMetadata(params: {
   const abiCoder = ethers.utils.defaultAbiCoder;
 
   // Encode the metadata as a packed bytes structure
-  // Convert slippage to basis points if it's a decimal (e.g., 0.005 -> 50 bps, or 0.5 -> 50 if already in %)
-  // Check if it's already in basis points (>= 1) or needs conversion
+  // Convert slippage percentage (0-100) to basis points (e.g., 0.5% -> 50 bps)
   const slippageBps =
-    typeof slippage === "number" && slippage < 1
-      ? Math.round(slippage * 10000)
+    typeof slippage === "number" && slippage <= 100
+      ? Math.round(slippage * 100)
       : slippage;
 
   const encoded = abiCoder.encode(
@@ -111,6 +115,8 @@ export function encodeSwapMetadata(params: {
       "uint8",
       "uint8",
       "address",
+      "uint256",
+      "uint256",
       "uint256",
       "uint256",
       "string",
@@ -124,8 +130,10 @@ export function encodeSwapMetadata(params: {
       type,
       side,
       address,
-      ethers.BigNumber.from(expectedAmount),
-      ethers.BigNumber.from(minAmount),
+      ethers.BigNumber.from(maximumAmountIn),
+      ethers.BigNumber.from(minAmountOut),
+      ethers.BigNumber.from(expectedAmountOut),
+      ethers.BigNumber.from(expectedAmountIn),
       swapProvider,
       ethers.BigNumber.from(slippageBps),
       autoSlippage,

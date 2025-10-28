@@ -28,12 +28,14 @@ describe("Event Emitter Module", () => {
       const metadata = encodeSwapMetadata({
         version: 1,
         type: SwapType.EXACT_INPUT,
-        side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+        side: SwapSide.DESTINATION_SWAP,
         address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH on Arbitrum
-        expectedAmount: ethers.utils.parseEther("2.0"),
-        minAmount: ethers.utils.parseEther("1.5"),
+        maximumAmountIn: ethers.utils.parseEther("2.1"),
+        minAmountOut: ethers.utils.parseEther("1.5"),
+        expectedAmountOut: ethers.utils.parseEther("2.0"),
+        expectedAmountIn: ethers.utils.parseEther("1.8"),
         swapProvider: "Uniswap V3",
-        slippage: ethers.BigNumber.from(50), // 0.5%
+        slippage: 0.5, // 0.5%
         autoSlippage: true,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
@@ -53,6 +55,8 @@ describe("Event Emitter Module", () => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
+          "uint256",
           "string",
           "uint256",
           "bool",
@@ -64,19 +68,21 @@ describe("Event Emitter Module", () => {
 
       expect(decoded[0]).toBe(1); // version
       expect(decoded[1]).toBe(SwapType.EXACT_INPUT); // type
-      expect(decoded[2]).toBe(SwapSide.ORIGIN_AND_DESTINATION_SWAPS); // side
+      expect(decoded[2]).toBe(SwapSide.DESTINATION_SWAP); // side
       expect(decoded[3].toLowerCase()).toBe(
         "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".toLowerCase()
       ); // address
-      expect(decoded[4]).toEqual(ethers.utils.parseEther("2.0")); // expectedAmount
-      expect(decoded[5]).toEqual(ethers.utils.parseEther("1.5")); // minAmount
-      expect(decoded[6]).toBe("Uniswap V3"); // swapProvider
-      expect(decoded[7]).toEqual(ethers.BigNumber.from(50)); // slippage
-      expect(decoded[8]).toBe(true); // autoSlippage
-      expect(decoded[9].toLowerCase()).toBe(
+      expect(decoded[4]).toEqual(ethers.utils.parseEther("2.1")); // maximumAmountIn
+      expect(decoded[5]).toEqual(ethers.utils.parseEther("1.5")); // minAmountOut
+      expect(decoded[6]).toEqual(ethers.utils.parseEther("2.0")); // expectedAmountOut
+      expect(decoded[7]).toEqual(ethers.utils.parseEther("1.8")); // expectedAmountIn
+      expect(decoded[8]).toBe("Uniswap V3"); // swapProvider
+      expect(decoded[9]).toEqual(ethers.BigNumber.from(50)); // slippage (0.5% = 50 bps)
+      expect(decoded[10]).toBe(true); // autoSlippage
+      expect(decoded[11].toLowerCase()).toBe(
         "0x1111111111111111111111111111111111111111".toLowerCase()
       ); // recipient
-      expect(decoded[10].toLowerCase()).toBe(
+      expect(decoded[12].toLowerCase()).toBe(
         "0x2222222222222222222222222222222222222222".toLowerCase()
       ); // appFeeRecipient
     });
@@ -87,10 +93,12 @@ describe("Event Emitter Module", () => {
         type: SwapType.EXACT_OUTPUT,
         side: SwapSide.DESTINATION_SWAP,
         address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        expectedAmount: ethers.utils.parseEther("1.1"),
-        minAmount: ethers.utils.parseEther("1"),
+        maximumAmountIn: ethers.utils.parseEther("1.2"),
+        minAmountOut: ethers.utils.parseEther("1"),
+        expectedAmountOut: ethers.utils.parseEther("1.1"),
+        expectedAmountIn: ethers.utils.parseEther("1.05"),
         swapProvider: "0x",
-        slippage: ethers.BigNumber.from(100), // 1%
+        slippage: 1, // 1%
         autoSlippage: false,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: ethers.constants.AddressZero,
@@ -105,6 +113,8 @@ describe("Event Emitter Module", () => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
+          "uint256",
           "string",
           "uint256",
           "bool",
@@ -114,7 +124,7 @@ describe("Event Emitter Module", () => {
         metadata
       );
 
-      expect(decoded[10]).toBe(ethers.constants.AddressZero);
+      expect(decoded[12]).toBe(ethers.constants.AddressZero);
     });
 
     it("should handle different swap providers", () => {
@@ -124,12 +134,14 @@ describe("Event Emitter Module", () => {
         const metadata = encodeSwapMetadata({
           version: 1,
           type: SwapType.EXACT_INPUT,
-          side: SwapSide.DESTINATION_SWAP,
+          side: SwapSide.ORIGIN_SWAP,
           address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-          expectedAmount: ethers.utils.parseEther("1.05"),
-          minAmount: ethers.utils.parseEther("1"),
+          maximumAmountIn: ethers.utils.parseEther("1.1"),
+          minAmountOut: ethers.utils.parseEther("1"),
+          expectedAmountOut: ethers.utils.parseEther("1.05"),
+          expectedAmountIn: ethers.utils.parseEther("1.02"),
           swapProvider: provider,
-          slippage: ethers.BigNumber.from(50),
+          slippage: 0.5, // 0.5%
           autoSlippage: false,
           recipient: "0x1111111111111111111111111111111111111111",
           appFeeRecipient: ethers.constants.AddressZero,
@@ -144,6 +156,8 @@ describe("Event Emitter Module", () => {
             "address",
             "uint256",
             "uint256",
+            "uint256",
+            "uint256",
             "string",
             "uint256",
             "bool",
@@ -153,7 +167,7 @@ describe("Event Emitter Module", () => {
           metadata
         );
 
-        expect(decoded[6]).toBe(provider);
+        expect(decoded[8]).toBe(provider);
       });
     });
 
@@ -165,17 +179,21 @@ describe("Event Emitter Module", () => {
         ethers.BigNumber.from("1"), // 1 wei
       ];
 
-      amounts.forEach((minAmount) => {
-        const expectedAmount = minAmount.mul(110).div(100); // 10% higher
+      amounts.forEach((minAmountOut) => {
+        const expectedAmountOut = minAmountOut.mul(110).div(100); // 10% higher
+        const maximumAmountIn = minAmountOut.mul(120).div(100); // 20% higher
+        const expectedAmountIn = minAmountOut.mul(105).div(100); // 5% higher
         const metadata = encodeSwapMetadata({
           version: 1,
           type: SwapType.EXACT_INPUT,
-          side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+          side: SwapSide.DESTINATION_SWAP,
           address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-          expectedAmount,
-          minAmount,
+          maximumAmountIn,
+          minAmountOut,
+          expectedAmountOut,
+          expectedAmountIn,
           swapProvider: "Test",
-          slippage: ethers.BigNumber.from(100), // 1%
+          slippage: 1, // 1%
           autoSlippage: false,
           recipient: "0x1111111111111111111111111111111111111111",
           appFeeRecipient: ethers.constants.AddressZero,
@@ -190,6 +208,8 @@ describe("Event Emitter Module", () => {
             "address",
             "uint256",
             "uint256",
+            "uint256",
+            "uint256",
             "string",
             "uint256",
             "bool",
@@ -199,8 +219,10 @@ describe("Event Emitter Module", () => {
           metadata
         );
 
-        expect(decoded[4]).toEqual(expectedAmount); // expectedAmount
-        expect(decoded[5]).toEqual(minAmount); // minAmount
+        expect(decoded[4]).toEqual(maximumAmountIn); // maximumAmountIn
+        expect(decoded[5]).toEqual(minAmountOut); // minAmountOut
+        expect(decoded[6]).toEqual(expectedAmountOut); // expectedAmountOut
+        expect(decoded[7]).toEqual(expectedAmountIn); // expectedAmountIn
       });
     });
   });
@@ -242,10 +264,12 @@ describe("Event Emitter Module", () => {
         type: SwapType.EXACT_OUTPUT,
         side: SwapSide.DESTINATION_SWAP,
         address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        expectedAmount: ethers.utils.parseEther("1.1"),
-        minAmount: ethers.utils.parseEther("1"),
+        maximumAmountIn: ethers.utils.parseEther("1.3"),
+        minAmountOut: ethers.utils.parseEther("1"),
+        expectedAmountOut: ethers.utils.parseEther("1.1"),
+        expectedAmountIn: ethers.utils.parseEther("1.15"),
         swapProvider: "Uniswap V3",
-        slippage: ethers.BigNumber.from(100),
+        slippage: 1, // 1%
         autoSlippage: true,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
@@ -273,6 +297,8 @@ describe("Event Emitter Module", () => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
+          "uint256",
           "string",
           "uint256",
           "bool",
@@ -289,15 +315,17 @@ describe("Event Emitter Module", () => {
       expect(decodedMetadata[3].toLowerCase()).toBe(
         "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".toLowerCase()
       );
-      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("1.1")); // expectedAmount
-      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("1")); // minAmount
-      expect(decodedMetadata[6]).toBe("Uniswap V3"); // swapProvider
-      expect(decodedMetadata[7]).toEqual(ethers.BigNumber.from(100)); // slippage
-      expect(decodedMetadata[8]).toBe(true); // autoSlippage
-      expect(decodedMetadata[9].toLowerCase()).toBe(
+      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("1.3")); // maximumAmountIn
+      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("1")); // minAmountOut
+      expect(decodedMetadata[6]).toEqual(ethers.utils.parseEther("1.1")); // expectedAmountOut
+      expect(decodedMetadata[7]).toEqual(ethers.utils.parseEther("1.15")); // expectedAmountIn
+      expect(decodedMetadata[8]).toBe("Uniswap V3"); // swapProvider
+      expect(decodedMetadata[9]).toEqual(ethers.BigNumber.from(100)); // slippage (1% = 100 bps)
+      expect(decodedMetadata[10]).toBe(true); // autoSlippage
+      expect(decodedMetadata[11].toLowerCase()).toBe(
         "0x1111111111111111111111111111111111111111".toLowerCase()
       );
-      expect(decodedMetadata[10].toLowerCase()).toBe(
+      expect(decodedMetadata[12].toLowerCase()).toBe(
         "0x2222222222222222222222222222222222222222".toLowerCase()
       );
     });
@@ -309,12 +337,14 @@ describe("Event Emitter Module", () => {
       const swapMetadata = encodeSwapMetadata({
         version: 1,
         type: SwapType.EXACT_INPUT,
-        side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+        side: SwapSide.ORIGIN_SWAP,
         address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        expectedAmount: ethers.utils.parseEther("2.8"),
-        minAmount: ethers.utils.parseEther("2.5"),
+        maximumAmountIn: ethers.utils.parseEther("3.0"),
+        minAmountOut: ethers.utils.parseEther("2.5"),
+        expectedAmountOut: ethers.utils.parseEther("2.8"),
+        expectedAmountIn: ethers.utils.parseEther("2.6"),
         swapProvider: "0x",
-        slippage: ethers.BigNumber.from(120), // 1.2%
+        slippage: 1.2, // 1.2%
         autoSlippage: false,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
@@ -341,6 +371,8 @@ describe("Event Emitter Module", () => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
+          "uint256",
           "string",
           "uint256",
           "bool",
@@ -352,12 +384,14 @@ describe("Event Emitter Module", () => {
 
       expect(decodedMetadata[0]).toBe(1); // version
       expect(decodedMetadata[1]).toBe(SwapType.EXACT_INPUT); // type
-      expect(decodedMetadata[2]).toBe(SwapSide.ORIGIN_AND_DESTINATION_SWAPS); // side
-      expect(decodedMetadata[6]).toBe("0x"); // swapProvider
-      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("2.8")); // expectedAmount
-      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("2.5")); // minAmount
-      expect(decodedMetadata[7]).toEqual(ethers.BigNumber.from(120)); // slippage
-      expect(decodedMetadata[8]).toBe(false); // autoSlippage
+      expect(decodedMetadata[2]).toBe(SwapSide.ORIGIN_SWAP); // side
+      expect(decodedMetadata[8]).toBe("0x"); // swapProvider
+      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("3.0")); // maximumAmountIn
+      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("2.5")); // minAmountOut
+      expect(decodedMetadata[6]).toEqual(ethers.utils.parseEther("2.8")); // expectedAmountOut
+      expect(decodedMetadata[7]).toEqual(ethers.utils.parseEther("2.6")); // expectedAmountIn
+      expect(decodedMetadata[9]).toEqual(ethers.BigNumber.from(120)); // slippage (1.2% = 120 bps)
+      expect(decodedMetadata[10]).toBe(false); // autoSlippage
     });
   });
 });
