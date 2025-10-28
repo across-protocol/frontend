@@ -3,6 +3,9 @@ import { assert, Infer, type } from "superstruct";
 import { TypedVercelRequest } from "../_types";
 import { getLogger, handleErrorCondition, validAddress } from "../_utils";
 import { handleUserTokenBalances } from "./_service";
+import { getRequestId, setRequestSpanAttributes } from "../_request_utils";
+import { sendResponse } from "../_response_utils";
+import { tracer, processor } from "../../instrumentation";
 
 const UserTokenBalancesQueryParamsSchema = type({
   account: validAddress(),
@@ -17,29 +20,52 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  const requestId = getRequestId(request);
+  logger.debug({
+    at: "user-token-balances",
+    message: "Request data",
+    requestId,
+  });
 
-  try {
-    const { query } = request;
-    assert(query, UserTokenBalancesQueryParamsSchema);
-    const { account } = query;
+  return tracer.startActiveSpan("user-token-balances", async (span) => {
+    setRequestSpanAttributes(request, span, requestId);
 
-    const responseData = await handleUserTokenBalances(account);
+    try {
+      const { query } = request;
+      assert(query, UserTokenBalancesQueryParamsSchema);
+      const { account } = query;
 
-    logger.debug({
-      at: "UserTokenBalances",
-      message: "Response data",
-      responseJson: responseData,
-    });
+      const responseData = await handleUserTokenBalances(account);
 
-    // Cache for 3 minutes
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=180, stale-while-revalidate=60"
-    );
-    response.status(200).json(responseData);
-  } catch (error: unknown) {
-    return handleErrorCondition("user-token-balances", response, logger, error);
-  }
+      logger.debug({
+        at: "user-token-balances",
+        message: "Response data",
+        responseJson: responseData,
+        requestId,
+      });
+
+      sendResponse({
+        response,
+        body: responseData,
+        statusCode: 200,
+        requestId,
+        cacheSeconds: 60 * 3,
+        staleWhileRevalidateSeconds: 60,
+      });
+    } catch (error: unknown) {
+      return handleErrorCondition(
+        "user-token-balances",
+        response,
+        logger,
+        error,
+        span,
+        requestId
+      );
+    } finally {
+      span.end();
+      processor.forceFlush();
+    }
+  });
 };
 
 export default handler;
