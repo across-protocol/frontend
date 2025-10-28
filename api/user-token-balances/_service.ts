@@ -6,12 +6,15 @@ import { getAlchemyRpcFromConfigJson } from "../_providers";
 import { isSvmAddress } from "../_address";
 import { getSvmBalance } from "../_balance";
 import { fetchSwapTokensData, SwapToken } from "../swap/tokens/_service";
+import { CHAIN_IDs, EVM_CHAIN_IDs } from "../_constants";
 
 const logger = getLogger();
 
-async function getSwapTokens(): Promise<SwapToken[]> {
+async function getSwapTokens(
+  filteredChainIds?: number[]
+): Promise<SwapToken[]> {
   try {
-    return await fetchSwapTokensData();
+    return await fetchSwapTokensData(filteredChainIds);
   } catch (error) {
     logger.warn({
       at: "getSwapTokens",
@@ -346,7 +349,7 @@ export const handleUserTokenBalances = async (account: string) => {
     const svmChainIds = getSvmChainIds();
 
     // Fetch swap tokens to get the list of token addresses for each chain
-    const swapTokens = await getSwapTokens();
+    const swapTokens = await getSwapTokens([CHAIN_IDs.SOLANA]);
 
     logger.debug({
       at: "handleUserTokenBalances",
@@ -388,7 +391,7 @@ export const handleUserTokenBalances = async (account: string) => {
   const chainIdsAvailable = getEvmChainIds();
 
   // Fetch swap tokens to get the list of token addresses for each chain
-  const swapTokens = await getSwapTokens();
+  const swapTokens = await getSwapTokens(EVM_CHAIN_IDs);
 
   logger.debug({
     at: "handleUserTokenBalances",
