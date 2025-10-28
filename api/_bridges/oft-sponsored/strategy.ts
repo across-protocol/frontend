@@ -35,7 +35,7 @@ import {
 } from "./utils/constants";
 import { buildSponsoredOFTQuote } from "./utils/quote-builder";
 
-const name = "sponsored";
+const name = "sponsored" as const;
 
 const capabilities: BridgeCapabilities = {
   ecosystems: ["evm"],
@@ -111,6 +111,131 @@ async function getIntermediaryToken(): Promise<Token> {
   });
 
   return tokenInfo;
+}
+
+/**
+ * Gets a quote for an exact input amount (user specifies input, gets output)
+ */
+export async function getSponsoredOftQuoteForExactInput(
+  params: GetExactInputBridgeQuoteParams
+) {
+  const { inputToken, outputToken, exactInputAmount, recipient } = params;
+
+  // Get intermediary token (HyperEVM USDT)
+  // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
+  const intermediaryToken = await getIntermediaryToken();
+
+  // Get OFT quote to intermediary token and estimated fill time
+  const [{ inputAmount, outputAmount, nativeFee }, estimatedFillTimeSec] =
+    await Promise.all([
+      getQuote({
+        inputToken,
+        outputToken: intermediaryToken,
+        inputAmount: exactInputAmount,
+        recipient: recipient!,
+      }),
+      getEstimatedFillTime(
+        inputToken.chainId,
+        intermediaryToken.chainId,
+        inputToken.symbol
+      ),
+    ]);
+
+  const nativeToken = getNativeTokenInfo(inputToken.chainId);
+
+  // Convert output amount from intermediary token decimals to final output token decimals
+  const finalOutputAmount = ConvertDecimals(
+    intermediaryToken.decimals,
+    outputToken.decimals
+  )(outputAmount);
+
+  return {
+    bridgeQuote: {
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount: finalOutputAmount,
+      minOutputAmount: finalOutputAmount,
+      estimatedFillTimeSec,
+      provider: name,
+      fees: getOftBridgeFees({
+        inputToken,
+        nativeFee,
+        nativeToken,
+      }),
+    },
+  };
+}
+
+/**
+ * Gets a quote for a desired output amount (user specifies output, gets required input)
+ */
+export async function getSponsoredOftQuoteForOutput(
+  params: GetOutputBridgeQuoteParams
+) {
+  const { inputToken, outputToken, minOutputAmount, recipient } = params;
+
+  // Get intermediary token (HyperEVM USDT)
+  // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
+  const intermediaryToken = await getIntermediaryToken();
+
+  // Convert minOutputAmount to input token decimals
+  const minOutputInInputDecimals = ConvertDecimals(
+    outputToken.decimals,
+    inputToken.decimals
+  )(minOutputAmount);
+
+  // Get OFT quote to intermediary token and estimated fill time
+  const [
+    { inputAmount, outputAmount: intermediaryOutputAmount, nativeFee },
+    estimatedFillTimeSec,
+  ] = await Promise.all([
+    getQuote({
+      inputToken,
+      outputToken: intermediaryToken,
+      inputAmount: minOutputInInputDecimals,
+      recipient: recipient!,
+    }),
+    getEstimatedFillTime(
+      inputToken.chainId,
+      intermediaryToken.chainId,
+      inputToken.symbol
+    ),
+  ]);
+
+  // Convert output amount from intermediary token decimals to output token decimals
+  const finalOutputAmount = ConvertDecimals(
+    intermediaryToken.decimals,
+    outputToken.decimals
+  )(intermediaryOutputAmount);
+
+  // OFT precision limitations may prevent delivering the exact minimum amount
+  // We validate against the rounded amount (maximum possible given shared decimals)
+  const roundedMinOutputAmount = roundAmountToSharedDecimals(
+    minOutputAmount,
+    inputToken.symbol,
+    inputToken.decimals
+  );
+  assertMinOutputAmount(finalOutputAmount, roundedMinOutputAmount);
+
+  const nativeToken = getNativeTokenInfo(inputToken.chainId);
+
+  return {
+    bridgeQuote: {
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount: finalOutputAmount,
+      minOutputAmount: finalOutputAmount,
+      estimatedFillTimeSec,
+      provider: name,
+      fees: getOftBridgeFees({
+        inputToken,
+        nativeFee,
+        nativeToken,
+      }),
+    },
+  };
 }
 
 /**
@@ -272,129 +397,9 @@ export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
       return "0x";
     },
 
-    getQuoteForExactInput: async ({
-      inputToken,
-      outputToken,
-      exactInputAmount,
-      recipient,
-      message: _message,
-    }: GetExactInputBridgeQuoteParams) => {
-      // Get intermediary token (HyperEVM USDT)
-      // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
-      const intermediaryToken = await getIntermediaryToken();
+    getQuoteForExactInput: getSponsoredOftQuoteForExactInput,
 
-      // Get OFT quote to intermediary token and estimated fill time
-      const [{ inputAmount, outputAmount, nativeFee }, estimatedFillTimeSec] =
-        await Promise.all([
-          getQuote({
-            inputToken,
-            outputToken: intermediaryToken,
-            inputAmount: exactInputAmount,
-            recipient: recipient!,
-          }),
-          getEstimatedFillTime(
-            inputToken.chainId,
-            intermediaryToken.chainId,
-            inputToken.symbol
-          ),
-        ]);
-
-      const nativeToken = getNativeTokenInfo(inputToken.chainId);
-
-      // Convert output amount from intermediary token decimals to final output token decimals
-      const finalOutputAmount = ConvertDecimals(
-        intermediaryToken.decimals,
-        outputToken.decimals
-      )(outputAmount);
-
-      return {
-        bridgeQuote: {
-          inputToken,
-          outputToken,
-          inputAmount,
-          outputAmount: finalOutputAmount,
-          minOutputAmount: finalOutputAmount,
-          estimatedFillTimeSec,
-          provider: name,
-          fees: getOftBridgeFees({
-            inputToken,
-            nativeFee,
-            nativeToken,
-          }),
-        },
-      };
-    },
-
-    getQuoteForOutput: async ({
-      inputToken,
-      outputToken,
-      minOutputAmount,
-      forceExactOutput: _forceExactOutput,
-      recipient,
-      message: _message,
-    }: GetOutputBridgeQuoteParams) => {
-      // Get intermediary token (HyperEVM USDT)
-      // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
-      const intermediaryToken = await getIntermediaryToken();
-
-      // Convert minOutputAmount to input token decimals
-      const minOutputInInputDecimals = ConvertDecimals(
-        outputToken.decimals,
-        inputToken.decimals
-      )(minOutputAmount);
-
-      // Get OFT quote to intermediary token and estimated fill time
-      const [
-        { inputAmount, outputAmount: intermediaryOutputAmount, nativeFee },
-        estimatedFillTimeSec,
-      ] = await Promise.all([
-        getQuote({
-          inputToken,
-          outputToken: intermediaryToken,
-          inputAmount: minOutputInInputDecimals,
-          recipient: recipient!,
-        }),
-        getEstimatedFillTime(
-          inputToken.chainId,
-          intermediaryToken.chainId,
-          inputToken.symbol
-        ),
-      ]);
-
-      // Convert output amount from intermediary token decimals to output token decimals
-      const finalOutputAmount = ConvertDecimals(
-        intermediaryToken.decimals,
-        outputToken.decimals
-      )(intermediaryOutputAmount);
-
-      // OFT precision limitations may prevent delivering the exact minimum amount
-      // We validate against the rounded amount (maximum possible given shared decimals)
-      const roundedMinOutputAmount = roundAmountToSharedDecimals(
-        minOutputAmount,
-        inputToken.symbol,
-        inputToken.decimals
-      );
-      assertMinOutputAmount(finalOutputAmount, roundedMinOutputAmount);
-
-      const nativeToken = getNativeTokenInfo(inputToken.chainId);
-
-      return {
-        bridgeQuote: {
-          inputToken,
-          outputToken,
-          inputAmount,
-          outputAmount: finalOutputAmount,
-          minOutputAmount: finalOutputAmount,
-          estimatedFillTimeSec,
-          provider: name,
-          fees: getOftBridgeFees({
-            inputToken,
-            nativeFee,
-            nativeToken,
-          }),
-        },
-      };
-    },
+    getQuoteForOutput: getSponsoredOftQuoteForOutput,
 
     buildTxForAllowanceHolder: async (params: {
       quotes: CrossSwapQuotes;

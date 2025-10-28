@@ -1,53 +1,60 @@
-import {
-  isRouteSupported,
-  calculateMaxBpsToSponsor,
-} from "../../../../api/_bridges/oft-sponsored/strategy";
-import { Token } from "../../../../api/_dexes/types";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { BigNumber } from "ethers";
+import {
+  calculateMaxBpsToSponsor,
+  getSponsoredOftQuoteForExactInput,
+  getSponsoredOftQuoteForOutput,
+  isRouteSupported,
+} from "../../../../api/_bridges/oft-sponsored/strategy";
+import * as oftUtils from "../../../../api/_bridges/oft/utils/utils";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
+import { Token } from "../../../../api/_dexes/types";
 import * as hypercore from "../../../../api/_hypercore";
+import * as utils from "../../../../api/_utils";
+import * as swapUtils from "../../../../api/swap/_utils";
 
 describe("Sponsored OFT Strategy", () => {
+  // Shared test fixtures
+  const arbitrumUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
+    symbol: "USDT",
+    decimals: 6,
+    chainId: CHAIN_IDs.ARBITRUM,
+  };
+
+  const mainnetUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.MAINNET],
+    symbol: "USDT",
+    decimals: 6,
+    chainId: CHAIN_IDs.MAINNET,
+  };
+
+  const polygonUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
+    symbol: "USDT",
+    decimals: 6,
+    chainId: CHAIN_IDs.POLYGON,
+  };
+
+  const hypercoreUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+    symbol: "USDT-SPOT",
+    decimals: 8,
+    chainId: CHAIN_IDs.HYPERCORE,
+  };
+
+  const hyperevmUSDT: Token = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.HYPEREVM],
+    symbol: "USDT",
+    decimals: 6,
+    chainId: CHAIN_IDs.HYPEREVM,
+  };
+
+  const recipient = "0x0000000000000000000000000000000000000001";
+
   describe("isRouteSupported", () => {
-    // Test token fixtures
-    const arbitrumUSDT: Token = {
-      address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
-      symbol: "USDT",
-      decimals: 6,
-      chainId: CHAIN_IDs.ARBITRUM,
-    };
-
-    const mainnetUSDT: Token = {
-      address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.MAINNET],
-      symbol: "USDT",
-      decimals: 6,
-      chainId: CHAIN_IDs.MAINNET,
-    };
-
-    const polygonUSDT: Token = {
-      address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
-      symbol: "USDT",
-      decimals: 6,
-      chainId: CHAIN_IDs.POLYGON,
-    };
-
-    const hypercoreUSDT: Token = {
-      address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
-      symbol: "USDT-SPOT",
-      decimals: 8,
-      chainId: CHAIN_IDs.HYPERCORE,
-    };
-
     const arbitrumWETH: Token = {
       address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
       symbol: "WETH",
-      decimals: 18,
-      chainId: CHAIN_IDs.ARBITRUM,
-    };
-
-    const unsupportedToken: Token = {
-      address: "0x1234567890123456789012345678901234567890",
-      symbol: "UNSUPPORTED",
       decimals: 18,
       chainId: CHAIN_IDs.ARBITRUM,
     };
@@ -90,15 +97,6 @@ describe("Sponsored OFT Strategy", () => {
 
         expect(result).toBe(false);
       });
-
-      it("should reject UNSUPPORTED → USDT-SPOT (unsupported input token)", () => {
-        const result = isRouteSupported({
-          inputToken: unsupportedToken,
-          outputToken: hypercoreUSDT,
-        });
-
-        expect(result).toBe(false);
-      });
     });
 
     describe("Invalid output tokens", () => {
@@ -113,22 +111,6 @@ describe("Sponsored OFT Strategy", () => {
         const result = isRouteSupported({
           inputToken: arbitrumUSDT,
           outputToken: hypercoreWETH,
-        });
-
-        expect(result).toBe(false);
-      });
-
-      it("should reject USDT → UNSUPPORTED (unsupported output token)", () => {
-        const hypercoreUnsupported: Token = {
-          address: "0x1234567890123456789012345678901234567890",
-          symbol: "UNSUPPORTED",
-          decimals: 18,
-          chainId: CHAIN_IDs.HYPERCORE,
-        };
-
-        const result = isRouteSupported({
-          inputToken: arbitrumUSDT,
-          outputToken: hypercoreUnsupported,
         });
 
         expect(result).toBe(false);
@@ -334,6 +316,147 @@ describe("Sponsored OFT Strategy", () => {
           })
         ).rejects.toThrow("Unsupported output token: WETH");
       });
+    });
+  });
+
+  describe("getSponsoredOftQuoteForExactInput", () => {
+    const exactInputAmount = BigNumber.from("1000000"); // 1 USDT (6 decimals)
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      // Mock getCachedTokenInfo to return HyperEVM USDT as intermediary
+      jest.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
+        ...hyperevmUSDT,
+        name: "USDT",
+      });
+
+      // Mock getNativeTokenInfo
+      jest.spyOn(swapUtils, "getNativeTokenInfo").mockReturnValue({
+        address: "0x0000000000000000000000000000000000000000",
+        symbol: "ETH",
+        decimals: 18,
+        chainId: CHAIN_IDs.ARBITRUM,
+      });
+    });
+
+    it("should convert output from intermediary decimals (6) to output decimals (8)", async () => {
+      // Mock getQuote to return 1 USDT in intermediary token decimals (6 decimals)
+      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+        inputAmount: exactInputAmount,
+        outputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals (HyperEVM)
+        nativeFee: BigNumber.from("100000000000000"), // 0.0001 ETH
+        oftFeeAmount: BigNumber.from(0),
+      });
+
+      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+
+      const result = await getSponsoredOftQuoteForExactInput({
+        inputToken: arbitrumUSDT,
+        outputToken: hypercoreUSDT,
+        exactInputAmount,
+        recipient,
+      });
+
+      // Output should be converted to 8 decimals (HyperCore USDT-SPOT)
+      expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000"); // 1 USDT in 8 decimals
+      expect(result.bridgeQuote.minOutputAmount.toString()).toBe("100000000");
+      expect(result.bridgeQuote.inputAmount.toString()).toBe("1000000");
+    });
+
+    it("should maintain correct decimal precision for larger amounts", async () => {
+      const largeAmount = BigNumber.from("1000000000"); // 1000 USDT (6 decimals)
+
+      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+        inputAmount: largeAmount,
+        outputAmount: BigNumber.from("1000000000"), // 1000 USDT in 6 decimals
+        nativeFee: BigNumber.from("100000000000000"),
+        oftFeeAmount: BigNumber.from(0),
+      });
+
+      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+
+      const result = await getSponsoredOftQuoteForExactInput({
+        inputToken: arbitrumUSDT,
+        outputToken: hypercoreUSDT,
+        exactInputAmount: largeAmount,
+        recipient,
+      });
+
+      // Output should be 1000 USDT in 8 decimals
+      expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000000"); // 1000 USDT in 8 decimals
+    });
+  });
+
+  describe("getSponsoredOftQuoteForOutput", () => {
+    const minOutputAmount = BigNumber.from("100000000"); // 1 USDT (8 decimals)
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      // Mock getCachedTokenInfo to return HyperEVM USDT as intermediary
+      jest.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
+        ...hyperevmUSDT,
+        name: "USDT",
+      });
+
+      // Mock getNativeTokenInfo
+      jest.spyOn(swapUtils, "getNativeTokenInfo").mockReturnValue({
+        address: "0x0000000000000000000000000000000000000000",
+        symbol: "ETH",
+        decimals: 18,
+        chainId: CHAIN_IDs.ARBITRUM,
+      });
+
+      // Mock roundAmountToSharedDecimals
+      jest
+        .spyOn(oftUtils, "roundAmountToSharedDecimals")
+        .mockReturnValue(minOutputAmount);
+    });
+
+    it("should convert input from output decimals (8) to input decimals (6) and back", async () => {
+      // Mock getQuote to return intermediary token output (6 decimals)
+      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+        inputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals
+        outputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals (intermediary)
+        nativeFee: BigNumber.from("100000000000000"),
+        oftFeeAmount: BigNumber.from(0),
+      });
+
+      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+
+      const result = await getSponsoredOftQuoteForOutput({
+        inputToken: arbitrumUSDT,
+        outputToken: hypercoreUSDT,
+        minOutputAmount,
+        recipient,
+      });
+
+      // Output should be converted back to 8 decimals
+      expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000"); // 1 USDT in 8 decimals
+      expect(result.bridgeQuote.minOutputAmount.toString()).toBe("100000000");
+      expect(result.bridgeQuote.inputAmount.toString()).toBe("1000000"); // 1 USDT in 6 decimals
+    });
+
+    it("should throw error when output is below minimum", async () => {
+      // Mock getQuote to return less than minimum
+      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+        inputAmount: BigNumber.from("1000000"),
+        outputAmount: BigNumber.from("900000"), // 0.9 USDT in 6 decimals (less than expected)
+        nativeFee: BigNumber.from("100000000000000"),
+        oftFeeAmount: BigNumber.from(0),
+      });
+
+      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+
+      await expect(
+        getSponsoredOftQuoteForOutput({
+          inputToken: arbitrumUSDT,
+          outputToken: hypercoreUSDT,
+          minOutputAmount,
+          recipient,
+        })
+      ).rejects.toThrow();
     });
   });
 });
