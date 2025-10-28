@@ -92,15 +92,15 @@ export const ChangeAccountModal = ({
 
   useHotkeys("esc", () => onCloseModal(), { enableOnFormTags: true });
 
-  if (!currentRecipientAccount) {
-    return;
-  }
-
   return (
     <>
       <Trigger onClick={() => setDisplayModal(true)}>
-        {shortenAddress(currentRecipientAccount, "..", 4)}
-        <PencilIcon color="inherit" width="16px" height="16px" />
+        <>
+          {currentRecipientAccount
+            ? shortenAddress(currentRecipientAccount, "..", 4)
+            : "Set Recipient"}
+          <PencilIcon color="inherit" width="16px" height="16px" />
+        </>
       </Trigger>
 
       <Modal
@@ -115,13 +115,14 @@ export const ChangeAccountModal = ({
         <Wrapper>
           <RowSpaced>
             <SubHeading>Wallet Address</SubHeading>
-            {userInput !== defaultRecipientAccount && (
-              <ResetButton
-                onClick={() => setUserInput(defaultRecipientAccount ?? "")}
-              >
-                Reset to Default
-              </ResetButton>
-            )}
+            {defaultRecipientAccount &&
+              userInput !== defaultRecipientAccount && (
+                <ResetButton
+                  onClick={() => setUserInput(defaultRecipientAccount ?? "")}
+                >
+                  Reset to Default
+                </ResetButton>
+              )}
           </RowSpaced>
 
           <InputGroup validationLevel={validationLevel}>
