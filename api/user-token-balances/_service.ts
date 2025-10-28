@@ -1,9 +1,67 @@
 import { BigNumber, ethers } from "ethers";
 import { MAINNET_CHAIN_IDs } from "@across-protocol/constants";
+import * as sdk from "@across-protocol/sdk";
 import { getLogger } from "../_utils";
 import { getAlchemyRpcFromConfigJson } from "../_providers";
+import { isSvmAddress } from "../_address";
+import { getSvmBalance } from "../_balance";
+import { fetchSwapTokensData, SwapToken } from "../swap/tokens/_service";
 
 const logger = getLogger();
+
+async function getSwapTokens(): Promise<SwapToken[]> {
+  try {
+    return await fetchSwapTokensData();
+  } catch (error) {
+    logger.warn({
+      at: "getSwapTokens",
+      message: "Failed to fetch swap tokens",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+function getEvmChainIds(): number[] {
+  return Object.values(MAINNET_CHAIN_IDs)
+    .filter((chainId) => !sdk.utils.chainIsSvm(chainId))
+    .filter((chainId) => !!getAlchemyRpcFromConfigJson(chainId))
+    .sort((a, b) => a - b);
+}
+
+function getSvmChainIds(): number[] {
+  return Object.values(MAINNET_CHAIN_IDs)
+    .filter((chainId) => sdk.utils.chainIsSvm(chainId))
+    .sort((a, b) => a - b);
+}
+
+function getTokenAddressesForChain(
+  swapTokens: SwapToken[],
+  chainId: number
+): string[] {
+  const tokens = swapTokens
+    .filter((token) => token.chainId === chainId)
+    .map((token) => token.address);
+
+  // Remove duplicates and filter out native token (AddressZero) since we fetch it separately
+  return Array.from(
+    new Set(tokens.filter((addr) => addr !== ethers.constants.AddressZero))
+  );
+}
+
+function getSvmTokenAddressesForChain(
+  swapTokens: SwapToken[],
+  chainId: number
+): string[] {
+  const tokens = swapTokens
+    .filter((token) => token.chainId === chainId)
+    .map((token) => token.address);
+
+  // Remove duplicates and filter out native token (zero address) since we fetch it separately
+  return Array.from(
+    new Set(tokens.filter((addr) => addr !== sdk.constants.ZERO_ADDRESS))
+  );
+}
 
 const fetchNativeBalance = async (
   chainId: number,
@@ -11,13 +69,6 @@ const fetchNativeBalance = async (
   rpcUrl: string
 ): Promise<string | null> => {
   try {
-    const requestBody = {
-      jsonrpc: "2.0",
-      id: 1,
-      method: "eth_getBalance",
-      params: [account, "latest"],
-    };
-
     logger.debug({
       at: "fetchNativeBalance",
       message: "Fetching native balance",
@@ -30,7 +81,12 @@ const fetchNativeBalance = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getBalance",
+        params: [account, "latest"],
+      }),
     });
 
     if (!response.ok) {
@@ -68,9 +124,76 @@ const fetchNativeBalance = async (
   }
 };
 
+const fetchSolanaTokenBalances = async (
+  chainId: number,
+  account: string,
+  tokenAddresses: string[]
+): Promise<{
+  chainId: number;
+  balances: Array<{ address: string; balance: string }>;
+}> => {
+  try {
+    logger.debug({
+      at: "fetchSolanaTokenBalances",
+      message: "Fetching Solana token balances",
+      chainId,
+      account,
+      tokenAddressCount: tokenAddresses.length,
+    });
+
+    // Include native SOL balance (zero address)
+    const allTokenAddresses = [sdk.constants.ZERO_ADDRESS, ...tokenAddresses];
+
+    // Fetch balances for all tokens in parallel
+    const balancePromises = allTokenAddresses.map(async (tokenAddress) => {
+      try {
+        const balance = await getSvmBalance(chainId, account, tokenAddress);
+        return {
+          address: tokenAddress,
+          balance: balance.toString(),
+        };
+      } catch (error) {
+        logger.warn({
+          at: "fetchSolanaTokenBalances",
+          message: "Error fetching balance for token",
+          chainId,
+          tokenAddress,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return null;
+      }
+    });
+
+    const results = await Promise.all(balancePromises);
+
+    // Filter out null results and zero balances
+    const balances = results.filter(
+      (result): result is { address: string; balance: string } =>
+        result !== null && BigNumber.from(result.balance).gt(0)
+    );
+
+    return {
+      chainId,
+      balances,
+    };
+  } catch (error) {
+    logger.warn({
+      at: "fetchSolanaTokenBalances",
+      message: "Error fetching Solana token balances, returning empty balances",
+      chainId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      chainId,
+      balances: [],
+    };
+  }
+};
+
 export const fetchTokenBalancesForChain = async (
   chainId: number,
-  account: string
+  account: string,
+  tokenAddresses: string[]
 ): Promise<{
   chainId: number;
   balances: Array<{ address: string; balance: string }>;
@@ -101,7 +224,7 @@ export const fetchTokenBalancesForChain = async (
           jsonrpc: "2.0",
           id: 1,
           method: "alchemy_getTokenBalances",
-          params: [account], // TODO: explicitly add token addresses for each chain
+          params: [account, tokenAddresses],
         }),
       }),
       fetchNativeBalance(chainId, account, rpcUrl),
@@ -209,15 +332,81 @@ export const fetchTokenBalancesForChain = async (
 };
 
 export const handleUserTokenBalances = async (account: string) => {
-  // Get all available chain IDs that have Alchemy RPC URLs
-  const chainIdsAvailable = Object.values(MAINNET_CHAIN_IDs)
-    .sort((a, b) => a - b)
-    .filter((chainId) => !!getAlchemyRpcFromConfigJson(chainId));
+  // Check if the account is a Solana address
+  const isSolanaAddress = isSvmAddress(account);
+
+  if (isSolanaAddress) {
+    // For SVM addresses, fetch all SVM chain balances
+    logger.debug({
+      at: "handleUserTokenBalances",
+      message: "Detected SVM address, fetching SVM balances",
+      account,
+    });
+
+    const svmChainIds = getSvmChainIds();
+
+    // Fetch swap tokens to get the list of token addresses for each chain
+    const swapTokens = await getSwapTokens();
+
+    logger.debug({
+      at: "handleUserTokenBalances",
+      message: "Fetched swap tokens for SVM",
+      tokenCount: swapTokens.length,
+    });
+
+    // Fetch balances for all SVM chains in parallel
+    const balancePromises = svmChainIds.map((chainId) => {
+      const tokenAddresses = getSvmTokenAddressesForChain(swapTokens, chainId);
+      logger.debug({
+        at: "handleUserTokenBalances",
+        message: "Token addresses for SVM chain",
+        chainId,
+        tokenAddressCount: tokenAddresses.length,
+      });
+      return fetchSolanaTokenBalances(chainId, account, tokenAddresses);
+    });
+
+    const chainBalances = await Promise.all(balancePromises);
+
+    return {
+      account,
+      balances: chainBalances.map(({ chainId, balances }) => ({
+        chainId: chainId.toString(),
+        balances,
+      })),
+    };
+  }
+
+  // For EVM addresses, fetch all EVM chain balances
+  logger.debug({
+    at: "handleUserTokenBalances",
+    message: "Detected EVM address, fetching EVM balances",
+    account,
+  });
+
+  // Get all available EVM chain IDs that have Alchemy RPC URLs
+  const chainIdsAvailable = getEvmChainIds();
+
+  // Fetch swap tokens to get the list of token addresses for each chain
+  const swapTokens = await getSwapTokens();
+
+  logger.debug({
+    at: "handleUserTokenBalances",
+    message: "Fetched swap tokens",
+    tokenCount: swapTokens.length,
+  });
 
   // Fetch balances for all chains in parallel
-  const balancePromises = chainIdsAvailable.map((chainId) =>
-    fetchTokenBalancesForChain(chainId, account)
-  );
+  const balancePromises = chainIdsAvailable.map((chainId) => {
+    const tokenAddresses = getTokenAddressesForChain(swapTokens, chainId);
+    logger.debug({
+      at: "handleUserTokenBalances",
+      message: "Token addresses for chain",
+      chainId,
+      tokenAddressCount: tokenAddresses.length,
+    });
+    return fetchTokenBalancesForChain(chainId, account, tokenAddresses);
+  });
 
   const chainBalances = await Promise.all(balancePromises);
 
