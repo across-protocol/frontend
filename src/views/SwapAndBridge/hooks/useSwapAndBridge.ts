@@ -265,12 +265,17 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const buttonLabel = useMemo(() => {
     if (buttonState === "notConnected" && walletTypeToConnect) {
+      // If neither wallet is connected, show generic "Connect Wallet"
+      if (!isConnectedEVM && !isConnectedSVM) {
+        return "Connect Wallet";
+      }
+      // Otherwise, show the specific wallet type that needs to be connected
       return walletTypeToConnect === "evm"
         ? "Connect EVM Wallet"
         : "Connect SVM Wallet";
     }
     return buttonLabels[buttonState];
-  }, [buttonState, walletTypeToConnect]);
+  }, [buttonState, walletTypeToConnect, isConnectedEVM, isConnectedSVM]);
 
   const buttonDisabled = useMemo(
     () =>
