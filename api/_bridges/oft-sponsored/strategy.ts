@@ -52,7 +52,7 @@ const capabilities: BridgeCapabilities = {
 /**
  * Checks if a route is supported for sponsored OFT transfers.
  */
-function isRouteSupported(params: {
+export function isRouteSupported(params: {
   inputToken: Token;
   outputToken: Token;
 }): boolean {
@@ -114,6 +114,67 @@ async function getIntermediaryToken(): Promise<Token> {
 }
 
 /**
+ * Calculates the maximum basis points to sponsor for a given output token
+ * @param outputTokenSymbol - The symbol of the output token (e.g., "USDT-SPOT", "USDC-SPOT")
+ * @param bridgeInputAmount - The input amount being bridged (in input token decimals)
+ * @param bridgeOutputAmount - The output amount from the bridge (in intermediary token decimals)
+ * @returns The maximum basis points to sponsor
+ */
+export async function calculateMaxBpsToSponsor(params: {
+  outputTokenSymbol: string;
+  bridgeInputAmount: BigNumber;
+  bridgeOutputAmount: BigNumber;
+}): Promise<BigNumber> {
+  const { outputTokenSymbol, bridgeInputAmount, bridgeOutputAmount } = params;
+
+  if (outputTokenSymbol === "USDT-SPOT") {
+    // USDT -> USDT: 0 bps (no swap needed, no sponsorship needed)
+    return BigNumber.from(0);
+  }
+
+  if (outputTokenSymbol === "USDC-SPOT") {
+    // USDT -> USDC: Calculate sponsorship needed to guarantee 1:1 output
+
+    // Simulate the swap on HyperCore to get estimated output
+    const simulation = await simulateMarketOrder({
+      tokenIn: {
+        symbol: "USDT",
+        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+      },
+      tokenOut: {
+        symbol: "USDC",
+        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals, // TODO: Update to use USDC-SPOT when available
+      },
+      inputAmount: bridgeOutputAmount,
+    });
+
+    // Expected output (1:1): same amount as initial input after decimal conversion
+    const expectedOutput = bridgeInputAmount;
+
+    const swapOutput = simulation.outputAmount;
+    const swapOutputInInputDecimals = ConvertDecimals(
+      TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+      TOKEN_SYMBOLS_MAP.USDT.decimals
+    )(swapOutput);
+
+    // Calculate loss if swap output is less than expected
+    if (swapOutputInInputDecimals.lt(expectedOutput)) {
+      const loss = expectedOutput.sub(swapOutputInInputDecimals);
+      // Loss as basis points: (loss / input) * 10000
+      const lossBps = loss.mul(10000).div(bridgeInputAmount);
+      return BigNumber.from(Math.ceil(lossBps.toNumber()));
+    }
+
+    // No loss or profit from swap, no sponsorship needed
+    return BigNumber.from(0);
+  }
+
+  throw new InvalidParamError({
+    message: `Unsupported output token: ${outputTokenSymbol}`,
+  });
+}
+
+/**
  * Builds transaction for sponsored OFT flow
  */
 async function buildTransaction(params: {
@@ -134,51 +195,11 @@ async function buildTransaction(params: {
   }
 
   // Calculate maxBpsToSponsor based on output token and market simulation
-  let maxBpsToSponsor: BigNumber;
-
-  if (crossSwap.outputToken.symbol === "USDT-SPOT") {
-    // USDT -> USDT: 0 bps (no bridge fee and no swap needed so no sponsorship needed)
-    maxBpsToSponsor = BigNumber.from(0);
-  } else if (crossSwap.outputToken.symbol === "USDC") {
-    // USDT -> USDC: Calculate sponsorship needed to guarantee 1:1 output
-
-    // Simulate the swap on HyperCore to get estimated output
-    const simulation = await simulateMarketOrder({
-      tokenIn: {
-        symbol: "USDT",
-        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
-      },
-      tokenOut: {
-        symbol: "USDC",
-        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals, // TODO: Update to use USDC-SPOT when available
-      },
-      inputAmount: bridgeQuote.outputAmount,
-    });
-
-    // Expected output (1:1): same amount as initial input after decimal conversion
-    const expectedOutput = bridgeQuote.inputAmount;
-
-    const swapOutput = simulation.outputAmount;
-    const swapOutputInInputDecimals = ConvertDecimals(
-      TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
-      TOKEN_SYMBOLS_MAP.USDT.decimals
-    )(swapOutput);
-
-    // Calculate loss if swap output is less than expected
-    if (swapOutputInInputDecimals.lt(expectedOutput)) {
-      const loss = expectedOutput.sub(swapOutputInInputDecimals);
-      // Loss as basis points: (loss / input) * 10000
-      const lossBps = loss.mul(10000).div(bridgeQuote.inputAmount);
-      maxBpsToSponsor = BigNumber.from(Math.ceil(lossBps.toNumber()));
-    } else {
-      // No loss or profit from swap, no sponsorship needed
-      maxBpsToSponsor = BigNumber.from(0);
-    }
-  } else {
-    throw new InvalidParamError({
-      message: `Unsupported output token: ${crossSwap.outputToken.symbol}`,
-    });
-  }
+  const maxBpsToSponsor = await calculateMaxBpsToSponsor({
+    outputTokenSymbol: crossSwap.outputToken.symbol,
+    bridgeInputAmount: bridgeQuote.inputAmount,
+    bridgeOutputAmount: bridgeQuote.outputAmount,
+  });
 
   // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.005 = 0.5% = 50 bps)
   const maxUserSlippageBps = Math.floor(crossSwap.slippageTolerance * 10000);
@@ -236,7 +257,7 @@ export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
       }
 
       // USDT → USDC: BridgeableToAny (destination swap)
-      if (inputToken.symbol === "USDT" && outputToken.symbol === "USDC") {
+      if (inputToken.symbol === "USDT" && outputToken.symbol === "USDC-SPOT") {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
       }
 
