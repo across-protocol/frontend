@@ -1,6 +1,24 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { ethers } from "ethers";
 
+/**
+ * Swap type for metadata encoding
+ */
+export enum SwapType {
+  EXACT_INPUT = 0,
+  MIN_OUTPUT = 1,
+  EXACT_OUTPUT = 2,
+}
+
+/**
+ * Swap side for metadata encoding
+ */
+export enum SwapSide {
+  ORIGIN_SWAP = 0,
+  DESTINATION_SWAP = 1,
+  ORIGIN_AND_DESTINATION_SWAPS = 2,
+}
+
 // AcrossEventEmitter contract addresses per chain
 export const ACROSS_EVENT_EMITTER_ADDRESS: Record<number, string> = {
   [CHAIN_IDs.MAINNET]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
@@ -31,7 +49,7 @@ export const ACROSS_EVENT_EMITTER_ADDRESS: Record<number, string> = {
  * @param chainId The chain ID
  * @returns The contract address or undefined if not deployed on that chain
  */
-export function getEventEmitterAddress(chainId: number): string | undefined {
+export function getEventEmitterAddress(chainId: number): string {
   return ACROSS_EVENT_EMITTER_ADDRESS[chainId];
 }
 
@@ -48,42 +66,74 @@ export function isEventEmitterDeployed(chainId: number): boolean {
 /**
  * Encodes metadata for destination swap events
  * @param version Metadata version (1 byte)
- * @param swapTokenAddress The token being swapped to (32 bytes)
- * @param swapTokenAmount The amount being swapped (32 bytes)
+ * @param type Swap type (EXACT_INPUT or EXACT_OUTPUT) (1 byte)
+ * @param side Swap side (NO_SWAP, DESTINATION_SWAP_ONLY, or BOTH_SWAPS) (1 byte)
+ * @param address The token being swapped to (32 bytes)
+ * @param expectedAmount The expected amount out from the swap (32 bytes)
+ * @param minAmount The minimum amount out from the swap (32 bytes)
+ * @param swapProvider The name of the swap provider (UTF-8 encoded, variable length)
+ * @param slippage The slippage tolerance (basis points, 32 bytes)
+ * @param autoSlippage Whether auto slippage was used (1 byte)
  * @param recipient The final recipient address (32 bytes)
  * @param appFeeRecipient The app fee recipient address (32 bytes, zero address if no app fee)
- * @param swapProvider The name of the swap provider (UTF-8 encoded, variable length)
  * @returns Encoded bytes
  */
 export function encodeSwapMetadata(params: {
   version: number;
-  swapTokenAddress: string;
-  swapTokenAmount: ethers.BigNumberish;
+  type: SwapType;
+  side: SwapSide;
+  address: string;
+  expectedAmount: ethers.BigNumberish;
+  minAmount: ethers.BigNumberish;
+  swapProvider: string;
+  slippage: ethers.BigNumberish;
+  autoSlippage: boolean;
   recipient: string;
   appFeeRecipient: string;
-  swapProvider: string;
 }): string {
   const {
     version,
-    swapTokenAddress,
-    swapTokenAmount,
+    type,
+    side,
+    address,
+    expectedAmount,
+    minAmount,
+    swapProvider,
+    slippage,
+    autoSlippage,
     recipient,
     appFeeRecipient,
-    swapProvider,
   } = params;
 
   const abiCoder = ethers.utils.defaultAbiCoder;
 
   // Encode the metadata as a packed bytes structure
   const encoded = abiCoder.encode(
-    ["uint8", "address", "uint256", "address", "address", "string"],
+    [
+      "uint8",
+      "uint8",
+      "uint8",
+      "address",
+      "uint256",
+      "uint256",
+      "string",
+      "uint256",
+      "bool",
+      "address",
+      "address",
+    ],
     [
       version,
-      swapTokenAddress,
-      ethers.BigNumber.from(swapTokenAmount),
+      type,
+      side,
+      address,
+      ethers.BigNumber.from(expectedAmount),
+      ethers.BigNumber.from(minAmount),
+      swapProvider,
+      ethers.BigNumber.from(slippage),
+      autoSlippage,
       recipient,
       appFeeRecipient,
-      swapProvider,
     ]
   );
 

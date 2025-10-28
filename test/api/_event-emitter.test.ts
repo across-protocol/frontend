@@ -7,6 +7,8 @@ import {
   isEventEmitterDeployed,
   encodeSwapMetadata,
   encodeEmitDataCalldata,
+  SwapType,
+  SwapSide,
 } from "../../api/_event-emitter";
 
 describe("Event Emitter Module", () => {
@@ -66,11 +68,16 @@ describe("Event Emitter Module", () => {
     it("should encode metadata with all required fields", () => {
       const metadata = encodeSwapMetadata({
         version: 1,
-        swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH on Arbitrum
-        swapTokenAmount: ethers.utils.parseEther("1.5"),
+        type: SwapType.EXACT_INPUT,
+        side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+        address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH on Arbitrum
+        expectedAmount: ethers.utils.parseEther("2.0"),
+        minAmount: ethers.utils.parseEther("1.5"),
+        swapProvider: "Uniswap V3",
+        slippage: ethers.BigNumber.from(50), // 0.5%
+        autoSlippage: true,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
-        swapProvider: "Uniswap V3",
       });
 
       expect(metadata).toBeDefined();
@@ -80,41 +87,75 @@ describe("Event Emitter Module", () => {
       // Decode and verify
       const abiCoder = ethers.utils.defaultAbiCoder;
       const decoded = abiCoder.decode(
-        ["uint8", "address", "uint256", "address", "address", "string"],
+        [
+          "uint8",
+          "uint8",
+          "uint8",
+          "address",
+          "uint256",
+          "uint256",
+          "string",
+          "uint256",
+          "bool",
+          "address",
+          "address",
+        ],
         metadata
       );
 
       expect(decoded[0]).toBe(1); // version
-      expect(decoded[1].toLowerCase()).toBe(
-        "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".toLowerCase()
-      ); // swapTokenAddress
-      expect(decoded[2]).toEqual(ethers.utils.parseEther("1.5")); // swapTokenAmount
+      expect(decoded[1]).toBe(SwapType.EXACT_INPUT); // type
+      expect(decoded[2]).toBe(SwapSide.ORIGIN_AND_DESTINATION_SWAPS); // side
       expect(decoded[3].toLowerCase()).toBe(
+        "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".toLowerCase()
+      ); // address
+      expect(decoded[4]).toEqual(ethers.utils.parseEther("2.0")); // expectedAmount
+      expect(decoded[5]).toEqual(ethers.utils.parseEther("1.5")); // minAmount
+      expect(decoded[6]).toBe("Uniswap V3"); // swapProvider
+      expect(decoded[7]).toEqual(ethers.BigNumber.from(50)); // slippage
+      expect(decoded[8]).toBe(true); // autoSlippage
+      expect(decoded[9].toLowerCase()).toBe(
         "0x1111111111111111111111111111111111111111".toLowerCase()
       ); // recipient
-      expect(decoded[4].toLowerCase()).toBe(
+      expect(decoded[10].toLowerCase()).toBe(
         "0x2222222222222222222222222222222222222222".toLowerCase()
       ); // appFeeRecipient
-      expect(decoded[5]).toBe("Uniswap V3"); // swapProvider
     });
 
     it("should handle zero address for appFeeRecipient", () => {
       const metadata = encodeSwapMetadata({
         version: 1,
-        swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        swapTokenAmount: ethers.utils.parseEther("1"),
+        type: SwapType.EXACT_OUTPUT,
+        side: SwapSide.DESTINATION_SWAP,
+        address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        expectedAmount: ethers.utils.parseEther("1.1"),
+        minAmount: ethers.utils.parseEther("1"),
+        swapProvider: "0x",
+        slippage: ethers.BigNumber.from(100), // 1%
+        autoSlippage: false,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: ethers.constants.AddressZero,
-        swapProvider: "0x",
       });
 
       const abiCoder = ethers.utils.defaultAbiCoder;
       const decoded = abiCoder.decode(
-        ["uint8", "address", "uint256", "address", "address", "string"],
+        [
+          "uint8",
+          "uint8",
+          "uint8",
+          "address",
+          "uint256",
+          "uint256",
+          "string",
+          "uint256",
+          "bool",
+          "address",
+          "address",
+        ],
         metadata
       );
 
-      expect(decoded[4]).toBe(ethers.constants.AddressZero);
+      expect(decoded[10]).toBe(ethers.constants.AddressZero);
     });
 
     it("should handle different swap providers", () => {
@@ -123,20 +164,37 @@ describe("Event Emitter Module", () => {
       providers.forEach((provider) => {
         const metadata = encodeSwapMetadata({
           version: 1,
-          swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-          swapTokenAmount: ethers.utils.parseEther("1"),
+          type: SwapType.EXACT_INPUT,
+          side: SwapSide.DESTINATION_SWAP,
+          address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+          expectedAmount: ethers.utils.parseEther("1.05"),
+          minAmount: ethers.utils.parseEther("1"),
+          swapProvider: provider,
+          slippage: ethers.BigNumber.from(50),
+          autoSlippage: false,
           recipient: "0x1111111111111111111111111111111111111111",
           appFeeRecipient: ethers.constants.AddressZero,
-          swapProvider: provider,
         });
 
         const abiCoder = ethers.utils.defaultAbiCoder;
         const decoded = abiCoder.decode(
-          ["uint8", "address", "uint256", "address", "address", "string"],
+          [
+            "uint8",
+            "uint8",
+            "uint8",
+            "address",
+            "uint256",
+            "uint256",
+            "string",
+            "uint256",
+            "bool",
+            "address",
+            "address",
+          ],
           metadata
         );
 
-        expect(decoded[5]).toBe(provider);
+        expect(decoded[6]).toBe(provider);
       });
     });
 
@@ -148,23 +206,42 @@ describe("Event Emitter Module", () => {
         ethers.BigNumber.from("1"), // 1 wei
       ];
 
-      amounts.forEach((amount) => {
+      amounts.forEach((minAmount) => {
+        const expectedAmount = minAmount.mul(110).div(100); // 10% higher
         const metadata = encodeSwapMetadata({
           version: 1,
-          swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-          swapTokenAmount: amount,
+          type: SwapType.EXACT_INPUT,
+          side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+          address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+          expectedAmount,
+          minAmount,
+          swapProvider: "Test",
+          slippage: ethers.BigNumber.from(100), // 1%
+          autoSlippage: false,
           recipient: "0x1111111111111111111111111111111111111111",
           appFeeRecipient: ethers.constants.AddressZero,
-          swapProvider: "Test",
         });
 
         const abiCoder = ethers.utils.defaultAbiCoder;
         const decoded = abiCoder.decode(
-          ["uint8", "address", "uint256", "address", "address", "string"],
+          [
+            "uint8",
+            "uint8",
+            "uint8",
+            "address",
+            "uint256",
+            "uint256",
+            "string",
+            "uint256",
+            "bool",
+            "address",
+            "address",
+          ],
           metadata
         );
 
-        expect(decoded[2]).toEqual(amount);
+        expect(decoded[4]).toEqual(expectedAmount); // expectedAmount
+        expect(decoded[5]).toEqual(minAmount); // minAmount
       });
     });
   });
@@ -203,11 +280,16 @@ describe("Event Emitter Module", () => {
       // First encode the metadata
       const metadata = encodeSwapMetadata({
         version: 1,
-        swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        swapTokenAmount: ethers.utils.parseEther("1"),
+        type: SwapType.EXACT_OUTPUT,
+        side: SwapSide.DESTINATION_SWAP,
+        address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        expectedAmount: ethers.utils.parseEther("1.1"),
+        minAmount: ethers.utils.parseEther("1"),
+        swapProvider: "Uniswap V3",
+        slippage: ethers.BigNumber.from(100),
+        autoSlippage: true,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
-        swapProvider: "Uniswap V3",
       });
 
       // Then encode it as calldata
@@ -225,23 +307,40 @@ describe("Event Emitter Module", () => {
       // Decode the inner metadata
       const abiCoder = ethers.utils.defaultAbiCoder;
       const decodedMetadata = abiCoder.decode(
-        ["uint8", "address", "uint256", "address", "address", "string"],
+        [
+          "uint8",
+          "uint8",
+          "uint8",
+          "address",
+          "uint256",
+          "uint256",
+          "string",
+          "uint256",
+          "bool",
+          "address",
+          "address",
+        ],
         decodedCalldata.data
       );
 
       // Verify all fields
       expect(decodedMetadata[0]).toBe(1); // version
-      expect(decodedMetadata[1].toLowerCase()).toBe(
+      expect(decodedMetadata[1]).toBe(SwapType.EXACT_OUTPUT); // type
+      expect(decodedMetadata[2]).toBe(SwapSide.DESTINATION_SWAP); // side
+      expect(decodedMetadata[3].toLowerCase()).toBe(
         "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1".toLowerCase()
       );
-      expect(decodedMetadata[2]).toEqual(ethers.utils.parseEther("1"));
-      expect(decodedMetadata[3].toLowerCase()).toBe(
+      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("1.1")); // expectedAmount
+      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("1")); // minAmount
+      expect(decodedMetadata[6]).toBe("Uniswap V3"); // swapProvider
+      expect(decodedMetadata[7]).toEqual(ethers.BigNumber.from(100)); // slippage
+      expect(decodedMetadata[8]).toBe(true); // autoSlippage
+      expect(decodedMetadata[9].toLowerCase()).toBe(
         "0x1111111111111111111111111111111111111111".toLowerCase()
       );
-      expect(decodedMetadata[4].toLowerCase()).toBe(
+      expect(decodedMetadata[10].toLowerCase()).toBe(
         "0x2222222222222222222222222222222222222222".toLowerCase()
       );
-      expect(decodedMetadata[5]).toBe("Uniswap V3");
     });
   });
 
@@ -250,11 +349,16 @@ describe("Event Emitter Module", () => {
       // This simulates the full flow of encoding metadata for the event emitter
       const swapMetadata = encodeSwapMetadata({
         version: 1,
-        swapTokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        swapTokenAmount: ethers.utils.parseEther("2.5"),
+        type: SwapType.EXACT_INPUT,
+        side: SwapSide.ORIGIN_AND_DESTINATION_SWAPS,
+        address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        expectedAmount: ethers.utils.parseEther("2.8"),
+        minAmount: ethers.utils.parseEther("2.5"),
+        swapProvider: "0x",
+        slippage: ethers.BigNumber.from(120), // 1.2%
+        autoSlippage: false,
         recipient: "0x1111111111111111111111111111111111111111",
         appFeeRecipient: "0x2222222222222222222222222222222222222222",
-        swapProvider: "0x",
       });
 
       const emitDataCalldata = encodeEmitDataCalldata(swapMetadata);
@@ -271,13 +375,30 @@ describe("Event Emitter Module", () => {
       // Verify the inner metadata
       const abiCoder = ethers.utils.defaultAbiCoder;
       const decodedMetadata = abiCoder.decode(
-        ["uint8", "address", "uint256", "address", "address", "string"],
+        [
+          "uint8",
+          "uint8",
+          "uint8",
+          "address",
+          "uint256",
+          "uint256",
+          "string",
+          "uint256",
+          "bool",
+          "address",
+          "address",
+        ],
         decodedCalldata.data
       );
 
-      expect(decodedMetadata[0]).toBe(1);
-      expect(decodedMetadata[5]).toBe("0x");
-      expect(decodedMetadata[2]).toEqual(ethers.utils.parseEther("2.5"));
+      expect(decodedMetadata[0]).toBe(1); // version
+      expect(decodedMetadata[1]).toBe(SwapType.EXACT_INPUT); // type
+      expect(decodedMetadata[2]).toBe(SwapSide.ORIGIN_AND_DESTINATION_SWAPS); // side
+      expect(decodedMetadata[6]).toBe("0x"); // swapProvider
+      expect(decodedMetadata[4]).toEqual(ethers.utils.parseEther("2.8")); // expectedAmount
+      expect(decodedMetadata[5]).toEqual(ethers.utils.parseEther("2.5")); // minAmount
+      expect(decodedMetadata[7]).toEqual(ethers.BigNumber.from(120)); // slippage
+      expect(decodedMetadata[8]).toBe(false); // autoSlippage
     });
   });
 });
