@@ -843,7 +843,11 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwap,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap,
@@ -948,12 +952,11 @@ export async function getCrossSwapQuotesForOutputA2B(
     isNative: crossSwapWithAppFee.isOutputNative,
   });
 
-  if (appFee.feeAmount.gt(0)) {
-    bridgeQuote.message = bridge.getBridgeQuoteMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
-  }
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwapWithAppFee,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap: crossSwapWithAppFee,
@@ -1306,6 +1309,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote: prioritizedOriginStrategy.originSwapQuote,
   });
 
   return {
@@ -1526,6 +1530,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote,
   });
   assertMinOutputAmount(
     finalDestinationSwapQuote.minAmountOut,

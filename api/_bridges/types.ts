@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import { CrossSwap, CrossSwapQuotes, Token } from "../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, SwapQuote, Token } from "../_dexes/types";
 import { AppFee, CrossSwapType } from "../_dexes/utils";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
@@ -78,7 +78,8 @@ export type BridgeStrategy = {
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
-    appFee?: AppFee
+    appFee?: AppFee,
+    originSwapQuote?: SwapQuote
   ) => string | undefined;
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
