@@ -4,7 +4,7 @@ import { getEnvs } from "../../../../api/_env";
 import {
   createOftSignature,
   SignedQuoteParams,
-} from "../../../../api/_bridges/sponsorship";
+} from "../../../../api/_bridges/oft-sponsored/utils/signing";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({

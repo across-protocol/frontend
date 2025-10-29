@@ -5,7 +5,7 @@ import {
   UnsignedQuoteParams,
   SponsoredOFTQuote,
   createOftSignature,
-} from "../../sponsorship/oft";
+} from "./signing";
 import { toBytes32 } from "../../../_address";
 import { getOftEndpointId } from "../../oft/utils/constants";
 import {

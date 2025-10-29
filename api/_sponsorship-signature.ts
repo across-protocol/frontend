@@ -1,5 +1,5 @@
 import { ethers, utils } from "ethers";
-import { getEnvs } from "../../../../api/_env";
+import { getEnvs } from "./_env";
 
 let sponsorshipSigner: ethers.Wallet | undefined;
 

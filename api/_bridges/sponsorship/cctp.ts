@@ -1,5 +1,5 @@
 import { BigNumberish, utils } from "ethers";
-import { signDigestWithSponsor } from "./utils";
+import { signDigestWithSponsor } from "../../_sponsorship-signature";
 
 /**
  * Represents the parameters for a sponsored CCTP quote.
