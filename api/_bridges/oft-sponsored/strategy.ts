@@ -35,7 +35,7 @@ import {
 } from "./utils/constants";
 import { buildSponsoredOFTQuote } from "./utils/quote-builder";
 
-const name = "sponsored" as const;
+const name = "sponsored-oft" as const;
 
 const capabilities: BridgeCapabilities = {
   ecosystems: ["evm"],
