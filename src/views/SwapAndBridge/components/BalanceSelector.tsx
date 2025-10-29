@@ -1,25 +1,57 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
-import { COLORS, formatUnitsWithMaxFractions } from "utils";
+import {
+  COLORS,
+  formatUnitsWithMaxFractions,
+  compareAddressesSimple,
+} from "utils";
+import { useUserTokenBalances } from "hooks/useUserTokenBalances";
 
 type BalanceSelectorProps = {
-  balance: BigNumber;
-  decimals: number;
+  token: {
+    chainId: number;
+    address: string;
+    decimals: number;
+  };
   setAmount: (amount: BigNumber | null) => void;
   disableHover?: boolean;
   error?: boolean;
 };
 
 export function BalanceSelector({
-  balance,
-  decimals,
+  token,
   setAmount,
   disableHover,
   error = false,
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const tokenBalances = useUserTokenBalances();
+
+  // Derive the balance from the latest token balances
+  const balance = useMemo(() => {
+    if (!tokenBalances.data?.balances) {
+      return BigNumber.from(0);
+    }
+
+    const chainBalances = tokenBalances.data.balances.find(
+      (cb) => cb.chainId === String(token.chainId)
+    );
+
+    if (!chainBalances) {
+      return BigNumber.from(0);
+    }
+
+    const tokenBalance = chainBalances.balances.find((b) =>
+      compareAddressesSimple(b.address, token.address)
+    );
+
+    return tokenBalance?.balance
+      ? BigNumber.from(tokenBalance.balance)
+      : BigNumber.from(0);
+  }, [tokenBalances.data, token.chainId, token.address]);
+
   if (!balance || balance.lte(0)) return null;
   const percentages = ["25%", "50%", "75%", "MAX"];
 
@@ -33,7 +65,7 @@ export function BalanceSelector({
     }
   };
 
-  const formattedBalance = formatUnitsWithMaxFractions(balance, decimals);
+  const formattedBalance = formatUnitsWithMaxFractions(balance, token.decimals);
 
   return (
     <BalanceWrapper

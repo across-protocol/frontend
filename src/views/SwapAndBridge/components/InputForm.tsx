@@ -237,9 +237,8 @@ const TokenInput = ({
 
         {token && (
           <BalanceSelector
-            balance={token.balance}
+            token={token}
             disableHover={!isOrigin}
-            decimals={token.decimals}
             error={insufficientInputBalance}
             setAmount={(amount) => {
               if (amount) {

@@ -43,9 +43,6 @@ export function useEnrichedCrosschainBalances() {
                 : 0,
           };
         });
-        // // TODO: consider removing
-        // // Filter out tokens that don't have a logoURI
-        // .filter((t) => t.logoURI !== undefined);
 
         // Sort high to low balanceUsd
         const sortedByBalance = enrichedTokens.sort(
