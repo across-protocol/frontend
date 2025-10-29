@@ -376,14 +376,13 @@ export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
     },
 
     getCrossSwapTypes: ({ inputToken, outputToken }) => {
-      // USDT → USDT: B2B (same token)
-      if (inputToken.symbol === "USDT" && outputToken.symbol === "USDT-SPOT") {
+      // Routes supported: USDT → USDT-SPOT or USDC-SPOT
+      if (
+        inputToken.symbol === "USDT" &&
+        (outputToken.symbol === "USDT-SPOT" ||
+          outputToken.symbol === "USDC-SPOT")
+      ) {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
-      }
-
-      // USDT → USDC: BridgeableToAny (destination swap)
-      if (inputToken.symbol === "USDT" && outputToken.symbol === "USDC-SPOT") {
-        return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY];
       }
 
       return [];
