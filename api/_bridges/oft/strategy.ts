@@ -1,5 +1,6 @@
 import { BigNumber, Contract, ethers } from "ethers";
 
+import { CHAIN_IDs } from "../../_constants";
 import {
   BridgeStrategy,
   GetExactInputBridgeQuoteParams,
@@ -29,8 +30,7 @@ import {
   getOftBridgeFees,
   getQuote,
   roundAmountToSharedDecimals,
-} from "./utils/utils";
-import { CHAIN_IDs } from "@across-protocol/constants";
+} from "./utils/shared";
 
 const name = "oft" as const;
 

@@ -5,7 +5,7 @@ import {
   getSponsoredOftQuoteForOutput,
   isRouteSupported,
 } from "../../../../api/_bridges/oft-sponsored/strategy";
-import * as oftUtils from "../../../../api/_bridges/oft/utils/utils";
+import * as oftUtils from "../../../../api/_bridges/oft/utils/shared";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { Token } from "../../../../api/_dexes/types";
 import * as hypercore from "../../../../api/_hypercore";

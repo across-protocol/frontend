@@ -11,7 +11,7 @@ import {
   getOftBridgeFees,
   getQuote,
   roundAmountToSharedDecimals,
-} from "../oft/utils/utils";
+} from "../oft/utils/shared";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import {

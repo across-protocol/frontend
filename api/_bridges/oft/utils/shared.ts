@@ -1,8 +1,8 @@
 import { BigNumber, Contract, ethers } from "ethers";
+import { CHAIN_IDs } from "../../../_constants";
 import { Token } from "../../../_dexes/types";
 import { InvalidParamError } from "../../../_errors";
 import { ConvertDecimals, getProvider } from "../../../_utils";
-import { CHAIN_IDs } from "@across-protocol/constants";
 import * as chainConfigs from "../../../../scripts/chain-configs";
 import {
   getOftMessengerForToken,
