@@ -55,6 +55,7 @@ export default function SelectorButton({
           displayModal={displayModal}
           setDisplayModal={setDisplayModal}
           isOriginToken={isOriginToken}
+          currentToken={selectedToken}
           otherToken={otherToken}
         />
       </>
@@ -85,6 +86,7 @@ export default function SelectorButton({
         displayModal={displayModal}
         setDisplayModal={setDisplayModal}
         isOriginToken={isOriginToken}
+        currentToken={selectedToken}
         otherToken={otherToken}
       />
     </>

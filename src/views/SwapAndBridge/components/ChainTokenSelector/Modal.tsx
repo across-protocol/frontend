@@ -63,6 +63,7 @@ type DisplayedTokens = {
 type Props = {
   onSelect: (token: EnrichedToken) => void;
   isOriginToken: boolean;
+  currentToken?: EnrichedToken | null; // The currently selected token we're changing from
   otherToken?: EnrichedToken | null; // The currently selected token on the other side
   displayModal: boolean;
   setDisplayModal: (displayModal: boolean) => void;
@@ -73,13 +74,14 @@ export default function ChainTokenSelectorModal({
   displayModal,
   setDisplayModal,
   onSelect,
+  currentToken,
   otherToken,
 }: Props) {
   const crossChainRoutes = useEnrichedCrosschainBalances();
   const { isMobile } = useCurrentBreakpoint();
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
-    popularChains[0]
+    currentToken?.chainId ?? popularChains[0]
   );
   const [mobileStep, setMobileStep] = useState<"chain" | "token">("chain");
 
@@ -91,8 +93,8 @@ export default function ChainTokenSelectorModal({
     setMobileStep("chain");
     setChainSearch("");
     setTokenSearch("");
-    setSelectedChain(popularChains[0]);
-  }, [displayModal]);
+    setSelectedChain(currentToken?.chainId ?? popularChains[0]);
+  }, [displayModal, currentToken]);
 
   const displayedTokens = useMemo(() => {
     let tokens = selectedChain ? (crossChainRoutes[selectedChain] ?? []) : [];
