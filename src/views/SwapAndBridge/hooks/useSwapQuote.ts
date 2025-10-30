@@ -6,6 +6,11 @@ import {
   SwapApprovalApiCallReturnType,
   SwapApprovalApiQueryParams,
 } from "utils/serverless-api/prod/swap-approval";
+import { chainIsSvm } from "utils/sdk";
+
+// Placeholder addresses for quote simulation when wallet is not connected
+const PLACEHOLDER_EVM_ADDRESS = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+const PLACEHOLDER_SVM_ADDRESS = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
 
 type SwapQuoteParams = {
   origin: SwapApiToken | null;
@@ -30,7 +35,7 @@ const useSwapQuote = ({
   refundAddress,
   depositor,
   refundOnOrigin = true,
-  slippageTolerance = 1,
+  slippageTolerance = 0.05,
 }: SwapQuoteParams) => {
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -46,9 +51,22 @@ const useSwapQuote = ({
       if (Number(amount) <= 0) {
         return undefined;
       }
-      if (!origin || !destination || !amount || !depositor) {
+      if (!origin || !destination || !amount) {
         throw new Error("Missing required swap quote parameters");
       }
+
+      // Use appropriate placeholder address based on chain ecosystem when wallet is not connected
+      const getPlaceholderAddress = (chainId: number) => {
+        return chainIsSvm(chainId)
+          ? PLACEHOLDER_SVM_ADDRESS
+          : PLACEHOLDER_EVM_ADDRESS;
+      };
+
+      const isUsingPlaceholderDepositor = !depositor;
+      const effectiveDepositor =
+        depositor || getPlaceholderAddress(origin.chainId);
+      const effectiveRecipient =
+        recipient || getPlaceholderAddress(destination.chainId);
 
       const params: SwapApprovalApiQueryParams = {
         tradeType: isInputAmount ? "exactInput" : "minOutput",
@@ -56,11 +74,13 @@ const useSwapQuote = ({
         outputToken: destination.address,
         originChainId: origin.chainId,
         destinationChainId: destination.chainId,
-        depositor,
-        recipient: recipient || depositor,
+        depositor: effectiveDepositor,
+        recipient: effectiveRecipient,
         amount: amount.toString(),
         refundOnOrigin,
         slippageTolerance,
+        // Skip transaction estimation when using placeholder address
+        skipOriginTxEstimation: isUsingPlaceholderDepositor,
         ...(integratorId ? { integratorId } : {}),
         ...(refundAddress ? { refundAddress } : {}),
       };
@@ -68,8 +88,7 @@ const useSwapQuote = ({
       const data = await swapApprovalApiCall(params);
       return data;
     },
-    enabled:
-      !!origin?.address && !!destination?.address && !!amount && !!depositor,
+    enabled: !!origin?.address && !!destination?.address && !!amount,
     retry: 2,
 
     refetchInterval(query) {
