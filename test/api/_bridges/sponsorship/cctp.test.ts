@@ -5,7 +5,7 @@ import { getEnvs } from "../../../../api/_env";
 import {
   createCctpSignature,
   SponsoredCCTPQuote,
-} from "../../../../api/_bridges/sponsorship";
+} from "../../../../api/_bridges/sponsorship/cctp";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({

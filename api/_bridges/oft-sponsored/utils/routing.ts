@@ -1,4 +1,4 @@
-import { getSponsoredBridgeStrategy } from "../strategy";
+import { getOftSponsoredBridgeStrategy } from "../strategy";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
@@ -54,7 +54,7 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
       data.hasVaultBalance &&
       data.isSlippageAcceptable &&
       data.isAccountCreationValid,
-    getStrategy: getSponsoredBridgeStrategy,
+    getStrategy: getOftSponsoredBridgeStrategy,
     reason: "All sponsorship eligibility criteria met",
   },
 ];
