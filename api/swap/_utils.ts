@@ -636,6 +636,7 @@ export async function calculateSwapFees(params: {
   bridgeQuoteInputTokenPriceUsd: number;
   appFeeTokenPriceUsd: number;
   minOutputAmountSansAppFees: BigNumber;
+  expectedOutputAmountSansAppFees: BigNumber;
   originChainId: number;
   destinationChainId: number;
   indirectDestinationRoute?: IndirectDestinationRoute;
@@ -656,6 +657,7 @@ export async function calculateSwapFees(params: {
     bridgeQuoteInputTokenPriceUsd,
     appFeeTokenPriceUsd,
     minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
     originChainId,
     destinationChainId,
     indirectDestinationRoute,
@@ -805,17 +807,37 @@ export async function calculateSwapFees(params: {
           indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
         )
       ) * outputTokenPriceUsd;
+    const expectedOutputAmountSansAppFeesUsd =
+      parseFloat(
+        utils.formatUnits(
+          expectedOutputAmountSansAppFees,
+          indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
+        )
+      ) * outputTokenPriceUsd;
 
-    const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
-    const totalFeePct = totalFeeUsd / inputAmountUsd;
-    const totalFeeAmount = inputAmount
-      .mul(utils.parseEther(totalFeePct.toFixed(18)))
+    const expectedTotalFeeUsd =
+      inputAmountUsd - expectedOutputAmountSansAppFeesUsd;
+    const expectedTotalFeePct = expectedTotalFeeUsd / inputAmountUsd;
+    const expectedTotalFeeAmount = inputAmount
+      .mul(utils.parseEther(expectedTotalFeePct.toFixed(18)))
+      .div(sdk.utils.fixedPointAdjustment);
+
+    const maxTotalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
+    const maxTotalFeePct = maxTotalFeeUsd / inputAmountUsd;
+    const maxTotalFeeAmount = inputAmount
+      .mul(utils.parseEther(maxTotalFeePct.toFixed(18)))
       .div(sdk.utils.fixedPointAdjustment);
 
     return {
       total: formatFeeComponent({
-        amount: totalFeeAmount,
-        amountUsd: totalFeeUsd,
+        amount: expectedTotalFeeAmount,
+        amountUsd: expectedTotalFeeUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      totalMax: formatFeeComponent({
+        amount: maxTotalFeeAmount,
+        amountUsd: maxTotalFeeUsd,
         token: inputToken,
         inputAmountUsd,
       }),
@@ -1052,6 +1074,7 @@ export async function buildBaseSwapResponseJson(params: {
       bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
       appFeeTokenPriceUsd: params.outputTokenPriceUsd,
       minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
       indirectDestinationRoute: params.indirectDestinationRoute,

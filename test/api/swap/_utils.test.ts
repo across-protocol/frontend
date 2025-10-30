@@ -316,6 +316,12 @@ describe("calculateSwapFees", () => {
       outputToken.decimals
     );
 
+    // Expected output amount sans app fees: 995 USDC
+    const expectedOutputAmountSansAppFees = utils.parseUnits(
+      "996",
+      outputToken.decimals
+    );
+
     // Mock logger
     const logger = {
       debug: jest.fn(),
@@ -336,6 +342,7 @@ describe("calculateSwapFees", () => {
       bridgeQuoteInputTokenPriceUsd,
       appFeeTokenPriceUsd,
       minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
       originChainId: CHAIN_IDs.MAINNET,
       destinationChainId: CHAIN_IDs.OPTIMISM,
       logger,
@@ -343,9 +350,13 @@ describe("calculateSwapFees", () => {
 
     // Verify total fee structure
     expect(result.total?.amount).toBeDefined();
-    expect(result.total?.amountUsd).toBe("5.0"); // 1000 - 995 = 5 USDC
+    expect(result.total?.amountUsd).toBe("4.0"); // 1000 - 996 = 4 USDC
     expect(result.total?.pct).toBeDefined();
     expect(result.total?.token).toEqual(inputToken);
+    expect(result.totalMax?.amount).toBeDefined();
+    expect(result.totalMax?.amountUsd).toBe("5.0"); // 1000 - 995 = 5 USDC
+    expect(result.totalMax?.pct).toBeDefined();
+    expect(result.totalMax?.token).toEqual(inputToken);
 
     // Verify origin gas fee
     // 0.005 ETH * $2000 = $10
