@@ -35,21 +35,33 @@ export default function useAvailableCrosschainRoutes(
       // Build token map by chain from API tokens
       const tokensByChain = (swapTokensQuery.data || []).reduce(
         (acc, token) => {
-          const mapped: LifiToken = {
-            chainId: token.chainId,
-            address: token.address,
-            name: token.name,
-            symbol: token.symbol,
-            decimals: token.decimals,
-            logoURI: token.logoUrl || "",
-            priceUSD: token.priceUsd || "0",
-            coinKey: token.symbol,
-            routeSource: "swap",
-          };
-          if (!acc[token.chainId]) {
-            acc[token.chainId] = [];
-          }
-          acc[token.chainId].push(mapped);
+          // Get the chainId from the addresses record (TokenInfo has addresses object)
+          const chainIds = token.addresses
+            ? Object.keys(token.addresses).map(Number)
+            : [];
+
+          chainIds.forEach((chainId) => {
+            const address = token.addresses?.[chainId];
+            if (!address) return;
+
+            const mapped: LifiToken = {
+              chainId: chainId,
+              address: address,
+              name: token.name,
+              symbol: token.symbol,
+              decimals: token.decimals,
+              logoURI: token.logoURI || "",
+              priceUSD: "0", // TokenInfo doesn't have price, would need to be enriched separately
+              coinKey: token.symbol,
+              routeSource: "swap",
+            };
+
+            if (!acc[chainId]) {
+              acc[chainId] = [];
+            }
+            acc[chainId].push(mapped);
+          });
+
           return acc;
         },
         {} as Record<number, Array<LifiToken>>

@@ -5,7 +5,6 @@ import { BigNumber } from "ethers";
 import { useAmplitude } from "hooks";
 import {
   generateDepositConfirmed,
-  getToken,
   recordTransferUserProperties,
   wait,
   getChainInfo,
@@ -25,6 +24,7 @@ import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useToken } from "hooks/useToken";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -53,6 +53,11 @@ export function useDepositTracking({
   const { account: accountSVM } = useConnectionSVM();
   const account =
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  // Resolve token info for analytics
+  const tokenForAnalytics = useToken(
+    fromBridgePagePayload?.quoteForAnalytics.tokenSymbol || ""
+  );
 
   // Create appropriate strategy for the source chain
   const { depositStrategy, fillStrategy } = useMemo(
@@ -189,16 +194,25 @@ export function useDepositTracking({
     const { quoteForAnalytics, depositArgs, tokenPrice } =
       fromBridgePagePayload;
 
-    recordTransferUserProperties(
-      BigNumber.from(depositArgs.amount),
-      BigNumber.from(tokenPrice),
-      getToken(quoteForAnalytics.tokenSymbol).decimals,
-      quoteForAnalytics.tokenSymbol.toLowerCase(),
-      Number(quoteForAnalytics.fromChainId),
-      Number(quoteForAnalytics.toChainId),
-      quoteForAnalytics.fromChainName
-    );
-  }, [fillQuery.data, depositTxHash, fromBridgePagePayload, fillStrategy]);
+    // Only record if we have token info
+    if (tokenForAnalytics) {
+      recordTransferUserProperties(
+        BigNumber.from(depositArgs.amount),
+        BigNumber.from(tokenPrice),
+        tokenForAnalytics.decimals,
+        quoteForAnalytics.tokenSymbol.toLowerCase(),
+        Number(quoteForAnalytics.fromChainId),
+        Number(quoteForAnalytics.toChainId),
+        quoteForAnalytics.fromChainName
+      );
+    }
+  }, [
+    fillQuery.data,
+    depositTxHash,
+    fromBridgePagePayload,
+    fillStrategy,
+    tokenForAnalytics,
+  ]);
 
   const status: DepositStatus = !depositQuery.data?.depositTimestamp
     ? "depositing"

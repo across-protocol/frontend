@@ -9,6 +9,15 @@ import {
   parseUnits,
 } from "utils";
 import { ERC20__factory } from "utils/typechain";
+import { SwapToken } from "utils/serverless-api/types";
+import { TokenInfo } from "constants/tokens";
+import {
+  CHAIN_IDs,
+  chainsWithUsdt0Enabled,
+  getToken,
+  tokenTable,
+} from "utils/constants";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
 
 export async function getNativeBalance(
   chainId: ChainId,
@@ -146,4 +155,59 @@ export function convertUSDToToken(
     return result18Dec.mul(BigNumber.from(10).pow(-decimalDiff));
   }
   return result18Dec;
+}
+
+/**
+ * Gets token info with chain-specific display modifications (temporary for USDT0)
+ * This is a temporary function that will be removed once all chains migrate to USDT0
+ */
+export const getTokenForChain = (
+  symbol: string,
+  chainId: number
+): TokenInfo => {
+  const token = getToken(symbol);
+
+  // Handle USDT -> USDT0 display for specific chains
+  if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
+    return {
+      ...token,
+      displaySymbol: "USDT0",
+      logoURI: usdt0Logo,
+    };
+  }
+
+  return token;
+};
+
+/**
+ * Attempts to coerce a SwapToken into a TokenInfo type
+ * Checks local token definitions to enrich with mainnetAddress and displaySymbol
+ * @param swapToken - The SwapToken to convert
+ * @returns A TokenInfo object with available properties mapped
+ */
+export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
+  // Try to find the token in our local token definitions
+  const localToken = tokenTable?.[swapToken.symbol.toUpperCase()];
+
+  const baseTokenInfo: TokenInfo = {
+    name: swapToken.name,
+    symbol: swapToken.symbol,
+    decimals: swapToken.decimals,
+    logoURI: swapToken.logoUrl || "",
+    addresses: {
+      [swapToken.chainId]: swapToken.address,
+    },
+  };
+
+  // If we found a local token definition, merge in mainnetAddress and displaySymbol
+  if (localToken) {
+    return {
+      ...baseTokenInfo,
+      mainnetAddress: localToken.mainnetAddress,
+      displaySymbol: localToken.displaySymbol,
+      logoURI: localToken.logoURI || baseTokenInfo.logoURI, // Prefer local logo if available
+    };
+  }
+
+  return baseTokenInfo;
 }

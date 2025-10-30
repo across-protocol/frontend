@@ -3,15 +3,13 @@ import { BigNumber, BigNumberish, ethers } from "ethers";
 import { useCallback } from "react";
 import {
   fixedPointAdjustment,
-  getToken,
   TOKEN_SYMBOLS_MAP,
   isDefined,
   getConfig,
   hubPoolChainId,
-  TokenInfo,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
-import { useSwapTokens } from "./useSwapTokens";
+import { useToken } from "./useToken";
 
 const config = getConfig();
 
@@ -20,41 +18,8 @@ export function useTokenConversion(
   baseCurrency: string,
   historicalDateISO?: string
 ) {
-  const { data: swapTokens } = useSwapTokens();
-
-  // Try to get token from constants first, fallback to swap API data
-  let token: TokenInfo | undefined;
-  try {
-    token = getToken(symbol);
-  } catch (error) {
-    // If token not found in constants, try to find it in swap API data
-    if (swapTokens) {
-      // Search across all chains for a token with matching symbol
-      const foundToken = swapTokens.find(
-        (t) => t.symbol.toUpperCase() === symbol.toUpperCase()
-      );
-      if (foundToken) {
-        // Convert SwapToken to TokenInfo format
-        token = {
-          symbol: foundToken.symbol,
-          name: foundToken.name,
-          decimals: foundToken.decimals,
-          addresses: { [foundToken.chainId]: foundToken.address },
-          mainnetAddress: foundToken.address, // Use the found address as mainnet address
-          logoURI: foundToken.logoUrl || "", // Use logoUrl from SwapToken
-        };
-      }
-
-      // If still not found, re-throw the original error
-      if (!token) {
-        throw error;
-      }
-    } else {
-      // If swapTokens is not available, re-throw the original error
-      console.error(`Unable to resolve token info for symbol ${symbol}`);
-      throw error;
-    }
-  }
+  // Use the useToken hook to resolve token info
+  const token = useToken(symbol);
 
   // If the token is OP, we need to use the address of the token on Optimism
   const l1Token =

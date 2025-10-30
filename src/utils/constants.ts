@@ -314,15 +314,17 @@ export const getToken = (symbol: string): TokenInfo => {
 };
 
 /**
- * Gets token info with chain-specific display modifications (temporary for USDT0)
- * This is a temporary function that will be removed once all chains migrate to USDT0
+ * Apply chain-specific display modifications to a token
+ * Currently handles: USDT -> USDT0 for supported chains
+ *
+ * @param token Token info to transform
+ * @param chainId Chain ID to apply transformations for
+ * @returns Transformed token info, or original if no transformations needed
  */
-export const getTokenForChain = (
-  symbol: string,
+export function applyChainSpecificTokenDisplay(
+  token: TokenInfo,
   chainId: number
-): TokenInfo => {
-  const token = getToken(symbol);
-
+): TokenInfo {
   // Handle USDT -> USDT0 display for specific chains
   if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
     return {
@@ -333,7 +335,7 @@ export const getTokenForChain = (
   }
 
   return token;
-};
+}
 
 export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
   if (!deposit.rewards) {

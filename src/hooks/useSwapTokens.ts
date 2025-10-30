@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import getApiEndpoint from "utils/serverless-api";
+import { swapTokenToTokenInfo } from "utils/token";
+import { TokenInfo } from "constants/tokens";
 
 // Import cached tokens data
 import cachedTokensData from "../data/swap-tokens.json";
@@ -24,12 +26,17 @@ function filterTokensByChainId(
   return tokens.filter((token) => chainIds.includes(token.chainId));
 }
 
+function convertSwapTokensToTokenInfo(tokens: SwapToken[]): TokenInfo[] {
+  return tokens.map((token) => swapTokenToTokenInfo(token));
+}
+
 export function useSwapTokens(query?: SwapTokensQuery) {
-  return useQuery({
+  return useQuery<TokenInfo[]>({
     queryKey: ["swapTokens", query],
     queryFn: async () => {
       const api = getApiEndpoint();
-      return await api.swapTokens(query);
+      const tokens = await api.swapTokens(query);
+      return convertSwapTokensToTokenInfo(tokens);
     },
     // Use cached data as initial data for immediate loading
     initialData: () => {
@@ -39,7 +46,7 @@ export function useSwapTokens(query?: SwapTokensQuery) {
           cache.tokens,
           query?.chainId
         );
-        return filteredTokens;
+        return convertSwapTokensToTokenInfo(filteredTokens);
       } catch (error) {
         console.warn("Failed to load cached swap tokens:", error);
         return undefined;
