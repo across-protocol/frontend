@@ -51,7 +51,7 @@ export default function useAvailableCrosschainRoutes(
               symbol: token.symbol,
               decimals: token.decimals,
               logoURI: token.logoURI || "",
-              priceUSD: "0", // TokenInfo doesn't have price, would need to be enriched separately
+              priceUSD: token.priceUsd || "0", // Use price from SwapToken, fallback to "0" if not available
               coinKey: token.symbol,
               routeSource: "swap",
             };

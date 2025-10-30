@@ -197,6 +197,7 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
     addresses: {
       [swapToken.chainId]: swapToken.address,
     },
+    priceUsd: swapToken.priceUsd,
   };
 
   // If we found a local token definition, merge in mainnetAddress and displaySymbol

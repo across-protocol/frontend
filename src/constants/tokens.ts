@@ -41,6 +41,8 @@ export type TokenInfo = {
   addresses?: Record<number, string>;
   // optional, if this is a stable coin
   isStable?: boolean;
+  // optional price in USD from swap tokens API
+  priceUsd?: string | null;
 };
 export type TokenInfoList = TokenInfo[];
 
