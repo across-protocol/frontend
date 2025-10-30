@@ -241,7 +241,12 @@ const globalStyles = css`
     border: none;
     background: none;
     color: inherit;
+  }
+  button:not(:disabled) {
     cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
   html,
   body {

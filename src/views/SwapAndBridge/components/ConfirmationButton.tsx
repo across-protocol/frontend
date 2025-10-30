@@ -1,5 +1,5 @@
 "use client";
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, useEffect } from "react";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
@@ -81,8 +81,22 @@ const ExpandableLabelSection: React.FC<
   // Render state-specific content
   let content: React.ReactNode = null;
 
+  const defaultState = (
+    <>
+      <ExpandableLabelLeft>
+        <Shield width="16" height="16" />
+        <FastSecureText>Fast & Secure</FastSecureText>
+      </ExpandableLabelLeft>
+      <ExpandableLabelRightAccent>
+        Across V4. More Chains Faster. <Across width="16" height="16" />
+      </ExpandableLabelRightAccent>
+    </>
+  );
+
   // Show validation messages for all non-ready states
-  if (quoteWarningMessage && state === "quoteError") {
+  if (state === "notConnected") {
+    content = defaultState;
+  } else if (quoteWarningMessage && state === "quoteError") {
     // Show quote warning message when ready to confirm but there's a warning
     content = (
       <>
@@ -92,7 +106,7 @@ const ExpandableLabelSection: React.FC<
         </ValidationText>
       </>
     );
-  } else if (state !== "readyToConfirm" && validationErrorFormatted) {
+  } else if (!hasQuote && !!validationErrorFormatted) {
     content = (
       <>
         <ValidationText>
@@ -101,7 +115,7 @@ const ExpandableLabelSection: React.FC<
         </ValidationText>
       </>
     );
-  } else if (state === "readyToConfirm" && hasQuote) {
+  } else if (hasQuote) {
     // Only show quote details when ready to confirm
     content = (
       <>
@@ -127,17 +141,7 @@ const ExpandableLabelSection: React.FC<
     );
   } else {
     // Default state - show Across V4 branding
-    content = (
-      <>
-        <ExpandableLabelLeft>
-          <Shield width="16" height="16" />
-          <FastSecureText>Fast & Secure</FastSecureText>
-        </ExpandableLabelLeft>
-        <ExpandableLabelRightAccent>
-          Across V4. More Chains Faster. <Across width="16" height="16" />
-        </ExpandableLabelRightAccent>
-      </>
-    );
+    content = defaultState;
   }
 
   return (
@@ -146,7 +150,7 @@ const ExpandableLabelSection: React.FC<
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        disabled={state !== "readyToConfirm"}
+        disabled={!hasQuote}
       >
         {content}
       </ExpandableLabelButton>
@@ -272,6 +276,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
+
+  useEffect(() => {
+    if (!swapQuote) {
+      setExpanded(false);
+    }
+  }, [swapQuote]);
 
   // Render unified group driven by state
   const content = (
