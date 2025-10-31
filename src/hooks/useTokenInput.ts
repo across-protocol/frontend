@@ -157,10 +157,9 @@ export function useTokenInput({
           setAmountString(a);
         } catch (e) {
           setAmountString("0");
-        } finally {
-          setUnit("usd");
         }
       }
+      setUnit("usd");
     } else {
       // Convert USD amount to token string for display
       if (amountString && token && convertedAmount) {
@@ -170,10 +169,9 @@ export function useTokenInput({
           setAmountString(a);
         } catch (e) {
           setAmountString("0");
-        } finally {
-          setUnit("token");
         }
       }
+      setUnit("token");
     }
   }, [unit, amountString, token, convertedAmount, setUnit]);
 

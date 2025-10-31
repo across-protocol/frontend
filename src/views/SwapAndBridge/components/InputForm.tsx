@@ -217,14 +217,10 @@ const TokenInput = ({
             error={insufficientInputBalance}
           />
         </TokenAmountInputWrapper>
-        <TokenAmountInputEstimatedUsd>
-          <ValueRow>
-            <UnitToggleButton onClick={toggleUnit}>
-              <ArrowsCross width={16} height={16} />{" "}
-              <span>Value: {formattedConvertedAmount}</span>
-            </UnitToggleButton>
-          </ValueRow>
-        </TokenAmountInputEstimatedUsd>
+        <UnitToggleButton onClick={toggleUnit}>
+          <ArrowsCross width={16} height={16} />{" "}
+          <span>Value: {formattedConvertedAmount}</span>
+        </UnitToggleButton>
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton
@@ -272,10 +268,19 @@ const ValueRow = styled.div`
 `;
 
 const UnitToggleButton = styled.button`
-  color: var(--color-neutrals-light-200);
+  color: var(--base-bright-gray, #e0f3ff);
+  opacity: 0.5;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 
   &:hover:not(:disabled) {
-    color: var(--color-interface-white);
+    opacity: 1;
+  }
+
+  span {
+    color: inherit;
   }
 
   svg {
@@ -325,7 +330,7 @@ const TokenAmountInputWrapper = styled.div<{
     font-size: 48px;
   }
 
-  ${({ showPrefix }) =>
+  ${({ showPrefix, value, error }) =>
     showPrefix &&
     `
     &::before {
@@ -336,6 +341,8 @@ const TokenAmountInputWrapper = styled.div<{
       font-weight: 300;
       line-height: 120%;
       letter-spacing: -1.92px;
+      color: ${error ? COLORS.error : value ? COLORS.aqua : "var(--base-bright-gray, #e0f3ff)"};
+      opacity: ${value ? 1 : 0.5};
     }
   `}
 `;
@@ -351,22 +358,22 @@ const TokenAmountInput = styled.input<{
   font: inherit;
   font-size: inherit;
   color: ${({ value, error }) =>
-    error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
+    error
+      ? COLORS.error
+      : value
+        ? COLORS.aqua
+        : "var(--base-bright-gray, #e0f3ff)"};
   flex-shrink: 0;
 
   &:focus {
     font-size: 48px;
     outline: none;
   }
-`;
 
-const TokenAmountInputEstimatedUsd = styled.div`
-  color: ${COLORS["light-200"]};
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 130%;
-  opacity: 0.5;
+  &::placeholder {
+    color: var(--base-bright-gray, #e0f3ff);
+    opacity: 0.5;
+  }
 `;
 
 const TokenInputWrapper = styled.div`
