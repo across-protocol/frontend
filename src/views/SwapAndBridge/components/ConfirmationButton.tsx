@@ -27,7 +27,7 @@ export type BridgeButtonState =
   | "wrongNetwork"
   | "loadingQuote"
   | "validationError"
-  | "quoteError";
+  | "apiError";
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -37,7 +37,6 @@ interface ConfirmationButtonProps
   swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
-  quoteWarningMessage: string | null;
   // External state props
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
@@ -55,18 +54,8 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
-    quoteWarningMessage?: string | null;
   }>
-> = ({
-  fee,
-  time,
-  expanded,
-  onToggle,
-  state,
-  children,
-  hasQuote,
-  quoteWarningMessage,
-}) => {
+> = ({ fee, time, expanded, onToggle, state, children, hasQuote }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -82,17 +71,8 @@ const ExpandableLabelSection: React.FC<
     </>
   );
 
-  // Show quote warning message for quoteError state
-  if (quoteWarningMessage && state === "quoteError") {
-    content = (
-      <>
-        <ValidationText>
-          <Warning color="inherit" width="20px" height="20px" />
-          <span>{quoteWarningMessage}</span>
-        </ValidationText>
-      </>
-    );
-  } else if (hasQuote) {
+  // Show quote breakdown when quote is available, otherwise show default state
+  if (hasQuote) {
     // Show quote details when available
     content = (
       <>
@@ -187,6 +167,9 @@ const ButtonCore: React.FC<{
       {state === "notConnected" && (
         <Wallet width={16} height={16} color="inherit" />
       )}
+      {(state === "apiError" || state === "validationError") && (
+        <Warning width={16} height={16} color="inherit" />
+      )}
       {label}
     </ButtonContent>
   </StyledButton>
@@ -198,7 +181,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   amount,
   swapQuote,
   onConfirm,
-  quoteWarningMessage,
   buttonState,
   buttonDisabled,
   buttonLoading,
@@ -269,7 +251,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         onToggle={() => setExpanded((e) => !e)}
         visible={true}
         state={state}
-        quoteWarningMessage={quoteWarningMessage}
         hasQuote={!!swapQuote}
       >
         <ExpandedDetails>
@@ -336,7 +317,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     <Container
       dark={
         buttonState === "validationError" ||
-        buttonState === "quoteError" ||
+        buttonState === "apiError" ||
         buttonLoading
       }
     >
@@ -344,16 +325,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     </Container>
   );
 };
-
-const ValidationText = styled.div`
-  color: ${COLORS.white};
-  font-size: 14px;
-  font-weight: 400;
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
 
 // Styled components
 const Container = styled(motion.div)<{ dark: boolean }>`

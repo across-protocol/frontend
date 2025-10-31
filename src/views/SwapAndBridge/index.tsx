@@ -24,7 +24,6 @@ export default function SwapAndBridge() {
     buttonLoading,
     buttonLabel,
     onConfirm,
-    quoteWarningMessage,
     destinationChainEcosystem,
     toAccountManagement,
   } = useSwapAndBridge();
@@ -54,7 +53,6 @@ export default function SwapAndBridge() {
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
           onConfirm={onConfirm}
-          quoteWarningMessage={quoteWarningMessage}
           buttonState={buttonState}
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}

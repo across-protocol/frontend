@@ -242,7 +242,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   const buttonState: BridgeButtonState = useMemo(() => {
     if (approvalAction.isButtonActionLoading) return "submitting";
     if (isQuoteLoading) return "loadingQuote";
-    if (quoteError) return "quoteError";
+    if (quoteError) return "apiError";
     if (validation.error) return "validationError";
     if (!isOriginConnected || !isRecipientSet) return "notConnected";
     return "readyToConfirm";
@@ -259,10 +259,19 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     return buttonState === "loadingQuote" || buttonState === "submitting";
   }, [buttonState]);
 
+  const quoteWarningMessage = useMemo(() => {
+    return getQuoteWarningMessage(quoteError);
+  }, [quoteError]);
+
   const buttonLabel = useMemo(() => {
     // Show validation error in button label if present
     if (validation.errorFormatted && buttonState === "validationError") {
       return validation.errorFormatted;
+    }
+
+    // Show API error in button label if present
+    if (quoteWarningMessage && buttonState === "apiError") {
+      return quoteWarningMessage;
     }
 
     if (buttonState === "notConnected" && walletTypeToConnect) {
@@ -282,6 +291,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isConnectedEVM,
     isConnectedSVM,
     validation.errorFormatted,
+    quoteWarningMessage,
   ]);
 
   console.log("validation.errorFormatted", validation.errorFormatted);
@@ -302,10 +312,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
       amount,
     ]
   );
-
-  const quoteWarningMessage = useMemo(() => {
-    return getQuoteWarningMessage(quoteError);
-  }, [quoteError]);
 
   return {
     inputToken,
@@ -350,7 +356,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 const buttonLabels: Record<BridgeButtonState, string> = {
   notConnected: "Connect Wallet",
   readyToConfirm: "Confirm Swap",
-  quoteError: "Confirm Swap",
+  apiError: "Confirm Swap",
   submitting: "Confirming...",
   wrongNetwork: "Confirm Swap",
   loadingQuote: "Finalizing quote...",
