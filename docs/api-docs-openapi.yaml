@@ -1779,6 +1779,11 @@ paths:
                         type: object
                         description: Bridge step information.
                         properties:
+                          provider:
+                            type: string
+                            description: Name of the bridge provider.
+                            example: 'across'
+                            x-gitbook-description-html: <p>Name of the bridge provider.</p>
                           inputAmount:
                             type: string
                             description: Amount of input token.
@@ -1866,6 +1871,14 @@ paths:
                                   total:
                                     type: string
                                     example: '11'
+                              bridgeFee:
+                                type: object
+                                description: Bridge-specific fee charged by the bridge provider.
+                                properties:
+                                  pct:
+                                    type: string
+                                  total:
+                                    type: string
                             x-gitbook-description-html: <p>Fee details for the bridge transaction.</p>
                         x-gitbook-description-html: <p>Bridge step information.</p>
                       destinationSwap:
@@ -2200,6 +2213,30 @@ paths:
                                 type: integer
                                 example: 10
                         x-gitbook-description-html: <p>Total relayer fees.</p>
+                      bridgeFee:
+                        type: object
+                        description: Bridge-specific fee charged by the bridge provider.
+                        properties:
+                          amount:
+                            type: string
+                          amountUsd:
+                            type: string
+                          pct:
+                            type: string
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                              symbol:
+                                type: string
+                              address:
+                                type: string
+                              name:
+                                type: string
+                              chainId:
+                                type: integer
+                        x-gitbook-description-html: <p>Bridge-specific fee charged by the bridge provider.</p>
                       app:
                         type: object
                         description: Application fees.
@@ -2783,6 +2820,14 @@ paths:
                                   total:
                                     type: string
                                     example: '11'
+                              bridgeFee:
+                                type: object
+                                description: Bridge-specific fee charged by the bridge provider.
+                                properties:
+                                  pct:
+                                    type: string
+                                  total:
+                                    type: string
                             x-gitbook-description-html: <p>Fee details for the bridge transaction.</p>
                         x-gitbook-description-html: <p>Bridge step information.</p>
                       destinationSwap:
@@ -3117,6 +3162,30 @@ paths:
                                 type: integer
                                 example: 10
                         x-gitbook-description-html: <p>Total relayer fees.</p>
+                      bridgeFee:
+                        type: object
+                        description: Bridge-specific fee charged by the bridge provider.
+                        properties:
+                          amount:
+                            type: string
+                          amountUsd:
+                            type: string
+                          pct:
+                            type: string
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                              symbol:
+                                type: string
+                              address:
+                                type: string
+                              name:
+                                type: string
+                              chainId:
+                                type: integer
+                        x-gitbook-description-html: <p>Bridge-specific fee charged by the bridge provider.</p>
                       app:
                         type: object
                         description: Application fees.

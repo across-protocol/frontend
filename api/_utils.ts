@@ -3,15 +3,17 @@ import {
   ERC20__factory,
   HubPool__factory,
 } from "@across-protocol/contracts/dist/typechain";
-import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
 } from "@balancer-labs/sdk";
-import axios, { AxiosError, AxiosRequestHeaders } from "axios";
 import { BigNumber, BigNumberish, ethers, providers, utils } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+import { http } from "viem";
+
 import {
   assert,
   coerce,
@@ -51,7 +53,12 @@ import {
   relayerFeeCapitalCostConfig,
   TOKEN_EQUIVALENCE_REMAPPING,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
+import {
+  LimitsResponse,
+  PoolStateOfUser,
+  PoolStateResult,
+  TokenInfo,
+} from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -86,6 +93,7 @@ import { getSpokePoolAddress, getSpokePool } from "./_spoke-pool";
 import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
+import { Span } from "@opentelemetry/api";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -283,93 +291,6 @@ export const validateChainAndTokenParams = (
   };
 };
 
-export const validateDepositMessage = async (
-  recipient: string,
-  destinationChainId: number,
-  relayer: string,
-  outputTokenAddress: string,
-  amountInput: BigNumber,
-  message: string
-) => {
-  if (!sdk.utils.isMessageEmpty(message)) {
-    if (!ethers.utils.isHexString(message)) {
-      throw new InvalidParamError({
-        message: "Message must be a hex string",
-        param: "message",
-      });
-    }
-    if (message.length % 2 !== 0) {
-      // Our message encoding is a hex string, so we need to check that the length is even.
-      throw new InvalidParamError({
-        message: "Message must be an even hex string",
-        param: "message",
-      });
-    }
-    const isRecipientAContract =
-      getStaticIsContract(destinationChainId, recipient) ||
-      (await isContractCache(destinationChainId, recipient).get());
-    if (!isRecipientAContract) {
-      throw new InvalidParamError({
-        message: "Recipient must be a contract when a message is provided",
-        param: "recipient",
-      });
-    } else {
-      // If we're in this case, it's likely that we're going to have to simulate the execution of
-      // a complex message handling from the specified relayer to the specified recipient by calling
-      // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
-      // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
-      // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
-      // support this deposit.
-      const balanceOfToken = await getCachedTokenBalance(
-        destinationChainId,
-        relayer,
-        outputTokenAddress
-      );
-      if (balanceOfToken.lt(amountInput)) {
-        throw new InvalidParamError({
-          message:
-            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-            ` for help, please reach out to https://discord.across.to`,
-          param: "relayer",
-        });
-      }
-    }
-  }
-};
-
-function getStaticIsContract(chainId: number, address: string) {
-  const addressType = toAddressType(address, chainId);
-  let comparableAddress = address;
-
-  if (sdk.utils.chainIsSvm(chainId)) {
-    try {
-      comparableAddress = addressType.toBase58();
-    } catch (error) {
-      // noop
-    }
-  } else {
-    if (addressType.isEVM()) {
-      comparableAddress = addressType.toEvmAddress();
-    }
-  }
-
-  const deployedAcrossContract = Object.values(
-    (
-      acrossDeployments as {
-        [chainId: number]: {
-          [contractName: string]: {
-            address: string;
-          };
-        };
-      }
-    )[chainId]
-  ).find(
-    (contract) =>
-      contract.address.toLowerCase() === comparableAddress.toLowerCase()
-  );
-  return !!deployedAcrossContract;
-}
-
 export function getChainInfo(chainId: number) {
   const chainInfo = CHAINS[chainId];
   if (!chainInfo) {
@@ -534,6 +455,16 @@ export const getTokenByAddress = (
   | undefined => {
   try {
     const parsedTokenAddress = toAddressType(tokenAddress, chainId ?? 1);
+    // If the address is the zero address, it means the user is looking for the native token info.
+    if (parsedTokenAddress.isZeroAddress()) {
+      if (chainId) {
+        const nativeTokenSymbol = getChainInfo(chainId).nativeToken;
+        return TOKEN_SYMBOLS_MAP[
+          nativeTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+      }
+      return undefined;
+    }
     tokenAddress = parsedTokenAddress.toNative();
 
     const matches =
@@ -550,25 +481,27 @@ export const getTokenByAddress = (
     }
 
     const ambiguousTokens = ["USDC", "USDT"];
-    const isAmbiguous =
-      matches.length > 1 &&
-      matches.some(([symbol]) => ambiguousTokens.includes(symbol));
-    if (isAmbiguous && chainId === HUB_POOL_CHAIN_ID) {
-      const token = matches.find(([symbol]) =>
-        ambiguousTokens.includes(symbol)
+    const wrappedTokens = [
+      "WETH",
+      "WMATIC",
+      "WHYPE",
+      "TATARA-WBTC",
+      "WBNB",
+      "WGHO",
+      "WGRASS",
+      "WSOL",
+      "WXPL",
+    ];
+
+    if (matches.length > 1) {
+      // Prefer wrapped tokens or ambiguous tokens if multiple matches
+      const token = matches.find(
+        ([symbol]) =>
+          wrappedTokens.includes(symbol) || ambiguousTokens.includes(symbol)
       );
       if (token) {
         return token[1];
       }
-    }
-
-    // For some chains, the same address is associated with both the ETH and WETH symbols in the constants file.
-    // See: https://www.npmjs.com/package/@across-protocol/constants
-    // This can cause issues when resolving the token.
-    // To fix this, we will check if there is a WETH match and prioritize it over the ETH match.
-    const wethMatch = matches.find(([symbol]) => symbol === "WETH");
-    if (wethMatch) {
-      return wethMatch[1];
     }
 
     return matches[0][1];
@@ -1052,21 +985,7 @@ export const getCachedLimits = async (
   relayer?: string,
   message?: string,
   allowUnmatchedDecimals?: boolean
-): Promise<{
-  minDeposit: string;
-  maxDeposit: string;
-  maxDepositInstant: string;
-  maxDepositShortDelay: string;
-  recommendedDepositInstant: string;
-  relayerFeeDetails: {
-    relayFeeTotal: string;
-    relayFeePercent: string;
-    capitalFeePercent: string;
-    capitalFeeTotal: string;
-    gasFeePercent: string;
-    gasFeeTotal: string;
-  };
-}> => {
+): Promise<LimitsResponse> => {
   const messageTooLong = isMessageTooLong(message ?? "");
 
   const params = {
@@ -1440,27 +1359,6 @@ export function getRoutesByChainIds(
       originChainId === fromChain && destinationChainId === toChain
   );
 }
-
-/**
- * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
- * native currency will be returned.
- * @param chainId The blockchain Id to query against
- * @param account A valid Web3 wallet address
- * @param token The valid ERC20 token address on the given `chainId`.
- * @returns A promise that resolves to the BigNumber of the balance
- */
-export const getCachedTokenBalance = async (
-  chainId: string | number,
-  account: string,
-  token: string
-): Promise<BigNumber> => {
-  const balance = await latestBalanceCache({
-    chainId: Number(chainId),
-    tokenAddress: token,
-    address: account,
-  }).get();
-  return balance;
-};
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
@@ -2452,6 +2350,12 @@ export async function getGasPriceEstimate(
       );
     }
   }
+  // We use viem for gas price estimation on Linea and need to pass a custom transport
+  // with our configured RPCs if possible.
+  const viemTransport =
+    chainId === CHAIN_IDs.LINEA && getRpcUrlsFromConfigJson(chainId).length > 0
+      ? http(getRpcUrlsFromConfigJson(chainId)[0])
+      : undefined;
   return sdk.gasPriceOracle.getGasPriceEstimate(
     relayerFeeCalculatorQueries.provider as Parameters<
       typeof sdk.gasPriceOracle.getGasPriceEstimate
@@ -2461,6 +2365,7 @@ export async function getGasPriceEstimate(
       unsignedTx: unsignedFillTx,
       baseFeeMultiplier,
       priorityFeeMultiplier,
+      transport: viemTransport,
     }
   );
 }
@@ -2552,6 +2457,7 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       });
     }
 
+    // Resolve token info statically
     const token = getTokenByAddress(address, chainId);
 
     if (token) {
@@ -2722,4 +2628,46 @@ export function computeUtilizationPostRelay(
 
   if (denominator.isZero()) return sdk.utils.fixedPointAdjustment;
   return numerator.mul(sdk.utils.fixedPointAdjustment).div(denominator);
+}
+
+export function getLimitsSpanAttributes(
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+  },
+  inputToken: Token,
+  tokenPriceUsd: number,
+  destinationChainId: number
+) {
+  const attributes: Record<string, number | string> = {};
+
+  for (const [key, value] of Object.entries(limits)) {
+    const valueBn = BigNumber.from(value);
+    const valueUsd = valueBn
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
+      .div(parseUnits("1", inputToken.decimals));
+
+    attributes[`limits.${key}.token`] = parseFloat(
+      ethers.utils.formatUnits(valueBn, inputToken.decimals)
+    );
+    attributes[`limits.${key}.usd`] = parseFloat(
+      ethers.utils.formatUnits(valueUsd, 18)
+    );
+  }
+  attributes["limits.token.address"] = inputToken.address;
+  attributes["limits.token.originChainId"] = inputToken.chainId;
+  attributes["limits.token.symbol"] = inputToken.symbol;
+  attributes["limits.token.destinationChainId"] = destinationChainId;
+  return attributes;
+}
+
+export function setLimitsSpanAttributes(
+  limits: Record<string, number | string>,
+  span: Span
+) {
+  for (const [key, value] of Object.entries(limits)) {
+    span.setAttribute(key, value.toString());
+  }
 }

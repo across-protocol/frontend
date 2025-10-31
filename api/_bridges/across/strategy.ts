@@ -39,6 +39,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
     feesFromApi: Awaited<ReturnType<typeof getSuggestedFees>>,
     bridgeFeesToken: Token
   ) => {
+    const zeroBN = BigNumber.from(0);
     return {
       totalRelay: {
         total: BigNumber.from(feesFromApi.totalRelayFee.total),
@@ -58,6 +59,11 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       lp: {
         total: BigNumber.from(feesFromApi.lpFee.total),
         pct: BigNumber.from(feesFromApi.lpFee.pct),
+        token: bridgeFeesToken,
+      },
+      bridgeFee: {
+        pct: zeroBN,
+        total: zeroBN,
         token: bridgeFeesToken,
       },
     };
@@ -160,6 +166,10 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         params.integratorId
       );
       return tx;
+    },
+
+    isRouteSupported: () => {
+      return true;
     },
   };
 }

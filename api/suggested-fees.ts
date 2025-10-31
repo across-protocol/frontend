@@ -29,6 +29,8 @@ import {
   ConvertDecimals,
   computeUtilizationPostRelay,
   PooledToken,
+  getLimitsSpanAttributes,
+  setLimitsSpanAttributes,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -46,9 +48,10 @@ import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
-import { tracer } from "../instrumentation";
+import { tracer as defaultTracer } from "../instrumentation";
 import { sendResponse } from "./_response_utils";
 import { getDefaultRecipientAddress } from "./_recipient-address";
+import { Tracer } from "@opentelemetry/api";
 
 const { BigNumber } = ethers;
 
@@ -76,10 +79,12 @@ type SuggestedFeesBody = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
   request: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedFeesBody>,
-  response: VercelResponse
+  response: VercelResponse,
+  services?: { tracer: Tracer }
 ) => {
   const logger = getLogger();
   const requestId = getRequestId(request);
+  const tracer = services?.tracer || defaultTracer;
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
@@ -274,6 +279,24 @@ const handler = async (
           allowUnmatchedDecimals
         ),
       ]);
+
+      setLimitsSpanAttributes(
+        getLimitsSpanAttributes(
+          {
+            maxDeposit: limits.maxDeposit,
+            maxDepositInstant: limits.maxDepositInstant,
+            minDeposit: limits.minDeposit,
+            maxDepositShortDelay: limits.recommendedDepositInstant,
+          },
+          {
+            ...inputToken,
+            chainId: Number(computedOriginChainId),
+          },
+          tokenPriceUsd,
+          destinationChainId
+        ),
+        span
+      );
 
       const nextUt = computeUtilizationPostRelay(
         pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.

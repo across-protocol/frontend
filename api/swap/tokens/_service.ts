@@ -15,7 +15,7 @@ export type SwapToken = {
 };
 
 const chains = mainnetChains;
-const chainIds = chains.map((chain) => chain.chainId);
+const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
 
 // List of tokens that are statically defined locally
 const staticTokens = indirectChains.flatMap((chain) =>

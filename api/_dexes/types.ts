@@ -131,6 +131,7 @@ export type CrossSwapQuotes = {
       relayerCapital: FeeComponent;
       relayerGas: FeeComponent;
       lp: FeeComponent;
+      bridgeFee: FeeComponent;
     };
   } & (
     | {
@@ -138,7 +139,7 @@ export type CrossSwapQuotes = {
         suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
       }
     | {
-        provider: "hypercore" | "cctp";
+        provider: "hypercore" | "cctp" | "oft";
       }
   );
   destinationSwapQuote?: SwapQuote;

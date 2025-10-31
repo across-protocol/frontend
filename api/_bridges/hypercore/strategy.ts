@@ -15,7 +15,11 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
 import { encodeTransferCalldata } from "../../_multicall-handler";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
-import { accountExistsOnHyperCore } from "../../_hypercore";
+import {
+  accountExistsOnHyperCore,
+  CORE_WRITER_EVM_ADDRESS,
+  encodeTransferOnCoreCalldata,
+} from "../../_hypercore";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -34,7 +38,6 @@ const capabilities: BridgeCapabilities = {
 
 /**
  * This strategy is only supported for HyperEVM <-> HyperCore transfers of SPOT tokens.
- * @returns
  */
 export function getHyperCoreBridgeStrategy(): BridgeStrategy {
   const isRouteSupported = (params: {
@@ -58,7 +61,25 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       );
       return Boolean(supportedInputToken && supportedOutputToken);
     }
-    // TODO: Add support for HyperCore -> HyperEVM
+
+    // HyperCore -> HyperEVM
+    if (
+      CHAIN_IDs.HYPERCORE === params.inputToken.chainId &&
+      CHAIN_IDs.HYPEREVM === params.outputToken.chainId
+    ) {
+      const supportedInputToken = supportedTokens.find(
+        (token) =>
+          token.addresses[CHAIN_IDs.HYPERCORE].toLowerCase() ===
+          params.inputToken.address.toLowerCase()
+      );
+      const supportedOutputToken = supportedTokens.find(
+        (token) =>
+          token.addresses[CHAIN_IDs.HYPEREVM].toLowerCase() ===
+          params.outputToken.address.toLowerCase()
+      );
+      return Boolean(supportedInputToken && supportedOutputToken);
+    }
+
     return false;
   };
 
@@ -68,9 +89,11 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
   }) => {
     if (!isRouteSupported(params)) {
       throw new InvalidParamError({
-        message: `HyperEVM -> HyperCore: Route ${
+        message: `HyperCore: Route ${
           params.inputToken.symbol
-        } -> ${params.outputToken.symbol} is not supported`,
+        } (${params.inputToken.chainId}) -> ${
+          params.outputToken.symbol
+        } (${params.outputToken.chainId}) is not supported`,
       });
     }
   };
@@ -93,7 +116,6 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       ) {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
       }
-      // TODO: Add support for HyperCore -> HyperEVM
       return [];
     },
 
@@ -169,33 +191,28 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         appFee,
       } = params.quotes;
 
+      const isToHyperCore =
+        crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE;
+
+      const errorMessagePrefix = isToHyperCore
+        ? "HyperEVM -> HyperCore"
+        : "HyperCore -> HyperEVM";
+
       if (appFee?.feeAmount.gt(0)) {
         throw new InvalidParamError({
-          message: "HyperEVM -> HyperCore: App fee is not supported",
+          message: `${errorMessagePrefix}: App fee is not supported`,
         });
       }
 
       if (crossSwap.depositor !== crossSwap.recipient) {
         throw new InvalidParamError({
-          message:
-            "HyperEVM -> HyperCore: Depositor and recipient must be the same",
+          message: `${errorMessagePrefix}: Depositor and recipient must be the same`,
         });
       }
 
       if (originSwapQuote || destinationSwapQuote) {
         throw new InvalidParamError({
-          message:
-            "HyperEVM -> HyperCore: Can not build tx for origin swap or destination swap",
-        });
-      }
-
-      const isToHyperCore =
-        crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE;
-
-      // TODO: Add support for HyperCore -> HyperEVM route
-      if (!isToHyperCore) {
-        throw new InvalidParamError({
-          message: "HyperCore -> HyperEVM: Route not supported yet",
+          message: `${errorMessagePrefix}: Can not build tx for origin swap or destination swap`,
         });
       }
 
@@ -205,28 +222,57 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
 
       if (!depositorExists) {
         throw new InvalidParamError({
-          message: "Depositor is not initialized on HyperCore",
+          message: `${errorMessagePrefix}: Depositor is not initialized on HyperCore`,
         });
       }
 
-      const data = encodeTransferCalldata(
-        crossSwap.outputToken.address, // System address on HyperCore
-        bridgeQuote.inputAmount // in HyperEVM decimals
-      );
+      let data: string;
+      let target: string;
+
+      // HyperEVM -> HyperCore: Transferring tokens from HyperEVM to HyperCore can be
+      // done using an ERC20 transfer with the corresponding system address as the
+      // destination. The tokens are credited to the Core based on the emitted
+      // `Transfer(address from, address to, uint256 value)a from the linked contract.
+      if (isToHyperCore) {
+        data = encodeTransferCalldata(
+          crossSwap.outputToken.address, // System address on HyperCore
+          bridgeQuote.inputAmount // in HyperEVM decimals
+        );
+        target = crossSwap.inputToken.address; // Token address on HyperEVM
+      } else {
+        // HyperCore -> HyperEVM: Transferring tokens from HyperCore to HyperEVM can be
+        // done using a `spotSend` action with the corresponding system address as the
+        // destination. The tokens are credited by a system transaction that calls
+        // `transfer(recipient, amount)` on the linked contract as the system address,
+        // where recipient is the sender of the spotSend action.
+        data = encodeTransferOnCoreCalldata({
+          recipientAddress: crossSwap.inputToken.address, // System address on HyperCore
+          tokenSystemAddress: crossSwap.inputToken.address, // System address on HyperCore
+          amount: bridgeQuote.inputAmount, // in HyperCore decimals
+        });
+        target = CORE_WRITER_EVM_ADDRESS;
+
+        // TODO: It might make sense to check the balance of native gas token on HyperCore
+        // here, as it seems to be required for the action to succeed. We need to figure
+        // out how to do this.
+      }
+
       const txDataWithIntegratorId = params.integratorId
         ? tagIntegratorId(params.integratorId, data)
         : data;
       const txDataWithSwapApiMarker = tagSwapApiMarker(txDataWithIntegratorId);
 
       return {
-        chainId: crossSwap.inputToken.chainId,
+        chainId: CHAIN_IDs.HYPEREVM,
         from: crossSwap.depositor,
-        to: crossSwap.inputToken.address, // HyperEVM address
+        to: target,
         data: txDataWithSwapApiMarker,
         value: BigNumber.from(0),
         ecosystem: "evm",
       };
     },
+
+    isRouteSupported,
   };
 }
 
@@ -249,6 +295,11 @@ function getZeroBridgeFees(inputToken: Token) {
       token: inputToken,
     },
     lp: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    bridgeFee: {
       pct: zeroBN,
       total: zeroBN,
       token: inputToken,
