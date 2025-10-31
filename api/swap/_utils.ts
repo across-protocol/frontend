@@ -960,6 +960,13 @@ function usdFeesToAmountAndPct(params: {
   inputAmountUsd: number;
   inputAmount: BigNumber;
 }) {
+  if (params.inputAmountUsd <= 0) {
+    return {
+      amount: BigNumber.from(0),
+      pct: BigNumber.from(0),
+    };
+  }
+
   const usdFeesPct = params.feesUsd / params.inputAmountUsd;
   const usdFeesAmount = params.inputAmount
     .mul(utils.parseEther(usdFeesPct.toFixed(18)))
