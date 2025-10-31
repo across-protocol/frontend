@@ -362,7 +362,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     </>
   );
 
-  return <Container disabled={isButtonDisabled}>{content}</Container>;
+  return (
+    <Container dark={!!validationErrorFormatted || buttonLoading}>
+      {content}
+    </Container>
+  );
 };
 
 const ValidationText = styled.div`
@@ -376,9 +380,9 @@ const ValidationText = styled.div`
 `;
 
 // Styled components
-const Container = styled(motion.div)<{ disabled: boolean }>`
-  background: ${({ disabled }) =>
-    disabled ? COLORS["grey-400-5"] : "rgba(108, 249, 216, 0.1)"};
+const Container = styled(motion.div)<{ dark: boolean }>`
+  background: ${({ dark }) =>
+    dark ? COLORS["grey-400-5"] : "rgba(108, 249, 216, 0.1)"};
   border-radius: 24px;
   display: flex;
   flex-direction: column;
