@@ -1,4 +1,4 @@
-import { COLORS, formatUSD } from "utils";
+import { COLORS, formatUSD, withOpacity } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import { BalanceSelector } from "./BalanceSelector";
@@ -268,15 +268,16 @@ const ValueRow = styled.div`
 `;
 
 const UnitToggleButton = styled.button`
-  color: var(--base-bright-gray, #e0f3ff);
-  opacity: 0.5;
+  color: ${withOpacity("#e0f3ff", 0.5)};
 
   display: inline-flex;
   align-items: center;
   gap: 4px;
 
   &:hover:not(:disabled) {
-    opacity: 1;
+    svg {
+      color: #e0f3ff;
+    }
   }
 
   span {
