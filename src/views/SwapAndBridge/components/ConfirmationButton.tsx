@@ -167,7 +167,7 @@ const ButtonCore: React.FC<{
       {state === "notConnected" && (
         <Wallet width={16} height={16} color="inherit" />
       )}
-      {(state === "apiError" || state === "validationError") && (
+      {state === "apiError" && (
         <Warning width={16} height={16} color="inherit" />
       )}
       {label}
