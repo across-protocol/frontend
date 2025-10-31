@@ -491,4 +491,98 @@ describe("calculateSwapFees", () => {
     expect(result.maxSwapImpact?.pct).toBeDefined();
     expect(result.maxSwapImpact?.token).toEqual(inputToken);
   });
+
+  test.only("should calculate fees for swap route where output > input", async () => {
+    const bridgeQuote = {
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount: utils.parseUnits("1005", outputToken.decimals),
+      minOutputAmount: utils.parseUnits("1004", outputToken.decimals),
+      estimatedFillTimeSec: 60,
+      provider: "across" as const,
+      suggestedFees: {} as any,
+      fees: {
+        relayerCapital: {
+          total: utils.parseUnits("1", inputToken.decimals),
+          pct: utils.parseEther("0.001"),
+          token: inputToken,
+        },
+        relayerGas: {
+          total: utils.parseUnits("2", inputToken.decimals),
+          pct: utils.parseEther("0.002"),
+          token: inputToken,
+        },
+        lp: {
+          total: utils.parseUnits("1.5", inputToken.decimals),
+          pct: utils.parseEther("0.0015"),
+          token: inputToken,
+        },
+        totalRelay: {
+          total: utils.parseUnits("4.5", inputToken.decimals),
+          pct: utils.parseEther("0.0045"),
+          token: inputToken,
+        },
+        bridgeFee: {
+          total: utils.parseUnits("0", inputToken.decimals),
+          pct: utils.parseEther("0"),
+          token: inputToken,
+        },
+      },
+    };
+
+    // Min output amount sans app fees: 1004 USDC, positive price impact + slippage
+    const minOutputAmountSansAppFees = utils.parseUnits(
+      "1004",
+      outputToken.decimals
+    );
+
+    // Expected output amount sans app fees: 1005 USDC, i.e. no-slippage
+    const expectedOutputAmountSansAppFees = utils.parseUnits(
+      "1005",
+      outputToken.decimals
+    );
+
+    const result = await calculateSwapFees({
+      inputAmount,
+      bridgeQuote,
+      originTxGas,
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
+      appFeeTokenPriceUsd,
+      minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
+      originChainId: CHAIN_IDs.MAINNET,
+      destinationChainId: CHAIN_IDs.OPTIMISM,
+      logger,
+    });
+
+    // Verify expected total fee structure (without slippage)
+    expect(result.total?.amount).toBeDefined();
+    expect(result.total?.amountUsd).toBe("-5.0");
+    expect(result.total?.pct).toBeDefined();
+    expect(result.total?.token).toEqual(inputToken);
+
+    // Verify max total fee structure (with slippage)
+    expect(result.totalMax?.amount).toBeDefined();
+    expect(result.totalMax?.amountUsd).toBe("-4.0");
+    expect(result.totalMax?.pct).toBeDefined();
+    expect(result.totalMax?.token).toEqual(inputToken);
+
+    // Verify swap impact
+    expect(result.swapImpact?.amount).toBeDefined();
+    expect(result.swapImpact?.amountUsd).toBe("-9.5"); // 4.5 (relayer fees) + 5 (price impact)
+    expect(result.swapImpact?.pct).toBeDefined();
+    expect(result.swapImpact?.token).toEqual(inputToken);
+
+    // Verify max swap impact
+    expect(result.maxSwapImpact?.amount).toBeDefined();
+    expect(result.maxSwapImpact?.amountUsd).toBe("-8.5"); // 4.5 (relayer fees) + 4 (price impact)
+    expect(result.maxSwapImpact?.pct).toBeDefined();
+    expect(result.maxSwapImpact?.token).toEqual(inputToken);
+  });
 });
