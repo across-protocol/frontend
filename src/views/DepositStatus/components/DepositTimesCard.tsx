@@ -15,8 +15,6 @@ import {
   getBridgeUrlWithQueryParams,
   isDefined,
   formatUSD,
-  getToken,
-  getTokenForChain,
 } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
@@ -32,6 +30,7 @@ import {
   getTokensForFeesCalc,
 } from "views/Bridge/utils";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import { useToken } from "hooks/useToken";
 import EstimatedTable from "views/Bridge/components/EstimatedTable";
 
 type Props = {
@@ -73,19 +72,32 @@ export function DepositTimesCard({
   const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
-  const { inputToken, bridgeToken } = getTokensForFeesCalc({
-    inputToken: getToken(inputTokenSymbol),
-    outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
-    isUniversalSwap: isUniversalSwap,
-    universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-  });
+  const inputTokenFromHook = useToken(inputTokenSymbol);
+  const outputTokenFromHook = useToken(outputTokenSymbol || inputTokenSymbol);
+  const outputTokenForChain = useToken(
+    outputTokenSymbol || inputTokenSymbol,
+    toChainId
+  );
+
+  const { inputToken, bridgeToken } =
+    inputTokenFromHook && outputTokenFromHook
+      ? getTokensForFeesCalc({
+          inputToken: inputTokenFromHook,
+          outputToken: outputTokenFromHook,
+          isUniversalSwap: isUniversalSwap,
+          universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+          fromChainId: fromChainId,
+          toChainId: toChainId,
+        })
+      : {
+          inputToken: inputTokenFromHook!,
+          bridgeToken: inputTokenFromHook!,
+        };
 
   const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
-    useTokenConversion(inputToken.symbol, "usd");
+    useTokenConversion(inputToken?.symbol || inputTokenSymbol, "usd");
   const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
-    useTokenConversion(bridgeToken.symbol, "usd");
+    useTokenConversion(bridgeToken?.symbol || inputTokenSymbol, "usd");
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
@@ -184,16 +196,17 @@ export function DepositTimesCard({
         )}
       </Row>
       {(netFee || amountSentBaseCurrency) && <Divider />}
-      {isDefined(outputAmount) &&
-        isDefined(outputTokenSymbol) &&
+
+      {isDefined(fromBridgePagePayload?.depositArgs?.initialAmount) &&
+        inputToken &&
         isDefined(amountSentBaseCurrency) && (
           <Row>
             <Text color="grey-400">Amount sent</Text>
             <TokenWrapper>
               <TokenFee
-                token={getTokenForChain(outputTokenSymbol, toChainId)}
-                amount={BigNumber.from(outputAmount)}
-                tokenChainId={toChainId}
+                token={inputToken}
+                amount={fromBridgePagePayload.depositArgs.initialAmount}
+                tokenChainId={fromChainId}
                 tokenFirst
                 showTokenLinkOnHover
                 textColor="light-100"
@@ -204,14 +217,33 @@ export function DepositTimesCard({
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputTokenSymbol) && (
+      {isDefined(outputAmount) &&
+        isDefined(outputTokenSymbol) &&
+        outputTokenForChain &&
+        isDefined(outputAmountUsd) && (
+          <Row>
+            <Text color="grey-400">Amount received</Text>
+            <TokenWrapper>
+              <TokenFee
+                token={outputTokenForChain}
+                amount={BigNumber.from(outputAmount)}
+                tokenChainId={toChainId}
+                tokenFirst
+                showTokenLinkOnHover
+                textColor="light-100"
+              />
+              <Text color="grey-400">(${formatUSD(outputAmountUsd)})</Text>
+            </TokenWrapper>
+          </Row>
+        )}
+      {isDefined(outputTokenSymbol) && outputTokenForChain && (
         <EstimatedTable
           {...estimatedRewards}
           isQuoteLoading={false}
           fromChainId={fromChainId}
           toChainId={toChainId}
           inputToken={inputToken}
-          outputToken={getTokenForChain(outputTokenSymbol, toChainId)}
+          outputToken={outputTokenForChain}
           isSwap={isSwap}
           isUniversalSwap={isUniversalSwap}
           swapQuote={fromBridgePagePayload?.swapQuote}

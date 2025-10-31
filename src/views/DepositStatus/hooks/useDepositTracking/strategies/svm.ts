@@ -196,11 +196,11 @@ export class SVMStrategy implements IChainStrategy {
       fromBridgePagePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbol(
+    const inputToken = config.getTokenInfoBySymbolSafe(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol
     );
-    const outputToken = config.getTokenInfoBySymbol(
+    const outputToken = config.getTokenInfoBySymbolSafe(
       selectedRoute.toChain,
       selectedRoute.toTokenSymbol
     );
@@ -266,11 +266,11 @@ export class SVMStrategy implements IChainStrategy {
     const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       fillInfo.depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbol(
+    const inputToken = config.getTokenInfoBySymbolSafe(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol
     );
-    const outputToken = config.getTokenInfoBySymbol(
+    const outputToken = config.getTokenInfoBySymbolSafe(
       selectedRoute.toChain,
       selectedRoute.toTokenSymbol
     );

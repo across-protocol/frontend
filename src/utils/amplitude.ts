@@ -70,8 +70,8 @@ export function getPageValue() {
   const path = getSanitizedPathname();
 
   // Check if the path is a deposit status page. We know that the
-  // deposit status page will always have a path that starts with /bridge/0x{tx hash}
-  if (/\/bridge\/0x[0-9a-fA-F]+/.test(path)) {
+  // deposit status page will always have a path that starts with /bridge-and-swap/0x{tx hash}
+  if (/\/bridge-and-swap\/0x[0-9a-fA-F]+/.test(path)) {
     return "depositStatusPage";
   }
 

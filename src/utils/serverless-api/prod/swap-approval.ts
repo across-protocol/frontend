@@ -30,6 +30,7 @@ export type SwapApprovalApiResponse = {
     };
   };
   approvalTxns: {
+    chainId: number;
     to: string;
     data: string;
   }[];
@@ -41,6 +42,10 @@ export type SwapApprovalApiResponse = {
       outputAmount: string;
       minOutputAmount: string;
       maxInputAmount: string;
+      swapProvider: {
+        name: string;
+        sources: string[];
+      };
     };
     bridge: {
       inputAmount: string;
@@ -73,6 +78,10 @@ export type SwapApprovalApiResponse = {
       maxInputAmount: string;
       outputAmount: string;
       minOutputAmount: string;
+      swapProvider: {
+        name: string;
+        sources: string[];
+      };
     };
   };
   refundToken: SwapApiToken;
@@ -85,10 +94,105 @@ export type SwapApprovalApiResponse = {
     chainId: number;
     to: string;
     data: string;
-    value: string;
+    value?: string;
     gas?: string;
     maxFeePerGas?: string;
     maxPriorityFeePerGas?: string;
+  };
+  fees: {
+    total: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    originGas: {
+      amount: string;
+      amountUsd: string;
+      token: {
+        chainId: number;
+        address: string;
+        decimals: number;
+        symbol: string;
+      };
+    };
+    destinationGas: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        chainId: number;
+        address: string;
+        decimals: number;
+        symbol: string;
+      };
+    };
+    relayerCapital: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    lpFee: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    relayerTotal: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    app: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
+    swap?: {
+      amount: string;
+      amountUsd: string;
+      pct: string;
+      token: {
+        decimals: number;
+        symbol: string;
+        address: string;
+        name: string;
+        chainId: number;
+      };
+    };
   };
 };
 
@@ -146,6 +250,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
             maxInputAmount: BigNumber.from(
               result.steps.originSwap.maxInputAmount
             ),
+            swapProvider: result.steps.originSwap.swapProvider,
           }
         : undefined,
       bridge: {
@@ -190,6 +295,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
             minOutputAmount: BigNumber.from(
               result.steps.destinationSwap.minOutputAmount
             ),
+            swapProvider: result.steps.destinationSwap.swapProvider,
           }
         : undefined,
     },
@@ -203,7 +309,9 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
       chainId: result.swapTx.chainId,
       to: result.swapTx.to,
       data: result.swapTx.data,
-      value: BigNumber.from(result.swapTx.value || "0"),
+      value: result.swapTx.value
+        ? BigNumber.from(result.swapTx.value)
+        : undefined,
       gas: result.swapTx.gas ? BigNumber.from(result.swapTx.gas) : undefined,
       maxFeePerGas: result.swapTx.maxFeePerGas
         ? BigNumber.from(result.swapTx.maxFeePerGas)
@@ -212,5 +320,60 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         ? BigNumber.from(result.swapTx.maxPriorityFeePerGas)
         : undefined,
     },
+    fees: {
+      total: {
+        amount: BigNumber.from(result.fees.total.amount),
+        amountUsd: result.fees.total.amountUsd,
+        pct: result.fees.total.pct,
+        token: result.fees.total.token,
+      },
+      originGas: {
+        amount: BigNumber.from(result.fees.originGas.amount),
+        amountUsd: result.fees.originGas.amountUsd,
+        token: result.fees.originGas.token,
+      },
+      destinationGas: {
+        amount: BigNumber.from(result.fees.destinationGas.amount),
+        amountUsd: result.fees.destinationGas.amountUsd,
+        pct: result.fees.destinationGas.pct,
+        token: result.fees.destinationGas.token,
+      },
+      relayerCapital: {
+        amount: BigNumber.from(result.fees.relayerCapital.amount),
+        amountUsd: result.fees.relayerCapital.amountUsd,
+        pct: result.fees.relayerCapital.pct,
+        token: result.fees.relayerCapital.token,
+      },
+      lpFee: {
+        amount: BigNumber.from(result.fees.lpFee.amount),
+        amountUsd: result.fees.lpFee.amountUsd,
+        pct: result.fees.lpFee.pct,
+        token: result.fees.lpFee.token,
+      },
+      relayerTotal: {
+        amount: BigNumber.from(result.fees.relayerTotal.amount),
+        amountUsd: result.fees.relayerTotal.amountUsd,
+        pct: result.fees.relayerTotal.pct,
+        token: result.fees.relayerTotal.token,
+      },
+      app: {
+        amount: BigNumber.from(result.fees.app.amount),
+        amountUsd: result.fees.app.amountUsd,
+        pct: result.fees.app.pct,
+        token: result.fees.app.token,
+      },
+      swap: result.fees.swap
+        ? {
+            amount: BigNumber.from(result.fees.swap.amount),
+            amountUsd: result.fees.swap.amountUsd,
+            pct: result.fees.swap.pct,
+            token: result.fees.swap.token,
+          }
+        : undefined,
+    },
   };
 }
+
+export type SwapApprovalApiCallReturnType = Awaited<
+  ReturnType<typeof swapApprovalApiCall>
+>;

@@ -3,13 +3,13 @@ import { BigNumber, BigNumberish, ethers } from "ethers";
 import { useCallback } from "react";
 import {
   fixedPointAdjustment,
-  getToken,
   TOKEN_SYMBOLS_MAP,
   isDefined,
   getConfig,
   hubPoolChainId,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
+import { useToken } from "./useToken";
 
 const config = getConfig();
 
@@ -18,16 +18,17 @@ export function useTokenConversion(
   baseCurrency: string,
   historicalDateISO?: string
 ) {
-  const token = getToken(symbol);
+  // Use the useToken hook to resolve token info
+  const token = useToken(symbol);
 
   // If the token is OP, we need to use the address of the token on Optimism
   const l1Token =
-    token.symbol === "OP"
+    token?.symbol === "OP"
       ? TOKEN_SYMBOLS_MAP["OP"].addresses[10]
-      : token.mainnetAddress!;
+      : token?.mainnetAddress;
 
   const query = useCoingeckoPrice(
-    l1Token,
+    l1Token || "",
     baseCurrency,
     historicalDateISO,
     isDefined(l1Token)
@@ -38,7 +39,9 @@ export function useTokenConversion(
       const price = query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
@@ -55,7 +58,9 @@ export function useTokenConversion(
       const price = query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;

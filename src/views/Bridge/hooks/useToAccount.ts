@@ -10,6 +10,8 @@ export type ToAccount = {
   is7702Delegate: boolean;
 };
 
+export type ToAccountManagement = ReturnType<typeof useToAccount>;
+
 export function useToAccount(toChainId?: number) {
   const [customToAddressEVM, setCustomToAddressEVM] = useState<
     string | undefined
@@ -110,7 +112,19 @@ export function useToAccount(toChainId?: number) {
     setCustomToAddressSVM(address);
   }, []);
 
+  const defaultRecipientAccount = useMemo(() => {
+    return isDestinationSVM
+      ? connectedAccountSVM?.toBase58()
+      : connectedAccountEVM;
+  }, [connectedAccountEVM, connectedAccountSVM, isDestinationSVM]);
+
+  const currentRecipientAccount = useMemo(() => {
+    return isDestinationSVM ? toAccountSVM?.address : toAccountEVM?.address;
+  }, [isDestinationSVM, toAccountEVM?.address, toAccountSVM?.address]);
+
   return {
+    currentRecipientAccount,
+    defaultRecipientAccount,
     toAccountEVM,
     toAccountSVM,
     handleChangeToAddressEVM,

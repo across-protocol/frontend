@@ -93,5 +93,89 @@ export async function swapApprovalApiCall(
       maxFeePerGas: BigNumber.from("0"),
       maxPriorityFeePerGas: BigNumber.from("0"),
     },
+    fees: {
+      total: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
+          address: params.outputToken,
+          name: outputToken?.symbol ?? "UNKNOWN",
+          chainId: params.destinationChainId,
+        },
+      },
+      originGas: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        token: {
+          chainId: params.originChainId,
+          address: "0x0000000000000000000000000000000000000000",
+          decimals: 18,
+          symbol: "ETH",
+        },
+      },
+      destinationGas: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          chainId: params.destinationChainId,
+          address: "0x0000000000000000000000000000000000000000",
+          decimals: 18,
+          symbol: "ETH",
+        },
+      },
+      relayerCapital: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
+          address: params.outputToken,
+          name: outputToken?.symbol ?? "UNKNOWN",
+          chainId: params.destinationChainId,
+        },
+      },
+      lpFee: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
+          address: params.outputToken,
+          name: outputToken?.symbol ?? "UNKNOWN",
+          chainId: params.destinationChainId,
+        },
+      },
+      relayerTotal: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
+          address: params.outputToken,
+          name: outputToken?.symbol ?? "UNKNOWN",
+          chainId: params.destinationChainId,
+        },
+      },
+      app: {
+        amount: BigNumber.from("0"),
+        amountUsd: "0",
+        pct: "0",
+        token: {
+          decimals: outputToken?.decimals ?? 18,
+          symbol: outputToken?.symbol ?? "UNKNOWN",
+          address: params.outputToken,
+          name: outputToken?.symbol ?? "UNKNOWN",
+          chainId: params.destinationChainId,
+        },
+      },
+      swap: undefined,
+    },
   };
 }
