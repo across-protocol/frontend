@@ -636,6 +636,7 @@ export async function calculateSwapFees(params: {
   bridgeQuoteInputTokenPriceUsd: number;
   appFeeTokenPriceUsd: number;
   minOutputAmountSansAppFees: BigNumber;
+  expectedOutputAmountSansAppFees: BigNumber;
   originChainId: number;
   destinationChainId: number;
   indirectDestinationRoute?: IndirectDestinationRoute;
@@ -656,6 +657,7 @@ export async function calculateSwapFees(params: {
     bridgeQuoteInputTokenPriceUsd,
     appFeeTokenPriceUsd,
     minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
     originChainId,
     destinationChainId,
     indirectDestinationRoute,
@@ -805,17 +807,67 @@ export async function calculateSwapFees(params: {
           indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
         )
       ) * outputTokenPriceUsd;
+    const expectedOutputAmountSansAppFeesUsd =
+      parseFloat(
+        utils.formatUnits(
+          expectedOutputAmountSansAppFees,
+          indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
+        )
+      ) * outputTokenPriceUsd;
 
-    const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
-    const totalFeePct = totalFeeUsd / inputAmountUsd;
-    const totalFeeAmount = inputAmount
-      .mul(utils.parseEther(totalFeePct.toFixed(18)))
-      .div(sdk.utils.fixedPointAdjustment);
+    const expectedTotalFeeUsd =
+      inputAmountUsd - expectedOutputAmountSansAppFeesUsd;
+    const { amount: expectedTotalFeeAmount } = usdFeesToAmountAndPct({
+      feesUsd: expectedTotalFeeUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
+
+    const maxTotalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
+    const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
+      feesUsd: maxTotalFeeUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
+
+    const swapImpactUsd =
+      expectedTotalFeeUsd - relayerTotalUsd - bridgeFeeUsd - appFeeUsd;
+    const { amount: swapImpactAmount } = usdFeesToAmountAndPct({
+      feesUsd: swapImpactUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
+
+    const maxSwapImpactUsd =
+      maxTotalFeeUsd - relayerTotalUsd - bridgeFeeUsd - appFeeUsd;
+    const { amount: maxSwapImpactAmount } = usdFeesToAmountAndPct({
+      feesUsd: maxSwapImpactUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
 
     return {
       total: formatFeeComponent({
-        amount: totalFeeAmount,
-        amountUsd: totalFeeUsd,
+        amount: expectedTotalFeeAmount,
+        amountUsd: expectedTotalFeeUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      totalMax: formatFeeComponent({
+        amount: maxTotalFeeAmount,
+        amountUsd: maxTotalFeeUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      swapImpact: formatFeeComponent({
+        amount: swapImpactAmount,
+        amountUsd: swapImpactUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      maxSwapImpact: formatFeeComponent({
+        amount: maxSwapImpactAmount,
+        amountUsd: maxSwapImpactUsd,
         token: inputToken,
         inputAmountUsd,
       }),
@@ -901,6 +953,28 @@ function safeUsdToTokenAmount(
     tokenAmount.toFixed(Math.min(decimals, 18)),
     decimals
   );
+}
+
+function usdFeesToAmountAndPct(params: {
+  feesUsd: number;
+  inputAmountUsd: number;
+  inputAmount: BigNumber;
+}) {
+  if (params.inputAmountUsd <= 0) {
+    return {
+      amount: BigNumber.from(0),
+      pct: BigNumber.from(0),
+    };
+  }
+
+  const usdFeesPct = params.feesUsd / params.inputAmountUsd;
+  const usdFeesAmount = params.inputAmount
+    .mul(utils.parseEther(usdFeesPct.toFixed(18)))
+    .div(sdk.utils.fixedPointAdjustment);
+  return {
+    amount: usdFeesAmount,
+    pct: usdFeesPct,
+  };
 }
 
 export async function buildBaseSwapResponseJson(params: {
@@ -1052,6 +1126,7 @@ export async function buildBaseSwapResponseJson(params: {
       bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
       appFeeTokenPriceUsd: params.outputTokenPriceUsd,
       minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
       indirectDestinationRoute: params.indirectDestinationRoute,
