@@ -21,6 +21,7 @@ import {
   TokenInfo,
   isNonEthChain,
   isStablecoin,
+  ChainId,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -455,8 +456,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (selectedToChain === ChainId.HYPERCORE &&
+            route.externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   const swapTokens = swapRoutes
@@ -471,8 +474,10 @@ export function getAvailableInputTokens(
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
-        route.toChain === selectedToChain &&
-        route.externalProjectId === externalProjectId
+        ((route.toChain === selectedToChain &&
+          route.externalProjectId === externalProjectId) ||
+          (route.toChain === ChainId.HYPERCORE &&
+            externalProjectId === "hyperliquid"))
     )
     .map((route) => getToken(route.fromTokenSymbol));
   return [...routeTokens, ...swapTokens, ...universalSwapTokens].filter(
@@ -530,21 +535,22 @@ export const ChainType = {
 export type ChainTypeT = (typeof ChainType)[keyof typeof ChainType];
 
 export function getSupportedChains(chainType: ChainTypeT = ChainType.ALL) {
+  const universalSwapRoutes = config.getUniversalSwapRoutes();
+  const bridgeRoutes = config.getRoutes();
+  const allRoutes = bridgeRoutes.concat(universalSwapRoutes);
+
   let chainIds: number[] = [];
 
   switch (chainType) {
     case ChainType.FROM:
-      chainIds = enabledRoutes.map((route) => route.fromChain);
+      chainIds = allRoutes.map((route) => route.fromChain);
       break;
     case ChainType.TO:
-      chainIds = enabledRoutes.map((route) => route.toChain);
+      chainIds = allRoutes.map((route) => route.toChain);
       break;
     case ChainType.ALL:
     default:
-      chainIds = enabledRoutes.flatMap((route) => [
-        route.fromChain,
-        route.toChain,
-      ]);
+      chainIds = allRoutes.flatMap((route) => [route.fromChain, route.toChain]);
       break;
   }
 
@@ -679,7 +685,8 @@ export function calcFeesForEstimatedTable(params: {
   swapQuote?: SwapQuoteApiResponse;
   universalSwapQuote?: UniversalSwapQuote;
   convertInputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
-  convertBridgeTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenInToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenOutToUsd: (amount: BigNumber) => BigNumber | undefined;
   convertOutputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
 }) {
   if (
@@ -714,16 +721,20 @@ export function calcFeesForEstimatedTable(params: {
 
   const parsedAmountUsd =
     params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
-  const gasFeeUsd = params.convertBridgeTokenToUsd(gasFee) || BigNumber.from(0);
+  const gasFeeUsd =
+    params.convertBridgeTokenInToUsd(gasFee) || BigNumber.from(0);
   const bridgeFeeUsd =
-    params.convertBridgeTokenToUsd(bridgeFee) || BigNumber.from(0);
+    params.convertBridgeTokenInToUsd(bridgeFee) || BigNumber.from(0);
   const capitalFeeUsd =
-    params.convertBridgeTokenToUsd(capitalFee) || BigNumber.from(0);
-  const lpFeeUsd = params.convertBridgeTokenToUsd(lpFee) || BigNumber.from(0);
+    params.convertBridgeTokenInToUsd(capitalFee) || BigNumber.from(0);
+  const lpFeeUsd = params.convertBridgeTokenInToUsd(lpFee) || BigNumber.from(0);
   const totalRelayFeeUsd = gasFeeUsd.add(bridgeFeeUsd);
   const swapFeeUsd =
     params.isSwap && params.swapQuote
-      ? calcSwapFeeUsd(params)
+      ? calcSwapFeeUsd({
+          ...params,
+          convertBridgeTokenToUsd: params.convertBridgeTokenInToUsd,
+        })
       : params.isUniversalSwap && params.universalSwapQuote
         ? calcUniversalSwapFeeUsd(params)
         : BigNumber.from(0);
@@ -767,28 +778,28 @@ function calcUniversalSwapFeeUsd(params: {
   parsedAmount?: BigNumberish;
   universalSwapQuote?: UniversalSwapQuote;
   convertInputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
-  convertBridgeTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenInToUsd: (amount: BigNumber) => BigNumber | undefined;
+  convertBridgeTokenOutToUsd: (amount: BigNumber) => BigNumber | undefined;
   convertOutputTokenToUsd: (amount: BigNumber) => BigNumber | undefined;
 }) {
   if (!params.universalSwapQuote || !params.parsedAmount) {
     return BigNumber.from(0);
   }
   const parsedAmount = BigNumber.from(params.parsedAmount || 0);
-  const { steps } = params.universalSwapQuote;
+  const { steps, expectedOutputAmount } = params.universalSwapQuote;
   const parsedInputAmountUsd =
     params.convertInputTokenToUsd(parsedAmount) || BigNumber.from(0);
   const originSwapFeeUsd = parsedInputAmountUsd.sub(
-    params.convertBridgeTokenToUsd(steps.bridge.inputAmount) ||
+    params.convertBridgeTokenInToUsd(steps.bridge.inputAmount) ||
       BigNumber.from(0)
   );
   const destinationSwapFeeUsd = (
-    params.convertBridgeTokenToUsd(steps.bridge.outputAmount) ||
+    params.convertBridgeTokenOutToUsd(steps.bridge.outputAmount) ||
     BigNumber.from(0)
   ).sub(
-    params.convertOutputTokenToUsd(
-      steps.destinationSwap?.outputAmount || steps.bridge.outputAmount
-    ) || BigNumber.from(0)
+    params.convertOutputTokenToUsd(expectedOutputAmount) || BigNumber.from(0)
   );
+
   return originSwapFeeUsd.add(destinationSwapFeeUsd);
 }
 
@@ -825,24 +836,36 @@ export function getTokensForFeesCalc(params: {
   toChainId: number;
 }) {
   const inputToken = params.swapToken || params.inputToken;
-  const bridgeToken =
+  const bridgeTokenIn =
     params.isUniversalSwap && params.universalSwapQuote
       ? config.getTokenInfoBySymbol(
           params.fromChainId,
           params.universalSwapQuote.steps.bridge.tokenIn.symbol
         )
       : inputToken;
-  const outputToken =
+
+  const _outputToken =
+    params.isUniversalSwap && params.universalSwapQuote
+      ? params.universalSwapQuote.outputToken
+      : {
+          ...params.outputToken,
+          chainId: params.toChainId,
+        };
+  const outputToken = config.getTokenInfoBySymbol(
+    _outputToken.chainId,
+    _outputToken.symbol
+  );
+  const bridgeTokenOut =
     params.isUniversalSwap && params.universalSwapQuote
       ? config.getTokenInfoBySymbol(
           params.toChainId,
-          params.universalSwapQuote.steps.destinationSwap?.tokenOut.symbol ||
-            params.universalSwapQuote.steps.bridge.tokenOut.symbol
+          params.universalSwapQuote.steps.bridge.tokenOut.symbol
         )
-      : params.outputToken;
+      : outputToken;
   return {
     inputToken,
     outputToken,
-    bridgeToken,
+    bridgeTokenIn,
+    bridgeTokenOut,
   };
 }

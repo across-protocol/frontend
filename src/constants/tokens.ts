@@ -88,6 +88,7 @@ export const orderedTokenLogos = {
   "USDC-BNB": usdcLogo,
   USDT: usdtLogo,
   "USDT-BNB": usdtLogo,
+  "USDT-SPOT": usdtLogo,
   DAI: daiLogo,
   USDB: usdbLogo,
   WBTC: wbtcLogo,
