@@ -233,37 +233,57 @@ describe("stringifyBigNumProps", () => {
 });
 
 describe("calculateSwapFees", () => {
+  // Setup test tokens using constants
+  const inputToken = {
+    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+    decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
+    chainId: CHAIN_IDs.MAINNET,
+  };
+
+  const outputToken = {
+    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+    symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+    decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
+    chainId: CHAIN_IDs.OPTIMISM,
+  };
+
+  const bridgeFeeToken = {
+    address: constants.AddressZero,
+    symbol: TOKEN_SYMBOLS_MAP.ETH.symbol,
+    decimals: TOKEN_SYMBOLS_MAP.ETH.decimals,
+    chainId: CHAIN_IDs.MAINNET,
+  };
+
+  // Input: 1000 USDC
+  const inputAmount = utils.parseUnits("1000", inputToken.decimals);
+
+  // Mock prices (1 USDC = $1, 1 ETH = $2000)
+  const inputTokenPriceUsd = 1;
+  const outputTokenPriceUsd = 1;
+  const originNativePriceUsd = 2000;
+  const destinationNativePriceUsd = 2000;
+  const bridgeQuoteInputTokenPriceUsd = 1;
+  const appFeeTokenPriceUsd = 1;
+
+  // Origin gas: 100k gas * 50 gwei = 0.005 ETH
+  const originTxGas = BigNumber.from(100000);
+  const originTxGasPrice = utils.parseUnits("50", "gwei");
+
+  // Mock logger
+  const logger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+
   test("should calculate fees for bridge-only route", async () => {
-    // Setup test tokens using constants
-    const inputToken = {
-      address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
-      symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
-      decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
-      chainId: CHAIN_IDs.MAINNET,
-    };
-
-    const outputToken = {
-      address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-      symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
-      decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
-      chainId: CHAIN_IDs.OPTIMISM,
-    };
-
-    const bridgeFeeToken = {
-      address: constants.AddressZero,
-      symbol: TOKEN_SYMBOLS_MAP.ETH.symbol,
-      decimals: TOKEN_SYMBOLS_MAP.ETH.decimals,
-      chainId: CHAIN_IDs.MAINNET,
-    };
-
-    // Input: 1000 USDC
-    const inputAmount = utils.parseUnits("1000", inputToken.decimals);
-
     // Bridge quote with fees
     const bridgeQuote = {
       inputToken,
       outputToken,
-      inputAmount: utils.parseUnits("1000", inputToken.decimals),
+      inputAmount,
       outputAmount: utils.parseUnits("995", outputToken.decimals),
       minOutputAmount: utils.parseUnits("995", outputToken.decimals),
       estimatedFillTimeSec: 60,
@@ -298,18 +318,6 @@ describe("calculateSwapFees", () => {
       },
     };
 
-    // Mock prices (1 USDC = $1, 1 ETH = $2000)
-    const inputTokenPriceUsd = 1;
-    const outputTokenPriceUsd = 1;
-    const originNativePriceUsd = 2000;
-    const destinationNativePriceUsd = 2000;
-    const bridgeQuoteInputTokenPriceUsd = 1;
-    const appFeeTokenPriceUsd = 1;
-
-    // Origin gas: 100k gas * 50 gwei = 0.005 ETH
-    const originTxGas = BigNumber.from(100000);
-    const originTxGasPrice = utils.parseUnits("50", "gwei");
-
     // Min output amount sans app fees: 995 USDC
     const minOutputAmountSansAppFees = utils.parseUnits(
       "995",
@@ -317,18 +325,7 @@ describe("calculateSwapFees", () => {
     );
 
     // Expected output amount sans app fees: 995 USDC
-    const expectedOutputAmountSansAppFees = utils.parseUnits(
-      "996",
-      outputToken.decimals
-    );
-
-    // Mock logger
-    const logger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
+    const expectedOutputAmountSansAppFees = minOutputAmountSansAppFees;
 
     const result = await calculateSwapFees({
       inputAmount,
@@ -348,11 +345,13 @@ describe("calculateSwapFees", () => {
       logger,
     });
 
-    // Verify total fee structure
+    // Verify expected total fee structure
     expect(result.total?.amount).toBeDefined();
-    expect(result.total?.amountUsd).toBe("4.0"); // 1000 - 996 = 4 USDC
+    expect(result.total?.amountUsd).toBe("5.0"); // 1000 - 995 = 5 USDC
     expect(result.total?.pct).toBeDefined();
     expect(result.total?.token).toEqual(inputToken);
+
+    // Verify max total fee structure (same as expected total fee structure for no-swap)
     expect(result.totalMax?.amount).toBeDefined();
     expect(result.totalMax?.amountUsd).toBe("5.0"); // 1000 - 995 = 5 USDC
     expect(result.totalMax?.pct).toBeDefined();
@@ -397,5 +396,99 @@ describe("calculateSwapFees", () => {
     expect(result.app?.amount).toEqual(BigNumber.from(0));
     expect(result.app?.amountUsd).toBe("0.0");
     expect(result.app?.token).toEqual(outputToken);
+  });
+
+  test("should calculate fees for swap route", async () => {
+    const bridgeQuote = {
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount: utils.parseUnits("995", outputToken.decimals),
+      minOutputAmount: utils.parseUnits("995", outputToken.decimals),
+      estimatedFillTimeSec: 60,
+      provider: "across" as const,
+      suggestedFees: {} as any,
+      fees: {
+        relayerCapital: {
+          total: utils.parseUnits("1", inputToken.decimals),
+          pct: utils.parseEther("0.001"),
+          token: inputToken,
+        },
+        relayerGas: {
+          total: utils.parseUnits("2", inputToken.decimals),
+          pct: utils.parseEther("0.002"),
+          token: inputToken,
+        },
+        lp: {
+          total: utils.parseUnits("1.5", inputToken.decimals),
+          pct: utils.parseEther("0.0015"),
+          token: inputToken,
+        },
+        totalRelay: {
+          total: utils.parseUnits("4.5", inputToken.decimals),
+          pct: utils.parseEther("0.0045"),
+          token: inputToken,
+        },
+        bridgeFee: {
+          total: utils.parseUnits("0", inputToken.decimals),
+          pct: utils.parseEther("0"),
+          token: inputToken,
+        },
+      },
+    };
+
+    // Min output amount sans app fees: 995 USDC, i.e. 0.5 USDC slippage
+    const minOutputAmountSansAppFees = utils.parseUnits(
+      "995",
+      outputToken.decimals
+    );
+
+    // Expected output amount sans app fees: 995.5 USDC, i.e. no-slippage
+    const expectedOutputAmountSansAppFees = utils.parseUnits(
+      "995.5",
+      outputToken.decimals
+    );
+
+    const result = await calculateSwapFees({
+      inputAmount,
+      bridgeQuote,
+      originTxGas,
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
+      appFeeTokenPriceUsd,
+      minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
+      originChainId: CHAIN_IDs.MAINNET,
+      destinationChainId: CHAIN_IDs.OPTIMISM,
+      logger,
+    });
+
+    // Verify expected total fee structure (without slippage)
+    expect(result.total?.amount).toBeDefined();
+    expect(result.total?.amountUsd).toBe("4.5"); // only relayer fees
+    expect(result.total?.pct).toBeDefined();
+    expect(result.total?.token).toEqual(inputToken);
+
+    // Verify max total fee structure (with slippage)
+    expect(result.totalMax?.amount).toBeDefined();
+    expect(result.totalMax?.amountUsd).toBe("5.0"); // relayer fees + slippage
+    expect(result.totalMax?.pct).toBeDefined();
+    expect(result.totalMax?.token).toEqual(inputToken);
+
+    // Verify swap impact
+    expect(result.swapImpact?.amount).toBeDefined();
+    expect(result.swapImpact?.amountUsd).toBe("0.0"); // no slippage
+    expect(result.swapImpact?.pct).toBeDefined();
+    expect(result.swapImpact?.token).toEqual(inputToken);
+
+    // Verify max swap impact
+    expect(result.maxSwapImpact?.amount).toBeDefined();
+    expect(result.maxSwapImpact?.amountUsd).toBe("0.5"); // slippage
+    expect(result.maxSwapImpact?.pct).toBeDefined();
+    expect(result.maxSwapImpact?.token).toEqual(inputToken);
   });
 });

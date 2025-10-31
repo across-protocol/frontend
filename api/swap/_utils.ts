@@ -817,16 +817,34 @@ export async function calculateSwapFees(params: {
 
     const expectedTotalFeeUsd =
       inputAmountUsd - expectedOutputAmountSansAppFeesUsd;
-    const expectedTotalFeePct = expectedTotalFeeUsd / inputAmountUsd;
-    const expectedTotalFeeAmount = inputAmount
-      .mul(utils.parseEther(expectedTotalFeePct.toFixed(18)))
-      .div(sdk.utils.fixedPointAdjustment);
+    const { amount: expectedTotalFeeAmount } = usdFeesToAmountAndPct({
+      feesUsd: expectedTotalFeeUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
 
     const maxTotalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
-    const maxTotalFeePct = maxTotalFeeUsd / inputAmountUsd;
-    const maxTotalFeeAmount = inputAmount
-      .mul(utils.parseEther(maxTotalFeePct.toFixed(18)))
-      .div(sdk.utils.fixedPointAdjustment);
+    const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
+      feesUsd: maxTotalFeeUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
+
+    const swapImpactUsd =
+      expectedTotalFeeUsd - relayerTotalUsd - bridgeFeeUsd - appFeeUsd;
+    const { amount: swapImpactAmount } = usdFeesToAmountAndPct({
+      feesUsd: swapImpactUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
+
+    const maxSwapImpactUsd =
+      maxTotalFeeUsd - relayerTotalUsd - bridgeFeeUsd - appFeeUsd;
+    const { amount: maxSwapImpactAmount } = usdFeesToAmountAndPct({
+      feesUsd: maxSwapImpactUsd,
+      inputAmountUsd,
+      inputAmount,
+    });
 
     return {
       total: formatFeeComponent({
@@ -838,6 +856,18 @@ export async function calculateSwapFees(params: {
       totalMax: formatFeeComponent({
         amount: maxTotalFeeAmount,
         amountUsd: maxTotalFeeUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      swapImpact: formatFeeComponent({
+        amount: swapImpactAmount,
+        amountUsd: swapImpactUsd,
+        token: inputToken,
+        inputAmountUsd,
+      }),
+      maxSwapImpact: formatFeeComponent({
+        amount: maxSwapImpactAmount,
+        amountUsd: maxSwapImpactUsd,
         token: inputToken,
         inputAmountUsd,
       }),
@@ -923,6 +953,21 @@ function safeUsdToTokenAmount(
     tokenAmount.toFixed(Math.min(decimals, 18)),
     decimals
   );
+}
+
+function usdFeesToAmountAndPct(params: {
+  feesUsd: number;
+  inputAmountUsd: number;
+  inputAmount: BigNumber;
+}) {
+  const usdFeesPct = params.feesUsd / params.inputAmountUsd;
+  const usdFeesAmount = params.inputAmount
+    .mul(utils.parseEther(usdFeesPct.toFixed(18)))
+    .div(sdk.utils.fixedPointAdjustment);
+  return {
+    amount: usdFeesAmount,
+    pct: usdFeesPct,
+  };
 }
 
 export async function buildBaseSwapResponseJson(params: {
