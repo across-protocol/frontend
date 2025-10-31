@@ -21,6 +21,7 @@ export async function get1inchQuoteForOriginSwapExactInput(
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
 
   const swapParams = {

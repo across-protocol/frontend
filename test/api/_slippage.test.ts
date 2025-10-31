@@ -35,6 +35,7 @@ describe("api/_slippage", () => {
         tokenIn: wethMainnet,
         tokenOut: usdcMainnet,
         slippageTolerance: 2.5,
+        originOrDestination: "origin",
       });
       expect(result).toBe(2.5);
     });
@@ -44,6 +45,7 @@ describe("api/_slippage", () => {
         tokenIn: wethMainnet,
         tokenOut: usdcMainnet,
         slippageTolerance: 2.5123456789,
+        originOrDestination: "origin",
       });
       expect(result).toBe(2.51);
     });
@@ -54,6 +56,7 @@ describe("api/_slippage", () => {
         tokenOut: usdcMainnet,
         slippageTolerance: 2,
         splitSlippage: true,
+        originOrDestination: "origin",
       });
       expect(result).toBe(1);
     });
@@ -64,6 +67,7 @@ describe("api/_slippage", () => {
           tokenIn: wethMainnet,
           tokenOut: usdcMainnet,
           slippageTolerance: -0.5,
+          originOrDestination: "origin",
         })
       ).toThrow("Slippage tolerance value is less than 0%");
     });
@@ -74,44 +78,77 @@ describe("api/_slippage", () => {
           tokenIn: wethMainnet,
           tokenOut: usdcMainnet,
           slippageTolerance: 100.5,
+          originOrDestination: "origin",
         })
       ).toThrow("Slippage tolerance value exceeds 100%");
     });
 
     test("should return the auto slippage value for stable coin pair", () => {
-      const result = getSlippage({
+      const resultOrigin = getSlippage({
         tokenIn: usdcMainnet,
         tokenOut: usdtMainnet,
         slippageTolerance: "auto",
+        originOrDestination: "origin",
       });
-      expect(result).toBe(STABLE_COIN_SWAP_SLIPPAGE);
+      const resultDestination = getSlippage({
+        tokenIn: usdcMainnet,
+        tokenOut: usdtMainnet,
+        slippageTolerance: "auto",
+        originOrDestination: "destination",
+      });
+      expect(resultOrigin).toBe(STABLE_COIN_SWAP_SLIPPAGE.origin);
+      expect(resultDestination).toBe(STABLE_COIN_SWAP_SLIPPAGE.destination);
     });
 
     test("should return the auto slippage value for major pair", () => {
-      const result = getSlippage({
+      const resultOrigin = getSlippage({
         tokenIn: wethMainnet,
         tokenOut: usdtMainnet,
         slippageTolerance: "auto",
+        originOrDestination: "origin",
       });
-      expect(result).toBe(MAJOR_PAIR_SLIPPAGE);
+      const resultDestination = getSlippage({
+        tokenIn: wethMainnet,
+        tokenOut: usdtMainnet,
+        slippageTolerance: "auto",
+        originOrDestination: "destination",
+      });
+      expect(resultOrigin).toBe(MAJOR_PAIR_SLIPPAGE.origin);
+      expect(resultDestination).toBe(MAJOR_PAIR_SLIPPAGE.destination);
     });
 
     test("should return the auto slippage value for long tail + major pair", () => {
-      const result = getSlippage({
+      const resultOrigin = getSlippage({
         tokenIn: pepeMainnet,
         tokenOut: wethMainnet,
         slippageTolerance: "auto",
+        originOrDestination: "origin",
       });
-      expect(result).toBe(LONG_TAIL_SLIPPAGE);
+      const resultDestination = getSlippage({
+        tokenIn: pepeMainnet,
+        tokenOut: wethMainnet,
+        slippageTolerance: "auto",
+        originOrDestination: "destination",
+      });
+      expect(resultOrigin).toBe(LONG_TAIL_SLIPPAGE.origin);
+      expect(resultDestination).toBe(LONG_TAIL_SLIPPAGE.destination);
     });
 
     test("should return the auto slippage value for long tail + stable pair", () => {
-      const result = getSlippage({
+      const resultOrigin = getSlippage({
         tokenIn: pepeMainnet,
         tokenOut: usdcMainnet,
         slippageTolerance: "auto",
+        originOrDestination: "origin",
       });
-      expect(result).toBe(LONG_TAIL_SLIPPAGE);
+      const resultDestination = getSlippage({
+        tokenIn: pepeMainnet,
+        tokenOut: usdcMainnet,
+        slippageTolerance: "auto",
+        originOrDestination: "destination",
+      });
+      expect(resultOrigin).toBe(LONG_TAIL_SLIPPAGE.origin);
+      expect(resultDestination).toBe(LONG_TAIL_SLIPPAGE.destination);
     });
 
     test("should throw an error when tokens are on different chains", () => {
@@ -124,6 +161,7 @@ describe("api/_slippage", () => {
             chainId: CHAIN_IDs.OPTIMISM,
           },
           slippageTolerance: "auto",
+          originOrDestination: "origin",
         })
       ).toThrow("Can't resolve auto slippage for tokens on different chains");
     });

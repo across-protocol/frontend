@@ -40,6 +40,7 @@ export async function getUniswapQuoteWithSwapQuoterFromSdk(
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
   const options = getOptions({
     recipient: swap.recipient,
@@ -140,6 +141,7 @@ export async function getUniswapQuoteWithSwapRouter02FromSdk(
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
   const { router, options } = getSwapRouter02AndOptions({
     chainId: swap.chainId,

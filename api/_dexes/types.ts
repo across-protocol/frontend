@@ -9,6 +9,8 @@ import { TransferType } from "../_spoke-pool-periphery";
 
 export type SlippageTolerance = number | "auto";
 
+export type OriginOrDestination = "origin" | "destination";
+
 export type { AmountType, CrossSwapType };
 
 export type Token = {
@@ -29,6 +31,7 @@ export type Swap = {
   type: AmountType;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  originOrDestination: OriginOrDestination;
 };
 
 export type CrossSwap = {
@@ -224,11 +227,11 @@ export type QuoteFetchFn = (
 
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
-  sources?: ReturnType<GetSourcesFn>;
-  sellEntireBalance?: boolean;
-  throwIfSellEntireBalanceUnsupported?: boolean;
-  quoteBuffer?: number;
-  splitSlippage?: boolean;
+  sources: ReturnType<GetSourcesFn>;
+  sellEntireBalance: boolean;
+  throwIfSellEntireBalanceUnsupported: boolean;
+  quoteBuffer: number;
+  splitSlippage: boolean;
 }>;
 
 export type OriginEntryPointContractName =

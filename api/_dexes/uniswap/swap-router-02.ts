@@ -242,15 +242,9 @@ function buildSwapRouterSwapTx(
   tradeType: TradeType,
   quote: UniswapClassicQuoteFromApi
 ) {
-  const slippageTolerance = getSlippage({
-    tokenIn: swap.tokenIn,
-    tokenOut: swap.tokenOut,
-    slippageTolerance: swap.slippageTolerance,
-  });
-
   const options = {
     recipient: swap.recipient,
-    slippageTolerance: floatToPercent(slippageTolerance),
+    slippageTolerance: floatToPercent(quote.slippage),
   };
 
   const routerTrade = RouterTradeAdapter.fromClassicQuote({
@@ -304,6 +298,7 @@ function buildIndicativeQuote(
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
   const expectedAmountIn = BigNumber.from(inputAmount);
   const maxAmountIn =

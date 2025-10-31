@@ -58,6 +58,7 @@ export async function getUniswapQuoteWithSwapQuoter(swap: SwapParam) {
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
 
   // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes

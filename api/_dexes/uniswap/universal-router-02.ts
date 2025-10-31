@@ -16,7 +16,6 @@ import { compactAxiosError } from "../../_errors";
 import { UNIVERSAL_ROUTER_02_ADDRESS } from "./utils/addresses";
 import { TransferType } from "../../_spoke-pool-periphery";
 import { SOURCES } from "./utils/sources";
-import { getSlippage } from "../../_slippage";
 
 const STRATEGY_NAME = "uniswap/universal-router-02";
 
@@ -154,14 +153,9 @@ export function buildUniversalRouterSwapTx(
     route: quote.route,
   });
 
-  const slippageTolerance = getSlippage({
-    tokenIn: swap.tokenIn,
-    tokenOut: swap.tokenOut,
-    slippageTolerance: swap.slippageTolerance,
-  });
   const { calldata, value } = SwapRouter.swapCallParameters(routerTrade, {
     recipient: swap.recipient,
-    slippageTolerance: floatToPercent(slippageTolerance),
+    slippageTolerance: floatToPercent(quote.slippage),
     useRouterBalance: true,
   });
   return {

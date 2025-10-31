@@ -65,6 +65,8 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       tokenIn: swap.tokenIn,
       tokenOut: swap.tokenOut,
       slippageTolerance: swap.slippageTolerance,
+      originOrDestination: swap.originOrDestination,
+      splitSlippage: opts?.splitSlippage,
     });
 
     // Only support:

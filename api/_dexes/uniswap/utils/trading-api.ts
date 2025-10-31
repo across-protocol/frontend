@@ -5,6 +5,7 @@ import { Swap } from "../../types";
 import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 import { getMulticall3Address } from "../../../_utils";
 import { CHAIN_IDs } from "../../../_constants";
+import { getSlippage } from "../../../_slippage";
 
 export type UniswapClassicQuoteFromApi = {
   chainId: number;
@@ -55,13 +56,18 @@ export async function getUniswapClassicQuoteFromApi(
   // Uniswap API supports auto slippage via the `autoSlippage` parameter. Therefore, we
   // don't need to resolve the slippage via our own logic.
   const slippageParams =
-    swap.slippageTolerance === "auto"
+    swap.slippageTolerance === undefined || swap.slippageTolerance === "auto"
       ? {
           // https://api-docs.uniswap.org/api-reference/swapping/quote#body-slippage-tolerance
           autoSlippage: "DEFAULT",
         }
       : {
-          slippageTolerance: swap.slippageTolerance,
+          slippageTolerance: getSlippage({
+            tokenIn: swap.tokenIn,
+            tokenOut: swap.tokenOut,
+            slippageTolerance: swap.slippageTolerance,
+            originOrDestination: swap.originOrDestination,
+          }),
         };
 
   const response = await axios.post<{

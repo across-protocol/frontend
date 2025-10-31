@@ -75,6 +75,7 @@ export async function estimateInputForExactOutput(
     tokenIn: swap.tokenIn,
     tokenOut: swap.tokenOut,
     slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
   });
 
   // Create cache for the unit price quote

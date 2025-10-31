@@ -69,6 +69,8 @@ export function get0xStrategy(
         tokenIn: swap.tokenIn,
         tokenOut: swap.tokenOut,
         slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
       });
 
       if (opts?.sellEntireBalance && opts.quoteBuffer) {

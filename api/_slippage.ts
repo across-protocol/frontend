@@ -3,11 +3,20 @@ import {
   TOKEN_SYMBOLS_MAP,
   CUSTOM_GAS_TOKENS,
 } from "./_constants";
-import { Token } from "./_dexes/types";
+import { OriginOrDestination, Token } from "./_dexes/types";
 
-export const STABLE_COIN_SWAP_SLIPPAGE = 0.5; // 0.5%
-export const MAJOR_PAIR_SLIPPAGE = 1.5; // 1.5%
-export const LONG_TAIL_SLIPPAGE = 5; // 5%
+export const STABLE_COIN_SWAP_SLIPPAGE = {
+  origin: 0.25, // 0.25%
+  destination: 0.5, // 0.5%
+};
+export const MAJOR_PAIR_SLIPPAGE = {
+  origin: 0.75, // 0.75%
+  destination: 1.5, // 1.5%
+};
+export const LONG_TAIL_SLIPPAGE = {
+  origin: 2.5, // 2.5%
+  destination: 5, // 5%
+};
 
 const MAJOR_TOKEN_SYMBOLS_BY_CHAIN: {
   default: string[];
@@ -42,6 +51,7 @@ export function getSlippage(params: {
   tokenIn: Token;
   tokenOut: Token;
   slippageTolerance: number | "auto";
+  originOrDestination: OriginOrDestination;
   splitSlippage?: boolean;
 }) {
   const resolvedSlippage =
@@ -49,6 +59,7 @@ export function getSlippage(params: {
       ? resolveAutoSlippage({
           tokenIn: params.tokenIn,
           tokenOut: params.tokenOut,
+          originOrDestination: params.originOrDestination,
         })
       : params.splitSlippage
         ? params.slippageTolerance / 2
@@ -74,7 +85,11 @@ export function getSlippage(params: {
  * Returns resolved auto slippage value expressed as 0 <= slippage <= 100, where 1 = 1%.
  * This function returns a value based on the token pair.
  */
-function resolveAutoSlippage(params: { tokenIn: Token; tokenOut: Token }) {
+function resolveAutoSlippage(params: {
+  tokenIn: Token;
+  tokenOut: Token;
+  originOrDestination: OriginOrDestination;
+}) {
   if (params.tokenIn.chainId !== params.tokenOut.chainId) {
     throw new Error(
       "Can't resolve auto slippage for tokens on different chains"
@@ -86,7 +101,7 @@ function resolveAutoSlippage(params: { tokenIn: Token; tokenOut: Token }) {
     isStableCoinSymbol(params.tokenOut.symbol);
 
   if (isStableCoinSwap) {
-    return STABLE_COIN_SWAP_SLIPPAGE;
+    return STABLE_COIN_SWAP_SLIPPAGE[params.originOrDestination];
   }
 
   const isTokenInStableOrMajor =
@@ -97,10 +112,10 @@ function resolveAutoSlippage(params: { tokenIn: Token; tokenOut: Token }) {
     isMajorTokenSymbol(params.tokenOut.symbol, params.tokenOut.chainId);
 
   if (isTokenInStableOrMajor && isTokenOutStableOrMajor) {
-    return MAJOR_PAIR_SLIPPAGE;
+    return MAJOR_PAIR_SLIPPAGE[params.originOrDestination];
   }
 
-  return LONG_TAIL_SLIPPAGE;
+  return LONG_TAIL_SLIPPAGE[params.originOrDestination];
 }
 
 function isStableCoinSymbol(symbol: string) {

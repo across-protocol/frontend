@@ -78,6 +78,8 @@ export function getLifiStrategy(
         tokenIn: swap.tokenIn,
         tokenOut: swap.tokenOut,
         slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
       });
 
       const sources = opts?.sources;
