@@ -1218,7 +1218,11 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
           amount: crossSwap.amount.toString(),
         },
         TradeType.EXACT_INPUT,
-        { sources: originSources }
+        {
+          sources: originSources,
+          // Split slippage between origin and destination swaps
+          splitSlippage: true,
+        }
       );
 
       // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
@@ -1230,7 +1234,11 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
             amount: originSwapQuote.minAmountOut.toString(),
           },
           TradeType.EXACT_INPUT,
-          { sources: destinationSources }
+          {
+            sources: destinationSources,
+            // Split slippage between origin and destination swaps
+            splitSlippage: true,
+          }
         );
       return {
         result,

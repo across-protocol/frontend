@@ -48,6 +48,16 @@ describe("api/_slippage", () => {
       expect(result).toBe(2.51);
     });
 
+    test("should return the provided slippage tolerance with 2 decimals", () => {
+      const result = getSlippage({
+        tokenIn: wethMainnet,
+        tokenOut: usdcMainnet,
+        slippageTolerance: 2,
+        splitSlippage: true,
+      });
+      expect(result).toBe(1);
+    });
+
     test("should throw an error when the slippage tolerance is invalid", () => {
       expect(() =>
         getSlippage({

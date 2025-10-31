@@ -34,12 +34,15 @@ const MAJOR_TOKEN_SYMBOLS_BY_CHAIN: {
  * @param params.tokenIn - The input token object.
  * @param params.tokenOut - The output token object
  * @param params.slippageTolerance - The slippage tolerance expressed as 0 <= slippage <= 100, where 1 = 1%.
+ * @param params.splitSlippage - Whether to split the slippage between the origin and destination swaps.
+ *                               Only applicable if the slippage tolerance is not "auto", i.e. explicitly set by user.
  * @returns The slippage tolerance value expressed as 0 <= slippage <= 100, where 1 = 1%. Max. decimals is 2.
  */
 export function getSlippage(params: {
   tokenIn: Token;
   tokenOut: Token;
   slippageTolerance: number | "auto";
+  splitSlippage?: boolean;
 }) {
   const resolvedSlippage =
     params.slippageTolerance === "auto"
@@ -47,7 +50,9 @@ export function getSlippage(params: {
           tokenIn: params.tokenIn,
           tokenOut: params.tokenOut,
         })
-      : params.slippageTolerance;
+      : params.splitSlippage
+        ? params.slippageTolerance / 2
+        : params.slippageTolerance;
   const parsedSlippage = parseFloat(resolvedSlippage.toFixed(2));
 
   if (isNaN(parsedSlippage)) {

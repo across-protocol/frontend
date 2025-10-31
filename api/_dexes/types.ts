@@ -228,6 +228,7 @@ export type QuoteFetchOpts = Partial<{
   sellEntireBalance?: boolean;
   throwIfSellEntireBalanceUnsupported?: boolean;
   quoteBuffer?: number;
+  splitSlippage?: boolean;
 }>;
 
 export type OriginEntryPointContractName =
