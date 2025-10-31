@@ -19,8 +19,6 @@ export default function SwapAndBridge() {
     expectedInputAmount,
     expectedOutputAmount,
     validationError,
-    validationWarning,
-    validationErrorFormatted,
     buttonState,
     buttonDisabled,
     buttonLoading,
@@ -57,9 +55,6 @@ export default function SwapAndBridge() {
           isQuoteLoading={isQuoteLoading}
           onConfirm={onConfirm}
           quoteWarningMessage={quoteWarningMessage}
-          validationError={validationError}
-          validationWarning={validationWarning}
-          validationErrorFormatted={validationErrorFormatted}
           buttonState={buttonState}
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}

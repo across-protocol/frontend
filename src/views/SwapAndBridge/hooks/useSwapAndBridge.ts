@@ -240,13 +240,11 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   // Button state logic
   const buttonState: BridgeButtonState = useMemo(() => {
+    if (approvalAction.isButtonActionLoading) return "submitting";
     if (isQuoteLoading) return "loadingQuote";
     if (quoteError) return "quoteError";
-    if (!isOriginConnected || !isRecipientSet) return "notConnected";
-    if (approvalAction.isButtonActionLoading) return "submitting";
-    if (!inputToken || !outputToken) return "awaitingTokenSelection";
-    if (!amount || amount.lte(0)) return "awaitingAmountInput";
     if (validation.error) return "validationError";
+    if (!isOriginConnected || !isRecipientSet) return "notConnected";
     return "readyToConfirm";
   }, [
     isQuoteLoading,
@@ -254,9 +252,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isOriginConnected,
     isRecipientSet,
     approvalAction.isButtonActionLoading,
-    inputToken,
-    outputToken,
-    amount,
     validation.error,
   ]);
 
@@ -265,6 +260,11 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [buttonState]);
 
   const buttonLabel = useMemo(() => {
+    // Show validation error in button label if present
+    if (validation.errorFormatted && buttonState === "validationError") {
+      return validation.errorFormatted;
+    }
+
     if (buttonState === "notConnected" && walletTypeToConnect) {
       // If neither wallet is connected, show generic "Connect Wallet"
       if (!isConnectedEVM && !isConnectedSVM) {
@@ -276,7 +276,15 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
         : "Connect SVM Wallet";
     }
     return buttonLabels[buttonState];
-  }, [buttonState, walletTypeToConnect, isConnectedEVM, isConnectedSVM]);
+  }, [
+    buttonState,
+    walletTypeToConnect,
+    isConnectedEVM,
+    isConnectedSVM,
+    validation.errorFormatted,
+  ]);
+
+  console.log("validation.errorFormatted", validation.errorFormatted);
 
   const buttonDisabled = useMemo(
     () =>
@@ -341,8 +349,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
 const buttonLabels: Record<BridgeButtonState, string> = {
   notConnected: "Connect Wallet",
-  awaitingTokenSelection: "Confirm Swap",
-  awaitingAmountInput: "Confirm Swap",
   readyToConfirm: "Confirm Swap",
   quoteError: "Confirm Swap",
   submitting: "Confirming...",

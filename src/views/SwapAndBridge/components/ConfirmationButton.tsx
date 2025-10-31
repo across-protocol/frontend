@@ -17,14 +17,11 @@ import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/Modal";
 import styled from "@emotion/styled";
-import { AmountInputError } from "../../Bridge/utils";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 
 export type BridgeButtonState =
   | "notConnected"
-  | "awaitingTokenSelection"
-  | "awaitingAmountInput"
   | "readyToConfirm"
   | "submitting"
   | "wrongNetwork"
@@ -41,9 +38,6 @@ interface ConfirmationButtonProps
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
   quoteWarningMessage: string | null;
-  validationError?: AmountInputError;
-  validationWarning?: AmountInputError;
-  validationErrorFormatted?: string;
   // External state props
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
@@ -61,9 +55,6 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
-    validationError?: AmountInputError;
-    validationWarning?: AmountInputError;
-    validationErrorFormatted?: string;
     quoteWarningMessage?: string | null;
   }>
 > = ({
@@ -74,8 +65,6 @@ const ExpandableLabelSection: React.FC<
   state,
   children,
   hasQuote,
-  validationError,
-  validationErrorFormatted,
   quoteWarningMessage,
 }) => {
   // Render state-specific content
@@ -93,10 +82,8 @@ const ExpandableLabelSection: React.FC<
     </>
   );
 
-  // Show validation messages for all non-ready states
-  // Prioritize showing quote if available, even when wallet is not connected
+  // Show quote warning message for quoteError state
   if (quoteWarningMessage && state === "quoteError") {
-    // Show quote warning message when ready to confirm but there's a warning
     content = (
       <>
         <ValidationText>
@@ -105,17 +92,8 @@ const ExpandableLabelSection: React.FC<
         </ValidationText>
       </>
     );
-  } else if (!hasQuote && !!validationErrorFormatted) {
-    content = (
-      <>
-        <ValidationText>
-          <Warning color="inherit" width="20px" height="20px" />
-          <span>{validationErrorFormatted}</span>
-        </ValidationText>
-      </>
-    );
   } else if (hasQuote) {
-    // Show quote details when available, regardless of connection state
+    // Show quote details when available
     content = (
       <>
         <ExpandableLabelLeft>
@@ -140,8 +118,6 @@ const ExpandableLabelSection: React.FC<
         <StyledChevronDown expanded={expanded} />
       </>
     );
-  } else if (state === "notConnected") {
-    content = defaultState;
   } else {
     // Default state - show Across V4 branding
     content = defaultState;
@@ -223,9 +199,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   swapQuote,
   onConfirm,
   quoteWarningMessage,
-  validationError,
-  validationWarning,
-  validationErrorFormatted,
   buttonState,
   buttonDisabled,
   buttonLoading,
@@ -296,9 +269,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         onToggle={() => setExpanded((e) => !e)}
         visible={true}
         state={state}
-        validationError={validationError}
-        validationWarning={validationWarning}
-        validationErrorFormatted={validationErrorFormatted}
         quoteWarningMessage={quoteWarningMessage}
         hasQuote={!!swapQuote}
       >
@@ -363,7 +333,13 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   );
 
   return (
-    <Container dark={!!validationErrorFormatted || buttonLoading}>
+    <Container
+      dark={
+        buttonState === "validationError" ||
+        buttonState === "quoteError" ||
+        buttonLoading
+      }
+    >
       {content}
     </Container>
   );
