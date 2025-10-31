@@ -180,7 +180,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     amount,
     isAmountOrigin,
     inputToken,
-    outputToken
+    outputToken,
+    isOriginConnected
   );
 
   const expectedInputAmount = useMemo(() => {

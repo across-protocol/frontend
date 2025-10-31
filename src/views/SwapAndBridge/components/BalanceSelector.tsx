@@ -99,14 +99,9 @@ export function BalanceSelector({
                   delay: (percentages.length - 1 - index) * 0.07,
                 }}
                 whileHover={{
-                  scale: 1.05,
+                  scale: 1.06,
                   backgroundColor: "rgba(224, 243, 255, 0.1)",
                   color: "#E0F3FF",
-                  transition: {
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 28,
-                  },
                 }}
                 onClick={() => handlePillClick(percentage)}
               >
@@ -133,16 +128,16 @@ const BalanceWrapper = styled.div`
 `;
 
 const BalanceText = styled.div<{ error?: boolean }>`
-  color: ${({ error }) => (error ? COLORS.error : COLORS.white)};
+  color: ${({ error }) =>
+    error ? COLORS.error : "var(--Base-bright-gray, #E0F3FF)"};
   opacity: 1;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 130%;
 
   span {
     opacity: 0.5;
-    color: ${COLORS.white};
-    font-weight: 400;
+    color: var(--Base-bright-gray, #e0f3ff);
   }
 `;
 

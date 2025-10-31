@@ -94,9 +94,8 @@ const ExpandableLabelSection: React.FC<
   );
 
   // Show validation messages for all non-ready states
-  if (state === "notConnected") {
-    content = defaultState;
-  } else if (quoteWarningMessage && state === "quoteError") {
+  // Prioritize showing quote if available, even when wallet is not connected
+  if (quoteWarningMessage && state === "quoteError") {
     // Show quote warning message when ready to confirm but there's a warning
     content = (
       <>
@@ -116,7 +115,7 @@ const ExpandableLabelSection: React.FC<
       </>
     );
   } else if (hasQuote) {
-    // Only show quote details when ready to confirm
+    // Show quote details when available, regardless of connection state
     content = (
       <>
         <ExpandableLabelLeft>
@@ -125,6 +124,8 @@ const ExpandableLabelSection: React.FC<
         </ExpandableLabelLeft>
         {!expanded && (
           <ExpandableLabelRight>
+            <Across />
+            <Divider />
             <FeeTimeItem>
               <Dollar width="16" height="16" />
               {fee}
@@ -139,6 +140,8 @@ const ExpandableLabelSection: React.FC<
         <StyledChevronDown expanded={expanded} />
       </>
     );
+  } else if (state === "notConnected") {
+    content = defaultState;
   } else {
     // Default state - show Across V4 branding
     content = defaultState;
