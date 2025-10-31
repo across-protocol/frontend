@@ -18,13 +18,38 @@ export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
 };
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
-TOKEN_SYMBOLS_MAP.USDC = {
-  ...constants.TOKEN_SYMBOLS_MAP.USDC,
-  addresses: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
-    [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
-    [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2000000000000000000000000000000000000000",
+export const TOKEN_SYMBOLS_MAP = {
+  ...constants.TOKEN_SYMBOLS_MAP,
+  USDH: {
+    name: "USDH",
+    symbol: "USDH",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.HYPEREVM]: "0x111111a1a0667d36bD57c0A9f569b98057111111",
+    },
+    coingeckoId: "usdh-2",
+  },
+  "USDH-SPOT": {
+    name: "USDH-SPOT",
+    symbol: "USDH-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000168",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000168",
+    },
+    coingeckoId: "usdh-2",
+  },
+  "USDC-SPOT": {
+    name: "USDC-SPOT",
+    symbol: "USDC-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
+    },
+    coingeckoId: "usd-coin",
   },
 };
 TOKEN_SYMBOLS_MAP.WHYPE = {
@@ -339,6 +364,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE

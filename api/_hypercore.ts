@@ -5,6 +5,7 @@ import { getProvider } from "./_providers";
 import { CHAIN_IDs } from "./_constants";
 
 const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
+const HYPERLIQUID_API_BASE_URL_TESTNET = "https://api.hyperliquid-testnet.xyz";
 
 // Maps <TOKEN_IN_SYMBOL>/<TOKEN_OUT_SYMBOL> to the coin identifier to be used to
 // retrieve the L2 order book for a given pair via the Hyperliquid API.
@@ -131,10 +132,27 @@ export async function accountExistsOnHyperCore(params: {
 
 // https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#l2-book-snapshot
 export async function getL2OrderBookForPair(params: {
+  chainId?: number;
   tokenInSymbol: string;
   tokenOutSymbol: string;
 }) {
-  const { tokenInSymbol, tokenOutSymbol } = params;
+  const {
+    chainId = CHAIN_IDs.HYPERCORE,
+    tokenInSymbol: _tokenInSymbol,
+    tokenOutSymbol: _tokenOutSymbol,
+  } = params;
+
+  const tokenInSymbol = getNormalizedSpotTokenSymbol(_tokenInSymbol);
+  const tokenOutSymbol = getNormalizedSpotTokenSymbol(_tokenOutSymbol);
+
+  if (![CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId)) {
+    throw new Error("Can't get L2 order book for non-HyperCore chain");
+  }
+
+  const baseUrl =
+    chainId === CHAIN_IDs.HYPERCORE_TESTNET
+      ? HYPERLIQUID_API_BASE_URL_TESTNET
+      : HYPERLIQUID_API_BASE_URL;
 
   // Try both directions since the pair might be stored either way
   let coin =
@@ -154,7 +172,7 @@ export async function getL2OrderBookForPair(params: {
       { px: string; sz: string; n: number }[], // bids sorted by price descending
       { px: string; sz: string; n: number }[], // asks sorted by price ascending
     ];
-  }>(`${HYPERLIQUID_API_BASE_URL}/info`, {
+  }>(`${baseUrl}/info`, {
     type: "l2Book",
     coin,
   });
@@ -206,6 +224,7 @@ export type MarketOrderSimulationResult = {
  * });
  */
 export async function simulateMarketOrder(params: {
+  chainId?: number;
   tokenIn: {
     symbol: string;
     decimals: number;
@@ -216,41 +235,50 @@ export async function simulateMarketOrder(params: {
   };
   inputAmount: BigNumber;
 }): Promise<MarketOrderSimulationResult> {
-  const { tokenIn, tokenOut, inputAmount } = params;
+  const {
+    chainId = CHAIN_IDs.HYPERCORE,
+    tokenIn,
+    tokenOut,
+    inputAmount,
+  } = params;
 
   const orderBook = await getL2OrderBookForPair({
+    chainId,
     tokenInSymbol: tokenIn.symbol,
     tokenOutSymbol: tokenOut.symbol,
   });
 
+  const tokenInSymbol = getNormalizedSpotTokenSymbol(tokenIn.symbol);
+  const tokenOutSymbol = getNormalizedSpotTokenSymbol(tokenOut.symbol);
+
   // Determine which side of the order book to use
   // We need to figure out the pair direction from L2_ORDER_BOOK_COIN_MAP
-  const pairKey = `${tokenIn.symbol}/${tokenOut.symbol}`;
-  const reversePairKey = `${tokenOut.symbol}/${tokenIn.symbol}`;
+  const pairKey = `${tokenInSymbol}/${tokenOutSymbol}`;
+  const reversePairKey = `${tokenOutSymbol}/${tokenInSymbol}`;
 
   let baseCurrency = "";
 
   if (L2_ORDER_BOOK_COIN_MAP[pairKey]) {
     // Normal direction: tokenIn/tokenOut exists in map
-    baseCurrency = tokenIn.symbol;
+    baseCurrency = tokenInSymbol;
   } else if (L2_ORDER_BOOK_COIN_MAP[reversePairKey]) {
     // Reverse direction: tokenOut/tokenIn exists in map
-    baseCurrency = tokenOut.symbol;
+    baseCurrency = tokenOutSymbol;
   } else {
     throw new Error(
-      `No L2 order book key configured for pair ${tokenIn.symbol}/${tokenOut.symbol}`
+      `No L2 order book key configured for pair ${tokenInSymbol}/${tokenOutSymbol}`
     );
   }
 
   // Determine which side to use:
   // - If buying base (quote → base): use asks
   // - If selling base (base → quote): use bids
-  const isBuyingBase = tokenOut.symbol === baseCurrency;
+  const isBuyingBase = tokenOutSymbol === baseCurrency;
   const levels = isBuyingBase ? orderBook.levels[1] : orderBook.levels[0]; // asks : bids
 
   if (levels.length === 0) {
     throw new Error(
-      `No liquidity available for ${tokenIn.symbol}/${tokenOut.symbol}`
+      `No liquidity available for ${tokenInSymbol}/${tokenOutSymbol}`
     );
   }
 
@@ -372,4 +400,10 @@ export async function simulateMarketOrder(params: {
     levelsConsumed,
     fullyFilled,
   };
+}
+
+export function getNormalizedSpotTokenSymbol(symbol: string): string {
+  return ["USDC-SPOT", "USDT-SPOT", "USDH-SPOT"].includes(symbol.toUpperCase())
+    ? symbol.toUpperCase().replace("-SPOT", "")
+    : symbol.toUpperCase();
 }

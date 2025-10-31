@@ -1,5 +1,3 @@
-import { BigNumber, utils } from "ethers";
-import { Token } from "../../../_dexes/types";
 import {
   SignedQuoteParams,
   UnsignedQuoteParams,
@@ -9,49 +7,28 @@ import {
 import { toBytes32 } from "../../../_address";
 import { getOftEndpointId } from "../../oft/utils/constants";
 import {
-  ExecutionMode,
   DEFAULT_LZ_RECEIVE_GAS_LIMIT,
   DEFAULT_LZ_COMPOSE_GAS_LIMIT,
-  DEFAULT_QUOTE_EXPIRY_SECONDS,
   DST_OFT_HANDLER,
 } from "./constants";
 import { CHAIN_IDs } from "../../../_constants";
-
-/**
- * Generates a unique nonce for a quote
- * Uses keccak256 hash of timestamp in milliseconds + depositor address
- */
-function generateQuoteNonce(depositor: string): string {
-  const timestamp = Date.now();
-  const encoded = utils.defaultAbiCoder.encode(
-    ["uint256", "address"],
-    [timestamp, depositor]
-  );
-  return utils.keccak256(encoded);
-}
-
-/**
- * Parameters for building a sponsored OFT quote
- */
-export interface BuildSponsoredOFTQuoteParams {
-  inputToken: Token;
-  outputToken: Token;
-  inputAmount: BigNumber;
-  recipient: string;
-  depositor: string;
-  refundRecipient: string;
-  maxBpsToSponsor: BigNumber;
-  maxUserSlippageBps: number;
-}
+import {
+  generateQuoteNonce,
+  BuildSponsoredQuoteParams,
+  DEFAULT_QUOTE_EXPIRY_SECONDS,
+  ExecutionMode,
+} from "../../../_sponsorship-utils";
 
 /**
  * Builds a complete sponsored OFT quote with signature
  * @param params Quote building parameters
  * @returns Complete quote with signed and unsigned params, plus signature
  */
-export async function buildSponsoredOFTQuote(
-  params: BuildSponsoredOFTQuoteParams
-): Promise<{ quote: SponsoredOFTQuote; signature: string; hash: string }> {
+export function buildSponsoredOFTQuote(params: BuildSponsoredQuoteParams): {
+  quote: SponsoredOFTQuote;
+  signature: string;
+  hash: string;
+} {
   const {
     inputToken,
     outputToken,
@@ -107,7 +84,7 @@ export async function buildSponsoredOFTQuote(
   };
 
   // Create signature
-  const { signature, hash } = await createOftSignature(signedParams);
+  const { signature, hash } = createOftSignature(signedParams);
 
   const quote: SponsoredOFTQuote = {
     signedParams,

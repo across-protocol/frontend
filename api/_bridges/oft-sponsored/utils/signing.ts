@@ -48,9 +48,9 @@ export interface SponsoredOFTQuote {
  * @returns A promise that resolves to an object containing the signature and the hash that was signed.
  * @see https://github.com/across-protocol/contracts/blob/7b37bbee4e8c71f2d3cffb28defe1c1e26583cb0/contracts/periphery/mintburn/sponsored-oft/QuoteSignLib.sol
  */
-export const createOftSignature = async (
+export const createOftSignature = (
   quote: SignedQuoteParams
-): Promise<{ signature: string; hash: string }> => {
+): { signature: string; hash: string } => {
   // ABI-encode all parameters and hash the result to create the digest to be signed.
   // Note: actionData is hashed before encoding to match the contract's behavior
   const encodedData = utils.defaultAbiCoder.encode(

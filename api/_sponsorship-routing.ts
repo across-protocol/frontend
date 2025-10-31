@@ -1,14 +1,16 @@
-import { getOftSponsoredBridgeStrategy } from "../strategy";
+import { getSponsoredCctpBridgeStrategy } from "./_bridges/cctp-sponsored/strategy";
+import { getOftSponsoredBridgeStrategy } from "./_bridges/oft-sponsored/strategy";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
   RoutingRule,
-} from "../../types";
+} from "./_bridges/types";
 import {
   getSponsorshipEligibilityData,
   SponsorshipEligibilityData,
-} from "./eligibility";
-import { getLogger } from "../../../_utils";
+} from "./_sponsorship-utils";
+import { getLogger } from "./_utils";
+import { Token } from "./_dexes/types";
 
 type SponsorshipRoutingRule = RoutingRule<
   NonNullable<SponsorshipEligibilityData>
@@ -54,7 +56,14 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
       data.hasVaultBalance &&
       data.isSlippageAcceptable &&
       data.isAccountCreationValid,
-    getStrategy: getOftSponsoredBridgeStrategy,
+    getStrategy: (inputToken?: Token) => {
+      if (inputToken?.symbol === "USDT") {
+        return getOftSponsoredBridgeStrategy();
+      } else if (inputToken?.symbol === "USDC") {
+        return getSponsoredCctpBridgeStrategy();
+      }
+      return null;
+    },
     reason: "All sponsorship eligibility criteria met",
   },
 ];
@@ -95,7 +104,7 @@ export async function routeStrategyForSponsorship(
     return null;
   }
 
-  const strategy = applicableRule.getStrategy();
+  const strategy = applicableRule.getStrategy(params.inputToken);
 
   logger.debug({
     at: "routeStrategyForSponsorship",

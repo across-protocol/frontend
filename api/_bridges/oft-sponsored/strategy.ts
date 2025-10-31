@@ -326,11 +326,11 @@ async function buildTransaction(params: {
     bridgeOutputAmount: bridgeQuote.outputAmount,
   });
 
-  // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.005 = 0.5% = 50 bps)
-  const maxUserSlippageBps = Math.floor(crossSwap.slippageTolerance * 10000);
+  // Convert slippage tolerance (expressed as 0 < slippage < 100, e.g. 1 = 1%) set by user to bps
+  const maxUserSlippageBps = Math.floor(crossSwap.slippageTolerance * 100);
 
   // Build signed quote with signature
-  const { quote, signature } = await buildSponsoredOFTQuote({
+  const { quote, signature } = buildSponsoredOFTQuote({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     inputAmount: bridgeQuote.inputAmount,
