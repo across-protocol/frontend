@@ -33,7 +33,6 @@ import { getSVMRpc } from "../../_providers";
 import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
-  CCTP_FILL_TIME_ESTIMATES,
   CCTP_FINALITY_THRESHOLDS,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
@@ -52,6 +51,7 @@ import {
   encodeForwardHookData,
   getCctpFees,
 } from "./utils/hypercore";
+import { getEstimatedFillTime } from "./utils/fill-times";
 
 const name = "cctp";
 
@@ -72,11 +72,6 @@ const capabilities: BridgeCapabilities = {
  * Supports Circle's CCTP for burning USDC on source chain.
  */
 export function getCctpBridgeStrategy(): BridgeStrategy {
-  const getEstimatedFillTime = (originChainId: number): number => {
-    // CCTP fill time is determined by the origin chain attestation process
-    return CCTP_FILL_TIME_ESTIMATES[originChainId] || 19 * 60; // Default to 19 minutes
-  };
-
   const isRouteSupported = (params: {
     inputToken: Token;
     outputToken: Token;
@@ -173,6 +168,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
 
       let maxFee = BigNumber.from(0);
       let outputAmount: BigNumber;
+      let standardOrFast: "standard" | "fast" = "standard";
       if (isToHyperCore(outputToken.chainId)) {
         // Query CCTP fee configuration for HyperCore destinations
         const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
@@ -199,6 +195,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           amount: remainingInputAmount,
           recipient,
         });
+        standardOrFast = "fast";
       } else {
         // Standard conversion after fees
         const inputAfterFee = exactInputAmount.sub(maxFee);
@@ -215,7 +212,10 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           inputAmount: exactInputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            standardOrFast
+          ),
           provider: name,
           fees: getCctpBridgeFees(inputToken, maxFee),
         },
@@ -253,8 +253,10 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       // Calculate how much to send from origin to cover CCTP fees
       let inputAmount: BigNumber;
       let maxFee = BigNumber.from(0);
+      let standardOrFast: "standard" | "fast" = "standard";
 
       if (destinationIsHyperCore) {
+        standardOrFast = "fast";
         const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
         const { transferFeeBps, forwardFee } = await getCctpFees({
           inputToken,
@@ -288,7 +290,10 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           inputAmount,
           outputAmount: minOutputAmount,
           minOutputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            standardOrFast
+          ),
           provider: name,
           fees: getCctpBridgeFees(inputToken, maxFee),
         },

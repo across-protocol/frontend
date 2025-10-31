@@ -7,6 +7,7 @@ import {
   BridgeStrategyData,
   BridgeStrategyDataParams,
 } from "../_bridges/types";
+import { Token } from "../_dexes/types";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 const LARGE_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
@@ -128,4 +129,35 @@ export async function getBridgeStrategyData({
     // Safely return undefined if we can't fetch bridge strategy data
     return undefined;
   }
+}
+
+export function getZeroBridgeFees(inputToken: Token) {
+  const zeroBN = BigNumber.from(0);
+  return {
+    totalRelay: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    relayerCapital: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    relayerGas: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    lp: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+    bridgeFee: {
+      pct: zeroBN,
+      total: zeroBN,
+      token: inputToken,
+    },
+  };
 }

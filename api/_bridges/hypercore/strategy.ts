@@ -20,6 +20,7 @@ import {
   CORE_WRITER_EVM_ADDRESS,
   encodeTransferOnCoreCalldata,
 } from "../../_hypercore";
+import { getZeroBridgeFees } from "../utils";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -273,36 +274,5 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
     },
 
     isRouteSupported,
-  };
-}
-
-function getZeroBridgeFees(inputToken: Token) {
-  const zeroBN = BigNumber.from(0);
-  return {
-    totalRelay: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerCapital: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerGas: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    lp: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    bridgeFee: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
   };
 }

@@ -138,7 +138,7 @@ export type GetBridgeStrategyParams = {
 export type RoutingRule<TEligibilityData> = {
   name: string;
   shouldApply: (data: TEligibilityData) => boolean;
-  getStrategy: () => BridgeStrategy | null;
+  getStrategy: (inputToken?: Token) => BridgeStrategy | null;
   reason: string;
 };
 
