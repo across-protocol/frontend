@@ -16,6 +16,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const SWAP_PROVIDER_NAME = "gho-multicall3";
 
@@ -61,6 +62,14 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
 
     const { tokenIn, tokenOut, amount, chainId } = swap;
 
+    const slippageTolerance = getSlippage({
+      tokenIn: swap.tokenIn,
+      tokenOut: swap.tokenOut,
+      slippageTolerance: swap.slippageTolerance,
+      originOrDestination: swap.originOrDestination,
+      splitSlippage: opts?.splitSlippage,
+    });
+
     // Only support:
     // - L1 USDC/DAI/USDT -> L1 WGHO
     if (![CHAIN_IDs.MAINNET].includes(chainId)) {
@@ -105,6 +114,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     );
     const ghoSwap = {
       ...swap,
+      slippageTolerance,
       recipient: getRouter(chainId).address,
       tokenOut: {
         address: TOKEN_SYMBOLS_MAP.GHO.addresses[chainId],
@@ -181,7 +191,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       minAmountOut: ghoSwapQuote.minAmountOut,
       expectedAmountOut: ghoSwapQuote.expectedAmountOut,
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
-      slippageTolerance: swap.slippageTolerance,
+      slippageTolerance,
       swapTxns: [aggregateTx],
       swapProvider: {
         name: SWAP_PROVIDER_NAME,

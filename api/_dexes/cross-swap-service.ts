@@ -466,6 +466,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
               crossSwap.inputToken.decimals,
               result.destinationSwap.tokenIn.decimals
             )(crossSwap.amount).toString(),
+            originOrDestination: "destination",
           },
           TradeType.EXACT_INPUT,
           { sources }
@@ -515,6 +516,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
+      originOrDestination: "destination",
     },
     TradeType.EXACT_INPUT,
     { sources: prioritizedStrategy.sources }
@@ -583,6 +585,7 @@ export async function getCrossSwapQuotesForOutputB2A(
         {
           ...result.destinationSwap,
           amount: crossSwapWithAppFee.amount.toString(),
+          originOrDestination: "destination",
         },
         TradeType.EXACT_OUTPUT,
         { sources }
@@ -801,6 +804,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
         {
           ...result.originSwap,
           amount: crossSwap.amount.toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_INPUT,
         { sources }
@@ -843,7 +847,11 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwap,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap,
@@ -915,6 +923,7 @@ export async function getCrossSwapQuotesForOutputA2B(
             bridgeQuote.inputAmount,
             QUOTE_BUFFER
           ).toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_OUTPUT,
         { sources }
@@ -948,12 +957,11 @@ export async function getCrossSwapQuotesForOutputA2B(
     isNative: crossSwapWithAppFee.isOutputNative,
   });
 
-  if (appFee.feeAmount.gt(0)) {
-    bridgeQuote.message = bridge.getBridgeQuoteMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
-  }
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwapWithAppFee,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap: crossSwapWithAppFee,
@@ -1213,9 +1221,14 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
           ...result.originSwap,
           depositor: crossSwap.depositor,
           amount: crossSwap.amount.toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_INPUT,
-        { sources: originSources }
+        {
+          sources: originSources,
+          // Split slippage between origin and destination swaps
+          splitSlippage: true,
+        }
       );
 
       // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
@@ -1225,9 +1238,14 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
           {
             ...result.destinationSwap,
             amount: originSwapQuote.minAmountOut.toString(),
+            originOrDestination: "destination",
           },
           TradeType.EXACT_INPUT,
-          { sources: destinationSources }
+          {
+            sources: destinationSources,
+            // Split slippage between origin and destination swaps
+            splitSlippage: true,
+          }
         );
       return {
         result,
@@ -1279,6 +1297,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
+      originOrDestination: "destination",
     },
     TradeType.EXACT_INPUT,
     {
@@ -1306,6 +1325,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote: prioritizedOriginStrategy.originSwapQuote,
   });
 
   return {
@@ -1386,6 +1406,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         {
           ...result.destinationSwap,
           amount: crossSwapWithAppFee.amount.toString(),
+          originOrDestination: "destination",
         },
         TradeType.EXACT_OUTPUT,
         {
@@ -1469,6 +1490,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
             {
               ...destinationSwap,
               amount: bridgeQuote.outputAmount.toString(),
+              originOrDestination: "destination",
             },
             TradeType.EXACT_INPUT,
             {
@@ -1499,6 +1521,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
                 bridgeQuote.inputAmount,
                 QUOTE_BUFFER
               ).toString(),
+              originOrDestination: "origin",
             },
             TradeType.EXACT_OUTPUT,
             {
@@ -1526,6 +1549,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote,
   });
   assertMinOutputAmount(
     finalDestinationSwapQuote.minAmountOut,

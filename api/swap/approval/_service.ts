@@ -57,7 +57,7 @@ export async function handleApprovalSwap(
     recipient,
     depositor,
     slippageTolerance: _slippageTolerance, // DEPRECATED: slippage expressed as 0 <= slippage <= 100, 1 = 1%
-    slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1%
+    slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1% or "auto"
     excludeSources,
     includeSources,
     appFeePercent,
@@ -77,7 +77,9 @@ export async function handleApprovalSwap(
         )
       : { actions: [] };
 
-  const slippageTolerance = _slippageTolerance ?? slippage * 100;
+  const slippageTolerance =
+    _slippageTolerance ??
+    (typeof slippage === "number" ? (slippage as number) * 100 : "auto");
 
   const bridgeStrategy = await getBridgeStrategy({
     originChainId: inputToken.chainId,

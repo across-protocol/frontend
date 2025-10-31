@@ -20,6 +20,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
 } from "../../_errors";
 import { estimateInputForExactOutput } from "./utils/utils";
+import { getSlippage } from "../../_slippage";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -64,10 +65,18 @@ export function get0xStrategy(
     opts?: QuoteFetchOpts
   ) => {
     try {
+      const slippageTolerance = getSlippage({
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
+      });
+
       if (opts?.sellEntireBalance && opts.quoteBuffer) {
         swap.amount = addMarkupToAmount(
           BigNumber.from(swap.amount),
-          opts.quoteBuffer + swap.slippageTolerance / 100
+          opts.quoteBuffer + slippageTolerance / 100
         ).toString();
       }
       let swapAmount = swap.amount;
@@ -115,7 +124,7 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.floor(swap.slippageTolerance * 100),
+            slippageBps: Math.round(slippageTolerance * 100), // needs to be an integer
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
@@ -185,7 +194,7 @@ export function get0xStrategy(
         minAmountOut,
         expectedAmountOut,
         expectedAmountIn,
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -205,6 +214,7 @@ export function get0xStrategy(
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;

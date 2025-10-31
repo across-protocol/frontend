@@ -117,6 +117,7 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;
@@ -151,9 +152,10 @@ export function buildUniversalRouterSwapTx(
     tradeType,
     route: quote.route,
   });
+
   const { calldata, value } = SwapRouter.swapCallParameters(routerTrade, {
     recipient: swap.recipient,
-    slippageTolerance: floatToPercent(swap.slippageTolerance),
+    slippageTolerance: floatToPercent(quote.slippage),
     useRouterBalance: true,
   });
   return {

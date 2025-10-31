@@ -19,6 +19,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -73,6 +74,14 @@ export function getLifiStrategy(
         assertSellEntireBalanceSupported();
       }
 
+      const slippageTolerance = getSlippage({
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
+      });
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
@@ -99,7 +108,7 @@ export function getLifiStrategy(
         fromAddress: swap.recipient,
         skipSimulation: true,
         swapStepTimingStrategies,
-        slippage: Math.floor(swap.slippageTolerance / 100),
+        slippage: slippageTolerance / 100,
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
           : { toAmount: swap.amount }),
@@ -144,7 +153,7 @@ export function getLifiStrategy(
         minAmountOut,
         expectedAmountOut,
         expectedAmountIn,
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -164,6 +173,7 @@ export function getLifiStrategy(
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;
