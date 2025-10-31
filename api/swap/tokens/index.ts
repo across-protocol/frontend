@@ -9,6 +9,7 @@ import { sendResponse } from "../../_response_utils";
 import { TypedVercelRequest } from "../../_types";
 import {
   ENABLED_ROUTES,
+  getChainInfo,
   getFallbackTokenLogoURI,
   getLogger,
   handleErrorCondition,
@@ -254,35 +255,63 @@ function getTokensFromEnabledRoutes(
   const tokens: Token[] = [];
   const seenTokens = new Set<string>();
 
+  const addToken = (
+    chainId: number,
+    tokenSymbol: string,
+    tokenAddress: string,
+    l1TokenAddress: string,
+    isNative: boolean
+  ) => {
+    const finalAddress = isNative ? constants.AddressZero : tokenAddress;
+
+    const tokenKey = `${chainId}-${tokenSymbol}-${finalAddress.toLowerCase()}`;
+
+    // Only add each unique token once
+    if (!seenTokens.has(tokenKey)) {
+      seenTokens.add(tokenKey);
+
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+
+      tokens.push({
+        chainId,
+        address: finalAddress,
+        name: tokenInfo.name,
+        symbol: tokenSymbol,
+        decimals: tokenInfo.decimals,
+        logoUrl: getFallbackTokenLogoURI(l1TokenAddress),
+        priceUsd: pricesForLifiTokens[chainId]?.[finalAddress] || null,
+      });
+    }
+  };
+
   ENABLED_ROUTES.routes.forEach((route) => {
+    // Process origin tokens (fromChain)
     if (chainIds.includes(route.fromChain)) {
-      // Use AddressZero for native tokens, original address otherwise
-      const tokenAddress = route.isNative
-        ? constants.AddressZero
-        : route.fromTokenAddress;
+      addToken(
+        route.fromChain,
+        route.fromTokenSymbol,
+        route.fromTokenAddress,
+        route.l1TokenAddress,
+        route.isNative
+      );
+    }
 
-      const tokenKey = `${route.fromChain}-${route.fromTokenSymbol}-${tokenAddress.toLowerCase()}`;
+    // Process destination tokens (toChain)
+    if (chainIds.includes(route.toChain)) {
+      // For destination tokens, check if token is native on that chain
+      const chainInfo = getChainInfo(route.toChain);
+      const nativeSymbol =
+        route.toChain === CHAIN_IDs.LENS ? "GHO" : chainInfo.nativeToken;
+      const isDestinationNative = route.toTokenSymbol === nativeSymbol;
 
-      // Only add each unique token once
-      if (!seenTokens.has(tokenKey)) {
-        seenTokens.add(tokenKey);
-
-        const tokenInfo =
-          TOKEN_SYMBOLS_MAP[
-            route.fromTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
-          ];
-
-        tokens.push({
-          chainId: route.fromChain,
-          address: tokenAddress,
-          name: tokenInfo.name,
-          symbol: route.fromTokenSymbol,
-          decimals: tokenInfo.decimals,
-          logoUrl: getFallbackTokenLogoURI(route.l1TokenAddress),
-          priceUsd:
-            pricesForLifiTokens[route.fromChain]?.[tokenAddress] || null,
-        });
-      }
+      addToken(
+        route.toChain,
+        route.toTokenSymbol,
+        route.toTokenAddress,
+        route.l1TokenAddress,
+        isDestinationNative
+      );
     }
   });
 
