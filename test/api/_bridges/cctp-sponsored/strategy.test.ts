@@ -1,4 +1,4 @@
-import { BigNumber, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import {
   buildEvmTxForAllowanceHolder,
   calculateMaxBpsToSponsor,
@@ -17,6 +17,7 @@ import { ConvertDecimals } from "../../../../api/_utils";
 import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
 import * as cctpHypercore from "../../../../api/_bridges/cctp/utils/hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES } from "../../../../api/_bridges/cctp-sponsored/utils/constants";
+import { getEnvs } from "../../../../api/_env";
 
 describe("api/_bridges/cctp-sponsored/strategy", () => {
   const arbitrumUSDC: Token = {
@@ -398,9 +399,15 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     const recipient = "0x0000000000000000000000000000000000000002";
     const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
     const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
+    const TEST_WALLET = ethers.Wallet.createRandom();
+    const TEST_PRIVATE_KEY = TEST_WALLET.privateKey;
 
     beforeEach(() => {
       jest.clearAllMocks();
+      // Before each test, mock the return value of getEnvs to provide our test private key.
+      (getEnvs as jest.Mock).mockReturnValue({
+        SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
+      });
     });
 
     test("should build transaction correctly for USDC output", async () => {
