@@ -1,4 +1,4 @@
-import React, { useState, ImgHTMLAttributes } from "react";
+import { useState, useEffect, ImgHTMLAttributes } from "react";
 import fallbackLogo from "assets/token-logos/fallback.svg";
 
 type TokenImageProps = ImgHTMLAttributes<HTMLImageElement> & {
@@ -12,6 +12,11 @@ type TokenImageProps = ImgHTMLAttributes<HTMLImageElement> & {
  */
 export function TokenImage({ src, alt, ...props }: TokenImageProps) {
   const [imageError, setImageError] = useState(false);
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setImageError(false);
+  }, [src]);
 
   const imageSrc = !src || imageError ? fallbackLogo : src;
 
