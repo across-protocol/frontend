@@ -13,7 +13,10 @@ import {
   getCctpDomainId,
 } from "../../cctp/utils/constants";
 import { isToHyperCore } from "../../cctp/utils/hypercore";
-import { SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES } from "./constants";
+import {
+  SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES,
+  SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS,
+} from "./constants";
 
 /**
  * Builds a complete sponsored CCTP quote with signature
@@ -62,8 +65,8 @@ export function buildSponsoredCCTPQuote(
   const sponsoredCCTPQuote: SponsoredCCTPQuote = {
     sourceDomain: getCctpDomainId(inputToken.chainId),
     destinationDomain: getCctpDomainId(intermediaryChainId),
-    destinationCaller: toBytes32(sponsoredCCTPDstPeripheryAddress),
-    mintRecipient: toBytes32(recipient),
+    destinationCaller: toBytes32(SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS),
+    mintRecipient: toBytes32(sponsoredCCTPDstPeripheryAddress),
     amount: inputAmount,
     burnToken: toBytes32(inputToken.address),
     maxFee,

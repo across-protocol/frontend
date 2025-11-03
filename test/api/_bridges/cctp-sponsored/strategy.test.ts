@@ -342,8 +342,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
       expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDC);
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
-      // Output should be converted from 6 decimals to 8 decimals
-      expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000"); // 1 USDC in 8 decimals
+      // Output should be converted from 6 decimals to 6 decimals (HyperCore USDC perp)
+      expect(result.bridgeQuote.outputAmount.toString()).toBe("1000000"); // 1 USDC in 6 decimals
       expect(result.bridgeQuote.minOutputAmount).toEqual(
         result.bridgeQuote.outputAmount
       );

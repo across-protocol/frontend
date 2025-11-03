@@ -23,7 +23,7 @@ import {
   SPONSORED_CCTP_OUTPUT_TOKENS,
   SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES,
 } from "./utils/constants";
-import { simulateMarketOrder } from "../../_hypercore";
+import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 
@@ -281,7 +281,7 @@ export async function calculateMaxBpsToSponsor(params: {
       chainId: outputToken.chainId,
       tokenIn: {
         symbol: "USDC",
-        decimals: 8,
+        decimals: SPOT_TOKEN_DECIMALS,
       },
       tokenOut: {
         symbol: outputToken.symbol,

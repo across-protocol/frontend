@@ -1,5 +1,12 @@
+import { ethers } from "ethers";
+
 import { CHAIN_IDs } from "../../../_constants";
 import { CCTP_SUPPORTED_CHAINS } from "../../cctp/utils/constants";
+import { getEnvs } from "../../../_env";
+
+export const SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS =
+  getEnvs().SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS ||
+  ethers.constants.AddressZero;
 
 // TODO: Use actual addresses for zero addresses
 export const SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES = {
@@ -15,7 +22,12 @@ export const SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES = {
 
 export const SPONSORED_CCTP_ORIGIN_CHAINS = CCTP_SUPPORTED_CHAINS.filter(
   (chainId) =>
-    ![CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId)
+    ![
+      CHAIN_IDs.HYPERCORE,
+      CHAIN_IDs.HYPERCORE_TESTNET,
+      CHAIN_IDs.HYPEREVM,
+      CHAIN_IDs.HYPEREVM_TESTNET,
+    ].includes(chainId)
 );
 
 export const SPONSORED_CCTP_INPUT_TOKENS = ["USDC"];
