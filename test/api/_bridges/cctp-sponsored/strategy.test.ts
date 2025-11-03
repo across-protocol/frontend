@@ -19,6 +19,11 @@ import * as cctpHypercore from "../../../../api/_bridges/cctp/utils/hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES } from "../../../../api/_bridges/cctp-sponsored/utils/constants";
 import { getEnvs } from "../../../../api/_env";
 
+// Mock the environment variables to ensure tests are deterministic.
+jest.mock("../../../../api/_env", () => ({
+  getEnvs: jest.fn(),
+}));
+
 describe("api/_bridges/cctp-sponsored/strategy", () => {
   const arbitrumUSDC: Token = {
     ...TOKEN_SYMBOLS_MAP.USDC,
