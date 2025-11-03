@@ -9,13 +9,15 @@ import { Tooltip } from "components/Tooltip";
 import { Input, InputGroup } from "components/Input";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import {
-  QUERIESV2,
-  formatUSD,
   formatUnitsWithMaxFractions,
+  formatUSD,
   getToken,
   isNumberEthersParseable,
   parseUnits,
+  QUERIESV2,
 } from "utils";
+import { useFeatureFlag } from "../../hooks";
+import { useCallback } from "react";
 
 export type Props = {
   balance?: BigNumber;
@@ -50,6 +52,8 @@ export function AmountInput({
 }: Props) {
   const token = getToken(inputTokenSymbol);
 
+  const { hasFeatureFlag } = useFeatureFlag();
+
   const validationLevel =
     (amountInput ?? "") === ""
       ? "valid"
@@ -74,6 +78,10 @@ export function AmountInput({
   const estimatedUsdInputAmount =
     convertTokenToBaseCurrency(inputAmountAsNumeric);
 
+  let getPlaceholder = useCallback(() => {
+    return hasFeatureFlag("demo-flag") ? "WORKS!" : "NAT!";
+  }, []);
+
   return (
     <Wrapper>
       <InputGroup validationLevel={validationLevel}>
@@ -93,7 +101,7 @@ export function AmountInput({
         <Input
           type="number"
           validationLevel={validationLevel}
-          placeholder="Enter amount"
+          placeholder={getPlaceholder()}
           value={amountInput}
           onWheel={(e) => e.currentTarget.blur()}
           onChange={(e) => {

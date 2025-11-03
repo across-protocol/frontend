@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useConnection } from "hooks";
 import {
-  identifyUserWallet,
-  setUserId,
-  identifyWalletChainId,
   identifyReferrer,
+  identifyUserWallet,
+  identifyWalletChainId,
+  setUserId,
 } from "utils/amplitude";
 import { ampli } from "ampli";
 
-export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
+export function useInitialUserPropTraces(
+  isAmpliLoaded: boolean,
+  fetchFeatureFlags: () => void
+) {
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
@@ -47,6 +50,10 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       await identifyReferrer()?.promise;
 
       setAreInitialUserPropsSet(true);
+
+      // Fetch feature flags AFTER userId is set
+      // TODO it seems like this hook is called exessively
+      fetchFeatureFlags();
       setPrevTrackedAccount(account);
     })();
   }, [
@@ -56,6 +63,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
     prevTrackedAccount,
     chainId,
     connector,
+    fetchFeatureFlags,
   ]);
 
   useEffect(() => {
