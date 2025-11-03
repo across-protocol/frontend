@@ -7,6 +7,8 @@ import { CHAIN_IDs } from "./_constants";
 const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
 const HYPERLIQUID_API_BASE_URL_TESTNET = "https://api.hyperliquid-testnet.xyz";
 
+export const SPOT_TOKEN_DECIMALS = 8;
+
 // Maps <TOKEN_IN_SYMBOL>/<TOKEN_OUT_SYMBOL> to the coin identifier to be used to
 // retrieve the L2 order book for a given pair via the Hyperliquid API.
 // See: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#perpetuals-vs-spot
@@ -403,7 +405,7 @@ export async function simulateMarketOrder(params: {
 }
 
 export function getNormalizedSpotTokenSymbol(symbol: string): string {
-  return ["USDC-SPOT", "USDT-SPOT", "USDH-SPOT"].includes(symbol.toUpperCase())
+  return ["USDT-SPOT", "USDH-SPOT"].includes(symbol.toUpperCase())
     ? symbol.toUpperCase().replace("-SPOT", "")
     : symbol.toUpperCase();
 }

@@ -192,7 +192,7 @@ describe("Sponsored OFT Strategy", () => {
       });
     });
 
-    describe("USDC-SPOT output", () => {
+    describe("USDC output", () => {
       beforeEach(() => {
         jest.clearAllMocks();
       });
@@ -210,7 +210,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         const result = await calculateMaxBpsToSponsor({
-          outputTokenSymbol: "USDC-SPOT",
+          outputTokenSymbol: "USDC",
           bridgeInputAmount,
           bridgeOutputAmount,
         });
@@ -231,7 +231,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         const result = await calculateMaxBpsToSponsor({
-          outputTokenSymbol: "USDC-SPOT",
+          outputTokenSymbol: "USDC",
           bridgeInputAmount,
           bridgeOutputAmount,
         });
@@ -252,7 +252,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         const result = await calculateMaxBpsToSponsor({
-          outputTokenSymbol: "USDC-SPOT",
+          outputTokenSymbol: "USDC",
           bridgeInputAmount,
           bridgeOutputAmount,
         });
@@ -274,7 +274,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         const result = await calculateMaxBpsToSponsor({
-          outputTokenSymbol: "USDC-SPOT",
+          outputTokenSymbol: "USDC",
           bridgeInputAmount,
           bridgeOutputAmount,
         });
@@ -296,7 +296,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         const result = await calculateMaxBpsToSponsor({
-          outputTokenSymbol: "USDC-SPOT",
+          outputTokenSymbol: "USDC",
           bridgeInputAmount,
           bridgeOutputAmount,
         });

@@ -25,11 +25,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
   };
 
-  const hyperCoreUSDCSpot: Token = {
-    symbol: "USDC-SPOT",
-    decimals: 8,
-    address:
-      TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE_TESTNET],
+  const hyperCoreUSDC: Token = {
+    ...TOKEN_SYMBOLS_MAP["USDC"],
+    address: TOKEN_SYMBOLS_MAP["USDC"].addresses[CHAIN_IDs.HYPERCORE_TESTNET],
     chainId: CHAIN_IDs.HYPERCORE_TESTNET,
   };
 
@@ -47,11 +45,11 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
   };
 
   describe("#isRouteSupported()", () => {
-    test("should return true for Arbitrum USDC -> HyperCore USDC-SPOT", () => {
+    test("should return true for Arbitrum USDC -> HyperCore USDC", () => {
       expect(
         isRouteSupported({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
         })
       ).toBe(true);
     });
@@ -83,11 +81,11 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
     const maxFee = utils.parseUnits("0.0001", arbitrumUSDC.decimals); // 0.01% = 1 bps
 
-    describe("USDC-SPOT output (no swap needed)", () => {
+    describe("USDC output (no swap needed)", () => {
       test("should return correct maxFeeBps", async () => {
         const result = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           maxFee,
           inputAmount,
         });
@@ -101,7 +99,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
         const result = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           maxFee: largerMaxFee,
           inputAmount,
         });
@@ -115,7 +113,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
         const result = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           maxFee,
           inputAmount: largerInputAmount,
         });
@@ -337,12 +335,12 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
       const result = await getQuoteForExactInput({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDCSpot,
+        outputToken: hyperCoreUSDC,
         exactInputAmount,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
-      expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDCSpot);
+      expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDC);
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
       // Output should be converted from 6 decimals to 8 decimals
       expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000"); // 1 USDC in 8 decimals
@@ -366,16 +364,16 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
   describe("#getQuoteForOutput()", () => {
     test("should return correct bridge quote with converted decimals", async () => {
-      const minOutputAmount = utils.parseUnits("1", hyperCoreUSDCSpot.decimals);
+      const minOutputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
 
       const result = await getQuoteForOutput({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDCSpot,
+        outputToken: hyperCoreUSDC,
         minOutputAmount,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
-      expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDCSpot);
+      expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDC);
       // Input should be converted from 8 decimals to 6 decimals
       expect(result.bridgeQuote.inputAmount.toString()).toBe("1000000"); // 1 USDC in 6 decimals
       expect(result.bridgeQuote.outputAmount).toEqual(minOutputAmount);
@@ -399,17 +397,17 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     const depositor = "0x0000000000000000000000000000000000000001";
     const recipient = "0x0000000000000000000000000000000000000002";
     const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
-    const outputAmount = utils.parseUnits("1", hyperCoreUSDCSpot.decimals);
+    const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    test("should build transaction correctly for USDC-SPOT output", async () => {
+    test("should build transaction correctly for USDC output", async () => {
       const crossSwap: CrossSwap = {
         amount: inputAmount,
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDCSpot,
+        outputToken: hyperCoreUSDC,
         depositor,
         recipient,
         slippageTolerance: 1,
@@ -423,7 +421,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         crossSwap,
         bridgeQuote: {
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           inputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
@@ -602,7 +600,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       const crossSwap: CrossSwap = {
         amount: inputAmount,
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDCSpot,
+        outputToken: hyperCoreUSDC,
         depositor,
         recipient,
         slippageTolerance: 1,
@@ -616,7 +614,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         crossSwap,
         bridgeQuote: {
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           inputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
@@ -679,7 +677,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       const crossSwap: CrossSwap = {
         amount: inputAmount,
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDCSpot,
+        outputToken: hyperCoreUSDC,
         depositor,
         recipient,
         slippageTolerance: 1,
@@ -693,7 +691,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         crossSwap,
         bridgeQuote: {
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDCSpot,
+          outputToken: hyperCoreUSDC,
           inputAmount,
           outputAmount,
           minOutputAmount: outputAmount,

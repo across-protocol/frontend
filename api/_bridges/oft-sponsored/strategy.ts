@@ -21,7 +21,7 @@ import {
   getFallbackRecipient,
 } from "../../_dexes/utils";
 import { InvalidParamError } from "../../_errors";
-import { simulateMarketOrder } from "../../_hypercore";
+import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import { ConvertDecimals, getCachedTokenInfo } from "../../_utils";
 import { getNativeTokenInfo } from "../../swap/_utils";
@@ -240,7 +240,7 @@ export async function getSponsoredOftQuoteForOutput(
 
 /**
  * Calculates the maximum basis points to sponsor for a given output token
- * @param outputTokenSymbol - The symbol of the output token (e.g., "USDT-SPOT", "USDC-SPOT")
+ * @param outputTokenSymbol - The symbol of the output token (e.g., "USDT-SPOT", "USDC")
  * @param bridgeInputAmount - The input amount being bridged (in input token decimals)
  * @param bridgeOutputAmount - The output amount from the bridge (in intermediary token decimals)
  * @returns The maximum basis points to sponsor
@@ -257,20 +257,23 @@ export async function calculateMaxBpsToSponsor(params: {
     return BigNumber.from(0);
   }
 
-  if (outputTokenSymbol === "USDC-SPOT") {
+  if (outputTokenSymbol === "USDC") {
     // USDT -> USDC: Calculate sponsorship needed to guarantee 1:1 output
 
     // Simulate the swap on HyperCore to get estimated output
     const simulation = await simulateMarketOrder({
       tokenIn: {
         symbol: "USDT",
-        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+        decimals: SPOT_TOKEN_DECIMALS, // Spot token decimals always 8
       },
       tokenOut: {
         symbol: "USDC",
-        decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals, // TODO: Update to use USDC-SPOT when available
+        decimals: SPOT_TOKEN_DECIMALS, // Spot token decimals always 8
       },
-      inputAmount: bridgeOutputAmount,
+      inputAmount: ConvertDecimals(
+        TOKEN_SYMBOLS_MAP.USDT.decimals,
+        SPOT_TOKEN_DECIMALS
+      )(bridgeOutputAmount), // Convert USDT to USDT-SPOT, as `bridgeOutputAmount` is in USDT decimals
     });
 
     // Expected output (1:1): same amount as initial input after decimal conversion
@@ -278,7 +281,7 @@ export async function calculateMaxBpsToSponsor(params: {
 
     const swapOutput = simulation.outputAmount;
     const swapOutputInInputDecimals = ConvertDecimals(
-      TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+      SPOT_TOKEN_DECIMALS,
       TOKEN_SYMBOLS_MAP.USDT.decimals
     )(swapOutput);
 
@@ -376,11 +379,10 @@ export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
     },
 
     getCrossSwapTypes: ({ inputToken, outputToken }) => {
-      // Routes supported: USDT → USDT-SPOT or USDC-SPOT
+      // Routes supported: USDT → USDT-SPOT or USDC
       if (
         inputToken.symbol === "USDT" &&
-        (outputToken.symbol === "USDT-SPOT" ||
-          outputToken.symbol === "USDC-SPOT")
+        (outputToken.symbol === "USDT-SPOT" || outputToken.symbol === "USDC")
       ) {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
       }

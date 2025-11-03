@@ -34,7 +34,7 @@ export const SPONSORED_OFT_INPUT_TOKENS = ["USDT"];
 /**
  * Supported output tokens for sponsored OFT flows
  */
-export const SPONSORED_OFT_OUTPUT_TOKENS = ["USDT-SPOT", "USDC-SPOT"];
+export const SPONSORED_OFT_OUTPUT_TOKENS = ["USDT-SPOT", "USDC"];
 
 /**
  * Supported destination chains for sponsored OFT flows
