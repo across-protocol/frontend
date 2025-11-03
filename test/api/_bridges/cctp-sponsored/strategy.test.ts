@@ -21,8 +21,11 @@ import { getEnvs } from "../../../../api/_env";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({
-  getEnvs: jest.fn(),
+  getEnvs: jest.fn().mockReturnValue({}),
 }));
+
+const TEST_WALLET = ethers.Wallet.createRandom();
+const TEST_PRIVATE_KEY = TEST_WALLET.privateKey;
 
 describe("api/_bridges/cctp-sponsored/strategy", () => {
   const arbitrumUSDC: Token = {
@@ -404,8 +407,6 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     const recipient = "0x0000000000000000000000000000000000000002";
     const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
     const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
-    const TEST_WALLET = ethers.Wallet.createRandom();
-    const TEST_PRIVATE_KEY = TEST_WALLET.privateKey;
 
     beforeEach(() => {
       jest.clearAllMocks();
