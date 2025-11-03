@@ -99,7 +99,10 @@ export default async function handler(
       responseJson.push(...jupiterTokens);
 
       // Add tokens from indirect chains (e.g., USDT-SPOT on HyperCore)
-      const indirectChainTokens = getIndirectChainTokens(filteredChainIds);
+      const indirectChainTokens = getIndirectChainTokens(
+        filteredChainIds,
+        pricesForLifiTokens
+      );
       responseJson.push(...indirectChainTokens);
 
       // Add tokens from Across' enabled routes (fills gaps from external sources)
@@ -229,22 +232,43 @@ function getJupiterTokens(
   }, []);
 }
 
-function getIndirectChainTokens(chainIds: number[]): Token[] {
+function getIndirectChainTokens(
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): Token[] {
+  // Chain ID to use for token price lookups
+  const PRICE_LOOKUP_CHAIN_ID = CHAIN_IDs.MAINNET;
+
   return indirectChains.flatMap((chain) => {
     if (!chainIds.includes(chain.chainId)) {
       return [];
     }
 
-    return chain.outputTokens.map((token) => ({
-      chainId: chain.chainId,
-      address: token.address,
-      name: token.name,
-      symbol: token.symbol,
-      decimals: token.decimals,
-      logoUrl: token.logoUrl,
-      // TODO: Add more generic price resolution logic for indirect chain tokens
-      priceUsd: token.symbol === "USDT-SPOT" ? "1" : null,
-    }));
+    return chain.outputTokens.map((token) => {
+      // Try to resolve price using L1 address from TOKEN_SYMBOLS_MAP
+      let priceUsd: string | null = null;
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
+
+      if (tokenInfo) {
+        // Get L1 address
+        const l1Address = tokenInfo.addresses[PRICE_LOOKUP_CHAIN_ID];
+        if (l1Address) {
+          priceUsd =
+            pricesForLifiTokens[PRICE_LOOKUP_CHAIN_ID]?.[l1Address] || null;
+        }
+      }
+
+      return {
+        chainId: chain.chainId,
+        address: token.address,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        logoUrl: token.logoUrl,
+        priceUsd,
+      };
+    });
   });
 }
 
