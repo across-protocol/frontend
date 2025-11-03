@@ -12,7 +12,7 @@ export function useUserTokenBalances() {
   const svmAccountString = svmAccount?.toString();
 
   return useQuery({
-    queryKey: ["userTokenBalances", evmAccount, svmAccountString],
+    queryKey: makeUseUserTokenBalancesQueryKey([evmAccount, svmAccountString]),
     queryFn: async (): Promise<UserTokenBalancesResponse> => {
       // Fetch balances for both accounts if they exist
       const promises: Promise<UserTokenBalancesResponse>[] = [];
@@ -48,3 +48,7 @@ export function useUserTokenBalances() {
     staleTime: 3 * 60 * 1000, // Consider data stale after 3 minutes
   });
 }
+
+export const makeUseUserTokenBalancesQueryKey = (
+  keys?: Parameters<typeof useQuery>[0]["queryKey"]
+) => ["userTokenBalances", ...(keys ? keys : [])];

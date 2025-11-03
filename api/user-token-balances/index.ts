@@ -49,8 +49,8 @@ const handler = async (
         body: responseData,
         statusCode: 200,
         requestId,
-        cacheSeconds: 60 * 3,
-        staleWhileRevalidateSeconds: 60,
+        cacheSeconds: 10, // 30 seconds cache - balances update frequently after transactions
+        staleWhileRevalidateSeconds: 10,
       });
     } catch (error: unknown) {
       return handleErrorCondition(

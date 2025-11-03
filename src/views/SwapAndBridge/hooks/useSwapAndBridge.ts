@@ -294,8 +294,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     quoteWarningMessage,
   ]);
 
-  console.log("validation.errorFormatted", validation.errorFormatted);
-
   const buttonDisabled = useMemo(
     () =>
       approvalAction.buttonDisabled ||
