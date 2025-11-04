@@ -18,26 +18,32 @@ type FeeComponent<T extends FeeDetailsBase | undefined = undefined> = {
   details?: T;
 };
 
+enum FeeDetailsType {
+  TOTAL_BREAKDOWN = "total-breakdown",
+  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
+  ACROSS = "across",
+}
+
 type FeeDetailsBase = {
-  type: "total-breakdown" | "max-total-breakdown" | "across";
+  type: FeeDetailsType;
 };
 
 type AcrossBridgeFeeDetails = FeeDetailsBase & {
-  type: "across";
+  type: FeeDetailsType.ACROSS;
   lp: FeeComponent;
   relayerCapital: FeeComponent;
   destinationGas: FeeComponent;
 };
 
 type TotalFeeBreakdownDetails = {
-  type: "total-breakdown";
+  type: FeeDetailsType.TOTAL_BREAKDOWN;
   swapImpact: FeeComponent;
   app: FeeComponent;
   bridge: FeeComponent<AcrossBridgeFeeDetails> | FeeComponent;
 };
 
 type MaxTotalFeeBreakdownDetails = {
-  type: "max-total-breakdown";
+  type: FeeDetailsType.MAX_TOTAL_BREAKDOWN;
   maxSwapImpact: FeeComponent;
   app: FeeComponent;
   bridge: FeeComponent<AcrossBridgeFeeDetails> | FeeComponent;
@@ -289,16 +295,16 @@ export async function calculateSwapFees(params: {
     });
 
     // Format total fee breakdown details
-    const totalFeeBreakdownDetails = {
-      type: "total-breakdown" as const,
+    const totalFeeBreakdownDetails: TotalFeeBreakdownDetails = {
+      type: FeeDetailsType.TOTAL_BREAKDOWN,
       swapImpact: swapImpactComponent,
       app: appFeeComponent,
       bridge: bridgeFeeComponent,
     };
 
     // Format max total fee breakdown details
-    const maxTotalFeeBreakdownDetails = {
-      type: "max-total-breakdown" as const,
+    const maxTotalFeeBreakdownDetails: MaxTotalFeeBreakdownDetails = {
+      type: FeeDetailsType.MAX_TOTAL_BREAKDOWN,
       maxSwapImpact: maxSwapImpactComponent,
       app: appFeeComponent,
       bridge: bridgeFeeComponent,
@@ -389,7 +395,7 @@ function formatBridgeFeesDetails(params: {
     destinationGasToken,
   } = params;
 
-  if (bridgeFees.details?.type !== "across") {
+  if (bridgeFees.details?.type !== FeeDetailsType.ACROSS) {
     return undefined;
   }
 
@@ -411,7 +417,7 @@ function formatBridgeFeesDetails(params: {
     bridgeQuoteInputTokenPriceUsd;
 
   return {
-    type: "across" as const,
+    type: FeeDetailsType.ACROSS,
     lp: formatFeeComponent({
       amount: lp.amount,
       amountUsd: lpFeeUsd,
@@ -434,7 +440,7 @@ function formatBridgeFeesDetails(params: {
       token: destinationGasToken,
       inputAmountUsd,
     }),
-  };
+  } as AcrossBridgeFeeDetails;
 }
 
 /**
