@@ -419,7 +419,7 @@ const DesktopModal = ({
     <Modal
       verticalLocation="middle"
       title={
-        <Title>Select ${isOriginToken ? "Origin" : "Destination"} Token</Title>
+        <Title>Select {isOriginToken ? "Origin" : "Destination"} Token</Title>
       }
       isOpen={displayModal}
       padding="thin"
