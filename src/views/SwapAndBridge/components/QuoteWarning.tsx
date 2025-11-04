@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { COLORS } from "utils";
-import { ReactComponent as WarningTriangle } from "assets/icons/warning_triangle.svg";
+import { ReactComponent as WarningTriangle } from "assets/icons/warning_triangle_filled.svg";
 
 type QuoteWarningProps = {
   message: string | null;

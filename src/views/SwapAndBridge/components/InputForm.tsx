@@ -1,6 +1,6 @@
 import { COLORS, formatUSD, withOpacity } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
-import { EnrichedToken } from "./ChainTokenSelector/Modal";
+import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import { BalanceSelector } from "./BalanceSelector";
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -64,6 +64,7 @@ export const InputForm = ({
     <Wrapper>
       <TokenInput
         setToken={setInputToken}
+        setOtherToken={setOutputToken}
         token={inputToken}
         setAmount={(amount) => {
           setAmount(amount);
@@ -88,6 +89,7 @@ export const InputForm = ({
       </QuickSwapButton>
       <TokenInput
         setToken={setOutputToken}
+        setOtherToken={setInputToken}
         token={outputToken}
         setAmount={(amount) => {
           setAmount(amount);
@@ -110,6 +112,7 @@ export const InputForm = ({
 
 const TokenInput = ({
   setToken,
+  setOtherToken,
   token,
   setAmount,
   isOrigin,
@@ -125,6 +128,7 @@ const TokenInput = ({
   destinationChainEcosystem,
 }: {
   setToken: (token: EnrichedToken) => void;
+  setOtherToken: (token: EnrichedToken | null) => void;
   token: EnrichedToken | null;
   setAmount: (amount: BigNumber | null) => void;
   isOrigin: boolean;
@@ -225,6 +229,7 @@ const TokenInput = ({
       <TokenSelectorColumn>
         <SelectorButton
           onSelect={setToken}
+          onSelectOtherToken={setOtherToken}
           isOriginToken={isOrigin}
           marginBottom={token ? "24px" : "0px"}
           selectedToken={token}

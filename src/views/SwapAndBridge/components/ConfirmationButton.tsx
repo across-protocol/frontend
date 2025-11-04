@@ -9,13 +9,13 @@ import { ReactComponent as Route } from "assets/icons/route.svg";
 import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
-import { ReactComponent as Warning } from "assets/icons/warning_triangle.svg";
+import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
-import { EnrichedToken } from "./ChainTokenSelector/Modal";
+import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";

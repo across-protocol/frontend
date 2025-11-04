@@ -3,11 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { TokenImage } from "components/TokenImage";
-import ChainTokenSelectorModal, { EnrichedToken } from "./Modal";
+import {
+  ChainTokenSelectorModal,
+  EnrichedToken,
+} from "./ChainTokenSelectorModal";
 
 type Props = {
   selectedToken: EnrichedToken | null;
   onSelect?: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void; // Callback to reset the other selector
   isOriginToken: boolean;
   otherToken?: EnrichedToken | null; // The currently selected token on the other side
   marginBottom?: string;
@@ -16,6 +20,7 @@ type Props = {
 
 export default function SelectorButton({
   onSelect,
+  onSelectOtherToken,
   selectedToken,
   isOriginToken,
   otherToken,
@@ -52,6 +57,7 @@ export default function SelectorButton({
         </Wrapper>
         <ChainTokenSelectorModal
           onSelect={setSelectedToken}
+          onSelectOtherToken={onSelectOtherToken}
           displayModal={displayModal}
           setDisplayModal={setDisplayModal}
           isOriginToken={isOriginToken}
@@ -83,6 +89,7 @@ export default function SelectorButton({
       </Wrapper>
       <ChainTokenSelectorModal
         onSelect={setSelectedToken}
+        onSelectOtherToken={onSelectOtherToken}
         displayModal={displayModal}
         setDisplayModal={setDisplayModal}
         isOriginToken={isOriginToken}

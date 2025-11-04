@@ -17,6 +17,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
+import { ReactComponent as WarningIcon } from "assets/icons/warning_triangle.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
@@ -55,13 +56,18 @@ export type EnrichedToken = LifiToken & {
   routeSource: "bridge" | "swap";
 };
 
+type EnrichedTokenWithReachability = EnrichedToken & {
+  isUnreachable: boolean;
+};
+
 type DisplayedTokens = {
-  popular: EnrichedToken[];
-  all: EnrichedToken[];
+  popular: EnrichedTokenWithReachability[];
+  all: EnrichedTokenWithReachability[];
 };
 
 type Props = {
   onSelect: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void; // Callback to reset the other selector
   isOriginToken: boolean;
   currentToken?: EnrichedToken | null; // The currently selected token we're changing from
   otherToken?: EnrichedToken | null; // The currently selected token on the other side
@@ -69,11 +75,12 @@ type Props = {
   setDisplayModal: (displayModal: boolean) => void;
 };
 
-export default function ChainTokenSelectorModal({
+export function ChainTokenSelectorModal({
   isOriginToken,
   displayModal,
   setDisplayModal,
   onSelect,
+  onSelectOtherToken,
   currentToken,
   otherToken,
 }: Props) {
@@ -103,16 +110,22 @@ export default function ChainTokenSelectorModal({
       tokens = Object.values(crossChainRoutes).flatMap((t) => t);
     }
 
-    // Enrich tokens with route source information
+    // Enrich tokens with route source information and unreachable flag
     const enrichedTokens = tokens.map((token) => {
       // Find the corresponding token in crossChainRoutes to get route source
       const routeToken = crossChainRoutes?.[token.chainId]?.find(
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
+      // Token is unreachable if otherToken exists and is from the same chain
+      const isUnreachable = otherToken
+        ? token.chainId === otherToken.chainId
+        : false;
+
       return {
         ...token,
         routeSource: routeToken?.routeSource || "bridge", // Default to bridge if not found
+        isUnreachable,
       };
     });
 
@@ -136,7 +149,7 @@ export default function ChainTokenSelectorModal({
     });
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
-    const sortTokens = (tokens: EnrichedToken[]) => {
+    const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
       return tokens.sort((a, b) => {
         // Sort by balance - tokens with balance go to top
         const aHasBalance = a.balance.gt(0) && a.balanceUsd > 0.01;
@@ -206,8 +219,7 @@ export default function ChainTokenSelectorModal({
       .map((chainInfo) => {
         return {
           ...chainInfo,
-          isDisabled:
-            otherToken && Number(chainInfo.chainId) === otherToken.chainId, // same chain can't be both input and output
+          isDisabled: false, // No longer disable chains at chain level
         };
       });
 
@@ -253,6 +265,7 @@ export default function ChainTokenSelectorModal({
         setMobileStep("token");
       }}
       onTokenSelect={onSelect}
+      onSelectOtherToken={onSelectOtherToken}
     />
   ) : (
     <DesktopModal
@@ -268,6 +281,7 @@ export default function ChainTokenSelectorModal({
       displayedTokens={displayedTokens}
       onChainSelect={setSelectedChain}
       onTokenSelect={onSelect}
+      onSelectOtherToken={onSelectOtherToken}
     />
   );
 }
@@ -288,6 +302,7 @@ const MobileModal = ({
   displayedTokens,
   onChainSelect,
   onTokenSelect,
+  onSelectOtherToken,
 }: {
   isOriginToken: boolean;
   displayModal: boolean;
@@ -303,6 +318,7 @@ const MobileModal = ({
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void;
 }) => {
   return (
     <Modal
@@ -336,6 +352,7 @@ const MobileModal = ({
       noScroll
     >
       <MobileLayout
+        isOriginToken={isOriginToken}
         mobileStep={mobileStep}
         selectedChain={selectedChain}
         chainSearch={chainSearch}
@@ -346,6 +363,7 @@ const MobileModal = ({
         displayedTokens={displayedTokens}
         onChainSelect={onChainSelect}
         onTokenSelect={onTokenSelect}
+        onSelectOtherToken={onSelectOtherToken}
         onModalClose={() => setDisplayModal(false)}
       />
     </Modal>
@@ -366,6 +384,7 @@ const DesktopModal = ({
   displayedTokens,
   onChainSelect,
   onTokenSelect,
+  onSelectOtherToken,
 }: {
   isOriginToken: boolean;
   displayModal: boolean;
@@ -379,6 +398,7 @@ const DesktopModal = ({
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void;
 }) => {
   return (
     <Modal
@@ -395,6 +415,7 @@ const DesktopModal = ({
       closeButtonTabIndex={99999}
     >
       <DesktopLayout
+        isOriginToken={isOriginToken}
         selectedChain={selectedChain}
         chainSearch={chainSearch}
         setChainSearch={setChainSearch}
@@ -404,6 +425,7 @@ const DesktopModal = ({
         displayedTokens={displayedTokens}
         onChainSelect={onChainSelect}
         onTokenSelect={onTokenSelect}
+        onSelectOtherToken={onSelectOtherToken}
         onModalClose={() => setDisplayModal(false)}
       />
     </Modal>
@@ -412,6 +434,7 @@ const DesktopModal = ({
 
 // Mobile Layout Component - 2-step process
 const MobileLayout = ({
+  isOriginToken,
   mobileStep,
   selectedChain,
   chainSearch,
@@ -422,8 +445,10 @@ const MobileLayout = ({
   displayedTokens,
   onChainSelect,
   onTokenSelect,
+  onSelectOtherToken,
   onModalClose,
 }: {
+  isOriginToken: boolean;
   mobileStep: "chain" | "token";
   selectedChain: number | null;
   chainSearch: string;
@@ -434,6 +459,7 @@ const MobileLayout = ({
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void;
   onModalClose: () => void;
 }) => {
   const chainSearchInputRef = useRef<HTMLInputElement>(null);
@@ -521,8 +547,12 @@ const MobileLayout = ({
                   <TokenEntry
                     key={token.address + token.chainId}
                     token={token}
+                    isOriginToken={isOriginToken}
                     isSelected={false}
                     onClick={() => {
+                      if (token.isUnreachable && onSelectOtherToken) {
+                        onSelectOtherToken(null);
+                      }
                       onTokenSelect(token);
                       onModalClose();
                     }}
@@ -540,8 +570,12 @@ const MobileLayout = ({
                   <TokenEntry
                     key={token.address + token.chainId}
                     token={token}
+                    isOriginToken={isOriginToken}
                     isSelected={false}
                     onClick={() => {
+                      if (token.isUnreachable && onSelectOtherToken) {
+                        onSelectOtherToken(null);
+                      }
                       onTokenSelect(token);
                       onModalClose();
                     }}
@@ -561,6 +595,7 @@ const MobileLayout = ({
 
 // Desktop Layout Component - Side-by-side columns
 const DesktopLayout = ({
+  isOriginToken,
   selectedChain,
   chainSearch,
   setChainSearch,
@@ -570,8 +605,10 @@ const DesktopLayout = ({
   displayedTokens,
   onChainSelect,
   onTokenSelect,
+  onSelectOtherToken,
   onModalClose,
 }: {
+  isOriginToken: boolean;
   selectedChain: number | null;
   chainSearch: string;
   setChainSearch: (search: string) => void;
@@ -581,6 +618,7 @@ const DesktopLayout = ({
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
   onTokenSelect: (token: EnrichedToken) => void;
+  onSelectOtherToken?: (token: EnrichedToken | null) => void;
   onModalClose: () => void;
 }) => {
   const chainSearchInputRef = useRef<HTMLInputElement>(null);
@@ -688,8 +726,12 @@ const DesktopLayout = ({
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
+                  isOriginToken={isOriginToken}
                   isSelected={false}
                   onClick={() => {
+                    if (token.isUnreachable && onSelectOtherToken) {
+                      onSelectOtherToken(null);
+                    }
                     onTokenSelect(token);
                     onModalClose();
                   }}
@@ -707,8 +749,12 @@ const DesktopLayout = ({
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
+                  isOriginToken={isOriginToken}
                   isSelected={false}
                   onClick={() => {
+                    if (token.isUnreachable && onSelectOtherToken) {
+                      onSelectOtherToken(null);
+                    }
                     onTokenSelect(token);
                     onModalClose();
                   }}
@@ -760,7 +806,7 @@ const ChainEntry = ({
         name: "All",
       };
   return (
-    <EntryItem
+    <ChainEntryItem
       isSelected={isSelected}
       isDisabled={isDisabled}
       onClick={isDisabled ? undefined : onClick}
@@ -769,36 +815,53 @@ const ChainEntry = ({
       <ChainItemImage src={chainInfo.logoURI} alt={chainInfo.name} />
       <ChainItemName>{chainInfo.name}</ChainItemName>
       {isSelected && <ChainItemCheckmark />}
-    </EntryItem>
+    </ChainEntryItem>
   );
 };
 
 const TokenEntry = ({
   token,
+  isOriginToken,
   isSelected,
   onClick,
   tabIndex,
 }: {
-  token: LifiToken & { balanceUsd: number; balance: BigNumber };
+  token: EnrichedTokenWithReachability;
+  isOriginToken: boolean;
   isSelected: boolean;
   onClick: () => void;
   tabIndex?: number;
 }) => {
   const hasBalance = token.balance.gt(0) && token.balanceUsd > 0.01;
+  const warningMessage = isOriginToken
+    ? "Output token will be reset"
+    : "Input token will be reset";
 
   return (
-    <EntryItem
+    <TokenEntryItem
       isSelected={isSelected}
       isDisabled={false}
       onClick={onClick}
       tabIndex={tabIndex}
     >
-      <TokenItemImage token={token} />
-      <TokenNameSymbolWrapper>
-        <TokenName>{token.name}</TokenName>
-        <TokenSymbol>{token.symbol}</TokenSymbol>
-      </TokenNameSymbolWrapper>
-      {hasBalance && (
+      <TokenInfoWrapper>
+        <TokenItemImage token={token} />
+        <TokenNameSymbolWrapper>
+          <TokenName>{token.name}</TokenName>
+          <TokenSymbol>{token.symbol}</TokenSymbol>
+        </TokenNameSymbolWrapper>
+      </TokenInfoWrapper>
+
+      {token.isUnreachable ? (
+        <UnreachableWarning>
+          <WarningIcon width="14px" height="14px" color="inherit" />{" "}
+          {warningMessage}
+        </UnreachableWarning>
+      ) : (
+        <div />
+      )}
+
+      {hasBalance ? (
         <TokenBalanceStack>
           <TokenBalance>
             {formatUnitsWithMaxFractions(
@@ -810,8 +873,10 @@ const TokenEntry = ({
             ${formatUSD(parseUnits(token.balanceUsd.toString(), 18))}
           </TokenBalanceUsd>
         </TokenBalanceStack>
+      ) : (
+        <div />
       )}
-    </EntryItem>
+    </TokenEntryItem>
   );
 };
 
@@ -853,6 +918,15 @@ const SearchResultsWrapper = styled.div`
 
 const SearchBarStyled = styled(Searchbar)`
   flex-shrink: 0;
+`;
+
+const TokenInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  height: 100%;
+  align-items: center;
+  gap: 8px;
 `;
 
 const TokenItemImageWrapper = styled.div`
@@ -1052,6 +1126,15 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
   }
 `;
 
+const ChainEntryItem = EntryItem;
+
+const TokenEntryItem = styled(EntryItem)`
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr; // [TOKEN_INFO - WARNING - BALANCE]
+  gap: 8px;
+  align-items: center;
+`;
+
 const ChainItemImage = styled.img`
   width: 32px;
   height: 32px;
@@ -1122,11 +1205,9 @@ const TokenSymbol = styled.div`
 const TokenBalanceStack = styled.div`
   display: flex;
   flex-direction: column;
-
   align-items: flex-end;
-
+  justify-content: center;
   gap: 4px;
-  margin-left: auto;
 `;
 
 const TokenBalance = styled.div`
@@ -1148,6 +1229,19 @@ const TokenBalanceUsd = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
   opacity: 0.5;
+`;
+
+const UnreachableWarning = styled.div`
+  color: var(--functional-red);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 `;
 
 const SectionHeader = styled.div`

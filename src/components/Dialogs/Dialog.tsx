@@ -2,7 +2,7 @@ import Modal from "components/Modal";
 import { ModalProps } from "components/Modal/Modal";
 import styled from "@emotion/styled";
 import { COLORS, QUERIES, withOpacity } from "utils";
-import { ReactComponent as Warning } from "assets/icons/warning_triangle.svg";
+import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 import { ReactComponent as Siren } from "assets/icons/siren.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
 import { PropsWithChildren } from "react";

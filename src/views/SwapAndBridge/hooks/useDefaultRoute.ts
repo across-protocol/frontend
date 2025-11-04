@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import { CHAIN_IDs } from "utils";
-import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
+import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { usePrevious } from "@uidotdev/usehooks";
 

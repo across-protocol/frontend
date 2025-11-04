@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
-import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
+import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
 
 export type ValidationResult = {

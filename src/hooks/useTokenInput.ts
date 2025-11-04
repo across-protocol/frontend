@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { BigNumber, utils } from "ethers";
 import { convertTokenToUSD, convertUSDToToken } from "utils";
-import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/Modal";
+import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 import { formatUnitsWithMaxFractions } from "utils";
 
 export type UnitType = "usd" | "token";

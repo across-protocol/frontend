@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
-import { EnrichedToken } from "../components/ChainTokenSelector/Modal";
+import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import {
   useSwapApprovalAction,
   SwapApprovalData,
