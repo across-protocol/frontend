@@ -1,10 +1,10 @@
-import { createContext, ReactNode, useContext } from "react";
+import { useContext, createContext, ReactNode } from "react";
 
 import { amplitudeAPIKey } from "utils";
 
 import { useLoadAmpli } from "./useLoadAmpli";
 import { useInitialUserPropTraces } from "./useInitialUserPropTraces";
-import { TrackingRequest, useAmpliTracking } from "./useAmpliTracking";
+import { useAmpliTracking, TrackingRequest } from "./useAmpliTracking";
 
 const isAmpliDisabled = Boolean(amplitudeAPIKey);
 
@@ -41,4 +41,7 @@ export function AmpliProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAmplitude = () => useContext(AmpliContext);
+export function useAmplitude() {
+  const context = useContext(AmpliContext);
+  return context;
+}
