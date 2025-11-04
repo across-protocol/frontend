@@ -16,7 +16,7 @@ import {
   parseUnits,
   QUERIESV2,
 } from "utils";
-import { useFeatureFlag } from "../../hooks/useInitializeFeatureFlags";
+import { useFeatureFlag } from "../../hooks";
 
 export type Props = {
   balance?: BigNumber;

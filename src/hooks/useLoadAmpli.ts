@@ -8,10 +8,11 @@ import {
   isAmplitudeLoggingEnabled,
   isProductionBuild,
 } from "utils";
-import { initializeExperiment } from "./useInitializeFeatureFlags";
+import { useFeatureFlags } from "./feature-flags/useFeatureFlags";
 
 export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
+  const { initializeExperiment } = useFeatureFlags();
 
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {
@@ -40,12 +41,12 @@ export function useLoadAmpli() {
               client: { instance: amplitude },
             }).promise
         )
-        .then(() => initializeExperiment())
         .then(() => {
+          initializeExperiment();
           setIsAmpliLoaded(true);
         });
     }
-  }, [isAmpliLoaded]);
+  }, [isAmpliLoaded, initializeExperiment]);
 
   return { isAmpliLoaded };
 }

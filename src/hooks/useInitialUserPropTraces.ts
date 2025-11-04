@@ -8,9 +8,10 @@ import {
   setUserId,
 } from "utils/amplitude";
 import { ampli } from "ampli";
-import { fetchFeatureFlags } from "./useInitializeFeatureFlags";
+import { useFeatureFlags } from "./feature-flags/useFeatureFlags";
 
 export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
+  const { fetchFlags } = useFeatureFlags();
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
@@ -50,7 +51,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       setAreInitialUserPropsSet(true);
 
       // Fetch feature flags AFTER userId is set
-      await fetchFeatureFlags();
+      await fetchFlags();
       setPrevTrackedAccount(account);
     })();
   }, [
@@ -60,6 +61,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
     prevTrackedAccount,
     chainId,
     connector,
+    fetchFlags,
   ]);
 
   useEffect(() => {

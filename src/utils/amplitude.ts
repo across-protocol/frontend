@@ -31,7 +31,6 @@ import { getConfig } from "./config";
 import { ChainId } from "./constants";
 import { categorizeNumberInRange } from "./math";
 import { range } from "lodash";
-import { fetchFeatureFlags } from "../hooks/useInitializeFeatureFlags";
 
 export const pageLookup: Record<
   string,
@@ -199,7 +198,6 @@ export function setUserId(walletAddress?: string) {
   }
 
   ampli.client?.setUserId(walletAddress);
-  void fetchFeatureFlags();
 }
 
 export function identifyUserWallet(
@@ -211,7 +209,6 @@ export function identifyUserWallet(
   }
 
   ampli.client?.setUserId(connectedAddress);
-  void fetchFeatureFlags();
 
   const identifyObj = new Identify();
   identifyObj.postInsert("AllWalletAddressesConnected", connectedAddress);

@@ -17,4 +17,4 @@ export * from "./useWalletTrace";
 export * from "./useQueue";
 export * from "./useAmplitude";
 export * from "./useRewardSummary";
-export { useFeatureFlag } from "./useInitializeFeatureFlags";
+export * from "./feature-flags/useFeatureFlag";
