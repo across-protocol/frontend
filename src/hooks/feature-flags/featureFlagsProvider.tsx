@@ -14,6 +14,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const experimentClientRef = useRef<ExperimentClient | null>(null);
+
   const initializeExperiment = useCallback(() => {
     if (experimentClientRef.current) {
       console.warn("Experiment client already initialized");
@@ -23,6 +24,8 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
       publicDeploymentKey,
       {}
     );
+    // set flags from localstorage before a fetch is initialized
+    setFlags(experimentClientRef.current.all());
     setIsInitialized(true);
   }, []);
 
