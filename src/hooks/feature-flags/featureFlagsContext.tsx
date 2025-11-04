@@ -5,7 +5,7 @@ interface FeatureFlagsContextValue {
   flags: Variants;
   isLoading: boolean;
   isInitialized: boolean;
-  initializeExperiment: () => void;
+  initializeFeatureFlags: () => void;
   fetchFlags: () => Promise<void>;
 }
 

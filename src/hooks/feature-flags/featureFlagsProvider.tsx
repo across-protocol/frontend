@@ -15,7 +15,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const experimentClientRef = useRef<ExperimentClient | null>(null);
 
-  const initializeExperiment = useCallback(() => {
+  const initializeFeatureFlags = useCallback(() => {
     if (experimentClientRef.current) {
       console.warn("Experiment client already initialized");
       return;
@@ -56,7 +56,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
         flags,
         isLoading,
         isInitialized,
-        initializeExperiment,
+        initializeFeatureFlags,
         fetchFlags,
       }}
     >

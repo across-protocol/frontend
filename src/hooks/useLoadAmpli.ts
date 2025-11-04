@@ -12,7 +12,7 @@ import { useFeatureFlags } from "./feature-flags/useFeatureFlags";
 
 export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
-  const { initializeExperiment } = useFeatureFlags();
+  const { initializeFeatureFlags } = useFeatureFlags();
 
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {
@@ -42,11 +42,11 @@ export function useLoadAmpli() {
             }).promise
         )
         .then(() => {
-          initializeExperiment();
+          initializeFeatureFlags();
           setIsAmpliLoaded(true);
         });
     }
-  }, [isAmpliLoaded, initializeExperiment]);
+  }, [isAmpliLoaded, initializeFeatureFlags]);
 
   return { isAmpliLoaded };
 }
