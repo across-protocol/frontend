@@ -239,4 +239,66 @@ describe("GET /swap/approval", () => {
       }
     }
   });
+
+  describe("'slippage' query parameter", () => {
+    jest.setTimeout(100000);
+    const baseParams = {
+      amount: ethers.utils.parseUnits("10", 6).toString(), // 10 USDC
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+      outputToken: TOKEN_SYMBOLS_MAP.OP.addresses[CHAIN_IDs.OPTIMISM],
+      originChainId: CHAIN_IDs.ARBITRUM,
+      destinationChainId: CHAIN_IDs.OPTIMISM,
+      depositor: e2eConfig.addresses.depositor,
+    };
+
+    test("should return a 'auto' resolved slippage for destination swap using local strategy", async () => {
+      const response = await axiosInstance.get(SWAP_API_URL, {
+        params: {
+          ...baseParams,
+          slippage: "auto",
+          // Use Sushiswap to avoid using the Uniswap API for slippage resolution
+          includeSources: "sushiswap",
+        },
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.steps.destinationSwap).toBeDefined();
+      // Resolved slippage should be between 0.5% and 5%
+      expect(
+        response.data.steps.destinationSwap.slippage
+      ).toBeGreaterThanOrEqual(0.005);
+      expect(response.data.steps.destinationSwap.slippage).toBeLessThanOrEqual(
+        0.05
+      );
+    }, 30_000);
+
+    test("should return a 'auto' resolved slippage for destination swap using uniswap-api", async () => {
+      const response = await axiosInstance.get(SWAP_API_URL, {
+        params: {
+          ...baseParams,
+          slippage: "auto",
+          includeSources: "uniswap-api",
+        },
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.steps.destinationSwap).toBeDefined();
+      expect(
+        response.data.steps.destinationSwap.slippage
+      ).toBeGreaterThanOrEqual(0);
+      expect(response.data.steps.destinationSwap.slippage).toBeLessThanOrEqual(
+        0.1
+      );
+    }, 30_000);
+
+    test("should use provided slippage tolerance for destination swap", async () => {
+      const response = await axiosInstance.get(SWAP_API_URL, {
+        params: {
+          ...baseParams,
+          slippage: 0.01,
+        },
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.steps.destinationSwap).toBeDefined();
+      expect(response.data.steps.destinationSwap.slippage).toBe(0.01);
+    }, 30_000);
+  });
 });

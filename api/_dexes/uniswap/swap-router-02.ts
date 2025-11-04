@@ -29,6 +29,7 @@ import {
   UpstreamSwapProviderError,
 } from "../../_errors";
 import { AxiosError } from "axios";
+import { getSlippage } from "../../_slippage";
 
 type QuoteSource = "trading-api" | "sdk-swap-quoter" | "sdk-alpha-router";
 
@@ -243,7 +244,7 @@ function buildSwapRouterSwapTx(
 ) {
   const options = {
     recipient: swap.recipient,
-    slippageTolerance: floatToPercent(swap.slippageTolerance),
+    slippageTolerance: floatToPercent(quote.slippage),
   };
 
   const routerTrade = RouterTradeAdapter.fromClassicQuote({
@@ -293,16 +294,22 @@ function buildIndicativeQuote(
         )
       : swap.amount;
 
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
+  });
   const expectedAmountIn = BigNumber.from(inputAmount);
   const maxAmountIn =
     tradeType === TradeType.EXACT_INPUT
       ? expectedAmountIn
-      : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
+      : addMarkupToAmount(expectedAmountIn, slippageTolerance / 100);
   const expectedAmountOut = BigNumber.from(outputAmount);
   const minAmountOut =
     tradeType === TradeType.EXACT_OUTPUT
       ? expectedAmountOut
-      : addMarkupToAmount(expectedAmountOut, -swap.slippageTolerance / 100);
+      : addMarkupToAmount(expectedAmountOut, -slippageTolerance / 100);
 
   const swapQuote = {
     tokenIn: swap.tokenIn,
@@ -311,7 +318,7 @@ function buildIndicativeQuote(
     minAmountOut,
     expectedAmountOut,
     expectedAmountIn,
-    slippageTolerance: swap.slippageTolerance,
+    slippageTolerance,
     swapTxns: [
       {
         ecosystem: "evm" as const,

@@ -365,7 +365,7 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
-export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hours
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
 
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
@@ -385,3 +385,24 @@ export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
 export const SVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
   .filter(([_, chain]) => chain.family === constants.ChainFamily.SVM)
   .map(([chainId]) => Number(chainId));
+
+export const STABLE_COIN_SYMBOLS = Array.from(
+  new Set([
+    ...sdkConstants.STABLE_COIN_SYMBOLS,
+    "USDe",
+    "USDS",
+    "USDf",
+    "USDTB",
+    "PYUSD",
+    "USD1",
+    "USDF",
+    "BFUSD",
+    "FDUSD",
+    "USDG",
+    "RLUSD",
+    "USD0",
+    "TUSD",
+    "USDD",
+    "EURC",
+  ])
+);
