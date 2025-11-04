@@ -13,7 +13,13 @@ import {
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { getNativeTokenInfo } from "../_token-info";
 
-type FeeComponent<T extends FeeDetailsBase | undefined = undefined> = {
+export type FeeComponent<
+  T extends
+    | AcrossBridgeFeeDetails
+    | TotalFeeBreakdownDetails
+    | MaxTotalFeeBreakdownDetails
+    | undefined = undefined,
+> = {
   amount: BigNumber;
   amountUsd: string;
   token: Token;
@@ -22,11 +28,7 @@ type FeeComponent<T extends FeeDetailsBase | undefined = undefined> = {
   details?: T;
 };
 
-type FeeDetailsBase = {
-  type: FeeDetailsType;
-};
-
-type AcrossBridgeFeeDetails = FeeDetailsBase & {
+type AcrossBridgeFeeDetails = {
   type: FeeDetailsType.ACROSS;
   lp: FeeComponent;
   relayerCapital: FeeComponent;

@@ -1,6 +1,7 @@
 import { BigNumber, utils, constants } from "ethers";
 import { calculateSwapFees } from "../../../api/swap/_swap-fees";
 import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../api/_constants";
+import { FeeDetailsType } from "../../../api/_dexes/types";
 
 describe("calculateSwapFees", () => {
   // Setup test tokens using constants
@@ -93,7 +94,7 @@ describe("calculateSwapFees", () => {
         pct: utils.parseEther("0.0045"),
         token: inputToken,
         details: {
-          type: "across" as const,
+          type: FeeDetailsType.ACROSS as const,
           relayerCapital: {
             amount: utils.parseUnits("1", inputToken.decimals),
             pct: utils.parseEther("0.001"),
@@ -272,7 +273,7 @@ describe("calculateSwapFees", () => {
         pct: utils.parseEther("0.0045"),
         token: inputToken,
         details: {
-          type: "across" as const,
+          type: FeeDetailsType.ACROSS as const,
           relayerCapital: {
             amount: utils.parseUnits("1", inputToken.decimals),
             pct: utils.parseEther("0.001"),
@@ -364,7 +365,7 @@ describe("calculateSwapFees", () => {
         pct: utils.parseEther("0.0045"),
         token: inputToken,
         details: {
-          type: "across" as const,
+          type: FeeDetailsType.ACROSS as const,
           relayerCapital: {
             amount: utils.parseUnits("1", inputToken.decimals),
             pct: utils.parseEther("0.001"),
