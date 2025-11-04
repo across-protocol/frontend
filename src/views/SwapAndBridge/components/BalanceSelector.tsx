@@ -52,7 +52,6 @@ export function BalanceSelector({
       : BigNumber.from(0);
   }, [tokenBalances.data, token.chainId, token.address]);
 
-  if (!balance || balance.lte(0)) return null;
   const percentages = ["25%", "50%", "75%", "MAX"];
 
   const handlePillClick = (percentage: string) => {
@@ -69,12 +68,13 @@ export function BalanceSelector({
 
   return (
     <BalanceWrapper
-      onMouseEnter={() => !disableHover && setIsHovered(true)}
+      onMouseEnter={() => !disableHover && balance.gt(0) && setIsHovered(true)}
       onMouseLeave={() => !disableHover && setIsHovered(false)}
     >
       <PillsContainer>
         <AnimatePresence>
           {isHovered &&
+            balance.gt(0) &&
             percentages.map((percentage, index) => (
               <motion.div
                 key={percentage}

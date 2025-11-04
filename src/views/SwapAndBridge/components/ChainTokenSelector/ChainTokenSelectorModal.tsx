@@ -11,6 +11,7 @@ import {
   formatUSD,
   getChainInfo,
   parseUnits,
+  QUERIES,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { useMemo, useState, useEffect, useRef } from "react";
@@ -151,20 +152,34 @@ export function ChainTokenSelectorModal({
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
       return tokens.sort((a, b) => {
-        // Sort by balance - tokens with balance go to top
-        const aHasBalance = a.balance.gt(0) && a.balanceUsd > 0.01;
-        const bHasBalance = b.balance.gt(0) && b.balanceUsd > 0.01;
+        // Sort by token balance - tokens with balance go to top
+        const aHasTokenBalance = a.balance.gt(0);
+        const bHasTokenBalance = b.balance.gt(0);
 
-        if (aHasBalance !== bHasBalance) {
-          return aHasBalance ? -1 : 1;
+        if (aHasTokenBalance !== bHasTokenBalance) {
+          return aHasTokenBalance ? -1 : 1;
         }
 
-        // If both have balance or both don't have balance, sort by balance amount
-        if (aHasBalance && bHasBalance) {
-          if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
-            return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+        // If both have token balance, prioritize sorting by USD value if available
+        if (aHasTokenBalance && bHasTokenBalance) {
+          const aHasUsdBalance = a.balanceUsd > 0.01;
+          const bHasUsdBalance = b.balanceUsd > 0.01;
+
+          // Both have USD values - sort by USD
+          if (aHasUsdBalance && bHasUsdBalance) {
+            if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+              return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+            }
+            return b.balanceUsd - a.balanceUsd;
           }
-          return b.balanceUsd - a.balanceUsd;
+
+          // Only one has USD value - prioritize the one with USD
+          if (aHasUsdBalance !== bHasUsdBalance) {
+            return aHasUsdBalance ? -1 : 1;
+          }
+
+          // Neither has USD value - sort alphabetically
+          return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
         }
 
         // If neither has balance, sort alphabetically
@@ -403,7 +418,9 @@ const DesktopModal = ({
   return (
     <Modal
       verticalLocation="middle"
-      title={`Select ${isOriginToken ? "Origin" : "Destination"} Token`}
+      title={
+        <Title>Select ${isOriginToken ? "Origin" : "Destination"} Token</Title>
+      }
       isOpen={displayModal}
       padding="thin"
       exitModalHandler={() => setDisplayModal(false)}
@@ -473,6 +490,8 @@ const MobileLayout = ({
       tokenSearchInputRef.current?.focus();
     }
   }, [mobileStep]);
+
+  const warningMessage = "No Route";
 
   return (
     <MobileInnerWrapper>
@@ -547,8 +566,8 @@ const MobileLayout = ({
                   <TokenEntry
                     key={token.address + token.chainId}
                     token={token}
-                    isOriginToken={isOriginToken}
                     isSelected={false}
+                    warningMessage={warningMessage}
                     onClick={() => {
                       if (token.isUnreachable && onSelectOtherToken) {
                         onSelectOtherToken(null);
@@ -570,8 +589,8 @@ const MobileLayout = ({
                   <TokenEntry
                     key={token.address + token.chainId}
                     token={token}
-                    isOriginToken={isOriginToken}
                     isSelected={false}
+                    warningMessage={warningMessage}
                     onClick={() => {
                       if (token.isUnreachable && onSelectOtherToken) {
                         onSelectOtherToken(null);
@@ -634,6 +653,10 @@ const DesktopLayout = ({
     onChainSelect(chainId);
     tokenSearchInputRef.current?.focus();
   }
+
+  const warningMessage = isOriginToken
+    ? "Output token will be reset"
+    : "Input token will be reset";
 
   /**
    * Tab order strategy for keyboard navigation:
@@ -726,8 +749,8 @@ const DesktopLayout = ({
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
-                  isOriginToken={isOriginToken}
                   isSelected={false}
+                  warningMessage={warningMessage}
                   onClick={() => {
                     if (token.isUnreachable && onSelectOtherToken) {
                       onSelectOtherToken(null);
@@ -749,8 +772,8 @@ const DesktopLayout = ({
                 <TokenEntry
                   key={token.address + token.chainId}
                   token={token}
-                  isOriginToken={isOriginToken}
                   isSelected={false}
+                  warningMessage={warningMessage}
                   onClick={() => {
                     if (token.isUnreachable && onSelectOtherToken) {
                       onSelectOtherToken(null);
@@ -821,21 +844,19 @@ const ChainEntry = ({
 
 const TokenEntry = ({
   token,
-  isOriginToken,
   isSelected,
   onClick,
   tabIndex,
+  warningMessage,
 }: {
   token: EnrichedTokenWithReachability;
-  isOriginToken: boolean;
   isSelected: boolean;
   onClick: () => void;
+  warningMessage: string;
   tabIndex?: number;
 }) => {
-  const hasBalance = token.balance.gt(0) && token.balanceUsd > 0.01;
-  const warningMessage = isOriginToken
-    ? "Output token will be reset"
-    : "Input token will be reset";
+  const hasTokenBalance = token.balance.gt(0);
+  const hasUsdBalance = token.balanceUsd >= 0.01;
 
   return (
     <TokenEntryItem
@@ -844,7 +865,7 @@ const TokenEntry = ({
       onClick={onClick}
       tabIndex={tabIndex}
     >
-      <TokenInfoWrapper>
+      <TokenInfoWrapper dim={token.isUnreachable}>
         <TokenItemImage token={token} />
         <TokenNameSymbolWrapper>
           <TokenName>{token.name}</TokenName>
@@ -861,16 +882,19 @@ const TokenEntry = ({
         <div />
       )}
 
-      {hasBalance ? (
-        <TokenBalanceStack>
+      {hasTokenBalance ? (
+        <TokenBalanceStack dim={token.isUnreachable}>
           <TokenBalance>
             {formatUnitsWithMaxFractions(
               token.balance.toBigInt(),
               token.decimals
             )}
           </TokenBalance>
+
           <TokenBalanceUsd>
-            ${formatUSD(parseUnits(token.balanceUsd.toString(), 18))}
+            {hasUsdBalance
+              ? "$" + formatUSD(parseUnits(token.balanceUsd.toString(), 18))
+              : "??"}
           </TokenBalanceUsd>
         </TokenBalanceStack>
       ) : (
@@ -920,13 +944,15 @@ const SearchBarStyled = styled(Searchbar)`
   flex-shrink: 0;
 `;
 
-const TokenInfoWrapper = styled.div`
+const TokenInfoWrapper = styled.div<{ dim?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   height: 100%;
   align-items: center;
   gap: 8px;
+
+  opacity: ${({ dim }) => (dim ? 0.5 : 1)};
 `;
 
 const TokenItemImageWrapper = styled.div`
@@ -1055,10 +1081,15 @@ const Title = styled.div`
   overflow: hidden;
   color: var(--base-bright-gray, #e0f3ff);
   font-family: Barlow;
-  font-size: 20px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 130%; /* 26px */
+  padding-left: 8px;
+
+  ${QUERIES.tabletAndUp} {
+    font-size: 20px;
+  }
 `;
 
 const ListWrapper = styled.div`
@@ -1101,7 +1132,6 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
 
   align-items: center;
 
-  padding: 8px;
   height: 48px;
   gap: 8px;
 
@@ -1202,12 +1232,13 @@ const TokenSymbol = styled.div`
   text-transform: uppercase;
 `;
 
-const TokenBalanceStack = styled.div`
+const TokenBalanceStack = styled.div<{ dim?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
   gap: 4px;
+  opacity: ${({ dim }) => (dim ? 0.5 : 1)};
 `;
 
 const TokenBalance = styled.div`

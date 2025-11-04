@@ -1,6 +1,6 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIES, QUERIESV2 } from "utils";
 import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`
@@ -93,8 +93,8 @@ type ModalWrapperType = {
 const minimumMargin = 32;
 
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
-  --padding-modal-content: ${({ padding }) =>
-    padding === "normal" ? "24px" : "16px"};
+  --padding-base: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
+  --padding-modal-content: calc(var(--padding-base) / 1.5);
   max-height: ${({ height, topYOffset }) =>
     height
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
@@ -114,11 +114,16 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   background: #202024;
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
-  border-radius: 24px;
+  border-radius: 16px;
 
   position: relative;
 
   overflow: hidden;
+
+  ${QUERIES.tabletAndUp} {
+    --padding-modal-content: var(--padding-base);
+    border-radius: 24px;
+  }
 `;
 
 export const TitleAndExitWrapper = styled.div`
