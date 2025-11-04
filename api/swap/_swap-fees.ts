@@ -18,7 +18,7 @@ type FeeComponent<T extends FeeDetailsBase | undefined = undefined> = {
   details?: T;
 };
 
-enum FeeDetailsType {
+export enum FeeDetailsType {
   TOTAL_BREAKDOWN = "total-breakdown",
   MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
   ACROSS = "across",

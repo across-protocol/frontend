@@ -20,6 +20,7 @@ import { AppFee } from "../../_dexes/utils";
 import { Token } from "../../_dexes/types";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
 import { BigNumber } from "ethers";
+import { FeeDetailsType } from "../../swap/_swap-fees";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -44,7 +45,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       pct: BigNumber.from(feesFromApi.totalRelayFee.pct),
       token: bridgeFeesToken,
       details: {
-        type: name,
+        type: FeeDetailsType.ACROSS,
         relayerCapital: {
           amount: BigNumber.from(feesFromApi.relayerCapitalFee.total),
           pct: BigNumber.from(feesFromApi.relayerCapitalFee.pct),
