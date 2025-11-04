@@ -5,7 +5,6 @@ import { amplitudeAPIKey } from "utils";
 import { useLoadAmpli } from "./useLoadAmpli";
 import { useInitialUserPropTraces } from "./useInitialUserPropTraces";
 import { TrackingRequest, useAmpliTracking } from "./useAmpliTracking";
-import { FeatureFlag } from "./useInitializeAmplitudeExperiment";
 
 const isAmpliDisabled = Boolean(amplitudeAPIKey);
 
@@ -14,23 +13,16 @@ export const AmpliContext = createContext<{
   isAmpliDisabled: boolean;
   areInitialUserPropsSet: boolean;
   addToAmpliQueue: (request: TrackingRequest) => void;
-  hasFeatureFlag: (featureFlag: FeatureFlag) => boolean;
-  fetchFeatureFlags: () => void;
 }>({
   isAmpliLoaded: false,
   isAmpliDisabled,
   areInitialUserPropsSet: false,
   addToAmpliQueue: () => {},
-  hasFeatureFlag: () => false,
-  fetchFeatureFlags: () => {},
 });
 
 export function AmpliProvider({ children }: { children: ReactNode }) {
-  const { fetchFeatureFlags, isAmpliLoaded, hasFeatureFlag } = useLoadAmpli();
-  const { areInitialUserPropsSet } = useInitialUserPropTraces(
-    isAmpliLoaded,
-    fetchFeatureFlags
-  );
+  const { isAmpliLoaded } = useLoadAmpli();
+  const { areInitialUserPropsSet } = useInitialUserPropTraces(isAmpliLoaded);
   const { addToQueue: addToAmpliQueue } = useAmpliTracking(
     areInitialUserPropsSet
   );
@@ -42,8 +34,6 @@ export function AmpliProvider({ children }: { children: ReactNode }) {
         isAmpliDisabled,
         areInitialUserPropsSet,
         addToAmpliQueue,
-        hasFeatureFlag,
-        fetchFeatureFlags,
       }}
     >
       {children}
@@ -52,11 +42,3 @@ export function AmpliProvider({ children }: { children: ReactNode }) {
 }
 
 export const useAmplitude = () => useContext(AmpliContext);
-
-export const useFeatureFlag = () => {
-  const { fetchFeatureFlags, hasFeatureFlag } = useAmplitude();
-  return {
-    hasFeatureFlag: (featureFlag: FeatureFlag) => hasFeatureFlag(featureFlag),
-    fetchFeatureFlags: () => fetchFeatureFlags(),
-  };
-};

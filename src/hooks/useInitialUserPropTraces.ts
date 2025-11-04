@@ -8,11 +8,9 @@ import {
   setUserId,
 } from "utils/amplitude";
 import { ampli } from "ampli";
+import { fetchFeatureFlags } from "./useInitializeFeatureFlags";
 
-export function useInitialUserPropTraces(
-  isAmpliLoaded: boolean,
-  fetchFeatureFlags: () => void
-) {
+export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
@@ -52,8 +50,7 @@ export function useInitialUserPropTraces(
       setAreInitialUserPropsSet(true);
 
       // Fetch feature flags AFTER userId is set
-      // TODO it seems like this hook is called exessively
-      fetchFeatureFlags();
+      await fetchFeatureFlags();
       setPrevTrackedAccount(account);
     })();
   }, [
@@ -63,7 +60,6 @@ export function useInitialUserPropTraces(
     prevTrackedAccount,
     chainId,
     connector,
-    fetchFeatureFlags,
   ]);
 
   useEffect(() => {

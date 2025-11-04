@@ -8,12 +8,11 @@ import {
   isAmplitudeLoggingEnabled,
   isProductionBuild,
 } from "utils";
-import { useInitializeAmplitudeExperiment } from "./useInitializeAmplitudeExperiment";
+import { initializeExperiment } from "./useInitializeFeatureFlags";
 
 export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
-  const { hasFeatureFlag, initializeExperiment, fetchFeatureFlags } =
-    useInitializeAmplitudeExperiment();
+
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {
       amplitude
@@ -48,5 +47,5 @@ export function useLoadAmpli() {
     }
   }, [isAmpliLoaded]);
 
-  return { isAmpliLoaded, hasFeatureFlag, fetchFeatureFlags };
+  return { isAmpliLoaded };
 }
