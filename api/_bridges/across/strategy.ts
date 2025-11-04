@@ -17,10 +17,9 @@ import {
   getCrossSwapTypes,
 } from "../../_dexes/utils";
 import { AppFee } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
+import { Token, FeeDetailsType } from "../../_dexes/types";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
 import { BigNumber } from "ethers";
-import { FeeDetailsType } from "../../swap/_swap-fees";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {

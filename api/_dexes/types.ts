@@ -7,6 +7,12 @@ import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
 
+export enum FeeDetailsType {
+  TOTAL_BREAKDOWN = "total-breakdown",
+  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
+  ACROSS = "across",
+}
+
 export type { AmountType, CrossSwapType };
 
 export type Token = {
@@ -111,7 +117,7 @@ export type SwapQuote = {
 };
 
 type AcrossBridgeFeeDetails = {
-  type: "across";
+  type: FeeDetailsType.ACROSS;
   lp: FeeComponent;
   relayerCapital: FeeComponent;
   destinationGas: FeeComponent;

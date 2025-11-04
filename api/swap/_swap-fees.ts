@@ -5,7 +5,11 @@ import { getCachedTokenPrice } from "../_utils";
 import { Token } from "../_dexes/types";
 import { SwapQuote } from "../_dexes/types";
 import { AppFee } from "../_dexes/utils";
-import { IndirectDestinationRoute, CrossSwapQuotes } from "../_dexes/types";
+import {
+  IndirectDestinationRoute,
+  CrossSwapQuotes,
+  FeeDetailsType,
+} from "../_dexes/types";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { getNativeTokenInfo } from "../_token-info";
 
@@ -17,12 +21,6 @@ type FeeComponent<T extends FeeDetailsBase | undefined = undefined> = {
   inputAmountUsd?: number;
   details?: T;
 };
-
-export enum FeeDetailsType {
-  TOTAL_BREAKDOWN = "total-breakdown",
-  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
-  ACROSS = "across",
-}
 
 type FeeDetailsBase = {
   type: FeeDetailsType;
