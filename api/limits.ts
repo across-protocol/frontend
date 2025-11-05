@@ -43,7 +43,7 @@ import {
   getTransferRestrictedRelayers,
 } from "./_relayer-address";
 import { getDefaultRecipientAddress } from "./_recipient-address";
-import { calcGasFeeDetails } from "./_gas";
+import { calcGasFeeDetails, assertDestinationGasBelowLimit } from "./_gas";
 import { sendResponse } from "./_response_utils";
 import { getCachedTokenBalance } from "./_balance";
 import { validateDepositMessage } from "./_message";
@@ -330,6 +330,12 @@ const handler = async (
         at: "Limits",
         message: "Relayer fee details from SDK",
         relayerFeeDetails,
+      });
+
+      // Check if the destination chain has a gas cost below the limit
+      assertDestinationGasBelowLimit({
+        destinationChainId,
+        gasUnits: relayerFeeDetails.gasUnits,
       });
 
       const { liquidReserves: _liquidReserves, utilizedReserves } =
