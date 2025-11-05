@@ -2032,7 +2032,7 @@ paths:
                     properties:
                       total:
                         type: object
-                        description: Total fees for the transaction.
+                        description: Total fees for the transaction. If a swap is involved this value takes the expected output amount into account.
                         properties:
                           amount:
                             type: string
@@ -2061,7 +2061,39 @@ paths:
                               chainId:
                                 type: integer
                                 example: 10
-                        x-gitbook-description-html: <p>Total fees for the transaction.</p>
+                        x-gitbook-description-html: <p>Total fees for the transaction. If a swap is involved this value takes the expected output amount into account.</p>
+                      maxTotal:
+                        type: object
+                        description: Total fees for the transaction. If a swap is involved this value takes the min. output amount into account.
+                        properties:
+                          amount:
+                            type: string
+                            example: '47651'
+                          amountUsd:
+                            type: string
+                            example: '0.047642182071510164'
+                          pct:
+                            type: string
+                            example: '47651283466652296'
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 6
+                              symbol:
+                                type: string
+                                example: USDC
+                              address:
+                                type: string
+                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                              name:
+                                type: string
+                                example: USD Coin
+                              chainId:
+                                type: integer
+                                example: 10
+                        x-gitbook-description-html: <p>Total fees for the transaction. If a swap is involved this value takes the min. output amount into account.</p>
                       originGas:
                         type: object
                         description: Gas fees on origin chain.
@@ -2269,7 +2301,70 @@ paths:
                                 type: integer
                                 example: 42161
                         x-gitbook-description-html: <p>Application fees.</p>
-                    x-gitbook-description-html: <p>Comprehensive fee breakdown.</p>
+                      swapImpact:
+                        type: object
+                        description: Expected swap impact if one or many swaps involved. Considers price impact and best-case swap execution, i.e. no slippage.
+                        properties:
+                          amount:
+                            type: string
+                            example: '0'
+                          amountUsd:
+                            type: string
+                            example: '0.0'
+                          pct:
+                            type: string
+                            example: '0'
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 18
+                              symbol:
+                                type: string
+                                example: ETH
+                              address:
+                                type: string
+                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                              name:
+                                type: string
+                                example: Ether
+                              chainId:
+                                type: integer
+                                example: 42161
+                        x-gitbook-description-html: <p>Expected swap impact if one or many swaps involved. Considers price impact and best-case swap execution, i.e. no slippage.</p>
+                      maxSwapImpact:
+                        type: object
+                        description: Max. swap impact amount if one or many swaps are involved. Considers price impact and worst-case execution, i.e. with slippage.
+                        properties:
+                          amount:
+                            type: string
+                            example: '0'
+                          amountUsd:
+                            type: string
+                            example: '0.0'
+                          pct:
+                            type: string
+                            example: '0'
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 18
+                              symbol:
+                                type: string
+                                example: ETH
+                              address:
+                                type: string
+                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                              name:
+                                type: string
+                                example: Ether
+                              chainId:
+                                type: integer
+                                example: 42161
+                        x-gitbook-description-html: <p>Max. swap impact amount if one or many swaps are involved. Considers price impact and worst-case execution, i.e. with slippage.</p>
                   inputAmount:
                     type: string
                     description: >-

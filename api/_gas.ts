@@ -2,6 +2,29 @@ import * as sdk from "@across-protocol/sdk";
 import { BigNumber, BigNumberish } from "ethers";
 import { getDefaultRecipientAddress } from "./_recipient-address";
 import { getDefaultRelayerAddress } from "./_relayer-address";
+import { CHAIN_IDs } from "./_constants";
+import { AcrossErrorCode, InputError } from "./_errors";
+
+export const DESTINATION_GAS_LIMITS_PER_CHAIN = {
+  [CHAIN_IDs.HYPEREVM]: BigNumber.from(2_000_000),
+};
+
+export function assertDestinationGasBelowLimit(params: {
+  destinationChainId: number;
+  gasUnits: BigNumberish;
+}) {
+  const { destinationChainId, gasUnits } = params;
+
+  const destinationGasLimit =
+    DESTINATION_GAS_LIMITS_PER_CHAIN[destinationChainId];
+
+  if (destinationGasLimit && BigNumber.from(gasUnits).gt(destinationGasLimit)) {
+    throw new InputError({
+      message: `Gas for destination chain ${destinationChainId} exceeds the limit of ${destinationGasLimit.toString()}`,
+      code: AcrossErrorCode.SIMULATION_ERROR,
+    });
+  }
+}
 
 export function calcGasFeeDetails(params: {
   gasPriceEstimate: sdk.gasPriceOracle.GasPriceEstimate;
