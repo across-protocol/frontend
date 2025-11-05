@@ -9,14 +9,13 @@ import { Tooltip } from "components/Tooltip";
 import { Input, InputGroup } from "components/Input";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import {
-  formatUnitsWithMaxFractions,
+  QUERIESV2,
   formatUSD,
+  formatUnitsWithMaxFractions,
   getToken,
   isNumberEthersParseable,
   parseUnits,
-  QUERIESV2,
 } from "utils";
-import { useFeatureFlag } from "../../hooks";
 
 export type Props = {
   balance?: BigNumber;
@@ -50,8 +49,6 @@ export function AmountInput({
   displayTokenIcon,
 }: Props) {
   const token = getToken(inputTokenSymbol);
-
-  const hasDemoFlag = useFeatureFlag("demo-flag");
 
   const validationLevel =
     (amountInput ?? "") === ""
@@ -96,7 +93,7 @@ export function AmountInput({
         <Input
           type="number"
           validationLevel={validationLevel}
-          placeholder={hasDemoFlag ? "WORKS!" : "Enter amount. NOT"}
+          placeholder="Enter amount"
           value={amountInput}
           onWheel={(e) => e.currentTarget.blur()}
           onChange={(e) => {

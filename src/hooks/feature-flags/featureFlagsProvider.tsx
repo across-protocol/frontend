@@ -24,7 +24,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
       publicDeploymentKey,
       {}
     );
-    // set flags from localstorage before a fetch is initialized
+    // set flags from localstorage cache before a fetch is initialized
     setFlags(experimentClientRef.current.all());
     setIsInitialized(true);
   }, []);

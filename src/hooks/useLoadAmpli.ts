@@ -8,11 +8,11 @@ import {
   isAmplitudeLoggingEnabled,
   isProductionBuild,
 } from "utils";
-import { useFeatureFlags } from "./feature-flags/useFeatureFlags";
+import { useFeatureFlagsContext } from "./feature-flags/useFeatureFlagsContext";
 
 export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
-  const { initializeFeatureFlags } = useFeatureFlags();
+  const { initializeFeatureFlags } = useFeatureFlagsContext();
 
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {

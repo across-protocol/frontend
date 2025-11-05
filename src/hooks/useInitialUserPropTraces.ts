@@ -8,10 +8,10 @@ import {
   setUserId,
 } from "utils/amplitude";
 import { ampli } from "ampli";
-import { useFeatureFlags } from "./feature-flags/useFeatureFlags";
+import { useFeatureFlagsContext } from "./feature-flags/useFeatureFlagsContext";
 
 export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
-  const { fetchFlags } = useFeatureFlags();
+  const { fetchFlags } = useFeatureFlagsContext();
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
