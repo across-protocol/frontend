@@ -16,6 +16,7 @@ import { isToHyperCore } from "../../cctp/utils/hypercore";
 import {
   SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES,
   SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS,
+  CCTP_TRANSFER_MODE,
 } from "./constants";
 
 /**
@@ -70,8 +71,7 @@ export function buildSponsoredCCTPQuote(
     amount: inputAmount,
     burnToken: toBytes32(inputToken.address),
     maxFee,
-    // TODO: Should this always be fast?
-    minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.fast,
+    minFinalityThreshold: CCTP_FINALITY_THRESHOLDS[CCTP_TRANSFER_MODE],
     nonce,
     deadline,
     maxBpsToSponsor,

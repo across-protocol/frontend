@@ -22,6 +22,7 @@ import {
   SPONSORED_CCTP_ORIGIN_CHAINS,
   SPONSORED_CCTP_OUTPUT_TOKENS,
   SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES,
+  CCTP_TRANSFER_MODE,
 } from "./utils/constants";
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
@@ -40,9 +41,6 @@ const capabilities: BridgeCapabilities = {
     crossChainMessage: false,
   },
 };
-
-// TODO: Should this always be fast?
-const cctpMode = "fast" as const;
 
 /**
  * Sponsored CCTP bridge strategy
@@ -112,7 +110,10 @@ export async function getQuoteForExactInput({
       inputAmount: exactInputAmount,
       outputAmount,
       minOutputAmount: outputAmount,
-      estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId, cctpMode),
+      estimatedFillTimeSec: getEstimatedFillTime(
+        inputToken.chainId,
+        CCTP_TRANSFER_MODE
+      ),
       provider: name,
       fees: getZeroBridgeFees(inputToken),
     },
@@ -139,7 +140,10 @@ export async function getQuoteForOutput({
       inputAmount,
       outputAmount: minOutputAmount,
       minOutputAmount,
-      estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId, cctpMode),
+      estimatedFillTimeSec: getEstimatedFillTime(
+        inputToken.chainId,
+        CCTP_TRANSFER_MODE
+      ),
       provider: name,
       fees: getZeroBridgeFees(inputToken),
     },
@@ -185,7 +189,7 @@ export async function buildEvmTxForAllowanceHolder(params: {
     });
   }
 
-  const minFinalityThreshold = CCTP_FINALITY_THRESHOLDS[cctpMode];
+  const minFinalityThreshold = CCTP_FINALITY_THRESHOLDS[CCTP_TRANSFER_MODE];
 
   // Calculate `maxFee` as required by `depositForBurnWithHook`
   const { transferFeeBps, forwardFee } = await getCctpFees({

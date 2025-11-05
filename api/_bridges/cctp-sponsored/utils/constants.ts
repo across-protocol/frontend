@@ -4,6 +4,9 @@ import { CHAIN_IDs } from "../../../_constants";
 import { CCTP_SUPPORTED_CHAINS } from "../../cctp/utils/constants";
 import { getEnvs } from "../../../_env";
 
+// NOTE: For now, we always use fast CCTP mode
+export const CCTP_TRANSFER_MODE = "fast" as const;
+
 export const SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS =
   getEnvs().SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS ||
   ethers.constants.AddressZero;
