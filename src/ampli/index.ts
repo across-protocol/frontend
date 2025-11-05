@@ -18,6 +18,7 @@
  */
 
 import * as amplitude from "@amplitude/analytics-browser";
+import { sessionReplayPlugin } from "@amplitude/plugin-session-replay-browser";
 
 export type Environment = "production" | "development" | "testing";
 
@@ -2029,6 +2030,10 @@ export class Ampli {
     } else if (apiKey) {
       this.amplitude = amplitude.createInstance();
       const configuration = (options.client && 'configuration' in options.client) ? options.client.configuration : {};
+
+      const sessionReplayTracking = sessionReplayPlugin();
+      amplitude.add(sessionReplayTracking);
+
       return this.amplitude.init(apiKey, undefined, { ...DefaultConfiguration, ...configuration });
     } else {
       console.error("ERROR: ampli.load() requires 'environment', 'client.apiKey', or 'client.instance'");
