@@ -14,6 +14,7 @@ import {
 } from "../../_errors";
 import { SOURCES } from "./utils/sources";
 import { getJupiterQuote, getJupiterSwapInstructions } from "./utils/api";
+import { getSlippage } from "../../_slippage";
 
 const SWAP_PROVIDER_NAME = "jupiter";
 // From https://dev.jup.ag/docs/old/additional-topics/links-and-contract-addresses
@@ -56,6 +57,14 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
         assertSellEntireBalanceSupported();
       }
 
+      const slippageTolerance = getSlippage({
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
+      });
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
@@ -73,7 +82,7 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
         inputMint: swap.tokenIn.address,
         outputMint: swap.tokenOut.address,
         amount: swap.amount,
-        slippageBps: swap.slippageTolerance * 100, // From percentage to bps
+        slippageBps: Math.round(slippageTolerance * 100), // From percentage to bps, needs to be an integer
         swapMode: tradeType === TradeType.EXACT_INPUT ? "ExactIn" : "ExactOut",
         ...sourcesParams,
         // @dev: We can use the following parameters if we face any limitations when building the transaction
@@ -133,6 +142,7 @@ export function getJupiterStrategy(): QuoteFetchStrategy {
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;

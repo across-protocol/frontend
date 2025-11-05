@@ -11,6 +11,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../../_errors";
+import { getSlippage } from "../../../_slippage";
 
 // Cache TTL for 0x price quotes (60 seconds)
 const PRICE_CACHE_TTL = 60;
@@ -70,6 +71,13 @@ export async function estimateInputForExactOutput(
 ): Promise<string> {
   const inputUnit = BigNumber.from(10).pow(swap.tokenIn.decimals);
 
+  const slippageTolerance = getSlippage({
+    tokenIn: swap.tokenIn,
+    tokenOut: swap.tokenOut,
+    slippageTolerance: swap.slippageTolerance,
+    originOrDestination: swap.originOrDestination,
+  });
+
   // Create cache for the unit price quote
   const unitPriceCache = create0xPriceCache(
     swap.chainId,
@@ -77,7 +85,7 @@ export async function estimateInputForExactOutput(
     swap.tokenOut.address,
     inputUnit.toString(),
     swap.recipient,
-    Math.floor(swap.slippageTolerance * 100),
+    slippageTolerance * 100,
     apiBaseUrl,
     apiHeaders,
     sourcesParams
@@ -107,7 +115,7 @@ export async function estimateInputForExactOutput(
   const buffer = 0.05; // 5%
   const adjustedInputAmount = addMarkupToAmount(
     requiredInputAmount,
-    swap.slippageTolerance / 100 + buffer
+    slippageTolerance / 100 + buffer
   );
   return adjustedInputAmount.toString();
 }

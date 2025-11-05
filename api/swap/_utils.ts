@@ -69,7 +69,7 @@ export const BaseSwapQueryParamsSchema = type({
   refundOnOrigin: optional(boolStr()),
   // DEPRECATED: Use `slippage` instead
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
-  slippage: optional(positiveFloatStr(0.5)), // max. 50% slippage
+  slippage: optional(union([positiveFloatStr(0.5), enums(["auto"])])), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
@@ -99,7 +99,7 @@ export async function handleBaseSwapQueryParams(
     refundAddress,
     refundOnOrigin: _refundOnOrigin = "true",
     slippageTolerance,
-    slippage = "0.01", // Default to 1% slippage
+    slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
@@ -210,7 +210,8 @@ export async function handleBaseSwapQueryParams(
   const slippageToleranceNum = slippageTolerance
     ? parseFloat(slippageTolerance)
     : undefined;
-  const slippageNum = parseFloat(slippage);
+  const slippageNumOrStr =
+    slippage === "auto" ? slippage : parseFloat(slippage);
   const appFeeNum = appFee ? parseFloat(appFee) : undefined;
 
   const [inputToken, outputToken] = await Promise.all([
@@ -238,7 +239,7 @@ export async function handleBaseSwapQueryParams(
     recipient,
     depositor,
     slippageTolerance: slippageToleranceNum,
-    slippage: slippageNum,
+    slippage: slippageNumOrStr,
     excludeSources,
     includeSources,
     appFeePercent: appFeeNum,
@@ -669,6 +670,7 @@ export async function buildBaseSwapResponseJson(params: {
             minOutputAmount: params.originSwapQuote.minAmountOut,
             maxInputAmount: params.originSwapQuote.maximumAmountIn,
             swapProvider: params.originSwapQuote.swapProvider,
+            slippage: params.originSwapQuote.slippageTolerance / 100,
           }
         : undefined,
       bridge: {
@@ -688,6 +690,7 @@ export async function buildBaseSwapResponseJson(params: {
             outputAmount: params.destinationSwapQuote.expectedAmountOut,
             minOutputAmount: params.destinationSwapQuote.minAmountOut,
             swapProvider: params.destinationSwapQuote.swapProvider,
+            slippage: params.destinationSwapQuote.slippageTolerance / 100,
           }
         : undefined,
     },
