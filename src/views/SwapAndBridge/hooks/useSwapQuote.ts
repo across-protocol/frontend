@@ -35,7 +35,6 @@ const useSwapQuote = ({
   refundAddress,
   depositor,
   refundOnOrigin = true,
-  slippageTolerance = 0.05,
 }: SwapQuoteParams) => {
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -78,7 +77,6 @@ const useSwapQuote = ({
         recipient: effectiveRecipient,
         amount: amount.toString(),
         refundOnOrigin,
-        slippageTolerance,
         // Skip transaction estimation when using placeholder address
         skipOriginTxEstimation: isUsingPlaceholderDepositor,
         ...(integratorId ? { integratorId } : {}),
