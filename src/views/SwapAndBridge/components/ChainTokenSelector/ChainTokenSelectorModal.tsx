@@ -10,6 +10,7 @@ import {
   formatUnitsWithMaxFractions,
   formatUSD,
   getChainInfo,
+  getTokenExplorerLinkFromAddress,
   parseUnits,
   QUERIES,
   TOKEN_SYMBOLS_MAP,
@@ -19,6 +20,7 @@ import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
 import { ReactComponent as WarningIcon } from "assets/icons/warning_triangle.svg";
+import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
@@ -868,8 +870,21 @@ const TokenEntry = ({
       <TokenInfoWrapper dim={token.isUnreachable}>
         <TokenItemImage token={token} />
         <TokenNameSymbolWrapper>
-          <TokenName>{token.name}</TokenName>
-          <TokenSymbol>{token.symbol}</TokenSymbol>
+          <TokenName>
+            <span>{token.name}</span>
+            <TokenLink
+              href={getTokenExplorerLinkFromAddress(
+                token.chainId,
+                token.address
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {token.symbol}
+              <LinkExternalIcon />
+            </TokenLink>
+          </TokenName>
+          <TokenSymbol>{getChainInfo(token.chainId).name}</TokenSymbol>
         </TokenNameSymbolWrapper>
       </TokenInfoWrapper>
 
@@ -894,7 +909,7 @@ const TokenEntry = ({
           <TokenBalanceUsd>
             {hasUsdBalance
               ? "$" + formatUSD(parseUnits(token.balanceUsd.toString(), 18))
-              : "??"}
+              : "-"}
           </TokenBalanceUsd>
         </TokenBalanceStack>
       ) : (
@@ -1191,29 +1206,11 @@ const ChainItemCheckmark = styled(CheckmarkCircleFilled)`
 
 const TokenNameSymbolWrapper = styled.div`
   display: flex;
-  flex-direction: row;
-  gap: 4px;
-
+  flex-direction: column;
   width: 100%;
 
-  align-items: center;
+  align-items: flex-start;
   justify-content: start;
-`;
-
-const TokenName = styled.div`
-  overflow: hidden;
-  color: var(--base-bright-gray, #e0f3ff);
-  /* Body/Medium */
-  font-family: Barlow;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%; /* 20.8px */
-
-  max-width: 20ch;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 const TokenSymbol = styled.div`
@@ -1228,8 +1225,6 @@ const TokenSymbol = styled.div`
   line-height: 130%; /* 15.6px */
 
   opacity: 0.5;
-
-  text-transform: uppercase;
 `;
 
 const TokenBalanceStack = styled.div<{ dim?: boolean }>`
@@ -1324,4 +1319,52 @@ const Key = styled.div`
   align-items: center;
   flex-shrink: 0;
   color: rgba(224, 243, 255, 0.4);
+`;
+
+const TokenName = styled.div`
+  overflow: hidden;
+  color: var(--base-bright-gray, #e0f3ff);
+  /* Body/Medium */
+  font-family: Barlow;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 130%; /* 20.8px */
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+`;
+
+const TokenLink = styled.a`
+  display: inline-flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: baseline;
+  text-decoration: none;
+  color: var(--base-bright-gray, #e0f3ff);
+  opacity: 0.5;
+  font-weight: 400;
+
+  svg,
+  span {
+    font-size: 14px;
+    display: none;
+    color: inherit;
+  }
+
+  &:hover {
+    text-decoration: underline;
+    color: ${COLORS.aqua};
+    opacity: 1;
+  }
+
+  &:hover {
+    svg {
+      display: inline;
+    }
+  }
 `;

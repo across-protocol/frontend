@@ -212,3 +212,11 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
 
   return baseTokenInfo;
 }
+
+export function getTokenExplorerLinkFromAddress(
+  chainId: number,
+  address: string
+) {
+  const explorerBaseUrl = getChainInfo(chainId).explorerUrl;
+  return `${explorerBaseUrl}/address/${address}`;
+}
