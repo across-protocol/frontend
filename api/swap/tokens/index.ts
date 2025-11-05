@@ -33,6 +33,18 @@ type Token = {
 const chains = mainnetChains;
 const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
 
+// Chains where USDT should be displayed as USDT0
+// Temporary list until all chains migrate to USDT0
+const chainsWithUsdt0Enabled = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.ARBITRUM,
+  CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.PLASMA,
+];
+
+// USDT0 logo URL (matches frontend logo)
+const USDT0_LOGO_URL = "https://across.to/logo-assets/usdt0.svg";
+
 const SwapTokensQueryParamsSchema = type({
   chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
 });
@@ -288,22 +300,35 @@ function getTokensFromEnabledRoutes(
   ) => {
     const finalAddress = isNative ? constants.AddressZero : tokenAddress;
 
-    const tokenKey = `${chainId}-${tokenSymbol}-${finalAddress.toLowerCase()}`;
+    const tokenInfo =
+      TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+
+    // Apply chain-specific display transformations
+    let displaySymbol = tokenSymbol;
+    let displayName = tokenInfo.name;
+    let displayLogoUrl = getFallbackTokenLogoURI(l1TokenAddress);
+
+    // Handle USDT -> USDT0 for specific chains
+    if (tokenSymbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
+      displaySymbol = "USDT0";
+      displayName = "Tether USD (USDT0)";
+      displayLogoUrl = USDT0_LOGO_URL;
+    }
+
+    // Use display symbol for deduplication key
+    const tokenKey = `${chainId}-${displaySymbol}-${finalAddress.toLowerCase()}`;
 
     // Only add each unique token once
     if (!seenTokens.has(tokenKey)) {
       seenTokens.add(tokenKey);
 
-      const tokenInfo =
-        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
-
       tokens.push({
         chainId,
         address: finalAddress,
-        name: tokenInfo.name,
-        symbol: tokenSymbol,
+        name: displayName,
+        symbol: displaySymbol,
         decimals: tokenInfo.decimals,
-        logoUrl: getFallbackTokenLogoURI(l1TokenAddress),
+        logoUrl: displayLogoUrl,
         priceUsd: pricesForLifiTokens[chainId]?.[finalAddress] || null,
       });
     }
@@ -347,6 +372,15 @@ function deduplicateTokens(tokens: Token[]): Token[] {
 
   tokens.forEach((token) => {
     const key = `${token.chainId}-${token.symbol}-${token.address.toLowerCase()}`;
+
+    // Skip USDT on chains with USDT0 enabled (USDT0 comes first from Across tokens)
+    if (
+      token.symbol === "USDT" &&
+      chainsWithUsdt0Enabled.includes(token.chainId)
+    ) {
+      const usdt0Key = `${token.chainId}-USDT0-${token.address.toLowerCase()}`;
+      if (seen.has(usdt0Key)) return; // Skip this USDT, we already have USDT0
+    }
 
     // Keep first occurrence
     if (!seen.has(key)) {
