@@ -311,7 +311,7 @@ function getTokensFromEnabledRoutes(
     // Handle USDT -> USDT0 for specific chains
     if (tokenSymbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
       displaySymbol = "USDT0";
-      displayName = "Tether USD (USDT0)";
+      displayName = "USDT0";
       displayLogoUrl = USDT0_LOGO_URL;
     }
 
