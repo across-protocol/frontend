@@ -7,7 +7,7 @@ import {
   GetOutputBridgeQuoteParams,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
-import { AMOUNT_TYPE, AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
+import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
 import { CCTP_FINALITY_THRESHOLDS } from "../cctp/utils/constants";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
@@ -205,10 +205,7 @@ export async function buildEvmTxForAllowanceHolder(params: {
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     maxFee,
-    inputAmount:
-      crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
-        ? bridgeQuote.inputAmount
-        : bridgeQuote.inputAmount.add(maxFee),
+    inputAmount: bridgeQuote.inputAmount,
   });
   const maxBpsToSponsorBn = BigNumber.from(Math.ceil(maxBpsToSponsor));
 
