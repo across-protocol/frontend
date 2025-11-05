@@ -187,9 +187,21 @@ export function useTokenInput({
   const handleBalanceClick = useCallback(
     (amount: BigNumber, decimals: number) => {
       setAmount(amount);
-      setAmountString(formatUnitsWithMaxFractions(amount, decimals));
+      if (unit === "usd" && token) {
+        // Convert token amount to USD for display
+        const tokenAmountFormatted = formatUnitsWithMaxFractions(
+          amount,
+          decimals
+        );
+        const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
+        // convertTokenToUSD returns in 18 decimal precision
+        setAmountString(utils.formatUnits(usdValue, 18));
+      } else {
+        // Display as token amount
+        setAmountString(formatUnitsWithMaxFractions(amount, decimals));
+      }
     },
-    [setAmount]
+    [setAmount, unit, token]
   );
 
   return {
