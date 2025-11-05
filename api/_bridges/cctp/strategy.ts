@@ -266,31 +266,9 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
 function getCctpBridgeFees(inputToken: Token) {
   const zeroBN = BigNumber.from(0);
   return {
-    totalRelay: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerCapital: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerGas: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    lp: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    bridgeFee: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
+    pct: zeroBN,
+    amount: zeroBN,
+    token: inputToken,
   };
 }
 

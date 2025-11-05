@@ -7,6 +7,12 @@ import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
 
+export enum FeeDetailsType {
+  TOTAL_BREAKDOWN = "total-breakdown",
+  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
+  ACROSS = "across",
+}
+
 export type SlippageTolerance = number | "auto";
 
 export type OriginOrDestination = "origin" | "destination";
@@ -115,10 +121,18 @@ export type SwapQuote = {
   };
 };
 
+type AcrossBridgeFeeDetails = {
+  type: FeeDetailsType.ACROSS;
+  lp: FeeComponent;
+  relayerCapital: FeeComponent;
+  destinationGas: FeeComponent;
+};
+
 type FeeComponent = {
-  total: BigNumber;
+  amount: BigNumber;
   pct: BigNumber;
   token: Token;
+  details?: AcrossBridgeFeeDetails;
 };
 
 export type CrossSwapQuotes = {
@@ -131,13 +145,7 @@ export type CrossSwapQuotes = {
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
     estimatedFillTimeSec: number;
-    fees: {
-      totalRelay: FeeComponent;
-      relayerCapital: FeeComponent;
-      relayerGas: FeeComponent;
-      lp: FeeComponent;
-      bridgeFee: FeeComponent;
-    };
+    fees: FeeComponent;
   } & (
     | {
         provider: "across";

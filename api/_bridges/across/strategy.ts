@@ -17,7 +17,7 @@ import {
   getCrossSwapTypes,
 } from "../../_dexes/utils";
 import { AppFee } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
+import { Token, FeeDetailsType } from "../../_dexes/types";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
 import { BigNumber } from "ethers";
 
@@ -39,34 +39,29 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
     feesFromApi: Awaited<ReturnType<typeof getSuggestedFees>>,
     bridgeFeesToken: Token
   ) => {
-    const zeroBN = BigNumber.from(0);
     return {
-      totalRelay: {
-        total: BigNumber.from(feesFromApi.totalRelayFee.total),
-        pct: BigNumber.from(feesFromApi.totalRelayFee.pct),
-        token: bridgeFeesToken,
+      amount: BigNumber.from(feesFromApi.totalRelayFee.total),
+      pct: BigNumber.from(feesFromApi.totalRelayFee.pct),
+      token: bridgeFeesToken,
+      details: {
+        type: FeeDetailsType.ACROSS,
+        relayerCapital: {
+          amount: BigNumber.from(feesFromApi.relayerCapitalFee.total),
+          pct: BigNumber.from(feesFromApi.relayerCapitalFee.pct),
+          token: bridgeFeesToken,
+        },
+        destinationGas: {
+          amount: BigNumber.from(feesFromApi.relayerGasFee.total),
+          pct: BigNumber.from(feesFromApi.relayerGasFee.pct),
+          token: bridgeFeesToken,
+        },
+        lp: {
+          amount: BigNumber.from(feesFromApi.lpFee.total),
+          pct: BigNumber.from(feesFromApi.lpFee.pct),
+          token: bridgeFeesToken,
+        },
       },
-      relayerCapital: {
-        total: BigNumber.from(feesFromApi.relayerCapitalFee.total),
-        pct: BigNumber.from(feesFromApi.relayerCapitalFee.pct),
-        token: bridgeFeesToken,
-      },
-      relayerGas: {
-        total: BigNumber.from(feesFromApi.relayerGasFee.total),
-        pct: BigNumber.from(feesFromApi.relayerGasFee.pct),
-        token: bridgeFeesToken,
-      },
-      lp: {
-        total: BigNumber.from(feesFromApi.lpFee.total),
-        pct: BigNumber.from(feesFromApi.lpFee.pct),
-        token: bridgeFeesToken,
-      },
-      bridgeFee: {
-        pct: zeroBN,
-        total: zeroBN,
-        token: bridgeFeesToken,
-      },
-    };
+    } as const;
   };
 
   return {
