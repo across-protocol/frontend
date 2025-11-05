@@ -75,6 +75,20 @@ export default async function handler(
 
       const responseJson: Token[] = [];
 
+      // Add tokens from Across' enabled routes first (highest priority for normalized names)
+      const tokensFromEnabledRoutes = getTokensFromEnabledRoutes(
+        filteredChainIds,
+        pricesForLifiTokens
+      );
+      responseJson.push(...tokensFromEnabledRoutes);
+
+      // Add tokens from indirect chains (e.g., USDT-SPOT on HyperCore)
+      const indirectChainTokens = getIndirectChainTokens(
+        filteredChainIds,
+        pricesForLifiTokens
+      );
+      responseJson.push(...indirectChainTokens);
+
       // Add Uniswap tokens
       const uniswapTokens = getUniswapTokens(
         uniswapTokensResponse.data,
@@ -98,21 +112,7 @@ export default async function handler(
       );
       responseJson.push(...jupiterTokens);
 
-      // Add tokens from indirect chains (e.g., USDT-SPOT on HyperCore)
-      const indirectChainTokens = getIndirectChainTokens(
-        filteredChainIds,
-        pricesForLifiTokens
-      );
-      responseJson.push(...indirectChainTokens);
-
-      // Add tokens from Across' enabled routes (fills gaps from external sources)
-      const tokensFromEnabledRoutes = getTokensFromEnabledRoutes(
-        filteredChainIds,
-        pricesForLifiTokens
-      );
-      responseJson.push(...tokensFromEnabledRoutes);
-
-      // Deduplicate tokens (external sources take precedence)
+      // Deduplicate tokens (Across tokens take precedence)
       const deduplicatedTokens = deduplicateTokens(responseJson);
 
       logger.debug({
