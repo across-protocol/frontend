@@ -1192,9 +1192,9 @@ const ChainItemName = styled.div`
   text-overflow: ellipsis;
   /* Body/Medium */
   font-family: Barlow;
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 130%; /* 20.8px */
 `;
 
@@ -1328,7 +1328,7 @@ const TokenName = styled.div`
   font-family: Barlow;
   font-size: 14px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 130%; /* 20.8px */
 
   white-space: nowrap;
@@ -1343,7 +1343,7 @@ const TokenLink = styled.a`
   display: inline-flex;
   flex-direction: row;
   gap: 4px;
-  align-items: baseline;
+  align-items: center;
   text-decoration: none;
   color: var(--base-bright-gray, #e0f3ff);
   opacity: 0.5;
