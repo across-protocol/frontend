@@ -24,6 +24,16 @@ const getMockedResponse = () => {
   return response;
 };
 
+// mock the logger
+jest.mock("../../api/_logger", () => ({
+  getLogger: jest.fn().mockReturnValue({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  }),
+}));
+
 describe("API Test", () => {
   // Create mocked response object:
   let response: any;
