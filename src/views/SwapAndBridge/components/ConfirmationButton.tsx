@@ -212,8 +212,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     const appFeesUsd = swapQuote.fees.total.details.app.amountUsd;
     const swapImpactUsd = swapQuote.fees.total.details.swapImpact.amountUsd;
 
-    const hasAppFee = Number(appFeesUsd) > 0;
-    const hasSwapImpact = Number(swapImpactUsd) > 0;
+    // Only show fee items if they're at least 1 cent
+    const hasAppFee = Number(appFeesUsd) >= 0.01;
+    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -269,35 +270,45 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               <Time width="16px" height="16px" />
               <span>Est. Time</span>
             </DetailLeft>
-            <span>{displayValues.estimatedTime}</span>
+            <DetailRight>{displayValues.estimatedTime}</DetailRight>
           </DetailRow>
           <DetailRow>
             <DetailLeft>
               <Dollar width="16px" height="16px" />
               <span>Total Fee</span>
               <Tooltip
-                tooltipId="ConfirmationButton - net fee"
-                body="Total fees less any reward, in USD"
+                tooltipId="ConfirmationButton - total fee"
+                body="Sum of bridge and swap fees"
               >
                 <Info width="16px" height="16px" />
               </Tooltip>
             </DetailLeft>
-            <span>{displayValues.totalFee}</span>
+            <DetailRight>{displayValues.totalFee}</DetailRight>
           </DetailRow>
           <FeeBreakdown>
             <FeeBreakdownRow>
-              <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
+              <FeeBreakdownLabel>
+                <span>Bridge Fee</span>
+                <Tooltip
+                  tooltipId="ConfirmationButton - bridge fee"
+                  body="Includes destination gas, relayer fees, and LP fees"
+                >
+                  <Info width="16px" height="16px" />
+                </Tooltip>
+              </FeeBreakdownLabel>
               <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
             </FeeBreakdownRow>
-            {isDefined(displayValues.appFee) && (
-              <FeeBreakdownRow>
-                <FeeBreakdownLabel>App Fee</FeeBreakdownLabel>
-                <FeeBreakdownValue>{displayValues.appFee}</FeeBreakdownValue>
-              </FeeBreakdownRow>
-            )}
             {isDefined(displayValues.swapImpact) && (
               <FeeBreakdownRow>
-                <FeeBreakdownLabel>Swap Impact</FeeBreakdownLabel>
+                <FeeBreakdownLabel>
+                  <span>Swap Impact</span>
+                  <Tooltip
+                    tooltipId="ConfirmationButton - Swap impact"
+                    body="Estimated price difference from pool depth and trade size"
+                  >
+                    <Info width="16px" height="16px" />
+                  </Tooltip>
+                </FeeBreakdownLabel>
                 <FeeBreakdownValue>
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
@@ -474,7 +485,7 @@ const StyledLoadingIcon = styled(LoadingIcon)`
 `;
 
 const ExpandedDetails = styled.div`
-  color: #e0f3ff;
+  color: rgba(224, 243, 255, 0.5);
   font-size: 14px;
   width: 100%;
   padding: 8px 16px 24px;
@@ -497,12 +508,13 @@ const DetailRight = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #e0f3ff;
 `;
 
 const FeeBreakdown = styled.div`
-  padding-left: 24px;
-  border-left: 1px solid rgba(224, 243, 255, 0.1);
+  padding-left: 16px;
   margin-left: 8px;
+  margin-top: 12px;
 `;
 
 const FeeBreakdownRow = styled.div`
@@ -510,10 +522,27 @@ const FeeBreakdownRow = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
+  position: relative;
+
+  &::before {
+    content: "";
+    width: 10px;
+    height: 18px;
+    border-radius: 0 0 0 6px;
+    border-left: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    position: absolute;
+    left: -16px;
+    top: -0.5em;
+    opacity: 0.5;
+  }
 `;
 
 const FeeBreakdownLabel = styled.span`
-  color: rgba(224, 243, 255, 0.7);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(224, 243, 255, 0.5);
 `;
 
 const FeeBreakdownValue = styled.span`
