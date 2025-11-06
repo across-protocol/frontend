@@ -151,7 +151,8 @@ const handler = async (
           getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
         destinationChainId
       );
-      const depositWithMessage = sdk.utils.isDefined(message);
+      const depositWithMessage =
+        sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message);
 
       // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
       const isDestinationOptInChain = OPT_IN_CHAINS.includes(
