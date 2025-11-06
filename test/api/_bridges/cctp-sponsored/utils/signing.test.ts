@@ -1,14 +1,14 @@
 import { ethers, utils } from "ethers";
 import { recoverAddress } from "viem";
 
-import { getEnvs } from "../../../../api/_env";
+import { getEnvs } from "../../../../../api/_env";
 import {
   createCctpSignature,
   SponsoredCCTPQuote,
-} from "../../../../api/_bridges/sponsorship/cctp";
+} from "../../../../../api/_bridges/cctp-sponsored/utils/signing";
 
 // Mock the environment variables to ensure tests are deterministic.
-jest.mock("../../../../api/_env", () => ({
+jest.mock("../../../../../api/_env", () => ({
   getEnvs: jest.fn(),
 }));
 
@@ -45,6 +45,8 @@ describe("CCTP Signature", () => {
       maxUserSlippageBps: 10,
       finalRecipient: randomAddress(),
       finalToken: randomAddress(),
+      executionMode: 0,
+      actionData: "0x",
     };
 
     // Create the signature and get the hash that was signed.
