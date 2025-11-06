@@ -18,6 +18,7 @@ import {
   SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS,
   CCTP_TRANSFER_MODE,
 } from "./constants";
+import { getSponsoredCctpFinalTokenAddress } from "./final-token";
 
 /**
  * Builds a complete sponsored CCTP quote with signature
@@ -63,6 +64,11 @@ export function buildSponsoredCCTPQuote(
     );
   }
 
+  const finalToken = getSponsoredCctpFinalTokenAddress(
+    outputToken.symbol,
+    intermediaryChainId
+  );
+
   const sponsoredCCTPQuote: SponsoredCCTPQuote = {
     sourceDomain: getCctpDomainId(inputToken.chainId),
     destinationDomain: getCctpDomainId(intermediaryChainId),
@@ -77,7 +83,7 @@ export function buildSponsoredCCTPQuote(
     maxBpsToSponsor,
     maxUserSlippageBps,
     finalRecipient: toBytes32(recipient),
-    finalToken: toBytes32(outputToken.address),
+    finalToken: toBytes32(finalToken),
     executionMode: ExecutionMode.Default, // Default HyperCore flow
     actionData: "0x", // Empty for default flow
   };

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { CHAIN_IDs } from "../../../_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
 import { CCTP_SUPPORTED_CHAINS } from "../../cctp/utils/constants";
 import { getEnvs } from "../../../_env";
 
@@ -36,6 +36,14 @@ export const SPONSORED_CCTP_ORIGIN_CHAINS = CCTP_SUPPORTED_CHAINS.filter(
 export const SPONSORED_CCTP_INPUT_TOKENS = ["USDC"];
 
 export const SPONSORED_CCTP_OUTPUT_TOKENS = ["USDC", "USDH-SPOT"];
+
+export const SPONSORED_CCTP_FINAL_TOKEN_PER_OUTPUT_TOKEN: Record<
+  string,
+  (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP]
+> = {
+  USDC: TOKEN_SYMBOLS_MAP.USDC,
+  "USDH-SPOT": TOKEN_SYMBOLS_MAP.USDH,
+};
 
 export const SPONSORED_CCTP_DESTINATION_CHAINS = [
   CHAIN_IDs.HYPERCORE,
