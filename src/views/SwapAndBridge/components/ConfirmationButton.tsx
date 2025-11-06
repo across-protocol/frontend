@@ -257,7 +257,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         <ExpandedDetails>
           <DetailRow>
             <DetailLeft>
-              <Route width="20px" height="20px" />
+              <Route width="16px" height="16px" />
               <span>Route</span>
             </DetailLeft>
             <DetailRight>
@@ -280,7 +280,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 tooltipId="ConfirmationButton - total fee"
                 body="Sum of bridge and swap fees"
               >
-                <Info width="16px" height="16px" />
+                <Info color="inherit" width="16px" height="16px" />
               </Tooltip>
             </DetailLeft>
             <DetailRight>{displayValues.totalFee}</DetailRight>
@@ -293,7 +293,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   tooltipId="ConfirmationButton - bridge fee"
                   body="Includes destination gas, relayer fees, and LP fees"
                 >
-                  <Info width="16px" height="16px" />
+                  <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
               </FeeBreakdownLabel>
               <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
@@ -306,7 +306,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                     tooltipId="ConfirmationButton - Swap impact"
                     body="Estimated price difference from pool depth and trade size"
                   >
-                    <Info width="16px" height="16px" />
+                    <Info color="inherit" width="16px" height="16px" />
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
@@ -501,7 +501,7 @@ const DetailRow = styled.div`
 const DetailLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const DetailRight = styled.div`
