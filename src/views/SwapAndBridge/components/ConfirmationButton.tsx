@@ -194,26 +194,26 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   // Resolve conversion helpers outside memo to respect hooks rules
 
   const displayValues = React.useMemo(() => {
-    if (!swapQuote || !inputToken || !outputToken) {
+    if (!swapQuote || !inputToken || !outputToken || !swapQuote.fees) {
       return {
         fee: "-",
         time: "-",
         bridgeFee: "-",
-        gasFee: "-",
-        swapFee: "-",
+        appFee: undefined,
+        swapImpact: undefined,
         route: "Across V4",
         estimatedTime: "-",
-        netFee: "-",
+        totalFee: "-",
       };
     }
 
-    const bridgeFeesUsd = swapQuote.fees.relayerTotal.amountUsd;
-    const gasFeeUsd = (
-      Number(swapQuote.fees.originGas.amountUsd) +
-      Number(swapQuote.fees.destinationGas.amountUsd)
-    ).toString();
-    const swapFeeUsd = swapQuote.fees.swap?.amountUsd;
     const totalFeeUsd = swapQuote.fees.total.amountUsd;
+    const bridgeFeesUsd = swapQuote.fees.total.details.bridge.amountUsd;
+    const appFeesUsd = swapQuote.fees.total.details.app.amountUsd;
+    const swapImpactUsd = swapQuote.fees.total.details.swapImpact.amountUsd;
+
+    const hasAppFee = Number(appFeesUsd) > 0;
+    const hasSwapImpact = Number(swapImpactUsd) > 0;
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -222,11 +222,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
     return {
-      fee: formatUSDString(totalFeeUsd),
+      totalFee: formatUSDString(totalFeeUsd),
       time,
       bridgeFee: formatUSDString(bridgeFeesUsd),
-      gasFee: formatUSDString(gasFeeUsd),
-      swapFee: swapFeeUsd ? formatUSDString(swapFeeUsd) : undefined,
+      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
+      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
       route: "Across V4",
       estimatedTime: time,
     };
@@ -245,7 +245,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const content = (
     <>
       <ExpandableLabelSection
-        fee={displayValues.fee}
+        fee={displayValues.totalFee}
         time={displayValues.time}
         expanded={expanded}
         onToggle={() => setExpanded((e) => !e)}
@@ -274,7 +274,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           <DetailRow>
             <DetailLeft>
               <Dollar width="16px" height="16px" />
-              <span>Net Fee</span>
+              <span>Total Fee</span>
               <Tooltip
                 tooltipId="ConfirmationButton - net fee"
                 body="Total fees less any reward, in USD"
@@ -282,21 +282,25 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 <Info width="16px" height="16px" />
               </Tooltip>
             </DetailLeft>
-            <span>{displayValues.netFee}</span>
+            <span>{displayValues.totalFee}</span>
           </DetailRow>
           <FeeBreakdown>
             <FeeBreakdownRow>
               <FeeBreakdownLabel>Bridge Fee</FeeBreakdownLabel>
               <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
             </FeeBreakdownRow>
-            <FeeBreakdownRow>
-              <FeeBreakdownLabel>Gas Fee</FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.gasFee}</FeeBreakdownValue>
-            </FeeBreakdownRow>
-            {isDefined(displayValues.swapFee) && (
+            {isDefined(displayValues.appFee) && (
               <FeeBreakdownRow>
-                <FeeBreakdownLabel>Swap Fee</FeeBreakdownLabel>
-                <FeeBreakdownValue>{displayValues.swapFee}</FeeBreakdownValue>
+                <FeeBreakdownLabel>App Fee</FeeBreakdownLabel>
+                <FeeBreakdownValue>{displayValues.appFee}</FeeBreakdownValue>
+              </FeeBreakdownRow>
+            )}
+            {isDefined(displayValues.swapImpact) && (
+              <FeeBreakdownRow>
+                <FeeBreakdownLabel>Swap Impact</FeeBreakdownLabel>
+                <FeeBreakdownValue>
+                  {displayValues.swapImpact}
+                </FeeBreakdownValue>
               </FeeBreakdownRow>
             )}
           </FeeBreakdown>

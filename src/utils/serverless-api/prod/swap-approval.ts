@@ -15,7 +15,37 @@ export type SwapApprovalApiReturnType = Awaited<
   ReturnType<typeof swapApprovalApiCall>
 >;
 
+type FeeComponent = {
+  amount: string;
+  amountUsd: string;
+  pct?: string;
+  token: SwapApiToken;
+};
+
+type AcrossBridgeFeeDetails = {
+  type: "across";
+  lp: FeeComponent;
+  relayerCapital: FeeComponent;
+  destinationGas: FeeComponent;
+};
+
+type TotalFeeBreakdownDetails = {
+  type: "TOTAL_BREAKDOWN";
+  swapImpact: FeeComponent;
+  app: FeeComponent;
+  bridge: FeeComponent & { details?: AcrossBridgeFeeDetails };
+};
+
+type MaxTotalFeeBreakdownDetails = {
+  type: "MAX_TOTAL_BREAKDOWN";
+  maxSwapImpact: FeeComponent;
+  app: FeeComponent;
+  bridge: FeeComponent & { details?: AcrossBridgeFeeDetails };
+};
+
 export type SwapApprovalApiResponse = {
+  crossSwapType: string;
+  amountType: string;
   checks: {
     allowance: {
       token: string;
@@ -29,7 +59,7 @@ export type SwapApprovalApiResponse = {
       expected: string;
     };
   };
-  approvalTxns: {
+  approvalTxns?: {
     chainId: number;
     to: string;
     data: string;
@@ -46,6 +76,7 @@ export type SwapApprovalApiResponse = {
         name: string;
         sources: string[];
       };
+      slippage: number;
     };
     bridge: {
       inputAmount: string;
@@ -55,6 +86,7 @@ export type SwapApprovalApiResponse = {
       fees: {
         amount: string;
         pct: string;
+        token: SwapApiToken;
         details: {
           type: "across";
           lp: {
@@ -71,6 +103,7 @@ export type SwapApprovalApiResponse = {
           };
         };
       };
+      provider: string;
     };
     destinationSwap?: {
       tokenIn: SwapApiToken;
@@ -83,10 +116,14 @@ export type SwapApprovalApiResponse = {
         name: string;
         sources: string[];
       };
+      slippage: number;
     };
   };
+  inputToken: SwapApiToken;
+  outputToken: SwapApiToken;
   refundToken: SwapApiToken;
   inputAmount: string;
+  maxInputAmount: string;
   expectedOutputAmount: string;
   minOutputAmount: string;
   expectedFillTime: number;
@@ -100,101 +137,12 @@ export type SwapApprovalApiResponse = {
     maxFeePerGas?: string;
     maxPriorityFeePerGas?: string;
   };
-  fees: {
-    total: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
-    originGas: {
-      amount: string;
-      amountUsd: string;
-      token: {
-        chainId: number;
-        address: string;
-        decimals: number;
-        symbol: string;
-      };
-    };
-    destinationGas: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        chainId: number;
-        address: string;
-        decimals: number;
-        symbol: string;
-      };
-    };
-    relayerCapital: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
-    lpFee: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
-    relayerTotal: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
-    app: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
-    swap?: {
-      amount: string;
-      amountUsd: string;
-      pct: string;
-      token: {
-        decimals: number;
-        symbol: string;
-        address: string;
-        name: string;
-        chainId: number;
-      };
-    };
+  fees?: {
+    total: FeeComponent & { details: TotalFeeBreakdownDetails };
+    totalMax: FeeComponent & { details: MaxTotalFeeBreakdownDetails };
+    originGas: FeeComponent;
   };
+  eip712?: any;
 };
 
 export type SwapApprovalApiQueryParams = {
@@ -223,7 +171,17 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
 
   const result = response.data;
 
+  // Helper function to convert fee component
+  const convertFeeComponent = (fee: FeeComponent) => ({
+    amount: BigNumber.from(fee.amount),
+    amountUsd: fee.amountUsd,
+    pct: fee.pct ? BigNumber.from(fee.pct) : undefined,
+    token: fee.token,
+  });
+
   return {
+    crossSwapType: result.crossSwapType,
+    amountType: result.amountType,
     checks: {
       allowance: {
         token: result.checks.allowance.token,
@@ -252,6 +210,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
               result.steps.originSwap.maxInputAmount
             ),
             swapProvider: result.steps.originSwap.swapProvider,
+            slippage: result.steps.originSwap.slippage,
           }
         : undefined,
       bridge: {
@@ -262,6 +221,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         fees: {
           amount: BigNumber.from(result.steps.bridge.fees.amount),
           pct: BigNumber.from(result.steps.bridge.fees.pct),
+          token: result.steps.bridge.fees.token,
           details: {
             type: "across",
             lp: {
@@ -288,6 +248,7 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
             },
           },
         },
+        provider: result.steps.bridge.provider,
       },
       destinationSwap: result.steps.destinationSwap
         ? {
@@ -306,11 +267,15 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
               result.steps.destinationSwap.minOutputAmount
             ),
             swapProvider: result.steps.destinationSwap.swapProvider,
+            slippage: result.steps.destinationSwap.slippage,
           }
         : undefined,
     },
+    inputToken: result.inputToken,
+    outputToken: result.outputToken,
     refundToken: result.refundToken,
     inputAmount: BigNumber.from(result.inputAmount),
+    maxInputAmount: BigNumber.from(result.maxInputAmount),
     expectedOutputAmount: BigNumber.from(result.expectedOutputAmount),
     minOutputAmount: BigNumber.from(result.minOutputAmount),
     expectedFillTime: result.expectedFillTime,
@@ -330,57 +295,68 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         ? BigNumber.from(result.swapTx.maxPriorityFeePerGas)
         : undefined,
     },
-    fees: {
-      total: {
-        amount: BigNumber.from(result.fees.total.amount),
-        amountUsd: result.fees.total.amountUsd,
-        pct: result.fees.total.pct,
-        token: result.fees.total.token,
-      },
-      originGas: {
-        amount: BigNumber.from(result.fees.originGas.amount),
-        amountUsd: result.fees.originGas.amountUsd,
-        token: result.fees.originGas.token,
-      },
-      destinationGas: {
-        amount: BigNumber.from(result.fees.destinationGas.amount),
-        amountUsd: result.fees.destinationGas.amountUsd,
-        pct: result.fees.destinationGas.pct,
-        token: result.fees.destinationGas.token,
-      },
-      relayerCapital: {
-        amount: BigNumber.from(result.fees.relayerCapital.amount),
-        amountUsd: result.fees.relayerCapital.amountUsd,
-        pct: result.fees.relayerCapital.pct,
-        token: result.fees.relayerCapital.token,
-      },
-      lpFee: {
-        amount: BigNumber.from(result.fees.lpFee.amount),
-        amountUsd: result.fees.lpFee.amountUsd,
-        pct: result.fees.lpFee.pct,
-        token: result.fees.lpFee.token,
-      },
-      relayerTotal: {
-        amount: BigNumber.from(result.fees.relayerTotal.amount),
-        amountUsd: result.fees.relayerTotal.amountUsd,
-        pct: result.fees.relayerTotal.pct,
-        token: result.fees.relayerTotal.token,
-      },
-      app: {
-        amount: BigNumber.from(result.fees.app.amount),
-        amountUsd: result.fees.app.amountUsd,
-        pct: result.fees.app.pct,
-        token: result.fees.app.token,
-      },
-      swap: result.fees.swap
-        ? {
-            amount: BigNumber.from(result.fees.swap.amount),
-            amountUsd: result.fees.swap.amountUsd,
-            pct: result.fees.swap.pct,
-            token: result.fees.swap.token,
-          }
-        : undefined,
-    },
+    fees: result.fees
+      ? {
+          total: {
+            ...convertFeeComponent(result.fees.total),
+            details: {
+              type: result.fees.total.details.type,
+              swapImpact: convertFeeComponent(
+                result.fees.total.details.swapImpact
+              ),
+              app: convertFeeComponent(result.fees.total.details.app),
+              bridge: {
+                ...convertFeeComponent(result.fees.total.details.bridge),
+                details: result.fees.total.details.bridge.details
+                  ? {
+                      type: result.fees.total.details.bridge.details.type,
+                      lp: convertFeeComponent(
+                        result.fees.total.details.bridge.details.lp
+                      ),
+                      relayerCapital: convertFeeComponent(
+                        result.fees.total.details.bridge.details.relayerCapital
+                      ),
+                      destinationGas: convertFeeComponent(
+                        result.fees.total.details.bridge.details.destinationGas
+                      ),
+                    }
+                  : undefined,
+              },
+            },
+          },
+          totalMax: {
+            ...convertFeeComponent(result.fees.totalMax),
+            details: {
+              type: result.fees.totalMax.details.type,
+              maxSwapImpact: convertFeeComponent(
+                result.fees.totalMax.details.maxSwapImpact
+              ),
+              app: convertFeeComponent(result.fees.totalMax.details.app),
+              bridge: {
+                ...convertFeeComponent(result.fees.totalMax.details.bridge),
+                details: result.fees.totalMax.details.bridge.details
+                  ? {
+                      type: result.fees.totalMax.details.bridge.details.type,
+                      lp: convertFeeComponent(
+                        result.fees.totalMax.details.bridge.details.lp
+                      ),
+                      relayerCapital: convertFeeComponent(
+                        result.fees.totalMax.details.bridge.details
+                          .relayerCapital
+                      ),
+                      destinationGas: convertFeeComponent(
+                        result.fees.totalMax.details.bridge.details
+                          .destinationGas
+                      ),
+                    }
+                  : undefined,
+              },
+            },
+          },
+          originGas: convertFeeComponent(result.fees.originGas),
+        }
+      : undefined,
+    eip712: result.eip712,
   };
 }
 
