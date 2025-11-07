@@ -16,7 +16,8 @@ export function useValidateSwapAndBridge(
   isAmountOrigin: boolean,
   inputToken: EnrichedToken | null,
   outputToken: EnrichedToken | null,
-  isConnected: boolean
+  isConnected: boolean,
+  swapQuoteInputAmount: BigNumber | undefined
 ): ValidationResult {
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
@@ -44,19 +45,12 @@ export function useValidateSwapAndBridge(
         if (amount.gt(inputToken.balance)) {
           errorType = AmountInputError.INSUFFICIENT_BALANCE;
         }
+      } else if (!isAmountOrigin && swapQuoteInputAmount) {
+        if (swapQuoteInputAmount?.gt(inputToken.balance)) {
+          errorType = AmountInputError.INSUFFICIENT_BALANCE;
+        }
       }
-      // // backend availability
-      // if (!errorType && error && axios.isAxiosError(error)) {
-      //   const axiosError = error as AxiosError<AcrossApiErrorResponse>;
-      //   const code = axiosError.response?.data?.code;
-      //   if (code === "AMOUNT_TOO_LOW") {
-      //     errorType = AmountInputError.AMOUNT_TOO_LOW;
-      //   } else if (code === "SWAP_QUOTE_UNAVAILABLE") {
-      //     errorType = AmountInputError.SWAP_QUOTE_UNAVAILABLE;
-      //   }
-      // }
     }
-
     return {
       error: errorType,
       warn: undefined as AmountInputError | undefined,
@@ -66,7 +60,14 @@ export function useValidateSwapAndBridge(
         outputToken,
       }),
     };
-  }, [isConnected, inputToken, outputToken, amount, isAmountOrigin]);
+  }, [
+    isConnected,
+    inputToken,
+    outputToken,
+    amount,
+    isAmountOrigin,
+    swapQuoteInputAmount,
+  ]);
 
   return validation;
 }
