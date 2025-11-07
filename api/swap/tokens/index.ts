@@ -43,7 +43,8 @@ const chainsWithUsdt0Enabled = [
 ];
 
 // USDT0 logo URL (matches frontend logo)
-const USDT0_LOGO_URL = "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
+const USDT0_LOGO_URL =
+  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
 
 const SwapTokensQueryParamsSchema = type({
   chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
