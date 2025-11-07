@@ -1114,7 +1114,9 @@ const ListWrapper = styled.div`
   overflow-y: auto;
   flex: 1;
   min-height: 0;
-  padding-bottom: calc(56px * 2 + 23px); // account for footer
+  padding-bottom: calc(
+    56px * 2 + 52px
+  ); // account for  (56px - shortcuts footer)
 
   &::-webkit-scrollbar {
     width: 8px;
