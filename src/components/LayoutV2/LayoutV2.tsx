@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import Footer from "components/Footer";
 import { QUERIESV2 } from "utils";
-import { useFeatureFlag } from "../../hooks";
 
 type LayoutProp = {
   maxWidth?: number;
@@ -14,22 +13,21 @@ const LayoutV2 = ({
   children,
   transparentBackground,
 }: LayoutProp) => {
-  const hasDemoFlag = useFeatureFlag("demo-flag");
   return (
-    <Wrapper transparentBackground={transparentBackground} demo={hasDemoFlag}>
+    <Wrapper transparentBackground={transparentBackground}>
       <InnerWrapper maxWidth={maxWidth ?? 600}>{children}</InnerWrapper>
       <Footer />
     </Wrapper>
   );
 };
 
-const Wrapper = styled.div<{ transparentBackground?: boolean; demo: boolean }>`
+const Wrapper = styled.div<{ transparentBackground?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  background-color: ${({ transparentBackground, demo }) =>
-    demo ? "#bada55" : transparentBackground ? "transparent" : "#2d2e33"};
+  background-color: ${({ transparentBackground }) =>
+    transparentBackground ? "transparent" : "#2d2e33"};
 
   /* Subtract to account for header */
   min-height: calc(100vh - 72px);
