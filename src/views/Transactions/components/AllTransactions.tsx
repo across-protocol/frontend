@@ -183,11 +183,3 @@ function convertIndexerDepositToDeposit(
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
   };
 }
-
-const ButtonStack = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-`;

@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
 import { COLORS, getConfig } from "utils";
@@ -36,6 +37,7 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
+  const history = useHistory();
   const swapToken = config.getTokenInfoByAddressSafe(
     deposit.sourceChainId,
     deposit.swapToken?.address || ""
@@ -54,8 +56,12 @@ export function DataRow({
     return null;
   }
 
+  const handleRowClick = () => {
+    history.push(`/transaction/${deposit.depositTxHash}`);
+  };
+
   return (
-    <StyledRow>
+    <StyledRow onClick={handleRowClick}>
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}
@@ -114,4 +120,10 @@ const StyledRow = styled.tr`
   border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${COLORS["grey-500"]};
+  }
 `;
