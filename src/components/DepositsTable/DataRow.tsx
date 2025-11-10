@@ -20,7 +20,7 @@ import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
 
 type Props = {
-  deposit: Deposit & { isNewlyStreamed?: boolean };
+  deposit: Deposit & { isNewlyStreamed?: boolean; isUpdated?: boolean };
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
@@ -79,12 +79,29 @@ export function DataRow({
         animate: { opacity: 0 },
         transition: { duration: 1.2, ease: "easeOut" },
       }
-    : {};
+    : deposit.isUpdated
+      ? {
+          initial: { opacity: 0.4 },
+          animate: { opacity: 0 },
+          transition: { duration: 1.0, ease: "easeOut" },
+        }
+      : {};
 
   return (
     <StyledRow onClick={handleRowClick} {...rowAnimationProps}>
       {deposit.isNewlyStreamed && (
-        <ColorOverlay className="color-overlay" {...overlayAnimationProps} />
+        <ColorOverlay
+          className="color-overlay"
+          color="aqua"
+          {...overlayAnimationProps}
+        />
+      )}
+      {deposit.isUpdated && (
+        <ColorOverlay
+          className="color-overlay"
+          color="yellow"
+          {...overlayAnimationProps}
+        />
       )}
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
@@ -135,13 +152,13 @@ export function DataRow({
   );
 }
 
-const ColorOverlay = styled(motion.div)`
+const ColorOverlay = styled(motion.div)<{ color: "aqua" | "yellow" }>`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${COLORS["aqua"]};
+  background-color: ${({ color }) => COLORS[color]};
   pointer-events: none;
   z-index: 0;
 `;

@@ -124,7 +124,7 @@ export function AllTransactions({ statusFilter }: Props) {
 
 function convertIndexerDepositToDeposit(
   indexerDeposit: StreamedDeposit
-): Deposit & { isNewlyStreamed?: boolean } {
+): Deposit & { isNewlyStreamed?: boolean; isUpdated?: boolean } {
   return {
     depositId: indexerDeposit.depositId,
     depositTime:
@@ -194,5 +194,6 @@ function convertIndexerDepositToDeposit(
     swapTokenAddress: indexerDeposit.swapToken,
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
     isNewlyStreamed: indexerDeposit.isNewlyStreamed,
+    isUpdated: indexerDeposit.isUpdated,
   };
 }

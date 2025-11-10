@@ -4,6 +4,7 @@ import { defaultRefetchInterval } from "../../../utils";
 
 export type StreamedDeposit = IndexerDeposit & {
   isNewlyStreamed?: boolean;
+  isUpdated?: boolean;
 };
 
 const ANIMATION_DURATION = 1000; // 1 second animation
@@ -46,7 +47,7 @@ export function useStreamingDeposits(
     }
   }, [deposits, enabled, maxVisibleRows]);
 
-  // Detect new deposits and add them to the queue
+  // Detect new deposits and updates to existing deposits
   useEffect(() => {
     if (!enabled || !initializedRef.current || deposits.length === 0) {
       return;
@@ -55,12 +56,59 @@ export function useStreamingDeposits(
     const currentIds = new Set(
       deposits.map((d) => `${d.originChainId}-${d.depositId}`)
     );
+
+    // Find new deposits
     const newDeposits = deposits.filter(
       (deposit) =>
         !previousIdsRef.current.has(
           `${deposit.originChainId}-${deposit.depositId}`
         )
     );
+
+    // Find updated deposits (existing deposits with changed data)
+    const updatedDepositIds = new Set<string>();
+    deposits.forEach((deposit) => {
+      const depositId = `${deposit.originChainId}-${deposit.depositId}`;
+      if (previousIdsRef.current.has(depositId)) {
+        // Check if this deposit has different data in displayedDeposits
+        setDisplayedDeposits((current) => {
+          const existingIndex = current.findIndex(
+            (d) => `${d.originChainId}-${d.depositId}` === depositId
+          );
+          if (existingIndex !== -1) {
+            const existing = current[existingIndex];
+            // Compare key fields that might change (status, fillTx, etc.)
+            if (
+              existing.status !== deposit.status ||
+              existing.fillTx !== deposit.fillTx ||
+              existing.fillBlockTimestamp !== deposit.fillBlockTimestamp
+            ) {
+              updatedDepositIds.add(depositId);
+              // Update the deposit data and mark as updated
+              const updated = [...current];
+              updated[existingIndex] = { ...deposit, isUpdated: true };
+
+              // Remove update flag after animation completes
+              const timeoutId = setTimeout(() => {
+                setDisplayedDeposits((curr) =>
+                  curr.map((d) =>
+                    `${d.originChainId}-${d.depositId}` === depositId
+                      ? { ...d, isUpdated: false }
+                      : d
+                  )
+                );
+                animationTimeoutsRef.current.delete(depositId);
+              }, ANIMATION_DURATION);
+
+              animationTimeoutsRef.current.set(depositId, timeoutId);
+
+              return updated;
+            }
+          }
+          return current;
+        });
+      }
+    });
 
     if (newDeposits.length > 0) {
       setDepositQueue((prev) => [...prev, ...newDeposits]);
