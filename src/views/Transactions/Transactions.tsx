@@ -8,6 +8,7 @@ import { PersonalTransactions } from "./components/PersonalTransactions";
 import { DepositStatusFilter } from "./types";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
+import { AllTransactions } from "./components/AllTransactions";
 
 const statusFilterOptions: DepositStatusFilter[] = [
   "all",
@@ -17,7 +18,7 @@ const statusFilterOptions: DepositStatusFilter[] = [
 ];
 
 export function Transactions() {
-  const [activeTab, setActiveTab] = useState<"personal" | "all">("personal");
+  const [activeTab, setActiveTab] = useState<"personal" | "all">("all");
   const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>(
     statusFilterOptions[0]
   );
@@ -28,6 +29,12 @@ export function Transactions() {
         <BreadcrumbV2 />
         <FilterWrapper>
           <TabWrapper>
+            <Tab
+              onClick={() => setActiveTab("all")}
+              active={activeTab === "all"}
+            >
+              All
+            </Tab>
             <Tab
               onClick={() => setActiveTab("personal")}
               active={activeTab === "personal"}
@@ -45,7 +52,12 @@ export function Transactions() {
           />
         </FilterWrapper>
         <BodyWrapper>
-          <PersonalTransactions statusFilter={statusFilter} />
+          {activeTab === "personal" && (
+            <PersonalTransactions statusFilter={statusFilter} />
+          )}
+          {activeTab === "all" && (
+            <AllTransactions statusFilter={statusFilter} />
+          )}
         </BodyWrapper>
       </Wrapper>
     </LayoutV2>

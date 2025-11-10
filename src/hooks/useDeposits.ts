@@ -176,17 +176,6 @@ export function useUserDeposits(
   return useQuery({
     queryKey: userDepositsQueryKey(userAddress!, status, limit, offset),
     queryFn: async () => {
-      if (!userAddress) {
-        return {
-          deposits: [],
-          pagination: {
-            total: 0,
-            limit: 0,
-            offset: 0,
-          },
-        };
-      }
-
       const omitStatusFilter = status === "all";
       const deposits = await getDeposits({
         address: userAddress,
@@ -201,7 +190,6 @@ export function useUserDeposits(
     },
     placeholderData: keepPreviousData,
     refetchInterval: defaultRefetchInterval,
-    enabled: Boolean(userAddress),
   });
 }
 
