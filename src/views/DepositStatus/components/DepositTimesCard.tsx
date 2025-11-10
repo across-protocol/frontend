@@ -73,23 +73,26 @@ export function DepositTimesCard({
   const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
-  const { inputToken, bridgeToken } = getTokensForFeesCalc({
-    inputToken: getToken(inputTokenSymbol),
-    outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
-    isUniversalSwap: isUniversalSwap,
-    universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-  });
+  const { inputToken, bridgeTokenIn, bridgeTokenOut, outputToken } =
+    getTokensForFeesCalc({
+      inputToken: getToken(inputTokenSymbol),
+      outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
+      isUniversalSwap: isUniversalSwap,
+      universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+      fromChainId: fromChainId,
+      toChainId: toChainId,
+    });
 
   const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
     useTokenConversion(inputToken.symbol, "usd");
-  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
-    useTokenConversion(bridgeToken.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenInToUsd } =
+    useTokenConversion(bridgeTokenIn.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenOutToUsd } =
+    useTokenConversion(bridgeTokenOut.symbol, "usd");
   const {
     convertTokenToBaseCurrency: convertOutputTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToOutputToken,
-  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+  } = useTokenConversion(outputToken.symbol || inputTokenSymbol, "usd");
 
   const { outputAmountUsd } =
     calcFeesForEstimatedTable({
@@ -103,7 +106,8 @@ export function DepositTimesCard({
       parsedAmount:
         fromBridgePagePayload?.depositArgs?.initialAmount || BigNumber.from(0),
       convertInputTokenToUsd,
-      convertBridgeTokenToUsd,
+      convertBridgeTokenInToUsd,
+      convertBridgeTokenOutToUsd,
       convertOutputTokenToUsd,
     }) || {};
   const outputAmount = convertUsdToOutputToken(outputAmountUsd);
@@ -262,12 +266,12 @@ function CheckIconExplorerLink({
     return <CheckIcon />;
   }
 
+  const explorerUrl = chainInfo.intermediaryChain
+    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
+    : chainInfo.constructExplorerLink(txHash);
+
   return (
-    <a
-      href={chainInfo.constructExplorerLink(txHash)}
-      target="_blank"
-      rel="noreferrer"
-    >
+    <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
   );

@@ -4,8 +4,8 @@ import { Selector } from "components";
 import { Text } from "components/Text";
 
 import {
+  ChainId,
   ChainInfo,
-  Route,
   capitalizeFirstLetter,
   getChainInfo,
   getToken,
@@ -18,11 +18,11 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useBalanceBySymbolPerChain, zeroBalance } from "hooks/useBalance";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
-import { getSupportedChains, findEnabledRoute } from "../utils";
+import { getSupportedChains, findEnabledRoute, SelectedRoute } from "../utils";
 import { externConfigs } from "constants/chains/configs";
 
 type Props = {
-  selectedRoute: Route;
+  selectedRoute: SelectedRoute;
   fromOrTo: "from" | "to";
   toAddress?: string;
   onSelectChain: (chainId: number, externalProjectId?: string) => void;
@@ -141,7 +141,10 @@ function ChainInfoElement({
 /**
  * Filters supported chains based on external project constraints
  */
-function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
+function filterAvailableChains(
+  fromOrTo: "from" | "to",
+  selectedRoute: SelectedRoute
+) {
   const isFrom = fromOrTo === "from";
   let chains = getSupportedChains(fromOrTo);
   const { externalProjectId, fromChain, fromTokenSymbol } = selectedRoute;
@@ -152,7 +155,15 @@ function filterAvailableChains(fromOrTo: "from" | "to", selectedRoute: Route) {
   }
 
   if (!isFrom) {
-    chains = chains.filter(({ projectId }) => {
+    chains = chains.filter(({ projectId, chainId }) => {
+      // FIXME: remove this hardcoded filter once we have a proper solution for HyperCore
+      if (
+        ["USDC", "USDC-BNB"].includes(fromTokenSymbol) &&
+        chainId === ChainId.HYPERCORE
+      ) {
+        return false;
+      }
+
       if (!projectId) return true;
       const { intermediaryChain } = externConfigs[projectId];
 

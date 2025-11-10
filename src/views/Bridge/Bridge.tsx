@@ -43,6 +43,7 @@ const Bridge = () => {
     handleSelectToChain,
     handleSetNewSlippage,
     isQuoteLoading,
+    showHyperliquidWarning,
   } = useBridge();
 
   const destinationChainEcosystem = getEcosystem(selectedRoute.toChain);
@@ -92,6 +93,7 @@ const Bridge = () => {
             isQuoteLoading={isQuoteLoading}
             swapQuote={swapQuote}
             universalSwapQuote={universalSwapQuote}
+            showHyperliquidWarning={showHyperliquidWarning}
           />
         </Wrapper>
       </LayoutV2>
