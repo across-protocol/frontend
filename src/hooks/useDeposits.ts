@@ -104,6 +104,11 @@ export type GetDepositsResponse = {
   deposits: Deposit[];
 };
 
+export type GetDepositResponse = {
+  pagination: Pagination;
+  deposit: Deposit;
+};
+
 export type IndexerDeposit = {
   id: number;
   relayHash: string;

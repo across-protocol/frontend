@@ -39,8 +39,6 @@ export function AllTransactions({ statusFilter }: Props) {
     [deposits]
   );
 
-  console.log(deposits);
-
   if (depositsQuery.isLoading) {
     return (
       <EmptyTable>
