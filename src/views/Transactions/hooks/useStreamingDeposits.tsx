@@ -18,11 +18,11 @@ export function useStreamingDeposits(
   const [displayedDeposits, setDisplayedDeposits] = useState<StreamedDeposit[]>(
     []
   );
-  const [depositQueue, setDepositQueue] = useState<IndexerDeposit[]>([]);
   const isProcessing = useRef(false);
   const previousDepositIds = useRef(new Set<string>());
   const isInitialized = useRef(false);
   const animationTimeouts = useRef<Map<string, number>>(new Map());
+  const depositQueueRef = useRef<IndexerDeposit[]>([]);
 
   const getDepositId = useCallback(
     (deposit: IndexerDeposit) =>
@@ -46,6 +46,44 @@ export function useStreamingDeposits(
     [getDepositId]
   );
 
+  const startStreaming = useCallback(() => {
+    if (isProcessing.current || depositQueueRef.current.length === 0) return;
+
+    isProcessing.current = true;
+    const queue = [...depositQueueRef.current];
+    depositQueueRef.current = [];
+
+    const delayBetweenDeposits = defaultRefetchInterval / queue.length;
+
+    const streamDeposit = (index: number) => {
+      if (index >= queue.length) {
+        isProcessing.current = false;
+        return;
+      }
+
+      const deposit = queue[index];
+      const depositId = getDepositId(deposit);
+
+      setDisplayedDeposits((current) => {
+        const withNewDeposit = [
+          { ...deposit, isNewlyStreamed: true },
+          ...current,
+        ];
+        return withNewDeposit.slice(0, maxVisibleRows);
+      });
+
+      clearAnimationFlag(depositId, "isNewlyStreamed");
+
+      if (index < queue.length - 1) {
+        setTimeout(() => streamDeposit(index + 1), delayBetweenDeposits);
+      } else {
+        isProcessing.current = false;
+      }
+    };
+
+    streamDeposit(0);
+  }, [maxVisibleRows, getDepositId, clearAnimationFlag]);
+
   useEffect(() => {
     if (!enabled || isInitialized.current || deposits.length === 0) return;
 
@@ -56,11 +94,12 @@ export function useStreamingDeposits(
     setDisplayedDeposits(olderDeposits);
 
     const recentDeposits = deposits.slice(0, streamCount);
-    setDepositQueue(recentDeposits);
+    depositQueueRef.current = recentDeposits;
+    startStreaming();
 
     previousDepositIds.current = new Set(deposits.map(getDepositId));
     isInitialized.current = true;
-  }, [enabled, deposits, maxVisibleRows, getDepositId]);
+  }, [enabled, deposits, maxVisibleRows, getDepositId, startStreaming]);
 
   useEffect(() => {
     if (!enabled || !isInitialized.current || deposits.length === 0) return;
@@ -96,55 +135,11 @@ export function useStreamingDeposits(
     });
 
     if (newDeposits.length > 0) {
-      setDepositQueue((prev) => [...prev, ...newDeposits]);
+      depositQueueRef.current = [...depositQueueRef.current, ...newDeposits];
       previousDepositIds.current = currentIds;
+      startStreaming();
     }
-  }, [enabled, deposits, getDepositId, clearAnimationFlag]);
-
-  useEffect(() => {
-    if (!enabled || depositQueue.length === 0 || isProcessing.current) return;
-
-    isProcessing.current = true;
-    const delayBetweenDeposits = defaultRefetchInterval / depositQueue.length;
-
-    const streamNextDeposit = () => {
-      setDepositQueue((queue) => {
-        if (queue.length === 0) {
-          isProcessing.current = false;
-          return queue;
-        }
-
-        const [nextDeposit, ...remaining] = queue;
-        const depositId = getDepositId(nextDeposit);
-
-        setDisplayedDeposits((current) => {
-          const withNewDeposit = [
-            { ...nextDeposit, isNewlyStreamed: true },
-            ...current,
-          ];
-          return withNewDeposit.slice(0, maxVisibleRows);
-        });
-
-        clearAnimationFlag(depositId, "isNewlyStreamed");
-
-        if (remaining.length > 0) {
-          setTimeout(streamNextDeposit, delayBetweenDeposits);
-        } else {
-          isProcessing.current = false;
-        }
-
-        return remaining;
-      });
-    };
-
-    streamNextDeposit();
-  }, [
-    enabled,
-    depositQueue.length,
-    maxVisibleRows,
-    getDepositId,
-    clearAnimationFlag,
-  ]);
+  }, [enabled, deposits, getDepositId, clearAnimationFlag, startStreaming]);
 
   useEffect(() => {
     const timeouts = animationTimeouts.current;
