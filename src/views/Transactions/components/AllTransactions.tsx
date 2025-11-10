@@ -1,7 +1,6 @@
 import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
-import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
@@ -13,6 +12,7 @@ import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
 import { Deposit, IndexerDeposit } from "hooks/useDeposits";
 import { useTransactions } from "../hooks/useTransactions";
+import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -34,9 +34,16 @@ export function AllTransactions({ statusFilter }: Props) {
   const history = useHistory();
   const queryClient = useQueryClient();
 
+  // Enable streaming only on the first page
+  const streamingEnabled = currentPage === 0;
+  const streamedDeposits = useStreamingDeposits(deposits, streamingEnabled);
+
   const convertedDeposits = useMemo(
-    () => deposits.map((deposit) => convertIndexerDepositToDeposit(deposit)),
-    [deposits]
+    () =>
+      streamedDeposits.map((deposit) =>
+        convertIndexerDepositToDeposit(deposit)
+      ),
+    [streamedDeposits]
   );
 
   if (depositsQuery.isLoading) {
