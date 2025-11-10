@@ -12,7 +12,10 @@ import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
 import { Deposit, IndexerDeposit } from "hooks/useDeposits";
 import { useTransactions } from "../hooks/useTransactions";
-import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
+import {
+  useStreamingDeposits,
+  StreamedDeposit,
+} from "../hooks/useStreamingDeposits";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -36,7 +39,11 @@ export function AllTransactions({ statusFilter }: Props) {
 
   // Enable streaming only on the first page
   const streamingEnabled = currentPage === 0;
-  const streamedDeposits = useStreamingDeposits(deposits, streamingEnabled);
+  const streamedDeposits = useStreamingDeposits(
+    deposits,
+    pageSize,
+    streamingEnabled
+  );
 
   const convertedDeposits = useMemo(
     () =>
@@ -116,8 +123,8 @@ export function AllTransactions({ statusFilter }: Props) {
 }
 
 function convertIndexerDepositToDeposit(
-  indexerDeposit: IndexerDeposit
-): Deposit {
+  indexerDeposit: StreamedDeposit
+): Deposit & { isNewlyStreamed?: boolean } {
   return {
     depositId: indexerDeposit.depositId,
     depositTime:
@@ -186,5 +193,6 @@ function convertIndexerDepositToDeposit(
     swapTokenAmount: indexerDeposit.swapTokenAmount,
     swapTokenAddress: indexerDeposit.swapToken,
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
+    isNewlyStreamed: indexerDeposit.isNewlyStreamed,
   };
 }

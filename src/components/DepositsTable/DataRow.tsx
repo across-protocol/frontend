@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
@@ -19,7 +20,7 @@ import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
 
 type Props = {
-  deposit: Deposit;
+  deposit: Deposit & { isNewlyStreamed?: boolean };
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
@@ -60,8 +61,31 @@ export function DataRow({
     history.push(`/transaction/${deposit.depositTxHash}`);
   };
 
+  const rowAnimationProps = deposit.isNewlyStreamed
+    ? {
+        initial: { opacity: 0, scaleY: 0 },
+        animate: { opacity: 1, scaleY: 1 },
+        transition: {
+          opacity: { duration: 0.5, ease: "easeOut" },
+          scaleY: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+        },
+        layout: true,
+      }
+    : { layout: true };
+
+  const overlayAnimationProps = deposit.isNewlyStreamed
+    ? {
+        initial: { opacity: 0.3 },
+        animate: { opacity: 0 },
+        transition: { duration: 1.2, ease: "easeOut" },
+      }
+    : {};
+
   return (
-    <StyledRow onClick={handleRowClick}>
+    <StyledRow onClick={handleRowClick} {...rowAnimationProps}>
+      {deposit.isNewlyStreamed && (
+        <ColorOverlay className="color-overlay" {...overlayAnimationProps} />
+      )}
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}
@@ -111,7 +135,19 @@ export function DataRow({
   );
 }
 
-const StyledRow = styled.tr`
+const ColorOverlay = styled(motion.div)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: ${COLORS["aqua"]};
+  pointer-events: none;
+  z-index: 0;
+`;
+
+const StyledRow = styled(motion.tr)`
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -121,9 +157,17 @@ const StyledRow = styled.tr`
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
   cursor: pointer;
+  overflow: hidden;
+  transform-origin: top;
   transition: background-color 0.2s;
 
   &:hover {
     background-color: ${COLORS["grey-500"]};
+  }
+
+  & > td,
+  & > div:not(.color-overlay) {
+    position: relative;
+    z-index: 1;
   }
 `;

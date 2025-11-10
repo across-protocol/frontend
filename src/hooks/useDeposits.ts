@@ -168,7 +168,7 @@ export function useDeposits(
       });
     },
     placeholderData: keepPreviousData,
-    refetchInterval: defaultRefetchInterval,
+    refetchInterval: 5_000,
   });
 }
 
@@ -194,7 +194,7 @@ export function useUserDeposits(
       };
     },
     placeholderData: keepPreviousData,
-    refetchInterval: defaultRefetchInterval,
+    refetchInterval: 5_000,
   });
 }
 
