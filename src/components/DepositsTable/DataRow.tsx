@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
@@ -61,7 +61,8 @@ export function DataRow({
     history.push(`/transaction/${deposit.depositTxHash}`);
   };
 
-  const rowAnimationProps = deposit.isNewlyStreamed
+  const isNewDeposit = deposit.isNewlyStreamed;
+  const rowAnimation = isNewDeposit
     ? {
         initial: { opacity: 0, scaleY: 0 },
         animate: { opacity: 1, scaleY: 1 },
@@ -73,36 +74,37 @@ export function DataRow({
       }
     : { layout: true };
 
-  const overlayAnimationProps = deposit.isNewlyStreamed
+  const overlayColor = isNewDeposit
+    ? "aqua"
+    : deposit.isUpdated
+      ? "yellow"
+      : null;
+  const overlayAnimation = isNewDeposit
     ? {
         initial: { opacity: 0.3 },
         animate: { opacity: 0 },
+        exit: { opacity: 0 },
         transition: { duration: 1.2, ease: "easeOut" },
       }
-    : deposit.isUpdated
-      ? {
-          initial: { opacity: 0.4 },
-          animate: { opacity: 0 },
-          transition: { duration: 1.0, ease: "easeOut" },
-        }
-      : {};
+    : {
+        initial: { opacity: 0.4 },
+        animate: { opacity: 0 },
+        exit: { opacity: 0 },
+        transition: { duration: 1.0, ease: "easeOut" },
+      };
 
   return (
-    <StyledRow onClick={handleRowClick} {...rowAnimationProps}>
-      {deposit.isNewlyStreamed && (
-        <ColorOverlay
-          className="color-overlay"
-          color="aqua"
-          {...overlayAnimationProps}
-        />
-      )}
-      {deposit.isUpdated && (
-        <ColorOverlay
-          className="color-overlay"
-          color="yellow"
-          {...overlayAnimationProps}
-        />
-      )}
+    <StyledRow onClick={handleRowClick} {...rowAnimation}>
+      <AnimatePresence>
+        {overlayColor && (
+          <ColorOverlay
+            key={`overlay-${deposit.depositId}`}
+            className="color-overlay"
+            color={overlayColor}
+            {...overlayAnimation}
+          />
+        )}
+      </AnimatePresence>
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}

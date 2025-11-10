@@ -53,23 +53,17 @@ export type IndexerDepositResponse = {
   };
 };
 
-async function getDepositByTxHash(depositTxHash: string) {
-  const { data } = await axios.get<IndexerDepositResponse>(
-    `${indexerApiBaseUrl}/deposit`,
-    {
-      params: {
-        depositTxHash,
-      },
-    }
-  );
-  return data;
-}
-
 export function useDepositByTxHash(depositTxHash?: string) {
   return useQuery({
     queryKey: ["deposit", depositTxHash],
-    queryFn: () => getDepositByTxHash(depositTxHash!),
+    queryFn: async () => {
+      const { data } = await axios.get<IndexerDepositResponse>(
+        `${indexerApiBaseUrl}/deposit`,
+        { params: { depositTxHash } }
+      );
+      return data;
+    },
     enabled: !!depositTxHash,
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: 10000,
   });
 }

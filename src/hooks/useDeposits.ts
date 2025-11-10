@@ -4,7 +4,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   depositsQueryKey,
   userDepositsQueryKey,
-  defaultRefetchInterval,
   indexerApiBaseUrl,
 } from "utils";
 import { DepositStatusFilter } from "views/Transactions/types";

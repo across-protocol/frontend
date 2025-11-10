@@ -4,18 +4,14 @@ import { useMemo } from "react";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
-
 import { SecondaryButton } from "components";
 import { getConfig } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
-import { Deposit, IndexerDeposit } from "hooks/useDeposits";
 import { useTransactions } from "../hooks/useTransactions";
-import {
-  useStreamingDeposits,
-  StreamedDeposit,
-} from "../hooks/useStreamingDeposits";
+import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
+import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 
 type Props = {
   statusFilter: DepositStatusFilter;
@@ -37,7 +33,6 @@ export function AllTransactions({ statusFilter }: Props) {
   const history = useHistory();
   const queryClient = useQueryClient();
 
-  // Enable streaming only on the first page
   const streamingEnabled = currentPage === 0;
   const streamedDeposits = useStreamingDeposits(
     deposits,
@@ -120,80 +115,4 @@ export function AllTransactions({ statusFilter }: Props) {
       />
     </>
   );
-}
-
-function convertIndexerDepositToDeposit(
-  indexerDeposit: StreamedDeposit
-): Deposit & { isNewlyStreamed?: boolean; isUpdated?: boolean } {
-  return {
-    depositId: indexerDeposit.depositId,
-    depositTime:
-      new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000,
-    status:
-      indexerDeposit.status === "unfilled" ? "pending" : indexerDeposit.status,
-    filled: "0",
-    sourceChainId: indexerDeposit.originChainId,
-    destinationChainId: indexerDeposit.destinationChainId,
-    assetAddr: indexerDeposit.inputToken,
-    depositorAddr: indexerDeposit.depositor,
-    recipientAddr: indexerDeposit.recipient,
-    message: indexerDeposit.message,
-    amount: indexerDeposit.inputAmount,
-    depositTxHash:
-      indexerDeposit.depositTransactionHash || indexerDeposit.depositTxHash,
-    fillTx: indexerDeposit.fillTx,
-    speedUps: indexerDeposit.speedups,
-    depositRelayerFeePct: "0",
-    initialRelayerFeePct: "0",
-    suggestedRelayerFeePct: "0",
-    fillTime: new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000,
-    fillDeadline: indexerDeposit.fillDeadline,
-    rewards: undefined,
-    feeBreakdown: indexerDeposit.bridgeFeeUsd
-      ? {
-          // lp fee
-          lpFeeUsd: "0",
-          lpFeePct: "0", // wei pct
-          lpFeeAmount: "0",
-          // relayer fee
-          relayCapitalFeeUsd: "0",
-          relayCapitalFeePct: "0", // wei pct
-          relayCapitalFeeAmount: "0",
-          relayGasFeeUsd: indexerDeposit.fillGasFeeUsd,
-          relayGasFeePct: "0", // wei pct
-          relayGasFeeAmount: "0",
-          // total = lp fee + relayer fee
-          totalBridgeFeeUsd: indexerDeposit.bridgeFeeUsd,
-          totalBridgeFeePct: "0", // wei pct
-          totalBridgeFeeAmount: "0",
-          // swap fee
-          swapFeeUsd: indexerDeposit.swapFeeUsd,
-          swapFeePct: "0", // wei pct
-          swapFeeAmount: "0",
-        }
-      : undefined,
-    token: {
-      address: indexerDeposit.inputToken,
-      symbol: undefined,
-      name: undefined,
-      decimals: undefined,
-    },
-    outputToken: {
-      address: indexerDeposit.outputToken,
-      symbol: undefined,
-      name: undefined,
-      decimals: undefined,
-    },
-    swapToken: {
-      address: indexerDeposit.swapToken,
-      symbol: undefined,
-      name: undefined,
-      decimals: undefined,
-    },
-    swapTokenAmount: indexerDeposit.swapTokenAmount,
-    swapTokenAddress: indexerDeposit.swapToken,
-    depositRefundTxHash: indexerDeposit.depositRefundTxHash,
-    isNewlyStreamed: indexerDeposit.isNewlyStreamed,
-    isUpdated: indexerDeposit.isUpdated,
-  };
 }

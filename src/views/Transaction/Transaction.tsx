@@ -2,8 +2,12 @@ import { useHistory, useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
-import { IconPair } from "components/IconPair";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
+import { CenteredMessage } from "./components/CenteredMessage";
+import { DetailSection } from "./components/DetailSection";
+import { StatusBadge } from "./components/StatusBadge";
+import { IconPairDisplay } from "./components/IconPairDisplay";
+import { TxDetailSection } from "./components/TxDetailSection";
 
 export default function Transaction() {
   const { depositTxnRef } = useParams<{ depositTxnRef: string }>();
@@ -13,47 +17,25 @@ export default function Transaction() {
     error,
   } = useDepositByTxHash(depositTxnRef);
   const history = useHistory();
-  const config = getConfig();
 
-  if (isLoading) {
+  if (isLoading) return <CenteredMessage title="Loading transaction..." />;
+  if (error)
     return (
-      <Wrapper>
-        <Container>
-          <Title>Loading transaction...</Title>
-        </Container>
-      </Wrapper>
+      <CenteredMessage
+        title="Error loading transaction"
+        error={String(error)}
+      />
     );
-  }
-
-  if (error) {
-    return (
-      <Wrapper>
-        <Container>
-          <Title>Error loading transaction</Title>
-          <ErrorText>{String(error)}</ErrorText>
-        </Container>
-      </Wrapper>
-    );
-  }
-
-  if (!depositData) {
-    return (
-      <Wrapper>
-        <Container>
-          <Title>Transaction not found</Title>
-        </Container>
-      </Wrapper>
-    );
-  }
+  if (!depositData) return <CenteredMessage title="Transaction not found" />;
 
   const deposit = depositData.deposit;
+  const config = getConfig();
+
   const sourceChainId = parseInt(deposit.originChainId);
   const destinationChainId = parseInt(deposit.destinationChainId);
-
   const sourceChain = getChainInfo(sourceChainId);
   const destinationChain = getChainInfo(destinationChainId);
 
-  // Get token info from the deposit data
   const inputToken = config.getTokenInfoByAddressSafe(
     sourceChainId,
     deposit.inputToken
@@ -72,115 +54,67 @@ export default function Transaction() {
         </Header>
 
         <DetailsGrid>
-          <DetailSection>
-            <SectionLabel>Status</SectionLabel>
-            <StatusBadge status={deposit.status}>
-              <Text color="light-200" size="lg">
-                {deposit.status.charAt(0).toUpperCase() +
-                  deposit.status.slice(1)}
-              </Text>
-            </StatusBadge>
+          <DetailSection label="Status">
+            <StatusBadge status={deposit.status} />
           </DetailSection>
 
           {inputToken && outputToken && (
-            <DetailSection>
-              <SectionLabel>Asset</SectionLabel>
-              <AssetInfo>
-                <IconPair
-                  LeftIcon={
-                    <img src={inputToken.logoURI} alt={inputToken.symbol} />
-                  }
-                  RightIcon={
-                    <img src={outputToken.logoURI} alt={outputToken.symbol} />
-                  }
-                  iconSize={32}
-                />
-                <div>
-                  <Text color="light-200" size="lg">
-                    {inputToken.symbol} → {outputToken.symbol}
-                  </Text>
-                </div>
-              </AssetInfo>
+            <DetailSection label="Asset">
+              <IconPairDisplay
+                leftIcon={inputToken.logoURI}
+                leftAlt={inputToken.symbol}
+                rightIcon={outputToken.logoURI}
+                rightAlt={outputToken.symbol}
+                label={`${inputToken.symbol} → ${outputToken.symbol}`}
+              />
             </DetailSection>
           )}
 
-          <DetailSection>
-            <SectionLabel>Route</SectionLabel>
-            <RouteInfo>
-              <IconPair
-                LeftIcon={
-                  <img src={sourceChain.logoURI} alt={sourceChain.name} />
-                }
-                RightIcon={
-                  <img
-                    src={destinationChain.logoURI}
-                    alt={destinationChain.name}
-                  />
-                }
-                iconSize={32}
-              />
-              <div>
-                <Text color="light-200" size="lg">
-                  {sourceChain.name} → {destinationChain.name}
-                </Text>
-              </div>
-            </RouteInfo>
+          <DetailSection label="Route">
+            <IconPairDisplay
+              leftIcon={sourceChain.logoURI}
+              leftAlt={sourceChain.name}
+              rightIcon={destinationChain.logoURI}
+              rightAlt={destinationChain.name}
+              label={`${sourceChain.name} → ${destinationChain.name}`}
+            />
           </DetailSection>
 
-          <DetailSection>
-            <SectionLabel>Deposit ID</SectionLabel>
+          <DetailSection label="Deposit ID">
             <Text color="light-200">{deposit.depositId}</Text>
           </DetailSection>
 
-          <DetailSection>
-            <SectionLabel>Deposit Transaction</SectionLabel>
-            <TxLink
-              href={sourceChain.constructExplorerLink(deposit.depositTxnRef)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Text color="aqua">{formatTxHash(deposit.depositTxnRef)}</Text>
-            </TxLink>
-          </DetailSection>
+          <TxDetailSection
+            label="Deposit Transaction"
+            txHash={deposit.depositTxnRef}
+            explorerLink={sourceChain.constructExplorerLink(
+              deposit.depositTxnRef
+            )}
+          />
 
           {deposit.fillTx && (
-            <DetailSection>
-              <SectionLabel>Fill Transaction</SectionLabel>
-              <TxLink
-                href={destinationChain.constructExplorerLink(deposit.fillTx)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Text color="aqua">{formatTxHash(deposit.fillTx)}</Text>
-              </TxLink>
-            </DetailSection>
+            <TxDetailSection
+              label="Fill Transaction"
+              txHash={deposit.fillTx}
+              explorerLink={destinationChain.constructExplorerLink(
+                deposit.fillTx
+              )}
+            />
           )}
 
           {deposit.depositRefundTxnRef && (
-            <DetailSection>
-              <SectionLabel>Refund Transaction</SectionLabel>
-              <TxLink
-                href={sourceChain.constructExplorerLink(
-                  deposit.depositRefundTxnRef
-                )}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Text color="aqua">
-                  {formatTxHash(deposit.depositRefundTxnRef)}
-                </Text>
-              </TxLink>
-            </DetailSection>
+            <TxDetailSection
+              label="Refund Transaction"
+              txHash={deposit.depositRefundTxnRef}
+              explorerLink={sourceChain.constructExplorerLink(
+                deposit.depositRefundTxnRef
+              )}
+            />
           )}
         </DetailsGrid>
       </Container>
     </Wrapper>
   );
-}
-
-function formatTxHash(hash: string): string {
-  if (hash.length <= 13) return hash;
-  return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
 }
 
 const Wrapper = styled.div`
@@ -250,64 +184,4 @@ const DetailsGrid = styled.div`
     grid-template-columns: 1fr;
     gap: 20px;
   }
-`;
-
-const DetailSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const SectionLabel = styled(Text)`
-  font-size: 12px;
-  font-weight: 600;
-  color: ${COLORS["grey-400"]};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-`;
-
-const StatusBadge = styled.div<{ status: string }>`
-  display: inline-flex;
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: ${({ status }) =>
-    status === "filled"
-      ? `${COLORS.aqua}20`
-      : status === "pending"
-        ? `${COLORS.yellow}20`
-        : `${COLORS["grey-500"]}`};
-  border: 1px solid
-    ${({ status }) =>
-      status === "filled"
-        ? COLORS.aqua
-        : status === "pending"
-          ? COLORS.yellow
-          : COLORS["grey-400"]};
-`;
-
-const AssetInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const RouteInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const TxLink = styled.a`
-  text-decoration: none;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
-const ErrorText = styled.div`
-  color: ${COLORS["error"]};
-  font-size: 14px;
 `;
