@@ -27,6 +27,7 @@ import {
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
+import { getSlippage } from "../../_slippage";
 
 const name = "sponsored-cctp" as const;
 
@@ -210,7 +211,17 @@ export async function buildEvmTxForAllowanceHolder(params: {
   const maxBpsToSponsorBn = BigNumber.from(Math.ceil(maxBpsToSponsor));
 
   // Convert slippage tolerance (expressed as 0 < slippage < 100, e.g. 1 = 1%) set by user to bps
-  const maxUserSlippageBps = Math.floor(crossSwap.slippageTolerance * 100);
+  const maxUserSlippageBps = Math.floor(
+    getSlippage({
+      tokenIn: {
+        ...crossSwap.inputToken,
+        chainId: crossSwap.outputToken.chainId,
+      },
+      tokenOut: crossSwap.outputToken,
+      slippageTolerance: crossSwap.slippageTolerance,
+      originOrDestination: "destination",
+    }) * 100
+  );
 
   const { quote, signature } = buildSponsoredCCTPQuote({
     inputToken: crossSwap.inputToken,

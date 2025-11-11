@@ -333,10 +333,13 @@ async function buildTransaction(params: {
   // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.5 = 0.5% = 50 bps)
   const maxUserSlippageBps = Math.floor(
     getSlippage({
-      tokenIn: crossSwap.inputToken,
+      tokenIn: {
+        ...crossSwap.inputToken,
+        chainId: crossSwap.outputToken.chainId,
+      },
       tokenOut: crossSwap.outputToken,
       slippageTolerance: crossSwap.slippageTolerance,
-      originOrDestination: "origin",
+      originOrDestination: "destination",
     }) * 100
   );
 

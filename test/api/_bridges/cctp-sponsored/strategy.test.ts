@@ -441,31 +441,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           estimatedFillTimeSec: 300,
           provider: "sponsored-cctp",
           fees: {
-            totalRelay: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerCapital: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerGas: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            lp: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            bridgeFee: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
+            amount: BigNumber.from(0),
           },
         },
         contracts: {
@@ -529,31 +507,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           estimatedFillTimeSec: 300,
           provider: "sponsored-cctp",
           fees: {
-            totalRelay: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerCapital: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerGas: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            lp: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            bridgeFee: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
+            amount: BigNumber.from(0),
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
           },
         },
         contracts: {
@@ -634,31 +590,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           estimatedFillTimeSec: 300,
           provider: "sponsored-cctp",
           fees: {
-            totalRelay: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerCapital: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerGas: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            lp: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            bridgeFee: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
+            amount: BigNumber.from(0),
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
           },
         },
         contracts: {
@@ -711,31 +645,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           estimatedFillTimeSec: 300,
           provider: "sponsored-cctp",
           fees: {
-            totalRelay: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerCapital: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            relayerGas: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            lp: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
-            bridgeFee: {
-              total: BigNumber.from(0),
-              pct: BigNumber.from(0),
-              token: arbitrumUSDC,
-            },
+            amount: BigNumber.from(0),
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
           },
         },
         contracts: {
