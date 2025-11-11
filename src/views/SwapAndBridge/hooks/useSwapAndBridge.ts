@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import {
   useSwapApprovalAction,
   SwapApprovalData,
@@ -17,12 +16,13 @@ import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
+import { TokenWithBalance } from "./useSwapAndBridgeTokens";
 
 export type UseSwapAndBridgeReturn = {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-  setInputToken: (t: EnrichedToken | null) => void;
-  setOutputToken: (t: EnrichedToken | null) => void;
+  inputToken: TokenWithBalance | null;
+  outputToken: TokenWithBalance | null;
+  setInputToken: (t: TokenWithBalance | null) => void;
+  setOutputToken: (t: TokenWithBalance | null) => void;
   quickSwap: () => void;
 
   amount: BigNumber | null;
@@ -60,8 +60,8 @@ export type UseSwapAndBridgeReturn = {
 };
 
 export function useSwapAndBridge(): UseSwapAndBridgeReturn {
-  const [inputToken, setInputToken] = useState<EnrichedToken | null>(null);
-  const [outputToken, setOutputToken] = useState<EnrichedToken | null>(null);
+  const [inputToken, setInputToken] = useState<TokenWithBalance | null>(null);
+  const [outputToken, setOutputToken] = useState<TokenWithBalance | null>(null);
   const [amount, setAmount] = useState<BigNumber | null>(null);
   const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
 

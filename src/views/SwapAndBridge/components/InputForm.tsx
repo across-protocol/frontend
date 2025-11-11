@@ -1,6 +1,5 @@
 import { COLORS, formatUSD, withOpacity } from "utils";
 import SelectorButton from "./ChainTokenSelector/SelectorButton";
-import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import { BalanceSelector } from "./BalanceSelector";
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,6 +11,7 @@ import { useTokenInput, UnitType } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
+import { TokenWithBalance } from "../hooks/useSwapAndBridgeTokens";
 
 export const InputForm = ({
   inputToken,
@@ -28,11 +28,11 @@ export const InputForm = ({
   toAccountManagement,
   destinationChainEcosystem,
 }: {
-  inputToken: EnrichedToken | null;
-  setInputToken: (token: EnrichedToken | null) => void;
+  inputToken: TokenWithBalance | null;
+  setInputToken: (token: TokenWithBalance | null) => void;
 
-  outputToken: EnrichedToken | null;
-  setOutputToken: (token: EnrichedToken | null) => void;
+  outputToken: TokenWithBalance | null;
+  setOutputToken: (token: TokenWithBalance | null) => void;
 
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
@@ -127,9 +127,9 @@ const TokenInput = ({
   toAccountManagement,
   destinationChainEcosystem,
 }: {
-  setToken: (token: EnrichedToken) => void;
-  setOtherToken: (token: EnrichedToken | null) => void;
-  token: EnrichedToken | null;
+  setToken: (token: TokenWithBalance) => void;
+  setOtherToken: (token: TokenWithBalance | null) => void;
+  token: TokenWithBalance | null;
   setAmount: (amount: BigNumber | null) => void;
   isOrigin: boolean;
   expectedAmount: string | undefined;
@@ -137,7 +137,7 @@ const TokenInput = ({
   isUpdateLoading: boolean;
   insufficientInputBalance?: boolean;
   disabled?: boolean;
-  otherToken?: EnrichedToken | null;
+  otherToken?: TokenWithBalance | null;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
   toAccountManagement: ToAccountManagement;

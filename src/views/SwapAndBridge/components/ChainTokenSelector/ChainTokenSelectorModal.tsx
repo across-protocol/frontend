@@ -22,11 +22,13 @@ import { ReactComponent as SearchResults } from "assets/icons/search_results.svg
 import { ReactComponent as WarningIcon } from "assets/icons/warning_triangle.svg";
 import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
-import { TokenWithBalance } from "views/SwapAndBridge/hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useSwapAndBridgeTokens } from "views/SwapAndBridge/hooks/useSwapAndBridgeTokens";
+import {
+  useSwapAndBridgeTokens,
+  TokenWithBalance,
+} from "views/SwapAndBridge/hooks/useSwapAndBridgeTokens";
 
 const popularChains = [
   CHAIN_IDs.MAINNET,

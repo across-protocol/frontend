@@ -21,16 +21,25 @@ function tokensMatch(token1: BasicToken, token2: BasicToken): boolean {
 }
 
 /**
- * Extended token type that includes unreachability status and user balances.
- * This is the return type for tokens from useSwapAndBridgeTokens.
+ * Token type that includes user balances.
+ * Used in components that need tokens with balance information but don't need unreachability status.
  */
-export type InputToken = LifiToken & {
-  /** Whether this token is unreachable given the current filter parameters */
-  isUnreachable: boolean;
+export type TokenWithBalance = LifiToken & {
   /** User's token balance as a BigNumber */
   balance: BigNumber;
   /** User's token balance in USD */
   balanceUsd: number;
+  /** Optional external project ID (e.g., for bridge routes) */
+  externalProjectId?: string;
+};
+
+/**
+ * Extended token type that includes unreachability status and user balances.
+ * This is the return type for tokens from useSwapAndBridgeTokens.
+ */
+export type InputToken = TokenWithBalance & {
+  /** Whether this token is unreachable given the current filter parameters */
+  isUnreachable: boolean;
 };
 
 /**
@@ -326,7 +335,7 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
        * - balance: BigNumber representation of the token balance
        * - balanceUsd: USD value of the balance (balance * priceUSD)
        */
-      const enrichedTokensByChain: Record<number, Array<InputToken>> = {};
+      const TokenWithBalancesByChain: Record<number, Array<InputToken>> = {};
       Object.keys(mergedTokensByChain).forEach((chainIdStr) => {
         const chainId = Number(chainIdStr);
         const balancesForChain = tokenBalances.data?.balances.find(
@@ -334,7 +343,7 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
         );
 
         const tokens = mergedTokensByChain[chainId];
-        const enrichedTokens = tokens.map((t) => {
+        const TokenWithBalances = tokens.map((t) => {
           const balance = balancesForChain?.balances.find((b) =>
             compareAddressesSimple(b.address, t.address)
           );
@@ -355,14 +364,14 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
           };
         });
 
-        enrichedTokensByChain[chainId] = enrichedTokens;
+        TokenWithBalancesByChain[chainId] = TokenWithBalances;
       });
 
       /**
        * Step 5: Return enriched tokens grouped by chainId
        * The result is a Record where keys are chainIds (numbers) and values are arrays of InputToken
        */
-      return enrichedTokensByChain;
+      return TokenWithBalancesByChain;
     },
     /**
      * Query is enabled when:

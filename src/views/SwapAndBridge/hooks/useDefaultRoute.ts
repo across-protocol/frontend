@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import {
-  TokenWithBalance,
-  useEnrichedCrosschainBalances,
-} from "views/SwapAndBridge/hooks/useEnrichedCrosschainBalances";
 import { CHAIN_IDs } from "utils";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { usePrevious } from "@uidotdev/usehooks";
+import {
+  useSwapAndBridgeTokens,
+  TokenWithBalance,
+} from "./useSwapAndBridgeTokens";
 
 type DefaultRoute = {
   inputToken: TokenWithBalance | null;
@@ -25,16 +25,16 @@ export function useDefaultRoute(): DefaultRoute {
     useConnectionEVM();
   const { isConnected: isConnectedSVM, chainId: chainIdSVM } =
     useConnectionSVM();
-  const routeData = useEnrichedCrosschainBalances();
+  const { data: routeData } = useSwapAndBridgeTokens();
 
   const anyConnected = isConnectedEVM || isConnectedSVM;
   const previouslyConnected = usePrevious(anyConnected);
   const chainId = chainIdEVM || chainIdSVM;
-  const hasRouteData = Object.keys(routeData).length ? true : false;
+  const hasRouteData = Object.keys(routeData ?? {}).length ? true : false;
 
   const findUsdcToken = useCallback(
     (targetChainId: number) => {
-      const tokensOnChain = routeData[targetChainId] || [];
+      const tokensOnChain = (routeData ?? {})[targetChainId] || [];
       return tokensOnChain.find(
         (token) => token.symbol.toUpperCase() === "USDC"
       );

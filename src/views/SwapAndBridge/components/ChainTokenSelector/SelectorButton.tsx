@@ -3,17 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { TokenImage } from "components/TokenImage";
-import {
-  ChainTokenSelectorModal,
-  EnrichedToken,
-} from "./ChainTokenSelectorModal";
+import { ChainTokenSelectorModal } from "./ChainTokenSelectorModal";
+import { TokenWithBalance } from "views/SwapAndBridge/hooks/useSwapAndBridgeTokens";
 
 type Props = {
-  selectedToken: EnrichedToken | null;
-  onSelect?: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void; // Callback to reset the other selector
+  selectedToken: TokenWithBalance | null;
+  onSelect?: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void; // Callback to reset the other selector
   isOriginToken: boolean;
-  otherToken?: EnrichedToken | null; // The currently selected token on the other side
+  otherToken?: TokenWithBalance | null; // The currently selected token on the other side
   marginBottom?: string;
   className?: string;
 };
@@ -36,7 +34,7 @@ export default function SelectorButton({
   }, [selectedToken]);
 
   const setSelectedToken = useCallback(
-    (token: EnrichedToken) => {
+    (token: TokenWithBalance) => {
       onSelect?.(token);
       setDisplayModal(false);
     },

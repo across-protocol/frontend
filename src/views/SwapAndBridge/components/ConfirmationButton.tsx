@@ -15,10 +15,10 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
-import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { TokenWithBalance } from "../hooks/useSwapAndBridgeTokens";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -31,8 +31,8 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
+  inputToken: TokenWithBalance | null;
+  outputToken: TokenWithBalance | null;
   amount: BigNumber | null;
   swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
