@@ -1,14 +1,23 @@
 import { useMemo } from "react";
 import useAvailableCrosschainRoutes, {
   LifiToken,
+  RouteFilterParams,
 } from "./useAvailableCrosschainRoutes";
-import { useUserTokenBalances } from "./useUserTokenBalances";
+import { useUserTokenBalances } from "../../../hooks/useUserTokenBalances";
 import { compareAddressesSimple } from "utils";
 import { BigNumber, utils } from "ethers";
 
-export function useEnrichedCrosschainBalances() {
+export type TokenWithBalance = LifiToken & {
+  balance: BigNumber;
+  balanceUsd: number;
+  externalProjectId?: string;
+};
+
+export function useEnrichedCrosschainBalances(
+  filterParams?: RouteFilterParams
+): Record<number, TokenWithBalance[]> {
   const tokenBalances = useUserTokenBalances();
-  const availableCrosschainRoutes = useAvailableCrosschainRoutes();
+  const availableCrosschainRoutes = useAvailableCrosschainRoutes(filterParams);
 
   return useMemo(() => {
     if (availableCrosschainRoutes.isLoading || tokenBalances.isLoading) {

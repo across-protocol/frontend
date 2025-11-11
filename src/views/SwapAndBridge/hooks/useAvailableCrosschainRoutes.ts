@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSwapTokens } from "./useSwapTokens";
+import { useSwapTokens } from "../../../hooks/useSwapTokens";
 
 export type LifiToken = {
   chainId: number;
@@ -10,7 +10,7 @@ export type LifiToken = {
   priceUSD: string;
   coinKey: string;
   logoURI: string;
-  routeSource: "bridge" | "swap";
+  routeSource: ("bridge" | "swap")[];
 };
 
 export type TokenInfo = {
@@ -53,7 +53,7 @@ export default function useAvailableCrosschainRoutes(
               logoURI: token.logoURI || "",
               priceUSD: token.priceUsd || "0", // Use price from SwapToken, fallback to "0" if not available
               coinKey: token.symbol,
-              routeSource: "swap",
+              routeSource: ["swap"],
             };
 
             if (!acc[chainId]) {

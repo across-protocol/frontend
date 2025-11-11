@@ -1,21 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
+import {
+  TokenWithBalance,
+  useEnrichedCrosschainBalances,
+} from "views/SwapAndBridge/hooks/useEnrichedCrosschainBalances";
 import { CHAIN_IDs } from "utils";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { usePrevious } from "@uidotdev/usehooks";
 
 type DefaultRoute = {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
+  inputToken: TokenWithBalance | null;
+  outputToken: TokenWithBalance | null;
 };
 
 export function useDefaultRoute(): DefaultRoute {
   const [defaultInputToken, setDefaultInputToken] =
-    useState<EnrichedToken | null>(null);
+    useState<TokenWithBalance | null>(null);
   const [defaultOutputToken, setDefaultOutputToken] =
-    useState<EnrichedToken | null>(null);
+    useState<TokenWithBalance | null>(null);
   const [hasSetInitial, setHasSetInitial] = useState(false);
   const [hasSetConnected, setHasSetConnected] = useState(false);
 
@@ -63,8 +65,8 @@ export function useDefaultRoute(): DefaultRoute {
 
     // only first connection - also check hasSetConnected to prevent infinite loop
     if (!previouslyConnected && anyConnected && chainId && !hasSetConnected) {
-      let inputToken: EnrichedToken | undefined;
-      let outputToken: EnrichedToken | undefined;
+      let inputToken: TokenWithBalance | undefined;
+      let outputToken: TokenWithBalance | undefined;
 
       if (chainId === CHAIN_IDs.ARBITRUM) {
         // Special case: If on Arbitrum, use Arbitrum -> Base

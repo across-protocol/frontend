@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
+import { LifiToken } from "views/SwapAndBridge/hooks/useAvailableCrosschainRoutes";
 
 import {
   getProvider,
