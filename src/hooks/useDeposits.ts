@@ -153,18 +153,15 @@ export type IndexerDeposit = {
 export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
-  status: DepositStatusFilter,
   limit: number,
   offset: number = 0,
   userAddress?: string
 ) {
   return useQuery({
-    queryKey: userDepositsQueryKey(userAddress!, status, limit, offset),
+    queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
     queryFn: async () => {
-      const omitStatusFilter = status === "all";
       const deposits = await getDeposits({
         address: userAddress,
-        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       });

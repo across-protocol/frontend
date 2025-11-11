@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { COLORS } from "utils";
+import { CopyIconButton } from "./CopyIconButton";
 
 type Props = {
   label: string;
@@ -15,9 +16,12 @@ export function TxDetailSection({ label, txHash, explorerLink }: Props) {
   return (
     <DetailSection>
       <SectionLabel>{label}</SectionLabel>
-      <TxLink href={explorerLink} target="_blank" rel="noreferrer">
-        <Text color="aqua">{shortenHash(txHash)}</Text>
-      </TxLink>
+      <ValueRow>
+        <TxLink href={explorerLink} target="_blank" rel="noreferrer">
+          <Text color="aqua">{shortenHash(txHash)}</Text>
+        </TxLink>
+        <CopyIconButton textToCopy={txHash} />
+      </ValueRow>
     </DetailSection>
   );
 }
@@ -35,6 +39,12 @@ const SectionLabel = styled(Text)`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
+`;
+
+const ValueRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const TxLink = styled.a`

@@ -57,9 +57,7 @@ export function Transactions() {
           {activeTab === "personal" && (
             <PersonalTransactions statusFilter={statusFilter} />
           )}
-          {activeTab === "all" && (
-            <AllTransactions statusFilter={statusFilter} />
-          )}
+          {activeTab === "all" && <AllTransactions />}
         </BodyWrapper>
       </Wrapper>
     </LayoutV2>

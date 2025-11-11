@@ -8,6 +8,7 @@ import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
 import { IconPairDisplay } from "./components/IconPairDisplay";
 import { TxDetailSection } from "./components/TxDetailSection";
+import { CopyableText } from "./components/CopyableText";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
 import { DepositStatusUpperCard } from "../DepositStatus/components/DepositStatusUpperCard";
 
@@ -190,32 +191,37 @@ export default function Transaction() {
           <SectionTitle>Addresses</SectionTitle>
 
           <DetailSection label="Depositor">
-            <Text color="light-200">
+            <CopyableText color="light-200" textToCopy={deposit.depositor}>
               {shortenAddress(deposit.depositor, "...", 6)}
-            </Text>
+            </CopyableText>
           </DetailSection>
 
           <DetailSection label="Recipient">
-            <Text color="light-200">
+            <CopyableText color="light-200" textToCopy={deposit.recipient}>
               {shortenAddress(deposit.recipient, "...", 6)}
-            </Text>
+            </CopyableText>
           </DetailSection>
 
           <DetailSection label="Relayer">
-            <Text color="light-200">
-              {deposit.relayer
-                ? shortenAddress(deposit.relayer, "...", 6)
-                : "N/A"}
-            </Text>
+            {deposit.relayer ? (
+              <CopyableText color="light-200" textToCopy={deposit.relayer}>
+                {shortenAddress(deposit.relayer, "...", 6)}
+              </CopyableText>
+            ) : (
+              <Text color="light-200">N/A</Text>
+            )}
           </DetailSection>
 
           {deposit.exclusiveRelayer &&
             deposit.exclusiveRelayer !==
               "0x0000000000000000000000000000000000000000" && (
               <DetailSection label="Exclusive Relayer">
-                <Text color="light-200">
+                <CopyableText
+                  color="light-200"
+                  textToCopy={deposit.exclusiveRelayer}
+                >
                   {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
-                </Text>
+                </CopyableText>
               </DetailSection>
             )}
 
@@ -309,22 +315,34 @@ export default function Transaction() {
           <SectionTitle>Advanced Details</SectionTitle>
 
           <DetailSection label="Relay Hash">
-            <Text color="light-200" style={{ wordBreak: "break-all" }}>
+            <CopyableText
+              color="light-200"
+              textToCopy={deposit.relayHash}
+              style={{ wordBreak: "break-all" }}
+            >
               {deposit.relayHash}
-            </Text>
+            </CopyableText>
           </DetailSection>
 
           <DetailSection label="Message Hash">
-            <Text color="light-200" style={{ wordBreak: "break-all" }}>
+            <CopyableText
+              color="light-200"
+              textToCopy={deposit.messageHash}
+              style={{ wordBreak: "break-all" }}
+            >
               {deposit.messageHash}
-            </Text>
+            </CopyableText>
           </DetailSection>
 
           {deposit.message && deposit.message !== "0x" && (
             <DetailSection label="Message">
-              <Text color="light-200" style={{ wordBreak: "break-all" }}>
+              <CopyableText
+                color="light-200"
+                textToCopy={deposit.message}
+                style={{ wordBreak: "break-all" }}
+              >
                 {deposit.message}
-              </Text>
+              </CopyableText>
             </DetailSection>
           )}
 
@@ -351,9 +369,9 @@ export default function Transaction() {
           {deposit.swapToken && (
             <>
               <DetailSection label="Swap Token">
-                <Text color="light-200">
+                <CopyableText color="light-200" textToCopy={deposit.swapToken}>
                   {shortenAddress(deposit.swapToken, "...", 6)}
-                </Text>
+                </CopyableText>
               </DetailSection>
 
               {deposit.swapTokenAmount && (

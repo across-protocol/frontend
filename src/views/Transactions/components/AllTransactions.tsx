@@ -1,6 +1,6 @@
 import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
@@ -8,18 +8,13 @@ import { Text } from "components/Text";
 import { SecondaryButton } from "components";
 import { Input, InputGroup } from "components/Input";
 import { EmptyTable } from "./EmptyTable";
-import { DepositStatusFilter } from "../types";
 import { useTransactions } from "../hooks/useTransactions";
 import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 
 const LIVE_REFETCH_INTERVAL = 5000; // 5 seconds
 
-type Props = {
-  statusFilter: DepositStatusFilter;
-};
-
-export function AllTransactions({ statusFilter }: Props) {
+export function AllTransactions() {
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
   const [isLiveMode, setIsLiveMode] = useState(true);
 
@@ -31,14 +26,14 @@ export function AllTransactions({ statusFilter }: Props) {
     deposits,
     totalDeposits,
     depositsQuery,
-  } = useTransactions(statusFilter, walletAddressFilter.trim() || undefined);
+  } = useTransactions(walletAddressFilter.trim() || undefined);
 
   const history = useHistory();
   const queryClient = useQueryClient();
 
   const isFirstPage = currentPage === 0;
   const liveToggleEnabled = isFirstPage;
-  const streamingEnabled = isFirstPage && isLiveMode;
+  const streamingEnabled = isFirstPage && isLiveMode && !walletAddressFilter;
   const streamedDeposits = useStreamingDeposits(
     deposits,
     pageSize,
@@ -146,7 +141,6 @@ export function AllTransactions({ statusFilter }: Props) {
         onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
         initialPageSize={pageSize}
-        filterKey={`personal-${statusFilter}`}
         disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
         displayPageNumbers={false}
       />
