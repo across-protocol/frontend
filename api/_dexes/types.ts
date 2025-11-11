@@ -7,6 +7,16 @@ import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
 
+export enum FeeDetailsType {
+  TOTAL_BREAKDOWN = "total-breakdown",
+  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
+  ACROSS = "across",
+}
+
+export type SlippageTolerance = number | "auto";
+
+export type OriginOrDestination = "origin" | "destination";
+
 export type { AmountType, CrossSwapType };
 
 export type Token = {
@@ -23,10 +33,11 @@ export type Swap = {
   amount: string;
   depositor?: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  originOrDestination: OriginOrDestination;
 };
 
 export type CrossSwap = {
@@ -35,7 +46,7 @@ export type CrossSwap = {
   outputToken: Token;
   depositor: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   refundOnOrigin: boolean;
   refundAddress?: string;
@@ -110,10 +121,18 @@ export type SwapQuote = {
   };
 };
 
+type AcrossBridgeFeeDetails = {
+  type: FeeDetailsType.ACROSS;
+  lp: FeeComponent;
+  relayerCapital: FeeComponent;
+  destinationGas: FeeComponent;
+};
+
 type FeeComponent = {
-  total: BigNumber;
+  amount: BigNumber;
   pct: BigNumber;
   token: Token;
+  details?: AcrossBridgeFeeDetails;
 };
 
 export type CrossSwapQuotes = {
@@ -126,13 +145,7 @@ export type CrossSwapQuotes = {
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
     estimatedFillTimeSec: number;
-    fees: {
-      totalRelay: FeeComponent;
-      relayerCapital: FeeComponent;
-      relayerGas: FeeComponent;
-      lp: FeeComponent;
-      bridgeFee: FeeComponent;
-    };
+    fees: FeeComponent;
   } & (
     | {
         provider: "across";
@@ -227,10 +240,11 @@ export type QuoteFetchFn = (
 
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
-  sources?: ReturnType<GetSourcesFn>;
-  sellEntireBalance?: boolean;
-  throwIfSellEntireBalanceUnsupported?: boolean;
-  quoteBuffer?: number;
+  sources: ReturnType<GetSourcesFn>;
+  sellEntireBalance: boolean;
+  throwIfSellEntireBalanceUnsupported: boolean;
+  quoteBuffer: number;
+  splitSlippage: boolean;
 }>;
 
 export type OriginEntryPointContractName =
@@ -257,7 +271,7 @@ export type CrossSwapQuotesRetrievalB2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originRouter: SwapRouter;
@@ -275,7 +289,7 @@ export type CrossSwapQuotesRetrievalA2BResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
@@ -291,7 +305,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   destinationSwap: {
@@ -299,7 +313,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;

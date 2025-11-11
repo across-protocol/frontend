@@ -54,6 +54,8 @@ const QUOTE_BUFFER = 0.005; // 0.5%
 
 const PROMISE_TIMEOUT_MS = 20_000;
 
+const ORIGIN_SWAP_PREFERENCE_THRESHOLD = 0.9;
+
 const logger = getLogger();
 
 export async function getCrossSwapQuotes(
@@ -466,6 +468,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
               crossSwap.inputToken.decimals,
               result.destinationSwap.tokenIn.decimals
             )(crossSwap.amount).toString(),
+            originOrDestination: "destination",
           },
           TradeType.EXACT_INPUT,
           { sources }
@@ -515,6 +518,7 @@ export async function getCrossSwapQuotesForExactInputB2A(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
+      originOrDestination: "destination",
     },
     TradeType.EXACT_INPUT,
     { sources: prioritizedStrategy.sources }
@@ -583,6 +587,7 @@ export async function getCrossSwapQuotesForOutputB2A(
         {
           ...result.destinationSwap,
           amount: crossSwapWithAppFee.amount.toString(),
+          originOrDestination: "destination",
         },
         TradeType.EXACT_OUTPUT,
         { sources }
@@ -801,6 +806,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
         {
           ...result.originSwap,
           amount: crossSwap.amount.toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_INPUT,
         { sources }
@@ -843,7 +849,11 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwap,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap,
@@ -915,6 +925,7 @@ export async function getCrossSwapQuotesForOutputA2B(
             bridgeQuote.inputAmount,
             QUOTE_BUFFER
           ).toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_OUTPUT,
         { sources }
@@ -948,12 +959,11 @@ export async function getCrossSwapQuotesForOutputA2B(
     isNative: crossSwapWithAppFee.isOutputNative,
   });
 
-  if (appFee.feeAmount.gt(0)) {
-    bridgeQuote.message = bridge.getBridgeQuoteMessage(
-      crossSwapWithAppFee,
-      appFee
-    );
-  }
+  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+    crossSwapWithAppFee,
+    appFee,
+    prioritizedStrategy.originSwapQuote
+  );
 
   return {
     crossSwap: crossSwapWithAppFee,
@@ -1213,9 +1223,14 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
           ...result.originSwap,
           depositor: crossSwap.depositor,
           amount: crossSwap.amount.toString(),
+          originOrDestination: "origin",
         },
         TradeType.EXACT_INPUT,
-        { sources: originSources }
+        {
+          sources: originSources,
+          // Split slippage between origin and destination swaps
+          splitSlippage: true,
+        }
       );
 
       // 2. Get INDICATIVE destination swap quote for bridgeable output token -> any token
@@ -1225,9 +1240,14 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
           {
             ...result.destinationSwap,
             amount: originSwapQuote.minAmountOut.toString(),
+            originOrDestination: "destination",
           },
           TradeType.EXACT_INPUT,
-          { sources: destinationSources }
+          {
+            sources: destinationSources,
+            // Split slippage between origin and destination swaps
+            splitSlippage: true,
+          }
         );
       return {
         result,
@@ -1279,6 +1299,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     {
       ...destinationSwap,
       amount: bridgeQuote.outputAmount.toString(),
+      originOrDestination: "destination",
     },
     TradeType.EXACT_INPUT,
     {
@@ -1306,6 +1327,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote: prioritizedOriginStrategy.originSwapQuote,
   });
 
   return {
@@ -1386,6 +1408,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         {
           ...result.destinationSwap,
           amount: crossSwapWithAppFee.amount.toString(),
+          originOrDestination: "destination",
         },
         TradeType.EXACT_OUTPUT,
         {
@@ -1469,6 +1492,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
             {
               ...destinationSwap,
               amount: bridgeQuote.outputAmount.toString(),
+              originOrDestination: "destination",
             },
             TradeType.EXACT_INPUT,
             {
@@ -1499,6 +1523,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
                 bridgeQuote.inputAmount,
                 QUOTE_BUFFER
               ).toString(),
+              originOrDestination: "origin",
             },
             TradeType.EXACT_OUTPUT,
             {
@@ -1526,6 +1551,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
     bridgeableOutputToken,
     router: destinationRouter,
     appFee,
+    originSwapQuote,
   });
   assertMinOutputAmount(
     finalDestinationSwapQuote.minAmountOut,
@@ -1954,10 +1980,13 @@ function supportsSellEntireBalance(strategy: QuoteFetchStrategy) {
 
 /**
  * Executes quotes for multiple cross swap types and selects the best one.
- * For exact input, compare based on destination swap output amount if available, otherwise bridge output amount.
- * For exact output, compare based on destination swap input amount if available, otherwise bridge input amount.
+ * For exact input, compare based on final output amounts (in output token).
+ * For exact output, compare based on initial input amounts (in input token).
+ *
+ * When comparing origin swaps (A2B) vs destination swaps (B2A), origin swaps are preferred if they are within
+ * the ORIGIN_SWAP_PREFERENCE_THRESHOLD (90%) of the destination swap's performance.
  */
-async function selectBestCrossSwapQuote(
+export async function selectBestCrossSwapQuote(
   crossSwapQuotePromises: Promise<CrossSwapQuotes>[],
   crossSwap: CrossSwap
 ): Promise<CrossSwapQuotes> {
@@ -1990,25 +2019,52 @@ async function selectBestCrossSwapQuote(
 
   const bestQuote = fulfilledQuotes.reduce((best, current) => {
     const currentDestinationSwapQuote = current.destinationSwapQuote;
+    const currentOriginSwapQuote = current.originSwapQuote;
     const bestDestinationSwapQuote = best.destinationSwapQuote;
+    const bestOriginSwapQuote = best.originSwapQuote;
     const currentBridgeQuote = current.bridgeQuote;
     const bestBridgeQuote = best.bridgeQuote;
     const isExactInput = crossSwap.type === "exactInput";
 
-    const currentAmount = currentDestinationSwapQuote
-      ? isExactInput
+    const currentIsOriginSwap =
+      !!currentOriginSwapQuote && !currentDestinationSwapQuote;
+    const bestIsOriginSwap = !!bestOriginSwapQuote && !bestDestinationSwapQuote;
+
+    // For exactInput: compare final output amounts (in output token)
+    // For exactOutput: compare initial input amounts (in input token)
+    const currentAmount = isExactInput
+      ? currentDestinationSwapQuote
         ? currentDestinationSwapQuote.expectedAmountOut
-        : currentDestinationSwapQuote.expectedAmountIn
-      : isExactInput
-        ? currentBridgeQuote.outputAmount
+        : currentBridgeQuote.outputAmount
+      : currentOriginSwapQuote
+        ? currentOriginSwapQuote.expectedAmountIn
         : currentBridgeQuote.inputAmount;
-    const bestAmount = bestDestinationSwapQuote
-      ? isExactInput
+    const bestAmount = isExactInput
+      ? bestDestinationSwapQuote
         ? bestDestinationSwapQuote.expectedAmountOut
-        : bestDestinationSwapQuote.expectedAmountIn
-      : isExactInput
-        ? bestBridgeQuote.outputAmount
+        : bestBridgeQuote.outputAmount
+      : bestOriginSwapQuote
+        ? bestOriginSwapQuote.expectedAmountIn
         : bestBridgeQuote.inputAmount;
+
+    // Apply origin swap preference when comparing A2B vs B2A
+    if (currentIsOriginSwap !== bestIsOriginSwap) {
+      const thresholdBps = Math.floor(ORIGIN_SWAP_PREFERENCE_THRESHOLD * 10000);
+
+      if (currentIsOriginSwap) {
+        // Prefer A2B if within threshold of B2A
+        const isWithinPreferenceThreshold = isExactInput
+          ? currentAmount.gte(bestAmount.mul(thresholdBps).div(10000))
+          : currentAmount.lte(bestAmount.mul(10000).div(thresholdBps));
+        return isWithinPreferenceThreshold ? current : best;
+      } else {
+        // Keep A2B unless B2A is beyond threshold
+        const isBeyondPreferenceThreshold = isExactInput
+          ? currentAmount.gt(bestAmount.mul(10000).div(thresholdBps))
+          : currentAmount.lt(bestAmount.mul(thresholdBps).div(10000));
+        return isBeyondPreferenceThreshold ? current : best;
+      }
+    }
 
     return isExactInput
       ? currentAmount.gt(bestAmount)

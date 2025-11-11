@@ -48,21 +48,22 @@ export type SwapApprovalApiResponse = {
       tokenIn: SwapApiToken;
       tokenOut: SwapApiToken;
       fees: {
-        totalRelay: {
-          pct: string;
-          total: string;
-        };
-        relayerCapital: {
-          pct: string;
-          total: string;
-        };
-        relayerGas: {
-          pct: string;
-          total: string;
-        };
-        lp: {
-          pct: string;
-          total: string;
+        amount: string;
+        pct: string;
+        details: {
+          type: "across";
+          lp: {
+            amount: string;
+            pct: string;
+          };
+          relayerCapital: {
+            amount: string;
+            pct: string;
+          };
+          destinationGas: {
+            amount: string;
+            pct: string;
+          };
         };
       };
     };
@@ -154,23 +155,32 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
         tokenIn: result.steps.bridge.tokenIn,
         tokenOut: result.steps.bridge.tokenOut,
         fees: {
-          totalRelay: {
-            pct: BigNumber.from(result.steps.bridge.fees.totalRelay.pct),
-            total: BigNumber.from(result.steps.bridge.fees.totalRelay.total),
-          },
-          relayerCapital: {
-            pct: BigNumber.from(result.steps.bridge.fees.relayerCapital.pct),
-            total: BigNumber.from(
-              result.steps.bridge.fees.relayerCapital.total
-            ),
-          },
-          relayerGas: {
-            pct: BigNumber.from(result.steps.bridge.fees.relayerGas.pct),
-            total: BigNumber.from(result.steps.bridge.fees.relayerGas.total),
-          },
-          lp: {
-            pct: BigNumber.from(result.steps.bridge.fees.lp.pct),
-            total: BigNumber.from(result.steps.bridge.fees.lp.total),
+          amount: BigNumber.from(result.steps.bridge.fees.amount),
+          pct: BigNumber.from(result.steps.bridge.fees.pct),
+          details: {
+            type: "across",
+            lp: {
+              amount: BigNumber.from(
+                result.steps.bridge.fees.details.lp.amount
+              ),
+              pct: BigNumber.from(result.steps.bridge.fees.details.lp.pct),
+            },
+            relayerCapital: {
+              amount: BigNumber.from(
+                result.steps.bridge.fees.details.relayerCapital.amount
+              ),
+              pct: BigNumber.from(
+                result.steps.bridge.fees.details.relayerCapital.pct
+              ),
+            },
+            destinationGas: {
+              amount: BigNumber.from(
+                result.steps.bridge.fees.details.destinationGas.amount
+              ),
+              pct: BigNumber.from(
+                result.steps.bridge.fees.details.destinationGas.pct
+              ),
+            },
           },
         },
       },

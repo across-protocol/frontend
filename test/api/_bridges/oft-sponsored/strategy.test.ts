@@ -11,6 +11,7 @@ import { Token } from "../../../../api/_dexes/types";
 import * as hypercore from "../../../../api/_hypercore";
 import * as utils from "../../../../api/_utils";
 import * as swapUtils from "../../../../api/swap/_utils";
+import * as tokenInfo from "../../../../api/_token-info";
 
 describe("Sponsored OFT Strategy", () => {
   // Shared test fixtures
@@ -332,7 +333,7 @@ describe("Sponsored OFT Strategy", () => {
       });
 
       // Mock getNativeTokenInfo
-      jest.spyOn(swapUtils, "getNativeTokenInfo").mockReturnValue({
+      jest.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
         address: "0x0000000000000000000000000000000000000000",
         symbol: "ETH",
         decimals: 18,
@@ -401,7 +402,7 @@ describe("Sponsored OFT Strategy", () => {
       });
 
       // Mock getNativeTokenInfo
-      jest.spyOn(swapUtils, "getNativeTokenInfo").mockReturnValue({
+      jest.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
         address: "0x0000000000000000000000000000000000000000",
         symbol: "ETH",
         decimals: 18,

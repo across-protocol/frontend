@@ -24,7 +24,7 @@ import { InvalidParamError } from "../../_errors";
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import { ConvertDecimals, getCachedTokenInfo } from "../../_utils";
-import { getNativeTokenInfo } from "../../swap/_utils";
+import { getNativeTokenInfo } from "../../_token-info";
 import { SPONSORED_OFT_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
   DST_OFT_HANDLER,
@@ -34,6 +34,7 @@ import {
   SPONSORED_OFT_SRC_PERIPHERY,
 } from "./utils/constants";
 import { buildSponsoredOFTQuote } from "./utils/quote-builder";
+import { getSlippage } from "../../_slippage";
 
 const name = "sponsored-oft" as const;
 
@@ -329,8 +330,15 @@ async function buildTransaction(params: {
     bridgeOutputAmount: bridgeQuote.outputAmount,
   });
 
-  // Convert slippage tolerance (expressed as 0 < slippage < 100, e.g. 1 = 1%) set by user to bps
-  const maxUserSlippageBps = Math.floor(crossSwap.slippageTolerance * 100);
+  // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.5 = 0.5% = 50 bps)
+  const maxUserSlippageBps = Math.floor(
+    getSlippage({
+      tokenIn: crossSwap.inputToken,
+      tokenOut: crossSwap.outputToken,
+      slippageTolerance: crossSwap.slippageTolerance,
+      originOrDestination: "origin",
+    }) * 100
+  );
 
   // Build signed quote with signature
   const { quote, signature } = buildSponsoredOFTQuote({
@@ -359,7 +367,7 @@ async function buildTransaction(params: {
     from: crossSwap.depositor,
     to: srcPeripheryAddress,
     data: callDataWithMarkers,
-    value: bridgeQuote.fees.bridgeFee.total, // Native fee for LayerZero
+    value: bridgeQuote.fees.amount, // Native fee for LayerZero
     ecosystem: "evm" as const,
   };
 }

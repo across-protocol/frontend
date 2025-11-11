@@ -16,7 +16,7 @@ import {
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals, getProvider } from "../../_utils";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
-import { getNativeTokenInfo } from "../../swap/_utils";
+import { getNativeTokenInfo } from "../../_token-info";
 import {
   getOftMessengerForToken,
   createSendParamStruct,

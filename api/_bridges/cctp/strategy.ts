@@ -350,7 +350,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
 
       // Read CCTP fees from the bridge quote (pre-calculated during quote generation)
-      const maxFee = bridgeQuote.fees.bridgeFee.total;
+      const maxFee = bridgeQuote.fees.amount;
       // Get the appropriate finality threshold for the destination
       const minFinalityThreshold = getFinalityThreshold(destinationChainId);
 
@@ -397,31 +397,9 @@ function getCctpBridgeFees(
 ) {
   const zeroBN = BigNumber.from(0);
   return {
-    totalRelay: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerCapital: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerGas: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    lp: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    bridgeFee: {
-      pct: zeroBN,
-      total: maxFee,
-      token: inputToken,
-    },
+    pct: zeroBN,
+    amount: maxFee,
+    token: inputToken,
   };
 }
 

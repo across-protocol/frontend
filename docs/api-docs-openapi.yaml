@@ -43,7 +43,7 @@ paths:
             type: string
           examples:
             default:
-              value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+              value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -66,7 +66,7 @@ paths:
             type: string
           examples:
             default:
-              value: '0x4200000000000000000000000000000000000006'
+              value: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -89,7 +89,7 @@ paths:
             Chain ID where the specified `inputToken` exists.
           schema:
             allOf:
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           examples:
             default:
               value: 1
@@ -103,7 +103,7 @@ paths:
             The desired destination chain ID of the bridge transfer.
           schema:
             allOf:
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           examples:
             default:
               value: 10
@@ -124,7 +124,7 @@ paths:
             minimum: 1
           examples:
             default:
-              value: '1000000000000000000'
+              value: "1000000000000000000"
           x-gitbook-description-html: >-
             <p>Amount of the token to transfer.</p>
 
@@ -234,85 +234,85 @@ paths:
           description: >
             Used to define whether you want to allow unmatched decimals between the input and output tokens. For tokens with mismatched decimals in the origin and destination chain the API will throw an error if this is not explicitly set to true. Defaults to false.
           schema:
-            type: boolean          
+            type: boolean
           examples:
             default:
               value: false
           x-gitbook-description-html: >-
             <p>Used to define whether you want to allow unmatched decimals between the input and output tokens. For tokens with mismatched decimals in the origin and destination chain the API will throw an error if this is not explicitly set to true. Defaults to false.</p>
       responses:
-        '200':
+        "200":
           description: Suggested fees for the transaction and supporting data
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuggestedFees'
+                $ref: "#/components/schemas/SuggestedFees"
               example:
                 estimatedFillTimeSec: 2
-                capitalFeePct: '78750000000001'
-                capitalFeeTotal: '78750000000001'
-                relayGasFeePct: '155024308002'
-                relayGasFeeTotal: '155024308002'
-                relayFeePct: '78905024308003'
-                relayFeeTotal: '78905024308003'
-                lpFeePct: '0'
-                timestamp: '1754342087'
+                capitalFeePct: "78750000000001"
+                capitalFeeTotal: "78750000000001"
+                relayGasFeePct: "155024308002"
+                relayGasFeeTotal: "155024308002"
+                relayFeePct: "78905024308003"
+                relayFeeTotal: "78905024308003"
+                lpFeePct: "0"
+                timestamp: "1754342087"
                 isAmountTooLow: false
-                quoteBlock: '23070320'
-                exclusiveRelayer: '0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD'
+                quoteBlock: "23070320"
+                exclusiveRelayer: "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD"
                 exclusivityDeadline: 1754342267
-                spokePoolAddress: '0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5'
-                destinationSpokePoolAddress: '0x6f26Bf09B1C792e3228e5467807a900A503c0281'
+                spokePoolAddress: "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5"
+                destinationSpokePoolAddress: "0x6f26Bf09B1C792e3228e5467807a900A503c0281"
                 totalRelayFee:
-                  pct: '78905024308003'
-                  total: '78905024308003'
+                  pct: "78905024308003"
+                  total: "78905024308003"
                 relayerCapitalFee:
-                  pct: '78750000000001'
-                  total: '78750000000001'
+                  pct: "78750000000001"
+                  total: "78750000000001"
                 relayerGasFee:
-                  pct: '155024308002'
-                  total: '155024308002'
+                  pct: "155024308002"
+                  total: "155024308002"
                 lpFee:
-                  pct: '0'
-                  total: '0'
+                  pct: "0"
+                  total: "0"
                 limits:
-                  minDeposit: '134862494200912'
-                  maxDeposit: '1661211802629989209324'
-                  maxDepositInstant: '231397155893653275446'
-                  maxDepositShortDelay: '1661211802629989209324'
-                  recommendedDepositInstant: '231397155893653275446'
-                fillDeadline: '1754353917'
-                outputAmount: '999921094975691997'
+                  minDeposit: "134862494200912"
+                  maxDeposit: "1661211802629989209324"
+                  maxDepositInstant: "231397155893653275446"
+                  maxDepositShortDelay: "1661211802629989209324"
+                  recommendedDepositInstant: "231397155893653275446"
+                fillDeadline: "1754353917"
+                outputAmount: "999921094975691997"
                 inputToken:
-                  address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+                  address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
                   symbol: ETH
                   decimals: 18
                   chainId: 1
                 outputToken:
-                  address: '0x4200000000000000000000000000000000000006'
+                  address: "0x4200000000000000000000000000000000000006"
                   symbol: ETH
                   decimals: 18
                   chainId: 10
                 id: xn8fx-1754342218143-67be35cfbdb6
           x-gitbook-description-html: <p>Suggested fees for the transaction and supporting data</p>
-        '400':
+        "400":
           description: Bad request due to invalid input parameter.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: AMOUNT_TOO_HIGH
                 status: 400
                 message: Amount exceeds max. deposit limit- 20003.800721 USDzC
           x-gitbook-description-html: <p>Bad request due to invalid input parameter.</p>
-        '500':
+        "500":
           description: Unexpected error within the API
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
@@ -332,7 +332,7 @@ paths:
               - object: text
                 leaves:
                   - object: leaf
-                    text: 'Returns suggested fees based '
+                    text: "Returns suggested fees based "
                     marks: []
                   - object: leaf
                     text: inputToken
@@ -350,7 +350,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ', '
+                    text: ", "
                     marks: []
                   - object: leaf
                     text: originChainId
@@ -359,7 +359,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ', '
+                    text: ", "
                     marks: []
                   - object: leaf
                     text: destinationChainId
@@ -368,7 +368,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ', and '
+                    text: ", and "
                     marks: []
                   - object: leaf
                     text: amount
@@ -404,7 +404,7 @@ paths:
             type: string
           examples:
             default:
-              value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+              value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -427,7 +427,7 @@ paths:
             type: string
           examples:
             default:
-              value: '0x4200000000000000000000000000000000000006'
+              value: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -450,7 +450,7 @@ paths:
             Chain ID where the specified `inputToken` exists.
           schema:
             allOf:
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           examples:
             default:
               value: 1
@@ -464,7 +464,7 @@ paths:
             The intended destination chain ID of the bridge transfer.
           schema:
             allOf:
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           examples:
             default:
               value: 10
@@ -485,7 +485,7 @@ paths:
             minimum: 1
           examples:
             default:
-              value: '1000000000000000000'
+              value: "1000000000000000000"
           x-gitbook-description-html: >-
             <p>Amount of the token to transfer.</p>
 
@@ -560,56 +560,56 @@ paths:
           description: >
             Used to define whether you want to allow unmatched decimals between the input and output tokens. For tokens with mismatched decimals in the origin and destination chain the API will throw an error if this is not explicitly set to true. Defaults to false.
           schema:
-            type: boolean          
+            type: boolean
           examples:
             default:
               value: false
           x-gitbook-description-html: >-
-            <p>Used to define whether you want to allow unmatched decimals between the input and output tokens. For tokens with mismatched decimals in the origin and destination chain the API will throw an error if this is not explicitly set to true. Defaults to false.</p>            
+            <p>Used to define whether you want to allow unmatched decimals between the input and output tokens. For tokens with mismatched decimals in the origin and destination chain the API will throw an error if this is not explicitly set to true. Defaults to false.</p>
       responses:
-        '200':
+        "200":
           description: Transfer limits
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransferLimits'
+                $ref: "#/components/schemas/TransferLimits"
               example:
-                minDeposit: '134349011863017'
-                maxDeposit: '1659439975009194758428'
-                maxDepositInstant: '231397155893653275446'
-                maxDepositShortDelay: '1659439975009194758428'
-                recommendedDepositInstant: '231397155893653275446'
+                minDeposit: "134349011863017"
+                maxDeposit: "1659439975009194758428"
+                maxDepositInstant: "231397155893653275446"
+                maxDepositShortDelay: "1659439975009194758428"
+                recommendedDepositInstant: "231397155893653275446"
                 relayerFeeDetails:
-                  relayFeeTotal: '141442042216'
-                  relayFeePercent: '1414420422160000000000000000'
-                  gasFeeTotal: '141442042216'
-                  gasFeePercent: '1414420422160000000000000000'
-                  capitalFeeTotal: '0'
-                  capitalFeePercent: '0'
+                  relayFeeTotal: "141442042216"
+                  relayFeePercent: "1414420422160000000000000000"
+                  gasFeeTotal: "141442042216"
+                  gasFeePercent: "1414420422160000000000000000"
+                  capitalFeeTotal: "0"
+                  capitalFeePercent: "0"
                 gasFeeDetails:
-                  nativeGasCost: '137265'
-                  opStackL1GasCost: '3993981356'
-                  gasPrice: '1000740'
-                  tokenGasCost: '141360557456'
+                  nativeGasCost: "137265"
+                  opStackL1GasCost: "3993981356"
+                  gasPrice: "1000740"
+                  tokenGasCost: "141360557456"
           x-gitbook-description-html: <p>Transfer limits</p>
-        '400':
+        "400":
           description: Bad request due to invalid input parameter.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: MISSING_PARAM
                 status: 400
                 message: Query param 'token' or 'inputToken' and 'outputToken' must be provided
           x-gitbook-description-html: <p>Bad request due to invalid input parameter.</p>
-        '500':
+        "500":
           description: Unexpected error within the API
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
@@ -629,7 +629,7 @@ paths:
               - object: text
                 leaves:
                   - object: leaf
-                    text: 'Returns transfer limits for '
+                    text: "Returns transfer limits for "
                     marks: []
                   - object: leaf
                     text: inputToken
@@ -647,7 +647,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ', '
+                    text: ", "
                     marks: []
                   - object: leaf
                     text: originChainId
@@ -656,7 +656,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ', and '
+                    text: ", and "
                     marks: []
                   - object: leaf
                     text: destinationChainId
@@ -685,7 +685,7 @@ paths:
           schema:
             allOf:
               - example: 1
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           x-gitbook-description-html: <p>Chain ID of the originating chain.</p>
         - name: destinationChainId
           in: query
@@ -696,7 +696,7 @@ paths:
           schema:
             allOf:
               - example: 10
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           x-gitbook-description-html: <p>Chain ID of the destination chain.</p>
         - name: originToken
           in: query
@@ -705,7 +705,7 @@ paths:
             Origin chain address of token contract to transfer.
 
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-          example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           schema:
             type: string
           x-gitbook-description-html: |-
@@ -714,7 +714,7 @@ paths:
         - name: destinationToken
           in: query
           required: false
-          example: '0x4200000000000000000000000000000000000006'
+          example: "0x4200000000000000000000000000000000000006"
           description: |
             Destination chain address of token contract to receive.
 
@@ -725,27 +725,27 @@ paths:
             <p>Destination chain address of token contract to receive.</p>
             <p><em>Example:</em> 0x4200000000000000000000000000000000000006</p>
       responses:
-        '200':
+        "200":
           description: List of available routes
           content:
             application/json:
               example:
                 - originChainId: 1
-                  originToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+                  originToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
                   destinationChainId: 10
-                  destinationToken: '0x4200000000000000000000000000000000000006'
+                  destinationToken: "0x4200000000000000000000000000000000000006"
                   originTokenSymbol: WETH
                   destinationTokenSymbol: WETH
                   isNative: false
                 - originChainId: 1
-                  originToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+                  originToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
                   destinationChainId: 10
-                  destinationToken: '0x4200000000000000000000000000000000000006'
+                  destinationToken: "0x4200000000000000000000000000000000000006"
                   originTokenSymbol: ETH
                   destinationTokenSymbol: ETH
                   isNative: true
           x-gitbook-description-html: <p>List of available routes</p>
-        '400':
+        "400":
           description: Invalid input
           x-gitbook-description-html: <p>Invalid input</p>
           content:
@@ -756,7 +756,7 @@ paths:
                 status: 400
                 message: Invalid parameter at path 'originToken'. Expected type 'union'
                 param: originToken
-        '500':
+        "500":
           description: Unexpected error within the API
           x-gitbook-description-html: <p>Unexpected error within the API</p>
           content:
@@ -807,7 +807,7 @@ paths:
             this parameter.
           schema:
             allOf:
-              - $ref: '#/components/schemas/ChainId'
+              - $ref: "#/components/schemas/ChainId"
           examples:
             default:
               value: 137
@@ -832,17 +832,17 @@ paths:
           in: query
           required: true
           description: >
-            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this, you donot need the other parameters (i.e. originChainId and depositId). 
+            The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this, you donot need the other parameters (i.e. originChainId and depositId).
           schema:
             type: string
           examples:
             default:
-              value:                '0x56a86610aad2a653161c9dd4b4972f948198fd02ae9589cfac1d57bd86a156c1'
+              value: "0x56a86610aad2a653161c9dd4b4972f948198fd02ae9589cfac1d57bd86a156c1"
           x-gitbook-description-html: >-
             <p>The deposit transaction hash that is emitted from the FundsDeposited event. If you are using this,
             you donot need the above parameters.</p>
       responses:
-        '200':
+        "200":
           description: Lifecycle of a Transaction
           content:
             application/json:
@@ -935,7 +935,7 @@ paths:
                       <p>The deposit refund transaction hash.
                       place.</p>
                   actionsSucceeded:
-                    type:  boolean
+                    type: boolean
                     description: |
                       Defines if the actions succeeded.
                     x-gitbook-description-html: >-
@@ -951,7 +951,7 @@ paths:
               example:
                 status: filled
                 originChainId: 8453
-                depositId: '4406025'
+                depositId: "4406025"
                 depositTxnRef: >-
                   0x0e44727151684ef4cfe7744aad88007cf55b155a64f5f9047fb9d2fa53780967
                 fillTxnRef: >-
@@ -963,7 +963,7 @@ paths:
                   currentIndex: 0
                   maxIndex: 0
           x-gitbook-description-html: <p>Lifecycle of a transaction</p>
-        '400':
+        "400":
           description: Invalid input
           x-gitbook-description-html: <p>Invalid input</p>
           content:
@@ -974,7 +974,7 @@ paths:
                 status: 400
                 message: Invalid parameter at path 'depositId'. Expected type 'union'
                 param: originToken
-        '500':
+        "500":
           description: Unexpected error within the API
           x-gitbook-description-html: <p>Unexpected error within the API</p>
           content:
@@ -983,7 +983,7 @@ paths:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
                 status: 500
-                message: Internal server error          
+                message: Internal server error
       x-gitbook-description-document:
         object: document
         data:
@@ -1080,7 +1080,7 @@ paths:
             type: string
           examples:
             default:
-              value: '0x89f423567c2648BB828c3997f60c47b54f57Fa6e'
+              value: "0x89f423567c2648BB828c3997f60c47b54f57Fa6e"
           x-gitbook-description-html: >-
             <p>Wallet address of the depositor; filters results to deposits made
             by this address.</p>
@@ -1088,16 +1088,16 @@ paths:
           in: query
           required: false
           description: >
-             This parameter would help return transactions where the provided address is either the depositor or recipient.
+            This parameter would help return transactions where the provided address is either the depositor or recipient.
           schema:
             type: string
           examples:
             default:
-              value: '0x89f423567c2648BB828c3997f60c47b54f57Fa6e'
+              value: "0x89f423567c2648BB828c3997f60c47b54f57Fa6e"
           x-gitbook-description-html: >-
             <p>This parameter would help return transactions where the provided address is either the depositor or recipient.</p>
       responses:
-        '200':
+        "200":
           description: List of deposits for a given depositor
           content:
             application/json:
@@ -1380,7 +1380,7 @@ paths:
                   fillTx:
                     type: string
                     description: |
-                      DEPRECATED: Please use fillTxnRef instead. Transaction hash of the actual fill transaction.                
+                      DEPRECATED: Please use fillTxnRef instead. Transaction hash of the actual fill transaction.
                   speedups:
                     type: array
                     items:
@@ -1394,47 +1394,47 @@ paths:
                 - id: 14503095
                   relayHash: >-
                     0x89cb192c96170615b7e1a0fb20fb64b7c04f6641b301e2735287533e1dbb22ac
-                  depositId: '4333561'
+                  depositId: "4333561"
                   originChainId: 8453
                   destinationChainId: 42161
-                  depositor: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
-                  recipient: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
-                  inputToken: '0x4200000000000000000000000000000000000006'
-                  inputAmount: '1000000000000000'
-                  outputToken: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
-                  outputAmount: '995226997892889'
+                  depositor: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
+                  recipient: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
+                  inputToken: "0x4200000000000000000000000000000000000006"
+                  inputAmount: "1000000000000000"
+                  outputToken: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+                  outputAmount: "995226997892889"
                   message: 0x
                   messageHash: >-
                     0x0000000000000000000000000000000000000000000000000000000000000000
-                  exclusiveRelayer: '0xCad97616f91872C02BA3553dB315Db4015cBE850'
-                  exclusivityDeadline: 'null'
-                  fillDeadline: '2025-07-24T19:26:20.000Z'
-                  quoteTimestamp: '2025-07-24T16:07:11.000Z'
+                  exclusiveRelayer: "0xCad97616f91872C02BA3553dB315Db4015cBE850"
+                  exclusivityDeadline: "null"
+                  fillDeadline: "2025-07-24T19:26:20.000Z"
+                  quoteTimestamp: "2025-07-24T16:07:11.000Z"
                   depositBlockNumber: 33292078
-                  depositBlockTimestamp: '2025-07-24T16:11:43.000Z'
+                  depositBlockTimestamp: "2025-07-24T16:11:43.000Z"
                   status: filled
                   depositRefundTxnRef: null
                   swapTokenPriceUsd: null
                   swapFeeUsd: null
-                  bridgeFeeUsd: '0.017884155707075979'
-                  inputPriceUsd: '3746.9406687316323'
-                  outputPriceUsd: '3746.9406687316323'
-                  fillGasFee: '2532354948000'
-                  fillGasFeeUsd: '0.009488583742324977'
-                  fillGasTokenPriceUsd: '3746.9406687316323'
+                  bridgeFeeUsd: "0.017884155707075979"
+                  inputPriceUsd: "3746.9406687316323"
+                  outputPriceUsd: "3746.9406687316323"
+                  fillGasFee: "2532354948000"
+                  fillGasFeeUsd: "0.009488583742324977"
+                  fillGasTokenPriceUsd: "3746.9406687316323"
                   actionsSucceeded: null
                   swapTransactionHash: null
                   swapToken: null
                   swapTokenAmount: null
-                  relayer: '0xCad97616f91872C02BA3553dB315Db4015cBE850'
-                  fillBlockTimestamp: '2025-07-24T16:11:43.000Z'
+                  relayer: "0xCad97616f91872C02BA3553dB315Db4015cBE850"
+                  fillBlockTimestamp: "2025-07-24T16:11:43.000Z"
                   depositTxnRef: >-
                     0x92ffc5d69d00e14e79254f68adab030dd38119996501a88cac0da76557703d11
                   fillTxnRef: >-
                     0x7b98cebd7ee6e2f75fead81d73005cdf25149141c2045cb5f731b6d9c6b9c517
                   speedups: []
           x-gitbook-description-html: <p>List of deposits for a given depositor</p>
-        '400':
+        "400":
           description: Invalid input
           x-gitbook-description-html: <p>Invalid input</p>
           content:
@@ -1445,7 +1445,7 @@ paths:
                 status: 400
                 message: Invalid parameter at path 'depositor'. Expected type 'union'
                 param: originToken
-        '500':
+        "500":
           description: Unexpected error within the API
           x-gitbook-description-html: <p>Unexpected error within the API</p>
           content:
@@ -1454,7 +1454,7 @@ paths:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
                 status: 500
-                message: Internal server error          
+                message: Internal server error
       x-gitbook-description-document:
         object: document
         data:
@@ -1506,8 +1506,8 @@ paths:
         - in: query
           name: tradeType
           required: true
-          x-warn-html: | 
-              when using exactOutput some routes may return more tokens than expected. So if you’re using exactOutput with embedded actions, and you need those actions to execute with the exact amount you specify, you should not use dynamic balance, instead, set the values explicitly to the exact amount.
+          x-warn-html: |
+            when using exactOutput some routes may return more tokens than expected. So if you're using exactOutput with embedded actions, and you need those actions to execute with the exact amount you specify, you should not use dynamic balance, instead, set the values explicitly to the exact amount.
           description: |
             Defines the type of trade execution strategy used in a swap or bridge request.
             Each trade type specifies how input and output token amounts are determined
@@ -1534,7 +1534,7 @@ paths:
           description: Required amount is in `inputToken` if `tradeType=exactInput` otherwise amount is in `outputToken`.
           schema:
             type: string
-            example: '1000000'
+            example: "1000000"
           x-gitbook-description-html: <p>Required amount of output token in smallest unit.</p>
         - in: query
           name: inputToken
@@ -1542,7 +1542,7 @@ paths:
           description: Address of the input token on the origin chain.
           schema:
             type: string
-            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
           x-gitbook-description-html: <p>Address of the input token on the origin chain.</p>
         - in: query
           name: outputToken
@@ -1550,7 +1550,7 @@ paths:
           description: Address of the output token on the destination chain.
           schema:
             type: string
-            example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+            example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
           x-gitbook-description-html: <p>Address of the output token on the destination chain.</p>
         - in: query
           name: originChainId
@@ -1574,7 +1574,7 @@ paths:
           description: Address of the depositor initiating the swap.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
           x-gitbook-description-html: <p>Address of the depositor initiating the swap.</p>
         - in: query
           name: recipient
@@ -1582,12 +1582,12 @@ paths:
           description: Address of the account receiving the output token. Defaults to `depositor` if not provided.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
           x-gitbook-description-html: <p>Address of the account receiving the output token.</p>
         - in: query
           name: appFee
           required: false
-          description: Enables integrators to collect a customizable fee in the output token, sent to a designated address on the destination chain. appFee is expressed in percentage with value ranging between 0 and 1. 
+          description: Enables integrators to collect a customizable fee in the output token, sent to a designated address on the destination chain. appFee is expressed in percentage with value ranging between 0 and 1.
           schema:
             type: number
             example: 0.01
@@ -1598,15 +1598,15 @@ paths:
           description: Address of the account receiving the app fees. Must be defined if you are also defining `appFee`.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
-          x-gitbook-description-html: <p>Address of the account receiving the output token.</p>          
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
+          x-gitbook-description-html: <p>Address of the account receiving the output token.</p>
         - in: query
           name: integratorId
           required: false
           description: 2-byte hex-string that identifies the integrator. E.g., "0xdead".
           schema:
             type: string
-            example: '0xdead'
+            example: "0xdead"
           x-gitbook-description-html: >-
             <p>2-byte hex-string that identifies the integrator. E.g.,
             "0xdead".</p>
@@ -1672,7 +1672,7 @@ paths:
               type: string
             default: []
           x-gitbook-description-html: >-
-            <p>Used to define the sources you want to exclude from the crosschain swap action. Defaults to an empty array. Available sources can be retrieved via `/swap/sources endpoint`</p>   
+            <p>Used to define the sources you want to exclude from the crosschain swap action. Defaults to an empty array. Available sources can be retrieved via `/swap/sources endpoint`</p>
         - in: query
           name: includeSources
           required: false
@@ -1684,9 +1684,9 @@ paths:
               type: string
             default: []
           x-gitbook-description-html: >-
-            <p>Used to define the sources you want to include from the crosschain swap action. Defaults to an empty array. Available sources can be retrieved via `/swap/sources` endpoint</p>            
+            <p>Used to define the sources you want to include from the crosschain swap action. Defaults to an empty array. Available sources can be retrieved via `/swap/sources` endpoint</p>
       responses:
-        '200':
+        "200":
           description: Swap approval data returned successfully.
           content:
             application/json:
@@ -1702,14 +1702,21 @@ paths:
                         - How to handle the swap flow (input/output token logic)
                         - Which quote-fetching functions to call
                         - How responses and errors are formatted
-                    enum: ["bridgeableToBridgeable", "bridgeableToBridgeableIndirect", "bridgeableToAny", "anyToBridgeable" , "anyToAny"]
+                    enum:
+                      [
+                        "bridgeableToBridgeable",
+                        "bridgeableToBridgeableIndirect",
+                        "bridgeableToAny",
+                        "anyToBridgeable",
+                        "anyToAny",
+                      ]
                     example: bridgeableToAny
                     x-enum-descriptions: |
-                        - bridgeableToBridgeable: Both input and output tokens are bridgeable
-                        - bridgeableToBridgeableIndirect: Specific case of `bridgeableToBridgeable`, where we route funds from any EVM to HyperCore (via HyperEVM) 
-                        - bridgeableToAny: Input token is bridgeable, output token is any token
-                        - anyToBridgeable: Input token is any token, output token is bridgeable
-                        - anyToAny: Both input and output tokens are any tokens (not bridgeable)
+                      - bridgeableToBridgeable: Both input and output tokens are bridgeable
+                      - bridgeableToBridgeableIndirect: Specific case of `bridgeableToBridgeable`, where we route funds from any EVM to HyperCore (via HyperEVM) 
+                      - bridgeableToAny: Input token is bridgeable, output token is any token
+                      - anyToBridgeable: Input token is any token, output token is bridgeable
+                      - anyToAny: Both input and output tokens are any tokens (not bridgeable)
                     x-gitbook-description-html: <p>Type of cross-swap operation.</p>
                   amountType:
                     type: string
@@ -1727,14 +1734,14 @@ paths:
                           token:
                             type: string
                             description: Address of the input token.
-                            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                             x-gitbook-description-html: <p>Address of the input token.</p>
                           spender:
                             type: string
                             description: >-
                               Address of Across Protocol contract that requires
                               approval.
-                            example: '0x6f26Bf09B1C792e3228e5467807a900A503c0281'
+                            example: "0x6f26Bf09B1C792e3228e5467807a900A503c0281"
                             x-gitbook-description-html: >-
                               <p>Address of Across Protocol contract that
                               requires approval.</p>
@@ -1747,7 +1754,7 @@ paths:
                           expected:
                             type: string
                             description: Minimum expected allowance for the swap.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Minimum expected allowance for the swap.</p>
                         x-gitbook-description-html: <p>Token allowance details.</p>
                       balance:
@@ -1757,17 +1764,17 @@ paths:
                           token:
                             type: string
                             description: Address of the input token.
-                            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                             x-gitbook-description-html: <p>Address of the input token.</p>
                           actual:
                             type: string
                             description: Current balance of the depositor.
-                            example: '7169942'
+                            example: "7169942"
                             x-gitbook-description-html: <p>Current balance of the depositor.</p>
                           expected:
                             type: string
                             description: Minimum required balance for the swap.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Minimum required balance for the swap.</p>
                         x-gitbook-description-html: <p>Token balance details.</p>
                     x-gitbook-description-html: <p>Contains data on required checks.</p>
@@ -1782,17 +1789,17 @@ paths:
                           provider:
                             type: string
                             description: Name of the bridge provider.
-                            example: 'across'
+                            example: "across"
                             x-gitbook-description-html: <p>Name of the bridge provider.</p>
                           inputAmount:
                             type: string
                             description: Amount of input token.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Amount of input token.</p>
                           outputAmount:
                             type: string
                             description: Estimated amount of output token.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Estimated amount of output token.</p>
                           tokenIn:
                             type: object
@@ -1806,7 +1813,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
@@ -1826,7 +1833,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+                                example: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                               chainId:
                                 type: integer
                                 example: 42161
@@ -1835,50 +1842,42 @@ paths:
                             type: object
                             description: Fee details for the bridge transaction.
                             properties:
-                              totalRelay:
+                              pct:
+                                type: string
+                                example: "19338767572622738"
+                              amount:
+                                type: string
+                                example: "19338"
+                              details:
                                 type: object
                                 properties:
-                                  pct:
-                                    type: string
-                                    example: '19338767572622738'
-                                  total:
-                                    type: string
-                                    example: '19338'
-                              relayerCapital:
-                                type: object
-                                properties:
-                                  pct:
-                                    type: string
-                                    example: '100000000000000'
-                                  total:
-                                    type: string
-                                    example: '100'
-                              relayerGas:
-                                type: object
-                                properties:
-                                  pct:
-                                    type: string
-                                    example: '19227000000000000'
-                                  total:
-                                    type: string
-                                    example: '19227'
-                              lp:
-                                type: object
-                                properties:
-                                  pct:
-                                    type: string
-                                    example: '11767572622738'
-                                  total:
-                                    type: string
-                                    example: '11'
-                              bridgeFee:
-                                type: object
-                                description: Bridge-specific fee charged by the bridge provider.
-                                properties:
-                                  pct:
-                                    type: string
-                                  total:
-                                    type: string
+                                  relayerCapital:
+                                    type: object
+                                    properties:
+                                      pct:
+                                        type: string
+                                        example: "100000000000000"
+                                      total:
+                                        type: string
+                                        example: "100"
+                                  destinationGas:
+                                    type: object
+                                    properties:
+                                      pct:
+                                        type: string
+                                        example: "19227000000000000"
+                                      total:
+                                        type: string
+                                        example: "19227"
+                                  lp:
+                                    type: object
+                                    properties:
+                                      pct:
+                                        type: string
+                                        example: "11767572622738"
+                                      total:
+                                        type: string
+                                        example: "11"
                             x-gitbook-description-html: <p>Fee details for the bridge transaction.</p>
                         x-gitbook-description-html: <p>Bridge step information.</p>
                       destinationSwap:
@@ -1891,7 +1890,7 @@ paths:
                             properties:
                               address:
                                 type: string
-                                example: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+                                example: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                               decimals:
                                 type: integer
                                 example: 6
@@ -1914,7 +1913,7 @@ paths:
                                 example: ETH
                               address:
                                 type: string
-                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                                example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                               name:
                                 type: string
                                 example: Ether
@@ -1925,17 +1924,17 @@ paths:
                           inputAmount:
                             type: string
                             description: Input amount for destination swap.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Input amount for destination swap.</p>
                           maxInputAmount:
                             type: string
                             description: Maximum input amount for destination swap.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Maximum input amount for destination swap.</p>
                           outputAmount:
                             type: string
                             description: Expected output amount from destination swap.
-                            example: '263466241499732'
+                            example: "263466241499732"
                             x-gitbook-description-html: >-
                               <p>Expected output amount from destination
                               swap.</p>
@@ -1944,7 +1943,7 @@ paths:
                             description: >-
                               Minimum guaranteed output amount from destination
                               swap.
-                            example: '260831579075100'
+                            example: "260831579075100"
                             x-gitbook-description-html: >-
                               <p>Minimum guaranteed output amount from
                               destination swap.</p>
@@ -1976,7 +1975,7 @@ paths:
                         example: USDC
                       address:
                         type: string
-                        example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                       name:
                         type: string
                         example: USD Coin
@@ -1996,7 +1995,7 @@ paths:
                         example: ETH
                       address:
                         type: string
-                        example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                        example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                       name:
                         type: string
                         example: Ether
@@ -2016,7 +2015,7 @@ paths:
                         example: USDC
                       address:
                         type: string
-                        example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                       name:
                         type: string
                         example: USD Coin
@@ -2032,17 +2031,17 @@ paths:
                     properties:
                       total:
                         type: object
-                        description: Total fees for the transaction.
+                        description: Total fees for the transaction. If a swap is involved this value takes the expected output amount into account.
                         properties:
                           amount:
                             type: string
-                            example: '47651'
+                            example: "47651"
                           amountUsd:
                             type: string
-                            example: '0.047642182071510164'
+                            example: "0.047642182071510164"
                           pct:
                             type: string
-                            example: '47651283466652296'
+                            example: "47651283466652296"
                           token:
                             type: object
                             properties:
@@ -2054,24 +2053,56 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
                               chainId:
                                 type: integer
                                 example: 10
-                        x-gitbook-description-html: <p>Total fees for the transaction.</p>
+                        x-gitbook-description-html: <p>Total fees for the transaction. If a swap is involved this value takes the expected output amount into account.</p>
+                      maxTotal:
+                        type: object
+                        description: Total fees for the transaction. If a swap is involved this value takes the min. output amount into account.
+                        properties:
+                          amount:
+                            type: string
+                            example: "47651"
+                          amountUsd:
+                            type: string
+                            example: "0.047642182071510164"
+                          pct:
+                            type: string
+                            example: "47651283466652296"
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 6
+                              symbol:
+                                type: string
+                                example: USDC
+                              address:
+                                type: string
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                              name:
+                                type: string
+                                example: USD Coin
+                              chainId:
+                                type: integer
+                                example: 10
+                        x-gitbook-description-html: <p>Total fees for the transaction. If a swap is involved this value takes the min. output amount into account.</p>
                       originGas:
                         type: object
                         description: Gas fees on origin chain.
                         properties:
                           amount:
                             type: string
-                            example: '134879133226'
+                            example: "134879133226"
                           amountUsd:
                             type: string
-                            example: '0.000502067341563801'
+                            example: "0.000502067341563801"
                           token:
                             type: object
                             properties:
@@ -2080,7 +2111,7 @@ paths:
                                 example: 10
                               address:
                                 type: string
-                                example: '0x0000000000000000000000000000000000000000'
+                                example: "0x0000000000000000000000000000000000000000"
                               decimals:
                                 type: integer
                                 example: 18
@@ -2094,13 +2125,13 @@ paths:
                         properties:
                           amount:
                             type: string
-                            example: '5161137520505'
+                            example: "5161137520505"
                           amountUsd:
                             type: string
-                            example: '0.019223327642999999'
+                            example: "0.019223327642999999"
                           pct:
                             type: string
-                            example: '19227000000000001'
+                            example: "19227000000000001"
                           token:
                             type: object
                             properties:
@@ -2109,7 +2140,7 @@ paths:
                                 example: 42161
                               address:
                                 type: string
-                                example: '0x0000000000000000000000000000000000000000'
+                                example: "0x0000000000000000000000000000000000000000"
                               decimals:
                                 type: integer
                                 example: 18
@@ -2123,13 +2154,13 @@ paths:
                         properties:
                           amount:
                             type: string
-                            example: '100'
+                            example: "100"
                           amountUsd:
                             type: string
-                            example: '0.0000999809'
+                            example: "0.0000999809"
                           pct:
                             type: string
-                            example: '100000000000000'
+                            example: "100000000000000"
                           token:
                             type: object
                             properties:
@@ -2141,7 +2172,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
@@ -2155,13 +2186,13 @@ paths:
                         properties:
                           amount:
                             type: string
-                            example: '11'
+                            example: "11"
                           amountUsd:
                             type: string
-                            example: '0.000010997899'
+                            example: "0.000010997899"
                           pct:
                             type: string
-                            example: '11000000000000'
+                            example: "11000000000000"
                           token:
                             type: object
                             properties:
@@ -2173,7 +2204,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
@@ -2187,13 +2218,13 @@ paths:
                         properties:
                           amount:
                             type: string
-                            example: '19338'
+                            example: "19338"
                           amountUsd:
                             type: string
-                            example: '0.019334306442000002'
+                            example: "0.019334306442000002"
                           pct:
                             type: string
-                            example: '19338000000000001'
+                            example: "19338000000000001"
                           token:
                             type: object
                             properties:
@@ -2205,7 +2236,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
@@ -2243,13 +2274,13 @@ paths:
                         properties:
                           amount:
                             type: string
-                            example: '0'
+                            example: "0"
                           amountUsd:
                             type: string
-                            example: '0.0'
+                            example: "0.0"
                           pct:
                             type: string
-                            example: '0'
+                            example: "0"
                           token:
                             type: object
                             properties:
@@ -2261,7 +2292,7 @@ paths:
                                 example: ETH
                               address:
                                 type: string
-                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                                example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                               name:
                                 type: string
                                 example: Ether
@@ -2269,25 +2300,89 @@ paths:
                                 type: integer
                                 example: 42161
                         x-gitbook-description-html: <p>Application fees.</p>
+                      swapImpact:
+                        type: object
+                        description: Expected swap impact if one or many swaps involved. Considers price impact and best-case swap execution, i.e. no slippage.
+                        properties:
+                          amount:
+                            type: string
+                            example: "0"
+                          amountUsd:
+                            type: string
+                            example: "0.0"
+                          pct:
+                            type: string
+                            example: "0"
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 18
+                              symbol:
+                                type: string
+                                example: ETH
+                              address:
+                                type: string
+                                example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+                              name:
+                                type: string
+                                example: Ether
+                              chainId:
+                                type: integer
+                                example: 42161
+                        x-gitbook-description-html: <p>Expected swap impact if one or many swaps involved. Considers price impact and best-case swap execution, i.e. no slippage.</p>
+                      maxSwapImpact:
+                        type: object
+                        description: Max. swap impact amount if one or many swaps are involved. Considers price impact and worst-case execution, i.e. with slippage.
+                        properties:
+                          amount:
+                            type: string
+                            example: "0"
+                          amountUsd:
+                            type: string
+                            example: "0.0"
+                          pct:
+                            type: string
+                            example: "0"
+                          token:
+                            type: object
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 18
+                              symbol:
+                                type: string
+                                example: ETH
+                              address:
+                                type: string
+                                example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+                              name:
+                                type: string
+                                example: Ether
+                              chainId:
+                                type: integer
+                                example: 42161
+                        x-gitbook-description-html: <p>Max. swap impact amount if one or many swaps are involved. Considers price impact and worst-case execution, i.e. with slippage.</p>
                     x-gitbook-description-html: <p>Comprehensive fee breakdown.</p>
                   inputAmount:
                     type: string
                     description: >-
                       Required input amount in the smallest unit of the input
                       token.
-                    example: '1000000'
+                    example: "1000000"
                     x-gitbook-description-html: >-
                       <p>Required input amount in the smallest unit of the input
                       token.</p>
                   expectedOutputAmount:
                     type: string
                     description: Expected amount of output token.
-                    example: '263466241499732'
+                    example: "263466241499732"
                     x-gitbook-description-html: <p>Expected amount of output token.</p>
                   minOutputAmount:
                     type: string
                     description: Minimum guaranteed amount of output token.
-                    example: '260831579075100'
+                    example: "260831579075100"
                     x-gitbook-description-html: <p>Minimum guaranteed amount of output token.</p>
                   expectedFillTime:
                     type: integer
@@ -2306,7 +2401,7 @@ paths:
                         example: 10
                       to:
                         type: string
-                        example: '0x6f26Bf09B1C792e3228e5467807a900A503c0281'
+                        example: "0x6f26Bf09B1C792e3228e5467807a900A503c0281"
                       data:
                         type: string
                         description: Transaction calldata for the swap.
@@ -2315,13 +2410,13 @@ paths:
                         x-gitbook-description-html: <p>Transaction calldata for the swap.</p>
                       gas:
                         type: string
-                        example: '122554'
+                        example: "122554"
                       maxFeePerGas:
                         type: string
-                        example: '1100569'
+                        example: "1100569"
                       maxPriorityFeePerGas:
                         type: string
-                        example: '1100000'
+                        example: "1100000"
                     x-gitbook-description-html: <p>Transaction data for executing the swap.</p>
                   id:
                     type: string
@@ -2329,7 +2424,7 @@ paths:
                     example: 6pl4c-1754347045980-2353645c0fb7
                     x-gitbook-description-html: <p>Unique identifier for the swap request.</p>
           x-gitbook-description-html: <p>Swap approval data returned successfully.</p>
-        '400':
+        "400":
           description: Bad request due to invalid input parameter.
           content:
             application/json:
@@ -2364,8 +2459,8 @@ paths:
                     type: string
                     description: Uniquely define the error.
                     example: dbsft-1756414126692-6a64b1802b70
-                    x-gitbook-description-html: <p>Uniquely define the error</p>   
-        '4XX':
+                    x-gitbook-description-html: <p>Uniquely define the error</p>
+        "4XX":
           description: Insufficient liquidity for same-asset bridging.
           content:
             application/json:
@@ -2399,7 +2494,7 @@ paths:
                     type: string
                     description: Uniquely define the error.
                     example: dbsft-1756414126692-6a64b1802b70
-                    x-gitbook-description-html: <p>Uniquely define the error</p>                    
+                    x-gitbook-description-html: <p>Uniquely define the error</p>
           x-gitbook-description-html: <p>Bad request due to invalid input parameter.</p>
       x-gitbook-description-document:
         object: document
@@ -2416,7 +2511,7 @@ paths:
                   - object: leaf
                     text: >-
                       Returns data required to execute a crosschain swap. If the
-                      input token requires approval, 
+                      input token requires approval,
                     marks: []
                   - object: leaf
                     text: approvalTxns
@@ -2425,7 +2520,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ' will be included in the response.'
+                    text: " will be included in the response."
                     marks: []
       x-gitbook-description-html: >-
         <p>Returns data required to execute a crosschain swap. If the input
@@ -2443,8 +2538,8 @@ paths:
         - in: query
           name: tradeType
           required: true
-          x-warn-html: | 
-              when using exactOutput some routes may return more tokens than expected. So if you’re using exactOutput with embedded actions, and you need those actions to execute with the exact amount you specify, you should not use dynamic balance, instead, set the values explicitly to the exact amount.
+          x-warn-html: |
+            when using exactOutput some routes may return more tokens than expected. So if you're using exactOutput with embedded actions, and you need those actions to execute with the exact amount you specify, you should not use dynamic balance, instead, set the values explicitly to the exact amount.
           description: |
             Defines the type of trade execution strategy used in a swap or bridge request.
             Each trade type specifies how input and output token amounts are determined
@@ -2471,7 +2566,7 @@ paths:
           description: Required amount of output token in smallest unit.
           schema:
             type: string
-            example: '1000000'
+            example: "1000000"
           x-gitbook-description-html: <p>Required amount of output token in smallest unit.</p>
         - in: query
           name: inputToken
@@ -2479,7 +2574,7 @@ paths:
           description: Address of the input token on the origin chain.
           schema:
             type: string
-            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
           x-gitbook-description-html: <p>Address of the input token on the origin chain.</p>
         - in: query
           name: outputToken
@@ -2487,7 +2582,7 @@ paths:
           description: Address of the output token on the destination chain.
           schema:
             type: string
-            example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+            example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
           x-gitbook-description-html: <p>Address of the output token on the destination chain.</p>
         - in: query
           name: originChainId
@@ -2511,20 +2606,20 @@ paths:
           description: Address of the depositor initiating the swap.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
           x-gitbook-description-html: <p>Address of the depositor initiating the swap.</p>
         - in: query
           name: recipient
-          required: false 
+          required: false
           description: Address of the account receiving the output token. Defaults to `depositor` if not provided.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
           x-gitbook-description-html: <p>Address of the account receiving the output token.</p>
         - in: query
           name: appFee
           required: false
-          description: Enables integrators to collect a customizable fee in the output token, sent to a designated address on the destination chain. appFee is expressed in percentage with value ranging between 0 and 1. 
+          description: Enables integrators to collect a customizable fee in the output token, sent to a designated address on the destination chain. appFee is expressed in percentage with value ranging between 0 and 1.
           schema:
             type: number
             example: 0.01
@@ -2535,15 +2630,15 @@ paths:
           description: Address of the account receiving the app fees. Must be defined if you are also defining `appFee`.
           schema:
             type: string
-            example: '0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB'
-          x-gitbook-description-html: <p>Address of the account receiving the output token.</p>          
+            example: "0xA4d353BBc130cbeF1811f27ac70989F9d568CeAB"
+          x-gitbook-description-html: <p>Address of the account receiving the output token.</p>
         - in: query
           name: integratorId
           required: false
           description: 2-byte hex-string that identifies the integrator. E.g., "0xdead".
           schema:
             type: string
-            example: '0xdead'
+            example: "0xdead"
           x-gitbook-description-html: >-
             <p>2-byte hex-string that identifies the integrator. E.g.,
             "0xdead".</p>
@@ -2609,7 +2704,7 @@ paths:
               type: string
             default: true
           x-gitbook-description-html: >-
-            <p>Used to define the sources you want to exclude from the crosschain swap action. Defaults to an empty array.</p>   
+            <p>Used to define the sources you want to exclude from the crosschain swap action. Defaults to an empty array.</p>
         - in: query
           name: includeSources
           required: false
@@ -2621,13 +2716,13 @@ paths:
               type: string
             default: true
           x-gitbook-description-html: >-
-            <p>Used to define the sources you want to include from the crosschain swap action. Defaults to an empty array.</p>   
+            <p>Used to define the sources you want to include from the crosschain swap action. Defaults to an empty array.</p>
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SwapApprovalRequest'          
+              $ref: "#/components/schemas/SwapApprovalRequest"
             example:
               actions:
                 - target: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
@@ -2639,9 +2734,9 @@ paths:
                       populateDynamically: true
                       balanceSourceToken: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                   value: "0"
-                  isNativeTransfer: false            
+                  isNativeTransfer: false
       responses:
-        '200':
+        "200":
           description: Swap approval data returned successfully.
           content:
             application/json:
@@ -2657,13 +2752,19 @@ paths:
                         - How to handle the swap flow (input/output token logic)
                         - Which quote-fetching functions to call
                         - How responses and errors are formatted
-                    enum: ["BRIDGEABLE_TO_BRIDGEABLE","BRIDGEABLE_TO_ANY", "ANY_TO_BRIDGEABLE" , "ANY_TO_ANY"]
+                    enum:
+                      [
+                        "BRIDGEABLE_TO_BRIDGEABLE",
+                        "BRIDGEABLE_TO_ANY",
+                        "ANY_TO_BRIDGEABLE",
+                        "ANY_TO_ANY",
+                      ]
                     example: bridgeableToAny
                     x-enum-descriptions: |
-                        - BRIDGEABLE_TO_BRIDGEABLE: Both input and output tokens are bridgeable
-                        - BRIDGEABLE_TO_ANY: Input token is bridgeable, output token is any token
-                        - ANY_TO_BRIDGEABLE: Input token is any token, output token is bridgeable
-                        - ANY_TO_ANY: Both input and output tokens are any tokens (not bridgeable)
+                      - BRIDGEABLE_TO_BRIDGEABLE: Both input and output tokens are bridgeable
+                      - BRIDGEABLE_TO_ANY: Input token is bridgeable, output token is any token
+                      - ANY_TO_BRIDGEABLE: Input token is any token, output token is bridgeable
+                      - ANY_TO_ANY: Both input and output tokens are any tokens (not bridgeable)
                     x-gitbook-description-html: <p>Type of cross-swap operation.</p>
                   amountType:
                     type: string
@@ -2681,14 +2782,14 @@ paths:
                           token:
                             type: string
                             description: Address of the input token.
-                            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                             x-gitbook-description-html: <p>Address of the input token.</p>
                           spender:
                             type: string
                             description: >-
                               Address of Across Protocol contract that requires
                               approval.
-                            example: '0x6f26Bf09B1C792e3228e5467807a900A503c0281'
+                            example: "0x6f26Bf09B1C792e3228e5467807a900A503c0281"
                             x-gitbook-description-html: >-
                               <p>Address of Across Protocol contract that
                               requires approval.</p>
@@ -2701,7 +2802,7 @@ paths:
                           expected:
                             type: string
                             description: Minimum expected allowance for the swap.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Minimum expected allowance for the swap.</p>
                         x-gitbook-description-html: <p>Token allowance details.</p>
                       balance:
@@ -2711,17 +2812,17 @@ paths:
                           token:
                             type: string
                             description: Address of the input token.
-                            example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                            example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                             x-gitbook-description-html: <p>Address of the input token.</p>
                           actual:
                             type: string
                             description: Current balance of the depositor.
-                            example: '7169942'
+                            example: "7169942"
                             x-gitbook-description-html: <p>Current balance of the depositor.</p>
                           expected:
                             type: string
                             description: Minimum required balance for the swap.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Minimum required balance for the swap.</p>
                         x-gitbook-description-html: <p>Token balance details.</p>
                     x-gitbook-description-html: <p>Contains data on required checks.</p>
@@ -2736,12 +2837,12 @@ paths:
                           inputAmount:
                             type: string
                             description: Amount of input token.
-                            example: '1000000'
+                            example: "1000000"
                             x-gitbook-description-html: <p>Amount of input token.</p>
                           outputAmount:
                             type: string
                             description: Estimated amount of output token.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Estimated amount of output token.</p>
                           tokenIn:
                             type: object
@@ -2755,7 +2856,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
@@ -2775,7 +2876,7 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+                                example: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                               chainId:
                                 type: integer
                                 example: 42161
@@ -2789,37 +2890,37 @@ paths:
                                 properties:
                                   pct:
                                     type: string
-                                    example: '19338767572622738'
+                                    example: "19338767572622738"
                                   total:
                                     type: string
-                                    example: '19338'
+                                    example: "19338"
                               relayerCapital:
                                 type: object
                                 properties:
                                   pct:
                                     type: string
-                                    example: '100000000000000'
+                                    example: "100000000000000"
                                   total:
                                     type: string
-                                    example: '100'
+                                    example: "100"
                               relayerGas:
                                 type: object
                                 properties:
                                   pct:
                                     type: string
-                                    example: '19227000000000000'
+                                    example: "19227000000000000"
                                   total:
                                     type: string
-                                    example: '19227'
+                                    example: "19227"
                               lp:
                                 type: object
                                 properties:
                                   pct:
                                     type: string
-                                    example: '11767572622738'
+                                    example: "11767572622738"
                                   total:
                                     type: string
-                                    example: '11'
+                                    example: "11"
                               bridgeFee:
                                 type: object
                                 description: Bridge-specific fee charged by the bridge provider.
@@ -2840,7 +2941,7 @@ paths:
                             properties:
                               address:
                                 type: string
-                                example: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+                                example: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
                               decimals:
                                 type: integer
                                 example: 6
@@ -2863,7 +2964,7 @@ paths:
                                 example: ETH
                               address:
                                 type: string
-                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                                example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                               name:
                                 type: string
                                 example: Ether
@@ -2874,17 +2975,17 @@ paths:
                           inputAmount:
                             type: string
                             description: Input amount for destination swap.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Input amount for destination swap.</p>
                           maxInputAmount:
                             type: string
                             description: Maximum input amount for destination swap.
-                            example: '980662'
+                            example: "980662"
                             x-gitbook-description-html: <p>Maximum input amount for destination swap.</p>
                           outputAmount:
                             type: string
                             description: Expected output amount from destination swap.
-                            example: '263466241499732'
+                            example: "263466241499732"
                             x-gitbook-description-html: >-
                               <p>Expected output amount from destination
                               swap.</p>
@@ -2893,7 +2994,7 @@ paths:
                             description: >-
                               Minimum guaranteed output amount from destination
                               swap.
-                            example: '260831579075100'
+                            example: "260831579075100"
                             x-gitbook-description-html: >-
                               <p>Minimum guaranteed output amount from
                               destination swap.</p>
@@ -2925,7 +3026,7 @@ paths:
                         example: USDC
                       address:
                         type: string
-                        example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                       name:
                         type: string
                         example: USD Coin
@@ -2945,7 +3046,7 @@ paths:
                         example: ETH
                       address:
                         type: string
-                        example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+                        example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
                       name:
                         type: string
                         example: Ether
@@ -2965,7 +3066,7 @@ paths:
                         example: USDC
                       address:
                         type: string
-                        example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                       name:
                         type: string
                         example: USD Coin
@@ -2981,19 +3082,22 @@ paths:
                     properties:
                       total:
                         type: object
-                        description: Total fees for the transaction.
+                        description: Expected total fees for the route.
                         properties:
                           amount:
                             type: string
-                            example: '47651'
+                            description: Total fee amount denominated in the smallest unit of the input token.
+                            example: "4500000"
                           amountUsd:
                             type: string
-                            example: '0.047642182071510164'
+                            example: "4.5"
                           pct:
                             type: string
-                            example: '47651283466652296'
+                            description: Total fees as a fraction of the input amount, scaled by 1e18.
+                            example: "4500000000000000"
                           token:
                             type: object
+                            description: Token denomination for the total fees.
                             properties:
                               decimals:
                                 type: integer
@@ -3003,24 +3107,483 @@ paths:
                                 example: USDC
                               address:
                                 type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
                               name:
                                 type: string
                                 example: USD Coin
                               chainId:
                                 type: integer
                                 example: 10
-                        x-gitbook-description-html: <p>Total fees for the transaction.</p>
+                          details:
+                            type: object
+                            description: Breakdown of the expected total fees.
+                            properties:
+                              type:
+                                type: string
+                                description: Identifier for the fee breakdown structure.
+                                enum:
+                                  - total-breakdown
+                                example: total-breakdown
+                              swapImpact:
+                                type: object
+                                description: Expected swap impact with best-case execution (no slippage).
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "0"
+                                  amountUsd:
+                                    type: string
+                                    example: "0.0"
+                                  pct:
+                                    type: string
+                                    example: "0"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 6
+                                      symbol:
+                                        type: string
+                                        example: USDC
+                                      address:
+                                        type: string
+                                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                      name:
+                                        type: string
+                                        example: USD Coin
+                                      chainId:
+                                        type: integer
+                                        example: 10
+                                x-gitbook-description-html: <p>Expected swap impact with best-case execution (no slippage).</p>
+                              app:
+                                type: object
+                                description: Application fee portion of the total fees.
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "0"
+                                  amountUsd:
+                                    type: string
+                                    example: "0.0"
+                                  pct:
+                                    type: string
+                                    example: "0"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 18
+                                      symbol:
+                                        type: string
+                                        example: ETH
+                                      address:
+                                        type: string
+                                        example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+                                      name:
+                                        type: string
+                                        example: Ether
+                                      chainId:
+                                        type: integer
+                                        example: 42161
+                                x-gitbook-description-html: <p>Application fee portion of the total fees.</p>
+                              bridge:
+                                type: object
+                                description: Bridge fees required for expected execution.
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "4500000"
+                                  amountUsd:
+                                    type: string
+                                    example: "4.5"
+                                  pct:
+                                    type: string
+                                    example: "4500000000000000"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 6
+                                      symbol:
+                                        type: string
+                                        example: USDC
+                                      address:
+                                        type: string
+                                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                      name:
+                                        type: string
+                                        example: USD Coin
+                                      chainId:
+                                        type: integer
+                                        example: 10
+                                  details:
+                                    type: object
+                                    nullable: true
+                                    description: Additional bridge-specific fee breakdown when provided by the bridge.
+                                    properties:
+                                      type:
+                                        type: string
+                                        description: Identifier for the bridge fee breakdown.
+                                        enum:
+                                          - across
+                                        example: across
+                                      lp:
+                                        type: object
+                                        description: Liquidity provider portion of the bridge fee.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1500000"
+                                          amountUsd:
+                                            type: string
+                                            example: "1.5"
+                                          pct:
+                                            type: string
+                                            example: "1500000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              decimals:
+                                                type: integer
+                                                example: 6
+                                              symbol:
+                                                type: string
+                                                example: USDC
+                                              address:
+                                                type: string
+                                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                              name:
+                                                type: string
+                                                example: USD Coin
+                                              chainId:
+                                                type: integer
+                                                example: 10
+                                        x-gitbook-description-html: <p>Liquidity provider portion of the bridge fee.</p>
+                                      relayerCapital:
+                                        type: object
+                                        description: Relayer capital portion of the bridge fee.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1000000"
+                                          amountUsd:
+                                            type: string
+                                            example: "1.0"
+                                          pct:
+                                            type: string
+                                            example: "1000000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              decimals:
+                                                type: integer
+                                                example: 6
+                                              symbol:
+                                                type: string
+                                                example: USDC
+                                              address:
+                                                type: string
+                                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                              name:
+                                                type: string
+                                                example: USD Coin
+                                              chainId:
+                                                type: integer
+                                                example: 10
+                                        x-gitbook-description-html: <p>Relayer capital portion of the bridge fee.</p>
+                                      destinationGas:
+                                        type: object
+                                        description: Destination chain gas portion of the bridge fee.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1000000000000000"
+                                          amountUsd:
+                                            type: string
+                                            example: "2.0"
+                                          pct:
+                                            type: string
+                                            example: "2000000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              chainId:
+                                                type: integer
+                                                example: 42161
+                                              address:
+                                                type: string
+                                                example: "0x0000000000000000000000000000000000000000"
+                                              decimals:
+                                                type: integer
+                                                example: 18
+                                              symbol:
+                                                type: string
+                                                example: ETH
+                                              name:
+                                                type: string
+                                                example: Ether
+                                        x-gitbook-description-html: <p>Destination chain gas portion of the bridge fee.</p>
+                                x-gitbook-description-html: <p>Bridge fees required for expected execution.</p>
+                            x-gitbook-description-html: <p>Breakdown of the expected total fees.</p>
+                        x-gitbook-description-html: <p>Expected total fees for the route.</p>
+                      totalMax:
+                        type: object
+                        description: Maximum fees considering configured slippage.
+                        properties:
+                          amount:
+                            type: string
+                            description: Max fee amount denominated in the smallest unit of the input token.
+                            example: "5000000"
+                          amountUsd:
+                            type: string
+                            example: "5.0"
+                          pct:
+                            type: string
+                            description: Max fees as a fraction of the input amount, scaled by 1e18.
+                            example: "5000000000000000"
+                          token:
+                            type: object
+                            description: Token denomination for the maximum fee.
+                            properties:
+                              decimals:
+                                type: integer
+                                example: 6
+                              symbol:
+                                type: string
+                                example: USDC
+                              address:
+                                type: string
+                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                              name:
+                                type: string
+                                example: USD Coin
+                              chainId:
+                                type: integer
+                                example: 10
+                          details:
+                            type: object
+                            description: Breakdown of the maximum possible fees.
+                            properties:
+                              type:
+                                type: string
+                                description: Identifier for the maximum fee breakdown structure.
+                                enum:
+                                  - max-total-breakdown
+                                example: max-total-breakdown
+                              maxSwapImpact:
+                                type: object
+                                description: Worst-case swap impact considering slippage.
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "500000"
+                                  amountUsd:
+                                    type: string
+                                    example: "0.5"
+                                  pct:
+                                    type: string
+                                    example: "500000000000000"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 6
+                                      symbol:
+                                        type: string
+                                        example: USDC
+                                      address:
+                                        type: string
+                                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                      name:
+                                        type: string
+                                        example: USD Coin
+                                      chainId:
+                                        type: integer
+                                        example: 10
+                                x-gitbook-description-html: <p>Worst-case swap impact considering slippage.</p>
+                              app:
+                                type: object
+                                description: Maximum application fee portion.
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "0"
+                                  amountUsd:
+                                    type: string
+                                    example: "0.0"
+                                  pct:
+                                    type: string
+                                    example: "0"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 18
+                                      symbol:
+                                        type: string
+                                        example: ETH
+                                      address:
+                                        type: string
+                                        example: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+                                      name:
+                                        type: string
+                                        example: Ether
+                                      chainId:
+                                        type: integer
+                                        example: 42161
+                                x-gitbook-description-html: <p>Maximum application fee portion.</p>
+                              bridge:
+                                type: object
+                                description: Maximum bridge fees including slippage.
+                                properties:
+                                  amount:
+                                    type: string
+                                    example: "4500000"
+                                  amountUsd:
+                                    type: string
+                                    example: "4.5"
+                                  pct:
+                                    type: string
+                                    example: "4500000000000000"
+                                  token:
+                                    type: object
+                                    properties:
+                                      decimals:
+                                        type: integer
+                                        example: 6
+                                      symbol:
+                                        type: string
+                                        example: USDC
+                                      address:
+                                        type: string
+                                        example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                      name:
+                                        type: string
+                                        example: USD Coin
+                                      chainId:
+                                        type: integer
+                                        example: 10
+                                  details:
+                                    type: object
+                                    nullable: true
+                                    description: Additional bridge-specific maximum fee breakdown.
+                                    properties:
+                                      type:
+                                        type: string
+                                        enum:
+                                          - across
+                                        example: across
+                                      lp:
+                                        type: object
+                                        description: Maximum liquidity provider fee portion.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1500000"
+                                          amountUsd:
+                                            type: string
+                                            example: "1.5"
+                                          pct:
+                                            type: string
+                                            example: "1500000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              decimals:
+                                                type: integer
+                                                example: 6
+                                              symbol:
+                                                type: string
+                                                example: USDC
+                                              address:
+                                                type: string
+                                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                              name:
+                                                type: string
+                                                example: USD Coin
+                                              chainId:
+                                                type: integer
+                                                example: 10
+                                      relayerCapital:
+                                        type: object
+                                        description: Maximum relayer capital fee portion.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1000000"
+                                          amountUsd:
+                                            type: string
+                                            example: "1.0"
+                                          pct:
+                                            type: string
+                                            example: "1000000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              decimals:
+                                                type: integer
+                                                example: 6
+                                              symbol:
+                                                type: string
+                                                example: USDC
+                                              address:
+                                                type: string
+                                                example: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"
+                                              name:
+                                                type: string
+                                                example: USD Coin
+                                              chainId:
+                                                type: integer
+                                                example: 10
+                                      destinationGas:
+                                        type: object
+                                        description: Maximum destination chain gas fee portion.
+                                        properties:
+                                          amount:
+                                            type: string
+                                            example: "1000000000000000"
+                                          amountUsd:
+                                            type: string
+                                            example: "2.0"
+                                          pct:
+                                            type: string
+                                            example: "2000000000000000"
+                                          token:
+                                            type: object
+                                            properties:
+                                              chainId:
+                                                type: integer
+                                                example: 42161
+                                              address:
+                                                type: string
+                                                example: "0x0000000000000000000000000000000000000000"
+                                              decimals:
+                                                type: integer
+                                                example: 18
+                                              symbol:
+                                                type: string
+                                                example: ETH
+                                              name:
+                                                type: string
+                                                example: Ether
+                                x-gitbook-description-html: <p>Maximum bridge fees including slippage.</p>
+                            x-gitbook-description-html: <p>Breakdown of the maximum possible fees.</p>
+                        x-gitbook-description-html: <p>Maximum fees considering configured slippage.</p>
                       originGas:
                         type: object
                         description: Gas fees on origin chain.
                         properties:
                           amount:
                             type: string
-                            example: '134879133226'
+                            example: "134879133226"
                           amountUsd:
                             type: string
-                            example: '0.000502067341563801'
+                            example: "10.0"
                           token:
                             type: object
                             properties:
@@ -3029,214 +3592,36 @@ paths:
                                 example: 10
                               address:
                                 type: string
-                                example: '0x0000000000000000000000000000000000000000'
+                                example: "0x0000000000000000000000000000000000000000"
                               decimals:
                                 type: integer
                                 example: 18
                               symbol:
                                 type: string
                                 example: ETH
-                        x-gitbook-description-html: <p>Gas fees on origin chain.</p>
-                      destinationGas:
-                        type: object
-                        description: Gas fees on destination chain.
-                        properties:
-                          amount:
-                            type: string
-                            example: '5161137520505'
-                          amountUsd:
-                            type: string
-                            example: '0.019223327642999999'
-                          pct:
-                            type: string
-                            example: '19227000000000001'
-                          token:
-                            type: object
-                            properties:
-                              chainId:
-                                type: integer
-                                example: 42161
-                              address:
-                                type: string
-                                example: '0x0000000000000000000000000000000000000000'
-                              decimals:
-                                type: integer
-                                example: 18
-                              symbol:
-                                type: string
-                                example: ETH
-                        x-gitbook-description-html: <p>Gas fees on destination chain.</p>
-                      relayerCapital:
-                        type: object
-                        description: Relayer capital fees.
-                        properties:
-                          amount:
-                            type: string
-                            example: '100'
-                          amountUsd:
-                            type: string
-                            example: '0.0000999809'
-                          pct:
-                            type: string
-                            example: '100000000000000'
-                          token:
-                            type: object
-                            properties:
-                              decimals:
-                                type: integer
-                                example: 6
-                              symbol:
-                                type: string
-                                example: USDC
-                              address:
-                                type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
-                              name:
-                                type: string
-                                example: USD Coin
-                              chainId:
-                                type: integer
-                                example: 10
-                        x-gitbook-description-html: <p>Relayer capital fees.</p>
-                      lpFee:
-                        type: object
-                        description: Liquidity provider fees.
-                        properties:
-                          amount:
-                            type: string
-                            example: '11'
-                          amountUsd:
-                            type: string
-                            example: '0.000010997899'
-                          pct:
-                            type: string
-                            example: '11000000000000'
-                          token:
-                            type: object
-                            properties:
-                              decimals:
-                                type: integer
-                                example: 6
-                              symbol:
-                                type: string
-                                example: USDC
-                              address:
-                                type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
-                              name:
-                                type: string
-                                example: USD Coin
-                              chainId:
-                                type: integer
-                                example: 10
-                        x-gitbook-description-html: <p>Liquidity provider fees.</p>
-                      relayerTotal:
-                        type: object
-                        description: Total relayer fees.
-                        properties:
-                          amount:
-                            type: string
-                            example: '19338'
-                          amountUsd:
-                            type: string
-                            example: '0.019334306442000002'
-                          pct:
-                            type: string
-                            example: '19338000000000001'
-                          token:
-                            type: object
-                            properties:
-                              decimals:
-                                type: integer
-                                example: 6
-                              symbol:
-                                type: string
-                                example: USDC
-                              address:
-                                type: string
-                                example: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
-                              name:
-                                type: string
-                                example: USD Coin
-                              chainId:
-                                type: integer
-                                example: 10
-                        x-gitbook-description-html: <p>Total relayer fees.</p>
-                      bridgeFee:
-                        type: object
-                        description: Bridge-specific fee charged by the bridge provider.
-                        properties:
-                          amount:
-                            type: string
-                          amountUsd:
-                            type: string
-                          pct:
-                            type: string
-                          token:
-                            type: object
-                            properties:
-                              decimals:
-                                type: integer
-                              symbol:
-                                type: string
-                              address:
-                                type: string
-                              name:
-                                type: string
-                              chainId:
-                                type: integer
-                        x-gitbook-description-html: <p>Bridge-specific fee charged by the bridge provider.</p>
-                      app:
-                        type: object
-                        description: Application fees.
-                        properties:
-                          amount:
-                            type: string
-                            example: '0'
-                          amountUsd:
-                            type: string
-                            example: '0.0'
-                          pct:
-                            type: string
-                            example: '0'
-                          token:
-                            type: object
-                            properties:
-                              decimals:
-                                type: integer
-                                example: 18
-                              symbol:
-                                type: string
-                                example: ETH
-                              address:
-                                type: string
-                                example: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
                               name:
                                 type: string
                                 example: Ether
-                              chainId:
-                                type: integer
-                                example: 42161
-                        x-gitbook-description-html: <p>Application fees.</p>
+                        x-gitbook-description-html: <p>Gas fees on origin chain.</p>
                     x-gitbook-description-html: <p>Comprehensive fee breakdown.</p>
                   inputAmount:
                     type: string
                     description: >-
                       Required input amount in the smallest unit of the input
                       token.
-                    example: '1000000'
+                    example: "1000000"
                     x-gitbook-description-html: >-
                       <p>Required input amount in the smallest unit of the input
                       token.</p>
                   expectedOutputAmount:
                     type: string
                     description: Expected amount of output token.
-                    example: '263466241499732'
+                    example: "263466241499732"
                     x-gitbook-description-html: <p>Expected amount of output token.</p>
                   minOutputAmount:
                     type: string
                     description: Minimum guaranteed amount of output token.
-                    example: '260831579075100'
+                    example: "260831579075100"
                     x-gitbook-description-html: <p>Minimum guaranteed amount of output token.</p>
                   expectedFillTime:
                     type: integer
@@ -3255,7 +3640,7 @@ paths:
                         example: 10
                       to:
                         type: string
-                        example: '0x6f26Bf09B1C792e3228e5467807a900A503c0281'
+                        example: "0x6f26Bf09B1C792e3228e5467807a900A503c0281"
                       data:
                         type: string
                         description: Transaction calldata for the swap.
@@ -3264,13 +3649,13 @@ paths:
                         x-gitbook-description-html: <p>Transaction calldata for the swap.</p>
                       gas:
                         type: string
-                        example: '122554'
+                        example: "122554"
                       maxFeePerGas:
                         type: string
-                        example: '1100569'
+                        example: "1100569"
                       maxPriorityFeePerGas:
                         type: string
-                        example: '1100000'
+                        example: "1100000"
                     x-gitbook-description-html: <p>Transaction data for executing the swap.</p>
                   id:
                     type: string
@@ -3278,7 +3663,7 @@ paths:
                     example: 6pl4c-1754347045980-2353645c0fb7
                     x-gitbook-description-html: <p>Unique identifier for the swap request.</p>
           x-gitbook-description-html: <p>Swap approval data returned successfully.</p>
-        '400':
+        "400":
           description: Bad request due to invalid input parameter.
           content:
             application/json:
@@ -3313,8 +3698,8 @@ paths:
                     type: string
                     description: Uniquely define the error.
                     example: dbsft-1756414126692-6a64b1802b70
-                    x-gitbook-description-html: <p>Uniquely define the error</p>   
-        '4XX':
+                    x-gitbook-description-html: <p>Uniquely define the error</p>
+        "4XX":
           description: Insufficient liquidity for same-asset bridging.
           content:
             application/json:
@@ -3348,7 +3733,7 @@ paths:
                     type: string
                     description: Uniquely define the error.
                     example: dbsft-1756414126692-6a64b1802b70
-                    x-gitbook-description-html: <p>Uniquely define the error</p>                    
+                    x-gitbook-description-html: <p>Uniquely define the error</p>
           x-gitbook-description-html: <p>Bad request due to invalid input parameter.</p>
       x-gitbook-description-document:
         object: document
@@ -3365,7 +3750,7 @@ paths:
                   - object: leaf
                     text: >-
                       Returns data required to execute a crosschain swap. If the
-                      input token requires approval, 
+                      input token requires approval,
                     marks: []
                   - object: leaf
                     text: approvalTxns
@@ -3374,7 +3759,7 @@ paths:
                         type: code
                         data: {}
                   - object: leaf
-                    text: ' will be included in the response.'
+                    text: " will be included in the response."
                     marks: []
       x-gitbook-description-html: >-
         <p>Returns data required to execute a crosschain swap. If the input
@@ -3387,7 +3772,7 @@ paths:
         Returns a list of all supported blockchains that support crosschain
         swaps on Across Protocol.
       responses:
-        '200':
+        "200":
           description: List of supported chains
           content:
             application/json:
@@ -3513,24 +3898,24 @@ paths:
                   logoUrl: >-
                     https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/bsc/assets/logo.svg
           x-gitbook-description-html: <p>List of supported chains</p>
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INVALID_REQUEST
                 status: 400
                 message: Invalid request parameters
           x-gitbook-description-html: <p>Bad request</p>
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
@@ -3564,51 +3949,51 @@ paths:
         Returns a list of all supported tokens that support crosschain swaps on
         Across Protocol.
       responses:
-        '200':
+        "200":
           description: List of supported tokens
           content:
             application/json:
               example:
                 - chainId: 1
-                  address: '0x111111111117dC0aa78b770fA6A738034120C302'
-                  name: '1inch'
-                  symbol: '1INCH'
+                  address: "0x111111111117dC0aa78b770fA6A738034120C302"
+                  name: "1inch"
+                  symbol: "1INCH"
                   decimals: 18
-                  logoUrl: 'https://assets.coingecko.com/coins/images/13469/thumb/1inch-token.png?1608803028'
-                  priceUsd: '0.2530907825982632'
+                  logoUrl: "https://assets.coingecko.com/coins/images/13469/thumb/1inch-token.png?1608803028"
+                  priceUsd: "0.2530907825982632"
                 - chainId: 1
-                  address: '0xB98d4C97425d9908E66E53A6fDf673ACcA0BE986'
-                  name: 'Arcblock'
-                  symbol: 'ABT'
+                  address: "0xB98d4C97425d9908E66E53A6fDf673ACcA0BE986"
+                  name: "Arcblock"
+                  symbol: "ABT"
                   decimals: 18
-                  logoUrl: 'https://assets.coingecko.com/coins/images/2341/thumb/arcblock.png?1547036543'
-                  priceUsd: '0.7697036684522818'
+                  logoUrl: "https://assets.coingecko.com/coins/images/2341/thumb/arcblock.png?1547036543"
+                  priceUsd: "0.7697036684522818"
                 - chainId: 1
-                  address: '0xEd04915c23f00A313a544955524EB7DBD823143d'
-                  name: 'Alchemy Pay'
-                  symbol: 'ACH'
+                  address: "0xEd04915c23f00A313a544955524EB7DBD823143d"
+                  name: "Alchemy Pay"
+                  symbol: "ACH"
                   decimals: 8
-                  logoUrl: 'https://assets.coingecko.com/coins/images/12390/thumb/ACH_%281%29.png?1599691266'
-                  priceUsd: '0.02048510218654289'
+                  logoUrl: "https://assets.coingecko.com/coins/images/12390/thumb/ACH_%281%29.png?1599691266"
+                  priceUsd: "0.02048510218654289"
           x-gitbook-description-html: <p>List of supported tokens</p>
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INVALID_REQUEST
                 status: 400
                 message: Invalid request parameters
           x-gitbook-description-html: <p>Bad request</p>
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
@@ -3651,14 +4036,15 @@ paths:
           schema:
             allOf:
               - example: 1
-              - $ref: '#/components/schemas/ChainId'
-          x-gitbook-description-html: <p>Chain ID of the chain to get supported sources for.</p>  
+              - $ref: "#/components/schemas/ChainId"
+          x-gitbook-description-html: <p>Chain ID of the chain to get supported sources for.</p>
       responses:
-        '200':
+        "200":
           description: List of supported sources for crosschain swaps for a given chain
           content:
             application/json:
-              example: [
+              example:
+                [
                   "0x_rfq",
                   "1inch",
                   "angle",
@@ -3669,27 +4055,27 @@ paths:
                   "camelot",
                   "camelot_v2",
                   "camelot_v3",
-                  ...
-                  ]                
+                  ...,
+                ]
           x-gitbook-description-html: <p>List of supported sources for crosschain swaps for a given chain</p>
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INVALID_PARAM
                 status: 400
                 message: Invalid request parameters
           x-gitbook-description-html: <p>Bad request</p>
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcrossApiError'
+                $ref: "#/components/schemas/AcrossApiError"
               example:
                 type: AcrossApiError
                 code: INTERNAL_SERVER_ERROR
@@ -3724,7 +4110,7 @@ components:
         actions:
           type: array
           items:
-            $ref: '#/components/schemas/Action'
+            $ref: "#/components/schemas/Action"
     Action:
       type: object
       properties:
@@ -3737,7 +4123,7 @@ components:
         args:
           type: array
           items:
-            $ref: '#/components/schemas/ActionArg'
+            $ref: "#/components/schemas/ActionArg"
         value:
           type: string
           description: The amount of native currency to send with the transaction.
@@ -3759,7 +4145,7 @@ components:
           nullable: true
       required:
         - value
-        - populateDynamically  
+        - populateDynamically
     SuggestedFees:
       type: object
       properties:
@@ -3784,7 +4170,7 @@ components:
                 Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17, etc.
                 These values are in the same format that the contract
                 understands.
-              example: '376607094864283'
+              example: "376607094864283"
               x-gitbook-description-html: >-
                 <p>The percentage of the transfer amount that should go to the
                 relayer as a fee in total. The value is inclusive of
@@ -3804,7 +4190,7 @@ components:
               description: >
                 The amount of the transfer that should go to the relayer a fee
                 in total. This value is inclusive of `lpFee.total`.
-              example: '376607094864283'
+              example: "376607094864283"
               x-gitbook-description-html: >-
                 <p>The amount of the transfer that should go to the relayer a
                 fee in total. This value is inclusive of
@@ -3814,7 +4200,7 @@ components:
           properties:
             pct:
               type: string
-              example: '100200000000000'
+              example: "100200000000000"
               description: >
                 The percentage of the transfer amount that should go the relayer
                 as a fee to cover relayer capital costs.
@@ -3835,7 +4221,7 @@ components:
               description: >
                 The amount that should go to the relayer as a fee to cover
                 relayer capital costs.
-              example: '100200000000000'
+              example: "100200000000000"
               x-gitbook-description-html: >-
                 <p>The amount that should go to the relayer as a fee to cover
                 relayer capital costs.</p>
@@ -3852,7 +4238,7 @@ components:
                 Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17, etc.
                 These values are in the same format that the contract
                 understands.
-              example: '276407094864283'
+              example: "276407094864283"
               x-gitbook-description-html: >-
                 <p>The percentage of the transfer amount that should go the
                 relayer as a fee to cover relayer gas costs.</p>
@@ -3865,7 +4251,7 @@ components:
               description: >
                 The amount that should go to the relayer as a fee to cover
                 relayer gas costs.
-              example: '276407094864283'
+              example: "276407094864283"
               x-gitbook-description-html: >-
                 <p>The amount that should go to the relayer as a fee to cover
                 relayer gas costs.</p>
@@ -3882,7 +4268,7 @@ components:
                 Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17, etc.
                 These values are in the same format that the contract
                 understands.
-              example: '4552495218411721'
+              example: "4552495218411721"
               x-gitbook-description-html: >-
                 <p>The percent of the amount that will go to the LPs as a fee
                 for borrowing their funds.</p>
@@ -3895,7 +4281,7 @@ components:
               description: >
                 The amount that will go to the LPs as a fee for borrowing their
                 funds.
-              example: '4552495218411721'
+              example: "4552495218411721"
               x-gitbook-description-html: >-
                 <p>The amount that will go to the LPs as a fee for borrowing
                 their funds.</p>
@@ -3905,7 +4291,7 @@ components:
             The quote timestamp that was used to compute the lpFeePct. To pay
             the quoted LP fee, the user would need to pass this quote timestamp
             to the protocol when sending their bridge transaction.
-          example: '1708047000'
+          example: "1708047000"
           x-gitbook-description-html: >-
             <p>The quote timestamp that was used to compute the lpFeePct. To pay
             the quoted LP fee, the user would need to pass this quote timestamp
@@ -3920,7 +4306,7 @@ components:
           type: string
           description: |
             The block used associated with this quote, used to compute lpFeePct.
-          example: '19237525'
+          example: "19237525"
           x-gitbook-description-html: >-
             <p>The block used associated with this quote, used to compute
             lpFeePct.</p>
@@ -3928,7 +4314,7 @@ components:
           type: string
           description: |
             The contract address of the origin SpokePool.
-          example: '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A'
+          example: "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A"
           x-gitbook-description-html: <p>The contract address of the origin SpokePool.</p>
         exclusiveRelayer:
           type: string
@@ -3938,7 +4324,7 @@ components:
             "0x0000000000000000000000000000000000000000", relayer exclusivity
             will be disabled. This value is returned in cases where using an
             exclusive relayer is not recommended.
-          example: '0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010'
+          example: "0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010"
           x-gitbook-description-html: >-
             <p>The relayer that is suggested to be set as the exclusive relayer
             for in the depositV3 call for the fastest fill. Note: when set to
@@ -3953,7 +4339,7 @@ components:
             the fill. Note: when set to "0", relayer exclusivity will be
             disabled. This value is returned in cases where using an exclusive
             relayer is not reccomended.
-          example: '10'
+          example: "10"
           x-gitbook-description-html: >-
             <p>The suggested exclusivity period (in seconds) the exclusive
             relayer should be given to fill before other relayers are allowed to
@@ -3967,7 +4353,7 @@ components:
             75th percentile of the 7-day rolling average of times (updated
             daily). Times are dynamic by origin/destination token/chain for a
             given amount.
-          example: '4'
+          example: "4"
           x-gitbook-description-html: >-
             <p>The expected time (in seconds) for a fill to be made. Represents
             75th percentile of the 7-day rolling average of times (updated
@@ -3984,7 +4370,7 @@ components:
             relayer to fill the deposit. After this destination chain timestamp,
             the fill will revert on the destination chain.</p>
         limits:
-          $ref: '#/components/schemas/TransferLimits'
+          $ref: "#/components/schemas/TransferLimits"
     TransferLimits:
       type: object
       properties:
@@ -4077,12 +4463,12 @@ components:
         originToken:
           type: string
           description: Origin chain address of token contract to transfer.
-          example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           x-gitbook-description-html: <p>Origin chain address of token contract to transfer.</p>
         destinationToken:
           type: string
           description: Destination chain address of token contract to receive.
-          example: '0x4200000000000000000000000000000000000006'
+          example: "0x4200000000000000000000000000000000000006"
           x-gitbook-description-html: <p>Destination chain address of token contract to receive.</p>
         originTokenSymbol:
           type: string
