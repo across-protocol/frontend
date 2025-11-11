@@ -8,8 +8,8 @@ import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
 import { IconPairDisplay } from "./components/IconPairDisplay";
 import { TxDetailSection } from "./components/TxDetailSection";
-import { shortenAddress, formatUnitsWithMaxFractions } from "utils/format";
-import { ethers } from "ethers";
+import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import { DepositStatusUpperCard } from "../DepositStatus/components/DepositStatusUpperCard";
 
 // Helper function to format USD string values
 function formatUSDValue(value: string | null): string {
@@ -81,6 +81,15 @@ export default function Transaction() {
           <BackButton onClick={() => history.goBack()}>← Back</BackButton>
           <Title>Transaction Details</Title>
         </Header>
+        <DepositStatusUpperCard
+          depositTxHash={deposit.depositTxHash}
+          fromChainId={Number(deposit.originChainId)}
+          toChainId={Number(destinationChainId)}
+          inputTokenSymbol={inputToken!.symbol}
+          outputTokenSymbol={outputToken?.symbol || inputToken!.symbol}
+          fromBridgePagePayload={undefined}
+          externalProjectId={undefined}
+        />
 
         <DetailsGrid>
           {/* Basic Information Section */}
