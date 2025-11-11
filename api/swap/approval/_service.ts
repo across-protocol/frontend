@@ -117,6 +117,8 @@ export async function handleApprovalSwap(
     quoteFetchStrategies,
     bridgeStrategy
   );
+
+  console.log("HERE");
   const crossSwapType = inferCrossSwapType(crossSwapQuotes);
   logger.debug({
     at: "handleApprovalSwap",
