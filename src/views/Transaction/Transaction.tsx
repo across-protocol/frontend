@@ -8,6 +8,34 @@ import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
 import { IconPairDisplay } from "./components/IconPairDisplay";
 import { TxDetailSection } from "./components/TxDetailSection";
+import { shortenAddress, formatUnitsWithMaxFractions } from "utils/format";
+import { ethers } from "ethers";
+
+// Helper function to format USD string values
+function formatUSDValue(value: string | null): string {
+  if (!value || value === "0") return "$0.00";
+  const num = parseFloat(value);
+  if (isNaN(num)) return "$0.00";
+  return `$${num.toFixed(2)}`;
+}
+
+// Helper function to format timestamps
+function formatTimestamp(timestamp: string | null): string {
+  if (!timestamp) return "N/A";
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return "Invalid date";
+  }
+}
 
 export default function Transaction() {
   const { depositTxnRef } = useParams<{ depositTxnRef: string }>();
@@ -16,6 +44,7 @@ export default function Transaction() {
     isLoading,
     error,
   } = useDepositByTxHash(depositTxnRef);
+
   const history = useHistory();
 
   if (isLoading) return <CenteredMessage title="Loading transaction..." />;
@@ -54,6 +83,9 @@ export default function Transaction() {
         </Header>
 
         <DetailsGrid>
+          {/* Basic Information Section */}
+          <SectionTitle>Basic Information</SectionTitle>
+
           <DetailSection label="Status">
             <StatusBadge status={deposit.status} />
           </DetailSection>
@@ -84,6 +116,144 @@ export default function Transaction() {
             <Text color="light-200">{deposit.depositId}</Text>
           </DetailSection>
 
+          {/* Amounts Section */}
+          <SectionTitle>Amounts</SectionTitle>
+
+          <DetailSection label="Input Amount">
+            <Text color="light-200">
+              {inputToken
+                ? formatUnitsWithMaxFractions(
+                    deposit.inputAmount,
+                    inputToken.decimals
+                  )
+                : deposit.inputAmount}{" "}
+              {inputToken?.symbol}
+              <Text color="grey-400" size="sm">
+                {" "}
+                ({formatUSDValue(deposit.inputPriceUsd)})
+              </Text>
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Output Amount">
+            <Text color="light-200">
+              {outputToken
+                ? formatUnitsWithMaxFractions(
+                    deposit.outputAmount,
+                    outputToken.decimals
+                  )
+                : deposit.outputAmount}{" "}
+              {outputToken?.symbol}
+              <Text color="grey-400" size="sm">
+                {" "}
+                ({formatUSDValue(deposit.outputPriceUsd)})
+              </Text>
+            </Text>
+          </DetailSection>
+
+          {/* Fees Section */}
+          <SectionTitle>Fees</SectionTitle>
+
+          <DetailSection label="Bridge Fee">
+            <Text color="light-200">
+              {formatUSDValue(deposit.bridgeFeeUsd)}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Fill Gas Fee">
+            <Text color="light-200">
+              {deposit.fillGasFee}{" "}
+              <Text color="grey-400" size="sm">
+                ({formatUSDValue(deposit.fillGasFeeUsd)})
+              </Text>
+            </Text>
+          </DetailSection>
+
+          {deposit.swapFeeUsd && (
+            <DetailSection label="Swap Fee">
+              <Text color="light-200">
+                {formatUSDValue(deposit.swapFeeUsd)}
+              </Text>
+            </DetailSection>
+          )}
+
+          {/* Addresses Section */}
+          <SectionTitle>Addresses</SectionTitle>
+
+          <DetailSection label="Depositor">
+            <Text color="light-200">
+              {shortenAddress(deposit.depositor, "...", 6)}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Recipient">
+            <Text color="light-200">
+              {shortenAddress(deposit.recipient, "...", 6)}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Relayer">
+            <Text color="light-200">
+              {deposit.relayer
+                ? shortenAddress(deposit.relayer, "...", 6)
+                : "N/A"}
+            </Text>
+          </DetailSection>
+
+          {deposit.exclusiveRelayer &&
+            deposit.exclusiveRelayer !==
+              "0x0000000000000000000000000000000000000000" && (
+              <DetailSection label="Exclusive Relayer">
+                <Text color="light-200">
+                  {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
+                </Text>
+              </DetailSection>
+            )}
+
+          {/* Timestamps Section */}
+          <SectionTitle>Timestamps & Deadlines</SectionTitle>
+
+          <DetailSection label="Deposit Time">
+            <Text color="light-200">
+              {formatTimestamp(deposit.depositBlockTimestamp)}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Deposit Block">
+            <Text color="light-200">{deposit.depositBlockNumber}</Text>
+          </DetailSection>
+
+          {deposit.fillBlockTimestamp && (
+            <DetailSection label="Fill Time">
+              <Text color="light-200">
+                {formatTimestamp(deposit.fillBlockTimestamp)}
+              </Text>
+            </DetailSection>
+          )}
+
+          <DetailSection label="Quote Time">
+            <Text color="light-200">
+              {formatTimestamp(deposit.quoteTimestamp)}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Fill Deadline">
+            <Text color="light-200">
+              {formatTimestamp(deposit.fillDeadline)}
+            </Text>
+          </DetailSection>
+
+          {deposit.exclusivityDeadline && (
+            <DetailSection label="Exclusivity Deadline">
+              <Text color="light-200">
+                {formatTimestamp(deposit.exclusivityDeadline)}
+              </Text>
+            </DetailSection>
+          )}
+
+          {/* Transactions Section */}
+          <SectionTitle>Transactions</SectionTitle>
+
           <TxDetailSection
             label="Deposit Transaction"
             txHash={deposit.depositTxnRef}
@@ -110,6 +280,92 @@ export default function Transaction() {
                 deposit.depositRefundTxnRef
               )}
             />
+          )}
+
+          {deposit.swapTransactionHash && (
+            <TxDetailSection
+              label="Swap Transaction"
+              txHash={deposit.swapTransactionHash}
+              explorerLink={
+                deposit.actionsTargetChainId
+                  ? getChainInfo(
+                      parseInt(deposit.actionsTargetChainId)
+                    ).constructExplorerLink(deposit.swapTransactionHash)
+                  : "#"
+              }
+            />
+          )}
+
+          {/* Advanced Details Section */}
+          <SectionTitle>Advanced Details</SectionTitle>
+
+          <DetailSection label="Relay Hash">
+            <Text color="light-200" style={{ wordBreak: "break-all" }}>
+              {deposit.relayHash}
+            </Text>
+          </DetailSection>
+
+          <DetailSection label="Message Hash">
+            <Text color="light-200" style={{ wordBreak: "break-all" }}>
+              {deposit.messageHash}
+            </Text>
+          </DetailSection>
+
+          {deposit.message && deposit.message !== "0x" && (
+            <DetailSection label="Message">
+              <Text color="light-200" style={{ wordBreak: "break-all" }}>
+                {deposit.message}
+              </Text>
+            </DetailSection>
+          )}
+
+          {deposit.actionsTargetChainId && (
+            <>
+              <DetailSection label="Actions Target Chain">
+                <Text color="light-200">
+                  {getChainInfo(parseInt(deposit.actionsTargetChainId)).name}
+                </Text>
+              </DetailSection>
+
+              <DetailSection label="Actions Succeeded">
+                <Text color="light-200">
+                  {deposit.actionsSucceeded === null
+                    ? "Pending"
+                    : deposit.actionsSucceeded
+                      ? "Yes"
+                      : "No"}
+                </Text>
+              </DetailSection>
+            </>
+          )}
+
+          {deposit.swapToken && (
+            <>
+              <DetailSection label="Swap Token">
+                <Text color="light-200">
+                  {shortenAddress(deposit.swapToken, "...", 6)}
+                </Text>
+              </DetailSection>
+
+              {deposit.swapTokenAmount && (
+                <DetailSection label="Swap Token Amount">
+                  <Text color="light-200">
+                    {deposit.swapTokenAmount}{" "}
+                    <Text color="grey-400" size="sm">
+                      ({formatUSDValue(deposit.swapTokenPriceUsd)})
+                    </Text>
+                  </Text>
+                </DetailSection>
+              )}
+            </>
+          )}
+
+          {deposit.fillGasTokenPriceUsd && (
+            <DetailSection label="Gas Token Price (USD)">
+              <Text color="light-200">
+                {formatUSDValue(deposit.fillGasTokenPriceUsd)}
+              </Text>
+            </DetailSection>
           )}
         </DetailsGrid>
       </Container>
@@ -183,5 +439,25 @@ const DetailsGrid = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+`;
+
+const SectionTitle = styled.h2`
+  grid-column: 1 / -1;
+  font-size: 18px;
+  font-weight: 600;
+  color: ${COLORS.white};
+  margin: 16px 0 0 0;
+  padding-top: 16px;
+  border-top: 1px solid ${COLORS["grey-500"]};
+
+  &:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 16px;
   }
 `;
