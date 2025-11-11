@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { DepositStatus } from "../types";
 import styled from "@emotion/styled";
@@ -5,8 +6,8 @@ import { ReactComponent as CheckStarPending } from "assets/icons/check-star-ring
 import { ReactComponent as CheckStarCompleted } from "assets/icons/check-star-ring-opaque-completed.svg";
 import { externConfigs } from "constants/chains/configs";
 
-const BlurLoadingAnimation = () => (
-  <AnimatedBlurLoader>
+const BlurLoadingAnimation = ({ animationKey }: { animationKey: number }) => (
+  <AnimatedBlurLoader key={animationKey}>
     <AnimatedBlurLoaderCenter />
     <AnimatedBlurLoaderFade />
   </AnimatedBlurLoader>
@@ -25,6 +26,29 @@ const DepositStatusAnimatedIcons = ({
   toChainId,
   externalProjectId,
 }: DepositStatusAnimatedIconsParams) => {
+  const [animationKey, setAnimationKey] = useState(0);
+
+  // Restart animation on mount (when navigating to the page)
+  useEffect(() => {
+    setAnimationKey((prev) => prev + 1);
+  }, []);
+
+  // Handle page visibility to restart animations when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Force re-render of animations when page becomes visible
+        setAnimationKey((prev) => prev + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   const GrayscaleLogoFromChain = getChainInfo(fromChainId).grayscaleLogoSvg;
   const GrayscaleLogoToChain = externalProjectId
     ? externConfigs[externalProjectId].grayscaleLogoSvg
@@ -35,7 +59,9 @@ const DepositStatusAnimatedIcons = ({
       <SVGGradientDefs />
       <TopWrapperAnimationWrapper>
         <AnimatedLogoWrapper completed={status === "filled"}>
-          {status === "depositing" && <BlurLoadingAnimation />}
+          {status === "depositing" && (
+            <BlurLoadingAnimation animationKey={animationKey} />
+          )}
           <LogoWrapper
             status={
               status === "filled"
@@ -52,7 +78,9 @@ const DepositStatusAnimatedIcons = ({
         {status === "filled" ? <CheckStarCompleted /> : <CheckStarPending />}
         <Divider />
         <AnimatedLogoWrapper completed={status === "filled"}>
-          {status === "filling" && <BlurLoadingAnimation />}
+          {status === "filling" && (
+            <BlurLoadingAnimation animationKey={animationKey} />
+          )}
           <LogoWrapper
             status={
               status === "filling"

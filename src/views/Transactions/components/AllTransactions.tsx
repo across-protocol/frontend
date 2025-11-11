@@ -1,6 +1,6 @@
 import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
@@ -17,6 +17,8 @@ const LIVE_REFETCH_INTERVAL = 5000; // 5 seconds
 export function AllTransactions() {
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
   const [isLiveMode, setIsLiveMode] = useState(true);
+  const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
+  const isRefetchingRef = useRef(false);
 
   const {
     currentPage,
@@ -47,19 +49,57 @@ export function AllTransactions() {
     }
   }, [isFirstPage]);
 
-  // Periodic refetch when live mode is enabled
+  // Handle page visibility changes
   useEffect(() => {
-    if (!streamingEnabled || depositsQuery.isLoading) {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsPageVisible(isVisible);
+
+      // Refetch when page becomes visible again
+      if (isVisible && streamingEnabled && !depositsQuery.isLoading) {
+        console.log("Page became visible, refetching deposits");
+        depositsQuery.refetch();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [streamingEnabled, depositsQuery]);
+
+  // Periodic refetch when live mode is enabled and page is visible
+  useEffect(() => {
+    const shouldRefetch =
+      streamingEnabled && isPageVisible && !depositsQuery.isLoading;
+
+    if (!shouldRefetch) {
+      if (isRefetchingRef.current) {
+        console.log("[Transactions] ⏹️  Stopping auto-refetch");
+        isRefetchingRef.current = false;
+      }
       return;
     }
 
+    if (!isRefetchingRef.current) {
+      console.log(
+        `[Transactions] 🔄 Starting auto-refetch every ${LIVE_REFETCH_INTERVAL / 1000}s`
+      );
+      isRefetchingRef.current = true;
+    }
+
     const intervalId = setInterval(() => {
-      console.log("refetching");
+      console.log(
+        `[Transactions] 📡 Fetching new deposits (interval: ${LIVE_REFETCH_INTERVAL / 1000}s)`
+      );
       depositsQuery.refetch();
     }, LIVE_REFETCH_INTERVAL);
 
-    return () => clearInterval(intervalId);
-  }, [streamingEnabled, depositsQuery]);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [streamingEnabled, isPageVisible, depositsQuery]);
 
   const convertedDeposits = useMemo(
     () =>
@@ -69,6 +109,15 @@ export function AllTransactions() {
     [streamedDeposits]
   );
 
+  // Log when new data arrives from refetch
+  useEffect(() => {
+    if (depositsQuery.data && streamingEnabled) {
+      console.log(
+        `[Transactions] ✅ Fetch complete: received ${deposits.length} deposits from API`
+      );
+    }
+  }, [depositsQuery.data, deposits.length, streamingEnabled]);
+
   if (depositsQuery.isLoading) {
     return (
       <EmptyTable>
@@ -77,7 +126,7 @@ export function AllTransactions() {
     );
   }
 
-  if (depositsQuery.isError || (currentPage === 0 && deposits.length === 0)) {
+  if (depositsQuery.isError) {
     return (
       <EmptyTable>
         <Text size="lg">Something went wrong... Please try again later</Text>
@@ -94,6 +143,9 @@ export function AllTransactions() {
       </EmptyTable>
     );
   }
+
+  const hasNoResults = currentPage === 0 && deposits.length === 0;
+  const isFiltering = walletAddressFilter.trim().length > 0;
 
   return (
     <>
@@ -133,17 +185,32 @@ export function AllTransactions() {
           </LiveToggleSection>
         </ControlsRow>
       </ControlsContainer>
-      <PaginatedDepositsTable
-        currentPage={currentPage}
-        currentPageSize={pageSize}
-        deposits={convertedDeposits}
-        totalCount={totalDeposits}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={handlePageSizeChange}
-        initialPageSize={pageSize}
-        disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
-        displayPageNumbers={false}
-      />
+      {hasNoResults ? (
+        <EmptyTable>
+          <Text size="lg">
+            {isFiltering
+              ? "No transactions found for this address"
+              : "No transactions found"}
+          </Text>
+          {isFiltering && (
+            <Text size="sm" color="grey-400" style={{ marginTop: "8px" }}>
+              Try a different wallet address
+            </Text>
+          )}
+        </EmptyTable>
+      ) : (
+        <PaginatedDepositsTable
+          currentPage={currentPage}
+          currentPageSize={pageSize}
+          deposits={convertedDeposits}
+          totalCount={totalDeposits}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={handlePageSizeChange}
+          initialPageSize={pageSize}
+          disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
+          displayPageNumbers={false}
+        />
+      )}
     </>
   );
 }

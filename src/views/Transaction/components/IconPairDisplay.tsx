@@ -34,5 +34,5 @@ export function IconPairDisplay({
 const InfoRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 `;

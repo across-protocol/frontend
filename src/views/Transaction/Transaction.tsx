@@ -1,7 +1,11 @@
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
+import { LayoutV2 } from "components";
+import BreadcrumbV2 from "components/BreadcrumbV2";
+import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { CenteredMessage } from "./components/CenteredMessage";
 import { DetailSection } from "./components/DetailSection";
@@ -10,7 +14,9 @@ import { IconPairDisplay } from "./components/IconPairDisplay";
 import { TxDetailSection } from "./components/TxDetailSection";
 import { CopyableText } from "./components/CopyableText";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
-import { DepositStatusUpperCard } from "../DepositStatus/components/DepositStatusUpperCard";
+import DepositStatusAnimatedIcons from "../DepositStatus/components/DepositStatusAnimatedIcons";
+
+const LOADING_DELAY_MS = 400;
 
 // Helper function to format USD string values
 function formatUSDValue(value: string | null): string {
@@ -46,9 +52,23 @@ export default function Transaction() {
     error,
   } = useDepositByTxHash(depositTxnRef);
 
-  const history = useHistory();
+  const [showLoading, setShowLoading] = useState(false);
 
-  if (isLoading) return <CenteredMessage title="Loading transaction..." />;
+  // Delay showing loading state to avoid flash for fast loads
+  useEffect(() => {
+    if (!isLoading) {
+      setShowLoading(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowLoading(true);
+    }, LOADING_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  if (showLoading) return <CenteredMessage title="Loading transaction..." />;
   if (error)
     return (
       <CenteredMessage
@@ -56,7 +76,14 @@ export default function Transaction() {
         error={String(error)}
       />
     );
-  if (!depositData) return <CenteredMessage title="Transaction not found" />;
+  if (!depositData) {
+    // If we have no data and not loading, it means the transaction wasn't found
+    if (!isLoading) {
+      return <CenteredMessage title="Transaction not found" />;
+    }
+    // Still loading but within the delay period, show nothing yet
+    return null;
+  }
 
   const deposit = depositData.deposit;
   const config = getConfig();
@@ -76,385 +103,392 @@ export default function Transaction() {
   );
 
   return (
-    <Wrapper>
-      <Container>
-        <Header>
-          <BackButton onClick={() => history.goBack()}>← Back</BackButton>
-          <Title>Transaction Details</Title>
-        </Header>
-        <DepositStatusUpperCard
-          depositTxHash={deposit.depositTxHash}
-          fromChainId={Number(deposit.originChainId)}
-          toChainId={Number(destinationChainId)}
-          inputTokenSymbol={inputToken!.symbol}
-          outputTokenSymbol={outputToken?.symbol || inputToken!.symbol}
-          fromBridgePagePayload={undefined}
-          externalProjectId={undefined}
-        />
-
-        <DetailsGrid>
-          {/* Basic Information Section */}
-          <SectionTitle>Basic Information</SectionTitle>
-
-          <DetailSection label="Status">
-            <StatusBadge status={deposit.status} />
-          </DetailSection>
-
-          {inputToken && outputToken && (
-            <DetailSection label="Asset">
-              <IconPairDisplay
-                leftIcon={inputToken.logoURI}
-                leftAlt={inputToken.symbol}
-                rightIcon={outputToken.logoURI}
-                rightAlt={outputToken.symbol}
-                label={`${inputToken.symbol} → ${outputToken.symbol}`}
-              />
-            </DetailSection>
-          )}
-
-          <DetailSection label="Route">
-            <IconPairDisplay
-              leftIcon={sourceChain.logoURI}
-              leftAlt={sourceChain.name}
-              rightIcon={destinationChain.logoURI}
-              rightAlt={destinationChain.name}
-              label={`${sourceChain.name} → ${destinationChain.name}`}
+    <LayoutV2 maxWidth={1140}>
+      <Wrapper>
+        <BreadcrumbV2 customCurrentRoute="Transaction Details" />
+        <InnerSectionWrapper>
+          <StatusWrapper>
+            <DepositStatusAnimatedIcons
+              status={deposit.status as any}
+              toChainId={Number(destinationChainId)}
+              fromChainId={Number(deposit.originChainId)}
+              externalProjectId={undefined}
             />
-          </DetailSection>
+          </StatusWrapper>
 
-          <DetailSection label="Deposit ID">
-            <Text color="light-200">{deposit.depositId}</Text>
-          </DetailSection>
-
-          {/* Amounts Section */}
-          <SectionTitle>Amounts</SectionTitle>
-
-          <DetailSection label="Input Amount">
-            <Text color="light-200">
-              {inputToken
-                ? formatUnitsWithMaxFractions(
-                    deposit.inputAmount,
-                    inputToken.decimals
-                  )
-                : deposit.inputAmount}{" "}
-              {inputToken?.symbol}
-              <Text color="grey-400" size="sm">
-                {" "}
-                ({formatUSDValue(deposit.inputPriceUsd)})
-              </Text>
-            </Text>
-          </DetailSection>
-
-          <DetailSection label="Output Amount">
-            <Text color="light-200">
-              {outputToken
-                ? formatUnitsWithMaxFractions(
-                    deposit.outputAmount,
-                    outputToken.decimals
-                  )
-                : deposit.outputAmount}{" "}
-              {outputToken?.symbol}
-              <Text color="grey-400" size="sm">
-                {" "}
-                ({formatUSDValue(deposit.outputPriceUsd)})
-              </Text>
-            </Text>
-          </DetailSection>
-
-          {/* Fees Section */}
-          <SectionTitle>Fees</SectionTitle>
-
-          <DetailSection label="Bridge Fee">
-            <Text color="light-200">
-              {formatUSDValue(deposit.bridgeFeeUsd)}
-            </Text>
-          </DetailSection>
-
-          <DetailSection label="Fill Gas Fee">
-            <Text color="light-200">
-              {deposit.fillGasFee}{" "}
-              <Text color="grey-400" size="sm">
-                ({formatUSDValue(deposit.fillGasFeeUsd)})
-              </Text>
-            </Text>
-          </DetailSection>
-
-          {deposit.swapFeeUsd && (
-            <DetailSection label="Swap Fee">
-              <Text color="light-200">
-                {formatUSDValue(deposit.swapFeeUsd)}
-              </Text>
-            </DetailSection>
-          )}
-
-          {/* Addresses Section */}
-          <SectionTitle>Addresses</SectionTitle>
-
-          <DetailSection label="Depositor">
-            <CopyableText color="light-200" textToCopy={deposit.depositor}>
-              {shortenAddress(deposit.depositor, "...", 6)}
-            </CopyableText>
-          </DetailSection>
-
-          <DetailSection label="Recipient">
-            <CopyableText color="light-200" textToCopy={deposit.recipient}>
-              {shortenAddress(deposit.recipient, "...", 6)}
-            </CopyableText>
-          </DetailSection>
-
-          <DetailSection label="Relayer">
-            {deposit.relayer ? (
-              <CopyableText color="light-200" textToCopy={deposit.relayer}>
-                {shortenAddress(deposit.relayer, "...", 6)}
-              </CopyableText>
-            ) : (
-              <Text color="light-200">N/A</Text>
-            )}
-          </DetailSection>
-
-          {deposit.exclusiveRelayer &&
-            deposit.exclusiveRelayer !==
-              "0x0000000000000000000000000000000000000000" && (
-              <DetailSection label="Exclusive Relayer">
-                <CopyableText
-                  color="light-200"
-                  textToCopy={deposit.exclusiveRelayer}
-                >
-                  {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
-                </CopyableText>
+          <SectionWrapper title="Basic Information">
+            <DetailsGrid>
+              <DetailSection label="Status">
+                <StatusBadge status={deposit.status} />
               </DetailSection>
-            )}
 
-          {/* Timestamps Section */}
-          <SectionTitle>Timestamps & Deadlines</SectionTitle>
-
-          <DetailSection label="Deposit Time">
-            <Text color="light-200">
-              {formatTimestamp(deposit.depositBlockTimestamp)}
-            </Text>
-          </DetailSection>
-
-          <DetailSection label="Deposit Block">
-            <Text color="light-200">{deposit.depositBlockNumber}</Text>
-          </DetailSection>
-
-          {deposit.fillBlockTimestamp && (
-            <DetailSection label="Fill Time">
-              <Text color="light-200">
-                {formatTimestamp(deposit.fillBlockTimestamp)}
-              </Text>
-            </DetailSection>
-          )}
-
-          <DetailSection label="Quote Time">
-            <Text color="light-200">
-              {formatTimestamp(deposit.quoteTimestamp)}
-            </Text>
-          </DetailSection>
-
-          <DetailSection label="Fill Deadline">
-            <Text color="light-200">
-              {formatTimestamp(deposit.fillDeadline)}
-            </Text>
-          </DetailSection>
-
-          {deposit.exclusivityDeadline && (
-            <DetailSection label="Exclusivity Deadline">
-              <Text color="light-200">
-                {formatTimestamp(deposit.exclusivityDeadline)}
-              </Text>
-            </DetailSection>
-          )}
-
-          {/* Transactions Section */}
-          <SectionTitle>Transactions</SectionTitle>
-
-          <TxDetailSection
-            label="Deposit Transaction"
-            txHash={deposit.depositTxnRef}
-            explorerLink={sourceChain.constructExplorerLink(
-              deposit.depositTxnRef
-            )}
-          />
-
-          {deposit.fillTx && (
-            <TxDetailSection
-              label="Fill Transaction"
-              txHash={deposit.fillTx}
-              explorerLink={destinationChain.constructExplorerLink(
-                deposit.fillTx
+              {inputToken && outputToken && (
+                <DetailSection label="Asset">
+                  <IconPairDisplay
+                    leftIcon={inputToken.logoURI}
+                    leftAlt={inputToken.symbol}
+                    rightIcon={outputToken.logoURI}
+                    rightAlt={outputToken.symbol}
+                    label={`${inputToken.symbol} → ${outputToken.symbol}`}
+                  />
+                </DetailSection>
               )}
-            />
-          )}
 
-          {deposit.depositRefundTxnRef && (
-            <TxDetailSection
-              label="Refund Transaction"
-              txHash={deposit.depositRefundTxnRef}
-              explorerLink={sourceChain.constructExplorerLink(
-                deposit.depositRefundTxnRef
-              )}
-            />
-          )}
+              <DetailSection label="Route">
+                <IconPairDisplay
+                  leftIcon={sourceChain.logoURI}
+                  leftAlt={sourceChain.name}
+                  rightIcon={destinationChain.logoURI}
+                  rightAlt={destinationChain.name}
+                  label={`${sourceChain.name} → ${destinationChain.name}`}
+                />
+              </DetailSection>
 
-          {deposit.swapTransactionHash && (
-            <TxDetailSection
-              label="Swap Transaction"
-              txHash={deposit.swapTransactionHash}
-              explorerLink={
-                deposit.actionsTargetChainId
-                  ? getChainInfo(
-                      parseInt(deposit.actionsTargetChainId)
-                    ).constructExplorerLink(deposit.swapTransactionHash)
-                  : "#"
-              }
-            />
-          )}
+              <DetailSection label="Deposit ID">
+                <Text color="light-200">{deposit.depositId}</Text>
+              </DetailSection>
+            </DetailsGrid>
+          </SectionWrapper>
 
-          {/* Advanced Details Section */}
-          <SectionTitle>Advanced Details</SectionTitle>
-
-          <DetailSection label="Relay Hash">
-            <CopyableText
-              color="light-200"
-              textToCopy={deposit.relayHash}
-              style={{ wordBreak: "break-all" }}
-            >
-              {deposit.relayHash}
-            </CopyableText>
-          </DetailSection>
-
-          <DetailSection label="Message Hash">
-            <CopyableText
-              color="light-200"
-              textToCopy={deposit.messageHash}
-              style={{ wordBreak: "break-all" }}
-            >
-              {deposit.messageHash}
-            </CopyableText>
-          </DetailSection>
-
-          {deposit.message && deposit.message !== "0x" && (
-            <DetailSection label="Message">
-              <CopyableText
-                color="light-200"
-                textToCopy={deposit.message}
-                style={{ wordBreak: "break-all" }}
-              >
-                {deposit.message}
-              </CopyableText>
-            </DetailSection>
-          )}
-
-          {deposit.actionsTargetChainId && (
-            <>
-              <DetailSection label="Actions Target Chain">
+          <SectionWrapper title="Amounts">
+            <DetailsGrid>
+              <DetailSection label="Input Amount">
                 <Text color="light-200">
-                  {getChainInfo(parseInt(deposit.actionsTargetChainId)).name}
+                  {inputToken
+                    ? formatUnitsWithMaxFractions(
+                        deposit.inputAmount,
+                        inputToken.decimals
+                      )
+                    : deposit.inputAmount}{" "}
+                  {inputToken?.symbol}
+                  <Text color="grey-400" size="sm">
+                    {" "}
+                    ({formatUSDValue(deposit.inputPriceUsd)})
+                  </Text>
                 </Text>
               </DetailSection>
 
-              <DetailSection label="Actions Succeeded">
+              <DetailSection label="Output Amount">
                 <Text color="light-200">
-                  {deposit.actionsSucceeded === null
-                    ? "Pending"
-                    : deposit.actionsSucceeded
-                      ? "Yes"
-                      : "No"}
+                  {outputToken
+                    ? formatUnitsWithMaxFractions(
+                        deposit.outputAmount,
+                        outputToken.decimals
+                      )
+                    : deposit.outputAmount}{" "}
+                  {outputToken?.symbol}
+                  <Text color="grey-400" size="sm">
+                    {" "}
+                    ({formatUSDValue(deposit.outputPriceUsd)})
+                  </Text>
                 </Text>
               </DetailSection>
-            </>
-          )}
+            </DetailsGrid>
+          </SectionWrapper>
 
-          {deposit.swapToken && (
-            <>
-              <DetailSection label="Swap Token">
-                <CopyableText color="light-200" textToCopy={deposit.swapToken}>
-                  {shortenAddress(deposit.swapToken, "...", 6)}
-                </CopyableText>
+          <SectionWrapper title="Fees">
+            <DetailsGrid>
+              <DetailSection label="Bridge Fee">
+                <Text color="light-200">
+                  {formatUSDValue(deposit.bridgeFeeUsd)}
+                </Text>
               </DetailSection>
 
-              {deposit.swapTokenAmount && (
-                <DetailSection label="Swap Token Amount">
+              <DetailSection label="Fill Gas Fee">
+                <Text color="light-200">
+                  {deposit.fillGasFee}{" "}
+                  <Text color="grey-400" size="sm">
+                    ({formatUSDValue(deposit.fillGasFeeUsd)})
+                  </Text>
+                </Text>
+              </DetailSection>
+
+              {deposit.swapFeeUsd && (
+                <DetailSection label="Swap Fee">
                   <Text color="light-200">
-                    {deposit.swapTokenAmount}{" "}
-                    <Text color="grey-400" size="sm">
-                      ({formatUSDValue(deposit.swapTokenPriceUsd)})
-                    </Text>
+                    {formatUSDValue(deposit.swapFeeUsd)}
                   </Text>
                 </DetailSection>
               )}
-            </>
-          )}
+            </DetailsGrid>
+          </SectionWrapper>
 
-          {deposit.fillGasTokenPriceUsd && (
-            <DetailSection label="Gas Token Price (USD)">
-              <Text color="light-200">
-                {formatUSDValue(deposit.fillGasTokenPriceUsd)}
-              </Text>
-            </DetailSection>
-          )}
-        </DetailsGrid>
-      </Container>
-    </Wrapper>
+          <SectionWrapper title="Addresses">
+            <DetailsGrid>
+              <DetailSection label="Depositor">
+                <CopyableText
+                  color="light-200"
+                  textToCopy={deposit.depositor}
+                  explorerLink={`${sourceChain.explorerUrl}/address/${deposit.depositor}`}
+                >
+                  {shortenAddress(deposit.depositor, "...", 6)}
+                </CopyableText>
+              </DetailSection>
+
+              <DetailSection label="Recipient">
+                <CopyableText
+                  color="light-200"
+                  textToCopy={deposit.recipient}
+                  explorerLink={`${destinationChain.explorerUrl}/address/${deposit.recipient}`}
+                >
+                  {shortenAddress(deposit.recipient, "...", 6)}
+                </CopyableText>
+              </DetailSection>
+
+              <DetailSection label="Relayer">
+                {deposit.relayer ? (
+                  <CopyableText
+                    color="light-200"
+                    textToCopy={deposit.relayer}
+                    explorerLink={`${destinationChain.explorerUrl}/address/${deposit.relayer}`}
+                  >
+                    {shortenAddress(deposit.relayer, "...", 6)}
+                  </CopyableText>
+                ) : (
+                  <Text color="light-200">N/A</Text>
+                )}
+              </DetailSection>
+
+              {deposit.exclusiveRelayer &&
+                deposit.exclusiveRelayer !==
+                  "0x0000000000000000000000000000000000000000" && (
+                  <DetailSection label="Exclusive Relayer">
+                    <CopyableText
+                      color="light-200"
+                      textToCopy={deposit.exclusiveRelayer}
+                      explorerLink={`${destinationChain.explorerUrl}/address/${deposit.exclusiveRelayer}`}
+                    >
+                      {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
+                    </CopyableText>
+                  </DetailSection>
+                )}
+            </DetailsGrid>
+          </SectionWrapper>
+
+          <SectionWrapper title="Timestamps & Deadlines">
+            <DetailsGrid>
+              <DetailSection label="Deposit Time">
+                <Text color="light-200">
+                  {formatTimestamp(deposit.depositBlockTimestamp)}
+                </Text>
+              </DetailSection>
+
+              <DetailSection label="Deposit Block">
+                <Text color="light-200">{deposit.depositBlockNumber}</Text>
+              </DetailSection>
+
+              {deposit.fillBlockTimestamp && (
+                <DetailSection label="Fill Time">
+                  <Text color="light-200">
+                    {formatTimestamp(deposit.fillBlockTimestamp)}
+                  </Text>
+                </DetailSection>
+              )}
+
+              <DetailSection label="Quote Time">
+                <Text color="light-200">
+                  {formatTimestamp(deposit.quoteTimestamp)}
+                </Text>
+              </DetailSection>
+
+              <DetailSection label="Fill Deadline">
+                <Text color="light-200">
+                  {formatTimestamp(deposit.fillDeadline)}
+                </Text>
+              </DetailSection>
+
+              {deposit.exclusivityDeadline && (
+                <DetailSection label="Exclusivity Deadline">
+                  <Text color="light-200">
+                    {formatTimestamp(deposit.exclusivityDeadline)}
+                  </Text>
+                </DetailSection>
+              )}
+            </DetailsGrid>
+          </SectionWrapper>
+
+          <SectionWrapper title="Transactions">
+            <DetailsGrid>
+              <TxDetailSection
+                label="Deposit Transaction"
+                txHash={deposit.depositTxnRef}
+                explorerLink={sourceChain.constructExplorerLink(
+                  deposit.depositTxnRef
+                )}
+              />
+
+              {deposit.fillTx && (
+                <TxDetailSection
+                  label="Fill Transaction"
+                  txHash={deposit.fillTx}
+                  explorerLink={destinationChain.constructExplorerLink(
+                    deposit.fillTx
+                  )}
+                />
+              )}
+
+              {deposit.depositRefundTxnRef && (
+                <TxDetailSection
+                  label="Refund Transaction"
+                  txHash={deposit.depositRefundTxnRef}
+                  explorerLink={sourceChain.constructExplorerLink(
+                    deposit.depositRefundTxnRef
+                  )}
+                />
+              )}
+
+              {deposit.swapTransactionHash && (
+                <TxDetailSection
+                  label="Swap Transaction"
+                  txHash={deposit.swapTransactionHash}
+                  explorerLink={
+                    deposit.actionsTargetChainId
+                      ? getChainInfo(
+                          parseInt(deposit.actionsTargetChainId)
+                        ).constructExplorerLink(deposit.swapTransactionHash)
+                      : "#"
+                  }
+                />
+              )}
+            </DetailsGrid>
+          </SectionWrapper>
+
+          <SectionWrapper title="Advanced Details">
+            <DetailsGrid>
+              <DetailSection label="Relay Hash">
+                <CopyableText
+                  color="light-200"
+                  textToCopy={deposit.relayHash}
+                  style={{ wordBreak: "break-all" }}
+                >
+                  {deposit.relayHash}
+                </CopyableText>
+              </DetailSection>
+
+              <DetailSection label="Message Hash">
+                <CopyableText
+                  color="light-200"
+                  textToCopy={deposit.messageHash}
+                  style={{ wordBreak: "break-all" }}
+                >
+                  {deposit.messageHash}
+                </CopyableText>
+              </DetailSection>
+
+              {deposit.message && deposit.message !== "0x" && (
+                <DetailSection label="Message">
+                  <CopyableText
+                    color="light-200"
+                    textToCopy={deposit.message}
+                    style={{ wordBreak: "break-all" }}
+                  >
+                    {deposit.message}
+                  </CopyableText>
+                </DetailSection>
+              )}
+
+              {deposit.actionsTargetChainId && (
+                <>
+                  <DetailSection label="Actions Target Chain">
+                    <Text color="light-200">
+                      {
+                        getChainInfo(parseInt(deposit.actionsTargetChainId))
+                          .name
+                      }
+                    </Text>
+                  </DetailSection>
+
+                  <DetailSection label="Actions Succeeded">
+                    <Text color="light-200">
+                      {deposit.actionsSucceeded === null
+                        ? "Pending"
+                        : deposit.actionsSucceeded
+                          ? "Yes"
+                          : "No"}
+                    </Text>
+                  </DetailSection>
+                </>
+              )}
+
+              {deposit.swapToken && (
+                <>
+                  <DetailSection label="Swap Token">
+                    <CopyableText
+                      color="light-200"
+                      textToCopy={deposit.swapToken}
+                      explorerLink={`${destinationChain.explorerUrl}/address/${deposit.swapToken}`}
+                    >
+                      {shortenAddress(deposit.swapToken, "...", 6)}
+                    </CopyableText>
+                  </DetailSection>
+
+                  {deposit.swapTokenAmount && (
+                    <DetailSection label="Swap Token Amount">
+                      <Text color="light-200">
+                        {deposit.swapTokenAmount}{" "}
+                        <Text color="grey-400" size="sm">
+                          ({formatUSDValue(deposit.swapTokenPriceUsd)})
+                        </Text>
+                      </Text>
+                    </DetailSection>
+                  )}
+                </>
+              )}
+
+              {deposit.fillGasTokenPriceUsd && (
+                <DetailSection label="Gas Token Price (USD)">
+                  <Text color="light-200">
+                    {formatUSDValue(deposit.fillGasTokenPriceUsd)}
+                  </Text>
+                </DetailSection>
+              )}
+            </DetailsGrid>
+          </SectionWrapper>
+        </InnerSectionWrapper>
+      </Wrapper>
+    </LayoutV2>
   );
 }
 
 const Wrapper = styled.div`
   display: flex;
-  justify-content: center;
-  padding: 40px 20px;
-  min-height: calc(100vh - 200px);
-  background: ${COLORS["black-900"]};
+  flex-direction: column;
+  gap: 24px;
 
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 20px 12px;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 900px;
+  max-width: 1140px;
   width: 100%;
-  background: ${COLORS["grey-600"]};
-  border-radius: 12px;
-  padding: 32px;
-  border: 1px solid ${COLORS["grey-500"]};
+
+  margin: 0 auto;
+  padding: 32px 0;
 
   @media ${QUERIESV2.sm.andDown} {
-    padding: 20px;
+    padding: 16px 0;
+    gap: 16px;
   }
 `;
 
-const Header = styled.div`
-  margin-bottom: 32px;
-`;
-
-const BackButton = styled.button`
+const InnerSectionWrapper = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: ${COLORS["grey-400"]};
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 16px;
-  transition: color 0.2s;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 64px;
 
-  &:hover {
-    color: ${COLORS["light-200"]};
+  width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 24px;
   }
 `;
 
-const Title = styled.h1`
-  font-size: 28px;
-  font-weight: 600;
-  color: ${COLORS.white};
-  margin: 0;
+const StatusWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -32px;
 
   @media ${QUERIESV2.sm.andDown} {
-    font-size: 24px;
+    margin-bottom: -8px;
   }
 `;
 
@@ -462,29 +496,15 @@ const DetailsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px;
+  width: 100%;
+  padding: 24px;
+  background: ${COLORS["grey-600"]};
+  border-radius: 12px;
+  border: 1px solid ${COLORS["grey-500"]};
 
   @media ${QUERIESV2.sm.andDown} {
     grid-template-columns: 1fr;
     gap: 20px;
-  }
-`;
-
-const SectionTitle = styled.h2`
-  grid-column: 1 / -1;
-  font-size: 18px;
-  font-weight: 600;
-  color: ${COLORS.white};
-  margin: 16px 0 0 0;
-  padding-top: 16px;
-  border-top: 1px solid ${COLORS["grey-500"]};
-
-  &:first-of-type {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-  }
-
-  @media ${QUERIESV2.sm.andDown} {
-    font-size: 16px;
+    padding: 16px;
   }
 `;

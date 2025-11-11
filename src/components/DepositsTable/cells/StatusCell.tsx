@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
@@ -19,6 +20,29 @@ type Props = {
 };
 
 export function StatusCell({ deposit, width }: Props) {
+  const [animationKey, setAnimationKey] = useState(0);
+
+  // Restart animation on mount (when navigating to the page)
+  useEffect(() => {
+    setAnimationKey((prev) => prev + 1);
+  }, []);
+
+  // Handle page visibility to restart animations when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Force re-render of animations when page becomes visible
+        setAnimationKey((prev) => prev + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   if (deposit.status === "filled") {
     return <FilledStatusCell deposit={deposit} width={width} />;
   }
@@ -31,7 +55,13 @@ export function StatusCell({ deposit, width }: Props) {
     return <SlowFillRequestedStatusCell deposit={deposit} width={width} />;
   }
 
-  return <PendingStatusCell deposit={deposit} width={width} />;
+  return (
+    <PendingStatusCell
+      deposit={deposit}
+      width={width}
+      animationKey={animationKey}
+    />
+  );
 }
 
 function FilledStatusCell({ deposit, width }: Props) {
@@ -55,7 +85,11 @@ function FilledStatusCell({ deposit, width }: Props) {
   );
 }
 
-function PendingStatusCell({ width, deposit }: Props) {
+function PendingStatusCell({
+  width,
+  deposit,
+  animationKey,
+}: Props & { animationKey: number }) {
   const { isDelayed, isProfitable, isExpired } = useDepositStatus(deposit);
 
   return (
@@ -91,7 +125,7 @@ function PendingStatusCell({ width, deposit }: Props) {
             <StyledInfoIcon />
           </Tooltip>
         ) : isProfitable ? (
-          <StyledLoadingIcon />
+          <StyledLoadingIcon key={animationKey} />
         ) : (
           <Tooltip
             tooltipId={`fee-too-low-${deposit.depositTxHash}`}

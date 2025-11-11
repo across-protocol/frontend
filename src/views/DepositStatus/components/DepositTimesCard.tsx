@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 import { DateTime } from "luxon";
@@ -61,6 +62,29 @@ export function DepositTimesCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
+  const [animationKey, setAnimationKey] = useState(0);
+
+  // Restart animation on mount (when navigating to the page)
+  useEffect(() => {
+    setAnimationKey((prev) => prev + 1);
+  }, []);
+
+  // Handle page visibility to restart animations when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Force re-render of animations when page becomes visible
+        setAnimationKey((prev) => prev + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   const { estimatedRewards, amountAsBaseCurrency, isSwap, isUniversalSwap } =
     useResolveFromBridgePagePayload(
       fromChainId,
@@ -121,7 +145,7 @@ export function DepositTimesCard({
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
             isCompleted={false}
-            StatusIcon={<StyledLoadingIcon />}
+            StatusIcon={<StyledLoadingIcon key={animationKey} />}
           />
         ) : isDepositReverted ? (
           <TryAgainButton
@@ -177,7 +201,7 @@ export function DepositTimesCard({
                   chainId={toChainId}
                 />
               ) : (
-                <StyledLoadingIcon />
+                <StyledLoadingIcon key={animationKey} />
               )
             }
           />

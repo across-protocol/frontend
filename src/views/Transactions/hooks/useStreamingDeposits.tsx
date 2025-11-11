@@ -18,6 +18,7 @@ export function useStreamingDeposits(
   const [displayedDeposits, setDisplayedDeposits] = useState<StreamedDeposit[]>(
     []
   );
+
   const isProcessing = useRef(false);
   const previousDepositIds = useRef(new Set<string>());
   const isInitialized = useRef(false);
@@ -55,9 +56,19 @@ export function useStreamingDeposits(
 
     const delayBetweenDeposits = defaultRefetchInterval / queue.length;
 
+    console.log(
+      `[Streaming] 🎬 Starting batch stream: ${queue.length} transaction${queue.length > 1 ? "s" : ""} queued`
+    );
+    console.log(
+      `[Streaming] ⏱️  Delay between deposits: ${Math.round(delayBetweenDeposits)}ms`
+    );
+
     const streamDeposit = (index: number) => {
       if (index >= queue.length) {
         isProcessing.current = false;
+        console.log(
+          `[Streaming] ✅ Batch complete: streamed ${queue.length}/${queue.length} transactions`
+        );
         return;
       }
 
@@ -78,6 +89,9 @@ export function useStreamingDeposits(
         setTimeout(() => streamDeposit(index + 1), delayBetweenDeposits);
       } else {
         isProcessing.current = false;
+        console.log(
+          `[Streaming] ✅ Batch complete: streamed ${queue.length}/${queue.length} transactions`
+        );
       }
     };
 
@@ -89,6 +103,13 @@ export function useStreamingDeposits(
 
     const totalToShow = Math.min(maxVisibleRows, deposits.length);
     const streamCount = Math.min(INITIAL_STREAM_COUNT, deposits.length);
+
+    console.log(
+      `[Streaming] 🚀 Initializing streaming: ${deposits.length} total deposits`
+    );
+    console.log(
+      `[Streaming] 📊 Will stream ${streamCount} newest, display ${totalToShow - streamCount} older immediately`
+    );
 
     const olderDeposits = deposits.slice(streamCount, totalToShow);
     setDisplayedDeposits(olderDeposits);
@@ -115,6 +136,8 @@ export function useStreamingDeposits(
       existing.fillTx !== incoming.fillTx ||
       existing.fillBlockTimestamp !== incoming.fillBlockTimestamp;
 
+    let updatedCount = 0;
+
     deposits.forEach((deposit) => {
       const depositId = getDepositId(deposit);
 
@@ -123,6 +146,7 @@ export function useStreamingDeposits(
           const index = current.findIndex((d) => getDepositId(d) === depositId);
 
           if (index !== -1 && hasChanged(current[index], deposit)) {
+            updatedCount++;
             const updated = [...current];
             updated[index] = { ...deposit, isUpdated: true };
             clearAnimationFlag(depositId, "isUpdated");
@@ -134,7 +158,20 @@ export function useStreamingDeposits(
       }
     });
 
+    if (updatedCount > 0) {
+      console.log(
+        `[Streaming] 🔄 Updated ${updatedCount} existing transaction${updatedCount > 1 ? "s" : ""}`
+      );
+    }
+
     if (newDeposits.length > 0) {
+      console.log(
+        `[Streaming] 🆕 Detected ${newDeposits.length} new transaction${newDeposits.length > 1 ? "s" : ""}`
+      );
+      console.log(
+        `[Streaming] 📦 Queue state: ${depositQueueRef.current.length} already queued + ${newDeposits.length} new = ${depositQueueRef.current.length + newDeposits.length} total`
+      );
+
       depositQueueRef.current = [...depositQueueRef.current, ...newDeposits];
       previousDepositIds.current = currentIds;
       startStreaming();
@@ -148,6 +185,16 @@ export function useStreamingDeposits(
       timeouts.clear();
     };
   }, []);
+
+  useEffect(() => {
+    if (enabled) {
+      console.log("[Streaming] ▶️  Streaming enabled");
+    } else {
+      console.log(
+        "[Streaming] ⏸️  Streaming disabled - displaying all deposits"
+      );
+    }
+  }, [enabled]);
 
   if (!enabled) {
     return deposits;
