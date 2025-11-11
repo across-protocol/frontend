@@ -8,7 +8,6 @@ import {
   validSvmAddress,
   validAddress,
   getTokenByAddress,
-  getChainInfo,
 } from "../../api/_utils";
 import { is } from "superstruct";
 

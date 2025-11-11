@@ -136,7 +136,7 @@ describe("bridges/cctp/strategy", () => {
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
       expect(result.bridgeQuote.outputAmount).toEqual(inputAfterFee);
       expect(result.bridgeQuote.minOutputAmount).toEqual(inputAfterFee);
-      expect(result.bridgeQuote.fees.bridgeFee.total).toEqual(maxFee);
+      expect(result.bridgeQuote.fees.amount).toEqual(maxFee);
     });
 
     test("should calculate correct output amount for new HyperCore account", async () => {
@@ -169,7 +169,7 @@ describe("bridges/cctp/strategy", () => {
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
       expect(result.bridgeQuote.outputAmount).toEqual(expectedOutput);
       expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutput);
-      expect(result.bridgeQuote.fees.bridgeFee.total).toEqual(maxFee);
+      expect(result.bridgeQuote.fees.amount).toEqual(maxFee);
     });
 
     test("should calculate correct output amount for non-HyperCore route with zero fees", async () => {
@@ -188,9 +188,7 @@ describe("bridges/cctp/strategy", () => {
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
       expect(result.bridgeQuote.outputAmount).toEqual(exactInputAmount);
       expect(result.bridgeQuote.minOutputAmount).toEqual(exactInputAmount);
-      expect(result.bridgeQuote.fees.bridgeFee.total).toEqual(
-        BigNumber.from(0)
-      );
+      expect(result.bridgeQuote.fees.amount).toEqual(BigNumber.from(0));
     });
   });
 
@@ -226,7 +224,7 @@ describe("bridges/cctp/strategy", () => {
 
       // Verify CCTP fee = inputAmount - amountToArriveOnDestination
       const expectedFee = expectedInputAmount.sub(100_000_000);
-      expect(result.bridgeQuote.fees.bridgeFee.total).toEqual(expectedFee);
+      expect(result.bridgeQuote.fees.amount).toEqual(expectedFee);
     });
 
     test("should calculate correct input amount for new HyperCore account", async () => {
@@ -261,7 +259,7 @@ describe("bridges/cctp/strategy", () => {
 
       // Verify CCTP fee = inputAmount - amountToArriveOnDestination
       const expectedFee = expectedInputAmount.sub(amountToArriveOnDestination);
-      expect(result.bridgeQuote.fees.bridgeFee.total).toEqual(expectedFee);
+      expect(result.bridgeQuote.fees.amount).toEqual(expectedFee);
     });
   });
 

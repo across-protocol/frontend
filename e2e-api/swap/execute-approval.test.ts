@@ -14,7 +14,7 @@ type TradeType = "exactInput" | "exactOutput" | "minOutput";
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
-const SLIPPAGE = 0.05; // 5% slippage
+const SLIPPAGE = "auto";
 
 const B2B_BASE_TEST_CASE = {
   amounts: {
@@ -27,7 +27,7 @@ const B2B_BASE_TEST_CASE = {
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
   slippage: SLIPPAGE,
-};
+} as const;
 
 const B2A_BASE_TEST_CASE = {
   amounts: {
@@ -40,7 +40,7 @@ const B2A_BASE_TEST_CASE = {
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
   slippage: SLIPPAGE,
-};
+} as const;
 
 const A2B_BASE_TEST_CASE = {
   amounts: {
@@ -53,7 +53,7 @@ const A2B_BASE_TEST_CASE = {
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   slippage: SLIPPAGE,
-};
+} as const;
 
 describe("execute response of GET /swap/approval", () => {
   async function fetchSwapQuote(params: {
@@ -65,7 +65,7 @@ describe("execute response of GET /swap/approval", () => {
     destinationChainId: number;
     depositor: string;
     recipient: string;
-    slippage: number;
+    slippage: number | "auto";
   }) {
     const response = await axios.get(SWAP_API_URL, {
       params: {
@@ -169,20 +169,6 @@ describe("execute response of GET /swap/approval", () => {
       inputTokenBalanceBefore - inputTokenBalanceAfter;
     const outputTokenBalanceDiff =
       outputTokenBalanceAfter - outputTokenBalanceBefore;
-
-    console.log(tradeType, {
-      inputTokenBalanceBefore,
-      inputTokenBalanceAfter,
-      inputTokenBalanceDiff,
-      outputTokenBalanceBefore,
-      outputTokenBalanceAfter,
-      outputTokenBalanceDiff,
-      amount,
-      quotedInputAmount: swapQuote.inputAmount,
-      quotedMaxInputAmount: swapQuote.maxInputAmount,
-      quotedOutputAmount: swapQuote.expectedOutputAmount,
-      quotedMinOutputAmount: swapQuote.minOutputAmount,
-    });
 
     // Sanity checks based on the trade type
     if (tradeType === "exactInput") {

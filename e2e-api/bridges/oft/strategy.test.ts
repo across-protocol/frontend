@@ -194,55 +194,13 @@ describe("OFT Strategy", () => {
           estimatedFillTimeSec: 24,
           provider: "oft",
           fees: {
-            totalRelay: {
-              pct: BigNumber.from(0),
-              total: BigNumber.from(0),
-              token: {
-                decimals: 6,
-                symbol: "USDT",
-                address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                chainId: 42161,
-              },
-            },
-            relayerCapital: {
-              pct: BigNumber.from(0),
-              total: BigNumber.from(0),
-              token: {
-                decimals: 6,
-                symbol: "USDT",
-                address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                chainId: 42161,
-              },
-            },
-            relayerGas: {
-              pct: BigNumber.from(0),
-              total: BigNumber.from(0),
-              token: {
-                decimals: 6,
-                symbol: "USDT",
-                address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                chainId: 42161,
-              },
-            },
-            lp: {
-              pct: BigNumber.from(0),
-              total: BigNumber.from(0),
-              token: {
-                decimals: 6,
-                symbol: "USDT",
-                address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                chainId: 42161,
-              },
-            },
-            bridgeFee: {
-              pct: BigNumber.from(0),
-              total: BigNumber.from("0x1522fe82c8c1"),
-              token: {
-                chainId: 42161,
-                address: "0x0000000000000000000000000000000000000000",
-                decimals: 18,
-                symbol: "ETH",
-              },
+            pct: BigNumber.from(0),
+            amount: BigNumber.from("0x1522fe82c8c1"),
+            token: {
+              chainId: 42161,
+              address: "0x0000000000000000000000000000000000000000",
+              decimals: 18,
+              symbol: "ETH",
             },
           },
           message: "0x",

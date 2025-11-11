@@ -53,21 +53,22 @@ export async function swapApprovalApiCall(
           symbol: outputToken?.symbol ?? "UNKNOWN",
         },
         fees: {
-          totalRelay: {
-            pct: BigNumber.from("0"),
-            total: BigNumber.from("0"),
-          },
-          relayerCapital: {
-            pct: BigNumber.from("0"),
-            total: BigNumber.from("0"),
-          },
-          relayerGas: {
-            pct: BigNumber.from("0"),
-            total: BigNumber.from("0"),
-          },
-          lp: {
-            pct: BigNumber.from("0"),
-            total: BigNumber.from("0"),
+          amount: BigNumber.from("0"),
+          pct: BigNumber.from("0"),
+          details: {
+            type: "across",
+            lp: {
+              amount: BigNumber.from("0"),
+              pct: BigNumber.from("0"),
+            },
+            relayerCapital: {
+              amount: BigNumber.from("0"),
+              pct: BigNumber.from("0"),
+            },
+            destinationGas: {
+              amount: BigNumber.from("0"),
+              pct: BigNumber.from("0"),
+            },
           },
         },
       },

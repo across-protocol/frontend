@@ -27,34 +27,12 @@ export function getOftBridgeFees(params: {
   nativeFee: BigNumber;
   nativeToken: Token;
 }) {
-  const { inputToken, nativeFee, nativeToken } = params;
+  const { nativeFee, nativeToken } = params;
   const zeroBN = BigNumber.from(0);
   return {
-    totalRelay: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerCapital: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    relayerGas: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    lp: {
-      pct: zeroBN,
-      total: zeroBN,
-      token: inputToken,
-    },
-    bridgeFee: {
-      pct: zeroBN,
-      total: nativeFee,
-      token: nativeToken,
-    },
+    pct: zeroBN,
+    amount: nativeFee,
+    token: nativeToken,
   };
 }
 
