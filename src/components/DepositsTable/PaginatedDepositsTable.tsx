@@ -12,6 +12,7 @@ type Props = DepositsTableProps & {
   initialPageSize?: number;
   pageSizes?: number[];
   displayPageNumbers?: boolean;
+  hasNoResults: boolean;
 };
 
 const DEFAULT_PAGE_SIZES = [10, 25, 50];
@@ -24,6 +25,7 @@ export function PaginatedDepositsTable({
   totalCount,
   pageSizes = DEFAULT_PAGE_SIZES,
   displayPageNumbers = true,
+  hasNoResults,
   ...depositsTableProps
 }: Props) {
   const paginateValues = paginate({
@@ -36,23 +38,25 @@ export function PaginatedDepositsTable({
   return (
     <>
       <DepositsTable {...depositsTableProps} />
-      <PaginationWrapper>
-        <Pagination
-          displayPageNumbers={displayPageNumbers}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-          pageList={paginateValues.pageList}
-          activeIndex={paginateValues.activeIndex}
-          disableBack={paginateValues.disableBack}
-          disableForward={paginateValues.disableForward}
-          hideStart={paginateValues.hideStart}
-          hideEnd={paginateValues.hideEnd}
-          lastPage={paginateValues.lastPage}
-          currentPage={currentPage}
-          pageSize={currentPageSize}
-          pageSizes={pageSizes}
-        />
-      </PaginationWrapper>
+      {!hasNoResults && (
+        <PaginationWrapper>
+          <Pagination
+            displayPageNumbers={displayPageNumbers}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+            pageList={paginateValues.pageList}
+            activeIndex={paginateValues.activeIndex}
+            disableBack={paginateValues.disableBack}
+            disableForward={paginateValues.disableForward}
+            hideStart={paginateValues.hideStart}
+            hideEnd={paginateValues.hideEnd}
+            lastPage={paginateValues.lastPage}
+            currentPage={currentPage}
+            pageSize={currentPageSize}
+            pageSizes={pageSizes}
+          />
+        </PaginationWrapper>
+      )}
     </>
   );
 }

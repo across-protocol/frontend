@@ -134,6 +134,7 @@ export function PersonalTransactions({ statusFilter }: Props) {
         filterKey={`personal-${statusFilter}`}
         disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
         displayPageNumbers={false}
+        hasNoResults={false}
       />
     </>
   );

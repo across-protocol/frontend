@@ -1,10 +1,10 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import { LayoutV2 } from "components";
-import BreadcrumbV2 from "components/BreadcrumbV2";
+import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { CenteredMessage } from "./components/CenteredMessage";
@@ -105,7 +105,16 @@ export default function Transaction() {
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
-        <BreadcrumbV2 customCurrentRoute="Transaction Details" />
+        <BreadcrumbWrapper>
+          <BreadcrumbContent>
+            <BreadcrumbLink to="/transactions">
+              <BreadcrumbLinkText size="lg">Transactions</BreadcrumbLinkText>
+            </BreadcrumbLink>
+            <StyledArrowIcon />
+            <CurrentPageText size="lg">Transaction Details</CurrentPageText>
+          </BreadcrumbContent>
+          <BreadcrumbDivider />
+        </BreadcrumbWrapper>
         <InnerSectionWrapper>
           <StatusWrapper>
             <DepositStatusAnimatedIcons
@@ -490,6 +499,49 @@ const StatusWrapper = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     margin-bottom: -8px;
   }
+`;
+
+const BreadcrumbWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 12px;
+  width: 100%;
+`;
+
+const BreadcrumbDivider = styled.div`
+  background: #34353b;
+  height: 1px;
+  width: 100%;
+`;
+
+const BreadcrumbContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 8px;
+`;
+
+const BreadcrumbLink = styled(Link)`
+  color: #9daab2;
+  text-transform: capitalize;
+  text-decoration: none;
+`;
+
+const BreadcrumbLinkText = styled(Text)`
+  color: #9daab2;
+  text-transform: capitalize;
+`;
+
+const CurrentPageText = styled(Text)`
+  color: #e0f3ff;
+  text-transform: capitalize;
+`;
+
+const StyledArrowIcon = styled(ArrowIcon)`
+  rotate: -90deg;
 `;
 
 const DetailsGrid = styled.div`

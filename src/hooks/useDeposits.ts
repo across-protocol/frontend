@@ -91,6 +91,7 @@ export type Deposit = {
   swapTokenAmount?: string;
   swapTokenAddress?: string;
   depositRefundTxHash?: string;
+  hideFeeTooLow?: boolean;
 };
 
 export type Pagination = {

@@ -7,6 +7,8 @@ import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components";
 import { Input, InputGroup } from "components/Input";
+import { Tooltip } from "components/Tooltip";
+import { COLORS } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { useTransactions } from "../hooks/useTransactions";
 import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
@@ -34,20 +36,21 @@ export function AllTransactions() {
   const queryClient = useQueryClient();
 
   const isFirstPage = currentPage === 0;
-  const liveToggleEnabled = isFirstPage;
-  const streamingEnabled = isFirstPage && isLiveMode && !walletAddressFilter;
+  const isFiltering = walletAddressFilter.trim().length > 0;
+  const liveToggleEnabled = isFirstPage && !isFiltering;
+  const streamingEnabled = isFirstPage && isLiveMode && !isFiltering;
   const streamedDeposits = useStreamingDeposits(
     deposits,
     pageSize,
     streamingEnabled
   );
 
-  // Disable live mode when navigating away from first page
+  // Disable live mode when navigating away from first page or when filtering
   useEffect(() => {
-    if (!isFirstPage) {
+    if (!isFirstPage || isFiltering) {
       setIsLiveMode(false);
     }
-  }, [isFirstPage]);
+  }, [isFirstPage, isFiltering]);
 
   // Handle page visibility changes
   useEffect(() => {
@@ -103,9 +106,11 @@ export function AllTransactions() {
 
   const convertedDeposits = useMemo(
     () =>
-      streamedDeposits.map((deposit) =>
-        convertIndexerDepositToDeposit(deposit)
-      ),
+      streamedDeposits.map((deposit) => {
+        const converted = convertIndexerDepositToDeposit(deposit);
+        // Show "processing" instead of "fee too low" on all transactions page
+        return { ...converted, hideFeeTooLow: true };
+      }),
     [streamedDeposits]
   );
 
@@ -145,7 +150,6 @@ export function AllTransactions() {
   }
 
   const hasNoResults = currentPage === 0 && deposits.length === 0;
-  const isFiltering = walletAddressFilter.trim().length > 0;
 
   return (
     <>
@@ -169,24 +173,74 @@ export function AllTransactions() {
               </InputGroup>
             </FilterInputWrapper>
           </FilterSection>
-          <LiveToggleSection disabled={!liveToggleEnabled}>
-            <ToggleSwitch>
-              <ToggleInput
-                type="checkbox"
-                checked={isLiveMode}
-                onChange={(e) => setIsLiveMode(e.target.checked)}
-                disabled={!liveToggleEnabled}
-              />
-              <ToggleSlider disabled={!liveToggleEnabled} />
-            </ToggleSwitch>
-            <Text size="sm" color={liveToggleEnabled ? undefined : "grey-400"}>
-              Live updates
-            </Text>
-          </LiveToggleSection>
+          {!liveToggleEnabled ? (
+            <Tooltip
+              tooltipId="live-toggle-disabled"
+              title={
+                isFiltering
+                  ? "Live updates disabled during filtering"
+                  : "Live updates only available on first page"
+              }
+              body={
+                <Text size="sm">
+                  {isFiltering
+                    ? "Clear the wallet address filter to enable live updates"
+                    : "Navigate to the first page to enable live updates"}
+                </Text>
+              }
+              placement="bottom"
+            >
+              <LiveToggleSection disabled={true}>
+                <ToggleSwitch>
+                  <ToggleInput
+                    type="checkbox"
+                    checked={isLiveMode}
+                    onChange={(e) => setIsLiveMode(e.target.checked)}
+                    disabled={true}
+                  />
+                  <ToggleSlider disabled={true} />
+                </ToggleSwitch>
+                <Text size="sm" color="grey-400">
+                  Live updates
+                </Text>
+              </LiveToggleSection>
+            </Tooltip>
+          ) : (
+            <LiveToggleSection disabled={false}>
+              <ToggleSwitch>
+                <ToggleInput
+                  type="checkbox"
+                  checked={isLiveMode}
+                  onChange={(e) => setIsLiveMode(e.target.checked)}
+                  disabled={false}
+                />
+                <ToggleSlider disabled={false} />
+              </ToggleSwitch>
+              <Text size="sm">Live updates</Text>
+            </LiveToggleSection>
+          )}
         </ControlsRow>
       </ControlsContainer>
-      {hasNoResults ? (
-        <EmptyTable>
+      <PaginatedDepositsTable
+        currentPage={currentPage}
+        currentPageSize={pageSize}
+        deposits={convertedDeposits}
+        totalCount={totalDeposits}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={handlePageSizeChange}
+        initialPageSize={pageSize}
+        disabledColumns={[
+          "date",
+          "bridgeFee",
+          "rewards",
+          "rewardsRate",
+          "actions",
+        ]}
+        displayPageNumbers={false}
+        hasNoResults={hasNoResults}
+      />
+      {hasNoResults && (
+        <EmptyStateMessage>
           <Text size="lg">
             {isFiltering
               ? "No transactions found for this address"
@@ -197,23 +251,24 @@ export function AllTransactions() {
               Try a different wallet address
             </Text>
           )}
-        </EmptyTable>
-      ) : (
-        <PaginatedDepositsTable
-          currentPage={currentPage}
-          currentPageSize={pageSize}
-          deposits={convertedDeposits}
-          totalCount={totalDeposits}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={handlePageSizeChange}
-          initialPageSize={pageSize}
-          disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
-          displayPageNumbers={false}
-        />
+        </EmptyStateMessage>
       )}
     </>
   );
 }
+
+const EmptyStateMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px solid ${COLORS["grey-600"]};
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  background: ${COLORS["grey-600"]};
+`;
 
 const ControlsContainer = styled.div`
   margin-bottom: 20px;

@@ -1,16 +1,17 @@
 import styled from "@emotion/styled";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
 import { COLORS, getConfig } from "utils";
 
-import { HeaderCells, ColumnKey } from "./HeadRow";
+import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
 import { AmountCell } from "./cells/AmountCell";
 import { RouteCell } from "./cells/RouteCell";
 import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
+import { TimeAgoCell } from "./cells/TimeAgoCell";
 import { StatusCell } from "./cells/StatusCell";
 import { TxCell } from "./cells/TxCell";
 import { NetFeeCell } from "./cells/NetFeeCell";
@@ -74,11 +75,15 @@ export function DataRow({
       }
     : { layout: true };
 
-  const overlayColor = isNewDeposit
-    ? "aqua"
-    : deposit.isUpdated
-      ? "yellow"
-      : null;
+  // Determine overlay color based on status
+  const getOverlayColor = () => {
+    if (!isNewDeposit && !deposit.isUpdated) return null;
+
+    // Use green (aqua) for filled, white for processing/pending
+    return deposit.status === "filled" ? "aqua" : "white";
+  };
+
+  const overlayColor = getOverlayColor();
   const overlayAnimation = isNewDeposit
     ? {
         initial: { opacity: 0.3 },
@@ -147,6 +152,9 @@ export function DataRow({
       {isColumnDisabled(disabledColumns, "rewards") ? null : (
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />
       )}
+      {isColumnDisabled(disabledColumns, "timeAgo") ? null : (
+        <TimeAgoCell deposit={deposit} width={headerCells.timeAgo.width} />
+      )}
       {isColumnDisabled(disabledColumns, "actions") ? null : (
         <ActionsCell deposit={deposit} onClickSpeedUp={onClickSpeedUp} />
       )}
@@ -154,7 +162,7 @@ export function DataRow({
   );
 }
 
-const ColorOverlay = styled(motion.div)<{ color: "aqua" | "yellow" }>`
+const ColorOverlay = styled(motion.div)<{ color: "aqua" | "yellow" | "white" }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -170,6 +178,7 @@ const StyledRow = styled(motion.tr)`
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 0px 24px;
   border-width: 0px 1px 1px 1px;
