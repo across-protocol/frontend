@@ -15,7 +15,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, utils } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
@@ -589,45 +589,6 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
       return [key, val];
     })
   ) as T;
-}
-
-/**
- * Helper function to format fee components with consistent structure
- * @param amount - Fee amount in token units (BigNumber)
- * @param amountUsd - Fee amount in USD
- * @param token - Token information
- * @param inputAmountUsd - Total input amount in USD (for percentage calculation). Omit to exclude pct field.
- * @returns Formatted fee object with amount, amountUsd, pct (if inputAmountUsd provided), and token
- */
-function formatFeeComponent(params: {
-  amount: BigNumber;
-  amountUsd: number;
-  token: Token;
-  inputAmountUsd?: number;
-}) {
-  const DEFAULT_PRECISION = 18;
-  const { amount, amountUsd, token, inputAmountUsd } = params;
-
-  const result: {
-    amount: BigNumber;
-    amountUsd: string;
-    pct?: BigNumber;
-    token: Token;
-  } = {
-    amount,
-    amountUsd: ethers.utils.formatEther(
-      ethers.utils.parseEther(amountUsd.toFixed(DEFAULT_PRECISION))
-    ),
-    token,
-  };
-
-  if (inputAmountUsd !== undefined) {
-    result.pct = ethers.utils.parseEther(
-      (amountUsd / inputAmountUsd).toFixed(DEFAULT_PRECISION)
-    );
-  }
-
-  return result;
 }
 
 export async function buildBaseSwapResponseJson(params: {

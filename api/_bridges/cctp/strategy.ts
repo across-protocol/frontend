@@ -217,7 +217,11 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
             standardOrFast
           ),
           provider: name,
-          fees: getCctpBridgeFees(inputToken, maxFee),
+          fees: getCctpBridgeFees({
+            inputToken,
+            inputAmount: exactInputAmount,
+            maxFee,
+          }),
         },
       };
     },
@@ -295,7 +299,11 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
             standardOrFast
           ),
           provider: name,
-          fees: getCctpBridgeFees(inputToken, maxFee),
+          fees: getCctpBridgeFees({
+            inputToken,
+            inputAmount,
+            maxFee,
+          }),
         },
       };
     },
@@ -391,13 +399,15 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
   };
 }
 
-function getCctpBridgeFees(
-  inputToken: Token,
-  maxFee: BigNumber = BigNumber.from(0)
-) {
-  const zeroBN = BigNumber.from(0);
+function getCctpBridgeFees(params: {
+  inputToken: Token;
+  inputAmount: BigNumber;
+  maxFee?: BigNumber;
+}) {
+  const { inputToken, inputAmount, maxFee = BigNumber.from(0) } = params;
+  const pct = maxFee.mul(sdk.utils.fixedPointAdjustment).div(inputAmount);
   return {
-    pct: zeroBN,
+    pct,
     amount: maxFee,
     token: inputToken,
   };
