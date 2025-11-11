@@ -118,21 +118,20 @@ export function ChainTokenSelectorModal({
     }
 
     // Enrich tokens with route source information and unreachable flag
+    // The hook (useSwapAndBridgeTokens) already handles all unreachability logic:
+    // - Same chain check (input tokens on same chain as output, or output tokens on same chain as input)
+    // - Bridge-only check (swap-only tokens when output is bridge-only)
     const TokenWithBalances = tokens.map((token) => {
       // Find the corresponding token in crossChainRoutes to get route source
       const routeToken = crossChainRoutes?.[token.chainId]?.find(
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
-      // Token is unreachable if otherToken exists and is from the same chain
-      const isUnreachable = otherToken
-        ? token.chainId === otherToken.chainId
-        : false;
-
       return {
         ...token,
-        routeSource: routeToken?.routeSource || ["bridge"], // Default to bridge if not found
-        isUnreachable,
+        routeSource: routeToken?.routeSource || token.routeSource || ["bridge"], // Use token's routeSource if available, otherwise default to bridge
+        // Use the hook's isUnreachable value directly - it handles all cases
+        isUnreachable: token.isUnreachable ?? false,
       };
     });
 

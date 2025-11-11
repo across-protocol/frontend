@@ -13,15 +13,9 @@ export type LifiToken = {
   routeSource: ("bridge" | "swap")[];
 };
 
-export type TokenInfo = {
-  chainId: number;
-  address: string;
-  symbol: string;
-};
-
 export type RouteFilterParams = {
-  inputToken?: TokenInfo | null;
-  outputToken?: TokenInfo | null;
+  inputToken?: LifiToken | null;
+  outputToken?: LifiToken | null;
 };
 
 export default function useAvailableCrosschainRoutes(

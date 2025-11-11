@@ -154,6 +154,7 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
 
       // step 3 => Mark isUnreachable
       const outputTokenChainId = filterParams?.outputToken?.chainId;
+      const inputTokenChainId = filterParams?.inputToken?.chainId;
       const outputToken = filterParams?.outputToken;
 
       // Check if output token is bridge only (i.e., not available in swap token pool)
@@ -176,16 +177,28 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
           );
         });
 
-        // If output token is not in swap tokens but exists in bridge routes, it's bridge-only
+        // If output token is not in swap tokens, check if it's reachable via bridge routes
         if (!outputTokenInSwap && bridgeTokensQuery.data) {
+          // When outputToken is set in filterParams, useBridgeRoutes filters inputTokens
+          // to only those that can bridge to that outputToken. So if there are any
+          // inputTokens, it means the outputToken is reachable via bridge routes.
+          const bridgeInputTokens = bridgeTokensQuery.data.inputTokens || [];
+          const hasBridgeRoutesToOutput = bridgeInputTokens.length > 0;
+
+          // Also check if the outputToken exists in the outputTokens list
+          // (this handles the case where outputToken might be in the list even if no inputToken is set)
           const bridgeOutputTokens = bridgeTokensQuery.data.outputTokens || [];
-          const outputTokenInBridge = bridgeOutputTokens.find(
+          const outputTokenInBridgeList = bridgeOutputTokens.find(
             (bt) =>
               bt.chainId === outputToken.chainId &&
               compareAddressesSimple(bt.address, outputToken.address) &&
               bt.symbol === outputToken.symbol
           );
-          isOutputTokenBridgeOnly = !!outputTokenInBridge;
+
+          // If there are bridge routes to this output token (indicated by inputTokens existing),
+          // or if the outputToken is in the bridge outputTokens list, it's bridge-only
+          isOutputTokenBridgeOnly =
+            hasBridgeRoutesToOutput || !!outputTokenInBridgeList;
         }
       }
 
@@ -196,14 +209,27 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
             let isUnreachable = false;
 
             // (same chain check)
-            // All input tokens with the same chainId as outputToken must be marked as isUnreachable
-            if (outputTokenChainId && token.chainId === outputTokenChainId) {
+            // When selecting input tokens: mark tokens on the same chain as outputToken as unreachable
+            // When selecting output tokens: mark tokens on the same chain as inputToken as unreachable
+            if (
+              filterParams?.isInput &&
+              outputTokenChainId &&
+              token.chainId === outputTokenChainId
+            ) {
+              isUnreachable = true;
+            } else if (
+              filterParams?.isOutput &&
+              inputTokenChainId &&
+              token.chainId === inputTokenChainId
+            ) {
               isUnreachable = true;
             }
 
             // (bridge only check)
-            // If outputToken is bridge only, mark all swap tokens as unreachable
+            // If outputToken is bridge only, mark all swap-only input tokens as unreachable
+            // This only applies when selecting input tokens (isInput: true)
             if (
+              filterParams?.isInput &&
               isOutputTokenBridgeOnly &&
               token.routeSource.includes("swap") &&
               !token.routeSource.includes("bridge")
