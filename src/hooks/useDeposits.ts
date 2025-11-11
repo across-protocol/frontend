@@ -2,9 +2,10 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
+  defaultRefetchInterval,
   depositsQueryKey,
-  userDepositsQueryKey,
   indexerApiBaseUrl,
+  userDepositsQueryKey,
 } from "utils";
 import { DepositStatusFilter } from "views/Transactions/types";
 
@@ -154,26 +155,6 @@ export type GetIndexerDepositsResponse = IndexerDeposit[];
 export function useDeposits(
   status: DepositStatusFilter,
   limit: number,
-  offset: number = 0
-) {
-  return useQuery({
-    queryKey: depositsQueryKey(status, limit, offset),
-    queryFn: () => {
-      return getDeposits({
-        status: status === "all" ? undefined : status,
-        limit,
-        offset,
-        skipOldUnprofitable: true,
-      });
-    },
-    placeholderData: keepPreviousData,
-    refetchInterval: 5_000,
-  });
-}
-
-export function useUserDeposits(
-  status: DepositStatusFilter,
-  limit: number,
   offset: number = 0,
   userAddress?: string
 ) {
@@ -193,7 +174,45 @@ export function useUserDeposits(
       };
     },
     placeholderData: keepPreviousData,
-    refetchInterval: 5_000,
+    refetchInterval: Infinity,
+  });
+}
+
+export function useUserDeposits(
+  status: DepositStatusFilter,
+  limit: number,
+  offset: number = 0,
+  userAddress?: string
+) {
+  return useQuery({
+    queryKey: userDepositsQueryKey(userAddress!, status, limit, offset),
+    queryFn: async () => {
+      if (!userAddress) {
+        return {
+          deposits: [],
+          pagination: {
+            total: 0,
+            limit: 0,
+            offset: 0,
+          },
+        };
+      }
+
+      const omitStatusFilter = status === "all";
+      const deposits = await getDeposits({
+        address: userAddress,
+        status: omitStatusFilter ? undefined : status,
+        limit,
+        offset,
+      });
+
+      return {
+        deposits,
+      };
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: defaultRefetchInterval,
+    enabled: Boolean(userAddress),
   });
 }
 

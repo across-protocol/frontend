@@ -7,10 +7,8 @@ import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components";
 import { Input, InputGroup } from "components/Input";
-import { getConfig } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { DepositStatusFilter } from "../types";
-import { SpeedUpModal } from "./SpeedUpModal";
 import { useTransactions } from "../hooks/useTransactions";
 import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
@@ -33,8 +31,6 @@ export function AllTransactions({ statusFilter }: Props) {
     deposits,
     totalDeposits,
     depositsQuery,
-    setDepositToSpeedUp,
-    depositToSpeedUp,
   } = useTransactions(statusFilter, walletAddressFilter.trim() || undefined);
 
   const history = useHistory();
@@ -63,6 +59,7 @@ export function AllTransactions({ statusFilter }: Props) {
     }
 
     const intervalId = setInterval(() => {
+      console.log("refetching");
       depositsQuery.refetch();
     }, LIVE_REFETCH_INTERVAL);
 
@@ -85,7 +82,7 @@ export function AllTransactions({ statusFilter }: Props) {
     );
   }
 
-  if (depositsQuery.isError) {
+  if (depositsQuery.isError || (currentPage === 0 && deposits.length === 0)) {
     return (
       <EmptyTable>
         <Text size="lg">Something went wrong... Please try again later</Text>
@@ -103,62 +100,44 @@ export function AllTransactions({ statusFilter }: Props) {
     );
   }
 
-  if (currentPage === 0 && deposits.length === 0) {
-    return (
-      <EmptyTable>
-        <Text size="lg">You have no personal transactions yet</Text>
-        <SecondaryButton size="md" onClick={() => history.push("/")}>
-          Bridge with Across
-        </SecondaryButton>
-      </EmptyTable>
-    );
-  }
-
   return (
     <>
-      {depositToSpeedUp && (
-        <SpeedUpModal
-          isOpen={Boolean(depositToSpeedUp)}
-          onClose={() => setDepositToSpeedUp(undefined)}
-          txTuple={[
-            getConfig().getTokenInfoByAddress(
-              depositToSpeedUp.sourceChainId,
-              depositToSpeedUp.assetAddr
-            ),
-            depositToSpeedUp,
-          ]}
-        />
-      )}
-      <LiveToggleSection disabled={!liveToggleEnabled}>
-        <Text size="sm" color={liveToggleEnabled ? undefined : "grey-400"}>
-          Live updates
-        </Text>
-        <ToggleSwitch>
-          <ToggleInput
-            type="checkbox"
-            checked={isLiveMode}
-            onChange={(e) => setIsLiveMode(e.target.checked)}
-            disabled={!liveToggleEnabled}
-          />
-          <ToggleSlider disabled={!liveToggleEnabled} />
-        </ToggleSwitch>
-      </LiveToggleSection>
-      <FilterSection>
-        <FilterLabel>
-          <Text size="sm">Filter by wallet address</Text>
-        </FilterLabel>
-        <FilterInputWrapper>
-          <InputGroup validationLevel="valid">
-            <Input
-              type="text"
-              placeholder="Enter wallet address (0x...)"
-              value={walletAddressFilter}
-              onChange={(e) => setWalletAddressFilter(e.target.value)}
-              validationLevel="valid"
-            />
-          </InputGroup>
-        </FilterInputWrapper>
-      </FilterSection>
+      <ControlsContainer>
+        <ControlsRow>
+          <FilterSection>
+            <FilterLabel>
+              <Text size="sm" color="grey-400">
+                Filter by wallet address
+              </Text>
+            </FilterLabel>
+            <FilterInputWrapper>
+              <InputGroup validationLevel="valid">
+                <Input
+                  type="text"
+                  placeholder="0x..."
+                  value={walletAddressFilter}
+                  onChange={(e) => setWalletAddressFilter(e.target.value)}
+                  validationLevel="valid"
+                />
+              </InputGroup>
+            </FilterInputWrapper>
+          </FilterSection>
+          <LiveToggleSection disabled={!liveToggleEnabled}>
+            <ToggleSwitch>
+              <ToggleInput
+                type="checkbox"
+                checked={isLiveMode}
+                onChange={(e) => setIsLiveMode(e.target.checked)}
+                disabled={!liveToggleEnabled}
+              />
+              <ToggleSlider disabled={!liveToggleEnabled} />
+            </ToggleSwitch>
+            <Text size="sm" color={liveToggleEnabled ? undefined : "grey-400"}>
+              Live updates
+            </Text>
+          </LiveToggleSection>
+        </ControlsRow>
+      </ControlsContainer>
       <PaginatedDepositsTable
         currentPage={currentPage}
         currentPageSize={pageSize}
@@ -167,7 +146,6 @@ export function AllTransactions({ statusFilter }: Props) {
         onPageChange={setCurrentPage}
         onPageSizeChange={handlePageSizeChange}
         initialPageSize={pageSize}
-        onClickSpeedUp={setDepositToSpeedUp}
         filterKey={`personal-${statusFilter}`}
         disabledColumns={["bridgeFee", "rewards", "rewardsRate"]}
         displayPageNumbers={false}
@@ -176,20 +154,48 @@ export function AllTransactions({ statusFilter }: Props) {
   );
 }
 
+const ControlsContainer = styled.div`
+  margin-bottom: 20px;
+`;
+
+const ControlsRow = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+`;
+
 const LiveToggleSection = styled.div<{ disabled?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(62, 64, 71, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
+
+  &:hover {
+    background: ${({ disabled }) =>
+      disabled ? "rgba(62, 64, 71, 0.3)" : "rgba(62, 64, 71, 0.5)"};
+  }
 `;
 
 const ToggleSwitch = styled.label`
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
 `;
 
 const ToggleInput = styled.input`
@@ -202,7 +208,7 @@ const ToggleInput = styled.input`
   }
 
   &:checked + span:before {
-    transform: translateX(20px);
+    transform: translateX(16px);
   }
 
   &:disabled + span {
@@ -220,13 +226,13 @@ const ToggleSlider = styled.span<{ disabled?: boolean }>`
   bottom: 0;
   background-color: #3e4047;
   transition: 0.3s;
-  border-radius: 24px;
+  border-radius: 20px;
 
   &:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 14px;
+    width: 14px;
     left: 3px;
     bottom: 3px;
     background-color: white;
@@ -238,16 +244,18 @@ const ToggleSlider = styled.span<{ disabled?: boolean }>`
 const FilterSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 6px;
+  flex: 1;
+  min-width: 240px;
 `;
 
 const FilterLabel = styled.div`
   display: flex;
   align-items: center;
+  padding-left: 2px;
 `;
 
 const FilterInputWrapper = styled.div`
-  max-width: 500px;
+  max-width: 400px;
   width: 100%;
 `;

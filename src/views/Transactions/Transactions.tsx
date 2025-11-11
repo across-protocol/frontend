@@ -26,7 +26,7 @@ export function Transactions() {
   return (
     <LayoutV2 maxWidth={1484}>
       <Wrapper>
-        <BreadcrumbV2 />
+        {activeTab !== "all" && <BreadcrumbV2 />}
         <FilterWrapper>
           <TabWrapper>
             <Tab
@@ -42,14 +42,16 @@ export function Transactions() {
               Personal
             </Tab>
           </TabWrapper>
-          <FilterDropdown
-            filterLabel="Status"
-            filterOptions={statusFilterOptions}
-            selectedFilter={statusFilter}
-            onSelectFilter={(filter) =>
-              setStatusFilter(filter as DepositStatusFilter)
-            }
-          />
+          {activeTab !== "all" && (
+            <FilterDropdown
+              filterLabel="Status"
+              filterOptions={statusFilterOptions}
+              selectedFilter={statusFilter}
+              onSelectFilter={(filter) =>
+                setStatusFilter(filter as DepositStatusFilter)
+              }
+            />
+          )}
         </FilterWrapper>
         <BodyWrapper>
           {activeTab === "personal" && (
