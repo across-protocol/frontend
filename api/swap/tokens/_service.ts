@@ -150,6 +150,19 @@ function getIndirectChainTokens(
   });
 }
 
+// Chains where USDT should be displayed as USDT0
+// Temporary list until all chains migrate to USDT0
+const chainsWithUsdt0Enabled = [
+  CHAIN_IDs.POLYGON,
+  CHAIN_IDs.ARBITRUM,
+  CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.PLASMA,
+];
+
+// USDT0 logo URL (matches frontend logo)
+const USDT0_LOGO_URL =
+  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
+
 function getTokensFromEnabledRoutes(
   chainIds: number[],
   pricesForLifiTokens: Record<number, Record<string, string>>
@@ -166,22 +179,35 @@ function getTokensFromEnabledRoutes(
   ) => {
     const finalAddress = isNative ? constants.AddressZero : tokenAddress;
 
-    const tokenKey = `${chainId}-${tokenSymbol}-${finalAddress.toLowerCase()}`;
+    const tokenInfo =
+      TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+
+    // Apply chain-specific display transformations
+    let displaySymbol = tokenSymbol;
+    let displayName = tokenInfo.name;
+    let displayLogoUrl = getFallbackTokenLogoURI(l1TokenAddress);
+
+    // Handle USDT -> USDT0 for specific chains
+    if (tokenSymbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
+      displaySymbol = "USDT0";
+      displayName = "USDT0";
+      displayLogoUrl = USDT0_LOGO_URL;
+    }
+
+    // Use display symbol for deduplication key
+    const tokenKey = `${chainId}-${displaySymbol}-${finalAddress.toLowerCase()}`;
 
     // Only add each unique token once
     if (!seenTokens.has(tokenKey)) {
       seenTokens.add(tokenKey);
 
-      const tokenInfo =
-        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
-
       tokens.push({
         chainId,
         address: finalAddress,
-        name: tokenInfo.name,
-        symbol: tokenSymbol,
+        name: displayName,
+        symbol: displaySymbol,
         decimals: tokenInfo.decimals,
-        logoUrl: getFallbackTokenLogoURI(l1TokenAddress),
+        logoUrl: displayLogoUrl,
         priceUsd: pricesForLifiTokens[chainId]?.[finalAddress] || null,
       });
     }
@@ -226,6 +252,15 @@ function deduplicateTokens(tokens: SwapToken[]): SwapToken[] {
   tokens.forEach((token) => {
     const key = `${token.chainId}-${token.symbol}-${token.address.toLowerCase()}`;
 
+    // Skip USDT on chains with USDT0 enabled (USDT0 comes first from Across tokens)
+    if (
+      token.symbol === "USDT" &&
+      chainsWithUsdt0Enabled.includes(token.chainId)
+    ) {
+      const usdt0Key = `${token.chainId}-USDT0-${token.address.toLowerCase()}`;
+      if (seen.has(usdt0Key)) return; // Skip this USDT, we already have USDT0
+    }
+
     // Keep first occurrence
     if (!seen.has(key)) {
       seen.set(key, token);
@@ -254,6 +289,20 @@ export async function fetchSwapTokensData(
 
   const responseJson: SwapToken[] = [];
 
+  // Add tokens from Across' enabled routes first (highest priority for normalized names)
+  const tokensFromEnabledRoutes = getTokensFromEnabledRoutes(
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...tokensFromEnabledRoutes);
+
+  // Add tokens from indirect chains (e.g., USDT-SPOT on HyperCore)
+  const indirectChainTokens = getIndirectChainTokens(
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...indirectChainTokens);
+
   // Add Uniswap tokens
   const uniswapTokens = getUniswapTokens(
     uniswapTokensResponse.data,
@@ -277,21 +326,7 @@ export async function fetchSwapTokensData(
   );
   responseJson.push(...jupiterTokens);
 
-  // Add tokens from indirect chains (e.g., USDT-SPOT on HyperCore)
-  const indirectChainTokens = getIndirectChainTokens(
-    targetChainIds,
-    pricesForLifiTokens
-  );
-  responseJson.push(...indirectChainTokens);
-
-  // Add tokens from Across' enabled routes (fills gaps from external sources)
-  const tokensFromEnabledRoutes = getTokensFromEnabledRoutes(
-    targetChainIds,
-    pricesForLifiTokens
-  );
-  responseJson.push(...tokensFromEnabledRoutes);
-
-  // Deduplicate tokens (external sources take precedence)
+  // Deduplicate tokens (Across tokens take precedence)
   const deduplicatedTokens = deduplicateTokens(responseJson);
 
   return deduplicatedTokens;

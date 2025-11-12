@@ -30,6 +30,7 @@ import {
   paramToArray,
   ConvertDecimals,
   isOutputTokenBridgeable,
+  addMarkupToAmount,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -752,6 +753,7 @@ function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
   let expectedOutputAmount = BigNumber.from(0);
 
   const appFeeAmount = params.appFee?.feeAmount ?? 0;
+  const originSlippage = (params.originSwapQuote?.slippageTolerance ?? 0) / 100;
 
   if (params.amountType === AMOUNT_TYPE.EXACT_INPUT) {
     inputAmount = params.amount;
@@ -829,7 +831,9 @@ function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
   const expectedOutputAmountSansAppFees =
     params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
       ? expectedOutputAmount
-      : expectedOutputAmount.sub(appFeeAmount);
+      : addMarkupToAmount(expectedOutputAmount, originSlippage).sub(
+          appFeeAmount
+        );
 
   return {
     inputAmount,

@@ -58,6 +58,7 @@ export function makeE2EConfig() {
         miningConfig: {
           type: "manual",
         },
+        loggingLevel: "error",
       }),
       [optimism.id]: createMemoryClient({
         common: optimism,
@@ -68,6 +69,7 @@ export function makeE2EConfig() {
         miningConfig: {
           type: "manual",
         },
+        loggingLevel: "error",
       }),
     };
 
