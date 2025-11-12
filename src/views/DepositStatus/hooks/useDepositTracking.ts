@@ -1,11 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { BigNumber } from "ethers";
 
 import { useAmplitude } from "hooks";
 import {
   generateDepositConfirmed,
-  getToken,
   recordTransferUserProperties,
   wait,
   getChainInfo,
@@ -25,6 +24,8 @@ import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useToken } from "hooks/useToken";
+import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -48,11 +49,17 @@ export function useDepositTracking({
 }) {
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
+  const queryClient = useQueryClient();
   const { addToAmpliQueue } = useAmplitude();
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
   const account =
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  // Resolve token info for analytics
+  const tokenForAnalytics = useToken(
+    fromBridgePagePayload?.quoteForAnalytics.tokenSymbol || ""
+  );
 
   // Create appropriate strategy for the source chain
   const { depositStrategy, fillStrategy } = useMemo(
@@ -167,9 +174,14 @@ export function useDepositTracking({
   useEffect(() => {
     const fillInfo = fillQuery.data;
 
-    if (!fromBridgePagePayload || !fillInfo || fillInfo.status === "filling") {
+    if (!fillInfo || fillInfo.status === "filling") {
       return;
     }
+    // Refetch user balances
+    queryClient.refetchQueries({
+      queryKey: makeUseUserTokenBalancesQueryKey(),
+      type: "all", // Refetch both active and inactive queries
+    });
     // Remove existing deposit and add updated one with fill information
     const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
 
@@ -177,28 +189,44 @@ export function useDepositTracking({
       removeLocalDeposits([depositTxHash]);
     }
 
-    // Add to local storage with fill information
-    // Use the strategy-specific conversion method
-    const localDeposit = fillStrategy.convertForFillQuery(
-      fillInfo,
-      fromBridgePagePayload
-    );
-    addLocalDeposit(localDeposit);
+    if (fromBridgePagePayload) {
+      // Add to local storage with fill information
+      // Use the strategy-specific conversion method
+      const localDeposit = fillStrategy.convertForFillQuery(
+        fillInfo,
+        fromBridgePagePayload
+      );
+      addLocalDeposit(localDeposit);
 
-    // Record transfer properties
-    const { quoteForAnalytics, depositArgs, tokenPrice } =
-      fromBridgePagePayload;
+      // Record transfer properties
+      const { quoteForAnalytics, depositArgs, tokenPrice } =
+        fromBridgePagePayload;
 
-    recordTransferUserProperties(
-      BigNumber.from(depositArgs.amount),
-      BigNumber.from(tokenPrice),
-      getToken(quoteForAnalytics.tokenSymbol).decimals,
-      quoteForAnalytics.tokenSymbol.toLowerCase(),
-      Number(quoteForAnalytics.fromChainId),
-      Number(quoteForAnalytics.toChainId),
-      quoteForAnalytics.fromChainName
-    );
-  }, [fillQuery.data, depositTxHash, fromBridgePagePayload, fillStrategy]);
+      // Only record if we have token info
+      if (tokenForAnalytics) {
+        recordTransferUserProperties(
+          BigNumber.from(depositArgs.amount),
+          BigNumber.from(tokenPrice),
+          tokenForAnalytics.decimals,
+          quoteForAnalytics.tokenSymbol.toLowerCase(),
+          Number(quoteForAnalytics.fromChainId),
+          Number(quoteForAnalytics.toChainId),
+          quoteForAnalytics.fromChainName
+        );
+      }
+    }
+  }, [
+    fillQuery.data,
+    depositTxHash,
+    fromBridgePagePayload,
+    fillStrategy,
+    tokenForAnalytics,
+    queryClient,
+    fromChainId,
+    toChainId,
+    accountSVM,
+    accountEVM,
+  ]);
 
   const status: DepositStatus = !depositQuery.data?.depositTimestamp
     ? "depositing"

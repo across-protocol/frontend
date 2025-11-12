@@ -7,6 +7,7 @@ import { IconPair } from "components/IconPair";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Input, InputGroup } from "components/Input";
+import { TokenImage } from "components/TokenImage";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import {
   QUERIESV2,
@@ -81,13 +82,23 @@ export function AmountInput({
           token.logoURIs?.length === 2 ? (
             <IconPairContainer>
               <IconPair
-                LeftIcon={<TokenIcon src={token.logoURIs[0]} />}
-                RightIcon={<TokenIcon src={token.logoURIs[1]} />}
+                LeftIcon={
+                  <TokenIcon
+                    src={token.logoURIs[0]}
+                    alt={`${token.symbol} logo`}
+                  />
+                }
+                RightIcon={
+                  <TokenIcon
+                    src={token.logoURIs[1]}
+                    alt={`${token.symbol} logo`}
+                  />
+                }
                 iconSize={16}
               />
             </IconPairContainer>
           ) : (
-            <TokenIcon src={token.logoURI} />
+            <TokenIcon src={token.logoURI} alt={`${token.symbol} logo`} />
           )
         ) : null}
         <Input
@@ -217,7 +228,7 @@ const MaxButtonWrapper = styled(UnstyledButton)`
   }
 `;
 
-const TokenIcon = styled.img`
+const TokenIcon = styled(TokenImage)`
   height: 16px;
   width: 16px;
 `;

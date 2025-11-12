@@ -1,7 +1,6 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
-import { QUERIESV2 } from "utils";
+import { COLORS, QUERIES, QUERIESV2 } from "utils";
 import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`
@@ -13,6 +12,7 @@ type WrapperType = {
   reverseAnimation?: boolean;
   direction: ModalDirection;
 };
+
 export const Wrapper = styled.div<WrapperType>`
   position: fixed;
   top: 0;
@@ -28,7 +28,7 @@ export const Wrapper = styled.div<WrapperType>`
 
   z-index: 99998;
 
-  animation: ${fadeBackground} 0.5s linear;
+  animation: ${fadeBackground} 0.3s linear;
   animation-fill-mode: forwards;
 
   opacity: ${({ reverseAnimation }) => (reverseAnimation ? 0 : 1)};
@@ -93,24 +93,21 @@ type ModalWrapperType = {
 const minimumMargin = 32;
 
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
-  --padding-modal-content: ${({ padding }) =>
-    padding === "normal" ? "24px" : "16px"};
+  --padding-base: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
+  --padding-modal-content: calc(var(--padding-base) / 1.5);
   max-height: ${({ height, topYOffset }) =>
     height
       ? `min(calc(100svh - ${minimumMargin * 2}px - ${topYOffset ?? 0}px), ${height}px)`
       : "calc(100svh - 64px)"};
   max-width: ${({ width }) => width ?? 800}px;
-
-  height: fit-content;
   width: calc(100% - 32px);
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--padding-modal-content);
 
   margin: 0 auto;
-  padding: var(--padding-modal-content);
+  padding: 0;
 
   margin-top: ${({ topYOffset }) => topYOffset ?? 0}px;
   margin-bottom: ${({ bottomYOffset }) => bottomYOffset ?? 0}px;
@@ -122,6 +119,11 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   position: relative;
 
   overflow: hidden;
+
+  ${QUERIES.tabletAndUp} {
+    --padding-modal-content: var(--padding-base);
+    border-radius: 24px;
+  }
 `;
 
 export const TitleAndExitWrapper = styled.div`
@@ -132,7 +134,7 @@ export const TitleAndExitWrapper = styled.div`
   align-items: center;
 
   gap: 12px;
-  padding: 0px;
+  padding-bottom: var(--padding-modal-content);
 
   width: 100%;
 `;
@@ -148,10 +150,6 @@ export const Title = styled.p`
   }
 `;
 
-export const StyledExitIcon = styled(CrossIcon)`
-  cursor: pointer;
-`;
-
 export const ElementRowDivider = styled.div`
   height: 1px;
   min-height: 1px;
@@ -159,4 +157,52 @@ export const ElementRowDivider = styled.div`
 
   margin-left: calc(0px - var(--padding-modal-content));
   width: calc(100% + (2 * var(--padding-modal-content)));
+`;
+
+export const CloseButton = styled.button`
+  border: none;
+  background-color: transparent;
+  display: inline-flex;
+  outline: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${COLORS["grey-400-15"]};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${COLORS.aqua};
+  }
+`;
+
+export const ModalHeader = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #202024;
+  padding: var(--padding-modal-content);
+  padding-bottom: 0;
+  flex-shrink: 0;
+  width: 100%;
+`;
+
+export const ModalContent = styled.div<{ noScroll?: boolean }>`
+  flex: 1;
+  overflow: ${({ noScroll }) => (noScroll ? "clip" : "hidden scroll")};
+  padding: var(--padding-modal-content);
+  min-height: 0;
+  width: 100%;
+`;
+
+export const ModalFooter = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #202024;
+  padding: var(--padding-modal-content);
+  padding-top: 0;
+  flex-shrink: 0;
 `;
