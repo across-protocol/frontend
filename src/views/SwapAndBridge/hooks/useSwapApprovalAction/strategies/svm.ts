@@ -3,6 +3,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { SwapApprovalData, SwapTx } from "./types";
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import bs58 from "bs58";
 
 export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStrategy {
   constructor(
@@ -68,13 +69,7 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
       throw new Error("Failed to get signature from signed transaction");
     }
 
-    // Convert signature to base64 string for logging and return
-    const signatureBase64 =
-      signature instanceof Buffer
-        ? signature.toString("base64")
-        : Buffer.from(signature).toString("base64");
-
-    console.log("Signed SVM tx:", signatureBase64);
+    console.log("Signed SVM tx:", signature);
 
     // Serialize the signed transaction and send it using the connection
     const serializedTx = signedTx.serialize();
@@ -87,7 +82,13 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
 
     console.log("Tx sent and confirmed");
 
-    return signatureBase64;
+    const signatureUint8Array =
+      signature instanceof Buffer
+        ? new Uint8Array(signature)
+        : signature instanceof Uint8Array
+          ? signature
+          : new Uint8Array(Buffer.from(signature));
+    return bs58.encode(signatureUint8Array);
   }
 
   async execute(approvalData: SwapApprovalData): Promise<string> {

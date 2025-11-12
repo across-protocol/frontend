@@ -26,6 +26,7 @@ import {
   messageCache,
   getLogger,
 } from "../../_utils";
+import { getMultiCallHandlerAddress } from "../../_multicall-handler";
 import {
   getSpokePoolPeriphery,
   TransferType,
@@ -308,8 +309,14 @@ async function _buildDepositTxForAllowanceHolderSvm(
     sdk.utils.toAddressType(crossSwap.depositor, originChainId).toBase58()
   );
   const recipient = address(
-    // FIXME: When we support messages, recipient must be the MulticallHandler
-    sdk.utils.toAddressType(crossSwap.recipient, destinationChainId).toBase58()
+    sdk.utils
+      .toAddressType(
+        sdk.utils.isMessageEmpty(crossSwapQuotes.bridgeQuote.message ?? "0x")
+          ? crossSwap.recipient
+          : getMultiCallHandlerAddress(destinationChainId),
+        destinationChainId
+      )
+      .toBase58()
   );
 
   const inputToken = address(
