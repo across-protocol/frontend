@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
@@ -11,7 +11,6 @@ import { AmountCell } from "./cells/AmountCell";
 import { RouteCell } from "./cells/RouteCell";
 import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
-import { TimeAgoCell } from "./cells/TimeAgoCell";
 import { StatusCell } from "./cells/StatusCell";
 import { TxCell } from "./cells/TxCell";
 import { NetFeeCell } from "./cells/NetFeeCell";
@@ -19,9 +18,12 @@ import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
+import { TimeAgoCell } from "./cells/TimeAgoCell";
+import { useDepositRowAnimation } from "./hooks/useDepositRowAnimation";
+import { AnimatedColorOverlay } from "./AnimatedColorOverlay";
 
 type Props = {
-  deposit: Deposit & { isNewlyStreamed?: boolean; isUpdated?: boolean };
+  deposit: Deposit & { streamedAt?: number; updatedAt?: number };
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
@@ -40,6 +42,8 @@ export function DataRow({
   onClickSpeedUp,
 }: Props) {
   const history = useHistory();
+  const { rowAnimation, overlayProps } = useDepositRowAnimation(deposit);
+
   const swapToken = config.getTokenInfoByAddressSafe(
     deposit.sourceChainId,
     deposit.swapToken?.address || ""
@@ -53,7 +57,6 @@ export function DataRow({
     deposit.outputToken?.address || ""
   );
 
-  // Hide unsupported or unknown token deposits
   if (!inputToken) {
     return null;
   }
@@ -62,54 +65,9 @@ export function DataRow({
     history.push(`/transaction/${deposit.depositTxHash}`);
   };
 
-  const isNewDeposit = deposit.isNewlyStreamed;
-  const rowAnimation = isNewDeposit
-    ? {
-        initial: { opacity: 0, scaleY: 0 },
-        animate: { opacity: 1, scaleY: 1 },
-        transition: {
-          opacity: { duration: 0.5, ease: "easeOut" },
-          scaleY: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-        },
-        layout: true,
-      }
-    : { layout: true };
-
-  // Determine overlay color based on status
-  const getOverlayColor = () => {
-    if (!isNewDeposit && !deposit.isUpdated) return null;
-
-    // Use green (aqua) for filled, white for processing/pending
-    return deposit.status === "filled" ? "aqua" : "white";
-  };
-
-  const overlayColor = getOverlayColor();
-  const overlayAnimation = isNewDeposit
-    ? {
-        initial: { opacity: 0.3 },
-        animate: { opacity: 0 },
-        exit: { opacity: 0 },
-        transition: { duration: 1.2, ease: "easeOut" },
-      }
-    : {
-        initial: { opacity: 0.4 },
-        animate: { opacity: 0 },
-        exit: { opacity: 0 },
-        transition: { duration: 1.0, ease: "easeOut" },
-      };
-
   return (
     <StyledRow onClick={handleRowClick} {...rowAnimation}>
-      <AnimatePresence>
-        {overlayColor && (
-          <ColorOverlay
-            key={`overlay-${deposit.depositId}`}
-            className="color-overlay"
-            color={overlayColor}
-            {...overlayAnimation}
-          />
-        )}
-      </AnimatePresence>
+      <AnimatedColorOverlay overlay={overlayProps} />
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}
@@ -161,17 +119,6 @@ export function DataRow({
     </StyledRow>
   );
 }
-
-const ColorOverlay = styled(motion.div)<{ color: "aqua" | "yellow" | "white" }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: ${({ color }) => COLORS[color]};
-  pointer-events: none;
-  z-index: 0;
-`;
 
 const StyledRow = styled(motion.tr)`
   position: relative;

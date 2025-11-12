@@ -3,7 +3,7 @@ import { StreamedDeposit } from "../hooks/useStreamingDeposits";
 
 export function convertIndexerDepositToDeposit(
   indexerDeposit: StreamedDeposit
-): Deposit & { isNewlyStreamed?: boolean; isUpdated?: boolean } {
+): Deposit & { streamedAt?: number; updatedAt?: number } {
   const depositTime =
     new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000;
   const fillTime = new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000;
@@ -78,7 +78,7 @@ export function convertIndexerDepositToDeposit(
         }
       : undefined,
 
-    isNewlyStreamed: indexerDeposit.isNewlyStreamed,
-    isUpdated: indexerDeposit.isUpdated,
+    streamedAt: indexerDeposit.streamedAt,
+    updatedAt: indexerDeposit.updatedAt,
   };
 }

@@ -1,6 +1,5 @@
-import { useHistory } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
@@ -32,18 +31,18 @@ export function AllTransactions() {
     depositsQuery,
   } = useTransactions(walletAddressFilter.trim() || undefined);
 
-  const history = useHistory();
   const queryClient = useQueryClient();
 
   const isFirstPage = currentPage === 0;
   const isFiltering = walletAddressFilter.trim().length > 0;
-  const liveToggleEnabled = isFirstPage && !isFiltering;
   const streamingEnabled = isFirstPage && isLiveMode && !isFiltering;
   const streamedDeposits = useStreamingDeposits(
     deposits,
     pageSize,
     streamingEnabled
   );
+
+  const liveToggleEnabled = isFirstPage && !isFiltering;
 
   // Disable live mode when navigating away from first page or when filtering
   useEffect(() => {
@@ -60,7 +59,6 @@ export function AllTransactions() {
 
       // Refetch when page becomes visible again
       if (isVisible && streamingEnabled && !depositsQuery.isLoading) {
-        console.log("Page became visible, refetching deposits");
         depositsQuery.refetch();
       }
     };
@@ -93,10 +91,7 @@ export function AllTransactions() {
     }
 
     const intervalId = setInterval(() => {
-      console.log(
-        `[Transactions] 📡 Fetching new deposits (interval: ${LIVE_REFETCH_INTERVAL / 1000}s)`
-      );
-      depositsQuery.refetch();
+      void depositsQuery.refetch();
     }, LIVE_REFETCH_INTERVAL);
 
     return () => {
