@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
@@ -15,7 +15,7 @@ import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 
-const LIVE_REFETCH_INTERVAL = 5000;
+const LIVE_REFETCH_INTERVAL = 1_000;
 
 export function AllTransactions() {
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
@@ -39,14 +39,11 @@ export function AllTransactions() {
   const isFirstPage = currentPage === 0;
   const isFiltering = walletAddressFilter.trim().length > 0;
 
-  const resetStreamingRef = useRef<() => void>(() => {});
-
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
     refetchInterval: LIVE_REFETCH_INTERVAL,
     enabled: isFirstPage && !isFiltering,
     isLoading: depositsQuery.isLoading,
-    onReset: () => resetStreamingRef.current(),
   });
 
   const convertedDeposits = useMemo(
@@ -59,7 +56,7 @@ export function AllTransactions() {
           hideFeeTooLow: !(account === walletAddressFilter),
         };
       }),
-    [deposits]
+    [deposits, account, walletAddressFilter]
   );
 
   if (depositsQuery.isLoading) {

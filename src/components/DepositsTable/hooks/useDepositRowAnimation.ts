@@ -20,25 +20,19 @@ type DepositRowAnimationResult = {
 };
 
 export function useDepositRowAnimation(
-  deposit: Deposit & { streamedAt?: number; updatedAt?: number }
+  deposit: Deposit
 ): DepositRowAnimationResult {
-  const isNewDeposit = !!deposit.streamedAt;
-  const isUpdated = !!deposit.updatedAt;
+  const rowAnimation: AnimationProps = {
+    initial: { opacity: 0, scaleY: 0, overlayColor: "aqua" },
+    animate: { opacity: 1, scaleY: 1, overlayColor: null },
+    transition: {
+      opacity: { duration: 0.5, ease: "easeOut" },
 
-  const rowAnimation: AnimationProps = isNewDeposit
-    ? {
-        initial: { opacity: 0, scaleY: 0 },
-        animate: { opacity: 1, scaleY: 1 },
-        transition: {
-          opacity: { duration: 0.5, ease: "easeOut" },
-          scaleY: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-        },
-        layout: true,
-      }
-    : { layout: true };
-
+      scaleY: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+    },
+    layout: true,
+  };
   const getOverlayColor = (): "aqua" | "white" | null => {
-    if (!isNewDeposit && !isUpdated) return null;
     return deposit.status === "filled" ? "aqua" : "white";
   };
 
@@ -48,19 +42,12 @@ export function useDepositRowAnimation(
     return { rowAnimation, overlayProps: null };
   }
 
-  const overlayAnimation: AnimationProps = isNewDeposit
-    ? {
-        initial: { opacity: 0.3 },
-        animate: { opacity: 0 },
-        exit: { opacity: 0 },
-        transition: { duration: 1.2, ease: "easeOut" },
-      }
-    : {
-        initial: { opacity: 0.4 },
-        animate: { opacity: 0 },
-        exit: { opacity: 0 },
-        transition: { duration: 1.0, ease: "easeOut" },
-      };
+  const overlayAnimation: AnimationProps = {
+    initial: { opacity: 0.3 },
+    animate: { opacity: 0 },
+    exit: { opacity: 0 },
+    transition: { duration: 1.2, ease: "easeOut" },
+  };
 
   return {
     rowAnimation,

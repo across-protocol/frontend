@@ -1,9 +1,8 @@
-import { Deposit } from "hooks/useDeposits";
-import { StreamedDeposit } from "../hooks/useStreamingDeposits";
+import { Deposit, IndexerDeposit } from "hooks/useDeposits";
 
 export function convertIndexerDepositToDeposit(
-  indexerDeposit: StreamedDeposit
-): Deposit & { streamedAt?: number; updatedAt?: number } {
+  indexerDeposit: IndexerDeposit
+): Deposit {
   const depositTime =
     new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000;
   const fillTime = new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000;
@@ -77,8 +76,5 @@ export function convertIndexerDepositToDeposit(
           swapFeeAmount: "0",
         }
       : undefined,
-
-    streamedAt: indexerDeposit.streamedAt,
-    updatedAt: indexerDeposit.updatedAt,
   };
 }

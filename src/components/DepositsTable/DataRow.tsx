@@ -23,7 +23,7 @@ import { useDepositRowAnimation } from "./hooks/useDepositRowAnimation";
 import { AnimatedColorOverlay } from "./AnimatedColorOverlay";
 
 type Props = {
-  deposit: Deposit & { streamedAt?: number; updatedAt?: number };
+  deposit: Deposit;
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;

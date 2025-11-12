@@ -32,6 +32,11 @@ export function WalletAddressFilter({
             validationLevel="valid"
           />
         </InputGroup>
+        {value.trim().length > 0 && (
+          <QuickFilterButton onClick={() => onChange("")}>
+            Clear
+          </QuickFilterButton>
+        )}
         {connectedAddress && (
           <QuickFilterButton onClick={() => onChange(connectedAddress)}>
             My Address
