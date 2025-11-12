@@ -5,6 +5,7 @@ import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import { LayoutV2 } from "components";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
+import { ReactComponent as BackgroundGraphic } from "assets/bg-banners/overview-card-background.svg";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { CenteredMessage } from "./components/CenteredMessage";
@@ -13,6 +14,8 @@ import { StatusBadge } from "./components/StatusBadge";
 import { IconPairDisplay } from "./components/IconPairDisplay";
 import { TxDetailSection } from "./components/TxDetailSection";
 import { CopyableText } from "./components/CopyableText";
+import { QuickLinksBar } from "./components/QuickLinksBar";
+import { CollapsibleSection } from "./components/CollapsibleSection";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
 import DepositStatusAnimatedIcons from "../DepositStatus/components/DepositStatusAnimatedIcons";
 
@@ -41,6 +44,62 @@ function formatTimestamp(timestamp: string | null): string {
     });
   } catch {
     return "Invalid date";
+  }
+}
+
+function calculateFillDuration(
+  depositTimestamp: string | null,
+  fillTimestamp: string | null
+): { formatted: string; isPending: boolean } {
+  if (!depositTimestamp) {
+    return { formatted: "N/A", isPending: false };
+  }
+
+  const depositTime = new Date(depositTimestamp).getTime();
+
+  if (!fillTimestamp) {
+    const elapsedMs = Date.now() - depositTime;
+    const elapsedSeconds = elapsedMs / 1000;
+
+    if (elapsedSeconds < 60) {
+      return {
+        formatted: `${elapsedSeconds.toFixed(1)}s elapsed`,
+        isPending: true,
+      };
+    } else if (elapsedSeconds < 3600) {
+      const minutes = Math.floor(elapsedSeconds / 60);
+      return {
+        formatted: `${minutes}m ${Math.floor(elapsedSeconds % 60)}s elapsed`,
+        isPending: true,
+      };
+    } else {
+      const hours = Math.floor(elapsedSeconds / 3600);
+      const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+      return {
+        formatted: `${hours}h ${minutes}m elapsed`,
+        isPending: true,
+      };
+    }
+  }
+
+  const fillTime = new Date(fillTimestamp).getTime();
+  const durationMs = fillTime - depositTime;
+
+  if (durationMs < 1000) {
+    return { formatted: `${durationMs}ms`, isPending: false };
+  } else if (durationMs < 60000) {
+    return {
+      formatted: `${(durationMs / 1000).toFixed(3)}s`,
+      isPending: false,
+    };
+  } else {
+    const seconds = Math.floor(durationMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return {
+      formatted: `${minutes}m ${remainingSeconds}s`,
+      isPending: false,
+    };
   }
 }
 
@@ -102,6 +161,27 @@ export default function Transaction() {
     deposit.outputToken
   );
 
+  const fillDuration = calculateFillDuration(
+    deposit.depositBlockTimestamp,
+    deposit.fillBlockTimestamp
+  );
+
+  const quickLinks = [
+    {
+      label: "View Deposit",
+      url: sourceChain.constructExplorerLink(deposit.depositTxnRef),
+      chainName: sourceChain.name,
+    },
+  ];
+
+  if (deposit.fillTx) {
+    quickLinks.push({
+      label: "View Fill",
+      url: destinationChain.constructExplorerLink(deposit.fillTx),
+      chainName: destinationChain.name,
+    });
+  }
+
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
@@ -116,14 +196,31 @@ export default function Transaction() {
           <BreadcrumbDivider />
         </BreadcrumbWrapper>
         <InnerSectionWrapper>
-          <StatusWrapper>
-            <DepositStatusAnimatedIcons
-              status={deposit.status as any}
-              toChainId={Number(destinationChainId)}
-              fromChainId={Number(deposit.originChainId)}
-              externalProjectId={undefined}
-            />
-          </StatusWrapper>
+          <FillTimeHero>
+            <StatusWrapper>
+              <DepositStatusAnimatedIcons
+                status={deposit.status as any}
+                toChainId={Number(destinationChainId)}
+                fromChainId={Number(deposit.originChainId)}
+                externalProjectId={undefined}
+              />
+            </StatusWrapper>
+
+            <BackgroundWrapper>
+              <BackgroundGraphic />
+            </BackgroundWrapper>
+            <HeroContent>
+              <FillTimeLabel>
+                {fillDuration.isPending ? "Time Elapsed" : "Fill Time"}
+              </FillTimeLabel>
+              <FillTimeDuration isPending={fillDuration.isPending}>
+                {fillDuration.formatted}
+              </FillTimeDuration>
+              <StatusBadge status={deposit.status} />
+            </HeroContent>
+          </FillTimeHero>
+
+          <QuickLinksBar links={quickLinks} />
 
           <SectionWrapper title="Basic Information">
             <DetailsGrid>
@@ -274,16 +371,12 @@ export default function Transaction() {
             </DetailsGrid>
           </SectionWrapper>
 
-          <SectionWrapper title="Timestamps & Deadlines">
+          <SectionWrapper title="Recent Activity">
             <DetailsGrid>
               <DetailSection label="Deposit Time">
                 <Text color="light-200">
                   {formatTimestamp(deposit.depositBlockTimestamp)}
                 </Text>
-              </DetailSection>
-
-              <DetailSection label="Deposit Block">
-                <Text color="light-200">{deposit.depositBlockNumber}</Text>
               </DetailSection>
 
               {deposit.fillBlockTimestamp && (
@@ -299,20 +392,6 @@ export default function Transaction() {
                   {formatTimestamp(deposit.quoteTimestamp)}
                 </Text>
               </DetailSection>
-
-              <DetailSection label="Fill Deadline">
-                <Text color="light-200">
-                  {formatTimestamp(deposit.fillDeadline)}
-                </Text>
-              </DetailSection>
-
-              {deposit.exclusivityDeadline && (
-                <DetailSection label="Exclusivity Deadline">
-                  <Text color="light-200">
-                    {formatTimestamp(deposit.exclusivityDeadline)}
-                  </Text>
-                </DetailSection>
-              )}
             </DetailsGrid>
           </SectionWrapper>
 
@@ -362,8 +441,26 @@ export default function Transaction() {
             </DetailsGrid>
           </SectionWrapper>
 
-          <SectionWrapper title="Advanced Details">
+          <CollapsibleSection title="Advanced Details" defaultOpen={false}>
             <DetailsGrid>
+              <DetailSection label="Deposit Block">
+                <Text color="light-200">{deposit.depositBlockNumber}</Text>
+              </DetailSection>
+
+              <DetailSection label="Fill Deadline">
+                <Text color="light-200">
+                  {formatTimestamp(deposit.fillDeadline)}
+                </Text>
+              </DetailSection>
+
+              {deposit.exclusivityDeadline && (
+                <DetailSection label="Exclusivity Deadline">
+                  <Text color="light-200">
+                    {formatTimestamp(deposit.exclusivityDeadline)}
+                  </Text>
+                </DetailSection>
+              )}
+
               <DetailSection label="Relay Hash">
                 <CopyableText
                   color="light-200"
@@ -452,7 +549,7 @@ export default function Transaction() {
                 </DetailSection>
               )}
             </DetailsGrid>
-          </SectionWrapper>
+          </CollapsibleSection>
         </InnerSectionWrapper>
       </Wrapper>
     </LayoutV2>
@@ -494,7 +591,6 @@ const StatusWrapper = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: -32px;
 
   @media ${QUERIESV2.sm.andDown} {
     margin-bottom: -8px;
@@ -558,5 +654,76 @@ const DetailsGrid = styled.div`
     grid-template-columns: 1fr;
     gap: 20px;
     padding: 16px;
+  }
+`;
+
+const FillTimeHero = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 40px 24px;
+  background: ${COLORS["black-700"]};
+  border-radius: 16px;
+  border: 1px solid ${COLORS["grey-600"]};
+  overflow: clip;
+  isolation: isolate;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 32px 16px;
+    gap: 12px;
+  }
+`;
+
+const BackgroundWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 12px;
+  }
+`;
+
+const FillTimeLabel = styled(Text)`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS["grey-400"]};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const FillTimeDuration = styled.div<{ isPending?: boolean }>`
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: ${(props) => (props.isPending ? COLORS.yellow : COLORS.aqua)};
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 40px;
   }
 `;
