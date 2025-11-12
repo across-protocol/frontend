@@ -20,7 +20,12 @@ import {
   tagIntegratorId,
   tagSwapApiMarker,
 } from "../../_integrator-id";
-import { getSpokePool, getSpokePoolAddress } from "../../_utils";
+import {
+  getSpokePool,
+  getSpokePoolAddress,
+  messageCache,
+  getLogger,
+} from "../../_utils";
 import {
   getSpokePoolPeriphery,
   TransferType,
@@ -285,6 +290,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
   crossSwapQuotes: CrossSwapQuotes,
   integratorId?: string
 ) {
+  const logger = getLogger();
   const { originSwapQuote, crossSwap } = crossSwapQuotes;
   const originChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
@@ -346,11 +352,27 @@ async function _buildDepositTxForAllowanceHolderSvm(
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
   // FIXME: Temporarily hardcoding empty messages.
   // Fix when we have a workaround for transaction size limitations
-  const message = Uint8Array.from(Buffer.from("", "hex"));
+  // const message = Uint8Array.from(Buffer.from("", "hex"));
   // Future implementation should use:
-  // const message = Uint8Array.from(
-  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "", "hex")
-  // );
+  const messageHex = crossSwapQuotes.bridgeQuote.message ?? "0x";
+  const messageHash = utils.keccak256(messageHex);
+  const message = Uint8Array.from(Buffer.from(messageHash.slice(2), "hex"));
+
+  // Store the original message in cache for retrieval via the message endpoint
+  const ttl = 4 * 3600;
+  logger.debug({
+    at: "_buildDepositTxForAllowanceHolderSvm",
+    message: "Storing message in cache",
+    messageHash,
+    messageHexLength: messageHex.length,
+    ttl,
+  });
+  await messageCache({ messageHash, ttl }).set(messageHex);
+  logger.debug({
+    at: "_buildDepositTxForAllowanceHolderSvm",
+    message: "Successfully stored message in cache",
+    messageHash,
+  });
 
   const noopSigner = createNoopSigner(depositor);
   const depositDataSeed: Parameters<

@@ -63,6 +63,7 @@ import {
   buildInternalCacheKey,
   getCachedValue,
   makeCacheGetterAndSetter,
+  makeCacheGetterAndSetterWithNull,
 } from "./_cache";
 import {
   MissingParamError,
@@ -2670,4 +2671,13 @@ export function setLimitsSpanAttributes(
   for (const [key, value] of Object.entries(limits)) {
     span.setAttribute(key, value.toString());
   }
+}
+
+export function messageCache(params: { messageHash: string; ttl: number }) {
+  const { messageHash, ttl } = params;
+
+  return makeCacheGetterAndSetterWithNull<string>(
+    buildInternalCacheKey("message", messageHash),
+    ttl
+  );
 }

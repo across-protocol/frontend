@@ -168,3 +168,36 @@ export function makeCacheGetterAndSetter<T>(
     },
   };
 }
+
+export async function getCachedValueOrNull<T>(
+  key: string,
+  parser?: (value: T) => T
+): Promise<T | null> {
+  let cachedValue = null;
+  try {
+    cachedValue = await redisCache.get<T>(key);
+  } catch (error) {
+    getLogger().error({
+      at: "getCachedValueOrNull",
+      message: "Error while calling redisCache.get",
+      error: compactAxiosError(error as Error),
+    });
+  }
+
+  return parser && cachedValue ? parser(cachedValue) : cachedValue;
+}
+
+export function makeCacheGetterAndSetterWithNull<T>(
+  key: string,
+  ttl: number,
+  parser?: (value: T) => T
+) {
+  return {
+    get: async () => {
+      return getCachedValueOrNull<T>(key, parser);
+    },
+    set: async (value: T) => {
+      await redisCache.set(key, value, ttl);
+    },
+  };
+}
