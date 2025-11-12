@@ -22,37 +22,42 @@ export function Transactions() {
   const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>(
     statusFilterOptions[0]
   );
+  const NO_TAB_POC = true;
 
   return (
     <LayoutV2 maxWidth={1484}>
       <Wrapper>
         {activeTab !== "all" && <BreadcrumbV2 />}
-        <FilterWrapper>
-          <TabWrapper>
-            <Tab
-              onClick={() => setActiveTab("all")}
-              active={activeTab === "all"}
-            >
-              All
-            </Tab>
-            <Tab
-              onClick={() => setActiveTab("personal")}
-              active={activeTab === "personal"}
-            >
-              Personal
-            </Tab>
-          </TabWrapper>
-          {activeTab !== "all" && (
-            <FilterDropdown
-              filterLabel="Status"
-              filterOptions={statusFilterOptions}
-              selectedFilter={statusFilter}
-              onSelectFilter={(filter) =>
-                setStatusFilter(filter as DepositStatusFilter)
-              }
-            />
-          )}
-        </FilterWrapper>
+        {!NO_TAB_POC && (
+          <FilterWrapper>
+            (
+            <TabWrapper>
+              <Tab
+                onClick={() => setActiveTab("all")}
+                active={activeTab === "all"}
+              >
+                All
+              </Tab>
+              <Tab
+                onClick={() => setActiveTab("personal")}
+                active={activeTab === "personal"}
+              >
+                Personal
+              </Tab>
+            </TabWrapper>
+            )
+            {activeTab !== "all" && (
+              <FilterDropdown
+                filterLabel="Status"
+                filterOptions={statusFilterOptions}
+                selectedFilter={statusFilter}
+                onSelectFilter={(filter) =>
+                  setStatusFilter(filter as DepositStatusFilter)
+                }
+              />
+            )}
+          </FilterWrapper>
+        )}
         <BodyWrapper>
           {activeTab === "personal" && (
             <PersonalTransactions statusFilter={statusFilter} />

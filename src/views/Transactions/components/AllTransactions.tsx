@@ -5,19 +5,25 @@ import styled from "@emotion/styled";
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components";
-import { Input, InputGroup } from "components/Input";
 import { COLORS } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";
+import { WalletAddressFilter } from "./WalletAddressFilter";
 import { useTransactions } from "../hooks/useTransactions";
 import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
 import { useLiveMode } from "../hooks/useLiveMode";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useConnectionSVM } from "hooks/useConnectionSVM";
 
 const LIVE_REFETCH_INTERVAL = 5000;
 
 export function AllTransactions() {
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
+
+  const { account: accountEVM } = useConnectionEVM();
+  const { account: accountSVM } = useConnectionSVM();
+  const account = accountEVM || accountSVM?.toString();
 
   const {
     currentPage,
@@ -90,24 +96,11 @@ export function AllTransactions() {
     <>
       <ControlsContainer>
         <ControlsRow>
-          <FilterSection>
-            <FilterLabel>
-              <Text size="sm" color="grey-400">
-                Filter by wallet address
-              </Text>
-            </FilterLabel>
-            <FilterInputWrapper>
-              <InputGroup validationLevel="valid">
-                <Input
-                  type="text"
-                  placeholder="0x..."
-                  value={walletAddressFilter}
-                  onChange={(e) => setWalletAddressFilter(e.target.value)}
-                  validationLevel="valid"
-                />
-              </InputGroup>
-            </FilterInputWrapper>
-          </FilterSection>
+          <WalletAddressFilter
+            value={walletAddressFilter}
+            onChange={setWalletAddressFilter}
+            connectedAddress={account}
+          />
           <LiveToggle
             isLiveMode={isLiveMode}
             onToggle={setIsLiveMode}
@@ -181,23 +174,4 @@ const ControlsRow = styled.div`
     align-items: flex-start;
     gap: 12px;
   }
-`;
-
-const FilterSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 240px;
-`;
-
-const FilterLabel = styled.div`
-  display: flex;
-  align-items: center;
-  padding-left: 2px;
-`;
-
-const FilterInputWrapper = styled.div`
-  max-width: 400px;
-  width: 100%;
 `;
