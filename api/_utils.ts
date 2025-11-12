@@ -94,6 +94,7 @@ import { getMulticall3, getMulticall3Address } from "./_multicall";
 import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
 import { Span } from "@opentelemetry/api";
+import { getNormalizedSpotTokenSymbol } from "./_hypercore";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -924,9 +925,10 @@ export const getCachedTokenPrice = async (params: {
 
   if (symbol) {
     try {
+      const resolvedSymbol = getNormalizedSpotTokenSymbol(symbol);
       const response = await axios(`${baseUrl}`, {
         params: {
-          symbol,
+          symbol: resolvedSymbol,
           baseCurrency,
           date: historicalDateISO,
         },

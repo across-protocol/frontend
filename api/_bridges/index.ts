@@ -9,7 +9,8 @@ import {
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { routeStrategyForCctp } from "./cctp/utils/routing";
-import { routeStrategyForSponsorship } from "./oft-sponsored/utils/routing";
+import { routeStrategyForSponsorship } from "../_sponsorship-routing";
+import { getSponsoredCctpBridgeStrategy } from "./cctp-sponsored/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -30,8 +31,12 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.SEPOLIA]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
+      // @TODO: Remove this once we can correctly route via eligibility checks
       [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
-        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.ARBITRUM]: {
+        [CHAIN_IDs.HYPERCORE]: getSponsoredCctpBridgeStrategy(),
       },
       // SVM → HyperCore routes
       [CHAIN_IDs.SOLANA]: {

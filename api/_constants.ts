@@ -18,11 +18,35 @@ export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
 };
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+export const TOKEN_SYMBOLS_MAP = {
+  ...constants.TOKEN_SYMBOLS_MAP,
+  USDH: {
+    name: "USDH",
+    symbol: "USDH",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.HYPEREVM]: "0x111111a1a0667d36bD57c0A9f569b98057111111",
+      [CHAIN_IDs.HYPEREVM_TESTNET]:
+        "0x111111a1a0667d36bD57c0A9f569b98057111111",
+    },
+    coingeckoId: "usdh-2",
+  },
+  "USDH-SPOT": {
+    name: "USDH-SPOT",
+    symbol: "USDH-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000168",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000168",
+    },
+    coingeckoId: "usdh-2",
+  },
+};
 TOKEN_SYMBOLS_MAP.USDC = {
-  ...constants.TOKEN_SYMBOLS_MAP.USDC,
+  ...TOKEN_SYMBOLS_MAP.USDC,
   addresses: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+    ...TOKEN_SYMBOLS_MAP.USDC.addresses,
     [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
     [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2000000000000000000000000000000000000000",
   },

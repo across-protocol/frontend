@@ -6,6 +6,16 @@ import { BridgeStrategyData } from "../../../../../api/_bridges/types";
 
 jest.mock("../../../../../api/_bridges/utils");
 
+// mock the logger
+jest.mock("../../../../../api/_logger", () => ({
+  getLogger: jest.fn().mockReturnValue({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  }),
+}));
+
 const mockedGetBridgeStrategyData =
   bridgeUtils.getBridgeStrategyData as jest.MockedFunction<
     typeof bridgeUtils.getBridgeStrategyData

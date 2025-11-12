@@ -1,13 +1,13 @@
 import { ethers, utils } from "ethers";
 
-import { getEnvs } from "../../../../api/_env";
+import { getEnvs } from "../../../../../api/_env";
 import {
   createOftSignature,
   SignedQuoteParams,
-} from "../../../../api/_bridges/oft-sponsored/utils/signing";
+} from "../../../../../api/_bridges/oft-sponsored/utils/signing";
 
 // Mock the environment variables to ensure tests are deterministic.
-jest.mock("../../../../api/_env", () => ({
+jest.mock("../../../../../api/_env", () => ({
   getEnvs: jest.fn(),
 }));
 

@@ -64,17 +64,15 @@ describe("bridges/cctp/strategy", () => {
   };
 
   const outputTokenHyperCore = {
-    ...TOKEN_SYMBOLS_MAP.USDC,
-    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPERCORE],
+    ...TOKEN_SYMBOLS_MAP["USDC"],
+    address: TOKEN_SYMBOLS_MAP["USDC"].addresses[CHAIN_IDs.HYPERCORE],
     chainId: CHAIN_IDs.HYPERCORE,
-    decimals: 6,
   };
 
   const outputTokenBase = {
     ...TOKEN_SYMBOLS_MAP.USDC,
     address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
     chainId: CHAIN_IDs.BASE,
-    decimals: 6,
   };
 
   // Shared mock CCTP fee response

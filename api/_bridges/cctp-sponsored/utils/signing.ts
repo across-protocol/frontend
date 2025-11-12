@@ -1,5 +1,5 @@
 import { BigNumberish, utils } from "ethers";
-import { signDigestWithSponsor } from "../../_sponsorship-signature";
+import { signDigestWithSponsor } from "../../../_sponsorship-signature";
 
 /**
  * Represents the parameters for a sponsored CCTP quote.
@@ -22,6 +22,8 @@ export interface SponsoredCCTPQuote {
   maxUserSlippageBps: BigNumberish;
   finalRecipient: string;
   finalToken: string;
+  executionMode: number;
+  actionData: string;
 }
 
 /**
@@ -65,7 +67,16 @@ export const createCctpSignature = (
 
   const hash2 = utils.keccak256(
     utils.defaultAbiCoder.encode(
-      ["bytes32", "uint256", "uint256", "uint256", "bytes32", "bytes32"],
+      [
+        "bytes32",
+        "uint256",
+        "uint256",
+        "uint256",
+        "bytes32",
+        "bytes32",
+        "uint8",
+        "bytes32",
+      ],
       [
         quote.nonce,
         quote.deadline,
@@ -73,6 +84,8 @@ export const createCctpSignature = (
         quote.maxUserSlippageBps,
         quote.finalRecipient,
         quote.finalToken,
+        quote.executionMode,
+        utils.keccak256(quote.actionData),
       ]
     )
   );
