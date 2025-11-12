@@ -346,11 +346,11 @@ async function _buildDepositTxForAllowanceHolderSvm(
     crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline;
   // FIXME: Temporarily hardcoding empty messages.
   // Fix when we have a workaround for transaction size limitations
-  const message = Uint8Array.from(Buffer.from("", "hex"));
+  // const message = Uint8Array.from(Buffer.from("", "hex"));
   // Future implementation should use:
-  // const message = Uint8Array.from(
-  //   Buffer.from(crossSwapQuotes.bridgeQuote.message?.slice(2) ?? "", "hex")
-  // );
+  const messageHex = crossSwapQuotes.bridgeQuote.message ?? "0x";
+  const messageHash = utils.keccak256(messageHex);
+  const message = Uint8Array.from(Buffer.from(messageHash.slice(2), "hex"));
 
   const noopSigner = createNoopSigner(depositor);
   const depositDataSeed: Parameters<
