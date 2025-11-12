@@ -19,7 +19,7 @@ type SponsorshipRoutingRule = RoutingRule<
 const makeRoutingRuleGetStrategyFn =
   (isEligibleForSponsorship: boolean) => (inputToken?: Token) => {
     if (inputToken?.symbol === "USDT") {
-      return getOftSponsoredBridgeStrategy();
+      return getOftSponsoredBridgeStrategy(isEligibleForSponsorship);
     } else if (inputToken?.symbol === "USDC") {
       return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
     }

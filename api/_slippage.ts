@@ -2,12 +2,22 @@ import {
   STABLE_COIN_SYMBOLS,
   TOKEN_SYMBOLS_MAP,
   CUSTOM_GAS_TOKENS,
+  CHAIN_IDs,
 } from "./_constants";
 import { OriginOrDestination, Token } from "./_dexes/types";
 
 export const STABLE_COIN_SWAP_SLIPPAGE = {
   origin: 0.25, // 0.25%
   destination: 0.5, // 0.5%
+};
+export const STABLE_COIN_SWAP_SLIPPAGE_BY_CHAIN: Record<
+  number,
+  typeof STABLE_COIN_SWAP_SLIPPAGE
+> = {
+  [CHAIN_IDs.HYPERCORE]: {
+    origin: 0.5, // 0.5%
+    destination: 1, // 1%
+  },
 };
 export const MAJOR_PAIR_SLIPPAGE = {
   origin: 0.75, // 0.75%
@@ -101,7 +111,10 @@ function resolveAutoSlippage(params: {
     isStableCoinSymbol(params.tokenOut.symbol);
 
   if (isStableCoinSwap) {
-    return STABLE_COIN_SWAP_SLIPPAGE[params.originOrDestination];
+    const stableCoinSwapSlippage =
+      STABLE_COIN_SWAP_SLIPPAGE_BY_CHAIN[params.tokenIn.chainId] ||
+      STABLE_COIN_SWAP_SLIPPAGE;
+    return stableCoinSwapSlippage[params.originOrDestination];
   }
 
   const isTokenInStableOrMajor =
