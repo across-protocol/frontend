@@ -166,6 +166,7 @@ export function useDeposits(
         offset,
       }),
     }),
+    gcTime: 0,
     placeholderData: keepPreviousData,
     refetchInterval: Infinity,
   });
