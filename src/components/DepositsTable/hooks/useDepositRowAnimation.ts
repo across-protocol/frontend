@@ -1,4 +1,5 @@
-import { Deposit } from "hooks/useDeposits";
+import { useEffect, useRef, useState } from "react";
+import { Deposit, DepositStatus } from "hooks/useDeposits";
 
 type AnimationProps = {
   initial?: Record<string, any>;
@@ -22,25 +23,41 @@ type DepositRowAnimationResult = {
 export function useDepositRowAnimation(
   deposit: Deposit
 ): DepositRowAnimationResult {
+  const previousStatusRef = useRef<DepositStatus | null>(null);
+  const [statusJustChanged, setStatusJustChanged] = useState(false);
+
+  useEffect(() => {
+    const currentStatus = deposit.status;
+    const previousStatus = previousStatusRef.current;
+
+    if (previousStatus !== null && previousStatus !== currentStatus) {
+      setStatusJustChanged(true);
+      const timer = setTimeout(() => setStatusJustChanged(false), 1200);
+      return () => clearTimeout(timer);
+    }
+
+    previousStatusRef.current = currentStatus;
+  }, [deposit.status]);
+
   const rowAnimation: AnimationProps = {
-    initial: { opacity: 0, scaleY: 0, overlayColor: "aqua" },
-    animate: { opacity: 1, scaleY: 1, overlayColor: null },
+    initial: { opacity: 0, scaleY: 0 },
+    animate: { opacity: 1, scaleY: 1 },
     transition: {
       opacity: { duration: 0.5, ease: "easeOut" },
-
       scaleY: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
     },
     layout: true,
   };
-  const getOverlayColor = (): "aqua" | "white" | null => {
-    return deposit.status === "filled" ? "aqua" : "white";
-  };
 
-  const overlayColor = getOverlayColor();
+  const shouldShowOverlay =
+    previousStatusRef.current === null || statusJustChanged;
 
-  if (!overlayColor) {
+  if (!shouldShowOverlay) {
     return { rowAnimation, overlayProps: null };
   }
+
+  const overlayColor: "aqua" | "white" =
+    deposit.status === "filled" ? "aqua" : "white";
 
   const overlayAnimation: AnimationProps = {
     initial: { opacity: 0.3 },
