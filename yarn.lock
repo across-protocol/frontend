@@ -272,6 +272,11 @@
   resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.5.0.tgz#89a78b8c6463abe4de1d621db4af6c62f0d62b0a"
   integrity sha512-T8mOYzB9RRxckzhL0NTHwdge9xuFxXEOplC8B1Y3UX3NHa3BLh7DlBUZlCOwQgMc2nxDfnSweDL5S3bhC+W90g==
 
+"@amplitude/analytics-connector@^1.6.4":
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.6.4.tgz#8a811ff5c8ee46bdfea0e8f61c7578769b5778ed"
+  integrity sha512-SpIv0IQMNIq6SH3UqFGiaZyGSc7PBZwRdq7lvP0pBxW8i4Ny+8zwI0pV+VMfMHQwWY3wdIbWw5WQphNjpdq1/Q==
+
 "@amplitude/analytics-core@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@amplitude/analytics-core/-/analytics-core-2.1.1.tgz#1b6105bd763b38e5633533c9917a78f64fde612a"
@@ -284,6 +289,24 @@
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@amplitude/analytics-types/-/analytics-types-2.3.1.tgz#a0ed8ab5304536c29d8f7f1ad7574eff1a4def7b"
   integrity sha512-yojBG20qvph0rpCJKb4i/FJa+otqLINEwv//hfzvjnCOcPPyS0YscI8oiRBM0rG7kZIDgaL9a6jPwkqK4ACmcw==
+
+"@amplitude/experiment-core@^0.11.1":
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/@amplitude/experiment-core/-/experiment-core-0.11.1.tgz#31eb485dc40b65f4cc2f15adab9b62f0df622065"
+  integrity sha512-fHVJazCwwgjUcj49N+yFSLMSroyY0eHImrsmd1ipIjIT1Cez8mh+TvwJQ0LGSdyYvL2NAZM2J5vpXrR1nHgdzg==
+  dependencies:
+    js-base64 "^3.7.5"
+
+"@amplitude/experiment-js-client@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/experiment-js-client/-/experiment-js-client-1.18.0.tgz#00e96aac951abcde1c7754322a26833765d82743"
+  integrity sha512-3UbR1WWhGNXYBcq3XzgO9Q2TgNPELUqqWHCU7sHIhHp8dDKVrkE6OPNFQsmrlPXfo+iAk63BFY/PjxGP+2BJLw==
+  dependencies:
+    "@amplitude/analytics-connector" "^1.6.4"
+    "@amplitude/experiment-core" "^0.11.1"
+    "@amplitude/ua-parser-js" "^0.7.31"
+    base64-js "1.5.1"
+    unfetch "4.1.0"
 
 "@amplitude/identify@^1.10.0", "@amplitude/identify@^1.10.2":
   version "1.10.2"
@@ -327,6 +350,11 @@
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/@amplitude/types/-/types-1.10.2.tgz#8f3c6c3c9ee24f401ee037b351c3c67eb945eefc"
   integrity sha512-I8qenRI7uU6wKNb9LiZrAosSHVoNHziXouKY81CrqxH9xhVTEIJFXeuCV0hbtBr0Al/8ejnGjQRx+S2SvU/pPg==
+
+"@amplitude/ua-parser-js@^0.7.31":
+  version "0.7.33"
+  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.33.tgz#26441a0fb2e956a64e4ede50fb80b848179bb5db"
+  integrity sha512-wKEtVR4vXuPT9cVEIJkYWnlF++Gx3BdLatPBM+SZ1ztVIvnhdGBZR/mn9x/PzyrMcRlZmyi6L56I2J3doVBnjA==
 
 "@amplitude/utils@^1.10.2":
   version "1.10.2"
@@ -12514,7 +12542,7 @@ base-x@4.0.0, base-x@^3.0.8, base-x@^4.0.0:
   resolved "https://registry.yarnpkg.com/base-x/-/base-x-4.0.0.tgz#d0e3b7753450c73f8ad2389b5c018a4af7b2224a"
   integrity sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==
 
-base64-js@^1.1.2, base64-js@^1.3.0, base64-js@^1.3.1, base64-js@^1.5.1:
+base64-js@1.5.1, base64-js@^1.1.2, base64-js@^1.3.0, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -26283,6 +26311,11 @@ unenv@^1.10.0:
     mime "^3.0.0"
     node-fetch-native "^1.6.4"
     pathe "^1.1.2"
+
+unfetch@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/unfetch/-/unfetch-4.1.0.tgz#6ec2dd0de887e58a4dee83a050ded80ffc4137db"
+  integrity sha512-crP/n3eAPUJxZXM9T80/yv0YhkTEx2K1D3h7D1AJM6fzsWZrxdyRuLN0JH/dkZh1LNH8LxCnBzoPFCPbb2iGpg==
 
 unicode-canonical-property-names-ecmascript@^2.0.0:
   version "2.0.0"
