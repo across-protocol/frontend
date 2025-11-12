@@ -3,7 +3,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   defaultRefetchInterval,
-  depositsQueryKey,
   indexerApiBaseUrl,
   userDepositsQueryKey,
 } from "utils";
@@ -160,17 +159,13 @@ export function useDeposits(
 ) {
   return useQuery({
     queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
-    queryFn: async () => {
-      const deposits = await getDeposits({
+    queryFn: async () => ({
+      deposits: await getDeposits({
         address: userAddress,
         limit,
         offset,
-      });
-
-      return {
-        deposits,
-      };
-    },
+      }),
+    }),
     placeholderData: keepPreviousData,
     refetchInterval: Infinity,
   });
