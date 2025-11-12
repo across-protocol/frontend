@@ -46,8 +46,6 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
 
   async execute(approvalData: SwapApprovalData): Promise<string> {
     try {
-      // For SVM, approvals are part of the transaction, so we just execute the swap
-      // The approve call is a no-op but kept for interface consistency
       return await this.swap(approvalData);
     } catch (e) {
       console.error(e);
