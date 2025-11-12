@@ -16,36 +16,46 @@ type SponsorshipRoutingRule = RoutingRule<
   NonNullable<SponsorshipEligibilityData>
 >;
 
+const makeRoutingRuleGetStrategyFn =
+  (isEligibleForSponsorship: boolean) => (inputToken?: Token) => {
+    if (inputToken?.symbol === "USDT") {
+      return getOftSponsoredBridgeStrategy();
+    } else if (inputToken?.symbol === "USDC") {
+      return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
+    }
+    return null;
+  };
+
 // Priority-ordered routing rules for sponsorship
 const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
   {
     name: "global-limit-exceeded",
     shouldApply: (data) => !data.isWithinGlobalDailyLimit,
-    getStrategy: () => null as any, // Indicates ineligible
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Global daily sponsorship limit exceeded",
   },
   {
     name: "user-limit-exceeded",
     shouldApply: (data) => !data.isWithinUserDailyLimit,
-    getStrategy: () => null as any, // Indicates ineligible
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "User daily sponsorship limit exceeded",
   },
   {
     name: "insufficient-vault-balance",
     shouldApply: (data) => !data.hasVaultBalance,
-    getStrategy: () => null as any, // Indicates ineligible
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Insufficient vault balance for sponsorship",
   },
   {
     name: "slippage-too-high",
     shouldApply: (data) => !data.isSlippageAcceptable,
-    getStrategy: () => null as any, // Indicates ineligible
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Destination swap slippage exceeds acceptable bounds",
   },
   {
     name: "invalid-account-creation",
     shouldApply: (data) => !data.isAccountCreationValid,
-    getStrategy: () => null as any, // Indicates ineligible
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Account creation requirements not met",
   },
   {
@@ -56,14 +66,7 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
       data.hasVaultBalance &&
       data.isSlippageAcceptable &&
       data.isAccountCreationValid,
-    getStrategy: (inputToken?: Token) => {
-      if (inputToken?.symbol === "USDT") {
-        return getOftSponsoredBridgeStrategy();
-      } else if (inputToken?.symbol === "USDC") {
-        return getSponsoredCctpBridgeStrategy();
-      }
-      return null;
-    },
+    getStrategy: makeRoutingRuleGetStrategyFn(true),
     reason: "All sponsorship eligibility criteria met",
   },
 ];

@@ -402,7 +402,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     });
   });
 
-  describe("#buildEvmTxForAllowanceHolder()", () => {
+  describe("#buildEvmTxForAllowanceHolder() - eligible for sponsorship", () => {
     const depositor = "0x0000000000000000000000000000000000000001";
     const recipient = "0x0000000000000000000000000000000000000002";
     const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
@@ -464,6 +464,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
       const result = await buildEvmTxForAllowanceHolder({
         quotes,
+        isEligibleForSponsorship: true,
       });
 
       expect(result.chainId).toBe(arbitrumUSDC.chainId);
@@ -553,6 +554,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
       const result = await buildEvmTxForAllowanceHolder({
         quotes,
+        isEligibleForSponsorship: true,
       });
 
       expect(result.chainId).toBe(arbitrumUSDC.chainId);
@@ -615,9 +617,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         ),
       });
 
-      await expect(buildEvmTxForAllowanceHolder({ quotes })).rejects.toThrow(
-        "App fee is not supported"
-      );
+      await expect(
+        buildEvmTxForAllowanceHolder({ quotes, isEligibleForSponsorship: true })
+      ).rejects.toThrow("App fee is not supported");
     });
 
     test("should throw error when origin swap quote is provided", async () => {
@@ -666,9 +668,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         ),
       });
 
-      await expect(buildEvmTxForAllowanceHolder({ quotes })).rejects.toThrow(
-        "Origin/destination swaps are not supported"
-      );
+      await expect(
+        buildEvmTxForAllowanceHolder({ quotes, isEligibleForSponsorship: true })
+      ).rejects.toThrow("Origin/destination swaps are not supported");
     });
   });
 });

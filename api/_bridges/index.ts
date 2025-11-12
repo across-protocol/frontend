@@ -31,12 +31,13 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.SEPOLIA]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
-      // @TODO: Remove this once we can correctly route via eligibility checks
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
       [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
-        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(),
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
       },
       [CHAIN_IDs.ARBITRUM]: {
-        [CHAIN_IDs.HYPERCORE]: getSponsoredCctpBridgeStrategy(),
+        [CHAIN_IDs.HYPERCORE]: getSponsoredCctpBridgeStrategy(true),
       },
       // SVM → HyperCore routes
       [CHAIN_IDs.SOLANA]: {

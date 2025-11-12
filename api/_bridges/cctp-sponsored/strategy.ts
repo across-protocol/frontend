@@ -28,6 +28,7 @@ import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import { getSlippage } from "../../_slippage";
+import { getCctpBridgeStrategy } from "../cctp/strategy";
 
 const name = "sponsored-cctp" as const;
 
@@ -46,7 +47,9 @@ const capabilities: BridgeCapabilities = {
 /**
  * Sponsored CCTP bridge strategy
  */
-export function getSponsoredCctpBridgeStrategy(): BridgeStrategy {
+export function getSponsoredCctpBridgeStrategy(
+  isEligibleForSponsorship: boolean
+): BridgeStrategy {
   return {
     name,
     capabilities,
@@ -66,10 +69,23 @@ export function getSponsoredCctpBridgeStrategy(): BridgeStrategy {
     getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
-    getQuoteForExactInput,
-    getQuoteForOutput,
+    getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
+      isEligibleForSponsorship
+        ? getQuoteForExactInput(params)
+        : getCctpBridgeStrategy().getQuoteForExactInput(params),
+    getQuoteForOutput: (params: GetOutputBridgeQuoteParams) =>
+      isEligibleForSponsorship
+        ? getQuoteForOutput(params)
+        : getCctpBridgeStrategy().getQuoteForOutput(params),
     // TODO: ADD Solana support
-    buildTxForAllowanceHolder: buildEvmTxForAllowanceHolder,
+    buildTxForAllowanceHolder: (params: {
+      quotes: CrossSwapQuotes;
+      integratorId?: string;
+    }) =>
+      buildEvmTxForAllowanceHolder({
+        ...params,
+        isEligibleForSponsorship,
+      }),
   };
 }
 
@@ -154,6 +170,7 @@ export async function getQuoteForOutput({
 export async function buildEvmTxForAllowanceHolder(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
+  isEligibleForSponsorship: boolean;
 }) {
   const {
     bridgeQuote,
@@ -193,21 +210,35 @@ export async function buildEvmTxForAllowanceHolder(params: {
   const minFinalityThreshold = CCTP_FINALITY_THRESHOLDS[CCTP_TRANSFER_MODE];
 
   // Calculate `maxFee` as required by `depositForBurnWithHook`
-  const { transferFeeBps, forwardFee } = await getCctpFees({
-    inputToken: crossSwap.inputToken,
-    outputToken: crossSwap.outputToken,
-    minFinalityThreshold,
-  });
-  const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
-  const maxFee = transferFee.add(forwardFee);
+  let maxFee = BigNumber.from(0);
+
+  // If eligible for sponsorship, we need to calculate the max fee based on the CCTP fees.
+  if (params.isEligibleForSponsorship) {
+    const { transferFeeBps, forwardFee } = await getCctpFees({
+      inputToken: crossSwap.inputToken,
+      outputToken: crossSwap.outputToken,
+      minFinalityThreshold,
+    });
+    const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
+    maxFee = transferFee.add(forwardFee);
+  }
+  // If not eligible for sponsorship, we use the pre-calculated max fee from the bridge quote.
+  else {
+    maxFee = bridgeQuote.fees.amount;
+  }
 
   // Calculate `maxBpsToSponsor` based on `maxFee` and est. swap slippage
-  const maxBpsToSponsor = await calculateMaxBpsToSponsor({
-    inputToken: crossSwap.inputToken,
-    outputToken: crossSwap.outputToken,
-    maxFee,
-    inputAmount: bridgeQuote.inputAmount,
-  });
+  const maxBpsToSponsor = params.isEligibleForSponsorship
+    ? // If eligible for sponsorship, we need to calculate the max fee based on the CCTP fees.
+      await calculateMaxBpsToSponsor({
+        inputToken: crossSwap.inputToken,
+        outputToken: crossSwap.outputToken,
+        maxFee,
+        inputAmount: bridgeQuote.inputAmount,
+      })
+    : // If not eligible for sponsorship, we use 0 bps as maxBpsToSponsor. This will
+      // trigger the un-sponsored flow in the destination periphery contract.
+      0;
   const maxBpsToSponsorBn = BigNumber.from(Math.ceil(maxBpsToSponsor));
 
   // Convert slippage tolerance (expressed as 0 < slippage < 100, e.g. 1 = 1%) set by user to bps
