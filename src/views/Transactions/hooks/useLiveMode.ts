@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 type UseLiveModeParams = {
   refetchFn: () => Promise<any>;
   refetchInterval: number;
   enabled: boolean;
   isLoading: boolean;
+  onReset?: () => void;
 };
 
 type UseLiveModeResult = {
@@ -19,11 +19,11 @@ export function useLiveMode({
   refetchInterval,
   enabled,
   isLoading,
+  onReset,
 }: UseLiveModeParams): UseLiveModeResult {
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
   const isRefetchingRef = useRef(false);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!enabled) {
@@ -37,8 +37,7 @@ export function useLiveMode({
       setIsPageVisible(isVisible);
 
       if (isVisible && isLiveMode && enabled && !isLoading) {
-        await queryClient.cancelQueries({ queryKey: ["deposits"] });
-        await queryClient.resetQueries({ queryKey: ["deposits"] });
+        onReset?.();
         await refetchFn();
       }
     };
@@ -48,7 +47,7 @@ export function useLiveMode({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isLiveMode, enabled, isLoading, refetchFn, queryClient]);
+  }, [isLiveMode, enabled, isLoading, refetchFn, onReset]);
 
   useEffect(() => {
     const shouldRefetch = isLiveMode && enabled && isPageVisible && !isLoading;

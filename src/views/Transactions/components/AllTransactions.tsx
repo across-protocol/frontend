@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import styled from "@emotion/styled";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
@@ -10,7 +10,6 @@ import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";
 import { WalletAddressFilter } from "./WalletAddressFilter";
 import { useTransactions } from "../hooks/useTransactions";
-import { useStreamingDeposits } from "../hooks/useStreamingDeposits";
 import { useLiveMode } from "../hooks/useLiveMode";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
@@ -40,28 +39,27 @@ export function AllTransactions() {
   const isFirstPage = currentPage === 0;
   const isFiltering = walletAddressFilter.trim().length > 0;
 
+  const resetStreamingRef = useRef<() => void>(() => {});
+
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
     refetchInterval: LIVE_REFETCH_INTERVAL,
     enabled: isFirstPage && !isFiltering,
     isLoading: depositsQuery.isLoading,
+    onReset: () => resetStreamingRef.current(),
   });
-
-  const streamingEnabled = isFirstPage && isLiveMode && !isFiltering;
-  const streamedDeposits = useStreamingDeposits(
-    deposits,
-    pageSize,
-    streamingEnabled
-  );
 
   const convertedDeposits = useMemo(
     () =>
-      streamedDeposits.map((deposit) => {
+      deposits.map((deposit) => {
         const converted = convertIndexerDepositToDeposit(deposit);
         // Show "processing" instead of "fee too low" on all transactions page
-        return { ...converted, hideFeeTooLow: true };
+        return {
+          ...converted,
+          hideFeeTooLow: !(account === walletAddressFilter),
+        };
       }),
-    [streamedDeposits]
+    [deposits]
   );
 
   if (depositsQuery.isLoading) {
