@@ -39,6 +39,7 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
     feesFromApi: Awaited<ReturnType<typeof getSuggestedFees>>,
     bridgeFeesToken: Token
   ) => {
+    const zeroBN = BigNumber.from(0);
     return {
       amount: BigNumber.from(feesFromApi.totalRelayFee.total),
       pct: BigNumber.from(feesFromApi.totalRelayFee.pct),

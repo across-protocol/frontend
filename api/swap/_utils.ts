@@ -53,6 +53,8 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
+import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 
@@ -78,6 +80,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
+  routingPreference: optional(enums(["default", "across", "native"])),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -108,6 +111,7 @@ export async function handleBaseSwapQueryParams(
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
     skipChecks: _skipChecks = "false",
+    routingPreference = "default",
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -158,7 +162,14 @@ export async function handleBaseSwapQueryParams(
       destinationChainId
     );
 
-    if (!outputBridgeable) {
+    // HyperCore uses special system addresses (0x20...) that aren't in standard enabled routes
+    // Allow HyperCore as destination if output token is USDC on HyperCore
+    const isHyperCoreUsdcDestination =
+      isToHyperCore(destinationChainId) &&
+      outputTokenAddress.toLowerCase() ===
+        TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId]?.toLowerCase();
+
+    if (!outputBridgeable && !isHyperCoreUsdcDestination) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
@@ -249,6 +260,7 @@ export async function handleBaseSwapQueryParams(
     skipChecks,
     isDestinationSvm,
     isOriginSvm,
+    routingPreference,
   };
 }
 
