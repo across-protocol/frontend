@@ -18,6 +18,7 @@ import {
   DEFAULT_QUOTE_EXPIRY_SECONDS,
   ExecutionMode,
 } from "../../../_sponsorship-utils";
+import { getSponsoredOftFinalTokenAddress } from "./final-token";
 
 /**
  * Builds a complete sponsored OFT quote with signature
@@ -70,7 +71,9 @@ export function buildSponsoredOFTQuote(params: BuildSponsoredQuoteParams): {
     deadline,
     maxBpsToSponsor,
     finalRecipient: toBytes32(recipient),
-    finalToken: toBytes32(outputToken.address),
+    finalToken: toBytes32(
+      getSponsoredOftFinalTokenAddress(outputToken.symbol, intermediaryChainId)
+    ),
     lzReceiveGasLimit: DEFAULT_LZ_RECEIVE_GAS_LIMIT,
     lzComposeGasLimit: DEFAULT_LZ_COMPOSE_GAS_LIMIT,
     executionMode: ExecutionMode.Default, // Default HyperCore flow

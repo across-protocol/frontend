@@ -1,4 +1,4 @@
-import { BigNumber, Contract, ethers } from "ethers";
+import { BigNumber, BigNumberish, Contract, ethers } from "ethers";
 import { CHAIN_IDs } from "../../../_constants";
 import { Token } from "../../../_dexes/types";
 import { InvalidParamError } from "../../../_errors";
@@ -123,6 +123,52 @@ export async function getRequiredDVNCount(
 }
 
 /**
+ * Composes the message for a sponsored OFT transfer. This differs from the message
+ * returned by `getHyperLiquidComposerMessage` in that it encodes the message as
+ * required by the `SponsoredOFTSrcPeriphery.sol` contract and not the `HyperliquidComposer.sol`
+ * contract from LayerZero.
+ * @param params The parameters for a sponsored OFT transfer.
+ */
+export function getSponsoredOftComposerMessageForQuoting(params: {
+  nonce: string;
+  deadline: BigNumberish;
+  maxBpsToSponsor: BigNumberish;
+  maxUserSlippageBps: BigNumberish;
+  finalRecipient: string;
+  finalToken: string;
+  executionMode: number;
+  actionData: string;
+}) {
+  const composeMsg = ethers.utils.defaultAbiCoder.encode(
+    [
+      "bytes32",
+      "uint256",
+      "uint256",
+      "uint256",
+      "bytes32",
+      "bytes32",
+      "uint8",
+      "bytes",
+    ],
+    [
+      params.nonce,
+      params.deadline,
+      params.maxBpsToSponsor,
+      params.maxUserSlippageBps,
+      params.finalRecipient,
+      params.finalToken,
+      params.executionMode,
+      params.actionData,
+    ]
+  );
+  // Encoded `lzReceiveGasLimit` and `lzComposeGasLimit`. We can use hardcoded values
+  // as we use this message for quoting only.
+  const extraOptions =
+    "0x000301001101000000000000000000000000000186A0010013030000000000000000000000000000000186A0010011010000000000000000000000000002AB98010013030000000000000000000000000000000493E0";
+  return { composeMsg, extraOptions };
+}
+
+/**
  * Composes the message for a Hyperliquid transfer.
  * This function creates the `composeMsg` and `extraOptions` for a Hyperliquid transfer.
  * The `composeMsg` is the payload for the HyperLiquidComposer, and the `extraOptions` is a custom-packed struct required by the legacy V1-style integration that the Hyperliquid Composer uses.
@@ -229,8 +275,20 @@ export async function getQuote(params: {
   outputToken: Token;
   inputAmount: BigNumber;
   recipient: string;
+  composerOpts?: {
+    toAddress: string;
+    composeMsg: string;
+    extraOptions: string;
+  };
 }) {
-  const { inputToken, outputToken, inputAmount, recipient } = params;
+  const { inputToken, outputToken, inputAmount, recipient, composerOpts } =
+    params;
+
+  const { toAddress, composeMsg, extraOptions } = composerOpts
+    ? composerOpts
+    : outputToken.chainId === CHAIN_IDs.HYPERCORE
+      ? getHyperLiquidComposerMessage(recipient, outputToken.symbol)
+      : { toAddress: recipient, composeMsg: "0x", extraOptions: "0x" };
 
   // Get OFT messenger contract
   const oftMessengerAddress = getOftMessengerForToken(
@@ -251,10 +309,6 @@ export async function getQuote(params: {
     inputToken.symbol,
     inputToken.decimals
   );
-  const { toAddress, composeMsg, extraOptions } =
-    outputToken.chainId === CHAIN_IDs.HYPERCORE
-      ? getHyperLiquidComposerMessage(recipient, outputToken.symbol)
-      : { toAddress: recipient, composeMsg: "0x", extraOptions: "0x" };
   // Create SendParam struct for quoting
   const sendParam = createSendParamStruct({
     // If sending to Hypercore, the destinationChainId in the SendParam is always HyperEVM

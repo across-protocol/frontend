@@ -11,6 +11,7 @@ import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { routeStrategyForCctp } from "./cctp/utils/routing";
 import { routeStrategyForSponsorship } from "../_sponsorship-routing";
 import { getSponsoredCctpBridgeStrategy } from "./cctp-sponsored/strategy";
+import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -23,6 +24,13 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
     },
   },
   inputTokens: {
+    USDT: {
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
+      [CHAIN_IDs.ARBITRUM]: {
+        [CHAIN_IDs.HYPERCORE]: getOftSponsoredBridgeStrategy(true),
+      },
+    },
     USDC: {
       // Testnet routes
       [CHAIN_IDs.HYPEREVM_TESTNET]: {

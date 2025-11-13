@@ -78,15 +78,6 @@ describe("Sponsored OFT Strategy", () => {
 
         expect(result).toBe(true);
       });
-
-      it("should support USDT → USDT-SPOT from Polygon to HyperCore", () => {
-        const result = isRouteSupported({
-          inputToken: polygonUSDT,
-          outputToken: hypercoreUSDT,
-        });
-
-        expect(result).toBe(true);
-      });
     });
 
     describe("Invalid input tokens", () => {

@@ -10,6 +10,7 @@ import {
   getEstimatedFillTime,
   getOftBridgeFees,
   getQuote,
+  getSponsoredOftComposerMessageForQuoting,
   roundAmountToSharedDecimals,
 } from "../oft/utils/shared";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
@@ -23,7 +24,11 @@ import {
 import { InvalidParamError } from "../../_errors";
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
-import { ConvertDecimals, getCachedTokenInfo } from "../../_utils";
+import {
+  addMarkupToAmount,
+  ConvertDecimals,
+  getCachedTokenInfo,
+} from "../../_utils";
 import { getNativeTokenInfo } from "../../_token-info";
 import { SPONSORED_OFT_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
@@ -35,6 +40,12 @@ import {
 } from "./utils/constants";
 import { buildSponsoredOFTQuote } from "./utils/quote-builder";
 import { getSlippage } from "../../_slippage";
+import { ExecutionMode, generateQuoteNonce } from "../../_sponsorship-utils";
+import { toBytes32 } from "../../_address";
+
+// We add some markup to the native fee for the initial quote to account for gas price
+// volatility. Expressed as a percentage, e.g., 0.01 = 1%.
+const INITIAL_QUOTE_NATIVE_FEE_MARKUP = 0.1;
 
 const name = "sponsored-oft" as const;
 
@@ -126,6 +137,19 @@ export async function getSponsoredOftQuoteForExactInput(
   // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
   const intermediaryToken = await getIntermediaryToken();
 
+  // The following composer options are used for the initial quote and are not used for
+  // the final quote execution.
+  const composerOptsForInitialQuote = getSponsoredOftComposerMessageForQuoting({
+    nonce: generateQuoteNonce(params.recipient!),
+    deadline: Math.floor(Date.now() / 1000),
+    maxBpsToSponsor: BigNumber.from(0),
+    maxUserSlippageBps: BigNumber.from(0),
+    finalRecipient: toBytes32(recipient!),
+    finalToken: toBytes32(intermediaryToken.address),
+    executionMode: ExecutionMode.Default,
+    actionData: "0x",
+  });
+
   // Get OFT quote to intermediary token and estimated fill time
   const [{ inputAmount, outputAmount, nativeFee }, estimatedFillTimeSec] =
     await Promise.all([
@@ -134,6 +158,11 @@ export async function getSponsoredOftQuoteForExactInput(
         outputToken: intermediaryToken,
         inputAmount: exactInputAmount,
         recipient: recipient!,
+        composerOpts: {
+          toAddress: recipient!,
+          composeMsg: composerOptsForInitialQuote.composeMsg,
+          extraOptions: composerOptsForInitialQuote.extraOptions,
+        },
       }),
       getEstimatedFillTime(
         inputToken.chainId,
@@ -161,7 +190,10 @@ export async function getSponsoredOftQuoteForExactInput(
       provider: name,
       fees: getOftBridgeFees({
         inputToken,
-        nativeFee,
+        nativeFee: addMarkupToAmount(
+          nativeFee,
+          INITIAL_QUOTE_NATIVE_FEE_MARKUP
+        ),
         nativeToken,
       }),
     },
@@ -310,8 +342,10 @@ async function buildTransaction(params: {
   crossSwap: CrossSwap;
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   integratorId?: string;
+  isEligibleForSponsorship: boolean;
 }) {
-  const { crossSwap, bridgeQuote, integratorId } = params;
+  const { crossSwap, bridgeQuote, integratorId, isEligibleForSponsorship } =
+    params;
 
   const originChainId = crossSwap.inputToken.chainId;
 
@@ -323,12 +357,17 @@ async function buildTransaction(params: {
     });
   }
 
-  // Calculate maxBpsToSponsor based on output token and market simulation
-  const maxBpsToSponsor = await calculateMaxBpsToSponsor({
-    outputTokenSymbol: crossSwap.outputToken.symbol,
-    bridgeInputAmount: bridgeQuote.inputAmount,
-    bridgeOutputAmount: bridgeQuote.outputAmount,
-  });
+  const maxBpsToSponsor = isEligibleForSponsorship
+    ? // If eligible for sponsorship, we calculate the maxBpsToSponsor based on output
+      // token and market simulation.
+      await calculateMaxBpsToSponsor({
+        outputTokenSymbol: crossSwap.outputToken.symbol,
+        bridgeInputAmount: bridgeQuote.inputAmount,
+        bridgeOutputAmount: bridgeQuote.outputAmount,
+      })
+    : // If not eligible for sponsorship, we use 0 bps as maxBpsToSponsor. This will
+      // trigger the un-sponsored flow in the destination periphery contract.
+      BigNumber.from(0);
 
   // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.5 = 0.5% = 50 bps)
   const maxUserSlippageBps = Math.floor(
@@ -378,7 +417,9 @@ async function buildTransaction(params: {
 /**
  * OFT sponsored bridge strategy
  */
-export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
+export function getOftSponsoredBridgeStrategy(
+  isEligibleForSponsorship: boolean
+): BridgeStrategy {
   return {
     name,
     capabilities,
@@ -443,6 +484,7 @@ export function getOftSponsoredBridgeStrategy(): BridgeStrategy {
         crossSwap,
         bridgeQuote,
         integratorId: params.integratorId,
+        isEligibleForSponsorship,
       });
     },
   };
