@@ -81,24 +81,9 @@ const ExpandableLabelSection: React.FC<
     </>
   );
 
-  const loadingState = (
-    <>
-      <ExpandableLabelLeft>
-        <Shield width="16" height="16" />
-        <FastSecureText>Fast & Secure</FastSecureText>
-      </ExpandableLabelLeft>
-      {!expanded && (
-        <ExpandableLabelRight>
-          <StyledLoadingIcon width="16" height="16" />
-          <span>Loading quote...</span>
-        </ExpandableLabelRight>
-      )}
-    </>
-  );
-
   // Show loading state when fetching quote
   if (isLoading) {
-    content = loadingState;
+    content = defaultState;
   } else if (hasQuote) {
     // Show quote details when available
     content = (

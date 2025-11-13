@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { BigNumber, utils } from "ethers";
 import { useTransferQuote } from "views/Bridge/hooks/useTransferQuote";
 import { findEnabledRoute } from "views/Bridge/utils";
@@ -65,7 +65,6 @@ export type NormalizedQuote = {
 };
 
 /**
- * Hook that intelligently routes quote requests based on token types.
  * - If either token is bridge-only, uses useTransferQuote (suggested-fees endpoint)
  * - If both tokens are swap tokens, uses useSwapQuote
  */
@@ -78,10 +77,6 @@ export function useSwapAndBridgeQuote(params: Params) {
     depositor,
     recipient,
   } = params;
-
-  useEffect(() => {
-    console.log("params", params);
-  }, [params]);
 
   // Check if either token is bridge-only
   const isInputBridgeOnly = useMemo(() => {
@@ -113,11 +108,6 @@ export function useSwapAndBridgeQuote(params: Params) {
     );
   }, [inputToken, outputToken, isInputBridgeOnly, isOutputBridgeOnly]);
 
-  useEffect(() => {
-    console.log("isBridgeOnlyRoute", isBridgeOnlyRoute);
-    console.log("isSwapOnlyRoute", isSwapOnlyRoute);
-  }, [isBridgeOnlyRoute, isSwapOnlyRoute]);
-
   // Construct SelectedRoute for bridge quotes
   const selectedRoute = useMemo(() => {
     if (!isBridgeOnlyRoute || !inputToken || !outputToken) return undefined;
@@ -136,10 +126,6 @@ export function useSwapAndBridgeQuote(params: Params) {
       type: "bridge",
     });
   }, [isBridgeOnlyRoute, inputToken, outputToken]);
-
-  useEffect(() => {
-    console.log("selectedRoute", selectedRoute);
-  }, [selectedRoute]);
 
   // Create a minimal route for useTransferQuote when selectedRoute is undefined
   // The query will be disabled internally if the route is invalid
@@ -181,7 +167,8 @@ export function useSwapAndBridgeQuote(params: Params) {
   // Always pass a valid route to prevent undefined errors
   const routeForBridgeQuote = selectedRoute || fallbackRoute;
   // Only enable bridge quote if we have a bridge-only route
-  const shouldFetchBridgeQuote = isBridgeOnlyRoute && !!selectedRoute;
+  const shouldFetchBridgeQuote =
+    isBridgeOnlyRoute && !!selectedRoute && amount?.gt(0);
   const bridgeQuoteResult = useTransferQuote(
     routeForBridgeQuote,
     amount || BigNumber.from(0),
@@ -199,20 +186,24 @@ export function useSwapAndBridgeQuote(params: Params) {
     isInputAmount,
     depositor,
     recipient,
-    enabled: isSwapOnlyRoute,
+    enabled: isSwapOnlyRoute && amount?.gt(0),
   });
 
   // Determine which quote to use and normalize the data
   const normalizedQuote: NormalizedQuote | undefined = useMemo(() => {
+    // Reset quote if amount is empty/null/zero to prevent stale data
+    if (!amount || amount.isZero() || amount.lte(0)) {
+      return undefined;
+    }
+
+    // Reset quote if tokens are missing to prevent stale data when tokens change
+    if (!inputToken || !outputToken) {
+      return undefined;
+    }
+
     if (isBridgeOnlyRoute && bridgeQuoteResult) {
       const bridgeQuote = bridgeQuoteResult.transferQuoteQuery.data;
-      if (
-        !bridgeQuote ||
-        !inputToken ||
-        !outputToken ||
-        !amount ||
-        !selectedRoute
-      )
+      if (!bridgeQuote || !inputToken || !outputToken || !selectedRoute)
         return undefined;
 
       // Extract fees from bridge quote and convert to USD
@@ -320,6 +311,18 @@ export function useSwapAndBridgeQuote(params: Params) {
       const swapQuote = swapQuoteResult.data;
       if (!swapQuote || !inputToken || !outputToken) return undefined;
 
+      // Verify quote tokens match current tokens to prevent stale data when tokens change
+      if (
+        swapQuote.inputToken.address.toLowerCase() !==
+          inputToken.address.toLowerCase() ||
+        swapQuote.inputToken.chainId !== inputToken.chainId ||
+        swapQuote.outputToken.address.toLowerCase() !==
+          outputToken.address.toLowerCase() ||
+        swapQuote.outputToken.chainId !== outputToken.chainId
+      ) {
+        return undefined;
+      }
+
       // Extract fees from swap quote structure (as it was done in ConfirmationButton)
       const fees: FeeItem[] = [];
       let totalFeeUsd = 0;
@@ -403,12 +406,23 @@ export function useSwapAndBridgeQuote(params: Params) {
   ]);
 
   // Determine loading and error states
-  const isLoading =
-    isBridgeOnlyRoute && selectedRoute
-      ? bridgeQuoteResult.transferQuoteQuery.isLoading
-      : !isBridgeOnlyRoute
-        ? swapQuoteResult.isLoading
-        : false;
+  // Mimic the logic from useBridge.ts - check transferQuoteQuery, feesQuery, and conditionally
+  // check swapQuoteQuery/universalSwapQuoteQuery based on route type
+  // Also check if we don't have a quote yet (!transferQuote) when we should be fetching one
+  const transferQuote = bridgeQuoteResult.transferQuoteQuery.data;
+  const bridgeQuoteIsLoading =
+    shouldFetchBridgeQuote &&
+    (bridgeQuoteResult.transferQuoteQuery.isLoading ||
+      bridgeQuoteResult.feesQuery.isLoading ||
+      (routeForBridgeQuote.type === "swap"
+        ? bridgeQuoteResult.swapQuoteQuery.isLoading
+        : false) ||
+      ((routeForBridgeQuote.type === "universal-swap"
+        ? bridgeQuoteResult.universalSwapQuoteQuery.isLoading
+        : false) &&
+        !transferQuote));
+
+  const isLoading = bridgeQuoteIsLoading || swapQuoteResult.isLoading;
 
   const error =
     isBridgeOnlyRoute && selectedRoute

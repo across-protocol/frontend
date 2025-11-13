@@ -272,6 +272,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
     // Show API error in button label if present
     if (quoteWarningMessage && buttonState === "apiError") {
+      // todo: parse suggested fees errors
       return quoteWarningMessage;
     }
 
@@ -297,18 +298,26 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const buttonDisabled = useMemo(
     () =>
-      approvalAction.buttonDisabled ||
+      // Only check approvalAction.buttonDisabled for swap quotes
+      // For bridge quotes, approvalAction.buttonDisabled will be true because approvalData is undefined,
+      // but we should still allow the button to be enabled if we have a valid bridge quote
+      (swapQuote?.quoteType === "swap"
+        ? approvalAction.buttonDisabled
+        : false) ||
       !!validation.error ||
       !inputToken ||
       !outputToken ||
       !amount ||
-      amount.lte(0),
+      amount.lte(0) ||
+      // Ensure we have a valid quote (for both swap and bridge quotes)
+      !swapQuote,
     [
       approvalAction.buttonDisabled,
       validation.error,
       inputToken,
       outputToken,
       amount,
+      swapQuote,
     ]
   );
 
