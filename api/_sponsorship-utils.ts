@@ -1,6 +1,7 @@
 import { BigNumber, utils } from "ethers";
 
 import { Token } from "./_dexes/types";
+import { toBytes32 } from "./_address";
 
 /**
  * Parameters for building a sponsored quote
@@ -75,8 +76,8 @@ export async function getSponsorshipEligibilityData(
 export function generateQuoteNonce(depositor: string): string {
   const timestamp = Date.now();
   const encoded = utils.defaultAbiCoder.encode(
-    ["uint256", "address"],
-    [timestamp, depositor]
+    ["uint256", "bytes32"],
+    [timestamp, toBytes32(depositor)]
   );
   return utils.keccak256(encoded);
 }

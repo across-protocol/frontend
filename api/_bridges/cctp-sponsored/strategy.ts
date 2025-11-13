@@ -1,4 +1,13 @@
 import { BigNumber, ethers, utils } from "ethers";
+import {
+  address,
+  appendTransactionMessageInstruction,
+  compileTransaction,
+  getBase64EncodedWireTransaction,
+  partiallySignTransaction,
+} from "@solana/kit";
+import { getAddMemoInstruction } from "@solana-program/memo";
+import * as sdk from "@across-protocol/sdk";
 
 import {
   BridgeStrategy,
@@ -26,9 +35,16 @@ import {
 } from "./utils/constants";
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
-import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
+import {
+  SWAP_CALLDATA_MARKER,
+  tagIntegratorId,
+  tagSwapApiMarker,
+} from "../../_integrator-id";
 import { getSlippage } from "../../_slippage";
 import { getCctpBridgeStrategy } from "../cctp/strategy";
+import { getDepositAccounts } from "./utils/svm";
+import { getDepositForBurnInstructionAsync } from "../../_svm-clients/SponsoredCctpSrcPeriphery/depositForBurn";
+import { getSVMRpc } from "../../_providers";
 
 const name = "sponsored-cctp" as const;
 
@@ -77,15 +93,19 @@ export function getSponsoredCctpBridgeStrategy(
       isEligibleForSponsorship
         ? getQuoteForOutput(params)
         : getCctpBridgeStrategy().getQuoteForOutput(params),
-    // TODO: ADD Solana support
     buildTxForAllowanceHolder: (params: {
       quotes: CrossSwapQuotes;
       integratorId?: string;
     }) =>
-      buildEvmTxForAllowanceHolder({
-        ...params,
-        isEligibleForSponsorship,
-      }),
+      params.quotes.crossSwap.isOriginSvm
+        ? buildSvmTxForAllowanceHolder({
+            ...params,
+            isEligibleForSponsorship,
+          })
+        : buildEvmTxForAllowanceHolder({
+            ...params,
+            isEligibleForSponsorship,
+          }),
   };
 }
 
@@ -168,6 +188,123 @@ export async function getQuoteForOutput({
 }
 
 export async function buildEvmTxForAllowanceHolder(params: {
+  quotes: CrossSwapQuotes;
+  integratorId?: string;
+  isEligibleForSponsorship: boolean;
+}) {
+  const { crossSwap } = params.quotes;
+
+  const { quote, signature, sponsoredCctpSrcPeripheryAddress } =
+    await _prepareSponsoredTx(params);
+
+  const iface = new ethers.utils.Interface(SPONSORED_CCTP_SRC_PERIPHERY_ABI);
+  const callData = iface.encodeFunctionData("depositForBurn", [
+    quote,
+    signature,
+  ]);
+
+  const callDataWithIntegratorId = params.integratorId
+    ? tagIntegratorId(params.integratorId, callData)
+    : callData;
+  const callDataWithMarkers = tagSwapApiMarker(callDataWithIntegratorId);
+
+  return {
+    chainId: crossSwap.inputToken.chainId,
+    from: crossSwap.depositor,
+    to: sponsoredCctpSrcPeripheryAddress,
+    data: callDataWithMarkers,
+    value: BigNumber.from(0),
+    ecosystem: "evm" as const,
+  };
+}
+
+export async function buildSvmTxForAllowanceHolder(params: {
+  quotes: CrossSwapQuotes;
+  integratorId?: string;
+  isEligibleForSponsorship: boolean;
+}) {
+  const { crossSwap } = params.quotes;
+  const originChainId = crossSwap.inputToken.chainId;
+  const rpcClient = getSVMRpc(originChainId);
+
+  const { quote, signature, sponsoredCctpSrcPeripheryAddress } =
+    await _prepareSponsoredTx(params);
+
+  // Retrieve accounts required for `depositForBurn` instruction
+  // and encode the instruction.
+  const depositAccounts = await getDepositAccounts({
+    originChainId,
+    depositor: crossSwap.depositor,
+    destinationDomain: quote.destinationDomain,
+    sponsoredCctpSrcPeripheryAddress,
+    nonce: quote.nonce,
+    inputToken: crossSwap.inputToken.address,
+  });
+  const svmEncodedQuote = {
+    sourceDomain: quote.sourceDomain,
+    destinationDomain: quote.destinationDomain,
+    mintRecipient: address(
+      sdk.utils.toAddressType(quote.mintRecipient, originChainId).toBase58()
+    ),
+    amount: BigInt(quote.amount.toString()),
+    burnToken: address(
+      sdk.utils.toAddressType(quote.burnToken, originChainId).toBase58()
+    ),
+    destinationCaller: address(
+      sdk.utils.toAddressType(quote.destinationCaller, originChainId).toBase58()
+    ),
+    maxFee: BigInt(quote.maxFee.toString()),
+    minFinalityThreshold: quote.minFinalityThreshold,
+    nonce: ethers.utils.arrayify(quote.nonce),
+    deadline: BigInt(quote.deadline.toString()),
+    maxBpsToSponsor: BigInt(quote.maxBpsToSponsor.toString()),
+    maxUserSlippageBps: BigInt(quote.maxUserSlippageBps.toString()),
+    finalRecipient: address(
+      sdk.utils.toAddressType(quote.finalRecipient, originChainId).toBase58()
+    ),
+    finalToken: address(
+      sdk.utils.toAddressType(quote.finalToken, originChainId).toBase58()
+    ),
+    executionMode: quote.executionMode,
+    actionData: ethers.utils.arrayify(quote.actionData),
+  };
+  const depositForBurnIx = await getDepositForBurnInstructionAsync({
+    ...depositAccounts,
+    quote: svmEncodedQuote,
+    signature: ethers.utils.arrayify(signature),
+  });
+
+  // Add deposit ix and integrator memo to the transaction
+  let tx = await sdk.arch.svm.createDefaultTransaction(
+    rpcClient,
+    depositAccounts.signer
+  );
+  tx = appendTransactionMessageInstruction(depositForBurnIx, tx);
+  tx = appendTransactionMessageInstruction(
+    getAddMemoInstruction({
+      memo: params.integratorId
+        ? utils.hexConcat([params.integratorId, SWAP_CALLDATA_MARKER])
+        : SWAP_CALLDATA_MARKER,
+    }),
+    tx
+  );
+
+  const compiledTx = compileTransaction(tx);
+  const partiallySignedTx = await partiallySignTransaction(
+    [depositAccounts.messageSentEventData.keyPair],
+    compiledTx
+  );
+  const base64EncodedTx = getBase64EncodedWireTransaction(partiallySignedTx);
+
+  return {
+    chainId: originChainId,
+    to: sponsoredCctpSrcPeripheryAddress,
+    data: base64EncodedTx,
+    ecosystem: "svm" as const,
+  };
+}
+
+async function _prepareSponsoredTx(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
   isEligibleForSponsorship: boolean;
@@ -266,24 +403,10 @@ export async function buildEvmTxForAllowanceHolder(params: {
     maxFee,
   });
 
-  const iface = new ethers.utils.Interface(SPONSORED_CCTP_SRC_PERIPHERY_ABI);
-  const callData = iface.encodeFunctionData("depositForBurn", [
+  return {
     quote,
     signature,
-  ]);
-
-  const callDataWithIntegratorId = params.integratorId
-    ? tagIntegratorId(params.integratorId, callData)
-    : callData;
-  const callDataWithMarkers = tagSwapApiMarker(callDataWithIntegratorId);
-
-  return {
-    chainId: originChainId,
-    from: crossSwap.depositor,
-    to: sponsoredCctpSrcPeripheryAddress,
-    data: callDataWithMarkers,
-    value: BigNumber.from(0),
-    ecosystem: "evm" as const,
+    sponsoredCctpSrcPeripheryAddress,
   };
 }
 

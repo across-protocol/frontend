@@ -57,6 +57,7 @@ import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
+import { assertValidAddressChainCombination } from "./_validations";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -125,6 +126,17 @@ export async function handleBaseSwapQueryParams(
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
   const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
 
+  assertValidAddressChainCombination({
+    address: _inputTokenAddress,
+    chainId: originChainId,
+    paramName: "inputToken",
+  });
+  assertValidAddressChainCombination({
+    address: _outputTokenAddress,
+    chainId: destinationChainId,
+    paramName: "outputToken",
+  });
+
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
     : sdk.utils.toAddressType(_inputTokenAddress, originChainId).toNative();
@@ -178,6 +190,27 @@ export async function handleBaseSwapQueryParams(
     }
   }
 
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
+    });
+  }
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
+    });
+  }
+
   if (excludeSources && includeSources) {
     throw new InvalidParamError({
       param: "excludeSources, includeSources",
@@ -206,13 +239,6 @@ export async function handleBaseSwapQueryParams(
     throw new InvalidParamError({
       param: "inputToken, outputToken",
       message: "Invalid input or output token address",
-    });
-  }
-
-  if (integratorId && !isValidIntegratorId(integratorId)) {
-    throw new InvalidParamError({
-      param: "integratorId",
-      message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
     });
   }
 
