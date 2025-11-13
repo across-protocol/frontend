@@ -44,6 +44,7 @@ export function AllTransactions() {
     refetchInterval: LIVE_REFETCH_INTERVAL,
     enabled: isFirstPage && !isFiltering,
     isLoading: depositsQuery.isLoading,
+    isFetching: depositsQuery.isFetching,
   });
 
   const convertedDeposits = useMemo(

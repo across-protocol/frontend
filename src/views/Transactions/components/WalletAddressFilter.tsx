@@ -17,16 +17,11 @@ export function WalletAddressFilter({
 }: WalletAddressFilterProps) {
   return (
     <FilterSection>
-      <FilterLabel>
-        <Text size="sm" color="grey-400">
-          Filter by wallet address
-        </Text>
-      </FilterLabel>
       <FilterInputWrapper>
         <InputGroup validationLevel="valid">
           <Input
             type="text"
-            placeholder="0x..."
+            placeholder="Filter by wallet address"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             validationLevel="valid"
@@ -39,7 +34,7 @@ export function WalletAddressFilter({
         )}
         {connectedAddress && (
           <QuickFilterButton onClick={() => onChange(connectedAddress)}>
-            My Address
+            Filter by my Address
           </QuickFilterButton>
         )}
       </FilterInputWrapper>
@@ -62,7 +57,7 @@ const FilterLabel = styled.div`
 `;
 
 const FilterInputWrapper = styled.div`
-  max-width: 400px;
+  max-width: 600px;
   width: 100%;
   display: flex;
   gap: 8px;

@@ -5,19 +5,16 @@ import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import { LayoutV2 } from "components";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
-import { ReactComponent as BackgroundGraphic } from "assets/bg-banners/overview-card-background.svg";
-import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { CenteredMessage } from "./components/CenteredMessage";
 import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
-import { IconPairDisplay } from "./components/IconPairDisplay";
-import { TxDetailSection } from "./components/TxDetailSection";
 import { CopyableText } from "./components/CopyableText";
-import { QuickLinksBar } from "./components/QuickLinksBar";
 import { CollapsibleSection } from "./components/CollapsibleSection";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
-import DepositStatusAnimatedIcons from "../DepositStatus/components/DepositStatusAnimatedIcons";
+import { TransactionSourceSection } from "./components/TransactionSourceSection";
+import { TransactionDestinationSection } from "./components/TransactionDestinationSection";
+import { TransactionFeeSection } from "./components/TransactionFeeSection";
 
 const LOADING_DELAY_MS = 400;
 
@@ -166,22 +163,6 @@ export default function Transaction() {
     deposit.fillBlockTimestamp
   );
 
-  const quickLinks = [
-    {
-      label: "View Deposit",
-      url: sourceChain.constructExplorerLink(deposit.depositTxnRef),
-      chainName: sourceChain.name,
-    },
-  ];
-
-  if (deposit.fillTx) {
-    quickLinks.push({
-      label: "View Fill",
-      url: destinationChain.constructExplorerLink(deposit.fillTx),
-      chainName: destinationChain.name,
-    });
-  }
-
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
@@ -196,250 +177,52 @@ export default function Transaction() {
           <BreadcrumbDivider />
         </BreadcrumbWrapper>
         <InnerSectionWrapper>
-          <FillTimeHero>
-            <StatusWrapper>
-              <DepositStatusAnimatedIcons
-                status={deposit.status as any}
-                toChainId={Number(destinationChainId)}
-                fromChainId={Number(deposit.originChainId)}
-                externalProjectId={undefined}
-              />
-            </StatusWrapper>
-
-            <BackgroundWrapper>
-              <BackgroundGraphic />
-            </BackgroundWrapper>
-            <HeroContent>
-              <FillTimeLabel>
-                {fillDuration.isPending ? "Time Elapsed" : "Fill Time"}
-              </FillTimeLabel>
-              <FillTimeDuration isPending={fillDuration.isPending}>
+          <HeaderBar>
+            <StatusBadge status={deposit.status} />
+            <FillTimeText>
+              <Text color="grey-400" size="sm">
+                {fillDuration.isPending ? "Time Elapsed:" : "Fill Time:"}
+              </Text>
+              <Text
+                color={fillDuration.isPending ? "yellow" : "aqua"}
+                size="lg"
+                weight={600}
+              >
                 {fillDuration.formatted}
-              </FillTimeDuration>
-              <StatusBadge status={deposit.status} />
-            </HeroContent>
-          </FillTimeHero>
+              </Text>
+            </FillTimeText>
+          </HeaderBar>
 
-          <QuickLinksBar links={quickLinks} />
-
-          <SectionWrapper title="Basic Information">
-            <DetailsGrid>
-              <DetailSection label="Status">
-                <StatusBadge status={deposit.status} />
-              </DetailSection>
-
-              {inputToken && outputToken && (
-                <DetailSection label="Asset">
-                  <IconPairDisplay
-                    leftIcon={inputToken.logoURI}
-                    leftAlt={inputToken.symbol}
-                    rightIcon={outputToken.logoURI}
-                    rightAlt={outputToken.symbol}
-                    label={`${inputToken.symbol} → ${outputToken.symbol}`}
-                  />
-                </DetailSection>
+          <TwoColumnGrid>
+            <TransactionSourceSection
+              deposit={deposit}
+              sourceChainId={sourceChainId}
+              formatUSDValue={formatUSDValue}
+              formatTimestamp={formatTimestamp}
+              explorerLink={sourceChain.constructExplorerLink(
+                deposit.depositTxnRef
               )}
+            />
+            <TransactionDestinationSection
+              deposit={deposit}
+              destinationChainId={destinationChainId}
+              formatUSDValue={formatUSDValue}
+              formatTimestamp={formatTimestamp}
+              explorerLink={
+                deposit.fillTx
+                  ? destinationChain.constructExplorerLink(deposit.fillTx)
+                  : undefined
+              }
+            />
+          </TwoColumnGrid>
 
-              <DetailSection label="Route">
-                <IconPairDisplay
-                  leftIcon={sourceChain.logoURI}
-                  leftAlt={sourceChain.name}
-                  rightIcon={destinationChain.logoURI}
-                  rightAlt={destinationChain.name}
-                  label={`${sourceChain.name} → ${destinationChain.name}`}
-                />
-              </DetailSection>
-
-              <DetailSection label="Deposit ID">
-                <Text color="light-200">{deposit.depositId}</Text>
-              </DetailSection>
-            </DetailsGrid>
-          </SectionWrapper>
-
-          <SectionWrapper title="Amounts">
-            <DetailsGrid>
-              <DetailSection label="Input Amount">
-                <Text color="light-200">
-                  {inputToken
-                    ? formatUnitsWithMaxFractions(
-                        deposit.inputAmount,
-                        inputToken.decimals
-                      )
-                    : deposit.inputAmount}{" "}
-                  {inputToken?.symbol}
-                  <Text color="grey-400" size="sm">
-                    {" "}
-                    ({formatUSDValue(deposit.inputPriceUsd)})
-                  </Text>
-                </Text>
-              </DetailSection>
-
-              <DetailSection label="Output Amount">
-                <Text color="light-200">
-                  {outputToken
-                    ? formatUnitsWithMaxFractions(
-                        deposit.outputAmount,
-                        outputToken.decimals
-                      )
-                    : deposit.outputAmount}{" "}
-                  {outputToken?.symbol}
-                  <Text color="grey-400" size="sm">
-                    {" "}
-                    ({formatUSDValue(deposit.outputPriceUsd)})
-                  </Text>
-                </Text>
-              </DetailSection>
-            </DetailsGrid>
-          </SectionWrapper>
-
-          <SectionWrapper title="Fees">
-            <DetailsGrid>
-              <DetailSection label="Bridge Fee">
-                <Text color="light-200">
-                  {formatUSDValue(deposit.bridgeFeeUsd)}
-                </Text>
-              </DetailSection>
-
-              <DetailSection label="Fill Gas Fee">
-                <Text color="light-200">
-                  {deposit.fillGasFee}{" "}
-                  <Text color="grey-400" size="sm">
-                    ({formatUSDValue(deposit.fillGasFeeUsd)})
-                  </Text>
-                </Text>
-              </DetailSection>
-
-              {deposit.swapFeeUsd && (
-                <DetailSection label="Swap Fee">
-                  <Text color="light-200">
-                    {formatUSDValue(deposit.swapFeeUsd)}
-                  </Text>
-                </DetailSection>
-              )}
-            </DetailsGrid>
-          </SectionWrapper>
-
-          <SectionWrapper title="Addresses">
-            <DetailsGrid>
-              <DetailSection label="Depositor">
-                <CopyableText
-                  color="light-200"
-                  textToCopy={deposit.depositor}
-                  explorerLink={`${sourceChain.explorerUrl}/address/${deposit.depositor}`}
-                >
-                  {shortenAddress(deposit.depositor, "...", 6)}
-                </CopyableText>
-              </DetailSection>
-
-              <DetailSection label="Recipient">
-                <CopyableText
-                  color="light-200"
-                  textToCopy={deposit.recipient}
-                  explorerLink={`${destinationChain.explorerUrl}/address/${deposit.recipient}`}
-                >
-                  {shortenAddress(deposit.recipient, "...", 6)}
-                </CopyableText>
-              </DetailSection>
-
-              <DetailSection label="Relayer">
-                {deposit.relayer ? (
-                  <CopyableText
-                    color="light-200"
-                    textToCopy={deposit.relayer}
-                    explorerLink={`${destinationChain.explorerUrl}/address/${deposit.relayer}`}
-                  >
-                    {shortenAddress(deposit.relayer, "...", 6)}
-                  </CopyableText>
-                ) : (
-                  <Text color="light-200">N/A</Text>
-                )}
-              </DetailSection>
-
-              {deposit.exclusiveRelayer &&
-                deposit.exclusiveRelayer !==
-                  "0x0000000000000000000000000000000000000000" && (
-                  <DetailSection label="Exclusive Relayer">
-                    <CopyableText
-                      color="light-200"
-                      textToCopy={deposit.exclusiveRelayer}
-                      explorerLink={`${destinationChain.explorerUrl}/address/${deposit.exclusiveRelayer}`}
-                    >
-                      {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
-                    </CopyableText>
-                  </DetailSection>
-                )}
-            </DetailsGrid>
-          </SectionWrapper>
-
-          <SectionWrapper title="Recent Activity">
-            <DetailsGrid>
-              <DetailSection label="Deposit Time">
-                <Text color="light-200">
-                  {formatTimestamp(deposit.depositBlockTimestamp)}
-                </Text>
-              </DetailSection>
-
-              {deposit.fillBlockTimestamp && (
-                <DetailSection label="Fill Time">
-                  <Text color="light-200">
-                    {formatTimestamp(deposit.fillBlockTimestamp)}
-                  </Text>
-                </DetailSection>
-              )}
-
-              <DetailSection label="Quote Time">
-                <Text color="light-200">
-                  {formatTimestamp(deposit.quoteTimestamp)}
-                </Text>
-              </DetailSection>
-            </DetailsGrid>
-          </SectionWrapper>
-
-          <SectionWrapper title="Transactions">
-            <DetailsGrid>
-              <TxDetailSection
-                label="Deposit Transaction"
-                txHash={deposit.depositTxnRef}
-                explorerLink={sourceChain.constructExplorerLink(
-                  deposit.depositTxnRef
-                )}
-              />
-
-              {deposit.fillTx && (
-                <TxDetailSection
-                  label="Fill Transaction"
-                  txHash={deposit.fillTx}
-                  explorerLink={destinationChain.constructExplorerLink(
-                    deposit.fillTx
-                  )}
-                />
-              )}
-
-              {deposit.depositRefundTxnRef && (
-                <TxDetailSection
-                  label="Refund Transaction"
-                  txHash={deposit.depositRefundTxnRef}
-                  explorerLink={sourceChain.constructExplorerLink(
-                    deposit.depositRefundTxnRef
-                  )}
-                />
-              )}
-
-              {deposit.swapTransactionHash && (
-                <TxDetailSection
-                  label="Swap Transaction"
-                  txHash={deposit.swapTransactionHash}
-                  explorerLink={
-                    deposit.actionsTargetChainId
-                      ? getChainInfo(
-                          parseInt(deposit.actionsTargetChainId)
-                        ).constructExplorerLink(deposit.swapTransactionHash)
-                      : "#"
-                  }
-                />
-              )}
-            </DetailsGrid>
-          </SectionWrapper>
+          <TransactionFeeSection
+            bridgeFeeUsd={deposit.bridgeFeeUsd}
+            fillGasFee={deposit.fillGasFee}
+            fillGasFeeUsd={deposit.fillGasFeeUsd}
+            swapFeeUsd={deposit.swapFeeUsd}
+            formatUSDValue={formatUSDValue}
+          />
 
           <CollapsibleSection title="Advanced Details" defaultOpen={false}>
             <DetailsGrid>
@@ -533,7 +316,16 @@ export default function Transaction() {
                       <Text color="light-200">
                         {deposit.swapTokenAmount}{" "}
                         <Text color="grey-400" size="sm">
-                          ({formatUSDValue(deposit.swapTokenPriceUsd)})
+                          (
+                          {formatUSDValue(
+                            deposit.swapTokenPriceUsd && deposit.swapTokenAmount
+                              ? String(
+                                  parseFloat(deposit.swapTokenPriceUsd) *
+                                    parseFloat(deposit.swapTokenAmount)
+                                )
+                              : null
+                          )}
+                          )
                         </Text>
                       </Text>
                     </DetailSection>
@@ -578,22 +370,12 @@ const InnerSectionWrapper = styled.div`
   flex-direction: column;
   align-items: flex-start;
   padding: 0px;
-  gap: 64px;
+  gap: 24px;
 
   width: 100%;
 
   @media ${QUERIESV2.sm.andDown} {
-    gap: 24px;
-  }
-`;
-
-const StatusWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-
-  @media ${QUERIESV2.sm.andDown} {
-    margin-bottom: -8px;
+    gap: 16px;
   }
 `;
 
@@ -657,73 +439,38 @@ const DetailsGrid = styled.div`
   }
 `;
 
-const FillTimeHero = styled.div`
-  position: relative;
+const HeaderBar = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 16px;
   width: 100%;
-  padding: 40px 24px;
-  background: ${COLORS["black-700"]};
+  padding: 16px;
+  background: ${COLORS["black-800"]};
   border-radius: 16px;
   border: 1px solid ${COLORS["grey-600"]};
-  overflow: clip;
-  isolation: isolate;
+  gap: 16px;
 
   @media ${QUERIESV2.sm.andDown} {
-    padding: 32px 16px;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
 `;
 
-const BackgroundWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
+const FillTimeText = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;
 
-const HeroContent = styled.div`
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+const TwoColumnGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   width: 100%;
 
   @media ${QUERIESV2.sm.andDown} {
-    gap: 12px;
-  }
-`;
-
-const FillTimeLabel = styled(Text)`
-  font-size: 14px;
-  font-weight: 500;
-  color: ${COLORS["grey-400"]};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const FillTimeDuration = styled.div<{ isPending?: boolean }>`
-  font-size: 56px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: ${(props) => (props.isPending ? COLORS.yellow : COLORS.aqua)};
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
-
-  @media ${QUERIESV2.sm.andDown} {
-    font-size: 40px;
+    grid-template-columns: 1fr;
   }
 `;

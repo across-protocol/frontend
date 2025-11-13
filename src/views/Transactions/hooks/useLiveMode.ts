@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type UseLiveModeParams = {
   refetchFn: () => Promise<any>;
   refetchInterval: number;
   enabled: boolean;
   isLoading: boolean;
+  isFetching?: boolean;
   onReset?: () => void;
 };
 
@@ -19,11 +20,11 @@ export function useLiveMode({
   refetchInterval,
   enabled,
   isLoading,
+  isFetching,
   onReset,
 }: UseLiveModeParams): UseLiveModeResult {
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
-  const isRefetchingRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) {
@@ -53,14 +54,13 @@ export function useLiveMode({
     const shouldRefetch = isLiveMode && enabled && isPageVisible && !isLoading;
 
     if (!shouldRefetch) {
-      isRefetchingRef.current = false;
       return;
     }
 
-    isRefetchingRef.current = true;
-
     const intervalId = setInterval(() => {
-      void refetchFn();
+      if (!isFetching) {
+        void refetchFn();
+      }
     }, refetchInterval);
 
     return () => {
@@ -71,6 +71,7 @@ export function useLiveMode({
     enabled,
     isPageVisible,
     isLoading,
+    isFetching,
     refetchFn,
     refetchInterval,
   ]);

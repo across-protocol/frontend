@@ -162,6 +162,7 @@ export function useDeposits(
     queryFn: async () => ({
       deposits: await getDeposits({
         address: userAddress,
+        // status: status === "all" ? undefined : status,
         limit,
         offset,
       }),

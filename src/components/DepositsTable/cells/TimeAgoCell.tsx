@@ -21,7 +21,7 @@ function getTimeAgoText(seconds: number): string {
   const totalMinutes = Math.floor((diff.minutes || 0) + totalSeconds / 60);
 
   if (totalMinutes === 0) {
-    return "a few seconds ago";
+    return "just now";
   } else if (totalMinutes < 3) {
     return `${totalMinutes}m ago`;
   } else {
