@@ -54,6 +54,10 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
       <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;
 
+  if (!speedUp && !slowRelayInfo) {
+    return null;
+  }
+
   return (
     <StyledActionsCell>
       <Blur />

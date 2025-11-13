@@ -55,6 +55,10 @@ export const headerCells = {
     label: "Rewards",
     width: 128,
   },
+  timeAgo: {
+    label: "Time",
+    width: 84,
+  },
   actions: {
     label: "",
     width: 64,
@@ -102,6 +106,7 @@ const StyledHead = styled.thead``;
 const StyledRow = styled.tr`
   display: flex;
   height: 40px;
+  justify-content: space-between;
   align-items: center;
   padding: 0px 24px;
   gap: 16px;

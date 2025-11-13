@@ -2,10 +2,9 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
-  depositsQueryKey,
-  userDepositsQueryKey,
   defaultRefetchInterval,
   indexerApiBaseUrl,
+  userDepositsQueryKey,
 } from "utils";
 import { DepositStatusFilter } from "views/Transactions/types";
 
@@ -91,6 +90,7 @@ export type Deposit = {
   swapTokenAmount?: string;
   swapTokenAddress?: string;
   depositRefundTxHash?: string;
+  hideFeeTooLow?: boolean;
 };
 
 export type Pagination = {
@@ -102,6 +102,11 @@ export type Pagination = {
 export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
+};
+
+export type GetDepositResponse = {
+  pagination: Pagination;
+  deposit: Deposit;
 };
 
 export type IndexerDeposit = {
@@ -148,22 +153,23 @@ export type IndexerDeposit = {
 export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
-  status: DepositStatusFilter,
   limit: number,
-  offset: number = 0
+  offset: number = 0,
+  userAddress?: string
 ) {
   return useQuery({
-    queryKey: depositsQueryKey(status, limit, offset),
-    queryFn: () => {
-      return getDeposits({
-        status: status === "all" ? undefined : status,
+    queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
+    queryFn: async () => ({
+      deposits: await getDeposits({
+        address: userAddress,
+        // status: status === "all" ? undefined : status,
         limit,
         offset,
-        skipOldUnprofitable: true,
-      });
-    },
+      }),
+    }),
+    gcTime: 0,
     placeholderData: keepPreviousData,
-    refetchInterval: defaultRefetchInterval,
+    refetchInterval: Infinity,
   });
 }
 

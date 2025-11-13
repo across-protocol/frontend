@@ -174,6 +174,7 @@ const BasicPagination = () => {
       totalCount={mockedDeposits.length}
       pageSizes={[1, 2, 3]}
       initialPageSize={pageSize}
+      hasNoResults={false}
     />
   );
 };

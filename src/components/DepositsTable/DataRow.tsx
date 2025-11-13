@@ -1,9 +1,11 @@
 import styled from "@emotion/styled";
+import { motion } from "framer-motion";
+import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
 import { COLORS, getConfig } from "utils";
 
-import { HeaderCells, ColumnKey } from "./HeadRow";
+import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
 import { AmountCell } from "./cells/AmountCell";
 import { RouteCell } from "./cells/RouteCell";
@@ -16,6 +18,9 @@ import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
+import { TimeAgoCell } from "./cells/TimeAgoCell";
+import { useDepositRowAnimation } from "./hooks/useDepositRowAnimation";
+import { AnimatedColorOverlay } from "./AnimatedColorOverlay";
 
 type Props = {
   deposit: Deposit;
@@ -36,6 +41,9 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
+  const history = useHistory();
+  const { rowAnimation, overlayProps } = useDepositRowAnimation(deposit);
+
   const swapToken = config.getTokenInfoByAddressSafe(
     deposit.sourceChainId,
     deposit.swapToken?.address || ""
@@ -49,13 +57,17 @@ export function DataRow({
     deposit.outputToken?.address || ""
   );
 
-  // Hide unsupported or unknown token deposits
   if (!inputToken) {
     return null;
   }
 
+  const handleRowClick = () => {
+    history.push(`/transaction/${deposit.depositTxHash}`);
+  };
+
   return (
-    <StyledRow>
+    <StyledRow onClick={handleRowClick} {...rowAnimation}>
+      <AnimatedColorOverlay overlay={overlayProps} />
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}
@@ -98,6 +110,9 @@ export function DataRow({
       {isColumnDisabled(disabledColumns, "rewards") ? null : (
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />
       )}
+      {isColumnDisabled(disabledColumns, "timeAgo") ? null : (
+        <TimeAgoCell deposit={deposit} width={headerCells.timeAgo.width} />
+      )}
       {isColumnDisabled(disabledColumns, "actions") ? null : (
         <ActionsCell deposit={deposit} onClickSpeedUp={onClickSpeedUp} />
       )}
@@ -105,13 +120,29 @@ export function DataRow({
   );
 }
 
-const StyledRow = styled.tr`
+const StyledRow = styled(motion.tr)`
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 0px 24px;
   border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
+  cursor: pointer;
+  overflow: hidden;
+  transform-origin: top;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${COLORS["grey-500"]};
+  }
+
+  & > td,
+  & > div:not(.color-overlay) {
+    position: relative;
+    z-index: 1;
+  }
 `;
