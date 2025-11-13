@@ -145,7 +145,7 @@ export async function getSponsoredOftQuoteForExactInput(
     maxBpsToSponsor: BigNumber.from(0),
     maxUserSlippageBps: BigNumber.from(0),
     finalRecipient: toBytes32(recipient!),
-    finalToken: toBytes32(outputToken.address),
+    finalToken: toBytes32(intermediaryToken.address),
     executionMode: ExecutionMode.Default,
     actionData: "0x",
   });
