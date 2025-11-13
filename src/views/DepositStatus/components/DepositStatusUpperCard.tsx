@@ -146,6 +146,11 @@ export function DepositStatusUpperCard({
           </SubTitleWrapper>
         </TopWrapperTitleWrapper>
       )}
+      {status !== "filled" && (
+        <GifContainer>
+          <GifImage src="/camm.gif" alt="Loading animation" />
+        </GifContainer>
+      )}
       <DepositTimeCardSocialSharedWrapper>
         <DepositTimesCard
           status={status}
@@ -263,4 +268,20 @@ const PMFFormButton = styled.div`
 
   margin-top: -8px;
   margin-bottom: -8px;
+`;
+
+const GifContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: -20px 0 20px 0;
+  z-index: 1;
+`;
+
+const GifImage = styled.img`
+  max-width: 100%;
+  max-height: 400px;
+  height: auto;
+  display: block;
 `;
