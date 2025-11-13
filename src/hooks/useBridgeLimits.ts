@@ -27,15 +27,18 @@ export function useBridgeLimits(
   fromChainId?: ChainId,
   toChainId?: ChainId,
   isUniversalSwap?: boolean,
-  universalSwapQuote?: UniversalSwapQuote
+  universalSwapQuote?: UniversalSwapQuote,
+  enabled: boolean = true
 ) {
-  const enabled = !!(
-    inputTokenSymbol &&
-    outputTokenSymbol &&
-    fromChainId &&
-    toChainId &&
-    (isUniversalSwap ? !!universalSwapQuote : true)
-  );
+  const queryEnabled =
+    enabled &&
+    !!(
+      inputTokenSymbol &&
+      outputTokenSymbol &&
+      fromChainId &&
+      toChainId &&
+      (isUniversalSwap ? !!universalSwapQuote : true)
+    );
   const didUniversalSwapLoad = isUniversalSwap && !!universalSwapQuote;
   const bridgeInputTokenSymbol = didUniversalSwapLoad
     ? universalSwapQuote.steps.bridge.tokenIn.symbol
@@ -78,7 +81,7 @@ export function useBridgeLimits(
         toChainIdToQuery
       );
     },
-    enabled,
+    enabled: queryEnabled,
     refetchInterval: 300_000, // 5 minutes
   });
   return {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
-import useSwapQuote from "./useSwapQuote";
+import { useSwapAndBridgeQuote } from "./useSwapAndBridgeQuote";
 import {
   useSwapApprovalAction,
   SwapApprovalData,
@@ -30,7 +30,7 @@ export type UseSwapAndBridgeReturn = {
   isAmountOrigin: boolean;
   setIsAmountOrigin: (v: boolean) => void;
   // route
-  swapQuote: ReturnType<typeof useSwapQuote>["data"];
+  swapQuote: ReturnType<typeof useSwapAndBridgeQuote>["data"];
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
   expectedOutputAmount?: string;
@@ -154,9 +154,9 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     data: swapQuote,
     isLoading: isQuoteLoading,
     error: quoteError,
-  } = useSwapQuote({
-    origin: inputToken ? inputToken : null,
-    destination: outputToken ? outputToken : null,
+  } = useSwapAndBridgeQuote({
+    inputToken: inputToken,
+    outputToken: outputToken,
     amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
     depositor,
@@ -164,7 +164,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   });
 
   const approvalData: SwapApprovalData | undefined = useMemo(() => {
-    if (!swapQuote) return undefined;
+    if (!swapQuote || swapQuote.quoteType !== "swap") return undefined;
     return {
       approvalTxns: swapQuote.approvalTxns,
       swapTx: swapQuote.swapTx as any,
@@ -261,7 +261,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [buttonState]);
 
   const quoteWarningMessage = useMemo(() => {
-    return getQuoteWarningMessage(quoteError);
+    return getQuoteWarningMessage(quoteError || null);
   }, [quoteError]);
 
   const buttonLabel = useMemo(() => {
@@ -347,7 +347,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isWrongNetwork: approvalAction.isWrongNetwork,
     isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
-    quoteError,
+    quoteError: quoteError || null,
     quoteWarningMessage,
   };
 }

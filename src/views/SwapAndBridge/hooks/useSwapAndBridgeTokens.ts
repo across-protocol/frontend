@@ -195,6 +195,7 @@ export function useSwapAndBridgeTokens(filterParams?: Params) {
             merged.push({
               ...swapToken, // Prefer swap token data (has price)
               routeSource: ["bridge", "swap"], // Combine route sources
+              externalProjectId: matchingBridgeToken.externalProjectId, // Preserve externalProjectId from bridge token
               isUnreachable: false, // Will be set in step 3
               balance: BigNumber.from(0), // Will be set in step 4
               balanceUsd: 0, // Will be set in step 4

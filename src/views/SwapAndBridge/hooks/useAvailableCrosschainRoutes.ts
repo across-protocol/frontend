@@ -11,6 +11,7 @@ export type LifiToken = {
   coinKey: string;
   logoURI: string;
   routeSource: ("bridge" | "swap")[];
+  externalProjectId?: string;
 };
 
 export type RouteFilterParams = {

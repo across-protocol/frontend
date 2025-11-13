@@ -36,7 +36,8 @@ export function useBridgeFees(
   externalProjectId?: string,
   _recipientAddress?: string,
   isUniversalSwap?: boolean,
-  universalSwapQuote?: UniversalSwapQuote
+  universalSwapQuote?: UniversalSwapQuote,
+  enabled: boolean = true
 ) {
   const didUniversalSwapLoad = isUniversalSwap && !!universalSwapQuote;
   const bridgeInputTokenSymbol = didUniversalSwapLoad
@@ -87,7 +88,7 @@ export function useBridgeFees(
         ? getBridgeFeesWithExternalProjectId(externalProjectIdToQuery, feeArgs)
         : getBridgeFees(feeArgs);
     },
-    enabled: Boolean(amount.gt(0)),
+    enabled: enabled && Boolean(amount.gt(0)),
     refetchInterval: 5000,
     retry: (_, error) => {
       if (

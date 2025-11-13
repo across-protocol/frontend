@@ -26,13 +26,14 @@ export function useTransferQuote(
   amount: BigNumber,
   swapSlippage: number,
   fromAddress?: string,
-  toAddress?: string
+  toAddress?: string,
+  isEnabled: boolean = true
 ) {
   const [initialQuoteTime, setInitialQuoteTime] = useState<
     number | undefined
   >();
-  const isSwapRoute = selectedRoute.type === "swap";
-  const isUniversalSwapRoute = selectedRoute.type === "universal-swap";
+  const isSwapRoute = selectedRoute?.type === "swap";
+  const isUniversalSwapRoute = selectedRoute?.type === "universal-swap";
   const swapQuoteQuery = useSwapQuoteQuery({
     // Setting `swapTokenSymbol` to undefined will disable the query
     swapTokenSymbol: isSwapRoute ? selectedRoute.swapTokenSymbol : undefined,
@@ -72,7 +73,8 @@ export function useTransferQuote(
     selectedRoute.externalProjectId,
     toAddress,
     isUniversalSwapRoute,
-    universalSwapQuoteQuery.data
+    universalSwapQuoteQuery.data,
+    isEnabled
   );
   const limitsQuery = useBridgeLimits(
     selectedRoute.fromTokenSymbol,
@@ -80,9 +82,15 @@ export function useTransferQuote(
     selectedRoute.fromChain,
     selectedRoute.toChain,
     isUniversalSwapRoute,
-    universalSwapQuoteQuery.data
+    universalSwapQuoteQuery.data,
+    isEnabled
   );
-  const usdPriceQuery = useCoingeckoPrice(selectedRoute.l1TokenAddress, "usd");
+  const usdPriceQuery = useCoingeckoPrice(
+    selectedRoute.l1TokenAddress,
+    "usd",
+    undefined,
+    isEnabled
+  );
 
   const transferQuoteQuery = useQuery({
     queryKey: [
@@ -100,7 +108,8 @@ export function useTransferQuote(
       selectedRoute.type,
     ],
     enabled: Boolean(
-      feesQuery.fees &&
+      isEnabled &&
+        feesQuery.fees &&
         limitsQuery.limits &&
         usdPriceQuery.data?.price &&
         // If it's a swap route, we also need to wait for the swap quote to be fetched

@@ -84,7 +84,7 @@ export default function useBridgeRoutes(filterParams?: RouteFilterParams) {
           priceUSD: "0", // TODO
           coinKey: tokenSymbol,
           routeSource: ["bridge"],
-          // externalProjectId: route.externalProjectId,
+          externalProjectId: route.externalProjectId,
         };
       };
 

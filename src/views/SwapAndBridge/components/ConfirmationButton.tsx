@@ -17,7 +17,7 @@ import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
-import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { NormalizedQuote } from "../hooks/useSwapAndBridgeQuote";
 import { TokenWithBalance } from "../hooks/useSwapAndBridgeTokens";
 
 export type BridgeButtonState =
@@ -34,7 +34,7 @@ interface ConfirmationButtonProps
   inputToken: TokenWithBalance | null;
   outputToken: TokenWithBalance | null;
   amount: BigNumber | null;
-  swapQuote: SwapApprovalApiCallReturnType | null;
+  swapQuote: NormalizedQuote | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
   // External state props
@@ -54,8 +54,18 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
+    isLoading: boolean;
   }>
-> = ({ fee, time, expanded, onToggle, state, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  state,
+  children,
+  hasQuote,
+  isLoading,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -71,8 +81,25 @@ const ExpandableLabelSection: React.FC<
     </>
   );
 
-  // Show quote breakdown when quote is available, otherwise show default state
-  if (hasQuote) {
+  const loadingState = (
+    <>
+      <ExpandableLabelLeft>
+        <Shield width="16" height="16" />
+        <FastSecureText>Fast & Secure</FastSecureText>
+      </ExpandableLabelLeft>
+      {!expanded && (
+        <ExpandableLabelRight>
+          <StyledLoadingIcon width="16" height="16" />
+          <span>Loading quote...</span>
+        </ExpandableLabelRight>
+      )}
+    </>
+  );
+
+  // Show loading state when fetching quote
+  if (isLoading) {
+    content = loadingState;
+  } else if (hasQuote) {
     // Show quote details when available
     content = (
       <>
@@ -109,7 +136,7 @@ const ExpandableLabelSection: React.FC<
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        disabled={!hasQuote}
+        disabled={!hasQuote || isLoading}
       >
         {content}
       </ExpandableLabelButton>
@@ -180,6 +207,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   outputToken,
   amount,
   swapQuote,
+  isQuoteLoading,
   onConfirm,
   buttonState,
   buttonDisabled,
@@ -194,42 +222,42 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   // Resolve conversion helpers outside memo to respect hooks rules
 
   const displayValues = React.useMemo(() => {
-    if (!swapQuote || !inputToken || !outputToken || !swapQuote.fees) {
+    if (!swapQuote || !inputToken || !outputToken) {
       return {
         fee: "-",
         time: "-",
-        bridgeFee: "-",
-        appFee: undefined,
-        swapImpact: undefined,
         route: "Across V4",
         estimatedTime: "-",
         totalFee: "-",
+        fees: [],
       };
     }
 
-    const totalFeeUsd = swapQuote.fees.total.amountUsd;
-    const bridgeFeesUsd = swapQuote.fees.total.details.bridge.amountUsd;
-    const appFeesUsd = swapQuote.fees.total.details.app.amountUsd;
-    const swapImpactUsd = swapQuote.fees.total.details.swapImpact.amountUsd;
+    // Get total fee from fees array (first item is usually Total Fee)
+    const totalFeeItem = swapQuote.fees.find((f) => f.label === "Total Fee");
+    const totalFeeUsd = totalFeeItem?.value || 0;
 
-    // Only show fee items if they're at least 1 cent
-    const hasAppFee = Number(appFeesUsd) >= 0.01;
-    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
-
-    const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
+    // Get estimated time from normalized quote
+    const totalSeconds = swapQuote.estimatedFillTimeSeconds || 0;
     const underOneMinute = totalSeconds < 60;
-    const time = underOneMinute
-      ? `~${Math.max(1, Math.round(totalSeconds))} secs`
-      : `~${Math.ceil(totalSeconds / 60)} min`;
+    const time =
+      totalSeconds > 0
+        ? underOneMinute
+          ? `~${Math.max(1, Math.round(totalSeconds))} secs`
+          : `~${Math.ceil(totalSeconds / 60)} min`
+        : "-";
+
+    // Filter fees to only show those >= 1 cent, excluding Total Fee (shown separately)
+    const feeBreakdown = swapQuote.fees.filter(
+      (fee) => fee.value >= 0.01 && fee.label !== "Total Fee"
+    );
 
     return {
-      totalFee: formatUSDString(totalFeeUsd),
+      totalFee: totalFeeUsd > 0 ? formatUSDString(totalFeeUsd.toString()) : "-",
       time,
-      bridgeFee: formatUSDString(bridgeFeesUsd),
-      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
-      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
       route: "Across V4",
       estimatedTime: time,
+      fees: feeBreakdown,
     };
   }, [swapQuote, inputToken, outputToken, amount]);
 
@@ -253,6 +281,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         visible={true}
         state={state}
         hasQuote={!!swapQuote}
+        isLoading={isQuoteLoading}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -276,45 +305,44 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
             <DetailLeft>
               <Dollar width="16px" height="16px" />
               <span>Total Fee</span>
-              <Tooltip
-                tooltipId="ConfirmationButton - total fee"
-                body="Sum of bridge and swap fees"
-              >
-                <Info color="inherit" width="16px" height="16px" />
-              </Tooltip>
-            </DetailLeft>
-            <DetailRight>{displayValues.totalFee}</DetailRight>
-          </DetailRow>
-          <FeeBreakdown>
-            <FeeBreakdownRow>
-              <FeeBreakdownLabel>
-                <span>Bridge Fee</span>
-                <Tooltip
-                  tooltipId="ConfirmationButton - bridge fee"
-                  body="Includes destination gas, relayer fees, and LP fees"
-                >
-                  <Info color="inherit" width="16px" height="16px" />
-                </Tooltip>
-              </FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
-            </FeeBreakdownRow>
-            {isDefined(displayValues.swapImpact) && (
-              <FeeBreakdownRow>
-                <FeeBreakdownLabel>
-                  <span>Swap Impact</span>
+              {(() => {
+                const totalFeeItem = swapQuote?.fees.find(
+                  (f) => f.label === "Total Fee"
+                );
+                return totalFeeItem?.description ? (
                   <Tooltip
-                    tooltipId="ConfirmationButton - Swap impact"
-                    body="Estimated price difference from pool depth and trade size"
+                    tooltipId="ConfirmationButton - total fee"
+                    body={totalFeeItem.description}
                   >
                     <Info color="inherit" width="16px" height="16px" />
                   </Tooltip>
-                </FeeBreakdownLabel>
-                <FeeBreakdownValue>
-                  {displayValues.swapImpact}
-                </FeeBreakdownValue>
-              </FeeBreakdownRow>
-            )}
-          </FeeBreakdown>
+                ) : null;
+              })()}
+            </DetailLeft>
+            <DetailRight>{displayValues.totalFee}</DetailRight>
+          </DetailRow>
+          {displayValues.fees.length > 0 && (
+            <FeeBreakdown>
+              {displayValues.fees.map((fee) => (
+                <FeeBreakdownRow key={fee.label}>
+                  <FeeBreakdownLabel>
+                    <span>{fee.label}</span>
+                    {fee.description && (
+                      <Tooltip
+                        tooltipId={`ConfirmationButton - ${fee.label}`}
+                        body={fee.description}
+                      >
+                        <Info color="inherit" width="16px" height="16px" />
+                      </Tooltip>
+                    )}
+                  </FeeBreakdownLabel>
+                  <FeeBreakdownValue>
+                    {formatUSDString(fee.value.toString())}
+                  </FeeBreakdownValue>
+                </FeeBreakdownRow>
+              ))}
+            </FeeBreakdown>
+          )}
         </ExpandedDetails>
       </ExpandableLabelSection>
       <ButtonCore
