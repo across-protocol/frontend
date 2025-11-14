@@ -1,3 +1,5 @@
+import { DepositActionParams } from "views/Bridge/hooks/useBridgeAction/strategies/types";
+
 export type ApprovalTxn = {
   chainId: number;
   to: string;
@@ -28,5 +30,8 @@ export type SwapApprovalActionStrategy = {
   isConnected(): boolean;
   isWrongNetwork(requiredChainId: number): boolean;
   switchNetwork(requiredChainId: number): Promise<void>;
-  execute(approvalData: SwapApprovalData): Promise<string>;
+  execute(
+    approvalData?: SwapApprovalData,
+    bridgeTxData?: DepositActionParams
+  ): Promise<string>;
 };

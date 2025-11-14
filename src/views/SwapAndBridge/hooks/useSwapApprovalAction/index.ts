@@ -5,10 +5,12 @@ import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
 import { SwapApprovalData } from "./strategies/types";
+import { DepositActionParams } from "views/Bridge/hooks/useBridgeAction/strategies/types";
 
 export function useSwapApprovalAction(
   originChainId: number,
-  approvalData?: SwapApprovalData
+  swapTxData?: SwapApprovalData,
+  bridgeTxData?: DepositActionParams
 ) {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
@@ -21,8 +23,8 @@ export function useSwapApprovalAction(
   );
 
   return getEcosystem(originChainId) === "evm"
-    ? evmHook(approvalData)
-    : svmHook(approvalData);
+    ? evmHook(swapTxData, bridgeTxData)
+    : svmHook(swapTxData, bridgeTxData);
 }
 
 export type { SwapApprovalData } from "./strategies/types";

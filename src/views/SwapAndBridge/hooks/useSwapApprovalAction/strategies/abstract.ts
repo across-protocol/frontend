@@ -1,5 +1,6 @@
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { SwapApprovalActionStrategy } from "./types";
+import { SwapApprovalActionStrategy, SwapApprovalData } from "./types";
+import { DepositActionParams } from "views/Bridge/hooks/useBridgeAction/strategies/types";
 
 export abstract class AbstractSwapApprovalActionStrategy
   implements SwapApprovalActionStrategy
@@ -9,7 +10,10 @@ export abstract class AbstractSwapApprovalActionStrategy
   abstract isConnected(): boolean;
   abstract isWrongNetwork(requiredChainId: number): boolean;
   abstract switchNetwork(requiredChainId: number): Promise<void>;
-  abstract execute(approvalData: any): Promise<string>;
+  abstract execute(
+    approvalData?: SwapApprovalData,
+    bridgeTxData?: DepositActionParams
+  ): Promise<string>;
 
   async assertCorrectNetwork(requiredChainId: number) {
     const currentChainId = this.evmConnection.chainId;
