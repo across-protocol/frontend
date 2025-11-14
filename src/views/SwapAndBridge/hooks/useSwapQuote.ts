@@ -23,6 +23,7 @@ type SwapQuoteParams = {
   refundAddress?: string;
   refundOnOrigin?: boolean;
   slippageTolerance?: number;
+  enabled?: boolean;
 };
 
 const useSwapQuote = ({
@@ -35,6 +36,7 @@ const useSwapQuote = ({
   refundAddress,
   depositor,
   refundOnOrigin = true,
+  enabled = true,
 }: SwapQuoteParams) => {
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -86,7 +88,7 @@ const useSwapQuote = ({
       const data = await swapApprovalApiCall(params);
       return data;
     },
-    enabled: !!origin?.address && !!destination?.address && !!amount,
+    enabled: enabled && !!origin?.address && !!destination?.address && !!amount,
     retry: 2,
 
     refetchInterval(query) {

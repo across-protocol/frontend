@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
-import useSwapQuote from "./useSwapQuote";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
+import { useSwapAndBridgeQuote } from "./useSwapAndBridgeQuote";
 import {
   useSwapApprovalAction,
   SwapApprovalData,
@@ -13,16 +12,22 @@ import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useDefaultRoute } from "./useDefaultRoute";
 import { useHistory } from "react-router-dom";
-import { getEcosystem, getQuoteWarningMessage } from "utils";
+import { buildSearchParams, getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
+import { TokenWithBalance } from "./useSwapAndBridgeTokens";
+import { findEnabledRoute } from "views/Bridge/utils";
+import { DepositActionParams } from "views/Bridge/hooks/useBridgeAction/strategies/types";
+import useReferrer from "hooks/useReferrer";
+import { useAmplitude } from "hooks/useAmplitude";
+import { ampli, DepositNetworkMismatchProperties } from "ampli";
 
 export type UseSwapAndBridgeReturn = {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-  setInputToken: (t: EnrichedToken | null) => void;
-  setOutputToken: (t: EnrichedToken | null) => void;
+  inputToken: TokenWithBalance | null;
+  outputToken: TokenWithBalance | null;
+  setInputToken: (t: TokenWithBalance | null) => void;
+  setOutputToken: (t: TokenWithBalance | null) => void;
   quickSwap: () => void;
 
   amount: BigNumber | null;
@@ -30,7 +35,7 @@ export type UseSwapAndBridgeReturn = {
   isAmountOrigin: boolean;
   setIsAmountOrigin: (v: boolean) => void;
   // route
-  swapQuote: ReturnType<typeof useSwapQuote>["data"];
+  swapQuote: ReturnType<typeof useSwapAndBridgeQuote>["data"];
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
   expectedOutputAmount?: string;
@@ -60,8 +65,8 @@ export type UseSwapAndBridgeReturn = {
 };
 
 export function useSwapAndBridge(): UseSwapAndBridgeReturn {
-  const [inputToken, setInputToken] = useState<EnrichedToken | null>(null);
-  const [outputToken, setOutputToken] = useState<EnrichedToken | null>(null);
+  const [inputToken, setInputToken] = useState<TokenWithBalance | null>(null);
+  const [outputToken, setOutputToken] = useState<TokenWithBalance | null>(null);
   const [amount, setAmount] = useState<BigNumber | null>(null);
   const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
 
@@ -82,6 +87,8 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   } = useConnectionSVM();
 
   const toAccountManagement = useToAccount(outputToken?.chainId);
+  const { referrer, integratorId } = useReferrer();
+  const { addToAmpliQueue } = useAmplitude();
 
   const originChainEcosystem = inputToken?.chainId
     ? getEcosystem(inputToken?.chainId)
@@ -151,29 +158,123 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [outputToken]);
 
   const {
-    data: swapQuote,
+    data: swapQuote, // normalized quote
     isLoading: isQuoteLoading,
     error: quoteError,
-  } = useSwapQuote({
-    origin: inputToken ? inputToken : null,
-    destination: outputToken ? outputToken : null,
+    bridgeQuoteResult,
+  } = useSwapAndBridgeQuote({
+    inputToken: inputToken,
+    outputToken: outputToken,
     amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
     depositor,
     recipient: toAccountManagement.currentRecipientAccount,
   });
 
-  const approvalData: SwapApprovalData | undefined = useMemo(() => {
-    if (!swapQuote) return undefined;
+  const swapTxData: SwapApprovalData | undefined = useMemo(() => {
+    if (!swapQuote || swapQuote.quoteType !== "swap") return undefined;
     return {
       approvalTxns: swapQuote.approvalTxns,
-      swapTx: swapQuote.swapTx as any,
-    };
+      swapTx: swapQuote.swapTx,
+    } as SwapApprovalData;
   }, [swapQuote]);
+
+  // Compute selectedRoute for bridge quotes (similar to useSwapAndBridgeQuote)
+  const selectedRouteForBridge = useMemo(() => {
+    if (
+      !swapQuote ||
+      swapQuote.quoteType !== "bridge" ||
+      !inputToken ||
+      !outputToken
+    ) {
+      return undefined;
+    }
+
+    const toChain = outputToken.externalProjectId
+      ? undefined
+      : outputToken.chainId;
+
+    return findEnabledRoute({
+      inputTokenSymbol: inputToken.symbol,
+      outputTokenSymbol: outputToken.symbol,
+      fromChain: inputToken.chainId,
+      toChain,
+      externalProjectId: outputToken.externalProjectId,
+      type: "bridge",
+    });
+  }, [swapQuote, inputToken, outputToken]);
+
+  // Create bridgeTxData from bridgeQuoteResult when we have a bridge quote
+  const bridgeTxData: DepositActionParams | undefined = useMemo(() => {
+    if (
+      !swapQuote ||
+      swapQuote.quoteType !== "bridge" ||
+      !bridgeQuoteResult ||
+      !selectedRouteForBridge
+    ) {
+      return undefined;
+    }
+
+    const transferQuote = bridgeQuoteResult.transferQuoteQuery.data;
+    if (!transferQuote || !transferQuote.quotedFees) {
+      return undefined;
+    }
+
+    const { amountToBridgeAfterSwap, initialAmount, quotedFees, recipient } =
+      transferQuote;
+
+    if (!amountToBridgeAfterSwap || !initialAmount || !recipient) {
+      return undefined;
+    }
+
+    const depositArgs = {
+      initialAmount,
+      amount: amountToBridgeAfterSwap,
+      fromChain: selectedRouteForBridge.fromChain,
+      toChain: selectedRouteForBridge.toChain,
+      timestamp: quotedFees.quoteTimestamp,
+      referrer: referrer || "",
+      relayerFeePct: quotedFees.totalRelayFee.pct,
+      inputTokenAddress: selectedRouteForBridge.fromTokenAddress,
+      outputTokenAddress: selectedRouteForBridge.toTokenAddress,
+      inputTokenSymbol: selectedRouteForBridge.fromTokenSymbol,
+      outputTokenSymbol: selectedRouteForBridge.toTokenSymbol,
+      fillDeadline: quotedFees.fillDeadline,
+      isNative: selectedRouteForBridge.isNative,
+      toAddress: recipient,
+      exclusiveRelayer: quotedFees.exclusiveRelayer,
+      exclusivityDeadline: quotedFees.exclusivityDeadline,
+      integratorId,
+      externalProjectId: selectedRouteForBridge.externalProjectId,
+    };
+
+    const onNetworkMismatch = (
+      networkMismatchProperties: DepositNetworkMismatchProperties
+    ) => {
+      addToAmpliQueue(() => {
+        ampli.depositNetworkMismatch(networkMismatchProperties);
+      });
+    };
+
+    return {
+      depositArgs,
+      transferQuote,
+      selectedRoute: selectedRouteForBridge,
+      onNetworkMismatch,
+    };
+  }, [
+    swapQuote,
+    bridgeQuoteResult,
+    selectedRouteForBridge,
+    referrer,
+    integratorId,
+    addToAmpliQueue,
+  ]);
 
   const approvalAction = useSwapApprovalAction(
     inputToken?.chainId || 0,
-    approvalData
+    swapTxData,
+    bridgeTxData
   );
 
   const validation = useValidateSwapAndBridge(
@@ -220,23 +321,36 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     const txHash = await approvalAction.buttonActionHandler();
     // Only navigate if we got a transaction hash (not empty string from wallet connection)
     if (txHash) {
-      history.push(
-        `/bridge-and-swap/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
-      );
+      const url =
+        `/bridge-and-swap/${txHash}?` +
+        buildSearchParams({
+          originChainId: swapQuote?.inputToken?.chainId || "",
+          destinationChainId:
+            (selectedRouteForBridge
+              ? selectedRouteForBridge.toChain
+              : swapQuote?.outputToken.chainId) ?? "",
+          inputTokenSymbol: swapQuote?.inputToken?.symbol || "",
+          outputTokenSymbol: swapQuote?.outputToken?.symbol || "",
+          externalProjectId: selectedRouteForBridge?.externalProjectId ?? "",
+          referrer: "",
+        });
+
+      history.push(url);
     }
   }, [
     isOriginConnected,
     isRecipientSet,
-    originChainEcosystem,
-    destinationChainEcosystem,
     approvalAction,
+    originChainEcosystem,
     connectEVM,
     connectSVM,
+    destinationChainEcosystem,
+    swapQuote?.inputToken?.chainId,
+    swapQuote?.inputToken?.symbol,
+    swapQuote?.outputToken.chainId,
+    swapQuote?.outputToken?.symbol,
+    selectedRouteForBridge,
     history,
-    inputToken?.chainId,
-    inputToken?.symbol,
-    outputToken?.chainId,
-    outputToken?.symbol,
   ]);
 
   // Button state logic
@@ -261,7 +375,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   }, [buttonState]);
 
   const quoteWarningMessage = useMemo(() => {
-    return getQuoteWarningMessage(quoteError);
+    return getQuoteWarningMessage(quoteError || null);
   }, [quoteError]);
 
   const buttonLabel = useMemo(() => {
@@ -272,6 +386,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
     // Show API error in button label if present
     if (quoteWarningMessage && buttonState === "apiError") {
+      // todo: parse suggested fees errors
       return quoteWarningMessage;
     }
 
@@ -297,18 +412,26 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const buttonDisabled = useMemo(
     () =>
-      approvalAction.buttonDisabled ||
+      // Only check approvalAction.buttonDisabled for swap quotes
+      // For bridge quotes, approvalAction.buttonDisabled will be true because approvalData is undefined,
+      // but we should still allow the button to be enabled if we have a valid bridge quote
+      (swapQuote?.quoteType === "swap"
+        ? approvalAction.buttonDisabled
+        : false) ||
       !!validation.error ||
       !inputToken ||
       !outputToken ||
       !amount ||
-      amount.lte(0),
+      amount.lte(0) ||
+      // Ensure we have a valid quote (for both swap and bridge quotes)
+      !swapQuote,
     [
       approvalAction.buttonDisabled,
       validation.error,
       inputToken,
       outputToken,
       amount,
+      swapQuote,
     ]
   );
 
@@ -347,7 +470,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isWrongNetwork: approvalAction.isWrongNetwork,
     isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
-    quoteError,
+    quoteError: quoteError || null,
     quoteWarningMessage,
   };
 }
