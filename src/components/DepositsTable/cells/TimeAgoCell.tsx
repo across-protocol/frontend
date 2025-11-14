@@ -1,36 +1,20 @@
 import styled from "@emotion/styled";
 import { DateTime } from "luxon";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
+import { getTimeAgoText } from "./getTimeAgoText";
 
-type Props = {
+export function TimeAgoCell({
+  deposit,
+  width,
+}: {
   deposit: Deposit;
   width: number;
-};
-
-function getTimeAgoText(seconds: number): string {
-  const now = DateTime.now();
-  const depositTime = DateTime.fromSeconds(seconds);
-  const diff = now.diff(depositTime, ["minutes", "seconds"]).toObject();
-
-  const totalSeconds = Math.floor(diff.seconds || 0);
-  const totalMinutes = Math.floor((diff.minutes || 0) + totalSeconds / 60);
-
-  if (totalMinutes === 0) {
-    return "just now";
-  } else if (totalMinutes < 3) {
-    return `${totalMinutes}m ago`;
-  } else {
-    // After 3 minutes, show the actual date/time
-    return depositTime.toFormat("dd LLL, hh:mm a");
-  }
-}
-
-export function TimeAgoCell({ deposit, width }: Props) {
+}) {
   const [timeAgoText, setTimeAgoText] = useState(() =>
     getTimeAgoText(deposit.depositTime)
   );
@@ -40,7 +24,6 @@ export function TimeAgoCell({ deposit, width }: Props) {
     const interval = setInterval(() => {
       setTimeAgoText(getTimeAgoText(deposit.depositTime));
     }, 1000);
-
     return () => clearInterval(interval);
   }, [deposit.depositTime]);
 

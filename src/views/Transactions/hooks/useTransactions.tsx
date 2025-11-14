@@ -41,7 +41,6 @@ function usePaginatedDeposits(pageSize: number, userAddress?: string) {
     : false;
   const numberOfDeposits = depositsQuery.data?.deposits.length || 0;
   const totalDeposits = numberOfDeposits + currentPage * pageSize;
-  // const end = depositsQuery.data ? depositsQuery.data!.deposits.length < pageSize : false;
 
   return {
     currentPage,

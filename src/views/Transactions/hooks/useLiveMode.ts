@@ -33,6 +33,7 @@ export function useLiveMode({
   }, [enabled]);
 
   useEffect(() => {
+    // TODO, test if this is needed
     const handleVisibilityChange = async () => {
       const isVisible = !document.hidden;
       setIsPageVisible(isVisible);
