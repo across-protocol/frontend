@@ -27,7 +27,7 @@ import { getSponsoredCctpFinalTokenAddress } from "./final-token";
  */
 export function buildSponsoredCCTPQuote(
   params: BuildSponsoredQuoteParams & { maxFee: BigNumber }
-): { quote: SponsoredCCTPQuote; signature: string; hash: string } {
+) {
   const {
     inputToken,
     outputToken,
@@ -90,5 +90,9 @@ export function buildSponsoredCCTPQuote(
 
   const { signature, typedDataHash } = createCctpSignature(sponsoredCCTPQuote);
 
-  return { quote: sponsoredCCTPQuote, signature, hash: typedDataHash };
+  return {
+    quote: sponsoredCCTPQuote,
+    signature,
+    hash: typedDataHash,
+  };
 }

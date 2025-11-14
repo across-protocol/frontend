@@ -51,8 +51,10 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.SOLANA]: {
         [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
       },
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
       [CHAIN_IDs.SOLANA_DEVNET]: {
-        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
       },
     },
   },
