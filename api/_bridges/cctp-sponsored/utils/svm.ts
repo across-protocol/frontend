@@ -53,6 +53,7 @@ export async function getDepositAccounts(params: {
     [rentFundAddress],
     [usedNonceAddress],
     depositorTokenAccountAddress,
+    messageSentEventDataKeypair,
   ] = await Promise.all([
     sdk.arch.svm.getCCTPDepositAccounts(
       params.originChainId,
@@ -80,9 +81,8 @@ export async function getDepositAccounts(params: {
       depositor.forceSvmAddress(),
       inputTokenAddress.forceSvmAddress()
     ),
+    generateKeyPairSigner(),
   ]);
-
-  const messageSentEventDataKeypair = await generateKeyPairSigner();
 
   return {
     signer: depositorSigner,
