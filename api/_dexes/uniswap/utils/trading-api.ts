@@ -43,7 +43,10 @@ export const UNISWAP_API_KEY =
  */
 export async function getUniswapClassicQuoteFromApi(
   swap: UniswapParamForApi,
-  tradeType: TradeType
+  tradeType: TradeType,
+  opts?: {
+    splitSlippage?: boolean;
+  }
 ) {
   // NOTE: Temporary fix Stablecoin Mainnet -> Lens. The Multicall3 address is currently blocked
   // by the Uniswap API. We use a dummy address for just fetching the quote.
@@ -67,6 +70,7 @@ export async function getUniswapClassicQuoteFromApi(
             tokenOut: swap.tokenOut,
             slippageTolerance: swap.slippageTolerance,
             originOrDestination: swap.originOrDestination,
+            splitSlippage: opts?.splitSlippage,
           }),
         };
 
