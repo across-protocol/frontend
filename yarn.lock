@@ -16,15 +16,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.77", "@across-protocol/constants@^3.1.82":
-  version "3.1.82"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.82.tgz#963a12d481a141048c39f54a3c1949eabb588c0a"
-  integrity sha512-eYz/yMjMa+MMyZ8J4g5rUtQ9ybmwNj/K5PG7RfJQZeRejg3AzxjL0o+9TNm+5FoeWUrYl+h4Ju6CO7VAr6Gr8Q==
-
-"@across-protocol/constants@^3.1.83":
-  version "3.1.84"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.84.tgz#8b6216b8e8bc2bb2fcde1019d8b1ee52d0dbd8f6"
-  integrity sha512-OB4PDv4/31jxT18L94YWp+RKAwo9GsXRSRmKjsENH2Hg6cJaFif/ah80y1Bb82FSjxaie201XhdsfAWvU6y2/w==
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.77", "@across-protocol/constants@^3.1.83", "@across-protocol/constants@^3.1.86":
+  version "3.1.86"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.86.tgz#82b7ae792f4b46a752679a5b0fcb1c0b4eb8049e"
+  integrity sha512-2AwW4CXQ+4GUJRj9i/hx3afB3prurZN/Gzye9eQUQYNyFD3xJ30u+CLstwJxfTm4KZX9qKxg4WjvppA6+0Cg9w==
 
 "@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
