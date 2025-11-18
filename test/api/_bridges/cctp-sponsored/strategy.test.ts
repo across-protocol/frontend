@@ -1,6 +1,7 @@
 import { BigNumber, ethers, utils } from "ethers";
 import {
   buildEvmTxForAllowanceHolder,
+  buildSvmTxForAllowanceHolder,
   calculateMaxBpsToSponsor,
   getQuoteForExactInput,
   getQuoteForOutput,
@@ -671,6 +672,142 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       await expect(
         buildEvmTxForAllowanceHolder({ quotes, isEligibleForSponsorship: true })
       ).rejects.toThrow("Origin/destination swaps are not supported");
+    });
+  });
+
+  describe("#buildSvmTxForAllowanceHolder() - eligible for sponsorship", () => {
+    const depositorSvm = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
+    const recipientEvm = "0x0000000000000000000000000000000000000002";
+    const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
+    const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
+
+    // Mock SVM chain ID - using a test SVM chain
+    const svmChainId = CHAIN_IDs.SOLANA_DEVNET;
+
+    const svmUSDC: Token = {
+      ...TOKEN_SYMBOLS_MAP.USDC,
+      address: TOKEN_SYMBOLS_MAP.USDC.addresses[svmChainId],
+      chainId: svmChainId,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Before each test, mock the return value of getEnvs to provide our test private key.
+      (getEnvs as jest.Mock).mockReturnValue({
+        SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
+      });
+    });
+
+    test("should build transaction correctly for USDC output", async () => {
+      const crossSwap: CrossSwap = {
+        amount: inputAmount,
+        inputToken: svmUSDC,
+        outputToken: hyperCoreUSDC,
+        depositor: depositorSvm,
+        recipient: recipientEvm,
+        slippageTolerance: 1,
+        type: AMOUNT_TYPE.EXACT_INPUT,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+        isOriginSvm: true,
+      };
+
+      const quotes: CrossSwapQuotes = {
+        crossSwap,
+        bridgeQuote: {
+          inputToken: svmUSDC,
+          outputToken: hyperCoreUSDC,
+          inputAmount,
+          outputAmount,
+          minOutputAmount: outputAmount,
+          estimatedFillTimeSec: 300,
+          provider: "sponsored-cctp",
+          fees: {
+            token: svmUSDC,
+            pct: BigNumber.from(0),
+            amount: BigNumber.from(0),
+          },
+        },
+        contracts: {
+          depositEntryPoint: {
+            address: "0x0000000000000000000000000000000000000000",
+            name: "SpokePoolPeriphery",
+          },
+        },
+      };
+
+      // Mock getCctpFees
+      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+        transferFeeBps: 10,
+        forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
+      });
+
+      const result = await buildSvmTxForAllowanceHolder({
+        quotes,
+        isEligibleForSponsorship: true,
+      });
+
+      expect(result.chainId).toBe(svmUSDC.chainId);
+      expect(result.to).toBe(
+        SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES[svmChainId]
+      );
+      expect(result.data).toBeTruthy();
+      expect(result.data.length).toBeGreaterThan(0);
+      expect(result.ecosystem).toBe("svm");
+    });
+
+    test("should throw for invalid depositor address", async () => {
+      const crossSwap: CrossSwap = {
+        amount: inputAmount,
+        inputToken: svmUSDC,
+        outputToken: hyperCoreUSDC,
+        depositor: recipientEvm, // invalid SVM address
+        recipient: recipientEvm,
+        slippageTolerance: 1,
+        type: AMOUNT_TYPE.EXACT_INPUT,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+        isOriginSvm: true,
+      };
+
+      const quotes: CrossSwapQuotes = {
+        crossSwap,
+        bridgeQuote: {
+          inputToken: svmUSDC,
+          outputToken: hyperCoreUSDC,
+          inputAmount,
+          outputAmount,
+          minOutputAmount: outputAmount,
+          estimatedFillTimeSec: 300,
+          provider: "sponsored-cctp",
+          fees: {
+            token: svmUSDC,
+            pct: BigNumber.from(0),
+            amount: BigNumber.from(0),
+          },
+        },
+        contracts: {
+          depositEntryPoint: {
+            address: "0x0000000000000000000000000000000000000000",
+            name: "SpokePoolPeriphery",
+          },
+        },
+      };
+
+      // Mock getCctpFees
+      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+        transferFeeBps: 10,
+        forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
+      });
+
+      await expect(
+        buildSvmTxForAllowanceHolder({
+          quotes,
+          isEligibleForSponsorship: true,
+        })
+      ).rejects.toThrow(/is not a valid SVM address/);
     });
   });
 });
