@@ -92,8 +92,7 @@ export function useResolveFromBridgePagePayload(
     isSwap || isUniversalSwap,
     parsedAmount,
     gasFee,
-    bridgeFee,
-    swapFee
+    bridgeFee
   );
 
   return {

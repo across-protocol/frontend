@@ -13,10 +13,10 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
+import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 
 type Props = {
   depositTxHash: string;
@@ -25,7 +25,7 @@ type Props = {
   externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  fromBridgePagePayload?: FromBridgePagePayload;
+  fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
 };
 
 export function DepositStatusUpperCard({
@@ -35,16 +35,16 @@ export function DepositStatusUpperCard({
   externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
-  fromBridgePagePayload,
+  fromBridgeAndSwapPagePayload,
 }: Props) {
   const { depositQuery, fillQuery, status } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload,
+    fromBridgeAndSwapPagePayload,
   });
 
-  const depositTxSentTime = fromBridgePagePayload?.timeSigned;
+  const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
   const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
 
@@ -158,7 +158,7 @@ export function DepositStatusUpperCard({
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          fromBridgePagePayload={fromBridgePagePayload}
+          fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
       {isPMFormAvailable && (

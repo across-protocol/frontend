@@ -2,7 +2,7 @@ import { VersionedTransaction } from "@solana/web3.js";
 import { AbstractSwapApprovalActionStrategy } from "./abstract";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { SwapApprovalData, SwapTx } from "./types";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStrategy {
   constructor(
@@ -24,12 +24,11 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     await this.svmConnection.connect();
   }
 
-  async swap(approvalData: SwapApprovalData): Promise<string> {
+  async swap(swapTx: SwapApprovalQuote["swapTx"]): Promise<string> {
     if (!this.svmConnection.wallet?.adapter) {
       throw new Error("Wallet needs to be connected");
     }
 
-    const swapTx: SwapTx = approvalData.swapTx;
     const txBuffer = Buffer.from(swapTx.data, "base64");
     // Convert to VersionedTransaction for the wallet adapter
     // The wallet adapter expects a VersionedTransaction from @solana/web3.js
@@ -44,9 +43,9 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     return signature;
   }
 
-  async execute(approvalData: SwapApprovalData): Promise<string> {
+  async execute(swapQuote: SwapApprovalQuote): Promise<string> {
     try {
-      return await this.swap(approvalData);
+      return await this.swap(swapQuote["swapTx"]);
     } catch (e) {
       console.error(e);
       throw e;

@@ -137,27 +137,27 @@ const EstimatedTable = ({
           : "-"}
       </Text>
     </>,
-    <>
-      <ToolTipWrapper>
-        <Text size="md" color="grey-400">
-          Destination gas fee
+    swapFeeAsBaseCurrency?.gt(0) ? (
+      <>
+        <ToolTipWrapper>
+          <Text size="md" color="grey-400">
+            Swap Impact
+          </Text>
+          <Tooltip
+            title="Swap Impact"
+            body="Fee to cover gas for destination chain fill transaction."
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        </ToolTipWrapper>
+        <Text color="grey-400" size="md">
+          {!showLoadingSkeleton ? `$${formatUSD(swapFeeAsBaseCurrency)}` : "-"}
         </Text>
-        <Tooltip
-          title="Destination gas fee"
-          body="Fee to cover gas for destination chain fill transaction."
-          placement="bottom-start"
-        >
-          <InfoIconWrapper>
-            <InfoIcon />
-          </InfoIconWrapper>
-        </Tooltip>
-      </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {gasFeeAsBaseCurrency && !showLoadingSkeleton
-          ? `$${formatUSD(gasFeeAsBaseCurrency)}`
-          : "-"}
-      </Text>
-    </>,
+      </>
+    ) : undefined,
     rewardDisplaySymbol && rewardToken && rewardPercentage ? (
       <>
         <ToolTipWrapper>
@@ -239,11 +239,11 @@ const EstimatedTable = ({
       >
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
-            Net fee
+            Total fee
           </Text>
           <Tooltip
             body="Total fees less any rewards, in USD."
-            title="Net fee"
+            title="Total fee"
             placement="bottom-start"
           >
             <InfoIconWrapper>

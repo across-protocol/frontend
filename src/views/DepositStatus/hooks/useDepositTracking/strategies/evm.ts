@@ -22,6 +22,12 @@ import { ethers } from "ethers";
  */
 export class EVMStrategy implements IChainStrategy {
   constructor(public readonly chainId: number) {}
+  convertForDepositQuery(
+    depositInfo: DepositedInfo,
+    fromBridgePagePayload: FromBridgePagePayload
+  ): Deposit {
+    throw new Error("Method not implemented.");
+  }
 
   /**
    * Get deposit information from an EVM transaction hash
@@ -277,75 +283,75 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  /**
-   * Convert deposit information to local storage format for EVM chains
-   * @param depositInfo Deposit information
-   * @param bridgePayload Bridge page payload
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } =
-      fromBridgePagePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
+  // /**
+  //  * Convert deposit information to local storage format for EVM chains
+  //  * @param depositInfo Deposit information
+  //  * @param bridgePayload Bridge page payload
+  //  * @returns Local deposit format for storage
+  //  */
+  // convertForDepositQuery(
+  //   depositInfo: DepositedInfo,
+  //   fromBridgePagePayload?: FromBridgePagePayload
+  // ): Deposit {
+  //   const config = getConfig();
+  //   const { selectedRoute, depositArgs, quoteForAnalytics } =
+  //     fromBridgePagePayload;
+  //   const { depositId, depositor, recipient, message, inputAmount } =
+  //     depositInfo.depositLog;
+  //   const inputToken = config.getTokenInfoBySymbolSafe(
+  //     selectedRoute.fromChain,
+  //     selectedRoute.fromTokenSymbol
+  //   );
+  //   const outputToken = config.getTokenInfoBySymbolSafe(
+  //     selectedRoute.toChain,
+  //     selectedRoute.toTokenSymbol
+  //   );
+  //   const swapToken = config.getTokenInfoBySymbolSafe(
+  //     selectedRoute.fromChain,
+  //     selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
+  //   );
 
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "pending" as const,
-      filled: "0",
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBase58(),
-      recipientAddr: recipient.toBase58(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: depositInfo.depositTxHash,
-      fillTx: "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
-  }
+  //   return {
+  //     depositId: depositId.toString(),
+  //     depositTime:
+  //       depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
+  //     status: "pending" as const,
+  //     filled: "0",
+  //     sourceChainId: selectedRoute.fromChain,
+  //     destinationChainId: selectedRoute.toChain,
+  //     assetAddr:
+  //       selectedRoute.type === "swap"
+  //         ? selectedRoute.swapTokenAddress
+  //         : selectedRoute.fromTokenAddress,
+  //     depositorAddr: depositor.toBase58(),
+  //     recipientAddr: recipient.toBase58(),
+  //     message: message || "0x",
+  //     amount: inputAmount.toString(),
+  //     depositTxHash: depositInfo.depositTxHash,
+  //     fillTx: "",
+  //     speedUps: [],
+  //     depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
+  //     initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
+  //     suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
+  //     feeBreakdown: {
+  //       lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
+  //       lpFeePct: quoteForAnalytics.lpFeePct,
+  //       lpFeeAmount: quoteForAnalytics.lpFeeTotal,
+  //       relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
+  //       relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
+  //       relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
+  //       relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
+  //       relayGasFeePct: quoteForAnalytics.relayGasFeePct,
+  //       relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+  //       totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+  //       totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+  //       totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
+  //     },
+  //     token: inputToken,
+  //     outputToken,
+  //     swapToken,
+  //   };
+  // }
 
   /**
    * Convert fill information to local storage format for EVM chains

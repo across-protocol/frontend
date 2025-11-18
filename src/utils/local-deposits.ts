@@ -1,4 +1,5 @@
 import { Deposit } from "../hooks/useDeposits";
+import { SwapApprovalQuote } from "./serverless-api/prod/swap-approval";
 
 const LOCAL_DEPOSITS_KEY = "local-deposits-v2";
 const LOCAL_DEPOSIT_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -60,4 +61,20 @@ export function removeLocalDeposits(depositTxHashes: string[]) {
     LOCAL_DEPOSITS_KEY,
     JSON.stringify(filteredLocalPendingDeposits)
   );
+}
+
+export type FromBridgeAndSwapPagePayload = {
+  timeSigned: number;
+  swapQuote: SwapApprovalQuote;
+  referrer: string;
+};
+
+export function createFromBridgeAndSwapPagePayload(
+  swapQuote: SwapApprovalQuote
+): FromBridgeAndSwapPagePayload {
+  return {
+    swapQuote,
+    timeSigned: Date.now(),
+    referrer: document.referrer,
+  };
 }

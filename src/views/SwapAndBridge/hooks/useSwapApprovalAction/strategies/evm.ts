@@ -1,6 +1,6 @@
 import { AbstractSwapApprovalActionStrategy } from "./abstract";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { ApprovalTxn, SwapApprovalData, SwapTx } from "./types";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStrategy {
   constructor(evmConnection: ReturnType<typeof useConnectionEVM>) {
@@ -28,10 +28,12 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     await this.evmConnection.setChain(requiredChainId);
   }
 
-  async approve(approvalData: SwapApprovalData): Promise<boolean> {
+  async approve(
+    approvalTxns: SwapApprovalQuote["approvalTxns"]
+  ): Promise<boolean> {
     const signer = this.getSigner();
     // approvals first
-    const approvals: ApprovalTxn[] = approvalData.approvalTxns || [];
+    const approvals = approvalTxns || [];
     for (const approval of approvals) {
       await this.switchNetwork(approval.chainId);
       await this.assertCorrectNetwork(approval.chainId);
@@ -44,10 +46,9 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     return true;
   }
 
-  async swap(approvalData: SwapApprovalData): Promise<string> {
+  async swap(swapTx: SwapApprovalQuote["swapTx"]): Promise<string> {
     const signer = this.getSigner();
 
-    const swapTx: SwapTx = approvalData.swapTx;
     await this.switchNetwork(swapTx.chainId);
     await this.assertCorrectNetwork(swapTx.chainId);
     const tx = await signer.sendTransaction({
@@ -63,10 +64,10 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     return tx.hash;
   }
 
-  async execute(approvalData: SwapApprovalData): Promise<string> {
+  async execute(swapQuote: SwapApprovalQuote): Promise<string> {
     try {
-      await this.approve(approvalData);
-      return await this.swap(approvalData);
+      await this.approve(swapQuote.approvalTxns);
+      return await this.swap(swapQuote.swapTx);
     } catch (e) {
       console.error(e);
       throw e;
