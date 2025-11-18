@@ -1239,7 +1239,10 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
         await result.destinationStrategy.fetchFn(
           {
             ...result.destinationSwap,
-            amount: originSwapQuote.minAmountOut.toString(),
+            amount: ConvertDecimals(
+              originSwapQuote.tokenOut.decimals,
+              result.destinationSwap.tokenIn.decimals
+            )(originSwapQuote.minAmountOut).toString(),
             originOrDestination: "destination",
           },
           TradeType.EXACT_INPUT,

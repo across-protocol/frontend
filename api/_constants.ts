@@ -222,6 +222,8 @@ export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
   [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
     CHAIN_IDs.PLASMA,
+  [TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM].toLowerCase()]:
+    CHAIN_IDs.HYPEREVM,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
@@ -323,6 +325,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
