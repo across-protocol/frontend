@@ -28,7 +28,7 @@ const A2A_BASE_TEST_CASE = {
     symbol: "USDe",
     decimals: 18,
   },
-  originChainId: CHAIN_IDs.OPTIMISM,
+  originChainId: CHAIN_IDs.BSC,
   destinationChainId: CHAIN_IDs.ARBITRUM,
   depositor: e2eConfig.addresses.depositor,
 };
