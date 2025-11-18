@@ -1312,6 +1312,7 @@ export async function getCrossSwapQuotesForExactInputByRouteA2A(
       // if we want to be strict about the provided `tradeType`. The user can override
       // this behavior by setting `strictTradeType=false` in the query params.
       throwIfSellEntireBalanceUnsupported: crossSwap.strictTradeType,
+      quoteBuffer: QUOTE_BUFFER,
       splitSlippage: true,
     }
   );
@@ -1506,6 +1507,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
               // this behavior by setting `strictTradeType=false` in the query params.
               throwIfSellEntireBalanceUnsupported:
                 crossSwapWithAppFee.strictTradeType,
+              quoteBuffer: QUOTE_BUFFER,
               splitSlippage: true,
             }
           );

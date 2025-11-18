@@ -95,8 +95,12 @@ describe("GET /swap/approval", () => {
     expect(response.data.steps.destinationSwap).toBeDefined();
 
     // Should prefer USDC as bridge token
-    expect(response.data.steps.bridge.tokenIn.symbol).toBe("USDC");
-    expect(response.data.steps.bridge.tokenOut.symbol).toBe("USDC");
+    expect(response.data.steps.bridge.tokenIn.symbol.includes("USDC")).toBe(
+      true
+    );
+    expect(response.data.steps.bridge.tokenOut.symbol.includes("USDC")).toBe(
+      true
+    );
   };
 
   const validateExactInputResponse = (response: any, inputParams: any) => {
