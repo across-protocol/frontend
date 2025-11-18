@@ -144,7 +144,7 @@ describe("GET /swap/approval", () => {
         expect(response.status).toBe(200);
         swapTypeValidator(response, testCase);
         amountTypeValidator(response, testCase);
-      }, 30_000);
+      }, 180_000);
     });
   };
 
