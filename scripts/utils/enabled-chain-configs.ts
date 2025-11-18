@@ -25,7 +25,7 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.PLASMA,
 ];
 
-export const enabledIndirectMainnetChainConfigs = [chainConfigs.HYPERCORE];
+export const enabledIndirectMainnetChainConfigs = [];
 
 export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
