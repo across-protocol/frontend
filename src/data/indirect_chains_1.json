@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "chainId": 1337,
+    "name": "HyperCore",
+    "publicRpcUrl": "https://api.hyperliquid.xyz",
+    "explorerUrl": "https://app.hyperliquid.xyz/explorer",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/hypercore/assets/logo.svg",
+    "spokePool": "0x0000000000000000000000000000000000000000",
+    "spokePoolBlock": 0,
+    "intermediaryChains": [],
+    "inputTokens": [],
+    "outputTokens": []
+  }
+]
