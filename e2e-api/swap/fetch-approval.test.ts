@@ -16,6 +16,23 @@ const B2B_BASE_TEST_CASE = {
   depositor: e2eConfig.addresses.depositor,
 };
 
+const A2A_BASE_TEST_CASE = {
+  amount: ethers.utils
+    .parseUnits("1", TOKEN_SYMBOLS_MAP.WBNB.decimals)
+    .toString(),
+  inputToken: TOKEN_SYMBOLS_MAP.WBNB,
+  outputToken: {
+    addresses: {
+      [CHAIN_IDs.ARBITRUM]: "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34",
+    },
+    symbol: "USDe",
+    decimals: 18,
+  },
+  originChainId: CHAIN_IDs.BSC,
+  destinationChainId: CHAIN_IDs.ARBITRUM,
+  depositor: e2eConfig.addresses.depositor,
+};
+
 describe("GET /swap/approval", () => {
   // Helper function to validate response structure
   const validateSwapApprovalResponse = (response: any) => {
@@ -69,6 +86,23 @@ describe("GET /swap/approval", () => {
     expect(response.data.steps.destinationSwap).toBeUndefined();
   };
 
+  // A2A specific checks
+  const validateA2AResponse = (response: any, _inputParams: any) => {
+    validateSwapApprovalResponse(response);
+
+    expect(response.data.steps.originSwap).toBeDefined();
+    expect(response.data.steps.bridge).toBeDefined();
+    expect(response.data.steps.destinationSwap).toBeDefined();
+
+    // Should prefer USDC as bridge token
+    expect(response.data.steps.bridge.tokenIn.symbol.includes("USDC")).toBe(
+      true
+    );
+    expect(response.data.steps.bridge.tokenOut.symbol.includes("USDC")).toBe(
+      true
+    );
+  };
+
   const validateExactInputResponse = (response: any, inputParams: any) => {
     expect(response.data.inputAmount).toEqual(inputParams.amount);
   };
@@ -84,7 +118,7 @@ describe("GET /swap/approval", () => {
   };
 
   const testBaseTestCases = (
-    testCases: (typeof B2B_BASE_TEST_CASE)[],
+    testCases: (typeof B2B_BASE_TEST_CASE | typeof A2A_BASE_TEST_CASE)[],
     tradeType: string,
     swapTypeValidator: (response: any, inputParams: any) => void,
     amountTypeValidator: (response: any, inputParams: any) => void
@@ -110,7 +144,7 @@ describe("GET /swap/approval", () => {
         expect(response.status).toBe(200);
         swapTypeValidator(response, testCase);
         amountTypeValidator(response, testCase);
-      }, 30_000);
+      }, 180_000);
     });
   };
 
@@ -162,6 +196,17 @@ describe("GET /swap/approval", () => {
         "exactOutput",
         validateB2BResponse,
         validateExactOutputResponse
+      );
+    });
+  });
+
+  describe("A2A", () => {
+    describe("exactInput", () => {
+      testBaseTestCases(
+        [A2A_BASE_TEST_CASE],
+        "exactInput",
+        validateA2AResponse,
+        validateExactInputResponse
       );
     });
   });
