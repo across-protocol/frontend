@@ -9,7 +9,7 @@ import { ConvertDecimals } from "../../_utils";
 import { CROSS_SWAP_TYPE } from "../../_dexes/utils";
 import { AppFee } from "../../_dexes/utils";
 import { Token } from "../../_dexes/types";
-import { isRouteSupported } from "./utils/common";
+import { getDepositMessage, isRouteSupported } from "./utils/common";
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 
@@ -55,8 +55,11 @@ export function getUsdhIntentsBridgeStrategy(): BridgeStrategy {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
-      return "0x";
+    getBridgeQuoteMessage: (crossSwap: CrossSwap, _appFee?: AppFee) => {
+      return getDepositMessage({
+        outputToken: crossSwap.outputToken,
+        recipient: crossSwap.recipient,
+      });
     },
 
     getQuoteForExactInput: async ({
