@@ -184,7 +184,6 @@ export function DepositTimesCard({
           </Row>
         )}
       {isDefined(outputAmount) &&
-        isDefined(outputTokenSymbol) &&
         outputTokenForChain &&
         isDefined(outputAmountUsd) && (
           <Row>
