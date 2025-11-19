@@ -386,31 +386,10 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
 export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
 
-export const CUSTOM_GAS_TOKENS = (() => {
-  // Lens & Lens Sepolia are exceptional; every other EVM
-  // custom gas token can be inferred from the chain defs.
-  const overrides = {
-    [CHAIN_IDs.POLYGON]: "POL",
-    [CHAIN_IDs.POLYGON_AMOY]: "POL",
-    [CHAIN_IDs.LENS]: "GHO",
-    [CHAIN_IDs.LENS_SEPOLIA]: "GHO",
-    [CHAIN_IDs.HYPERCORE]: "HYPE",
-  };
-
-  return Object.entries(PUBLIC_NETWORKS)
-    .filter(
-      ([chainId, network]) =>
-        utils.chainIsEvm(Number(chainId)) && network.nativeToken !== "ETH"
-    )
-    .reduce(
-      (acc, [chainId, network]) => {
-        acc[Number(chainId)] =
-          overrides[Number(chainId)] ?? network.nativeToken;
-        return acc;
-      },
-      {} as Record<number, string>
-    );
-})();
+export const CUSTOM_GAS_TOKENS = {
+  ...sdkConstants.CUSTOM_GAS_TOKENS,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: "HYPE",
+};
 
 export const STABLE_COIN_SYMBOLS = Array.from(
   new Set([
