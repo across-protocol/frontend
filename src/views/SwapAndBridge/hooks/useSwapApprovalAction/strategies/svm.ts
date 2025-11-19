@@ -3,6 +3,7 @@ import { AbstractSwapApprovalActionStrategy } from "./abstract";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { SwapApprovalData, SwapTx } from "./types";
+import { DepositActionParams } from "views/Bridge/hooks/useBridgeAction/strategies/types";
 
 export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStrategy {
   constructor(
@@ -44,9 +45,19 @@ export class SVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
     return signature;
   }
 
-  async execute(approvalData: SwapApprovalData): Promise<string> {
+  async execute(
+    swapTxData?: SwapApprovalData,
+    bridgeTxData?: DepositActionParams
+  ): Promise<string> {
     try {
-      return await this.swap(approvalData);
+      if (!swapTxData) {
+        throw new Error("No swap Tx data found");
+      }
+      // SVM strategy doesn't support bridge transactions for now
+      if (bridgeTxData) {
+        throw new Error("Bridge transactions are not supported for SVM");
+      }
+      return await this.swap(swapTxData);
     } catch (e) {
       console.error(e);
       throw e;

@@ -2,7 +2,7 @@ import Modal from "components/Modal";
 import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
-import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
+import { LifiToken } from "views/SwapAndBridge/hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
   ChainInfo,
@@ -22,11 +22,13 @@ import { ReactComponent as SearchResults } from "assets/icons/search_results.svg
 import { ReactComponent as WarningIcon } from "assets/icons/warning_triangle.svg";
 import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
 import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
-import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
-import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
+import {
+  useSwapAndBridgeTokens,
+  TokenWithBalance,
+} from "views/SwapAndBridge/hooks/useSwapAndBridgeTokens";
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -53,27 +55,21 @@ type DisplayedChains = {
   all: ChainData[];
 };
 
-export type EnrichedToken = LifiToken & {
-  balance: BigNumber;
-  balanceUsd: number;
-  routeSource: "bridge" | "swap";
-};
-
-type EnrichedTokenWithReachability = EnrichedToken & {
+type TokenWithBalanceWithReachability = TokenWithBalance & {
   isUnreachable: boolean;
 };
 
 type DisplayedTokens = {
-  popular: EnrichedTokenWithReachability[];
-  all: EnrichedTokenWithReachability[];
+  popular: TokenWithBalanceWithReachability[];
+  all: TokenWithBalanceWithReachability[];
 };
 
 type Props = {
-  onSelect: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void; // Callback to reset the other selector
+  onSelect: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void; // Callback to reset the other selector
   isOriginToken: boolean;
-  currentToken?: EnrichedToken | null; // The currently selected token we're changing from
-  otherToken?: EnrichedToken | null; // The currently selected token on the other side
+  currentToken?: TokenWithBalance | null; // The currently selected token we're changing from
+  otherToken?: TokenWithBalance | null; // The currently selected token on the other side
   displayModal: boolean;
   setDisplayModal: (displayModal: boolean) => void;
 };
@@ -87,7 +83,17 @@ export function ChainTokenSelectorModal({
   currentToken,
   otherToken,
 }: Props) {
-  const crossChainRoutes = useEnrichedCrosschainBalances();
+  const { data: crossChainRoutes } = useSwapAndBridgeTokens(
+    isOriginToken
+      ? {
+          outputToken: otherToken,
+          isInput: true,
+        }
+      : {
+          inputToken: otherToken,
+          isOutput: true,
+        }
+  );
   const { isMobile } = useCurrentBreakpoint();
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
@@ -107,33 +113,32 @@ export function ChainTokenSelectorModal({
   }, [displayModal, currentToken]);
 
   const displayedTokens = useMemo(() => {
-    let tokens = selectedChain ? (crossChainRoutes[selectedChain] ?? []) : [];
+    let tokens = selectedChain ? (crossChainRoutes?.[selectedChain] ?? []) : [];
 
     if (tokens.length === 0 && selectedChain === null) {
-      tokens = Object.values(crossChainRoutes).flatMap((t) => t);
+      tokens = Object.values(crossChainRoutes ?? {}).flatMap((t) => t);
     }
 
     // Enrich tokens with route source information and unreachable flag
-    const enrichedTokens = tokens.map((token) => {
+    // The hook (useSwapAndBridgeTokens) already handles all unreachability logic:
+    // - Same chain check (input tokens on same chain as output, or output tokens on same chain as input)
+    // - Bridge-only check (swap-only tokens when output is bridge-only)
+    const TokenWithBalances = tokens.map((token) => {
       // Find the corresponding token in crossChainRoutes to get route source
       const routeToken = crossChainRoutes?.[token.chainId]?.find(
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
-      // Token is unreachable if otherToken exists and is from the same chain
-      const isUnreachable = otherToken
-        ? token.chainId === otherToken.chainId
-        : false;
-
       return {
         ...token,
-        routeSource: routeToken?.routeSource || "bridge", // Default to bridge if not found
-        isUnreachable,
+        routeSource: routeToken?.routeSource || token.routeSource || ["bridge"], // Use token's routeSource if available, otherwise default to bridge
+        // Use the hook's isUnreachable value directly - it handles all cases
+        isUnreachable: token.isUnreachable ?? false,
       };
     });
 
     // Filter by search first
-    const filteredTokens = enrichedTokens.filter((t) => {
+    const filteredTokens = TokenWithBalances.filter((t) => {
       if (tokenSearch === "") {
         return true;
       }
@@ -152,7 +157,7 @@ export function ChainTokenSelectorModal({
     });
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
-    const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
+    const sortTokens = (tokens: TokenWithBalanceWithReachability[]) => {
       return tokens.sort((a, b) => {
         // Sort by token balance - tokens with balance go to top
         const aHasTokenBalance = a.balance.gt(0);
@@ -334,8 +339,8 @@ const MobileModal = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void;
+  onTokenSelect: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void;
 }) => {
   return (
     <Modal
@@ -414,8 +419,8 @@ const DesktopModal = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void;
+  onTokenSelect: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void;
 }) => {
   return (
     <Modal
@@ -477,8 +482,8 @@ const MobileLayout = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void;
+  onTokenSelect: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void;
   onModalClose: () => void;
 }) => {
   const chainSearchInputRef = useRef<HTMLInputElement>(null);
@@ -638,8 +643,8 @@ const DesktopLayout = ({
   displayedChains: DisplayedChains;
   displayedTokens: DisplayedTokens;
   onChainSelect: (chainId: number | null) => void;
-  onTokenSelect: (token: EnrichedToken) => void;
-  onSelectOtherToken?: (token: EnrichedToken | null) => void;
+  onTokenSelect: (token: TokenWithBalance) => void;
+  onSelectOtherToken?: (token: TokenWithBalance | null) => void;
   onModalClose: () => void;
 }) => {
   const chainSearchInputRef = useRef<HTMLInputElement>(null);
@@ -851,7 +856,7 @@ const TokenEntry = ({
   tabIndex,
   warningMessage,
 }: {
-  token: EnrichedTokenWithReachability;
+  token: TokenWithBalanceWithReachability;
   isSelected: boolean;
   onClick: () => void;
   warningMessage: string;

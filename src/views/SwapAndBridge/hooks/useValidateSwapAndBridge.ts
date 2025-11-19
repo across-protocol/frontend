@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { BigNumber } from "ethers";
 
 import { AmountInputError } from "../../Bridge/utils";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
+import { TokenWithBalance } from "./useSwapAndBridgeTokens";
 
 export type ValidationResult = {
   error?: AmountInputError;
@@ -14,8 +14,8 @@ export type ValidationResult = {
 export function useValidateSwapAndBridge(
   amount: BigNumber | null,
   isAmountOrigin: boolean,
-  inputToken: EnrichedToken | null,
-  outputToken: EnrichedToken | null,
+  inputToken: TokenWithBalance | null,
+  outputToken: TokenWithBalance | null,
   isConnected: boolean,
   swapQuoteInputAmount: BigNumber | undefined
 ): ValidationResult {
@@ -74,8 +74,8 @@ export function useValidateSwapAndBridge(
 
 function getValidationErrorText(props: {
   validationError?: AmountInputError;
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
+  inputToken: TokenWithBalance | null;
+  outputToken: TokenWithBalance | null;
 }): string | undefined {
   if (!props.validationError) {
     return;

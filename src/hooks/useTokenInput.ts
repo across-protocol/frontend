@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { BigNumber, utils } from "ethers";
 import { convertTokenToUSD, convertUSDToToken } from "utils";
-import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
+
 import { formatUnitsWithMaxFractions } from "utils";
+import { TokenWithBalance } from "views/SwapAndBridge/hooks/useSwapAndBridgeTokens";
 
 export type UnitType = "usd" | "token";
 
 type UseTokenInputProps = {
-  token: EnrichedToken | null;
+  token: TokenWithBalance | null;
   setAmount: (amount: BigNumber | null) => void;
   expectedAmount: string | undefined;
   shouldUpdate: boolean;
