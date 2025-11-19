@@ -4,6 +4,7 @@ import {
   utils,
   constants as sdkConstants,
 } from "@across-protocol/sdk";
+import { PUBLIC_NETWORKS } from "@across-protocol/constants";
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
 
@@ -14,7 +15,10 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE_TESTNET: 13372,
+};
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
   WHYPE: {
@@ -23,6 +27,17 @@ export const TOKEN_SYMBOLS_MAP = {
       ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
     },
+  },
+  "USDH-SPOT": {
+    name: "Hyperliquid USD",
+    symbol: "USDH-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000168",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000168",
+    },
+    coingeckoId: "usdh-2",
   },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
@@ -371,16 +386,31 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
 export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
 
-export const CUSTOM_GAS_TOKENS = {
-  ...sdkConstants.CUSTOM_GAS_TOKENS,
-  [CHAIN_IDs.POLYGON]: "POL",
-  [CHAIN_IDs.POLYGON_AMOY]: "POL",
-  [CHAIN_IDs.LENS]: "GHO",
-  [CHAIN_IDs.BSC]: "BNB",
-  [CHAIN_IDs.HYPEREVM]: "HYPE",
-  [CHAIN_IDs.PLASMA]: "XPL",
-  [CHAIN_IDs.HYPERCORE]: "HYPE",
-};
+export const CUSTOM_GAS_TOKENS = (() => {
+  // Lens & Lens Sepolia are exceptional; every other EVM
+  // custom gas token can be inferred from the chain defs.
+  const overrides = {
+    [CHAIN_IDs.POLYGON]: "POL",
+    [CHAIN_IDs.POLYGON_AMOY]: "POL",
+    [CHAIN_IDs.LENS]: "GHO",
+    [CHAIN_IDs.LENS_SEPOLIA]: "GHO",
+    [CHAIN_IDs.HYPERCORE]: "HYPE",
+  };
+
+  return Object.entries(PUBLIC_NETWORKS)
+    .filter(
+      ([chainId, network]) =>
+        utils.chainIsEvm(Number(chainId)) && network.nativeToken !== "ETH"
+    )
+    .reduce(
+      (acc, [chainId, network]) => {
+        acc[Number(chainId)] =
+          overrides[Number(chainId)] ?? network.nativeToken;
+        return acc;
+      },
+      {} as Record<number, string>
+    );
+})();
 
 export const STABLE_COIN_SYMBOLS = Array.from(
   new Set([

@@ -1,17 +1,30 @@
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
+import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
   BridgeStrategyDataParams,
   GetBridgeStrategyParams,
 } from "./types";
-import { CHAIN_IDs } from "../_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getBridgeStrategyData } from "./utils";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
+  tokenPairPerToChain: {
+    [CHAIN_IDs.HYPEREVM]: {
+      [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
+      },
+    },
+    [CHAIN_IDs.HYPERCORE]: {
+      [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
+      },
+    },
+  },
   fromToChains: {
     [CHAIN_IDs.HYPEREVM]: {
       [CHAIN_IDs.HYPERCORE]: getHyperCoreBridgeStrategy(),
@@ -38,6 +51,14 @@ export async function getBridgeStrategy({
   recipient,
   depositor,
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const tokenPairPerToChainOverride =
+    bridgeStrategies.tokenPairPerToChain?.[destinationChainId]?.[
+      inputToken.symbol
+    ]?.[outputToken.symbol];
+  if (tokenPairPerToChainOverride) {
+    return tokenPairPerToChainOverride;
+  }
+
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {
