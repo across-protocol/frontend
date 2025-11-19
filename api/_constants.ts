@@ -341,6 +341,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
