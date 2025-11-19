@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Text, TextColor } from "components/Text";
 import { LoadingSkeleton, TokenImage } from "components";
 import {
+  COLORS,
   formatUnitsWithMaxFractions,
   getExplorerLinkForToken,
   TokenInfo,
@@ -65,7 +66,7 @@ const TokenFee = ({
                 exit={{ y: "+100%" }}
                 transition={{ duration: 0.2 }}
               >
-                <ExternalLinkIcon />
+                <ExternalLinkIcon color={COLORS[textColor]} />
               </motion.div>
             ) : (
               <motion.div
