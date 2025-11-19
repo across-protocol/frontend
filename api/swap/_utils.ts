@@ -53,8 +53,11 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
+import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
+import { assertValidAddressChainCombination } from "./_validations";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -78,6 +81,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
+  routingPreference: optional(enums(["default", "across", "native"])),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -108,6 +112,7 @@ export async function handleBaseSwapQueryParams(
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
     skipChecks: _skipChecks = "false",
+    routingPreference = "default",
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -120,6 +125,17 @@ export async function handleBaseSwapQueryParams(
   const isOutputNative = _outputTokenAddress === constants.AddressZero;
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
   const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
+
+  assertValidAddressChainCombination({
+    address: _inputTokenAddress,
+    chainId: originChainId,
+    paramName: "inputToken",
+  });
+  assertValidAddressChainCombination({
+    address: _outputTokenAddress,
+    chainId: destinationChainId,
+    paramName: "outputToken",
+  });
 
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
@@ -158,13 +174,41 @@ export async function handleBaseSwapQueryParams(
       destinationChainId
     );
 
-    if (!outputBridgeable) {
+    // HyperCore uses special system addresses (0x20...) that aren't in standard enabled routes
+    // Allow HyperCore as destination if output token is USDC on HyperCore
+    const isHyperCoreUsdcDestination =
+      isToHyperCore(destinationChainId) &&
+      outputTokenAddress.toLowerCase() ===
+        TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId]?.toLowerCase();
+
+    if (!outputBridgeable && !isHyperCoreUsdcDestination) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
           "Destination swaps are not supported yet for routes involving Solana.",
       });
     }
+  }
+
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
+    });
+  }
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
+    });
   }
 
   if (excludeSources && includeSources) {
@@ -195,13 +239,6 @@ export async function handleBaseSwapQueryParams(
     throw new InvalidParamError({
       param: "inputToken, outputToken",
       message: "Invalid input or output token address",
-    });
-  }
-
-  if (integratorId && !isValidIntegratorId(integratorId)) {
-    throw new InvalidParamError({
-      param: "integratorId",
-      message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
     });
   }
 
@@ -249,6 +286,7 @@ export async function handleBaseSwapQueryParams(
     skipChecks,
     isDestinationSvm,
     isOriginSvm,
+    routingPreference,
   };
 }
 

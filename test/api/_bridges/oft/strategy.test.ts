@@ -1,5 +1,4 @@
 import {
-  getHyperLiquidComposerMessage,
   isRouteSupported,
   getOftCrossSwapTypes,
 } from "../../../../api/_bridges/oft/strategy";
@@ -7,11 +6,11 @@ import {
   HYPEREVM_OFT_COMPOSER_ADDRESSES,
   OFT_MESSENGERS,
 } from "../../../../api/_bridges/oft/utils/constants";
-import { CHAIN_IDs } from "@across-protocol/constants";
+import { getHyperLiquidComposerMessage } from "../../../../api/_bridges/oft/utils/shared";
 import { Token } from "../../../../api/_dexes/types";
 import { ethers } from "ethers";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
-import { TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { assert } from "console";
 
 describe("OFT Strategy", () => {

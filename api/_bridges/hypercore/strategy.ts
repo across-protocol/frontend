@@ -20,6 +20,7 @@ import {
   CORE_WRITER_EVM_ADDRESS,
   encodeTransferOnCoreCalldata,
 } from "../../_hypercore";
+import { getZeroBridgeFees } from "../utils";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -273,14 +274,5 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
     },
 
     isRouteSupported,
-  };
-}
-
-function getZeroBridgeFees(inputToken: Token) {
-  const zeroBN = BigNumber.from(0);
-  return {
-    pct: zeroBN,
-    amount: zeroBN,
-    token: inputToken,
   };
 }

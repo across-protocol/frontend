@@ -1,14 +1,15 @@
+import { BigNumber } from "ethers";
 import {
-  getQuote,
-  getEstimatedFillTime,
   getOftQuoteForExactInput,
-  getRequiredDVNCount,
   buildOftTx,
 } from "../../../api/_bridges/oft/strategy";
-import { CHAIN_IDs } from "@across-protocol/constants";
 import { CrossSwapQuotes, Token } from "../../../api/_dexes/types";
-import { BigNumber } from "ethers";
-import { TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
+import {
+  getRequiredDVNCount,
+  getQuote,
+  getEstimatedFillTime,
+} from "../../../api/_bridges/oft/utils/shared";
 
 describe("OFT Strategy", () => {
   const arbitrumUSDT: Token = {

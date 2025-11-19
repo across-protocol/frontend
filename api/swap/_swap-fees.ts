@@ -246,7 +246,9 @@ export async function calculateSwapFees(params: {
           indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
         )
       ) * outputTokenPriceUsd;
-    const maxTotalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
+    const maxTotalFeeUsd = parseFloat(
+      (inputAmountUsd - outputMinAmountSansAppFeesUsd).toFixed(4)
+    );
     const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: maxTotalFeeUsd,
       inputAmountUsd,
@@ -274,8 +276,9 @@ export async function calculateSwapFees(params: {
         )
       ) * outputTokenPriceUsd;
 
-    const expectedTotalFeeUsd =
-      inputAmountUsd - expectedOutputAmountSansAppFeesUsd;
+    const expectedTotalFeeUsd = parseFloat(
+      (inputAmountUsd - expectedOutputAmountSansAppFeesUsd).toFixed(4)
+    );
     const { amount: expectedTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: expectedTotalFeeUsd,
       inputAmountUsd,
