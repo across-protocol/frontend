@@ -15,7 +15,7 @@ import {
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
@@ -77,6 +77,8 @@ export class EVMStrategy implements IChainStrategy {
       const { data } = await axios.get<{
         status: "filled" | "pending";
         fillTx: string | null;
+        swapOutputToken: string | undefined;
+        swapOutputAmount: string | undefined;
       }>(`${indexerApiBaseUrl}/deposit/status`, {
         params: {
           originChainId,
@@ -91,12 +93,7 @@ export class EVMStrategy implements IChainStrategy {
         const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
         const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
 
-        const swapMetadata = await this.getSwapMetadata(
-          fillTxReceipt.transactionHash
-        );
         const parsedFIllLog = parseFilledRelayLog(fillTxReceipt.logs);
-
-        console.log("swapMetadata found:", swapMetadata);
 
         if (!parsedFIllLog) {
           throw new Error(
@@ -111,12 +108,15 @@ export class EVMStrategy implements IChainStrategy {
           fillLog: {
             ...parsedFIllLog,
             ...parsedFIllLog.args,
+            outputAmount: data?.swapOutputAmount
+              ? BigNumber.from(data.swapOutputAmount)
+              : parsedFIllLog.args.outputAmount,
             inputToken: toAddressType(
               parsedFIllLog.args.inputToken,
               Number(parsedFIllLog.args.originChainId)
             ),
             outputToken: toAddressType(
-              swapMetadata?.outputToken ?? parsedFIllLog.args.outputToken,
+              data?.swapOutputToken ?? parsedFIllLog.args.outputToken,
               Number(this.chainId)
             ),
             depositor: toAddressType(
