@@ -75,7 +75,8 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
           swapper: swap.recipient,
           protocols: protocols as ("V2" | "V3" | "V4")[],
         },
-        tradeType
+        tradeType,
+        opts
       );
       const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
 
