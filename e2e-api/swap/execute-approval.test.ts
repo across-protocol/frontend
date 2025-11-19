@@ -55,6 +55,25 @@ const A2B_BASE_TEST_CASE = {
   slippage: SLIPPAGE,
 } as const;
 
+const A2A_BASE_TEST_CASE = {
+  amounts: {
+    exactInput: parseUnits("1", 18), // 1 OP
+    exactOutput: parseUnits("1", 18), // 1 USDS
+    minOutput: parseUnits("1", 18), // 1 USDS
+  },
+  inputToken: TOKEN_SYMBOLS_MAP.OP,
+  outputToken: {
+    symbol: "USDS",
+    decimals: 18,
+    addresses: {
+      [CHAIN_IDs.BASE]: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
+    },
+  },
+  originChainId: CHAIN_IDs.OPTIMISM,
+  destinationChainId: CHAIN_IDs.BASE,
+  slippage: SLIPPAGE,
+} as const;
+
 describe("execute response of GET /swap/approval", () => {
   async function fetchSwapQuote(params: {
     amount: string;
@@ -83,7 +102,8 @@ describe("execute response of GET /swap/approval", () => {
     testCase:
       | typeof B2B_BASE_TEST_CASE
       | typeof B2A_BASE_TEST_CASE
-      | typeof A2B_BASE_TEST_CASE,
+      | typeof A2B_BASE_TEST_CASE
+      | typeof A2A_BASE_TEST_CASE,
     opts?: { freshDepositorWallet?: PrivateKeyAccount }
   ) {
     const {
@@ -257,6 +277,26 @@ describe("execute response of GET /swap/approval", () => {
     describe("minOutput", () => {
       it("should fetch, execute deposit, and fill the relay", async () => {
         await runEndToEnd("minOutput", A2B_BASE_TEST_CASE);
+      }, 180_000);
+    });
+  });
+
+  describe("A2A", () => {
+    describe("exactInput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactInput", A2A_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("exactOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("exactOutput", A2A_BASE_TEST_CASE);
+      }, 180_000);
+    });
+
+    describe("minOutput", () => {
+      it("should fetch, execute deposit, and fill the relay", async () => {
+        await runEndToEnd("minOutput", A2A_BASE_TEST_CASE);
       }, 180_000);
     });
   });

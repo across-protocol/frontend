@@ -131,7 +131,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["USDC", "WETH", "USDT", "DAI"],
+  default: ["USDC", "USDT", "WETH", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },

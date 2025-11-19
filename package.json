@@ -78,7 +78,7 @@
     "test:e2e:headful": "yarn pretest:e2e && playwright test",
     "test:e2e:headless": "yarn pretest:e2e && HEADLESS=true playwright test",
     "test:e2e:headless:ui": "yarn pretest:e2e && HEADLESS=true playwright test --ui",
-    "test:e2e-api": "yarn remote-config && jest --config jest.api.config.cjs ./e2e-api",
+    "test:e2e-api": "export NODE_OPTIONS='--max-old-space-size=8192' && yarn remote-config && jest --config jest.api.config.cjs ./e2e-api",
     "eject": "react-scripts eject",
     "format": "prettier --check src api e2e test",
     "format:fix": "prettier --write src api e2e test",

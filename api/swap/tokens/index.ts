@@ -18,7 +18,11 @@ import {
 } from "../../_utils";
 import { tracer, processor } from "../../../instrumentation";
 import mainnetChains from "../../../src/data/chains_1.json";
-import indirectChains from "../../../src/data/indirect_chains_1.json";
+import indirectChainsImport from "../../../src/data/indirect_chains_1.json";
+
+// Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
+// Uses the same structure as mainnetChains since indirect chains share the same base schema.
+const indirectChains = indirectChainsImport as typeof mainnetChains;
 
 type Token = {
   chainId: number;
