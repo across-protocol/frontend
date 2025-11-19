@@ -1,8 +1,14 @@
 import { useMemo } from "react";
-import { TokenInfo, applyChainSpecificTokenDisplay, getConfig } from "utils";
+import {
+  getToken,
+  TOKEN_SYMBOLS_MAP,
+  TokenInfo,
+  applyChainSpecificTokenDisplay,
+  getConfig,
+} from "utils";
+import { orderedTokenLogos } from "../constants/tokens";
 import { useSwapTokens } from "./useSwapTokens";
-
-const config = getConfig();
+import unknownLogo from "assets/icons/question-circle.svg";
 
 /**
  * Hook to resolve token info for a given symbol
@@ -22,12 +28,31 @@ export function useToken(
   const token = useMemo(() => {
     let resolvedToken: TokenInfo | undefined;
 
-    // First try local
+    // Try to get token from constants first
     try {
-      resolvedToken = config.getTokenInfoBySymbolSafe(chainId ?? 1, symbol);
+      resolvedToken = getToken(symbol);
     } catch (error) {
-      if (swapTokens) {
-        // If still not found, try swap tokens from API
+      // If getToken fails, try TOKEN_SYMBOLS_MAP directly
+      const tokenFromMap =
+        TOKEN_SYMBOLS_MAP[
+          symbol.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+
+      if (tokenFromMap) {
+        // Get logoURI from orderedTokenLogos or use unknown logo
+        const logoURI =
+          orderedTokenLogos[
+            symbol.toUpperCase() as keyof typeof orderedTokenLogos
+          ] || unknownLogo;
+
+        resolvedToken = {
+          ...tokenFromMap,
+          logoURI,
+        } as TokenInfo;
+      } else if (swapTokens) {
+        // If still not found, try to find it in swap API data
+        // Search across all chains for a token with matching symbol
+        // Note: swapTokens is now already converted to TokenInfo[]
         const foundToken = swapTokens.find(
           (t) => t.symbol.toUpperCase() === symbol.toUpperCase()
         );
@@ -36,6 +61,7 @@ export function useToken(
           resolvedToken = foundToken;
         }
       }
+
       // If still not found, log warning
       if (!resolvedToken) {
         console.warn(`Unable to resolve token info for symbol ${symbol}`);
@@ -44,7 +70,7 @@ export function useToken(
     }
 
     // Apply chain-specific display modifications if chainId is provided
-    if (chainId !== undefined && resolvedToken) {
+    if (chainId !== undefined) {
       return applyChainSpecificTokenDisplay(resolvedToken, chainId);
     }
 
@@ -57,24 +83,25 @@ export function useToken(
 /**
  * Hook to resolve token info for a given address
  * Resolution order:
- * 1. Try getConfig().getTokenInfoByAddressSafe if chainId is provided (resolves via TOKEN_SYMBOLS_MAP)
- * 2. Fallback to swap tokens from API
+ * 1. Try getConfig().getTokenInfoByAddressSafe if chainId is provided
+ * 2. Try TOKEN_SYMBOLS_MAP by searching addresses (across all chains or specific chain)
+ * 3. Fallback to swap tokens from API
  *
  * If chainId is provided, applies chain-specific display modifications (e.g., USDT -> USDT0)
  */
-
 export function useTokenFromAddress(
   address: string,
   chainId?: number
 ): TokenInfo | undefined {
   const { data: swapTokens } = useSwapTokens();
+  const config = getConfig();
 
   const token = useMemo(() => {
     let resolvedToken: TokenInfo | undefined;
 
     const normalizedAddress = address.toLowerCase();
 
-    // First, try local token defs
+    // First, try getConfig().getTokenInfoByAddressSafe if chainId is provided
     if (chainId !== undefined) {
       const configToken = config.getTokenInfoByAddressSafe(
         chainId,
@@ -82,6 +109,41 @@ export function useTokenFromAddress(
       );
       if (configToken) {
         resolvedToken = configToken as TokenInfo;
+      }
+    }
+
+    // If not found, try TOKEN_SYMBOLS_MAP by searching addresses
+    if (!resolvedToken) {
+      const tokenEntries = Object.entries(TOKEN_SYMBOLS_MAP);
+      const matchingToken = tokenEntries.find(([_symbol, tokenData]) => {
+        if (!tokenData.addresses) {
+          return false;
+        }
+        if (chainId !== undefined) {
+          // If chainId is provided, check only that chain's address
+          return (
+            tokenData.addresses[chainId]?.toLowerCase() === normalizedAddress
+          );
+        } else {
+          // Otherwise, check all addresses
+          return Object.values(tokenData.addresses).some(
+            (addr) => addr?.toLowerCase() === normalizedAddress
+          );
+        }
+      });
+
+      if (matchingToken) {
+        const [symbol, tokenData] = matchingToken;
+        // Get logoURI from orderedTokenLogos or use unknown logo
+        const logoURI =
+          orderedTokenLogos[
+            symbol.toUpperCase() as keyof typeof orderedTokenLogos
+          ] || unknownLogo;
+
+        resolvedToken = {
+          ...tokenData,
+          logoURI,
+        } as TokenInfo;
       }
     }
 
@@ -123,7 +185,7 @@ export function useTokenFromAddress(
     }
 
     return resolvedToken;
-  }, [address, chainId, swapTokens]);
+  }, [address, chainId, swapTokens, config]);
 
   return token;
 }
