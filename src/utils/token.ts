@@ -102,12 +102,13 @@ const PRECISION = 18;
  * @returns The limited string
  */
 function limitDecimals(value: string, maxDecimals: number): string {
-  const parts = value.split(".");
+  const sanitized = value.replace(/,/g, "");
+  const parts = sanitized.split(".");
   if (parts.length === 1) {
-    return value; // No decimal point
+    return sanitized;
   }
   if (parts[1].length <= maxDecimals) {
-    return value; // Within limits
+    return sanitized;
   }
   return parts[0] + "." + parts[1].substring(0, maxDecimals);
 }
