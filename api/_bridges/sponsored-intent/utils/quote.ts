@@ -69,7 +69,7 @@ export async function getUsdhIntentQuote({
   )(exactInputAmount);
   const outputAmount = ConvertDecimals(
     inputToken.decimals,
-    bridgeableOutputToken.decimals
+    outputToken.decimals
   )(exactInputAmount);
 
   const [outputTokenPriceNative, inputTokenPriceUsd] = await Promise.all([

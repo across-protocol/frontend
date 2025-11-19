@@ -1,5 +1,14 @@
 import { BigNumber, constants, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import { getAddMemoInstruction } from "@solana-program/memo";
+import { appendTransactionMessageInstruction } from "@solana/transaction-messages";
+import {
+  address,
+  compileTransaction,
+  createNoopSigner,
+  getBase64EncodedWireTransaction,
+  pipe,
+} from "@solana/kit";
 
 import { CrossSwapQuotes } from "../../../_dexes/types";
 import { getSpokePool, getSpokePoolAddress } from "../../../_spoke-pool";
@@ -18,16 +27,8 @@ import {
 } from "./common";
 import { ERROR_MESSAGE_PREFIX } from "./constants";
 import { getFillDeadline } from "../../../_fill-deadline";
-import {
-  address,
-  compileTransaction,
-  createNoopSigner,
-  getBase64EncodedWireTransaction,
-  pipe,
-} from "@solana/kit";
-import { appendTransactionMessageInstruction } from "@solana/transaction-messages";
 import { getSVMRpc } from "../../../_providers";
-import { getAddMemoInstruction } from "@solana-program/memo";
+import { ConvertDecimals } from "../../../_utils";
 
 export async function buildTxEvm(params: {
   quotes: CrossSwapQuotes;
@@ -46,7 +47,7 @@ export async function buildTxEvm(params: {
     deposit.inputToken.toBytes32(),
     deposit.outputToken.toBytes32(),
     deposit.inputAmount,
-    deposit.outputAmount,
+    deposit.outputAmountHyperEvm,
     deposit.destinationChainId,
     deposit.exclusiveRelayer.toBytes32(),
     deposit.quoteTimestamp,
@@ -90,7 +91,7 @@ export async function buildTxSvm(params: {
   const inputToken = address(deposit.inputToken.toBase58());
   const outputToken = address(deposit.outputToken.toBase58());
   const inputAmount = BigInt(deposit.inputAmount.toString());
-  const outputAmount = sdk.arch.svm.bigToU8a32(deposit.outputAmount);
+  const outputAmount = sdk.arch.svm.bigToU8a32(deposit.outputAmountHyperEvm);
   const exclusiveRelayer = address(deposit.exclusiveRelayer.toBase58());
   const quoteTimestamp = deposit.quoteTimestamp;
   const fillDeadline = deposit.fillDeadline;
@@ -241,6 +242,10 @@ function _prepDepositTx(
     ),
     inputAmount: bridgeQuote.inputAmount,
     outputAmount: bridgeQuote.outputAmount,
+    outputAmountHyperEvm: ConvertDecimals(
+      outputToken.decimals,
+      bridgeableOutputToken.decimals
+    )(bridgeQuote.outputAmount),
     destinationChainId: hyperEvmChainId,
     exclusiveRelayer: sdk.utils.toAddressType(
       constants.AddressZero,
