@@ -1,10 +1,8 @@
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
-import { e2eConfig, axiosInstance } from "../utils/config";
+import { e2eConfig, axiosInstance, JEST_TIMEOUT_MS } from "../utils/config";
 import { ENABLED_ROUTES } from "../../api/_utils";
-
-const JEST_TIMEOUT_MS = 180_000;
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
