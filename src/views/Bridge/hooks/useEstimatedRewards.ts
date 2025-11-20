@@ -80,8 +80,6 @@ export function useEstimatedRewards(
     ) {
       return undefined;
     }
-    // In new fee structure, bridgeFee already includes gasFee
-    // So we use bridgeFee directly for reward calculations
     const totalFeeInL1 = bridgeFee;
     const maximalFee = inputAmount
       .mul(parseUnits("0.0025", 18)) // Cap fee at 25 basis points of input amount
@@ -126,7 +124,6 @@ export function useEstimatedRewards(
         : undefined;
     const formatNumericUsd = (usd: BigNumber) =>
       Number(Number(ethersUtils.formatUnits(usd, 18)).toFixed(2));
-    // In new fee structure, bridgeFee already includes gasFee
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
     const swapFeeInUSD = convertL1ToBaseCurrency(swapFee);
     const inputAmountInUSD = convertL1ToBaseCurrency(inputAmount);
@@ -161,7 +158,6 @@ export function useEstimatedRewards(
       numericBridgeFee + numericSwapFee - (numericReward ?? 0);
 
     return {
-      gasFeeAsBaseCurrency: undefined, // No longer separate in new fee structure
       bridgeFeeAsBaseCurrency: parseUsd(numericBridgeFee),
       referralRewardAsBaseCurrency: parseUsd(numericReward),
       netFeeAsBaseCurrency: parseUsd(netFeeAsBaseCurrency),

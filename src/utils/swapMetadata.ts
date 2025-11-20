@@ -1,11 +1,5 @@
 import { ethers, providers } from "ethers";
 
-// Fill
-// find fillRelay event
-// find MetadataEmitted event in same tx
-// swapMetadataData.address === swapOutputToken
-// swapMetadataData.minAmountOut === swapOutputTokenAmount
-// parse log
 export const metadataEmittedEventTopic =
   "0xc28009f405f9b451f5155492167b1ad5ab376d991bea880cb5049e924e5b823c";
 
