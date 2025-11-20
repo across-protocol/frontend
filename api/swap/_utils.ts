@@ -748,7 +748,7 @@ export async function buildBaseSwapResponseJson(params: {
       params.bridgeQuote.provider === "across"
         ? getQuoteExpiryTimestamp(
             params.bridgeQuote.suggestedFees.timestamp,
-            !!params.destinationSwapQuote
+            params.destinationSwapQuote?.tokenOut.chainId
           )
         : 0, // Implies no quote expiry
   });

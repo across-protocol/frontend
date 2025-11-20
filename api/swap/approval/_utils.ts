@@ -342,7 +342,7 @@ async function _buildDepositTxForAllowanceHolderSvm(
   );
   const quoteTimestamp = getQuoteTimestampArg(
     crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    !!crossSwapQuotes.destinationSwapQuote
+    crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
   );
   const fillDeadline =
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);

@@ -584,7 +584,7 @@ export async function extractDepositDataStruct(
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
     quoteTimestamp: getQuoteTimestampArg(
       crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-      !!crossSwapQuotes.destinationSwapQuote
+      crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
     ),
     fillDeadline: getFillDeadline(
       destinationChainId,
