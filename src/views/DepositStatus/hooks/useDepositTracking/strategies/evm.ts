@@ -15,7 +15,11 @@ import {
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
+import {
+  findSwapMetaDataEventsFromTxHash,
+  SwapMetaData,
+} from "utils/swapMetadata";
 
 /**
  * Strategy for handling EVM chain operations
@@ -73,6 +77,8 @@ export class EVMStrategy implements IChainStrategy {
       const { data } = await axios.get<{
         status: "filled" | "pending";
         fillTx: string | null;
+        swapOutputToken: string | undefined;
+        swapOutputAmount: string | undefined;
       }>(`${indexerApiBaseUrl}/deposit/status`, {
         params: {
           originChainId,
@@ -102,12 +108,15 @@ export class EVMStrategy implements IChainStrategy {
           fillLog: {
             ...parsedFIllLog,
             ...parsedFIllLog.args,
+            outputAmount: data?.swapOutputAmount
+              ? BigNumber.from(data.swapOutputAmount)
+              : parsedFIllLog.args.outputAmount,
             inputToken: toAddressType(
               parsedFIllLog.args.inputToken,
               Number(parsedFIllLog.args.originChainId)
             ),
             outputToken: toAddressType(
-              parsedFIllLog.args.outputToken,
+              data?.swapOutputToken ?? parsedFIllLog.args.outputToken,
               Number(this.chainId)
             ),
             depositor: toAddressType(
@@ -219,6 +228,10 @@ export class EVMStrategy implements IChainStrategy {
 
       const fillTxBlock = await filledRelayEvent.getBlock();
 
+      const swapMetadata = await this.getSwapMetadata(
+        filledRelayEvent.transactionHash
+      );
+
       return {
         fillTxHash: filledRelayEvent.transactionHash,
         fillTxTimestamp: fillTxBlock.timestamp,
@@ -231,7 +244,7 @@ export class EVMStrategy implements IChainStrategy {
             Number(filledRelayEvent.args.originChainId)
           ),
           outputToken: toAddressType(
-            filledRelayEvent.args.outputToken,
+            swapMetadata?.outputToken ?? filledRelayEvent.args.outputToken,
             Number(this.chainId)
           ),
           depositor: toAddressType(
@@ -277,6 +290,22 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
+  async getSwapMetadata(txHash: string): Promise<SwapMetaData | undefined> {
+    try {
+      const swapMetadata = await findSwapMetaDataEventsFromTxHash(
+        txHash,
+        getProvider(this.chainId)
+      );
+
+      return swapMetadata;
+    } catch (error) {
+      console.warn(`No swap metadata found for tx with hash ${txHash}`, {
+        cause: error,
+      });
+      return;
+    }
+  }
+
   /**
    * Convert deposit information to local storage format for EVM chains
    * @param depositInfo Deposit information
@@ -285,66 +314,67 @@ export class EVMStrategy implements IChainStrategy {
    */
   convertForDepositQuery(
     depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
+    fromBridgePagePayload?: FromBridgePagePayload
   ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } =
-      fromBridgePagePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
+    throw new Error("Method not implemented.");
+    // const config = getConfig();
+    // const { selectedRoute, depositArgs, quoteForAnalytics } =
+    //   fromBridgePagePayload;
+    // const { depositId, depositor, recipient, message, inputAmount } =
+    //   depositInfo.depositLog;
+    // const inputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.fromTokenSymbol
+    // );
+    // const outputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.toChain,
+    //   selectedRoute.toTokenSymbol
+    // );
+    // const swapToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
+    // );
 
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "pending" as const,
-      filled: "0",
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBase58(),
-      recipientAddr: recipient.toBase58(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: depositInfo.depositTxHash,
-      fillTx: "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
+    // return {
+    //   depositId: depositId.toString(),
+    //   depositTime:
+    //     depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
+    //   status: "pending" as const,
+    //   filled: "0",
+    //   sourceChainId: selectedRoute.fromChain,
+    //   destinationChainId: selectedRoute.toChain,
+    //   assetAddr:
+    //     selectedRoute.type === "swap"
+    //       ? selectedRoute.swapTokenAddress
+    //       : selectedRoute.fromTokenAddress,
+    //   depositorAddr: depositor.toBase58(),
+    //   recipientAddr: recipient.toBase58(),
+    //   message: message || "0x",
+    //   amount: inputAmount.toString(),
+    //   depositTxHash: depositInfo.depositTxHash,
+    //   fillTx: "",
+    //   speedUps: [],
+    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   feeBreakdown: {
+    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
+    //     lpFeePct: quoteForAnalytics.lpFeePct,
+    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
+    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
+    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
+    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
+    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
+    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
+    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
+    //   },
+    //   token: inputToken,
+    //   outputToken,
+    //   swapToken,
+    // };
   }
 
   /**
@@ -357,62 +387,63 @@ export class EVMStrategy implements IChainStrategy {
     fillInfo: FilledInfo,
     bridgePayload: FromBridgePagePayload
   ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      fillInfo.depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
+    throw new Error("Method not implemented.");
+    // const config = getConfig();
+    // const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
+    // const { depositId, depositor, recipient, message, inputAmount } =
+    //   fillInfo.depositInfo.depositLog;
+    // const inputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.fromTokenSymbol
+    // );
+    // const outputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.toChain,
+    //   selectedRoute.toTokenSymbol
+    // );
+    // const swapToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
+    // );
 
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "filled" as const,
-      filled: inputAmount.toString(),
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBytes32(),
-      recipientAddr: recipient.toBytes32(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: fillInfo.depositInfo.depositTxHash,
-      fillTx: fillInfo.fillTxHash || "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
+    // return {
+    //   depositId: depositId.toString(),
+    //   depositTime:
+    //     fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
+    //   status: "filled" as const,
+    //   filled: inputAmount.toString(),
+    //   sourceChainId: selectedRoute.fromChain,
+    //   destinationChainId: selectedRoute.toChain,
+    //   assetAddr:
+    //     selectedRoute.type === "swap"
+    //       ? selectedRoute.swapTokenAddress
+    //       : selectedRoute.fromTokenAddress,
+    //   depositorAddr: depositor.toBytes32(),
+    //   recipientAddr: recipient.toBytes32(),
+    //   message: message || "0x",
+    //   amount: inputAmount.toString(),
+    //   depositTxHash: fillInfo.depositInfo.depositTxHash,
+    //   fillTx: fillInfo.fillTxHash || "",
+    //   speedUps: [],
+    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   feeBreakdown: {
+    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
+    //     lpFeePct: quoteForAnalytics.lpFeePct,
+    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
+    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
+    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
+    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
+    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
+    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
+    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
+    //   },
+    //   token: inputToken,
+    //   outputToken,
+    //   swapToken,
+    // };
   }
 }

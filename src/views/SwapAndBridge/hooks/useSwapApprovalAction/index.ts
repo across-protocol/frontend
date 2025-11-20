@@ -4,11 +4,11 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
-import { SwapApprovalData } from "./strategies/types";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 export function useSwapApprovalAction(
   originChainId: number,
-  approvalData?: SwapApprovalData
+  swapQuote?: SwapApprovalQuote
 ) {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
@@ -21,8 +21,6 @@ export function useSwapApprovalAction(
   );
 
   return getEcosystem(originChainId) === "evm"
-    ? evmHook(approvalData)
-    : svmHook(approvalData);
+    ? evmHook(swapQuote)
+    : svmHook(swapQuote);
 }
-
-export type { SwapApprovalData } from "./strategies/types";

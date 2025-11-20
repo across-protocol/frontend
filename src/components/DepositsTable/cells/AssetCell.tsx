@@ -3,14 +3,14 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
 import { TokenImage } from "components/TokenImage";
-import { QUERIESV2, Token } from "utils";
+import { QUERIESV2, TokenInfo } from "utils";
 
 import { BaseCell } from "./BaseCell";
 
 type Props = {
-  inputToken: Token;
-  outputToken?: Token;
-  swapToken?: Token;
+  inputToken: TokenInfo;
+  outputToken?: TokenInfo;
+  swapToken?: TokenInfo;
   width: number;
 };
 

@@ -4,15 +4,11 @@ import { BigNumber } from "ethers";
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
-import {
-  useSwapApprovalAction,
-  SwapApprovalData,
-} from "./useSwapApprovalAction";
+import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useDefaultRoute } from "./useDefaultRoute";
-import { useHistory } from "react-router-dom";
 import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
@@ -67,8 +63,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
 
   const debouncedAmount = useDebounce(amount, 300);
   const defaultRoute = useDefaultRoute();
-
-  const history = useHistory();
 
   const {
     account: accountEVM,
@@ -163,17 +157,9 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     recipient: toAccountManagement.currentRecipientAccount,
   });
 
-  const approvalData: SwapApprovalData | undefined = useMemo(() => {
-    if (!swapQuote) return undefined;
-    return {
-      approvalTxns: swapQuote.approvalTxns,
-      swapTx: swapQuote.swapTx as any,
-    };
-  }, [swapQuote]);
-
   const approvalAction = useSwapApprovalAction(
     inputToken?.chainId || 0,
-    approvalData
+    swapQuote
   );
 
   const validation = useValidateSwapAndBridge(
@@ -217,13 +203,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     }
 
     // Otherwise, proceed with the transaction
-    const txHash = await approvalAction.buttonActionHandler();
-    // Only navigate if we got a transaction hash (not empty string from wallet connection)
-    if (txHash) {
-      history.push(
-        `/bridge-and-swap/${txHash}?originChainId=${inputToken?.chainId}&destinationChainId=${outputToken?.chainId}&inputTokenSymbol=${inputToken?.symbol}&outputTokenSymbol=${outputToken?.symbol}&referrer=`
-      );
-    }
+    await approvalAction.buttonActionHandler();
   }, [
     isOriginConnected,
     isRecipientSet,
@@ -232,11 +212,6 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     approvalAction,
     connectEVM,
     connectSVM,
-    history,
-    inputToken?.chainId,
-    inputToken?.symbol,
-    outputToken?.chainId,
-    outputToken?.symbol,
   ]);
 
   // Button state logic

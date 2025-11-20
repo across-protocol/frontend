@@ -19,6 +19,7 @@ import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { getSwapQuoteFees } from "../utils/fees";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -208,11 +209,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    const totalFeeUsd = swapQuote.fees.total.amountUsd;
-    const bridgeFeesUsd = swapQuote.fees.total.details.bridge.amountUsd;
-    const appFeesUsd = swapQuote.fees.total.details.app.amountUsd;
-    const swapImpactUsd = swapQuote.fees.total.details.swapImpact.amountUsd;
-
+    const { totalFeeUsd, bridgeFeesUsd, appFeesUsd, swapImpactUsd } =
+      getSwapQuoteFees(swapQuote);
     // Only show fee items if they're at least 1 cent
     const hasAppFee = Number(appFeesUsd) >= 0.01;
     const hasSwapImpact = Number(swapImpactUsd) >= 0.01;

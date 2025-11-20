@@ -161,6 +161,8 @@ export type SwapApprovalApiQueryParams = {
   skipOriginTxEstimation?: boolean;
 };
 
+export type SwapApprovalQuote = Awaited<ReturnType<typeof swapApprovalApiCall>>;
+
 export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
   const response = await axios.get<SwapApprovalApiResponse>(
     `${vercelApiBaseUrl}/api/swap/approval`,
