@@ -232,8 +232,6 @@ export class EVMStrategy implements IChainStrategy {
         filledRelayEvent.transactionHash
       );
 
-      console.log("swapMetadata", swapMetadata);
-
       return {
         fillTxHash: filledRelayEvent.transactionHash,
         fillTxTimestamp: fillTxBlock.timestamp,
