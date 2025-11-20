@@ -91,6 +91,11 @@ import modeSepoliaGrayscaleLogo from "assets/chain-logos/mode-sepolia-grayscale.
 import { ReactComponent as modeSepoliaLogoSvg } from "assets/chain-logos/mode-sepolia.svg";
 import { ReactComponent as modeSepoliaGrayscaleLogoSvg } from "assets/chain-logos/mode-sepolia-grayscale.svg";
 
+import monadLogo from "assets/chain-logos/monad.svg";
+import monadGrayscaleLogo from "assets/chain-logos/monad-grayscale.svg";
+import { ReactComponent as monadLogoSvg } from "assets/chain-logos/monad.svg";
+import { ReactComponent as monadGrayscaleLogoSvg } from "assets/chain-logos/monad-grayscale.svg";
+
 import optimismLogo from "assets/chain-logos/optimism.svg";
 import optimismGrayscaleLogo from "assets/chain-logos/optimism-grayscale.svg";
 import { ReactComponent as optimismLogoSvg } from "assets/chain-logos/optimism.svg";
@@ -873,13 +878,14 @@ export const monad = {
   name: "Monad",
   fullName: "Monad",
   chainId: 143,
-  logoURI: modeLogo, // todo
-  grayscaleLogoURI: modeGrayscaleLogo, // @todo
-  logoSvg: modeLogoSvg, // @todo
-  grayscaleLogoSvg: modeGrayscaleLogoSvg, // @todo
+  logoURI: monadLogo,
+  grayscaleLogoURI: monadGrayscaleLogo,
+  logoSvg: monadLogoSvg,
+  grayscaleLogoSvg: monadGrayscaleLogoSvg,
   rpcUrl: "https://rpc-mainnet.monadinfra.com",
-  explorerUrl: "https://monadvision.com",
-  constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
+  explorerUrl: "https://monadscan.com/",
+  constructExplorerLink: (txHash: string) =>
+    `${monad.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MON",
   customRpcUrl: process.env.REACT_APP_CHAIN_143_CUSTOM_RPC_URL,
   pollingInterval: 1000,
@@ -1041,7 +1047,7 @@ export const polygon = {
   explorerUrl: "https://polygonscan.com",
   constructExplorerLink: (txHash: string) =>
     `${polygon.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "MATIC",
+  nativeCurrencySymbol: "POL",
   customRpcUrl: process.env.REACT_APP_CHAIN_137_CUSTOM_RPC_URL,
   pollingInterval: 5000,
 };
@@ -1082,7 +1088,7 @@ export const polygonAmoy = {
   explorerUrl: "https://amoy.polygonscan.com",
   constructExplorerLink: (txHash: string) =>
     `${polygonAmoy.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "MATIC",
+  nativeCurrencySymbol: "POL",
   customRpcUrl: process.env.REACT_APP_CHAIN_80002_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
@@ -1583,6 +1589,7 @@ export const chainConfigs = [
   ethereum,
   mode,
   modeSepolia,
+  monad,
   optimism,
   optimismSepolia,
   plasma,
@@ -1626,6 +1633,7 @@ export const chains_viem = [
   ethereum_viem,
   mode_viem,
   modeSepolia_viem,
+  monad_viem,
   optimism_viem,
   optimismSepolia_viem,
   plasma_viem,
