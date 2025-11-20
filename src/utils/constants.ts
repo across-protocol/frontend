@@ -707,14 +707,15 @@ const resolveRpcConfig = () => {
   );
 };
 
-const mergeConfig = <T>(config: T, envVar: string): T => {
+const mergeConfig = <T>(config: T, envVar: string | undefined): T => {
   const shallowCopy = { ...config };
   Object.entries(JSON.parse(envVar ?? "{}")).forEach(([k, v]) => {
     assert(
-      typeof v === typeof shallowCopy[k] || !isDefined(shallowCopy[k]),
-      `Invalid ${envVar} configuration on key ${k} (${typeof v} != ${typeof shallowCopy[k]})`
+      typeof v === typeof shallowCopy[k as keyof T] ||
+        !isDefined(shallowCopy[k as keyof T]),
+      `Invalid ${envVar} configuration on key ${k} (${typeof v} != ${typeof shallowCopy[k as keyof T]})`
     );
-    shallowCopy[k] = v;
+    shallowCopy[k as keyof T] = v as T[keyof T];
   });
   return shallowCopy;
 };
