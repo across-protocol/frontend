@@ -882,8 +882,8 @@ export const monad = {
   grayscaleLogoURI: monadGrayscaleLogo,
   logoSvg: monadLogoSvg,
   grayscaleLogoSvg: monadGrayscaleLogoSvg,
-  rpcUrl: "https://rpc-mainnet.monadinfra.com",
-  explorerUrl: "https://monadscan.com/",
+  rpcUrl: "https://monad-mainnet.g.alchemy.com/v2/CrY3QO43HhgQsCf7G9CAr",
+  explorerUrl: "https://monadvision.com",
   constructExplorerLink: (txHash: string) =>
     `${monad.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MON",

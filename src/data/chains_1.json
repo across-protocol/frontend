@@ -1989,8 +1989,8 @@
   {
     "chainId": 143,
     "name": "Monad",
-    "publicRpcUrl": "https://rpc-mainnet.monadinfra.com",
-    "explorerUrl": "https://monadscan.com/",
+    "publicRpcUrl": "https://monad-mainnet.g.alchemy.com/v2/CrY3QO43HhgQsCf7G9CAr",
+    "explorerUrl": "https://monadvision.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/monad/assets/logo.svg",
     "spokePool": "0xd2ecb3afe598b746F8123CaE365a598DA831A449",
     "spokePoolBlock": 36437473,
