@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc-mainnet.monadinfra.com",
   blockTimeSeconds: 1,
-  tokens: ["USDC", "USDT"],
+  tokens: ["USDC"],
   enableCCTP: false,
 } as ChainConfig;
