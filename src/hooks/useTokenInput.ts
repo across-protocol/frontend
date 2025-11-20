@@ -88,6 +88,7 @@ export function useTokenInput({
     if (token) {
       setAmountString("");
       setConvertedAmount(undefined);
+      setAmount(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.chainId, token?.symbol]);
