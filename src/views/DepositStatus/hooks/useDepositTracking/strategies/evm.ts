@@ -1,9 +1,14 @@
 import { getProvider } from "utils/providers";
 import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
 import { getConfig } from "utils/config";
-import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
+import {
+  getBlockForTimestamp,
+  getMessageHash,
+  toAddressType,
+  paginatedEventQuery,
+} from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
-import { indexerApiBaseUrl } from "utils/constants";
+import { indexerApiBaseUrl, chainMaxBlockLookback } from "utils/constants";
 import axios from "axios";
 import {
   IChainStrategy,
@@ -183,16 +188,23 @@ export class EVMStrategy implements IChainStrategy {
     // If API approach didn't work, find the fill on-chain
     try {
       const provider = getProvider(this.chainId);
-      const blockForTimestamp = await getBlockForTimestamp(
-        provider,
-        depositInfo.depositTimestamp
-      );
+      const [blockForTimestamp, latestBlock] = await Promise.all([
+        getBlockForTimestamp(provider, depositInfo.depositTimestamp),
+        provider.getBlockNumber(),
+      ]);
+      const maxLookBack = chainMaxBlockLookback[this.chainId];
+      const destinationEventSearchConfig = {
+        from: blockForTimestamp,
+        to: latestBlock,
+        maxLookBack,
+      };
 
       const config = getConfig();
       const destinationSpokePool = config.getSpokePool(this.chainId);
       const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all(
         [
-          destinationSpokePool.queryFilter(
+          paginatedEventQuery(
+            destinationSpokePool,
             destinationSpokePool.filters.FilledV3Relay(
               undefined,
               undefined,
@@ -202,9 +214,10 @@ export class EVMStrategy implements IChainStrategy {
               originChainId,
               depositId.toNumber()
             ),
-            blockForTimestamp
+            destinationEventSearchConfig
           ),
-          destinationSpokePool.queryFilter(
+          paginatedEventQuery(
+            destinationSpokePool,
             destinationSpokePool.filters.FilledRelay(
               undefined,
               undefined,
@@ -214,7 +227,7 @@ export class EVMStrategy implements IChainStrategy {
               originChainId,
               depositId.toNumber()
             ),
-            blockForTimestamp
+            destinationEventSearchConfig
           ),
         ]
       );

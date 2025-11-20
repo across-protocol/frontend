@@ -686,3 +686,40 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
 ];
+
+// Autogenerate RPC config for each supported chain.
+// Any exceptions can be added to the ranges object.
+const resolveRpcConfig = () => {
+  const defaultRange = 10_000;
+  const ranges = {
+    [CHAIN_IDs.ALEPH_ZERO]: 0,
+    [CHAIN_IDs.BOBA]: 0,
+    [CHAIN_IDs.HYPEREVM]: 1_000, // QuickNode constraint.
+    [CHAIN_IDs.MONAD]: 1_000, // Alchemy constraint
+    [CHAIN_IDs.SOLANA]: 1_000,
+    [CHAIN_IDs.SOLANA_DEVNET]: 1000,
+  };
+  return Object.fromEntries(
+    Object.values(CHAIN_IDs).map((chainId) => [
+      chainId,
+      ranges[chainId] ?? defaultRange,
+    ])
+  );
+};
+
+const mergeConfig = <T>(config: T, envVar: string): T => {
+  const shallowCopy = { ...config };
+  Object.entries(JSON.parse(envVar ?? "{}")).forEach(([k, v]) => {
+    assert(
+      typeof v === typeof shallowCopy[k] || !isDefined(shallowCopy[k]),
+      `Invalid ${envVar} configuration on key ${k} (${typeof v} != ${typeof shallowCopy[k]})`
+    );
+    shallowCopy[k] = v;
+  });
+  return shallowCopy;
+};
+
+export const chainMaxBlockLookback = mergeConfig(
+  resolveRpcConfig(),
+  process.env.MAX_BLOCK_LOOK_BACK
+);
