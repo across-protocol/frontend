@@ -744,12 +744,13 @@ export async function buildBaseSwapResponseJson(params: {
     expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
-    quoteExpiryTimestamp: getQuoteExpiryTimestamp(
+    quoteExpiryTimestamp:
       params.bridgeQuote.provider === "across"
-        ? params.bridgeQuote.suggestedFees.timestamp
-        : sdk.utils.getCurrentTime(),
-      !!params.destinationSwapQuote
-    ),
+        ? getQuoteExpiryTimestamp(
+            params.bridgeQuote.suggestedFees.timestamp,
+            !!params.destinationSwapQuote
+          )
+        : 0, // Implies no quote expiry
   });
 }
 
