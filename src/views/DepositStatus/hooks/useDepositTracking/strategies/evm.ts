@@ -21,6 +21,7 @@ import {
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { BigNumber, ethers } from "ethers";
+import { FilledRelayEvent } from "utils/typechain";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
@@ -201,7 +202,7 @@ export class EVMStrategy implements IChainStrategy {
 
       const config = getConfig();
       const destinationSpokePool = config.getSpokePool(this.chainId);
-      const filledRelayEvents = await paginatedEventQuery(
+      const filledRelayEvents = (await paginatedEventQuery(
         destinationSpokePool,
         destinationSpokePool.filters.FilledRelay(
           undefined,
@@ -213,7 +214,7 @@ export class EVMStrategy implements IChainStrategy {
           depositId.toNumber()
         ),
         destinationEventSearchConfig
-      );
+      )) as FilledRelayEvent[];
       // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
       // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
