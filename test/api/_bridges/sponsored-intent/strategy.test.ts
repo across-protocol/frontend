@@ -93,20 +93,13 @@ describe("getUsdhIntentsBridgeStrategy", () => {
 
   describe("getQuoteForOutput", () => {
     it("should convert amount and return bridge quote", async () => {
-      // Strategy implementation uses ConvertDecimals.
-      // 100 (dec 18) -> to dec 6 -> 100 / 10^12 = 0 if we strictly integer divide, but ConvertDecimals handles it.
-      // Let's use easier numbers.
-      // input: dec 6, output: dec 18.
-      // params.minOutputAmount (dec 18) -> input (dec 6).
-      // If minOutput = 1 * 10^18 (1 token), input should be 1 * 10^6.
-
       const mockQuote = { some: "quote" };
       (getUsdhIntentQuote as jest.Mock).mockResolvedValue(mockQuote);
 
       const params = {
         inputToken: USDC_ON_OPTIMISM,
         outputToken: USDH_ON_HYPERCORE,
-        minOutputAmount: BigNumber.from("100000000"), // 1.0 USDH
+        minOutputAmount: BigNumber.from("100000000"), // 1.0 USDH on HyperCore
         recipient: "0xRecipient",
       };
 
@@ -115,7 +108,7 @@ describe("getUsdhIntentsBridgeStrategy", () => {
       expect(getUsdhIntentQuote).toHaveBeenCalledWith({
         inputToken: params.inputToken,
         outputToken: params.outputToken,
-        exactInputAmount: BigNumber.from("1000000"), // 1.0 in dec 6
+        exactInputAmount: BigNumber.from("1000000"), // 1.0 USDH on Optimism
         recipient: params.recipient,
       });
       expect(result).toEqual({
