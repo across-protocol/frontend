@@ -181,11 +181,12 @@ const TokenInput = ({
   }, [isOrigin, inputDisabled]);
 
   const formattedConvertedAmount = (() => {
-    if (!convertedAmount) return "0.00";
     if (unit === "token") {
+      if (!convertedAmount) return "$0.00";
       // convertTokenToUSD returns in 18 decimal precision
       return "$" + formatUSD(convertedAmount);
     }
+    if (!convertedAmount) return "0.00";
     // convertUSDToToken returns in token's native decimals
     return `${formatUnits(convertedAmount, token?.decimals)} ${token?.symbol}`;
   })();
@@ -222,10 +223,12 @@ const TokenInput = ({
             error={insufficientInputBalance}
           />
         </TokenAmountInputWrapper>
-        <UnitToggleButton onClick={toggleUnit}>
-          <ArrowsCross width={16} height={16} />{" "}
-          <span>Value: {formattedConvertedAmount}</span>
-        </UnitToggleButton>
+        <UnitToggleButtonWrapper>
+          <UnitToggleButton onClick={toggleUnit}>
+            <ArrowsCross width={16} height={16} />{" "}
+            <span>{formattedConvertedAmount}</span>
+          </UnitToggleButton>
+        </UnitToggleButtonWrapper>
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton
@@ -273,12 +276,19 @@ const ValueRow = styled.div`
   }
 `;
 
+const UnitToggleButtonWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+`;
+
 const UnitToggleButton = styled.button`
   color: ${withOpacity("#e0f3ff", 0.5)};
 
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  overflow: hidden;
 
   &:hover:not(:disabled) {
     svg {
@@ -288,6 +298,10 @@ const UnitToggleButton = styled.button`
 
   span {
     color: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+    text-overflow: ellipsis;
   }
 
   svg {
@@ -303,6 +317,9 @@ const TokenAmountStack = styled.div`
   align-self: stretch;
 
   height: 100%;
+  margin-right: 24px;
+  min-width: 0;
+  flex: 1;
 `;
 
 const TokenAmountInputTitle = styled.div`
@@ -324,18 +341,15 @@ const TokenAmountInputWrapper = styled.div<{
   align-items: center;
   width: 100%;
   position: relative;
+  overflow: hidden;
 
-  font-size: 48px;
+  font-size: clamp(20px, 7cqw, 48px);
   font-weight: 300;
   line-height: 120%;
   letter-spacing: -1.92px;
 
   color: ${({ value, error }) =>
     error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
-
-  &:focus-within {
-    font-size: 48px;
-  }
 
   ${({ showPrefix, value, error }) =>
     showPrefix &&
@@ -344,7 +358,7 @@ const TokenAmountInputWrapper = styled.div<{
       content: "$";
       margin-right: 4px;
       flex-shrink: 0;
-      font-size: 48px;
+      font-size: inherit;
       font-weight: 300;
       line-height: 120%;
       letter-spacing: -1.92px;
@@ -362,8 +376,11 @@ const TokenAmountInput = styled.input<{
   outline: none;
   border: none;
   background: transparent;
-  font: inherit;
-  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit !important;
+  line-height: inherit;
+  letter-spacing: inherit;
   color: ${({ value, error }) =>
     error
       ? COLORS.error
@@ -373,8 +390,8 @@ const TokenAmountInput = styled.input<{
   flex-shrink: 0;
 
   &:focus {
-    font-size: 48px;
     outline: none;
+    font-size: inherit !important;
   }
 
   &::placeholder {
