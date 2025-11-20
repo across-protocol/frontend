@@ -220,6 +220,8 @@ export function getAlchemyRpcFromConfigJson(
   chainId: number
 ): string | undefined {
   const { providers } = rpcProvidersJson;
-  const alchemyUrls = providers.urls.alchemy as Record<string, string>;
+  const alchemyUrls = providers.urls["alchemy"] as
+    | Record<string, string>
+    | undefined;
   return alchemyUrls?.[String(chainId)];
 }
