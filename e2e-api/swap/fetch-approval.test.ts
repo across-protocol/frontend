@@ -375,7 +375,7 @@ describe("GET /swap/approval", () => {
     );
   });
 
-  describe.only("Sponsored Intents USDH", () => {
+  describe("Sponsored Intents USDH", () => {
     const inputTokensToTest = [
       {
         decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
