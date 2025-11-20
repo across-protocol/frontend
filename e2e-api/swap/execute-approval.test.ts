@@ -2,7 +2,7 @@ import axios from "axios";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { Address, parseUnits, PrivateKeyAccount } from "viem";
 
-import { e2eConfig } from "../utils/config";
+import { e2eConfig, JEST_TIMEOUT_MS } from "../utils/config";
 import { executeApprovalAndDeposit } from "../utils/deposit";
 import { executeFill } from "../utils/fill";
 import { getBalance } from "../utils/token";
@@ -74,6 +74,12 @@ const A2A_BASE_TEST_CASE = {
   slippage: SLIPPAGE,
 } as const;
 
+type EndToEndTestCase =
+  | typeof B2B_BASE_TEST_CASE
+  | typeof B2A_BASE_TEST_CASE
+  | typeof A2B_BASE_TEST_CASE
+  | typeof A2A_BASE_TEST_CASE;
+
 describe("execute response of GET /swap/approval", () => {
   async function fetchSwapQuote(params: {
     amount: string;
@@ -97,13 +103,9 @@ describe("execute response of GET /swap/approval", () => {
     return response.data as SwapQuoteResponse;
   }
 
-  async function runEndToEnd(
+  async function prepEndToEndExecution(
     tradeType: TradeType,
-    testCase:
-      | typeof B2B_BASE_TEST_CASE
-      | typeof B2A_BASE_TEST_CASE
-      | typeof A2B_BASE_TEST_CASE
-      | typeof A2A_BASE_TEST_CASE,
+    testCase: EndToEndTestCase,
     opts?: { freshDepositorWallet?: PrivateKeyAccount }
   ) {
     const {
@@ -137,30 +139,57 @@ describe("execute response of GET /swap/approval", () => {
     });
     await originClient.tevmMine({ blockCount: 1 });
 
-    // Fetch swap quote
-    const swapQuote = await fetchSwapQuote({
-      amount: amount.toString(),
-      tradeType,
-      inputToken: inputTokenAddress,
-      outputToken: outputTokenAddress,
+    const [swapQuote, inputTokenBalanceBefore, outputTokenBalanceBefore] =
+      await Promise.all([
+        fetchSwapQuote({
+          amount: amount.toString(),
+          tradeType,
+          inputToken: inputTokenAddress,
+          outputToken: outputTokenAddress,
+          originChainId,
+          destinationChainId,
+          depositor,
+          recipient,
+          slippage,
+        }),
+        getBalance(originChainId, inputTokenAddress, depositor),
+        getBalance(destinationChainId, outputTokenAddress, recipient),
+      ]);
+
+    return {
       originChainId,
       destinationChainId,
+      inputTokenAddress,
+      outputTokenAddress,
       depositor,
       recipient,
+      swapQuote,
+      inputTokenBalanceBefore,
+      outputTokenBalanceBefore,
+      amount,
       slippage,
-    });
+      originClient,
+      destinationClient,
+    };
+  }
 
-    // Balances BEFORE swap tx execution
-    const inputTokenBalanceBefore = await getBalance(
+  async function runEndToEnd(
+    tradeType: TradeType,
+    testCase: EndToEndTestCase,
+    opts?: { freshDepositorWallet?: PrivateKeyAccount }
+  ) {
+    const {
       originChainId,
-      inputTokenAddress,
-      depositor
-    );
-    const outputTokenBalanceBefore = await getBalance(
       destinationChainId,
+      inputTokenAddress,
       outputTokenAddress,
-      recipient
-    );
+      depositor,
+      recipient,
+      swapQuote,
+      inputTokenBalanceBefore,
+      outputTokenBalanceBefore,
+      amount,
+    } = await prepEndToEndExecution(tradeType, testCase, opts);
 
     // Execute swap tx
     const { approvalReceipts, swapReceipt, depositEvent } =
@@ -223,81 +252,149 @@ describe("execute response of GET /swap/approval", () => {
 
   describe("B2B", () => {
     describe("exactInput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactInput", B2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactInput", B2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("minOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("minOutput", B2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("minOutput", B2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("exactOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactOutput", B2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactOutput", B2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
   });
 
   describe("B2A", () => {
     describe("exactInput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactInput", B2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactInput", B2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("exactOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactOutput", B2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactOutput", B2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("minOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("minOutput", B2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("minOutput", B2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
+    });
+
+    describe("deposit expiry", () => {
+      it(
+        "should revert if expired",
+        async () => {
+          const { originClient, swapQuote } = await prepEndToEndExecution(
+            "exactInput",
+            B2A_BASE_TEST_CASE
+          );
+
+          // Mine next block to make the deposit expired (2 minutes from now)
+          await originClient.tevmMine({ blockCount: 2, interval: 2 * 60 });
+
+          await expect(executeApprovalAndDeposit(swapQuote)).rejects.toThrow(
+            /revert/
+          );
+        },
+        JEST_TIMEOUT_MS
+      );
     });
   });
 
   describe("A2B", () => {
     describe("exactInput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactInput", A2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactInput", A2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("exactOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactOutput", A2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactOutput", A2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("minOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("minOutput", A2B_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("minOutput", A2B_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
   });
 
   describe("A2A", () => {
     describe("exactInput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactInput", A2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactInput", A2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("exactOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("exactOutput", A2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("exactOutput", A2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
 
     describe("minOutput", () => {
-      it("should fetch, execute deposit, and fill the relay", async () => {
-        await runEndToEnd("minOutput", A2A_BASE_TEST_CASE);
-      }, 180_000);
+      it(
+        "should fetch, execute deposit, and fill the relay",
+        async () => {
+          await runEndToEnd("minOutput", A2A_BASE_TEST_CASE);
+        },
+        JEST_TIMEOUT_MS
+      );
     });
   });
 });

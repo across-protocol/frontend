@@ -57,6 +57,7 @@ import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
+import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -771,6 +772,13 @@ export async function buildBaseSwapResponseJson(params: {
     expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
+    quoteExpiryTimestamp:
+      params.bridgeQuote.provider === "across"
+        ? getQuoteExpiryTimestamp(
+            params.bridgeQuote.suggestedFees.timestamp,
+            params.destinationSwapQuote?.tokenOut.chainId
+          )
+        : 0, // Implies no quote expiry
   });
 }
 
