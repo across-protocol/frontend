@@ -34,6 +34,7 @@ import { appendJupiterIxs } from "../../_dexes/jupiter/utils/transaction-builder
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
 import { getSVMRpc } from "../../_providers";
 import { getFillDeadlineBuffer } from "../../_fill-deadline";
+import { getQuoteTimestampArg } from "../../_quote-timestamp";
 
 export async function buildCrossSwapTxForAllowanceHolder(
   crossSwapQuotes: CrossSwapQuotes,
@@ -339,7 +340,10 @@ async function _buildDepositTxForAllowanceHolderSvm(
       )
       .toBase58()
   );
-  const quoteTimestamp = crossSwapQuotes.bridgeQuote.suggestedFees.timestamp;
+  const quoteTimestamp = getQuoteTimestampArg(
+    crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+    crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
+  );
   const fillDeadline =
     sdk.utils.getCurrentTime() + getFillDeadlineBuffer(destinationChainId);
   const exclusivityParameter =

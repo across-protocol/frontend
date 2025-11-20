@@ -8,6 +8,8 @@ import https from "https";
 
 dotenv.config({ path: [".env.e2e", ".env.local", ".env"] });
 
+export const JEST_TIMEOUT_MS = 180_000;
+
 export const axiosInstance = axios.create({
   httpAgent: new nodeHttp.Agent({ keepAlive: false }),
   httpsAgent: new https.Agent({ keepAlive: false }),
