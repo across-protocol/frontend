@@ -1,13 +1,17 @@
 import axios from "axios";
 import { constants } from "ethers";
 import mainnetChains from "../../../src/data/chains_1.json";
-import indirectChains from "../../../src/data/indirect_chains_1.json";
+import indirectChainsImport from "../../../src/data/indirect_chains_1.json";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import {
   ENABLED_ROUTES,
   getChainInfo,
   getFallbackTokenLogoURI,
 } from "../../_utils";
+
+// Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
+// Uses the same structure as mainnetChains since indirect chains share the same base schema.
+const indirectChains = indirectChainsImport as typeof mainnetChains;
 
 export type SwapToken = {
   chainId: number;

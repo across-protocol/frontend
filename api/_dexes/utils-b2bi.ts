@@ -18,7 +18,16 @@ import {
   buildMulticallHandlerMessage,
 } from "../_multicall-handler";
 
-import indirectChains from "../../src/data/indirect_chains_1.json";
+import indirectChainsImport from "../../src/data/indirect_chains_1.json";
+import mainnetChains from "../../src/data/chains_1.json";
+
+// Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json or any of its nested arrays are empty.
+// Extends mainnetChains type with intermediaryChains property specific to indirect chains.
+const indirectChains = indirectChainsImport as Array<
+  (typeof mainnetChains)[number] & {
+    intermediaryChains: number[];
+  }
+>;
 
 import { CrossSwap, IndirectDestinationRoute } from "./types";
 
