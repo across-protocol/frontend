@@ -4,7 +4,7 @@ import { CHAIN_IDs } from "../../../_constants";
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
 export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
-  "0xb4aead497fcbeaa3c37919032d42c29682f46376";
+  "0xe1601d869f3c72fdf12b9f40ca18e8c6c5f5d860";
 
 export const SUPPORTED_INPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
