@@ -54,6 +54,7 @@ import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
 import { isEvmAddress, isSvmAddress } from "../_address";
 import { isIndirectDestinationRouteSupported } from "./utils-b2bi";
+import { getQuoteTimestampArg } from "../_quote-timestamp";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -581,7 +582,10 @@ export async function extractDepositDataStruct(
     destinationChainId,
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
-    quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+    quoteTimestamp: getQuoteTimestampArg(
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+      !!crossSwapQuotes.destinationSwapQuote
+    ),
     fillDeadline: getFillDeadline(
       destinationChainId,
       crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
