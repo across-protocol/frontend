@@ -156,6 +156,7 @@ const ButtonCore: React.FC<{
   onClick?: () => void;
 }> = ({ label, loading, disabled, state, onClick, fullHeight }) => (
   <StyledButton
+    data-cy="bridge-button"
     disabled={disabled || loading}
     onClick={onClick}
     aqua={!disabled}

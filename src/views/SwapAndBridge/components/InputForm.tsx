@@ -211,8 +211,9 @@ const TokenInput = ({
           error={insufficientInputBalance}
         >
           <TokenAmountInput
-            id={`${isOrigin ? "origin" : "destination"}-token-input`}
-            name={`${isOrigin ? "origin" : "destination"}-token-input`}
+            id={`${isOrigin ? "origin" : "destination"}-amount-input`}
+            name={`${isOrigin ? "origin" : "destination"}-amount-input`}
+            data-testid={isOrigin ? "bridge-amount-input" : undefined}
             ref={amountInputRef}
             placeholder="0.00"
             value={amountString}

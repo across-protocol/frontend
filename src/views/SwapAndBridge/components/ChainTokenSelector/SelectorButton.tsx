@@ -46,7 +46,11 @@ export default function SelectorButton({
   if (!selectedToken) {
     return (
       <>
-        <Wrapper className={className} onClick={() => setDisplayModal(true)}>
+        <Wrapper
+          id={`${isOriginToken ? "origin" : "destination"}-token-selector`}
+          className={className}
+          onClick={() => setDisplayModal(true)}
+        >
           <NamesStack>
             <SelectTokenName>Select token</SelectTokenName>
           </NamesStack>
@@ -72,7 +76,11 @@ export default function SelectorButton({
 
   return (
     <>
-      <Wrapper className={className} onClick={() => setDisplayModal(true)}>
+      <Wrapper
+        id={`${isOriginToken ? "origin" : "destination"}-token-selector`}
+        className={className}
+        onClick={() => setDisplayModal(true)}
+      >
         <TokenStack>
           <TokenImg src={selectedToken.logoURI} alt={selectedToken.symbol} />
           <ChainImg src={chain.logoURI} alt={chain.name} />
