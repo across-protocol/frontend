@@ -869,6 +869,43 @@ export const modeSepolia_viem = defineChain({
   },
 });
 
+export const monad = {
+  name: "Monad",
+  fullName: "Monad",
+  chainId: 143,
+  logoURI: modeLogo, // todo
+  grayscaleLogoURI: modeGrayscaleLogo, // @todo
+  logoSvg: modeLogoSvg, // @todo
+  grayscaleLogoSvg: modeGrayscaleLogoSvg, // @todo
+  rpcUrl: "https://rpc3.monad.xyz",
+  explorerUrl: "https://monadvision.com",
+  constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "MON",
+  customRpcUrl: process.env.REACT_APP_CHAIN_143_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const monad_viem = defineChain({
+  id: monad.chainId,
+  name: monad.name,
+  nativeCurrency: {
+    name: monad.nativeCurrencySymbol,
+    symbol: monad.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [monad.customRpcUrl ? monad.customRpcUrl : [], monad.rpcUrl].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: monad.name + " Explorer",
+      url: monad.explorerUrl,
+    },
+  },
+});
+
 export const optimism = {
   name: "Optimism",
   fullName: "Optimism",
