@@ -15,7 +15,7 @@ import {
   QUERIES,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
@@ -27,6 +27,7 @@ import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
+import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -133,23 +134,26 @@ export function ChainTokenSelectorModal({
     });
 
     // Filter by search first
-    const filteredTokens = enrichedTokens.filter((t) => {
-      if (tokenSearch === "") {
-        return true;
-      }
-      // When a specific chain is selected, only show tokens from that chain
-      if (selectedChain !== null && t.chainId !== selectedChain) {
-        return false;
-      }
-      const keywords = [
-        t.symbol.toLowerCase().replaceAll(" ", ""),
-        t.name.toLowerCase().replaceAll(" ", ""),
-        t.address.toLowerCase().replaceAll(" ", ""),
-      ];
-      return keywords.some((keyword) =>
-        keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
-      );
-    });
+    const filteredTokens = enrichedTokens
+      .filter((t) => {
+        if (tokenSearch === "") {
+          return true;
+        }
+
+        // When a specific chain is selected, only show tokens from that chain
+        if (selectedChain !== null && t.chainId !== selectedChain) {
+          return false;
+        }
+        const keywords = [
+          t.symbol.toLowerCase().replaceAll(" ", ""),
+          t.name.toLowerCase().replaceAll(" ", ""),
+          t.address.toLowerCase().replaceAll(" ", ""),
+        ];
+        return keywords.some((keyword) =>
+          keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
+        );
+      })
+      .filter(getBridgeableSvmTokenFilterPredicate(isOriginToken, otherToken));
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
@@ -214,7 +218,7 @@ export function ChainTokenSelectorModal({
       popular: sortedPopularTokens,
       all: sortedAllTokens,
     };
-  }, [selectedChain, crossChainRoutes, tokenSearch]);
+  }, [selectedChain, crossChainRoutes, isOriginToken, otherToken, tokenSearch]);
 
   const displayedChains = useMemo(() => {
     const chainsWithDisabledState = Object.keys(crossChainRoutes || {})
