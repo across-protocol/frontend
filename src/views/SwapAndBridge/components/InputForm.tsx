@@ -342,17 +342,13 @@ const TokenAmountInputWrapper = styled.div<{
   position: relative;
   overflow: hidden;
 
-  font-size: 48px;
+  font-size: clamp(20px, 7cqw, 48px);
   font-weight: 300;
   line-height: 120%;
   letter-spacing: -1.92px;
 
   color: ${({ value, error }) =>
     error ? COLORS.error : value ? COLORS.aqua : COLORS["light-200"]};
-
-  &:focus-within {
-    font-size: 48px;
-  }
 
   ${({ showPrefix, value, error }) =>
     showPrefix &&
@@ -361,7 +357,7 @@ const TokenAmountInputWrapper = styled.div<{
       content: "$";
       margin-right: 4px;
       flex-shrink: 0;
-      font-size: 48px;
+      font-size: inherit;
       font-weight: 300;
       line-height: 120%;
       letter-spacing: -1.92px;
@@ -379,8 +375,11 @@ const TokenAmountInput = styled.input<{
   outline: none;
   border: none;
   background: transparent;
-  font: inherit;
-  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit !important;
+  line-height: inherit;
+  letter-spacing: inherit;
   color: ${({ value, error }) =>
     error
       ? COLORS.error
@@ -390,8 +389,8 @@ const TokenAmountInput = styled.input<{
   flex-shrink: 0;
 
   &:focus {
-    font-size: 48px;
     outline: none;
+    font-size: inherit !important;
   }
 
   &::placeholder {
