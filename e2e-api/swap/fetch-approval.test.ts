@@ -1,8 +1,8 @@
 import { BigNumber, ethers } from "ethers";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { e2eConfig, axiosInstance } from "../utils/config";
-import { ENABLED_ROUTES } from "../../api/_utils";
+import { compactAxiosError, ENABLED_ROUTES } from "../../api/_utils";
 
 const JEST_TIMEOUT_MS = 180_000;
 
@@ -375,5 +375,78 @@ describe("GET /swap/approval", () => {
       },
       JEST_TIMEOUT_MS
     );
+  });
+
+  describe.only("Sponsored Intents USDH", () => {
+    const inputTokensToTest = [
+      {
+        decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
+        address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+        chainId: CHAIN_IDs.ARBITRUM,
+        symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+      },
+      {
+        decimals: TOKEN_SYMBOLS_MAP["USDC-BNB"].decimals,
+        address: TOKEN_SYMBOLS_MAP["USDC-BNB"].addresses[CHAIN_IDs.BSC],
+        chainId: CHAIN_IDs.BSC,
+        symbol: TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol,
+      },
+    ];
+
+    async function testSponsoredIntentsUsdh(
+      inputAmountUsd: number,
+      inputToken: {
+        decimals: number;
+        address: string;
+        chainId: number;
+      },
+      destinationChainId: number
+    ) {
+      const inputAmountUsdc = ethers.utils
+        .parseUnits(inputAmountUsd.toString(), inputToken.decimals)
+        .toString();
+      const destinationToken =
+        destinationChainId === CHAIN_IDs.HYPERCORE
+          ? TOKEN_SYMBOLS_MAP["USDH-SPOT"]
+          : TOKEN_SYMBOLS_MAP.USDH;
+      try {
+        const response = await axiosInstance.get(SWAP_API_URL, {
+          params: {
+            amount: inputAmountUsdc,
+            inputToken: inputToken.address,
+            outputToken: destinationToken.addresses[destinationChainId],
+            originChainId: inputToken.chainId,
+            destinationChainId,
+            depositor: e2eConfig.addresses.depositor,
+          },
+        });
+        expect(response.status).toBe(200);
+        expect(response.data.inputAmount).toBe(inputAmountUsdc);
+        expect(response.data.expectedOutputAmount).toEqual(
+          response.data.minOutputAmount
+        );
+        expect(response.data.expectedOutputAmount).toEqual(
+          ethers.utils
+            .parseUnits(inputAmountUsd.toString(), destinationToken.decimals)
+            .toString()
+        );
+      } catch (error: any) {
+        throw compactAxiosError(error);
+      }
+    }
+
+    for (const inputToken of inputTokensToTest) {
+      test(`should return a valid quote for ${
+        inputToken.symbol
+      } on ${inputToken.chainId} -> USDH on HyperCore`, async () => {
+        await testSponsoredIntentsUsdh(1, inputToken, CHAIN_IDs.HYPERCORE);
+      });
+
+      test(`should return a valid quote for ${
+        inputToken.symbol
+      } on ${inputToken.chainId} -> USDH on HyperEvm`, async () => {
+        await testSponsoredIntentsUsdh(1, inputToken, CHAIN_IDs.HYPEREVM);
+      });
+    }
   });
 });

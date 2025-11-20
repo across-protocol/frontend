@@ -18,9 +18,15 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
         [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
       },
+      [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
+      },
     },
     [CHAIN_IDs.HYPERCORE]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
+      },
+      [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
         [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
       },
     },
