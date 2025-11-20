@@ -877,7 +877,7 @@ export const monad = {
   grayscaleLogoURI: modeGrayscaleLogo, // @todo
   logoSvg: modeLogoSvg, // @todo
   grayscaleLogoSvg: modeGrayscaleLogoSvg, // @todo
-  rpcUrl: "https://rpc3.monad.xyz",
+  rpcUrl: "https://rpc-mainnet.monadinfra.com",
   explorerUrl: "https://monadvision.com",
   constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MON",
