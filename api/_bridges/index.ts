@@ -53,10 +53,12 @@ export async function getBridgeStrategy({
   }
   if (
     supportedBridgeStrategies.some(
-      (strategy) => strategy.name === getCctpBridgeStrategy().name
+      (strategy) =>
+        strategy.name === getCctpBridgeStrategy().name ||
+        strategy.name === getOftBridgeStrategy().name
     )
   ) {
-    return routeStrategyForCctp({
+    return routeMintAndBurnStrategy({
       inputToken,
       outputToken,
       amount,
@@ -68,7 +70,7 @@ export async function getBridgeStrategy({
   return getAcrossBridgeStrategy();
 }
 
-async function routeStrategyForCctp({
+async function routeMintAndBurnStrategy({
   inputToken,
   outputToken,
   amount,
@@ -84,6 +86,7 @@ async function routeStrategyForCctp({
     recipient,
     depositor,
   });
+
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
   }
@@ -96,6 +99,8 @@ async function routeStrategyForCctp({
     }
     if (bridgeStrategyData.isUsdcToUsdc) {
       return getCctpBridgeStrategy();
+    } else {
+      return getAcrossBridgeStrategy();
     }
   }
   if (!bridgeStrategyData.isUsdcToUsdc) {
