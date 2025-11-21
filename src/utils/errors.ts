@@ -1,5 +1,9 @@
 import axios, { AxiosError } from "axios";
 import { ChainId } from "./constants";
+import { ethers } from "ethers";
+import { SpokePoolErrorAbi } from "./abis/spokepool-errors";
+import { getProvider } from "./providers";
+import { chainIsEvm } from "./sdk";
 
 export class UnsupportedChainIdError extends Error {
   public constructor(unsupportedChainId: number) {
@@ -125,5 +129,169 @@ export function getQuoteWarningMessage(error: Error | null): string | null {
     case "MISSING_PARAM":
     default:
       return "Oops, something went wrong. Please try again.";
+  }
+}
+
+export type EthersCallRevertError = Error & {
+  code?: string;
+  reason?: string;
+  data?: string;
+
+  error?: {
+    code?: string;
+    reason?: string;
+    data?: string;
+    error?: {
+      data?: string;
+    };
+  };
+
+  body?: string; // JSON string with error.data
+};
+
+export function decodeSpokepoolError(data: string) {
+  if (!data || data === "0x") {
+    return "Transaction reverted (no revert data)";
+  }
+
+  try {
+    const spokepoolInterface = new ethers.utils.Interface(SpokePoolErrorAbi);
+    const parsed = spokepoolInterface.parseError(data);
+    if (!parsed) {
+      throw new Error("unable to parse custom errors");
+    }
+    return parsed.name; // eg. InvalidQuoteTimestamp or InvalidRelayerFeePct etc
+  } catch {
+    // fallback
+    return `Transaction reverted (raw data: ${data})`;
+  }
+}
+
+export const SPOKEPOOL_REVERT_REASON_MESSAGES: Record<string, string> = {
+  default: "Transaction reverted.",
+  InvalidQuoteTimestamp:
+    "Quote expired - please try again to get updated rates.",
+  // ...
+};
+
+export type SpokepoolRevertReason = {
+  error: string;
+  formattedError: string;
+};
+
+/**
+ * Formats a decoded error name into a user-friendly message
+ */
+function formatSpokepoolError(errorName: string): string {
+  return (
+    SPOKEPOOL_REVERT_REASON_MESSAGES[errorName] ||
+    SPOKEPOOL_REVERT_REASON_MESSAGES.default
+  );
+}
+
+// Re-simulate tx to capture revert data
+export async function getRevertDataFromReceipt(
+  receipt: ethers.providers.TransactionReceipt,
+  chainId: number
+): Promise<string | null> {
+  if (receipt.status !== 0) {
+    // Not a failed tx
+    return null;
+  }
+
+  try {
+    const provider = getProvider(chainId);
+
+    const tx = await provider.getTransaction(receipt.transactionHash);
+
+    if (!tx) {
+      throw new Error("Could not load transaction for receipt");
+    }
+
+    // re-simulate
+    const res = await provider.call(
+      {
+        to: tx.to!,
+        from: tx.from,
+        data: tx.data,
+        value: tx.value,
+      },
+      receipt.blockNumber
+    );
+    if (!res) {
+      return null;
+    }
+
+    return res; // revert payload
+  } catch (err: unknown) {
+    const revertData = extractRevertData(err);
+
+    if (!revertData) {
+      return null;
+    }
+
+    return revertData; // revert payload
+  }
+}
+
+function extractRevertData(err: unknown): string | undefined {
+  const e = err as EthersCallRevertError;
+
+  // Most common cases:
+  if (e.data && e.data !== "0x") return e.data;
+  if (e.error?.data && e.error.data !== "0x") return e.error.data;
+  if (e.error?.error?.data && e.error.error.data !== "0x")
+    return e.error.error.data;
+
+  // Some RPCs embed revert data inside err.body JSON:
+  if (e.body) {
+    try {
+      const parsed = JSON.parse(e.body);
+      const data = parsed?.error?.data;
+      if (typeof data === "string" && data !== "0x") return data;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Decodes and formats a SpokePool transaction revert reason
+ * @param receipt The transaction receipt (must have status 0 for failed tx)
+ * @param chainId The chain ID where the transaction was executed
+ * @returns Object containing the raw error name and formatted user-friendly message, or null if unable to decode
+ */
+export async function getSpokepoolRevertReason(
+  receipt: ethers.providers.TransactionReceipt,
+  chainId: number
+): Promise<SpokepoolRevertReason | null> {
+  if (!chainIsEvm(chainId)) {
+    console.warn("Cannot decode revert message on SVM chains");
+    return null;
+  }
+
+  if (receipt.status !== 0) {
+    // Not a failed transaction
+    return null;
+  }
+
+  try {
+    const revertData = await getRevertDataFromReceipt(receipt, chainId);
+    if (!revertData) {
+      return null;
+    }
+
+    const errorName = decodeSpokepoolError(revertData);
+    const formattedError = formatSpokepoolError(errorName);
+
+    return {
+      error: errorName,
+      formattedError,
+    };
+  } catch (error) {
+    console.error("Failed to decode SpokePool revert reason:", error);
+    return null;
   }
 }

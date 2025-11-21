@@ -20,6 +20,7 @@ import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
 } from "utils/swapMetadata";
+import { getSpokepoolRevertReason } from "utils";
 
 /**
  * Strategy for handling EVM chain operations
@@ -37,11 +38,18 @@ export class EVMStrategy implements IChainStrategy {
       const deposit = await getDepositByTxHash(txHash, this.chainId);
 
       if (deposit.depositTxReceipt.status === 0) {
+        const revertReason = await getSpokepoolRevertReason(
+          deposit.depositTxReceipt,
+          this.chainId
+        );
+
         return {
           depositTxHash: deposit.depositTxReceipt.transactionHash,
           depositTimestamp: deposit.depositTimestamp,
           status: "deposit-reverted",
           depositLog: undefined,
+          error: revertReason?.error,
+          formattedError: revertReason?.formattedError,
         };
       }
 
