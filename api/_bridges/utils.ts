@@ -10,6 +10,7 @@ import {
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 const LARGE_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
+const MONAD_LIMIT = 2; // 2 USD
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
   // Check if utilization is high (>80%)
@@ -115,7 +116,7 @@ export async function getBridgeStrategyData({
         outputToken.chainId !== CHAIN_IDs.SOLANA) ||
       outputToken.chainId === CHAIN_IDs.MONAD;
 
-    const isWithinMonadLimit = depositAmountUsd < 2;
+    const isWithinMonadLimit = depositAmountUsd < MONAD_LIMIT;
 
     return {
       canFillInstantly,
