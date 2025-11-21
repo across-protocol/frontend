@@ -11,6 +11,25 @@ type DefaultRoute = {
   outputToken: EnrichedToken | null;
 };
 
+/**
+ * Parse query params from URL to get route preferences
+ */
+function getRouteFromQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  const fromChain = Number(params.get("from")) || undefined;
+  const toChain = Number(params.get("to")) || undefined;
+  const inputTokenSymbol = params.get("inputToken") || undefined;
+  const outputTokenSymbol = params.get("outputToken") || undefined;
+
+  return {
+    fromChain,
+    toChain,
+    inputTokenSymbol: inputTokenSymbol?.toUpperCase(),
+    outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
+  };
+}
+
 export function useDefaultRoute(): DefaultRoute {
   const [defaultInputToken, setDefaultInputToken] =
     useState<EnrichedToken | null>(null);
@@ -40,19 +59,55 @@ export function useDefaultRoute(): DefaultRoute {
     [routeData]
   );
 
+  const findToken = useCallback(
+    (targetChainId: number, symbol: string) => {
+      const tokensOnChain = routeData[targetChainId] || [];
+      return tokensOnChain.find(
+        (token) => token.symbol.toUpperCase() === symbol.toUpperCase()
+      );
+    },
+    [routeData]
+  );
+
   // initial load
   useEffect(() => {
     // Wait for balances to be available
     if (!hasRouteData || hasSetInitial) {
       return;
     }
-    // Wallet is not connected: Base -> Arbitrum
+
+    // Check query params first
+    const queryParams = getRouteFromQueryParams();
+
+    if (
+      queryParams.fromChain &&
+      queryParams.toChain &&
+      queryParams.inputTokenSymbol
+    ) {
+      // Try to find tokens from query params
+      const inputToken = findToken(
+        queryParams.fromChain,
+        queryParams.inputTokenSymbol
+      );
+      const outputToken = queryParams.outputTokenSymbol
+        ? findToken(queryParams.toChain, queryParams.outputTokenSymbol)
+        : undefined;
+
+      if (inputToken) {
+        setDefaultInputToken(inputToken);
+        setDefaultOutputToken(outputToken ?? null);
+        setHasSetInitial(true);
+        return;
+      }
+    }
+
+    // Fallback to default: Base -> Arbitrum
     const inputToken = findUsdcToken(CHAIN_IDs.BASE);
     const outputToken = findUsdcToken(CHAIN_IDs.ARBITRUM);
     setDefaultInputToken(inputToken ?? null);
     setDefaultOutputToken(outputToken ?? null);
     setHasSetInitial(true);
-  }, [findUsdcToken, hasSetInitial, hasRouteData]);
+  }, [findUsdcToken, findToken, hasSetInitial, hasRouteData]);
 
   // connect wallet
   useEffect(() => {
@@ -62,7 +117,40 @@ export function useDefaultRoute(): DefaultRoute {
     }
 
     // only first connection - also check hasSetConnected to prevent infinite loop
-    if (!previouslyConnected && anyConnected && chainId && !hasSetConnected) {
+    // Also skip if we've already set initial tokens (they might be from query params)
+    if (
+      !previouslyConnected &&
+      anyConnected &&
+      chainId &&
+      !hasSetConnected &&
+      !hasSetInitial
+    ) {
+      // Check query params first - if they're set, use them instead of wallet-based defaults
+      const queryParams = getRouteFromQueryParams();
+
+      if (
+        queryParams.fromChain &&
+        queryParams.toChain &&
+        queryParams.inputTokenSymbol
+      ) {
+        const inputToken = findToken(
+          queryParams.fromChain,
+          queryParams.inputTokenSymbol
+        );
+        const outputToken = queryParams.outputTokenSymbol
+          ? findToken(queryParams.toChain, queryParams.outputTokenSymbol)
+          : undefined;
+
+        if (inputToken) {
+          setDefaultInputToken(inputToken);
+          setDefaultOutputToken(outputToken ?? null);
+          setHasSetConnected(true);
+          setHasSetInitial(true);
+          return;
+        }
+      }
+
+      // Fallback to wallet-based defaults
       let inputToken: EnrichedToken | undefined;
       let outputToken: EnrichedToken | undefined;
 
@@ -79,14 +167,17 @@ export function useDefaultRoute(): DefaultRoute {
       setDefaultInputToken(inputToken || null);
       setDefaultOutputToken(outputToken || null);
       setHasSetConnected(true);
+      setHasSetInitial(true);
     }
   }, [
     anyConnected,
     hasRouteData,
     chainId,
     findUsdcToken,
+    findToken,
     previouslyConnected,
     hasSetConnected,
+    hasSetInitial,
   ]);
 
   // Memoize the return value to prevent unnecessary re-renders
