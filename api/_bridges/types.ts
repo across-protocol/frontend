@@ -110,6 +110,9 @@ export type BridgeStrategyData =
       isFastCctpEligible: boolean;
       isLineaSource: boolean;
       isInThreshold: boolean;
+      isUsdtToUsdt: boolean;
+      isMonadTransfer: boolean;
+      isWithinMonadLimit: boolean;
     }
   | undefined;
 

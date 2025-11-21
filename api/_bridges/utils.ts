@@ -107,6 +107,16 @@ export async function getBridgeStrategyData({
     // Check if Linea is the source chain
     const isLineaSource = inputToken.chainId === CHAIN_IDs.LINEA;
 
+    const isUsdtToUsdt =
+      inputToken.symbol === "USDT" && outputToken.symbol === "USDT";
+
+    const isMonadTransfer =
+      (inputToken.chainId === CHAIN_IDs.MONAD &&
+        outputToken.chainId !== CHAIN_IDs.SOLANA) ||
+      outputToken.chainId === CHAIN_IDs.MONAD;
+
+    const isWithinMonadLimit = depositAmountUsd < 2;
+
     return {
       canFillInstantly,
       isUtilizationHigh,
@@ -115,6 +125,9 @@ export async function getBridgeStrategyData({
       isInThreshold,
       isFastCctpEligible,
       isLineaSource,
+      isUsdtToUsdt,
+      isMonadTransfer,
+      isWithinMonadLimit,
     };
   } catch (error) {
     if (logger) {
