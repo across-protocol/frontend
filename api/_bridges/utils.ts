@@ -10,7 +10,7 @@ import {
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 const LARGE_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
-const MONAD_LIMIT = 2; // 2 USD
+const MONAD_LIMIT = 25_000; // 25K USD
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
   // Check if utilization is high (>80%)
