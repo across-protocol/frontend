@@ -483,7 +483,7 @@ export const getTokenByAddress = (
     const ambiguousTokens = ["USDC", "USDT"];
     const wrappedTokens = [
       "WETH",
-      "WMATIC",
+      "WPOL",
       "WHYPE",
       "TATARA-WBTC",
       "WBNB",
