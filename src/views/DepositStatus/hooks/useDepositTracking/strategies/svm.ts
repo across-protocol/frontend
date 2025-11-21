@@ -84,7 +84,7 @@ export class SVMStrategy implements IChainStrategy {
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog?.depositId;
+    const depositId = depositInfo.depositLog.depositId;
     const originChainId = depositInfo.depositLog.originChainId;
 
     if (!depositId) {

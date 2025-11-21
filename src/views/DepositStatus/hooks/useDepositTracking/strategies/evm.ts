@@ -36,6 +36,15 @@ export class EVMStrategy implements IChainStrategy {
     try {
       const deposit = await getDepositByTxHash(txHash, this.chainId);
 
+      if (deposit.depositTxReceipt.status === 0) {
+        return {
+          depositTxHash: deposit.depositTxReceipt.transactionHash,
+          depositTimestamp: deposit.depositTimestamp,
+          status: "deposit-reverted",
+          depositLog: undefined,
+        };
+      }
+
       // Create a normalized response
       if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
         return {
@@ -48,10 +57,7 @@ export class EVMStrategy implements IChainStrategy {
       return {
         depositTxHash: deposit.depositTxReceipt.transactionHash,
         depositTimestamp: deposit.depositTimestamp,
-        status:
-          deposit.depositTxReceipt.status === 0
-            ? "deposit-reverted"
-            : "deposited",
+        status: "deposited",
         depositLog: deposit.parsedDepositLog,
       };
     } catch (error) {
@@ -67,7 +73,7 @@ export class EVMStrategy implements IChainStrategy {
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog?.depositId;
+    const depositId = depositInfo.depositLog.depositId;
     const originChainId = depositInfo.depositLog.originChainId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
