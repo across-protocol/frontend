@@ -9,6 +9,7 @@ import {
 import { CHAIN_IDs } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getBridgeStrategyData } from "./utils";
+import { getOftBridgeStrategy } from "./oft/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -25,7 +26,8 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  // TODO: Add CCTP bridge strategy when ready
+  getCctpBridgeStrategy(),
+  getOftBridgeStrategy(),
 ];
 
 export async function getBridgeStrategy({
@@ -84,6 +86,17 @@ async function routeStrategyForCctp({
   });
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
+  }
+  if (bridgeStrategyData.isMonadTransfer) {
+    if (bridgeStrategyData.isWithinMonadLimit) {
+      return getAcrossBridgeStrategy();
+    }
+    if (bridgeStrategyData.isUsdtToUsdt) {
+      return getOftBridgeStrategy();
+    }
+    if (bridgeStrategyData.isUsdcToUsdc) {
+      return getCctpBridgeStrategy();
+    }
   }
   if (!bridgeStrategyData.isUsdcToUsdc) {
     return getAcrossBridgeStrategy();
