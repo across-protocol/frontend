@@ -255,7 +255,7 @@ describe("GET /swap/approval", () => {
             inputToken: ethers.constants.AddressZero,
             outputToken: ethers.constants.AddressZero,
             originChainId: CHAIN_IDs.BSC,
-            destinationChainId: CHAIN_IDs.POLYGON,
+            destinationChainId: CHAIN_IDs.OPTIMISM,
             depositor: e2eConfig.addresses.depositor,
           },
         });
@@ -264,7 +264,7 @@ describe("GET /swap/approval", () => {
         expect(response.data.inputToken.address).toBe(
           ethers.constants.AddressZero
         );
-        expect(response.data.outputToken.symbol).toBe("POL");
+        expect(response.data.outputToken.symbol).toBe("ETH");
         expect(response.data.outputToken.address).toBe(
           ethers.constants.AddressZero
         );
