@@ -16,6 +16,7 @@ export const V2_ENDPOINTS: Record<number, string | undefined> = {
   [CHAIN_IDs.POLYGON]: "0x1a44076050125825900e736c501f859c50fE728c",
   [CHAIN_IDs.SONEIUM]: "0x4bcb6a963a9563c33569d7a512d35754221f3a19",
   [CHAIN_IDs.UNICHAIN]: "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B",
+  [CHAIN_IDs.MONAD]: "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B",
 };
 
 // OFT messenger contract addresses per token per chain
@@ -31,6 +32,7 @@ export const OFT_MESSENGERS: Record<
     // [CHAIN_IDs.INK]: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65", // TODO: Enable when we have intents support for Ink USDT
     [CHAIN_IDs.PLASMA]: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
     [CHAIN_IDs.POLYGON]: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
+    [CHAIN_IDs.MONAD]: "0x9151434b16b9763660705744891fA906F660EcC5",
     // [CHAIN_IDs.UNICHAIN]: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3", // TODO: Enable when we have intents support for Unichain USDT
   },
   // Source: https://docs.layerzero.network/v2/deployments & https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list?symbols=WBTC

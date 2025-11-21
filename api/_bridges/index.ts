@@ -10,6 +10,7 @@ import {
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getBridgeStrategyData } from "./utils";
+import { getOftBridgeStrategy } from "./oft/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -46,7 +47,8 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  // TODO: Add CCTP bridge strategy when ready
+  getCctpBridgeStrategy(),
+  getOftBridgeStrategy(),
 ];
 
 export async function getBridgeStrategy({
@@ -80,10 +82,12 @@ export async function getBridgeStrategy({
   }
   if (
     supportedBridgeStrategies.some(
-      (strategy) => strategy.name === getCctpBridgeStrategy().name
+      (strategy) =>
+        strategy.name === getCctpBridgeStrategy().name ||
+        strategy.name === getOftBridgeStrategy().name
     )
   ) {
-    return routeStrategyForCctp({
+    return routeMintAndBurnStrategy({
       inputToken,
       outputToken,
       amount,
@@ -95,7 +99,7 @@ export async function getBridgeStrategy({
   return getAcrossBridgeStrategy();
 }
 
-async function routeStrategyForCctp({
+async function routeMintAndBurnStrategy({
   inputToken,
   outputToken,
   amount,
@@ -111,8 +115,22 @@ async function routeStrategyForCctp({
     recipient,
     depositor,
   });
+
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
+  }
+  if (bridgeStrategyData.isMonadTransfer) {
+    if (bridgeStrategyData.isWithinMonadLimit) {
+      return getAcrossBridgeStrategy();
+    }
+    if (bridgeStrategyData.isUsdtToUsdt) {
+      return getOftBridgeStrategy();
+    }
+    if (bridgeStrategyData.isUsdcToUsdc) {
+      return getCctpBridgeStrategy();
+    } else {
+      return getAcrossBridgeStrategy();
+    }
   }
   if (!bridgeStrategyData.isUsdcToUsdc) {
     return getAcrossBridgeStrategy();
