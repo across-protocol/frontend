@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://monad-mainnet.g.alchemy.com/v2/CrY3QO43HhgQsCf7G9CAr",
   blockTimeSeconds: 1,
-  tokens: ["USDC"],
+  tokens: ["USDC", "USDT"],
   enableCCTP: false,
 } as ChainConfig;
