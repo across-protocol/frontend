@@ -31,7 +31,7 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.90.tgz#73871be1ff9da23864e2c56f1532ca1a5826ea07"
   integrity sha512-K9bNb5opVamCjyx5zgj4+LFNGMvQf3l9G3FHp2Xef2XAS43/WTIWaZwgP4zH8Qg89eX3bAKQ6u0ZGF2F8LKJGw==
 
-"@across-protocol/constants@^3.1.89", "@across-protocol/constants@^3.1.90":
+"@across-protocol/constants@^3.1.89":
   version "3.1.90"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.90.tgz#73871be1ff9da23864e2c56f1532ca1a5826ea07"
   integrity sha512-K9bNb5opVamCjyx5zgj4+LFNGMvQf3l9G3FHp2Xef2XAS43/WTIWaZwgP4zH8Qg89eX3bAKQ6u0ZGF2F8LKJGw==
