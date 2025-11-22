@@ -15,7 +15,10 @@ import {
 } from "./constants";
 import { ConvertDecimals, maxBN } from "../../../_utils";
 import { getCachedTokenBalance } from "../../../_balance";
-import { getFullRelayers } from "../../../_relayer-address";
+import {
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "../../../_relayer-address";
 
 export function getHyperEvmChainId(destinationChainId: number) {
   return [CHAIN_IDs.HYPEREVM, CHAIN_IDs.HYPERCORE].includes(destinationChainId)
@@ -80,8 +83,15 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
   const bridgeableOutputToken = getBridgeableOutputToken(params.outputToken);
 
   const fullRelayersDestinationChain = getFullRelayers(hyperEvmChainId);
+  const transferRestrictedRelayers = getTransferRestrictedRelayers(
+    hyperEvmChainId,
+    bridgeableOutputToken.symbol
+  );
+  const relayerAddresses = Array.from(
+    new Set([...fullRelayersDestinationChain, ...transferRestrictedRelayers])
+  );
   const relayerBalances = await Promise.all(
-    fullRelayersDestinationChain.map((relayer) =>
+    relayerAddresses.map((relayer) =>
       getCachedTokenBalance(
         hyperEvmChainId,
         relayer,
