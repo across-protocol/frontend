@@ -10,7 +10,10 @@ import {
 } from "../../../../api/_bridges/sponsored-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
 import { accountExistsOnHyperCore } from "../../../../api/_hypercore";
-import { getFullRelayers } from "../../../../api/_relayer-address";
+import {
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "../../../../api/_relayer-address";
 import { CHAIN_IDs } from "../../../../api/_constants";
 import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
@@ -62,6 +65,9 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
 
     beforeEach(() => {
       (getFullRelayers as jest.Mock).mockReturnValue(["0xRelayer1"]);
+      (getTransferRestrictedRelayers as jest.Mock).mockReturnValue([
+        "0xRelayer2",
+      ]);
     });
 
     it("should resolve if balance is sufficient", async () => {

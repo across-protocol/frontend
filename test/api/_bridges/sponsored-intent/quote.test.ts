@@ -16,6 +16,7 @@ jest.mock("../../../../api/_balance");
 jest.mock("../../../../api/_hypercore");
 jest.mock("../../../../api/_relayer-address", () => ({
   getFullRelayers: jest.fn().mockReturnValue(["0xRelayer"]),
+  getTransferRestrictedRelayers: jest.fn().mockReturnValue(["0xRelayer2"]),
   getDefaultRelayerAddress: jest.fn().mockReturnValue("0xRelayer"),
 }));
 
