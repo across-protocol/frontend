@@ -240,27 +240,29 @@ export function getBridgeQuoteMessage(
     const eventEmitterAddress = getEventEmitterAddress(
       crossSwap.outputToken.chainId
     );
-    const originSwapMetadataParams = {
-      version: 1,
-      type: crossSwapType,
-      side: SwapSide.ORIGIN_SWAP,
-      address: crossSwap.inputToken.address,
-      maximumAmountIn: originSwapQuote.maximumAmountIn,
-      minAmountOut: originSwapQuote.minAmountOut,
-      expectedAmountOut: originSwapQuote.expectedAmountOut,
-      expectedAmountIn: originSwapQuote.expectedAmountIn,
-      swapProvider: originSwapQuote.swapProvider.name,
-      slippage: originSwapQuote.slippageTolerance,
-      autoSlippage: crossSwap.slippageTolerance === "auto",
-      recipient: crossSwap.recipient,
-      appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
-    };
-    const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
-    eventEmitterActions.push({
-      target: eventEmitterAddress,
-      callData: encodeEmitDataCalldata(originSwapMetadata),
-      value: "0",
-    });
+    if (eventEmitterAddress) {
+      const originSwapMetadataParams = {
+        version: 1,
+        type: crossSwapType,
+        side: SwapSide.ORIGIN_SWAP,
+        address: crossSwap.inputToken.address,
+        maximumAmountIn: originSwapQuote.maximumAmountIn,
+        minAmountOut: originSwapQuote.minAmountOut,
+        expectedAmountOut: originSwapQuote.expectedAmountOut,
+        expectedAmountIn: originSwapQuote.expectedAmountIn,
+        swapProvider: originSwapQuote.swapProvider.name,
+        slippage: originSwapQuote.slippageTolerance,
+        autoSlippage: crossSwap.slippageTolerance === "auto",
+        recipient: crossSwap.recipient,
+        appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+      };
+      const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
+      eventEmitterActions.push({
+        target: eventEmitterAddress,
+        callData: encodeEmitDataCalldata(originSwapMetadata),
+        value: "0",
+      });
+    }
   }
 
   switch (crossSwap.type) {
@@ -850,7 +852,7 @@ export function buildDestinationSwapCrossChainMessage({
         : SwapType.EXACT_OUTPUT;
   const eventEmitterActions: Action[] = [];
   const eventEmitterAddress = getEventEmitterAddress(destinationSwapChainId);
-  if (!isIndicativeQuote) {
+  if (!isIndicativeQuote && eventEmitterAddress) {
     const destinationSwapMetadataParams = {
       version: 1,
       type: crossSwapType,
