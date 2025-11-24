@@ -136,4 +136,5 @@ export type BridgeStrategyDataParams = {
 export type GetBridgeStrategyParams = {
   originChainId: number;
   destinationChainId: number;
+  routingPreference?: string;
 } & BridgeStrategyDataParams;

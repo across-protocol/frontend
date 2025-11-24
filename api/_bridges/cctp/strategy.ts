@@ -34,12 +34,13 @@ import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
   CCTP_FINALITY_THRESHOLDS,
-  CCTP_FILL_TIME_ESTIMATES,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
   getCctpDomainId,
   encodeDepositForBurn,
 } from "./utils/constants";
+import { getEstimatedFillTime } from "./utils/fill-times";
+import { getCctpFees } from "./utils/fees";
 
 const name = "cctp";
 
@@ -59,12 +60,9 @@ const capabilities: BridgeCapabilities = {
  * CCTP (Cross-Chain Transfer Protocol) bridge strategy for native USDC transfers.
  * Supports Circle's CCTP for burning USDC on source chain.
  */
-export function getCctpBridgeStrategy(): BridgeStrategy {
-  const getEstimatedFillTime = (originChainId: number): number => {
-    // CCTP fill time is determined by the origin chain attestation process
-    return CCTP_FILL_TIME_ESTIMATES[originChainId] || 19 * 60; // Default to 19 minutes
-  };
-
+export function getCctpBridgeStrategy(
+  transferMode: "standard" | "fast" = "standard"
+): BridgeStrategy {
   const isRouteSupported = (params: {
     inputToken: Token;
     outputToken: Token;
@@ -149,10 +147,27 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }: GetExactInputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
+      let maxFee = BigNumber.from(0);
+
+      if (transferMode === "fast") {
+        const { transferFeeBps, forwardFee } = await getCctpFees({
+          inputToken,
+          outputToken,
+          transferMode,
+        });
+
+        // Calculate actual fee:
+        // transferFee = input * (bps / 10000)
+        // maxFee = transferFee + forwardFee
+        const transferFee = exactInputAmount.mul(transferFeeBps).div(10000);
+        maxFee = transferFee.add(forwardFee);
+      }
+
+      const remainingInputAmount = exactInputAmount.sub(maxFee);
       const outputAmount = ConvertDecimals(
         inputToken.decimals,
         outputToken.decimals
-      )(exactInputAmount);
+      )(remainingInputAmount);
 
       return {
         bridgeQuote: {
@@ -161,9 +176,16 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           inputAmount: exactInputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            transferMode
+          ),
           provider: name,
-          fees: getCctpBridgeFees(inputToken),
+          fees: getCctpBridgeFees({
+            inputToken,
+            inputAmount: exactInputAmount,
+            maxFee,
+          }),
         },
       };
     },
@@ -178,10 +200,31 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }: GetOutputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const inputAmount = ConvertDecimals(
+      let inputAmount = ConvertDecimals(
         outputToken.decimals,
         inputToken.decimals
       )(minOutputAmount);
+      let maxFee = BigNumber.from(0);
+
+      if (transferMode === "fast") {
+        const { transferFeeBps, forwardFee } = await getCctpFees({
+          inputToken,
+          outputToken,
+          transferMode,
+        });
+
+        // Solve for required input based on the following equation:
+        // inputAmount - (inputAmount * bps / 10000) - forwardFee = amountToArriveOnDestination
+        // Rearranging: inputAmount * (1 - bps/10000) = amountToArriveOnDestination + forwardFee
+        // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
+        // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
+        const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
+        inputAmount = inputAmount.add(forwardFee).mul(10000).div(bpsFactor);
+
+        // Calculate total CCTP fee (transfer fee + forward fee)
+        const transferFee = inputAmount.mul(transferFeeBps).div(10000);
+        maxFee = transferFee.add(forwardFee);
+      }
 
       return {
         bridgeQuote: {
@@ -190,9 +233,16 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           inputAmount,
           outputAmount: minOutputAmount,
           minOutputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            transferMode
+          ),
           provider: name,
-          fees: getCctpBridgeFees(inputToken),
+          fees: getCctpBridgeFees({
+            inputToken,
+            inputAmount,
+            maxFee,
+          }),
         },
       };
     },
@@ -234,8 +284,8 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         destinationDomain,
         mintRecipient: crossSwap.recipient,
         destinationCaller: ethers.constants.AddressZero, // Anyone can finalize the message on domain when this is set to bytes32(0)
-        maxFee: BigNumber.from(0), // maxFee set to 0 so this will be a "standard" speed transfer
-        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS.standard, // Hardcoded minFinalityThreshold value for standard transfer
+        maxFee: bridgeQuote.fees.amount, // pre-calculated in getQuoteForExactInput or getQuoteForOutput
+        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS[transferMode],
       };
 
       if (crossSwap.isOriginSvm) {
@@ -263,15 +313,19 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
   };
 }
 
-function getCctpBridgeFees(inputToken: Token) {
-  const zeroBN = BigNumber.from(0);
+function getCctpBridgeFees(params: {
+  inputToken: Token;
+  inputAmount: BigNumber;
+  maxFee?: BigNumber;
+}) {
+  const { inputToken, inputAmount, maxFee = BigNumber.from(0) } = params;
+  const pct = maxFee.mul(sdk.utils.fixedPointAdjustment).div(inputAmount);
   return {
-    pct: zeroBN,
-    amount: zeroBN,
+    pct,
+    amount: maxFee,
     token: inputToken,
   };
 }
-
 /**
  * Builds CCTP deposit transaction for EVM chains
  */
