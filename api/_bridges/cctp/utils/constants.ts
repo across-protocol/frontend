@@ -136,16 +136,35 @@ export const encodeDepositForBurn = (params: {
 };
 
 // CCTP estimated fill times in seconds
-// Soruce: https://developers.circle.com/cctp/required-block-confirmations
-export const CCTP_FILL_TIME_ESTIMATES: Record<number, number> = {
-  [CHAIN_IDs.MAINNET]: 19 * 60,
-  [CHAIN_IDs.ARBITRUM]: 19 * 60,
-  [CHAIN_IDs.BASE]: 19 * 60,
-  [CHAIN_IDs.HYPEREVM]: 5,
-  [CHAIN_IDs.INK]: 30 * 60,
-  [CHAIN_IDs.OPTIMISM]: 19 * 60,
-  [CHAIN_IDs.POLYGON]: 8,
-  [CHAIN_IDs.SOLANA]: 25,
-  [CHAIN_IDs.UNICHAIN]: 19 * 60,
-  [CHAIN_IDs.WORLD_CHAIN]: 19 * 60,
+// Source: https://developers.circle.com/cctp/required-block-confirmations
+export const CCTP_FILL_TIME_ESTIMATES: {
+  fast: Record<number, number>;
+  standard: Record<number, number>;
+} = {
+  standard: {
+    [CHAIN_IDs.MAINNET]: 19 * 60,
+    [CHAIN_IDs.ARBITRUM]: 19 * 60,
+    [CHAIN_IDs.BASE]: 19 * 60,
+    [CHAIN_IDs.HYPEREVM]: 5,
+    [CHAIN_IDs.INK]: 30 * 60,
+    [CHAIN_IDs.MONAD]: 5, // TODO: Confirm this when officially in docs
+    [CHAIN_IDs.OPTIMISM]: 19 * 60,
+    [CHAIN_IDs.POLYGON]: 8,
+    [CHAIN_IDs.SOLANA]: 25,
+    [CHAIN_IDs.UNICHAIN]: 19 * 60,
+    [CHAIN_IDs.WORLD_CHAIN]: 19 * 60,
+  },
+  fast: {
+    [CHAIN_IDs.MAINNET]: 20,
+    [CHAIN_IDs.ARBITRUM]: 8,
+    [CHAIN_IDs.BASE]: 8,
+    [CHAIN_IDs.HYPEREVM]: 5,
+    [CHAIN_IDs.INK]: 8,
+    [CHAIN_IDs.MONAD]: 5, // TODO: Confirm this when officially in docs
+    [CHAIN_IDs.OPTIMISM]: 8,
+    [CHAIN_IDs.POLYGON]: 8,
+    [CHAIN_IDs.SOLANA]: 8,
+    [CHAIN_IDs.UNICHAIN]: 8,
+    [CHAIN_IDs.WORLD_CHAIN]: 8,
+  },
 };

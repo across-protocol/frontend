@@ -80,6 +80,7 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
+  routingPreference: optional(enums(["default", "across", "native"])),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -110,6 +111,7 @@ export async function handleBaseSwapQueryParams(
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
     skipChecks: _skipChecks = "false",
+    routingPreference = "default",
   } = query;
 
   const originChainId = Number(_originChainId);
@@ -251,6 +253,7 @@ export async function handleBaseSwapQueryParams(
     skipChecks,
     isDestinationSvm,
     isOriginSvm,
+    routingPreference,
   };
 }
 

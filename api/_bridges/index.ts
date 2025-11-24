@@ -3,6 +3,7 @@ import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
+  BridgeStrategyData,
   BridgeStrategyDataParams,
   GetBridgeStrategyParams,
 } from "./types";
@@ -39,15 +40,20 @@ export async function getBridgeStrategy({
   amountType,
   recipient,
   depositor,
+  routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {
     return fromToChainOverride;
   }
-  const supportedBridgeStrategies = routableBridgeStrategies.filter(
-    (strategy) => strategy.isRouteSupported({ inputToken, outputToken })
-  );
+
+  const supportedBridgeStrategies = getSupportedBridgeStrategies({
+    inputToken,
+    outputToken,
+    routingPreference,
+  });
+
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
@@ -68,6 +74,37 @@ export async function getBridgeStrategy({
     });
   }
   return getAcrossBridgeStrategy();
+}
+
+export function getSupportedBridgeStrategies({
+  inputToken,
+  outputToken,
+  routingPreference,
+}: {
+  inputToken: GetBridgeStrategyParams["inputToken"];
+  outputToken: GetBridgeStrategyParams["outputToken"];
+  routingPreference: string;
+}) {
+  const routingPreferenceFilter = (strategyName: string) => {
+    // If default routing preference, don't filter based on name
+    if (routingPreference === "default") {
+      return true;
+    }
+
+    // If native routing preference, filter out 'across' bridge strategy
+    if (routingPreference === "native") {
+      return strategyName !== "across";
+    }
+
+    // Else use across bridge strategy
+    return strategyName === "across";
+  };
+  const supportedBridgeStrategies = routableBridgeStrategies.filter(
+    (strategy) =>
+      strategy.isRouteSupported({ inputToken, outputToken }) &&
+      routingPreferenceFilter(strategy.name)
+  );
+  return supportedBridgeStrategies;
 }
 
 async function routeMintAndBurnStrategy({
@@ -98,16 +135,16 @@ async function routeMintAndBurnStrategy({
       return getOftBridgeStrategy();
     }
     if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy();
+      return getCctpBridgeStrategy("fast");
     } else {
       return getAcrossBridgeStrategy();
     }
   }
-  if (!bridgeStrategyData.isUsdcToUsdc) {
+  if (!bridgeStrategyData.isUsdcToUsdc && !bridgeStrategyData.isUsdtToUsdt) {
     return getAcrossBridgeStrategy();
   }
   if (bridgeStrategyData.isUtilizationHigh) {
-    return getCctpBridgeStrategy();
+    return getBurnAndMintStrategy(bridgeStrategyData);
   }
   if (bridgeStrategyData.isLineaSource) {
     return getAcrossBridgeStrategy();
@@ -117,18 +154,31 @@ async function routeMintAndBurnStrategy({
       return getAcrossBridgeStrategy();
     }
     if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
+      return getBurnAndMintStrategy(bridgeStrategyData);
     } else {
-      return getCctpBridgeStrategy();
+      return getAcrossBridgeStrategy();
     }
   }
   if (bridgeStrategyData.canFillInstantly) {
     return getAcrossBridgeStrategy();
   } else {
     if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
+      return getBurnAndMintStrategy(bridgeStrategyData);
     } else {
-      return getCctpBridgeStrategy();
+      return getAcrossBridgeStrategy();
     }
   }
+}
+
+function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
+  if (!bridgeStrategyData) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUsdcToUsdc) {
+    return getCctpBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUsdtToUsdt) {
+    return getOftBridgeStrategy();
+  }
+  return getAcrossBridgeStrategy();
 }
