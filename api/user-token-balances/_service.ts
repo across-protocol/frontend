@@ -1,7 +1,6 @@
 import { MAINNET_CHAIN_IDs } from "@across-protocol/constants";
 import * as sdk from "@across-protocol/sdk";
 import { getLogger } from "../_utils";
-import { getAlchemyRpcFromConfigJson } from "../_providers";
 import { isSvmAddress } from "../_address";
 import { fetchSwapTokensData, SwapToken } from "../swap/tokens/_service";
 import { CHAIN_IDs, EVM_CHAIN_IDs } from "../_constants";
@@ -28,7 +27,6 @@ async function getSwapTokens(
 function getEvmChainIds(): number[] {
   return Object.values(MAINNET_CHAIN_IDs)
     .filter((chainId) => !sdk.utils.chainIsSvm(chainId))
-    .filter((chainId) => !!getAlchemyRpcFromConfigJson(chainId))
     .sort((a, b) => a - b);
 }
 
@@ -98,7 +96,7 @@ export const handleUserTokenBalances = async (account: string) => {
     account,
   });
 
-  // Get all available EVM chain IDs that have Alchemy RPC URLs
+  // Get all available EVM chain IDs
   const chainIdsAvailable = getEvmChainIds();
 
   // Fetch swap tokens to get the list of token addresses for each chain
