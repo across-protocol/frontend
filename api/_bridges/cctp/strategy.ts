@@ -176,7 +176,10 @@ export function getCctpBridgeStrategy(
           inputAmount: exactInputAmount,
           outputAmount,
           minOutputAmount: outputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            transferMode
+          ),
           provider: name,
           fees: getCctpBridgeFees({
             inputToken,
@@ -230,7 +233,10 @@ export function getCctpBridgeStrategy(
           inputAmount,
           outputAmount: minOutputAmount,
           minOutputAmount,
-          estimatedFillTimeSec: getEstimatedFillTime(inputToken.chainId),
+          estimatedFillTimeSec: getEstimatedFillTime(
+            inputToken.chainId,
+            transferMode
+          ),
           provider: name,
           fees: getCctpBridgeFees({
             inputToken,
