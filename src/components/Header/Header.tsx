@@ -13,12 +13,19 @@ import {
   StyledLogo,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
+import { enableMigration } from "utils";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
 import { useSidebarContext } from "hooks/useSidebarContext";
-import { NAVIGATION_LINKS } from "Routes";
 
-export const LINKS = NAVIGATION_LINKS;
+const LINKS = !enableMigration
+  ? [
+      { href: "/bridge", name: "Bridge" },
+      { href: "/pool", name: "Pool" },
+      { href: "/rewards", name: "Rewards" },
+      { href: "/transactions", name: "Transactions" },
+    ]
+  : [];
 
 interface Props {
   transparentHeader?: boolean;

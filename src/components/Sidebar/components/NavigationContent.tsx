@@ -5,20 +5,27 @@ import { useSidebarContext } from "hooks/useSidebarContext";
 import { AccountContent } from "./AccountContent";
 import { SidebarItem } from "./SidebarItem";
 import { TermsOfServiceDisclaimer } from "./TermsOfServiceDisclaimer";
-import { NAVIGATION_LINKS } from "Routes";
 
-type NavigationLInk = {
-  href: string;
-  name: string;
-  isExternalLink?: boolean;
-  rightIcon?: React.ReactNode;
-};
-
-const sidebarNavigationLinks: NavigationLInk[] = [
-  ...NAVIGATION_LINKS,
+const sidebarNavigationLinks = [
   {
-    href: "https://docs.across.to/",
-    name: "Docs",
+    pathName: "/bridge",
+    title: "Bridge",
+  },
+  {
+    pathName: "/pool",
+    title: "Pool",
+  },
+  {
+    pathName: "/rewards",
+    title: "Rewards",
+  },
+  {
+    pathName: "/transactions",
+    title: "Transactions",
+  },
+  {
+    pathName: "https://docs.across.to/",
+    title: "Docs",
     isExternalLink: true,
     rightIcon: <ExternalLinkIcon />,
   },
@@ -68,20 +75,20 @@ export function NavigationContent() {
     <>
       <AccountContent />
       {sidebarNavigationLinks.map((item) =>
-        item?.isExternalLink ? (
+        item.isExternalLink ? (
           <SidebarItem.ExternalLink
-            key={item.name}
+            key={item.title}
             onClick={handleClickNavLink}
-            label={item.name}
-            linkTo={item.href}
+            label={item.title}
+            linkTo={item.pathName}
             rightIcon={item.rightIcon}
           />
         ) : (
           <SidebarItem.InternalLink
-            key={item.name}
+            key={item.title}
             onClick={handleClickNavLink}
-            label={item.name}
-            path={item.href}
+            label={item.title}
+            path={item.pathName}
           />
         )
       )}

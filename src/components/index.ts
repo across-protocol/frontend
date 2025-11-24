@@ -16,4 +16,3 @@ export * from "./Button";
 export * from "./Badge";
 export * from "./ExternalLink";
 export * from "./ErrorBoundary";
-export * from "./TokenImage";

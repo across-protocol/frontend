@@ -59,16 +59,6 @@
       "source": "/about",
       "destination": "https://across.to",
       "permanent": true
-    },
-    {
-      "source": "/bridge",
-      "destination": "/bridge-and-swap",
-      "permanent": false
-    },
-    {
-      "source": "/bridge/:txHash",
-      "destination": "/bridge-and-swap/:txHash",
-      "permanent": false
     }
   ],
   "headers": [

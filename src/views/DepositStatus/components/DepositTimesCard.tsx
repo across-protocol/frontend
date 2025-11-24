@@ -15,6 +15,8 @@ import {
   getBridgeUrlWithQueryParams,
   isDefined,
   formatUSD,
+  getToken,
+  getTokenForChain,
 } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
@@ -22,11 +24,15 @@ import { ampli } from "ampli";
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import TokenFee from "views/Bridge/components/TokenFee";
-import EstimatedTable from "views/Bridge/components/EstimatedTable";
-import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
-import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
-import { useToken } from "hooks/useToken";
+import { BigNumber } from "ethers";
+import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import {
+  calcFeesForEstimatedTable,
+  getTokensForFeesCalc,
+} from "views/Bridge/utils";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import EstimatedTable from "views/Bridge/components/EstimatedTable";
 
 type Props = {
   status: DepositStatus;
@@ -39,7 +45,7 @@ type Props = {
   toChainId: number;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositTimesCard({
@@ -53,37 +59,53 @@ export function DepositTimesCard({
   toChainId,
   inputTokenSymbol,
   outputTokenSymbol,
-  fromBridgeAndSwapPagePayload,
+  fromBridgePagePayload,
 }: Props) {
-  const {
-    estimatedRewards,
-    amountAsBaseCurrency,
-    outputAmountUsd,
-    isSwap,
-    isUniversalSwap,
-    inputToken,
-    bridgeFeeUsd,
-    swapFeeUsd,
-    netFeeUsd,
-  } = useResolveFromBridgeAndSwapPagePayload(
-    fromChainId,
-    toChainId,
-    inputTokenSymbol,
-    outputTokenSymbol ?? "",
-    fromBridgeAndSwapPagePayload
-  );
+  const { estimatedRewards, amountAsBaseCurrency, isSwap, isUniversalSwap } =
+    useResolveFromBridgePagePayload(
+      fromChainId,
+      toChainId,
+      inputTokenSymbol,
+      outputTokenSymbol || inputTokenSymbol,
+      fromBridgePagePayload
+    );
 
-  const netFee = netFeeUsd?.toString();
+  const netFee = estimatedRewards?.netFeeAsBaseCurrency?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
-  const outputTokenForChain = useToken(
-    outputTokenSymbol || inputTokenSymbol,
-    toChainId
-  );
+  const { inputToken, bridgeToken } = getTokensForFeesCalc({
+    inputToken: getToken(inputTokenSymbol),
+    outputToken: getToken(outputTokenSymbol || inputTokenSymbol),
+    isUniversalSwap: isUniversalSwap,
+    universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+    fromChainId: fromChainId,
+    toChainId: toChainId,
+  });
 
-  const { convertBaseCurrencyToToken: convertUsdToOutputToken } =
-    useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+  const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
+    useTokenConversion(inputToken.symbol, "usd");
+  const { convertTokenToBaseCurrency: convertBridgeTokenToUsd } =
+    useTokenConversion(bridgeToken.symbol, "usd");
+  const {
+    convertTokenToBaseCurrency: convertOutputTokenToUsd,
+    convertBaseCurrencyToToken: convertUsdToOutputToken,
+  } = useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
 
+  const { outputAmountUsd } =
+    calcFeesForEstimatedTable({
+      gasFee: fromBridgePagePayload?.quote?.relayerGasFee?.total,
+      capitalFee: fromBridgePagePayload?.quote?.relayerCapitalFee?.total,
+      lpFee: fromBridgePagePayload?.quote?.lpFee?.total,
+      isSwap,
+      isUniversalSwap,
+      swapQuote: fromBridgePagePayload?.swapQuote,
+      universalSwapQuote: fromBridgePagePayload?.universalSwapQuote,
+      parsedAmount:
+        fromBridgePagePayload?.depositArgs?.initialAmount || BigNumber.from(0),
+      convertInputTokenToUsd,
+      convertBridgeTokenToUsd,
+      convertOutputTokenToUsd,
+    }) || {};
   const outputAmount = convertUsdToOutputToken(outputAmountUsd);
 
   const isDepositing = status === "depositing";
@@ -162,17 +184,16 @@ export function DepositTimesCard({
         )}
       </Row>
       {(netFee || amountSentBaseCurrency) && <Divider />}
-
-      {isDefined(fromBridgeAndSwapPagePayload?.swapQuote?.inputAmount) &&
-        inputToken &&
+      {isDefined(outputAmount) &&
+        isDefined(outputTokenSymbol) &&
         isDefined(amountSentBaseCurrency) && (
           <Row>
             <Text color="grey-400">Amount sent</Text>
             <TokenWrapper>
               <TokenFee
-                token={inputToken}
-                amount={fromBridgeAndSwapPagePayload.swapQuote.inputAmount}
-                tokenChainId={fromChainId}
+                token={getTokenForChain(outputTokenSymbol, toChainId)}
+                amount={BigNumber.from(outputAmount)}
+                tokenChainId={toChainId}
                 tokenFirst
                 showTokenLinkOnHover
                 textColor="light-100"
@@ -183,40 +204,18 @@ export function DepositTimesCard({
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputAmount) &&
-        outputTokenForChain &&
-        isDefined(outputAmountUsd) && (
-          <Row>
-            <Text color="grey-400">Amount received</Text>
-            <TokenWrapper>
-              <TokenFee
-                token={outputTokenForChain}
-                amount={outputAmount}
-                tokenChainId={toChainId}
-                tokenFirst
-                showTokenLinkOnHover
-                textColor="light-100"
-              />
-              <Text color="grey-400">(${formatUSD(outputAmountUsd)})</Text>
-            </TokenWrapper>
-          </Row>
-        )}
-      {isDefined(outputTokenSymbol) && outputTokenForChain && (
+      {isDefined(outputTokenSymbol) && (
         <EstimatedTable
           {...estimatedRewards}
-          // Override USD amounts with values from swapQuote.fees (source of truth)
-          bridgeFeeAsBaseCurrency={bridgeFeeUsd}
-          swapFeeAsBaseCurrency={swapFeeUsd}
-          netFeeAsBaseCurrency={netFeeUsd}
           isQuoteLoading={false}
           fromChainId={fromChainId}
           toChainId={toChainId}
           inputToken={inputToken}
-          outputToken={outputTokenForChain}
+          outputToken={getTokenForChain(outputTokenSymbol, toChainId)}
           isSwap={isSwap}
           isUniversalSwap={isUniversalSwap}
-          swapQuote={undefined}
-          universalSwapQuote={undefined}
+          swapQuote={fromBridgePagePayload?.swapQuote}
+          universalSwapQuote={fromBridgePagePayload?.universalSwapQuote}
           omitDivider
           collapsible
           onSetNewSlippage={undefined}

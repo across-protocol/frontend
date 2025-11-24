@@ -25,6 +25,7 @@ export function useEstimatedRewards(
   destinationChainId: number,
   isSwap: boolean,
   inputAmount?: BigNumber,
+  gasFee?: BigNumber,
   bridgeFee?: BigNumber,
   swapFee?: BigNumber
 ) {
@@ -76,11 +77,12 @@ export function useEstimatedRewards(
       availableRewardPercentage === undefined ||
       rewardToken === undefined ||
       bridgeFee === undefined ||
+      gasFee === undefined ||
       inputAmount === undefined
     ) {
       return undefined;
     }
-    const totalFeeInL1 = bridgeFee;
+    const totalFeeInL1 = bridgeFee.add(gasFee);
     const maximalFee = inputAmount
       .mul(parseUnits("0.0025", 18)) // Cap fee at 25 basis points of input amount
       .div(fixedPointAdjustment);
@@ -111,6 +113,7 @@ export function useEstimatedRewards(
     bridgeFee,
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
+    gasFee,
     rewardToken,
     inputAmount,
   ]);
@@ -124,11 +127,13 @@ export function useEstimatedRewards(
         : undefined;
     const formatNumericUsd = (usd: BigNumber) =>
       Number(Number(ethersUtils.formatUnits(usd, 18)).toFixed(2));
+    const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
     const swapFeeInUSD = convertL1ToBaseCurrency(swapFee);
     const inputAmountInUSD = convertL1ToBaseCurrency(inputAmount);
 
     if (
+      !isDefined(gasFeeInUSD) ||
       !isDefined(bridgeFeeInUSD) ||
       !isDefined(inputAmountInUSD) ||
       (isSwap && !isDefined(swapFeeInUSD))
@@ -143,21 +148,21 @@ export function useEstimatedRewards(
     }
 
     const numericInputAmount = formatNumericUsd(inputAmountInUSD);
+    const numericGasFee = formatNumericUsd(gasFeeInUSD);
     const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
-    // Reward is calculated based on bridgeFee only (which includes gasFee)
     const numericReward = availableRewardPercentage
       ? Math.min(
           numericInputAmount * 0.0025, // Cap reward at 25 basis points
-          numericBridgeFee
+          numericBridgeFee + numericGasFee
         ) * Number(formatUnitsWithMaxFractions(availableRewardPercentage, 18))
       : undefined;
     const numericSwapFee = swapFeeInUSD ? formatNumericUsd(swapFeeInUSD) : 0;
 
-    // Net fee = bridgeFee + swapFee - reward
     const netFeeAsBaseCurrency =
-      numericBridgeFee + numericSwapFee - (numericReward ?? 0);
+      numericBridgeFee + numericGasFee + numericSwapFee - (numericReward ?? 0);
 
     return {
+      gasFeeAsBaseCurrency: parseUsd(numericGasFee),
       bridgeFeeAsBaseCurrency: parseUsd(numericBridgeFee),
       referralRewardAsBaseCurrency: parseUsd(numericReward),
       netFeeAsBaseCurrency: parseUsd(netFeeAsBaseCurrency),
@@ -167,6 +172,7 @@ export function useEstimatedRewards(
     availableRewardPercentage,
     bridgeFee,
     convertL1ToBaseCurrency,
+    gasFee,
     swapFee,
     isSwap,
     inputAmount,

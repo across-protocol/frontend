@@ -7,6 +7,8 @@ import {
   getBridgeUrlWithQueryParams,
 } from "utils";
 import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
 import { TwitterShareCard } from "./TwitterShare/TwitterShareCard";
 
 export type DepositStatusLowerCardProps = {
@@ -16,7 +18,7 @@ export type DepositStatusLowerCardProps = {
   externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol: string;
-  fillTxElapsedSeconds?: number;
+  fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositStatusLowerCard(props: DepositStatusLowerCardProps) {
@@ -26,7 +28,15 @@ export function DepositStatusLowerCard(props: DepositStatusLowerCardProps) {
     externalProjectId,
     inputTokenSymbol,
     outputTokenSymbol,
+    fromBridgePagePayload,
   } = props;
+  const { inputToken } = useResolveFromBridgePagePayload(
+    fromChainId,
+    toChainId,
+    inputTokenSymbol,
+    outputTokenSymbol,
+    fromBridgePagePayload
+  );
 
   const history = useHistory();
   const programName = chainIdToRewardsProgramName[toChainId];
@@ -43,7 +53,7 @@ export function DepositStatusLowerCard(props: DepositStatusLowerCardProps) {
             getBridgeUrlWithQueryParams({
               fromChainId,
               toChainId,
-              inputTokenSymbol,
+              inputTokenSymbol: inputToken.symbol,
               outputTokenSymbol,
               externalProjectId,
             })

@@ -5,7 +5,7 @@ import {
   formatUnitsWithMaxFractions,
   rewardProgramTypes,
 } from "utils";
-import { Text, TokenImage } from "components";
+import { Text } from "components";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Link } from "react-router-dom";
@@ -72,7 +72,7 @@ const Wrapper = styled.div<{ primaryColor: string; backgroundUrl: string }>`
   }
 `;
 
-const Logo = styled(TokenImage)`
+const Logo = styled.img`
   height: 24px;
   width: 24px;
 `;

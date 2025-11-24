@@ -6,9 +6,9 @@ import { AmountInputError, SelectedRoute } from "../utils";
 import { formatUnitsWithMaxFractions, getToken } from "utils";
 import { BridgeLimits } from "hooks";
 
-export const validationErrorTextMap: Record<AmountInputError, string> = {
+const validationErrorTextMap: Record<AmountInputError, string> = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
-    "Not enough [INPUT_TOKEN] to process this transfer.",
+    "Insufficient balance to process this transfer.",
   [AmountInputError.PAUSED_DEPOSITS]:
     "[INPUT_TOKEN] deposits are temporarily paused.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
@@ -20,11 +20,6 @@ export const validationErrorTextMap: Record<AmountInputError, string> = {
     "Price impact is too high. Check back later when liquidity is restored.",
   [AmountInputError.SWAP_QUOTE_UNAVAILABLE]:
     "Swap quote temporarily unavailable. Please try again later.",
-  [AmountInputError.NO_INPUT_TOKEN_SELECTED]:
-    "Select an input token to continue",
-  [AmountInputError.NO_OUTPUT_TOKEN_SELECTED]:
-    "Select an output token to continue",
-  [AmountInputError.NO_AMOUNT_ENTERED]: "Enter an amount to continue",
 };
 
 type Props = {

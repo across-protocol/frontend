@@ -382,14 +382,6 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.HYPERCORE]: "HYPE",
 };
 
-export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
-  .filter(([_, chain]) => chain.family !== constants.ChainFamily.SVM)
-  .map(([chainId]) => Number(chainId));
-
-export const SVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
-  .filter(([_, chain]) => chain.family === constants.ChainFamily.SVM)
-  .map(([chainId]) => Number(chainId));
-
 export const STABLE_COIN_SYMBOLS = Array.from(
   new Set([
     ...sdkConstants.STABLE_COIN_SYMBOLS,

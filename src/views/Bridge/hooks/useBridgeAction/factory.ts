@@ -174,7 +174,7 @@ export function createBridgeActionHook(strategy: BridgeActionStrategy) {
           statusPageSearchParams.set("integrator", existingIntegrator);
         }
         history.push(
-          `/bridge-and-swap/${txHash}?${statusPageSearchParams}`,
+          `/bridge/${txHash}?${statusPageSearchParams}`,
           // This state is stored in session storage and therefore persist
           // after a refresh of the deposit status page.
           { fromBridgePagePayload }

@@ -3,8 +3,7 @@ import { Tooltip } from "react-tooltip";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
 
 export const StyledAnchor = styled.a<{ width?: string }>`
-  line-height: 1em;
-  height: 1em;
+  line-height: 1;
   width: ${({ width }) => width};
 `;
 

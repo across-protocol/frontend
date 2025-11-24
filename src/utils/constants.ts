@@ -1,14 +1,10 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-
 import {
   CHAIN_IDs,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
 } from "@across-protocol/constants";
-
-export { CHAIN_IDs } from "@across-protocol/constants";
-
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -314,17 +310,15 @@ export const getToken = (symbol: string): TokenInfo => {
 };
 
 /**
- * Apply chain-specific display modifications to a token
- * Currently handles: USDT -> USDT0 for supported chains
- *
- * @param token Token info to transform
- * @param chainId Chain ID to apply transformations for
- * @returns Transformed token info, or original if no transformations needed
+ * Gets token info with chain-specific display modifications (temporary for USDT0)
+ * This is a temporary function that will be removed once all chains migrate to USDT0
  */
-export function applyChainSpecificTokenDisplay(
-  token: TokenInfo,
+export const getTokenForChain = (
+  symbol: string,
   chainId: number
-): TokenInfo {
+): TokenInfo => {
+  const token = getToken(symbol);
+
   // Handle USDT -> USDT0 display for specific chains
   if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
     return {
@@ -335,7 +329,7 @@ export function applyChainSpecificTokenDisplay(
   }
 
   return token;
-}
+};
 
 export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
   if (!deposit.rewards) {

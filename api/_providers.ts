@@ -210,18 +210,3 @@ export function getProviderHeaders(
 
   return rpcHeaders?.[String(chainId)];
 }
-
-/**
- * Gets the Alchemy RPC URL for a given chain ID from the rpc-providers.json configuration
- * @param chainId The chain ID to get the Alchemy RPC URL for
- * @returns The Alchemy RPC URL or undefined if not available
- */
-export function getAlchemyRpcFromConfigJson(
-  chainId: number
-): string | undefined {
-  const { providers } = rpcProvidersJson;
-  const alchemyUrls = providers.urls?.["alchemy"] as
-    | Record<string, string>
-    | undefined;
-  return alchemyUrls?.[String(chainId)];
-}
