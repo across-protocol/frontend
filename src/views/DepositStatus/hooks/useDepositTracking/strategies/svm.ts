@@ -84,7 +84,7 @@ export class SVMStrategy implements IChainStrategy {
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog.depositId;
+    const depositId = depositInfo.depositLog?.depositId;
     const originChainId = depositInfo.depositLog.originChainId;
 
     if (!depositId) {
@@ -196,11 +196,11 @@ export class SVMStrategy implements IChainStrategy {
       fromBridgePagePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
+    const inputToken = config.getTokenInfoBySymbol(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol
     );
-    const outputToken = config.getTokenInfoBySymbolSafe(
+    const outputToken = config.getTokenInfoBySymbol(
       selectedRoute.toChain,
       selectedRoute.toTokenSymbol
     );
@@ -266,11 +266,11 @@ export class SVMStrategy implements IChainStrategy {
     const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       fillInfo.depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
+    const inputToken = config.getTokenInfoBySymbol(
       selectedRoute.fromChain,
       selectedRoute.fromTokenSymbol
     );
-    const outputToken = config.getTokenInfoBySymbolSafe(
+    const outputToken = config.getTokenInfoBySymbol(
       selectedRoute.toChain,
       selectedRoute.toTokenSymbol
     );

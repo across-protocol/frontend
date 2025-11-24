@@ -8,24 +8,20 @@ import {
 } from "react-router-dom";
 import { Header, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
-import { stringValueInArray, getConfig, chainEndpointToId } from "utils";
+import {
+  enableMigration,
+  stringValueInArray,
+  getConfig,
+  chainEndpointToId,
+} from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { enableMigration } from "utils";
+
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
 import Banners from "components/Banners";
-
-export const NAVIGATION_LINKS = !enableMigration
-  ? [
-      { href: "/bridge-and-swap", name: "Bridge & Swap" },
-      { href: "/pool", name: "Pool" },
-      { href: "/rewards", name: "Rewards" },
-      { href: "/transactions", name: "Transactions" },
-    ]
-  : [];
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -53,9 +49,6 @@ const Transactions = lazyWithRetry(
 );
 const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
-);
-const SwapAndBridge = lazyWithRetry(
-  () => import(/* webpackChunkName: "RewardStaking" */ "./views/SwapAndBridge")
 );
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
 
@@ -144,28 +137,13 @@ const Routes: React.FC = () => {
               }
             }}
           />
-          <Route exact path="/bridge-and-swap" component={SwapAndBridge} />
-          <Route
-            path="/bridge-and-swap/:depositTxHash"
-            component={DepositStatus}
-          />
-          <Redirect exact from="/bridge" to="/bridge-and-swap" />
-          <Route
-            path="/bridge/:depositTxHash"
-            render={({ match, location: routeLocation }) => (
-              <Redirect
-                to={{
-                  pathname: `/bridge-and-swap/${match.params.depositTxHash}`,
-                  search: routeLocation.search,
-                }}
-              />
-            )}
-          />
+          <Route exact path="/bridge" component={Send} />
+          <Route path="/bridge/:depositTxHash" component={DepositStatus} />
           <Redirect
             exact
             path="/"
             to={{
-              pathname: "/bridge-and-swap",
+              pathname: "/bridge",
               search: location.search,
             }}
           />

@@ -4,10 +4,12 @@ import { LayoutV2 } from "components";
 import { Wrapper } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import BridgeForm from "./components/BridgeForm";
+import ChangeAccountModal from "./components/ChangeAccountModal";
 import { useBridge } from "./hooks/useBridge";
+import { getEcosystem } from "utils";
 
 const Bridge = () => {
-  const [_, setDisplayChangeAccount] = useState(false);
+  const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
 
   const {
     selectedRoute,
@@ -31,6 +33,8 @@ const Bridge = () => {
     universalSwapQuote,
     toAccountEVM,
     toAccountSVM,
+    handleChangeToAddressEVM,
+    handleChangeToAddressSVM,
     handleChangeAmountInput,
     handleClickMaxBalance,
     handleSelectInputToken,
@@ -41,8 +45,19 @@ const Bridge = () => {
     isQuoteLoading,
   } = useBridge();
 
+  const destinationChainEcosystem = getEcosystem(selectedRoute.toChain);
+
   return (
     <>
+      <ChangeAccountModal
+        displayModal={displayChangeAccount}
+        onCloseModal={() => setDisplayChangeAccount(false)}
+        currentAccountEVM={toAccountEVM?.address}
+        currentAccountSVM={toAccountSVM?.address}
+        onChangeAccountEVM={handleChangeToAddressEVM}
+        onChangeAccountSVM={handleChangeToAddressSVM}
+        destinationChainEcosystem={destinationChainEcosystem}
+      />
       <LayoutV2 maxWidth={600}>
         <Wrapper>
           <Breadcrumb />

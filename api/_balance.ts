@@ -63,7 +63,7 @@ export async function getBalance(
   );
 }
 
-export async function getSvmBalance(
+async function getSvmBalance(
   chainId: string | number,
   account: string,
   token: string

@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import {
   isDefined,
   COLORS,
@@ -8,6 +9,7 @@ import {
 } from "utils";
 import { useTwitter } from "hooks/useTwitter";
 import { DepositStatusLowerCardProps } from "views/DepositStatus/components/DepositStatusLowerCard";
+import { useDepositTracking } from "views/DepositStatus/hooks/useDepositTracking";
 
 import { SecondaryButton, Text } from "components";
 import { ReactComponent as ShareIcon } from "assets/icons/share.svg";
@@ -20,12 +22,11 @@ import { ampli } from "ampli";
 
 const SHARE_THRESHOLD_SECONDS = 5; // only share if bridge is 5s or faster
 
-type TwitterShareProps = DepositStatusLowerCardProps & {
-  fillTxElapsedSeconds?: number;
-};
+type TwitterShareProps = DepositStatusLowerCardProps;
 
 export function TwitterShareCard(props: TwitterShareProps) {
-  const { fromChainId, toChainId, fillTxElapsedSeconds } = props;
+  const { depositTxHash, fromChainId, toChainId, fromBridgePagePayload } =
+    props;
   const [showModal, setShowModal] = useState(false);
   const openModal = () => void setShowModal(true);
   const closeModal = () => void setShowModal(false);
@@ -33,6 +34,21 @@ export function TwitterShareCard(props: TwitterShareProps) {
   const { addToAmpliQueue } = useAmplitude();
 
   const { twitterParams } = useTwitter();
+
+  const { depositQuery, fillQuery } = useDepositTracking({
+    depositTxHash,
+    fromChainId,
+    toChainId,
+    fromBridgePagePayload,
+  });
+
+  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
+  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
+
+  const { elapsedSeconds: fillTxElapsedSeconds } = useElapsedSeconds(
+    depositTxCompletedTime,
+    fillTxCompletedTime
+  );
 
   const imageUrl = useMemo(() => {
     if (

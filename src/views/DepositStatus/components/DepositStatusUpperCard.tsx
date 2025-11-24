@@ -13,10 +13,10 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
-import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 
 type Props = {
   depositTxHash: string;
@@ -25,7 +25,7 @@ type Props = {
   externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositStatusUpperCard({
@@ -35,16 +35,16 @@ export function DepositStatusUpperCard({
   externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
-  fromBridgeAndSwapPagePayload,
+  fromBridgePagePayload,
 }: Props) {
   const { depositQuery, fillQuery, status } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgeAndSwapPagePayload,
+    fromBridgePagePayload,
   });
 
-  const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
+  const depositTxSentTime = fromBridgePagePayload?.timeSigned;
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
   const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
 
@@ -58,11 +58,6 @@ export function DepositStatusUpperCard({
   );
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
-
-  const depositRevertMessage =
-    depositQuery?.data?.status === "deposit-reverted"
-      ? depositQuery.data.formattedError
-      : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -114,7 +109,7 @@ export function DepositStatusUpperCard({
           )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
-              {depositRevertMessage ?? "Deposit unsuccessful"}
+              Deposit unsuccessful
             </Text>
             <a
               href={`${
@@ -163,7 +158,7 @@ export function DepositStatusUpperCard({
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
+          fromBridgePagePayload={fromBridgePagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
       {isPMFormAvailable && (

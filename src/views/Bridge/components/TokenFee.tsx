@@ -4,9 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
-import { LoadingSkeleton, TokenImage } from "components";
+import { LoadingSkeleton } from "components";
 import {
-  COLORS,
   formatUnitsWithMaxFractions,
   getExplorerLinkForToken,
   TokenInfo,
@@ -66,7 +65,7 @@ const TokenFee = ({
                 exit={{ y: "+100%" }}
                 transition={{ duration: 0.2 }}
               >
-                <ExternalLinkIcon color={COLORS[textColor]} />
+                <ExternalLinkIcon />
               </motion.div>
             ) : (
               <motion.div
@@ -74,13 +73,13 @@ const TokenFee = ({
                 exit={{ y: "-100%" }}
                 transition={{ duration: 0.2 }}
               >
-                <TokenSymbol src={token.logoURI} alt={token.symbol} />
+                <TokenSymbol src={token.logoURI} />
               </motion.div>
             )}
           </AnimatePresence>
         </TokenLinkWrapper>
       ) : (
-        <TokenSymbol src={token.logoURI} alt={token.symbol} />
+        <TokenSymbol src={token.logoURI} />
       )}
     </Wrapper>
   );
@@ -97,7 +96,7 @@ const Wrapper = styled.div<{ invertDirection?: boolean }>`
   gap: 8px;
 `;
 
-const TokenSymbol = styled(TokenImage)`
+const TokenSymbol = styled.img`
   width: 16px;
   height: 16px;
 `;

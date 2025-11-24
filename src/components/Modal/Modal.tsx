@@ -1,19 +1,14 @@
 import usePageScrollLock from "hooks/usePageScrollLock";
-import { useTabIndexManager } from "hooks/useTabIndexManager";
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  CloseButton,
   ElementRowDivider,
   ModalContentWrapper,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
+  StyledExitIcon,
   Title,
   TitleAndExitWrapper,
   Wrapper,
 } from "./Modal.styles";
-import { ReactComponent as ExitIcon } from "assets/icons/cross.svg";
 
 type ModalDirectionOrientation = "middle" | "top" | "bottom";
 export type ModalDirection = {
@@ -39,12 +34,9 @@ export type ModalProps = {
   topYOffset?: number;
   "data-cy"?: string;
   bottomYOffset?: number;
-  noScroll?: boolean;
+
   children?: React.ReactNode;
-  footer?: React.ReactNode;
   titleBorder?: boolean;
-  className?: string;
-  closeButtonTabIndex?: number;
 };
 
 const Modal = ({
@@ -56,16 +48,12 @@ const Modal = ({
   exitModalHandler: externalModalExitHandler,
   disableExitOverride,
   children,
-  footer,
   verticalLocation: _verticalLocation,
   topYOffset,
   bottomYOffset,
   padding,
-  className,
   "data-cy": dataCy,
   titleBorder = false,
-  noScroll = false,
-  closeButtonTabIndex = 999999, // should default to being last
 }: ModalProps) => {
   const verticalLocation: ModalDirection | undefined =
     typeof _verticalLocation === "string"
@@ -88,9 +76,6 @@ const Modal = ({
   const exitAnimationTimeoutId = useRef<number>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
   const { lockScroll, unlockScroll } = usePageScrollLock();
-
-  // Manage tab indices when modal is open - only elements inside modal will be focusable
-  useTabIndexManager(!!isOpen, modalContentRef);
 
   const offModalClickHandler = (event: React.MouseEvent<HTMLElement>) => {
     if (
@@ -160,29 +145,18 @@ const Modal = ({
             topYOffset={topYOffset}
             bottomYOffset={bottomYOffset}
             padding={padding ?? "normal"}
-            className={className}
           >
-            <ModalHeader>
-              <TitleAndExitWrapper>
-                {typeof title === "string" ? (
-                  <Title>{title}</Title>
-                ) : (
-                  <div>{title}</div>
-                )}
+            <TitleAndExitWrapper>
+              {typeof title === "string" ? (
+                <Title>{title}</Title>
+              ) : (
+                <div>{title}</div>
+              )}
 
-                <CloseButton
-                  tabIndex={closeButtonTabIndex}
-                  onClick={() => externalModalExitHandler()}
-                >
-                  <ExitIcon />
-                </CloseButton>
-              </TitleAndExitWrapper>
-              {titleBorder && <ElementRowDivider />}
-            </ModalHeader>
-
-            <ModalContent noScroll={noScroll}>{children}</ModalContent>
-
-            {footer && <ModalFooter>{footer}</ModalFooter>}
+              <StyledExitIcon onClick={() => externalModalExitHandler()} />
+            </TitleAndExitWrapper>
+            {titleBorder && <ElementRowDivider />}
+            {children}
           </ModalContentWrapper>
         </Wrapper>,
         container.current

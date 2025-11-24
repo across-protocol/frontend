@@ -53,9 +53,6 @@ export enum AmountInputError {
   AMOUNT_TOO_LOW = "amountTooLow",
   PRICE_IMPACT_TOO_HIGH = "priceImpactTooHigh",
   SWAP_QUOTE_UNAVAILABLE = "swapQuoteUnavailable",
-  NO_INPUT_TOKEN_SELECTED = "noInputTokenSelected",
-  NO_OUTPUT_TOKEN_SELECTED = "noOutputTokenSelected",
-  NO_AMOUNT_ENTERED = "noAmountEntered",
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();

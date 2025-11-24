@@ -1,8 +1,12 @@
 import styled from "@emotion/styled";
 import { Text } from "components";
 import { BigNumber } from "ethers";
-import { formatUnitsWithMaxFractions, getChainInfo, QUERIESV2 } from "utils";
-import { useToken } from "hooks/useToken";
+import {
+  formatUnitsWithMaxFractions,
+  getChainInfo,
+  getToken,
+  QUERIESV2,
+} from "utils";
 import SocialShareButton from "./SocialShareButton";
 
 type SharedSocialsCardParamsType = {
@@ -18,13 +22,11 @@ const SharedSocialsCard = ({
   toChainId,
   amountSent,
 }: SharedSocialsCardParamsType) => {
-  const token = useToken(inputTokenSymbol);
   const fromChain = getChainInfo(fromChainId).name;
   const toChain = getChainInfo(toChainId).name;
-  const amountSentText =
-    amountSent && token
-      ? `~${formatUnitsWithMaxFractions(amountSent, token.decimals)}`
-      : undefined;
+  const amountSentText = amountSent
+    ? `~${formatUnitsWithMaxFractions(amountSent, getToken(inputTokenSymbol).decimals)}`
+    : undefined;
 
   const shareText = [
     `I just bridged ${amountSentText}${inputTokenSymbol} from ${fromChain} to ${toChain} using @AcrossProtocol.`,

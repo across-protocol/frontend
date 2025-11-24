@@ -73,11 +73,7 @@ export function useConnectionSVM() {
   );
 
   return {
-    chainId: !connected
-      ? 0
-      : hubPoolChainId === 1
-        ? solana.chainId
-        : solanaDevnet.chainId,
+    chainId: hubPoolChainId === 1 ? solana.chainId : solanaDevnet.chainId,
     account: publicKey,
     select,
     state,
