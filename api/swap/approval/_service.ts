@@ -66,6 +66,7 @@ export async function handleApprovalSwap(
     skipChecks,
     isDestinationSvm,
     isOriginSvm,
+    routingPreference,
   } = await handleBaseSwapQueryParams(request.query);
 
   const { actions } =
@@ -90,6 +91,7 @@ export async function handleApprovalSwap(
     amountType,
     recipient,
     depositor,
+    routingPreference,
   });
 
   const crossSwapQuotes = await getCrossSwapQuotes(
