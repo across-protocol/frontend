@@ -8,16 +8,19 @@ import React from "react";
 type BreadcrumbV2Type = {
   onlyRootAncestor?: boolean;
   customCurrentRoute?: string | React.ReactElement;
+  customAncestorRoutes?: { path: string; name: string }[];
 };
 
 const BreadcrumbV2 = ({
   onlyRootAncestor,
   customCurrentRoute,
+  customAncestorRoutes,
 }: BreadcrumbV2Type) => {
   const { ancestorRoutes, currentRoute } = useBreadcrumb();
 
-  const definedAncestors =
-    onlyRootAncestor && ancestorRoutes.length > 0
+  const definedAncestors = customAncestorRoutes
+    ? customAncestorRoutes
+    : onlyRootAncestor && ancestorRoutes.length > 0
       ? [ancestorRoutes[0]]
       : ancestorRoutes;
 

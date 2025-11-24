@@ -1,5 +1,5 @@
 import { EVMResult } from "@ethereumjs/evm";
-import { bytesToString } from "viem";
+import { bytesToHex, bytesToString } from "viem";
 
 export function handleTevmError(result: EVMResult, next: any) {
   if (result.execResult.exceptionError) {
@@ -10,11 +10,10 @@ export function handleTevmError(result: EVMResult, next: any) {
         console.error("Transaction ran out of gas");
         break;
       case "revert":
-        console.error(
-          "Transaction reverted:",
-          bytesToString(result.execResult.returnValue),
-          result.execResult.returnValue.toString()
-        );
+        console.error("Transaction reverted:", {
+          stringDecoded: bytesToString(result.execResult.returnValue),
+          hexDecoded: bytesToHex(result.execResult.returnValue),
+        });
         break;
       case "invalid opcode":
         console.error("Invalid opcode encountered");
