@@ -23,7 +23,6 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.SOLANA,
   chainConfigs.HYPEREVM,
   chainConfigs.PLASMA,
-  chainConfigs.MONAD,
 ];
 
 export const enabledIndirectMainnetChainConfigs = [chainConfigs.HYPERCORE];
