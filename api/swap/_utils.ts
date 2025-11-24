@@ -30,6 +30,7 @@ import {
   paramToArray,
   ConvertDecimals,
   isOutputTokenBridgeable,
+  addMarkupToAmount,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
@@ -54,6 +55,8 @@ import {
 } from "../_multicall-handler";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
+import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
+import { getNativeTokenInfo } from "../_token-info";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -582,6 +585,7 @@ export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
+  outputTokenAddress: string;
   originChainId: number;
   destinationChainId: number;
   inputAmount: BigNumber;
@@ -627,6 +631,16 @@ export async function buildBaseSwapResponseJson(params: {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
+  const inputToken =
+    params.inputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.originChainId)
+      : (params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken);
+  const outputToken =
+    params.outputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.destinationChainId)
+      : (params.indirectDestinationRoute?.outputToken ??
+        params.destinationSwapQuote?.tokenOut ??
+        params.bridgeQuote.outputToken);
 
   const {
     inputAmount,
@@ -694,19 +708,9 @@ export async function buildBaseSwapResponseJson(params: {
           }
         : undefined,
     },
-    inputToken:
-      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
-    outputToken:
-      params.indirectDestinationRoute?.outputToken ??
-      params.destinationSwapQuote?.tokenOut ??
-      params.bridgeQuote.outputToken,
-    refundToken:
-      refundToken.symbol === "ETH"
-        ? {
-            ...refundToken,
-            symbol: "WETH",
-          }
-        : refundToken,
+    inputToken,
+    outputToken,
+    refundToken,
     fees: await calculateSwapFees({
       inputAmount,
       originSwapQuote: params.originSwapQuote,
@@ -742,6 +746,13 @@ export async function buildBaseSwapResponseJson(params: {
     expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
+    quoteExpiryTimestamp:
+      params.bridgeQuote.provider === "across"
+        ? getQuoteExpiryTimestamp(
+            params.bridgeQuote.suggestedFees.timestamp,
+            params.destinationSwapQuote?.tokenOut.chainId
+          )
+        : 0, // Implies no quote expiry
   });
 }
 
@@ -752,6 +763,7 @@ function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
   let expectedOutputAmount = BigNumber.from(0);
 
   const appFeeAmount = params.appFee?.feeAmount ?? 0;
+  const originSlippage = (params.originSwapQuote?.slippageTolerance ?? 0) / 100;
 
   if (params.amountType === AMOUNT_TYPE.EXACT_INPUT) {
     inputAmount = params.amount;
@@ -829,7 +841,9 @@ function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
   const expectedOutputAmountSansAppFees =
     params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
       ? expectedOutputAmount
-      : expectedOutputAmount.sub(appFeeAmount);
+      : addMarkupToAmount(expectedOutputAmount, originSlippage).sub(
+          appFeeAmount
+        );
 
   return {
     inputAmount,

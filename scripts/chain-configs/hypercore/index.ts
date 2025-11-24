@@ -16,10 +16,13 @@ export default {
   blockTimeSeconds: 1,
   tokens: [],
   inputTokens: [],
-  outputTokens: ["USDT-SPOT"],
+  outputTokens: [],
   enableCCTP: false,
   omitViemConfig: true,
   nativeToken: "HYPE",
   // HyperCore can only be reached via HyperEVM as an intermediary chain.
-  intermediaryChains: [CHAIN_IDs.HYPEREVM],
+  // NOTE: This route must remain disabled until the new HyperEVM handler is deployed.
+  intermediaryChains: [
+    // CHAIN_IDs.HYPEREVM,
+  ],
 } as ChainConfig;
