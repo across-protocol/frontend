@@ -1,10 +1,8 @@
 import { BigNumber, ethers } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 
-import { e2eConfig, axiosInstance } from "../utils/config";
+import { e2eConfig, axiosInstance, JEST_TIMEOUT_MS } from "../utils/config";
 import { ENABLED_ROUTES } from "../../api/_utils";
-
-const JEST_TIMEOUT_MS = 180_000;
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
@@ -221,12 +219,66 @@ describe("GET /swap/approval", () => {
     });
   });
 
+  describe("Native Tokens", () => {
+    test(
+      "should return correct native token infos for ETH",
+      async () => {
+        const response = await axiosInstance.get(SWAP_API_URL, {
+          params: {
+            amount: ethers.utils.parseEther("0.1").toString(),
+            inputToken: ethers.constants.AddressZero,
+            outputToken: ethers.constants.AddressZero,
+            originChainId: CHAIN_IDs.OPTIMISM,
+            destinationChainId: CHAIN_IDs.ARBITRUM,
+            depositor: e2eConfig.addresses.depositor,
+          },
+        });
+        expect(response.status).toBe(200);
+        expect(response.data.inputToken.symbol).toBe("ETH");
+        expect(response.data.inputToken.address).toBe(
+          ethers.constants.AddressZero
+        );
+        expect(response.data.outputToken.symbol).toBe("ETH");
+        expect(response.data.outputToken.address).toBe(
+          ethers.constants.AddressZero
+        );
+      },
+      JEST_TIMEOUT_MS
+    );
+
+    test(
+      "should return correct native token infos for non-ETH",
+      async () => {
+        const response = await axiosInstance.get(SWAP_API_URL, {
+          params: {
+            amount: ethers.utils.parseEther("0.1").toString(),
+            inputToken: ethers.constants.AddressZero,
+            outputToken: ethers.constants.AddressZero,
+            originChainId: CHAIN_IDs.BSC,
+            destinationChainId: CHAIN_IDs.OPTIMISM,
+            depositor: e2eConfig.addresses.depositor,
+          },
+        });
+        expect(response.status).toBe(200);
+        expect(response.data.inputToken.symbol).toBe("BNB");
+        expect(response.data.inputToken.address).toBe(
+          ethers.constants.AddressZero
+        );
+        expect(response.data.outputToken.symbol).toBe("ETH");
+        expect(response.data.outputToken.address).toBe(
+          ethers.constants.AddressZero
+        );
+      },
+      JEST_TIMEOUT_MS
+    );
+  });
+
   describe("Wrapped Tokens", () => {
     jest.setTimeout(JEST_TIMEOUT_MS);
     const tokensToTest = [
       "WETH",
       "WBNB",
-      "WMATIC",
+      "WPOL",
       "WHYPE",
       "TATARA-WBTC",
       "WGHO",
