@@ -16,10 +16,15 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.87", "@across-protocol/constants@^3.1.88":
-  version "3.1.88"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.88.tgz#1ba756921a06bd5bd2d3750a934b1ceb624a6b66"
-  integrity sha512-pwvbDpaMm25VCsjc9G3gsIyWxY/mak+AGg0NHQszhS1nbKFFZxgJe6Qs5v9IIND7mlxTAXFmXNLOsjwC9U5Kkg==
+"@across-protocol/constants@^3.1.69", "@across-protocol/constants@^3.1.77", "@across-protocol/constants@^3.1.83", "@across-protocol/constants@^3.1.86":
+  version "3.1.86"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.86.tgz#82b7ae792f4b46a752679a5b0fcb1c0b4eb8049e"
+  integrity sha512-2AwW4CXQ+4GUJRj9i/hx3afB3prurZN/Gzye9eQUQYNyFD3xJ30u+CLstwJxfTm4KZX9qKxg4WjvppA6+0Cg9w==
+
+"@across-protocol/constants@^3.1.88":
+  version "3.1.89"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.89.tgz#c35b9052cc456474e13a8c39ff071d85177596eb"
+  integrity sha512-KNVEnvX9Ygs9G5GSZB9NvN/HGquHfHJipmKS7kOY35UqA2yrZlzgKFKnL6//BdXlukE+eru6t+v/7lhPtYUi0A==
 
 "@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
@@ -61,22 +66,20 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/contracts@^4.1.13":
-  version "4.1.13"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.13.tgz#e07096c6f9226b6719648afa784d9193e8541c3f"
-  integrity sha512-TNcAY3gx8Mdh6zhKKh+uaQ9vOTz9BH2GqaQAXRDaPwzuu0BVGu79Zg1H3ByLaPEe5YNvE8hjtRXKNRvg21U73Q==
+"@across-protocol/contracts@^4.1.12":
+  version "4.1.12"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.12.tgz#dbf0d4f105884f2cd5a25280f0aac635b8505a5c"
+  integrity sha512-+d1xTLBxGNHDMuZDMaZPunDb46SYzAsIfqrwK6252cP0+9dG7XFX+6hBXpeqyytp7ESe+W8UgpGQdSCxXAdhkw==
   dependencies:
-    "@across-protocol/constants" "^3.1.87"
+    "@across-protocol/constants" "^3.1.77"
     "@coral-xyz/anchor" "^0.31.1"
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.40"
     "@ethersproject/abstract-provider" "5.7.0"
     "@ethersproject/abstract-signer" "5.7.0"
     "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "5.5.0"
-    "@openzeppelin/contracts-upgradeable" "5.5.0"
-    "@openzeppelin/contracts-upgradeable-v4" "npm:@openzeppelin/contracts-upgradeable@4.9.6"
-    "@openzeppelin/contracts-v4" "npm:@openzeppelin/contracts@4.9.6"
+    "@openzeppelin/contracts" "4.9.6"
+    "@openzeppelin/contracts-upgradeable" "4.9.6"
     "@openzeppelin/foundry-upgrades" "^0.4.0"
     "@safe-global/protocol-kit" "^6.1.1"
     "@scroll-tech/contracts" "^0.1.0"
@@ -89,6 +92,7 @@
     "@types/yargs" "^17.0.33"
     "@uma/common" "^2.37.3"
     "@uma/contracts-node" "^0.4.17"
+    "@uma/core" "^2.61.0"
     axios "^1.7.4"
     bs58 "^6.0.0"
     prettier-plugin-rust "^0.1.9"
@@ -129,14 +133,14 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^4.3.96":
-  version "4.3.96"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.96.tgz#0a95d59b1799c71c0d4f5cfdfdd0146078f20768"
-  integrity sha512-4tszaCy6RaL4aH0fliYOVUdefkkW8v3wxaMcCWT1xpCjUg8qDyJKk+3vD7kXaVQhKPe/PdmIOamyTRQwaXBvVw==
+"@across-protocol/sdk@^4.3.88":
+  version "4.3.88"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.88.tgz#0a19b9d5bb76fe79e54b9911bd6759ad305f40ff"
+  integrity sha512-WXyG7Zkd41w6K1CfbUVJuAogqDYiXd6en5sEcGkqhhRQ77DgtO7QISIgJIJVU2IZ8YXFTFYbQYMzApKOAv4VxQ==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants" "^3.1.88"
-    "@across-protocol/contracts" "^4.1.14"
+    "@across-protocol/constants" "^3.1.83"
+    "@across-protocol/contracts" "^4.1.12"
     "@coral-xyz/anchor" "^0.30.1"
     "@eth-optimism/sdk" "^3.3.1"
     "@ethersproject/bignumber" "^5.7.0"
@@ -10467,6 +10471,11 @@
   dependencies:
     "@typescript-eslint/types" "7.13.1"
     eslint-visitor-keys "^3.4.3"
+
+"@uidotdev/usehooks@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@uidotdev/usehooks/-/usehooks-2.4.1.tgz#4b733eaeae09a7be143c6c9ca158b56cc1ea75bf"
+  integrity sha512-1I+RwWyS+kdv3Mv0Vmc+p0dPYH0DTRAo04HLyXReYBL9AeseDWUJyi4THuksBJcu9F0Pih69Ak150VDnqbVnXg==
 
 "@uma/common@^2.17.0", "@uma/common@^2.37.3":
   version "2.37.3"
@@ -23199,6 +23208,11 @@ react-focus-lock@^2.5.2:
     react-clientside-effect "^1.2.5"
     use-callback-ref "^1.2.5"
     use-sidecar "^1.0.5"
+
+react-hotkeys-hook@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/react-hotkeys-hook/-/react-hotkeys-hook-5.1.0.tgz#794eaa4428363b2312e26b19d49301fb05052e24"
+  integrity sha512-GCNGXjBzV9buOS3REoQFmSmE4WTvBhYQ0YrAeeMZI83bhXg3dRWsLHXDutcVDdEjwJqJCxk5iewWYX5LtFUd7g==
 
 react-inspector@^6.0.0:
   version "6.0.2"
