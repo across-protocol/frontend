@@ -220,6 +220,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD].toLowerCase()]:
+    CHAIN_IDs.MONAD,
   [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
     CHAIN_IDs.PLASMA,
   [TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM].toLowerCase()]:

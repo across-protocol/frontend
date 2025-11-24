@@ -48,7 +48,7 @@ export const ACROSS_EVENT_EMITTER_ADDRESS: Record<number, string> = {
  * @param chainId The chain ID
  * @returns The contract address or undefined if not deployed on that chain
  */
-export function getEventEmitterAddress(chainId: number): string {
+export function getEventEmitterAddress(chainId: number): string | undefined {
   return ACROSS_EVENT_EMITTER_ADDRESS[chainId];
 }
 
