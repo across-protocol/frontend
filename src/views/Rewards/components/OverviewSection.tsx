@@ -12,7 +12,7 @@ import {
 } from "utils";
 import GenericOverviewCard from "./GenericOverviewCard";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
-import { Text } from "components";
+import { Text, TokenImage } from "components";
 import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
 import ChainLogoOverlap from "./ChainLogoOverlap";
@@ -213,7 +213,7 @@ const LogoContainer = styled.div<{ primaryColor: string; smallLogo?: boolean }>`
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
 `;
 
-const Logo = styled.img<{ smallLogo: boolean }>`
+const Logo = styled(TokenImage)<{ smallLogo: boolean }>`
   height: ${({ smallLogo }) => (smallLogo ? 16 : 24)}px;
   width: ${({ smallLogo }) => (smallLogo ? 16 : 24)}px;
 `;
