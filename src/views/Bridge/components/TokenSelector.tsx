@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useMemo } from "react";
 
 import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
-import { Selector } from "components";
+import { Selector, TokenImage } from "components";
 import { Text } from "components/Text";
 
 import { TokenInfo, getTokenForChain, tokenList } from "utils";
@@ -125,7 +125,7 @@ export function TokenSelector({
         },
         element: (
           <CoinIconTextWrapper>
-            <CoinIcon src={t.logoURI} />
+            <CoinIcon src={t.logoURI} alt={t.symbol} />
             <ElementTextWrapper>
               <Text size="md" color="white-100">
                 {t.name}
@@ -160,7 +160,7 @@ export function TokenSelector({
       }))}
       displayElement={
         <CoinIconTextWrapper>
-          <CoinIcon src={tokenToDisplay.logoURI} />
+          <CoinIcon src={tokenToDisplay.logoURI} alt={tokenToDisplay.symbol} />
           <Text size="lg" color="white-100">
             {tokenToDisplay.displaySymbol ||
               tokenToDisplay.symbol.toUpperCase()}
@@ -192,7 +192,7 @@ const CoinIconTextWrapper = styled.div`
   gap: 12px;
 `;
 
-const CoinIcon = styled.img`
+const CoinIcon = styled(TokenImage)`
   width: 24px;
   height: 24px;
 `;
