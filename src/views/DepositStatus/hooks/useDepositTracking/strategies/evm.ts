@@ -20,6 +20,7 @@ import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
 } from "utils/swapMetadata";
+import { getSpokepoolRevertReason } from "utils";
 
 /**
  * Strategy for handling EVM chain operations
@@ -36,6 +37,22 @@ export class EVMStrategy implements IChainStrategy {
     try {
       const deposit = await getDepositByTxHash(txHash, this.chainId);
 
+      if (deposit.depositTxReceipt.status === 0) {
+        const revertReason = await getSpokepoolRevertReason(
+          deposit.depositTxReceipt,
+          this.chainId
+        );
+
+        return {
+          depositTxHash: deposit.depositTxReceipt.transactionHash,
+          depositTimestamp: deposit.depositTimestamp,
+          status: "deposit-reverted",
+          depositLog: undefined,
+          error: revertReason?.error,
+          formattedError: revertReason?.formattedError,
+        };
+      }
+
       // Create a normalized response
       if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
         return {
@@ -48,10 +65,7 @@ export class EVMStrategy implements IChainStrategy {
       return {
         depositTxHash: deposit.depositTxReceipt.transactionHash,
         depositTimestamp: deposit.depositTimestamp,
-        status:
-          deposit.depositTxReceipt.status === 0
-            ? "deposit-reverted"
-            : "deposited",
+        status: "deposited",
         depositLog: deposit.parsedDepositLog,
       };
     } catch (error) {
@@ -67,7 +81,7 @@ export class EVMStrategy implements IChainStrategy {
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog?.depositId;
+    const depositId = depositInfo.depositLog.depositId;
     const originChainId = depositInfo.depositLog.originChainId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");

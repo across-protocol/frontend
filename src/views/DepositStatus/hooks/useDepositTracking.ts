@@ -85,6 +85,7 @@ export function useDepositTracking({
   useEffect(() => {
     const depositInfo = depositQuery.data;
 
+    // Wait for a successful deposit (or a revert)
     if (!depositInfo || depositInfo.status === "depositing") {
       return;
     }
@@ -104,11 +105,11 @@ export function useDepositTracking({
     // }
 
     // Check if the deposit is from the current user
-    const isFromCurrentUser =
-      depositInfo.depositLog.depositor.toNative() === account;
-    if (!isFromCurrentUser) {
-      return;
-    }
+    // const isFromCurrentUser =
+    //   depositInfo.depositLog.depositor.toNative() === account;
+    // if (!isFromCurrentUser) {
+    //   return;
+    // }
 
     // TODO
     //  Track deposit in Amplitude

@@ -59,6 +59,11 @@ export function DepositStatusUpperCard({
 
   const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
 
+  const depositRevertMessage =
+    depositQuery?.data?.status === "deposit-reverted"
+      ? depositQuery.data.formattedError
+      : undefined;
+
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
   if (depositQuery.error instanceof NoFundsDepositedLogError) {
@@ -109,7 +114,7 @@ export function DepositStatusUpperCard({
           )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
-              Deposit unsuccessful
+              {depositRevertMessage ?? "Deposit unsuccessful"}
             </Text>
             <a
               href={`${
