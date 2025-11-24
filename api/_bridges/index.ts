@@ -3,6 +3,7 @@ import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
+  BridgeStrategyData,
   BridgeStrategyDataParams,
   GetBridgeStrategyParams,
 } from "./types";
@@ -134,16 +135,16 @@ async function routeMintAndBurnStrategy({
       return getOftBridgeStrategy();
     }
     if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy();
+      return getCctpBridgeStrategy("fast");
     } else {
       return getAcrossBridgeStrategy();
     }
   }
-  if (!bridgeStrategyData.isUsdcToUsdc) {
+  if (!bridgeStrategyData.isUsdcToUsdc && !bridgeStrategyData.isUsdtToUsdt) {
     return getAcrossBridgeStrategy();
   }
   if (bridgeStrategyData.isUtilizationHigh) {
-    return getCctpBridgeStrategy();
+    return getBurnAndMintStrategy(bridgeStrategyData);
   }
   if (bridgeStrategyData.isLineaSource) {
     return getAcrossBridgeStrategy();
@@ -153,18 +154,31 @@ async function routeMintAndBurnStrategy({
       return getAcrossBridgeStrategy();
     }
     if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
+      return getBurnAndMintStrategy(bridgeStrategyData);
     } else {
-      return getCctpBridgeStrategy();
+      return getAcrossBridgeStrategy();
     }
   }
   if (bridgeStrategyData.canFillInstantly) {
     return getAcrossBridgeStrategy();
   } else {
     if (bridgeStrategyData.isLargeDeposit) {
-      return getAcrossBridgeStrategy();
+      return getBurnAndMintStrategy(bridgeStrategyData);
     } else {
-      return getCctpBridgeStrategy();
+      return getAcrossBridgeStrategy();
     }
   }
+}
+
+function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
+  if (!bridgeStrategyData) {
+    return getAcrossBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUsdcToUsdc) {
+    return getCctpBridgeStrategy();
+  }
+  if (bridgeStrategyData.isUsdtToUsdt) {
+    return getOftBridgeStrategy();
+  }
+  return getAcrossBridgeStrategy();
 }
