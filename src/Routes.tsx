@@ -172,7 +172,12 @@ const Routes: React.FC = () => {
           {Object.values(chainEndpointToId).flatMap(
             ({ chainId, associatedProjectIds, vanity }) => [
               vanity.map((v) => (
-                <Route key={v} exact path={`/${v}`} render={() => <Send />} />
+                <Route
+                  key={v}
+                  exact
+                  path={`/${v}`}
+                  render={() => <SwapAndBridge />}
+                />
               )),
               associatedProjectIds.map((projectId) => (
                 <Route
