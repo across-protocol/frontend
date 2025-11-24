@@ -33,6 +33,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
   CHAIN_IDs.HYPERCORE,
+  CHAIN_IDs.MONAD,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

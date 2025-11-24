@@ -1,9 +1,14 @@
 import { getProvider } from "utils/providers";
 import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
 import { getConfig } from "utils/config";
-import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
+import {
+  getBlockForTimestamp,
+  getMessageHash,
+  toAddressType,
+  paginatedEventQuery,
+} from "utils/sdk";
 import { NoFilledRelayLogError } from "utils/deposits";
-import { indexerApiBaseUrl } from "utils/constants";
+import { indexerApiBaseUrl, chainMaxBlockLookback } from "utils/constants";
 import axios from "axios";
 import {
   IChainStrategy,
@@ -16,6 +21,7 @@ import {
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { ethers } from "ethers";
+import { FilledRelayEvent } from "utils/typechain";
 
 /**
  * Strategy for handling EVM chain operations
@@ -160,45 +166,32 @@ export class EVMStrategy implements IChainStrategy {
     // If API approach didn't work, find the fill on-chain
     try {
       const provider = getProvider(this.chainId);
-      const blockForTimestamp = await getBlockForTimestamp(
-        provider,
-        depositInfo.depositTimestamp
-      );
+      const [blockForTimestamp, latestBlock] = await Promise.all([
+        getBlockForTimestamp(provider, depositInfo.depositTimestamp),
+        provider.getBlockNumber(),
+      ]);
+      const maxLookBack = chainMaxBlockLookback[this.chainId];
+      const destinationEventSearchConfig = {
+        from: blockForTimestamp,
+        to: latestBlock,
+        maxLookBack,
+      };
 
       const config = getConfig();
       const destinationSpokePool = config.getSpokePool(this.chainId);
-      const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all(
-        [
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledV3Relay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              originChainId,
-              depositId.toNumber()
-            ),
-            blockForTimestamp
-          ),
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledRelay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              originChainId,
-              depositId.toNumber()
-            ),
-            blockForTimestamp
-          ),
-        ]
-      );
-      const filledRelayEvents = [
-        ...legacyFilledRelayEvents,
-        ...newFilledRelayEvents,
-      ];
+      const filledRelayEvents = (await paginatedEventQuery(
+        destinationSpokePool,
+        destinationSpokePool.filters.FilledRelay(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          originChainId,
+          depositId.toNumber()
+        ),
+        destinationEventSearchConfig
+      )) as FilledRelayEvent[];
       // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
       // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
@@ -207,15 +200,10 @@ export class EVMStrategy implements IChainStrategy {
       if (!filledRelayEvent) {
         throw new NoFilledRelayLogError(Number(depositId), this.chainId);
       }
-      const messageHash =
-        "messageHash" in filledRelayEvent.args
-          ? filledRelayEvent.args.messageHash
-          : getMessageHash(filledRelayEvent.args.message);
+      const messageHash = filledRelayEvent.args.messageHash;
 
       const updatedMessageHash =
-        "updatedMessageHash" in filledRelayEvent.args.relayExecutionInfo
-          ? filledRelayEvent.args.relayExecutionInfo.updatedMessageHash
-          : messageHash;
+        filledRelayEvent.args.relayExecutionInfo.updatedMessageHash;
 
       const fillTxBlock = await filledRelayEvent.getBlock();
 
