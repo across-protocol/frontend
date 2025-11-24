@@ -369,7 +369,7 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
-export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2 * 60 * 60; // 2 hours
 
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
