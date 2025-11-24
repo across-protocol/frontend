@@ -1,9 +1,15 @@
 import { BigNumber, constants } from "ethers";
 import { MAINNET_CHAIN_IDs } from "@across-protocol/constants";
 import * as sdk from "@across-protocol/sdk";
-import { getLogger } from "../_utils";
+import axios from "axios";
+import {
+  getLogger,
+  resolveVercelEndpoint,
+  buildSearchParams,
+  getVercelHeaders,
+} from "../_utils";
 import { isSvmAddress } from "../_address";
-import { fetchSwapTokensData, SwapToken } from "../swap/tokens/_service";
+import { SwapToken } from "../swap/tokens/_service";
 import { CHAIN_IDs, EVM_CHAIN_IDs } from "../_constants";
 import { getBatchBalance } from "../_balance";
 
@@ -13,11 +19,28 @@ async function getSwapTokens(
   filteredChainIds?: number[]
 ): Promise<SwapToken[]> {
   try {
-    return await fetchSwapTokensData(filteredChainIds);
+    const baseUrl = resolveVercelEndpoint();
+    const params: { chainId?: number | number[] } = {};
+
+    if (filteredChainIds && filteredChainIds.length > 0) {
+      params.chainId =
+        filteredChainIds.length === 1 ? filteredChainIds[0] : filteredChainIds;
+    }
+
+    const queryString = buildSearchParams(params);
+    const url = queryString
+      ? `${baseUrl}/api/swap/tokens?${queryString}`
+      : `${baseUrl}/api/swap/tokens`;
+
+    const response = await axios.get<SwapToken[]>(url, {
+      headers: getVercelHeaders(),
+    });
+
+    return response.data;
   } catch (error) {
     logger.warn({
       at: "getSwapTokens",
-      message: "Failed to fetch swap tokens",
+      message: "Failed to fetch swap tokens from endpoint",
       error: error instanceof Error ? error.message : String(error),
     });
     return [];
