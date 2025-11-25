@@ -269,13 +269,11 @@ export type CrossSwapQuotesRetrievalB2AResult = {
     slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
-  originRouter: SwapRouter;
   destinationRouter: SwapRouter;
   depositEntryPoint: DepositEntryPoint;
   bridgeableOutputToken: Token;
   destinationSwapChainId: number;
   destinationStrategy: QuoteFetchStrategy;
-  originStrategy: QuoteFetchStrategy;
 };
 
 export type CrossSwapQuotesRetrievalA2BResult = {
