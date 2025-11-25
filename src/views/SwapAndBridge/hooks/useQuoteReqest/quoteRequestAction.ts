@@ -3,7 +3,7 @@ import { EnrichedToken } from "../../components/ChainTokenSelector/ChainTokenSel
 
 type QuoteAccount = { accountType: "evm" | "svm"; address: string };
 
-export type Types =
+export type QuoteRequestAction =
   | {
       type: "SET_ORIGIN_TOKEN";
       payload: EnrichedToken | null;

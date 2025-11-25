@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 import { quoteRequestReducer } from "./quoteRequestReducer";
-import { QuoteRequest } from "./types";
+import { QuoteRequest } from "./quoteRequestAction";
 
 const initialState = {
   tradeType: "exactInput",
@@ -12,10 +12,10 @@ const initialState = {
 } satisfies QuoteRequest;
 
 export const useQuoteRequest = () => {
-  const [quoteRequest, dispatchQuoteAction] = useReducer(
+  const [quoteRequest, dispatchQuoteRequestAction] = useReducer(
     quoteRequestReducer,
     initialState
   );
 
-  return { quoteRequest, dispatchQuoteAction };
+  return { quoteRequest, dispatchQuoteRequestAction };
 };

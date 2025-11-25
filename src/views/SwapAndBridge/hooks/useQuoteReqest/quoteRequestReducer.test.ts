@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { quoteRequestReducer } from "./quoteRequestReducer";
-import { QuoteRequest } from "./types";
+import { QuoteRequest } from "./quoteRequestAction";
 
 const initialState: QuoteRequest = {
   tradeType: "exactInput",

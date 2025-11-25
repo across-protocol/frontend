@@ -1,8 +1,8 @@
-import { QuoteRequest, Types } from "./types";
+import { QuoteRequest, QuoteRequestAction } from "./quoteRequestAction";
 
 export const quoteRequestReducer = (
   prevState: QuoteRequest,
-  action: Types
+  action: QuoteRequestAction
 ): QuoteRequest => {
   switch (action.type) {
     case "SET_ORIGIN_TOKEN":
