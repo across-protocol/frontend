@@ -14,7 +14,7 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined } from "utils";
+import { COLORS, formatUSDString, isDefined, withOpacity } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
@@ -43,6 +43,7 @@ interface ConfirmationButtonProps
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel?: string;
+  showHighFeesWarning?: boolean;
 }
 
 // Expandable label section component
@@ -55,8 +56,17 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
+    showHighFeesWarning?: boolean;
   }>
-> = ({ fee, time, expanded, onToggle, state, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  showHighFeesWarning,
+  children,
+  hasQuote,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -86,8 +96,21 @@ const ExpandableLabelSection: React.FC<
             <Across />
             <Divider />
             <FeeTimeItem>
-              <Dollar width="16" height="16" />
-              {fee}
+              {showHighFeesWarning ? (
+                <FeeTimeItemRed>
+                  <Warning
+                    color="var(--functional-red)"
+                    width="16"
+                    height="16"
+                  />
+                  <span>{fee}</span>
+                </FeeTimeItemRed>
+              ) : (
+                <>
+                  <Dollar width="16" height="16" />
+                  {fee}
+                </>
+              )}
             </FeeTimeItem>
             <Divider />
             <FeeTimeItem>
@@ -187,6 +210,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonDisabled,
   buttonLoading,
   buttonLabel,
+  showHighFeesWarning,
 }) => {
   const [expanded, setExpanded] = React.useState(false);
 
@@ -252,6 +276,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         visible={true}
         state={state}
         hasQuote={!!swapQuote}
+        showHighFeesWarning={showHighFeesWarning}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -282,7 +307,25 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 <Info color="inherit" width="16px" height="16px" />
               </Tooltip>
             </DetailLeft>
-            <DetailRight>{displayValues.totalFee}</DetailRight>
+            <DetailRight>
+              {showHighFeesWarning ? (
+                <Tooltip
+                  tooltipId="High fee warning"
+                  body={
+                    <WarningTooltipBody>
+                      Warning: High fees relative to input amount
+                    </WarningTooltipBody>
+                  }
+                >
+                  <DetailRightRed>
+                    <Warning width="16px" height="16px" color="inherit" />
+                    {displayValues.totalFee}
+                  </DetailRightRed>
+                </Tooltip>
+              ) : (
+                displayValues.totalFee
+              )}
+            </DetailRight>
           </DetailRow>
           <FeeBreakdown>
             <FeeBreakdownRow>
@@ -328,15 +371,23 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   );
 
   return (
-    <Container
-      dark={
-        buttonState === "validationError" ||
-        buttonState === "apiError" ||
-        buttonLoading
-      }
-    >
-      {content}
-    </Container>
+    <>
+      <Container
+        dark={
+          buttonState === "validationError" ||
+          buttonState === "apiError" ||
+          buttonLoading
+        }
+      >
+        {content}
+      </Container>
+      {showHighFeesWarning && (
+        <FeeWarning>
+          <Warning width="20px" height="20px" color="inherit" /> Fees are very
+          high
+        </FeeWarning>
+      )}
+    </>
   );
 };
 
@@ -398,7 +449,11 @@ const ExpandableLabelRightAccent = styled(ExpandableLabelLeft)`
 const FeeTimeItem = styled.span`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
 `;
 
 const Divider = styled.span`
@@ -506,7 +561,7 @@ const DetailLeft = styled.div`
 const DetailRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #e0f3ff;
 `;
 
@@ -546,4 +601,48 @@ const FeeBreakdownLabel = styled.span`
 
 const FeeBreakdownValue = styled.span`
   color: #e0f3ff;
+`;
+
+const FeeTimeItemRed = styled(FeeTimeItem)`
+  background: ${withOpacity("var(--functional-red)", 0.2)};
+  border-radius: 999px;
+  height: 20px;
+  padding-inline: 6px;
+  margin-inline: -6px; // account for inline padding
+
+  span {
+    height: 100%;
+  }
+`;
+
+const FeeWarning = styled.div`
+  height: 36px;
+  display: flex;
+  padding: 8px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 97, 102, 0.1);
+  background: rgba(255, 97, 102, 0.1);
+  color: var(--functional-red);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+
+  /* text */
+  span {
+    height: 100%;
+  }
+`;
+
+const DetailRightRed = styled(DetailRight)`
+  color: var(--functional-red);
+  font-weight: 600;
+`;
+
+const WarningTooltipBody = styled.span`
+  color: var(--functional-red);
+  font-weight: 600;
+  font-size: 14px;
 `;
