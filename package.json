@@ -98,6 +98,7 @@
     "generate:routes": "tsx scripts/generate-routes.ts",
     "generate:routes:e2e": "tsx scripts/generate-e2e-test-routes.ts",
     "generate:routes:mainnet": "yarn generate:routes 1",
+    "generate:token-logo-urls": "tsx scripts/generate-token-logo-urls.ts",
     "generate:routes:testnet": "yarn generate:routes 11155111",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
     "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",

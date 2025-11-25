@@ -2,12 +2,13 @@ import axios from "axios";
 import { constants } from "ethers";
 import mainnetChains from "../../../src/data/chains_1.json";
 import indirectChainsImport from "../../../src/data/indirect_chains_1.json";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import {
-  ENABLED_ROUTES,
-  getChainInfo,
-  getFallbackTokenLogoURI,
-} from "../../_utils";
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP,
+  TOKEN_EQUIVALENCE_REMAPPING,
+} from "../../_constants";
+import { getChainInfo, getFallbackTokenLogoURI } from "../../_utils";
+import { TOKEN_LOGO_URLS } from "./_logo-urls";
 
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
 // Uses the same structure as mainnetChains since indirect chains share the same base schema.
@@ -167,7 +168,7 @@ const chainsWithUsdt0Enabled = [
 const USDT0_LOGO_URL =
   "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
 
-function getTokensFromEnabledRoutes(
+function getTokensFromConstants(
   chainIds: number[],
   pricesForLifiTokens: Record<number, Record<string, string>>
 ): SwapToken[] {
@@ -178,24 +179,39 @@ function getTokensFromEnabledRoutes(
     chainId: number,
     tokenSymbol: string,
     tokenAddress: string,
-    l1TokenAddress: string,
     isNative: boolean
   ) => {
     const finalAddress = isNative ? constants.AddressZero : tokenAddress;
 
     const tokenInfo =
       TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+    const equivalentTokenSymbol = TOKEN_EQUIVALENCE_REMAPPING[tokenSymbol];
+    const l1TokenAddress = equivalentTokenSymbol
+      ? TOKEN_SYMBOLS_MAP[
+          equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+        ].addresses[CHAIN_IDs.MAINNET]
+      : tokenInfo.addresses[CHAIN_IDs.MAINNET] || tokenAddress;
 
     // Apply chain-specific display transformations
     let displaySymbol = tokenSymbol;
     let displayName = tokenInfo.name;
-    let displayLogoUrl = getFallbackTokenLogoURI(l1TokenAddress);
+    let displayLogoUrl =
+      TOKEN_LOGO_URLS[tokenSymbol] || getFallbackTokenLogoURI(l1TokenAddress);
 
     // Handle USDT -> USDT0 for specific chains
     if (tokenSymbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
       displaySymbol = "USDT0";
       displayName = "USDT0";
       displayLogoUrl = USDT0_LOGO_URL;
+    }
+
+    if (
+      // Only add SPOT tokens for HyperCore
+      (tokenSymbol.includes("-SPOT") && chainId !== CHAIN_IDs.HYPERCORE) ||
+      // Only add BNB tokens for BSC
+      (tokenSymbol.includes("-BNB") && chainId !== CHAIN_IDs.BSC)
+    ) {
+      return;
     }
 
     // Use display symbol for deduplication key
@@ -217,34 +233,14 @@ function getTokensFromEnabledRoutes(
     }
   };
 
-  ENABLED_ROUTES.routes.forEach((route) => {
-    // Process origin tokens (fromChain)
-    if (chainIds.includes(route.fromChain)) {
-      addToken(
-        route.fromChain,
-        route.fromTokenSymbol,
-        route.fromTokenAddress,
-        route.l1TokenAddress,
-        route.isNative
-      );
-    }
-
-    // Process destination tokens (toChain)
-    if (chainIds.includes(route.toChain)) {
-      // For destination tokens, check if token is native on that chain
-      const chainInfo = getChainInfo(route.toChain);
-      const nativeSymbol =
-        route.toChain === CHAIN_IDs.LENS ? "GHO" : chainInfo.nativeToken;
-      const isDestinationNative = route.toTokenSymbol === nativeSymbol;
-
-      addToken(
-        route.toChain,
-        route.toTokenSymbol,
-        route.toTokenAddress,
-        route.l1TokenAddress,
-        isDestinationNative
-      );
-    }
+  Object.values(TOKEN_SYMBOLS_MAP).forEach((tokenInfo) => {
+    Object.entries(tokenInfo.addresses).forEach(([chainId, address]) => {
+      if (chainIds.includes(Number(chainId))) {
+        const chainInfo = getChainInfo(Number(chainId));
+        const isNative = tokenInfo.symbol === chainInfo.nativeToken;
+        addToken(Number(chainId), tokenInfo.symbol, address, isNative);
+      }
+    });
   });
 
   return tokens;
@@ -294,7 +290,7 @@ export async function fetchSwapTokensData(
   const responseJson: SwapToken[] = [];
 
   // Add tokens from Across' enabled routes first (highest priority for normalized names)
-  const tokensFromEnabledRoutes = getTokensFromEnabledRoutes(
+  const tokensFromEnabledRoutes = getTokensFromConstants(
     targetChainIds,
     pricesForLifiTokens
   );
