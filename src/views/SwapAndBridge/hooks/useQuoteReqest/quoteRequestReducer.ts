@@ -31,11 +31,7 @@ export const quoteRequestReducer = (
         originToken: prevState.destinationToken,
         destinationToken: prevState.originToken,
         tradeType:
-          prevState.tradeType === "exactInput"
-            ? "minOutput"
-            : prevState.tradeType === "minOutput"
-              ? "minOutput"
-              : "exactInput",
+          prevState.tradeType === "exactInput" ? "minOutput" : "exactInput",
       };
     default:
       return prevState;

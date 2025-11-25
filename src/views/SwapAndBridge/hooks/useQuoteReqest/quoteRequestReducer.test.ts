@@ -102,13 +102,13 @@ describe("quoteRequestReducer", () => {
       expect(result.tradeType).toBe("minOutput");
     });
 
-    it("keeps minOutput as minOutput", () => {
+    it("converts minOutput to exactInput", () => {
       const state: QuoteRequest = { ...initialState, tradeType: "minOutput" };
       const result = quoteRequestReducer(state, {
         type: "QUICK_SWAP",
         payload: undefined,
       });
-      expect(result.tradeType).toBe("minOutput");
+      expect(result.tradeType).toBe("exactInput");
     });
   });
 
