@@ -93,7 +93,6 @@ export function FeesCollapsible(props: Props) {
     props.toChainId,
     isSwap,
     convertUsdToBridgeToken(parsedAmountUsd),
-    convertUsdToBridgeToken(gasFeeUsd),
     convertUsdToBridgeToken(bridgeFeeUsd),
     convertUsdToBridgeToken(swapFeeUsd)
   );

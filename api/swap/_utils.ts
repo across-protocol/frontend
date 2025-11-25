@@ -58,6 +58,7 @@ import { calculateSwapFees } from "./_swap-fees";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
 import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
+import { getNativeTokenInfo } from "../_token-info";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -612,6 +613,7 @@ export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
+  outputTokenAddress: string;
   originChainId: number;
   destinationChainId: number;
   inputAmount: BigNumber;
@@ -657,6 +659,16 @@ export async function buildBaseSwapResponseJson(params: {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
+  const inputToken =
+    params.inputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.originChainId)
+      : (params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken);
+  const outputToken =
+    params.outputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.destinationChainId)
+      : (params.indirectDestinationRoute?.outputToken ??
+        params.destinationSwapQuote?.tokenOut ??
+        params.bridgeQuote.outputToken);
 
   const {
     inputAmount,
@@ -724,19 +736,9 @@ export async function buildBaseSwapResponseJson(params: {
           }
         : undefined,
     },
-    inputToken:
-      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
-    outputToken:
-      params.indirectDestinationRoute?.outputToken ??
-      params.destinationSwapQuote?.tokenOut ??
-      params.bridgeQuote.outputToken,
-    refundToken:
-      refundToken.symbol === "ETH"
-        ? {
-            ...refundToken,
-            symbol: "WETH",
-          }
-        : refundToken,
+    inputToken,
+    outputToken,
+    refundToken,
     fees: await calculateSwapFees({
       inputAmount,
       originSwapQuote: params.originSwapQuote,

@@ -91,6 +91,11 @@ import modeSepoliaGrayscaleLogo from "assets/chain-logos/mode-sepolia-grayscale.
 import { ReactComponent as modeSepoliaLogoSvg } from "assets/chain-logos/mode-sepolia.svg";
 import { ReactComponent as modeSepoliaGrayscaleLogoSvg } from "assets/chain-logos/mode-sepolia-grayscale.svg";
 
+import monadLogo from "assets/chain-logos/monad.svg";
+import monadGrayscaleLogo from "assets/chain-logos/monad-grayscale.svg";
+import { ReactComponent as monadLogoSvg } from "assets/chain-logos/monad.svg";
+import { ReactComponent as monadGrayscaleLogoSvg } from "assets/chain-logos/monad-grayscale.svg";
+
 import optimismLogo from "assets/chain-logos/optimism.svg";
 import optimismGrayscaleLogo from "assets/chain-logos/optimism-grayscale.svg";
 import { ReactComponent as optimismLogoSvg } from "assets/chain-logos/optimism.svg";
@@ -869,6 +874,44 @@ export const modeSepolia_viem = defineChain({
   },
 });
 
+export const monad = {
+  name: "Monad",
+  fullName: "Monad",
+  chainId: 143,
+  logoURI: monadLogo,
+  grayscaleLogoURI: monadGrayscaleLogo,
+  logoSvg: monadLogoSvg,
+  grayscaleLogoSvg: monadGrayscaleLogoSvg,
+  rpcUrl: "https://monad-mainnet.g.alchemy.com/v2/CrY3QO43HhgQsCf7G9CAr",
+  explorerUrl: "https://monadvision.com",
+  constructExplorerLink: (txHash: string) =>
+    `${monad.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "MON",
+  customRpcUrl: process.env.REACT_APP_CHAIN_143_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const monad_viem = defineChain({
+  id: monad.chainId,
+  name: monad.name,
+  nativeCurrency: {
+    name: monad.nativeCurrencySymbol,
+    symbol: monad.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [monad.customRpcUrl ? monad.customRpcUrl : [], monad.rpcUrl].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: monad.name + " Explorer",
+      url: monad.explorerUrl,
+    },
+  },
+});
+
 export const optimism = {
   name: "Optimism",
   fullName: "Optimism",
@@ -1004,7 +1047,7 @@ export const polygon = {
   explorerUrl: "https://polygonscan.com",
   constructExplorerLink: (txHash: string) =>
     `${polygon.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "MATIC",
+  nativeCurrencySymbol: "POL",
   customRpcUrl: process.env.REACT_APP_CHAIN_137_CUSTOM_RPC_URL,
   pollingInterval: 5000,
 };
@@ -1045,7 +1088,7 @@ export const polygonAmoy = {
   explorerUrl: "https://amoy.polygonscan.com",
   constructExplorerLink: (txHash: string) =>
     `${polygonAmoy.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "MATIC",
+  nativeCurrencySymbol: "POL",
   customRpcUrl: process.env.REACT_APP_CHAIN_80002_CUSTOM_RPC_URL,
   pollingInterval: 15000,
 };
@@ -1546,6 +1589,7 @@ export const chainConfigs = [
   ethereum,
   mode,
   modeSepolia,
+  monad,
   optimism,
   optimismSepolia,
   plasma,
@@ -1589,6 +1633,7 @@ export const chains_viem = [
   ethereum_viem,
   mode_viem,
   modeSepolia_viem,
+  monad_viem,
   optimism_viem,
   optimismSepolia_viem,
   plasma_viem,

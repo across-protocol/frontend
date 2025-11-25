@@ -491,7 +491,6 @@ export async function getCrossSwapQuotesForExactInputB2A(
 
   const {
     destinationSwap,
-    originRouter,
     destinationRouter,
     depositEntryPoint,
     bridgeableOutputToken,
@@ -546,7 +545,6 @@ export async function getCrossSwapQuotesForExactInputB2A(
     destinationSwapQuote,
     originSwapQuote: undefined,
     contracts: {
-      originRouter,
       destinationRouter,
       depositEntryPoint,
     },
@@ -628,7 +626,6 @@ export async function getCrossSwapQuotesForOutputB2A(
   });
 
   const {
-    originRouter,
     destinationRouter,
     depositEntryPoint,
     bridgeableOutputToken,
@@ -667,7 +664,6 @@ export async function getCrossSwapQuotesForOutputB2A(
     destinationSwapQuote: prioritizedStrategy.destinationSwapQuote,
     originSwapQuote: undefined,
     contracts: {
-      originRouter,
       destinationRouter,
       depositEntryPoint,
     },
@@ -679,29 +675,6 @@ function _prepCrossSwapQuotesRetrievalB2A(
   crossSwap: CrossSwap,
   strategies: QuoteFetchStrategies
 ): CrossSwapQuotesRetrievalB2AResult[] {
-  const originStrategies = getQuoteFetchStrategies(
-    crossSwap.inputToken.chainId,
-    crossSwap.inputToken.symbol,
-    crossSwap.inputToken.symbol,
-    strategies
-  );
-  // Use the first origin strategy that is supported for the input token since we don't need
-  // to fetch multiple origin quotes for B2A swaps.
-  const originStrategy = originStrategies.find((originStrategy) => {
-    try {
-      originStrategy.getRouter(crossSwap.inputToken.chainId);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  });
-  if (!originStrategy) {
-    throw new InvalidParamError({
-      message: `Failed to fetch swap quote: no origin strategy found for ${crossSwap.inputToken.symbol}`,
-    });
-  }
-
-  const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByInputTokenAndDestinationChain(
     crossSwap.inputToken.address,
@@ -753,24 +726,38 @@ function _prepCrossSwapQuotesRetrievalB2A(
     strategies
   );
 
+  // Resolve deposit entry point
+  const spokePoolPeripheryAddress = getSpokePoolPeripheryAddress(
+    crossSwap.inputToken.chainId,
+    false
+  );
+  const spokePoolAddress = getSpokePoolAddress(
+    crossSwap.inputToken.chainId,
+    false
+  );
+  const depositEntryPoint = spokePoolPeripheryAddress
+    ? ({
+        name: "SpokePoolPeriphery",
+        address: spokePoolPeripheryAddress,
+      } as const)
+    : ({
+        name: crossSwap.isOriginSvm ? "SvmSpoke" : "SpokePool",
+        address: spokePoolAddress,
+      } as const);
+
   return destinationStrategies.flatMap((destinationStrategy) => {
     try {
-      const originRouter = originStrategy.getRouter(originSwapChainId);
       const destinationRouter = destinationStrategy.getRouter(
         destinationSwapChainId
       );
-      const depositEntryPoint =
-        originStrategy.getOriginEntryPoints(originSwapChainId).deposit;
 
       return {
         destinationSwap,
-        originRouter,
         destinationRouter,
         depositEntryPoint,
         bridgeableOutputToken,
         destinationSwapChainId,
         destinationStrategy,
-        originStrategy,
       };
     } catch (error) {
       logger.debug({

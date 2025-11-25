@@ -16,6 +16,7 @@ import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
+import { useTokenFromAddress } from "hooks/useToken";
 
 type Props = {
   deposit: Deposit;
@@ -23,8 +24,6 @@ type Props = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
 };
-
-const config = getConfig();
 
 function isColumnDisabled(disabledColumns: ColumnKey[], column: ColumnKey) {
   return disabledColumns.includes(column);
@@ -36,17 +35,20 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
-  const swapToken = config.getTokenInfoByAddressSafe(
-    deposit.sourceChainId,
-    deposit.swapToken?.address || ""
+  const swapToken = useTokenFromAddress(
+    deposit.swapToken?.address || "",
+    deposit.sourceChainId
   );
-  const inputToken = config.getTokenInfoByAddressSafe(
-    deposit.sourceChainId,
-    deposit.token?.address || deposit.assetAddr
+
+  const inputToken = useTokenFromAddress(
+    deposit.token?.address || deposit.assetAddr,
+    deposit.sourceChainId
   );
-  const outputToken = config.getTokenInfoByAddressSafe(
-    deposit.destinationChainId,
-    deposit.outputToken?.address || ""
+  const outputToken = useTokenFromAddress(
+    deposit.swapOutputToken ||
+      deposit.outputToken?.address ||
+      deposit.assetAddr,
+    deposit.destinationChainId
   );
 
   // Hide unsupported or unknown token deposits

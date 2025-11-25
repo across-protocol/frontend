@@ -25,14 +25,19 @@ export type DepositInfo =
   | {
       depositTxHash: string;
       depositTimestamp: number;
-      status: "deposit-reverted" | "deposited";
+      status: "deposit-reverted";
+      depositLog: undefined;
+      error?: string | undefined;
+      formattedError?: string | undefined;
+    }
+  | {
+      depositTxHash: string;
+      depositTimestamp: number;
+      status: "deposited";
       depositLog: DepositData;
     };
 
-export type DepositedInfo = Extract<
-  DepositInfo,
-  { status: "deposit-reverted" | "deposited" }
->;
+export type DepositedInfo = Extract<DepositInfo, { status: "deposited" }>;
 
 /**
  * Common type for fill information

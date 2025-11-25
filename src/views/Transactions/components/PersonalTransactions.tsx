@@ -210,6 +210,8 @@ function convertIndexerDepositToDeposit(
     swapTokenAmount: indexerDeposit.swapTokenAmount,
     swapTokenAddress: indexerDeposit.swapToken,
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
+    swapOutputToken: indexerDeposit.swapOutputToken,
+    swapOutputTokenAmount: indexerDeposit.swapOutputTokenAmount,
   };
 }
 

@@ -95,7 +95,7 @@ describe("OFT Strategy", () => {
           "USDT"
         )
       ).toBeGreaterThan(0);
-    });
+    }, 30000);
   });
 
   describe("getOftQuoteForExactInput", () => {
