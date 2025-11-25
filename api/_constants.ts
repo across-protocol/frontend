@@ -40,8 +40,10 @@ export const TOKEN_SYMBOLS_MAP = {
   },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
-export const TOKEN_EQUIVALENCE_REMAPPING =
-  constants.TOKEN_EQUIVALENCE_REMAPPING;
+export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
+  ...constants.TOKEN_EQUIVALENCE_REMAPPING,
+  "USDH-SPOT": "USDH",
+};
 
 export const maxRelayFeePct = 0.25;
 
