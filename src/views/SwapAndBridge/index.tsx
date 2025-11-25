@@ -10,20 +10,6 @@ import { BigNumber } from "ethers";
 export default function SwapAndBridge() {
   const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();
 
-  const setInputToken: (token: EnrichedToken | null) => void = (
-    token: EnrichedToken | null
-  ) =>
-    dispatchQuoteRequestAction({
-      type: "SET_ORIGIN_TOKEN",
-      payload: token,
-    });
-
-  const setOutputToken = (token: EnrichedToken | null) =>
-    dispatchQuoteRequestAction({
-      type: "SET_DESTINATION_TOKEN",
-      payload: token,
-    });
-
   const isAmountOrigin = quoteRequest.tradeType === "exactInput";
 
   const {
@@ -39,21 +25,26 @@ export default function SwapAndBridge() {
     onConfirm,
     destinationChainEcosystem,
     toAccountManagement,
-  } = useSwapAndBridge(
-    quoteRequest,
-    setInputToken,
-    setOutputToken,
-    isAmountOrigin
-  );
+  } = useSwapAndBridge(quoteRequest, isAmountOrigin);
 
   return (
     <LayoutV2 maxWidth={600}>
       <Wrapper>
         <InputForm
-          inputToken={quoteRequest.originToken}
-          setInputToken={setInputToken}
+          originToken={quoteRequest.originToken}
+          setOriginToken={(token: EnrichedToken | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_ORIGIN_TOKEN",
+              payload: token,
+            })
+          }
           outputToken={quoteRequest.destinationToken}
-          setOutputToken={setOutputToken}
+          setDestinationToken={(token: EnrichedToken | null) => {
+            dispatchQuoteRequestAction({
+              type: "SET_DESTINATION_TOKEN",
+              payload: token,
+            });
+          }}
           setOriginAmount={(amount: BigNumber | null) =>
             dispatchQuoteRequestAction({
               type: "SET_ORIGIN_AMOUNT",

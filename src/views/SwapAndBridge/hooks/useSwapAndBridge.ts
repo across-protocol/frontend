@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
@@ -6,13 +6,11 @@ import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useDefaultRoute } from "./useDefaultRoute";
 import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
 import { QuoteRequest } from "./useQuoteReqest/quoteRequestAction";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
@@ -33,12 +31,9 @@ export type UseSwapAndBridgeReturn = {
 
 export function useSwapAndBridge(
   quoteRequest: QuoteRequest,
-  setInputToken: (token: EnrichedToken | null) => void,
-  setOutputToken: (token: EnrichedToken | null) => void,
   isAmountOrigin: boolean
 ): UseSwapAndBridgeReturn {
   const debouncedAmount = useDebounce(quoteRequest.amount, 300);
-  const defaultRoute = useDefaultRoute();
 
   const {
     account: accountEVM,
@@ -85,34 +80,6 @@ export function useSwapAndBridge(
     }
     return undefined;
   })();
-
-  useEffect(() => {
-    if (defaultRoute.inputToken && defaultRoute.outputToken) {
-      if (
-        !quoteRequest.originToken ||
-        quoteRequest.originToken.address !== defaultRoute.inputToken!.address ||
-        quoteRequest.originToken.chainId !== defaultRoute.inputToken!.chainId
-      ) {
-        return setInputToken(defaultRoute.inputToken);
-      }
-
-      if (
-        !quoteRequest.destinationToken ||
-        quoteRequest.destinationToken.address !==
-          defaultRoute.outputToken!.address ||
-        quoteRequest.destinationToken.chainId !==
-          defaultRoute.outputToken!.chainId
-      ) {
-        return setOutputToken(defaultRoute.outputToken);
-      }
-    }
-  }, [
-    defaultRoute,
-    quoteRequest.destinationToken,
-    quoteRequest.originToken,
-    setInputToken,
-    setOutputToken,
-  ]);
 
   const {
     data: swapQuote,

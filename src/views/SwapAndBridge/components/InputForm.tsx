@@ -14,10 +14,10 @@ import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
 
 export const InputForm = ({
-  inputToken,
+  originToken,
   outputToken,
-  setInputToken,
-  setOutputToken,
+  setOriginToken,
+  setDestinationToken,
   setOriginAmount,
   setDestinationAmount,
   isAmountOrigin,
@@ -28,10 +28,10 @@ export const InputForm = ({
   toAccountManagement,
   destinationChainEcosystem,
 }: {
-  inputToken: EnrichedToken | null;
-  setInputToken: (token: EnrichedToken | null) => void;
+  originToken: EnrichedToken | null;
+  setOriginToken: (token: EnrichedToken | null) => void;
   outputToken: EnrichedToken | null;
-  setOutputToken: (token: EnrichedToken | null) => void;
+  setDestinationToken: (token: EnrichedToken | null) => void;
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
   expectedInputAmount: string | undefined;
@@ -46,26 +46,26 @@ export const InputForm = ({
   const [unit, setUnit] = useState<UnitType>("token");
 
   const quickSwap = useCallback(() => {
-    setOutputToken(inputToken);
-    setInputToken(outputToken);
+    setDestinationToken(originToken);
+    setOriginToken(outputToken);
 
     setOriginAmount(null);
     setDestinationAmount(null);
   }, [
-    inputToken,
+    originToken,
     outputToken,
     setDestinationAmount,
-    setInputToken,
+    setOriginToken,
     setOriginAmount,
-    setOutputToken,
+    setDestinationToken,
   ]);
 
   return (
     <Wrapper>
       <TokenInput
-        setToken={setInputToken}
-        setOtherToken={setOutputToken}
-        token={inputToken}
+        setToken={setOriginToken}
+        setOtherToken={setDestinationToken}
+        token={originToken}
         setAmount={setOriginAmount}
         isOrigin={true}
         expectedAmount={expectedInputAmount}
@@ -85,15 +85,15 @@ export const InputForm = ({
         <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
       <TokenInput
-        setToken={setOutputToken}
-        setOtherToken={setInputToken}
+        setToken={setDestinationToken}
+        setOtherToken={setOriginToken}
         token={outputToken}
         setAmount={setDestinationAmount}
         isOrigin={false}
         expectedAmount={expectedOutputAmount}
         shouldUpdate={isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
-        otherToken={inputToken}
+        otherToken={originToken}
         disabled={!outputToken || !outputToken}
         unit={unit}
         setUnit={setUnit}

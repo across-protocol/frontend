@@ -1,20 +1,36 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { quoteRequestReducer } from "./quoteRequestReducer";
 import { QuoteRequest } from "./quoteRequestAction";
-
-const initialState = {
-  tradeType: "exactInput",
-  originToken: null,
-  destinationToken: null,
-  originAccount: null,
-  destinationAccount: null,
-  amount: null,
-} satisfies QuoteRequest;
+import { useDefaultRoute } from "../useDefaultRoute";
 
 export const useQuoteRequest = () => {
+  const defaultRoute = useDefaultRoute();
+
+  useEffect(() => {
+    if (defaultRoute.inputToken) {
+      dispatchQuoteRequestAction({
+        type: "SET_ORIGIN_TOKEN",
+        payload: defaultRoute.inputToken,
+      });
+    }
+    if (defaultRoute.outputToken) {
+      dispatchQuoteRequestAction({
+        type: "SET_DESTINATION_TOKEN",
+        payload: defaultRoute.inputToken,
+      });
+    }
+  }, [defaultRoute]);
+
   const [quoteRequest, dispatchQuoteRequestAction] = useReducer(
     quoteRequestReducer,
-    initialState
+    {
+      tradeType: "exactInput",
+      originToken: null,
+      destinationToken: null,
+      originAccount: null,
+      destinationAccount: null,
+      amount: null,
+    } satisfies QuoteRequest
   );
 
   return { quoteRequest, dispatchQuoteRequestAction };
