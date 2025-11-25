@@ -7,8 +7,16 @@
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/hypercore/assets/logo.svg",
     "spokePool": "0x0000000000000000000000000000000000000000",
     "spokePoolBlock": 0,
-    "intermediaryChains": [],
+    "intermediaryChains": [999],
     "inputTokens": [],
-    "outputTokens": []
+    "outputTokens": [
+      {
+        "address": "0x2000000000000000000000000000000000000168",
+        "symbol": "USDH-SPOT",
+        "name": "Hyperliquid USD",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdh-spot.svg"
+      }
+    ]
   }
 ]
