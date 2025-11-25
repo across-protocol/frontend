@@ -1,7 +1,13 @@
 import { BigNumber, ethers } from "ethers";
 import { utils } from "@across-protocol/sdk";
+import { CHAIN_IDs } from "./_constants";
 
 export function getMultiCallHandlerAddress(chainId: number) {
+  // TODO: Remove this once the correct address of the MulticallHandler is updated upstream
+  // in @across-protocol/contracts
+  if (chainId === CHAIN_IDs.BSC) {
+    return "0x0F7Ae28dE1C8532170AD4ee566B5801485c13a0E";
+  }
   const addressFromSdk = utils.getDeployedAddress(
     "MulticallHandler",
     chainId,
