@@ -8,7 +8,7 @@ import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
-import { useTokenInput, UnitType } from "hooks";
+import { UnitType, useTokenInput } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
@@ -18,9 +18,9 @@ export const InputForm = ({
   outputToken,
   setInputToken,
   setOutputToken,
-  setAmount,
+  setOriginAmount,
+  setDestinationAmount,
   isAmountOrigin,
-  setIsAmountOrigin,
   isQuoteLoading,
   expectedOutputAmount,
   expectedInputAmount,
@@ -30,18 +30,14 @@ export const InputForm = ({
 }: {
   inputToken: EnrichedToken | null;
   setInputToken: (token: EnrichedToken | null) => void;
-
   outputToken: EnrichedToken | null;
   setOutputToken: (token: EnrichedToken | null) => void;
-
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
   expectedInputAmount: string | undefined;
-
-  setAmount: (amount: BigNumber | null) => void;
-
+  setOriginAmount: (amount: BigNumber | null) => void;
+  setDestinationAmount: (amount: BigNumber | null) => void;
   isAmountOrigin: boolean;
-  setIsAmountOrigin: (isAmountOrigin: boolean) => void;
   validationError: AmountInputError | undefined;
   toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: "evm" | "svm";
@@ -50,15 +46,19 @@ export const InputForm = ({
   const [unit, setUnit] = useState<UnitType>("token");
 
   const quickSwap = useCallback(() => {
-    const origin = inputToken;
-    const destination = outputToken;
+    setOutputToken(inputToken);
+    setInputToken(outputToken);
 
-    setOutputToken(origin);
-    setInputToken(destination);
-
-    setAmount(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputToken, outputToken]);
+    setOriginAmount(null);
+    setDestinationAmount(null);
+  }, [
+    inputToken,
+    outputToken,
+    setDestinationAmount,
+    setInputToken,
+    setOriginAmount,
+    setOutputToken,
+  ]);
 
   return (
     <Wrapper>
@@ -66,10 +66,7 @@ export const InputForm = ({
         setToken={setInputToken}
         setOtherToken={setOutputToken}
         token={inputToken}
-        setAmount={(amount) => {
-          setAmount(amount);
-          setIsAmountOrigin(true);
-        }}
+        setAmount={setOriginAmount}
         isOrigin={true}
         expectedAmount={expectedInputAmount}
         shouldUpdate={!isAmountOrigin}
@@ -91,10 +88,7 @@ export const InputForm = ({
         setToken={setOutputToken}
         setOtherToken={setInputToken}
         token={outputToken}
-        setAmount={(amount) => {
-          setAmount(amount);
-          setIsAmountOrigin(false);
-        }}
+        setAmount={setDestinationAmount}
         isOrigin={false}
         expectedAmount={expectedOutputAmount}
         shouldUpdate={isAmountOrigin}

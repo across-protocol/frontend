@@ -24,20 +24,9 @@ export default function SwapAndBridge() {
       payload: token,
     });
 
-  const setAmount = (amount: BigNumber | null) =>
-    isAmountOrigin
-      ? dispatchQuoteRequestAction({
-          type: "SET_ORIGIN_AMOUNT",
-          payload: amount,
-        })
-      : dispatchQuoteRequestAction({
-          type: "SET_DESTINATION_AMOUNT",
-          payload: amount,
-        });
+  const isAmountOrigin = quoteRequest.tradeType === "exactInput";
 
   const {
-    isAmountOrigin,
-    setIsAmountOrigin,
     swapQuote,
     isQuoteLoading,
     expectedInputAmount,
@@ -50,7 +39,12 @@ export default function SwapAndBridge() {
     onConfirm,
     destinationChainEcosystem,
     toAccountManagement,
-  } = useSwapAndBridge(quoteRequest, setInputToken, setOutputToken);
+  } = useSwapAndBridge(
+    quoteRequest,
+    setInputToken,
+    setOutputToken,
+    isAmountOrigin
+  );
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -60,9 +54,19 @@ export default function SwapAndBridge() {
           setInputToken={setInputToken}
           outputToken={quoteRequest.destinationToken}
           setOutputToken={setOutputToken}
-          setAmount={setAmount}
-          isAmountOrigin={quoteRequest.tradeType === "exactInput"}
-          setIsAmountOrigin={setIsAmountOrigin}
+          setOriginAmount={(amount: BigNumber | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_ORIGIN_AMOUNT",
+              payload: amount,
+            })
+          }
+          setDestinationAmount={(amount: BigNumber | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_DESTINATION_AMOUNT",
+              payload: amount,
+            })
+          }
+          isAmountOrigin={isAmountOrigin}
           isQuoteLoading={isQuoteLoading}
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}

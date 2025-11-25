@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
@@ -15,9 +15,6 @@ import { QuoteRequest } from "./useQuoteReqest/quoteRequestAction";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 
 export type UseSwapAndBridgeReturn = {
-  isAmountOrigin: boolean;
-  setIsAmountOrigin: (v: boolean) => void;
-  // route
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
@@ -37,10 +34,9 @@ export type UseSwapAndBridgeReturn = {
 export function useSwapAndBridge(
   quoteRequest: QuoteRequest,
   setInputToken: (token: EnrichedToken | null) => void,
-  setOutputToken: (token: EnrichedToken | null) => void
+  setOutputToken: (token: EnrichedToken | null) => void,
+  isAmountOrigin: boolean
 ): UseSwapAndBridgeReturn {
-  const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
-
   const debouncedAmount = useDebounce(quoteRequest.amount, 300);
   const defaultRoute = useDefaultRoute();
 
@@ -264,8 +260,6 @@ export function useSwapAndBridge(
   );
 
   return {
-    isAmountOrigin,
-    setIsAmountOrigin,
     swapQuote,
     isQuoteLoading,
     expectedInputAmount,
