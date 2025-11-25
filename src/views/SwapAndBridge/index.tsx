@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
 import { ConfirmationButton } from "./components/ConfirmationButton";
 import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
-import { useQuoteRequest } from "./hooks/useQuoteReqest/useQuoteRequest";
+import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
 import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
 import { BigNumber } from "ethers";
 

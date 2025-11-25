@@ -75,7 +75,7 @@ export const InputForm = ({
           validationError === AmountInputError.INSUFFICIENT_BALANCE
         }
         otherToken={outputToken}
-        disabled={!outputToken || !outputToken}
+        disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
         toAccountManagement={toAccountManagement}
@@ -94,7 +94,7 @@ export const InputForm = ({
         shouldUpdate={isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
         otherToken={originToken}
-        disabled={!outputToken || !outputToken}
+        disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
         toAccountManagement={toAccountManagement}

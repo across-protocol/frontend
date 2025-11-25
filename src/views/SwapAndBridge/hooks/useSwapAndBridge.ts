@@ -10,7 +10,7 @@ import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
-import { QuoteRequest } from "./useQuoteReqest/quoteRequestAction";
+import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
