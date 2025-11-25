@@ -11,12 +11,7 @@ import {
 import { ERC20__factory } from "utils/typechain";
 import { SwapToken } from "utils/serverless-api/types";
 import { TokenInfo } from "constants/tokens";
-import {
-  CHAIN_IDs,
-  chainsWithUsdt0Enabled,
-  getToken,
-  tokenTable,
-} from "utils/constants";
+import { chainsWithUsdt0Enabled, getToken, tokenTable } from "utils/constants";
 import usdt0Logo from "assets/token-logos/usdt0.svg";
 
 export async function getNativeBalance(

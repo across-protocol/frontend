@@ -724,3 +724,5 @@ export const chainMaxBlockLookback = mergeConfig(
   resolveRpcConfig(),
   process.env.MAX_BLOCK_LOOK_BACK
 );
+
+export const INTEGRATOR_ID_ACROSS = "0x007f";
