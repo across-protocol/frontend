@@ -263,12 +263,12 @@ function CheckIconExplorerLink({
     return <CheckIcon />;
   }
 
+  const explorerUrl = chainInfo.intermediaryChain
+    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
+    : chainInfo.constructExplorerLink(txHash);
+
   return (
-    <a
-      href={chainInfo.constructExplorerLink(txHash)}
-      target="_blank"
-      rel="noreferrer"
-    >
+    <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
   );

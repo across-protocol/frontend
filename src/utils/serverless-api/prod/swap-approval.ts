@@ -224,31 +224,36 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
           amount: BigNumber.from(result.steps.bridge.fees.amount),
           pct: BigNumber.from(result.steps.bridge.fees.pct),
           token: result.steps.bridge.fees.token,
-          details: {
-            type: "across",
-            lp: {
-              amount: BigNumber.from(
-                result.steps.bridge.fees.details.lp.amount
-              ),
-              pct: BigNumber.from(result.steps.bridge.fees.details.lp.pct),
-            },
-            relayerCapital: {
-              amount: BigNumber.from(
-                result.steps.bridge.fees.details.relayerCapital.amount
-              ),
-              pct: BigNumber.from(
-                result.steps.bridge.fees.details.relayerCapital.pct
-              ),
-            },
-            destinationGas: {
-              amount: BigNumber.from(
-                result.steps.bridge.fees.details.destinationGas.amount
-              ),
-              pct: BigNumber.from(
-                result.steps.bridge.fees.details.destinationGas.pct
-              ),
-            },
-          },
+          details:
+            result.steps.bridge.fees.details?.type === "across"
+              ? {
+                  type: "across",
+                  lp: {
+                    amount: BigNumber.from(
+                      result.steps.bridge.fees.details.lp.amount
+                    ),
+                    pct: BigNumber.from(
+                      result.steps.bridge.fees.details.lp.pct
+                    ),
+                  },
+                  relayerCapital: {
+                    amount: BigNumber.from(
+                      result.steps.bridge.fees.details.relayerCapital.amount
+                    ),
+                    pct: BigNumber.from(
+                      result.steps.bridge.fees.details.relayerCapital.pct
+                    ),
+                  },
+                  destinationGas: {
+                    amount: BigNumber.from(
+                      result.steps.bridge.fees.details.destinationGas.amount
+                    ),
+                    pct: BigNumber.from(
+                      result.steps.bridge.fees.details.destinationGas.pct
+                    ),
+                  },
+                }
+              : undefined,
         },
         provider: result.steps.bridge.provider,
       },
@@ -309,20 +314,23 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
               app: convertFeeComponent(result.fees.total.details.app),
               bridge: {
                 ...convertFeeComponent(result.fees.total.details.bridge),
-                details: result.fees.total.details.bridge.details
-                  ? {
-                      type: result.fees.total.details.bridge.details.type,
-                      lp: convertFeeComponent(
-                        result.fees.total.details.bridge.details.lp
-                      ),
-                      relayerCapital: convertFeeComponent(
-                        result.fees.total.details.bridge.details.relayerCapital
-                      ),
-                      destinationGas: convertFeeComponent(
-                        result.fees.total.details.bridge.details.destinationGas
-                      ),
-                    }
-                  : undefined,
+                details:
+                  result.fees.total.details?.bridge?.details?.type === "across"
+                    ? {
+                        type: result.fees.total.details.bridge.details.type,
+                        lp: convertFeeComponent(
+                          result.fees.total.details.bridge.details.lp
+                        ),
+                        relayerCapital: convertFeeComponent(
+                          result.fees.total.details.bridge.details
+                            .relayerCapital
+                        ),
+                        destinationGas: convertFeeComponent(
+                          result.fees.total.details.bridge.details
+                            .destinationGas
+                        ),
+                      }
+                    : undefined,
               },
             },
           },
@@ -336,22 +344,24 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
               app: convertFeeComponent(result.fees.totalMax.details.app),
               bridge: {
                 ...convertFeeComponent(result.fees.totalMax.details.bridge),
-                details: result.fees.totalMax.details.bridge.details
-                  ? {
-                      type: result.fees.totalMax.details.bridge.details.type,
-                      lp: convertFeeComponent(
-                        result.fees.totalMax.details.bridge.details.lp
-                      ),
-                      relayerCapital: convertFeeComponent(
-                        result.fees.totalMax.details.bridge.details
-                          .relayerCapital
-                      ),
-                      destinationGas: convertFeeComponent(
-                        result.fees.totalMax.details.bridge.details
-                          .destinationGas
-                      ),
-                    }
-                  : undefined,
+                details:
+                  result.fees.totalMax.details?.bridge?.details?.type ===
+                  "across"
+                    ? {
+                        type: result.fees.totalMax.details.bridge.details.type,
+                        lp: convertFeeComponent(
+                          result.fees.totalMax.details.bridge.details.lp
+                        ),
+                        relayerCapital: convertFeeComponent(
+                          result.fees.totalMax.details.bridge.details
+                            .relayerCapital
+                        ),
+                        destinationGas: convertFeeComponent(
+                          result.fees.totalMax.details.bridge.details
+                            .destinationGas
+                        ),
+                      }
+                    : undefined,
               },
             },
           },

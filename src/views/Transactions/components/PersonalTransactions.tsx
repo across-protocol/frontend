@@ -212,6 +212,9 @@ function convertIndexerDepositToDeposit(
     depositRefundTxHash: indexerDeposit.depositRefundTxHash,
     swapOutputToken: indexerDeposit.swapOutputToken,
     swapOutputTokenAmount: indexerDeposit.swapOutputTokenAmount,
+    actionsTargetChainId: indexerDeposit.actionsTargetChainId
+      ? Number(indexerDeposit.actionsTargetChainId)
+      : undefined,
   };
 }
 

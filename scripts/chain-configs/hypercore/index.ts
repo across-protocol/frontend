@@ -21,6 +21,5 @@ export default {
   omitViemConfig: true,
   nativeToken: "HYPE",
   // HyperCore can only be reached via HyperEVM as an intermediary chain.
-  // NOTE: This route must remain disabled until the new HyperEVM handler is deployed.
-  intermediaryChains: [CHAIN_IDs.HYPEREVM],
+  intermediaryChain: CHAIN_IDs.HYPEREVM,
 } as ChainConfig;
