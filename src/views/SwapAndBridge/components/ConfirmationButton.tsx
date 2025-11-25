@@ -14,7 +14,7 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined, withOpacity } from "utils";
+import { COLORS, formatUSDString, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
@@ -604,7 +604,7 @@ const FeeBreakdownValue = styled.span`
 `;
 
 const FeeTimeItemRed = styled(FeeTimeItem)`
-  background: ${withOpacity("var(--functional-red)", 0.2)};
+  background: rgba(255, 97, 102, 0.2);
   border-radius: 999px;
   height: 20px;
   padding-inline: 6px;
