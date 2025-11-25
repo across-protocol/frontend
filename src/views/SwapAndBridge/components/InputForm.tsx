@@ -258,18 +258,6 @@ const TokenSelectorColumn = styled.div`
   gap: 12px;
 `;
 
-const ValueRow = styled.div`
-  font-size: 16px;
-  span {
-    margin-left: 4px;
-  }
-  span,
-  svg {
-    display: inline-block;
-    vertical-align: middle;
-  }
-`;
-
 const UnitToggleButtonWrapper = styled.div`
   display: flex;
   width: 100%;
@@ -405,7 +393,7 @@ const TokenInputWrapper = styled.div`
   padding: 24px;
   border-radius: 24px;
   background: ${COLORS["black-700"]};
-  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
 `;
 
 const Wrapper = styled.div`
