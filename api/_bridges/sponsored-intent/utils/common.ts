@@ -13,7 +13,7 @@ import {
   SUPPORTED_INPUT_TOKENS,
   SUPPORTED_DESTINATION_CHAINS,
 } from "./constants";
-import { ConvertDecimals, maxBN } from "../../../_utils";
+import { ConvertDecimals, maxBN, minBN } from "../../../_utils";
 import { getCachedTokenBalance } from "../../../_balance";
 import {
   getFullRelayers,
@@ -90,18 +90,28 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
     )
   );
   const maxBalance = maxBN(...relayerBalances);
-  const maxDeposit = ConvertDecimals(
+  const maxAvailableBalance = ConvertDecimals(
     bridgeableOutputToken.decimals,
     params.inputToken.decimals
   )(maxBalance);
 
-  if (!maxBalance.gte(params.amountHyperEvm)) {
+  const MAX_USDH_DEPOSIT_LIMIT = ethers.utils.parseUnits(
+    "50000",
+    bridgeableOutputToken.decimals
+  );
+  const maxDeposit: BigNumber = minBN(
+    maxAvailableBalance,
+    MAX_USDH_DEPOSIT_LIMIT
+  );
+
+  if (params.amountHyperEvm.gt(maxDeposit)) {
     throw new AmountTooHighError({
       message: `${
         ERROR_MESSAGE_PREFIX
-      }: Amount exceeds max. deposit limit ${maxDeposit.toString()} ${
-        params.inputToken.symbol
-      } on HyperEVM`,
+      }: Amount exceeds max. deposit limit ${ethers.utils.formatUnits(
+        maxDeposit,
+        params.inputToken.decimals
+      )} ${params.inputToken.symbol} on HyperEVM`,
     });
   }
 }
