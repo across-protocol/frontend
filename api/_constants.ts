@@ -220,6 +220,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD].toLowerCase()]:
+    CHAIN_IDs.MONAD,
   [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
     CHAIN_IDs.PLASMA,
   [TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM].toLowerCase()]:
@@ -310,6 +312,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "hype",
   "xpl",
   "pol",
+  "mon",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -327,6 +330,8 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -369,7 +374,7 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
-export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2 * 60 * 60; // 2 hours
 
 export const CUSTOM_GAS_TOKENS = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
@@ -381,6 +386,14 @@ export const CUSTOM_GAS_TOKENS = {
   [CHAIN_IDs.PLASMA]: "XPL",
   [CHAIN_IDs.HYPERCORE]: "HYPE",
 };
+
+export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family !== constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
+
+export const SVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family === constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
 
 export const STABLE_COIN_SYMBOLS = Array.from(
   new Set([
