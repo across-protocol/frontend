@@ -130,7 +130,7 @@ export function useDefaultRoute(): DefaultRoute {
 
     // Use wallet chain if connected, otherwise undefined (will use defaults)
     const { inputToken, outputToken } = selectTokens(
-      connectedChainId ?? undefined,
+      connectedChainId === 0 ? undefined : connectedChainId,
       CHAIN_IDs.BASE,
       CHAIN_IDs.ARBITRUM
     );

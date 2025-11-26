@@ -1,90 +1,56 @@
 import { useQuery } from "@tanstack/react-query";
-import { BigNumber } from "ethers";
 import {
-  SwapApiToken,
   swapApprovalApiCall,
   SwapApprovalApiCallReturnType,
   SwapApprovalApiQueryParams,
 } from "utils/serverless-api/prod/swap-approval";
-import { chainIsSvm } from "utils/sdk";
-
-// Placeholder addresses for quote simulation when wallet is not connected
-const PLACEHOLDER_EVM_ADDRESS = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
-const PLACEHOLDER_SVM_ADDRESS = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
-
-type SwapQuoteParams = {
-  origin: SwapApiToken | null;
-  destination: SwapApiToken | null;
-  amount: BigNumber | null;
-  isInputAmount: boolean;
-  depositor: string | undefined;
-  recipient: string | undefined;
-  integratorId?: string;
-  refundAddress?: string;
-  refundOnOrigin?: boolean;
-  slippageTolerance?: number;
-};
+import { useDebounce } from "@uidotdev/usehooks";
+import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 
 const useSwapQuote = ({
-  origin,
-  destination,
+  originToken: origin,
+  destinationToken: destination,
   amount,
-  isInputAmount,
-  recipient,
-  integratorId,
-  refundAddress,
-  depositor,
-  refundOnOrigin = true,
-}: SwapQuoteParams) => {
+  destinationAccount: recipient,
+  tradeType,
+  originAccount: depositor,
+}: QuoteRequest) => {
+  const debouncedAmount = useDebounce(amount, 300);
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "swap-quote",
       origin,
       destination,
-      amount,
-      isInputAmount,
-      depositor,
-      recipient,
+      debouncedAmount,
+      tradeType,
+      depositor.address,
+      recipient.address,
     ],
-    queryFn: async (): Promise<SwapApprovalApiCallReturnType | undefined> => {
-      if (Number(amount) <= 0) {
-        return undefined;
+    queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
+      if (Number(debouncedAmount) <= 0) {
+        return Promise.resolve(undefined);
       }
-      if (!origin || !destination || !amount) {
+      if (!origin || !destination || !debouncedAmount) {
         throw new Error("Missing required swap quote parameters");
       }
 
-      // Use appropriate placeholder address based on chain ecosystem when wallet is not connected
-      const getPlaceholderAddress = (chainId: number) => {
-        return chainIsSvm(chainId)
-          ? PLACEHOLDER_SVM_ADDRESS
-          : PLACEHOLDER_EVM_ADDRESS;
-      };
-
       const isUsingPlaceholderDepositor = !depositor;
-      const effectiveDepositor =
-        depositor || getPlaceholderAddress(origin.chainId);
-      const effectiveRecipient =
-        recipient || getPlaceholderAddress(destination.chainId);
 
       const params: SwapApprovalApiQueryParams = {
-        tradeType: isInputAmount ? "exactInput" : "minOutput",
+        tradeType: tradeType,
         inputToken: origin.address,
         outputToken: destination.address,
         originChainId: origin.chainId,
         destinationChainId: destination.chainId,
-        depositor: effectiveDepositor,
-        recipient: effectiveRecipient,
-        amount: amount.toString(),
-        refundOnOrigin,
+        depositor: depositor.address,
+        recipient: recipient.address,
+        amount: debouncedAmount.toString(),
+        refundOnOrigin: true,
         // Skip transaction estimation when using placeholder address
         skipOriginTxEstimation: isUsingPlaceholderDepositor,
-        ...(integratorId ? { integratorId } : {}),
-        ...(refundAddress ? { refundAddress } : {}),
       };
 
-      const data = await swapApprovalApiCall(params);
-      return data;
+      return swapApprovalApiCall(params);
     },
     enabled: !!origin?.address && !!destination?.address && !!amount,
     retry: 2,

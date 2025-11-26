@@ -5,7 +5,6 @@ import useSwapQuote from "./useSwapQuote";
 import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
-import { useDebounce } from "@uidotdev/usehooks";
 import { getEcosystemFromToken, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
@@ -30,11 +29,8 @@ export type UseSwapAndBridgeReturn = {
 };
 
 export function useSwapAndBridge(
-  quoteRequest: QuoteRequest,
-  isAmountOrigin: boolean
+  quoteRequest: QuoteRequest
 ): UseSwapAndBridgeReturn {
-  const debouncedAmount = useDebounce(quoteRequest.amount, 300);
-
   const { isConnected: isConnectedEVM } = useConnectionEVM();
   const { isConnected: isConnectedSVM } = useConnectionSVM();
 
@@ -65,16 +61,7 @@ export function useSwapAndBridge(
     data: swapQuote,
     isLoading: isQuoteLoading,
     error: quoteError,
-  } = useSwapQuote({
-    origin: quoteRequest.originToken ? quoteRequest.originToken : null,
-    destination: quoteRequest.destinationToken
-      ? quoteRequest.destinationToken
-      : null,
-    amount: debouncedAmount,
-    isInputAmount: isAmountOrigin,
-    depositor: quoteRequest.originAccount?.address,
-    recipient: quoteRequest.destinationAccount?.address,
-  });
+  } = useSwapQuote(quoteRequest);
 
   const approvalAction = useSwapApprovalAction(
     quoteRequest.originToken?.chainId || 0,
@@ -83,7 +70,7 @@ export function useSwapAndBridge(
 
   const validation = useValidateSwapAndBridge(
     quoteRequest.amount,
-    isAmountOrigin,
+    quoteRequest.tradeType === "exactInput",
     quoteRequest.originToken,
     quoteRequest.destinationToken,
     isOriginConnected,

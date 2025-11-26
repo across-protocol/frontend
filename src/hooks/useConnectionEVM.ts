@@ -1,10 +1,10 @@
 import { providers } from "ethers";
-import { useMemo, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Config,
+  useAccount,
   useClient,
   useConnectorClient,
-  useAccount,
   useDisconnect,
   useSwitchChain,
 } from "wagmi";

@@ -28,7 +28,7 @@ export default function SwapAndBridge() {
     buttonLabel,
     onConfirm,
     destinationChainEcosystem,
-  } = useSwapAndBridge(quoteRequest, isAmountOrigin);
+  } = useSwapAndBridge(quoteRequest);
 
   return (
     <LayoutV2 maxWidth={600}>
