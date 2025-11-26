@@ -11,6 +11,7 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
+import type { ChainEcosystem } from "../../../constants/chains/types";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
@@ -71,7 +72,7 @@ export function useSwapAndBridge(
       : !!toAccountManagement.toAccountSVM;
 
   // Determine which wallet type needs to be connected (if any)
-  const walletTypeToConnect: "evm" | "svm" | undefined = (() => {
+  const walletTypeToConnect: ChainEcosystem | undefined = (() => {
     if (!isOriginConnected) {
       return originChainEcosystem;
     }

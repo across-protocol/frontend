@@ -1,7 +1,8 @@
 import { BigNumber } from "ethers";
 import { EnrichedToken } from "../../components/ChainTokenSelector/ChainTokenSelectorModal";
+import type { ChainEcosystem } from "../../../../constants/chains/types";
 
-type QuoteAccount = { accountType: "evm" | "svm"; address: string };
+type QuoteAccount = { accountType: ChainEcosystem; address: string };
 
 export type QuoteRequestAction =
   | {

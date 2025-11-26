@@ -15,10 +15,11 @@ import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToAccountManagement } from "../hooks/useToAccount";
+import type { ChainEcosystem } from "../../../constants/chains/types";
 
 type ChangeAccountModalProps = {
   toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: "evm" | "svm";
+  destinationChainEcosystem: ChainEcosystem;
 };
 
 export const ChangeAccountModal = ({

@@ -12,6 +12,7 @@ import { UnitType, useTokenInput } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
+import type { ChainEcosystem } from "../../../constants/chains/types";
 
 export const InputForm = ({
   originToken,
@@ -40,7 +41,7 @@ export const InputForm = ({
   isAmountOrigin: boolean;
   validationError: AmountInputError | undefined;
   toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: "evm" | "svm";
+  destinationChainEcosystem: ChainEcosystem;
 }) => {
   // Shared unit state for both inputs
   const [unit, setUnit] = useState<UnitType>("token");
@@ -135,7 +136,7 @@ const TokenInput = ({
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
   toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: "evm" | "svm";
+  destinationChainEcosystem: ChainEcosystem;
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
