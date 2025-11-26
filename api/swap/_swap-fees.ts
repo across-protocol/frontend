@@ -2,7 +2,7 @@ import { BigNumber, ethers, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { getCachedTokenPrice } from "../_utils";
-import { Token } from "../_dexes/types";
+import { BridgeProvider, Token } from "../_dexes/types";
 import { SwapQuote } from "../_dexes/types";
 import { AppFee } from "../_dexes/utils";
 import {
@@ -78,6 +78,7 @@ export async function calculateSwapFees(params: {
   destinationChainId: number;
   indirectDestinationRoute?: IndirectDestinationRoute;
   logger: Logger;
+  bridgeProvider?: BridgeProvider;
 }): Promise<SwapFees | undefined> {
   const {
     inputAmount,
@@ -99,6 +100,7 @@ export async function calculateSwapFees(params: {
     destinationChainId,
     indirectDestinationRoute,
     logger,
+    bridgeProvider = "across",
   } = params;
 
   try {
@@ -246,9 +248,12 @@ export async function calculateSwapFees(params: {
           indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
         )
       ) * outputTokenPriceUsd;
-    const maxTotalFeeUsd = parseFloat(
-      (inputAmountUsd - outputMinAmountSansAppFeesUsd).toFixed(4)
-    );
+    const maxTotalFeeUsd =
+      bridgeProvider === "sponsored-intent"
+        ? 0
+        : parseFloat(
+            (inputAmountUsd - outputMinAmountSansAppFeesUsd).toFixed(4)
+          );
     const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: maxTotalFeeUsd,
       inputAmountUsd,
@@ -276,9 +281,12 @@ export async function calculateSwapFees(params: {
         )
       ) * outputTokenPriceUsd;
 
-    const expectedTotalFeeUsd = parseFloat(
-      (inputAmountUsd - expectedOutputAmountSansAppFeesUsd).toFixed(4)
-    );
+    const expectedTotalFeeUsd =
+      bridgeProvider === "sponsored-intent"
+        ? 0
+        : parseFloat(
+            (inputAmountUsd - expectedOutputAmountSansAppFeesUsd).toFixed(4)
+          );
     const { amount: expectedTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: expectedTotalFeeUsd,
       inputAmountUsd,

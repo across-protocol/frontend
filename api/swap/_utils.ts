@@ -766,6 +766,7 @@ export async function buildBaseSwapResponseJson(params: {
       destinationChainId: params.destinationChainId,
       indirectDestinationRoute: params.indirectDestinationRoute,
       logger: params.logger,
+      bridgeProvider: params.bridgeQuote.provider,
     }),
     inputAmount,
     maxInputAmount,
