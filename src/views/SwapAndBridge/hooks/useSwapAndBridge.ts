@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
@@ -6,12 +6,12 @@ import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
-import { getEcosystem, getQuoteWarningMessage } from "utils";
+import { getEcosystemFromToken, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
-import { useToAccount } from "views/Bridge/hooks/useToAccount";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import type { ChainEcosystem } from "../../../constants/chains/types";
+import { useOnConfirm } from "./useOnConfirm";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
@@ -27,7 +27,6 @@ export type UseSwapAndBridgeReturn = {
 
   onConfirm: () => Promise<void>;
   destinationChainEcosystem: "svm" | "evm";
-  toAccountManagement: ReturnType<typeof useToAccount>;
 };
 
 export function useSwapAndBridge(
@@ -36,40 +35,20 @@ export function useSwapAndBridge(
 ): UseSwapAndBridgeReturn {
   const debouncedAmount = useDebounce(quoteRequest.amount, 300);
 
-  const {
-    account: accountEVM,
-    connect: connectEVM,
-    isConnected: isConnectedEVM,
-  } = useConnectionEVM();
-  const {
-    account: accountSVM,
-    connect: connectSVM,
-    isConnected: isConnectedSVM,
-  } = useConnectionSVM();
+  const { isConnected: isConnectedEVM } = useConnectionEVM();
+  const { isConnected: isConnectedSVM } = useConnectionSVM();
 
-  const toAccountManagement = useToAccount(
-    quoteRequest.destinationToken?.chainId
+  const originChainEcosystem = getEcosystemFromToken(quoteRequest.originToken);
+  const destinationChainEcosystem = getEcosystemFromToken(
+    quoteRequest.destinationToken
   );
-
-  const originChainEcosystem = quoteRequest.originToken?.chainId
-    ? getEcosystem(quoteRequest.originToken?.chainId)
-    : "evm";
-  const destinationChainEcosystem = quoteRequest.destinationToken?.chainId
-    ? getEcosystem(quoteRequest.destinationToken?.chainId)
-    : "evm";
-
-  const depositor =
-    originChainEcosystem === "evm" ? accountEVM : accountSVM?.toBase58();
 
   // Check if origin wallet is connected
   const isOriginConnected =
     originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
 
   // Check if destination recipient is set (appropriate wallet connected for destination ecosystem)
-  const isRecipientSet =
-    destinationChainEcosystem === "evm"
-      ? !!toAccountManagement.toAccountEVM
-      : !!toAccountManagement.toAccountSVM;
+  const isRecipientSet = quoteRequest.destinationAccount;
 
   // Determine which wallet type needs to be connected (if any)
   const walletTypeToConnect: ChainEcosystem | undefined = (() => {
@@ -93,8 +72,8 @@ export function useSwapAndBridge(
       : null,
     amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
-    depositor,
-    recipient: toAccountManagement.currentRecipientAccount,
+    depositor: quoteRequest.originAccount?.address,
+    recipient: quoteRequest.destinationAccount?.address,
   });
 
   const approvalAction = useSwapApprovalAction(
@@ -119,40 +98,7 @@ export function useSwapAndBridge(
     return swapQuote?.expectedOutputAmount?.toString();
   }, [swapQuote]);
 
-  const onConfirm = useCallback(async () => {
-    // If origin wallet is not connected, connect it first
-    if (!isOriginConnected) {
-      if (originChainEcosystem === "evm") {
-        connectEVM({ trackSection: "bridgeForm" });
-        return;
-      } else {
-        connectSVM({ trackSection: "bridgeForm" });
-        return;
-      }
-    }
-
-    // If destination recipient is not set, connect the destination wallet
-    if (!isRecipientSet) {
-      if (destinationChainEcosystem === "evm") {
-        connectEVM({ trackSection: "bridgeForm" });
-        return;
-      } else {
-        connectSVM({ trackSection: "bridgeForm" });
-        return;
-      }
-    }
-
-    // Otherwise, proceed with the transaction
-    await approvalAction.buttonActionHandler();
-  }, [
-    isOriginConnected,
-    isRecipientSet,
-    originChainEcosystem,
-    destinationChainEcosystem,
-    approvalAction,
-    connectEVM,
-    connectSVM,
-  ]);
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
 
   // Button state logic
   const buttonState: BridgeButtonState = useMemo(() => {
@@ -241,7 +187,6 @@ export function useSwapAndBridge(
 
     onConfirm,
     destinationChainEcosystem,
-    toAccountManagement,
   };
 }
 

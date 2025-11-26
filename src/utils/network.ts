@@ -1,5 +1,6 @@
 import { ChainId } from "./constants";
 import { chainIsSvm } from "./sdk";
+import { EnrichedToken } from "../views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 
 /**
  * Resolves the current vercel endpoint dynamically
@@ -21,4 +22,10 @@ export const resolveWebsiteUrl = () => {
 
 export function getEcosystem(chainId: ChainId) {
   return chainIsSvm(chainId) ? "svm" : "evm";
+}
+
+export function getEcosystemFromToken(
+  token: EnrichedToken | null
+): "svm" | "evm" {
+  return token?.chainId ? getEcosystem(token?.chainId) : "evm";
 }

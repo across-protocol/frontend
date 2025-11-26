@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { isAddress as isSvmAddress } from "@solana/kit";
 
@@ -14,24 +14,50 @@ import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
-import { ToAccountManagement } from "../hooks/useToAccount";
+import { useToAccount } from "../hooks/useToAccount";
 import type { ChainEcosystem } from "../../../constants/chains/types";
-
-type ChangeAccountModalProps = {
-  toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: ChainEcosystem;
-};
+import {
+  QuoteRequest,
+  QuoteRequestAction,
+} from "../../SwapAndBridge/hooks/useQuoteRequest/quoteRequestAction";
 
 export const ChangeAccountModal = ({
-  toAccountManagement,
   destinationChainEcosystem,
-}: ChangeAccountModalProps) => {
+  quoteRequest,
+  dispatchQuoteRequestAction,
+}: {
+  destinationChainEcosystem: ChainEcosystem;
+  quoteRequest: QuoteRequest;
+  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
+}) => {
   const {
     currentRecipientAccount,
     handleChangeToAddressEVM,
     handleChangeToAddressSVM,
-    defaultRecipientAccount,
-  } = toAccountManagement;
+  } = useToAccount(quoteRequest.destinationToken?.chainId);
+
+  useEffect(() => {
+    if (currentRecipientAccount) {
+      dispatchQuoteRequestAction({
+        type: "SET_DESTINATION_ACCOUNT",
+        payload: {
+          accountType: destinationChainEcosystem,
+          address: currentRecipientAccount,
+        },
+      });
+    } else {
+      dispatchQuoteRequestAction({
+        type: "SET_DESTINATION_ACCOUNT",
+        payload: quoteRequest.originAccount,
+      });
+    }
+  }, [
+    currentRecipientAccount,
+    quoteRequest.originAccount,
+    dispatchQuoteRequestAction,
+    destinationChainEcosystem,
+  ]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayModal, setDisplayModal] = useState(false);
   const [userInput, setUserInput] = useState(currentRecipientAccount ?? "");
@@ -116,14 +142,15 @@ export const ChangeAccountModal = ({
         <Wrapper>
           <RowSpaced>
             <SubHeading>Wallet Address</SubHeading>
-            {defaultRecipientAccount &&
-              userInput !== defaultRecipientAccount && (
-                <ResetButton
-                  onClick={() => setUserInput(defaultRecipientAccount ?? "")}
-                >
-                  Reset to Default
-                </ResetButton>
-              )}
+            {userInput !== quoteRequest.originAccount?.address && (
+              <ResetButton
+                onClick={() =>
+                  setUserInput(quoteRequest.originAccount?.address ?? "")
+                }
+              >
+                Reset to Default
+              </ResetButton>
+            )}
           </RowSpaced>
 
           <InputGroup validationLevel={validationLevel}>
@@ -164,7 +191,7 @@ export const ChangeAccountModal = ({
 const ResetButton = styled.button`
   font-size: 14px;
   color: ${COLORS.aqua};
-  padding-block: 0px;
+  padding-block: 0;
 `;
 
 const RowSpaced = styled.div`
@@ -177,7 +204,7 @@ const Trigger = styled.button`
   color: var(--base-bright-gray, #e0f3ff);
 
   /* Body/Small */
-  font-family: Barlow;
+  font-family: Barlow, serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -249,7 +276,7 @@ const ButtonWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding: 0px;
+  padding: 0;
   gap: 16px;
   width: 100%;
 `;

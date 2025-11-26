@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useAddressType } from "hooks/useAddressType";
@@ -9,8 +9,6 @@ export type ToAccount = {
   isContract: boolean;
   is7702Delegate: boolean;
 };
-
-export type ToAccountManagement = ReturnType<typeof useToAccount>;
 
 export function useToAccount(toChainId?: number) {
   const [customToAddressEVM, setCustomToAddressEVM] = useState<
