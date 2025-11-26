@@ -17,6 +17,13 @@ export type SlippageTolerance = number | "auto";
 
 export type OriginOrDestination = "origin" | "destination";
 
+export type BridgeProvider =
+  | "across"
+  | "hypercore"
+  | "cctp"
+  | "oft"
+  | "sponsored-intent";
+
 export type { AmountType, CrossSwapType };
 
 export type Token = {
@@ -152,7 +159,7 @@ export type CrossSwapQuotes = {
         suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
       }
     | {
-        provider: "hypercore" | "cctp" | "oft" | "sponsored-intent";
+        provider: Exclude<BridgeProvider, "across">;
       }
   );
   destinationSwapQuote?: SwapQuote;
