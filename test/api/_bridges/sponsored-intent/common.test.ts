@@ -119,7 +119,7 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
           account: "0x123",
           errorMessagePrefix: "Error",
         })
-      ).rejects.toThrow("Depositor is not initialized on HyperCore");
+      ).rejects.toThrow("Error: Account 0x123 is not initialized on HyperCore");
     });
   });
 
