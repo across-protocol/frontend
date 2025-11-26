@@ -128,7 +128,7 @@ export async function assertAccountExistsOnHyperCore(params: {
 
   if (!depositorExists) {
     throw new InvalidParamError({
-      message: `${errorMessagePrefix}: Depositor is not initialized on HyperCore`,
+      message: `${errorMessagePrefix}: Account ${account} is not initialized on HyperCore`,
     });
   }
 }
