@@ -12,11 +12,28 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
 
 const TEN_PERCENT_SCALED = utils.parseEther("0.1"); // 10%
 
-export function feesTooHigh(quote?: SwapApprovalQuote): boolean {
+export type PriceImpact = {
+  tooHigh: boolean;
+  priceImpact: number;
+  priceImpactFormatted: string;
+};
+
+export function getPriceImpact(quote?: SwapApprovalQuote): PriceImpact {
   if (!quote?.fees?.total?.pct) {
-    return false;
+    return {
+      tooHigh: false,
+      priceImpact: 0,
+      priceImpactFormatted: "0",
+    };
   }
 
-  const totalFeesPct = quote.fees.total.pct;
-  return totalFeesPct.gte(TEN_PERCENT_SCALED);
+  const tooHigh = quote.fees.total.pct.gte(TEN_PERCENT_SCALED);
+  const priceImpact = Number(utils.formatEther(quote.fees.total.pct));
+  const priceImpactFormatted = (priceImpact * 100).toFixed(1);
+
+  return {
+    priceImpact,
+    priceImpactFormatted,
+    tooHigh,
+  };
 }

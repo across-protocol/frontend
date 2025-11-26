@@ -26,7 +26,7 @@ export default function SwapAndBridge() {
     onConfirm,
     destinationChainEcosystem,
     toAccountManagement,
-    showHighFeesWarning,
+    priceImpact,
   } = useSwapAndBridge();
 
   return (
@@ -58,7 +58,7 @@ export default function SwapAndBridge() {
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}
           buttonLabel={buttonLabel}
-          showHighFeesWarning={showHighFeesWarning}
+          priceImpact={priceImpact}
         />
       </Wrapper>
     </LayoutV2>

@@ -19,7 +19,7 @@ import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees } from "../utils/fees";
+import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -43,7 +43,7 @@ interface ConfirmationButtonProps
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel?: string;
-  showHighFeesWarning?: boolean;
+  priceImpact?: PriceImpact;
 }
 
 // Expandable label section component
@@ -56,17 +56,9 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
-    showHighFeesWarning?: boolean;
+    priceImpact?: PriceImpact;
   }>
-> = ({
-  fee,
-  time,
-  expanded,
-  onToggle,
-  showHighFeesWarning,
-  children,
-  hasQuote,
-}) => {
+> = ({ fee, time, expanded, onToggle, priceImpact, children, hasQuote }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -96,14 +88,16 @@ const ExpandableLabelSection: React.FC<
             <Across />
             <Divider />
             <FeeTimeItem>
-              {showHighFeesWarning ? (
+              {priceImpact?.tooHigh ? (
                 <FeeTimeItemRed>
                   <Warning
                     color="var(--functional-red)"
                     width="16"
                     height="16"
                   />
-                  <span>{fee}</span>
+                  <span>
+                    {fee} (-{priceImpact.priceImpactFormatted}%)
+                  </span>
                 </FeeTimeItemRed>
               ) : (
                 <>
@@ -210,7 +204,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonDisabled,
   buttonLoading,
   buttonLabel,
-  showHighFeesWarning,
+  priceImpact,
 }) => {
   const [expanded, setExpanded] = React.useState(false);
 
@@ -276,7 +270,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         visible={true}
         state={state}
         hasQuote={!!swapQuote}
-        showHighFeesWarning={showHighFeesWarning}
+        priceImpact={priceImpact}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -308,18 +302,20 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               </Tooltip>
             </DetailLeft>
             <DetailRight>
-              {showHighFeesWarning ? (
+              {priceImpact?.tooHigh ? (
                 <Tooltip
                   tooltipId="High fee warning"
                   body={
                     <WarningTooltipBody>
-                      Warning: High fees relative to input amount
+                      Warning: High price impact, you will receive{" "}
+                      {priceImpact.priceImpactFormatted}% less than your input.
                     </WarningTooltipBody>
                   }
                 >
                   <DetailRightRed>
                     <Warning width="16px" height="16px" color="inherit" />
-                    {displayValues.totalFee}
+                    {displayValues.totalFee} (-
+                    {priceImpact.priceImpactFormatted}%)
                   </DetailRightRed>
                 </Tooltip>
               ) : (
@@ -381,10 +377,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       >
         {content}
       </Container>
-      {showHighFeesWarning && (
+      {priceImpact?.tooHigh && (
         <FeeWarning>
-          <Warning width="20px" height="20px" color="inherit" /> Fees are very
-          high
+          <Warning width="20px" height="20px" color="inherit" />
+          High price Impact (-{priceImpact.priceImpactFormatted}%)
         </FeeWarning>
       )}
     </>
