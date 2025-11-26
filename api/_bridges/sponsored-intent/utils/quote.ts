@@ -7,7 +7,6 @@ import {
   getBridgeableOutputToken,
   assertSupportedRoute,
   assertSufficientBalanceOnHyperEvm,
-  isToHyperCore,
   assertAccountExistsOnHyperCore,
   getDepositRecipient,
   getDepositMessage,
@@ -26,6 +25,7 @@ import {
 } from "./constants";
 import { InvalidParamError } from "../../../_errors";
 import { resolveTiming } from "../../../_timings";
+import { isToHyperCore } from "../../../_hypercore";
 
 export async function getRelayerFeeDetailsOnHyperEvm(params: {
   inputToken: Token;
@@ -88,7 +88,7 @@ export async function getUsdhIntentQuote({
       inputToken,
       outputToken,
     }),
-    isToHyperCore(outputToken)
+    isToHyperCore(outputToken.chainId)
       ? assertAccountExistsOnHyperCore({
           account: recipient,
           errorMessagePrefix: ERROR_MESSAGE_PREFIX,

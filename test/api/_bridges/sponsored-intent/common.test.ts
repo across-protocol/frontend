@@ -8,10 +8,7 @@ import {
   getDepositMessage,
 } from "../../../../api/_bridges/sponsored-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
-import {
-  accountExistsOnHyperCore,
-  isToHyperCore,
-} from "../../../../api/_hypercore";
+import { accountExistsOnHyperCore } from "../../../../api/_hypercore";
 import {
   getFullRelayers,
   getTransferRestrictedRelayers,
@@ -24,7 +21,10 @@ import {
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
 
 jest.mock("../../../../api/_balance");
-jest.mock("../../../../api/_hypercore");
+jest.mock("../../../../api/_hypercore", () => ({
+  ...jest.requireActual("../../../../api/_hypercore"),
+  accountExistsOnHyperCore: jest.fn(),
+}));
 jest.mock("../../../../api/_relayer-address");
 
 describe("api/_bridges/sponsored-intent/utils/common", () => {
@@ -49,15 +49,6 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
       expect(getBridgeableOutputToken(USDH_ON_HYPERCORE)).toBe(
         BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN.USDH
       );
-    });
-  });
-
-  describe("isToHyperCore", () => {
-    it("should return true for HyperCore chainId", () => {
-      expect(isToHyperCore(USDH_ON_HYPERCORE.chainId)).toBe(true);
-    });
-    it("should return false for other chainId", () => {
-      expect(isToHyperCore(USDH_ON_HYPEREVM.chainId)).toBe(false);
     });
   });
 
