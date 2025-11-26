@@ -126,9 +126,10 @@ export function ChainTokenSelectorModal({
       );
 
       const isUnreachable = isTokenUnreachable(
+        token,
         isOriginToken,
         otherToken
-      )(token);
+      );
 
       return {
         ...token,

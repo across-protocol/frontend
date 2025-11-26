@@ -15,8 +15,9 @@ describe("isTokenUnreachable", () => {
         symbol: "USDT",
       } as EnrichedToken;
 
-      const predicate = isTokenUnreachable(true, otherToken);
-      expect(predicate(token)).toBe(true);
+      const isUnreachable = isTokenUnreachable(token, true, otherToken);
+
+      expect(isUnreachable).toBe(true);
     });
 
     it("should not mark token as unreachable if it's from a different chain", () => {
@@ -30,8 +31,9 @@ describe("isTokenUnreachable", () => {
         symbol: "USDC",
       } as EnrichedToken;
 
-      const predicate = isTokenUnreachable(true, otherToken);
-      expect(predicate(token)).toBe(false);
+      const isUnreachable = isTokenUnreachable(token, true, otherToken);
+
+      expect(isUnreachable).toBe(false);
     });
   });
 
@@ -49,8 +51,13 @@ describe("isTokenUnreachable", () => {
         symbol: "USDC",
       } as EnrichedToken;
 
-      const predicate = isTokenUnreachable(true, destinationToken);
-      expect(predicate(originToken)).toBe(true);
+      const isUnreachable = isTokenUnreachable(
+        originToken,
+        true,
+        destinationToken
+      );
+
+      expect(isUnreachable).toBe(true);
     });
 
     it("should not mark token as unreachable if origin chain is allowed for destination", () => {
@@ -66,8 +73,13 @@ describe("isTokenUnreachable", () => {
         symbol: "USDC",
       } as EnrichedToken;
 
-      const predicate = isTokenUnreachable(true, destinationToken);
-      expect(predicate(originToken)).toBe(false);
+      const isUnreachable = isTokenUnreachable(
+        originToken,
+        true,
+        destinationToken
+      );
+
+      expect(isUnreachable).toBe(false);
     });
   });
 });
