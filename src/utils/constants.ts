@@ -121,6 +121,12 @@ export const tokenList = [
       displaySymbol = "USDT";
     }
 
+    // Override for USDH-SPOT
+    if (symbol === "USDH-SPOT") {
+      name = "Hyperliquid USD";
+      displaySymbol = "USDH";
+    }
+
     return {
       ...tokenInfo,
       name,
