@@ -177,9 +177,11 @@ export async function handleBaseSwapQueryParams(
     const isToUsdh = !![
       TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
       TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
-    ].find(
-      (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
-    );
+    ]
+      .filter(Boolean)
+      .find(
+        (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+      );
 
     if (!outputBridgeable && !isToUsdh) {
       throw new InvalidParamError({
