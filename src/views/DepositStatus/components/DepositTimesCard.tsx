@@ -27,6 +27,8 @@ import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
 import { useToken } from "hooks/useToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import { FillData } from "../hooks/useDepositTracking/types";
+import { getIntermediaryTokenInfo } from "utils/token";
 
 type Props = {
   status: DepositStatus;
@@ -34,6 +36,7 @@ type Props = {
   depositTxElapsedSeconds?: number;
   fillTxElapsedSeconds?: number;
   fillTxHash?: string;
+  fillLog?: FillData;
   depositTxHash?: string;
   fromChainId: number;
   toChainId: number;
@@ -48,6 +51,7 @@ export function DepositTimesCard({
   depositTxElapsedSeconds,
   fillTxElapsedSeconds,
   fillTxHash,
+  fillLog,
   depositTxHash,
   fromChainId,
   toChainId,
@@ -76,15 +80,38 @@ export function DepositTimesCard({
   const netFee = netFeeUsd?.toString();
   const amountSentBaseCurrency = amountAsBaseCurrency?.toString();
 
+  // Check if destination chain is an intermediary chain and resolve token info if needed
+  const toChainInfo = getChainInfo(toChainId);
+  const resolvedTokenInfo =
+    outputTokenSymbol && toChainInfo.intermediaryChain
+      ? getIntermediaryTokenInfo({
+          symbol: outputTokenSymbol,
+          chainId: toChainId,
+        })
+      : undefined;
+
+  // Use resolved token symbol if available, otherwise fall back to original
+  const tokenSymbolForConversion =
+    resolvedTokenInfo?.symbol || outputTokenSymbol || inputTokenSymbol;
+
   const outputTokenForChain = useToken(
-    outputTokenSymbol || inputTokenSymbol,
+    resolvedTokenInfo?.symbol || inputTokenSymbol,
     toChainId
   );
 
-  const { convertBaseCurrencyToToken: convertUsdToOutputToken } =
-    useTokenConversion(outputTokenSymbol || inputTokenSymbol, "usd");
+  const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
+    useTokenConversion(tokenSymbolForConversion, "usd");
 
-  const outputAmount = convertUsdToOutputToken(outputAmountUsd);
+  // Wait for final output amount from fill log
+  const outputAmount = fillLog?.outputAmount;
+
+  // Convert outputAmount to USD
+  const outputAmountUsdFromToken = outputAmount
+    ? convertOutputTokenToUsd(outputAmount)
+    : undefined;
+
+  // Use USD from token conversion if available, otherwise fall back to calculated USD
+  const finalOutputAmountUsd = outputAmountUsdFromToken ?? outputAmountUsd;
 
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
@@ -185,7 +212,7 @@ export function DepositTimesCard({
         )}
       {isDefined(outputAmount) &&
         outputTokenForChain &&
-        isDefined(outputAmountUsd) && (
+        isDefined(finalOutputAmountUsd) && (
           <Row>
             <Text color="grey-400">Amount received</Text>
             <TokenWrapper>
@@ -197,7 +224,7 @@ export function DepositTimesCard({
                 showTokenLinkOnHover
                 textColor="light-100"
               />
-              <Text color="grey-400">(${formatUSD(outputAmountUsd)})</Text>
+              <Text color="grey-400">(${formatUSD(finalOutputAmountUsd)})</Text>
             </TokenWrapper>
           </Row>
         )}
@@ -263,12 +290,12 @@ function CheckIconExplorerLink({
     return <CheckIcon />;
   }
 
+  const explorerUrl = chainInfo.intermediaryChain
+    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
+    : chainInfo.constructExplorerLink(txHash);
+
   return (
-    <a
-      href={chainInfo.constructExplorerLink(txHash)}
-      target="_blank"
-      rel="noreferrer"
-    >
+    <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
   );

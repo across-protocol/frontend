@@ -216,3 +216,18 @@ export function getTokenExplorerLinkFromAddress(
   const explorerBaseUrl = getChainInfo(chainId).explorerUrl;
   return `${explorerBaseUrl}/address/${address}`;
 }
+
+// mapping to resolve intermediary token info
+const INTERMEDIARY_TOKEN_MAPPING: Record<
+  number,
+  Record<string, { symbol: string; chainId: number }>
+> = {
+  1337: { "USDH-SPOT": { symbol: "USDH", chainId: 999 } },
+};
+
+export function getIntermediaryTokenInfo(tokenInfo: {
+  symbol: string;
+  chainId: number;
+}): { symbol: string; chainId: number } | undefined {
+  return INTERMEDIARY_TOKEN_MAPPING?.[tokenInfo.chainId]?.[tokenInfo.symbol];
+}

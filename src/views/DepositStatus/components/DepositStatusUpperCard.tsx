@@ -158,6 +158,7 @@ export function DepositStatusUpperCard({
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
           fillTxHash={fillQuery.data?.fillTxHash}
+          fillLog={fillQuery.data?.fillLog}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

@@ -11,7 +11,11 @@ import {
   paginatedEventQuery,
   toAddressType,
 } from "utils/sdk";
-import { chainMaxBlockLookback, indexerApiBaseUrl } from "utils/constants";
+import {
+  chainMaxBlockLookback,
+  indexerApiBaseUrl,
+  INDIRECT_CHAINS,
+} from "utils/constants";
 import axios from "axios";
 import {
   DepositedInfo,
@@ -95,6 +99,12 @@ export class EVMStrategy implements IChainStrategy {
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
     }
+
+    let fillChainId = this.chainId;
+    if (INDIRECT_CHAINS[this.chainId]) {
+      fillChainId = INDIRECT_CHAINS[this.chainId]?.intermediaryChain;
+    }
+
     try {
       // First try the rewards API
       const { data } = await axios.get<{
@@ -112,15 +122,15 @@ export class EVMStrategy implements IChainStrategy {
 
       if (data?.status === "filled" && data.fillTx) {
         // Get fill transaction details
-        const provider = getProvider(this.chainId);
+        const provider = getProvider(fillChainId);
         const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
         const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
 
-        const parsedFIllLog = parseFilledRelayLog(fillTxReceipt.logs);
+        const parsedFillLog = parseFilledRelayLog(fillTxReceipt.logs);
 
-        if (!parsedFIllLog) {
+        if (!parsedFillLog) {
           throw new Error(
-            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${this.chainId}`
+            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
           );
         }
 
@@ -129,57 +139,51 @@ export class EVMStrategy implements IChainStrategy {
           fillTxTimestamp: fillTxBlock.timestamp,
           depositInfo,
           fillLog: {
-            ...parsedFIllLog,
-            ...parsedFIllLog.args,
+            ...parsedFillLog,
+            ...parsedFillLog.args,
             outputAmount: data?.swapOutputAmount
               ? BigNumber.from(data.swapOutputAmount)
-              : parsedFIllLog.args.outputAmount,
+              : parsedFillLog.args.outputAmount,
             inputToken: toAddressType(
-              parsedFIllLog.args.inputToken,
-              Number(parsedFIllLog.args.originChainId)
+              parsedFillLog.args.inputToken,
+              Number(parsedFillLog.args.originChainId)
             ),
             outputToken: toAddressType(
-              data?.swapOutputToken ?? parsedFIllLog.args.outputToken,
-              Number(this.chainId)
+              data?.swapOutputToken ?? parsedFillLog.args.outputToken,
+              fillChainId
             ),
             depositor: toAddressType(
-              parsedFIllLog.args.depositor,
-              Number(parsedFIllLog.args.originChainId)
+              parsedFillLog.args.depositor,
+              Number(parsedFillLog.args.originChainId)
             ),
-            recipient: toAddressType(
-              parsedFIllLog.args.recipient,
-              Number(this.chainId)
-            ),
+            recipient: toAddressType(parsedFillLog.args.recipient, fillChainId),
             exclusiveRelayer: toAddressType(
-              parsedFIllLog.args.exclusiveRelayer,
-              Number(this.chainId)
+              parsedFillLog.args.exclusiveRelayer,
+              fillChainId
             ),
-            relayer: toAddressType(
-              parsedFIllLog.args.relayer,
-              Number(this.chainId)
-            ),
-            destinationChainId: this.chainId,
+            relayer: toAddressType(parsedFillLog.args.relayer, fillChainId),
+            destinationChainId: fillChainId,
             fillTimestamp: fillTxBlock.timestamp,
-            blockNumber: parsedFIllLog.blockNumber,
-            txnRef: parsedFIllLog.transactionHash,
-            txnIndex: parsedFIllLog.transactionIndex,
-            logIndex: parsedFIllLog.logIndex,
-            originChainId: Number(parsedFIllLog.args.originChainId),
-            repaymentChainId: Number(parsedFIllLog.args.repaymentChainId),
-            depositId: ethers.BigNumber.from(parsedFIllLog.args.depositId),
+            blockNumber: parsedFillLog.blockNumber,
+            txnRef: parsedFillLog.transactionHash,
+            txnIndex: parsedFillLog.transactionIndex,
+            logIndex: parsedFillLog.logIndex,
+            originChainId: Number(parsedFillLog.args.originChainId),
+            repaymentChainId: Number(parsedFillLog.args.repaymentChainId),
+            depositId: ethers.BigNumber.from(parsedFillLog.args.depositId),
             relayExecutionInfo: {
               updatedMessageHash:
-                parsedFIllLog.args.messageHash ||
+                parsedFillLog.args.messageHash ||
                 getMessageHash(
-                  parsedFIllLog.args.relayExecutionInfo.updatedMessageHash
+                  parsedFillLog.args.relayExecutionInfo.updatedMessageHash
                 ),
               updatedRecipient: toAddressType(
-                parsedFIllLog.args.relayExecutionInfo.updatedRecipient,
-                this.chainId
+                parsedFillLog.args.relayExecutionInfo.updatedRecipient,
+                fillChainId
               ),
               updatedOutputAmount:
-                parsedFIllLog.args.relayExecutionInfo.updatedOutputAmount,
-              fillType: parsedFIllLog.args.relayExecutionInfo.fillType,
+                parsedFillLog.args.relayExecutionInfo.updatedOutputAmount,
+              fillType: parsedFillLog.args.relayExecutionInfo.fillType,
             },
           } as const satisfies FillData,
           status: "filled",
@@ -191,12 +195,12 @@ export class EVMStrategy implements IChainStrategy {
 
     // If API approach didn't work, find the fill on-chain
     try {
-      const provider = getProvider(this.chainId);
+      const provider = getProvider(fillChainId);
       const [blockForTimestamp, latestBlock] = await Promise.all([
         getBlockForTimestamp(provider, depositInfo.depositTimestamp),
         provider.getBlockNumber(),
       ]);
-      const maxLookBack = chainMaxBlockLookback[this.chainId];
+      const maxLookBack = chainMaxBlockLookback[fillChainId];
       const destinationEventSearchConfig = {
         from: blockForTimestamp,
         to: latestBlock,
@@ -204,7 +208,7 @@ export class EVMStrategy implements IChainStrategy {
       };
 
       const config = getConfig();
-      const destinationSpokePool = config.getSpokePool(this.chainId);
+      const destinationSpokePool = config.getSpokePool(fillChainId);
       const filledRelayEvents = (await paginatedEventQuery(
         destinationSpokePool,
         destinationSpokePool.filters.FilledRelay(
@@ -224,7 +228,7 @@ export class EVMStrategy implements IChainStrategy {
       const filledRelayEvent = filledRelayEvents?.[0];
 
       if (!filledRelayEvent) {
-        throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
       const messageHash = filledRelayEvent.args.messageHash;
 
@@ -234,7 +238,8 @@ export class EVMStrategy implements IChainStrategy {
       const fillTxBlock = await filledRelayEvent.getBlock();
 
       const swapMetadata = await this.getSwapMetadata(
-        filledRelayEvent.transactionHash
+        filledRelayEvent.transactionHash,
+        fillChainId
       );
 
       return {
@@ -250,7 +255,7 @@ export class EVMStrategy implements IChainStrategy {
           ),
           outputToken: toAddressType(
             swapMetadata?.outputToken ?? filledRelayEvent.args.outputToken,
-            Number(this.chainId)
+            fillChainId
           ),
           depositor: toAddressType(
             filledRelayEvent.args.depositor,
@@ -258,18 +263,15 @@ export class EVMStrategy implements IChainStrategy {
           ),
           recipient: toAddressType(
             filledRelayEvent.args.recipient,
-            Number(this.chainId)
+            fillChainId
           ),
           exclusiveRelayer: toAddressType(
             filledRelayEvent.args.exclusiveRelayer,
-            Number(this.chainId)
+            fillChainId
           ),
-          relayer: toAddressType(
-            filledRelayEvent.args.relayer,
-            Number(this.chainId)
-          ),
+          relayer: toAddressType(filledRelayEvent.args.relayer, fillChainId),
           messageHash,
-          destinationChainId: this.chainId,
+          destinationChainId: fillChainId,
           fillTimestamp: fillTxBlock.timestamp,
           blockNumber: filledRelayEvent.blockNumber,
           txnRef: filledRelayEvent.transactionHash,
@@ -283,7 +285,7 @@ export class EVMStrategy implements IChainStrategy {
             updatedMessageHash,
             updatedRecipient: toAddressType(
               filledRelayEvent.args.relayExecutionInfo.updatedRecipient,
-              Number(this.chainId)
+              fillChainId
             ),
           },
         } satisfies FillData,
@@ -295,11 +297,14 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getSwapMetadata(txHash: string): Promise<SwapMetaData | undefined> {
+  async getSwapMetadata(
+    txHash: string,
+    fillChainId: number
+  ): Promise<SwapMetaData | undefined> {
     try {
       const swapMetadata = await findSwapMetaDataEventsFromTxHash(
         txHash,
-        getProvider(this.chainId)
+        getProvider(fillChainId)
       );
 
       return swapMetadata;

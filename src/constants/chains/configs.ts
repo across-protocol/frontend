@@ -481,6 +481,7 @@ export const hyperCore = {
   nativeCurrencySymbol: "HYPE",
   customRpcUrl: process.env.REACT_APP_CHAIN_1337_CUSTOM_RPC_URL,
   pollingInterval: 1000,
+  intermediaryChain: 999,
 };
 
 export const hyperEvm = {

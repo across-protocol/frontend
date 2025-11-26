@@ -213,8 +213,7 @@ const enabledRoutes = {
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
-      enabledMainnetExternalProjects,
-      enabledIndirectMainnetChainConfigs
+      enabledMainnetExternalProjects
     ),
   },
   [CHAIN_IDs.SEPOLIA]: {
@@ -247,18 +246,13 @@ const enabledRoutes = {
     },
     spokePoolPeripheryAddresses: {},
     swapProxyAddresses: {},
-    routes: transformChainConfigs(
-      enabledSepoliaChainConfigs,
-      [],
-      enabledIndirectSepoliaChainConfigs
-    ),
+    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
 
 function transformChainConfigs(
   enabledChainConfigs: typeof enabledMainnetChainConfigs,
-  enabledExternalProjects: typeof enabledMainnetExternalProjects,
-  enabledIndirectChainConfigs: typeof enabledIndirectMainnetChainConfigs
+  enabledExternalProjects: typeof enabledMainnetExternalProjects
 ) {
   const transformedChainConfigs: {
     fromChain: number;
@@ -800,7 +794,8 @@ async function generateRoutes(hubPoolChainId = 1) {
       logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
-      intermediaryChains: chainConfig.intermediaryChains,
+      intermediaryChain: chainConfig.intermediaryChain,
+      restrictedOriginChains: chainConfig.restrictedOriginChains,
       inputTokens: chainConfig.tokens.flatMap((token) => {
         try {
           if (typeof token === "string") {
