@@ -4,12 +4,14 @@ import {
   assertAccountExistsOnHyperCore,
   getHyperEvmChainId,
   getBridgeableOutputToken,
-  isToHyperCore,
   getDepositRecipient,
   getDepositMessage,
 } from "../../../../api/_bridges/sponsored-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
-import { accountExistsOnHyperCore } from "../../../../api/_hypercore";
+import {
+  accountExistsOnHyperCore,
+  isToHyperCore,
+} from "../../../../api/_hypercore";
 import {
   getFullRelayers,
   getTransferRestrictedRelayers,
@@ -52,10 +54,10 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
 
   describe("isToHyperCore", () => {
     it("should return true for HyperCore chainId", () => {
-      expect(isToHyperCore(USDH_ON_HYPERCORE)).toBe(true);
+      expect(isToHyperCore(USDH_ON_HYPERCORE.chainId)).toBe(true);
     });
     it("should return false for other chainId", () => {
-      expect(isToHyperCore(USDH_ON_HYPEREVM)).toBe(false);
+      expect(isToHyperCore(USDH_ON_HYPEREVM.chainId)).toBe(false);
     });
   });
 
