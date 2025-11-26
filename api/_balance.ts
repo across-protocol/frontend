@@ -12,6 +12,7 @@ import {
   getBalanceOnHyperCore,
   getHyperEvmChainId,
   getTokenIndexFromSystemAddress,
+  isToHyperCore,
 } from "./_hypercore";
 
 /**
@@ -138,11 +139,8 @@ export async function getBatchBalanceViaMulticall3(
   balances: Record<string, Record<string, string>>;
 }> {
   const chainIdAsInt = Number(chainId);
-  const isHyperCore = [
-    CHAIN_IDs.HYPERCORE,
-    CHAIN_IDs.HYPERCORE_TESTNET,
-  ].includes(Number(chainId));
-  const providerChainId = isHyperCore
+  const toHyperCore = isToHyperCore(chainIdAsInt);
+  const providerChainId = toHyperCore
     ? getHyperEvmChainId(chainIdAsInt)
     : chainIdAsInt;
 
@@ -175,7 +173,7 @@ export async function getBatchBalanceViaMulticall3(
             multicall3.interface.decodeFunctionResult("getEthBalance", result),
         }))
       );
-    } else if (isHyperCore) {
+    } else if (toHyperCore) {
       for (const address of addresses) {
         const callData = utils.defaultAbiCoder.encode(
           ["address", "uint64"],
