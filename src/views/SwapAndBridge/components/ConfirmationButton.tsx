@@ -380,7 +380,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       {priceImpact?.tooHigh && (
         <FeeWarning>
           <Warning width="20px" height="20px" color="inherit" />
-          High price Impact (-{priceImpact.priceImpactFormatted}%)
+          High price impact (-{priceImpact.priceImpactFormatted}%)
         </FeeWarning>
       )}
     </>
