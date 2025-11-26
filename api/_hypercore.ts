@@ -114,3 +114,7 @@ export function getHyperEvmChainId(hyperCoreChainId: number): number {
     ? CHAIN_IDs.HYPEREVM
     : CHAIN_IDs.HYPEREVM_TESTNET;
 }
+
+export function isToHyperCore(chainId: number) {
+  return [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId);
+}

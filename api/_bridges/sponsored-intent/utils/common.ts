@@ -2,7 +2,7 @@ import { BigNumber, ethers } from "ethers";
 
 import { SwapQuote, Token } from "../../../_dexes/types";
 import { AmountTooHighError, InvalidParamError } from "../../../_errors";
-import { accountExistsOnHyperCore } from "../../../_hypercore";
+import { accountExistsOnHyperCore, isToHyperCore } from "../../../_hypercore";
 import { AppFee } from "../../../_dexes/utils";
 import { CHAIN_IDs } from "../../../_constants";
 import {
@@ -30,12 +30,6 @@ export function getBridgeableOutputToken(outputToken: Token) {
   return BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
 }
 
-export function isToHyperCore(outputToken: Token) {
-  return [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(
-    outputToken.chainId
-  );
-}
-
 export function getZeroBridgeFees(inputToken: Token) {
   const zeroBN = BigNumber.from(0);
   return {
@@ -52,11 +46,7 @@ export function getDepositRecipient(params: {
   const { outputToken, recipient } = params;
 
   // If to HyperCore, the recipient is our custom handler contract on HyperEVM.
-  if (
-    [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(
-      outputToken.chainId
-    )
-  ) {
+  if (isToHyperCore(outputToken.chainId)) {
     return HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS;
   }
   // Otherwise, the recipient is the normal EOA on HyperEVM.
@@ -68,7 +58,7 @@ export function getDepositMessage(params: {
   recipient: string;
 }) {
   const { outputToken, recipient } = params;
-  if (isToHyperCore(outputToken)) {
+  if (isToHyperCore(outputToken.chainId)) {
     return ethers.utils.defaultAbiCoder.encode(["address"], [recipient]);
   }
   return "0x";
