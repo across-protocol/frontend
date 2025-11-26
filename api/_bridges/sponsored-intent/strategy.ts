@@ -15,7 +15,7 @@ import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 
 const name = "sponsored-intent" as const;
 const capabilities: BridgeCapabilities = {
-  ecosystems: ["evm"],
+  ecosystems: ["evm", "svm"],
   supports: {
     A2A: false,
     A2B: false,
