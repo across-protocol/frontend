@@ -1,15 +1,7 @@
-import { INDIRECT_CHAINS } from "../../../../utils";
+import { INDIRECT_CHAINS } from "../../../../utils/constants";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 
-/**
- * Determines if a token is unreachable due to restricted origin chains
- * for indirect destination chains (e.g., Hypercore).
- *
- * @param isOriginToken - Whether we're selecting an origin token
- * @param otherToken - The other token (destination if selecting origin, origin if selecting destination)
- * @returns A function that takes a token and returns true if it's unreachable
- */
-export const getRestrictedOriginChainsUnreachable =
+const getRestrictedOriginChainsUnreachable =
   (isOriginToken: boolean, otherToken: EnrichedToken | null | undefined) =>
   (token: EnrichedToken): boolean => {
     if (!otherToken) return false;
@@ -27,9 +19,7 @@ export const getRestrictedOriginChainsUnreachable =
   };
 
 /**
- * Determines if a token is unreachable based on various criteria.
- * This is a parent function that combines multiple unreachability checks,
- * making it easy to add more checks in the future.
+ * Add reachability checks here
  *
  * @param isOriginToken - Whether we're selecting an origin token
  * @param otherToken - The other token (destination if selecting origin, origin if selecting destination)
