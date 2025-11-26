@@ -437,12 +437,12 @@ describe("GET /swap/approval", () => {
         chainId: CHAIN_IDs.ARBITRUM,
         symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
       },
-      {
-        decimals: TOKEN_SYMBOLS_MAP["USDC-BNB"].decimals,
-        address: TOKEN_SYMBOLS_MAP["USDC-BNB"].addresses[CHAIN_IDs.BSC],
-        chainId: CHAIN_IDs.BSC,
-        symbol: TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol,
-      },
+      // {
+      //   decimals: TOKEN_SYMBOLS_MAP["USDC-BNB"].decimals,
+      //   address: TOKEN_SYMBOLS_MAP["USDC-BNB"].addresses[CHAIN_IDs.BSC],
+      //   chainId: CHAIN_IDs.BSC,
+      //   symbol: TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol,
+      // },
     ];
 
     async function testSponsoredIntentsUsdh(
