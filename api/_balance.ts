@@ -1,13 +1,18 @@
-import { BigNumber, providers } from "ethers";
+import { BigNumber, providers, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { ERC20__factory } from "@across-protocol/contracts/dist/typechain";
 
 import { getSvmProvider, getProvider } from "./_providers";
 import { BLOCK_TAG_LAG, CHAIN_IDs } from "./_constants";
-import { getMulticall3, callViaMulticall3 } from "./_multicall";
+import { getMulticall3 } from "./_multicall";
 import { toSolanaKitAddress } from "./_address";
 import { buildInternalCacheKey, makeCacheGetterAndSetter } from "./_cache";
-import { getBalanceOnHyperCore } from "./_hypercore";
+import {
+  CORE_BALANCE_SYSTEM_PRECOMPILE,
+  getBalanceOnHyperCore,
+  getHyperEvmChainId,
+  getTokenIndexFromSystemAddress,
+} from "./_hypercore";
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address.
@@ -133,56 +138,82 @@ export async function getBatchBalanceViaMulticall3(
   balances: Record<string, Record<string, string>>;
 }> {
   const chainIdAsInt = Number(chainId);
-  const provider = getProvider(chainIdAsInt, {
+  const isHyperCore = [
+    CHAIN_IDs.HYPERCORE,
+    CHAIN_IDs.HYPERCORE_TESTNET,
+  ].includes(Number(chainId));
+  const providerChainId = isHyperCore
+    ? getHyperEvmChainId(chainIdAsInt)
+    : chainIdAsInt;
+
+  const provider = getProvider(providerChainId, {
     useSpeedProvider: true,
   });
 
-  const multicall3 = getMulticall3(chainIdAsInt, provider);
+  const multicall3 = getMulticall3(providerChainId, provider);
 
   if (!multicall3) {
     throw new Error("No Multicall3 deployed on this chain");
   }
 
-  let calls: Parameters<typeof callViaMulticall3>[1] = [];
+  let calls: {
+    target: string;
+    callData: string;
+    decoder: (rawData: string) => utils.Result;
+  }[] = [];
 
   for (const tokenAddress of tokenAddresses) {
     if (tokenAddress === sdk.constants.ZERO_ADDRESS) {
       // For native currency
       calls.push(
         ...addresses.map((address) => ({
-          contract: multicall3,
-          functionName: "getEthBalance",
-          args: [address],
+          target: multicall3.address,
+          callData: multicall3.interface.encodeFunctionData("getEthBalance", [
+            address,
+          ]),
+          decoder: (result: string) =>
+            multicall3.interface.decodeFunctionResult("getEthBalance", result),
         }))
       );
+    } else if (isHyperCore) {
+      for (const address of addresses) {
+        const callData = utils.defaultAbiCoder.encode(
+          ["address", "uint64"],
+          [address, getTokenIndexFromSystemAddress(tokenAddress)]
+        );
+        calls.push({
+          target: CORE_BALANCE_SYSTEM_PRECOMPILE,
+          callData: callData,
+          decoder: (result: string) => {
+            const decodedResult = utils.defaultAbiCoder.decode(
+              ["uint64", "uint64", "uint64"], // total, hold, entryNtl
+              result
+            );
+            return decodedResult[0];
+          },
+        });
+      }
     } else {
       // For ERC20 tokens
       const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
       calls.push(
         ...addresses.map((address) => ({
-          contract: erc20Contract,
-          functionName: "balanceOf",
-          args: [address],
+          target: erc20Contract.address,
+          callData: erc20Contract.interface.encodeFunctionData("balanceOf", [
+            address,
+          ]),
+          decoder: (result: string) =>
+            erc20Contract.interface.decodeFunctionResult("balanceOf", result),
         }))
       );
     }
   }
 
-  const inputs = calls.map(({ contract, functionName, args }) => ({
-    target: contract.address,
-    callData: contract.interface.encodeFunctionData(functionName, args),
-  }));
-
-  const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
+  const [blockNumber, results] = await multicall3.callStatic.aggregate(calls, {
     blockTag,
   });
 
-  const decodedResults = results.map((result, i) =>
-    calls[i].contract.interface.decodeFunctionResult(
-      calls[i].functionName,
-      result
-    )
-  );
+  const decodedResults = results.map((result, i) => calls[i].decoder(result));
 
   let balances: Record<string, Record<string, string>> = {};
 
