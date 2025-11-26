@@ -34,6 +34,8 @@ export function getUsdhIntentsBridgeStrategy(): BridgeStrategy {
     name,
     capabilities,
 
+    originTxNeedsAllowance: true,
+
     getCrossSwapTypes: (params: {
       inputToken: Token;
       outputToken: Token;
