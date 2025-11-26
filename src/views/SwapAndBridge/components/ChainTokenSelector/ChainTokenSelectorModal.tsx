@@ -14,6 +14,7 @@ import {
   parseUnits,
   QUERIES,
   TOKEN_SYMBOLS_MAP,
+  INDIRECT_CHAINS,
 } from "utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
@@ -122,9 +123,27 @@ export function ChainTokenSelectorModal({
       );
 
       // Token is unreachable if otherToken exists and is from the same chain
-      const isUnreachable = otherToken
+      let isUnreachable = otherToken
         ? token.chainId === otherToken.chainId
         : false;
+
+      // Check if token is unreachable due to restricted origin chains for indirect destinations
+      if (!isUnreachable && otherToken) {
+        const destinationChainId = isOriginToken
+          ? otherToken.chainId
+          : token.chainId;
+        const originChainId = isOriginToken
+          ? token.chainId
+          : otherToken.chainId;
+
+        const destinationChain = INDIRECT_CHAINS[destinationChainId];
+        if (
+          destinationChain?.restrictedOriginChains &&
+          destinationChain.restrictedOriginChains.includes(originChainId)
+        ) {
+          isUnreachable = true;
+        }
+      }
 
       return {
         ...token,
