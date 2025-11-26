@@ -795,6 +795,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
       intermediaryChain: chainConfig.intermediaryChain,
+      restrictedOriginChains: chainConfig.restrictedOriginChains,
       inputTokens: chainConfig.tokens.flatMap((token) => {
         try {
           if (typeof token === "string") {

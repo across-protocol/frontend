@@ -8,6 +8,7 @@
     "spokePool": "0x0000000000000000000000000000000000000000",
     "spokePoolBlock": 0,
     "intermediaryChain": 999,
+    "restrictedOriginChains": [56, 1135, 999],
     "inputTokens": [],
     "outputTokens": [
       {

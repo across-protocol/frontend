@@ -22,4 +22,5 @@ export default {
   nativeToken: "HYPE",
   // HyperCore can only be reached via HyperEVM as an intermediary chain.
   intermediaryChain: CHAIN_IDs.HYPEREVM,
+  restrictedOriginChains: [CHAIN_IDs.BSC, CHAIN_IDs.LISK, CHAIN_IDs.HYPEREVM], // this list should always include the intermediary chain
 } as ChainConfig;

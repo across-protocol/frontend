@@ -42,4 +42,5 @@ export type ChainConfig = {
         chainIds: number[];
       }
   )[];
+  restrictedOriginChains?: number[];
 };
