@@ -11,10 +11,10 @@ import {
   formatUSD,
   getChainInfo,
   getTokenExplorerLinkFromAddress,
+  INDIRECT_CHAINS,
   parseUnits,
   QUERIES,
   TOKEN_SYMBOLS_MAP,
-  INDIRECT_CHAINS,
 } from "utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
@@ -29,6 +29,9 @@ import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
+import { isTokenUnreachable } from "./isTokenUnreachable";
+
+const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -122,28 +125,10 @@ export function ChainTokenSelectorModal({
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
-      // Token is unreachable if otherToken exists and is from the same chain
-      let isUnreachable = otherToken
-        ? token.chainId === otherToken.chainId
-        : false;
-
-      // Check if token is unreachable due to restricted origin chains for indirect destinations
-      if (!isUnreachable && otherToken) {
-        const destinationChainId = isOriginToken
-          ? otherToken.chainId
-          : token.chainId;
-        const originChainId = isOriginToken
-          ? token.chainId
-          : otherToken.chainId;
-
-        const destinationChain = INDIRECT_CHAINS[destinationChainId];
-        if (
-          destinationChain?.restrictedOriginChains &&
-          destinationChain.restrictedOriginChains.includes(originChainId)
-        ) {
-          isUnreachable = true;
-        }
-      }
+      const isUnreachable = isTokenUnreachable(
+        isOriginToken,
+        otherToken
+      )(token);
 
       return {
         ...token,
@@ -248,6 +233,14 @@ export function ChainTokenSelectorModal({
           return false;
         }
 
+        // Filter out destination-only chains if origin selector
+        if (
+          isOriginToken &&
+          destinationOnlyChainIds.includes(chainInfo.chainId)
+        ) {
+          return false;
+        }
+
         const keywords = [
           String(chainInfo.chainId),
           chainInfo.name.toLowerCase().replace(" ", ""),
@@ -284,7 +277,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, otherToken]);
+  }, [chainSearch, crossChainRoutes, otherToken, isOriginToken]);
 
   return isMobile ? (
     <MobileModal
