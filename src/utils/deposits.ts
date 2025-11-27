@@ -1,4 +1,7 @@
-import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types";
+import {
+  BridgeProvider,
+  DepositData,
+} from "views/DepositStatus/hooks/useDepositTracking/types";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 
@@ -8,6 +11,7 @@ import {
   FilledRelayEvent,
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
+import { parseDepositForBurnLog } from "./cctp";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
@@ -121,7 +125,8 @@ export function parseFilledRelayLogOutputAmount(logs: Log[]) {
 
 export async function getDepositByTxHash(
   depositTxHash: string,
-  fromChainId: number
+  fromChainId: number,
+  bridgeProvider: BridgeProvider
 ): Promise<
   | {
       depositTxReceipt: TransactionReceipt;
@@ -153,12 +158,16 @@ export async function getDepositByTxHash(
     };
   }
 
-  const parsedDepositLog = parseFundsDepositedLog({
+  const parseDepositLogArgs = {
     logs: depositTxReceipt.logs,
     originChainId: fromChainId,
     block,
     depositTxReceipt,
-  });
+  };
+  const parsedDepositLog =
+    bridgeProvider === "cctp"
+      ? parseDepositForBurnLog(parseDepositLogArgs)
+      : parseFundsDepositedLog(parseDepositLogArgs);
 
   if (!parsedDepositLog) {
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);

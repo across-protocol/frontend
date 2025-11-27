@@ -14,6 +14,7 @@ import { Breadcrumb } from "./components/Breadcrumb";
 import { DepositStatusUpperCard } from "./components/DepositStatusUpperCard";
 import { DepositStatusLowerCard } from "./components/DepositStatusLowerCard";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
+import { BridgeProvider } from "./hooks/useDepositTracking/types";
 
 export default function DepositStatus() {
   const { depositTxHash } = useParams<
@@ -31,6 +32,8 @@ export default function DepositStatus() {
   const inputTokenSymbol = queryParams.get("inputTokenSymbol");
   const outputTokenSymbol = queryParams.get("outputTokenSymbol");
   const externalProjectId = queryParams.get("externalProjectId") || undefined;
+  const bridgeProvider = (queryParams.get("bridgeProvider") ||
+    "across") as BridgeProvider;
   const fromChainId = Number(originChainId);
   const toChainId = Number(destinationChainId);
 
@@ -38,6 +41,7 @@ export default function DepositStatus() {
     depositTxHash: depositTxHash ?? "",
     fromChainId,
     toChainId,
+    bridgeProvider,
     fromBridgeAndSwapPagePayload: state.fromBridgeAndSwapPagePayload,
   });
 
@@ -74,6 +78,7 @@ export default function DepositStatus() {
             outputTokenSymbol={outputTokenSymbol || inputTokenSymbol}
             fromBridgeAndSwapPagePayload={state.fromBridgeAndSwapPagePayload}
             externalProjectId={externalProjectId}
+            bridgeProvider={bridgeProvider}
           />
           <DepositStatusLowerCard
             depositTxHash={depositTxHash}

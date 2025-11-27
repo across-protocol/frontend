@@ -11,6 +11,7 @@ import {
 } from "utils";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
+import { BridgeProvider } from "./useDepositTracking/types";
 import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
@@ -31,11 +32,13 @@ export function useDepositTracking({
   depositTxHash,
   fromChainId,
   toChainId,
+  bridgeProvider = "across",
   fromBridgeAndSwapPagePayload,
 }: {
   depositTxHash: string;
   fromChainId: number;
   toChainId: number;
+  bridgeProvider?: BridgeProvider;
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
 }) {
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
@@ -60,14 +63,14 @@ export function useDepositTracking({
 
   // Query for deposit information
   const depositQuery = useQuery({
-    queryKey: ["deposit", depositTxHash, fromChainId, account],
+    queryKey: ["deposit", bridgeProvider, depositTxHash, fromChainId, account],
     queryFn: async () => {
       // On some L2s the tx is mined too fast for the animation to show, so we add a delay
       await wait(1_000);
 
       try {
         // Use the strategy to get deposit information through the normalized interface
-        return depositStrategy.getDeposit(depositTxHash);
+        return depositStrategy.getDeposit(depositTxHash, bridgeProvider);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
         if (e instanceof NoFundsDepositedLogError) {
@@ -152,7 +155,7 @@ export function useDepositTracking({
       }
       logRelayData(depositInfo.depositLog);
       // Use the strategy to get fill information through the normalized interface
-      return await fillStrategy.getFill(depositInfo);
+      return await fillStrategy.getFill(depositInfo, bridgeProvider);
     },
     staleTime: Infinity,
     retry: true,
