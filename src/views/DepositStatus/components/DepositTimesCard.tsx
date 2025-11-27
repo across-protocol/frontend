@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 import { DateTime } from "luxon";
 import { Link } from "react-router-dom";
+import { BigNumber } from "ethers";
 
 import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
@@ -27,7 +28,6 @@ import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
 import { useToken } from "hooks/useToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
-import { FillData } from "../hooks/useDepositTracking/types";
 import { getIntermediaryTokenInfo } from "utils/token";
 
 type Props = {
@@ -36,7 +36,7 @@ type Props = {
   depositTxElapsedSeconds?: number;
   fillTxElapsedSeconds?: number;
   fillTxHash?: string;
-  fillLog?: FillData;
+  outputAmount?: BigNumber;
   depositTxHash?: string;
   fromChainId: number;
   toChainId: number;
@@ -51,7 +51,7 @@ export function DepositTimesCard({
   depositTxElapsedSeconds,
   fillTxElapsedSeconds,
   fillTxHash,
-  fillLog,
+  outputAmount,
   depositTxHash,
   fromChainId,
   toChainId,
@@ -98,9 +98,6 @@ export function DepositTimesCard({
 
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
     useTokenConversion(tokenSymbolForConversion, "usd");
-
-  // Wait for final output amount from fill log
-  const outputAmount = fillLog?.outputAmount;
 
   // Convert outputAmount to USD
   const outputAmountUsdFromToken = outputAmount

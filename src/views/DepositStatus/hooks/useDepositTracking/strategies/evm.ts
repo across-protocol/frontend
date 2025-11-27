@@ -2,15 +2,10 @@ import { getProvider } from "utils/providers";
 import {
   getDepositByTxHash,
   NoFilledRelayLogError,
-  parseFilledRelayLog,
+  parseFilledRelayLogOutputAmount,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
-import {
-  getBlockForTimestamp,
-  getMessageHash,
-  paginatedEventQuery,
-  toAddressType,
-} from "utils/sdk";
+import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
 import {
   chainMaxBlockLookback,
   indexerApiBaseUrl,
@@ -20,17 +15,17 @@ import axios from "axios";
 import {
   DepositedInfo,
   DepositInfo,
-  FillData,
   FilledInfo,
   FillInfo,
   IChainStrategy,
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
+  SwapSide,
 } from "utils/swapMetadata";
 import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
@@ -126,11 +121,21 @@ export class EVMStrategy implements IChainStrategy {
         const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
         const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
 
-        const parsedFillLog = parseFilledRelayLog(fillTxReceipt.logs);
+        const swapMetadata = await this.getSwapMetadata(
+          data.fillTx,
+          fillChainId
+        );
+        const destinationSwapMetadata = swapMetadata?.find(
+          (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
+        );
 
-        if (!parsedFillLog) {
+        const outputAmount = destinationSwapMetadata
+          ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
+          : parseFilledRelayLogOutputAmount(fillTxReceipt.logs);
+
+        if (!outputAmount) {
           throw new Error(
-            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
+            `Unable to parse output amount from FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
           );
         }
 
@@ -138,54 +143,7 @@ export class EVMStrategy implements IChainStrategy {
           fillTxHash: data.fillTx,
           fillTxTimestamp: fillTxBlock.timestamp,
           depositInfo,
-          fillLog: {
-            ...parsedFillLog,
-            ...parsedFillLog.args,
-            outputAmount: data?.swapOutputAmount
-              ? BigNumber.from(data.swapOutputAmount)
-              : parsedFillLog.args.outputAmount,
-            inputToken: toAddressType(
-              parsedFillLog.args.inputToken,
-              Number(parsedFillLog.args.originChainId)
-            ),
-            outputToken: toAddressType(
-              data?.swapOutputToken ?? parsedFillLog.args.outputToken,
-              fillChainId
-            ),
-            depositor: toAddressType(
-              parsedFillLog.args.depositor,
-              Number(parsedFillLog.args.originChainId)
-            ),
-            recipient: toAddressType(parsedFillLog.args.recipient, fillChainId),
-            exclusiveRelayer: toAddressType(
-              parsedFillLog.args.exclusiveRelayer,
-              fillChainId
-            ),
-            relayer: toAddressType(parsedFillLog.args.relayer, fillChainId),
-            destinationChainId: fillChainId,
-            fillTimestamp: fillTxBlock.timestamp,
-            blockNumber: parsedFillLog.blockNumber,
-            txnRef: parsedFillLog.transactionHash,
-            txnIndex: parsedFillLog.transactionIndex,
-            logIndex: parsedFillLog.logIndex,
-            originChainId: Number(parsedFillLog.args.originChainId),
-            repaymentChainId: Number(parsedFillLog.args.repaymentChainId),
-            depositId: ethers.BigNumber.from(parsedFillLog.args.depositId),
-            relayExecutionInfo: {
-              updatedMessageHash:
-                parsedFillLog.args.messageHash ||
-                getMessageHash(
-                  parsedFillLog.args.relayExecutionInfo.updatedMessageHash
-                ),
-              updatedRecipient: toAddressType(
-                parsedFillLog.args.relayExecutionInfo.updatedRecipient,
-                fillChainId
-              ),
-              updatedOutputAmount:
-                parsedFillLog.args.relayExecutionInfo.updatedOutputAmount,
-              fillType: parsedFillLog.args.relayExecutionInfo.fillType,
-            },
-          } as const satisfies FillData,
+          outputAmount,
           status: "filled",
         };
       }
@@ -230,10 +188,6 @@ export class EVMStrategy implements IChainStrategy {
       if (!filledRelayEvent) {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-      const messageHash = filledRelayEvent.args.messageHash;
-
-      const updatedMessageHash =
-        filledRelayEvent.args.relayExecutionInfo.updatedMessageHash;
 
       const fillTxBlock = await filledRelayEvent.getBlock();
 
@@ -241,54 +195,19 @@ export class EVMStrategy implements IChainStrategy {
         filledRelayEvent.transactionHash,
         fillChainId
       );
+      const destinationSwapMetadata = swapMetadata?.find(
+        (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
+      );
+
+      const outputAmount = destinationSwapMetadata
+        ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
+        : filledRelayEvent.args.outputAmount;
 
       return {
         fillTxHash: filledRelayEvent.transactionHash,
         fillTxTimestamp: fillTxBlock.timestamp,
         depositInfo,
-        fillLog: {
-          ...filledRelayEvent,
-          ...filledRelayEvent.args,
-          inputToken: toAddressType(
-            filledRelayEvent.args.inputToken,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          outputToken: toAddressType(
-            swapMetadata?.outputToken ?? filledRelayEvent.args.outputToken,
-            fillChainId
-          ),
-          depositor: toAddressType(
-            filledRelayEvent.args.depositor,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          recipient: toAddressType(
-            filledRelayEvent.args.recipient,
-            fillChainId
-          ),
-          exclusiveRelayer: toAddressType(
-            filledRelayEvent.args.exclusiveRelayer,
-            fillChainId
-          ),
-          relayer: toAddressType(filledRelayEvent.args.relayer, fillChainId),
-          messageHash,
-          destinationChainId: fillChainId,
-          fillTimestamp: fillTxBlock.timestamp,
-          blockNumber: filledRelayEvent.blockNumber,
-          txnRef: filledRelayEvent.transactionHash,
-          txnIndex: filledRelayEvent.transactionIndex,
-          logIndex: filledRelayEvent.logIndex,
-          originChainId: Number(filledRelayEvent.args.originChainId),
-          repaymentChainId: Number(filledRelayEvent.args.repaymentChainId),
-          depositId: ethers.BigNumber.from(filledRelayEvent.args.depositId),
-          relayExecutionInfo: {
-            ...filledRelayEvent.args.relayExecutionInfo,
-            updatedMessageHash,
-            updatedRecipient: toAddressType(
-              filledRelayEvent.args.relayExecutionInfo.updatedRecipient,
-              fillChainId
-            ),
-          },
-        } satisfies FillData,
+        outputAmount,
         status: "filled",
       };
     } catch (error) {
@@ -300,7 +219,7 @@ export class EVMStrategy implements IChainStrategy {
   async getSwapMetadata(
     txHash: string,
     fillChainId: number
-  ): Promise<SwapMetaData | undefined> {
+  ): Promise<SwapMetaData[] | undefined> {
     try {
       const swapMetadata = await findSwapMetaDataEventsFromTxHash(
         txHash,

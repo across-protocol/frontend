@@ -8,7 +8,6 @@ import {
   DepositedInfo,
   FilledInfo,
   DepositData,
-  FillData,
 } from "../types";
 import {
   getSVMRpc,
@@ -129,7 +128,7 @@ export class SVMStrategy implements IChainStrategy {
           fillTxTimestamp: Number(fillTxDetails.fillTimestamp),
           status: "filled",
           depositInfo,
-          fillLog: fillTxDetails satisfies FillData,
+          outputAmount: BigNumber.from(fillTxDetails.outputAmount),
         };
       }
     } catch (error) {
@@ -167,10 +166,7 @@ export class SVMStrategy implements IChainStrategy {
       return {
         fillTxHash: fillEvent.txnRef,
         fillTxTimestamp: Number(fillTxTimestamp),
-        fillLog: {
-          ...fillEvent,
-          fillTimestamp: Number(fillTxTimestamp),
-        } satisfies FillData,
+        outputAmount: BigNumber.from(fillEvent.outputAmount),
         depositInfo,
         status: "filled",
       };
