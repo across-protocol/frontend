@@ -1,4 +1,5 @@
 import { utils } from "ethers";
+import { isDefined } from "utils/sdk";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
@@ -19,7 +20,10 @@ export type PriceImpact = {
 };
 
 export function getPriceImpact(quote?: SwapApprovalQuote): PriceImpact {
-  if (!quote?.fees?.total?.pct) {
+  if (
+    !isDefined(quote?.fees?.total?.pct) ||
+    (isDefined(quote?.fees?.total?.pct) && quote.fees.total.pct.lt(0))
+  ) {
     return {
       tooHigh: false,
       priceImpact: 0,
