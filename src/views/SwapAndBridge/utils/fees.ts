@@ -1,20 +1,18 @@
 import { utils } from "ethers";
 import { isDefined } from "utils/sdk";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
-import { formatUSDString, roundToSignificantDecimal } from "utils/format";
+import { formatUSDString, roundToDecimalPlaces } from "utils/format";
 
 export function formatFeeUsd(value: string): string {
   const numValue = Number(value);
 
   if (numValue > 0 && numValue < 0.01) {
-    // In very rare cases, for very small values (< $0.001), we round UP to ensure they show as at least $0.001
-    if (numValue > 0 && numValue < 0.001) {
-      const roundedUp = roundToSignificantDecimal(numValue, 3, "up");
-      return `$${roundedUp}`;
-    }
-    // For values >= $0.001 and < $0.01, round DOWN to 3 decimal places
-    const roundedDown = roundToSignificantDecimal(numValue, 3, "down");
-    return `$${roundedDown}`;
+    const rounded = roundToDecimalPlaces(
+      numValue,
+      3,
+      numValue < 0.001 ? "up" : "down" // we round "up" for very small values (< $0.001) so they aren't represented as 0
+    );
+    return `$${rounded}`;
   }
 
   return formatUSDString(value);

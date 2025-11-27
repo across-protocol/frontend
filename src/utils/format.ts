@@ -306,8 +306,12 @@ export function formatUSDString(value: string, decimals = 2): string {
 
 /**
  * Rounds a number to a specific number of decimal places with a specified direction.
+ * @param value The number to round
+ * @param decimalPlaces The number of decimal places to round to
+ * @param roundingDirection "up" to round up (ceiling), "down" to round down (floor)
+ * @returns The rounded number
  */
-export function roundToSignificantDecimal(
+export function roundToDecimalPlaces(
   value: number,
   decimalPlaces: number,
   roundingDirection: "up" | "down"
