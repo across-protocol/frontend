@@ -11,6 +11,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import type { ChainEcosystem } from "../../../constants/chains/types";
 import { useOnConfirm } from "./useOnConfirm";
+import { getPriceImpact, PriceImpact } from "../utils/fees";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
@@ -19,6 +20,7 @@ export type UseSwapAndBridgeReturn = {
   expectedOutputAmount?: string;
 
   validationError?: AmountInputError;
+  priceImpact?: PriceImpact;
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
   buttonLoading: boolean;
@@ -85,6 +87,7 @@ export function useSwapAndBridge(
     return swapQuote?.expectedOutputAmount?.toString();
   }, [swapQuote]);
 
+  const priceImpact = getPriceImpact(swapQuote);
   const onConfirm = useOnConfirm(quoteRequest, approvalAction);
 
   // Button state logic
@@ -166,6 +169,7 @@ export function useSwapAndBridge(
     expectedInputAmount,
     expectedOutputAmount,
     validationError: validation.error,
+    priceImpact,
     // Button state information
     buttonState,
     buttonDisabled,

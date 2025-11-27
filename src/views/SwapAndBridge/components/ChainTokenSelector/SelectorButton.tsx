@@ -7,6 +7,7 @@ import {
   ChainTokenSelectorModal,
   EnrichedToken,
 } from "./ChainTokenSelectorModal";
+import { getTokenDisplaySymbol } from "hooks/useAvailableCrosschainRoutes";
 
 type Props = {
   selectedToken: EnrichedToken | null;
@@ -87,7 +88,7 @@ export default function SelectorButton({
         </TokenStack>
         <VerticalDivider />
         <NamesStack>
-          <TokenName>{selectedToken.symbol}</TokenName>
+          <TokenName>{getTokenDisplaySymbol(selectedToken)}</TokenName>
           <ChainName>{chain.name}</ChainName>
         </NamesStack>
         <VerticalDivider />

@@ -12,10 +12,14 @@ describe("getBridgeableSvmTokenFilterPredicate", () => {
       { symbol: "XYZ" },
       { symbol: "USDC" },
       { symbol: "USDzC" },
+      { symbol: "USDH" },
+      { symbol: "USDH-SPOT" },
     ] as EnrichedToken[];
     expect(tokens.filter(predicate)).toEqual([
       { symbol: "USDC" },
       { symbol: "USDzC" },
+      { symbol: "USDH" },
+      { symbol: "USDH-SPOT" },
     ]);
   });
 });

@@ -11,9 +11,11 @@ export const getBridgeableSvmTokenFilterPredicate =
   (isOriginToken: boolean, otherToken: EnrichedToken | null | undefined) =>
   (token: EnrichedToken) => {
     if (isOriginToken || otherToken?.chainId !== solana.chainId) return true;
-    const bridgeableSvmTokenSymbol = "USDC";
+    const bridgeableSvmTokenSymbols = ["USDC", "USDH", "USDH-SPOT"];
     return (
-      token.symbol === bridgeableSvmTokenSymbol ||
-      interchangeableTokensMap[token.symbol]?.includes(bridgeableSvmTokenSymbol)
+      bridgeableSvmTokenSymbols.includes(token.symbol) ||
+      bridgeableSvmTokenSymbols.some((symbol) =>
+        interchangeableTokensMap[token.symbol]?.includes(symbol)
+      )
     );
   };

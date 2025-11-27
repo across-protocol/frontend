@@ -93,6 +93,7 @@ export type Deposit = {
   depositRefundTxHash?: string;
   swapOutputToken?: string; // destination swap output token
   swapOutputTokenAmount?: string; // destination swap output amount
+  actionsTargetChainId?: number;
 };
 
 export type Pagination = {
@@ -147,6 +148,7 @@ export type IndexerDeposit = {
   swapOutputToken?: string;
   swapOutputTokenAmount?: string;
   speedups: any[];
+  actionsTargetChainId?: number | string;
 };
 
 export type GetIndexerDepositsResponse = IndexerDeposit[];

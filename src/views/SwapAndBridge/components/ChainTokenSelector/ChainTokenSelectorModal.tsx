@@ -2,7 +2,10 @@ import Modal from "components/Modal";
 import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
-import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
+import {
+  LifiToken,
+  getTokenDisplaySymbol,
+} from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
   ChainInfo,
@@ -11,6 +14,7 @@ import {
   formatUSD,
   getChainInfo,
   getTokenExplorerLinkFromAddress,
+  INDIRECT_CHAINS,
   parseUnits,
   QUERIES,
   TOKEN_SYMBOLS_MAP,
@@ -28,6 +32,9 @@ import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
+import { isTokenUnreachable } from "./isTokenUnreachable";
+
+const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
 const popularChains = [
   CHAIN_IDs.MAINNET,
@@ -121,10 +128,11 @@ export function ChainTokenSelectorModal({
         (rt) => rt.address.toLowerCase() === token.address.toLowerCase()
       );
 
-      // Token is unreachable if otherToken exists and is from the same chain
-      const isUnreachable = otherToken
-        ? token.chainId === otherToken.chainId
-        : false;
+      const isUnreachable = isTokenUnreachable(
+        token,
+        isOriginToken,
+        otherToken
+      );
 
       return {
         ...token,
@@ -229,6 +237,14 @@ export function ChainTokenSelectorModal({
           return false;
         }
 
+        // Filter out destination-only chains if origin selector
+        if (
+          isOriginToken &&
+          destinationOnlyChainIds.includes(chainInfo.chainId)
+        ) {
+          return false;
+        }
+
         const keywords = [
           String(chainInfo.chainId),
           chainInfo.name.toLowerCase().replace(" ", ""),
@@ -265,7 +281,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, otherToken]);
+  }, [chainSearch, crossChainRoutes, otherToken, isOriginToken]);
 
   return isMobile ? (
     <MobileModal
@@ -884,7 +900,7 @@ const TokenEntry = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              {token.symbol}
+              {getTokenDisplaySymbol(token)}
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>

@@ -28,6 +28,7 @@ export default function SwapAndBridge() {
     buttonLabel,
     onConfirm,
     destinationChainEcosystem,
+    priceImpact,
   } = useSwapAndBridge(quoteRequest);
 
   return (
@@ -80,6 +81,7 @@ export default function SwapAndBridge() {
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}
           buttonLabel={buttonLabel}
+          priceImpact={priceImpact}
         />
       </Wrapper>
     </LayoutV2>

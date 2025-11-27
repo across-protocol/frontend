@@ -128,11 +128,9 @@ const Modal = ({
     }
   }, [isOpen, externalModalExitHandler, disableExitOverride]);
 
-  // We create the "modal" element and insert it into the DOM, if it does not exist already
   useLayoutEffect(() => {
     if (!container.current) {
-      // we know this to always be defined.
-      const root = document.getElementById("root") as HTMLDivElement;
+      const root = document.getElementById("root") || document.body;
       const div = document.createElement("div");
       div.id = "modal";
       root.insertBefore(div, root.firstChild);

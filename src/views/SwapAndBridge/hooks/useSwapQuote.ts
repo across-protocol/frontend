@@ -6,6 +6,7 @@ import {
 } from "utils/serverless-api/prod/swap-approval";
 import { useDebounce } from "@uidotdev/usehooks";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
+import { INTEGRATOR_ID_ACROSS } from "utils";
 
 const useSwapQuote = ({
   originToken: origin,
@@ -48,6 +49,7 @@ const useSwapQuote = ({
         refundOnOrigin: true,
         // Skip transaction estimation when using placeholder address
         skipOriginTxEstimation: isUsingPlaceholderDepositor,
+        integratorId: INTEGRATOR_ID_ACROSS,
       };
 
       return swapApprovalApiCall(params);

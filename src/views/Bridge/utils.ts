@@ -699,18 +699,18 @@ export function calcFeesForEstimatedTable(params: {
   const parsedAmount = BigNumber.from(params.parsedAmount || 0);
   const capitalFee = BigNumber.from(
     params.universalSwapQuote
-      ? params.universalSwapQuote.steps.bridge.fees.details.relayerCapital
+      ? params.universalSwapQuote.steps.bridge.fees.details?.relayerCapital
           .amount
       : params.capitalFee || 0
   );
   const lpFee = BigNumber.from(
     params.universalSwapQuote
-      ? params.universalSwapQuote.steps.bridge.fees.details.lp.amount
+      ? params.universalSwapQuote.steps.bridge.fees.details?.lp.amount
       : params.lpFee || 0
   );
   const gasFee = BigNumber.from(
     params.universalSwapQuote
-      ? params.universalSwapQuote.steps.bridge.fees.details.destinationGas
+      ? params.universalSwapQuote.steps.bridge.fees.details?.destinationGas
           .amount
       : params.gasFee || 0
   );

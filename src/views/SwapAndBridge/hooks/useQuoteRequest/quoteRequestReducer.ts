@@ -4,7 +4,6 @@ export const quoteRequestReducer = (
   prevState: QuoteRequest,
   action: QuoteRequestAction
 ): QuoteRequest => {
-  console.log(action);
   switch (action.type) {
     case "SET_ORIGIN_TOKEN":
       return { ...prevState, originToken: action.payload };

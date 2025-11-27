@@ -14,7 +14,10 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE_TESTNET: 13372,
+};
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
   WHYPE: {
@@ -24,10 +27,24 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
     },
   },
+  "USDH-SPOT": {
+    name: "Hyperliquid USD",
+    symbol: "USDH-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000168",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000168",
+    },
+    coingeckoId: "usdh-2",
+  },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
-export const TOKEN_EQUIVALENCE_REMAPPING =
-  constants.TOKEN_EQUIVALENCE_REMAPPING;
+export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
+  ...constants.TOKEN_EQUIVALENCE_REMAPPING,
+  "USDH-SPOT": "USDH",
+};
+export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 
 export const maxRelayFeePct = 0.25;
 
@@ -330,6 +347,7 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
   TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
   TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD],
   TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD_TESTNET],
 ]);
@@ -376,15 +394,9 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
 export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2 * 60 * 60; // 2 hours
 
-export const CUSTOM_GAS_TOKENS = {
+export const CUSTOM_GAS_TOKENS: Record<number, string> = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
-  [CHAIN_IDs.POLYGON]: "POL",
-  [CHAIN_IDs.POLYGON_AMOY]: "POL",
-  [CHAIN_IDs.LENS]: "GHO",
-  [CHAIN_IDs.BSC]: "BNB",
-  [CHAIN_IDs.HYPEREVM]: "HYPE",
-  [CHAIN_IDs.PLASMA]: "XPL",
-  [CHAIN_IDs.HYPERCORE]: "HYPE",
+  [CHAIN_IDs.HYPERCORE_TESTNET]: "HYPE",
 };
 
 export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)

@@ -24,6 +24,7 @@ import usdt0Logo from "assets/token-logos/usdt0.svg";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import IndirectChains from "data/indirect_chains_1.json";
 import { Deposit } from "hooks/useDeposits";
 
 import {
@@ -61,6 +62,14 @@ export {
   interchangeableTokensMap,
   similarTokensMap,
 };
+
+export const INDIRECT_CHAINS = IndirectChains.reduce(
+  (acc, chain) => {
+    acc[chain.chainId] = chain;
+    return acc;
+  },
+  {} as Record<number, (typeof IndirectChains)[number]>
+);
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
@@ -331,6 +340,13 @@ export function applyChainSpecificTokenDisplay(
       ...token,
       displaySymbol: "USDT0",
       logoURI: usdt0Logo,
+    };
+  }
+
+  if (token.symbol === "USDH-SPOT" && chainId === CHAIN_IDs.HYPERCORE) {
+    return {
+      ...token,
+      displaySymbol: "USDH",
     };
   }
 
@@ -724,3 +740,5 @@ export const chainMaxBlockLookback = mergeConfig(
   resolveRpcConfig(),
   process.env.MAX_BLOCK_LOOK_BACK
 );
+
+export const INTEGRATOR_ID_ACROSS = "0x007f";

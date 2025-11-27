@@ -55,6 +55,8 @@ import {
 } from "../_multicall-handler";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
+import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import { assertValidAddressChainCombination } from "./_validations";
 import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
 import { getNativeTokenInfo } from "../_token-info";
 
@@ -123,6 +125,17 @@ export async function handleBaseSwapQueryParams(
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
   const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
 
+  assertValidAddressChainCombination({
+    address: _inputTokenAddress,
+    chainId: originChainId,
+    paramName: "inputToken",
+  });
+  assertValidAddressChainCombination({
+    address: _outputTokenAddress,
+    chainId: destinationChainId,
+    paramName: "outputToken",
+  });
+
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
     : sdk.utils.toAddressType(_inputTokenAddress, originChainId).toNative();
@@ -160,7 +173,17 @@ export async function handleBaseSwapQueryParams(
       destinationChainId
     );
 
-    if (!outputBridgeable) {
+    // Allows USDH output from SVM
+    const isToUsdh = !![
+      TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
+      TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+    ]
+      .filter(Boolean)
+      .find(
+        (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+      );
+
+    if (!outputBridgeable && !isToUsdh) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
@@ -193,17 +216,24 @@ export async function handleBaseSwapQueryParams(
     });
   }
 
-  if (!inputTokenAddress || !outputTokenAddress) {
-    throw new InvalidParamError({
-      param: "inputToken, outputToken",
-      message: "Invalid input or output token address",
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
     });
   }
-
-  if (integratorId && !isValidIntegratorId(integratorId)) {
-    throw new InvalidParamError({
-      param: "integratorId",
-      message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
     });
   }
 
@@ -738,6 +768,7 @@ export async function buildBaseSwapResponseJson(params: {
       destinationChainId: params.destinationChainId,
       indirectDestinationRoute: params.indirectDestinationRoute,
       logger: params.logger,
+      bridgeProvider: params.bridgeQuote.provider,
     }),
     inputAmount,
     maxInputAmount,
