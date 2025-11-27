@@ -3,6 +3,8 @@ import { CHAIN_IDs } from "../../../_constants";
 
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
+// TODO: Pull from @across-protocol/contracts once `HyperliquidDepositHandler`
+// deployments are available upstream.
 export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
   "0x861E127036B28D32f3777B4676F6bbb9e007d195";
 
