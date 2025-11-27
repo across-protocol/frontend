@@ -2,7 +2,10 @@ import Modal from "components/Modal";
 import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
-import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
+import {
+  LifiToken,
+  getTokenDisplaySymbol,
+} from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
   ChainInfo,
@@ -897,7 +900,7 @@ const TokenEntry = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              {token.symbol}
+              {getTokenDisplaySymbol(token)}
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>
