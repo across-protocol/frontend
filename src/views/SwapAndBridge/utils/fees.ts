@@ -10,11 +10,11 @@ export function formatFeeUsd(value: string): string {
     // In very rare cases, for very small values (< $0.001), we round UP to ensure they show as at least $0.001
     if (numValue > 0 && numValue < 0.001) {
       const roundedUp = roundToSignificantDecimal(numValue, 3, "up");
-      return `$${roundedUp.toFixed(3)}`;
+      return `$${roundedUp}`;
     }
     // For values >= $0.001 and < $0.01, round DOWN to 3 decimal places
     const roundedDown = roundToSignificantDecimal(numValue, 3, "down");
-    return `$${roundedDown.toFixed(3)}`;
+    return `$${roundedDown}`;
   }
 
   return formatUSDString(value);
