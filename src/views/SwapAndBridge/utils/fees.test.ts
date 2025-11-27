@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
-import { getPriceImpact } from "./fees";
+import { getPriceImpact, formatFeeUsd } from "./fees";
 
 describe("getPriceImpact", () => {
   it("should return default values if no fees in quote", () => {
@@ -92,5 +92,20 @@ describe("getPriceImpact", () => {
       priceImpact: 0,
       priceImpactFormatted: "0",
     });
+  });
+});
+
+describe("formatFeeUsd", () => {
+  it("should format fees >= $0.01 with standard 2 decimal formatting", () => {
+    const result1 = formatFeeUsd("0.01");
+    expect(result1).toBe("$0.01");
+
+    const result2 = formatFeeUsd("1.50");
+    expect(result2).toBe("$1.50");
+  });
+
+  it("should round DOWN fees < $0.01 to 3 decimal places", () => {
+    const result = formatFeeUsd("0.00567");
+    expect(result).toBe("$0.005");
   });
 });

@@ -14,7 +14,7 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined } from "utils";
+import { COLORS, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
@@ -228,11 +228,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    const { totalFeeUsd, bridgeFeesUsd, appFeesUsd, swapImpactUsd } =
-      getSwapQuoteFees(swapQuote);
-    // Only show fee items if they're at least 1 cent
-    const hasAppFee = Number(appFeesUsd) >= 0.01;
-    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
+    const {
+      totalFeeFormatted,
+      bridgeFeeFormatted,
+      appFeeFormatted,
+      swapImpactFormatted,
+    } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -241,11 +242,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
     return {
-      totalFee: formatUSDString(totalFeeUsd),
+      totalFee: totalFeeFormatted,
       time,
-      bridgeFee: formatUSDString(bridgeFeesUsd),
-      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
-      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
+      bridgeFee: bridgeFeeFormatted,
+      appFee: appFeeFormatted,
+      swapImpact: swapImpactFormatted,
       route: "Across V4",
       estimatedTime: time,
     };

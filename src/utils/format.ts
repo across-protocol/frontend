@@ -305,6 +305,23 @@ export function formatUSDString(value: string, decimals = 2): string {
 }
 
 /**
+ * Rounds a number to a specific number of decimal places with a specified direction.
+ */
+export function roundToSignificantDecimal(
+  value: number,
+  decimalPlaces: number,
+  roundingDirection: "up" | "down"
+): number {
+  const multiplier = Math.pow(10, decimalPlaces);
+
+  if (roundingDirection === "down") {
+    return Math.floor(value * multiplier) / multiplier;
+  } else {
+    return Math.ceil(value * multiplier) / multiplier;
+  }
+}
+
+/**
  * A fault-tolerant version of `parseUnits` that will attempt to parse
  * a string while being mindful of truncation.
  * @param value The string to parse

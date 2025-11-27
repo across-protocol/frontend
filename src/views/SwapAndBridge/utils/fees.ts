@@ -1,13 +1,36 @@
 import { utils } from "ethers";
 import { isDefined } from "utils/sdk";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
+import { formatUSDString, roundToSignificantDecimal } from "utils/format";
+
+export function formatFeeUsd(value: string): string {
+  const numValue = Number(value);
+  // For values less than 0.01, round DOWN to 3 decimal places
+  if (numValue > 0 && numValue < 0.01) {
+    const roundedDown = roundToSignificantDecimal(numValue, 3, "down");
+    return `$${roundedDown}`;
+  }
+
+  return formatUSDString(value);
+}
 
 export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
-  return {
+  const rawValues = {
     totalFeeUsd: swapQuote?.fees?.total.amountUsd || "0",
     bridgeFeesUsd: swapQuote?.fees?.total.details.bridge.amountUsd || "0",
     appFeesUsd: swapQuote?.fees?.total.details.app.amountUsd || "0",
     swapImpactUsd: swapQuote?.fees?.total.details.swapImpact.amountUsd || "0",
+  };
+
+  return {
+    totalFeeUsd: rawValues.totalFeeUsd,
+    bridgeFeesUsd: rawValues.bridgeFeesUsd,
+    appFeesUsd: rawValues.appFeesUsd,
+    swapImpactUsd: rawValues.swapImpactUsd,
+    totalFeeFormatted: formatFeeUsd(rawValues.totalFeeUsd),
+    bridgeFeeFormatted: formatFeeUsd(rawValues.bridgeFeesUsd),
+    appFeeFormatted: formatFeeUsd(rawValues.appFeesUsd),
+    swapImpactFormatted: formatFeeUsd(rawValues.swapImpactUsd),
   };
 }
 
