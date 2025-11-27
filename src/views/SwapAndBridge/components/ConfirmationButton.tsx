@@ -356,6 +356,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
+                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
               </FeeBreakdownRow>
@@ -579,7 +580,7 @@ const FeeBreakdownRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   position: relative;
 
   &::before {
@@ -651,7 +652,7 @@ const WarningTooltipBody = styled.span`
   font-size: 14px;
 `;
 
-const FreeTag = styled.div`
+export const FreeTag = styled.div`
   height: 20px;
   padding-inline: 8px;
   justify-content: center;
