@@ -41,8 +41,10 @@ export function useTwitter() {
 
   const shareConfig = useMemo(() => {
     return {
-      stepDescription:
-        "Paste the image, tag @AcrossProtocol, and post. That’s it!",
+      stepDescription: [
+        "Paste the image, tag @AcrossProtocol, and post.",
+        "That’s it!",
+      ],
       twitterUrl: isLaptopAndUp
         ? "https://twitter.com/intent/tweet"
         : `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
