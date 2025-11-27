@@ -104,8 +104,22 @@ describe("formatFeeUsd", () => {
     expect(result2).toBe("$1.50");
   });
 
-  it("should round DOWN fees < $0.01 to 3 decimal places", () => {
-    const result = formatFeeUsd("0.00567");
-    expect(result).toBe("$0.005");
+  it("should round DOWN fees >= $0.001 and < $0.01 to 3 decimal places", () => {
+    const result1 = formatFeeUsd("0.00567");
+    expect(result1).toBe("$0.005");
+
+    const result2 = formatFeeUsd("0.00999");
+    expect(result2).toBe("$0.009");
+  });
+
+  it("should round UP fees < $0.001 to $0.001", () => {
+    const result1 = formatFeeUsd("0.0005");
+    expect(result1).toBe("$0.001");
+
+    const result2 = formatFeeUsd("0.0001");
+    expect(result2).toBe("$0.001");
+
+    const result3 = formatFeeUsd("0.0009");
+    expect(result3).toBe("$0.001");
   });
 });

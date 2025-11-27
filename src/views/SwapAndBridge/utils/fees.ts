@@ -5,10 +5,16 @@ import { formatUSDString, roundToSignificantDecimal } from "utils/format";
 
 export function formatFeeUsd(value: string): string {
   const numValue = Number(value);
-  // For values less than 0.01, round DOWN to 3 decimal places
+
   if (numValue > 0 && numValue < 0.01) {
+    // In very rare cases, for very small values (< $0.001), we round UP to ensure they show as at least $0.001
+    if (numValue > 0 && numValue < 0.001) {
+      const roundedUp = roundToSignificantDecimal(numValue, 3, "up");
+      return `$${roundedUp.toFixed(3)}`;
+    }
+    // For values >= $0.001 and < $0.01, round DOWN to 3 decimal places
     const roundedDown = roundToSignificantDecimal(numValue, 3, "down");
-    return `$${roundedDown}`;
+    return `$${roundedDown.toFixed(3)}`;
   }
 
   return formatUSDString(value);
