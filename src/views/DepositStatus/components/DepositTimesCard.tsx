@@ -94,10 +94,7 @@ export function DepositTimesCard({
   const tokenSymbolForConversion =
     resolvedTokenInfo?.symbol || outputTokenSymbol || inputTokenSymbol;
 
-  const outputTokenForChain = useToken(
-    resolvedTokenInfo?.symbol || inputTokenSymbol,
-    toChainId
-  );
+  const outputTokenForChain = useToken(tokenSymbolForConversion, toChainId);
 
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
     useTokenConversion(tokenSymbolForConversion, "usd");
