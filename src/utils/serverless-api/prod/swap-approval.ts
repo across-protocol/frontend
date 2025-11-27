@@ -1,6 +1,6 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
-import { vercelApiBaseUrl } from "utils";
+import { swapApiRoutingPreference, vercelApiBaseUrl } from "utils";
 
 export type SwapApprovalApiCall = typeof swapApprovalApiCall;
 
@@ -167,7 +167,10 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
   const response = await axios.get<SwapApprovalApiResponse>(
     `${vercelApiBaseUrl}/api/swap/approval`,
     {
-      params,
+      params: {
+        ...params,
+        routingPreference: swapApiRoutingPreference,
+      },
     }
   );
 
