@@ -17,6 +17,7 @@ import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
+import { BridgeProvider } from "../hooks/useDepositTracking/types";
 
 type Props = {
   depositTxHash: string;
@@ -26,12 +27,14 @@ type Props = {
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  bridgeProvider?: BridgeProvider;
 };
 
 export function DepositStatusUpperCard({
   depositTxHash,
   fromChainId,
   toChainId,
+  bridgeProvider,
   externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
@@ -41,6 +44,7 @@ export function DepositStatusUpperCard({
     depositTxHash,
     fromChainId,
     toChainId,
+    bridgeProvider,
     fromBridgeAndSwapPagePayload,
   });
 
@@ -158,7 +162,7 @@ export function DepositStatusUpperCard({
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
           fillTxHash={fillQuery.data?.fillTxHash}
-          fillLog={fillQuery.data?.fillLog}
+          outputAmount={fillQuery.data?.outputAmount}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

@@ -48,7 +48,7 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  getCctpBridgeStrategy(),
+  getCctpBridgeStrategy("fast"),
   getOftBridgeStrategy(),
 ];
 
@@ -204,7 +204,7 @@ function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
     return getAcrossBridgeStrategy();
   }
   if (bridgeStrategyData.isUsdcToUsdc) {
-    return getCctpBridgeStrategy();
+    return getCctpBridgeStrategy("fast");
   }
   if (bridgeStrategyData.isUsdtToUsdt) {
     return getOftBridgeStrategy();
