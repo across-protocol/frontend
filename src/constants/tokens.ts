@@ -25,6 +25,7 @@ import bnbLogo from "assets/token-logos/bnb.svg";
 import vlrLogo from "assets/token-logos/vlr.svg";
 import hypeLogo from "assets/token-logos/hype.svg";
 import solLogo from "assets/token-logos/sol.svg";
+import usdhLogo from "assets/token-logos/usdh.png";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
 
@@ -120,4 +121,6 @@ export const orderedTokenLogos = {
   VLR: vlrLogo,
   HYPE: hypeLogo,
   SOL: solLogo,
+  USDH: usdhLogo,
+  "USDH-SPOT": usdhLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;

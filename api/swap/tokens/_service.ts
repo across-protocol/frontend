@@ -2,7 +2,11 @@ import axios from "axios";
 import { constants } from "ethers";
 import mainnetChains from "../../../src/data/chains_1.json";
 import indirectChainsImport from "../../../src/data/indirect_chains_1.json";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
+import {
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP,
+  TOKEN_EQUIVALENCE_REMAPPING,
+} from "../../_constants";
 import {
   ENABLED_ROUTES,
   getChainInfo,
@@ -11,8 +15,11 @@ import {
 
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
 // Uses the same structure as mainnetChains since indirect chains share the same base schema.
-const indirectChains = indirectChainsImport as typeof mainnetChains;
-
+const indirectChains = indirectChainsImport as Array<
+  (typeof mainnetChains)[number] & {
+    intermediaryChain: number;
+  }
+>;
 export type SwapToken = {
   chainId: number;
   address: string;
@@ -114,31 +121,47 @@ function getJupiterTokens(
   }, []);
 }
 
+// Using hardcoded value until https://github.com/across-protocol/frontend/pull/1988 merged
+const USDH_LOGO_URL =
+  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
+
 function getIndirectChainTokens(
   chainIds: number[],
   pricesForLifiTokens: Record<number, Record<string, string>>
 ): SwapToken[] {
-  // Chain ID to use for token price lookups
-  const PRICE_LOOKUP_CHAIN_ID = CHAIN_IDs.MAINNET;
-
   return indirectChains.flatMap((chain) => {
     if (!chainIds.includes(chain.chainId)) {
       return [];
     }
 
     return chain.outputTokens.map((token) => {
-      // Try to resolve price using L1 address from TOKEN_SYMBOLS_MAP
+      // Try to resolve price using equivalent token
       let priceUsd: string | null = null;
+      const equivalentTokenSymbol =
+        TOKEN_EQUIVALENCE_REMAPPING[token.symbol] || token.symbol;
       const tokenInfo =
-        TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
+        TOKEN_SYMBOLS_MAP[
+          equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
 
       if (tokenInfo) {
-        // Get L1 address
-        const l1Address = tokenInfo.addresses[PRICE_LOOKUP_CHAIN_ID];
+        const l1Address = tokenInfo.addresses[CHAIN_IDs.MAINNET];
         if (l1Address) {
           priceUsd =
-            pricesForLifiTokens[PRICE_LOOKUP_CHAIN_ID]?.[l1Address] || null;
+            pricesForLifiTokens[CHAIN_IDs.MAINNET]?.[l1Address] || null;
+        } else {
+          const intermediaryAddress =
+            tokenInfo.addresses[chain.intermediaryChain];
+          priceUsd =
+            pricesForLifiTokens[chain.intermediaryChain]?.[
+              intermediaryAddress
+            ] || null;
         }
+      }
+
+      let logoUrl = token.logoUrl;
+      if (token.symbol === "USDH-SPOT") {
+        logoUrl = USDH_LOGO_URL;
       }
 
       return {
@@ -147,7 +170,7 @@ function getIndirectChainTokens(
         name: token.name,
         symbol: token.symbol,
         decimals: token.decimals,
-        logoUrl: token.logoUrl,
+        logoUrl,
         priceUsd,
       };
     });

@@ -12,6 +12,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import type { ChainEcosystem } from "../../../constants/chains/types";
+import { getPriceImpact, PriceImpact } from "../utils/fees";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
@@ -20,6 +21,7 @@ export type UseSwapAndBridgeReturn = {
   expectedOutputAmount?: string;
 
   validationError?: AmountInputError;
+  priceImpact?: PriceImpact;
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
   buttonLoading: boolean;
@@ -118,6 +120,8 @@ export function useSwapAndBridge(
   const expectedOutputAmount = useMemo(() => {
     return swapQuote?.expectedOutputAmount?.toString();
   }, [swapQuote]);
+
+  const priceImpact = getPriceImpact(swapQuote);
 
   const onConfirm = useCallback(async () => {
     // If origin wallet is not connected, connect it first
@@ -233,6 +237,7 @@ export function useSwapAndBridge(
     expectedInputAmount,
     expectedOutputAmount,
     validationError: validation.error,
+    priceImpact,
     // Button state information
     buttonState,
     buttonDisabled,

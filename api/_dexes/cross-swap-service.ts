@@ -25,7 +25,7 @@ import {
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 import {
   getIndirectBridgeQuoteMessage,
-  getIndirectDestinationRoutes,
+  getIndirectDestinationRoute,
 } from "./utils-b2bi";
 import {
   InvalidParamError,
@@ -230,20 +230,18 @@ export async function getCrossSwapQuotesForExactInputB2BI(
 ): Promise<CrossSwapQuotes> {
   const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
-  const indirectDestinationRoutes = getIndirectDestinationRoutes({
+  const indirectDestinationRoute = getIndirectDestinationRoute({
     originChainId: crossSwap.inputToken.chainId,
     destinationChainId: crossSwap.outputToken.chainId,
     inputToken: crossSwap.inputToken.address,
     outputToken: crossSwap.outputToken.address,
   });
 
-  if (indirectDestinationRoutes.length === 0) {
+  if (!indirectDestinationRoute) {
     throw new InvalidParamError({
-      message: "No indirect bridge routes found to specified destination chain",
+      message: "No indirect bridge route found to specified destination chain",
     });
   }
-
-  const [indirectDestinationRoute] = indirectDestinationRoutes;
 
   // For EXACT_INPUT, we need to convert the amount to the intermediary output token decimals
   // to get the initial bridgeable output amount.
@@ -331,20 +329,18 @@ export async function getCrossSwapQuotesForOutputB2BI(
 ): Promise<CrossSwapQuotes> {
   const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
-  const indirectDestinationRoutes = getIndirectDestinationRoutes({
+  const indirectDestinationRoute = getIndirectDestinationRoute({
     originChainId: crossSwap.inputToken.chainId,
     destinationChainId: crossSwap.outputToken.chainId,
     inputToken: crossSwap.inputToken.address,
     outputToken: crossSwap.outputToken.address,
   });
 
-  if (indirectDestinationRoutes.length === 0) {
+  if (!indirectDestinationRoute) {
     throw new InvalidParamError({
-      message: "No indirect bridge routes found to specified destination chain",
+      message: "No indirect bridge route found to specified destination chain",
     });
   }
-
-  const [indirectDestinationRoute] = indirectDestinationRoutes;
 
   const outputAmountWithAppFee = crossSwap.appFeePercent
     ? addMarkupToAmount(crossSwap.amount, crossSwap.appFeePercent)

@@ -7,6 +7,7 @@ import {
   SwapApprovalApiQueryParams,
 } from "utils/serverless-api/prod/swap-approval";
 import { chainIsSvm } from "utils/sdk";
+import { INTEGRATOR_ID_ACROSS } from "utils";
 
 // Placeholder addresses for quote simulation when wallet is not connected
 const PLACEHOLDER_EVM_ADDRESS = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
@@ -31,7 +32,6 @@ const useSwapQuote = ({
   amount,
   isInputAmount,
   recipient,
-  integratorId,
   refundAddress,
   depositor,
   refundOnOrigin = true,
@@ -79,7 +79,7 @@ const useSwapQuote = ({
         refundOnOrigin,
         // Skip transaction estimation when using placeholder address
         skipOriginTxEstimation: isUsingPlaceholderDepositor,
-        ...(integratorId ? { integratorId } : {}),
+        integratorId: INTEGRATOR_ID_ACROSS, // always use our own ID
         ...(refundAddress ? { refundAddress } : {}),
       };
 

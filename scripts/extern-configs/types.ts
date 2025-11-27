@@ -10,4 +10,5 @@ export type ExternalProjectConfig = {
   grayscaleLogoPath: string;
   intermediaryChain: number;
   tokens: string[];
+  restrictedOriginChains?: number[];
 };

@@ -1,4 +1,4 @@
-import { getIndirectDestinationRoutes } from "../../../api/_dexes/utils-b2bi";
+import { getIndirectDestinationRoute } from "../../../api/_dexes/utils-b2bi";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 
 describe("_dexes/utils-b2bi", () => {
@@ -10,8 +10,8 @@ describe("_dexes/utils-b2bi", () => {
         inputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.OPTIMISM],
         outputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes).toEqual([]);
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toEqual(undefined);
     });
 
     // TODO: Enable this test once USDT to HyperCore routes are enabled again.
@@ -87,8 +87,8 @@ describe("_dexes/utils-b2bi", () => {
         outputToken:
           TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
       };
-      const indirectDestinationRoutes = getIndirectDestinationRoutes(params);
-      expect(indirectDestinationRoutes).toEqual([]);
+      const indirectDestinationRoute = getIndirectDestinationRoute(params);
+      expect(indirectDestinationRoute).toEqual(undefined);
     });
   });
 });
