@@ -44,6 +44,7 @@ export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   ...constants.TOKEN_EQUIVALENCE_REMAPPING,
   "USDH-SPOT": "USDH",
 };
+export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 
 export const maxRelayFeePct = 0.25;
 

@@ -7,7 +7,7 @@ import {
 } from "../../../../api/_bridges/sponsored-intent/utils/tx-builder";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { Token } from "../../../../api/_dexes/types";
-import { CHAIN_IDs } from "../../../../api/_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
 
 jest.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
@@ -21,10 +21,22 @@ describe("getUsdhIntentsBridgeStrategy", () => {
   });
 
   describe("getCrossSwapTypes", () => {
-    it("should return BRIDGEABLE_TO_BRIDGEABLE for supported route (USDC -> USDH)", () => {
+    it("should return BRIDGEABLE_TO_BRIDGEABLE for supported route USDC on Optimism -> USDH on HyperEVM", () => {
       const params = {
         inputToken: USDC_ON_OPTIMISM,
         outputToken: USDH_ON_HYPEREVM,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return BRIDGEABLE_TO_BRIDGEABLE for supported route USDC on Optimism -> USDH on HyperCore", () => {
+      const params = {
+        inputToken: USDC_ON_OPTIMISM,
+        outputToken: USDH_ON_HYPERCORE,
         isInputNative: false,
         isOutputNative: false,
       };
@@ -46,6 +58,28 @@ describe("getUsdhIntentsBridgeStrategy", () => {
         isOutputNative: false,
       };
       expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+    });
+
+    it("should return empty array for non-CCTP origin chain", () => {
+      const nonCctpUsdcChains = [
+        CHAIN_IDs.LENS,
+        CHAIN_IDs.SCROLL,
+        CHAIN_IDs.BLAST,
+      ];
+      const nonCctpUsdcChainsParams = nonCctpUsdcChains.map((chainId) => ({
+        inputToken: {
+          symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
+          decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[chainId],
+          chainId,
+        },
+        outputToken: USDH_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      }));
+      nonCctpUsdcChainsParams.forEach((params) => {
+        expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+      });
     });
   });
 
