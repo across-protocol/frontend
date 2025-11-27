@@ -13,6 +13,7 @@ export const USDH_ON_HYPEREVM = {
   symbol: "USDH",
   decimals: TOKEN_SYMBOLS_MAP.USDH.decimals,
 };
+
 export const USDH_ON_HYPERCORE = {
   address: TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
   chainId: CHAIN_IDs.HYPERCORE,
