@@ -52,7 +52,7 @@ import { BigNumber } from "ethers";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
-const PROMISE_TIMEOUT_MS = 20_000;
+const PROMISE_TIMEOUT_MS = 60_000;
 
 const ORIGIN_SWAP_PREFERENCE_THRESHOLD = 0.9;
 

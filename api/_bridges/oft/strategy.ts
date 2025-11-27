@@ -402,6 +402,10 @@ export function isRouteSupported(params: {
   // Token must be supported by OFT
   const oftMessengerContract = OFT_MESSENGERS[params.inputToken.symbol];
 
+  if (!oftMessengerContract) {
+    return false;
+  }
+
   if (oftMessengerContract[params.inputToken.chainId]) {
     if (oftMessengerContract[params.outputToken.chainId]) {
       // Both chains must have OFT contracts configured for the token

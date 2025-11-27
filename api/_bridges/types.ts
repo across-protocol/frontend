@@ -117,6 +117,9 @@ export type BridgeStrategyData =
       isFastCctpEligible: boolean;
       isLineaSource: boolean;
       isInThreshold: boolean;
+      isUsdtToUsdt: boolean;
+      isMonadTransfer: boolean;
+      isWithinMonadLimit: boolean;
     }
   | undefined;
 
@@ -133,4 +136,5 @@ export type BridgeStrategyDataParams = {
 export type GetBridgeStrategyParams = {
   originChainId: number;
   destinationChainId: number;
+  routingPreference?: string;
 } & BridgeStrategyDataParams;

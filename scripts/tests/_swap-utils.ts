@@ -145,6 +145,13 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Strict trade type.",
         type: "boolean",
         default: true,
+      })
+      .option("routingPreference", {
+        alias: "rp",
+        description: "Routing preference.",
+        type: "string",
+        default: "default",
+        choices: ["default", "across", "native"],
       });
   })
   .option("host", {
@@ -222,6 +229,7 @@ export async function fetchSwapQuotes() {
       appFeeRecipient,
       strictTradeType,
       integratorId,
+      routingPreference,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -247,6 +255,7 @@ export async function fetchSwapQuotes() {
       appFeeRecipient,
       strictTradeType,
       integratorId,
+      routingPreference,
     };
     console.log("Params:", params);
 

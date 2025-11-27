@@ -10,6 +10,7 @@ import {
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 const LARGE_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
+const MONAD_LIMIT = 25_000; // 25K USD
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
   // Check if utilization is high (>80%)
@@ -107,6 +108,16 @@ export async function getBridgeStrategyData({
     // Check if Linea is the source chain
     const isLineaSource = inputToken.chainId === CHAIN_IDs.LINEA;
 
+    const isUsdtToUsdt =
+      inputToken.symbol === "USDT" && outputToken.symbol === "USDT";
+
+    const isMonadTransfer =
+      (inputToken.chainId === CHAIN_IDs.MONAD &&
+        outputToken.chainId !== CHAIN_IDs.SOLANA) ||
+      outputToken.chainId === CHAIN_IDs.MONAD;
+
+    const isWithinMonadLimit = depositAmountUsd < MONAD_LIMIT;
+
     return {
       canFillInstantly,
       isUtilizationHigh,
@@ -115,6 +126,9 @@ export async function getBridgeStrategyData({
       isInThreshold,
       isFastCctpEligible,
       isLineaSource,
+      isUsdtToUsdt,
+      isMonadTransfer,
+      isWithinMonadLimit,
     };
   } catch (error) {
     if (logger) {
