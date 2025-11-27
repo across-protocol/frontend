@@ -343,6 +343,13 @@ export function applyChainSpecificTokenDisplay(
     };
   }
 
+  if (token.symbol === "USDH-SPOT" && chainId === CHAIN_IDs.HYPERCORE) {
+    return {
+      ...token,
+      displaySymbol: "USDH",
+    };
+  }
+
   return token;
 }
 
