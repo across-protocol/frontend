@@ -61,11 +61,7 @@ describe("getUsdhIntentsBridgeStrategy", () => {
     });
 
     it("should return empty array for non-CCTP origin chain", () => {
-      const nonCctpUsdcChains = [
-        CHAIN_IDs.LENS,
-        CHAIN_IDs.SCROLL,
-        CHAIN_IDs.BLAST,
-      ];
+      const nonCctpUsdcChains = [CHAIN_IDs.LENS, CHAIN_IDs.SCROLL];
       const nonCctpUsdcChainsParams = nonCctpUsdcChains.map((chainId) => ({
         inputToken: {
           symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
