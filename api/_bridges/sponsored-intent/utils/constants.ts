@@ -18,7 +18,7 @@ export const SUPPORTED_OUTPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDH,
   TOKEN_SYMBOLS_MAP["USDH-SPOT"],
 ];
-export const SUPPORTED_ORIGIN_CHAINS = Object.keys(CHAIN_IDs).flatMap(
+export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
   (chainId) => {
     // Only mark CCTP enabled origin chains as eligible for sponsored intents
     const isCctpChain = CHAINS[Number(chainId)]?.cctpDomain !== CCTP_NO_DOMAIN;

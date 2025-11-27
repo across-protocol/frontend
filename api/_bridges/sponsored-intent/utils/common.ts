@@ -12,6 +12,7 @@ import {
   SUPPORTED_OUTPUT_TOKENS,
   SUPPORTED_INPUT_TOKENS,
   SUPPORTED_DESTINATION_CHAINS,
+  SUPPORTED_ORIGIN_CHAINS,
 } from "./constants";
 import { ConvertDecimals, maxBN, minBN } from "../../../_utils";
 import { getCachedTokenBalance } from "../../../_balance";
@@ -178,6 +179,10 @@ export function isRouteSupported(params: {
   inputToken: Token;
   outputToken: Token;
 }) {
+  if (!SUPPORTED_ORIGIN_CHAINS.includes(params.inputToken.chainId)) {
+    return false;
+  }
+
   if (SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
     const supportedInputToken = SUPPORTED_INPUT_TOKENS.find(
       (token) =>
