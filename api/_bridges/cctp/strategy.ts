@@ -18,9 +18,8 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
 import {
@@ -39,7 +38,10 @@ import {
   getCctpDomainId,
   encodeDepositForBurn,
 } from "./utils/constants";
-import { getEstimatedFillTime } from "./utils/fill-times";
+import {
+  getEstimatedFillTime,
+  isTransferModeSupported,
+} from "./utils/fill-times";
 import { getCctpFees } from "./utils/fees";
 
 const name = "cctp";
@@ -61,8 +63,18 @@ const capabilities: BridgeCapabilities = {
  * Supports Circle's CCTP for burning USDC on source chain.
  */
 export function getCctpBridgeStrategy(
-  transferMode: "standard" | "fast" = "standard"
+  requestedTransferMode: "standard" | "fast" = "fast"
 ): BridgeStrategy {
+  /**
+   * Get the transfer mode for a given origin chain.
+   * Falls back to "standard" if the requested mode is not supported.
+   */
+  const getTransferMode = (originChainId: number): "standard" | "fast" => {
+    return isTransferModeSupported(originChainId, requestedTransferMode)
+      ? requestedTransferMode
+      : "standard";
+  };
+
   const isRouteSupported = (params: {
     inputToken: Token;
     outputToken: Token;
@@ -148,6 +160,7 @@ export function getCctpBridgeStrategy(
       assertSupportedRoute({ inputToken, outputToken });
 
       let maxFee = BigNumber.from(0);
+      const transferMode = getTransferMode(inputToken.chainId);
 
       if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
@@ -205,6 +218,7 @@ export function getCctpBridgeStrategy(
         inputToken.decimals
       )(minOutputAmount);
       let maxFee = BigNumber.from(0);
+      const transferMode = getTransferMode(inputToken.chainId);
 
       if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
@@ -277,6 +291,7 @@ export function getCctpBridgeStrategy(
       const destinationChainId = crossSwap.outputToken.chainId;
       const destinationDomain = getCctpDomainId(destinationChainId);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
+      const transferMode = getTransferMode(originChainId);
 
       // depositForBurn input parameters
       const depositForBurnParams = {

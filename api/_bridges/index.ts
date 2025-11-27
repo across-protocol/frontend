@@ -164,7 +164,7 @@ async function routeMintAndBurnStrategy({
       return getOftBridgeStrategy();
     }
     if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy("fast");
+      return getCctpBridgeStrategy();
     } else {
       return getAcrossBridgeStrategy();
     }
