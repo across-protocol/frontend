@@ -7,6 +7,8 @@ import { BigNumber } from "ethers";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
+export type BridgeProvider = "across" | "cctp" | "oft";
+
 /**
  * Common types for deposit & fill information
  */
@@ -86,16 +88,23 @@ export interface IChainStrategy {
   /**
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
+   * @param bridgeProvider Bridge provider
    * @returns Normalized deposit information
    */
-  getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
+  getDeposit(
+    txIdOrSignature: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<DepositInfo>;
 
-  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+  getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<FillInfo>;
 
   /**
    * Get fill information for a deposit
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
+   * @param bridgeProvider Bridge provider
    * @returns Normalized fill information
    */
   getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;

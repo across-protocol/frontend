@@ -29,17 +29,13 @@ export function createSwapApprovalActionHook(
             inputTokenSymbol: swapQuote?.inputToken?.symbol || "",
             outputTokenSymbol: swapQuote?.outputToken?.symbol || "",
             referrer,
-            // externalProjectId: ??
+            bridgeProvider: swapQuote?.steps.bridge.provider || "across",
           });
 
         const fromBridgeAndSwapPagePayload =
           createFromBridgeAndSwapPagePayload(swapQuote);
         if (txHash) {
-          history.push(
-            url,
-
-            { fromBridgeAndSwapPagePayload }
-          );
+          history.push(url, { fromBridgeAndSwapPagePayload });
         }
         return txHash;
       },
