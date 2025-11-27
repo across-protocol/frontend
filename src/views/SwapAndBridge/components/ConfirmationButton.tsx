@@ -102,6 +102,7 @@ const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
+                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
@@ -319,7 +320,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </DetailRightRed>
                 </Tooltip>
               ) : (
-                displayValues.totalFee
+                <>
+                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}{" "}
+                  {displayValues.totalFee}
+                </>
               )}
             </DetailRight>
           </DetailRow>
@@ -334,7 +338,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
               </FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
+              <FeeBreakdownValue>
+                {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
+                {displayValues.bridgeFee}
+              </FeeBreakdownValue>
             </FeeBreakdownRow>
             {isDefined(displayValues.swapImpact) && (
               <FeeBreakdownRow>
@@ -595,7 +602,7 @@ const FeeBreakdownLabel = styled.span`
   color: rgba(224, 243, 255, 0.5);
 `;
 
-const FeeBreakdownValue = styled.span`
+const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
 `;
 
@@ -641,4 +648,17 @@ const WarningTooltipBody = styled.span`
   color: var(--functional-red);
   font-weight: 600;
   font-size: 14px;
+`;
+
+const FreeTag = styled.div`
+  height: 20px;
+  padding-inline: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--transparency-aqua-aqua-40);
+  background: var(--transparency-aqua-aqua-20);
+  color: var(--base-aqua);
+  font-size: 12px;
+  font-weight: 600;
 `;
