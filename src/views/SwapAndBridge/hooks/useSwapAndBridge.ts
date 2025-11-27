@@ -1,70 +1,42 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { BigNumber } from "ethers";
+import { useCallback, useMemo } from "react";
 
 import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
-import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useDefaultRoute } from "./useDefaultRoute";
 import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useToAccount } from "views/Bridge/hooks/useToAccount";
+import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
+import type { ChainEcosystem } from "../../../constants/chains/types";
 import { getPriceImpact, PriceImpact } from "../utils/fees";
 
 export type UseSwapAndBridgeReturn = {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-  setInputToken: (t: EnrichedToken | null) => void;
-  setOutputToken: (t: EnrichedToken | null) => void;
-  quickSwap: () => void;
-
-  amount: BigNumber | null;
-  setAmount: (a: BigNumber | null) => void;
-  isAmountOrigin: boolean;
-  setIsAmountOrigin: (v: boolean) => void;
-  // route
   swapQuote: ReturnType<typeof useSwapQuote>["data"];
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
   expectedOutputAmount?: string;
-  destinationChainEcosystem: "svm" | "evm";
-  // validation
-  validationError?: AmountInputError;
-  validationWarning?: AmountInputError;
-  validationErrorFormatted?: string | undefined;
-  priceImpact?: PriceImpact;
 
-  // Button state information
+  validationError?: AmountInputError;
+  priceImpact?: PriceImpact;
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel: string;
-  walletTypeToConnect?: "evm" | "svm"; // Which wallet type needs to be connected
 
-  // Account management
-  toAccountManagement: ReturnType<typeof useToAccount>;
-
-  // Legacy properties
-  isConnected: boolean;
-  isWrongNetwork: boolean;
-  isSubmitting: boolean;
   onConfirm: () => Promise<void>;
-  quoteError: Error | null;
-  quoteWarningMessage: string | null;
+  destinationChainEcosystem: "svm" | "evm";
+  toAccountManagement: ReturnType<typeof useToAccount>;
 };
 
-export function useSwapAndBridge(): UseSwapAndBridgeReturn {
-  const [inputToken, setInputToken] = useState<EnrichedToken | null>(null);
-  const [outputToken, setOutputToken] = useState<EnrichedToken | null>(null);
-  const [amount, setAmount] = useState<BigNumber | null>(null);
-  const [isAmountOrigin, setIsAmountOrigin] = useState<boolean>(true);
-
-  const debouncedAmount = useDebounce(amount, 300);
-  const defaultRoute = useDefaultRoute();
+export function useSwapAndBridge(
+  quoteRequest: QuoteRequest,
+  isAmountOrigin: boolean
+): UseSwapAndBridgeReturn {
+  const debouncedAmount = useDebounce(quoteRequest.amount, 300);
 
   const {
     account: accountEVM,
@@ -77,13 +49,15 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     isConnected: isConnectedSVM,
   } = useConnectionSVM();
 
-  const toAccountManagement = useToAccount(outputToken?.chainId);
+  const toAccountManagement = useToAccount(
+    quoteRequest.destinationToken?.chainId
+  );
 
-  const originChainEcosystem = inputToken?.chainId
-    ? getEcosystem(inputToken?.chainId)
+  const originChainEcosystem = quoteRequest.originToken?.chainId
+    ? getEcosystem(quoteRequest.originToken?.chainId)
     : "evm";
-  const destinationChainEcosystem = outputToken?.chainId
-    ? getEcosystem(outputToken?.chainId)
+  const destinationChainEcosystem = quoteRequest.destinationToken?.chainId
+    ? getEcosystem(quoteRequest.destinationToken?.chainId)
     : "evm";
 
   const depositor =
@@ -100,7 +74,7 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
       : !!toAccountManagement.toAccountSVM;
 
   // Determine which wallet type needs to be connected (if any)
-  const walletTypeToConnect: "evm" | "svm" | undefined = (() => {
+  const walletTypeToConnect: ChainEcosystem | undefined = (() => {
     if (!isOriginConnected) {
       return originChainEcosystem;
     }
@@ -110,49 +84,15 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     return undefined;
   })();
 
-  useEffect(() => {
-    if (defaultRoute.inputToken && defaultRoute.outputToken) {
-      setInputToken((prev) => {
-        // Only update if token is different (avoid unnecessary re-renders)
-        if (
-          !prev ||
-          prev.address !== defaultRoute.inputToken!.address ||
-          prev.chainId !== defaultRoute.inputToken!.chainId
-        ) {
-          return defaultRoute.inputToken;
-        }
-        return prev;
-      });
-      setOutputToken((prev) => {
-        // Only update if token is different (avoid unnecessary re-renders)
-        if (
-          !prev ||
-          prev.address !== defaultRoute.outputToken!.address ||
-          prev.chainId !== defaultRoute.outputToken!.chainId
-        ) {
-          return defaultRoute.outputToken;
-        }
-        return prev;
-      });
-    }
-  }, [defaultRoute]);
-
-  const quickSwap = useCallback(() => {
-    setInputToken((prevInput) => {
-      const prevOut = outputToken;
-      setOutputToken(prevInput || null);
-      return prevOut || null;
-    });
-    setAmount(null);
-  }, [outputToken]);
-
   const {
     data: swapQuote,
     isLoading: isQuoteLoading,
     error: quoteError,
   } = useSwapQuote({
-    origin: inputToken ? inputToken : null,
-    destination: outputToken ? outputToken : null,
+    origin: quoteRequest.originToken ? quoteRequest.originToken : null,
+    destination: quoteRequest.destinationToken
+      ? quoteRequest.destinationToken
+      : null,
     amount: debouncedAmount,
     isInputAmount: isAmountOrigin,
     depositor,
@@ -160,15 +100,15 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
   });
 
   const approvalAction = useSwapApprovalAction(
-    inputToken?.chainId || 0,
+    quoteRequest.originToken?.chainId || 0,
     swapQuote
   );
 
   const validation = useValidateSwapAndBridge(
-    amount,
+    quoteRequest.amount,
     isAmountOrigin,
-    inputToken,
-    outputToken,
+    quoteRequest.originToken,
+    quoteRequest.destinationToken,
     isOriginConnected,
     swapQuote?.inputAmount
   );
@@ -278,57 +218,35 @@ export function useSwapAndBridge(): UseSwapAndBridgeReturn {
     () =>
       approvalAction.buttonDisabled ||
       !!validation.error ||
-      !inputToken ||
-      !outputToken ||
-      !amount ||
-      amount.lte(0),
+      !quoteRequest.originToken ||
+      !quoteRequest.destinationToken ||
+      !quoteRequest.amount ||
+      quoteRequest.amount.lte(0),
     [
       approvalAction.buttonDisabled,
       validation.error,
-      inputToken,
-      outputToken,
-      amount,
+      quoteRequest.originToken,
+      quoteRequest.destinationToken,
+      quoteRequest.amount,
     ]
   );
 
   return {
-    inputToken,
-    outputToken,
-    setInputToken,
-    setOutputToken,
-    quickSwap,
-
-    amount,
-    setAmount,
-    isAmountOrigin,
-    setIsAmountOrigin,
-
     swapQuote,
     isQuoteLoading,
     expectedInputAmount,
     expectedOutputAmount,
-    validationErrorFormatted: validation.errorFormatted,
     validationError: validation.error,
-    validationWarning: validation.warn,
     priceImpact,
-
     // Button state information
     buttonState,
     buttonDisabled,
     buttonLoading,
     buttonLabel,
-    walletTypeToConnect,
 
-    // Account management
-    toAccountManagement,
-    destinationChainEcosystem,
-    // Legacy properties
-    isConnected: isOriginConnected && isRecipientSet,
-    isWrongNetwork: approvalAction.isWrongNetwork,
-    isSubmitting: approvalAction.isButtonActionLoading,
     onConfirm,
-    quoteError,
-    quoteWarningMessage,
+    destinationChainEcosystem,
+    toAccountManagement,
   };
 }
 
