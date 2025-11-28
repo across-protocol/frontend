@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within } from "@storybook/testing-library";
 import { BigNumber } from "ethers";
 
 import {
   BridgeButtonState,
+  BridgeProvider,
+  bridgeProviders,
   ConfirmationButton,
 } from "../views/SwapAndBridge/components/ConfirmationButton";
 import { EnrichedToken } from "../views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
@@ -199,6 +200,19 @@ const mockHighPriceImpact: PriceImpact = {
   priceImpactFormatted: "15.0",
 };
 
+const createQuoteWithProvider = (
+  provider: BridgeProvider
+): SwapApprovalApiCallReturnType => ({
+  ...mockSwapQuote,
+  steps: {
+    ...mockSwapQuote.steps,
+    bridge: {
+      ...mockSwapQuote.steps.bridge,
+      provider,
+    },
+  },
+});
+
 const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
   argTypes: {
@@ -336,13 +350,7 @@ export const WithHighPriceImpact: Story = {
 export const Expanded: Story = {
   args: {
     ...Default.args,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const expandButton = canvas.getByRole("button", {
-      name: /fast & secure/i,
-    });
-    await userEvent.click(expandButton);
+    initialExpanded: true,
   },
 };
 
@@ -350,12 +358,51 @@ export const ExpandedWithHighPriceImpact: Story = {
   args: {
     ...Default.args,
     priceImpact: mockHighPriceImpact,
+    initialExpanded: true,
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const expandButton = canvas.getByRole("button", {
-      name: /fast & secure/i,
-    });
-    await userEvent.click(expandButton);
-  },
+};
+
+export const AllProvidersCollapsed: Story = {
+  render: () => (
+    <>
+      {bridgeProviders.map((provider) => (
+        <ConfirmationButton
+          key={provider}
+          inputToken={mockInputToken}
+          outputToken={mockOutputToken}
+          amount={BigNumber.from("100000000")}
+          swapQuote={createQuoteWithProvider(provider)}
+          isQuoteLoading={false}
+          buttonState="readyToConfirm"
+          buttonDisabled={false}
+          buttonLoading={false}
+          buttonLabel="Confirm Swap"
+          priceImpact={mockPriceImpact}
+        />
+      ))}
+    </>
+  ),
+};
+
+export const AllProvidersExpanded: Story = {
+  render: () => (
+    <>
+      {bridgeProviders.map((provider) => (
+        <ConfirmationButton
+          key={provider}
+          inputToken={mockInputToken}
+          outputToken={mockOutputToken}
+          amount={BigNumber.from("100000000")}
+          swapQuote={createQuoteWithProvider(provider)}
+          isQuoteLoading={false}
+          buttonState="readyToConfirm"
+          buttonDisabled={false}
+          buttonLoading={false}
+          buttonLabel="Confirm Swap"
+          priceImpact={mockPriceImpact}
+          initialExpanded
+        />
+      ))}
+    </>
+  ),
 };
