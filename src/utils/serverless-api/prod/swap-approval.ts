@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
 import { vercelApiBaseUrl } from "utils";
+import type { BridgeProvider } from "../../../../api/_dexes/types";
 
 export type SwapApprovalApiCall = typeof swapApprovalApiCall;
 
@@ -103,7 +104,7 @@ export type SwapApprovalApiResponse = {
           };
         };
       };
-      provider: string;
+      provider: BridgeProvider;
     };
     destinationSwap?: {
       tokenIn: SwapApiToken;

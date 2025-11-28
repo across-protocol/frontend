@@ -1,5 +1,5 @@
 "use client";
-import { ButtonHTMLAttributes, useEffect } from "react";
+import React, { ButtonHTMLAttributes, useEffect } from "react";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
@@ -10,9 +10,7 @@ import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
@@ -20,15 +18,7 @@ import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
-
-export const bridgeProviders = [
-  "across",
-  "cctp",
-  "oft",
-  "sponsored-intent",
-] as const;
-
-export type BridgeProvider = (typeof bridgeProviders)[number];
+import type { BridgeProvider } from "../../../../api/_dexes/types";
 
 const PROVIDER_DISPLAY: Record<
   BridgeProvider,
@@ -37,6 +27,7 @@ const PROVIDER_DISPLAY: Record<
   across: { name: "Across", label: "Across V4" },
   cctp: { name: "CCTP", label: "Circle CCTP" },
   oft: { name: "OFT", label: "LayerZero OFT" },
+  hypercore: { name: "HC", label: "Hypercore" },
   "sponsored-intent": { name: "Intent", label: "Sponsored Intent" },
 };
 
@@ -701,6 +692,7 @@ const PROVIDER_COLORS: Record<BridgeProvider, string> = {
   cctp: "#3B82F6",
   oft: "#8B5CF6",
   "sponsored-intent": "#F59E0B",
+  hypercore: "#bada55",
 };
 
 const ProviderBadge = styled.span<{ provider: BridgeProvider }>`

@@ -3,13 +3,12 @@ import { BigNumber } from "ethers";
 
 import {
   BridgeButtonState,
-  BridgeProvider,
-  bridgeProviders,
   ConfirmationButton,
 } from "../views/SwapAndBridge/components/ConfirmationButton";
 import { EnrichedToken } from "../views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../utils/serverless-api/prod/swap-approval";
 import { PriceImpact } from "../views/SwapAndBridge/utils/fees";
+import type { BridgeProvider } from "../../api/_dexes/types";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
@@ -361,6 +360,14 @@ export const ExpandedWithHighPriceImpact: Story = {
     initialExpanded: true,
   },
 };
+
+export const bridgeProviders = [
+  "across",
+  "cctp",
+  "oft",
+  "sponsored-intent",
+  "hypercore",
+] as const satisfies BridgeProvider[];
 
 export const AllProvidersCollapsed: Story = {
   render: () => (
