@@ -1,13 +1,15 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
 import { useAmplitude } from "hooks";
 import {
-  wait,
-  getChainInfo,
-  NoFundsDepositedLogError,
   debug,
+  getChainInfo,
   getEcosystem,
+  indexerApiBaseUrl,
+  NoFundsDepositedLogError,
+  wait,
 } from "utils";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
@@ -58,7 +60,24 @@ export function useDepositTracking({
     [fromChainId, toChainId]
   );
 
-  // Query for deposit information
+  // Query indexer for fill status (fast path - doesn't need depositId)
+  const indexerQuery = useQuery({
+    queryKey: ["indexer-deposit-status", depositTxHash, fromChainId],
+    queryFn: async () => {
+      const { data } = await axios.get<{
+        status: "filled" | "pending";
+        fillTx: string | null;
+      }>(`${indexerApiBaseUrl}/deposit/status`, {
+        params: { depositTxHash, originChainId: fromChainId },
+      });
+      return data;
+    },
+    staleTime: Infinity,
+    refetchInterval: (query) =>
+      query.state.data?.status === "filled" ? false : 1_000,
+  });
+
+  // Query for deposit information from RPC
   const depositQuery = useQuery({
     queryKey: ["deposit", depositTxHash, fromChainId, account],
     queryFn: async () => {
@@ -221,17 +240,21 @@ export function useDepositTracking({
     accountEVM,
   ]);
 
-  const status: DepositStatus = !depositQuery.data?.depositTimestamp
-    ? "depositing"
-    : depositQuery.data?.status === "deposit-reverted"
-      ? "deposit-reverted"
-      : !fillQuery.data?.fillTxTimestamp
-        ? "filling"
-        : "filled";
+  const status: DepositStatus =
+    indexerQuery.data?.status === "filled"
+      ? "filled"
+      : !depositQuery.data?.depositTimestamp
+        ? "depositing"
+        : depositQuery.data?.status === "deposit-reverted"
+          ? "deposit-reverted"
+          : fillQuery.data?.fillTxTimestamp
+            ? "filled"
+            : "filling";
 
   return {
     depositQuery,
     fillQuery,
+    indexerQuery,
     status,
   };
 }
