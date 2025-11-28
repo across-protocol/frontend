@@ -6,9 +6,13 @@ import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
 import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
 import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
 import { BigNumber } from "ethers";
+import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
+import { useAccountInQuote } from "./hooks/useQuoteRequest/useAccountInQuote";
 
 export default function SwapAndBridge() {
   const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();
+  useDefaultRouteInQuote(dispatchQuoteRequestAction);
+  useAccountInQuote(quoteRequest, dispatchQuoteRequestAction);
 
   const isAmountOrigin = quoteRequest.tradeType === "exactInput";
 
@@ -24,9 +28,8 @@ export default function SwapAndBridge() {
     buttonLabel,
     onConfirm,
     destinationChainEcosystem,
-    toAccountManagement,
     priceImpact,
-  } = useSwapAndBridge(quoteRequest, isAmountOrigin);
+  } = useSwapAndBridge(quoteRequest);
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -64,7 +67,8 @@ export default function SwapAndBridge() {
           expectedInputAmount={expectedInputAmount}
           validationError={validationError}
           destinationChainEcosystem={destinationChainEcosystem}
-          toAccountManagement={toAccountManagement}
+          quoteRequest={quoteRequest}
+          dispatchQuoteRequestAction={dispatchQuoteRequestAction}
         />
         <ConfirmationButton
           inputToken={quoteRequest.originToken}

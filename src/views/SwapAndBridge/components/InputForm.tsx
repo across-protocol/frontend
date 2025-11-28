@@ -3,7 +3,7 @@ import SelectorButton from "./ChainTokenSelector/SelectorButton";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import { BalanceSelector } from "./BalanceSelector";
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
 import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
@@ -11,8 +11,11 @@ import { AmountInputError } from "views/Bridge/utils";
 import { UnitType, useTokenInput } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
-import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
 import type { ChainEcosystem } from "../../../constants/chains/types";
+import {
+  QuoteRequest,
+  QuoteRequestAction,
+} from "../hooks/useQuoteRequest/quoteRequestAction";
 
 export const InputForm = ({
   originToken,
@@ -26,8 +29,9 @@ export const InputForm = ({
   expectedOutputAmount,
   expectedInputAmount,
   validationError,
-  toAccountManagement,
   destinationChainEcosystem,
+  quoteRequest,
+  dispatchQuoteRequestAction,
 }: {
   originToken: EnrichedToken | null;
   setOriginToken: (token: EnrichedToken | null) => void;
@@ -40,8 +44,9 @@ export const InputForm = ({
   setDestinationAmount: (amount: BigNumber | null) => void;
   isAmountOrigin: boolean;
   validationError: AmountInputError | undefined;
-  toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: ChainEcosystem;
+  quoteRequest: QuoteRequest;
+  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
   // Shared unit state for both inputs
   const [unit, setUnit] = useState<UnitType>("token");
@@ -79,8 +84,9 @@ export const InputForm = ({
         disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
-        toAccountManagement={toAccountManagement}
         destinationChainEcosystem={destinationChainEcosystem}
+        quoteRequest={quoteRequest}
+        dispatchQuoteRequestAction={dispatchQuoteRequestAction}
       />
       <QuickSwapButton onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
@@ -98,8 +104,9 @@ export const InputForm = ({
         disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
-        toAccountManagement={toAccountManagement}
         destinationChainEcosystem={destinationChainEcosystem}
+        quoteRequest={quoteRequest}
+        dispatchQuoteRequestAction={dispatchQuoteRequestAction}
       />
     </Wrapper>
   );
@@ -119,8 +126,9 @@ const TokenInput = ({
   disabled,
   unit,
   setUnit,
-  toAccountManagement,
   destinationChainEcosystem,
+  quoteRequest,
+  dispatchQuoteRequestAction,
 }: {
   setToken: (token: EnrichedToken) => void;
   setOtherToken: (token: EnrichedToken | null) => void;
@@ -135,8 +143,9 @@ const TokenInput = ({
   otherToken?: EnrichedToken | null;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
-  toAccountManagement: ToAccountManagement;
   destinationChainEcosystem: ChainEcosystem;
+  quoteRequest: QuoteRequest;
+  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
@@ -194,8 +203,9 @@ const TokenInput = ({
           {!isOrigin && (
             <>
               <ChangeAccountModal
-                toAccountManagement={toAccountManagement}
+                quoteRequest={quoteRequest}
                 destinationChainEcosystem={destinationChainEcosystem}
+                dispatchQuoteRequestAction={dispatchQuoteRequestAction}
               />
             </>
           )}
