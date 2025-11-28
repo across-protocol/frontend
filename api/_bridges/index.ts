@@ -1,6 +1,3 @@
-import { getAcrossBridgeStrategy } from "./across/strategy";
-import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
@@ -9,9 +6,12 @@ import {
   GetBridgeStrategyParams,
 } from "./types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
-import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getBridgeStrategyData } from "./utils";
+import { getAcrossBridgeStrategy } from "./across/strategy";
+import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
+import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
+import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -164,7 +164,7 @@ async function routeMintAndBurnStrategy({
       return getOftBridgeStrategy();
     }
     if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy("fast");
+      return getCctpBridgeStrategy();
     } else {
       return getAcrossBridgeStrategy();
     }
