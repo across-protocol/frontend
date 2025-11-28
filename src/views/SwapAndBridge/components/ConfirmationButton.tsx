@@ -231,8 +231,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     const {
       totalFeeFormatted,
       bridgeFeeFormatted,
-      appFeeFormatted,
       swapImpactFormatted,
+      swapImpactUsd,
     } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
@@ -241,12 +241,15 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       ? `~${Math.max(1, Math.round(totalSeconds))} secs`
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
+    // for sponsored bridges, always show this line item (as a flex), otherwise only show if a swap is involved
+    const showSwapImpact =
+      priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
+
     return {
       totalFee: totalFeeFormatted,
       time,
       bridgeFee: bridgeFeeFormatted,
-      appFee: appFeeFormatted,
-      swapImpact: swapImpactFormatted,
+      swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       route: "Across V4",
       estimatedTime: time,
     };
