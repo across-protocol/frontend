@@ -112,10 +112,10 @@ export function clientToProvider(client: Client<Transport, Chain>) {
   if (transport.type === "fallback")
     return new providers.FallbackProvider(
       (transport.transports as ReturnType<Transport>[]).map(
-        ({ value }) => new providers.JsonRpcProvider(value?.url, "any")
+        ({ value }) => new providers.StaticJsonRpcProvider(value?.url, "any")
       )
     );
-  return new providers.JsonRpcProvider(transport.url, "any");
+  return new providers.StaticJsonRpcProvider(transport.url, "any");
 }
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
