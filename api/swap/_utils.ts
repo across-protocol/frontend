@@ -129,15 +129,12 @@ export async function handleBaseSwapQueryParams(
     !KNOWN_CHAIN_IDS.has(originChainId) ||
     !KNOWN_CHAIN_IDS.has(destinationChainId)
   ) {
-    const unknownChainSide = !KNOWN_CHAIN_IDS.has(originChainId)
-      ? "origin"
-      : "destination";
-    const unknownChainId = !KNOWN_CHAIN_IDS.has(originChainId)
-      ? originChainId
-      : destinationChainId;
+    const unknownChainIdParam = !KNOWN_CHAIN_IDS.has(originChainId)
+      ? "originChainId"
+      : "destinationChainId";
     throw new InvalidParamError({
-      param: `${unknownChainSide}ChainId`,
-      message: `Unsupported ${unknownChainSide} chain: ${unknownChainId}`,
+      param: unknownChainIdParam,
+      message: `Unsupported chain id: ${originChainId}`,
     });
   }
 
