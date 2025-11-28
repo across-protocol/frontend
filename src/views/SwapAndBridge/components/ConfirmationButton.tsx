@@ -509,6 +509,10 @@ const StyledButton = styled.button<{
     box-shadow: none;
     opacity: ${({ loading }) => (loading ? 0.9 : 0.6)};
   }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const ButtonContent = styled.span`
