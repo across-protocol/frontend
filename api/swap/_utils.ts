@@ -55,7 +55,7 @@ import {
 } from "../_multicall-handler";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
+import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
 import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
 import { getNativeTokenInfo } from "../_token-info";
@@ -124,6 +124,19 @@ export async function handleBaseSwapQueryParams(
   const isOutputNative = isNativeToken(_outputTokenAddress, destinationChainId);
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
   const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
+
+  if (
+    !KNOWN_CHAIN_IDS.has(originChainId) ||
+    !KNOWN_CHAIN_IDS.has(destinationChainId)
+  ) {
+    const unknownChainIdParam = !KNOWN_CHAIN_IDS.has(originChainId)
+      ? "originChainId"
+      : "destinationChainId";
+    throw new InvalidParamError({
+      param: unknownChainIdParam,
+      message: `Unsupported chain id: ${originChainId}`,
+    });
+  }
 
   assertValidAddressChainCombination({
     address: _inputTokenAddress,

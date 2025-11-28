@@ -47,6 +47,7 @@ export const TOKEN_SYMBOLS_MAP = {
   },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
+export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
 export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   ...constants.TOKEN_EQUIVALENCE_REMAPPING,
   "USDH-SPOT": "USDH",
