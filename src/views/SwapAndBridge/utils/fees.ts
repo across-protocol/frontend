@@ -46,7 +46,7 @@ export type PriceImpact = {
   priceImpactFormatted: string;
 };
 
-export function showFreeTag(quote?: SwapApprovalQuote): boolean {
+export function isSponsoredIntentQuote(quote?: SwapApprovalQuote): boolean {
   return quote?.steps?.bridge?.provider === "sponsored-intent";
 }
 

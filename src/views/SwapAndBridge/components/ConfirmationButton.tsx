@@ -19,7 +19,11 @@ import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees, PriceImpact, showFreeTag } from "../utils/fees";
+import {
+  getSwapQuoteFees,
+  PriceImpact,
+  isSponsoredIntentQuote,
+} from "../utils/fees";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -220,7 +224,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const [expanded, setExpanded] = React.useState(false);
 
   const state = buttonState;
-  const isSponsoredIntent = showFreeTag(swapQuote ?? undefined);
+  const isSponsoredIntent = isSponsoredIntentQuote(swapQuote ?? undefined);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules

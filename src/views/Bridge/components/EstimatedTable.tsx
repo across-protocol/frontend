@@ -27,7 +27,7 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 import { FreeTag } from "views/SwapAndBridge/components/ConfirmationButton";
-import { showFreeTag } from "views/SwapAndBridge/utils/fees";
+import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
@@ -82,7 +82,9 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const isSponsoredIntent = showFreeTag(universalSwapQuote ?? undefined);
+  const isSponsoredIntent = isSponsoredIntentQuote(
+    universalSwapQuote ?? undefined
+  );
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
