@@ -16,7 +16,7 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://monad-mainnet.g.alchemy.com/v2/CrY3QO43HhgQsCf7G9CAr",
+  publicRpcUrl: "https://rpc-mainnet.monadinfra.com",
   blockTimeSeconds: 1,
   tokens: ["USDC", "USDT"],
   enableCCTP: false,
