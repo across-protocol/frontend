@@ -136,7 +136,7 @@ export async function handleBaseSwapQueryParams(
       ? originChainId
       : destinationChainId;
     throw new InvalidParamError({
-      param: unknownChainSide,
+      param: `${unknownChainSide}ChainId`,
       message: `Unsupported ${unknownChainSide} chain: ${unknownChainId}`,
     });
   }
