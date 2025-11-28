@@ -1,5 +1,5 @@
 "use client";
-import { ButtonHTMLAttributes, useEffect } from "react";
+import React, { ButtonHTMLAttributes, useEffect } from "react";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
@@ -10,9 +10,7 @@ import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, formatUSDString, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
@@ -20,6 +18,11 @@ import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
+import type { BridgeProvider } from "../../../../api/_dexes/types";
+import {
+  getProviderFromQuote,
+  ProviderBadge,
+} from "./Confirmation/BridgeProvider";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -44,6 +47,7 @@ interface ConfirmationButtonProps
   buttonLoading: boolean;
   buttonLabel?: string;
   priceImpact?: PriceImpact;
+  initialExpanded?: boolean;
 }
 
 // Expandable label section component
@@ -57,8 +61,18 @@ const ExpandableLabelSection: React.FC<
     state: BridgeButtonState;
     hasQuote: boolean;
     priceImpact?: PriceImpact;
+    provider: BridgeProvider;
   }>
-> = ({ fee, time, expanded, onToggle, priceImpact, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  priceImpact,
+  children,
+  hasQuote,
+  provider,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -85,7 +99,10 @@ const ExpandableLabelSection: React.FC<
         </ExpandableLabelLeft>
         {!expanded && (
           <ExpandableLabelRight>
-            <Across />
+            <ProviderBadge
+              expanded={expanded}
+              provider={provider}
+            ></ProviderBadge>
             <Divider />
             <FeeTimeItem>
               {priceImpact?.tooHigh ? (
@@ -205,8 +222,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonLoading,
   buttonLabel,
   priceImpact,
+  initialExpanded = false,
 }) => {
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(initialExpanded);
 
   const state = buttonState;
 
@@ -245,7 +263,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       bridgeFee: formatUSDString(bridgeFeesUsd),
       appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
       swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
-      route: "Across V4",
       estimatedTime: time,
     };
   }, [swapQuote, inputToken, outputToken, amount]);
@@ -259,6 +276,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   }, [swapQuote]);
 
+  const provider = getProviderFromQuote(swapQuote);
+
   // Render unified group driven by state
   const content = (
     <>
@@ -271,6 +290,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
+        provider={provider}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -279,8 +299,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               <span>Route</span>
             </DetailLeft>
             <DetailRight>
-              <Across width="20px" height="20px" />
-              <span>{displayValues.route}</span>
+              <ProviderBadge provider={provider} expanded></ProviderBadge>
             </DetailRight>
           </DetailRow>
           <DetailRow>
@@ -508,6 +527,10 @@ const StyledButton = styled.button<{
     cursor: ${({ loading }) => (loading ? "wait" : "not-allowed")};
     box-shadow: none;
     opacity: ${({ loading }) => (loading ? 0.9 : 0.6)};
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
