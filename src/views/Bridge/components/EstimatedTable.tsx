@@ -26,6 +26,7 @@ import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
+import { FreeTag } from "views/SwapAndBridge/components/ConfirmationButton";
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
@@ -80,6 +81,10 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
+  const isBridgeFeeFree = bridgeFeeAsBaseCurrency?.eq(0) ?? false;
+  const isSwapFeeFree = swapFeeAsBaseCurrency?.eq(0) ?? false;
+  const isNetFeeFree = netFeeAsBaseCurrency?.eq(0) ?? false;
+
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
       <>
@@ -109,6 +114,7 @@ const EstimatedTable = ({
             }
           }}
         >
+          {isSwapFeeFree && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
             ${formatUSD(swapFeeAsBaseCurrency)}
           </Text>
@@ -131,11 +137,14 @@ const EstimatedTable = ({
           </InfoIconWrapper>
         </Tooltip>
       </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
-          ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
-          : "-"}
-      </Text>
+      <FeeValueWrapper>
+        {isBridgeFeeFree && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        <Text color="grey-400" size="md">
+          {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
+            ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
+            : "-"}
+        </Text>
+      </FeeValueWrapper>
     </>,
     swapFeeAsBaseCurrency?.gt(0) ? (
       <>
@@ -153,9 +162,14 @@ const EstimatedTable = ({
             </InfoIconWrapper>
           </Tooltip>
         </ToolTipWrapper>
-        <Text color="grey-400" size="md">
-          {!showLoadingSkeleton ? `$${formatUSD(swapFeeAsBaseCurrency)}` : "-"}
-        </Text>
+        <FeeValueWrapper>
+          {isSwapFeeFree && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          <Text color="grey-400" size="md">
+            {!showLoadingSkeleton
+              ? `$${formatUSD(swapFeeAsBaseCurrency)}`
+              : "-"}
+          </Text>
+        </FeeValueWrapper>
       </>
     ) : undefined,
     rewardDisplaySymbol && rewardToken && rewardPercentage ? (
@@ -255,6 +269,9 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
+            {isNetFeeFree && !doesAmountExceedMaxDeposit && (
+              <FreeTag>FREE</FreeTag>
+            )}
             <Text
               size="md"
               color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
@@ -795,4 +812,10 @@ const ChevronIconStyled = styled(ChevronIcon)`
       isExpanded ? "180deg" : "0deg"}
   );
   transition: transform 0.2s ease-in-out;
+`;
+
+const FeeValueWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
 `;
