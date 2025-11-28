@@ -54,17 +54,28 @@ export const isTransferModeSupported = (
 };
 
 /**
- * Get the transfer mode for a given origin chain and amount.
- * Falls back to "standard" if:
- * - The requested mode is not supported
- * - checkAllowance is true and the amount exceeds available fast burn allowance (See: https://developers.circle.com/cctp#fast-transfer)
+ * Determines the appropriate CCTP transfer mode (standard or fast) for a given transfer.
+ *
+ * Returns "standard" mode if:
+ * - The requested mode is not supported on the origin chain.
+ * - Fast mode is requested with allowance checking enabled, and the transfer amount exceeds Circle's fast burn allowance.
+ *    (See: https://developers.circle.com/cctp#fast-transfer)
+ * - Allowance checking is enabled and the fast burn allowance API call fails.
+ *
+ * @param originChainId - The origin chain ID
+ * @param requestedTransferMode - The desired transfer mode.
+ * @param checkAllowance - Whether to check fast burn allowance limit. Defaults to false since allowance is rarely exceeded.
+ * @param amount - The transfer amount in token units. Required when checkAllowance is true.
+ * @param tokenDecimals - The number of decimals for the amount token. Required when checkAllowance is true.
+ * @returns The transfer mode to use.
+ *
  */
 export const getTransferMode = async (
   originChainId: number,
-  amount: BigNumber,
-  tokenDecimals: number,
-  requestedTransferMode: "standard" | "fast" = "fast",
-  checkAllowance = false
+  requestedTransferMode: "standard" | "fast",
+  checkAllowance = false,
+  amount?: BigNumber,
+  tokenDecimals?: number
 ): Promise<"standard" | "fast"> => {
   if (!isTransferModeSupported(originChainId, requestedTransferMode)) {
     return "standard";
@@ -72,6 +83,12 @@ export const getTransferMode = async (
 
   // If fast mode is requested, check if the amount is within allowance
   if (requestedTransferMode === "fast" && checkAllowance) {
+    if (!amount || tokenDecimals === undefined) {
+      throw new Error(
+        "amount and tokenDecimals are required when checkAllowance is true"
+      );
+    }
+
     try {
       const isMainnet = sdk.utils.chainIsProd(originChainId);
       const fastAllowance = await sdk.utils.getV2FastBurnAllowance(isMainnet);
