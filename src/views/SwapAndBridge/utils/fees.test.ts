@@ -96,30 +96,16 @@ describe("getPriceImpact", () => {
 });
 
 describe("formatFeeUsd", () => {
-  it("should format fees >= $0.01 with standard 2 decimal formatting", () => {
-    const result1 = formatFeeUsd("0.01");
-    expect(result1).toBe("$0.01");
-
-    const result2 = formatFeeUsd("1.50");
-    expect(result2).toBe("$1.50");
-  });
-
-  it("should round DOWN fees >= $0.001 and < $0.01 to 3 decimal places", () => {
-    const result1 = formatFeeUsd("0.00567");
-    expect(result1).toBe("$0.005");
-
-    const result2 = formatFeeUsd("0.00999");
-    expect(result2).toBe("$0.009");
-  });
-
-  it("should round UP fees < $0.001 to $0.001", () => {
-    const result1 = formatFeeUsd("0.0005");
-    expect(result1).toBe("$0.001");
-
-    const result2 = formatFeeUsd("0.0001");
-    expect(result2).toBe("$0.001");
-
-    const result3 = formatFeeUsd("0.0009");
-    expect(result3).toBe("$0.001");
+  it.each`
+    input        | expected    | description
+    ${"0.01"}    | ${"$0.01"}  | ${"formats fees >= $0.01 with standard 2 decimal formatting"}
+    ${"1.50"}    | ${"$1.50"}  | ${"formats fees >= $0.01 with standard 2 decimal formatting"}
+    ${"0.00567"} | ${"$0.005"} | ${"rounds DOWN fees >= $0.001 and < $0.01 to 3 decimal places"}
+    ${"0.00999"} | ${"$0.009"} | ${"rounds DOWN fees >= $0.001 and < $0.01 to 3 decimal places"}
+    ${"0.0005"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+    ${"0.0001"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+    ${"0.0009"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+  `("formatFeeUsd $description ($input → $expected)", ({ input, expected }) => {
+    expect(formatFeeUsd(input)).toBe(expected);
   });
 });
