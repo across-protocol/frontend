@@ -2,6 +2,7 @@ import {
   DepositEventFromSignature,
   FillEventFromSignature,
 } from "@across-protocol/sdk/dist/esm/arch/svm";
+import { BigNumber } from "ethers";
 
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
@@ -48,14 +49,14 @@ export type FillInfo =
       fillTxTimestamp: undefined;
       depositInfo: DepositedInfo;
       status: "filling";
-      fillLog: undefined;
+      outputAmount: undefined;
     }
   | {
       fillTxHash: string;
       fillTxTimestamp: number;
       depositInfo: DepositedInfo;
       status: "filled" | "fill-reverted";
-      fillLog: FillData;
+      outputAmount: BigNumber;
     };
 
 export type FilledInfo = Extract<
