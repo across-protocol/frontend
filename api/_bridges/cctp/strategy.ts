@@ -285,10 +285,12 @@ export function getCctpBridgeStrategy(
       const destinationChainId = crossSwap.outputToken.chainId;
       const destinationDomain = getCctpDomainId(destinationChainId);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
-      // Forward fee returned by Circle's API is a min fee, so we add 0.1% buffer to ensure our transfers are eligible for fast mode.
-      const MAX_FEE_BUFFER = BigNumber.from(1001).div(1000);
-      const maxFee = bridgeQuote.fees.amount.mul(MAX_FEE_BUFFER);
-      const minFinalityThreshold = maxFee.gt(0)
+      // Circle's API returns a minimum fee. Add 1 unit as buffer to ensure the transfer meets the threshold for fast mode eligibility.
+      const hasFastFee = bridgeQuote.fees.amount.gt(0);
+      const maxFee = hasFastFee
+        ? bridgeQuote.fees.amount.add(1)
+        : bridgeQuote.fees.amount;
+      const minFinalityThreshold = hasFastFee
         ? CCTP_FINALITY_THRESHOLDS.fast
         : CCTP_FINALITY_THRESHOLDS.standard;
 
