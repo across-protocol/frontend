@@ -177,6 +177,46 @@ describe("GET /swap/approval", () => {
       },
       JEST_TIMEOUT_MS
     );
+
+    describe("unknown origin or destination chain id", () => {
+      it("should throw 400 for unknown origin chain id", async () => {
+        try {
+          await axiosInstance.get(SWAP_API_URL, {
+            params: {
+              amount: "10000000000000000",
+              tradeType: "exactInput",
+              inputToken: "0x0000000000000000000000000000000000000000",
+              outputToken: "0x0000000000000000000000000000000000000000",
+              originChainId: 1111,
+              destinationChainId: 10,
+              depositor: e2eConfig.addresses.depositor,
+            },
+          });
+        } catch (error: any) {
+          expect(error.response?.status).toEqual(400);
+          expect(error.response?.data.param).toEqual("originChainId");
+        }
+      });
+
+      it("should throw 400 for unknown destination chain id", async () => {
+        try {
+          await axiosInstance.get(SWAP_API_URL, {
+            params: {
+              amount: "10000000000000000",
+              tradeType: "exactInput",
+              inputToken: "0x0000000000000000000000000000000000000000",
+              outputToken: "0x0000000000000000000000000000000000000000",
+              originChainId: 10,
+              destinationChainId: 1111,
+              depositor: e2eConfig.addresses.depositor,
+            },
+          });
+        } catch (error: any) {
+          expect(error.response?.status).toEqual(400);
+          expect(error.response?.data.param).toEqual("destinationChainId");
+        }
+      });
+    });
   });
 
   describe("B2B", () => {
