@@ -55,7 +55,7 @@ import {
 } from "../_multicall-handler";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
-import { KNOWN_CHAIN_IDS, TOKEN_SYMBOLS_MAP } from "../_constants";
+import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
 import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
 import { getNativeTokenInfo } from "../_token-info";
@@ -120,8 +120,8 @@ export async function handleBaseSwapQueryParams(
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
   const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
-  const isInputNative = _inputTokenAddress === constants.AddressZero;
-  const isOutputNative = _outputTokenAddress === constants.AddressZero;
+  const isInputNative = isNativeToken(_inputTokenAddress, originChainId);
+  const isOutputNative = isNativeToken(_outputTokenAddress, destinationChainId);
   const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
   const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
 
@@ -296,6 +296,14 @@ export async function handleBaseSwapQueryParams(
     isOriginSvm,
   };
 }
+
+const isNativeToken = (tokenAddress: string, chainId: number) => {
+  if (tokenAddress === constants.AddressZero) return true;
+  return (
+    chainId === CHAIN_IDs.POLYGON &&
+    tokenAddress === TOKEN_SYMBOLS_MAP.POL.addresses[chainId]
+  );
+};
 
 // Schema definitions for embedded actions
 // Input param for a function call

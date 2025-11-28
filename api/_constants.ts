@@ -20,6 +20,13 @@ export const CHAIN_IDs = {
 };
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
+  POL: {
+    ...constants.TOKEN_SYMBOLS_MAP.POL,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.POL.addresses,
+      [CHAIN_IDs.POLYGON]: "0x0000000000000000000000000000000000001010",
+    },
+  },
   WHYPE: {
     ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
     addresses: {
