@@ -19,17 +19,10 @@ import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
 import type { BridgeProvider } from "../../../../api/_dexes/types";
-
-const PROVIDER_DISPLAY: Record<
-  BridgeProvider,
-  { name: string; label: string }
-> = {
-  across: { name: "Across", label: "Across V4" },
-  cctp: { name: "CCTP", label: "Circle CCTP" },
-  oft: { name: "OFT", label: "LayerZero OFT" },
-  hypercore: { name: "HC", label: "Hypercore" },
-  "sponsored-intent": { name: "Intent", label: "Sponsored Intent" },
-};
+import {
+  getProviderFromQuote,
+  ProviderBadge,
+} from "./Confirmation/BridgeProvider";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -106,13 +99,10 @@ const ExpandableLabelSection: React.FC<
         </ExpandableLabelLeft>
         {!expanded && (
           <ExpandableLabelRight>
-            {provider === "across" ? (
-              <Across />
-            ) : (
-              <ProviderBadge provider={provider}>
-                {PROVIDER_DISPLAY[provider].name}
-              </ProviderBadge>
-            )}
+            <ProviderBadge
+              expanded={expanded}
+              provider={provider}
+            ></ProviderBadge>
             <Divider />
             <FeeTimeItem>
               {priceImpact?.tooHigh ? (
@@ -249,7 +239,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         bridgeFee: "-",
         appFee: undefined,
         swapImpact: undefined,
-        provider: "across" as BridgeProvider,
         route: "Across V4",
         estimatedTime: "-",
         totalFee: "-",
@@ -268,19 +257,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       ? `~${Math.max(1, Math.round(totalSeconds))} secs`
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
-    const provider = (swapQuote.steps.bridge.provider ||
-      "across") as BridgeProvider;
-    const providerDisplay =
-      PROVIDER_DISPLAY[provider] || PROVIDER_DISPLAY.across;
-
     return {
       totalFee: formatUSDString(totalFeeUsd),
       time,
       bridgeFee: formatUSDString(bridgeFeesUsd),
       appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
       swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
-      provider,
-      route: providerDisplay.label,
       estimatedTime: time,
     };
   }, [swapQuote, inputToken, outputToken, amount]);
@@ -294,6 +276,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   }, [swapQuote]);
 
+  const provider = getProviderFromQuote(swapQuote);
+
   // Render unified group driven by state
   const content = (
     <>
@@ -306,7 +290,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
-        provider={displayValues.provider}
+        provider={provider}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -315,12 +299,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               <span>Route</span>
             </DetailLeft>
             <DetailRight>
-              <ProviderBadge provider={displayValues.provider}>
-                {displayValues.provider === "across" && (
-                  <Across width="16px" height="16px" />
-                )}
-                {displayValues.route}
-              </ProviderBadge>
+              <ProviderBadge provider={provider} expanded></ProviderBadge>
             </DetailRight>
           </DetailRow>
           <DetailRow>
@@ -685,24 +664,4 @@ const WarningTooltipBody = styled.span`
   color: var(--functional-red);
   font-weight: 600;
   font-size: 14px;
-`;
-
-const PROVIDER_COLORS: Record<BridgeProvider, string> = {
-  across: COLORS.aqua,
-  cctp: "#3B82F6",
-  oft: "#8B5CF6",
-  "sponsored-intent": "#F59E0B",
-  hypercore: "#bada55",
-};
-
-const ProviderBadge = styled.span<{ provider: BridgeProvider }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  background: ${({ provider }) => `${PROVIDER_COLORS[provider]}20`};
-  color: ${({ provider }) => PROVIDER_COLORS[provider]};
 `;
