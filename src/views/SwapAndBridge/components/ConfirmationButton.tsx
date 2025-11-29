@@ -19,7 +19,11 @@ import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
+import {
+  getSwapQuoteFees,
+  PriceImpact,
+  isSponsoredIntentQuote,
+} from "../utils/fees";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -57,8 +61,18 @@ const ExpandableLabelSection: React.FC<
     state: BridgeButtonState;
     hasQuote: boolean;
     priceImpact?: PriceImpact;
+    isSponsoredIntent?: boolean;
   }>
-> = ({ fee, time, expanded, onToggle, priceImpact, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  priceImpact,
+  children,
+  hasQuote,
+  isSponsoredIntent,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -102,7 +116,7 @@ const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
-                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
@@ -210,6 +224,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const [expanded, setExpanded] = React.useState(false);
 
   const state = buttonState;
+  const isSponsoredIntent = isSponsoredIntentQuote(swapQuote ?? undefined);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
@@ -276,6 +291,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
+        isSponsoredIntent={isSponsoredIntent}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -325,7 +341,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 </Tooltip>
               ) : (
                 <>
-                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}{" "}
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}{" "}
                   {displayValues.totalFee}
                 </>
               )}
@@ -343,7 +359,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 </Tooltip>
               </FeeBreakdownLabel>
               <FeeBreakdownValue>
-                {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
+                {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                 {displayValues.bridgeFee}
               </FeeBreakdownValue>
             </FeeBreakdownRow>
@@ -359,7 +375,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
-                  {priceImpact?.priceImpact === 0 && <FreeTag>FREE</FreeTag>}
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
               </FeeBreakdownRow>

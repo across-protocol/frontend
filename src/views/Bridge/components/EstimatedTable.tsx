@@ -27,6 +27,7 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 import { FreeTag } from "views/SwapAndBridge/components/ConfirmationButton";
+import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
@@ -81,9 +82,9 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const isBridgeFeeFree = bridgeFeeAsBaseCurrency?.eq(0) ?? false;
-  const isSwapFeeFree = swapFeeAsBaseCurrency?.eq(0) ?? false;
-  const isNetFeeFree = netFeeAsBaseCurrency?.eq(0) ?? false;
+  const isSponsoredIntent = isSponsoredIntentQuote(
+    universalSwapQuote ?? undefined
+  );
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
@@ -114,7 +115,7 @@ const EstimatedTable = ({
             }
           }}
         >
-          {isSwapFeeFree && <FreeTag>FREE</FreeTag>}
+          {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
             ${formatUSD(swapFeeAsBaseCurrency)}
           </Text>
@@ -138,7 +139,7 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <FeeValueWrapper>
-        {isBridgeFeeFree && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
         <Text color="grey-400" size="md">
           {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
             ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
@@ -163,7 +164,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <FeeValueWrapper>
-          {isSwapFeeFree && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
           <Text color="grey-400" size="md">
             {!showLoadingSkeleton
               ? `$${formatUSD(swapFeeAsBaseCurrency)}`
@@ -269,7 +270,7 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
-            {isNetFeeFree && !doesAmountExceedMaxDeposit && (
+            {isSponsoredIntent && !doesAmountExceedMaxDeposit && (
               <FreeTag>FREE</FreeTag>
             )}
             <Text
