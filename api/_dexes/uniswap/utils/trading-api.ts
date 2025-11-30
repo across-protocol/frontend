@@ -91,7 +91,8 @@ export async function getUniswapClassicQuoteFromApi(
       amount: swap.amount,
       urgency: "urgent",
       protocols: swap.protocols || ["V2", "V3", "V4"],
-      routingPreference: "FASTEST",
+      routingPreference: "BEST_PRICE",
+      hooksOptions: "V4_NO_HOOKS",
       ...slippageParams,
     },
     {
