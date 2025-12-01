@@ -18,11 +18,8 @@ import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
-import {
-  BridgeProvider,
-  getProviderFromQuote,
-  ProviderBadge,
-} from "./BridgeProvider";
+import { ProviderBadge } from "./BridgeProvider";
+import { BridgeProvider, getProviderFromQuote } from "./provider";
 
 export type BridgeButtonState =
   | "notConnected"

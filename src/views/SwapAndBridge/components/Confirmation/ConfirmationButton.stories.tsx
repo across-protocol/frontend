@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
 import { BridgeButtonState, ConfirmationButton } from "./ConfirmationButton";
-import { BridgeProvider } from "./BridgeProvider";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import { PriceImpact } from "../../utils/fees";
+import { BridgeProvider } from "./provider";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
