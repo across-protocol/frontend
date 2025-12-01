@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo } from "react";
 
 import { useAmplitude } from "hooks";
 import {
-  wait,
   getChainInfo,
   NoFundsDepositedLogError,
   debug,

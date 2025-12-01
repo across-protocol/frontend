@@ -90,21 +90,23 @@ export interface IChainStrategy {
    */
   getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
 
-  // /**
-  //  * Get fill information for a deposit
-  //  * @param depositInfo Deposit information
-  //  * @param toChainId Destination chain ID
-  //  * @returns Normalized fill information
-  //  */
-  // getFillFromRpc(depositInfo: DepositedInfo): Promise<FillInfo>;
+  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
 
-  // /**
-  //  * Get fill information for a deposit
-  //  * @param depositInfo Deposit information
-  //  * @param toChainId Destination chain ID
-  //  * @returns Normalized fill information
-  //  */
-  // getFillFromIndexer(depositInfo: DepositedInfo): Promise<FillInfo>;
+  /**
+   * Get fill information for a deposit
+   * @param depositInfo Deposit information
+   * @param toChainId Destination chain ID
+   * @returns Normalized fill information
+   */
+  getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;
+
+  /**
+   * Get fill information for a deposit
+   * @param depositInfo Deposit information
+   * @param toChainId Destination chain ID
+   * @returns Normalized fill information
+   */
+  getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
 
   /**
    * Convert deposit information to local storage format
