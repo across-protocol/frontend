@@ -1,5 +1,52 @@
-import { INDIRECT_CHAINS } from "../../../../utils/constants";
+import {
+  CHAIN_IDs,
+  INDIRECT_CHAINS,
+  TOKEN_SYMBOLS_MAP,
+} from "../../../../utils/constants";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
+
+// we may want to allow these fileds to be arrays
+export type RestrictedRoute = {
+  fromChainId: number | "*";
+  fromSymbol: string | "*";
+  toChainId: number | "*";
+  toSymbol: string | "*";
+};
+
+export type RouteParams = Required<RestrictedRoute>;
+
+// hardcoded restricted routes
+const RESTRICTED_ROUTES: RestrictedRoute[] = [
+  {
+    fromChainId: "*",
+    fromSymbol: TOKEN_SYMBOLS_MAP["USDC.e"].symbol,
+    toChainId: CHAIN_IDs.HYPERCORE,
+    toSymbol: TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
+  },
+];
+
+export function matchesRestrictedRoute(
+  route: RouteParams,
+  restriction: RestrictedRoute
+): boolean {
+  // helper
+  const matches = <T>(restrictionValue: T | "*", routeValue: T): boolean => {
+    return restrictionValue === "*" || restrictionValue === routeValue;
+  };
+
+  return (
+    matches(restriction.fromChainId, route.fromChainId) &&
+    matches(restriction.fromSymbol, route.fromSymbol) &&
+    matches(restriction.toChainId, route.toChainId) &&
+    matches(restriction.toSymbol, route.toSymbol)
+  );
+}
+
+function isRouteRestricted(route: RouteParams): boolean {
+  return RESTRICTED_ROUTES.some((restriction) =>
+    matchesRestrictedRoute(route, restriction)
+  );
+}
 
 function getRestrictedOriginChainsUnreachable(
   token: EnrichedToken,
@@ -41,6 +88,15 @@ export function isTokenUnreachable(
     otherToken
   );
 
+  const isRestrictedRoute = otherToken
+    ? isRouteRestricted({
+        fromChainId: isOriginToken ? token.chainId : otherToken.chainId,
+        fromSymbol: isOriginToken ? token.symbol : otherToken.symbol,
+        toChainId: isOriginToken ? otherToken.chainId : token.chainId,
+        toSymbol: isOriginToken ? otherToken.symbol : token.symbol,
+      })
+    : false;
+
   // Combine all unreachability checks
-  return isSameChain || isRestrictedOrigin;
+  return isSameChain || isRestrictedOrigin || isRestrictedRoute;
 }

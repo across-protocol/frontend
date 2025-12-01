@@ -1,4 +1,9 @@
-import { isTokenUnreachable } from "./isTokenUnreachable";
+import {
+  isTokenUnreachable,
+  matchesRestrictedRoute,
+  RestrictedRoute,
+  RouteParams,
+} from "./isTokenUnreachable";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 import { CHAIN_IDs } from "../../../../utils/constants";
 
@@ -80,6 +85,129 @@ describe("isTokenUnreachable", () => {
       );
 
       expect(isUnreachable).toBe(false);
+    });
+  });
+
+  describe("matchesRestrictedRoute", () => {
+    describe("exact restriction", () => {
+      const restriction: RestrictedRoute = {
+        fromChainId: CHAIN_IDs.MAINNET,
+        fromSymbol: "USDC",
+        toChainId: CHAIN_IDs.ARBITRUM,
+        toSymbol: "USDT",
+      };
+
+      it("should match when all fields match exactly", () => {
+        const route: RouteParams = {
+          fromChainId: CHAIN_IDs.MAINNET,
+          fromSymbol: "USDC",
+          toChainId: CHAIN_IDs.ARBITRUM,
+          toSymbol: "USDT",
+        };
+        expect(matchesRestrictedRoute(route, restriction)).toBe(true);
+      });
+
+      it("should not match when any field differs", () => {
+        expect(
+          matchesRestrictedRoute(
+            {
+              fromChainId: CHAIN_IDs.MAINNET,
+              fromSymbol: "USDT",
+              toChainId: CHAIN_IDs.ARBITRUM,
+              toSymbol: "USDT",
+            },
+            restriction
+          )
+        ).toBe(false);
+      });
+    });
+
+    it("should match when '*' fields act as wildcards", () => {
+      // Test each wildcard pattern
+      expect(
+        matchesRestrictedRoute(
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "USDT",
+          },
+          {
+            fromChainId: "*",
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "USDT",
+          }
+        )
+      ).toBe(true);
+
+      expect(
+        matchesRestrictedRoute(
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "ETH",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "USDT",
+          },
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "*",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "USDT",
+          }
+        )
+      ).toBe(true);
+
+      expect(
+        matchesRestrictedRoute(
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.BASE,
+            toSymbol: "USDT",
+          },
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: "*",
+            toSymbol: "USDT",
+          }
+        )
+      ).toBe(true);
+
+      expect(
+        matchesRestrictedRoute(
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "ETH",
+          },
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "*",
+          }
+        )
+      ).toBe(true);
+
+      expect(
+        matchesRestrictedRoute(
+          {
+            fromChainId: CHAIN_IDs.MAINNET,
+            fromSymbol: "USDC",
+            toChainId: CHAIN_IDs.ARBITRUM,
+            toSymbol: "USDT",
+          },
+          {
+            fromChainId: "*",
+            fromSymbol: "*",
+            toChainId: "*",
+            toSymbol: "*",
+          }
+        )
+      ).toBe(true);
     });
   });
 });
