@@ -25,6 +25,10 @@ const PROVIDER_DISPLAY: Record<
   { label: string; logo: ReactElement }
 > = {
   across: { label: "Across V4", logo: <Across width="16px" height="16px" /> },
+  "sponsored-intent": {
+    label: "Across V4",
+    logo: <Across width="16px" height="16px" />,
+  },
   cctp: { label: "CCTP", logo: <Circle width="16px" height="16px" /> },
   oft: {
     label: "OFT",
@@ -32,17 +36,6 @@ const PROVIDER_DISPLAY: Record<
       <TokenImage
         src={orderedTokenLogos.USDT}
         alt="usdt-logo"
-        width="16px"
-        height="16px"
-      />
-    ),
-  },
-  "sponsored-intent": {
-    label: "USDH",
-    logo: (
-      <TokenImage
-        src={orderedTokenLogos.USDH}
-        alt="usdh-logo"
         width="16px"
         height="16px"
       />
