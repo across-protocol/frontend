@@ -123,36 +123,13 @@ export class EVMStrategy implements IChainStrategy {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
 
-      // Get fill transaction details
-      const provider = getProvider(fillChainId);
-      const fillTxReceipt = await provider.getTransactionReceipt(fillTxHash);
-      const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
-
-      const swapMetadata = await this.getSwapMetadata(fillTxHash, fillChainId);
-      const destinationSwapMetadata = swapMetadata?.find(
-        (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
-      );
-
-      const outputAmountParser =
-        bridgeProvider === "cctp"
-          ? parseOutputAmountFromMintAndWithdrawLog
-          : parseFilledRelayLogOutputAmount;
-
-      const outputAmount = destinationSwapMetadata
-        ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
-        : outputAmountParser(fillTxReceipt.logs);
-
-      if (!outputAmount) {
-        throw new Error(
-          `Unable to parse output amount from FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
-        );
-      }
+      const metadata = await this.getFillMetadata(fillTxHash, bridgeProvider);
 
       return {
-        fillTxHash,
-        fillTxTimestamp: fillTxBlock.timestamp,
+        fillTxHash: metadata.fillTxHash,
+        fillTxTimestamp: metadata.fillTxTimestamp,
         depositInfo,
-        outputAmount,
+        outputAmount: metadata.outputAmount || BigNumber.from(0),
         status: "filled",
       };
     } catch (error) {
@@ -238,7 +215,10 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getFillMetadata(fillTxHash: string): Promise<{
+  async getFillMetadata(
+    fillTxHash: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
@@ -256,9 +236,14 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
+      const outputAmountParser =
+        bridgeProvider === "cctp"
+          ? parseOutputAmountFromMintAndWithdrawLog
+          : parseFilledRelayLogOutputAmount;
+
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
-        : parseFilledRelayLogOutputAmount(fillTxReceipt.logs);
+        : outputAmountParser(fillTxReceipt.logs);
 
       return {
         fillTxHash,
