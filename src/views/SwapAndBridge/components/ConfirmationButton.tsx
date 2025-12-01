@@ -12,12 +12,16 @@ import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined } from "utils";
+import { COLORS, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
+import {
+  getSwapQuoteFees,
+  PriceImpact,
+  isSponsoredIntentQuote,
+} from "../utils/fees";
 import type { BridgeProvider } from "../../../../api/_dexes/types";
 import {
   getProviderFromQuote,
@@ -62,6 +66,7 @@ const ExpandableLabelSection: React.FC<
     hasQuote: boolean;
     priceImpact?: PriceImpact;
     provider: BridgeProvider;
+    isSponsoredIntent?: boolean;
   }>
 > = ({
   fee,
@@ -72,6 +77,7 @@ const ExpandableLabelSection: React.FC<
   children,
   hasQuote,
   provider,
+  isSponsoredIntent,
 }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
@@ -119,6 +125,7 @@ const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
@@ -227,6 +234,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const [expanded, setExpanded] = React.useState(initialExpanded);
 
   const state = buttonState;
+  const isSponsoredIntent = isSponsoredIntentQuote(swapQuote ?? undefined);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
@@ -245,11 +253,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    const { totalFeeUsd, bridgeFeesUsd, appFeesUsd, swapImpactUsd } =
-      getSwapQuoteFees(swapQuote);
-    // Only show fee items if they're at least 1 cent
-    const hasAppFee = Number(appFeesUsd) >= 0.01;
-    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
+    const {
+      totalFeeFormatted,
+      bridgeFeeFormatted,
+      swapImpactFormatted,
+      swapImpactUsd,
+    } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -257,12 +266,15 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       ? `~${Math.max(1, Math.round(totalSeconds))} secs`
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
+    // for sponsored bridges, always show this line item (as a flex), otherwise only show if a swap is involved
+    const showSwapImpact =
+      priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
+
     return {
-      totalFee: formatUSDString(totalFeeUsd),
+      totalFee: totalFeeFormatted,
       time,
-      bridgeFee: formatUSDString(bridgeFeesUsd),
-      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
-      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
+      bridgeFee: bridgeFeeFormatted,
+      swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
   }, [swapQuote, inputToken, outputToken, amount]);
@@ -290,6 +302,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
+        isSponsoredIntent={isSponsoredIntent}
         provider={provider}
       >
         <ExpandedDetails>
@@ -338,7 +351,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </DetailRightRed>
                 </Tooltip>
               ) : (
-                displayValues.totalFee
+                <>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}{" "}
+                  {displayValues.totalFee}
+                </>
               )}
             </DetailRight>
           </DetailRow>
@@ -353,7 +369,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
               </FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
+              <FeeBreakdownValue>
+                {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                {displayValues.bridgeFee}
+              </FeeBreakdownValue>
             </FeeBreakdownRow>
             {isDefined(displayValues.swapImpact) && (
               <FeeBreakdownRow>
@@ -367,6 +386,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
               </FeeBreakdownRow>
@@ -594,7 +614,7 @@ const FeeBreakdownRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   position: relative;
 
   &::before {
@@ -618,7 +638,7 @@ const FeeBreakdownLabel = styled.span`
   color: rgba(224, 243, 255, 0.5);
 `;
 
-const FeeBreakdownValue = styled.span`
+const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
 `;
 
@@ -664,4 +684,17 @@ const WarningTooltipBody = styled.span`
   color: var(--functional-red);
   font-weight: 600;
   font-size: 14px;
+`;
+
+export const FreeTag = styled.div`
+  height: 20px;
+  padding-inline: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--transparency-aqua-aqua-40);
+  background: var(--transparency-aqua-aqua-20);
+  color: var(--base-aqua);
+  font-size: 12px;
+  font-weight: 600;
 `;
