@@ -1,27 +1,24 @@
-import {
-  CHAIN_IDs,
-  INDIRECT_CHAINS,
-  TOKEN_SYMBOLS_MAP,
-} from "../../../../utils/constants";
+import { CHAIN_IDs, INDIRECT_CHAINS } from "../../../../utils/constants";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 
-// we may want to allow these fileds to be arrays
-export type RestrictedRoute = {
-  fromChainId: number | "*";
-  fromSymbol: string | "*";
-  toChainId: number | "*";
-  toSymbol: string | "*";
+export type RouteParams = {
+  fromChainId: number;
+  fromSymbol: string;
+  toChainId: number;
+  toSymbol: string;
 };
 
-export type RouteParams = Required<RestrictedRoute>;
+export type RestrictedRoute = {
+  [K in keyof RouteParams]: "*" | RouteParams[K][];
+};
 
 // hardcoded restricted routes
 const RESTRICTED_ROUTES: RestrictedRoute[] = [
   {
     fromChainId: "*",
-    fromSymbol: TOKEN_SYMBOLS_MAP["USDC.e"].symbol,
-    toChainId: CHAIN_IDs.HYPERCORE,
-    toSymbol: TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
+    fromSymbol: ["USDC.e"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDH-SPOT"],
   },
 ];
 
@@ -30,8 +27,11 @@ export function matchesRestrictedRoute(
   restriction: RestrictedRoute
 ): boolean {
   // helper
-  const matches = <T>(restrictionValue: T | "*", routeValue: T): boolean => {
-    return restrictionValue === "*" || restrictionValue === routeValue;
+  const matches = <T>(restrictionValue: "*" | T[], routeValue: T): boolean => {
+    if (restrictionValue === "*") {
+      return true;
+    }
+    return restrictionValue.includes(routeValue);
   };
 
   return (

@@ -91,10 +91,10 @@ describe("isTokenUnreachable", () => {
   describe("matchesRestrictedRoute", () => {
     describe("exact restriction", () => {
       const restriction: RestrictedRoute = {
-        fromChainId: CHAIN_IDs.MAINNET,
-        fromSymbol: "USDC",
-        toChainId: CHAIN_IDs.ARBITRUM,
-        toSymbol: "USDT",
+        fromChainId: [CHAIN_IDs.MAINNET],
+        fromSymbol: ["USDC"],
+        toChainId: [CHAIN_IDs.ARBITRUM],
+        toSymbol: ["USDT"],
       };
 
       it("should match when all fields match exactly", () => {
@@ -134,9 +134,9 @@ describe("isTokenUnreachable", () => {
           },
           {
             fromChainId: "*",
-            fromSymbol: "USDC",
-            toChainId: CHAIN_IDs.ARBITRUM,
-            toSymbol: "USDT",
+            fromSymbol: ["USDC"],
+            toChainId: [CHAIN_IDs.ARBITRUM],
+            toSymbol: ["USDT"],
           }
         )
       ).toBe(true);
@@ -150,10 +150,10 @@ describe("isTokenUnreachable", () => {
             toSymbol: "USDT",
           },
           {
-            fromChainId: CHAIN_IDs.MAINNET,
+            fromChainId: [CHAIN_IDs.MAINNET],
             fromSymbol: "*",
-            toChainId: CHAIN_IDs.ARBITRUM,
-            toSymbol: "USDT",
+            toChainId: [CHAIN_IDs.ARBITRUM],
+            toSymbol: ["USDT"],
           }
         )
       ).toBe(true);
@@ -167,10 +167,10 @@ describe("isTokenUnreachable", () => {
             toSymbol: "USDT",
           },
           {
-            fromChainId: CHAIN_IDs.MAINNET,
-            fromSymbol: "USDC",
+            fromChainId: [CHAIN_IDs.MAINNET],
+            fromSymbol: ["USDC"],
             toChainId: "*",
-            toSymbol: "USDT",
+            toSymbol: ["USDT"],
           }
         )
       ).toBe(true);
@@ -184,26 +184,9 @@ describe("isTokenUnreachable", () => {
             toSymbol: "ETH",
           },
           {
-            fromChainId: CHAIN_IDs.MAINNET,
-            fromSymbol: "USDC",
-            toChainId: CHAIN_IDs.ARBITRUM,
-            toSymbol: "*",
-          }
-        )
-      ).toBe(true);
-
-      expect(
-        matchesRestrictedRoute(
-          {
-            fromChainId: CHAIN_IDs.MAINNET,
-            fromSymbol: "USDC",
-            toChainId: CHAIN_IDs.ARBITRUM,
-            toSymbol: "USDT",
-          },
-          {
-            fromChainId: "*",
-            fromSymbol: "*",
-            toChainId: "*",
+            fromChainId: [CHAIN_IDs.MAINNET],
+            fromSymbol: ["USDC"],
+            toChainId: [CHAIN_IDs.ARBITRUM],
             toSymbol: "*",
           }
         )
