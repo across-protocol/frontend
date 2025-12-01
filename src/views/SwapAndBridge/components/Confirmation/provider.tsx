@@ -53,7 +53,7 @@ const PROVIDER_DISPLAY: Record<
     logo: (
       <TokenImage
         src={orderedTokenLogos.HYPE}
-        alt="usdh-logo"
+        alt="hyperliquid-logo"
         width="16px"
         height="16px"
       />
