@@ -31,7 +31,7 @@ const PROVIDER_DISPLAY: Record<
     logo: (
       <TokenImage
         src={orderedTokenLogos.USDT}
-        alt="usdh-logo"
+        alt="usdt-logo"
         width="16px"
         height="16px"
       />
