@@ -63,17 +63,17 @@ export type FilledInfo = Extract<
   FillInfo,
   { status: "filled" | "fill-reverted" }
 >;
-
+// partial taken from https://docs.across.to/reference/api-reference#get-deposit-status
 export type DepositStatusResponse =
   | {
       status: "pending";
-      fillTx: null;
+      fillTxnRef: null;
       swapOutputToken: string | undefined;
       swapOutputAmount: string | undefined;
     }
   | {
       status: "filled";
-      fillTx: string;
+      fillTxnRef: string;
       swapOutputToken: string | undefined;
       swapOutputAmount: string | undefined;
     };

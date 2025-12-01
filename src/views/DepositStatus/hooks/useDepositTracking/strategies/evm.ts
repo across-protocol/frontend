@@ -88,8 +88,7 @@ export class EVMStrategy implements IChainStrategy {
   }
 
   /**
-   * Get fill information for a deposit by checking both indexer and RPC methods
-   * Uses Promise.any to race both methods and use whichever succeeds first
+   * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
    * @returns Fill information
    */
@@ -97,32 +96,16 @@ export class EVMStrategy implements IChainStrategy {
     const { depositId } = depositInfo.depositLog;
     const fillChainId = this.getFillChain();
 
-    // Wrap both promises to return consistent result format
-    const indexerResultPromise = this.getFillFromIndexer(depositInfo).then(
-      (hash) => ({
-        success: !!hash,
-        hash: hash || undefined,
-        source: "indexer" as const,
-      })
-    );
-
-    const rpcResultPromise = this.getFillFromRpc(depositInfo).then((hash) => ({
-      success: true,
-      hash,
-      source: "rpc" as const,
-    }));
-
     try {
-      const result = await Promise.any([
-        indexerResultPromise,
-        rpcResultPromise,
+      const fillTxHash = await Promise.any([
+        this.getFillFromIndexer(depositInfo),
+        this.getFillFromRpc(depositInfo),
       ]);
-      console.log(`${result.source} success!!`);
 
-      if (!result?.success || !result.hash) {
+      if (!fillTxHash) {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-      const metadata = await this.getFillMetadata(result.hash);
+      const metadata = await this.getFillMetadata(fillTxHash);
 
       return {
         fillTxHash: metadata.fillTxHash,
@@ -142,21 +125,23 @@ export class EVMStrategy implements IChainStrategy {
    * @param depositInfo Deposit information
    * @returns Fill transaction hash or null
    */
-  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string | null> {
-    const originChainId = depositInfo.depositLog.originChainId;
+  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+    const { originChainId, depositId } = depositInfo.depositLog;
+
     try {
       const { data } = await axios.get<DepositStatusResponse>(
         `${indexerApiBaseUrl}/deposit/status`,
         {
           params: {
+            depositId: depositId.toString(),
             originChainId,
             depositTxHash: depositInfo.depositTxHash,
           },
         }
       );
 
-      if (data?.status === "filled" && data.fillTx) {
-        return data.fillTx;
+      if (data?.status === "filled" && data.fillTxnRef) {
+        return data.fillTxnRef;
       }
 
       throw new Error("Indexer response still pending");
