@@ -18,9 +18,8 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
 import {
@@ -39,7 +38,7 @@ import {
   getCctpDomainId,
   encodeDepositForBurn,
 } from "./utils/constants";
-import { getEstimatedFillTime } from "./utils/fill-times";
+import { getEstimatedFillTime, getTransferMode } from "./utils/fill-times";
 import { getCctpFees } from "./utils/fees";
 
 const name = "cctp";
@@ -61,7 +60,7 @@ const capabilities: BridgeCapabilities = {
  * Supports Circle's CCTP for burning USDC on source chain.
  */
 export function getCctpBridgeStrategy(
-  transferMode: "standard" | "fast" = "standard"
+  requestedTransferMode: "standard" | "fast" = "fast"
 ): BridgeStrategy {
   const isRouteSupported = (params: {
     inputToken: Token;
@@ -148,6 +147,10 @@ export function getCctpBridgeStrategy(
       assertSupportedRoute({ inputToken, outputToken });
 
       let maxFee = BigNumber.from(0);
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        requestedTransferMode
+      );
 
       if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
@@ -205,6 +208,11 @@ export function getCctpBridgeStrategy(
         inputToken.decimals
       )(minOutputAmount);
       let maxFee = BigNumber.from(0);
+
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        requestedTransferMode
+      );
 
       if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
@@ -277,6 +285,14 @@ export function getCctpBridgeStrategy(
       const destinationChainId = crossSwap.outputToken.chainId;
       const destinationDomain = getCctpDomainId(destinationChainId);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
+      // Circle's API returns a minimum fee. Add 1 unit as buffer to ensure the transfer meets the threshold for fast mode eligibility.
+      const hasFastFee = bridgeQuote.fees.amount.gt(0);
+      const maxFee = hasFastFee
+        ? bridgeQuote.fees.amount.add(1)
+        : bridgeQuote.fees.amount;
+      const minFinalityThreshold = hasFastFee
+        ? CCTP_FINALITY_THRESHOLDS.fast
+        : CCTP_FINALITY_THRESHOLDS.standard;
 
       // depositForBurn input parameters
       const depositForBurnParams = {
@@ -284,8 +300,8 @@ export function getCctpBridgeStrategy(
         destinationDomain,
         mintRecipient: crossSwap.recipient,
         destinationCaller: ethers.constants.AddressZero, // Anyone can finalize the message on domain when this is set to bytes32(0)
-        maxFee: bridgeQuote.fees.amount, // pre-calculated in getQuoteForExactInput or getQuoteForOutput
-        minFinalityThreshold: CCTP_FINALITY_THRESHOLDS[transferMode],
+        maxFee,
+        minFinalityThreshold,
       };
 
       if (crossSwap.isOriginSvm) {
