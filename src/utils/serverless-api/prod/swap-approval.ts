@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
 import { vercelApiBaseUrl } from "utils";
-import type { BridgeProvider } from "../../../../api/_dexes/types";
+import { BridgeProvider } from "../../../views/SwapAndBridge/components/Confirmation/provider";
 
 export type SwapApprovalApiCall = typeof swapApprovalApiCall;
 
