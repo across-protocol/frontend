@@ -3,17 +3,16 @@ import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
 import { ConfirmationButton } from "./components/ConfirmationButton";
 import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
+import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
+import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
+import { BigNumber } from "ethers";
 
 export default function SwapAndBridge() {
+  const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();
+
+  const isAmountOrigin = quoteRequest.tradeType === "exactInput";
+
   const {
-    inputToken,
-    outputToken,
-    setInputToken,
-    setOutputToken,
-    amount,
-    setAmount,
-    isAmountOrigin,
-    setIsAmountOrigin,
     swapQuote,
     isQuoteLoading,
     expectedInputAmount,
@@ -26,19 +25,40 @@ export default function SwapAndBridge() {
     onConfirm,
     destinationChainEcosystem,
     toAccountManagement,
-  } = useSwapAndBridge();
+    priceImpact,
+  } = useSwapAndBridge(quoteRequest, isAmountOrigin);
 
   return (
     <LayoutV2 maxWidth={600}>
       <Wrapper>
         <InputForm
-          inputToken={inputToken}
-          setInputToken={setInputToken}
-          outputToken={outputToken}
-          setOutputToken={setOutputToken}
-          setAmount={setAmount}
+          originToken={quoteRequest.originToken}
+          setOriginToken={(token: EnrichedToken | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_ORIGIN_TOKEN",
+              payload: token,
+            })
+          }
+          outputToken={quoteRequest.destinationToken}
+          setDestinationToken={(token: EnrichedToken | null) => {
+            dispatchQuoteRequestAction({
+              type: "SET_DESTINATION_TOKEN",
+              payload: token,
+            });
+          }}
+          setOriginAmount={(amount: BigNumber | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_ORIGIN_AMOUNT",
+              payload: amount,
+            })
+          }
+          setDestinationAmount={(amount: BigNumber | null) =>
+            dispatchQuoteRequestAction({
+              type: "SET_DESTINATION_AMOUNT",
+              payload: amount,
+            })
+          }
           isAmountOrigin={isAmountOrigin}
-          setIsAmountOrigin={setIsAmountOrigin}
           isQuoteLoading={isQuoteLoading}
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}
@@ -47,9 +67,9 @@ export default function SwapAndBridge() {
           toAccountManagement={toAccountManagement}
         />
         <ConfirmationButton
-          inputToken={inputToken}
-          outputToken={outputToken}
-          amount={amount}
+          inputToken={quoteRequest.originToken}
+          outputToken={quoteRequest.destinationToken}
+          amount={quoteRequest.amount}
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
           onConfirm={onConfirm}
@@ -57,6 +77,7 @@ export default function SwapAndBridge() {
           buttonDisabled={buttonDisabled}
           buttonLoading={buttonLoading}
           buttonLabel={buttonLabel}
+          priceImpact={priceImpact}
         />
       </Wrapper>
     </LayoutV2>

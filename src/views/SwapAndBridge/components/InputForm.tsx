@@ -8,19 +8,20 @@ import { BigNumber } from "ethers";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
-import { useTokenInput, UnitType } from "hooks";
+import { UnitType, useTokenInput } from "hooks";
 import { formatUnits } from "ethers/lib/utils";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import { ToAccountManagement } from "views/Bridge/hooks/useToAccount";
+import type { ChainEcosystem } from "../../../constants/chains/types";
 
 export const InputForm = ({
-  inputToken,
+  originToken,
   outputToken,
-  setInputToken,
-  setOutputToken,
-  setAmount,
+  setOriginToken,
+  setDestinationToken,
+  setOriginAmount,
+  setDestinationAmount,
   isAmountOrigin,
-  setIsAmountOrigin,
   isQuoteLoading,
   expectedOutputAmount,
   expectedInputAmount,
@@ -28,48 +29,45 @@ export const InputForm = ({
   toAccountManagement,
   destinationChainEcosystem,
 }: {
-  inputToken: EnrichedToken | null;
-  setInputToken: (token: EnrichedToken | null) => void;
-
+  originToken: EnrichedToken | null;
+  setOriginToken: (token: EnrichedToken | null) => void;
   outputToken: EnrichedToken | null;
-  setOutputToken: (token: EnrichedToken | null) => void;
-
+  setDestinationToken: (token: EnrichedToken | null) => void;
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
   expectedInputAmount: string | undefined;
-
-  setAmount: (amount: BigNumber | null) => void;
-
+  setOriginAmount: (amount: BigNumber | null) => void;
+  setDestinationAmount: (amount: BigNumber | null) => void;
   isAmountOrigin: boolean;
-  setIsAmountOrigin: (isAmountOrigin: boolean) => void;
   validationError: AmountInputError | undefined;
   toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: "evm" | "svm";
+  destinationChainEcosystem: ChainEcosystem;
 }) => {
   // Shared unit state for both inputs
   const [unit, setUnit] = useState<UnitType>("token");
 
   const quickSwap = useCallback(() => {
-    const origin = inputToken;
-    const destination = outputToken;
+    setDestinationToken(originToken);
+    setOriginToken(outputToken);
 
-    setOutputToken(origin);
-    setInputToken(destination);
-
-    setAmount(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputToken, outputToken]);
+    setOriginAmount(null);
+    setDestinationAmount(null);
+  }, [
+    originToken,
+    outputToken,
+    setDestinationAmount,
+    setOriginToken,
+    setOriginAmount,
+    setDestinationToken,
+  ]);
 
   return (
     <Wrapper>
       <TokenInput
-        setToken={setInputToken}
-        setOtherToken={setOutputToken}
-        token={inputToken}
-        setAmount={(amount) => {
-          setAmount(amount);
-          setIsAmountOrigin(true);
-        }}
+        setToken={setOriginToken}
+        setOtherToken={setDestinationToken}
+        token={originToken}
+        setAmount={setOriginAmount}
         isOrigin={true}
         expectedAmount={expectedInputAmount}
         shouldUpdate={!isAmountOrigin}
@@ -78,7 +76,7 @@ export const InputForm = ({
           validationError === AmountInputError.INSUFFICIENT_BALANCE
         }
         otherToken={outputToken}
-        disabled={!outputToken || !outputToken}
+        disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
         toAccountManagement={toAccountManagement}
@@ -88,19 +86,16 @@ export const InputForm = ({
         <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
       <TokenInput
-        setToken={setOutputToken}
-        setOtherToken={setInputToken}
+        setToken={setDestinationToken}
+        setOtherToken={setOriginToken}
         token={outputToken}
-        setAmount={(amount) => {
-          setAmount(amount);
-          setIsAmountOrigin(false);
-        }}
+        setAmount={setDestinationAmount}
         isOrigin={false}
         expectedAmount={expectedOutputAmount}
         shouldUpdate={isAmountOrigin}
         isUpdateLoading={isQuoteLoading}
-        otherToken={inputToken}
-        disabled={!outputToken || !outputToken}
+        otherToken={originToken}
+        disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
         toAccountManagement={toAccountManagement}
@@ -141,7 +136,7 @@ const TokenInput = ({
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
   toAccountManagement: ToAccountManagement;
-  destinationChainEcosystem: "evm" | "svm";
+  destinationChainEcosystem: ChainEcosystem;
 }) => {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
@@ -262,18 +257,6 @@ const TokenSelectorColumn = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-`;
-
-const ValueRow = styled.div`
-  font-size: 16px;
-  span {
-    margin-left: 4px;
-  }
-  span,
-  svg {
-    display: inline-block;
-    vertical-align: middle;
-  }
 `;
 
 const UnitToggleButtonWrapper = styled.div`
@@ -411,7 +394,7 @@ const TokenInputWrapper = styled.div`
   padding: 24px;
   border-radius: 24px;
   background: ${COLORS["black-700"]};
-  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
 `;
 
 const Wrapper = styled.div`

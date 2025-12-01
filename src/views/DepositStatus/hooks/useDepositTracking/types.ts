@@ -2,6 +2,7 @@ import {
   DepositEventFromSignature,
   FillEventFromSignature,
 } from "@across-protocol/sdk/dist/esm/arch/svm";
+import { BigNumber } from "ethers";
 
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
@@ -48,20 +49,34 @@ export type FillInfo =
       fillTxTimestamp: undefined;
       depositInfo: DepositedInfo;
       status: "filling";
-      fillLog: undefined;
+      outputAmount: undefined;
     }
   | {
       fillTxHash: string;
       fillTxTimestamp: number;
       depositInfo: DepositedInfo;
       status: "filled" | "fill-reverted";
-      fillLog: FillData;
+      outputAmount: BigNumber;
     };
 
 export type FilledInfo = Extract<
   FillInfo,
   { status: "filled" | "fill-reverted" }
 >;
+// partial taken from https://docs.across.to/reference/api-reference#get-deposit-status
+export type DepositStatusResponse =
+  | {
+      status: "pending";
+      fillTxnRef: null;
+      swapOutputToken: string | undefined;
+      swapOutputAmount: string | undefined;
+    }
+  | {
+      status: "filled";
+      fillTxnRef: string;
+      swapOutputToken: string | undefined;
+      swapOutputAmount: string | undefined;
+    };
 
 /**
  * Common chain strategy interface
@@ -75,13 +90,23 @@ export interface IChainStrategy {
    */
   getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
 
+  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+
   /**
    * Get fill information for a deposit
    * @param depositInfo Deposit information
    * @param toChainId Destination chain ID
    * @returns Normalized fill information
    */
-  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+  getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;
+
+  /**
+   * Get fill information for a deposit
+   * @param depositInfo Deposit information
+   * @param toChainId Destination chain ID
+   * @returns Normalized fill information
+   */
+  getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
 
   /**
    * Convert deposit information to local storage format

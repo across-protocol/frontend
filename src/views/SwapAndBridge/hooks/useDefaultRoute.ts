@@ -42,6 +42,7 @@ export function useDefaultRoute(): DefaultRoute {
   const [defaultOutputToken, setDefaultOutputToken] =
     useState<EnrichedToken | null>(null);
   const [hasSetInitial, setHasSetInitial] = useState(false);
+  const [hasSetFromConnected, setHasSetFromConnected] = useState(false);
 
   const { chainId: chainIdEVM } = useConnectionEVM();
   const { chainId: chainIdSVM } = useConnectionSVM();
@@ -50,12 +51,14 @@ export function useDefaultRoute(): DefaultRoute {
   const connectedChainId = chainIdEVM || chainIdSVM;
   const hasRouteData = Object.keys(routeData).length ? true : false;
 
-  const findUsdcToken = useCallback(
+  const findUsdcTokenWithFallback = useCallback(
     (targetChainId: number) => {
       const tokensOnChain = routeData[targetChainId] || [];
-      return tokensOnChain.find(
+      const usdc = tokensOnChain.find(
         (token) => token.symbol.toUpperCase() === "USDC"
       );
+
+      return usdc ?? tokensOnChain?.[0];
     },
     [routeData]
   );
@@ -105,12 +108,12 @@ export function useDefaultRoute(): DefaultRoute {
 
       const inputToken =
         findToken(inputChainId, inputTokenSymbol) ??
-        findUsdcToken(inputChainId) ??
+        findUsdcTokenWithFallback(inputChainId) ??
         null;
 
       const outputToken =
         findToken(outputChainId, outputTokenSymbol) ??
-        findUsdcToken(outputChainId) ??
+        findUsdcTokenWithFallback(outputChainId) ??
         null;
 
       return {
@@ -118,27 +121,59 @@ export function useDefaultRoute(): DefaultRoute {
         outputToken,
       };
     },
-    [findToken, findUsdcToken]
+    [findToken, findUsdcTokenWithFallback]
   );
 
-  // initial load
-  useEffect(() => {
-    // Wait for balances to be available
-    if (!hasRouteData || hasSetInitial) {
-      return;
-    }
-
-    // Use wallet chain if connected, otherwise undefined (will use defaults)
+  const selectTokensOnLoad = useCallback(() => {
     const { inputToken, outputToken } = selectTokens(
-      connectedChainId ?? undefined,
+      undefined,
       CHAIN_IDs.BASE,
       CHAIN_IDs.ARBITRUM
     );
+    if (inputToken && outputToken) {
+      setDefaultInputToken(inputToken);
+      setDefaultOutputToken(outputToken);
+      setHasSetInitial(true);
+    }
+  }, [selectTokens]);
 
-    setDefaultInputToken(inputToken);
-    setDefaultOutputToken(outputToken);
-    setHasSetInitial(true);
-  }, [selectTokens, hasSetInitial, hasRouteData, connectedChainId]);
+  const selectTokensOnWalletConnect = useCallback(() => {
+    const { inputToken, outputToken } = selectTokens(
+      connectedChainId,
+      CHAIN_IDs.BASE,
+      CHAIN_IDs.ARBITRUM
+    );
+    if (inputToken && outputToken) {
+      setDefaultInputToken(inputToken);
+      setDefaultOutputToken(outputToken);
+      setHasSetFromConnected(true);
+    }
+  }, [selectTokens, connectedChainId]);
+
+  useEffect(() => {
+    // Wait for balances to be available
+    if (!hasRouteData) {
+      return;
+    }
+
+    if (!hasSetInitial) {
+      selectTokensOnLoad();
+      return;
+    }
+
+    if (!hasSetFromConnected) {
+      selectTokensOnWalletConnect();
+      return;
+    }
+  }, [
+    selectTokens,
+    hasSetInitial,
+    hasRouteData,
+    connectedChainId,
+    selectTokensOnWalletConnect,
+    selectTokensOnLoad,
+    hasSetFromConnected,
+  ]);
 
   // Memoize the return value to prevent unnecessary re-renders
   return useMemo(

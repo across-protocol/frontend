@@ -2,15 +2,10 @@ import { getProvider } from "utils/providers";
 import {
   getDepositByTxHash,
   NoFilledRelayLogError,
-  parseFilledRelayLog,
+  parseFilledRelayLogOutputAmount,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
-import {
-  getBlockForTimestamp,
-  getMessageHash,
-  paginatedEventQuery,
-  toAddressType,
-} from "utils/sdk";
+import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
 import {
   chainMaxBlockLookback,
   indexerApiBaseUrl,
@@ -20,17 +15,18 @@ import axios from "axios";
 import {
   DepositedInfo,
   DepositInfo,
-  FillData,
+  DepositStatusResponse,
   FilledInfo,
   FillInfo,
   IChainStrategy,
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
+  SwapSide,
 } from "utils/swapMetadata";
 import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
@@ -87,114 +83,79 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
+  getFillChain(): number {
+    return INDIRECT_CHAINS?.[this.chainId]?.intermediaryChain ?? this.chainId;
+  }
+
   /**
-   * Get fill information for a deposit
+   * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog.depositId;
-    const originChainId = depositInfo.depositLog.originChainId;
-    if (!depositId) {
-      throw new Error("Deposit ID not found in deposit information");
-    }
-
-    let fillChainId = this.chainId;
-    if (INDIRECT_CHAINS[this.chainId]) {
-      fillChainId = INDIRECT_CHAINS[this.chainId]?.intermediaryChain;
-    }
+    const { depositId } = depositInfo.depositLog;
+    const fillChainId = this.getFillChain();
 
     try {
-      // First try the rewards API
-      const { data } = await axios.get<{
-        status: "filled" | "pending";
-        fillTx: string | null;
-        swapOutputToken: string | undefined;
-        swapOutputAmount: string | undefined;
-      }>(`${indexerApiBaseUrl}/deposit/status`, {
-        params: {
-          originChainId,
-          depositId: depositId.toString(),
-          depositTxHash: depositInfo.depositTxHash,
-        },
-      });
+      const fillTxHash = await Promise.any([
+        this.getFillFromIndexer(depositInfo),
+        this.getFillFromRpc(depositInfo),
+      ]);
 
-      if (data?.status === "filled" && data.fillTx) {
-        // Get fill transaction details
-        const provider = getProvider(fillChainId);
-        const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
-        const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
-
-        const parsedFillLog = parseFilledRelayLog(fillTxReceipt.logs);
-
-        if (!parsedFillLog) {
-          throw new Error(
-            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${fillChainId}`
-          );
-        }
-
-        return {
-          fillTxHash: data.fillTx,
-          fillTxTimestamp: fillTxBlock.timestamp,
-          depositInfo,
-          fillLog: {
-            ...parsedFillLog,
-            ...parsedFillLog.args,
-            outputAmount: data?.swapOutputAmount
-              ? BigNumber.from(data.swapOutputAmount)
-              : parsedFillLog.args.outputAmount,
-            inputToken: toAddressType(
-              parsedFillLog.args.inputToken,
-              Number(parsedFillLog.args.originChainId)
-            ),
-            outputToken: toAddressType(
-              data?.swapOutputToken ?? parsedFillLog.args.outputToken,
-              fillChainId
-            ),
-            depositor: toAddressType(
-              parsedFillLog.args.depositor,
-              Number(parsedFillLog.args.originChainId)
-            ),
-            recipient: toAddressType(parsedFillLog.args.recipient, fillChainId),
-            exclusiveRelayer: toAddressType(
-              parsedFillLog.args.exclusiveRelayer,
-              fillChainId
-            ),
-            relayer: toAddressType(parsedFillLog.args.relayer, fillChainId),
-            destinationChainId: fillChainId,
-            fillTimestamp: fillTxBlock.timestamp,
-            blockNumber: parsedFillLog.blockNumber,
-            txnRef: parsedFillLog.transactionHash,
-            txnIndex: parsedFillLog.transactionIndex,
-            logIndex: parsedFillLog.logIndex,
-            originChainId: Number(parsedFillLog.args.originChainId),
-            repaymentChainId: Number(parsedFillLog.args.repaymentChainId),
-            depositId: ethers.BigNumber.from(parsedFillLog.args.depositId),
-            relayExecutionInfo: {
-              updatedMessageHash:
-                parsedFillLog.args.messageHash ||
-                getMessageHash(
-                  parsedFillLog.args.relayExecutionInfo.updatedMessageHash
-                ),
-              updatedRecipient: toAddressType(
-                parsedFillLog.args.relayExecutionInfo.updatedRecipient,
-                fillChainId
-              ),
-              updatedOutputAmount:
-                parsedFillLog.args.relayExecutionInfo.updatedOutputAmount,
-              fillType: parsedFillLog.args.relayExecutionInfo.fillType,
-            },
-          } as const satisfies FillData,
-          status: "filled",
-        };
+      if (!fillTxHash) {
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-    } catch (error) {
-      console.warn("Error fetching fill from API:", error);
-    }
+      const metadata = await this.getFillMetadata(fillTxHash);
 
-    // If API approach didn't work, find the fill on-chain
+      return {
+        fillTxHash: metadata.fillTxHash,
+        fillTxTimestamp: metadata.fillTxTimestamp,
+        depositInfo,
+        status: "filled",
+        outputAmount: metadata.outputAmount || BigNumber.from(0),
+      };
+    } catch (error) {
+      // Both rejected - throw error so we can retry
+      throw new NoFilledRelayLogError(Number(depositId), fillChainId);
+    }
+  }
+
+  /**
+   * Get fill information for a deposit from indexer
+   * @param depositInfo Deposit information
+   * @returns Fill transaction hash or null
+   */
+  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+    const { originChainId, depositId } = depositInfo.depositLog;
+
     try {
+      const { data } = await axios.get<DepositStatusResponse>(
+        `${indexerApiBaseUrl}/deposit/status`,
+        {
+          params: {
+            depositId: depositId.toString(),
+            originChainId,
+            depositTxHash: depositInfo.depositTxHash,
+          },
+        }
+      );
+
+      if (data?.status === "filled" && data.fillTxnRef) {
+        return data.fillTxnRef;
+      }
+
+      throw new Error("Indexer response still pending");
+    } catch (error) {
+      console.warn("Error fetching fill from indexer:", error);
+      throw error;
+    }
+  }
+
+  async getFillFromRpc(depositInfo: DepositedInfo): Promise<string> {
+    const { originChainId, depositId } = depositInfo.depositLog;
+
+    try {
+      const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
       const [blockForTimestamp, latestBlock] = await Promise.all([
         getBlockForTimestamp(provider, depositInfo.depositTimestamp),
@@ -222,85 +183,57 @@ export class EVMStrategy implements IChainStrategy {
         ),
         destinationEventSearchConfig
       )) as FilledRelayEvent[];
-      // If we make it to this point, we can be sure that there is exactly one filled relay event
-      // that corresponds to the deposit we are looking for.
-      // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
+
       const filledRelayEvent = filledRelayEvents?.[0];
 
       if (!filledRelayEvent) {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-      const messageHash = filledRelayEvent.args.messageHash;
 
-      const updatedMessageHash =
-        filledRelayEvent.args.relayExecutionInfo.updatedMessageHash;
+      return filledRelayEvent.transactionHash;
+    } catch (error) {
+      console.error("Error fetching EVM fill from RPC:", error);
+      throw error;
+    }
+  }
 
-      const fillTxBlock = await filledRelayEvent.getBlock();
+  async getFillMetadata(fillTxHash: string): Promise<{
+    fillTxHash: string;
+    fillTxTimestamp: number;
+    outputAmount: BigNumber | undefined;
+  }> {
+    try {
+      const fillChainId = this.getFillChain();
+      const provider = getProvider(fillChainId);
+      const fillTxReceipt = await provider.getTransactionReceipt(fillTxHash);
+      const [fillTxBlock, swapMetadata] = await Promise.all([
+        provider.getBlock(fillTxReceipt.blockNumber),
+        this.getSwapMetadata(fillTxHash, fillChainId),
+      ]);
 
-      const swapMetadata = await this.getSwapMetadata(
-        filledRelayEvent.transactionHash,
-        fillChainId
+      const destinationSwapMetadata = swapMetadata?.find(
+        (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
+      const outputAmount = destinationSwapMetadata
+        ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
+        : parseFilledRelayLogOutputAmount(fillTxReceipt.logs);
+
       return {
-        fillTxHash: filledRelayEvent.transactionHash,
+        fillTxHash,
         fillTxTimestamp: fillTxBlock.timestamp,
-        depositInfo,
-        fillLog: {
-          ...filledRelayEvent,
-          ...filledRelayEvent.args,
-          inputToken: toAddressType(
-            filledRelayEvent.args.inputToken,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          outputToken: toAddressType(
-            swapMetadata?.outputToken ?? filledRelayEvent.args.outputToken,
-            fillChainId
-          ),
-          depositor: toAddressType(
-            filledRelayEvent.args.depositor,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          recipient: toAddressType(
-            filledRelayEvent.args.recipient,
-            fillChainId
-          ),
-          exclusiveRelayer: toAddressType(
-            filledRelayEvent.args.exclusiveRelayer,
-            fillChainId
-          ),
-          relayer: toAddressType(filledRelayEvent.args.relayer, fillChainId),
-          messageHash,
-          destinationChainId: fillChainId,
-          fillTimestamp: fillTxBlock.timestamp,
-          blockNumber: filledRelayEvent.blockNumber,
-          txnRef: filledRelayEvent.transactionHash,
-          txnIndex: filledRelayEvent.transactionIndex,
-          logIndex: filledRelayEvent.logIndex,
-          originChainId: Number(filledRelayEvent.args.originChainId),
-          repaymentChainId: Number(filledRelayEvent.args.repaymentChainId),
-          depositId: ethers.BigNumber.from(filledRelayEvent.args.depositId),
-          relayExecutionInfo: {
-            ...filledRelayEvent.args.relayExecutionInfo,
-            updatedMessageHash,
-            updatedRecipient: toAddressType(
-              filledRelayEvent.args.relayExecutionInfo.updatedRecipient,
-              fillChainId
-            ),
-          },
-        } satisfies FillData,
-        status: "filled",
+        outputAmount,
       };
-    } catch (error) {
-      console.error("Error fetching EVM fill:", error);
-      throw error;
+    } catch (e) {
+      console.error(`Unable to get fill metadata fro tx hash: ${fillTxHash}`);
+      throw e;
     }
   }
 
   async getSwapMetadata(
     txHash: string,
     fillChainId: number
-  ): Promise<SwapMetaData | undefined> {
+  ): Promise<SwapMetaData[] | undefined> {
     try {
       const swapMetadata = await findSwapMetaDataEventsFromTxHash(
         txHash,

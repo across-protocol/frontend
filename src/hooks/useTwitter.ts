@@ -12,8 +12,8 @@ const contestActiveParams = {
 const contestInactiveParams = {
   cardTitle: "Wow, that was fast!",
   cardSubtitle:
-    "Flex your transaction speed on X and show your friends how fast they can bridge with Across! #PoweredByIntents",
-  modalTitle: "Flex Your Speed",
+    "This deserves a tweet. Show your friends how fast you bridged! #PoweredByIntents",
+  modalTitle: "Too Fast Not to Share",
 };
 
 const tweetText =
@@ -31,10 +31,8 @@ export function useTwitter() {
 
   const copyConfig = useMemo(() => {
     return {
-      stepTitle: isLaptopAndUp ? "Copy image to clipboard" : "Download image",
-      stepDescription: isLaptopAndUp
-        ? "Copy your Across flex image to clipboard."
-        : "Download your Across flex image to your device.",
+      stepTitle: "Grab your speed snapshot",
+      stepDescription: "Copy the image on the left (or take a screenshot).",
       buttonText: isLaptopAndUp ? "COPY TO CLIPBOARD" : "DOWNLOAD IMAGE",
       showCopyButton: isLaptopAndUp,
       showDownloadButton: !isLaptopAndUp,
@@ -43,9 +41,10 @@ export function useTwitter() {
 
   const shareConfig = useMemo(() => {
     return {
-      stepDescription: isLaptopAndUp
-        ? "Just paste (Ctrl+V / ⌘+V) before posting!"
-        : "Just upload your image before posting!",
+      stepDescription: [
+        "Paste the image, tag @AcrossProtocol, and post.",
+        "That’s it!",
+      ],
       twitterUrl: isLaptopAndUp
         ? "https://twitter.com/intent/tweet"
         : `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
