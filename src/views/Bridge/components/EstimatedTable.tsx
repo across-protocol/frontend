@@ -26,8 +26,8 @@ import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
-import { FreeTag } from "views/SwapAndBridge/components/ConfirmationButton";
 import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
+import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
