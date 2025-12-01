@@ -3,6 +3,8 @@ import { COLORS } from "../../../../utils";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import React from "react";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
+import { TokenImage } from "../../../../components";
+import { orderedTokenLogos } from "../../../../constants/tokens";
 
 export type BridgeProvider =
   | "across"
@@ -26,7 +28,7 @@ export const PROVIDER_COLORS: Record<BridgeProvider, string> = {
   across: COLORS.aqua,
   cctp: "#3B82F6",
   oft: "#8B5CF6",
-  "sponsored-intent": "#F59E0B",
+  "sponsored-intent": "none",
   hypercore: "#bada55",
 };
 
@@ -50,12 +52,27 @@ export const ProviderBadge = ({
       {expanded ? (
         <>
           {provider === "across" && <Across width="16px" height="16px" />}
+          {provider === "sponsored-intent" && (
+            <TokenImage
+              src={orderedTokenLogos.USDH}
+              alt="usdh-logo"
+              width="16px"
+              height="16px"
+            />
+          )}
           {label}
         </>
       ) : (
         <>
           {provider === "across" ? (
             <Across width="16px" height="16px" />
+          ) : provider === "sponsored-intent" ? (
+            <TokenImage
+              src={orderedTokenLogos.USDH}
+              alt="usdh-logo"
+              width="16px"
+              height="16px"
+            />
           ) : (
             label
           )}
