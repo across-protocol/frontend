@@ -1,9 +1,15 @@
-import type { BridgeProvider } from "../../../../../api/_dexes/types";
 import styled from "@emotion/styled";
 import { COLORS } from "../../../../utils";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import React from "react";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
+
+export type BridgeProvider =
+  | "across"
+  | "hypercore"
+  | "cctp"
+  | "oft"
+  | "sponsored-intent";
 
 export const PROVIDER_DISPLAY: Record<
   BridgeProvider,

@@ -1,14 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
-
-import {
-  BridgeButtonState,
-  ConfirmationButton,
-} from "../views/SwapAndBridge/components/ConfirmationButton";
-import { EnrichedToken } from "../views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
-import { SwapApprovalApiCallReturnType } from "../utils/serverless-api/prod/swap-approval";
-import { PriceImpact } from "../views/SwapAndBridge/utils/fees";
-import type { BridgeProvider } from "../../api/_dexes/types";
+import { BridgeButtonState, ConfirmationButton } from "./ConfirmationButton";
+import { BridgeProvider } from "./BridgeProvider";
+import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
+import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
+import { PriceImpact } from "../../utils/fees";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
@@ -214,6 +210,7 @@ const createQuoteWithProvider = (
 
 const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
+  title: "Stories/ConfirmationButton",
   argTypes: {
     buttonState: {
       control: {

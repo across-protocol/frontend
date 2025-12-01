@@ -13,20 +13,16 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
 import { COLORS, isDefined } from "utils";
-import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
+import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
 import {
-  getSwapQuoteFees,
-  PriceImpact,
-  isSponsoredIntentQuote,
-} from "../utils/fees";
-import type { BridgeProvider } from "../../../../api/_dexes/types";
-import {
+  BridgeProvider,
   getProviderFromQuote,
   ProviderBadge,
-} from "./Confirmation/BridgeProvider";
+} from "./BridgeProvider";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -66,7 +62,6 @@ const ExpandableLabelSection: React.FC<
     hasQuote: boolean;
     priceImpact?: PriceImpact;
     provider: BridgeProvider;
-    isSponsoredIntent?: boolean;
   }>
 > = ({
   fee,
@@ -77,7 +72,6 @@ const ExpandableLabelSection: React.FC<
   children,
   hasQuote,
   provider,
-  isSponsoredIntent,
 }) => {
   // Render state-specific content
   let content: React.ReactNode = null;
@@ -93,6 +87,8 @@ const ExpandableLabelSection: React.FC<
       </ExpandableLabelRightAccent>
     </>
   );
+
+  const isSponsoredIntent = provider === "sponsored-intent";
 
   // Show quote breakdown when quote is available, otherwise show default state
   if (hasQuote) {
@@ -234,7 +230,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const [expanded, setExpanded] = React.useState(initialExpanded);
 
   const state = buttonState;
-  const isSponsoredIntent = isSponsoredIntentQuote(swapQuote ?? undefined);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
@@ -289,7 +284,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   }, [swapQuote]);
 
   const provider = getProviderFromQuote(swapQuote);
-
+  const isSponsoredIntent = provider === "sponsored-intent";
   // Render unified group driven by state
   const content = (
     <>
@@ -302,7 +297,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
-        isSponsoredIntent={isSponsoredIntent}
         provider={provider}
       >
         <ExpandedDetails>
