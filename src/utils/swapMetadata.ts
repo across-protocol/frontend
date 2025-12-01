@@ -69,9 +69,7 @@ export async function findSwapMetaDataEventsFromTxReceipt(
   });
 
   if (!parsedLogs?.length) {
-    console.error(
-      `Event: MetaDataEmitted not found in tx with hash: ${txReceipt.transactionHash}.`
-    );
+    // no swaps for this tx
     return undefined;
   }
 

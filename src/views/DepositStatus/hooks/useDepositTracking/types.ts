@@ -64,6 +64,20 @@ export type FilledInfo = Extract<
   { status: "filled" | "fill-reverted" }
 >;
 
+export type DepositStatusResponse =
+  | {
+      status: "pending";
+      fillTx: null;
+      swapOutputToken: string | undefined;
+      swapOutputAmount: string | undefined;
+    }
+  | {
+      status: "filled";
+      fillTx: string;
+      swapOutputToken: string | undefined;
+      swapOutputAmount: string | undefined;
+    };
+
 /**
  * Common chain strategy interface
  * Each chain implementation adapts its native types to these normalized interfaces
@@ -76,13 +90,21 @@ export interface IChainStrategy {
    */
   getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
 
-  /**
-   * Get fill information for a deposit
-   * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
-   * @returns Normalized fill information
-   */
-  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+  // /**
+  //  * Get fill information for a deposit
+  //  * @param depositInfo Deposit information
+  //  * @param toChainId Destination chain ID
+  //  * @returns Normalized fill information
+  //  */
+  // getFillFromRpc(depositInfo: DepositedInfo): Promise<FillInfo>;
+
+  // /**
+  //  * Get fill information for a deposit
+  //  * @param depositInfo Deposit information
+  //  * @param toChainId Destination chain ID
+  //  * @returns Normalized fill information
+  //  */
+  // getFillFromIndexer(depositInfo: DepositedInfo): Promise<FillInfo>;
 
   /**
    * Convert deposit information to local storage format
