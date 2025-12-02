@@ -184,9 +184,7 @@ async function routeMintAndBurnStrategy({
   if (bridgeStrategyData.isUtilizationHigh) {
     return getBurnAndMintStrategy(bridgeStrategyData);
   }
-  if (bridgeStrategyData.isLineaSource) {
-    return getAcrossBridgeStrategy();
-  }
+
   if (bridgeStrategyData.isFastCctpEligible) {
     if (bridgeStrategyData.isInThreshold) {
       return getAcrossBridgeStrategy();

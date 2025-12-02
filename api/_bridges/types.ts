@@ -115,7 +115,6 @@ export type BridgeStrategyData =
       isUsdcToUsdc: boolean;
       isLargeDeposit: boolean;
       isFastCctpEligible: boolean;
-      isLineaSource: boolean;
       isInThreshold: boolean;
       isUsdtToUsdt: boolean;
       isMonadTransfer: boolean;
