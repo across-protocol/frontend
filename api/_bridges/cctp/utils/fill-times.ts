@@ -13,6 +13,7 @@ export const CCTP_FILL_TIME_ESTIMATES: {
     [CHAIN_IDs.MAINNET]: 20,
     [CHAIN_IDs.ARBITRUM]: 8,
     [CHAIN_IDs.BASE]: 8,
+    [CHAIN_IDs.LINEA]: 8,
     [CHAIN_IDs.OPTIMISM]: 8,
     [CHAIN_IDs.SOLANA]: 8,
     [CHAIN_IDs.UNICHAIN]: 8,
@@ -23,6 +24,7 @@ export const CCTP_FILL_TIME_ESTIMATES: {
     [CHAIN_IDs.ARBITRUM]: 19 * 60,
     [CHAIN_IDs.BASE]: 19 * 60,
     [CHAIN_IDs.HYPEREVM]: 5,
+    [CHAIN_IDs.LINEA]: 6 * 60 * 60, // 6 hours
     [CHAIN_IDs.MONAD]: 5,
     [CHAIN_IDs.OPTIMISM]: 19 * 60,
     [CHAIN_IDs.POLYGON]: 8,
