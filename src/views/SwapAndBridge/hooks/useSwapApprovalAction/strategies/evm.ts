@@ -56,10 +56,6 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
       data: swapTx.data,
       value: swapTx.value,
       chainId: swapTx.chainId,
-      gasPrice: undefined,
-      maxFeePerGas: swapTx.maxFeePerGas as any,
-      maxPriorityFeePerGas: swapTx.maxPriorityFeePerGas as any,
-      gasLimit: swapTx.gas as any,
     });
     return tx.hash;
   }
