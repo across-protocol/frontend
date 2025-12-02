@@ -60,4 +60,50 @@ export const useAccountInQuote = (
     dispatchQuoteRequestAction,
     quoteRequest.originToken,
   ]);
+
+  useEffect(() => {
+    if (getEcosystemFromToken(quoteRequest.destinationToken) === "evm") {
+      if (accountEVM) {
+        dispatchQuoteRequestAction({
+          type: "SET_DESTINATION_ACCOUNT",
+          payload: {
+            accountType: "evm",
+            address: accountEVM,
+          },
+        });
+      } else {
+        dispatchQuoteRequestAction({
+          type: "SET_DESTINATION_ACCOUNT",
+          payload: {
+            accountType: "evm",
+            address: PLACEHOLDER_EVM_ADDRESS,
+          },
+        });
+      }
+    }
+    if (getEcosystemFromToken(quoteRequest.destinationToken) === "svm") {
+      if (accountSVM) {
+        dispatchQuoteRequestAction({
+          type: "SET_DESTINATION_ACCOUNT",
+          payload: {
+            accountType: "svm",
+            address: accountSVM.toBase58(),
+          },
+        });
+      } else {
+        dispatchQuoteRequestAction({
+          type: "SET_DESTINATION_ACCOUNT",
+          payload: {
+            accountType: "svm",
+            address: PLACEHOLDER_SVM_ADDRESS,
+          },
+        });
+      }
+    }
+  }, [
+    accountEVM,
+    accountSVM,
+    dispatchQuoteRequestAction,
+    quoteRequest.destinationToken,
+  ]);
 };

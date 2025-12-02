@@ -130,7 +130,7 @@ const ExpandableLabelSection: React.FC<
             </FeeTimeItem>
           </ExpandableLabelRight>
         )}
-        <StyledChevronDown expanded={expanded} />
+        <StyledChevronDown expandedIcon={expanded} />
       </>
     );
   } else {
@@ -195,7 +195,7 @@ const ButtonCore: React.FC<{
     disabled={disabled || loading}
     onClick={onClick}
     aqua={!disabled}
-    loading={loading}
+    buttonLoading={loading}
     fullHeight={fullHeight}
   >
     <ButtonContent>
@@ -489,20 +489,20 @@ const Divider = styled.span`
   background: rgba(224, 243, 255, 0.5);
 `;
 
-const StyledChevronDown = styled(ChevronDownIcon)<{ expanded: boolean }>`
+const StyledChevronDown = styled(ChevronDownIcon)<{ expandedIcon: boolean }>`
   width: 20px;
   height: 20px;
   margin-left: 12px;
   transition: transform 0.2s ease;
   cursor: pointer;
   color: #e0f3ff;
-  transform: ${({ expanded }) =>
-    expanded ? "rotate(180deg)" : "rotate(0deg)"};
+  transform: ${({ expandedIcon }) =>
+    expandedIcon ? "rotate(180deg)" : "rotate(0deg)"};
 `;
 
 const StyledButton = styled.button<{
   aqua?: boolean;
-  loading?: boolean;
+  buttonLoading?: boolean;
   fullHeight?: boolean;
 }>`
   width: 100%;
@@ -535,9 +535,9 @@ const StyledButton = styled.button<{
   }
 
   &:disabled {
-    cursor: ${({ loading }) => (loading ? "wait" : "not-allowed")};
+    cursor: ${({ buttonLoading }) => (buttonLoading ? "wait" : "not-allowed")};
     box-shadow: none;
-    opacity: ${({ loading }) => (loading ? 0.9 : 0.6)};
+    opacity: ${({ buttonLoading }) => (buttonLoading ? 0.9 : 0.6)};
   }
 
   &:focus {

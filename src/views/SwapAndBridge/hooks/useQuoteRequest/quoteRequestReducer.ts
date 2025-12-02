@@ -21,10 +21,10 @@ export const quoteRequestReducer = (
         amount: action.payload,
         tradeType: "exactInput",
       };
-    case "SET_DESTINATION_ACCOUNT":
-      return { ...prevState, destinationAccount: action.payload };
     case "SET_ORIGIN_ACCOUNT":
       return { ...prevState, originAccount: action.payload };
+    case "SET_DESTINATION_ACCOUNT":
+      return { ...prevState, destinationAccount: action.payload };
     case "QUICK_SWAP":
       return {
         ...prevState,

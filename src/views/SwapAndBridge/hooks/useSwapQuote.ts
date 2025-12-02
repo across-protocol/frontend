@@ -19,15 +19,16 @@ const useSwapQuote = ({
   tradeType,
 }: QuoteRequest) => {
   const debouncedAmount = useDebounce(amount, 300);
+
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "swap-quote",
-      originToken,
-      destinationToken,
       debouncedAmount,
-      tradeType,
-      originAccount.address,
       destinationAccount.address,
+      destinationToken?.address,
+      originAccount.address,
+      originToken?.address,
+      tradeType,
     ],
     queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
       if (Number(debouncedAmount) <= 0) {
@@ -55,7 +56,10 @@ const useSwapQuote = ({
 
       return swapApprovalApiCall(params);
     },
-    enabled: !!originToken?.address && !!destinationToken?.address && !!amount,
+    enabled:
+      !!originToken?.address &&
+      !!destinationToken?.address &&
+      !!debouncedAmount,
     retry: 2,
     refetchInterval: (query) =>
       query.state.status === "success" ? 10_000 : false,
