@@ -8,59 +8,57 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import { INTEGRATOR_ID_ACROSS } from "utils";
 
+export type SwapQuote = ReturnType<typeof useSwapQuote>["data"];
+
 const useSwapQuote = ({
-  originToken: origin,
-  destinationToken: destination,
   amount,
-  destinationAccount: recipient,
+  destinationAccount,
+  destinationToken,
+  originAccount,
+  originToken,
   tradeType,
-  originAccount: depositor,
 }: QuoteRequest) => {
   const debouncedAmount = useDebounce(amount, 300);
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "swap-quote",
-      origin,
-      destination,
+      originToken,
+      destinationToken,
       debouncedAmount,
       tradeType,
-      depositor.address,
-      recipient.address,
+      originAccount.address,
+      destinationAccount.address,
     ],
     queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
       if (Number(debouncedAmount) <= 0) {
         return Promise.resolve(undefined);
       }
-      if (!origin || !destination || !debouncedAmount) {
+      if (!originToken || !destinationToken || !debouncedAmount) {
         throw new Error("Missing required swap quote parameters");
       }
 
-      const isUsingPlaceholderDepositor = !depositor;
+      const isUsingPlaceholderDepositor = !originAccount;
 
       const params: SwapApprovalApiQueryParams = {
         tradeType: tradeType,
-        inputToken: origin.address,
-        outputToken: destination.address,
-        originChainId: origin.chainId,
-        destinationChainId: destination.chainId,
-        depositor: depositor.address,
-        recipient: recipient.address,
+        inputToken: originToken.address,
+        outputToken: destinationToken.address,
+        originChainId: originToken.chainId,
+        destinationChainId: destinationToken.chainId,
+        depositor: originAccount.address,
+        recipient: destinationAccount.address,
         amount: debouncedAmount.toString(),
         refundOnOrigin: true,
-        // Skip transaction estimation when using placeholder address
         skipOriginTxEstimation: isUsingPlaceholderDepositor,
         integratorId: INTEGRATOR_ID_ACROSS,
       };
 
       return swapApprovalApiCall(params);
     },
-    enabled: !!origin?.address && !!destination?.address && !!amount,
+    enabled: !!originToken?.address && !!destinationToken?.address && !!amount,
     retry: 2,
-
-    refetchInterval(query) {
-      // only refetch if data
-      return query.state.status === "success" ? 10_000 : false;
-    },
+    refetchInterval: (query) =>
+      query.state.status === "success" ? 10_000 : false,
   });
 
   return { data, isLoading, error };

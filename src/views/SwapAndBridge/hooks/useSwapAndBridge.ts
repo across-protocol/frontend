@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { AmountInputError } from "../../Bridge/utils";
-import useSwapQuote from "./useSwapQuote";
+import useSwapQuote, { SwapQuote } from "./useSwapQuote";
 import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
 import { getEcosystemFromToken, getQuoteWarningMessage } from "utils";
@@ -14,7 +14,7 @@ import { getPriceImpact, PriceImpact } from "../utils/fees";
 import { BridgeButtonState } from "../components/Confirmation/ConfirmationButton";
 
 export type UseSwapAndBridgeReturn = {
-  swapQuote: ReturnType<typeof useSwapQuote>["data"];
+  swapQuote: SwapQuote;
   isQuoteLoading: boolean;
   expectedInputAmount?: string;
   expectedOutputAmount?: string;
@@ -33,6 +33,7 @@ export type UseSwapAndBridgeReturn = {
 export function useSwapAndBridge(
   quoteRequest: QuoteRequest
 ): UseSwapAndBridgeReturn {
+  const isRecipientSet = quoteRequest.destinationAccount;
   const { isConnected: isConnectedEVM } = useConnectionEVM();
   const { isConnected: isConnectedSVM } = useConnectionSVM();
 
@@ -46,7 +47,6 @@ export function useSwapAndBridge(
     originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
 
   // Check if destination recipient is set (appropriate wallet connected for destination ecosystem)
-  const isRecipientSet = quoteRequest.destinationAccount;
 
   // Determine which wallet type needs to be connected (if any)
   const walletTypeToConnect: ChainEcosystem | undefined = (() => {
