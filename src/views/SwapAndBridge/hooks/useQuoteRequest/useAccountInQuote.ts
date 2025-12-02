@@ -3,12 +3,10 @@ import { Dispatch, useEffect } from "react";
 import { useConnectionEVM } from "../../../../hooks/useConnectionEVM";
 import { useConnectionSVM } from "../../../../hooks/useConnectionSVM";
 import { getEcosystemFromToken } from "../../../../utils";
-
-// Placeholder addresses for quote simulation when wallet is not connected
-export const PLACEHOLDER_EVM_ADDRESS =
-  "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
-export const PLACEHOLDER_SVM_ADDRESS =
-  "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
+import {
+  PLACEHOLDER_EVM_ADDRESS,
+  PLACEHOLDER_SVM_ADDRESS,
+} from "./initialQuote";
 
 export const useAccountInQuote = (
   quoteRequest: QuoteRequest,

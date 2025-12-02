@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { quoteRequestReducer } from "./quoteRequestReducer";
 import { QuoteRequest } from "./quoteRequestAction";
-import { initialQuote } from "./useQuoteRequest";
+import { initialQuote } from "./initialQuote";
 
 const mockToken = (symbol: string) =>
   ({ symbol, chainId: 1, address: "0x" }) as QuoteRequest["originToken"];
