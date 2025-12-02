@@ -497,5 +497,49 @@ describe("api/_bridges/index", () => {
         expect(strategy.name).toBe("hypercore");
       });
     });
+
+    describe("Actions routing", () => {
+      test("should use Across when actions are present for USDC transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdcToUsdc: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        jest
+          .spyOn(bridgeUtils, "getBridgeStrategyData")
+          .mockResolvedValue(mockData);
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.OPTIMISM,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdcOptimism,
+          outputToken: usdcArbitrum,
+          includesActions: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+
+      test("should use Across when actions are present for USDT transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdtToUsdt: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        jest
+          .spyOn(bridgeUtils, "getBridgeStrategyData")
+          .mockResolvedValue(mockData);
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.MAINNET,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdtMainnet,
+          outputToken: usdtArbitrum,
+          includesActions: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+    });
   });
 });

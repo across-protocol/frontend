@@ -128,6 +128,7 @@ export type BridgeStrategyDataParams = {
   outputToken: Token;
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
+  includesActions?: boolean;
   recipient?: string;
   depositor: string;
   logger?: Logger;
