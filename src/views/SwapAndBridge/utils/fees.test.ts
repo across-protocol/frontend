@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
-import { getPriceImpact } from "./fees";
+import { getPriceImpact, formatFeeUsd } from "./fees";
 
 describe("getPriceImpact", () => {
   it("should return default values if no fees in quote", () => {
@@ -92,5 +92,20 @@ describe("getPriceImpact", () => {
       priceImpact: 0,
       priceImpactFormatted: "0",
     });
+  });
+});
+
+describe("formatFeeUsd", () => {
+  it.each`
+    input        | expected    | description
+    ${"0.01"}    | ${"$0.01"}  | ${"formats fees >= $0.01 with standard 2 decimal formatting"}
+    ${"1.50"}    | ${"$1.50"}  | ${"formats fees >= $0.01 with standard 2 decimal formatting"}
+    ${"0.00567"} | ${"$0.005"} | ${"rounds DOWN fees >= $0.001 and < $0.01 to 3 decimal places"}
+    ${"0.00999"} | ${"$0.009"} | ${"rounds DOWN fees >= $0.001 and < $0.01 to 3 decimal places"}
+    ${"0.0005"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+    ${"0.0001"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+    ${"0.0009"}  | ${"$0.001"} | ${"rounds UP fees < $0.001 to $0.001"}
+  `("formatFeeUsd $description ($input → $expected)", ({ input, expected }) => {
+    expect(formatFeeUsd(input)).toBe(expected);
   });
 });

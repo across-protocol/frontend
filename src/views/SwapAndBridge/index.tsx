@@ -1,13 +1,13 @@
 import { LayoutV2 } from "components";
 import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
-import { ConfirmationButton } from "./components/ConfirmationButton";
 import { useSwapAndBridge } from "./hooks/useSwapAndBridge";
 import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
 import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
 import { BigNumber } from "ethers";
 import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
 import { useAccountInQuote } from "./hooks/useQuoteRequest/useAccountInQuote";
+import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
 
 export default function SwapAndBridge() {
   const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();

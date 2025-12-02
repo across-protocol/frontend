@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo } from "react";
 
 import { useAmplitude } from "hooks";
 import {
-  wait,
   getChainInfo,
   NoFundsDepositedLogError,
   debug,
@@ -62,9 +61,6 @@ export function useDepositTracking({
   const depositQuery = useQuery({
     queryKey: ["deposit", depositTxHash, fromChainId, account],
     queryFn: async () => {
-      // On some L2s the tx is mined too fast for the animation to show, so we add a delay
-      await wait(1_000);
-
       try {
         // Use the strategy to get deposit information through the normalized interface
         return depositStrategy.getDeposit(depositTxHash);

@@ -2,9 +2,9 @@ import styled from "@emotion/styled";
 import { Tooltip } from "react-tooltip";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
 
-export const StyledAnchor = styled.a<{ width?: string }>`
+export const StyledAnchor = styled.a<{ width?: string; height?: string }>`
   line-height: 1em;
-  height: 1em;
+  height: ${({ height }) => height};
   width: ${({ width }) => width};
 `;
 
@@ -16,8 +16,8 @@ export const StyledTooltip = styled(Tooltip)`
   border-radius: 50%;
 `;
 
-export const Wrapper = styled.div<{ maxWidth?: number }>`
-  padding: 16px;
+export const Wrapper = styled.div<{ maxWidth?: number; paddingPx: number }>`
+  padding: ${({ paddingPx }) => paddingPx}px;
   max-width: ${({ maxWidth = 320 }) => maxWidth}px;
   background: #202024;
   border: 1px solid #34353b;

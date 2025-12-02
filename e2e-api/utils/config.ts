@@ -47,7 +47,9 @@ export function getSpokePoolAddress(chainId: number): string {
 
 export function makeE2EConfig() {
   return (() => {
-    const [depositor, relayer, recipient] = PREFUNDED_ACCOUNTS;
+    // NOTE: Using `PREFUNDED_ACCOUNTS[0]` makes the e2e tests flakier for some reason
+    // on some chains. Rotating to the second account until further investigation.
+    const [depositor, relayer, recipient] = PREFUNDED_ACCOUNTS.slice(1);
 
     const rpcUrls = buildRpcUrlMapFromEnv();
     const nodes = {

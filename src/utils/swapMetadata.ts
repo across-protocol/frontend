@@ -16,8 +16,8 @@ export enum SwapType {
 
 export type SwapMetaData = {
   version: `${number}`;
-  type: SwapType.EXACT_INPUT;
-  side: SwapSide.ORIGIN_SWAP;
+  type: SwapType;
+  side: SwapSide;
   outputToken: string;
   maximumAmountIn: string; // BN string
   minAmountOut: string; // BN string
@@ -54,7 +54,7 @@ export interface SwapMetadataEvent extends providers.Log {
 
 export async function findSwapMetaDataEventsFromTxReceipt(
   txReceipt: ethers.providers.TransactionReceipt
-): Promise<SwapMetaData | undefined> {
+): Promise<SwapMetaData[] | undefined> {
   const contract = new ethers.utils.Interface(METADATA_EMITTED_ABI);
 
   const parsedLogs = txReceipt.logs.flatMap((log) => {
@@ -69,21 +69,20 @@ export async function findSwapMetaDataEventsFromTxReceipt(
   });
 
   if (!parsedLogs?.length) {
-    console.error(
-      `Event: MetaDataEmitted not found in tx with hash: ${txReceipt.transactionHash}.`
-    );
+    // no swaps for this tx
     return undefined;
   }
 
-  const data = parsedLogs[0].args.data as string;
-
-  return decodeMetadataEmitted(data);
+  return parsedLogs.map((log) => {
+    const data = log.args.data as string;
+    return decodeMetadataEmitted(data);
+  });
 }
 
 export async function findSwapMetaDataEventsFromTxHash(
   txHash: string,
   provider: ethers.providers.JsonRpcProvider
-): Promise<SwapMetaData | undefined> {
+): Promise<SwapMetaData[] | undefined> {
   const txReceipt = await provider.getTransactionReceipt(txHash);
   return findSwapMetaDataEventsFromTxReceipt(txReceipt);
 }

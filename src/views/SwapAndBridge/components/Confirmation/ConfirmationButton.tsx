@@ -1,5 +1,5 @@
 "use client";
-import { ButtonHTMLAttributes, useEffect } from "react";
+import React, { ButtonHTMLAttributes, useEffect } from "react";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
@@ -10,16 +10,16 @@ import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined } from "utils";
-import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
+import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees, PriceImpact } from "../utils/fees";
+import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
+import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
+import { ProviderBadge } from "./BridgeProvider";
+import { BridgeProvider, getProviderFromQuote } from "./provider";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -44,6 +44,7 @@ interface ConfirmationButtonProps
   buttonLoading: boolean;
   buttonLabel?: string;
   priceImpact?: PriceImpact;
+  initialExpanded?: boolean;
 }
 
 // Expandable label section component
@@ -57,8 +58,18 @@ const ExpandableLabelSection: React.FC<
     state: BridgeButtonState;
     hasQuote: boolean;
     priceImpact?: PriceImpact;
+    provider: BridgeProvider;
   }>
-> = ({ fee, time, expanded, onToggle, priceImpact, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  priceImpact,
+  children,
+  hasQuote,
+  provider,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -74,6 +85,8 @@ const ExpandableLabelSection: React.FC<
     </>
   );
 
+  const isSponsoredIntent = provider === "sponsored-intent";
+
   // Show quote breakdown when quote is available, otherwise show default state
   if (hasQuote) {
     // Show quote details when available
@@ -85,7 +98,10 @@ const ExpandableLabelSection: React.FC<
         </ExpandableLabelLeft>
         {!expanded && (
           <ExpandableLabelRight>
-            <Across />
+            <ProviderBadge
+              expanded={expanded}
+              provider={provider}
+            ></ProviderBadge>
             <Divider />
             <FeeTimeItem>
               {priceImpact?.tooHigh ? (
@@ -102,6 +118,7 @@ const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
@@ -205,8 +222,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonLoading,
   buttonLabel,
   priceImpact,
+  initialExpanded = false,
 }) => {
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(initialExpanded);
 
   const state = buttonState;
 
@@ -227,11 +245,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    const { totalFeeUsd, bridgeFeesUsd, appFeesUsd, swapImpactUsd } =
-      getSwapQuoteFees(swapQuote);
-    // Only show fee items if they're at least 1 cent
-    const hasAppFee = Number(appFeesUsd) >= 0.01;
-    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
+    const {
+      totalFeeFormatted,
+      bridgeFeeFormatted,
+      swapImpactFormatted,
+      swapImpactUsd,
+    } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -239,13 +258,15 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       ? `~${Math.max(1, Math.round(totalSeconds))} secs`
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
+    // for sponsored bridges, always show this line item (as a flex), otherwise only show if a swap is involved
+    const showSwapImpact =
+      priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
+
     return {
-      totalFee: formatUSDString(totalFeeUsd),
+      totalFee: totalFeeFormatted,
       time,
-      bridgeFee: formatUSDString(bridgeFeesUsd),
-      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
-      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
-      route: "Across V4",
+      bridgeFee: bridgeFeeFormatted,
+      swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
   }, [swapQuote, inputToken, outputToken, amount]);
@@ -259,6 +280,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   }, [swapQuote]);
 
+  const provider = getProviderFromQuote(swapQuote);
+  const isSponsoredIntent = provider === "sponsored-intent";
   // Render unified group driven by state
   const content = (
     <>
@@ -271,6 +294,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={state}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
+        provider={provider}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -279,8 +303,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               <span>Route</span>
             </DetailLeft>
             <DetailRight>
-              <Across width="20px" height="20px" />
-              <span>{displayValues.route}</span>
+              <ProviderBadge provider={provider} expanded></ProviderBadge>
             </DetailRight>
           </DetailRow>
           <DetailRow>
@@ -319,7 +342,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </DetailRightRed>
                 </Tooltip>
               ) : (
-                displayValues.totalFee
+                <>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}{" "}
+                  {displayValues.totalFee}
+                </>
               )}
             </DetailRight>
           </DetailRow>
@@ -334,7 +360,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
               </FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
+              <FeeBreakdownValue>
+                {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                {displayValues.bridgeFee}
+              </FeeBreakdownValue>
             </FeeBreakdownRow>
             {isDefined(displayValues.swapImpact) && (
               <FeeBreakdownRow>
@@ -348,6 +377,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
               </FeeBreakdownRow>
@@ -509,6 +539,10 @@ const StyledButton = styled.button<{
     box-shadow: none;
     opacity: ${({ loading }) => (loading ? 0.9 : 0.6)};
   }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const ButtonContent = styled.span`
@@ -571,7 +605,7 @@ const FeeBreakdownRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   position: relative;
 
   &::before {
@@ -595,7 +629,7 @@ const FeeBreakdownLabel = styled.span`
   color: rgba(224, 243, 255, 0.5);
 `;
 
-const FeeBreakdownValue = styled.span`
+const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
 `;
 
@@ -641,4 +675,17 @@ const WarningTooltipBody = styled.span`
   color: var(--functional-red);
   font-weight: 600;
   font-size: 14px;
+`;
+
+export const FreeTag = styled.div`
+  height: 20px;
+  padding-inline: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--transparency-aqua-aqua-40);
+  background: var(--transparency-aqua-aqua-20);
+  color: var(--base-aqua);
+  font-size: 12px;
+  font-weight: 600;
 `;
