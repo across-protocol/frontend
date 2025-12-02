@@ -6,8 +6,10 @@ import {
   userDepositsQueryKey,
   defaultRefetchInterval,
   indexerApiBaseUrl,
+  getConfig,
 } from "utils";
 import { DepositStatusFilter } from "views/Transactions/types";
+import { OFT_MESSENGERS } from "utils/oft";
 
 export type DepositStatus =
   | "pending"
@@ -231,5 +233,33 @@ async function getDeposits(
       },
     }
   );
+
+  // FIXME: Temporary fix to remap `inputToken` and `outputToken` to `USDT` addresses for OFT deposits.
+  // This will be removed once this is handled correctly in the indexer.
+  data.forEach((deposit) => {
+    const usdcOnOrigin = getConfig().getTokenInfoBySymbolSafe(
+      deposit.originChainId,
+      "USDT"
+    );
+    const usdcOnDestination = getConfig().getTokenInfoBySymbolSafe(
+      deposit.destinationChainId,
+      "USDT"
+    );
+    if (
+      deposit.inputToken.toLowerCase() ===
+        OFT_MESSENGERS.USDT[deposit.originChainId]?.toLowerCase() &&
+      usdcOnOrigin
+    ) {
+      deposit.inputToken = usdcOnOrigin?.address;
+    }
+    if (
+      deposit.outputToken.toLowerCase() ===
+        OFT_MESSENGERS.USDT[deposit.destinationChainId]?.toLowerCase() &&
+      usdcOnDestination
+    ) {
+      deposit.outputToken = usdcOnDestination?.address;
+    }
+  });
+
   return data;
 }
