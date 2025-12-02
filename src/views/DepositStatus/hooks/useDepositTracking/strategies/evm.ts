@@ -13,6 +13,7 @@ import {
 } from "utils/constants";
 import axios from "axios";
 import {
+  BridgeProvider,
   DepositedInfo,
   DepositInfo,
   DepositStatusResponse,
@@ -30,6 +31,7 @@ import {
 } from "utils/swapMetadata";
 import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
+import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 
 /**
  * Strategy for handling EVM chain operations
@@ -39,12 +41,20 @@ export class EVMStrategy implements IChainStrategy {
 
   /**
    * Get deposit information from an EVM transaction hash
-   * @param txHash EVM transaction hash
+   * @param txHash Transaction hash
+   * @param bridgeProvider Bridge provider
    * @returns Deposit information
    */
-  async getDeposit(txHash: string): Promise<DepositInfo> {
+  async getDeposit(
+    txHash: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<DepositInfo> {
     try {
-      const deposit = await getDepositByTxHash(txHash, this.chainId);
+      const deposit = await getDepositByTxHash(
+        txHash,
+        this.chainId,
+        bridgeProvider
+      );
 
       if (deposit.depositTxReceipt.status === 0) {
         const revertReason = await getSpokepoolRevertReason(
@@ -92,8 +102,15 @@ export class EVMStrategy implements IChainStrategy {
    * @param depositInfo Deposit information
    * @returns Fill information
    */
-  async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const { depositId } = depositInfo.depositLog;
+  async getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<FillInfo> {
+    const depositId = depositInfo.depositLog.depositId;
+    if (!depositId) {
+      throw new Error("Deposit ID not found in deposit information");
+    }
+
     const fillChainId = this.getFillChain();
 
     try {
@@ -105,14 +122,15 @@ export class EVMStrategy implements IChainStrategy {
       if (!fillTxHash) {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-      const metadata = await this.getFillMetadata(fillTxHash);
+
+      const metadata = await this.getFillMetadata(fillTxHash, bridgeProvider);
 
       return {
         fillTxHash: metadata.fillTxHash,
         fillTxTimestamp: metadata.fillTxTimestamp,
         depositInfo,
-        status: "filled",
         outputAmount: metadata.outputAmount || BigNumber.from(0),
+        status: "filled",
       };
     } catch (error) {
       // Both rejected - throw error so we can retry
@@ -197,7 +215,10 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getFillMetadata(fillTxHash: string): Promise<{
+  async getFillMetadata(
+    fillTxHash: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
@@ -215,9 +236,14 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
+      const outputAmountParser =
+        bridgeProvider === "cctp"
+          ? parseOutputAmountFromMintAndWithdrawLog
+          : parseFilledRelayLogOutputAmount;
+
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
-        : parseFilledRelayLogOutputAmount(fillTxReceipt.logs);
+        : outputAmountParser(fillTxReceipt.logs);
 
       return {
         fillTxHash,
