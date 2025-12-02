@@ -66,7 +66,6 @@ const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
 const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
-const usdcLinea = createToken("USDC", CHAIN_IDs.LINEA);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
 const wethOptimism = createToken("WETH", CHAIN_IDs.OPTIMISM);
@@ -285,52 +284,26 @@ describe("#getBridgeStrategyData()", () => {
     });
 
     describe("Chain specific checks", () => {
-      test("should identify Linea as source chain", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcLinea,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isLineaSource).toBe(true);
-      });
-
-      test("should identify non-Linea source chains", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcOptimism,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isLineaSource).toBe(false);
-      });
-
-      test("should identify Fast CCTP eligible transfers (Polygon > 10K)", async () => {
+      test("should identify Fast CCTP eligible transfers (Arbitrum > 10K)", async () => {
         const amount = BigNumber.from("15000000000"); // 15,000 USDC
 
         const result = await getBridgeStrategyData({
           ...baseParams,
-          inputToken: usdcPolygon,
-          outputToken: usdcArbitrum,
+          inputToken: usdcArbitrum,
+          outputToken: usdcPolygon,
           amount,
         });
 
         expect(result?.isFastCctpEligible).toBe(true);
       });
 
-      test("should not mark Fast CCTP eligible for Polygon <= 10K", async () => {
+      test("should not mark Fast CCTP eligible for Arbitrum <= 10K", async () => {
         const amount = BigNumber.from("5000000"); // 5 USDC
 
         const result = await getBridgeStrategyData({
           ...baseParams,
-          inputToken: usdcPolygon,
-          outputToken: usdcArbitrum,
+          inputToken: usdcArbitrum,
+          outputToken: usdcPolygon,
           amount,
         });
 
@@ -342,7 +315,7 @@ describe("#getBridgeStrategyData()", () => {
 
         const result = await getBridgeStrategyData({
           ...baseParams,
-          inputToken: usdcOptimism,
+          inputToken: usdcPolygon,
           outputToken: usdcArbitrum,
           amount,
         });
