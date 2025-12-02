@@ -20,12 +20,7 @@ import {
   QuoteRequest,
   QuoteRequestAction,
 } from "../../SwapAndBridge/hooks/useQuoteRequest/quoteRequestAction";
-import { useConnectionEVM } from "../../../hooks/useConnectionEVM";
-import { useConnectionSVM } from "../../../hooks/useConnectionSVM";
-import {
-  PLACEHOLDER_EVM_ADDRESS,
-  PLACEHOLDER_SVM_ADDRESS,
-} from "../../SwapAndBridge/hooks/useSwapQuote";
+import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 
 export const ChangeAccountModal = ({
   destinationChainEcosystem,
@@ -42,8 +37,10 @@ export const ChangeAccountModal = ({
     handleChangeToAddressSVM,
   } = useToAccount(quoteRequest.destinationToken?.chainId);
 
-  const { account: connectedAccountEVM } = useConnectionEVM();
-  const { account: connectedAccountSVM } = useConnectionSVM();
+  const { recipientOrPlaceholder } = useEcosystemAccounts({
+    originToken: quoteRequest.originToken,
+    destinationToken: quoteRequest.destinationToken,
+  });
 
   useEffect(() => {
     if (currentRecipientAccount) {
@@ -126,11 +123,6 @@ export const ChangeAccountModal = ({
 
   useHotkeys("esc", () => onCloseModal(), { enableOnFormTags: true });
 
-  const defaultRecipient =
-    destinationChainEcosystem === "evm"
-      ? connectedAccountEVM || PLACEHOLDER_EVM_ADDRESS
-      : connectedAccountSVM?.toBase58 || PLACEHOLDER_SVM_ADDRESS;
-
   return (
     <>
       <Trigger onClick={() => setDisplayModal(true)}>
@@ -154,8 +146,8 @@ export const ChangeAccountModal = ({
         <Wrapper>
           <RowSpaced>
             <SubHeading>Wallet Address</SubHeading>
-            {userInput !== defaultRecipient && (
-              <ResetButton onClick={() => setUserInput(defaultRecipient)}>
+            {userInput !== recipientOrPlaceholder && (
+              <ResetButton onClick={() => setUserInput(recipientOrPlaceholder)}>
                 Reset to Default
               </ResetButton>
             )}
