@@ -23,6 +23,9 @@ import unknownLogo from "assets/icons/question-circle.svg";
 import cakeLogo from "assets/token-logos/cake.svg";
 import bnbLogo from "assets/token-logos/bnb.svg";
 import vlrLogo from "assets/token-logos/vlr.svg";
+import hypeLogo from "assets/token-logos/hype.svg";
+import solLogo from "assets/token-logos/sol.svg";
+import usdhLogo from "assets/token-logos/usdh.png";
 
 import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
 
@@ -39,6 +42,8 @@ export type TokenInfo = {
   addresses?: Record<number, string>;
   // optional, if this is a stable coin
   isStable?: boolean;
+  // optional price in USD from swap tokens API
+  priceUsd?: string | null;
 };
 export type TokenInfoList = TokenInfo[];
 
@@ -114,4 +119,8 @@ export const orderedTokenLogos = {
   BNB: bnbLogo,
   WBNB: bnbLogo,
   VLR: vlrLogo,
+  HYPE: hypeLogo,
+  SOL: solLogo,
+  USDH: usdhLogo,
+  "USDH-SPOT": usdhLogo,
 } as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;

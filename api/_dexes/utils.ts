@@ -54,6 +54,7 @@ import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
 import { isEvmAddress, isSvmAddress } from "../_address";
 import { isIndirectDestinationRouteSupported } from "./utils-b2bi";
+import { getQuoteTimestampArg } from "../_quote-timestamp";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -131,7 +132,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["USDC", "WETH", "USDT", "DAI"],
+  default: ["USDC", "USDT", "WETH", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },
@@ -239,27 +240,29 @@ export function getBridgeQuoteMessage(
     const eventEmitterAddress = getEventEmitterAddress(
       crossSwap.outputToken.chainId
     );
-    const originSwapMetadataParams = {
-      version: 1,
-      type: crossSwapType,
-      side: SwapSide.ORIGIN_SWAP,
-      address: crossSwap.inputToken.address,
-      maximumAmountIn: originSwapQuote.maximumAmountIn,
-      minAmountOut: originSwapQuote.minAmountOut,
-      expectedAmountOut: originSwapQuote.expectedAmountOut,
-      expectedAmountIn: originSwapQuote.expectedAmountIn,
-      swapProvider: originSwapQuote.swapProvider.name,
-      slippage: originSwapQuote.slippageTolerance,
-      autoSlippage: crossSwap.slippageTolerance === "auto",
-      recipient: crossSwap.recipient,
-      appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
-    };
-    const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
-    eventEmitterActions.push({
-      target: eventEmitterAddress,
-      callData: encodeEmitDataCalldata(originSwapMetadata),
-      value: "0",
-    });
+    if (eventEmitterAddress) {
+      const originSwapMetadataParams = {
+        version: 1,
+        type: crossSwapType,
+        side: SwapSide.ORIGIN_SWAP,
+        address: crossSwap.inputToken.address,
+        maximumAmountIn: originSwapQuote.maximumAmountIn,
+        minAmountOut: originSwapQuote.minAmountOut,
+        expectedAmountOut: originSwapQuote.expectedAmountOut,
+        expectedAmountIn: originSwapQuote.expectedAmountIn,
+        swapProvider: originSwapQuote.swapProvider.name,
+        slippage: originSwapQuote.slippageTolerance,
+        autoSlippage: crossSwap.slippageTolerance === "auto",
+        recipient: crossSwap.recipient,
+        appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+      };
+      const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
+      eventEmitterActions.push({
+        target: eventEmitterAddress,
+        callData: encodeEmitDataCalldata(originSwapMetadata),
+        value: "0",
+      });
+    }
   }
 
   switch (crossSwap.type) {
@@ -581,7 +584,10 @@ export async function extractDepositDataStruct(
     destinationChainId,
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
-    quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+    quoteTimestamp: getQuoteTimestampArg(
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+      crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
+    ),
     fillDeadline: getFillDeadline(
       destinationChainId,
       crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
@@ -846,7 +852,7 @@ export function buildDestinationSwapCrossChainMessage({
         : SwapType.EXACT_OUTPUT;
   const eventEmitterActions: Action[] = [];
   const eventEmitterAddress = getEventEmitterAddress(destinationSwapChainId);
-  if (!isIndicativeQuote) {
+  if (!isIndicativeQuote && eventEmitterAddress) {
     const destinationSwapMetadataParams = {
       version: 1,
       type: crossSwapType,

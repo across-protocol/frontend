@@ -295,9 +295,34 @@ export function humanReadableNumber(num: number, decimals = 0): string {
  * @returns A string formatted as USD. A number with 2 decimal places.
  * @note USD only has 2 decimal places of precision, so this will round to the nearest cent.
  */
-export function formatUSD(value: BigNumberish): string {
-  const formattedString = ethers.utils.formatUnits(value, 18);
+export function formatUSD(value: BigNumberish, decimals = 18): string {
+  const formattedString = ethers.utils.formatUnits(value, decimals);
   return numeral(Number(formattedString).toFixed(2)).format("0,0.00");
+}
+
+export function formatUSDString(value: string, decimals = 2): string {
+  return `$${numeral(Number(value).toFixed(decimals)).format("0,0.00")}`;
+}
+
+/**
+ * Rounds a number to a specific number of decimal places with a specified direction.
+ * @param value The number to round
+ * @param decimalPlaces The number of decimal places to round to
+ * @param roundingDirection "up" to round up (ceiling), "down" to round down (floor)
+ * @returns The rounded number
+ */
+export function roundToDecimalPlaces(
+  value: number,
+  decimalPlaces: number,
+  roundingDirection: "up" | "down"
+): number {
+  const multiplier = Math.pow(10, decimalPlaces);
+
+  if (roundingDirection === "down") {
+    return Math.floor(value * multiplier) / multiplier;
+  } else {
+    return Math.ceil(value * multiplier) / multiplier;
+  }
 }
 
 /**

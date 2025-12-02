@@ -1,21 +1,35 @@
 import { getProvider } from "utils/providers";
-import { getDepositByTxHash, parseFilledRelayLog } from "utils/deposits";
+import {
+  getDepositByTxHash,
+  NoFilledRelayLogError,
+  parseFilledRelayLogOutputAmount,
+} from "utils/deposits";
 import { getConfig } from "utils/config";
-import { getBlockForTimestamp, getMessageHash, toAddressType } from "utils/sdk";
-import { NoFilledRelayLogError } from "utils/deposits";
-import { indexerApiBaseUrl } from "utils/constants";
+import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
+import {
+  chainMaxBlockLookback,
+  indexerApiBaseUrl,
+  INDIRECT_CHAINS,
+} from "utils/constants";
 import axios from "axios";
 import {
-  IChainStrategy,
-  DepositInfo,
-  FillInfo,
   DepositedInfo,
+  DepositInfo,
+  DepositStatusResponse,
   FilledInfo,
-  FillData,
+  FillInfo,
+  IChainStrategy,
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { ethers } from "ethers";
+import { BigNumber } from "ethers";
+import {
+  findSwapMetaDataEventsFromTxHash,
+  SwapMetaData,
+  SwapSide,
+} from "utils/swapMetadata";
+import { getSpokepoolRevertReason } from "utils";
+import { FilledRelayEvent } from "utils/typechain";
 
 /**
  * Strategy for handling EVM chain operations
@@ -32,6 +46,22 @@ export class EVMStrategy implements IChainStrategy {
     try {
       const deposit = await getDepositByTxHash(txHash, this.chainId);
 
+      if (deposit.depositTxReceipt.status === 0) {
+        const revertReason = await getSpokepoolRevertReason(
+          deposit.depositTxReceipt,
+          this.chainId
+        );
+
+        return {
+          depositTxHash: deposit.depositTxReceipt.transactionHash,
+          depositTimestamp: deposit.depositTimestamp,
+          status: "deposit-reverted",
+          depositLog: undefined,
+          error: revertReason?.error,
+          formattedError: revertReason?.formattedError,
+        };
+      }
+
       // Create a normalized response
       if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
         return {
@@ -44,10 +74,7 @@ export class EVMStrategy implements IChainStrategy {
       return {
         depositTxHash: deposit.depositTxReceipt.transactionHash,
         depositTimestamp: deposit.depositTimestamp,
-        status:
-          deposit.depositTxReceipt.status === 0
-            ? "deposit-reverted"
-            : "deposited",
+        status: "deposited",
         depositLog: deposit.parsedDepositLog,
       };
     } catch (error) {
@@ -56,224 +83,169 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
+  getFillChain(): number {
+    return INDIRECT_CHAINS?.[this.chainId]?.intermediaryChain ?? this.chainId;
+  }
+
   /**
-   * Get fill information for a deposit
+   * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog?.depositId;
-    const originChainId = depositInfo.depositLog.originChainId;
-    if (!depositId) {
-      throw new Error("Deposit ID not found in deposit information");
-    }
+    const { depositId } = depositInfo.depositLog;
+    const fillChainId = this.getFillChain();
+
     try {
-      // First try the rewards API
-      const { data } = await axios.get<{
-        status: "filled" | "pending";
-        fillTx: string | null;
-      }>(`${indexerApiBaseUrl}/deposit/status`, {
-        params: {
-          originChainId,
-          depositId: depositId.toString(),
-          depositTxHash: depositInfo.depositTxHash,
-        },
-      });
+      const fillTxHash = await Promise.any([
+        this.getFillFromIndexer(depositInfo),
+        this.getFillFromRpc(depositInfo),
+      ]);
 
-      if (data?.status === "filled" && data.fillTx) {
-        // Get fill transaction details
-        const provider = getProvider(this.chainId);
-        const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
-        const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
-
-        const parsedFIllLog = parseFilledRelayLog(fillTxReceipt.logs);
-
-        if (!parsedFIllLog) {
-          throw new Error(
-            `Unable to parse FilledRelay logs for tx ${fillTxReceipt.transactionHash} on Chain ${this.chainId}`
-          );
-        }
-
-        return {
-          fillTxHash: data.fillTx,
-          fillTxTimestamp: fillTxBlock.timestamp,
-          depositInfo,
-          fillLog: {
-            ...parsedFIllLog,
-            ...parsedFIllLog.args,
-            inputToken: toAddressType(
-              parsedFIllLog.args.inputToken,
-              Number(parsedFIllLog.args.originChainId)
-            ),
-            outputToken: toAddressType(
-              parsedFIllLog.args.outputToken,
-              Number(this.chainId)
-            ),
-            depositor: toAddressType(
-              parsedFIllLog.args.depositor,
-              Number(parsedFIllLog.args.originChainId)
-            ),
-            recipient: toAddressType(
-              parsedFIllLog.args.recipient,
-              Number(this.chainId)
-            ),
-            exclusiveRelayer: toAddressType(
-              parsedFIllLog.args.exclusiveRelayer,
-              Number(this.chainId)
-            ),
-            relayer: toAddressType(
-              parsedFIllLog.args.relayer,
-              Number(this.chainId)
-            ),
-            destinationChainId: this.chainId,
-            fillTimestamp: fillTxBlock.timestamp,
-            blockNumber: parsedFIllLog.blockNumber,
-            txnRef: parsedFIllLog.transactionHash,
-            txnIndex: parsedFIllLog.transactionIndex,
-            logIndex: parsedFIllLog.logIndex,
-            originChainId: Number(parsedFIllLog.args.originChainId),
-            repaymentChainId: Number(parsedFIllLog.args.repaymentChainId),
-            depositId: ethers.BigNumber.from(parsedFIllLog.args.depositId),
-            relayExecutionInfo: {
-              updatedMessageHash:
-                parsedFIllLog.args.messageHash ||
-                getMessageHash(
-                  parsedFIllLog.args.relayExecutionInfo.updatedMessageHash
-                ),
-              updatedRecipient: toAddressType(
-                parsedFIllLog.args.relayExecutionInfo.updatedRecipient,
-                this.chainId
-              ),
-              updatedOutputAmount:
-                parsedFIllLog.args.relayExecutionInfo.updatedOutputAmount,
-              fillType: parsedFIllLog.args.relayExecutionInfo.fillType,
-            },
-          } as const satisfies FillData,
-          status: "filled",
-        };
+      if (!fillTxHash) {
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-    } catch (error) {
-      console.warn("Error fetching fill from API:", error);
-    }
+      const metadata = await this.getFillMetadata(fillTxHash);
 
-    // If API approach didn't work, find the fill on-chain
+      return {
+        fillTxHash: metadata.fillTxHash,
+        fillTxTimestamp: metadata.fillTxTimestamp,
+        depositInfo,
+        status: "filled",
+        outputAmount: metadata.outputAmount || BigNumber.from(0),
+      };
+    } catch (error) {
+      // Both rejected - throw error so we can retry
+      throw new NoFilledRelayLogError(Number(depositId), fillChainId);
+    }
+  }
+
+  /**
+   * Get fill information for a deposit from indexer
+   * @param depositInfo Deposit information
+   * @returns Fill transaction hash or null
+   */
+  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+    const { originChainId, depositId } = depositInfo.depositLog;
+
     try {
-      const provider = getProvider(this.chainId);
-      const blockForTimestamp = await getBlockForTimestamp(
-        provider,
-        depositInfo.depositTimestamp
+      const { data } = await axios.get<DepositStatusResponse>(
+        `${indexerApiBaseUrl}/deposit/status`,
+        {
+          params: {
+            depositId: depositId.toString(),
+            originChainId,
+            depositTxHash: depositInfo.depositTxHash,
+          },
+        }
       );
+
+      if (data?.status === "filled" && data.fillTxnRef) {
+        return data.fillTxnRef;
+      }
+
+      throw new Error("Indexer response still pending");
+    } catch (error) {
+      console.warn("Error fetching fill from indexer:", error);
+      throw error;
+    }
+  }
+
+  async getFillFromRpc(depositInfo: DepositedInfo): Promise<string> {
+    const { originChainId, depositId } = depositInfo.depositLog;
+
+    try {
+      const fillChainId = this.getFillChain();
+      const provider = getProvider(fillChainId);
+      const [blockForTimestamp, latestBlock] = await Promise.all([
+        getBlockForTimestamp(provider, depositInfo.depositTimestamp),
+        provider.getBlockNumber(),
+      ]);
+      const maxLookBack = chainMaxBlockLookback[fillChainId];
+      const destinationEventSearchConfig = {
+        from: blockForTimestamp,
+        to: latestBlock,
+        maxLookBack,
+      };
 
       const config = getConfig();
-      const destinationSpokePool = config.getSpokePool(this.chainId);
-      const [legacyFilledRelayEvents, newFilledRelayEvents] = await Promise.all(
-        [
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledV3Relay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              originChainId,
-              depositId.toNumber()
-            ),
-            blockForTimestamp
-          ),
-          destinationSpokePool.queryFilter(
-            destinationSpokePool.filters.FilledRelay(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              originChainId,
-              depositId.toNumber()
-            ),
-            blockForTimestamp
-          ),
-        ]
-      );
-      const filledRelayEvents = [
-        ...legacyFilledRelayEvents,
-        ...newFilledRelayEvents,
-      ];
-      // If we make it to this point, we can be sure that there is exactly one filled relay event
-      // that corresponds to the deposit we are looking for.
-      // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
+      const destinationSpokePool = config.getSpokePool(fillChainId);
+      const filledRelayEvents = (await paginatedEventQuery(
+        destinationSpokePool,
+        destinationSpokePool.filters.FilledRelay(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          originChainId,
+          depositId.toNumber()
+        ),
+        destinationEventSearchConfig
+      )) as FilledRelayEvent[];
+
       const filledRelayEvent = filledRelayEvents?.[0];
 
       if (!filledRelayEvent) {
-        throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-      const messageHash =
-        "messageHash" in filledRelayEvent.args
-          ? filledRelayEvent.args.messageHash
-          : getMessageHash(filledRelayEvent.args.message);
 
-      const updatedMessageHash =
-        "updatedMessageHash" in filledRelayEvent.args.relayExecutionInfo
-          ? filledRelayEvent.args.relayExecutionInfo.updatedMessageHash
-          : messageHash;
+      return filledRelayEvent.transactionHash;
+    } catch (error) {
+      console.error("Error fetching EVM fill from RPC:", error);
+      throw error;
+    }
+  }
 
-      const fillTxBlock = await filledRelayEvent.getBlock();
+  async getFillMetadata(fillTxHash: string): Promise<{
+    fillTxHash: string;
+    fillTxTimestamp: number;
+    outputAmount: BigNumber | undefined;
+  }> {
+    try {
+      const fillChainId = this.getFillChain();
+      const provider = getProvider(fillChainId);
+      const fillTxReceipt = await provider.getTransactionReceipt(fillTxHash);
+      const [fillTxBlock, swapMetadata] = await Promise.all([
+        provider.getBlock(fillTxReceipt.blockNumber),
+        this.getSwapMetadata(fillTxHash, fillChainId),
+      ]);
+
+      const destinationSwapMetadata = swapMetadata?.find(
+        (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
+      );
+
+      const outputAmount = destinationSwapMetadata
+        ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
+        : parseFilledRelayLogOutputAmount(fillTxReceipt.logs);
 
       return {
-        fillTxHash: filledRelayEvent.transactionHash,
+        fillTxHash,
         fillTxTimestamp: fillTxBlock.timestamp,
-        depositInfo,
-        fillLog: {
-          ...filledRelayEvent,
-          ...filledRelayEvent.args,
-          inputToken: toAddressType(
-            filledRelayEvent.args.inputToken,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          outputToken: toAddressType(
-            filledRelayEvent.args.outputToken,
-            Number(this.chainId)
-          ),
-          depositor: toAddressType(
-            filledRelayEvent.args.depositor,
-            Number(filledRelayEvent.args.originChainId)
-          ),
-          recipient: toAddressType(
-            filledRelayEvent.args.recipient,
-            Number(this.chainId)
-          ),
-          exclusiveRelayer: toAddressType(
-            filledRelayEvent.args.exclusiveRelayer,
-            Number(this.chainId)
-          ),
-          relayer: toAddressType(
-            filledRelayEvent.args.relayer,
-            Number(this.chainId)
-          ),
-          messageHash,
-          destinationChainId: this.chainId,
-          fillTimestamp: fillTxBlock.timestamp,
-          blockNumber: filledRelayEvent.blockNumber,
-          txnRef: filledRelayEvent.transactionHash,
-          txnIndex: filledRelayEvent.transactionIndex,
-          logIndex: filledRelayEvent.logIndex,
-          originChainId: Number(filledRelayEvent.args.originChainId),
-          repaymentChainId: Number(filledRelayEvent.args.repaymentChainId),
-          depositId: ethers.BigNumber.from(filledRelayEvent.args.depositId),
-          relayExecutionInfo: {
-            ...filledRelayEvent.args.relayExecutionInfo,
-            updatedMessageHash,
-            updatedRecipient: toAddressType(
-              filledRelayEvent.args.relayExecutionInfo.updatedRecipient,
-              Number(this.chainId)
-            ),
-          },
-        } satisfies FillData,
-        status: "filled",
+        outputAmount,
       };
+    } catch (e) {
+      console.error(`Unable to get fill metadata fro tx hash: ${fillTxHash}`);
+      throw e;
+    }
+  }
+
+  async getSwapMetadata(
+    txHash: string,
+    fillChainId: number
+  ): Promise<SwapMetaData[] | undefined> {
+    try {
+      const swapMetadata = await findSwapMetaDataEventsFromTxHash(
+        txHash,
+        getProvider(fillChainId)
+      );
+
+      return swapMetadata;
     } catch (error) {
-      console.error("Error fetching EVM fill:", error);
-      throw error;
+      console.warn(`No swap metadata found for tx with hash ${txHash}`, {
+        cause: error,
+      });
+      return;
     }
   }
 
@@ -285,66 +257,67 @@ export class EVMStrategy implements IChainStrategy {
    */
   convertForDepositQuery(
     depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
+    fromBridgePagePayload?: FromBridgePagePayload
   ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } =
-      fromBridgePagePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbol(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbol(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
+    throw new Error("Method not implemented.");
+    // const config = getConfig();
+    // const { selectedRoute, depositArgs, quoteForAnalytics } =
+    //   fromBridgePagePayload;
+    // const { depositId, depositor, recipient, message, inputAmount } =
+    //   depositInfo.depositLog;
+    // const inputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.fromTokenSymbol
+    // );
+    // const outputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.toChain,
+    //   selectedRoute.toTokenSymbol
+    // );
+    // const swapToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
+    // );
 
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "pending" as const,
-      filled: "0",
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBase58(),
-      recipientAddr: recipient.toBase58(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: depositInfo.depositTxHash,
-      fillTx: "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
+    // return {
+    //   depositId: depositId.toString(),
+    //   depositTime:
+    //     depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
+    //   status: "pending" as const,
+    //   filled: "0",
+    //   sourceChainId: selectedRoute.fromChain,
+    //   destinationChainId: selectedRoute.toChain,
+    //   assetAddr:
+    //     selectedRoute.type === "swap"
+    //       ? selectedRoute.swapTokenAddress
+    //       : selectedRoute.fromTokenAddress,
+    //   depositorAddr: depositor.toBase58(),
+    //   recipientAddr: recipient.toBase58(),
+    //   message: message || "0x",
+    //   amount: inputAmount.toString(),
+    //   depositTxHash: depositInfo.depositTxHash,
+    //   fillTx: "",
+    //   speedUps: [],
+    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   feeBreakdown: {
+    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
+    //     lpFeePct: quoteForAnalytics.lpFeePct,
+    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
+    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
+    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
+    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
+    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
+    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
+    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
+    //   },
+    //   token: inputToken,
+    //   outputToken,
+    //   swapToken,
+    // };
   }
 
   /**
@@ -357,62 +330,63 @@ export class EVMStrategy implements IChainStrategy {
     fillInfo: FilledInfo,
     bridgePayload: FromBridgePagePayload
   ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      fillInfo.depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbol(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbol(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
+    throw new Error("Method not implemented.");
+    // const config = getConfig();
+    // const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
+    // const { depositId, depositor, recipient, message, inputAmount } =
+    //   fillInfo.depositInfo.depositLog;
+    // const inputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.fromTokenSymbol
+    // );
+    // const outputToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.toChain,
+    //   selectedRoute.toTokenSymbol
+    // );
+    // const swapToken = config.getTokenInfoBySymbolSafe(
+    //   selectedRoute.fromChain,
+    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
+    // );
 
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "filled" as const,
-      filled: inputAmount.toString(),
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBytes32(),
-      recipientAddr: recipient.toBytes32(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: fillInfo.depositInfo.depositTxHash,
-      fillTx: fillInfo.fillTxHash || "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
+    // return {
+    //   depositId: depositId.toString(),
+    //   depositTime:
+    //     fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
+    //   status: "filled" as const,
+    //   filled: inputAmount.toString(),
+    //   sourceChainId: selectedRoute.fromChain,
+    //   destinationChainId: selectedRoute.toChain,
+    //   assetAddr:
+    //     selectedRoute.type === "swap"
+    //       ? selectedRoute.swapTokenAddress
+    //       : selectedRoute.fromTokenAddress,
+    //   depositorAddr: depositor.toBytes32(),
+    //   recipientAddr: recipient.toBytes32(),
+    //   message: message || "0x",
+    //   amount: inputAmount.toString(),
+    //   depositTxHash: fillInfo.depositInfo.depositTxHash,
+    //   fillTx: fillInfo.fillTxHash || "",
+    //   speedUps: [],
+    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
+    //   feeBreakdown: {
+    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
+    //     lpFeePct: quoteForAnalytics.lpFeePct,
+    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
+    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
+    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
+    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
+    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
+    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
+    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
+    //   },
+    //   token: inputToken,
+    //   outputToken,
+    //   swapToken,
+    // };
   }
 }

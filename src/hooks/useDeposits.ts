@@ -90,6 +90,9 @@ export type Deposit = {
   swapTokenAmount?: string;
   swapTokenAddress?: string;
   depositRefundTxHash?: string;
+  swapOutputToken?: string; // destination swap output token
+  swapOutputTokenAmount?: string; // destination swap output amount
+  actionsTargetChainId?: number;
   hideFeeTooLow?: boolean;
 };
 
@@ -147,7 +150,10 @@ export type IndexerDeposit = {
   relayer: string;
   fillBlockTimestamp: string;
   fillTx: string;
+  swapOutputToken?: string;
+  swapOutputTokenAmount?: string;
   speedups: any[];
+  actionsTargetChainId?: number | string;
 };
 
 export type GetIndexerDepositsResponse = IndexerDeposit[];

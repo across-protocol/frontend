@@ -27,7 +27,7 @@ export type ChainConfig = {
     toTokenSymbol: string;
     externalProjectId?: string;
   }[];
-  intermediaryChains?: number[];
+  intermediaryChain?: number;
   outputTokens?: (
     | string
     | {
@@ -42,4 +42,5 @@ export type ChainConfig = {
         chainIds: number[];
       }
   )[];
+  restrictedOriginChains?: number[];
 };

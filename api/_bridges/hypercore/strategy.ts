@@ -19,6 +19,7 @@ import {
   accountExistsOnHyperCore,
   CORE_WRITER_EVM_ADDRESS,
   encodeTransferOnCoreCalldata,
+  isToHyperCore as _isToHyperCore,
 } from "../../_hypercore";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
@@ -191,8 +192,7 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
         appFee,
       } = params.quotes;
 
-      const isToHyperCore =
-        crossSwap.outputToken.chainId === CHAIN_IDs.HYPERCORE;
+      const isToHyperCore = _isToHyperCore(crossSwap.outputToken.chainId);
 
       const errorMessagePrefix = isToHyperCore
         ? "HyperEVM -> HyperCore"
