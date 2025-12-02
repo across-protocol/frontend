@@ -1,8 +1,12 @@
 import { TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
+import {
+  V2PoolInRoute,
+  V3PoolInRoute,
+  V4PoolInRoute,
+} from "@uniswap/universal-router-sdk";
 
 import { Swap } from "../../types";
-import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 import { getMulticall3Address } from "../../../_utils";
 import { CHAIN_IDs } from "../../../_constants";
 import { getSlippage } from "../../../_slippage";
@@ -19,7 +23,7 @@ export type UniswapClassicQuoteFromApi = {
     recipient: string;
   };
   swapper: string;
-  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>;
+  route: Array<(V3PoolInRoute | V2PoolInRoute | V4PoolInRoute)[]>;
   slippage: number;
   tradeType: "EXACT_OUTPUT" | "EXACT_INPUT";
   quoteId: string;

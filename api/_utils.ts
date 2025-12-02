@@ -1248,10 +1248,15 @@ export async function getBridgeQuoteForOutput(params: {
       // If upstream error is an AcrossApiError, we just return it
       if (response?.data?.type === "AcrossApiError") {
         if (response.data.code === "SIMULATION_ERROR") {
-          throw new SimulationError({
-            message: response.data.message,
-            transaction: response.data.transaction,
-          });
+          throw new SimulationError(
+            {
+              message: response.data.message,
+              transaction: response.data.transaction,
+            },
+            {
+              cause: compactAxiosError(err),
+            }
+          );
         }
         throw new AcrossApiError(
           {
