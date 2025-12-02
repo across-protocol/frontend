@@ -716,6 +716,7 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
+  CHAIN_IDs.MONAD,
 ];
 
 // Autogenerate RPC config for each supported chain.
