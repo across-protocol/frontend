@@ -5,6 +5,7 @@ import {
   CHAIN_IDs,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
+  OFT_NO_EID,
 } from "@across-protocol/constants";
 
 export { CHAIN_IDs } from "@across-protocol/constants";
@@ -69,6 +70,12 @@ export const INDIRECT_CHAINS = IndirectChains.reduce(
     return acc;
   },
   {} as Record<number, (typeof IndirectChains)[number]>
+);
+
+export const OFT_EIDS_BY_CHAIN_ID = Object.fromEntries(
+  Object.entries(PUBLIC_NETWORKS)
+    .filter(([_, network]) => network.oftEid !== OFT_NO_EID)
+    .map(([chainId, network]) => [chainId, network.oftEid])
 );
 
 /* Colors and Media Queries section */
@@ -709,6 +716,7 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
+  CHAIN_IDs.MONAD,
 ];
 
 // Autogenerate RPC config for each supported chain.

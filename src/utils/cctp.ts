@@ -143,7 +143,6 @@ export function parseDepositForBurnLog(params: {
     originChainId,
     destinationChainId,
     depositor: toAddressType(depositForBurnLog.args.depositor, originChainId),
-    // HyperCore recipient must be the HyperEVM depositor in initial Swap API support
     recipient: toAddressType(
       depositForBurnLog.args.mintRecipient,
       destinationChainId

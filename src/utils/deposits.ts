@@ -12,6 +12,7 @@ import {
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
+import { parseOftSentLog } from "./oft";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
@@ -167,7 +168,9 @@ export async function getDepositByTxHash(
   const parsedDepositLog =
     bridgeProvider === "cctp"
       ? parseDepositForBurnLog(parseDepositLogArgs)
-      : parseFundsDepositedLog(parseDepositLogArgs);
+      : bridgeProvider === "oft"
+        ? parseOftSentLog(parseDepositLogArgs)
+        : parseFundsDepositedLog(parseDepositLogArgs);
 
   if (!parsedDepositLog) {
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);

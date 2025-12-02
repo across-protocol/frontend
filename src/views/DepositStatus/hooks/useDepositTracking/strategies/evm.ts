@@ -32,6 +32,7 @@ import {
 import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
+import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
 
 /**
  * Strategy for handling EVM chain operations
@@ -239,7 +240,9 @@ export class EVMStrategy implements IChainStrategy {
       const outputAmountParser =
         bridgeProvider === "cctp"
           ? parseOutputAmountFromMintAndWithdrawLog
-          : parseFilledRelayLogOutputAmount;
+          : bridgeProvider === "oft"
+            ? parseOutputAmountFromOftReceivedLog
+            : parseFilledRelayLogOutputAmount;
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
