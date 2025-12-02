@@ -40,6 +40,7 @@ export interface TooltipProps {
   anchorWidth?: string;
   children?: ReactNode;
   paddingPx?: number;
+  tooltipAnchorHeight?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -54,6 +55,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   offset,
   anchorWidth,
   paddingPx = 16,
+  tooltipAnchorHeight = "1em",
 }) => {
   const id = tooltipId || title;
 
@@ -67,6 +69,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         data-tooltip-id={id}
         data-tooltip-place={placement}
         width={anchorWidth}
+        height={tooltipAnchorHeight}
       >
         {children}
       </StyledAnchor>

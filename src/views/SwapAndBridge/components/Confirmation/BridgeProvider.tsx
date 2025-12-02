@@ -18,6 +18,7 @@ export const ProviderBadge = ({
     </ProviderBadgeWrapper>
   ) : (
     <Tooltip
+      tooltipAnchorHeight="inherit"
       paddingPx={8}
       tooltipId={`tooltip-${provider}`}
       body={
@@ -27,11 +28,16 @@ export const ProviderBadge = ({
         </ToolipContent>
       }
     >
-      {logo}
+      <LogoWrapper>{logo}</LogoWrapper>
     </Tooltip>
   );
 };
 
+const LogoWrapper = styled.div`
+  display: flex;
+  height: 100%;
+  justify-content: center;
+`;
 const ToolipContent = styled.div`
   display: flex;
   flex-direction: row;

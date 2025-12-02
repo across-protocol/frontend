@@ -1,9 +1,10 @@
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import { TokenImage } from "../../../../components";
-import { orderedTokenLogos } from "../../../../constants/tokens";
 import React, { ReactElement } from "react";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Circle } from "assets/extern-logos/circle.svg";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
+import hypeLogo from "assets/token-logos/hype.svg";
 
 export type BridgeProvider =
   | "across"
@@ -33,19 +34,14 @@ const PROVIDER_DISPLAY: Record<
   oft: {
     label: "OFT",
     logo: (
-      <TokenImage
-        src={orderedTokenLogos.USDT}
-        alt="usdt-logo"
-        width="16px"
-        height="16px"
-      />
+      <TokenImage src={usdt0Logo} alt="usdt-logo" width="16px" height="16px" />
     ),
   },
   hypercore: {
     label: "Hypercore",
     logo: (
       <TokenImage
-        src={orderedTokenLogos.HYPE}
+        src={hypeLogo}
         alt="hyperliquid-logo"
         width="16px"
         height="16px"
