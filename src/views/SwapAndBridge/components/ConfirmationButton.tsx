@@ -14,12 +14,16 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BigNumber } from "ethers";
-import { COLORS, formatUSDString, isDefined } from "utils";
+import { COLORS, isDefined } from "utils";
 import { EnrichedToken } from "./ChainTokenSelector/ChainTokenSelectorModal";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getSwapQuoteFees } from "../utils/fees";
+import {
+  getSwapQuoteFees,
+  PriceImpact,
+  isSponsoredIntentQuote,
+} from "../utils/fees";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -43,6 +47,7 @@ interface ConfirmationButtonProps
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel?: string;
+  priceImpact?: PriceImpact;
 }
 
 // Expandable label section component
@@ -55,8 +60,19 @@ const ExpandableLabelSection: React.FC<
     visible: boolean;
     state: BridgeButtonState;
     hasQuote: boolean;
+    priceImpact?: PriceImpact;
+    isSponsoredIntent?: boolean;
   }>
-> = ({ fee, time, expanded, onToggle, state, children, hasQuote }) => {
+> = ({
+  fee,
+  time,
+  expanded,
+  onToggle,
+  priceImpact,
+  children,
+  hasQuote,
+  isSponsoredIntent,
+}) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
@@ -86,8 +102,24 @@ const ExpandableLabelSection: React.FC<
             <Across />
             <Divider />
             <FeeTimeItem>
-              <Dollar width="16" height="16" />
-              {fee}
+              {priceImpact?.tooHigh ? (
+                <FeeTimeItemRed>
+                  <Warning
+                    color="var(--functional-red)"
+                    width="16"
+                    height="16"
+                  />
+                  <span>
+                    {fee} (-{priceImpact.priceImpactFormatted}%)
+                  </span>
+                </FeeTimeItemRed>
+              ) : (
+                <>
+                  <Dollar width="16" height="16" />
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                  {fee}
+                </>
+              )}
             </FeeTimeItem>
             <Divider />
             <FeeTimeItem>
@@ -187,10 +219,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonDisabled,
   buttonLoading,
   buttonLabel,
+  priceImpact,
 }) => {
   const [expanded, setExpanded] = React.useState(false);
 
   const state = buttonState;
+  const isSponsoredIntent = isSponsoredIntentQuote(swapQuote ?? undefined);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
@@ -209,11 +243,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       };
     }
 
-    const { totalFeeUsd, bridgeFeesUsd, appFeesUsd, swapImpactUsd } =
-      getSwapQuoteFees(swapQuote);
-    // Only show fee items if they're at least 1 cent
-    const hasAppFee = Number(appFeesUsd) >= 0.01;
-    const hasSwapImpact = Number(swapImpactUsd) >= 0.01;
+    const {
+      totalFeeFormatted,
+      bridgeFeeFormatted,
+      swapImpactFormatted,
+      swapImpactUsd,
+    } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
     const underOneMinute = totalSeconds < 60;
@@ -221,12 +256,15 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       ? `~${Math.max(1, Math.round(totalSeconds))} secs`
       : `~${Math.ceil(totalSeconds / 60)} min`;
 
+    // for sponsored bridges, always show this line item (as a flex), otherwise only show if a swap is involved
+    const showSwapImpact =
+      priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
+
     return {
-      totalFee: formatUSDString(totalFeeUsd),
+      totalFee: totalFeeFormatted,
       time,
-      bridgeFee: formatUSDString(bridgeFeesUsd),
-      appFee: hasAppFee ? formatUSDString(appFeesUsd) : undefined,
-      swapImpact: hasSwapImpact ? formatUSDString(swapImpactUsd) : undefined,
+      bridgeFee: bridgeFeeFormatted,
+      swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       route: "Across V4",
       estimatedTime: time,
     };
@@ -252,6 +290,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         visible={true}
         state={state}
         hasQuote={!!swapQuote}
+        priceImpact={priceImpact}
+        isSponsoredIntent={isSponsoredIntent}
       >
         <ExpandedDetails>
           <DetailRow>
@@ -282,7 +322,30 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 <Info color="inherit" width="16px" height="16px" />
               </Tooltip>
             </DetailLeft>
-            <DetailRight>{displayValues.totalFee}</DetailRight>
+            <DetailRight>
+              {priceImpact?.tooHigh ? (
+                <Tooltip
+                  tooltipId="High fee warning"
+                  body={
+                    <WarningTooltipBody>
+                      Warning: High price impact, you will receive{" "}
+                      {priceImpact.priceImpactFormatted}% less than your input.
+                    </WarningTooltipBody>
+                  }
+                >
+                  <DetailRightRed>
+                    <Warning width="16px" height="16px" color="inherit" />
+                    {displayValues.totalFee} (-
+                    {priceImpact.priceImpactFormatted}%)
+                  </DetailRightRed>
+                </Tooltip>
+              ) : (
+                <>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}{" "}
+                  {displayValues.totalFee}
+                </>
+              )}
+            </DetailRight>
           </DetailRow>
           <FeeBreakdown>
             <FeeBreakdownRow>
@@ -295,7 +358,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
               </FeeBreakdownLabel>
-              <FeeBreakdownValue>{displayValues.bridgeFee}</FeeBreakdownValue>
+              <FeeBreakdownValue>
+                {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                {displayValues.bridgeFee}
+              </FeeBreakdownValue>
             </FeeBreakdownRow>
             {isDefined(displayValues.swapImpact) && (
               <FeeBreakdownRow>
@@ -309,6 +375,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   </Tooltip>
                 </FeeBreakdownLabel>
                 <FeeBreakdownValue>
+                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {displayValues.swapImpact}
                 </FeeBreakdownValue>
               </FeeBreakdownRow>
@@ -328,15 +395,23 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   );
 
   return (
-    <Container
-      dark={
-        buttonState === "validationError" ||
-        buttonState === "apiError" ||
-        buttonLoading
-      }
-    >
-      {content}
-    </Container>
+    <>
+      <Container
+        dark={
+          buttonState === "validationError" ||
+          buttonState === "apiError" ||
+          buttonLoading
+        }
+      >
+        {content}
+      </Container>
+      {priceImpact?.tooHigh && (
+        <FeeWarning>
+          <Warning width="20px" height="20px" color="inherit" />
+          High price impact (-{priceImpact.priceImpactFormatted}%)
+        </FeeWarning>
+      )}
+    </>
   );
 };
 
@@ -398,7 +473,11 @@ const ExpandableLabelRightAccent = styled(ExpandableLabelLeft)`
 const FeeTimeItem = styled.span`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
 `;
 
 const Divider = styled.span`
@@ -506,7 +585,7 @@ const DetailLeft = styled.div`
 const DetailRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #e0f3ff;
 `;
 
@@ -520,7 +599,7 @@ const FeeBreakdownRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   position: relative;
 
   &::before {
@@ -544,6 +623,63 @@ const FeeBreakdownLabel = styled.span`
   color: rgba(224, 243, 255, 0.5);
 `;
 
-const FeeBreakdownValue = styled.span`
+const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
+`;
+
+const FeeTimeItemRed = styled(FeeTimeItem)`
+  background: rgba(255, 97, 102, 0.2);
+  border-radius: 999px;
+  height: 20px;
+  padding-inline: 6px;
+  margin-inline: -6px; // account for inline padding
+
+  span {
+    height: 100%;
+  }
+`;
+
+const FeeWarning = styled.div`
+  height: 36px;
+  display: flex;
+  padding: 8px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 97, 102, 0.1);
+  background: rgba(255, 97, 102, 0.1);
+  color: var(--functional-red);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+
+  /* text */
+  span {
+    height: 100%;
+  }
+`;
+
+const DetailRightRed = styled(DetailRight)`
+  color: var(--functional-red);
+  font-weight: 600;
+`;
+
+const WarningTooltipBody = styled.span`
+  color: var(--functional-red);
+  font-weight: 600;
+  font-size: 14px;
+`;
+
+export const FreeTag = styled.div`
+  height: 20px;
+  padding-inline: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--transparency-aqua-aqua-40);
+  background: var(--transparency-aqua-aqua-20);
+  color: var(--base-aqua);
+  font-size: 12px;
+  font-weight: 600;
 `;

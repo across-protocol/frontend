@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
-import { SwapRouter } from "@uniswap/universal-router-sdk";
+import { Protocol } from "@uniswap/router-sdk";
+import { SwapRouter, RouterTradeAdapter } from "@uniswap/universal-router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
@@ -9,10 +10,13 @@ import {
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
-import { RouterTradeAdapter } from "./utils/adapter";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { parseUniswapError } from "./swap-router-02";
-import { compactAxiosError } from "../../_errors";
+import {
+  compactAxiosError,
+  UPSTREAM_SWAP_PROVIDER_ERRORS,
+  UpstreamSwapProviderError,
+} from "../../_errors";
 import { UNIVERSAL_ROUTER_02_ADDRESS } from "./utils/addresses";
 import { TransferType } from "../../_spoke-pool-periphery";
 import { SOURCES } from "./utils/sources";
@@ -78,7 +82,7 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
         tradeType,
         opts
       );
-      const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
+      const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote, opts);
 
       const expectedAmountIn = BigNumber.from(quote.input.amount);
       const maxAmountIn =
@@ -145,7 +149,8 @@ export function getUniversalRouter02Strategy(): QuoteFetchStrategy {
 export function buildUniversalRouterSwapTx(
   swap: Swap,
   tradeType: TradeType,
-  quote: UniswapClassicQuoteFromApi
+  quote: UniswapClassicQuoteFromApi,
+  opts?: QuoteFetchOpts
 ) {
   const routerTrade = RouterTradeAdapter.fromClassicQuote({
     tokenIn: quote.input.token,
@@ -153,6 +158,19 @@ export function buildUniversalRouterSwapTx(
     tradeType,
     route: quote.route,
   });
+
+  // NOTE: V4 only swaps behave differently when using `useRouterBalance: true`.
+  // TODO: Investigate if this is a problem and if we can fix it.
+  const isV4Only = routerTrade.swaps.every(
+    (swap) => swap.route.protocol === Protocol.V4
+  );
+  if (opts?.sellEntireBalance && isV4Only) {
+    throw new UpstreamSwapProviderError({
+      message: `Option 'sellEntireBalance' is not supported by ${STRATEGY_NAME}`,
+      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
+      swapProvider: STRATEGY_NAME,
+    });
+  }
 
   const { calldata, value } = SwapRouter.swapCallParameters(routerTrade, {
     recipient: swap.recipient,

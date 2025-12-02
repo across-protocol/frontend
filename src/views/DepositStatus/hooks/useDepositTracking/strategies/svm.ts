@@ -8,7 +8,7 @@ import {
   DepositedInfo,
   FilledInfo,
   DepositData,
-  FillData,
+  DepositStatusResponse,
 } from "../types";
 import {
   getSVMRpc,
@@ -78,65 +78,82 @@ export class SVMStrategy implements IChainStrategy {
   }
 
   /**
-   * Get fill information for a deposit
+   * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
    * @returns Fill information
    */
   async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
-    const depositId = depositInfo.depositLog.depositId;
-    const originChainId = depositInfo.depositLog.originChainId;
-
-    if (!depositId) {
-      throw new Error("Deposit ID not found in deposit information");
-    }
+    const { depositId } = depositInfo.depositLog;
+    const fillChainId = this.chainId;
 
     try {
-      // First try the rewards API
-      const { data } = await axios.get<{
-        status: "filled" | "pending";
-        fillTx: string | null;
-      }>(`${indexerApiBaseUrl}/deposit/status`, {
-        params: {
-          originChainId,
-          depositId: depositId.toString(),
-          depositTxHash: depositInfo.depositTxHash,
-        },
-      });
+      const fillTxSignature = await Promise.any([
+        this.getFillFromIndexer(depositInfo),
+        this.getFillFromRpc(depositInfo),
+      ]);
 
-      if (data?.status === "filled" && data.fillTx) {
-        if (!isSignature(data.fillTx)) {
-          throw new Error(
-            `Invalid Signature: ${data.fillTx}. \nChain ${this.chainId} is likely not an svm chain.`
-          );
-        }
-        const rpc = getSVMRpc(this.chainId);
-        const eventsClient = await SvmCpiEventsClient.create(rpc);
-        const fillTx = await eventsClient.getFillEventsFromSignature(
-          this.chainId,
-          data.fillTx
-        );
-
-        const fillTxDetails = fillTx?.[0];
-        if (!fillTxDetails) {
-          throw new Error(
-            `Unable to find fill with signature ${data.fillTx} on chain ${this.chainId}`
-          );
-        }
-
-        return {
-          fillTxHash: data.fillTx,
-          fillTxTimestamp: Number(fillTxDetails.fillTimestamp),
-          status: "filled",
-          depositInfo,
-          fillLog: fillTxDetails satisfies FillData,
-        };
+      if (!fillTxSignature) {
+        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
-    } catch (error) {
-      console.warn("Error fetching fill from API:", error);
-    }
 
-    // If API approach didn't work, find the fill on-chain
+      const metadata = await this.getFillMetadata(fillTxSignature);
+
+      return {
+        fillTxHash: metadata.fillTxHash,
+        fillTxTimestamp: metadata.fillTxTimestamp,
+        depositInfo,
+        status: "filled",
+        outputAmount: metadata.outputAmount || BigNumber.from(0),
+      };
+    } catch (error) {
+      // Both rejected - throw error so we can retry
+      throw new NoFilledRelayLogError(Number(depositId), fillChainId);
+    }
+  }
+
+  /**
+   * Get fill information for a deposit from indexer
+   * @param depositInfo Deposit information
+   * @returns Fill transaction hash (signature) or null
+   */
+  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+    const { depositId } = depositInfo.depositLog;
+
+    try {
+      const { data } = await axios.get<DepositStatusResponse>(
+        `${indexerApiBaseUrl}/deposit/status`,
+        {
+          params: {
+            depositId: depositId.toString(),
+            depositTxHash: depositInfo.depositTxHash,
+          },
+        }
+      );
+
+      if (data?.status === "filled" && data.fillTxnRef) {
+        if (!isSignature(data.fillTxnRef)) {
+          throw new Error(
+            `Invalid Signature: ${data.fillTxnRef}. \nChain ${this.chainId} is likely not an svm chain.`
+          );
+        }
+        return data.fillTxnRef;
+      }
+
+      throw new Error("Indexer response still pending");
+    } catch (error) {
+      console.warn("Error fetching fill from indexer:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get fill information for a deposit from RPC
+   * @param depositInfo Deposit information
+   * @returns Fill transaction hash (signature)
+   */
+  async getFillFromRpc(depositInfo: DepositedInfo): Promise<string> {
+    const { depositId } = depositInfo.depositLog;
+
     try {
       const rpc = getSVMRpc(this.chainId);
       const eventsClient = await SvmCpiEventsClient.create(rpc);
@@ -160,22 +177,52 @@ export class SVMStrategy implements IChainStrategy {
         throw new NoFilledRelayLogError(Number(depositId), this.chainId);
       }
 
-      const fillTxTimestamp = await rpc
-        .getBlockTime(BigInt(fillEvent.blockNumber))
-        .send();
+      return fillEvent.txnRef;
+    } catch (error) {
+      console.error("Error fetching Solana fill from RPC:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get fill metadata (timestamp and output amount) from a fill transaction signature
+   * @param fillTxHash Fill transaction hash (signature)
+   * @returns Fill metadata
+   */
+  async getFillMetadata(fillTxHash: string): Promise<{
+    fillTxHash: string;
+    fillTxTimestamp: number;
+    outputAmount: BigNumber | undefined;
+  }> {
+    try {
+      if (!isSignature(fillTxHash)) {
+        throw new Error(`Invalid tx signature: ${fillTxHash}`);
+      }
+      const rpc = getSVMRpc(this.chainId);
+      const eventsClient = await SvmCpiEventsClient.create(rpc);
+      // We skip fetching swap metadata on Solana, since we don't support destination chain swaps yet
+      const fillTx = await eventsClient.getFillEventsFromSignature(
+        this.chainId,
+        fillTxHash
+      );
+
+      const fillTxDetails = fillTx?.[0];
+      if (!fillTxDetails) {
+        throw new Error(
+          `Unable to find fill with signature ${fillTxHash} on chain ${this.chainId}`
+        );
+      }
 
       return {
-        fillTxHash: fillEvent.txnRef,
-        fillTxTimestamp: Number(fillTxTimestamp),
-        fillLog: {
-          ...fillEvent,
-          fillTimestamp: Number(fillTxTimestamp),
-        } satisfies FillData,
-        depositInfo,
-        status: "filled",
+        fillTxHash,
+        fillTxTimestamp: Number(fillTxDetails.fillTimestamp),
+        outputAmount: BigNumber.from(fillTxDetails.outputAmount),
       };
     } catch (error) {
-      console.error("Error fetching Solana fill:", error);
+      console.error(
+        `Unable to get fill metadata for tx hash: ${fillTxHash}`,
+        error
+      );
       throw error;
     }
   }

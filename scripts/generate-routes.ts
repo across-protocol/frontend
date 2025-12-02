@@ -177,6 +177,7 @@ const enabledRoutes = {
       [CHAIN_IDs.LISK]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.MAINNET]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.MODE]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
+      [CHAIN_IDs.MONAD]: "0xe9b0666DFfC176Df6686726CB9aaC78fD83D20d7",
       [CHAIN_IDs.OPTIMISM]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
       [CHAIN_IDs.PLASMA]: "0xF1BF00D947267Da5cC63f8c8A60568c59FA31bCb",
       [CHAIN_IDs.POLYGON]: "0x89415a82d909a7238d69094C3Dd1dCC1aCbDa85C",
@@ -200,6 +201,7 @@ const enabledRoutes = {
       [CHAIN_IDs.LISK]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.MAINNET]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.MODE]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
+      [CHAIN_IDs.MONAD]: "0x4734e36f56F1A4Acbacf61C03F7b773b631B95A3",
       [CHAIN_IDs.OPTIMISM]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
       [CHAIN_IDs.PLASMA]: "0xdC49fD0a3A7d44969E818452Af93C46d5C8099a4",
       [CHAIN_IDs.POLYGON]: "0x4D6d2A149A46D9D8C4473FbaA269f3738247eB60",
@@ -213,8 +215,7 @@ const enabledRoutes = {
     },
     routes: transformChainConfigs(
       enabledMainnetChainConfigs,
-      enabledMainnetExternalProjects,
-      enabledIndirectMainnetChainConfigs
+      enabledMainnetExternalProjects
     ),
   },
   [CHAIN_IDs.SEPOLIA]: {
@@ -247,18 +248,13 @@ const enabledRoutes = {
     },
     spokePoolPeripheryAddresses: {},
     swapProxyAddresses: {},
-    routes: transformChainConfigs(
-      enabledSepoliaChainConfigs,
-      [],
-      enabledIndirectSepoliaChainConfigs
-    ),
+    routes: transformChainConfigs(enabledSepoliaChainConfigs, []),
   },
 } as const;
 
 function transformChainConfigs(
   enabledChainConfigs: typeof enabledMainnetChainConfigs,
-  enabledExternalProjects: typeof enabledMainnetExternalProjects,
-  enabledIndirectChainConfigs: typeof enabledIndirectMainnetChainConfigs
+  enabledExternalProjects: typeof enabledMainnetExternalProjects
 ) {
   const transformedChainConfigs: {
     fromChain: number;
@@ -800,7 +796,8 @@ async function generateRoutes(hubPoolChainId = 1) {
       logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
-      intermediaryChains: chainConfig.intermediaryChains,
+      intermediaryChain: chainConfig.intermediaryChain,
+      restrictedOriginChains: chainConfig.restrictedOriginChains,
       inputTokens: chainConfig.tokens.flatMap((token) => {
         try {
           if (typeof token === "string") {

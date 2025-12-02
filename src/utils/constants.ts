@@ -24,6 +24,7 @@ import usdt0Logo from "assets/token-logos/usdt0.svg";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import IndirectChains from "data/indirect_chains_1.json";
 import { Deposit } from "hooks/useDeposits";
 
 import {
@@ -61,6 +62,14 @@ export {
   interchangeableTokensMap,
   similarTokensMap,
 };
+
+export const INDIRECT_CHAINS = IndirectChains.reduce(
+  (acc, chain) => {
+    acc[chain.chainId] = chain;
+    return acc;
+  },
+  {} as Record<number, (typeof IndirectChains)[number]>
+);
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
@@ -331,6 +340,13 @@ export function applyChainSpecificTokenDisplay(
       ...token,
       displaySymbol: "USDT0",
       logoURI: usdt0Logo,
+    };
+  }
+
+  if (token.symbol === "USDH-SPOT" && chainId === CHAIN_IDs.HYPERCORE) {
+    return {
+      ...token,
+      displaySymbol: "USDH",
     };
   }
 
@@ -686,3 +702,43 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
 ];
+
+// Autogenerate RPC config for each supported chain.
+// Any exceptions can be added to the ranges object.
+const resolveRpcConfig = () => {
+  const defaultRange = 10_000;
+  const ranges = {
+    [CHAIN_IDs.ALEPH_ZERO]: 0,
+    [CHAIN_IDs.BOBA]: 0,
+    [CHAIN_IDs.HYPEREVM]: 1_000, // QuickNode constraint.
+    [CHAIN_IDs.MONAD]: 100, // Alchemy constraint
+    [CHAIN_IDs.SOLANA]: 1_000,
+    [CHAIN_IDs.SOLANA_DEVNET]: 1000,
+  };
+  return Object.fromEntries(
+    Object.values(CHAIN_IDs).map((chainId) => [
+      chainId,
+      ranges[chainId] ?? defaultRange,
+    ])
+  );
+};
+
+const mergeConfig = <T>(config: T, envVar: string | undefined): T => {
+  const shallowCopy = { ...config };
+  Object.entries(JSON.parse(envVar ?? "{}")).forEach(([k, v]) => {
+    assert(
+      typeof v === typeof shallowCopy[k as keyof T] ||
+        !isDefined(shallowCopy[k as keyof T]),
+      `Invalid ${envVar} configuration on key ${k} (${typeof v} != ${typeof shallowCopy[k as keyof T]})`
+    );
+    shallowCopy[k as keyof T] = v as T[keyof T];
+  });
+  return shallowCopy;
+};
+
+export const chainMaxBlockLookback = mergeConfig(
+  resolveRpcConfig(),
+  process.env.MAX_BLOCK_LOOK_BACK
+);
+
+export const INTEGRATOR_ID_ACROSS = "0x007f";

@@ -57,7 +57,7 @@ export function getSpotSendBytesForTransferOnCore(params: {
   amount: BigNumber;
 }) {
   const { recipientAddress, tokenSystemAddress, amount } = params;
-  const tokenIndex = parseInt(tokenSystemAddress.replace("0x20", ""), 16);
+  const tokenIndex = getTokenIndexFromSystemAddress(tokenSystemAddress);
   const transferOnCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64", "uint64"],
     [recipientAddress, tokenIndex, amount]
@@ -72,10 +72,7 @@ export async function getBalanceOnHyperCore(params: {
   tokenSystemAddress: string;
 }) {
   const provider = getProvider(CHAIN_IDs.HYPEREVM);
-  const tokenIndex = parseInt(
-    params.tokenSystemAddress.replace("0x20", ""),
-    16
-  );
+  const tokenIndex = getTokenIndexFromSystemAddress(params.tokenSystemAddress);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64"],
     [params.account, tokenIndex]
@@ -89,6 +86,10 @@ export async function getBalanceOnHyperCore(params: {
     queryResult
   );
   return BigNumber.from(decodedQueryResult[0].toString());
+}
+
+export function getTokenIndexFromSystemAddress(systemAddress: string) {
+  return parseInt(systemAddress.replace("0x20", ""), 16);
 }
 
 export async function accountExistsOnHyperCore(params: { account: string }) {
@@ -106,4 +107,14 @@ export async function accountExistsOnHyperCore(params: { account: string }) {
     queryResult
   );
   return Boolean(decodedQueryResult[0]);
+}
+
+export function getHyperEvmChainId(hyperCoreChainId: number): number {
+  return hyperCoreChainId === CHAIN_IDs.HYPERCORE
+    ? CHAIN_IDs.HYPEREVM
+    : CHAIN_IDs.HYPEREVM_TESTNET;
+}
+
+export function isToHyperCore(chainId: number) {
+  return [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId);
 }
