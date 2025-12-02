@@ -26,7 +26,6 @@ const mockBridgeStrategyData = (
   isUsdcToUsdc: false,
   isLargeDeposit: false,
   isFastCctpEligible: false,
-  isLineaSource: false,
   isInThreshold: false,
   isUsdtToUsdt: false,
   isMonadTransfer: false,
@@ -39,7 +38,6 @@ const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
 const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
-const usdcLinea = createToken("USDC", CHAIN_IDs.LINEA);
 const usdcBase = createToken("USDC", CHAIN_IDs.BASE);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
@@ -307,29 +305,6 @@ describe("api/_bridges/index", () => {
       });
     });
 
-    describe("Linea source chain routing", () => {
-      test("should always use Across for Linea source chain", async () => {
-        const mockData = mockBridgeStrategyData({
-          isLineaSource: true,
-          isUsdcToUsdc: true,
-          isLargeDeposit: true,
-        });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.LINEA,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcLinea,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
-    });
-
     describe("Fast CCTP eligible routing", () => {
       test("should use Across for Fast CCTP eligible transfers within 10K threshold", async () => {
         const mockData = mockBridgeStrategyData({
@@ -343,10 +318,10 @@ describe("api/_bridges/index", () => {
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
-          originChainId: CHAIN_IDs.POLYGON,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcPolygon,
-          outputToken: usdcArbitrum,
+          originChainId: CHAIN_IDs.ARBITRUM,
+          destinationChainId: CHAIN_IDs.POLYGON,
+          inputToken: usdcArbitrum,
+          outputToken: usdcPolygon,
         });
 
         expect(strategy.name).toBe("across");
@@ -365,9 +340,9 @@ describe("api/_bridges/index", () => {
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
-          originChainId: CHAIN_IDs.POLYGON,
+          originChainId: CHAIN_IDs.BASE,
           destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcPolygon,
+          inputToken: usdcBase,
           outputToken: usdcArbitrum,
         });
 
