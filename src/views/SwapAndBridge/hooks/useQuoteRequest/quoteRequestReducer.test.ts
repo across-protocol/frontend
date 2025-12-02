@@ -7,7 +7,7 @@ const mockToken = (symbol: string) =>
   ({ symbol, chainId: 1, address: "0x" }) as QuoteRequest["originToken"];
 
 const mockAccount = (address: string) =>
-  ({ accountType: "evm", address }) as QuoteRequest["originAccount"];
+  ({ accountType: "evm", address }) as QuoteRequest["customDestinationAccount"];
 
 describe("quoteRequestReducer", () => {
   it("sets origin token", () => {
@@ -48,22 +48,13 @@ describe("quoteRequestReducer", () => {
     expect(result.tradeType).toBe("minOutput");
   });
 
-  it("sets origin account", () => {
-    const account = mockAccount("0xabc");
-    const result = quoteRequestReducer(initialQuote, {
-      type: "SET_ORIGIN_ACCOUNT",
-      payload: account,
-    });
-    expect(result.originAccount).toBe(account);
-  });
-
-  it("sets destination account", () => {
+  it("sets custom destination account", () => {
     const account = mockAccount("0xdef");
     const result = quoteRequestReducer(initialQuote, {
-      type: "SET_DESTINATION_ACCOUNT",
-      payload: account,
+      type: "SET_CUSTOM_DESTINATION_ACCOUNT",
+      payload: account!,
     });
-    expect(result.destinationAccount).toBe(account);
+    expect(result.customDestinationAccount).toBe(account);
   });
 
   describe("QUICK_SWAP", () => {

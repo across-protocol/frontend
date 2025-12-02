@@ -21,15 +21,14 @@ export type QuoteRequestAction =
       type: "SET_DESTINATION_AMOUNT";
       payload: BigNumber | null;
     }
-  | { type: "SET_ORIGIN_ACCOUNT"; payload: QuoteAccount }
-  | { type: "SET_DESTINATION_ACCOUNT"; payload: QuoteAccount }
+  | { type: "SET_CUSTOM_DESTINATION_ACCOUNT"; payload: QuoteAccount }
+  | { type: "RESET_CUSTOM_DESTINATION_ACCOUNT" }
   | { type: "QUICK_SWAP"; payload: undefined };
 
 export interface QuoteRequest {
   tradeType: "minOutput" | "exactInput";
   originToken: EnrichedToken | null;
   destinationToken: EnrichedToken | null;
-  originAccount: QuoteAccount;
-  destinationAccount: QuoteAccount;
+  customDestinationAccount: QuoteAccount | null;
   amount: BigNumber | null;
 }

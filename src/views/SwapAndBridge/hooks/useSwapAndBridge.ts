@@ -33,7 +33,7 @@ export type UseSwapAndBridgeReturn = {
 export function useSwapAndBridge(
   quoteRequest: QuoteRequest
 ): UseSwapAndBridgeReturn {
-  const isRecipientSet = quoteRequest.destinationAccount;
+  const isRecipientSet = quoteRequest.customDestinationAccount;
   const { isConnected: isConnectedEVM } = useConnectionEVM();
   const { isConnected: isConnectedSVM } = useConnectionSVM();
 

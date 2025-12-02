@@ -6,13 +6,11 @@ import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
 import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
 import { BigNumber } from "ethers";
 import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
-import { useAccountInQuote } from "./hooks/useQuoteRequest/useAccountInQuote";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
 
 export default function SwapAndBridge() {
   const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();
   useDefaultRouteInQuote(dispatchQuoteRequestAction);
-  useAccountInQuote(quoteRequest, dispatchQuoteRequestAction);
 
   const isAmountOrigin = quoteRequest.tradeType === "exactInput";
 

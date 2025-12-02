@@ -20,6 +20,12 @@ import {
   QuoteRequest,
   QuoteRequestAction,
 } from "../../SwapAndBridge/hooks/useQuoteRequest/quoteRequestAction";
+import { useConnectionEVM } from "../../../hooks/useConnectionEVM";
+import { useConnectionSVM } from "../../../hooks/useConnectionSVM";
+import {
+  PLACEHOLDER_EVM_ADDRESS,
+  PLACEHOLDER_SVM_ADDRESS,
+} from "../../SwapAndBridge/hooks/useSwapQuote";
 
 export const ChangeAccountModal = ({
   destinationChainEcosystem,
@@ -36,10 +42,13 @@ export const ChangeAccountModal = ({
     handleChangeToAddressSVM,
   } = useToAccount(quoteRequest.destinationToken?.chainId);
 
+  const { account: connectedAccountEVM } = useConnectionEVM();
+  const { account: connectedAccountSVM } = useConnectionSVM();
+
   useEffect(() => {
     if (currentRecipientAccount) {
       dispatchQuoteRequestAction({
-        type: "SET_DESTINATION_ACCOUNT",
+        type: "SET_CUSTOM_DESTINATION_ACCOUNT",
         payload: {
           accountType: destinationChainEcosystem,
           address: currentRecipientAccount,
@@ -47,13 +56,11 @@ export const ChangeAccountModal = ({
       });
     } else {
       dispatchQuoteRequestAction({
-        type: "SET_DESTINATION_ACCOUNT",
-        payload: quoteRequest.originAccount,
+        type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
       });
     }
   }, [
     currentRecipientAccount,
-    quoteRequest.originAccount,
     dispatchQuoteRequestAction,
     destinationChainEcosystem,
   ]);
@@ -119,6 +126,11 @@ export const ChangeAccountModal = ({
 
   useHotkeys("esc", () => onCloseModal(), { enableOnFormTags: true });
 
+  const defaultRecipient =
+    destinationChainEcosystem === "evm"
+      ? connectedAccountEVM || PLACEHOLDER_EVM_ADDRESS
+      : connectedAccountSVM?.toBase58 || PLACEHOLDER_SVM_ADDRESS;
+
   return (
     <>
       <Trigger onClick={() => setDisplayModal(true)}>
@@ -142,12 +154,8 @@ export const ChangeAccountModal = ({
         <Wrapper>
           <RowSpaced>
             <SubHeading>Wallet Address</SubHeading>
-            {userInput !== quoteRequest.originAccount?.address && (
-              <ResetButton
-                onClick={() =>
-                  setUserInput(quoteRequest.originAccount?.address ?? "")
-                }
-              >
+            {userInput !== defaultRecipient && (
+              <ResetButton onClick={() => setUserInput(defaultRecipient)}>
                 Reset to Default
               </ResetButton>
             )}
@@ -196,6 +204,7 @@ const ResetButton = styled.button`
 
 const RowSpaced = styled.div`
   width: 100%;
+  height: 21px;
   display: flex;
   justify-content: space-between;
 `;

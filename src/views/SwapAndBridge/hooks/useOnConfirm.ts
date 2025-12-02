@@ -24,7 +24,8 @@ export function useOnConfirm(
     originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
 
   // Check if destination recipient is set (appropriate wallet connected for destination ecosystem)
-  const isRecipientSet = quoteRequest.destinationAccount;
+  const isRecipientSet =
+    destinationChainEcosystem === "svm" ? isConnectedSVM : isConnectedEVM;
 
   return useCallback(async () => {
     // If origin wallet is not connected, connect it first
