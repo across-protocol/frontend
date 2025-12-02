@@ -88,7 +88,12 @@ export function getCctpBridgeStrategy(
     const isDestinationChainSupported = CCTP_SUPPORTED_CHAINS.includes(
       params.outputToken.chainId
     );
-    if (!isOriginChainSupported || !isDestinationChainSupported) {
+    if (
+      !isOriginChainSupported ||
+      !isDestinationChainSupported ||
+      // NOTE: Our finalizer doesn't support destination Solana yet. Block the route until we do.
+      sdk.utils.chainIsSvm(params.outputToken.chainId)
+    ) {
       return false;
     }
 
