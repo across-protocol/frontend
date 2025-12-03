@@ -61,6 +61,7 @@ export async function getBridgeStrategy({
   amountType,
   recipient,
   depositor,
+  includesActions,
   routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const tokenPairPerToChainOverride =
@@ -100,6 +101,7 @@ export async function getBridgeStrategy({
       amountType,
       recipient,
       depositor,
+      includesActions,
     });
   }
   return getAcrossBridgeStrategy();
@@ -143,6 +145,7 @@ async function routeMintAndBurnStrategy({
   amountType,
   recipient,
   depositor,
+  includesActions,
 }: BridgeStrategyDataParams): Promise<BridgeStrategy> {
   const bridgeStrategyData = await getBridgeStrategyData({
     inputToken,
@@ -156,6 +159,12 @@ async function routeMintAndBurnStrategy({
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
   }
+
+  // Always use Across when actions are present
+  if (includesActions) {
+    return getAcrossBridgeStrategy();
+  }
+
   if (bridgeStrategyData.isMonadTransfer) {
     if (bridgeStrategyData.isWithinMonadLimit) {
       return getAcrossBridgeStrategy();
@@ -175,9 +184,7 @@ async function routeMintAndBurnStrategy({
   if (bridgeStrategyData.isUtilizationHigh) {
     return getBurnAndMintStrategy(bridgeStrategyData);
   }
-  if (bridgeStrategyData.isLineaSource) {
-    return getAcrossBridgeStrategy();
-  }
+
   if (bridgeStrategyData.isFastCctpEligible) {
     if (bridgeStrategyData.isInThreshold) {
       return getAcrossBridgeStrategy();

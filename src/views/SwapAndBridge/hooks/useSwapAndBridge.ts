@@ -4,7 +4,6 @@ import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote from "./useSwapQuote";
 import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
-import { BridgeButtonState } from "../components/ConfirmationButton";
 import { useDebounce } from "@uidotdev/usehooks";
 import { getEcosystem, getQuoteWarningMessage } from "utils";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
@@ -13,6 +12,7 @@ import { useToAccount } from "views/Bridge/hooks/useToAccount";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import type { ChainEcosystem } from "../../../constants/chains/types";
 import { getPriceImpact, PriceImpact } from "../utils/fees";
+import { BridgeButtonState } from "../components/Confirmation/ConfirmationButton";
 
 export type UseSwapAndBridgeReturn = {
   swapQuote: ReturnType<typeof useSwapQuote>["data"];

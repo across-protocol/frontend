@@ -44,8 +44,8 @@ export function useResolveFromBridgeAndSwapPagePayload(
     : "";
 
   const swapToken = useToken(swapTokenSymbol);
-  const outputToken = useToken(outputTokenSymbol);
-  const inputTokenFromHook = useToken(inputTokenSymbol);
+  const outputToken = useToken(outputTokenSymbol, toChainId);
+  const inputTokenFromHook = useToken(inputTokenSymbol, fromChainId);
 
   const {
     inputToken,

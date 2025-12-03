@@ -115,7 +115,6 @@ export type BridgeStrategyData =
       isUsdcToUsdc: boolean;
       isLargeDeposit: boolean;
       isFastCctpEligible: boolean;
-      isLineaSource: boolean;
       isInThreshold: boolean;
       isUsdtToUsdt: boolean;
       isMonadTransfer: boolean;
@@ -128,6 +127,7 @@ export type BridgeStrategyDataParams = {
   outputToken: Token;
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
+  includesActions?: boolean;
   recipient?: string;
   depositor: string;
   logger?: Logger;

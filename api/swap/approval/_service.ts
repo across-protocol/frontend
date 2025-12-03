@@ -91,6 +91,7 @@ export async function handleApprovalSwap(
     amountType,
     recipient,
     depositor,
+    includesActions: actions.length > 0,
     routingPreference,
   });
 

@@ -9,7 +9,6 @@ export const CCTP_SUPPORTED_CHAINS = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.BASE,
   CHAIN_IDs.HYPEREVM,
-  CHAIN_IDs.INK,
   CHAIN_IDs.MONAD,
   CHAIN_IDs.OPTIMISM,
   CHAIN_IDs.POLYGON,
@@ -34,6 +33,10 @@ export const CCTP_FINALITY_THRESHOLDS = {
   fast: 1000,
   standard: 2000,
 };
+
+// CCTP Across Finalizer address
+export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
+  "0x72adB07A487f38321b6665c02D289C413610B081";
 
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
