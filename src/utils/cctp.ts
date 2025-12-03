@@ -217,52 +217,10 @@ export function parseOutputAmountFromMintAndWithdrawLog(
 // ========================= SVM ======================== //
 // ====================================================== //
 
-// minimal idl for DepositForBurn and its internal type
-const TOKEN_MESSENGER_MINTER_V2_IDL = {
-  name: "token_messenger_minter",
-  events: [
-    {
-      name: "DepositForBurn",
-      fields: [
-        { name: "nonce", type: "u64", index: false },
-        { name: "burnToken", type: "publicKey", index: false },
-        { name: "amount", type: "u64", index: false },
-        { name: "depositor", type: "publicKey", index: false },
-        { name: "mintRecipient", type: "publicKey", index: false },
-        { name: "destinationDomain", type: "u32", index: false },
-        { name: "destinationTokenMessenger", type: "publicKey", index: false },
-        { name: "destinationCaller", type: "publicKey", index: false },
-      ],
-    },
-  ],
-  types: [
-    {
-      name: "DepositForBurn",
-      type: {
-        kind: "struct",
-        fields: [
-          { name: "nonce", type: "u64" },
-          { name: "burnToken", type: "publicKey" },
-          { name: "amount", type: "u64" },
-          { name: "depositor", type: "publicKey" },
-          { name: "mintRecipient", type: "publicKey" },
-          { name: "destinationDomain", type: "u32" },
-          { name: "destinationTokenMessenger", type: "publicKey" },
-          { name: "destinationCaller", type: "publicKey" },
-        ],
-      },
-    },
-  ],
-} as const;
-
 // events client for token messenger
-export class SvmCctpEventsClient {
-  private eventsClient: SvmCpiEventsClient;
-  private cctpEventAuthority: Address;
-
-  constructor(eventsClient: SvmCpiEventsClient, cctpEventAuthority: Address) {
-    this.eventsClient = eventsClient;
-    this.cctpEventAuthority = cctpEventAuthority;
+export class SvmCctpEventsClient extends SvmCpiEventsClient {
+  constructor(...params: ConstructorParameters<typeof SvmCpiEventsClient>) {
+    super(...params);
   }
 
   static async create() {
@@ -270,27 +228,25 @@ export class SvmCctpEventsClient {
       hubPoolChainId === 1 ? CHAIN_IDs.SOLANA : CHAIN_IDs.SOLANA_DEVNET;
 
     const rpc = getSVMRpc(chainId);
-    // get address
-    const tokenMessengerAddress =
+
+    const tokenMessengerMinterAddress =
       TokenMessengerMinterV2Client.TOKEN_MESSENGER_MINTER_V2_PROGRAM_ADDRESS; // "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe"
 
-    const [eventAuthorityPda] = await getProgramDerivedAddress({
-      programAddress: tokenMessengerAddress,
+    const [eventAuthority] = await getProgramDerivedAddress({
+      programAddress: tokenMessengerMinterAddress,
       seeds: ["__event_authority"],
     });
 
-    // Create events client for TokenMessenger program
-    const eventsClient = await SvmCpiEventsClient.createFor(
+    return new SvmCctpEventsClient(
       rpc,
-      tokenMessengerAddress,
+      tokenMessengerMinterAddress,
+      eventAuthority,
       TokenMessengerMinterV2Idl
     );
-
-    return new SvmCctpEventsClient(eventsClient, eventAuthorityPda);
   }
 
   async queryDepositForBurnEvents(fromSlot?: bigint, toSlot?: bigint) {
-    return await this.eventsClient.queryEvents(
+    return await this.queryEvents(
       "DepositForBurn" as any, // Maybe override queryEvents method
       fromSlot,
       toSlot,
@@ -299,8 +255,7 @@ export class SvmCctpEventsClient {
   }
 
   async getDepositForBurnFromSignature(signature: Signature) {
-    const events = await this.eventsClient.readEventsFromSignature(signature);
-    console.log("all events", events);
+    const events = await this.readEventsFromSignature(signature);
     return events.filter((event) => event.name === "DepositForBurn");
   }
 }
