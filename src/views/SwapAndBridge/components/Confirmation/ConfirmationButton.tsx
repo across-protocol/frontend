@@ -17,7 +17,7 @@ import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
+import { formatFeeUsd, getSwapQuoteFees, PriceImpact } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
 
@@ -228,6 +228,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   const state = buttonState;
 
+  const provider = getProviderFromQuote(swapQuote);
+  const isSponsoredIntent = provider === "sponsored-intent";
+
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
 
@@ -262,14 +265,18 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     const showSwapImpact =
       priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
 
+    // show fees as 0 for OFT until we have designs to show fees in native tokens
+    const showZeroFee = provider === "oft";
+    const zeroFeesFormatted = formatFeeUsd("0");
+
     return {
-      totalFee: totalFeeFormatted,
+      totalFee: showZeroFee ? zeroFeesFormatted : totalFeeFormatted,
       time,
-      bridgeFee: bridgeFeeFormatted,
+      bridgeFee: showZeroFee ? zeroFeesFormatted : bridgeFeeFormatted,
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, inputToken, outputToken, amount]);
+  }, [swapQuote, inputToken, outputToken, amount, provider]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
@@ -280,8 +287,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   }, [swapQuote]);
 
-  const provider = getProviderFromQuote(swapQuote);
-  const isSponsoredIntent = provider === "sponsored-intent";
   // Render unified group driven by state
   const content = (
     <>
