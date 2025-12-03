@@ -185,6 +185,7 @@ const chainsWithUsdt0Enabled = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
   CHAIN_IDs.MONAD,
+  CHAIN_IDs.UNICHAIN,
 ];
 
 // USDT0 logo URL (matches frontend logo)
