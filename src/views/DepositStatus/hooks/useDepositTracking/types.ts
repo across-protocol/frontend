@@ -1,4 +1,4 @@
-import {
+import type {
   DepositEventFromSignature,
   FillEventFromSignature,
 } from "@across-protocol/sdk/dist/esm/arch/svm";
@@ -79,6 +79,18 @@ export type DepositStatusResponse =
       swapOutputToken: string | undefined;
       swapOutputAmount: string | undefined;
     };
+
+export type DepositForBurnEvent = {
+  amount: bigint;
+  burnToken: string; // base58 signature
+  depositor: string; // base58 signature
+  destinationCaller: string; // base58 signature (20 byte evm address)
+  destinationDomain: number; // (int) cctp domain
+  destinationTokenMessenger: string; // base58 signature (20 byte evm address)
+  maxFee: bigint;
+  minFinalityThreshold: number;
+  mintRecipient: string; // base58 account (20 byte evm address)
+};
 
 /**
  * Common chain strategy interface

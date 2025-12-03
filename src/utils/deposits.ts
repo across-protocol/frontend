@@ -12,7 +12,8 @@ import {
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
-
+import { Signature } from "@solana/kit";
+import { getSVMRpc, SvmCpiEventsClient } from "utils";
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
     super(
@@ -178,4 +179,26 @@ export async function getDepositByTxHash(
     parsedDepositLog,
     depositTimestamp: block.timestamp,
   };
+}
+
+// ====================================================== //
+// ========================= SVM ======================== //
+// ====================================================== //
+
+export async function getDepositBySignatureSVM(args: {
+  signature: Signature;
+  chainId: number;
+}): Promise<DepositData | undefined> {
+  const { signature, chainId } = args;
+
+  const rpc = getSVMRpc(chainId);
+
+  const eventsClient = await SvmCpiEventsClient.create(rpc);
+
+  const depositEventsAtSignature =
+    await eventsClient.getDepositEventsFromSignature(chainId, signature);
+
+  const tx = depositEventsAtSignature?.[0];
+
+  return tx ? (tx as DepositData) : undefined;
 }
