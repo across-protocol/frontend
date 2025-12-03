@@ -174,7 +174,7 @@ describe("#getBridgeStrategyData()", () => {
       });
 
       expect(result?.isInThreshold).toBe(true);
-      expect(result?.isLargeDeposit).toBe(false);
+      expect(result?.isLargeCctpDeposit).toBe(false);
     });
 
     test("should identify deposits exceeding 10K threshold", async () => {
@@ -188,11 +188,11 @@ describe("#getBridgeStrategyData()", () => {
       });
 
       expect(result?.isInThreshold).toBe(false);
-      expect(result?.isLargeDeposit).toBe(false);
+      expect(result?.isLargeCctpDeposit).toBe(false);
     });
 
-    test("should identify large deposits exceeding 1M threshold", async () => {
-      const amount = BigNumber.from("2000000000000"); // 2M USDC
+    test("should identify large deposits exceeding 10M threshold", async () => {
+      const amount = BigNumber.from("10000000000001"); // 10.000001M USDC
 
       const result = await getBridgeStrategyData({
         ...baseParams,
@@ -202,7 +202,7 @@ describe("#getBridgeStrategyData()", () => {
       });
 
       expect(result?.isInThreshold).toBe(false);
-      expect(result?.isLargeDeposit).toBe(true);
+      expect(result?.isLargeCctpDeposit).toBe(true);
     });
 
     describe("Instant fill checks", () => {

@@ -24,7 +24,7 @@ const mockBridgeStrategyData = (
   canFillInstantly: false,
   isUtilizationHigh: false,
   isUsdcToUsdc: false,
-  isLargeDeposit: false,
+  isLargeCctpDeposit: false,
   isFastCctpEligible: false,
   isInThreshold: false,
   isUsdtToUsdt: false,
@@ -327,11 +327,11 @@ describe("api/_bridges/index", () => {
         expect(strategy.name).toBe("across");
       });
 
-      test("should use CCTP for Fast CCTP eligible large deposits", async () => {
+      test("should use Across for fast CCTP eligible large deposits", async () => {
         const mockData = mockBridgeStrategyData({
           isFastCctpEligible: true,
           isInThreshold: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
         jest
@@ -346,7 +346,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdcArbitrum,
         });
 
-        expect(strategy.name).toBe("cctp");
+        expect(strategy.name).toBe("across");
       });
     });
 
@@ -371,10 +371,10 @@ describe("api/_bridges/index", () => {
         expect(strategy.name).toBe("across");
       });
 
-      test("should use CCTP when cannot fill instantly and is large deposit (USDC)", async () => {
+      test("should use Across when cannot fill instantly and is large deposit (USDC)", async () => {
         const mockData = mockBridgeStrategyData({
           canFillInstantly: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
         jest
@@ -389,13 +389,14 @@ describe("api/_bridges/index", () => {
           outputToken: usdcArbitrum,
         });
 
-        expect(strategy.name).toBe("cctp");
+        expect(strategy.name).toBe("across");
       });
 
       test("should use OFT when cannot fill instantly and is large deposit (USDT)", async () => {
         const mockData = mockBridgeStrategyData({
           canFillInstantly: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
+          isUsdcToUsdc: false,
           isUsdtToUsdt: true,
         });
         jest
@@ -413,10 +414,10 @@ describe("api/_bridges/index", () => {
         expect(strategy.name).toBe("oft");
       });
 
-      test("should use Across when cannot fill instantly but is not large deposit", async () => {
+      test("should use CCTP when cannot fill instantly but is not large USDC deposit", async () => {
         const mockData = mockBridgeStrategyData({
           canFillInstantly: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isUsdcToUsdc: true,
         });
         jest
@@ -431,7 +432,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdcArbitrum,
         });
 
-        expect(strategy.name).toBe("across");
+        expect(strategy.name).toBe("cctp");
       });
     });
 
