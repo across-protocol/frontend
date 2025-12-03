@@ -271,7 +271,7 @@ describe("calculateSwapFees", () => {
       suggestedFees: {} as any,
       fees: {
         amount: utils.parseUnits("0.005", bridgeFeeTokenNative.decimals), // 0.005 ETH = $10
-        pct: utils.parseEther("0.01"), // 10 / 1000 = 1%
+        pct: utils.parseEther("0"),
         token: bridgeFeeTokenNative,
       },
     };
