@@ -7,7 +7,10 @@ import {
   BridgeStrategyData,
   BridgeStrategyDataParams,
 } from "../_bridges/types";
-import { CCTP_FILL_TIME_ESTIMATES } from "./cctp/utils/fill-times";
+import {
+  CCTP_FILL_TIME_ESTIMATES,
+  getTransferMode,
+} from "./cctp/utils/fill-times";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 // https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
@@ -105,8 +108,21 @@ export async function getBridgeStrategyData({
       Number
     );
     const isFastCctpChain = fastCctpChains.includes(inputToken.chainId);
-    const isFastCctpEligible =
+    let isFastCctpEligible =
       isFastCctpChain && depositAmountUsd > ACROSS_THRESHOLD;
+
+    // For Linea origin, verify that fast mode would actually be available. If not, don't use CCTP
+    if (inputToken.chainId === CHAIN_IDs.LINEA && isFastCctpEligible) {
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        "fast",
+        amountInInputTokenDecimals,
+        inputToken.decimals
+      );
+      if (transferMode === "standard") {
+        isFastCctpEligible = false;
+      }
+    }
 
     const isUsdtToUsdt =
       inputToken.symbol === "USDT" && outputToken.symbol === "USDT";
