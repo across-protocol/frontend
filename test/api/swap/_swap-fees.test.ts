@@ -281,7 +281,7 @@ describe("calculateSwapFees", () => {
       outputToken.decimals
     );
 
-    // Expected output amount sans app fees: 995 USDC
+    // Expected output amount sans app fees: 1000 USDC
     const expectedOutputAmountSansAppFees = minOutputAmountSansAppFees;
 
     const result = await calculateSwapFees({
