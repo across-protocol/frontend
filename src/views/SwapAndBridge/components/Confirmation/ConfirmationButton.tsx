@@ -228,9 +228,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   const state = buttonState;
 
-  const provider = getProviderFromQuote(swapQuote);
-  const isSponsoredIntent = provider === "sponsored-intent";
-
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
 
@@ -265,18 +262,14 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     const showSwapImpact =
       priceImpact?.priceImpact === 0 ? true : Number(swapImpactUsd) > 0;
 
-    // show fees as 0 for OFT until we have designs to show fees in native tokens
-    const showZeroFee = provider === "oft";
-    const zeroFeesFormatted = formatFeeUsd("0");
-
     return {
-      totalFee: showZeroFee ? zeroFeesFormatted : totalFeeFormatted,
+      totalFee: totalFeeFormatted,
       time,
-      bridgeFee: showZeroFee ? zeroFeesFormatted : bridgeFeeFormatted,
+      bridgeFee: bridgeFeeFormatted,
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, inputToken, outputToken, amount, provider]);
+  }, [swapQuote, inputToken, outputToken, amount]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
@@ -287,6 +280,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     }
   }, [swapQuote]);
 
+  const provider = getProviderFromQuote(swapQuote);
+  const isSponsoredIntent = provider === "sponsored-intent";
   // Render unified group driven by state
   const content = (
     <>
