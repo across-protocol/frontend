@@ -313,7 +313,7 @@ function replaceUsdtOnNonAcrossChains(
         address: "0x9151434b16b9763660705744891fA906F660EcC5",
         name: "USDT0",
         symbol: "USDT0",
-        decimals: 18,
+        decimals: 6,
         logoUrl: USDT0_LOGO_URL,
         priceUsd:
           pricesForLifiTokens[CHAIN_IDs.UNICHAIN]?.[token.address] || null,
