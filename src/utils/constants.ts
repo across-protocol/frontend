@@ -3,10 +3,13 @@ import { BigNumber, ethers, providers } from "ethers";
 
 import {
   CHAIN_IDs,
-  OFT_NO_EID,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
+  OFT_NO_EID,
 } from "@across-protocol/constants";
+
+export { CHAIN_IDs } from "@across-protocol/constants";
+
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
