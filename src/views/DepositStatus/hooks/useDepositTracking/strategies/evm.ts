@@ -145,14 +145,13 @@ export class EVMStrategy implements IChainStrategy {
    * @returns Fill transaction hash or null
    */
   async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
-    const { originChainId, depositId } = depositInfo.depositLog;
+    const { originChainId } = depositInfo.depositLog;
 
     try {
       const { data } = await axios.get<DepositStatusResponse>(
         `${indexerApiBaseUrl}/deposit/status`,
         {
           params: {
-            depositId: depositId.toString(),
             originChainId,
             depositTxHash: depositInfo.depositTxHash,
           },

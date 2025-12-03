@@ -15,7 +15,7 @@ import {
   TokenMessengerMinterV2Idl,
 } from "@across-protocol/contracts";
 
-import type { Address, Signature } from "@solana/kit";
+import type { Signature } from "@solana/kit";
 import { getProgramDerivedAddress } from "@solana/kit";
 import { getSVMRpc } from "./providers";
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
@@ -259,12 +259,13 @@ export class SvmCctpEventsClient extends SvmCpiEventsClient {
   }
 }
 
-export async function getDepositForBurnBySignatureSVM(args: {
+export async function getDepositForBurnBySignatureSVM({
+  signature,
+  chainId,
+}: {
   signature: Signature;
   chainId: number;
 }) {
-  const { signature, chainId } = args;
-
   // init events client
   const eventsClient = await SvmCctpEventsClient.create();
   const rpc = getSVMRpc(chainId);
