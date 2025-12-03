@@ -155,7 +155,9 @@ export function getCctpBridgeStrategy(
       let maxFee = BigNumber.from(0);
       const transferMode = await getTransferMode(
         inputToken.chainId,
-        requestedTransferMode
+        requestedTransferMode,
+        exactInputAmount,
+        inputToken.decimals
       );
 
       if (transferMode === "fast") {
@@ -217,7 +219,9 @@ export function getCctpBridgeStrategy(
 
       const transferMode = await getTransferMode(
         inputToken.chainId,
-        requestedTransferMode
+        requestedTransferMode,
+        inputAmount,
+        inputToken.decimals
       );
 
       if (transferMode === "fast") {
