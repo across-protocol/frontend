@@ -17,7 +17,7 @@ import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { formatFeeUsd, getSwapQuoteFees, PriceImpact } from "../../utils/fees";
+import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
 
