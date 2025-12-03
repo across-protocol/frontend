@@ -19,10 +19,10 @@ describe("calculateSwapFees", () => {
     chainId: CHAIN_IDs.OPTIMISM,
   };
 
-  const bridgeFeeToken = {
+  const bridgeFeeTokenNative = {
     address: constants.AddressZero,
-    symbol: TOKEN_SYMBOLS_MAP.ETH.symbol,
-    decimals: TOKEN_SYMBOLS_MAP.ETH.decimals,
+    symbol: "ETH",
+    decimals: 18,
     chainId: CHAIN_IDs.MAINNET,
   };
 
@@ -90,8 +90,8 @@ describe("calculateSwapFees", () => {
       provider: "across" as const,
       suggestedFees: {} as any,
       fees: {
-        amount: utils.parseUnits("4.5", inputToken.decimals),
-        pct: utils.parseEther("0.0045"),
+        amount: utils.parseUnits("5", inputToken.decimals),
+        pct: utils.parseEther("0.005"),
         token: inputToken,
         details: {
           type: FeeDetailsType.ACROSS as const,
@@ -106,8 +106,8 @@ describe("calculateSwapFees", () => {
             token: inputToken,
           },
           lp: {
-            amount: utils.parseUnits("1.5", inputToken.decimals),
-            pct: utils.parseEther("0.0015"),
+            amount: utils.parseUnits("2", inputToken.decimals),
+            pct: utils.parseEther("0.002"),
             token: inputToken,
           },
         },
@@ -181,20 +181,20 @@ describe("calculateSwapFees", () => {
       result?.total.details?.bridge?.details?.relayerCapital?.token
     ).toEqual(inputToken);
 
-    // Verify LP fee (1.5 USDC = $1.5)
+    // Verify LP fee (2 USDC = $2)
     expect(result?.total.details?.bridge?.details?.lp?.amount).toEqual(
       bridgeQuote.fees.details.lp.amount
     );
-    expect(result?.total.details?.bridge?.details?.lp?.amountUsd).toBe("1.5");
+    expect(result?.total.details?.bridge?.details?.lp?.amountUsd).toBe("2.0");
     expect(result?.total.details?.bridge?.details?.lp?.token).toEqual(
       inputToken
     );
 
-    // Verify relayer total fee (4.5 USDC = $4.5)
+    // Verify relayer total fee (5 USDC = $5)
     expect(result?.total.details?.bridge?.amount).toEqual(
       bridgeQuote.fees.amount
     );
-    expect(result?.total.details?.bridge?.amountUsd).toBe("4.5");
+    expect(result?.total.details?.bridge?.amountUsd).toBe("5.0");
     expect(result?.total.details?.bridge?.token).toEqual(inputToken);
 
     // Verify app fee (0 in this test)
@@ -217,9 +217,9 @@ describe("calculateSwapFees", () => {
       provider: "across" as const,
       suggestedFees: {} as any,
       fees: {
-        amount: utils.parseUnits("0.005", bridgeFeeToken.decimals), // 0.005 ETH = $10
-        pct: utils.parseEther("0.01"), // 10 / 1000 = 1%
-        token: bridgeFeeToken,
+        amount: utils.parseUnits("1", inputToken.decimals),
+        pct: utils.parseEther("0.01"),
+        token: inputToken,
       },
     };
 
@@ -252,8 +252,61 @@ describe("calculateSwapFees", () => {
     expect(result?.total.details?.bridge?.amount).toEqual(
       bridgeQuote.fees.amount
     );
+    expect(result?.total.details?.bridge?.amountUsd).toBe("1.0");
+    expect(result?.total.details?.bridge?.token).toEqual(inputToken);
+
+    verifyFeeDetailsAddUp(result, false);
+  });
+
+  test("should calculate fees for bridge-only route via oft", async () => {
+    // Bridge quote with fees
+    const bridgeQuote = {
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount: utils.parseUnits("1000", outputToken.decimals),
+      minOutputAmount: utils.parseUnits("1000", outputToken.decimals),
+      estimatedFillTimeSec: 60,
+      provider: "oft" as const,
+      suggestedFees: {} as any,
+      fees: {
+        amount: utils.parseUnits("0.005", bridgeFeeTokenNative.decimals), // 0.005 ETH = $10
+        pct: utils.parseEther("0.01"), // 10 / 1000 = 1%
+        token: bridgeFeeTokenNative,
+      },
+    };
+
+    const minOutputAmountSansAppFees = utils.parseUnits(
+      "1000",
+      outputToken.decimals
+    );
+
+    // Expected output amount sans app fees: 995 USDC
+    const expectedOutputAmountSansAppFees = minOutputAmountSansAppFees;
+
+    const result = await calculateSwapFees({
+      inputAmount,
+      bridgeQuote,
+      originTxGas,
+      originTxGasPrice,
+      inputTokenPriceUsd,
+      outputTokenPriceUsd,
+      originNativePriceUsd,
+      destinationNativePriceUsd,
+      bridgeQuoteInputTokenPriceUsd,
+      appFeeTokenPriceUsd,
+      minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
+      originChainId: CHAIN_IDs.MAINNET,
+      destinationChainId: CHAIN_IDs.OPTIMISM,
+      logger,
+    });
+
+    expect(result?.total.details?.bridge?.amount).toEqual(
+      bridgeQuote.fees.amount
+    );
     expect(result?.total.details?.bridge?.amountUsd).toBe("10.0");
-    expect(result?.total.details?.bridge?.token).toEqual(bridgeFeeToken);
+    expect(result?.total.details?.bridge?.token).toEqual(bridgeFeeTokenNative);
 
     verifyFeeDetailsAddUp(result, false);
   });
