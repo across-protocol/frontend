@@ -45,13 +45,6 @@ export const TOKEN_SYMBOLS_MAP = {
     },
     coingeckoId: "usdh-2",
   },
-  USDT: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDT,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
-      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
-    },
-  },
 };
 export const CHAINS = constants.PUBLIC_NETWORKS;
 export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
