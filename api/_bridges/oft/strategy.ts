@@ -49,7 +49,7 @@ const capabilities: BridgeCapabilities = {
 
 // Temporarily disabled origin chain IDs for USDT0 transfers.
 // In the future we'll probably want separate lists for each token.
-const TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS = [
+export const TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS = [
   CHAIN_IDs.PLASMA,
   CHAIN_IDs.HYPEREVM,
 ];
