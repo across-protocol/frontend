@@ -78,6 +78,11 @@ export async function getBridgeStrategy({
     return fromToChainOverride;
   }
 
+  // Always use Across when actions are present
+  if (includesActions) {
+    return getAcrossBridgeStrategy();
+  }
+
   const supportedBridgeStrategies = getSupportedBridgeStrategies({
     inputToken,
     outputToken,
@@ -101,7 +106,6 @@ export async function getBridgeStrategy({
       amountType,
       recipient,
       depositor,
-      includesActions,
     });
   }
   return getAcrossBridgeStrategy();
@@ -145,7 +149,6 @@ async function routeMintAndBurnStrategy({
   amountType,
   recipient,
   depositor,
-  includesActions,
 }: BridgeStrategyDataParams): Promise<BridgeStrategy> {
   const bridgeStrategyData = await getBridgeStrategyData({
     inputToken,
@@ -158,11 +161,6 @@ async function routeMintAndBurnStrategy({
 
   if (!bridgeStrategyData) {
     return bridgeStrategies.default;
-  }
-
-  // Always use Across when actions are present
-  if (includesActions) {
-    return getAcrossBridgeStrategy();
   }
 
   if (bridgeStrategyData.isMonadTransfer) {
