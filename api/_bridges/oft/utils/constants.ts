@@ -62,15 +62,16 @@ export const OFT_SHARED_DECIMALS: Record<string, number> = {
 export const OFT_ORIGIN_CONFIRMATIONS: Record<number, number> = {
   [CHAIN_IDs.MAINNET]: 15,
   [CHAIN_IDs.ARBITRUM]: 20,
-  [CHAIN_IDs.POLYGON]: 512,
-  [CHAIN_IDs.OPTIMISM]: 20,
-  [CHAIN_IDs.UNICHAIN]: 20,
-  [CHAIN_IDs.INK]: 20,
-  [CHAIN_IDs.HYPEREVM]: 1,
-  [CHAIN_IDs.PLASMA]: 5,
   [CHAIN_IDs.BASE]: 10,
   [CHAIN_IDs.BSC]: 20,
+  [CHAIN_IDs.HYPEREVM]: 43200,
+  [CHAIN_IDs.INK]: 20,
+  [CHAIN_IDs.MONAD]: 1200,
+  [CHAIN_IDs.OPTIMISM]: 20,
+  [CHAIN_IDs.PLASMA]: 3600,
+  [CHAIN_IDs.POLYGON]: 512,
   [CHAIN_IDs.SONEIUM]: 20,
+  [CHAIN_IDs.UNICHAIN]: 20,
 };
 
 // Default values for OFT fill time calculation
