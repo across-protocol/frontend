@@ -48,7 +48,7 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
-  getCctpBridgeStrategy("fast"),
+  getCctpBridgeStrategy(),
   getOftBridgeStrategy(),
 ];
 
@@ -189,19 +189,22 @@ async function routeMintAndBurnStrategy({
     if (bridgeStrategyData.isInThreshold) {
       return getAcrossBridgeStrategy();
     }
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    } else {
+    if (bridgeStrategyData.isLargeCctpDeposit) {
       return getAcrossBridgeStrategy();
+    } else {
+      return getBurnAndMintStrategy(bridgeStrategyData);
     }
   }
   if (bridgeStrategyData.canFillInstantly) {
     return getAcrossBridgeStrategy();
   } else {
-    if (bridgeStrategyData.isLargeDeposit) {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    } else {
+    if (
+      bridgeStrategyData.isUsdcToUsdc &&
+      bridgeStrategyData.isLargeCctpDeposit
+    ) {
       return getAcrossBridgeStrategy();
+    } else {
+      return getBurnAndMintStrategy(bridgeStrategyData);
     }
   }
 }
@@ -211,7 +214,7 @@ function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
     return getAcrossBridgeStrategy();
   }
   if (bridgeStrategyData.isUsdcToUsdc) {
-    return getCctpBridgeStrategy("fast");
+    return getCctpBridgeStrategy();
   }
   if (bridgeStrategyData.isUsdtToUsdt) {
     return getOftBridgeStrategy();

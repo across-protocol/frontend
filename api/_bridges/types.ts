@@ -113,7 +113,7 @@ export type BridgeStrategyData =
       canFillInstantly: boolean;
       isUtilizationHigh: boolean;
       isUsdcToUsdc: boolean;
-      isLargeDeposit: boolean;
+      isLargeCctpDeposit: boolean;
       isFastCctpEligible: boolean;
       isInThreshold: boolean;
       isUsdtToUsdt: boolean;
