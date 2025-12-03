@@ -55,40 +55,32 @@ export const isTransferModeSupported = (
 
 /**
  * Determines the appropriate CCTP transfer mode (standard or fast) for a given transfer.
+ * Docs: https://developers.circle.com/cctp#fast-transfer
  *
- * Returns "standard" mode if:
- * - The requested mode is not supported on the origin chain.
- * - Fast mode is requested with allowance checking enabled, and the transfer amount exceeds Circle's fast burn allowance.
- *    (See: https://developers.circle.com/cctp#fast-transfer)
- * - Allowance checking is enabled and the fast burn allowance API call fails.
+ * Falls back to "standard" mode if:
+ * - The requested mode is not supported on the origin chain
+ * - For large transfers (≥ $1M): fast mode is requested but the amount exceeds Circle's available fast burn allowance
+ * - For large transfers (≥ $1M): the fast burn allowance API call fails
  *
  * @param originChainId - The origin chain ID
- * @param requestedTransferMode - The desired transfer mode.
- * @param checkAllowance - Whether to check fast burn allowance limit. Defaults to false since allowance is rarely exceeded.
- * @param amount - The transfer amount in token units. Required when checkAllowance is true.
- * @param tokenDecimals - The number of decimals for the amount token. Required when checkAllowance is true.
- * @returns The transfer mode to use.
- *
+ * @param requestedTransferMode - The desired transfer mode
+ * @param amount - The transfer amount in token units
+ * @param tokenDecimals - The number of decimals for the transfer token
+ * @returns The transfer mode to use ("standard" or "fast")
  */
 export const getTransferMode = async (
   originChainId: number,
   requestedTransferMode: "standard" | "fast",
-  checkAllowance = false,
-  amount?: BigNumber,
-  tokenDecimals?: number
+  amount: BigNumber,
+  tokenDecimals: number
 ): Promise<"standard" | "fast"> => {
   if (!isTransferModeSupported(originChainId, requestedTransferMode)) {
     return "standard";
   }
 
-  // If fast mode is requested, check if the amount is within allowance
-  if (requestedTransferMode === "fast" && checkAllowance) {
-    if (!amount || tokenDecimals === undefined) {
-      throw new Error(
-        "amount and tokenDecimals are required when checkAllowance is true"
-      );
-    }
-
+  // If fast mode is requested and is a large transfer (≥ $1M), check if the amount is within allowance
+  const allowanceCheckMinAmount = utils.parseUnits("1000000", tokenDecimals);
+  if (requestedTransferMode === "fast" && amount.gt(allowanceCheckMinAmount)) {
     try {
       const isMainnet = sdk.utils.chainIsProd(originChainId);
       const fastAllowance = await sdk.utils.getV2FastBurnAllowance(isMainnet);
