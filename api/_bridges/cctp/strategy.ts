@@ -1,4 +1,4 @@
-import { BigNumber, ethers, utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { TokenMessengerMinterV2Client } from "@across-protocol/contracts";
 import {
