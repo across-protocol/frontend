@@ -7,10 +7,16 @@ import {
 import { Token } from "../../../api/_dexes/types";
 import { LimitsResponse } from "../../../api/_types";
 import { getCachedLimits } from "../../../api/_utils";
+import { getTransferMode } from "../../../api/_bridges/cctp/utils/fill-times";
 
 jest.mock("../../../api/_utils", () => ({
   ...jest.requireActual("../../../api/_utils"),
   getCachedLimits: jest.fn(),
+}));
+
+jest.mock("../../../api/_bridges/cctp/utils/fill-times", () => ({
+  ...jest.requireActual("../../../api/_bridges/cctp/utils/fill-times"),
+  getTransferMode: jest.fn(),
 }));
 
 // Helper function to create a token on a specific chain
@@ -66,6 +72,7 @@ const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
 const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
+const usdcLinea = createToken("USDC", CHAIN_IDs.LINEA);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
 const wethOptimism = createToken("WETH", CHAIN_IDs.OPTIMISM);
@@ -373,6 +380,87 @@ describe("#getBridgeStrategyData()", () => {
         });
 
         expect(result?.isWithinMonadLimit).toBe(false);
+      });
+
+      describe("Linea fast mode eligibility", () => {
+        beforeEach(() => {
+          // Reset getTransferMode mock before each test
+          (getTransferMode as jest.Mock).mockReset();
+        });
+
+        test("should mark Linea as Fast CCTP eligible when fast mode is available", async () => {
+          const amount = BigNumber.from("15000000000"); // 15,000 USDC
+          // Mock getTransferMode to return "fast" mode
+          (getTransferMode as jest.Mock).mockResolvedValue("fast");
+
+          const result = await getBridgeStrategyData({
+            ...baseParams,
+            inputToken: usdcLinea,
+            outputToken: usdcArbitrum,
+            amount,
+          });
+
+          expect(result?.isFastCctpEligible).toBe(true);
+          expect(getTransferMode).toHaveBeenCalledWith(
+            CHAIN_IDs.LINEA,
+            "fast",
+            amount,
+            usdcLinea.decimals
+          );
+        });
+
+        test("should not mark Linea as Fast CCTP eligible when fast mode is unavailable", async () => {
+          const amount = BigNumber.from("15000000000"); // 15,000 USDC
+          // Mock getTransferMode to return "standard" mode (fast mode not available)
+          (getTransferMode as jest.Mock).mockResolvedValue("standard");
+
+          const result = await getBridgeStrategyData({
+            ...baseParams,
+            inputToken: usdcLinea,
+            outputToken: usdcArbitrum,
+            amount,
+          });
+
+          expect(result?.isFastCctpEligible).toBe(false);
+          expect(getTransferMode).toHaveBeenCalledWith(
+            CHAIN_IDs.LINEA,
+            "fast",
+            amount,
+            usdcLinea.decimals
+          );
+        });
+
+        test("should not call getTransferMode for Linea when amount is below threshold", async () => {
+          const amount = BigNumber.from("5000000"); // 5 USDC (below 10K threshold)
+
+          const result = await getBridgeStrategyData({
+            ...baseParams,
+            inputToken: usdcLinea,
+            outputToken: usdcArbitrum,
+            amount,
+          });
+
+          // Should not be marked as eligible because amount is below threshold
+          expect(result?.isFastCctpEligible).toBe(false);
+          // getTransferMode should not be called since not initially eligible
+          expect(getTransferMode).not.toHaveBeenCalled();
+        });
+
+        test("should not call getTransferMode for non-Linea chains", async () => {
+          const amount = BigNumber.from("15000000000"); // 15,000 USDC
+
+          const result = await getBridgeStrategyData({
+            ...baseParams,
+            inputToken: usdcArbitrum,
+            outputToken: usdcOptimism,
+            amount,
+          });
+
+          // Arbitrum should be marked as eligible without special checks
+          expect(result?.isFastCctpEligible).toBe(true);
+          // getTransferMode should not be called for non-Linea chains
+          expect(getTransferMode).not.toHaveBeenCalled();
+        });
       });
     });
 
