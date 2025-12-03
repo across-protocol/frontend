@@ -548,8 +548,7 @@ function getTotalFeeUsd(params: {
     return 0;
   }
 
-  // OFT bridge fees are paid in native tokens and not deducted from the input amount.
-  if (bridgeProvider === "oft") {
+  if (bridgeProvider === "oft" || bridgeProvider === "cctp") {
     return bridgeFeesUsd;
   }
 
