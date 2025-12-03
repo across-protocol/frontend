@@ -178,6 +178,11 @@ export async function calculateSwapFees(params: {
       parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
       inputTokenPriceUsd;
 
+    // OFT bridge fees are paid in native tokens and not deducted from the input amount.
+    // Therefore, the pct calculation should not include the input amount.
+    const inputAmountUsdForPctCalc =
+      bridgeProvider === "oft" ? 0 : inputAmountUsd;
+
     const originGas =
       originTxGas && originTxGasPrice
         ? originTxGas.mul(originTxGasPrice)
@@ -206,7 +211,7 @@ export async function calculateSwapFees(params: {
       amount: appFeeAmount,
       amountUsd: appFeeUsd,
       token: appFeeToken,
-      inputAmountUsd,
+      inputAmountUsd: inputAmountUsdForPctCalc,
     });
 
     // Overall bridge fees, can be 'across' or other bridge provider incurred fees
@@ -226,7 +231,7 @@ export async function calculateSwapFees(params: {
     const bridgeFeeDetails = formatBridgeFeesDetails({
       bridgeFees,
       bridgeQuoteInputTokenPriceUsd,
-      inputAmountUsd,
+      inputAmountUsd: inputAmountUsdForPctCalc,
       destinationNativePriceUsd,
       destinationGasToken,
     });
@@ -251,7 +256,7 @@ export async function calculateSwapFees(params: {
     const maxTotalFeeUsd = getTotalFeeUsd({
       bridgeProvider,
       bridgeFeesUsd,
-      inputAmountUsd,
+      inputAmountUsd: inputAmountUsdForPctCalc,
       outputAmountSansAppFeesUsd: outputMinAmountSansAppFeesUsd,
     });
     const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
@@ -269,7 +274,7 @@ export async function calculateSwapFees(params: {
       amount: maxSwapImpactAmount,
       amountUsd: maxSwapImpactUsd,
       token: inputToken,
-      inputAmountUsd,
+      inputAmountUsd: inputAmountUsdForPctCalc,
     });
 
     // Calculate `totalFee` and `swapImpact`
@@ -302,7 +307,7 @@ export async function calculateSwapFees(params: {
       amount: swapImpactAmount,
       amountUsd: swapImpactUsd,
       token: inputToken,
-      inputAmountUsd,
+      inputAmountUsd: inputAmountUsdForPctCalc,
     });
 
     // Format total fee breakdown details
@@ -321,10 +326,6 @@ export async function calculateSwapFees(params: {
       bridge: bridgeFeeComponent,
     };
 
-    // OFT bridge fees are paid in native tokens and not deducted from the input amount.
-    // Therefore, the pct calculation should not include the input amount.
-    const inputAmountUsdForPctCalc =
-      bridgeProvider === "oft" ? 0 : inputAmountUsd;
     return {
       total: {
         ...formatFeeComponent({
