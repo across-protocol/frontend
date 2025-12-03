@@ -4,8 +4,22 @@ import {
   toAddressType,
   getCctpDestinationChainFromDomain,
   chainIsProd,
+  SvmCpiEventsClient,
 } from "./sdk";
-import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types";
+import {
+  DepositData,
+  DepositForBurnEvent,
+} from "views/DepositStatus/hooks/useDepositTracking/types";
+import {
+  TokenMessengerMinterV2Client,
+  TokenMessengerMinterV2Idl,
+} from "@across-protocol/contracts";
+
+import type { Signature } from "@solana/kit";
+import { getProgramDerivedAddress } from "@solana/kit";
+import { getSVMRpc } from "./providers";
+import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
+import { hubPoolChainId } from "./constants";
 
 const CCTP_ABI = [
   {
@@ -196,4 +210,113 @@ export function parseOutputAmountFromMintAndWithdrawLog(
   }
 
   return BigNumber.from(mintAndWithdrawLog.args.amount);
+}
+
+// ====================================================== //
+// ========================= SVM ======================== //
+// ====================================================== //
+
+// events client for token messenger
+export class SvmCctpEventsClient extends SvmCpiEventsClient {
+  constructor(...params: ConstructorParameters<typeof SvmCpiEventsClient>) {
+    super(...params);
+  }
+
+  static async create() {
+    const chainId =
+      hubPoolChainId === 1 ? CHAIN_IDs.SOLANA : CHAIN_IDs.SOLANA_DEVNET;
+
+    const rpc = getSVMRpc(chainId);
+
+    const tokenMessengerMinterAddress =
+      TokenMessengerMinterV2Client.TOKEN_MESSENGER_MINTER_V2_PROGRAM_ADDRESS; // "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe"
+
+    const [eventAuthority] = await getProgramDerivedAddress({
+      programAddress: tokenMessengerMinterAddress,
+      seeds: ["__event_authority"],
+    });
+
+    return new SvmCctpEventsClient(
+      rpc,
+      tokenMessengerMinterAddress,
+      eventAuthority,
+      TokenMessengerMinterV2Idl
+    );
+  }
+
+  async queryDepositForBurnEvents(fromSlot?: bigint, toSlot?: bigint) {
+    return await this.queryEvents(
+      "DepositForBurn" as any, // Maybe override queryEvents method
+      fromSlot,
+      toSlot,
+      { limit: 1000, commitment: "confirmed" }
+    );
+  }
+
+  async getDepositForBurnFromSignature(signature: Signature) {
+    const events = await this.readEventsFromSignature(signature);
+    return events.filter((event) => event.name === "DepositForBurn");
+  }
+}
+
+export async function getDepositForBurnBySignatureSVM({
+  signature,
+  chainId,
+}: {
+  signature: Signature;
+  chainId: number;
+}) {
+  // init events client
+  const eventsClient = await SvmCctpEventsClient.create();
+  const rpc = getSVMRpc(chainId);
+  const [depositForBurnEvents, depositTransaction] = await Promise.all([
+    eventsClient.getDepositForBurnFromSignature(signature),
+    rpc
+      .getTransaction(signature, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      })
+      .send(),
+  ]);
+
+  if (depositForBurnEvents?.length) {
+    const event = depositForBurnEvents[0];
+    const data = event.data as DepositForBurnEvent;
+    const destinationChainId = Number(
+      Object.entries(PUBLIC_NETWORKS).find(
+        ([_, chain]) => chain.cctpDomain === data.destinationDomain
+      )?.[0]
+    );
+
+    const blockTimestamp = Number(depositTransaction?.blockTime);
+
+    // convert to normalized type for compatibility
+    const convertedLog: DepositData = {
+      depositId: BigNumber.from(0),
+      depositTimestamp: blockTimestamp,
+      originChainId: chainId,
+      destinationChainId,
+      depositor: toAddressType(data.depositor, chainId),
+      recipient: toAddressType(data.mintRecipient, destinationChainId),
+      exclusiveRelayer: toAddressType(
+        ethers.constants.AddressZero,
+        destinationChainId
+      ),
+      inputToken: toAddressType(data.burnToken, chainId),
+      outputToken: toAddressType(data.burnToken, chainId),
+      inputAmount: BigNumber.from(data.amount?.toString?.() ?? "0"),
+      outputAmount: BigNumber.from(data.amount?.toString?.() ?? "0"),
+      quoteTimestamp: blockTimestamp,
+      fillDeadline: blockTimestamp,
+      messageHash: "0x",
+      message: "0x",
+      exclusivityDeadline: 0,
+      blockNumber: Number(depositTransaction?.slot),
+      txnIndex: 0,
+      txnRef: signature,
+      logIndex: 0,
+    };
+
+    return convertedLog;
+  }
 }
