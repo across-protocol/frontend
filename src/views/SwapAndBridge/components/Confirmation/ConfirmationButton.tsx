@@ -130,7 +130,7 @@ const ExpandableLabelSection: React.FC<
             </FeeTimeItem>
           </ExpandableLabelRight>
         )}
-        <StyledChevronDown expandedIcon={expanded} />
+        <StyledChevronDown expanded={expanded} />
       </>
     );
   } else {
@@ -489,15 +489,17 @@ const Divider = styled.span`
   background: rgba(224, 243, 255, 0.5);
 `;
 
-const StyledChevronDown = styled(ChevronDownIcon)<{ expandedIcon: boolean }>`
+const StyledChevronDown = styled(ChevronDownIcon, {
+  shouldForwardProp: (prop) => prop !== "expanded",
+})<{ expanded: boolean }>`
   width: 20px;
   height: 20px;
   margin-left: 12px;
   transition: transform 0.2s ease;
   cursor: pointer;
   color: #e0f3ff;
-  transform: ${({ expandedIcon }) =>
-    expandedIcon ? "rotate(180deg)" : "rotate(0deg)"};
+  transform: ${({ expanded }) =>
+    expanded ? "rotate(180deg)" : "rotate(0deg)"};
 `;
 
 const StyledButton = styled.button<{
