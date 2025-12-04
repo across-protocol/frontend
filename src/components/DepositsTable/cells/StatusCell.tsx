@@ -58,18 +58,21 @@ function FilledStatusCell({ deposit, width }: Props) {
 function PendingStatusCell({ width, deposit }: Props) {
   const { isDelayed, isProfitable, isExpired } = useDepositStatus(deposit);
 
+  // On all transactions page, always show "Processing..." instead of "Fee too low"
+  const showAsProcessing = deposit.hideFeeTooLow || isProfitable;
+
   return (
     <StyledPendingStatusCell width={width}>
       <Text
         color={
-          (isProfitable && !isDelayed) || isExpired ? "light-200" : "yellow"
+          (showAsProcessing && !isDelayed) || isExpired ? "light-200" : "yellow"
         }
       >
         {isExpired
           ? "Expired"
           : isDelayed
             ? "Delayed"
-            : isProfitable
+            : showAsProcessing
               ? "Processing..."
               : "Fee too low"}
       </Text>
@@ -90,7 +93,7 @@ function PendingStatusCell({ width, deposit }: Props) {
           >
             <StyledInfoIcon />
           </Tooltip>
-        ) : isProfitable ? (
+        ) : showAsProcessing ? (
           <StyledLoadingIcon />
         ) : (
           <Tooltip

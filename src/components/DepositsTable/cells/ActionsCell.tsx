@@ -54,6 +54,11 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
       <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;
 
+  if (!speedUp && !slowRelayInfo) {
+    // This might be wrong. We want to show the actions if either sppedup or slowRelayInfo is there
+    return null;
+  }
+
   return (
     <StyledActionsCell>
       <Blur />
