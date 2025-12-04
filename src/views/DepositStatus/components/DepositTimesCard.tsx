@@ -82,6 +82,8 @@ export function DepositTimesCard({
 
   // Check if destination chain is an intermediary chain and resolve token info if needed
   const toChainInfo = getChainInfo(toChainId);
+
+  // resolve intermediate token info for conversion (eg. USDH on HyperEVM)
   const resolvedTokenInfo =
     outputTokenSymbol && toChainInfo.intermediaryChain
       ? getIntermediaryTokenInfo({
@@ -90,14 +92,20 @@ export function DepositTimesCard({
         })
       : undefined;
 
-  // Use resolved token symbol if available, otherwise fall back to original
-  const tokenSymbolForConversion =
-    resolvedTokenInfo?.symbol || outputTokenSymbol || inputTokenSymbol;
+  // use final token info for display (eg. USDH-SPOT on HyperCore)
+  const outputTokenSymbolForDisplay = outputTokenSymbol || inputTokenSymbol;
+  const outputTokenForDisplay = useToken(
+    outputTokenSymbolForDisplay,
+    toChainId
+  );
 
-  const outputTokenForChain = useToken(tokenSymbolForConversion, toChainId);
+  // For USD conversion, use the intermediary token symbol if available (for price lookup),
+  // otherwise use the display symbol
+  const outputTokenSymbolForConversion =
+    resolvedTokenInfo?.symbol || outputTokenSymbolForDisplay;
 
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
-    useTokenConversion(tokenSymbolForConversion, "usd");
+    useTokenConversion(outputTokenSymbolForConversion, "usd");
 
   // Convert outputAmount to USD
   const outputAmountUsdFromToken = outputAmount
@@ -205,13 +213,13 @@ export function DepositTimesCard({
           </Row>
         )}
       {isDefined(outputAmount) &&
-        outputTokenForChain &&
+        outputTokenForDisplay &&
         isDefined(finalOutputAmountUsd) && (
           <Row>
             <Text color="grey-400">Amount received</Text>
             <TokenWrapper>
               <TokenFee
-                token={outputTokenForChain}
+                token={outputTokenForDisplay}
                 amount={outputAmount}
                 tokenChainId={toChainId}
                 tokenFirst
@@ -222,7 +230,7 @@ export function DepositTimesCard({
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputTokenSymbol) && outputTokenForChain && (
+      {isDefined(outputTokenSymbol) && outputTokenForDisplay && (
         <EstimatedTable
           {...estimatedRewards}
           // Override USD amounts with values from swapQuote.fees (source of truth)
@@ -233,7 +241,7 @@ export function DepositTimesCard({
           fromChainId={fromChainId}
           toChainId={toChainId}
           inputToken={inputToken}
-          outputToken={outputTokenForChain}
+          outputToken={outputTokenForDisplay}
           isSwap={isSwap}
           isUniversalSwap={isUniversalSwap}
           swapQuote={undefined}
