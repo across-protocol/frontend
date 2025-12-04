@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import {
   swapApprovalApiCall,
   SwapApprovalApiCallReturnType,
@@ -66,7 +67,15 @@ const useSwapQuote = ({
       !!originToken?.address &&
       !!destinationToken?.address &&
       !!debouncedAmount,
-    retry: 2,
+    retry: (failureCount, error) => {
+      if (axios.isAxiosError(error) && error.response?.status) {
+        const status = error.response.status;
+        if (status >= 400 && status < 500) {
+          return false;
+        }
+      }
+      return failureCount < 2;
+    },
     refetchInterval: (query) =>
       query.state.status === "success" ? 10_000 : false,
   });
