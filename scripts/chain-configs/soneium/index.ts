@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.soneium.org",
   blockTimeSeconds: 2,
-  tokens: [],
+  tokens: ["WETH", "ETH", "USDC.e"],
   enableCCTP: false,
 } as ChainConfig;
