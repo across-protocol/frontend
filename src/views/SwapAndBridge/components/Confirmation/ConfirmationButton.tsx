@@ -418,7 +418,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 };
 
 // Styled components
-const Container = styled(motion.div)<{ dark: boolean }>`
+const Container = styled.div<{ dark: boolean }>`
   background: ${({ dark }) =>
     dark ? COLORS["grey-400-5"] : "rgba(108, 249, 216, 0.1)"};
   border-radius: 24px;
@@ -427,6 +427,7 @@ const Container = styled(motion.div)<{ dark: boolean }>`
   padding: 8px 12px 12px 12px;
   width: 100%;
   overflow: hidden;
+  transition: background 0.2s ease;
 `;
 
 const ExpandableLabelButton = styled.button`
