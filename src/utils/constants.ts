@@ -5,6 +5,7 @@ import {
   CHAIN_IDs,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
+  OFT_NO_EID,
 } from "@across-protocol/constants";
 
 export { CHAIN_IDs } from "@across-protocol/constants";
@@ -69,6 +70,12 @@ export const INDIRECT_CHAINS = IndirectChains.reduce(
     return acc;
   },
   {} as Record<number, (typeof IndirectChains)[number]>
+);
+
+export const OFT_EIDS_BY_CHAIN_ID = Object.fromEntries(
+  Object.entries(PUBLIC_NETWORKS)
+    .filter(([_, network]) => network.oftEid !== OFT_NO_EID)
+    .map(([chainId, network]) => [chainId, network.oftEid])
 );
 
 /* Colors and Media Queries section */
@@ -694,6 +701,14 @@ export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
 
 export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
 
+// This will override the routing preference for the swap API. Useful for testing burn/mint routes.
+export const swapApiRoutingPreference =
+  (["default", "native", "across"] as const).find(
+    (preference) =>
+      preference.toLowerCase() ===
+      process.env.REACT_APP_SWAP_API_ROUTING_PREFERENCE?.toLowerCase()
+  ) || "default";
+
 // temporary list, to show usdt0 symbol & icon.
 // once all chains have migrated we can remove this list and make upstream changes to USDT icons in @constants.
 export const chainsWithUsdt0Enabled = [
@@ -701,6 +716,8 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
+  CHAIN_IDs.MONAD,
+  CHAIN_IDs.UNICHAIN,
 ];
 
 // Autogenerate RPC config for each supported chain.

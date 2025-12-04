@@ -7,9 +7,15 @@ import {
   BridgeStrategyData,
   BridgeStrategyDataParams,
 } from "../_bridges/types";
+import {
+  CCTP_FILL_TIME_ESTIMATES,
+  getTransferMode,
+} from "./cctp/utils/fill-times";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
-const LARGE_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
+// https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
+const LARGE_CCTP_DEPOSIT_THRESHOLD = 10_000_000; // 10M USD
+const MONAD_LIMIT = 25_000; // 25K USD
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
   // Check if utilization is high (>80%)
@@ -48,10 +54,9 @@ export function isFullyUtilized(limits: LimitsResponse): boolean {
  *   - canFillInstantly: Whether the bridge can fill the deposit instantly
  *   - isUtilizationHigh: Whether bridge utilization is above 80% threshold
  *   - isUsdcToUsdc: Whether both input and output tokens are USDC
- *   - isLargeDeposit: Whether deposit amount exceeds 1M USD threshold
+ *   - isLargeCctpDeposit: Whether deposit amount exceeds 10M USD threshold
  *   - isInThreshold: Whether deposit is within 10K USD Across threshold
  *   - isFastCctpEligible: Whether eligible for Fast CCTP on supported chains
- *   - isLineaSource: Whether the source chain is Linea
  */
 export async function getBridgeStrategyData({
   inputToken,
@@ -96,25 +101,49 @@ export async function getBridgeStrategyData({
       ethers.utils.formatUnits(amountInInputTokenDecimals, inputToken.decimals)
     );
     const isInThreshold = depositAmountUsd <= ACROSS_THRESHOLD;
-    const isLargeDeposit = depositAmountUsd > LARGE_DEPOSIT_THRESHOLD;
+    const isLargeCctpDeposit = depositAmountUsd > LARGE_CCTP_DEPOSIT_THRESHOLD;
 
-    // Check if eligible for Fast CCTP (Polygon, BSC, Solana) and deposit > 10K USD
-    const fastCctpChains = [CHAIN_IDs.POLYGON, CHAIN_IDs.BSC, CHAIN_IDs.SOLANA];
+    // Check if eligible for Fast CCTP
+    const fastCctpChains = Object.keys(CCTP_FILL_TIME_ESTIMATES.fast).map(
+      Number
+    );
     const isFastCctpChain = fastCctpChains.includes(inputToken.chainId);
-    const isFastCctpEligible =
+    let isFastCctpEligible =
       isFastCctpChain && depositAmountUsd > ACROSS_THRESHOLD;
 
-    // Check if Linea is the source chain
-    const isLineaSource = inputToken.chainId === CHAIN_IDs.LINEA;
+    // For Linea origin, verify that fast mode would actually be available. If not, don't use CCTP
+    if (inputToken.chainId === CHAIN_IDs.LINEA && isFastCctpEligible) {
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        "fast",
+        amountInInputTokenDecimals,
+        inputToken.decimals
+      );
+      if (transferMode === "standard") {
+        isFastCctpEligible = false;
+      }
+    }
+
+    const isUsdtToUsdt =
+      inputToken.symbol === "USDT" && outputToken.symbol === "USDT";
+
+    const isMonadTransfer =
+      (inputToken.chainId === CHAIN_IDs.MONAD &&
+        outputToken.chainId !== CHAIN_IDs.SOLANA) ||
+      outputToken.chainId === CHAIN_IDs.MONAD;
+
+    const isWithinMonadLimit = depositAmountUsd < MONAD_LIMIT;
 
     return {
       canFillInstantly,
       isUtilizationHigh,
       isUsdcToUsdc,
-      isLargeDeposit,
+      isLargeCctpDeposit,
       isInThreshold,
       isFastCctpEligible,
-      isLineaSource,
+      isUsdtToUsdt,
+      isMonadTransfer,
+      isWithinMonadLimit,
     };
   } catch (error) {
     if (logger) {
