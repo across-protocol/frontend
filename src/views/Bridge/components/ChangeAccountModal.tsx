@@ -14,7 +14,6 @@ import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
-import type { ChainEcosystem } from "../../../constants/chains/types";
 import {
   QuoteRequest,
   QuoteRequestAction,
@@ -22,18 +21,17 @@ import {
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 
 export const ChangeAccountModal = ({
-  destinationChainEcosystem,
   quoteRequest,
   dispatchQuoteRequestAction,
 }: {
-  destinationChainEcosystem: ChainEcosystem;
   quoteRequest: QuoteRequest;
   dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
-  const { recipient, recipientOrPlaceholder } = useEcosystemAccounts({
-    originToken: quoteRequest.originToken,
-    destinationToken: quoteRequest.destinationToken,
-  });
+  const { recipient, recipientOrPlaceholder, destinationEcosystem } =
+    useEcosystemAccounts({
+      originToken: quoteRequest.originToken,
+      destinationToken: quoteRequest.destinationToken,
+    });
 
   const currentRecipientAccount =
     quoteRequest.customDestinationAccount?.address ?? recipient;
@@ -65,11 +63,9 @@ export const ChangeAccountModal = ({
     const isValidAddressSVM = isSvmAddress(userInput) && !isBlocked;
 
     setValidInput(
-      destinationChainEcosystem === "evm"
-        ? isValidAddressEVM
-        : isValidAddressSVM
+      destinationEcosystem === "evm" ? isValidAddressEVM : isValidAddressSVM
     );
-  }, [userInput, isBlocked, isLoading, destinationChainEcosystem]);
+  }, [userInput, isBlocked, isLoading, destinationEcosystem]);
 
   const handleClickSave = () => {
     if (validInput || userInput === "") {
@@ -77,7 +73,7 @@ export const ChangeAccountModal = ({
         dispatchQuoteRequestAction({
           type: "SET_CUSTOM_DESTINATION_ACCOUNT",
           payload: {
-            accountType: destinationChainEcosystem,
+            accountType: destinationEcosystem,
             address: userInput,
           },
         });
@@ -152,7 +148,7 @@ export const ChangeAccountModal = ({
           <Warning>
             Note that only{" "}
             <BoldText>
-              {destinationChainEcosystem === "evm" ? "Ethereum" : "Solana"}
+              {destinationEcosystem === "evm" ? "Ethereum" : "Solana"}
             </BoldText>{" "}
             addresses are valid.
           </Warning>

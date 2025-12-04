@@ -17,7 +17,11 @@ import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
+import {
+  getPriceImpact,
+  getSwapQuoteFees,
+  PriceImpact,
+} from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
 
@@ -43,7 +47,6 @@ interface ConfirmationButtonProps
   buttonDisabled: boolean;
   buttonLoading: boolean;
   buttonLabel?: string;
-  priceImpact?: PriceImpact;
   initialExpanded?: boolean;
 }
 
@@ -221,9 +224,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonDisabled,
   buttonLoading,
   buttonLabel,
-  priceImpact,
   initialExpanded = false,
 }) => {
+  // Render unified group driven by state
+  const priceImpact = getPriceImpact(swapQuote);
   const [expanded, setExpanded] = React.useState(initialExpanded);
 
   const state = buttonState;
@@ -282,7 +286,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   const provider = getProviderFromQuote(swapQuote);
   const isSponsoredIntent = provider === "sponsored-intent";
-  // Render unified group driven by state
   const content = (
     <>
       <ExpandableLabelSection

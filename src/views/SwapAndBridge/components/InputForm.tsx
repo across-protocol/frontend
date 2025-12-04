@@ -29,7 +29,6 @@ export const InputForm = ({
   expectedOutputAmount,
   expectedInputAmount,
   validationError,
-  destinationChainEcosystem,
   quoteRequest,
   dispatchQuoteRequestAction,
 }: {
@@ -44,7 +43,6 @@ export const InputForm = ({
   setDestinationAmount: (amount: BigNumber | null) => void;
   isAmountOrigin: boolean;
   validationError: AmountInputError | undefined;
-  destinationChainEcosystem: ChainEcosystem;
   quoteRequest: QuoteRequest;
   dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
@@ -84,7 +82,6 @@ export const InputForm = ({
         disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
-        destinationChainEcosystem={destinationChainEcosystem}
         quoteRequest={quoteRequest}
         dispatchQuoteRequestAction={dispatchQuoteRequestAction}
       />
@@ -104,7 +101,6 @@ export const InputForm = ({
         disabled={!outputToken}
         unit={unit}
         setUnit={setUnit}
-        destinationChainEcosystem={destinationChainEcosystem}
         quoteRequest={quoteRequest}
         dispatchQuoteRequestAction={dispatchQuoteRequestAction}
       />
@@ -126,7 +122,6 @@ const TokenInput = ({
   disabled,
   unit,
   setUnit,
-  destinationChainEcosystem,
   quoteRequest,
   dispatchQuoteRequestAction,
 }: {
@@ -143,7 +138,6 @@ const TokenInput = ({
   otherToken?: EnrichedToken | null;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
-  destinationChainEcosystem: ChainEcosystem;
   quoteRequest: QuoteRequest;
   dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
@@ -204,7 +198,6 @@ const TokenInput = ({
             <>
               <ChangeAccountModal
                 quoteRequest={quoteRequest}
-                destinationChainEcosystem={destinationChainEcosystem}
                 dispatchQuoteRequestAction={dispatchQuoteRequestAction}
               />
             </>
