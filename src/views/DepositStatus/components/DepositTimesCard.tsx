@@ -92,6 +92,11 @@ export function DepositTimesCard({
         })
       : undefined;
 
+  const outputTokenForConversion = useToken(
+    resolvedTokenInfo?.symbol,
+    resolvedTokenInfo?.chainId
+  );
+
   // use final token info for display (eg. USDH-SPOT on HyperCore)
   const outputTokenSymbolForDisplay = outputTokenSymbol || inputTokenSymbol;
   const outputTokenForDisplay = useToken(
@@ -219,7 +224,12 @@ export function DepositTimesCard({
             <Text color="grey-400">Amount received</Text>
             <TokenWrapper>
               <TokenFee
-                token={outputTokenForDisplay}
+                token={{
+                  ...outputTokenForDisplay,
+                  decimals:
+                    outputTokenForConversion?.decimals ??
+                    outputTokenForDisplay.decimals,
+                }}
                 amount={outputAmount}
                 tokenChainId={toChainId}
                 tokenFirst

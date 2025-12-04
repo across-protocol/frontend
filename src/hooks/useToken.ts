@@ -20,13 +20,17 @@ import unknownLogo from "assets/icons/question-circle.svg";
  * If chainId is provided, applies chain-specific display modifications (e.g., USDT -> USDT0)
  */
 export function useToken(
-  symbol: string,
+  symbol?: string,
   chainId?: number
 ): TokenInfo | undefined {
   const { data: swapTokens } = useSwapTokens();
 
   const token = useMemo(() => {
     let resolvedToken: TokenInfo | undefined;
+
+    if (!symbol) {
+      return;
+    }
 
     // Try to get token from constants first
     try {
