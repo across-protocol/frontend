@@ -39,6 +39,17 @@ export const CCTP_FINALITY_THRESHOLDS = {
 export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
   "0x72adB07A487f38321b6665c02D289C413610B081";
 
+const CCTP_FINALIZER_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.SOLANA]: "5v4SXbcAKKo3YbPBXU9K7zNBMgJ2RQFsvQmg2RAFZT6t",
+};
+
+export const getCctpFinalizerAddress = (chainId: number): string => {
+  return (
+    CCTP_FINALIZER_ADDRESS_OVERRIDES[chainId] ||
+    DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS
+  );
+};
+
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
 const DEFAULT_CCTP_TOKEN_MESSENGER_ADDRESS =
