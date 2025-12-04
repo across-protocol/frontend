@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
@@ -11,7 +11,6 @@ import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import {
   COLORS,
-  formatUSD,
   formatWeiPct,
   getChainInfo,
   getToken,
@@ -28,6 +27,10 @@ import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
 import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
+import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
+
+const formatFeeUsdInWei = (feeInWei: BigNumber) =>
+  formatFeeUsd(utils.formatEther(feeInWei));
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
@@ -117,7 +120,7 @@ const EstimatedTable = ({
         >
           {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
-            ${formatUSD(swapFeeAsBaseCurrency)}
+            {formatFeeUsdInWei(swapFeeAsBaseCurrency)}
           </Text>
           <SettingsIcon />
         </SwapSlippageSettings>
@@ -142,7 +145,7 @@ const EstimatedTable = ({
         {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
         <Text color="grey-400" size="md">
           {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
-            ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
+            ? formatFeeUsdInWei(bridgeFeeAsBaseCurrency)
             : "-"}
         </Text>
       </FeeValueWrapper>
@@ -167,7 +170,7 @@ const EstimatedTable = ({
           {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
           <Text color="grey-400" size="md">
             {!showLoadingSkeleton
-              ? `$${formatUSD(swapFeeAsBaseCurrency)}`
+              ? formatFeeUsdInWei(swapFeeAsBaseCurrency)
               : "-"}
           </Text>
         </FeeValueWrapper>
@@ -199,7 +202,7 @@ const EstimatedTable = ({
         <TransparentWrapper isTransparent={!hasDepositReward}>
           <Text size="md" color="grey-400">
             {referralRewardAsBaseCurrency
-              ? `-$${formatUSD(referralRewardAsBaseCurrency)}`
+              ? `-${formatFeeUsdInWei(referralRewardAsBaseCurrency)}`
               : "-"}
           </Text>
         </TransparentWrapper>
@@ -233,7 +236,7 @@ const EstimatedTable = ({
               <RewardRebateWrapper>
                 {referralRewardAsBaseCurrency && (
                   <Text size="md" color="grey-400">
-                    ${formatUSD(referralRewardAsBaseCurrency)}
+                    {formatFeeUsdInWei(referralRewardAsBaseCurrency)}
                   </Text>
                 )}
                 <TokenFee
@@ -278,7 +281,7 @@ const EstimatedTable = ({
               color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
             >
               {netFeeAsBaseCurrency && !doesAmountExceedMaxDeposit
-                ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
+                ? formatFeeUsdInWei(netFeeAsBaseCurrency)
                 : "-"}
             </Text>
             {collapsible && <ChevronIconStyled isExpanded={isExpanded} />}

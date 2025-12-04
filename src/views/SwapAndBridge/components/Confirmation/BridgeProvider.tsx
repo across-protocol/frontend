@@ -13,8 +13,8 @@ export const ProviderBadge = ({
   const { label, logo } = getProviderDisplay(provider);
   return expanded ? (
     <ProviderBadgeWrapper provider={provider}>
-      {label}
       {logo}
+      {label}
     </ProviderBadgeWrapper>
   ) : (
     <Tooltip

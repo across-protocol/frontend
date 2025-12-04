@@ -50,6 +50,7 @@ const popularTokens = [
   TOKEN_SYMBOLS_MAP.ETH.symbol,
   TOKEN_SYMBOLS_MAP.WETH.symbol,
   TOKEN_SYMBOLS_MAP.WBTC.symbol,
+  "USDT0", // hardcoded symbol while we wait for support in @across-protocol/constants
 ];
 
 type ChainData = ChainInfo & {

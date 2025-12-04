@@ -19,9 +19,14 @@ export function formatFeeUsd(value: string): string {
 }
 
 export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
+  // show fees as 0 for OFT until we have designs to show fees in native tokens
+  const showZeroFee = swapQuote?.steps?.bridge?.provider === "oft";
+
   const rawValues = {
-    totalFeeUsd: swapQuote?.fees?.total.amountUsd || "0",
-    bridgeFeesUsd: swapQuote?.fees?.total.details.bridge.amountUsd || "0",
+    totalFeeUsd: showZeroFee ? "0" : swapQuote?.fees?.total.amountUsd || "0",
+    bridgeFeesUsd: showZeroFee
+      ? "0"
+      : swapQuote?.fees?.total.details.bridge.amountUsd || "0",
     appFeesUsd: swapQuote?.fees?.total.details.app.amountUsd || "0",
     swapImpactUsd: swapQuote?.fees?.total.details.swapImpact.amountUsd || "0",
   };

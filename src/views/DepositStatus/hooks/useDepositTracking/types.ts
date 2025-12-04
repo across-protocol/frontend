@@ -1,4 +1,4 @@
-import {
+import type {
   DepositEventFromSignature,
   FillEventFromSignature,
 } from "@across-protocol/sdk/dist/esm/arch/svm";
@@ -6,6 +6,8 @@ import { BigNumber } from "ethers";
 
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+
+export type BridgeProvider = "across" | "cctp" | "oft";
 
 /**
  * Common types for deposit & fill information
@@ -78,6 +80,18 @@ export type DepositStatusResponse =
       swapOutputAmount: string | undefined;
     };
 
+export type DepositForBurnEvent = {
+  amount: bigint;
+  burnToken: string; // base58 signature
+  depositor: string; // base58 signature
+  destinationCaller: string; // base58 signature (20 byte evm address)
+  destinationDomain: number; // (int) cctp domain
+  destinationTokenMessenger: string; // base58 signature (20 byte evm address)
+  maxFee: bigint;
+  minFinalityThreshold: number;
+  mintRecipient: string; // base58 account (20 byte evm address)
+};
+
 /**
  * Common chain strategy interface
  * Each chain implementation adapts its native types to these normalized interfaces
@@ -86,16 +100,23 @@ export interface IChainStrategy {
   /**
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
+   * @param bridgeProvider Bridge provider
    * @returns Normalized deposit information
    */
-  getDeposit(txIdOrSignature: string): Promise<DepositInfo>;
+  getDeposit(
+    txIdOrSignature: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<DepositInfo>;
 
-  getFill(depositInfo: DepositedInfo): Promise<FillInfo>;
+  getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<FillInfo>;
 
   /**
    * Get fill information for a deposit
    * @param depositInfo Deposit information
-   * @param toChainId Destination chain ID
+   * @param bridgeProvider Bridge provider
    * @returns Normalized fill information
    */
   getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;

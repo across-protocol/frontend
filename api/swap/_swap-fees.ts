@@ -248,12 +248,12 @@ export async function calculateSwapFees(params: {
           indirectDestinationRoute?.outputToken.decimals ?? outputToken.decimals
         )
       ) * outputTokenPriceUsd;
-    const maxTotalFeeUsd =
-      bridgeProvider === "sponsored-intent"
-        ? 0
-        : parseFloat(
-            (inputAmountUsd - outputMinAmountSansAppFeesUsd).toFixed(4)
-          );
+    const maxTotalFeeUsd = getTotalFeeUsd({
+      bridgeProvider,
+      bridgeFeesUsd,
+      inputAmountUsd,
+      outputAmountSansAppFeesUsd: outputMinAmountSansAppFeesUsd,
+    });
     const { amount: maxTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: maxTotalFeeUsd,
       inputAmountUsd,
@@ -281,12 +281,12 @@ export async function calculateSwapFees(params: {
         )
       ) * outputTokenPriceUsd;
 
-    const expectedTotalFeeUsd =
-      bridgeProvider === "sponsored-intent"
-        ? 0
-        : parseFloat(
-            (inputAmountUsd - expectedOutputAmountSansAppFeesUsd).toFixed(4)
-          );
+    const expectedTotalFeeUsd = getTotalFeeUsd({
+      bridgeProvider,
+      bridgeFeesUsd,
+      inputAmountUsd,
+      outputAmountSansAppFeesUsd: expectedOutputAmountSansAppFeesUsd,
+    });
     const { amount: expectedTotalFeeAmount } = usdFeesToAmountAndPct({
       feesUsd: expectedTotalFeeUsd,
       inputAmountUsd,
@@ -529,4 +529,28 @@ function usdFeesToAmountAndPct(params: {
     amount: usdFeesAmount,
     pct: usdFeesPct,
   };
+}
+
+function getTotalFeeUsd(params: {
+  bridgeProvider: BridgeProvider;
+  bridgeFeesUsd: number;
+  inputAmountUsd: number;
+  outputAmountSansAppFeesUsd: number;
+}) {
+  const {
+    bridgeProvider,
+    bridgeFeesUsd,
+    inputAmountUsd,
+    outputAmountSansAppFeesUsd,
+  } = params;
+
+  if (bridgeProvider === "sponsored-intent") {
+    return 0;
+  }
+
+  if (bridgeProvider === "oft" || bridgeProvider === "cctp") {
+    return bridgeFeesUsd;
+  }
+
+  return parseFloat((inputAmountUsd - outputAmountSansAppFeesUsd).toFixed(4));
 }

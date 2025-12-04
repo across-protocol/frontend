@@ -9,7 +9,8 @@ export const CCTP_SUPPORTED_CHAINS = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.BASE,
   CHAIN_IDs.HYPEREVM,
-  CHAIN_IDs.INK,
+  CHAIN_IDs.LINEA,
+  CHAIN_IDs.MONAD,
   CHAIN_IDs.OPTIMISM,
   CHAIN_IDs.POLYGON,
   CHAIN_IDs.SOLANA,
@@ -33,6 +34,10 @@ export const CCTP_FINALITY_THRESHOLDS = {
   fast: 1000,
   standard: 2000,
 };
+
+// CCTP Across Finalizer address
+export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
+  "0x72adB07A487f38321b6665c02D289C413610B081";
 
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
@@ -132,19 +137,4 @@ export const encodeDepositForBurn = (params: {
     params.maxFee,
     params.minFinalityThreshold,
   ]);
-};
-
-// CCTP estimated fill times in seconds
-// Soruce: https://developers.circle.com/cctp/required-block-confirmations
-export const CCTP_FILL_TIME_ESTIMATES: Record<number, number> = {
-  [CHAIN_IDs.MAINNET]: 19 * 60,
-  [CHAIN_IDs.ARBITRUM]: 19 * 60,
-  [CHAIN_IDs.BASE]: 19 * 60,
-  [CHAIN_IDs.HYPEREVM]: 5,
-  [CHAIN_IDs.INK]: 30 * 60,
-  [CHAIN_IDs.OPTIMISM]: 19 * 60,
-  [CHAIN_IDs.POLYGON]: 8,
-  [CHAIN_IDs.SOLANA]: 25,
-  [CHAIN_IDs.UNICHAIN]: 19 * 60,
-  [CHAIN_IDs.WORLD_CHAIN]: 19 * 60,
 };

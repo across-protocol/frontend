@@ -47,6 +47,13 @@ const capabilities: BridgeCapabilities = {
   },
 };
 
+// Temporarily disabled origin chain IDs for USDT0 transfers.
+// In the future we'll probably want separate lists for each token.
+export const TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS = [
+  CHAIN_IDs.PLASMA,
+  CHAIN_IDs.HYPEREVM,
+];
+
 /**
  * Rounds the token amount down to the correct precision for OFT transfer.
  * The last (tokenDecimals - sharedDecimals) digits must be zero to prevent contract-side rounding.
@@ -402,7 +409,17 @@ export function isRouteSupported(params: {
   // Token must be supported by OFT
   const oftMessengerContract = OFT_MESSENGERS[params.inputToken.symbol];
 
+  if (!oftMessengerContract) {
+    return false;
+  }
+
   if (oftMessengerContract[params.inputToken.chainId]) {
+    if (
+      TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS.includes(params.inputToken.chainId)
+    ) {
+      // OFT Messenger contract is defined for the origin chain, but route is temporarily disabled
+      return false;
+    }
     if (oftMessengerContract[params.outputToken.chainId]) {
       // Both chains must have OFT contracts configured for the token
       return true;

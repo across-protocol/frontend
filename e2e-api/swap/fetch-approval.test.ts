@@ -549,4 +549,21 @@ describe("GET /swap/approval", () => {
       });
     }
   });
+
+  describe("Burn/Mint routing", () => {
+    test("should return the correct bridge strategy for burn/mint routing", async () => {
+      const response = await axiosInstance.get(SWAP_API_URL, {
+        params: {
+          amount: ethers.utils.parseUnits("30000", 6).toString(), // 30,000 USDC
+          inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+          outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MONAD],
+          originChainId: CHAIN_IDs.OPTIMISM,
+          destinationChainId: CHAIN_IDs.MONAD,
+          depositor: e2eConfig.addresses.depositor,
+        },
+      });
+      expect(response.status).toBe(200);
+      expect(response.data.steps.bridge.provider).toBe("cctp");
+    });
+  });
 });

@@ -30,7 +30,9 @@ export function useToken(
 
     // Try to get token from constants first
     try {
-      resolvedToken = getToken(symbol);
+      resolvedToken = chainId
+        ? getConfig().getTokenInfoBySymbol(chainId, symbol)
+        : getToken(symbol);
     } catch (error) {
       // If getToken fails, try TOKEN_SYMBOLS_MAP directly
       const tokenFromMap =

@@ -97,7 +97,7 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
   )(maxBalance);
 
   const MAX_USDH_DEPOSIT_LIMIT = ethers.utils.parseUnits(
-    "50000",
+    "200000",
     bridgeableOutputToken.decimals
   );
   const maxDeposit: BigNumber = minBN(
