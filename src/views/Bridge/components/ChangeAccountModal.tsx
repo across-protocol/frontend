@@ -14,7 +14,6 @@ import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useToAccount } from "../hooks/useToAccount";
 import type { ChainEcosystem } from "../../../constants/chains/types";
 import {
   QuoteRequest,
@@ -31,36 +30,13 @@ export const ChangeAccountModal = ({
   quoteRequest: QuoteRequest;
   dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
-  const {
-    currentRecipientAccount,
-    handleChangeToAddressEVM,
-    handleChangeToAddressSVM,
-  } = useToAccount(quoteRequest.destinationToken?.chainId);
-
-  const { recipientOrPlaceholder } = useEcosystemAccounts({
+  const { recipient, recipientOrPlaceholder } = useEcosystemAccounts({
     originToken: quoteRequest.originToken,
     destinationToken: quoteRequest.destinationToken,
   });
 
-  useEffect(() => {
-    if (currentRecipientAccount) {
-      dispatchQuoteRequestAction({
-        type: "SET_CUSTOM_DESTINATION_ACCOUNT",
-        payload: {
-          accountType: destinationChainEcosystem,
-          address: currentRecipientAccount,
-        },
-      });
-    } else {
-      dispatchQuoteRequestAction({
-        type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
-      });
-    }
-  }, [
-    currentRecipientAccount,
-    dispatchQuoteRequestAction,
-    destinationChainEcosystem,
-  ]);
+  const currentRecipientAccount =
+    quoteRequest.customDestinationAccount?.address ?? recipient;
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayModal, setDisplayModal] = useState(false);
@@ -97,10 +73,18 @@ export const ChangeAccountModal = ({
 
   const handleClickSave = () => {
     if (validInput || userInput === "") {
-      if (destinationChainEcosystem === "evm") {
-        handleChangeToAddressEVM(userInput);
+      if (userInput && userInput !== recipient) {
+        dispatchQuoteRequestAction({
+          type: "SET_CUSTOM_DESTINATION_ACCOUNT",
+          payload: {
+            accountType: destinationChainEcosystem,
+            address: userInput,
+          },
+        });
       } else {
-        handleChangeToAddressSVM(userInput);
+        dispatchQuoteRequestAction({
+          type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
+        });
       }
       addToAmpliQueue(() => {
         ampli.toAccountChanged({

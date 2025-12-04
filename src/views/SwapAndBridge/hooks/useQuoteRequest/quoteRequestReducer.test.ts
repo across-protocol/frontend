@@ -57,6 +57,17 @@ describe("quoteRequestReducer", () => {
     expect(result.customDestinationAccount).toBe(account);
   });
 
+  it("resets custom destination account", () => {
+    const account = mockAccount("0xdef");
+    const result = quoteRequestReducer(
+      { ...initialQuote, customDestinationAccount: account },
+      {
+        type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
+      }
+    );
+    expect(result.customDestinationAccount).toBe(null);
+  });
+
   describe("QUICK_SWAP", () => {
     it("swaps origin and destination tokens", () => {
       const eth = mockToken("ETH");

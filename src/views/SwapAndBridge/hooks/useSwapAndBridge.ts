@@ -4,9 +4,8 @@ import { AmountInputError } from "../../Bridge/utils";
 import useSwapQuote, { SwapQuote } from "./useSwapQuote";
 import { useSwapApprovalAction } from "./useSwapApprovalAction";
 import { useValidateSwapAndBridge } from "./useValidateSwapAndBridge";
-import { getEcosystemFromToken, getQuoteWarningMessage } from "utils";
-import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { useConnectionSVM } from "hooks/useConnectionSVM";
+import { getQuoteWarningMessage } from "utils";
+import { useEcosystemAccounts } from "hooks/useEcosystemAccounts";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import type { ChainEcosystem } from "../../../constants/chains/types";
 import { useOnConfirm } from "./useOnConfirm";
@@ -33,27 +32,22 @@ export type UseSwapAndBridgeReturn = {
 export function useSwapAndBridge(
   quoteRequest: QuoteRequest
 ): UseSwapAndBridgeReturn {
-  const isRecipientSet = quoteRequest.customDestinationAccount;
-  const { isConnected: isConnectedEVM } = useConnectionEVM();
-  const { isConnected: isConnectedSVM } = useConnectionSVM();
+  const {
+    depositor,
+    recipient,
+    originEcosystem,
+    destinationEcosystem: destinationChainEcosystem,
+  } = useEcosystemAccounts({
+    originToken: quoteRequest.originToken,
+    destinationToken: quoteRequest.destinationToken,
+    customDestinationAccount: quoteRequest.customDestinationAccount,
+  });
 
-  const originChainEcosystem = getEcosystemFromToken(quoteRequest.originToken);
-  const destinationChainEcosystem = getEcosystemFromToken(
-    quoteRequest.destinationToken
-  );
-
-  // Check if origin wallet is connected
-  const isOriginConnected =
-    originChainEcosystem === "evm" ? isConnectedEVM : isConnectedSVM;
-
-  // Check if destination recipient is set (appropriate wallet connected for destination ecosystem)
-
-  // Determine which wallet type needs to be connected (if any)
   const walletTypeToConnect: ChainEcosystem | undefined = (() => {
-    if (!isOriginConnected) {
-      return originChainEcosystem;
+    if (!depositor) {
+      return originEcosystem;
     }
-    if (!isRecipientSet) {
+    if (!recipient) {
       return destinationChainEcosystem;
     }
     return undefined;
@@ -75,7 +69,7 @@ export function useSwapAndBridge(
     quoteRequest.tradeType === "exactInput",
     quoteRequest.originToken,
     quoteRequest.destinationToken,
-    isOriginConnected,
+    !!depositor,
     swapQuote?.inputAmount
   );
 
@@ -96,13 +90,13 @@ export function useSwapAndBridge(
     if (isQuoteLoading) return "loadingQuote";
     if (quoteError) return "apiError";
     if (validation.error) return "validationError";
-    if (!isOriginConnected || !isRecipientSet) return "notConnected";
+    if (!depositor || !recipient) return "notConnected";
     return "readyToConfirm";
   }, [
     isQuoteLoading,
     quoteError,
-    isOriginConnected,
-    isRecipientSet,
+    depositor,
+    recipient,
     approvalAction.isButtonActionLoading,
     validation.error,
   ]);
@@ -127,11 +121,9 @@ export function useSwapAndBridge(
     }
 
     if (buttonState === "notConnected" && walletTypeToConnect) {
-      // If neither wallet is connected, show generic "Connect Wallet"
-      if (!isConnectedEVM && !isConnectedSVM) {
+      if (!depositor && !recipient) {
         return "Connect Wallet";
       }
-      // Otherwise, show the specific wallet type that needs to be connected
       return walletTypeToConnect === "evm"
         ? "Connect EVM Wallet"
         : "Connect SVM Wallet";
@@ -140,8 +132,8 @@ export function useSwapAndBridge(
   }, [
     buttonState,
     walletTypeToConnect,
-    isConnectedEVM,
-    isConnectedSVM,
+    depositor,
+    recipient,
     validation.errorFormatted,
     quoteWarningMessage,
   ]);
