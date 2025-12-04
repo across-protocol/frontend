@@ -51,7 +51,9 @@ const useSwapQuote = ({
         originChainId: originToken.chainId,
         destinationChainId: destinationToken.chainId,
         depositor: depositorOrPlaceholder,
-        recipient: recipientOrPlaceholder,
+        recipient: customDestinationAccount
+          ? customDestinationAccount.address
+          : recipientOrPlaceholder,
         amount: debouncedAmount.toString(),
         refundOnOrigin: true,
         skipOriginTxEstimation: !depositor,
