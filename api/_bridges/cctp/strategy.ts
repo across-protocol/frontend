@@ -34,7 +34,7 @@ import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
   CCTP_FINALITY_THRESHOLDS,
-  DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
+  getCctpFinalizerAddress,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
   getCctpDomainId,
@@ -107,12 +107,7 @@ export function getCctpBridgeStrategy(
     const isDestinationChainSupported = CCTP_SUPPORTED_CHAINS.includes(
       params.outputToken.chainId
     );
-    if (
-      !isOriginChainSupported ||
-      !isDestinationChainSupported ||
-      // NOTE: Our finalizer doesn't support destination Solana yet. Block the route until we do.
-      sdk.utils.chainIsSvm(params.outputToken.chainId)
-    ) {
+    if (!isOriginChainSupported || !isDestinationChainSupported) {
       return false;
     }
 
@@ -379,6 +374,7 @@ export function getCctpBridgeStrategy(
       // Get CCTP domain IDs and addresses
       const destinationDomain = getCctpDomainId(destinationChainIdForCctp);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
+      const destinationFinalizer = getCctpFinalizerAddress(destinationChainId);
       const maxFee = bridgeQuote.fees.amount;
       const hasFastFee = maxFee.gt(0);
       const minFinalityThreshold = hasFastFee
@@ -390,7 +386,7 @@ export function getCctpBridgeStrategy(
         amount: bridgeQuote.inputAmount,
         destinationDomain,
         mintRecipient: crossSwap.recipient,
-        destinationCaller: DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
+        destinationCaller: destinationFinalizer,
         maxFee,
         minFinalityThreshold,
       };

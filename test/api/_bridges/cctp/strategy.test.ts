@@ -16,6 +16,7 @@ import {
   _buildCctpTxForAllowanceHolderEvm,
 } from "../../../../api/_bridges/cctp/strategy";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
+import { encodeDepositForBurn } from "../../../../api/_bridges/cctp/utils/constants";
 import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 import * as hypercoreModule from "../../../../api/_hypercore";
 import { ConvertDecimals } from "../../../../api/_utils";
@@ -474,5 +475,110 @@ describe("bridges/cctp/strategy", () => {
         "0xencoded-mintRecipient:0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D"
       );
     });
+  });
+
+  it("passes through SVM destination caller to encodeDepositForBurn", async () => {
+    const solanaDestinationCaller =
+      "5v4SXbcAKKo3YbPBXU9K7zNBMgJ2RQFsvQmg2RAFZT6t";
+    const quotes: CrossSwapQuotes = {
+      crossSwap: {
+        amount: BigNumber.from("1000000"),
+        inputToken: {
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+          decimals: 6,
+          symbol: "USDC",
+          chainId: CHAIN_IDs.OPTIMISM,
+        },
+        outputToken: {
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA],
+          decimals: 6,
+          symbol: "USDC",
+          chainId: CHAIN_IDs.SOLANA,
+        },
+        depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+        recipient: "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t",
+        slippageTolerance: 0.01,
+        type: "exactInput",
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: true,
+        isDestinationSvm: true,
+      },
+      bridgeQuote: {} as any,
+      contracts: {} as any,
+    };
+
+    await _buildCctpTxForAllowanceHolderEvm({
+      crossSwapQuotes: quotes,
+      originChainId: CHAIN_IDs.OPTIMISM,
+      destinationChainId: CHAIN_IDs.SOLANA,
+      tokenMessenger: "0x1234567890123456789012345678901234567890",
+      depositForBurnParams: {
+        amount: BigNumber.from("1000000"),
+        destinationDomain: 5,
+        mintRecipient: quotes.crossSwap.recipient,
+        destinationCaller: solanaDestinationCaller,
+        maxFee: BigNumber.from(0),
+        minFinalityThreshold: 12,
+      },
+    });
+
+    expect(encodeDepositForBurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        destinationCaller: solanaDestinationCaller,
+      })
+    );
+  });
+
+  it("passes through EVM destination caller to encodeDepositForBurn", async () => {
+    const evmDestinationCaller = "0x72adB07A487f38321b6665c02D289C413610B081";
+    const quotes: CrossSwapQuotes = {
+      crossSwap: {
+        amount: BigNumber.from("1000000"),
+        inputToken: {
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+          decimals: 6,
+          symbol: "USDC",
+          chainId: CHAIN_IDs.OPTIMISM,
+        },
+        outputToken: {
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
+          decimals: 6,
+          symbol: "USDC",
+          chainId: CHAIN_IDs.BASE,
+        },
+        depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+        recipient: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+        slippageTolerance: 0.01,
+        type: "exactInput",
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: true,
+        isDestinationSvm: false,
+      },
+      bridgeQuote: {} as any,
+      contracts: {} as any,
+    };
+
+    await _buildCctpTxForAllowanceHolderEvm({
+      crossSwapQuotes: quotes,
+      originChainId: CHAIN_IDs.OPTIMISM,
+      destinationChainId: CHAIN_IDs.BASE,
+      tokenMessenger: "0x1234567890123456789012345678901234567890",
+      depositForBurnParams: {
+        amount: BigNumber.from("1000000"),
+        destinationDomain: 6,
+        mintRecipient: quotes.crossSwap.recipient,
+        destinationCaller: evmDestinationCaller,
+        maxFee: BigNumber.from(0),
+        minFinalityThreshold: 12,
+      },
+    });
+
+    expect(encodeDepositForBurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        destinationCaller: evmDestinationCaller,
+      })
+    );
   });
 });
