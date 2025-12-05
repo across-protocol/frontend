@@ -5,8 +5,8 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
  * TODO: Update with actual deployed addresses
  */
 export const SPONSORED_OFT_SRC_PERIPHERY: Record<number, string | undefined> = {
-  [CHAIN_IDs.MAINNET]: "0xE35d1205a523B699785967FFfe99b72059B46707",
-  [CHAIN_IDs.ARBITRUM]: "0xcC0A3e41304c43BD13f520d300f0c2F8B17ABe7B",
+  [CHAIN_IDs.MAINNET]: "0x4607BceaF7b22cb0c46882FFc9fAB3c6efe66e5a",
+  [CHAIN_IDs.ARBITRUM]: "0x2ac5Ee3796E027dA274fbDe84c82173a65868940",
 };
 
 /**
@@ -14,7 +14,7 @@ export const SPONSORED_OFT_SRC_PERIPHERY: Record<number, string | undefined> = {
  * TODO: Update with actual deployed addresses
  */
 export const DST_OFT_HANDLER: Record<number, string | undefined> = {
-  [CHAIN_IDs.HYPEREVM]: "0xd9f40794367a2EcB0B409Ca8DBc55345c0dB6E9F",
+  [CHAIN_IDs.HYPEREVM]: "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461",
 };
 
 /**
