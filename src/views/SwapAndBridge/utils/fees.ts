@@ -22,13 +22,19 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
   // show fees as 0 for OFT until we have designs to show fees in native tokens
   const showZeroFee = swapQuote?.steps?.bridge?.provider === "oft";
 
+  // show swap impact only if swaps involved
+  const showSwapImpact =
+    swapQuote?.steps?.originSwap || swapQuote?.steps?.destinationSwap;
+
   const rawValues = {
     totalFeeUsd: showZeroFee ? "0" : swapQuote?.fees?.total.amountUsd || "0",
     bridgeFeesUsd: showZeroFee
       ? "0"
       : swapQuote?.fees?.total.details.bridge.amountUsd || "0",
     appFeesUsd: swapQuote?.fees?.total.details.app.amountUsd || "0",
-    swapImpactUsd: swapQuote?.fees?.total.details.swapImpact.amountUsd || "0",
+    swapImpactUsd: showSwapImpact
+      ? swapQuote?.fees?.total.details.swapImpact.amountUsd || "0"
+      : "0",
   };
 
   return {
