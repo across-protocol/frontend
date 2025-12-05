@@ -23,7 +23,11 @@ import {
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
-import { ButtonState } from "../../hooks/useButtonState";
+import { useButtonState } from "../../hooks/useButtonState";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
+import { useOnConfirm } from "../../hooks/useOnConfirm";
+import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
+import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -38,8 +42,8 @@ interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
   swapQuote: SwapApprovalApiCallReturnType | undefined;
   isQuoteLoading: boolean;
+  quoteError: Error | null;
   onConfirm?: () => Promise<void>;
-  buttonState: ButtonState;
   initialExpanded?: boolean;
 }
 
@@ -208,12 +212,43 @@ const ButtonCore: React.FC<{
 );
 
 export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
-  buttonState,
   swapQuote,
-  onConfirm,
+  isQuoteLoading,
+  quoteError,
   initialExpanded = false,
 }) => {
   const { quoteRequest } = useQuoteRequestContext();
+
+  const { depositor } = useEcosystemAccounts({
+    originToken: quoteRequest.originToken,
+    destinationToken: quoteRequest.destinationToken,
+    customDestinationAccount: quoteRequest.customDestinationAccount,
+  });
+
+  const approvalAction = useSwapApprovalAction(
+    quoteRequest.originToken?.chainId || 0,
+    swapQuote
+  );
+
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
+
+  const validation = useValidateSwapAndBridge(
+    quoteRequest.amount,
+    quoteRequest.tradeType === "exactInput",
+    quoteRequest.originToken,
+    quoteRequest.destinationToken,
+    !!depositor,
+    swapQuote?.inputAmount
+  );
+
+  const buttonState = useButtonState(
+    quoteRequest,
+    approvalAction,
+    validation,
+    quoteError,
+    isQuoteLoading
+  );
+
   const { originToken, destinationToken, amount } = quoteRequest;
   const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
     buttonState;
