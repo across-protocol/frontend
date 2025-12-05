@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import {
   getCrossSwapTypes,
   CROSS_SWAP_TYPE,
@@ -287,7 +287,10 @@ describe("_dexes/utils", () => {
       test("should handle exactOutput with refundAddress", () => {
         const crossSwap = createMockCrossSwap({
           type: "exactOutput",
-          refundAddress: "0xREFUNDADDRESS0000000000000000000000000",
+          refundAddress: utils.hexZeroPad(
+            ethers.Wallet.createRandom().address,
+            32
+          ),
         });
         const message = getBridgeQuoteMessage(crossSwap);
 
