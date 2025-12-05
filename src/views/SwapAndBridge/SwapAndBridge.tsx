@@ -2,8 +2,6 @@ import { LayoutV2 } from "components";
 import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
 import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
-import { EnrichedToken } from "./components/ChainTokenSelector/ChainTokenSelectorModal";
-import { BigNumber } from "ethers";
 import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
 import { useMemo } from "react";
@@ -66,33 +64,6 @@ export default function SwapAndBridge() {
     <LayoutV2 maxWidth={600}>
       <Wrapper>
         <InputForm
-          originToken={quoteRequest.originToken}
-          setOriginToken={(token: EnrichedToken | null) =>
-            dispatchQuoteRequestAction({
-              type: "SET_ORIGIN_TOKEN",
-              payload: token,
-            })
-          }
-          outputToken={quoteRequest.destinationToken}
-          setDestinationToken={(token: EnrichedToken | null) => {
-            dispatchQuoteRequestAction({
-              type: "SET_DESTINATION_TOKEN",
-              payload: token,
-            });
-          }}
-          setOriginAmount={(amount: BigNumber | null) =>
-            dispatchQuoteRequestAction({
-              type: "SET_ORIGIN_AMOUNT",
-              payload: amount,
-            })
-          }
-          setDestinationAmount={(amount: BigNumber | null) =>
-            dispatchQuoteRequestAction({
-              type: "SET_DESTINATION_AMOUNT",
-              payload: amount,
-            })
-          }
-          isAmountOrigin={quoteRequest.tradeType === "exactInput"}
           isQuoteLoading={isQuoteLoading}
           expectedOutputAmount={expectedOutputAmount}
           expectedInputAmount={expectedInputAmount}
