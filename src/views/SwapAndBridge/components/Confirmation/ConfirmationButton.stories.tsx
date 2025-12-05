@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
-import { BridgeButtonState, ConfirmationButton } from "./ConfirmationButton";
+import { ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import { BridgeProvider } from "./provider";
@@ -209,28 +209,11 @@ const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
   title: "Stories/ConfirmationButton",
   argTypes: {
-    buttonStatus: {
-      control: {
-        type: "select",
-      },
-      options: [
-        "notConnected",
-        "readyToConfirm",
-        "submitting",
-        "wrongNetwork",
-        "loadingQuote",
-        "validationError",
-        "apiError",
-      ] satisfies BridgeButtonState[],
-    },
-    buttonDisabled: {
+    isQuoteLoading: {
       control: { type: "boolean" },
     },
-    buttonLoading: {
+    initialExpanded: {
       control: { type: "boolean" },
-    },
-    buttonLabel: {
-      control: { type: "text" },
     },
     onConfirm: {
       table: { disable: true },
@@ -262,89 +245,38 @@ export const Default: Story = {
   args: {
     swapQuote: mockSwapQuote,
     isQuoteLoading: false,
-    buttonStatus: "readyToConfirm",
-    buttonDisabled: false,
-    buttonLoading: false,
-    buttonLabel: "Confirm Swap",
+    quoteError: null,
     onConfirm: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     },
   },
 };
 
-export const NotConnected: Story = {
+export const NoQuote: Story = {
   args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonStatus: "notConnected",
-    buttonLabel: "Connect wallet",
+    swapQuote: undefined,
+    isQuoteLoading: false,
+    quoteError: null,
   },
 };
 
 export const LoadingQuote: Story = {
   args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonStatus: "loadingQuote",
-    buttonDisabled: true,
-    buttonLoading: true,
-    buttonLabel: "Fetching quote...",
+    swapQuote: undefined,
+    isQuoteLoading: true,
+    quoteError: null,
   },
 };
 
-export const Submitting: Story = {
+export const WithError: Story = {
   args: {
-    ...Default.args,
-    buttonStatus: "submitting",
-    buttonDisabled: true,
-    buttonLoading: true,
-    buttonLabel: "Confirming...",
-  },
-};
-
-export const WrongNetwork: Story = {
-  args: {
-    ...Default.args,
-    buttonStatus: "wrongNetwork",
-    buttonDisabled: true,
-    buttonLabel: "Switch network",
-  },
-};
-
-export const ValidationError: Story = {
-  args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonStatus: "validationError",
-    buttonDisabled: true,
-    buttonLabel: "Invalid amount",
-  },
-};
-
-export const ApiError: Story = {
-  args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonStatus: "apiError",
-    buttonDisabled: true,
-    buttonLabel: "Failed to get quote",
-  },
-};
-
-export const WithHighPriceImpact: Story = {
-  args: {
-    ...Default.args,
+    swapQuote: undefined,
+    isQuoteLoading: false,
+    quoteError: new Error("Failed to fetch quote"),
   },
 };
 
 export const Expanded: Story = {
-  args: {
-    ...Default.args,
-    initialExpanded: true,
-  },
-};
-
-export const ExpandedWithHighPriceImpact: Story = {
   args: {
     ...Default.args,
     initialExpanded: true,
@@ -367,10 +299,7 @@ export const AllProvidersCollapsed: Story = {
           key={provider}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonStatus="readyToConfirm"
-          buttonDisabled={false}
-          buttonLoading={false}
-          buttonLabel="Confirm Swap"
+          quoteError={null}
         />
       ))}
     </>
@@ -385,10 +314,7 @@ export const AllProvidersExpanded: Story = {
           key={provider}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonStatus="readyToConfirm"
-          buttonDisabled={false}
-          buttonLoading={false}
-          buttonLabel="Confirm Swap"
+          quoteError={null}
           initialExpanded
         />
       ))}
