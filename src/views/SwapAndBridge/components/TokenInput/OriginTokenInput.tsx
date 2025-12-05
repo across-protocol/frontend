@@ -17,34 +17,7 @@ import {
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
-import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
-
-const hasInsufficientBalance = (
-  quoteRequest: QuoteRequest,
-  expectedAmount: BigNumber | undefined
-) => {
-  if (!quoteRequest.amount) {
-    return false;
-  }
-  if (
-    quoteRequest.tradeType === "exactInput" &&
-    quoteRequest.originToken?.balance
-  ) {
-    // isAmountorigin
-    if (quoteRequest.amount.gt(quoteRequest.originToken.balance)) {
-      return true;
-    }
-  } else if (
-    quoteRequest.tradeType === "minOutput" &&
-    expectedAmount &&
-    quoteRequest.originToken?.balance
-  ) {
-    if (expectedAmount?.gt(quoteRequest.originToken.balance)) {
-      return true;
-    }
-  }
-  return false;
-};
+import { hasInsufficientBalance } from "../../utils/balance";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -89,6 +62,11 @@ export const OriginTokenInput = ({
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
+  const insufficientBalance = hasInsufficientBalance(
+    quoteRequest,
+    expectedAmount
+  );
+
   useEffect(() => {
     if (
       !inputDisabled &&
@@ -108,11 +86,6 @@ export const OriginTokenInput = ({
     if (!convertedAmount) return "0.00";
     return `${formatUnits(convertedAmount, originToken?.decimals)} ${originToken?.symbol}`;
   })();
-
-  const insufficientBalance = hasInsufficientBalance(
-    quoteRequest,
-    expectedAmount
-  );
 
   return (
     <TokenInputWrapper>
