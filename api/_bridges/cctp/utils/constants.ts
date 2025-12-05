@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 import { CCTP_NO_DOMAIN } from "@across-protocol/constants";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP, CHAINS } from "../../../_constants";
 import { InvalidParamError } from "../../../_errors";
@@ -57,19 +58,16 @@ export const CCTP_FINALITY_THRESHOLDS = {
   standard: 2000,
 };
 
-// CCTP Across Finalizer address
-export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
-  "0x708704d33ace3daFbED28f150A56CE9D124B1eF8";
-
-const CCTP_FINALIZER_ADDRESS_OVERRIDES: Record<number, string> = {
-  [CHAIN_IDs.SOLANA]: "5v4SXbcAKKo3YbPBXU9K7zNBMgJ2RQFsvQmg2RAFZT6t",
-};
+// CCTP Across Finalizer addresses
+const CCTP_ACROSS_FINALIZER_ADDRESS_EVM =
+  "0x72adB07A487f38321b6665c02D289C413610B081";
+const CCTP_ACROSS_FINALIZER_ADDRESS_SVM =
+  "5v4SXbcAKKo3YbPBXU9K7zNBMgJ2RQFsvQmg2RAFZT6t";
 
 export const getCctpFinalizerAddress = (chainId: number): string => {
-  return (
-    CCTP_FINALIZER_ADDRESS_OVERRIDES[chainId] ||
-    DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS
-  );
+  return sdk.utils.chainIsSvm(chainId)
+    ? CCTP_ACROSS_FINALIZER_ADDRESS_SVM
+    : CCTP_ACROSS_FINALIZER_ADDRESS_EVM;
 };
 
 // CCTP TokenMessenger contract addresses
