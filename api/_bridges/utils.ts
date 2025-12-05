@@ -14,6 +14,7 @@ import {
 } from "./cctp/utils/fill-times";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
+// https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
 const LARGE_CCTP_DEPOSIT_THRESHOLD = 10_000_000; // 10M USD
 const MONAD_LIMIT = 25_000; // 25K USD
 

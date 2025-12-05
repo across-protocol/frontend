@@ -134,7 +134,7 @@ function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
     return {
       strategy: acrossStrategy,
       rule: "large-cctp-deposit",
-      reason: "Large USDC deposits (>$1M) remain on Across for capacity",
+      reason: "Large USDC deposits (>$10M) remain on Across for capacity",
     };
   }
 
