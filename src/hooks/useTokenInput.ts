@@ -9,7 +9,7 @@ export type UnitType = "usd" | "token";
 type UseTokenInputProps = {
   token: EnrichedToken | null;
   setAmount: (amount: BigNumber | null) => void;
-  expectedAmount: string | undefined;
+  expectedAmount: BigNumber | undefined;
   shouldUpdate: boolean;
   isUpdateLoading: boolean;
   // Optional: Allow unit state to be controlled from parent

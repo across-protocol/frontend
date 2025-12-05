@@ -126,7 +126,7 @@ export function useDefaultRoute(): DefaultRoute {
 
   const selectTokensOnLoad = useCallback(() => {
     const { inputToken, outputToken } = selectTokens(
-      undefined,
+      connectedChainId === 0 ? undefined : connectedChainId,
       CHAIN_IDs.BASE,
       CHAIN_IDs.ARBITRUM
     );

@@ -14,7 +14,7 @@ export type BridgeProvider =
   | "sponsored-intent";
 
 export const getProviderFromQuote = (
-  swapQuote: SwapApprovalApiCallReturnType | null
+  swapQuote: SwapApprovalApiCallReturnType | undefined
 ) => (swapQuote?.steps.bridge.provider || "across") as BridgeProvider;
 
 export const getProviderDisplay = (provider: BridgeProvider) => {

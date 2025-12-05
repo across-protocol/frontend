@@ -61,7 +61,9 @@ export function isSponsoredIntentQuote(quote?: SwapApprovalQuote): boolean {
   return quote?.steps?.bridge?.provider === "sponsored-intent";
 }
 
-export function getPriceImpact(quote?: SwapApprovalQuote): PriceImpact {
+export function getPriceImpact(
+  quote: SwapApprovalQuote | undefined
+): PriceImpact {
   if (
     !isDefined(quote?.fees?.total?.pct) ||
     (isDefined(quote?.fees?.total?.pct) && quote.fees.total.pct.lt(0))
