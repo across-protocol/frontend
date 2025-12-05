@@ -21,6 +21,7 @@ import {
   CROSS_SWAP_TYPE,
   buildDestinationSwapCrossChainMessage,
   assertMinOutputAmount,
+  createPlaceholderOriginSwapQuote,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 import {
@@ -822,7 +823,11 @@ export async function getCrossSwapQuotesForExactInputA2B(
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
     recipient: bridge.getBridgeQuoteRecipient(crossSwap, true), // A2B flow: has origin swap
-    message: bridge.getBridgeQuoteMessage(crossSwap),
+    message: bridge.getBridgeQuoteMessage(
+      crossSwap,
+      undefined,
+      prioritizedStrategy.originSwapQuote
+    ),
   });
 
   const appFee = calculateAppFee({
@@ -880,12 +885,23 @@ export async function getCrossSwapQuotesForOutputA2B(
   const { originSwapChainId, bridgeableInputToken } = results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
+  // For A2B flows, we need accurate gas estimation that includes the cost of processing
+  // a message with origin swap metadata. Use a placeholder to ensure accurate fees.
+  const placeholderOriginSwapQuote = createPlaceholderOriginSwapQuote(
+    crossSwapWithAppFee,
+    bridgeableInputToken
+  );
+
   const { bridgeQuote } = await bridge.getQuoteForOutput({
     inputToken: bridgeableInputToken,
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
     recipient: bridge.getBridgeQuoteRecipient(crossSwapWithAppFee, true), // A2B flow: has origin swap
-    message: bridge.getBridgeQuoteMessage(crossSwapWithAppFee),
+    message: bridge.getBridgeQuoteMessage(
+      crossSwapWithAppFee,
+      undefined,
+      placeholderOriginSwapQuote
+    ),
     forceExactOutput: crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 

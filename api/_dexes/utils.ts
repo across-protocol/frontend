@@ -215,6 +215,7 @@ export function getCrossSwapTypes(params: {
  * Helper function to determine if MultiCallHandler can be bypassed for a simple bridge.
  * Returns true when ALL of the following conditions are met:
  * - Amount type is exactInput or minOutput
+ * - No origin swap is needed. For origin swaps, we need to use MulticallHandler to emit metadata events.
  * - No app fees are specified
  * - No native output token (no unwrapping needed)
  * - No destination actions
@@ -250,6 +251,31 @@ function shouldBypassMultiCallHandler(
     !isOutputNative &&
     !hasEmbeddedActions
   );
+}
+
+/**
+ * Creates a placeholder origin swap quote for A2B flows to ensure accurate gas estimation.
+ * This is used when requesting a bridge quote but the actual origin swap quote hasn't been
+ * calculated yet. The placeholder has the correct structure so the message gas costs are accurate.
+ */
+export function createPlaceholderOriginSwapQuote(
+  crossSwap: CrossSwap,
+  bridgeableInputToken: Token
+): SwapQuote {
+  return {
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    maximumAmountIn: BigNumber.from("1000000"),
+    minAmountOut: BigNumber.from("1000000"),
+    expectedAmountIn: BigNumber.from("1000000"),
+    expectedAmountOut: BigNumber.from("1000000"),
+    slippageTolerance:
+      typeof crossSwap.slippageTolerance === "number"
+        ? crossSwap.slippageTolerance
+        : 0.5,
+    swapProvider: { name: "placeholder", sources: [] },
+    swapTxns: [],
+  };
 }
 
 export function getBridgeQuoteRecipient(

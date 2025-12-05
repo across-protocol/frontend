@@ -9,6 +9,7 @@ import {
   CrossSwap,
   CrossSwapQuotes,
   FeeDetailsType,
+  SwapQuote,
   Token,
 } from "../../_dexes/types";
 import {
@@ -97,8 +98,12 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       return getBridgeQuoteRecipient(crossSwap, hasOriginSwap);
     },
 
-    getBridgeQuoteMessage: (crossSwap: CrossSwap, appFee?: AppFee) => {
-      return getBridgeQuoteMessage(crossSwap, appFee);
+    getBridgeQuoteMessage: (
+      crossSwap: CrossSwap,
+      appFee?: AppFee,
+      originSwapQuote?: SwapQuote
+    ) => {
+      return getBridgeQuoteMessage(crossSwap, appFee, originSwapQuote);
     },
 
     getQuoteForExactInput: async ({
