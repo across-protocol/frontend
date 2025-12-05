@@ -1,17 +1,10 @@
-import { Dispatch } from "react";
-import { BigNumber } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { formatUSD } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "views/Bridge/components/ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
-import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { BalanceSelector } from "../BalanceSelector";
-import {
-  QuoteRequest,
-  QuoteRequestAction,
-} from "../../hooks/useQuoteRequest/quoteRequestAction";
 import {
   TokenAmountInput,
   TokenAmountInputTitle,
@@ -22,14 +15,13 @@ import {
   UnitToggleButton,
   UnitToggleButtonWrapper,
 } from "./styles";
+import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: string | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
-  quoteRequest: QuoteRequest;
-  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 };
 
 export const DestinationTokenDisplay = ({
@@ -37,31 +29,17 @@ export const DestinationTokenDisplay = ({
   isUpdateLoading,
   unit,
   setUnit,
-  quoteRequest,
-  dispatchQuoteRequestAction,
 }: DestinationTokenDisplayProps) => {
+  const {
+    quoteRequest,
+    setDestinationAmount,
+    setOriginToken,
+    setDestinationToken,
+  } = useQuoteRequestContext();
+
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
   const { destinationToken, originToken } = quoteRequest;
-
-  const setDestinationAmount = (amount: BigNumber | null) =>
-    dispatchQuoteRequestAction({
-      type: "SET_DESTINATION_AMOUNT",
-      payload: amount,
-    });
-
-  const setOriginToken = (token: EnrichedToken | null) =>
-    dispatchQuoteRequestAction({
-      type: "SET_ORIGIN_TOKEN",
-      payload: token,
-    });
-
-  const setDestinationToken = (token: EnrichedToken | null) => {
-    dispatchQuoteRequestAction({
-      type: "SET_DESTINATION_TOKEN",
-      payload: token,
-    });
-  };
 
   const {
     amountString,
@@ -98,10 +76,7 @@ export const DestinationTokenDisplay = ({
       <TokenAmountStack>
         <TokenAmountInputTitle>
           To
-          <ChangeAccountModal
-            quoteRequest={quoteRequest}
-            dispatchQuoteRequestAction={dispatchQuoteRequestAction}
-          />
+          <ChangeAccountModal />
         </TokenAmountInputTitle>
 
         <TokenAmountInputWrapper

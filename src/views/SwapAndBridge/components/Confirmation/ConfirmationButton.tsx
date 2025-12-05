@@ -22,7 +22,7 @@ import {
 } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
-import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
+import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -35,11 +35,9 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  quoteRequest: QuoteRequest;
   swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
-  // External state props
   buttonState: BridgeButtonState;
   buttonDisabled: boolean;
   buttonLoading: boolean;
@@ -218,9 +216,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   buttonDisabled,
   buttonLoading,
   buttonLabel,
-  quoteRequest,
   initialExpanded = false,
 }) => {
+  const { quoteRequest } = useQuoteRequestContext();
   const { originToken, destinationToken, amount } = quoteRequest;
 
   // Render unified group driven by state

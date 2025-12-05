@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Dispatch, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { isAddress as isSvmAddress } from "@solana/kit";
 
@@ -14,19 +14,15 @@ import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
-import {
-  QuoteRequest,
-  QuoteRequestAction,
-} from "../../SwapAndBridge/hooks/useQuoteRequest/quoteRequestAction";
+import { useQuoteRequestContext } from "../../SwapAndBridge/hooks/useQuoteRequest/QuoteRequestContext";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 
-export const ChangeAccountModal = ({
-  quoteRequest,
-  dispatchQuoteRequestAction,
-}: {
-  quoteRequest: QuoteRequest;
-  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
-}) => {
+export const ChangeAccountModal = () => {
+  const {
+    quoteRequest,
+    setCustomDestinationAccount,
+    resetCustomDestinationAccount,
+  } = useQuoteRequestContext();
   const { recipient, recipientOrPlaceholder, destinationEcosystem } =
     useEcosystemAccounts({
       originToken: quoteRequest.originToken,
@@ -70,17 +66,12 @@ export const ChangeAccountModal = ({
   const handleClickSave = () => {
     if (validInput || userInput === "") {
       if (userInput && userInput !== recipient) {
-        dispatchQuoteRequestAction({
-          type: "SET_CUSTOM_DESTINATION_ACCOUNT",
-          payload: {
-            accountType: destinationEcosystem,
-            address: userInput,
-          },
+        setCustomDestinationAccount({
+          accountType: destinationEcosystem,
+          address: userInput,
         });
       } else {
-        dispatchQuoteRequestAction({
-          type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
-        });
+        resetCustomDestinationAccount();
       }
       addToAmpliQueue(() => {
         ampli.toAccountChanged({

@@ -1,7 +1,10 @@
 import { LayoutV2 } from "components";
 import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
-import { useQuoteRequest } from "./hooks/useQuoteRequest/useQuoteRequest";
+import {
+  QuoteRequestProvider,
+  useQuoteRequestContext,
+} from "./hooks/useQuoteRequest/QuoteRequestContext";
 import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
 import { useMemo } from "react";
@@ -12,9 +15,9 @@ import { useOnConfirm } from "./hooks/useOnConfirm";
 import { useValidateSwapAndBridge } from "./hooks/useValidateSwapAndBridge";
 import { useButtonState } from "./hooks/useButtonState";
 
-export default function SwapAndBridge() {
-  const { quoteRequest, dispatchQuoteRequestAction } = useQuoteRequest();
-  useDefaultRouteInQuote(dispatchQuoteRequestAction);
+function SwapAndBridgeContent() {
+  const { quoteRequest } = useQuoteRequestContext();
+  useDefaultRouteInQuote();
 
   const { depositor } = useEcosystemAccounts({
     originToken: quoteRequest.originToken,
@@ -61,27 +64,32 @@ export default function SwapAndBridge() {
   }, [swapQuote]);
 
   return (
+    <Wrapper>
+      <InputForm
+        isQuoteLoading={isQuoteLoading}
+        expectedOutputAmount={expectedOutputAmount}
+        expectedInputAmount={expectedInputAmount}
+        validationError={validation.error}
+      />
+      <ConfirmationButton
+        swapQuote={swapQuote || null}
+        isQuoteLoading={isQuoteLoading}
+        onConfirm={onConfirm}
+        buttonState={buttonState}
+        buttonDisabled={buttonDisabled}
+        buttonLoading={buttonLoading}
+        buttonLabel={buttonLabel}
+      />
+    </Wrapper>
+  );
+}
+
+export default function SwapAndBridge() {
+  return (
     <LayoutV2 maxWidth={600}>
-      <Wrapper>
-        <InputForm
-          isQuoteLoading={isQuoteLoading}
-          expectedOutputAmount={expectedOutputAmount}
-          expectedInputAmount={expectedInputAmount}
-          validationError={validation.error}
-          quoteRequest={quoteRequest}
-          dispatchQuoteRequestAction={dispatchQuoteRequestAction}
-        />
-        <ConfirmationButton
-          quoteRequest={quoteRequest}
-          swapQuote={swapQuote || null}
-          isQuoteLoading={isQuoteLoading}
-          onConfirm={onConfirm}
-          buttonState={buttonState}
-          buttonDisabled={buttonDisabled}
-          buttonLoading={buttonLoading}
-          buttonLabel={buttonLabel}
-        />
-      </Wrapper>
+      <QuoteRequestProvider>
+        <SwapAndBridgeContent />
+      </QuoteRequestProvider>
     </LayoutV2>
   );
 }
@@ -89,13 +97,9 @@ export default function SwapAndBridge() {
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-
   gap: 8px;
-
   align-items: center;
   justify-content: center;
-
   width: 100%;
-
   padding-top: 64px;
 `;

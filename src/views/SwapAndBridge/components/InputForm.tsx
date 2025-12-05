@@ -1,13 +1,10 @@
 import { COLORS } from "utils";
 import styled from "@emotion/styled";
-import { Dispatch, useState } from "react";
+import { useState } from "react";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
 import { AmountInputError } from "views/Bridge/utils";
 import { UnitType } from "hooks";
-import {
-  QuoteRequest,
-  QuoteRequestAction,
-} from "../hooks/useQuoteRequest/quoteRequestAction";
+import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
 import { DestinationTokenDisplay, OriginTokenInput } from "./TokenInput";
 
 export const InputForm = ({
@@ -15,23 +12,18 @@ export const InputForm = ({
   expectedOutputAmount,
   expectedInputAmount,
   validationError,
-  quoteRequest,
-  dispatchQuoteRequestAction,
 }: {
   isQuoteLoading: boolean;
   expectedOutputAmount: string | undefined;
   expectedInputAmount: string | undefined;
   validationError: AmountInputError | undefined;
-  quoteRequest: QuoteRequest;
-  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
 }) => {
+  const { quickSwap } = useQuoteRequestContext();
   const [unit, setUnit] = useState<UnitType>("token");
 
   return (
     <Wrapper>
       <OriginTokenInput
-        quoteRequest={quoteRequest}
-        dispatchQuoteRequestAction={dispatchQuoteRequestAction}
         expectedAmount={expectedInputAmount}
         isUpdateLoading={isQuoteLoading}
         insufficientBalance={
@@ -40,16 +32,10 @@ export const InputForm = ({
         unit={unit}
         setUnit={setUnit}
       />
-      <QuickSwapButton
-        onClick={() =>
-          dispatchQuoteRequestAction({ type: "QUICK_SWAP", payload: undefined })
-        }
-      >
+      <QuickSwapButton onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
       <DestinationTokenDisplay
-        quoteRequest={quoteRequest}
-        dispatchQuoteRequestAction={dispatchQuoteRequestAction}
         expectedOutputAmount={expectedOutputAmount}
         isUpdateLoading={isQuoteLoading}
         unit={unit}

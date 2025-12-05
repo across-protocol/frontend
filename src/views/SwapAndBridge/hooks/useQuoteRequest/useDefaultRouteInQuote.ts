@@ -1,23 +1,17 @@
-import { Dispatch, useEffect } from "react";
-import { QuoteRequestAction } from "./quoteRequestAction";
+import { useEffect } from "react";
 import { useDefaultRoute } from "../useDefaultRoute";
+import { useQuoteRequestContext } from "./QuoteRequestContext";
 
-export const useDefaultRouteInQuote = (
-  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>
-) => {
+export const useDefaultRouteInQuote = () => {
+  const { setOriginToken, setDestinationToken } = useQuoteRequestContext();
   const defaultRoute = useDefaultRoute();
+
   useEffect(() => {
     if (defaultRoute.inputToken) {
-      dispatchQuoteRequestAction({
-        type: "SET_ORIGIN_TOKEN",
-        payload: defaultRoute.inputToken,
-      });
+      setOriginToken(defaultRoute.inputToken);
     }
     if (defaultRoute.outputToken) {
-      dispatchQuoteRequestAction({
-        type: "SET_DESTINATION_TOKEN",
-        payload: defaultRoute.outputToken,
-      });
+      setDestinationToken(defaultRoute.outputToken);
     }
-  }, [defaultRoute, dispatchQuoteRequestAction]);
+  }, [defaultRoute, setOriginToken, setDestinationToken]);
 };

@@ -1,11 +1,9 @@
-import { Dispatch, useEffect, useRef } from "react";
-import { BigNumber } from "ethers";
+import { useEffect, useRef } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { formatUSD } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
-import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { BalanceSelector } from "../BalanceSelector";
 import {
   TokenAmountInput,
@@ -17,52 +15,29 @@ import {
   UnitToggleButton,
   UnitToggleButtonWrapper,
 } from "./styles";
-import {
-  QuoteRequest,
-  QuoteRequestAction,
-} from "../../hooks/useQuoteRequest/quoteRequestAction";
+import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 
 type OriginTokenInputProps = {
-  dispatchQuoteRequestAction: Dispatch<QuoteRequestAction>;
   expectedAmount: string | undefined;
   isUpdateLoading: boolean;
   insufficientBalance: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
-  quoteRequest: QuoteRequest;
 };
 
 export const OriginTokenInput = ({
-  quoteRequest,
-  dispatchQuoteRequestAction,
   expectedAmount,
   isUpdateLoading,
   insufficientBalance,
   unit,
   setUnit,
 }: OriginTokenInputProps) => {
+  const { quoteRequest, setOriginAmount, setOriginToken, setDestinationToken } =
+    useQuoteRequestContext();
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
   const { originToken, destinationToken } = quoteRequest;
-  const setOriginAmount = (amount: BigNumber | null) =>
-    dispatchQuoteRequestAction({
-      type: "SET_ORIGIN_AMOUNT",
-      payload: amount,
-    });
-
-  const setOriginToken = (token: EnrichedToken | null) =>
-    dispatchQuoteRequestAction({
-      type: "SET_ORIGIN_TOKEN",
-      payload: token,
-    });
-
-  const setDestinationToken = (token: EnrichedToken | null) => {
-    dispatchQuoteRequestAction({
-      type: "SET_DESTINATION_TOKEN",
-      payload: token,
-    });
-  };
 
   const shouldUpdate = quoteRequest.tradeType === "minOutput";
 

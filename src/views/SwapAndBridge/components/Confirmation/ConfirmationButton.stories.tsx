@@ -3,8 +3,9 @@ import { BigNumber } from "ethers";
 import { BridgeButtonState, ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
-import { PriceImpact } from "../../utils/fees";
 import { BridgeProvider } from "./provider";
+import { QuoteRequestProvider } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
@@ -183,16 +184,12 @@ const mockSwapQuote: SwapApprovalApiCallReturnType = {
   },
 };
 
-const mockPriceImpact: PriceImpact = {
-  tooHigh: false,
-  priceImpact: 0.005,
-  priceImpactFormatted: "0.5",
-};
-
-const mockHighPriceImpact: PriceImpact = {
-  tooHigh: true,
-  priceImpact: 0.15,
-  priceImpactFormatted: "15.0",
+const mockQuoteRequest: QuoteRequest = {
+  tradeType: "exactInput",
+  originToken: mockInputToken,
+  destinationToken: mockOutputToken,
+  customDestinationAccount: null,
+  amount: BigNumber.from("100000000"),
 };
 
 const createQuoteWithProvider = (
@@ -241,17 +238,19 @@ const meta: Meta<typeof ConfirmationButton> = {
   },
   decorators: [
     (Story) => (
-      <div
-        style={{
-          maxWidth: 648,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          flexDirection: "column",
-        }}
-      >
-        <Story />
-      </div>
+      <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
+        <div
+          style={{
+            maxWidth: 648,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            flexDirection: "column",
+          }}
+        >
+          <Story />
+        </div>
+      </QuoteRequestProvider>
     ),
   ],
 };
@@ -261,16 +260,12 @@ type Story = StoryObj<typeof ConfirmationButton>;
 
 export const Default: Story = {
   args: {
-    originToken: mockInputToken,
-    destinationToken: mockOutputToken,
-    amount: BigNumber.from("100000000"),
     swapQuote: mockSwapQuote,
     isQuoteLoading: false,
     buttonState: "readyToConfirm",
     buttonDisabled: false,
     buttonLoading: false,
     buttonLabel: "Confirm Swap",
-    priceImpact: mockPriceImpact,
     onConfirm: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     },
@@ -339,7 +334,6 @@ export const ApiError: Story = {
 export const WithHighPriceImpact: Story = {
   args: {
     ...Default.args,
-    priceImpact: mockHighPriceImpact,
   },
 };
 
@@ -353,7 +347,6 @@ export const Expanded: Story = {
 export const ExpandedWithHighPriceImpact: Story = {
   args: {
     ...Default.args,
-    priceImpact: mockHighPriceImpact,
     initialExpanded: true,
   },
 };
@@ -372,16 +365,12 @@ export const AllProvidersCollapsed: Story = {
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          originToken={mockInputToken}
-          destinationToken={mockOutputToken}
-          amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
           buttonState="readyToConfirm"
           buttonDisabled={false}
           buttonLoading={false}
           buttonLabel="Confirm Swap"
-          priceImpact={mockPriceImpact}
         />
       ))}
     </>
@@ -394,16 +383,12 @@ export const AllProvidersExpanded: Story = {
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          originToken={mockInputToken}
-          destinationToken={mockOutputToken}
-          amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
           buttonState="readyToConfirm"
           buttonDisabled={false}
           buttonLoading={false}
           buttonLabel="Confirm Swap"
-          priceImpact={mockPriceImpact}
           initialExpanded
         />
       ))}
