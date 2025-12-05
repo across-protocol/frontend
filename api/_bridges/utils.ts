@@ -7,6 +7,7 @@ import {
   BridgeStrategyData,
   BridgeStrategyDataParams,
 } from "../_bridges/types";
+import { Token } from "../_dexes/types";
 import {
   CCTP_FILL_TIME_ESTIMATES,
   getTransferMode,
@@ -157,4 +158,13 @@ export async function getBridgeStrategyData({
     // Safely return undefined if we can't fetch bridge strategy data
     return undefined;
   }
+}
+
+export function getZeroBridgeFees(inputToken: Token) {
+  const zeroBN = BigNumber.from(0);
+  return {
+    amount: zeroBN,
+    token: inputToken,
+    pct: zeroBN,
+  };
 }

@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { CCTP_FINALITY_THRESHOLDS, getCctpDomainId } from "./constants";
 import { Token } from "../../../_dexes/types";
+import { getHyperEvmChainId, isToHyperCore } from "../../../_hypercore";
 
 /**
  * CCTP fee configuration type from Circle API
@@ -49,14 +50,24 @@ export async function getCctpFees(params: {
   const { inputToken, outputToken, transferMode, useSandbox, useForwardFee } =
     params;
 
+  // Check if destination is HyperCore (requires forward fee)
+  const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
+
+  const shouldUseForwardFee = useForwardFee ?? isDestinationHyperCore;
+
+  // Determine the CCTP destination domain (use HyperEVM domain for HyperCore)
+  const destinationChainIdForCctp = isDestinationHyperCore
+    ? getHyperEvmChainId(outputToken.chainId)
+    : outputToken.chainId;
+
   // Get CCTP domain IDs
   const sourceDomainId = getCctpDomainId(inputToken.chainId);
-  const destDomainId = getCctpDomainId(outputToken.chainId);
+  const destDomainId = getCctpDomainId(destinationChainIdForCctp);
 
   const endpoint = useSandbox ? "iris-api-sandbox" : "iris-api";
   const url = `https://${endpoint}.circle.com/v2/burn/USDC/fees/${sourceDomainId}/${destDomainId}`;
   const response = await axios.get<CctpFeeConfig[]>(url, {
-    params: useForwardFee ? { forward: true } : undefined,
+    params: shouldUseForwardFee ? { forward: true } : undefined,
   });
 
   const finalityThreshold = CCTP_FINALITY_THRESHOLDS[transferMode];
@@ -72,7 +83,7 @@ export async function getCctpFees(params: {
     );
   }
 
-  const forwardFee = useForwardFee ? transferConfig.forwardFee.med : 0;
+  const forwardFee = shouldUseForwardFee ? transferConfig.forwardFee.med : 0;
 
   return {
     transferFeeBps: transferConfig.minimumFee,

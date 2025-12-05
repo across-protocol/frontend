@@ -8,6 +8,15 @@ import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
 
+jest.mock("../../../api/_logger", () => ({
+  getLogger: jest.fn().mockReturnValue({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  }),
+}));
+
 // Helper function to create a token on a specific chain
 const createToken = (
   tokenSymbol: keyof typeof TOKEN_SYMBOLS_MAP,

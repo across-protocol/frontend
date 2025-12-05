@@ -18,6 +18,7 @@ export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
 };
+
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
   POL: {
@@ -32,10 +33,28 @@ export const TOKEN_SYMBOLS_MAP = {
     addresses: {
       ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2222222222222222222222222222222222222222",
+    },
+  },
+  USDC: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
+    },
+  },
+  USDT: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDT,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
+      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
     },
   },
   "USDH-SPOT": {
-    name: "Hyperliquid USD",
+    name: "USDH-SPOT",
     symbol: "USDH-SPOT",
     decimals: 8,
     addresses: {
@@ -45,15 +64,15 @@ export const TOKEN_SYMBOLS_MAP = {
     },
     coingeckoId: "usdh-2",
   },
-  USDT: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDT,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
-      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
-    },
+};
+
+export const CHAINS = {
+  ...constants.PUBLIC_NETWORKS,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: {
+    ...constants.PUBLIC_NETWORKS[CHAIN_IDs.HYPERCORE],
+    chainId: CHAIN_IDs.HYPERCORE_TESTNET,
   },
 };
-export const CHAINS = constants.PUBLIC_NETWORKS;
 export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
 export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   ...constants.TOKEN_EQUIVALENCE_REMAPPING,

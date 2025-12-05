@@ -53,6 +53,7 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
+import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
@@ -198,13 +199,41 @@ export async function handleBaseSwapQueryParams(
         (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
       );
 
-    if (!outputBridgeable && !isToUsdh) {
+    // HyperCore uses special system addresses (0x20...) that aren't in standard enabled routes
+    // Allow HyperCore as destination if output token is USDC on HyperCore
+    const isHyperCoreUsdcDestination =
+      isToHyperCore(destinationChainId) &&
+      outputTokenAddress.toLowerCase() ===
+        TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId]?.toLowerCase();
+
+    if (!outputBridgeable && !isToUsdh && !isHyperCoreUsdcDestination) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
           "Destination swaps are not supported yet for routes involving Solana.",
       });
     }
+  }
+
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
+    });
+  }
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
+    });
   }
 
   if (excludeSources && includeSources) {
@@ -231,24 +260,10 @@ export async function handleBaseSwapQueryParams(
     });
   }
 
-  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
-  assertValidAddressChainCombination({
-    address: depositor,
-    chainId: originChainId,
-    paramName: "depositor",
-  });
-  if (recipient) {
-    assertValidAddressChainCombination({
-      address: recipient,
-      chainId: destinationChainId,
-      paramName: "recipient",
-    });
-  }
-  if (appFeeRecipient) {
-    assertValidAddressChainCombination({
-      address: appFeeRecipient,
-      chainId: destinationChainId,
-      paramName: "appFeeRecipient",
+  if (!inputTokenAddress || !outputTokenAddress) {
+    throw new InvalidParamError({
+      param: "inputToken, outputToken",
+      message: "Invalid input or output token address",
     });
   }
 

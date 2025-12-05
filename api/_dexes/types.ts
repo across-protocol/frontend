@@ -22,7 +22,9 @@ export type BridgeProvider =
   | "hypercore"
   | "cctp"
   | "oft"
-  | "sponsored-intent";
+  | "sponsored-intent"
+  | "sponsored-oft"
+  | "sponsored-cctp";
 
 export type { AmountType, CrossSwapType };
 

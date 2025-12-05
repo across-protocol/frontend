@@ -1,17 +1,19 @@
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
-  BridgeStrategyData,
-  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
+  RouteStrategyFunction,
 } from "./types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
-import { getBridgeStrategyData } from "./utils";
-import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
+import { routeStrategyForSponsorship } from "../_sponsorship-routing";
+import { getSponsoredCctpBridgeStrategy } from "./cctp-sponsored/strategy";
+import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
+import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
+import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -43,13 +45,53 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPEREVM]: getHyperCoreBridgeStrategy(),
     },
   },
-  // TODO: Add CCTP routes when ready
+  inputTokens: {
+    USDT: {
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
+      [CHAIN_IDs.ARBITRUM]: {
+        [CHAIN_IDs.HYPERCORE]: getOftSponsoredBridgeStrategy(true),
+      },
+    },
+    USDC: {
+      // Testnet routes
+      [CHAIN_IDs.HYPEREVM_TESTNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
+      [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
+      },
+      [CHAIN_IDs.ARBITRUM]: {
+        [CHAIN_IDs.HYPERCORE]: getSponsoredCctpBridgeStrategy(true),
+      },
+      // SVM → HyperCore routes
+      [CHAIN_IDs.SOLANA]: {
+        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
+      },
+      // @TODO: Remove this once we can correctly route via eligibility checks.
+      // Currently we are using hardcoded true for eligibility checks.
+      [CHAIN_IDs.SOLANA_DEVNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
+      },
+    },
+  },
 };
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
   getCctpBridgeStrategy(),
   getOftBridgeStrategy(),
+];
+
+// Priority-ordered routing strategies
+const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
+  routeStrategyForSponsorship,
+  routeMintAndBurnStrategy,
 ];
 
 export async function getBridgeStrategy({
@@ -72,6 +114,14 @@ export async function getBridgeStrategy({
     return tokenPairPerToChainOverride;
   }
 
+  const inputTokenOverride =
+    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
+      destinationChainId
+    ];
+  if (inputTokenOverride) {
+    return inputTokenOverride;
+  }
+
   const fromToChainOverride =
     bridgeStrategies.fromToChains?.[originChainId]?.[destinationChainId];
   if (fromToChainOverride) {
@@ -92,14 +142,9 @@ export async function getBridgeStrategy({
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
-  if (
-    supportedBridgeStrategies.some(
-      (strategy) =>
-        strategy.name === getCctpBridgeStrategy().name ||
-        strategy.name === getOftBridgeStrategy().name
-    )
-  ) {
-    return routeMintAndBurnStrategy({
+
+  for (const routeStrategy of ROUTING_STRATEGIES) {
+    const strategy = await routeStrategy({
       inputToken,
       outputToken,
       amount,
@@ -107,7 +152,15 @@ export async function getBridgeStrategy({
       recipient,
       depositor,
     });
+
+    if (
+      strategy &&
+      supportedBridgeStrategies.some((s) => s.name === strategy.name)
+    ) {
+      return strategy;
+    }
   }
+
   return getAcrossBridgeStrategy();
 }
 
@@ -140,82 +193,4 @@ export function getSupportedBridgeStrategies({
       routingPreferenceFilter(strategy.name)
   );
   return supportedBridgeStrategies;
-}
-
-async function routeMintAndBurnStrategy({
-  inputToken,
-  outputToken,
-  amount,
-  amountType,
-  recipient,
-  depositor,
-}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
-  const bridgeStrategyData = await getBridgeStrategyData({
-    inputToken,
-    outputToken,
-    amount,
-    amountType,
-    recipient,
-    depositor,
-  });
-
-  if (!bridgeStrategyData) {
-    return bridgeStrategies.default;
-  }
-
-  if (bridgeStrategyData.isMonadTransfer) {
-    if (bridgeStrategyData.isWithinMonadLimit) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdtToUsdt) {
-      return getOftBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy();
-    } else {
-      return getAcrossBridgeStrategy();
-    }
-  }
-  if (!bridgeStrategyData.isUsdcToUsdc && !bridgeStrategyData.isUsdtToUsdt) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUtilizationHigh) {
-    return getBurnAndMintStrategy(bridgeStrategyData);
-  }
-
-  if (bridgeStrategyData.isFastCctpEligible) {
-    if (bridgeStrategyData.isInThreshold) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isLargeCctpDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-  if (bridgeStrategyData.canFillInstantly) {
-    return getAcrossBridgeStrategy();
-  } else {
-    if (
-      bridgeStrategyData.isUsdcToUsdc &&
-      bridgeStrategyData.isLargeCctpDeposit
-    ) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-}
-
-function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
-  if (!bridgeStrategyData) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdcToUsdc) {
-    return getCctpBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdtToUsdt) {
-    return getOftBridgeStrategy();
-  }
-  return getAcrossBridgeStrategy();
 }
