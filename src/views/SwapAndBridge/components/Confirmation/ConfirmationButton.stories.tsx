@@ -283,7 +283,35 @@ export const Expanded: Story = {
   },
 };
 
-export const bridgeProviders = [
+const highPriceImpactQuote: SwapApprovalApiCallReturnType = {
+  ...mockSwapQuote,
+  fees: {
+    ...mockSwapQuote.fees!,
+    total: {
+      ...mockSwapQuote.fees!.total,
+      pct: BigNumber.from("150000000000000000"), // 15% - above 10% threshold
+    },
+  },
+};
+
+export const HighPriceImpact: Story = {
+  args: {
+    swapQuote: highPriceImpactQuote,
+    isQuoteLoading: false,
+    quoteError: null,
+  },
+};
+
+export const HighPriceImpactExpanded: Story = {
+  args: {
+    swapQuote: highPriceImpactQuote,
+    isQuoteLoading: false,
+    quoteError: null,
+    initialExpanded: true,
+  },
+};
+
+const bridgeProviders = [
   "across",
   "cctp",
   "oft",
@@ -293,7 +321,7 @@ export const bridgeProviders = [
 
 export const AllProvidersCollapsed: Story = {
   render: () => (
-    <>
+    <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
@@ -302,13 +330,13 @@ export const AllProvidersCollapsed: Story = {
           quoteError={null}
         />
       ))}
-    </>
+    </QuoteRequestProvider>
   ),
 };
 
 export const AllProvidersExpanded: Story = {
   render: () => (
-    <>
+    <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
@@ -318,6 +346,6 @@ export const AllProvidersExpanded: Story = {
           initialExpanded
         />
       ))}
-    </>
+    </QuoteRequestProvider>
   ),
 };
