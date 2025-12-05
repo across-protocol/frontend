@@ -11,7 +11,7 @@ export function toWeiSafe(
   numberToConvertToWei: string,
   desiredPrecision = DEFAULT_PRECISION
 ) {
-  // Try converting just the raw string first to avoid unneccessary stripping of precision.
+  // Try converting just the raw string first to avoid unnecessary stripping of precision.
   try {
     return toWei(numberToConvertToWei, desiredPrecision);
   } catch (err) {
