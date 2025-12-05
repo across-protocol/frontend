@@ -1,33 +1,25 @@
 "use client";
 import React, { ButtonHTMLAttributes, useEffect } from "react";
-import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
-import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
-import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Route } from "assets/icons/route.svg";
-import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-import { AnimatePresence, motion } from "framer-motion";
 import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import {
-  getPriceImpact,
-  getSwapQuoteFees,
-  PriceImpact,
-} from "../../utils/fees";
+import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
-import { BridgeProvider, getProviderFromQuote } from "./provider";
+import { getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
 import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 import { useOnConfirm } from "../../hooks/useOnConfirm";
 import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
+import { ExpandableLabelSection } from "./ExpandableLabelSection";
+import { CoreConfirmationButton } from "./CoreConfirmationButton";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -46,170 +38,6 @@ interface ConfirmationButtonProps
   onConfirm?: () => Promise<void>;
   initialExpanded?: boolean;
 }
-
-// Expandable label section component
-const ExpandableLabelSection: React.FC<
-  React.PropsWithChildren<{
-    fee: string;
-    time: string;
-    expanded: boolean;
-    onToggle: () => void;
-    visible: boolean;
-    state: BridgeButtonState;
-    hasQuote: boolean;
-    priceImpact?: PriceImpact;
-    provider: BridgeProvider;
-  }>
-> = ({
-  fee,
-  time,
-  expanded,
-  onToggle,
-  priceImpact,
-  children,
-  hasQuote,
-  provider,
-}) => {
-  // Render state-specific content
-  let content: React.ReactNode = null;
-
-  const defaultState = (
-    <>
-      <ExpandableLabelLeft>
-        <Shield width="16" height="16" />
-        <FastSecureText>Fast & Secure</FastSecureText>
-      </ExpandableLabelLeft>
-      <ExpandableLabelRightAccent>
-        Across V4. More Chains Faster. <Across width="16" height="16" />
-      </ExpandableLabelRightAccent>
-    </>
-  );
-
-  const isSponsoredIntent = provider === "sponsored-intent";
-
-  // Show quote breakdown when quote is available, otherwise show default state
-  if (hasQuote) {
-    // Show quote details when available
-    content = (
-      <>
-        <ExpandableLabelLeft>
-          <Shield width="16" height="16" />
-          <FastSecureText>Fast & Secure</FastSecureText>
-        </ExpandableLabelLeft>
-        {!expanded && (
-          <ExpandableLabelRight>
-            <ProviderBadge
-              expanded={expanded}
-              provider={provider}
-            ></ProviderBadge>
-            <Divider />
-            <FeeTimeItem>
-              {priceImpact?.tooHigh ? (
-                <FeeTimeItemRed>
-                  <Warning
-                    color="var(--functional-red)"
-                    width="16"
-                    height="16"
-                  />
-                  <span>
-                    {fee} (-{priceImpact.priceImpactFormatted}%)
-                  </span>
-                </FeeTimeItemRed>
-              ) : (
-                <>
-                  <Dollar width="16" height="16" />
-                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
-                  {fee}
-                </>
-              )}
-            </FeeTimeItem>
-            <Divider />
-            <FeeTimeItem>
-              <Time width="16" height="16" />
-              {time}
-            </FeeTimeItem>
-          </ExpandableLabelRight>
-        )}
-        <StyledChevronDown expanded={expanded} />
-      </>
-    );
-  } else {
-    // Default state - show Across V4 branding
-    content = defaultState;
-  }
-
-  return (
-    <>
-      <ExpandableLabelButton
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        disabled={!hasQuote}
-      >
-        {content}
-      </ExpandableLabelButton>
-      <AnimatePresence initial={false} mode="wait">
-        {expanded && (
-          <motion.div
-            key="expandable-content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{
-              height: "auto",
-              opacity: 1,
-              transition: {
-                type: "spring",
-                stiffness: 400,
-                damping: 25,
-                mass: 0.8,
-              },
-            }}
-            exit={{
-              height: 0,
-              opacity: 0,
-              transition: {
-                duration: 0.2,
-                ease: "easeInOut",
-              },
-            }}
-            style={{ overflow: "hidden", willChange: "height, opacity" }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
-
-// Core button component, used by all states
-const ButtonCore: React.FC<{
-  label: React.ReactNode;
-  loading?: boolean;
-  disabled?: boolean;
-  state: BridgeButtonState;
-  fullHeight?: boolean;
-  onClick?: () => void;
-}> = ({ label, loading, disabled, state, onClick, fullHeight }) => (
-  <StyledButton
-    data-cy="bridge-button"
-    disabled={disabled || loading}
-    onClick={onClick}
-    aqua={!disabled}
-    buttonLoading={loading}
-    fullHeight={fullHeight}
-  >
-    <ButtonContent>
-      {loading && <StyledLoadingIcon />}
-      {state === "notConnected" && (
-        <Wallet width={16} height={16} color="inherit" />
-      )}
-      {state === "apiError" && (
-        <Warning width={16} height={16} color="inherit" />
-      )}
-      {label}
-    </ButtonContent>
-  </StyledButton>
-);
 
 export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   swapQuote,
@@ -413,7 +241,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           </FeeBreakdown>
         </ExpandedDetails>
       </ExpandableLabelSection>
-      <ButtonCore
+      <CoreConfirmationButton
         state={buttonStatus}
         label={buttonLabel}
         loading={buttonLoading}
@@ -456,147 +284,6 @@ const Container = styled.div<{ dark: boolean }>`
   width: 100%;
   overflow: hidden;
   transition: background 0.2s ease;
-`;
-
-const ExpandableLabelButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 8px;
-  padding-bottom: 16px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-`;
-
-const ExpandableLabelLeft = styled.span`
-  color: ${COLORS.aqua};
-  font-weight: 600;
-  font-size: 14px;
-  flex: 1;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
-`;
-
-const FastSecureText = styled.span`
-  color: ${COLORS.aqua};
-`;
-
-const ExpandableLabelRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #e0f3ff;
-  justify-content: flex-end;
-`;
-
-const ExpandableLabelRightAccent = styled(ExpandableLabelLeft)`
-  text-align: right;
-  justify-content: flex-end;
-`;
-
-const FeeTimeItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%;
-`;
-
-const Divider = styled.span`
-  margin: 0 8px;
-  height: 16px;
-  width: 1px;
-  background: rgba(224, 243, 255, 0.5);
-`;
-
-const StyledChevronDown = styled(ChevronDownIcon, {
-  shouldForwardProp: (prop) => prop !== "expanded",
-})<{ expanded: boolean }>`
-  width: 20px;
-  height: 20px;
-  margin-left: 12px;
-  transition: transform 0.2s ease;
-  cursor: pointer;
-  color: #e0f3ff;
-  transform: ${({ expanded }) =>
-    expanded ? "rotate(180deg)" : "rotate(0deg)"};
-`;
-
-const StyledButton = styled.button<{
-  aqua?: boolean;
-  buttonLoading?: boolean;
-  fullHeight?: boolean;
-}>`
-  width: 100%;
-  height: 64px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease,
-    opacity 0.3s ease;
-  border: none;
-  cursor: pointer;
-
-  background: ${({ aqua }) =>
-    aqua ? COLORS.aqua : "rgba(224, 243, 255, 0.05)"};
-  color: ${({ aqua }) => (aqua ? "#2D2E33" : "#E0F3FF")};
-
-  &:not(:disabled):hover {
-    box-shadow: ${({ aqua }) =>
-      aqua
-        ? `0 0 10px 0 var(--Transparency-Bright-Gray-bright-gray-50, rgba(224, 243, 255, 0.50)) inset, 0 0 4px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 2px 12px 1px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 4px 24px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20))`
-        : `
-      `};
-  }
-
-  &:not(:disabled):focus {
-    ${({ aqua }) => !aqua && `box-shadow: 0 0 16px 0 ${COLORS.aqua};`}
-  }
-
-  &:disabled {
-    cursor: ${({ buttonLoading }) => (buttonLoading ? "wait" : "not-allowed")};
-    box-shadow: none;
-    opacity: ${({ buttonLoading }) => (buttonLoading ? 0.9 : 0.6)};
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const ButtonContent = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-`;
-
-const StyledLoadingIcon = styled(LoadingIcon)`
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-  color: inherit;
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
 `;
 
 const ExpandedDetails = styled.div`
@@ -662,18 +349,6 @@ const FeeBreakdownLabel = styled.span`
 
 const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
-`;
-
-const FeeTimeItemRed = styled(FeeTimeItem)`
-  background: rgba(255, 97, 102, 0.2);
-  border-radius: 999px;
-  height: 20px;
-  padding-inline: 6px;
-  margin-inline: -6px; // account for inline padding
-
-  span {
-    height: 100%;
-  }
 `;
 
 const FeeWarning = styled.div`
