@@ -177,6 +177,30 @@ describe("_dexes/utils", () => {
         expect(message).toBeUndefined();
       });
 
+      test("should bypass for regular ERC-20 to ERC-20 (not native or wrapped native)", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactInput",
+          inputToken: {
+            address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.OPTIMISM],
+            decimals: 18,
+            symbol: "DAI",
+            chainId: CHAIN_IDs.OPTIMISM,
+          },
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+            decimals: 6,
+            symbol: "USDC",
+            chainId: CHAIN_IDs.ARBITRUM,
+          },
+          isOutputNative: false,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        expect(recipient).toBe(crossSwap.recipient);
+        expect(message).toBeUndefined();
+      });
+
       test("should return message for exactOutput (requires MultiCallHandler even without app fees)", () => {
         const crossSwap = createMockCrossSwap({
           type: "exactOutput",
@@ -185,6 +209,20 @@ describe("_dexes/utils", () => {
         expect(message).toBeDefined();
         expect(message).not.toBe("");
         expect(message).not.toBe("0x");
+      });
+
+      test("should bypass MultiCallHandler for exactInput with zero app fees", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactInput",
+          appFeePercent: 0,
+          appFeeRecipient: "0xFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        // Should bypass MultiCallHandler when app fee is 0%
+        expect(recipient).toBe(crossSwap.recipient);
+        expect(message).toBeUndefined();
       });
     });
 
@@ -228,22 +266,109 @@ describe("_dexes/utils", () => {
         expect(message).not.toBe("");
         expect(message).not.toBe("0x");
       });
+
+      test("should return message and MultiCallHandler for minOutput with native output", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "minOutput",
+          isOutputNative: true,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should handle exactOutput with refundAddress", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactOutput",
+          refundAddress: "0xREFUNDADDRESS0000000000000000000000000",
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+        // Message should be built successfully with refund address
+      });
+
+      test("should use MultiCallHandler for exactInput with wrapped native output", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactInput",
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.OPTIMISM],
+            decimals: 18,
+            symbol: "WETH",
+            chainId: CHAIN_IDs.OPTIMISM,
+          },
+          isOutputNative: false,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should use MultiCallHandler for minOutput with wrapped native output", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "minOutput",
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.BASE],
+            decimals: 18,
+            symbol: "WETH",
+            chainId: CHAIN_IDs.BASE,
+          },
+          isOutputNative: false,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const message = getBridgeQuoteMessage(crossSwap);
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
     });
 
     describe("A2B bridge with origin swap (should use MultiCallHandler)", () => {
+      const mockOriginSwapQuote = {
+        tokenIn: {
+          address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.OPTIMISM],
+          decimals: 18,
+          symbol: "DAI",
+          chainId: CHAIN_IDs.OPTIMISM,
+        },
+        tokenOut: {
+          address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+          decimals: 6,
+          symbol: "USDC",
+          chainId: CHAIN_IDs.OPTIMISM,
+        },
+        maximumAmountIn: BigNumber.from("1100000000000000000"),
+        minAmountOut: BigNumber.from("990000"),
+        expectedAmountIn: BigNumber.from("1000000000000000000"),
+        expectedAmountOut: BigNumber.from("1000000"),
+        slippageTolerance: 0.5,
+        swapProvider: { name: "uniswap", sources: [] },
+        swapTxns: [],
+      };
+
       test("should return message even without app fees when origin swap is involved", () => {
         const crossSwap = createMockCrossSwap();
-        const mockOriginSwapQuote = {
-          tokenIn: crossSwap.inputToken,
-          tokenOut: crossSwap.outputToken,
-          maximumAmountIn: BigNumber.from("1100000"),
-          minAmountOut: BigNumber.from("990000"),
-          expectedAmountIn: BigNumber.from("1000000"),
-          expectedAmountOut: BigNumber.from("1000000"),
-          slippageTolerance: 0.5,
-          swapProvider: { name: "uniswap", sources: [] },
-          swapTxns: [],
-        };
         const message = getBridgeQuoteMessage(
           crossSwap,
           undefined,
@@ -251,6 +376,65 @@ describe("_dexes/utils", () => {
         );
         expect(message).toBeDefined();
         expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should return message for A2B with exactInput", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactInput",
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, true);
+        const message = getBridgeQuoteMessage(
+          crossSwap,
+          undefined,
+          mockOriginSwapQuote
+        );
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should return message for A2B with exactOutput", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactOutput",
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, true);
+        const message = getBridgeQuoteMessage(
+          crossSwap,
+          undefined,
+          mockOriginSwapQuote
+        );
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should return message for A2B with minOutput", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "minOutput",
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, true);
+        const message = getBridgeQuoteMessage(
+          crossSwap,
+          undefined,
+          mockOriginSwapQuote
+        );
+
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).toBe(multicallHandler);
+        expect(message).toBeDefined();
         expect(message).not.toBe("");
         expect(message).not.toBe("0x");
       });

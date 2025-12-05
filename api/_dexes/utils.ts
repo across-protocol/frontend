@@ -41,6 +41,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
+  getWrappedNativeTokenAddress,
 } from "../_utils";
 import { CHAIN_IDs } from "../_constants";
 import {
@@ -236,8 +237,20 @@ function shouldBypassMultiCallHandler(
     crossSwap.appFeePercent > 0 &&
     crossSwap.appFeeRecipient !== undefined;
 
-  // Check if output is native (requires unwrapping)
-  const isOutputNative = crossSwap.isOutputNative;
+  // Check if output requires special handling
+  const isOutputNative = crossSwap.isOutputNative; // We need to unwrap for the user
+  const wrappedNativeTokenAddress = getWrappedNativeTokenAddress(
+    crossSwap.outputToken.chainId
+  );
+  const isOutputWrappedNative =
+    crossSwap.outputToken.address.toLowerCase() ===
+    wrappedNativeTokenAddress.toLowerCase();
+
+  // Since the protocol has special rules for handling native tokens on the destination chain
+  // depending on whether the recipient is a contract or an EOA, we have to handle both cases
+  // where the output token is native or wrapped native.
+  // See: https://docs.across.to/introduction/technical-faq#what-is-the-behavior-of-eth-weth-in-transfers
+  const needsOutputTokenHandling = isOutputNative || isOutputWrappedNative;
 
   // Check if there are embedded actions
   const hasEmbeddedActions =
@@ -248,7 +261,7 @@ function shouldBypassMultiCallHandler(
     isValidAmountType &&
     !hasOriginSwap &&
     !hasAppFees &&
-    !isOutputNative &&
+    !needsOutputTokenHandling &&
     !hasEmbeddedActions
   );
 }

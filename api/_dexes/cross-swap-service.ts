@@ -886,7 +886,7 @@ export async function getCrossSwapQuotesForOutputA2B(
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
   // For A2B flows, we need accurate gas estimation that includes the cost of processing
-  // a message with origin swap metadata. Use a placeholder to ensure accurate fees.
+  // a message with origin swap metadata. Use a placeholder quote to ensure accurate fees.
   const placeholderOriginSwapQuote = createPlaceholderOriginSwapQuote(
     crossSwapWithAppFee,
     bridgeableInputToken
