@@ -1,8 +1,6 @@
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
-  BridgeStrategyData,
-  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
   RouteStrategyFunction,
 } from "./types";
@@ -11,11 +9,11 @@ import { getCctpBridgeStrategy } from "./cctp/strategy";
 import { routeStrategyForSponsorship } from "../_sponsorship-routing";
 import { getSponsoredCctpBridgeStrategy } from "./cctp-sponsored/strategy";
 import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
-import { getBridgeStrategyData } from "./utils";
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
+import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -93,8 +91,6 @@ export const routableBridgeStrategies = [
 // Priority-ordered routing strategies
 const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
   routeStrategyForSponsorship,
-  // TODO: Replace with refactored CCTP routing strategy `routeStrategyForCctp`
-  // if latest logic is reflected.
   routeMintAndBurnStrategy,
 ];
 
@@ -197,82 +193,4 @@ export function getSupportedBridgeStrategies({
       routingPreferenceFilter(strategy.name)
   );
   return supportedBridgeStrategies;
-}
-
-async function routeMintAndBurnStrategy({
-  inputToken,
-  outputToken,
-  amount,
-  amountType,
-  recipient,
-  depositor,
-}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
-  const bridgeStrategyData = await getBridgeStrategyData({
-    inputToken,
-    outputToken,
-    amount,
-    amountType,
-    recipient,
-    depositor,
-  });
-
-  if (!bridgeStrategyData) {
-    return bridgeStrategies.default;
-  }
-
-  if (bridgeStrategyData.isMonadTransfer) {
-    if (bridgeStrategyData.isWithinMonadLimit) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdtToUsdt) {
-      return getOftBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy();
-    } else {
-      return getAcrossBridgeStrategy();
-    }
-  }
-  if (!bridgeStrategyData.isUsdcToUsdc && !bridgeStrategyData.isUsdtToUsdt) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUtilizationHigh) {
-    return getBurnAndMintStrategy(bridgeStrategyData);
-  }
-
-  if (bridgeStrategyData.isFastCctpEligible) {
-    if (bridgeStrategyData.isInThreshold) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isLargeCctpDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-  if (bridgeStrategyData.canFillInstantly) {
-    return getAcrossBridgeStrategy();
-  } else {
-    if (
-      bridgeStrategyData.isUsdcToUsdc &&
-      bridgeStrategyData.isLargeCctpDeposit
-    ) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-}
-
-function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
-  if (!bridgeStrategyData) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdcToUsdc) {
-    return getCctpBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdtToUsdt) {
-    return getOftBridgeStrategy();
-  }
-  return getAcrossBridgeStrategy();
 }

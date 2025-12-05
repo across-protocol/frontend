@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { routeStrategyForCctp } from "../../../../../api/_bridges/cctp/utils/routing";
+import { routeMintAndBurnStrategy } from "../../../../../api/_bridges/routing";
 import * as bridgeUtils from "../../../../../api/_bridges/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 import { BridgeStrategyData } from "../../../../../api/_bridges/types";
@@ -48,343 +48,168 @@ describe("api/_bridges/cctp/utils/routing", () => {
     jest.clearAllMocks();
   });
 
-  describe("routeStrategyForCctp", () => {
-    describe("Rule 1: non-usdc-route", () => {
-      it("should return Across for non-USDC pairs", async () => {
-        const strategyData: BridgeStrategyData = {
+  describe("routeMintAndBurnStrategy", () => {
+    const buildStrategyData = (
+      overrides: Partial<NonNullable<BridgeStrategyData>> = {}
+    ): BridgeStrategyData => ({
+      canFillInstantly: false,
+      isUtilizationHigh: false,
+      isUsdcToUsdc: true,
+      isLargeCctpDeposit: false,
+      isFastCctpEligible: false,
+      isInThreshold: false,
+      isUsdtToUsdt: false,
+      isMonadTransfer: false,
+      isWithinMonadLimit: false,
+      ...overrides,
+    });
+
+    it("returns Across for routes that are neither USDC nor USDT", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isUsdcToUsdc: false,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
           isUsdtToUsdt: false,
-          isMonadTransfer: false,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("across");
+    });
+
+    it("keeps Monad transfers within the lite limit on Across", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          isMonadTransfer: true,
+          isWithinMonadLimit: true,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("across");
+    });
+
+    it("routes Monad USDT transfers over OFT", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          isMonadTransfer: true,
           isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
-
-      it("should prioritize non-USDC rule over high utilization", async () => {
-        const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: false,
+          isUsdtToUsdt: true,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("oft");
+    });
+
+    it("routes Monad USDC transfers over CCTP", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          isMonadTransfer: true,
+          isWithinMonadLimit: false,
+          isUsdcToUsdc: true,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("cctp");
+    });
+
+    it("uses burn-and-mint routes when utilization is high", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isUtilizationHigh: true,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+        })
+      );
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("across");
-      });
+      expect(result?.name).toBe("cctp");
     });
 
-    describe("Rule 2: high-utilization", () => {
-      it("should return CCTP when utilization is high (>80%)", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: true,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("cctp");
-      });
-
-      it("should prioritize high utilization over Linea exclusion", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: true,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("cctp");
-      });
-    });
-
-    describe("Rule 3: fast-cctp-small-deposit", () => {
-      it("should return CCTP for medium deposits on fast CCTP chains", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
+    it("uses burn-and-mint on fast CCTP chains for medium deposits", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isFastCctpEligible: true,
           isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("cctp");
-      });
-
-      it("should not apply for deposits within threshold", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
           isLargeCctpDeposit: false,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("cctp");
+    });
+
+    it("keeps small deposits on fast CCTP chains on Across", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isFastCctpEligible: true,
           isInThreshold: true,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+        })
+      );
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("across");
-      });
+      expect(result?.name).toBe("across");
+    });
 
-      it("should not apply for large deposits", async () => {
-        const strategyData: BridgeStrategyData = {
+    it("keeps instant-fill deposits on Across", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          canFillInstantly: true,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("across");
+    });
+
+    it("keeps large USDC deposits on Across", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isUsdcToUsdc: true,
-          isUtilizationHigh: false,
           isLargeCctpDeposit: true,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+        })
+      );
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("across");
-      });
+      expect(result?.name).toBe("across");
     });
 
-    describe("Rule 4: fast-cctp-threshold-or-large", () => {
-      it("should return Across for very small deposits (<$10K) on fast CCTP chains", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: true,
-          isInThreshold: true,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+    it("defaults to CCTP for standard USDC routes", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(buildStrategyData());
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("across");
-      });
-
-      it("should return Across for very large deposits (>$1M) on fast CCTP chains", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: true,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
+      expect(result?.name).toBe("cctp");
     });
 
-    describe("Rule 5: instant-fill", () => {
-      it("should return Across when deposit can be filled instantly", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
-    });
-
-    describe("Rule 6: large-deposit-fallback", () => {
-      it("should return Across for large deposits (>$1M)", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: true,
-          isFastCctpEligible: false,
-          isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
-    });
-
-    describe("Rule 7: default-cctp", () => {
-      it("should return CCTP for standard USDC routes", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("cctp");
-      });
-    });
-
-    describe("Edge cases and fallbacks", () => {
-      it("should return null when bridge strategy data is undefined", async () => {
-        mockedGetBridgeStrategyData.mockResolvedValue(undefined);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result).toBeNull();
-      });
-
-      it("should return null when getBridgeStrategyData errors", async () => {
-        mockedGetBridgeStrategyData.mockResolvedValue(undefined);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result).toBeNull();
-      });
-    });
-
-    describe("Rule priority validation", () => {
-      it("should prioritize non-USDC over all other rules", async () => {
-        const strategyData: BridgeStrategyData = {
+    it("defaults to OFT for standard USDT routes", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
           isUsdcToUsdc: false,
-          isUtilizationHigh: true,
-          isLargeCctpDeposit: true,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+          isUsdtToUsdt: true,
+        })
+      );
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("across");
-      });
+      expect(result?.name).toBe("oft");
+    });
 
-      it("should prioritize high utilization over lower priority rules", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: true,
-          isLargeCctpDeposit: true,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
+    it("falls back to Across when no bridge data is available", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(undefined);
 
-        const result = await routeStrategyForCctp(baseParams);
+      const result = await routeMintAndBurnStrategy(baseParams);
 
-        expect(result?.name).toBe("cctp");
-      });
-
-      it("should prioritize Linea exclusion over fast CCTP rules", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: true,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: false,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
-
-      it("should prioritize fast CCTP rules over instant fill", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLargeCctpDeposit: false,
-          isFastCctpEligible: true,
-          isInThreshold: false,
-          canFillInstantly: true,
-          isUsdtToUsdt: false,
-          isMonadTransfer: false,
-          isWithinMonadLimit: false,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("cctp");
-      });
+      expect(result?.name).toBe("across");
     });
   });
 });
