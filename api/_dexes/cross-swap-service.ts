@@ -821,7 +821,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwap),
+    recipient: bridge.getBridgeQuoteRecipient(crossSwap, true), // A2B flow: has origin swap
     message: bridge.getBridgeQuoteMessage(crossSwap),
   });
 
@@ -884,7 +884,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwapWithAppFee),
+    recipient: bridge.getBridgeQuoteRecipient(crossSwapWithAppFee, true), // A2B flow: has origin swap
     message: bridge.getBridgeQuoteMessage(crossSwapWithAppFee),
     forceExactOutput: crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });

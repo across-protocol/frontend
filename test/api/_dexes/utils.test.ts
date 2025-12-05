@@ -1,5 +1,13 @@
-import { getCrossSwapTypes, CROSS_SWAP_TYPE } from "../../../api/_dexes/utils";
+import { BigNumber } from "ethers";
+import {
+  getCrossSwapTypes,
+  CROSS_SWAP_TYPE,
+  getBridgeQuoteRecipient,
+  getBridgeQuoteMessage,
+} from "../../../api/_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
+import { CrossSwap } from "../../../api/_dexes/types";
+import { getMultiCallHandlerAddress } from "../../../api/_multicall-handler";
 
 describe("_dexes/utils", () => {
   describe("#getCrossSwapType()", () => {
@@ -58,6 +66,212 @@ describe("_dexes/utils", () => {
         CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
         CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY,
       ]);
+    });
+  });
+
+  describe("#getBridgeQuoteRecipient() and #getBridgeQuoteMessage()", () => {
+    const createMockCrossSwap = (
+      overrides?: Partial<CrossSwap>
+    ): CrossSwap => ({
+      amount: BigNumber.from("1000000"),
+      inputToken: {
+        address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+        decimals: 6,
+        symbol: "USDC",
+        chainId: CHAIN_IDs.OPTIMISM,
+      },
+      outputToken: {
+        address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+        decimals: 6,
+        symbol: "USDC",
+        chainId: CHAIN_IDs.ARBITRUM,
+      },
+      depositor: "0x1234567890123456789012345678901234567890",
+      recipient: "0x0987654321098765432109876543210987654321",
+      slippageTolerance: 0.5,
+      type: "exactInput",
+      refundOnOrigin: false,
+      embeddedActions: [],
+      strictTradeType: false,
+      ...overrides,
+    });
+
+    describe("getBridgeQuoteRecipient() behavior", () => {
+      test("should return recipient directly for simple B2B", () => {
+        const crossSwap = createMockCrossSwap();
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        expect(recipient).toBe(crossSwap.recipient);
+      });
+
+      test("should return MultiCallHandler for A2B (has origin swap)", () => {
+        const crossSwap = createMockCrossSwap();
+        const recipient = getBridgeQuoteRecipient(crossSwap, true);
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).not.toBe(crossSwap.recipient);
+        expect(recipient).toBe(multicallHandler);
+      });
+
+      test("should return MultiCallHandler for B2B with app fees", () => {
+        const crossSwap = createMockCrossSwap({
+          appFeePercent: 0.01,
+          appFeeRecipient: "0xFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).not.toBe(crossSwap.recipient);
+        expect(recipient).toBe(multicallHandler);
+      });
+
+      test("should return MultiCallHandler for B2B with native output", () => {
+        const crossSwap = createMockCrossSwap({
+          isOutputNative: true,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).not.toBe(crossSwap.recipient);
+        expect(recipient).toBe(multicallHandler);
+      });
+
+      test("should return MultiCallHandler for B2B with embedded actions", () => {
+        const crossSwap = createMockCrossSwap({
+          embeddedActions: [
+            {
+              target: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              functionSignature: "function test()",
+              isNativeTransfer: false,
+              args: [],
+              value: "0",
+              populateCallValueDynamically: false,
+            },
+          ],
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap, false);
+        const multicallHandler = getMultiCallHandlerAddress(
+          crossSwap.outputToken.chainId
+        );
+        expect(recipient).not.toBe(crossSwap.recipient);
+        expect(recipient).toBe(multicallHandler);
+      });
+    });
+
+    describe("Simple B2B bridge (message bypasses MultiCallHandler)", () => {
+      test("should return undefined message for exactInput (no app fees, native output, or actions)", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactInput",
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeUndefined();
+      });
+
+      test("should return undefined message for minOutput (no app fees, native output, or actions)", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "minOutput",
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeUndefined();
+      });
+
+      test("should return message for exactOutput (requires MultiCallHandler even without app fees)", () => {
+        const crossSwap = createMockCrossSwap({
+          type: "exactOutput",
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+    });
+
+    describe("B2B bridge with special handling requirements (message uses MultiCallHandler)", () => {
+      test("should return message when app fees specified", () => {
+        const crossSwap = createMockCrossSwap({
+          appFeePercent: 0.01,
+          appFeeRecipient: "0xFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should return message when output is native", () => {
+        const crossSwap = createMockCrossSwap({
+          isOutputNative: true,
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+
+      test("should return message when embedded actions specified", () => {
+        const crossSwap = createMockCrossSwap({
+          embeddedActions: [
+            {
+              target: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              functionSignature: "function test()",
+              isNativeTransfer: false,
+              args: [],
+              value: "0",
+              populateCallValueDynamically: false,
+            },
+          ],
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+    });
+
+    describe("A2B bridge with origin swap (should use MultiCallHandler)", () => {
+      test("should return message even without app fees when origin swap is involved", () => {
+        const crossSwap = createMockCrossSwap();
+        const mockOriginSwapQuote = {
+          tokenIn: crossSwap.inputToken,
+          tokenOut: crossSwap.outputToken,
+          maximumAmountIn: BigNumber.from("1100000"),
+          minAmountOut: BigNumber.from("990000"),
+          expectedAmountIn: BigNumber.from("1000000"),
+          expectedAmountOut: BigNumber.from("1000000"),
+          slippageTolerance: 0.5,
+          swapProvider: { name: "uniswap", sources: [] },
+          swapTxns: [],
+        };
+        const message = getBridgeQuoteMessage(
+          crossSwap,
+          undefined,
+          mockOriginSwapQuote
+        );
+        expect(message).toBeDefined();
+        expect(message).not.toBe("");
+        expect(message).not.toBe("");
+        expect(message).not.toBe("0x");
+      });
+    });
+
+    describe("SVM destinations (should always bypass MultiCallHandler)", () => {
+      test("should return recipient directly for SVM destination", () => {
+        const crossSwap = createMockCrossSwap({
+          isDestinationSvm: true,
+        });
+        const recipient = getBridgeQuoteRecipient(crossSwap);
+        expect(recipient).toBe(crossSwap.recipient);
+      });
+
+      test("should return undefined message for SVM destination", () => {
+        const crossSwap = createMockCrossSwap({
+          isDestinationSvm: true,
+        });
+        const message = getBridgeQuoteMessage(crossSwap);
+        expect(message).toBeUndefined();
+      });
     });
   });
 });
