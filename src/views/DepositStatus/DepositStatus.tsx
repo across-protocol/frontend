@@ -7,11 +7,14 @@ import { QUERIESV2 } from "utils";
 import { isValidTxHash } from "utils/transactions";
 import { LayoutV2 } from "components";
 import NotFound from "views/NotFound";
+import { useDepositTracking } from "./hooks/useDepositTracking";
+import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { Breadcrumb } from "./components/Breadcrumb";
 import { DepositStatusUpperCard } from "./components/DepositStatusUpperCard";
 import { DepositStatusLowerCard } from "./components/DepositStatusLowerCard";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
+import { BridgeProvider } from "./hooks/useDepositTracking/types";
 
 export default function DepositStatus() {
   const { depositTxHash } = useParams<
@@ -20,7 +23,7 @@ export default function DepositStatus() {
     }>
   >();
   const { search, state = {} } = useLocation<{
-    fromBridgePagePayload?: FromBridgePagePayload;
+    fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
   }>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
 
@@ -29,6 +32,26 @@ export default function DepositStatus() {
   const inputTokenSymbol = queryParams.get("inputTokenSymbol");
   const outputTokenSymbol = queryParams.get("outputTokenSymbol");
   const externalProjectId = queryParams.get("externalProjectId") || undefined;
+  const bridgeProvider = (queryParams.get("bridgeProvider") ||
+    "across") as BridgeProvider;
+  const fromChainId = Number(originChainId);
+  const toChainId = Number(destinationChainId);
+
+  const { depositQuery, fillQuery } = useDepositTracking({
+    depositTxHash: depositTxHash ?? "",
+    fromChainId,
+    toChainId,
+    bridgeProvider,
+    fromBridgeAndSwapPagePayload: state.fromBridgeAndSwapPagePayload,
+  });
+
+  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
+  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
+  const { elapsedSeconds: fillTxElapsedSeconds } = useElapsedSeconds(
+    depositTxCompletedTime,
+    fillTxCompletedTime
+  );
+
   if (
     !depositTxHash ||
     !originChainId ||
@@ -49,21 +72,22 @@ export default function DepositStatus() {
         <InnerWrapper>
           <DepositStatusUpperCard
             depositTxHash={depositTxHash}
-            fromChainId={Number(originChainId)}
-            toChainId={Number(destinationChainId)}
+            fromChainId={fromChainId}
+            toChainId={toChainId}
             inputTokenSymbol={inputTokenSymbol}
             outputTokenSymbol={outputTokenSymbol || inputTokenSymbol}
-            fromBridgePagePayload={state.fromBridgePagePayload}
+            fromBridgeAndSwapPagePayload={state.fromBridgeAndSwapPagePayload}
             externalProjectId={externalProjectId}
+            bridgeProvider={bridgeProvider}
           />
           <DepositStatusLowerCard
             depositTxHash={depositTxHash}
-            fromChainId={Number(originChainId)}
-            toChainId={Number(destinationChainId)}
+            fromChainId={fromChainId}
+            toChainId={toChainId}
             externalProjectId={externalProjectId}
             inputTokenSymbol={inputTokenSymbol}
             outputTokenSymbol={outputTokenSymbol || inputTokenSymbol}
-            fromBridgePagePayload={state.fromBridgePagePayload}
+            fillTxElapsedSeconds={fillTxElapsedSeconds}
           />
         </InnerWrapper>
       </OuterWrapper>

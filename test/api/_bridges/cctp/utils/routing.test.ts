@@ -54,11 +54,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: false,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: true,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -71,11 +73,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: false,
           isUtilizationHigh: true,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: true,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -90,11 +94,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: true,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: true,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -107,11 +113,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: true,
-          isLineaSource: true,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: true,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -121,35 +129,18 @@ describe("api/_bridges/cctp/utils/routing", () => {
       });
     });
 
-    describe("Rule 3: linea-exclusion", () => {
-      it("should return Across when source chain is Linea", async () => {
-        const strategyData: BridgeStrategyData = {
-          isUsdcToUsdc: true,
-          isUtilizationHigh: false,
-          isLineaSource: true,
-          isLargeDeposit: false,
-          isFastCctpEligible: false,
-          isInThreshold: true,
-          canFillInstantly: true,
-        };
-        mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
-
-        const result = await routeStrategyForCctp(baseParams);
-
-        expect(result?.name).toBe("across");
-      });
-    });
-
-    describe("Rule 4: fast-cctp-small-deposit", () => {
+    describe("Rule 3: fast-cctp-small-deposit", () => {
       it("should return CCTP for medium deposits on fast CCTP chains", async () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -162,11 +153,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: true,
           isInThreshold: true,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -179,11 +172,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -193,16 +188,18 @@ describe("api/_bridges/cctp/utils/routing", () => {
       });
     });
 
-    describe("Rule 5: fast-cctp-threshold-or-large", () => {
+    describe("Rule 4: fast-cctp-threshold-or-large", () => {
       it("should return Across for very small deposits (<$10K) on fast CCTP chains", async () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: true,
           isInThreshold: true,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -215,11 +212,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -229,16 +228,18 @@ describe("api/_bridges/cctp/utils/routing", () => {
       });
     });
 
-    describe("Rule 6: instant-fill", () => {
+    describe("Rule 5: instant-fill", () => {
       it("should return Across when deposit can be filled instantly", async () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: true,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -248,16 +249,18 @@ describe("api/_bridges/cctp/utils/routing", () => {
       });
     });
 
-    describe("Rule 7: large-deposit-fallback", () => {
+    describe("Rule 6: large-deposit-fallback", () => {
       it("should return Across for large deposits (>$1M)", async () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: false,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -267,16 +270,18 @@ describe("api/_bridges/cctp/utils/routing", () => {
       });
     });
 
-    describe("Rule 8: default-cctp", () => {
+    describe("Rule 7: default-cctp", () => {
       it("should return CCTP for standard USDC routes", async () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: false,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -309,11 +314,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: false,
           isUtilizationHigh: true,
-          isLineaSource: true,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -326,11 +333,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: true,
-          isLineaSource: true,
-          isLargeDeposit: true,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -343,11 +352,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: true,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: true,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: false,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 
@@ -360,11 +371,13 @@ describe("api/_bridges/cctp/utils/routing", () => {
         const strategyData: BridgeStrategyData = {
           isUsdcToUsdc: true,
           isUtilizationHigh: false,
-          isLineaSource: false,
-          isLargeDeposit: false,
+          isLargeCctpDeposit: false,
           isFastCctpEligible: true,
           isInThreshold: false,
           canFillInstantly: true,
+          isUsdtToUsdt: false,
+          isMonadTransfer: false,
+          isWithinMonadLimit: false,
         };
         mockedGetBridgeStrategyData.mockResolvedValue(strategyData);
 

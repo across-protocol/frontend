@@ -128,7 +128,11 @@ export function TwitterShareModal({
             <Text size="xl" color="white">
               2. Share on X (Twitter)
             </Text>
-            <Text size="md">{shareConfig.stepDescription}</Text>
+            {shareConfig.stepDescription.map((line) => (
+              <Text size="md" key={line}>
+                {line}
+              </Text>
+            ))}
 
             <ButtonRow>
               <Button

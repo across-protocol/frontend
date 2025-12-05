@@ -12,7 +12,15 @@ import * as hypercoreModule from "../../../../api/_hypercore";
 
 // Mock all dependencies
 jest.mock("axios");
-jest.mock("../../../../api/_hypercore");
+
+// Only mock subset of functions we need
+jest.mock("../../../../api/_hypercore", () => {
+  const actual = jest.requireActual("../../../../api/_hypercore");
+  return {
+    ...actual,
+    accountExistsOnHyperCore: jest.fn(),
+  };
+});
 
 // Mock SDK - only the SVM utilities we need
 jest.mock("@across-protocol/sdk", () => {
@@ -53,7 +61,9 @@ describe("bridges/cctp/strategy", () => {
       typeof hypercoreModule.accountExistsOnHyperCore
     >;
 
-  const strategy = getCctpBridgeStrategy();
+  // Default transfer mode is "fast"
+  const strategy = getCctpBridgeStrategy("fast");
+  const strategyStandard = getCctpBridgeStrategy("standard");
 
   // Shared test tokens
   const inputToken = {
@@ -173,10 +183,11 @@ describe("bridges/cctp/strategy", () => {
     test("should calculate correct output amount for non-HyperCore route with zero fees", async () => {
       const exactInputAmount = BigNumber.from(100_000_000); // 100 USDC
 
-      const result = await strategy.getQuoteForExactInput({
+      const result = await strategyStandard.getQuoteForExactInput({
         inputToken,
         outputToken: outputTokenBase,
         exactInputAmount,
+        recipient: "0x1234567890123456789012345678901234567890",
       });
 
       // Expected calculation:

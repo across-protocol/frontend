@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { getProvider } from "./_providers";
 import { CHAIN_IDs } from "./_constants";
+import { Token } from "./_dexes/types";
 
 const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
 const HYPERLIQUID_API_BASE_URL_TESTNET = "https://api.hyperliquid-testnet.xyz";
@@ -71,7 +72,7 @@ export function getSpotSendBytesForTransferOnCore(params: {
   amount: BigNumber;
 }) {
   const { recipientAddress, tokenSystemAddress, amount } = params;
-  const tokenIndex = parseInt(tokenSystemAddress.replace("0x20", ""), 16);
+  const tokenIndex = getTokenIndexFromSystemAddress(tokenSystemAddress);
   const transferOnCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64", "uint64"],
     [recipientAddress, tokenIndex, amount]
@@ -86,10 +87,7 @@ export async function getBalanceOnHyperCore(params: {
   tokenSystemAddress: string;
 }) {
   const provider = getProvider(CHAIN_IDs.HYPEREVM);
-  const tokenIndex = parseInt(
-    params.tokenSystemAddress.replace("0x20", ""),
-    16
-  );
+  const tokenIndex = getTokenIndexFromSystemAddress(params.tokenSystemAddress);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address", "uint64"],
     [params.account, tokenIndex]
@@ -105,18 +103,21 @@ export async function getBalanceOnHyperCore(params: {
   return BigNumber.from(decodedQueryResult[0].toString());
 }
 
+export function getTokenIndexFromSystemAddress(systemAddress: string) {
+  return parseInt(systemAddress.replace("0x20", ""), 16);
+}
+
 export async function accountExistsOnHyperCore(params: {
   account: string;
   chainId?: number;
 }) {
   const chainId = params.chainId ?? CHAIN_IDs.HYPEREVM;
 
-  if (![CHAIN_IDs.HYPEREVM, CHAIN_IDs.HYPEREVM_TESTNET].includes(chainId)) {
+  if (isToHyperCore(chainId)) {
     throw new Error("Can't check account existence on non-HyperCore chain");
   }
 
-  const provider = getProvider(chainId);
-
+  const provider = getProvider(CHAIN_IDs.HYPEREVM);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address"],
     [params.account]
@@ -405,7 +406,30 @@ export async function simulateMarketOrder(params: {
 }
 
 export function getNormalizedSpotTokenSymbol(symbol: string): string {
-  return ["USDT-SPOT", "USDH-SPOT"].includes(symbol.toUpperCase())
+  return ["USDT-SPOT", "USDH-SPOT", "USDC-SPOT"].includes(symbol.toUpperCase())
     ? symbol.toUpperCase().replace("-SPOT", "")
     : symbol.toUpperCase();
+}
+
+export function getHyperEvmChainId(hyperCoreChainId: number): number {
+  return hyperCoreChainId === CHAIN_IDs.HYPERCORE
+    ? CHAIN_IDs.HYPEREVM
+    : CHAIN_IDs.HYPEREVM_TESTNET;
+}
+
+export function isToHyperCore(chainId: number) {
+  return [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId);
+}
+
+export function isHyperEvmToHyperCoreRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  // Mainnet or testnet route
+  return (
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE) ||
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM_TESTNET &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET)
+  );
 }

@@ -1,8 +1,12 @@
 import { TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
+import {
+  V2PoolInRoute,
+  V3PoolInRoute,
+  V4PoolInRoute,
+} from "@uniswap/universal-router-sdk";
 
 import { Swap } from "../../types";
-import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 import { getMulticall3Address } from "../../../_utils";
 import { CHAIN_IDs } from "../../../_constants";
 import { getSlippage } from "../../../_slippage";
@@ -19,7 +23,7 @@ export type UniswapClassicQuoteFromApi = {
     recipient: string;
   };
   swapper: string;
-  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>;
+  route: Array<(V3PoolInRoute | V2PoolInRoute | V4PoolInRoute)[]>;
   slippage: number;
   tradeType: "EXACT_OUTPUT" | "EXACT_INPUT";
   quoteId: string;
@@ -43,7 +47,10 @@ export const UNISWAP_API_KEY =
  */
 export async function getUniswapClassicQuoteFromApi(
   swap: UniswapParamForApi,
-  tradeType: TradeType
+  tradeType: TradeType,
+  opts?: {
+    splitSlippage?: boolean;
+  }
 ) {
   // NOTE: Temporary fix Stablecoin Mainnet -> Lens. The Multicall3 address is currently blocked
   // by the Uniswap API. We use a dummy address for just fetching the quote.
@@ -67,6 +74,7 @@ export async function getUniswapClassicQuoteFromApi(
             tokenOut: swap.tokenOut,
             slippageTolerance: swap.slippageTolerance,
             originOrDestination: swap.originOrDestination,
+            splitSlippage: opts?.splitSlippage,
           }),
         };
 

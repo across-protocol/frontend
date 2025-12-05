@@ -1,7 +1,7 @@
 {
   "providers": {
     "enabled": {
-      "default": ["public"]
+      "default": ["alchemy", "public"]
     },
     "urls": {
       "public": {
@@ -18,6 +18,20 @@
         "534352": "https://rpc.scroll.io",
         "7777777": "https://rpc.zora.energy",
         "34268394551451": "https://api.mainnet-beta.solana.com"
+      },
+      "alchemy": {
+        "1": "https://eth-mainnet.d.alchemy.com/v2/demo",
+        "10": "https://opt-mainnet.d.alchemy.com/v2/demo",
+        "137": "https://polygon-mainnet.d.alchemy.com/v2/demo",
+        "324": "https://zksync-mainnet.d.alchemy.com/v2/demo",
+        "8453": "https://base-mainnet.d.alchemy.com/v2/demo",
+        "34443": "https://mode-mainnet.d.alchemy.com/v2/demo",
+        "42161": "https://arb-mainnet.d.alchemy.com/v2/demo",
+        "59144": "https://linea-mainnet.d.alchemy.com/v2/demo",
+        "81457": "https://blast-mainnet.d.alchemy.com/v2/demo",
+        "534352": "https://scroll-mainnet.d.alchemy.com/v2/demo",
+        "7777777": "https://zora-mainnet.d.alchemy.com/v2/demo",
+        "34268394551451": "https://solana-mainnet.d.alchemy.com/v2/demo"
       }
     }
   }

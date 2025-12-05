@@ -16,7 +16,7 @@ import {
 import * as hypercore from "../../../../api/_hypercore";
 import { ConvertDecimals } from "../../../../api/_utils";
 import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
-import * as cctpHypercore from "../../../../api/_bridges/cctp/utils/hypercore";
+import * as cctpFees from "../../../../api/_bridges/cctp/utils/fees";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES } from "../../../../api/_bridges/cctp-sponsored/utils/constants";
 import { getEnvs } from "../../../../api/_env";
 
@@ -347,6 +347,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         inputToken: arbitrumUSDC,
         outputToken: hyperCoreUSDC,
         exactInputAmount,
+        recipient: TEST_WALLET.address,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
@@ -367,6 +368,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputToken: arbitrumUSDC,
           outputToken: baseWETH,
           exactInputAmount: utils.parseUnits("1", arbitrumUSDC.decimals),
+          recipient: TEST_WALLET.address,
         })
       ).rejects.toThrow();
     });
@@ -380,6 +382,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         inputToken: arbitrumUSDC,
         outputToken: hyperCoreUSDC,
         minOutputAmount,
+        recipient: TEST_WALLET.address,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
@@ -398,6 +401,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputToken: arbitrumUSDC,
           outputToken: baseWETH,
           minOutputAmount: utils.parseUnits("1", baseWETH.decimals),
+          recipient: TEST_WALLET.address,
         })
       ).rejects.toThrow();
     });
@@ -456,7 +460,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       };
 
       // Mock getCctpFees
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
@@ -523,7 +527,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       };
 
       // Mock getCctpFees
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
@@ -611,7 +615,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         },
       };
 
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
@@ -662,7 +666,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         originSwapQuote: {} as any,
       };
 
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
@@ -738,7 +742,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       };
 
       // Mock getCctpFees
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
       });
@@ -797,7 +801,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       };
 
       // Mock getCctpFees
-      jest.spyOn(cctpHypercore, "getCctpFees").mockResolvedValue({
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
       });

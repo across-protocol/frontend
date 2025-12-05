@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
@@ -11,7 +11,6 @@ import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import {
   COLORS,
-  formatUSD,
   formatWeiPct,
   getChainInfo,
   getToken,
@@ -26,6 +25,12 @@ import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
+import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
+import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
+import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
+
+const formatFeeUsdInWei = (feeInWei: BigNumber) =>
+  formatFeeUsd(utils.formatEther(feeInWei));
 
 export type EstimatedTableProps = EstimatedRewards &
   FeesCollapsibleProps & {
@@ -80,6 +85,10 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
+  const isSponsoredIntent = isSponsoredIntentQuote(
+    universalSwapQuote ?? undefined
+  );
+
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
       <>
@@ -109,8 +118,9 @@ const EstimatedTable = ({
             }
           }}
         >
+          {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
-            ${formatUSD(swapFeeAsBaseCurrency)}
+            {formatFeeUsdInWei(swapFeeAsBaseCurrency)}
           </Text>
           <SettingsIcon />
         </SwapSlippageSettings>
@@ -131,33 +141,41 @@ const EstimatedTable = ({
           </InfoIconWrapper>
         </Tooltip>
       </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
-          ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
-          : "-"}
-      </Text>
-    </>,
-    <>
-      <ToolTipWrapper>
-        <Text size="md" color="grey-400">
-          Destination gas fee
+      <FeeValueWrapper>
+        {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        <Text color="grey-400" size="md">
+          {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
+            ? formatFeeUsdInWei(bridgeFeeAsBaseCurrency)
+            : "-"}
         </Text>
-        <Tooltip
-          title="Destination gas fee"
-          body="Fee to cover gas for destination chain fill transaction."
-          placement="bottom-start"
-        >
-          <InfoIconWrapper>
-            <InfoIcon />
-          </InfoIconWrapper>
-        </Tooltip>
-      </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {gasFeeAsBaseCurrency && !showLoadingSkeleton
-          ? `$${formatUSD(gasFeeAsBaseCurrency)}`
-          : "-"}
-      </Text>
+      </FeeValueWrapper>
     </>,
+    swapFeeAsBaseCurrency?.gt(0) ? (
+      <>
+        <ToolTipWrapper>
+          <Text size="md" color="grey-400">
+            Swap Impact
+          </Text>
+          <Tooltip
+            title="Swap Impact"
+            body="Fee to cover gas for destination chain fill transaction."
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        </ToolTipWrapper>
+        <FeeValueWrapper>
+          {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          <Text color="grey-400" size="md">
+            {!showLoadingSkeleton
+              ? formatFeeUsdInWei(swapFeeAsBaseCurrency)
+              : "-"}
+          </Text>
+        </FeeValueWrapper>
+      </>
+    ) : undefined,
     rewardDisplaySymbol && rewardToken && rewardPercentage ? (
       <>
         <ToolTipWrapper>
@@ -184,7 +202,7 @@ const EstimatedTable = ({
         <TransparentWrapper isTransparent={!hasDepositReward}>
           <Text size="md" color="grey-400">
             {referralRewardAsBaseCurrency
-              ? `-$${formatUSD(referralRewardAsBaseCurrency)}`
+              ? `-${formatFeeUsdInWei(referralRewardAsBaseCurrency)}`
               : "-"}
           </Text>
         </TransparentWrapper>
@@ -218,7 +236,7 @@ const EstimatedTable = ({
               <RewardRebateWrapper>
                 {referralRewardAsBaseCurrency && (
                   <Text size="md" color="grey-400">
-                    ${formatUSD(referralRewardAsBaseCurrency)}
+                    {formatFeeUsdInWei(referralRewardAsBaseCurrency)}
                   </Text>
                 )}
                 <TokenFee
@@ -239,11 +257,11 @@ const EstimatedTable = ({
       >
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
-            Net fee
+            Total fee
           </Text>
           <Tooltip
             body="Total fees less any rewards, in USD."
-            title="Net fee"
+            title="Total fee"
             placement="bottom-start"
           >
             <InfoIconWrapper>
@@ -255,12 +273,15 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
+            {isSponsoredIntent && !doesAmountExceedMaxDeposit && (
+              <FreeTag>FREE</FreeTag>
+            )}
             <Text
               size="md"
               color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
             >
               {netFeeAsBaseCurrency && !doesAmountExceedMaxDeposit
-                ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
+                ? formatFeeUsdInWei(netFeeAsBaseCurrency)
                 : "-"}
             </Text>
             {collapsible && <ChevronIconStyled isExpanded={isExpanded} />}
@@ -795,4 +816,10 @@ const ChevronIconStyled = styled(ChevronIcon)`
       isExpanded ? "180deg" : "0deg"}
   );
   transition: transform 0.2s ease-in-out;
+`;
+
+const FeeValueWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
 `;

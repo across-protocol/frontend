@@ -1,4 +1,3 @@
-import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { CrossSwapQuotes } from "../../../_dexes/types";
 import { tagIntegratorId, tagSwapApiMarker } from "../../../_integrator-id";
@@ -6,8 +5,10 @@ import { InvalidParamError } from "../../../_errors";
 import { CHAIN_IDs } from "../../../_constants";
 import { Token } from "../../../_dexes/types";
 import { ConvertDecimals } from "../../../_utils";
-import { accountExistsOnHyperCore } from "../../../_hypercore";
-import { getCctpDomainId } from "./constants";
+import {
+  accountExistsOnHyperCore,
+  isHyperEvmToHyperCoreRoute,
+} from "../../../_hypercore";
 
 const HYPERCORE_ACCOUNT_CREATION_FEE_USDC = 1;
 
@@ -69,87 +70,6 @@ export function encodeForwardHookData(hypercoreMintRecipient: string): string {
   return "0x" + hookDataBuffer.toString("hex");
 }
 
-/**
- * CCTP fee configuration type from Circle API
- */
-type CctpFeeConfig = {
-  finalityThreshold: number;
-  minimumFee: number; // in bps
-  forwardFee: {
-    low: number; // in token units
-    med: number;
-    high: number;
-  };
-};
-
-/**
- * Queries Circle API to fetch CCTP fees for the specified finality threshold.
- *
- * Transfer fee: Variable fee in basis points of the transfer amount, collected at minting time.
- * - 0 bps for standard transfers (finality threshold > 1000)
- * - Varies by origin chain for fast transfers (finality threshold ≤ 1000)
- * - See: https://developers.circle.com/cctp/technical-guide#cctp-v2-fees
- *
- * Forward fee: Fixed fee in token units charged when routing through CCTP forwarder (e.g., to HyperCore).
- * - Applies only to forwarded transfers via depositForBurnWithHook
- * - Returned in token decimals (e.g., 6 decimals for USDC)
- *
- * @param inputToken - Input token with chainId
- * @param outputToken - Output token with chainId
- * @param minFinalityThreshold - Finality threshold: 1000 for fast, 2000 for standard
- * @returns transferFeeBps (basis points) and forwardFee (in token units)
- */
-export async function getCctpFees(params: {
-  inputToken: Token;
-  outputToken: Token;
-  minFinalityThreshold: number;
-}): Promise<{
-  transferFeeBps: number;
-  forwardFee: BigNumber;
-}> {
-  const { inputToken, outputToken, minFinalityThreshold } = params;
-
-  // Check if destination is HyperCore (requires forward fee)
-  const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
-  const useSandbox = outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET;
-
-  // Determine the CCTP destination domain (use HyperEVM domain for HyperCore)
-  const destinationChainIdForCctp = isDestinationHyperCore
-    ? CHAIN_IDs.HYPEREVM
-    : outputToken.chainId;
-
-  // Get CCTP domain IDs
-  const sourceDomainId = getCctpDomainId(inputToken.chainId);
-  const destDomainId = getCctpDomainId(destinationChainIdForCctp);
-
-  const endpoint = useSandbox ? "iris-api-sandbox" : "iris-api";
-  const url = `https://${endpoint}.circle.com/v2/burn/USDC/fees/${sourceDomainId}/${destDomainId}`;
-
-  const response = await axios.get<CctpFeeConfig[]>(url, {
-    params: isDestinationHyperCore ? { forward: true } : undefined,
-  });
-
-  // Find config matching the requested finality threshold
-  const transferConfig = response.data.find(
-    (config) => config.finalityThreshold === minFinalityThreshold
-  );
-
-  if (!transferConfig) {
-    throw new Error(
-      `Fee configuration not found for finality threshold ${minFinalityThreshold} in CCTP fee response`
-    );
-  }
-
-  // Use medium forward fee for HyperCore destinations, 0 otherwise
-  // Forward fee is a fixed fee charged by CCTP when going to HyperCore
-  const forwardFee = isDestinationHyperCore ? transferConfig.forwardFee.med : 0;
-
-  return {
-    transferFeeBps: transferConfig.minimumFee,
-    forwardFee: BigNumber.from(forwardFee),
-  };
-}
-
 export async function getAmountToHyperCore(params: {
   inputToken: Token;
   outputToken: Token;
@@ -202,19 +122,6 @@ export async function getAmountToHyperCore(params: {
     outputToken.decimals,
     inputToken.decimals
   )(amount.add(accountCreationFee));
-}
-
-export function isHyperEvmToHyperCoreRoute(params: {
-  inputToken: Token;
-  outputToken: Token;
-}) {
-  // Mainnet or testnet route
-  return (
-    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM &&
-      params.outputToken.chainId === CHAIN_IDs.HYPERCORE) ||
-    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM_TESTNET &&
-      params.outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET)
-  );
 }
 
 export function buildCctpTxHyperEvmToHyperCore(params: {

@@ -1,10 +1,15 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
+
 import {
   CHAIN_IDs,
   PUBLIC_NETWORKS,
   TOKEN_SYMBOLS_MAP,
+  OFT_NO_EID,
 } from "@across-protocol/constants";
+
+export { CHAIN_IDs } from "@across-protocol/constants";
+
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -20,6 +25,7 @@ import usdt0Logo from "assets/token-logos/usdt0.svg";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import MainnetUniversalSwapRoutes from "data/universal-swap-routes_1.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import IndirectChains from "data/indirect_chains_1.json";
 import { Deposit } from "hooks/useDeposits";
 
 import {
@@ -57,6 +63,20 @@ export {
   interchangeableTokensMap,
   similarTokensMap,
 };
+
+export const INDIRECT_CHAINS = IndirectChains.reduce(
+  (acc, chain) => {
+    acc[chain.chainId] = chain;
+    return acc;
+  },
+  {} as Record<number, (typeof IndirectChains)[number]>
+);
+
+export const OFT_EIDS_BY_CHAIN_ID = Object.fromEntries(
+  Object.entries(PUBLIC_NETWORKS)
+    .filter(([_, network]) => network.oftEid !== OFT_NO_EID)
+    .map(([chainId, network]) => [chainId, network.oftEid])
+);
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
@@ -310,15 +330,17 @@ export const getToken = (symbol: string): TokenInfo => {
 };
 
 /**
- * Gets token info with chain-specific display modifications (temporary for USDT0)
- * This is a temporary function that will be removed once all chains migrate to USDT0
+ * Apply chain-specific display modifications to a token
+ * Currently handles: USDT -> USDT0 for supported chains
+ *
+ * @param token Token info to transform
+ * @param chainId Chain ID to apply transformations for
+ * @returns Transformed token info, or original if no transformations needed
  */
-export const getTokenForChain = (
-  symbol: string,
+export function applyChainSpecificTokenDisplay(
+  token: TokenInfo,
   chainId: number
-): TokenInfo => {
-  const token = getToken(symbol);
-
+): TokenInfo {
   // Handle USDT -> USDT0 display for specific chains
   if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
     return {
@@ -328,8 +350,15 @@ export const getTokenForChain = (
     };
   }
 
+  if (token.symbol === "USDH-SPOT" && chainId === CHAIN_IDs.HYPERCORE) {
+    return {
+      ...token,
+      displaySymbol: "USDH",
+    };
+  }
+
   return token;
-};
+}
 
 export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
   if (!deposit.rewards) {
@@ -672,6 +701,14 @@ export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
 
 export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
 
+// This will override the routing preference for the swap API. Useful for testing burn/mint routes.
+export const swapApiRoutingPreference =
+  (["default", "native", "across"] as const).find(
+    (preference) =>
+      preference.toLowerCase() ===
+      process.env.REACT_APP_SWAP_API_ROUTING_PREFERENCE?.toLowerCase()
+  ) || "default";
+
 // temporary list, to show usdt0 symbol & icon.
 // once all chains have migrated we can remove this list and make upstream changes to USDT icons in @constants.
 export const chainsWithUsdt0Enabled = [
@@ -679,4 +716,46 @@ export const chainsWithUsdt0Enabled = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
+  CHAIN_IDs.MONAD,
+  CHAIN_IDs.UNICHAIN,
 ];
+
+// Autogenerate RPC config for each supported chain.
+// Any exceptions can be added to the ranges object.
+const resolveRpcConfig = () => {
+  const defaultRange = 10_000;
+  const ranges = {
+    [CHAIN_IDs.ALEPH_ZERO]: 0,
+    [CHAIN_IDs.BOBA]: 0,
+    [CHAIN_IDs.HYPEREVM]: 1_000, // QuickNode constraint.
+    [CHAIN_IDs.MONAD]: 100, // Alchemy constraint
+    [CHAIN_IDs.SOLANA]: 1_000,
+    [CHAIN_IDs.SOLANA_DEVNET]: 1000,
+  };
+  return Object.fromEntries(
+    Object.values(CHAIN_IDs).map((chainId) => [
+      chainId,
+      ranges[chainId] ?? defaultRange,
+    ])
+  );
+};
+
+const mergeConfig = <T>(config: T, envVar: string | undefined): T => {
+  const shallowCopy = { ...config };
+  Object.entries(JSON.parse(envVar ?? "{}")).forEach(([k, v]) => {
+    assert(
+      typeof v === typeof shallowCopy[k as keyof T] ||
+        !isDefined(shallowCopy[k as keyof T]),
+      `Invalid ${envVar} configuration on key ${k} (${typeof v} != ${typeof shallowCopy[k as keyof T]})`
+    );
+    shallowCopy[k as keyof T] = v as T[keyof T];
+  });
+  return shallowCopy;
+};
+
+export const chainMaxBlockLookback = mergeConfig(
+  resolveRpcConfig(),
+  process.env.MAX_BLOCK_LOOK_BACK
+);
+
+export const INTEGRATOR_ID_ACROSS = "0x007f";

@@ -1,7 +1,9 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { chainConfigs } from "./configs";
 
-export type ChainInfo = (typeof chainConfigs)[0];
+export type ChainInfo = (typeof chainConfigs)[0] & {
+  intermediaryChain?: number;
+};
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
 export type ChainId = (typeof CHAIN_IDs)[keyof typeof CHAIN_IDs];
@@ -33,6 +35,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
   CHAIN_IDs.HYPERCORE,
+  CHAIN_IDs.MONAD,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

@@ -23,7 +23,7 @@ export function getBridgeUrlWithQueryParams({
     }
     return acc;
   }, {});
-  return "/bridge?" + new URLSearchParams(cleanParams).toString();
+  return "/bridge-and-swap?" + new URLSearchParams(cleanParams).toString();
 }
 
 export function buildSearchParams(

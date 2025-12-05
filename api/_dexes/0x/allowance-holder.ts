@@ -72,11 +72,12 @@ export function get0xStrategy(
         originOrDestination: swap.originOrDestination,
         splitSlippage: opts?.splitSlippage,
       });
+      let initialSwapAmount = swap.amount;
 
-      if (opts?.sellEntireBalance && opts.quoteBuffer) {
+      if (opts?.sellEntireBalance) {
         swap.amount = addMarkupToAmount(
           BigNumber.from(swap.amount),
-          opts.quoteBuffer + slippageTolerance / 100
+          slippageTolerance / 100
         ).toString();
       }
       let swapAmount = swap.amount;
@@ -111,6 +112,7 @@ export function get0xStrategy(
           SWAP_PROVIDER_NAME,
           sourcesParams
         );
+        initialSwapAmount = swapAmount;
       }
 
       // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
@@ -167,8 +169,8 @@ export function get0xStrategy(
         });
       }
 
-      const expectedAmountIn = BigNumber.from(quote.sellAmount);
-      const maximumAmountIn = expectedAmountIn;
+      const expectedAmountIn = BigNumber.from(initialSwapAmount);
+      const maximumAmountIn = BigNumber.from(quote.sellAmount);
 
       const expectedAmountOut = BigNumber.from(quote.buyAmount);
       const minAmountOut = BigNumber.from(quote.minBuyAmount);

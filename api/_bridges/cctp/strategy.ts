@@ -1,4 +1,4 @@
-import { BigNumber, ethers, utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { TokenMessengerMinterV2Client } from "@across-protocol/contracts";
 import {
@@ -18,9 +18,8 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
 import {
@@ -34,6 +33,7 @@ import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
   CCTP_FINALITY_THRESHOLDS,
+  DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
   getCctpDomainId,
@@ -44,14 +44,14 @@ import {
 import { CHAIN_IDs } from "../../_constants";
 import {
   buildCctpTxHyperEvmToHyperCore,
-  getAmountToHyperCore,
-  isHyperEvmToHyperCoreRoute,
   isEvmToHyperCoreRoute,
   isToHyperCore,
   encodeForwardHookData,
-  getCctpFees,
+  getAmountToHyperCore,
 } from "./utils/hypercore";
-import { getEstimatedFillTime } from "./utils/fill-times";
+import { getEstimatedFillTime, getTransferMode } from "./utils/fill-times";
+import { getCctpFees } from "./utils/fees";
+import { isHyperEvmToHyperCoreRoute } from "../../_hypercore";
 
 const name = "cctp";
 
@@ -71,7 +71,9 @@ const capabilities: BridgeCapabilities = {
  * CCTP (Cross-Chain Transfer Protocol) bridge strategy for native USDC transfers.
  * Supports Circle's CCTP for burning USDC on source chain.
  */
-export function getCctpBridgeStrategy(): BridgeStrategy {
+export function getCctpBridgeStrategy(
+  requestedTransferMode: "standard" | "fast" = "fast"
+): BridgeStrategy {
   const isRouteSupported = (params: {
     inputToken: Token;
     outputToken: Token;
@@ -98,7 +100,12 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     const isDestinationChainSupported = CCTP_SUPPORTED_CHAINS.includes(
       params.outputToken.chainId
     );
-    if (!isOriginChainSupported || !isDestinationChainSupported) {
+    if (
+      !isOriginChainSupported ||
+      !isDestinationChainSupported ||
+      // NOTE: Our finalizer doesn't support destination Solana yet. Block the route until we do.
+      sdk.utils.chainIsSvm(params.outputToken.chainId)
+    ) {
       return false;
     }
 
@@ -114,16 +121,6 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         message: `CCTP: Route ${params.inputToken.symbol} -> ${params.outputToken.symbol} is not supported`,
       });
     }
-  };
-
-  /**
-   * Determines the appropriate CCTP finality threshold for a route.
-   * When going to HyperCore we use fast finality, all others use standard.
-   */
-  const getFinalityThreshold = (destinationChainId: number): number => {
-    return isToHyperCore(destinationChainId)
-      ? CCTP_FINALITY_THRESHOLDS.fast
-      : CCTP_FINALITY_THRESHOLDS.standard;
   };
 
   return {
@@ -167,15 +164,20 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       assertSupportedRoute({ inputToken, outputToken });
 
       let maxFee = BigNumber.from(0);
-      let outputAmount: BigNumber;
-      let standardOrFast: "standard" | "fast" = "standard";
-      if (isToHyperCore(outputToken.chainId)) {
-        // Query CCTP fee configuration for HyperCore destinations
-        const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        requestedTransferMode,
+        exactInputAmount,
+        inputToken.decimals
+      );
+      const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
+
+      if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
           inputToken,
           outputToken,
-          minFinalityThreshold,
+          transferMode,
+          useForwardFee: isDestinationHyperCore,
         });
 
         // Calculate actual fee:
@@ -183,27 +185,22 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         // maxFee = transferFee + forwardFee
         const transferFee = exactInputAmount.mul(transferFeeBps).div(10000);
         maxFee = transferFee.add(forwardFee);
-
-        // First subtract the CCTP fee from input
-        const remainingInputAmount = exactInputAmount.sub(maxFee);
-
-        // Then calculate HyperCore output (accounting for account creation fee if needed)
-        outputAmount = await getAmountToHyperCore({
-          inputToken,
-          outputToken,
-          inputOrOutput: "input",
-          amount: remainingInputAmount,
-          recipient,
-        });
-        standardOrFast = "fast";
-      } else {
-        // Standard conversion after fees
-        const inputAfterFee = exactInputAmount.sub(maxFee);
-        outputAmount = ConvertDecimals(
-          inputToken.decimals,
-          outputToken.decimals
-        )(inputAfterFee);
       }
+
+      const remainingInputAmount = exactInputAmount.sub(maxFee);
+      const outputAmount = isDestinationHyperCore
+        ? // Then calculate HyperCore output (accounting for account creation fee if needed)
+          await getAmountToHyperCore({
+            inputToken,
+            outputToken,
+            inputOrOutput: "input",
+            amount: remainingInputAmount,
+            recipient,
+          })
+        : ConvertDecimals(
+            inputToken.decimals,
+            outputToken.decimals
+          )(remainingInputAmount);
 
       return {
         bridgeQuote: {
@@ -214,7 +211,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           minOutputAmount: outputAmount,
           estimatedFillTimeSec: getEstimatedFillTime(
             inputToken.chainId,
-            standardOrFast
+            transferMode
           ),
           provider: name,
           fees: getCctpBridgeFees({
@@ -236,12 +233,12 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
     }: GetOutputBridgeQuoteParams) => {
       assertSupportedRoute({ inputToken, outputToken });
 
-      const destinationIsHyperCore = isToHyperCore(outputToken.chainId);
+      const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
 
       // Calculate how much needs to arrive on destination after HyperCore account creation fee (if applicable)
       // For HyperCore: minOutputAmount + accountCreationFee (if needed)
       // For other chains: just minOutputAmount
-      const amountToArriveOnDestination = destinationIsHyperCore
+      const amountToArriveOnDestination = isDestinationHyperCore
         ? await getAmountToHyperCore({
             inputToken,
             outputToken,
@@ -254,18 +251,22 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
             inputToken.decimals
           )(minOutputAmount);
 
-      // Calculate how much to send from origin to cover CCTP fees
-      let inputAmount: BigNumber;
+      let inputAmount = amountToArriveOnDestination;
       let maxFee = BigNumber.from(0);
-      let standardOrFast: "standard" | "fast" = "standard";
 
-      if (destinationIsHyperCore) {
-        standardOrFast = "fast";
-        const minFinalityThreshold = getFinalityThreshold(outputToken.chainId);
+      const transferMode = await getTransferMode(
+        inputToken.chainId,
+        requestedTransferMode,
+        inputAmount,
+        inputToken.decimals
+      );
+
+      if (transferMode === "fast") {
         const { transferFeeBps, forwardFee } = await getCctpFees({
           inputToken,
           outputToken,
-          minFinalityThreshold,
+          transferMode,
+          useForwardFee: isDestinationHyperCore,
         });
 
         // Solve for required input based on the following equation:
@@ -274,17 +275,11 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
         // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
         // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
         const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
-        inputAmount = amountToArriveOnDestination
-          .add(forwardFee)
-          .mul(10000)
-          .div(bpsFactor);
+        inputAmount = inputAmount.add(forwardFee).mul(10000).div(bpsFactor);
 
         // Calculate total CCTP fee (transfer fee + forward fee)
         const transferFee = inputAmount.mul(transferFeeBps).div(10000);
         maxFee = transferFee.add(forwardFee);
-      } else {
-        // Standard non-HyperCore route (no CCTP fees for now)
-        inputAmount = amountToArriveOnDestination;
       }
 
       return {
@@ -296,7 +291,7 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
           minOutputAmount,
           estimatedFillTimeSec: getEstimatedFillTime(
             inputToken.chainId,
-            standardOrFast
+            transferMode
           ),
           provider: name,
           fees: getCctpBridgeFees({
@@ -356,18 +351,21 @@ export function getCctpBridgeStrategy(): BridgeStrategy {
       // Get CCTP domain IDs and addresses
       const destinationDomain = getCctpDomainId(destinationChainIdForCctp);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
-
-      // Read CCTP fees from the bridge quote (pre-calculated during quote generation)
-      const maxFee = bridgeQuote.fees.amount;
-      // Get the appropriate finality threshold for the destination
-      const minFinalityThreshold = getFinalityThreshold(destinationChainId);
+      // Circle's API returns a minimum fee. Add 1 unit as buffer to ensure the transfer meets the threshold for fast mode eligibility.
+      const hasFastFee = bridgeQuote.fees.amount.gt(0);
+      const maxFee = hasFastFee
+        ? bridgeQuote.fees.amount.add(1)
+        : bridgeQuote.fees.amount;
+      const minFinalityThreshold = hasFastFee
+        ? CCTP_FINALITY_THRESHOLDS.fast
+        : CCTP_FINALITY_THRESHOLDS.standard;
 
       // depositForBurn input parameters
       const depositForBurnParams = {
         amount: bridgeQuote.inputAmount,
         destinationDomain,
         mintRecipient: crossSwap.recipient,
-        destinationCaller: ethers.constants.AddressZero, // Anyone can finalize the message on domain when this is set to bytes32(0)
+        destinationCaller: DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
         maxFee,
         minFinalityThreshold,
       };

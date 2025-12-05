@@ -18,18 +18,40 @@ export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
 };
+
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
-  USDH: {
-    name: "USDH",
-    symbol: "USDH",
-    decimals: 6,
+  POL: {
+    ...constants.TOKEN_SYMBOLS_MAP.POL,
     addresses: {
-      [CHAIN_IDs.HYPEREVM]: "0x111111a1a0667d36bD57c0A9f569b98057111111",
-      [CHAIN_IDs.HYPEREVM_TESTNET]:
-        "0x111111a1a0667d36bD57c0A9f569b98057111111",
+      ...constants.TOKEN_SYMBOLS_MAP.POL.addresses,
+      [CHAIN_IDs.POLYGON]: "0x0000000000000000000000000000000000001010",
     },
-    coingeckoId: "usdh-2",
+  },
+  WHYPE: {
+    ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
+      [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2222222222222222222222222222222222222222",
+    },
+  },
+  USDC: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
+    },
+  },
+  USDT: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDT,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
+      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
+    },
   },
   "USDH-SPOT": {
     name: "USDH-SPOT",
@@ -43,22 +65,7 @@ export const TOKEN_SYMBOLS_MAP = {
     coingeckoId: "usdh-2",
   },
 };
-TOKEN_SYMBOLS_MAP.USDC = {
-  ...TOKEN_SYMBOLS_MAP.USDC,
-  addresses: {
-    ...TOKEN_SYMBOLS_MAP.USDC.addresses,
-    [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
-    [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2000000000000000000000000000000000000000",
-  },
-};
-TOKEN_SYMBOLS_MAP.WHYPE = {
-  ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
-  addresses: {
-    ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
-    [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
-    [CHAIN_IDs.HYPERCORE_TESTNET]: "0x2222222222222222222222222222222222222222",
-  },
-};
+
 export const CHAINS = {
   ...constants.PUBLIC_NETWORKS,
   [CHAIN_IDs.HYPERCORE_TESTNET]: {
@@ -66,8 +73,12 @@ export const CHAINS = {
     chainId: CHAIN_IDs.HYPERCORE_TESTNET,
   },
 };
-export const TOKEN_EQUIVALENCE_REMAPPING =
-  constants.TOKEN_EQUIVALENCE_REMAPPING;
+export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
+export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
+  ...constants.TOKEN_EQUIVALENCE_REMAPPING,
+  "USDH-SPOT": "USDH",
+};
+export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 
 export const maxRelayFeePct = 0.25;
 
@@ -260,8 +271,12 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
   "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD].toLowerCase()]:
+    CHAIN_IDs.MONAD,
   [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
     CHAIN_IDs.PLASMA,
+  [TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM].toLowerCase()]:
+    CHAIN_IDs.HYPEREVM,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
@@ -348,6 +363,7 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "hype",
   "xpl",
   "pol",
+  "mon",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
@@ -363,6 +379,11 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
   TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -405,18 +426,20 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
-export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 1.5 * 60 * 60; // 1.5 hours
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2 * 60 * 60; // 2 hours
 
-export const CUSTOM_GAS_TOKENS = {
+export const CUSTOM_GAS_TOKENS: Record<number, string> = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
-  [CHAIN_IDs.POLYGON]: "POL",
-  [CHAIN_IDs.POLYGON_AMOY]: "POL",
-  [CHAIN_IDs.LENS]: "GHO",
-  [CHAIN_IDs.BSC]: "BNB",
-  [CHAIN_IDs.HYPEREVM]: "HYPE",
-  [CHAIN_IDs.PLASMA]: "XPL",
-  [CHAIN_IDs.HYPERCORE]: "HYPE",
+  [CHAIN_IDs.HYPERCORE_TESTNET]: "HYPE",
 };
+
+export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family !== constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
+
+export const SVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family === constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
 
 export const STABLE_COIN_SYMBOLS = Array.from(
   new Set([

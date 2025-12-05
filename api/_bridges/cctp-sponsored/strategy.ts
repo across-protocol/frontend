@@ -17,13 +17,12 @@ import {
 } from "../types";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { CCTP_FINALITY_THRESHOLDS } from "../cctp/utils/constants";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
 import { getFallbackRecipient } from "../../_dexes/utils";
 import { getEstimatedFillTime } from "../cctp/utils/fill-times";
 import { getZeroBridgeFees } from "../utils";
-import { getCctpFees } from "../cctp/utils/hypercore";
+import { getCctpFees } from "../cctp/utils/fees";
 import { buildSponsoredCCTPQuote } from "./utils/quote-builder";
 import {
   SPONSORED_CCTP_DESTINATION_CHAINS,
@@ -344,8 +343,6 @@ async function _prepareSponsoredTx(params: {
     });
   }
 
-  const minFinalityThreshold = CCTP_FINALITY_THRESHOLDS[CCTP_TRANSFER_MODE];
-
   // Calculate `maxFee` as required by `depositForBurnWithHook`
   let maxFee = BigNumber.from(0);
 
@@ -354,7 +351,9 @@ async function _prepareSponsoredTx(params: {
     const { transferFeeBps, forwardFee } = await getCctpFees({
       inputToken: crossSwap.inputToken,
       outputToken: crossSwap.outputToken,
-      minFinalityThreshold,
+      transferMode: CCTP_TRANSFER_MODE,
+      useSandbox: sdk.utils.chainIsProd(originChainId),
+      useForwardFee: true,
     });
     const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
     maxFee = transferFee.add(forwardFee);

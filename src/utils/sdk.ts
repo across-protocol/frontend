@@ -1,6 +1,7 @@
 import { BigNumber, providers } from "ethers";
 import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
 import { toAddressType as _toAddressType } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+export { getCCTPDepositAccounts } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 
 export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
@@ -21,16 +22,22 @@ export {
   compareAddressesSimple,
   isContractDeployedToAddress,
   toAddressType,
+  Address,
 } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+
 export {
   getNativeTokenSymbol,
   chainIsSvm,
   chainIsEvm,
+  chainIsProd,
 } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
 export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
 export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 export { bigToU8a32 } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
+export { paginatedEventQuery } from "@across-protocol/sdk/dist/esm/utils/EventUtils";
+export { getCctpDestinationChainFromDomain } from "@across-protocol/sdk/dist/esm/utils/CCTPUtils";
+export type { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm/types";
 
 export function getUpdateV3DepositTypedData(
   depositId: string,

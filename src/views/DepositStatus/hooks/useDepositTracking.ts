@@ -1,30 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
-import { BigNumber } from "ethers";
 
 import { useAmplitude } from "hooks";
 import {
-  generateDepositConfirmed,
-  getToken,
-  recordTransferUserProperties,
-  wait,
   getChainInfo,
   NoFundsDepositedLogError,
   debug,
   getEcosystem,
 } from "utils";
-import {
-  getLocalDepositByTxHash,
-  addLocalDeposit,
-  removeLocalDeposits,
-} from "utils/local-deposits";
-import { ampli } from "ampli";
+import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { BridgeProvider } from "./useDepositTracking/types";
 import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useToken } from "hooks/useToken";
+import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -32,27 +24,35 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
  * - depositTxHash: Transaction hash or signature
  * - fromChainId: Origin chain ID
  * - toChainId: Destination chain ID
- * - fromBridgePagePayload: Optional bridge page payload
+ * - fromBridgeAndSwapPagePayload: Optional bridge page payload
  * @returns Deposit and fill query results and status
  */
 export function useDepositTracking({
   depositTxHash,
   fromChainId,
   toChainId,
-  fromBridgePagePayload,
+  bridgeProvider = "across",
+  fromBridgeAndSwapPagePayload,
 }: {
   depositTxHash: string;
   fromChainId: number;
   toChainId: number;
-  fromBridgePagePayload?: FromBridgePagePayload;
+  bridgeProvider?: BridgeProvider;
+  fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
 }) {
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
+  const queryClient = useQueryClient();
   const { addToAmpliQueue } = useAmplitude();
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
   const account =
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  // Resolve token info for analytics
+  const tokenForAnalytics = useToken(
+    fromBridgeAndSwapPagePayload?.swapQuote.inputToken.symbol || ""
+  );
 
   // Create appropriate strategy for the source chain
   const { depositStrategy, fillStrategy } = useMemo(
@@ -62,14 +62,11 @@ export function useDepositTracking({
 
   // Query for deposit information
   const depositQuery = useQuery({
-    queryKey: ["deposit", depositTxHash, fromChainId, account],
+    queryKey: ["deposit", bridgeProvider, depositTxHash, fromChainId, account],
     queryFn: async () => {
-      // On some L2s the tx is mined too fast for the animation to show, so we add a delay
-      await wait(1_000);
-
       try {
         // Use the strategy to get deposit information through the normalized interface
-        return depositStrategy.getDeposit(depositTxHash);
+        return depositStrategy.getDeposit(depositTxHash, bridgeProvider);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
         if (e instanceof NoFundsDepositedLogError) {
@@ -87,53 +84,52 @@ export function useDepositTracking({
   useEffect(() => {
     const depositInfo = depositQuery.data;
 
-    if (
-      !fromBridgePagePayload ||
-      !depositInfo ||
-      depositInfo.status === "depositing"
-    ) {
+    // Wait for a successful deposit (or a revert)
+    if (!depositInfo || depositInfo.status === "depositing") {
       return;
     }
 
-    // Check if deposit is already in local storage
-    const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    // TODO
+    // // Check if deposit is already in local storage
+    // const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
 
-    if (!localDepositByTxHash) {
-      // Optimistically add deposit to local storage for instant visibility
-      // Use the strategy-specific conversion method
-      const localDeposit = depositStrategy.convertForDepositQuery(
-        depositInfo,
-        fromBridgePagePayload
-      );
-      addLocalDeposit(localDeposit);
-    }
+    // if (!localDepositByTxHash) {
+    //   // Optimistically add deposit to local storage for instant visibility
+    //   // Use the strategy-specific conversion method
+    //   const localDeposit = depositStrategy.convertForDepositQuery(
+    //     depositInfo,
+    //     fromBridgeAndSwapPagePayload
+    //   );
+    //   addLocalDeposit(localDeposit);
+    // }
 
     // Check if the deposit is from the current user
-    const isFromCurrentUser =
-      depositInfo.depositLog.depositor.toNative() === account;
-    if (!isFromCurrentUser) {
-      return;
-    }
+    // const isFromCurrentUser =
+    //   depositInfo.depositLog.depositor.toNative() === account;
+    // if (!isFromCurrentUser) {
+    //   return;
+    // }
 
-    // Track deposit in Amplitude
-    addToAmpliQueue(() => {
-      ampli.transferDepositCompleted(
-        generateDepositConfirmed(
-          fromBridgePagePayload.quoteForAnalytics,
-          fromBridgePagePayload.referrer,
-          fromBridgePagePayload.timeSigned,
-          depositInfo.depositTxHash,
-          true,
-          depositInfo.depositTimestamp,
-          fromBridgePagePayload.selectedRoute.fromTokenAddress,
-          fromBridgePagePayload.selectedRoute.toTokenAddress
-        )
-      );
-    });
+    // TODO
+    //  Track deposit in Amplitude
+    // addToAmpliQueue(() => {
+    //   ampli.transferDepositCompleted(
+    //     generateDepositConfirmed(
+    //       fromBridgeAndSwapPagePayload.quoteForAnalytics,
+    //       fromBridgeAndSwapPagePayload.referrer,
+    //       fromBridgeAndSwapPagePayload.timeSigned,
+    //       depositInfo.depositTxHash,
+    //       true,
+    //       depositInfo.depositTimestamp,
+    //       fromBridgeAndSwapPagePayload.selectedRoute.fromTokenAddress,
+    //       fromBridgeAndSwapPagePayload.selectedRoute.toTokenAddress
+    //     )
+    //   );
+    // });
   }, [
     depositQuery.data,
     addToAmpliQueue,
-    fromBridgePagePayload,
+    fromBridgeAndSwapPagePayload,
     account,
     depositTxHash,
     depositStrategy,
@@ -155,7 +151,7 @@ export function useDepositTracking({
       }
       logRelayData(depositInfo.depositLog);
       // Use the strategy to get fill information through the normalized interface
-      return await fillStrategy.getFill(depositInfo);
+      return await fillStrategy.getFill(depositInfo, bridgeProvider);
     },
     staleTime: Infinity,
     retry: true,
@@ -167,38 +163,62 @@ export function useDepositTracking({
   useEffect(() => {
     const fillInfo = fillQuery.data;
 
-    if (!fromBridgePagePayload || !fillInfo || fillInfo.status === "filling") {
+    if (!fillInfo || fillInfo.status === "filling") {
       return;
     }
-    // Remove existing deposit and add updated one with fill information
-    const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    // Refetch user balances
+    queryClient.refetchQueries({
+      queryKey: makeUseUserTokenBalancesQueryKey(),
+      type: "all", // Refetch both active and inactive queries
+    });
 
-    if (localDepositByTxHash) {
-      removeLocalDeposits([depositTxHash]);
-    }
+    // TODO
+    // // Remove existing deposit and add updated one with fill information
+    // const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
 
-    // Add to local storage with fill information
-    // Use the strategy-specific conversion method
-    const localDeposit = fillStrategy.convertForFillQuery(
-      fillInfo,
-      fromBridgePagePayload
-    );
-    addLocalDeposit(localDeposit);
+    // if (localDepositByTxHash) {
+    //   removeLocalDeposits([depositTxHash]);
+    // }
 
-    // Record transfer properties
-    const { quoteForAnalytics, depositArgs, tokenPrice } =
-      fromBridgePagePayload;
+    // TODO update deposit in localStorage. track in Amplitude
+    // if (fromBridgeAndSwapPagePayload) {
+    //   // Add to local storage with fill information
+    //   // Use the strategy-specific conversion method
+    //   const localDeposit = fillStrategy.convertForFillQuery(
+    //     fillInfo,
+    //     fromBridgeAndSwapPagePayload
+    //   );
+    //   addLocalDeposit(localDeposit);
 
-    recordTransferUserProperties(
-      BigNumber.from(depositArgs.amount),
-      BigNumber.from(tokenPrice),
-      getToken(quoteForAnalytics.tokenSymbol).decimals,
-      quoteForAnalytics.tokenSymbol.toLowerCase(),
-      Number(quoteForAnalytics.fromChainId),
-      Number(quoteForAnalytics.toChainId),
-      quoteForAnalytics.fromChainName
-    );
-  }, [fillQuery.data, depositTxHash, fromBridgePagePayload, fillStrategy]);
+    //   // Record transfer properties
+    //   const { swapQuote, depositArgs, tokenPrice } =
+    //     fromBridgeAndSwapPagePayload;
+
+    //   // Only record if we have token info
+    //   if (tokenForAnalytics) {
+    //     recordTransferUserProperties(
+    //       BigNumber.from(depositArgs.amount),
+    //       BigNumber.from(tokenPrice),
+    //       tokenForAnalytics.decimals,
+    //       quoteForAnalytics.tokenSymbol.toLowerCase(),
+    //       Number(quoteForAnalytics.fromChainId),
+    //       Number(quoteForAnalytics.toChainId),
+    //       quoteForAnalytics.fromChainName
+    //     );
+    //   }
+    // }
+  }, [
+    fillQuery.data,
+    depositTxHash,
+    fromBridgeAndSwapPagePayload,
+    fillStrategy,
+    tokenForAnalytics,
+    queryClient,
+    fromChainId,
+    toChainId,
+    accountSVM,
+    accountEVM,
+  ]);
 
   const status: DepositStatus = !depositQuery.data?.depositTimestamp
     ? "depositing"

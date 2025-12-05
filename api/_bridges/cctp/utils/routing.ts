@@ -16,53 +16,50 @@ const CCTP_ROUTING_RULES: CctpRoutingRule[] = [
   {
     name: "non-usdc-route",
     shouldApply: (data) => !data.isUsdcToUsdc,
-    getStrategy: getAcrossBridgeStrategy,
+    getStrategy: () => getAcrossBridgeStrategy(),
     reason: "Non-USDC pairs always use Across",
   },
   {
     name: "high-utilization",
     shouldApply: (data) => data.isUtilizationHigh,
-    getStrategy: getCctpBridgeStrategy,
+    getStrategy: () => getCctpBridgeStrategy(),
     reason: "High utilization (>80%) routes to CCTP",
-  },
-  {
-    name: "linea-exclusion",
-    shouldApply: (data) => data.isLineaSource,
-    getStrategy: getAcrossBridgeStrategy,
-    reason: "Linea source chain uses Across",
   },
   {
     name: "fast-cctp-small-deposit",
     shouldApply: (data) =>
-      data.isFastCctpEligible && !data.isInThreshold && !data.isLargeDeposit,
-    getStrategy: getCctpBridgeStrategy,
+      data.isFastCctpEligible &&
+      !data.isInThreshold &&
+      !data.isLargeCctpDeposit,
+    getStrategy: () => getCctpBridgeStrategy(),
     reason:
       "Fast CCTP eligible chains (Polygon/BSC/Solana) use CCTP for medium deposits (>$10K, <$1M)",
   },
   {
     name: "fast-cctp-threshold-or-large",
     shouldApply: (data) =>
-      data.isFastCctpEligible && (data.isInThreshold || data.isLargeDeposit),
-    getStrategy: getAcrossBridgeStrategy,
+      data.isFastCctpEligible &&
+      (data.isInThreshold || data.isLargeCctpDeposit),
+    getStrategy: () => getAcrossBridgeStrategy(),
     reason:
       "Fast CCTP chains use Across for very small (<$10K) or very large (>$1M) deposits",
   },
   {
     name: "instant-fill",
     shouldApply: (data) => data.canFillInstantly,
-    getStrategy: getAcrossBridgeStrategy,
+    getStrategy: () => getAcrossBridgeStrategy(),
     reason: "Instant fills always use Across for speed",
   },
   {
     name: "large-deposit-fallback",
-    shouldApply: (data) => data.isLargeDeposit,
+    shouldApply: (data) => data.isLargeCctpDeposit,
     getStrategy: getAcrossBridgeStrategy,
-    reason: "Large deposits (>$1M) use Across for better liquidity",
+    reason: "Large deposits (>$10M) use Across for better liquidity",
   },
   {
     name: "default-cctp",
     shouldApply: () => true,
-    getStrategy: getCctpBridgeStrategy,
+    getStrategy: () => getCctpBridgeStrategy(),
     reason: "Default to CCTP for standard USDC routes",
   },
 ];

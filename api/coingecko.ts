@@ -61,6 +61,12 @@ const BASE_TOKEN_SYMBOL_OVERRIDES: Record<string, string> = {
   MATIC: "POL",
 };
 
+// Static list of redirected token price lookup symbols.
+// Will be merged env variable REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS.
+const REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS_STATIC: Record<string, string> = {
+  "USDH-SPOT": "USDH",
+};
+
 const handler = async (
   { query }: TypedVercelRequest<CoingeckoQueryParams>,
   response: VercelResponse
@@ -281,10 +287,14 @@ async function resolvePriceBySymbol(params: {
   const logger = getLogger();
   const { symbol: _symbol, baseCurrency = "usd", dateStr } = params;
 
-  const redirectedLookupSymbols: Record<string, string> =
+  let redirectedLookupSymbols: Record<string, string> =
     REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS !== undefined
       ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS)
       : {};
+  redirectedLookupSymbols = {
+    ...REDIRECTED_TOKEN_PRICE_LOOKUP_SYMBOLS_STATIC,
+    ...redirectedLookupSymbols,
+  };
 
   if (dateStr) {
     throw new InvalidParamError({

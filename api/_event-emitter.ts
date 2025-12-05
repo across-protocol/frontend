@@ -27,6 +27,7 @@ export const ACROSS_EVENT_EMITTER_ADDRESS: Record<number, string> = {
   [CHAIN_IDs.POLYGON]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
   [CHAIN_IDs.LINEA]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
   [CHAIN_IDs.MODE]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
+  [CHAIN_IDs.MONAD]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
   [CHAIN_IDs.BLAST]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
   [CHAIN_IDs.LISK]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
   [CHAIN_IDs.REDSTONE]: "0xBF75133b48b0a42AB9374027902E83C5E2949034",
@@ -48,7 +49,7 @@ export const ACROSS_EVENT_EMITTER_ADDRESS: Record<number, string> = {
  * @param chainId The chain ID
  * @returns The contract address or undefined if not deployed on that chain
  */
-export function getEventEmitterAddress(chainId: number): string {
+export function getEventEmitterAddress(chainId: number): string | undefined {
   return ACROSS_EVENT_EMITTER_ADDRESS[chainId];
 }
 

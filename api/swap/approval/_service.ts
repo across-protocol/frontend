@@ -97,6 +97,7 @@ export async function handleApprovalSwap(
     amountType,
     recipient,
     depositor,
+    includesActions: actions.length > 0,
     routingPreference,
   });
 
@@ -157,6 +158,9 @@ export async function handleApprovalSwap(
   const inputTokenAddress = isInputNative
     ? ethers.constants.AddressZero
     : crossSwap.inputToken.address;
+  const outputTokenAddress = isOutputNative
+    ? ethers.constants.AddressZero
+    : crossSwap.outputToken.address;
   const inputAmount =
     originSwapQuote?.maximumAmountIn || bridgeQuote.inputAmount;
 
@@ -311,6 +315,7 @@ export async function handleApprovalSwap(
     originChainId: originTxChainId,
     destinationChainId,
     inputTokenAddress,
+    outputTokenAddress,
     inputAmount,
     approvalSwapTx:
       crossSwapTx.ecosystem === "evm"

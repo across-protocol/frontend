@@ -6,6 +6,13 @@ import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
+  tokenPairPerToChain?: {
+    [toChainId: number]: {
+      [inputToken: string]: {
+        [outputToken: string]: BridgeStrategy;
+      };
+    };
+  };
   fromToChains?: {
     [fromChainId: number]: {
       [toChainId: number]: BridgeStrategy;
@@ -55,7 +62,7 @@ export type OriginTx =
 export type GetBridgeQuoteParams = {
   inputToken: Token;
   outputToken: Token;
-  recipient?: string;
+  recipient: string;
   message?: string;
 };
 
@@ -113,10 +120,12 @@ export type BridgeStrategyData =
       canFillInstantly: boolean;
       isUtilizationHigh: boolean;
       isUsdcToUsdc: boolean;
-      isLargeDeposit: boolean;
+      isLargeCctpDeposit: boolean;
       isFastCctpEligible: boolean;
-      isLineaSource: boolean;
       isInThreshold: boolean;
+      isUsdtToUsdt: boolean;
+      isMonadTransfer: boolean;
+      isWithinMonadLimit: boolean;
     }
   | undefined;
 
@@ -125,6 +134,7 @@ export type BridgeStrategyDataParams = {
   outputToken: Token;
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
+  includesActions?: boolean;
   recipient?: string;
   depositor: string;
   logger?: Logger;
