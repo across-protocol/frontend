@@ -33,7 +33,7 @@ import {
   CCTP_SUPPORTED_CHAINS,
   CCTP_SUPPORTED_TOKENS,
   CCTP_FINALITY_THRESHOLDS,
-  DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
+  getCctpFinalizerAddress,
   getCctpTokenMessengerAddress,
   getCctpMessageTransmitterAddress,
   getCctpDomainId,
@@ -89,12 +89,7 @@ export function getCctpBridgeStrategy(
     const isDestinationChainSupported = CCTP_SUPPORTED_CHAINS.includes(
       params.outputToken.chainId
     );
-    if (
-      !isOriginChainSupported ||
-      !isDestinationChainSupported ||
-      // NOTE: Our finalizer doesn't support destination Solana yet. Block the route until we do.
-      sdk.utils.chainIsSvm(params.outputToken.chainId)
-    ) {
+    if (!isOriginChainSupported || !isDestinationChainSupported) {
       return false;
     }
 
@@ -295,6 +290,7 @@ export function getCctpBridgeStrategy(
       const destinationChainId = crossSwap.outputToken.chainId;
       const destinationDomain = getCctpDomainId(destinationChainId);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
+      const destinationFinalizer = getCctpFinalizerAddress(destinationChainId);
       // Circle's API returns a minimum fee. Add 1 unit as buffer to ensure the transfer meets the threshold for fast mode eligibility.
       const hasFastFee = bridgeQuote.fees.amount.gt(0);
       const maxFee = hasFastFee
@@ -309,7 +305,7 @@ export function getCctpBridgeStrategy(
         amount: bridgeQuote.inputAmount,
         destinationDomain,
         mintRecipient: crossSwap.recipient,
-        destinationCaller: DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS,
+        destinationCaller: destinationFinalizer,
         maxFee,
         minFinalityThreshold,
       };
