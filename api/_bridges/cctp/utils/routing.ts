@@ -1,116 +1,160 @@
 import { getAcrossBridgeStrategy } from "../../across/strategy";
 import { getCctpBridgeStrategy } from "../strategy";
+import { getOftBridgeStrategy } from "../../oft/strategy";
 import {
   BridgeStrategy,
   BridgeStrategyData,
   BridgeStrategyDataParams,
-  RoutingRule,
 } from "../../types";
 import { getBridgeStrategyData } from "../../utils";
 import { getLogger } from "../../../_utils";
 
-type CctpRoutingRule = RoutingRule<NonNullable<BridgeStrategyData>>;
-
-// Priority-ordered routing rules for CCTP
-const CCTP_ROUTING_RULES: CctpRoutingRule[] = [
-  {
-    name: "non-usdc-route",
-    shouldApply: (data) => !data.isUsdcToUsdc,
-    getStrategy: () => getAcrossBridgeStrategy(),
-    reason: "Non-USDC pairs always use Across",
-  },
-  {
-    name: "high-utilization",
-    shouldApply: (data) => data.isUtilizationHigh,
-    getStrategy: () => getCctpBridgeStrategy(),
-    reason: "High utilization (>80%) routes to CCTP",
-  },
-  {
-    name: "fast-cctp-small-deposit",
-    shouldApply: (data) =>
-      data.isFastCctpEligible &&
-      !data.isInThreshold &&
-      !data.isLargeCctpDeposit,
-    getStrategy: () => getCctpBridgeStrategy(),
-    reason:
-      "Fast CCTP eligible chains (Polygon/BSC/Solana) use CCTP for medium deposits (>$10K, <$1M)",
-  },
-  {
-    name: "fast-cctp-threshold-or-large",
-    shouldApply: (data) =>
-      data.isFastCctpEligible &&
-      (data.isInThreshold || data.isLargeCctpDeposit),
-    getStrategy: () => getAcrossBridgeStrategy(),
-    reason:
-      "Fast CCTP chains use Across for very small (<$10K) or very large (>$1M) deposits",
-  },
-  {
-    name: "instant-fill",
-    shouldApply: (data) => data.canFillInstantly,
-    getStrategy: () => getAcrossBridgeStrategy(),
-    reason: "Instant fills always use Across for speed",
-  },
-  {
-    name: "large-deposit-fallback",
-    shouldApply: (data) => data.isLargeCctpDeposit,
-    getStrategy: getAcrossBridgeStrategy,
-    reason: "Large deposits (>$10M) use Across for better liquidity",
-  },
-  {
-    name: "default-cctp",
-    shouldApply: () => true,
-    getStrategy: () => getCctpBridgeStrategy(),
-    reason: "Default to CCTP for standard USDC routes",
-  },
-];
-
 /**
- * Determines the optimal bridge strategy (CCTP vs Across) for a given route.
+ * Determines the optimal mint-and-burn bridge strategy (CCTP/OFT) for a given route.
  *
  * @param params - Bridge strategy data parameters including tokens, amounts, and addresses
  * @returns The selected bridge strategy, or null to pass to next routing function
  */
-export async function routeStrategyForCctp(
+export async function routeMintAndBurnStrategy(
   params: BridgeStrategyDataParams
 ): Promise<BridgeStrategy | null> {
   const logger = getLogger();
   const bridgeStrategyData = await getBridgeStrategyData(params);
 
   if (!bridgeStrategyData) {
-    logger.warn({
-      at: "routeStrategyForCctp",
-      message: "Failed to fetch bridge strategy data, passing to next router",
+    logger.debug({
+      at: "routeMintAndBurnStrategy",
+      message:
+        "Failed to fetch bridge strategy data, defaulting to Across routing",
       inputToken: params.inputToken.symbol,
       outputToken: params.outputToken.symbol,
     });
-    return null;
+    return getAcrossBridgeStrategy();
   }
 
-  const applicableRule = CCTP_ROUTING_RULES.find((rule) =>
-    rule.shouldApply(bridgeStrategyData)
-  );
-
-  if (!applicableRule) {
-    logger.warn({
-      at: "routeStrategyForCctp",
-      message: "No routing rule matched (unexpected), passing to next router",
-      bridgeStrategyData,
-    });
-    return null;
-  }
-
-  const strategy = applicableRule.getStrategy();
+  const decision = decideBurnAndMintStrategy(bridgeStrategyData);
 
   logger.debug({
-    at: "routeStrategyForCctp",
+    at: "routeMintAndBurnStrategy",
     message: "Bridge routing decision",
-    rule: applicableRule.name,
-    reason: applicableRule.reason,
-    strategy: strategy?.name || "null",
+    rule: decision.rule,
+    reason: decision.reason,
+    strategy: decision.strategy.name,
     inputToken: params.inputToken.symbol,
     outputToken: params.outputToken.symbol,
     bridgeStrategyData,
   });
 
-  return strategy;
+  return decision.strategy;
+}
+
+function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
+  strategy: BridgeStrategy;
+  rule: string;
+  reason: string;
+} {
+  const acrossStrategy = getAcrossBridgeStrategy();
+  const burnAndMintStrategy = getBurnAndMintStrategy(data);
+
+  if (!data.isUsdcToUsdc && !data.isUsdtToUsdt) {
+    return {
+      strategy: acrossStrategy,
+      rule: "non-mintable-route",
+      reason: "Non-USDC/USDT pairs always use Across",
+    };
+  }
+
+  if (data.isMonadTransfer) {
+    if (data.isWithinMonadLimit) {
+      return {
+        strategy: acrossStrategy,
+        rule: "monad-within-limit",
+        reason: "Monad routes within the lite limit use Across",
+      };
+    }
+
+    if (data.isUsdtToUsdt) {
+      return {
+        strategy: getOftBridgeStrategy(),
+        rule: "monad-usdt-route",
+        reason: "Monad USDT routes burn/mint via OFT",
+      };
+    }
+
+    if (data.isUsdcToUsdc) {
+      return {
+        strategy: getCctpBridgeStrategy(),
+        rule: "monad-usdc-route",
+        reason: "Monad USDC routes burn/mint via CCTP",
+      };
+    }
+
+    return {
+      strategy: acrossStrategy,
+      rule: "monad-default",
+      reason: "Fallback to Across for unsupported Monad pairs",
+    };
+  }
+
+  if (data.isUtilizationHigh) {
+    return {
+      strategy: burnAndMintStrategy,
+      rule: "high-utilization",
+      reason: "High utilization (>80%) routes to burn-and-mint bridges",
+    };
+  }
+
+  if (data.isFastCctpEligible) {
+    if (data.isInThreshold || data.isLargeCctpDeposit) {
+      return {
+        strategy: acrossStrategy,
+        rule: "fast-cctp-small-or-large",
+        reason:
+          "Fast CCTP chains use Across for <$10K or >$1M deposits to manage liquidity",
+      };
+    }
+
+    return {
+      strategy: burnAndMintStrategy,
+      rule: "fast-cctp-medium",
+      reason:
+        "Fast CCTP chains use burn-and-mint bridges for medium-sized deposits",
+    };
+  }
+
+  if (data.canFillInstantly) {
+    return {
+      strategy: acrossStrategy,
+      rule: "instant-fill",
+      reason: "Instant fills prioritize Across for the fastest UX",
+    };
+  }
+
+  if (data.isUsdcToUsdc && data.isLargeCctpDeposit) {
+    return {
+      strategy: acrossStrategy,
+      rule: "large-cctp-deposit",
+      reason: "Large USDC deposits (>$1M) remain on Across for capacity",
+    };
+  }
+
+  return {
+    strategy: burnAndMintStrategy,
+    rule: "default-burn-and-mint",
+    reason: "Default to burn-and-mint bridges for remaining USDC/USDT routes",
+  };
+}
+
+function getBurnAndMintStrategy(
+  data: NonNullable<BridgeStrategyData>
+): BridgeStrategy {
+  if (data.isUsdcToUsdc) {
+    return getCctpBridgeStrategy();
+  }
+
+  if (data.isUsdtToUsdt) {
+    return getOftBridgeStrategy();
+  }
+
+  return getAcrossBridgeStrategy();
 }

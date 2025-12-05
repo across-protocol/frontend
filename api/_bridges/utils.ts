@@ -14,8 +14,7 @@ import {
 } from "./cctp/utils/fill-times";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
-// https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
-const LARGE_CCTP_DEPOSIT_THRESHOLD = 10_000_000; // 10M USD
+const LARGE_CCTP_DEPOSIT_THRESHOLD = 1_000_000; // 1M USD
 const MONAD_LIMIT = 25_000; // 25K USD
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
@@ -55,7 +54,7 @@ export function isFullyUtilized(limits: LimitsResponse): boolean {
  *   - canFillInstantly: Whether the bridge can fill the deposit instantly
  *   - isUtilizationHigh: Whether bridge utilization is above 80% threshold
  *   - isUsdcToUsdc: Whether both input and output tokens are USDC
- *   - isLargeCctpDeposit: Whether deposit amount exceeds 10M USD threshold
+ *   - isLargeCctpDeposit: Whether deposit amount exceeds 1M USD threshold
  *   - isInThreshold: Whether deposit is within 10K USD Across threshold
  *   - isFastCctpEligible: Whether eligible for Fast CCTP on supported chains
  */
@@ -104,7 +103,7 @@ export async function getBridgeStrategyData({
     const isInThreshold = depositAmountUsd <= ACROSS_THRESHOLD;
     const isLargeCctpDeposit = depositAmountUsd > LARGE_CCTP_DEPOSIT_THRESHOLD;
 
-    // Check if eligible for Fast CCTP
+    // Check if eligible for Fast CCTP and deposit > 10K USD
     const fastCctpChains = Object.keys(CCTP_FILL_TIME_ESTIMATES.fast).map(
       Number
     );
