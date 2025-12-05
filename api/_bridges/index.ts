@@ -13,7 +13,7 @@ import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
-import { routeMintAndBurnStrategy } from "./cctp/utils/routing";
+import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),

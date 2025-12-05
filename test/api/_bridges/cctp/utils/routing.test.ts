@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { routeMintAndBurnStrategy } from "../../../../../api/_bridges/cctp/utils/routing";
+import { routeMintAndBurnStrategy } from "../../../../../api/_bridges/routing";
 import * as bridgeUtils from "../../../../../api/_bridges/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 import { BridgeStrategyData } from "../../../../../api/_bridges/types";

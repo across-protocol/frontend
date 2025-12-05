@@ -1,13 +1,13 @@
-import { getAcrossBridgeStrategy } from "../../across/strategy";
-import { getCctpBridgeStrategy } from "../strategy";
-import { getOftBridgeStrategy } from "../../oft/strategy";
+import { getAcrossBridgeStrategy } from "./across/strategy";
+import { getCctpBridgeStrategy } from "./cctp/strategy";
+import { getOftBridgeStrategy } from "./oft/strategy";
 import {
   BridgeStrategy,
   BridgeStrategyData,
   BridgeStrategyDataParams,
-} from "../../types";
-import { getBridgeStrategyData } from "../../utils";
-import { getLogger } from "../../../_utils";
+} from "./types";
+import { getBridgeStrategyData } from "./utils";
+import { getLogger } from "../_utils";
 
 /**
  * Determines the optimal mint-and-burn bridge strategy (CCTP/OFT) for a given route.
