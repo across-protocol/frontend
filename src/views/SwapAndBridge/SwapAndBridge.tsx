@@ -72,9 +72,7 @@ export default function SwapAndBridge() {
           dispatchQuoteRequestAction={dispatchQuoteRequestAction}
         />
         <ConfirmationButton
-          inputToken={quoteRequest.originToken}
-          outputToken={quoteRequest.destinationToken}
-          amount={quoteRequest.amount}
+          quoteRequest={quoteRequest}
           swapQuote={swapQuote || null}
           isQuoteLoading={isQuoteLoading}
           onConfirm={onConfirm}

@@ -261,8 +261,8 @@ type Story = StoryObj<typeof ConfirmationButton>;
 
 export const Default: Story = {
   args: {
-    inputToken: mockInputToken,
-    outputToken: mockOutputToken,
+    originToken: mockInputToken,
+    destinationToken: mockOutputToken,
     amount: BigNumber.from("100000000"),
     swapQuote: mockSwapQuote,
     isQuoteLoading: false,
@@ -372,8 +372,8 @@ export const AllProvidersCollapsed: Story = {
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          inputToken={mockInputToken}
-          outputToken={mockOutputToken}
+          originToken={mockInputToken}
+          destinationToken={mockOutputToken}
           amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
@@ -394,8 +394,8 @@ export const AllProvidersExpanded: Story = {
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          inputToken={mockInputToken}
-          outputToken={mockOutputToken}
+          originToken={mockInputToken}
+          destinationToken={mockOutputToken}
           amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}

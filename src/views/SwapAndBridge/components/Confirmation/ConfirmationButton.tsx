@@ -11,12 +11,10 @@ import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 import { AnimatePresence, motion } from "framer-motion";
-import { BigNumber } from "ethers";
 import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import {
   getPriceImpact,
   getSwapQuoteFees,
@@ -24,6 +22,7 @@ import {
 } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
+import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -36,9 +35,7 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-  amount: BigNumber | null;
+  quoteRequest: QuoteRequest;
   swapQuote: SwapApprovalApiCallReturnType | null;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
@@ -215,17 +212,17 @@ const ButtonCore: React.FC<{
 );
 
 export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
-  inputToken,
-  outputToken,
-  amount,
   swapQuote,
   onConfirm,
   buttonState,
   buttonDisabled,
   buttonLoading,
   buttonLabel,
+  quoteRequest,
   initialExpanded = false,
 }) => {
+  const { originToken, destinationToken, amount } = quoteRequest;
+
   // Render unified group driven by state
   const priceImpact = getPriceImpact(swapQuote);
   const [expanded, setExpanded] = React.useState(initialExpanded);
@@ -236,7 +233,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   // Resolve conversion helpers outside memo to respect hooks rules
 
   const displayValues = React.useMemo(() => {
-    if (!swapQuote || !inputToken || !outputToken || !swapQuote.fees) {
+    if (!swapQuote || !originToken || !destinationToken || !swapQuote.fees) {
       return {
         fee: "-",
         time: "-",
@@ -273,7 +270,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, inputToken, outputToken, amount]);
+  }, [swapQuote, originToken, destinationToken, amount]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
