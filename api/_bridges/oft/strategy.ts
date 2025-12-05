@@ -31,7 +31,7 @@ import {
   HYPEREVM_OFT_COMPOSER_ADDRESSES,
 } from "./utils/constants";
 import * as chainConfigs from "../../../scripts/chain-configs";
-import { CHAIN_IDs } from "@across-protocol/constants";
+import { CHAIN_IDs } from "../../../api/_constants";
 
 const name = "oft" as const;
 
@@ -616,7 +616,10 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     capabilities,
     originTxNeedsAllowance: true,
     getCrossSwapTypes: getOftCrossSwapTypes,
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: (
+      crossSwap: CrossSwap,
+      _hasOriginSwap?: boolean
+    ) => {
       return crossSwap.recipient;
     },
     getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {

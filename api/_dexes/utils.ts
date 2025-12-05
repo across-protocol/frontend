@@ -41,6 +41,7 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
+  getWrappedNativeTokenAddress,
 } from "../_utils";
 import { CHAIN_IDs } from "../_constants";
 import {
@@ -211,11 +212,103 @@ export function getCrossSwapTypes(params: {
   return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
-export function getBridgeQuoteRecipient(crossSwap: CrossSwap) {
+/**
+ * Helper function to determine if MultiCallHandler can be bypassed for a simple bridge.
+ * Returns true when ALL of the following conditions are met:
+ * - Amount type is exactInput or minOutput
+ * - No origin swap is needed. For origin swaps, we need to use MulticallHandler to emit metadata events.
+ * - No app fees are specified
+ * - No native output token (no unwrapping needed)
+ * - No destination actions
+ */
+function shouldBypassMultiCallHandler(
+  crossSwap: CrossSwap,
+  hasOriginSwap: boolean
+): boolean {
+  // Only bypass for exactInput and minOutput trade types
+  // exactOutput is excluded since it requires MultiCallHandler to handle precise output transfers and potential refunds
+  const isValidAmountType =
+    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT ||
+    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT;
+
+  // Check if app fees are specified
+  const hasAppFees =
+    crossSwap.appFeePercent !== undefined &&
+    crossSwap.appFeePercent > 0 &&
+    crossSwap.appFeeRecipient !== undefined;
+
+  // Check if output requires special handling
+  const isOutputNative = crossSwap.isOutputNative; // We need to unwrap for the user
+  const wrappedNativeTokenAddress = getWrappedNativeTokenAddress(
+    crossSwap.outputToken.chainId
+  );
+  const isOutputWrappedNative =
+    crossSwap.outputToken.address.toLowerCase() ===
+    wrappedNativeTokenAddress.toLowerCase();
+
+  // Since the protocol has special rules for handling native tokens on the destination chain
+  // depending on whether the recipient is a contract or an EOA, we have to handle both cases
+  // where the output token is native or wrapped native.
+  // See: https://docs.across.to/introduction/technical-faq#what-is-the-behavior-of-eth-weth-in-transfers
+  const needsOutputTokenHandling = isOutputNative || isOutputWrappedNative;
+
+  // Check if there are embedded actions
+  const hasEmbeddedActions =
+    crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
+
+  // Can bypass only if amount type is valid AND none of the special handling conditions are present
+  return (
+    isValidAmountType &&
+    !hasOriginSwap &&
+    !hasAppFees &&
+    !needsOutputTokenHandling &&
+    !hasEmbeddedActions
+  );
+}
+
+/**
+ * Creates a placeholder origin swap quote for A2B flows to ensure accurate gas estimation.
+ * This is used when requesting a bridge quote but the actual origin swap quote hasn't been
+ * calculated yet. The placeholder has the correct structure so the message gas costs are accurate.
+ */
+export function createPlaceholderOriginSwapQuote(
+  crossSwap: CrossSwap,
+  bridgeableInputToken: Token
+): SwapQuote {
+  return {
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    maximumAmountIn: BigNumber.from("1000000"),
+    minAmountOut: BigNumber.from("1000000"),
+    expectedAmountIn: BigNumber.from("1000000"),
+    expectedAmountOut: BigNumber.from("1000000"),
+    slippageTolerance:
+      typeof crossSwap.slippageTolerance === "number"
+        ? crossSwap.slippageTolerance
+        : 0.5,
+    swapProvider: { name: "placeholder", sources: [] },
+    swapTxns: [],
+  };
+}
+
+export function getBridgeQuoteRecipient(
+  crossSwap: CrossSwap,
+  hasOriginSwap: boolean = false
+) {
   if (crossSwap.isDestinationSvm) {
     // Until we support messages for SVM destinations, we don't need to use MultiCallHandler
     return crossSwap.recipient;
   }
+
+  // For simple B2B transfers we can send funds directly to the recipient, bypassing MultiCallHandler.
+  // This only applies when:
+  // - amount type is exactInput or minOutput
+  // - no origin swap is needed
+  // - no app fees, native output, or embedded actions are present
+  if (shouldBypassMultiCallHandler(crossSwap, hasOriginSwap)) {
+    return crossSwap.recipient;
+  }
+
   return getMultiCallHandlerAddress(crossSwap.outputToken.chainId);
 }
 
@@ -226,6 +319,11 @@ export function getBridgeQuoteMessage(
 ) {
   if (crossSwap.isDestinationSvm) {
     // Until we support messages for SVM destinations, we don't need to build a message
+    return undefined;
+  }
+
+  // For simple B2B transfers we don't need to build a message
+  if (shouldBypassMultiCallHandler(crossSwap, !!originSwapQuote)) {
     return undefined;
   }
 
