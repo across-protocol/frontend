@@ -17,13 +17,26 @@ const buttonLabels: Record<BridgeButtonState, string> = {
   validationError: "Confirm Swap",
 };
 
+export type ButtonState = {
+  buttonStatus:
+    | "notConnected"
+    | "readyToConfirm"
+    | "submitting"
+    | "loadingQuote"
+    | "validationError"
+    | "apiError";
+  buttonDisabled: boolean;
+  buttonLoading: boolean;
+  buttonLabel: string;
+};
+
 export const useButtonState = (
   quoteRequest: QuoteRequest,
   approvalAction: SwapApproval,
   validation: ValidationResult,
   quoteError: Error | null,
   isQuoteLoading: boolean
-) => {
+): ButtonState => {
   const {
     depositor,
     recipient,
@@ -45,7 +58,7 @@ export const useButtonState = (
     return undefined;
   })();
 
-  const buttonState: BridgeButtonState = useMemo(() => {
+  const buttonStatus: BridgeButtonState = useMemo(() => {
     if (approvalAction.isButtonActionLoading) return "submitting";
     if (isQuoteLoading) return "loadingQuote";
     if (quoteError) return "apiError";
@@ -62,8 +75,8 @@ export const useButtonState = (
   ]);
 
   const buttonLoading = useMemo(() => {
-    return buttonState === "loadingQuote" || buttonState === "submitting";
-  }, [buttonState]);
+    return buttonStatus === "loadingQuote" || buttonStatus === "submitting";
+  }, [buttonStatus]);
 
   const quoteWarningMessage = useMemo(() => {
     return getQuoteWarningMessage(quoteError);
@@ -71,16 +84,16 @@ export const useButtonState = (
 
   const buttonLabel = useMemo(() => {
     // Show validation error in button label if present
-    if (validation.errorFormatted && buttonState === "validationError") {
+    if (validation.errorFormatted && buttonStatus === "validationError") {
       return validation.errorFormatted;
     }
 
     // Show API error in button label if present
-    if (quoteWarningMessage && buttonState === "apiError") {
+    if (quoteWarningMessage && buttonStatus === "apiError") {
       return quoteWarningMessage;
     }
 
-    if (buttonState === "notConnected" && walletTypeToConnect) {
+    if (buttonStatus === "notConnected" && walletTypeToConnect) {
       if (!depositor && !recipient) {
         return "Connect Wallet";
       }
@@ -88,9 +101,9 @@ export const useButtonState = (
         ? "Connect EVM Wallet"
         : "Connect SVM Wallet";
     }
-    return buttonLabels[buttonState];
+    return buttonLabels[buttonStatus];
   }, [
-    buttonState,
+    buttonStatus,
     walletTypeToConnect,
     depositor,
     recipient,
@@ -116,7 +129,7 @@ export const useButtonState = (
   );
 
   return {
-    buttonState,
+    buttonStatus,
     buttonDisabled,
     buttonLoading,
     buttonLabel,

@@ -209,7 +209,7 @@ const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
   title: "Stories/ConfirmationButton",
   argTypes: {
-    buttonState: {
+    buttonStatus: {
       control: {
         type: "select",
       },
@@ -262,7 +262,7 @@ export const Default: Story = {
   args: {
     swapQuote: mockSwapQuote,
     isQuoteLoading: false,
-    buttonState: "readyToConfirm",
+    buttonStatus: "readyToConfirm",
     buttonDisabled: false,
     buttonLoading: false,
     buttonLabel: "Confirm Swap",
@@ -276,7 +276,7 @@ export const NotConnected: Story = {
   args: {
     ...Default.args,
     swapQuote: null,
-    buttonState: "notConnected",
+    buttonStatus: "notConnected",
     buttonLabel: "Connect wallet",
   },
 };
@@ -285,7 +285,7 @@ export const LoadingQuote: Story = {
   args: {
     ...Default.args,
     swapQuote: null,
-    buttonState: "loadingQuote",
+    buttonStatus: "loadingQuote",
     buttonDisabled: true,
     buttonLoading: true,
     buttonLabel: "Fetching quote...",
@@ -295,7 +295,7 @@ export const LoadingQuote: Story = {
 export const Submitting: Story = {
   args: {
     ...Default.args,
-    buttonState: "submitting",
+    buttonStatus: "submitting",
     buttonDisabled: true,
     buttonLoading: true,
     buttonLabel: "Confirming...",
@@ -305,7 +305,7 @@ export const Submitting: Story = {
 export const WrongNetwork: Story = {
   args: {
     ...Default.args,
-    buttonState: "wrongNetwork",
+    buttonStatus: "wrongNetwork",
     buttonDisabled: true,
     buttonLabel: "Switch network",
   },
@@ -315,7 +315,7 @@ export const ValidationError: Story = {
   args: {
     ...Default.args,
     swapQuote: null,
-    buttonState: "validationError",
+    buttonStatus: "validationError",
     buttonDisabled: true,
     buttonLabel: "Invalid amount",
   },
@@ -325,7 +325,7 @@ export const ApiError: Story = {
   args: {
     ...Default.args,
     swapQuote: null,
-    buttonState: "apiError",
+    buttonStatus: "apiError",
     buttonDisabled: true,
     buttonLabel: "Failed to get quote",
   },
@@ -367,7 +367,7 @@ export const AllProvidersCollapsed: Story = {
           key={provider}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonState="readyToConfirm"
+          buttonStatus="readyToConfirm"
           buttonDisabled={false}
           buttonLoading={false}
           buttonLabel="Confirm Swap"
@@ -385,7 +385,7 @@ export const AllProvidersExpanded: Story = {
           key={provider}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonState="readyToConfirm"
+          buttonStatus="readyToConfirm"
           buttonDisabled={false}
           buttonLoading={false}
           buttonLabel="Confirm Swap"

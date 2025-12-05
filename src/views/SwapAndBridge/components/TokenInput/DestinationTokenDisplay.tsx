@@ -16,9 +16,10 @@ import {
   UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { BigNumber } from "ethers";
 
 type DestinationTokenDisplayProps = {
-  expectedOutputAmount: string | undefined;
+  expectedOutputAmount: BigNumber | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;

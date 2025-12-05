@@ -2,21 +2,20 @@ import { COLORS } from "utils";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
-import { AmountInputError } from "views/Bridge/utils";
 import { UnitType } from "hooks";
 import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
-import { DestinationTokenDisplay, OriginTokenInput } from "./TokenInput";
+import { BigNumber } from "ethers";
+import { OriginTokenInput } from "./TokenInput/OriginTokenInput";
+import { DestinationTokenDisplay } from "./TokenInput/DestinationTokenDisplay";
 
 export const InputForm = ({
   isQuoteLoading,
   expectedOutputAmount,
   expectedInputAmount,
-  validationError,
 }: {
   isQuoteLoading: boolean;
-  expectedOutputAmount: string | undefined;
-  expectedInputAmount: string | undefined;
-  validationError: AmountInputError | undefined;
+  expectedOutputAmount: BigNumber | undefined;
+  expectedInputAmount: BigNumber | undefined;
 }) => {
   const { quickSwap } = useQuoteRequestContext();
   const [unit, setUnit] = useState<UnitType>("token");
@@ -26,9 +25,6 @@ export const InputForm = ({
       <OriginTokenInput
         expectedAmount={expectedInputAmount}
         isUpdateLoading={isQuoteLoading}
-        insufficientBalance={
-          validationError === AmountInputError.INSUFFICIENT_BALANCE
-        }
         unit={unit}
         setUnit={setUnit}
       />

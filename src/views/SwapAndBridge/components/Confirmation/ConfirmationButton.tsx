@@ -23,6 +23,7 @@ import {
 import { ProviderBadge } from "./BridgeProvider";
 import { BridgeProvider, getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { ButtonState } from "../../hooks/useButtonState";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -35,13 +36,10 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  swapQuote: SwapApprovalApiCallReturnType | null;
+  swapQuote: SwapApprovalApiCallReturnType | undefined;
   isQuoteLoading: boolean;
   onConfirm?: () => Promise<void>;
-  buttonState: BridgeButtonState;
-  buttonDisabled: boolean;
-  buttonLoading: boolean;
-  buttonLabel?: string;
+  buttonState: ButtonState;
   initialExpanded?: boolean;
 }
 
@@ -210,22 +208,18 @@ const ButtonCore: React.FC<{
 );
 
 export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
+  buttonState,
   swapQuote,
   onConfirm,
-  buttonState,
-  buttonDisabled,
-  buttonLoading,
-  buttonLabel,
   initialExpanded = false,
 }) => {
   const { quoteRequest } = useQuoteRequestContext();
   const { originToken, destinationToken, amount } = quoteRequest;
-
+  const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
+    buttonState;
   // Render unified group driven by state
   const priceImpact = getPriceImpact(swapQuote);
   const [expanded, setExpanded] = React.useState(initialExpanded);
-
-  const state = buttonState;
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
@@ -271,7 +265,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   }, [swapQuote, originToken, destinationToken, amount]);
 
   // When notConnected, make button clickable so it can open wallet modal
-  const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
+  const isButtonDisabled =
+    buttonStatus === "notConnected" ? false : buttonDisabled;
 
   useEffect(() => {
     if (!swapQuote) {
@@ -289,7 +284,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         expanded={expanded}
         onToggle={() => setExpanded((e) => !e)}
         visible={true}
-        state={state}
+        state={buttonStatus}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
         provider={provider}
@@ -384,11 +379,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         </ExpandedDetails>
       </ExpandableLabelSection>
       <ButtonCore
-        state={state}
+        state={buttonStatus}
         label={buttonLabel}
         loading={buttonLoading}
         disabled={isButtonDisabled}
-        fullHeight={state !== "readyToConfirm"}
+        fullHeight={buttonStatus !== "readyToConfirm"}
         onClick={onConfirm}
       />
     </>
@@ -398,8 +393,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     <>
       <Container
         dark={
-          buttonState === "validationError" ||
-          buttonState === "apiError" ||
+          buttonStatus === "validationError" ||
+          buttonStatus === "apiError" ||
           buttonLoading
         }
       >

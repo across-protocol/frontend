@@ -10,7 +10,7 @@ import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
 import { INTEGRATOR_ID_ACROSS } from "utils";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 
-export type SwapQuote = ReturnType<typeof useSwapQuote>["data"];
+export type SwapQuote = ReturnType<typeof useSwapQuote>["swapQuote"];
 
 const useSwapQuote = ({
   amount,
@@ -80,7 +80,7 @@ const useSwapQuote = ({
       query.state.status === "success" ? 10_000 : false,
   });
 
-  return { data, isLoading, error };
+  return { swapQuote: data, isQuoteLoading: isLoading, quoteError: error };
 };
 
 export default useSwapQuote;

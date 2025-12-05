@@ -24,12 +24,7 @@ function SwapAndBridgeContent() {
     destinationToken: quoteRequest.destinationToken,
     customDestinationAccount: quoteRequest.customDestinationAccount,
   });
-
-  const {
-    data: swapQuote,
-    isLoading: isQuoteLoading,
-    error: quoteError,
-  } = useSwapQuote(quoteRequest);
+  const { swapQuote, quoteError, isQuoteLoading } = useSwapQuote(quoteRequest);
 
   const approvalAction = useSwapApprovalAction(
     quoteRequest.originToken?.chainId || 0,
@@ -47,38 +42,33 @@ function SwapAndBridgeContent() {
     swapQuote?.inputAmount
   );
 
-  const { buttonState, buttonDisabled, buttonLoading, buttonLabel } =
-    useButtonState(
-      quoteRequest,
-      approvalAction,
-      validation,
-      quoteError,
-      isQuoteLoading
-    );
+  const buttonState = useButtonState(
+    quoteRequest,
+    approvalAction,
+    validation,
+    quoteError,
+    isQuoteLoading
+  );
 
   const expectedInputAmount = useMemo(() => {
-    return swapQuote?.inputAmount?.toString();
+    return swapQuote?.inputAmount;
   }, [swapQuote]);
   const expectedOutputAmount = useMemo(() => {
-    return swapQuote?.expectedOutputAmount?.toString();
+    return swapQuote?.expectedOutputAmount;
   }, [swapQuote]);
 
   return (
     <Wrapper>
       <InputForm
-        isQuoteLoading={isQuoteLoading}
-        expectedOutputAmount={expectedOutputAmount}
         expectedInputAmount={expectedInputAmount}
-        validationError={validation.error}
+        expectedOutputAmount={expectedOutputAmount}
+        isQuoteLoading={isQuoteLoading}
       />
       <ConfirmationButton
-        swapQuote={swapQuote || null}
+        buttonState={buttonState}
         isQuoteLoading={isQuoteLoading}
         onConfirm={onConfirm}
-        buttonState={buttonState}
-        buttonDisabled={buttonDisabled}
-        buttonLoading={buttonLoading}
-        buttonLabel={buttonLabel}
+        swapQuote={swapQuote}
       />
     </Wrapper>
   );
