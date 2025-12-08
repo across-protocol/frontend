@@ -5,11 +5,21 @@ import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
+import { UseMutateAsyncFunction } from "@tanstack/react-query/build/modern/types";
 
-export function useSwapApprovalAction(
+export interface SwapApproval {
+  isConnected: boolean;
+  isWrongNetwork: boolean;
+  buttonActionHandler: UseMutateAsyncFunction<string, Error>;
+  isButtonActionLoading: boolean;
+  didActionError: boolean;
+  buttonDisabled: boolean;
+}
+
+export const useSwapApprovalAction = (
   originChainId: number,
   swapQuote?: SwapApprovalQuote
-) {
+): SwapApproval => {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
 
@@ -23,4 +33,4 @@ export function useSwapApprovalAction(
   return getEcosystem(originChainId) === "evm"
     ? evmHook(swapQuote)
     : svmHook(swapQuote);
-}
+};
