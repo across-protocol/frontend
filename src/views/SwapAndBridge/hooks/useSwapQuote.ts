@@ -28,14 +28,22 @@ const useSwapQuote = ({
 
   const debouncedAmount = useDebounce(amount, 300);
 
+  const skipOriginTxEstimation = !depositor;
+
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "swap-quote",
       debouncedAmount,
       customDestinationAccount?.address,
       destinationToken?.address,
+      destinationToken?.chainId,
       originToken?.address,
+      originToken?.chainId,
       tradeType,
+      depositor,
+      depositorOrPlaceholder,
+      recipientOrPlaceholder,
+      skipOriginTxEstimation,
     ],
     queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
       if (Number(debouncedAmount) <= 0) {
@@ -57,7 +65,7 @@ const useSwapQuote = ({
           : recipientOrPlaceholder,
         amount: debouncedAmount.toString(),
         refundOnOrigin: true,
-        skipOriginTxEstimation: !depositor,
+        skipOriginTxEstimation,
         integratorId: INTEGRATOR_ID_ACROSS,
       };
 
