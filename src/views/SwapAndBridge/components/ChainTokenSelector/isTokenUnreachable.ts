@@ -20,7 +20,28 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
   },
+  // only allow bridegable output to SOlana
+  {
+    fromChainId: "*",
+    fromSymbol: ["*"],
+    toChainId: [CHAIN_IDs.SOLANA],
+    toSymbol: ["!USDC"],
+  },
 ];
+
+// simple glob tester. supports only:  ["*" , "!"]
+function matchesGlob(pattern: string, value: string): boolean {
+  const negate = pattern.startsWith("!");
+  const raw = negate ? pattern.slice(1) : pattern;
+
+  // escape regex meta characters
+  const escaped = raw.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const body = escaped.replace(/\*/g, ".*");
+
+  const positive = new RegExp(`^${body}$`);
+
+  return negate ? !positive.test(value) : positive.test(value);
+}
 
 export function matchesRestrictedRoute(
   route: RouteParams,
@@ -28,10 +49,17 @@ export function matchesRestrictedRoute(
 ): boolean {
   // helper
   const matches = <T>(restrictionValue: "*" | T[], routeValue: T): boolean => {
+    // Special case: "*" matches everything
     if (restrictionValue === "*") {
       return true;
     }
-    return restrictionValue.includes(routeValue);
+
+    const routeValueStr = String(routeValue);
+
+    return restrictionValue.some((pattern) => {
+      const patternStr = String(pattern);
+      return matchesGlob(patternStr, routeValueStr);
+    });
   };
 
   return (
