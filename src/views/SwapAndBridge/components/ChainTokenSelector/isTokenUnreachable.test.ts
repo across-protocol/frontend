@@ -1,5 +1,6 @@
 import {
   isTokenUnreachable,
+  matchesGlob,
   matchesRestrictedRoute,
   RestrictedRoute,
   RouteParams,
@@ -224,5 +225,51 @@ describe("isTokenUnreachable", () => {
     const isUnreachable = isTokenUnreachable(inputToken, true, outputToken);
 
     expect(isUnreachable).toBe(false);
+  });
+
+  describe("matchesGlob", () => {
+    it.each([
+      // No special characters (exact match)
+      { pattern: "USDC", value: "USDC", expected: true },
+      { pattern: "USDC", value: "USDT", expected: false },
+      { pattern: "USDC.e", value: "USDC.e", expected: true },
+      { pattern: "USDC.e", value: "USDC", expected: false },
+      // Only * (glob pattern)
+      { pattern: "USDC*", value: "USDC", expected: true },
+      { pattern: "USDC*", value: "USDC.e", expected: true },
+      { pattern: "USDC*", value: "USDC-BNB", expected: true },
+      { pattern: "USDC*", value: "USDT", expected: false },
+      { pattern: "*ETH", value: "ETH", expected: true },
+      { pattern: "*ETH", value: "WETH", expected: true },
+      { pattern: "*ETH", value: "USDC", expected: false },
+      { pattern: "*USDC*", value: "USDC", expected: true },
+      { pattern: "*USDC*", value: "wrappedUSDC", expected: true },
+      { pattern: "*USDC*", value: "USDC.e", expected: true },
+      { pattern: "*USDC*", value: "USDT", expected: false },
+      // Only ! (negation)
+      { pattern: "!USDC", value: "USDC", expected: false },
+      { pattern: "!USDC", value: "USDT", expected: true },
+      { pattern: "!USDC", value: "ETH", expected: true },
+      // Both ! and * (negation + glob)
+      { pattern: "!USDC*", value: "USDC", expected: false },
+      { pattern: "!USDC*", value: "USDC.e", expected: false },
+      { pattern: "!USDC*", value: "USDC-BNB", expected: false },
+      { pattern: "!USDC*", value: "USDT", expected: true },
+      { pattern: "!USDC*", value: "ETH", expected: true },
+      { pattern: "!*ETH", value: "ETH", expected: false },
+      { pattern: "!*ETH", value: "WETH", expected: false },
+      { pattern: "!*ETH", value: "USDC", expected: true },
+      { pattern: "!*ETH", value: "USDT", expected: true },
+      { pattern: "!USD*", value: "USDC", expected: false },
+      { pattern: "!USD*", value: "USDT", expected: false },
+      { pattern: "!USD*", value: "USDC.e", expected: false },
+      { pattern: "!USD*", value: "ETH", expected: true },
+      { pattern: "!USD*", value: "BTC", expected: true },
+    ])(
+      'should match pattern "$pattern" with value "$value" -> $expected',
+      ({ pattern, value, expected }) => {
+        expect(matchesGlob(pattern, value)).toBe(expected);
+      }
+    );
   });
 });

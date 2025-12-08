@@ -30,7 +30,7 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
 ];
 
 // simple glob tester. supports only:  ["*" , "!"]
-function matchesGlob(pattern: string, value: string): boolean {
+export function matchesGlob(pattern: string, value: string): boolean {
   const negate = pattern.startsWith("!");
   const raw = negate ? pattern.slice(1) : pattern;
 
