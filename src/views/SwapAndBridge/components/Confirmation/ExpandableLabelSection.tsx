@@ -1,5 +1,5 @@
 // Expandable label section component
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { PriceImpact } from "../../utils/fees";
 import { BridgeProvider } from "./provider";
 import { ProviderBadge } from "./BridgeProvider";
@@ -14,19 +14,19 @@ import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 
-export const ExpandableLabelSection: React.FC<
-  React.PropsWithChildren<{
-    fee: string;
-    time: string;
-    expanded: boolean;
-    onToggle: () => void;
-    visible: boolean;
-    state: BridgeButtonState;
-    hasQuote: boolean;
-    priceImpact?: PriceImpact;
-    provider: BridgeProvider;
-  }>
-> = ({
+type ExpandableLabelSelectionProps = PropsWithChildren<{
+  fee: string;
+  time: string;
+  expanded: boolean;
+  onToggle: () => void;
+  visible: boolean;
+  state: BridgeButtonState;
+  hasQuote: boolean;
+  priceImpact?: PriceImpact;
+  provider: BridgeProvider;
+}>;
+
+export const ExpandableLabelSection = ({
   fee,
   time,
   expanded,
@@ -35,7 +35,7 @@ export const ExpandableLabelSection: React.FC<
   children,
   hasQuote,
   provider,
-}) => {
+}: ExpandableLabelSelectionProps) => {
   // Render state-specific content
   let content: React.ReactNode = null;
 
