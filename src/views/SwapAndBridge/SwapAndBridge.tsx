@@ -5,14 +5,15 @@ import {
   QuoteRequestProvider,
   useQuoteRequestContext,
 } from "./hooks/useQuoteRequest/QuoteRequestContext";
-import { useDefaultRouteInQuote } from "./hooks/useQuoteRequest/useDefaultRouteInQuote";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
 import { useMemo } from "react";
 import useSwapQuote from "./hooks/useSwapQuote";
+import { useDefaultRoute } from "./hooks/useDefaultRoute";
 
 function SwapAndBridgeContent() {
-  const { quoteRequest } = useQuoteRequestContext();
-  useDefaultRouteInQuote();
+  const { quoteRequest, setOriginToken, setDestinationToken } =
+    useQuoteRequestContext();
+  useDefaultRoute(setOriginToken, setDestinationToken);
 
   const { swapQuote, quoteError, isQuoteLoading } = useSwapQuote(quoteRequest);
 

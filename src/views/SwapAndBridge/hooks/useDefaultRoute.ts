@@ -1,14 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import { CHAIN_IDs, chainEndpointToId, TOKEN_SYMBOLS_MAP } from "utils";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
-
-type DefaultRoute = {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-};
 
 /**
  * Parse query params from URL to get route preferences
@@ -36,11 +31,10 @@ function getRouteFromQueryParams() {
   };
 }
 
-export function useDefaultRoute(): DefaultRoute {
-  const [defaultInputToken, setDefaultInputToken] =
-    useState<EnrichedToken | null>(null);
-  const [defaultOutputToken, setDefaultOutputToken] =
-    useState<EnrichedToken | null>(null);
+export function useDefaultRoute(
+  setOriginToken: (token: EnrichedToken | null) => void,
+  setDestinationToken: (token: EnrichedToken | null) => void
+) {
   const [hasSetInitial, setHasSetInitial] = useState(false);
   const [hasSetFromConnected, setHasSetFromConnected] = useState(false);
 
@@ -131,8 +125,8 @@ export function useDefaultRoute(): DefaultRoute {
       CHAIN_IDs.ARBITRUM
     );
     if (inputToken && outputToken) {
-      setDefaultInputToken(inputToken);
-      setDefaultOutputToken(outputToken);
+      setOriginToken(inputToken);
+      setDestinationToken(outputToken);
       setHasSetInitial(true);
     }
   }, [selectTokens]);
@@ -144,11 +138,11 @@ export function useDefaultRoute(): DefaultRoute {
       CHAIN_IDs.ARBITRUM
     );
     if (inputToken && outputToken) {
-      setDefaultInputToken(inputToken);
-      setDefaultOutputToken(outputToken);
+      setOriginToken(inputToken);
+      setDestinationToken(outputToken);
       setHasSetFromConnected(true);
     }
-  }, [selectTokens, connectedChainId]);
+  }, [selectTokens, connectedChainId, setOriginToken, setDestinationToken]);
 
   useEffect(() => {
     // Wait for balances to be available
@@ -174,13 +168,4 @@ export function useDefaultRoute(): DefaultRoute {
     selectTokensOnLoad,
     hasSetFromConnected,
   ]);
-
-  // Memoize the return value to prevent unnecessary re-renders
-  return useMemo(
-    () => ({
-      inputToken: defaultInputToken,
-      outputToken: defaultOutputToken,
-    }),
-    [defaultInputToken, defaultOutputToken]
-  );
 }
