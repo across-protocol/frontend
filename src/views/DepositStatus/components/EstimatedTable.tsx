@@ -20,10 +20,35 @@ import {
 } from "utils";
 
 import TokenFee from "./TokenFee";
-import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
+
+export type FeesCollapsibleProps = {
+  isQuoteLoading: boolean;
+  fromChainId: number;
+  toChainId: number;
+  isSwap: boolean;
+  isUniversalSwap: boolean;
+  gasFee?: BigNumber;
+  capitalFee?: BigNumber;
+  lpFee?: BigNumber;
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
+  swapToken?: TokenInfo;
+  swapQuote?: SwapQuoteApiResponse;
+  universalSwapQuote?: UniversalSwapQuote;
+  parsedAmount?: BigNumber;
+  currentSwapSlippage?: number;
+  onSetNewSlippage?: (slippage: number) => void;
+  validationError?: AmountInputError;
+  quotedLimits?: any;
+  showPriceImpactWarning?: boolean;
+  swapPriceImpact?: BigNumber;
+  estimatedFillTimeSec?: number;
+};
 import { LoadingSkeleton } from "components";
 import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
 import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";

@@ -1,10 +1,7 @@
-import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import {
-  calcFeesForEstimatedTable,
-  getTokensForFeesCalc,
-} from "views/Bridge/utils";
+import { useEstimatedRewards } from "./useEstimatedRewards";
+import { calcFeesForEstimatedTable, getTokensForFeesCalc } from "../utils";
 
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../types";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useToken } from "hooks/useToken";
 import { bigNumberifyObject } from "utils/bignumber";

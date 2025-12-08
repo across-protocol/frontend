@@ -1,5 +1,5 @@
-import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import { getTokensForFeesCalc } from "views/Bridge/utils";
+import { useEstimatedRewards } from "./useEstimatedRewards";
+import { getTokensForFeesCalc } from "../utils";
 
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useToken } from "hooks/useToken";
