@@ -236,12 +236,13 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser =
-        bridgeProvider === "cctp"
-          ? parseOutputAmountFromMintAndWithdrawLog
-          : bridgeProvider === "oft"
-            ? parseOutputAmountFromOftReceivedLog
-            : parseFilledRelayLogOutputAmount;
+      const outputAmountParser = ["cctp", "sponsored-cctp"].includes(
+        bridgeProvider
+      )
+        ? parseOutputAmountFromMintAndWithdrawLog
+        : ["oft", "sponsored-oft"].includes(bridgeProvider)
+          ? parseOutputAmountFromOftReceivedLog
+          : parseFilledRelayLogOutputAmount;
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)

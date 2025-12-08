@@ -11,7 +11,9 @@ export type BridgeProvider =
   | "hypercore"
   | "cctp"
   | "oft"
-  | "sponsored-intent";
+  | "sponsored-intent"
+  | "sponsored-oft"
+  | "sponsored-cctp";
 
 export const getProviderFromQuote = (
   swapQuote: SwapApprovalApiCallReturnType | null
@@ -31,7 +33,17 @@ const PROVIDER_DISPLAY: Record<
     logo: <Across width="16px" height="16px" />,
   },
   cctp: { label: "CCTP", logo: <Circle width="16px" height="16px" /> },
+  "sponsored-cctp": {
+    label: "CCTP",
+    logo: <Circle width="16px" height="16px" />,
+  },
   oft: {
+    label: "OFT",
+    logo: (
+      <TokenImage src={usdt0Logo} alt="usdt-logo" width="16px" height="16px" />
+    ),
+  },
+  "sponsored-oft": {
     label: "OFT",
     logo: (
       <TokenImage src={usdt0Logo} alt="usdt-logo" width="16px" height="16px" />

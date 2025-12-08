@@ -167,12 +167,11 @@ export async function getDepositByTxHash(
     block,
     depositTxReceipt,
   };
-  const parsedDepositLog =
-    bridgeProvider === "cctp"
-      ? parseDepositForBurnLog(parseDepositLogArgs)
-      : bridgeProvider === "oft"
-        ? parseOftSentLog(parseDepositLogArgs)
-        : parseFundsDepositedLog(parseDepositLogArgs);
+  const parsedDepositLog = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+    ? parseDepositForBurnLog(parseDepositLogArgs)
+    : ["oft", "sponsored-oft"].includes(bridgeProvider)
+      ? parseOftSentLog(parseDepositLogArgs)
+      : parseFundsDepositedLog(parseDepositLogArgs);
 
   if (!parsedDepositLog) {
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
