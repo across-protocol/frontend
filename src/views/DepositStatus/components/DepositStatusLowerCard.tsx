@@ -6,7 +6,7 @@ import {
   chainIdToRewardsProgramName,
   getBridgeUrlWithQueryParams,
 } from "utils";
-import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
+import RewardsProgramCTA from "./RewardsProgramCTA";
 import { TwitterShareCard } from "./TwitterShare/TwitterShareCard";
 
 export type DepositStatusLowerCardProps = {

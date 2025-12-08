@@ -14,7 +14,7 @@ import { useAmplitude } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useQuoteRequestContext } from "../../SwapAndBridge/hooks/useQuoteRequest/QuoteRequestContext";
+import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 
 export const ChangeAccountModal = () => {
