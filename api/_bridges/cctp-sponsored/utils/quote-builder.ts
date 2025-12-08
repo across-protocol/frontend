@@ -15,7 +15,6 @@ import {
 import { isToHyperCore } from "../../cctp/utils/hypercore";
 import {
   SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES,
-  SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS,
   CCTP_TRANSFER_MODE,
 } from "./constants";
 import { getSponsoredCctpFinalTokenAddress } from "./final-token";
@@ -72,7 +71,7 @@ export function buildSponsoredCCTPQuote(
   const sponsoredCCTPQuote: SponsoredCCTPQuote = {
     sourceDomain: getCctpDomainId(inputToken.chainId),
     destinationDomain: getCctpDomainId(intermediaryChainId),
-    destinationCaller: toBytes32(SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS),
+    destinationCaller: toBytes32(sponsoredCCTPDstPeripheryAddress),
     mintRecipient: toBytes32(sponsoredCCTPDstPeripheryAddress),
     amount: inputAmount,
     burnToken: toBytes32(inputToken.address),
