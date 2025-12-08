@@ -193,4 +193,36 @@ describe("isTokenUnreachable", () => {
       ).toBe(true);
     });
   });
+
+  it("should restrict ANY output tokens to Solana", () => {
+    const inputToken = {
+      chainId: CHAIN_IDs.MAINNET,
+      symbol: "USDC",
+    } as EnrichedToken;
+
+    const outputToken = {
+      chainId: CHAIN_IDs.SOLANA,
+      symbol: "USDT", // not bridgeable
+    } as EnrichedToken;
+
+    const isUnreachable = isTokenUnreachable(inputToken, true, outputToken);
+
+    expect(isUnreachable).toBe(true);
+  });
+
+  it("should NOT restrict BRIDGEABLE output tokens to Solana", () => {
+    const inputToken = {
+      chainId: CHAIN_IDs.MAINNET,
+      symbol: "USDC",
+    } as EnrichedToken;
+
+    const outputToken = {
+      chainId: CHAIN_IDs.SOLANA,
+      symbol: "USDC", // not bridgeable
+    } as EnrichedToken;
+
+    const isUnreachable = isTokenUnreachable(inputToken, true, outputToken);
+
+    expect(isUnreachable).toBe(false);
+  });
 });
