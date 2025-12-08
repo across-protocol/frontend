@@ -1052,7 +1052,7 @@ const MobileTokenWrapper = styled.div`
 // Desktop Layout Styled Components
 const DesktopInnerWrapper = styled.div`
   width: 100%;
-  height: 800px;
+  height: min(calc(100svh - 32px), 800px);
   display: flex;
   flex-direction: row;
   gap: 12px;
