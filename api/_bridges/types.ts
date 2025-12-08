@@ -135,7 +135,7 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
-  recipient?: string;
+  recipient: string;
   depositor: string;
   logger?: Logger;
 };

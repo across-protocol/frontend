@@ -2,6 +2,7 @@ import { BigNumber, utils } from "ethers";
 
 import { Token } from "./_dexes/types";
 import { toBytes32 } from "./_address";
+import { CHAIN_IDs } from "./_constants";
 
 /**
  * Parameters for building a sponsored quote
@@ -17,23 +18,6 @@ export type BuildSponsoredQuoteParams = {
   maxUserSlippageBps: number;
 };
 
-export type SponsorshipEligibilityParams = {
-  inputToken: Token;
-  outputToken: Token;
-  amount: BigNumber;
-  amountType: "exactInput" | "exactOutput" | "minOutput";
-  recipient?: string;
-  depositor: string;
-};
-
-export type SponsorshipEligibilityData = {
-  isWithinGlobalDailyLimit: boolean;
-  isWithinUserDailyLimit: boolean;
-  hasVaultBalance: boolean;
-  isSlippageAcceptable: boolean;
-  isAccountCreationValid: boolean;
-};
-
 /**
  * Execution modes for destination handler
  * Must match the ExecutionMode enum in the destination contract
@@ -45,29 +29,29 @@ export enum ExecutionMode {
 }
 
 /**
+ * Address of the donation box contract on HyperEVM
+ */
+export const DONATION_BOX_ADDRESS = {
+  [CHAIN_IDs.HYPEREVM]: "0x90E2487764E5316a2e4109c2Ed40A3B3ad423659",
+  // TODO: Add testnet donation box address
+  [CHAIN_IDs.HYPEREVM_TESTNET]: "0x0000000000000000000000000000000000000000",
+};
+
+/**
+ * Map of destination chain to the sponsored chain, i.e. the EVM chain where the
+ * sponsorships are recorded.
+ */
+export const SPONSORED_CHAIN_ID_PER_DST_CHAIN_ID = {
+  [CHAIN_IDs.HYPERCORE]: CHAIN_IDs.HYPEREVM,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: CHAIN_IDs.HYPEREVM_TESTNET,
+  [CHAIN_IDs.HYPEREVM]: CHAIN_IDs.HYPEREVM,
+  [CHAIN_IDs.HYPEREVM_TESTNET]: CHAIN_IDs.HYPEREVM_TESTNET,
+};
+
+/**
  * Default quote expiry time (15 minutes)
  */
 export const DEFAULT_QUOTE_EXPIRY_SECONDS = 15 * 60;
-
-/**
- * Checks if a bridge transaction is eligible for sponsorship.
- *
- * Validates:
- * - Global daily limit
- * - Per-user daily limit
- * - Vault balance
- * - Swap slippage for destination swaps
- * - Account creation status
- *
- * @param params - Parameters for eligibility check
- * @returns Eligibility data or undefined if check fails
- */
-export async function getSponsorshipEligibilityData(
-  params: SponsorshipEligibilityParams
-): Promise<SponsorshipEligibilityData | undefined> {
-  // TODO: Implement actual checks
-  return undefined;
-}
 
 /**
  * Generates a unique nonce for a quote
@@ -80,4 +64,33 @@ export function generateQuoteNonce(depositor: string): string {
     [timestamp, toBytes32(depositor)]
   );
   return utils.keccak256(encoded);
+}
+
+/**
+ * Gets the sponsored EVM chain ID for a destination chain. E.g. for HyperCore, it will return HyperEVM.
+ * @param dstChainId - The destination chain ID.
+ * @returns The sponsored EVM chain ID.
+ */
+export function getSponsoredEvmChainId(dstChainId: number) {
+  const sponsoredChainId = SPONSORED_CHAIN_ID_PER_DST_CHAIN_ID[dstChainId];
+  if (!sponsoredChainId) {
+    throw new Error(`Destination chain ${dstChainId} is not sponsored`);
+  }
+  return sponsoredChainId;
+}
+
+/**
+ * Gets the donation box address for a destination chain.
+ * @param dstChainId - The destination chain ID.
+ * @returns The donation box address.
+ */
+export function getDonationBoxAddress(dstChainId: number) {
+  const sponsoredChainId = getSponsoredEvmChainId(dstChainId);
+  const donationBoxAddress = DONATION_BOX_ADDRESS[sponsoredChainId];
+  if (!donationBoxAddress) {
+    throw new Error(
+      `Donation box address not found for chain ${sponsoredChainId}`
+    );
+  }
+  return donationBoxAddress;
 }

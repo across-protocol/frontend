@@ -42,6 +42,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
     amount: BigNumber.from("100000000"), // 100 USDC
     amountType: "exactInput" as const,
     depositor: "0x1234567890123456789012345678901234567890",
+    recipient: "0x1234567890123456789012345678901234567890",
   };
 
   beforeEach(() => {

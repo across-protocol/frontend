@@ -7,6 +7,7 @@ import {
 import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
+import * as indexerApi from "../../../api/_indexer-api";
 
 jest.mock("../../../api/_logger", () => ({
   getLogger: jest.fn().mockReturnValue({
@@ -14,6 +15,15 @@ jest.mock("../../../api/_logger", () => ({
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+  }),
+}));
+
+jest.mock("../../../api/_indexer-api", () => ({
+  ...jest.requireActual("../../../api/_indexer-api"),
+  getSponsorshipsFromIndexer: jest.fn().mockResolvedValue({
+    totalSponsorships: [],
+    userSponsorships: [],
+    accountActivations: [],
   }),
 }));
 
@@ -62,6 +72,7 @@ describe("api/_bridges/index", () => {
     amount: BigNumber.from("1000000"), // 1 USDC
     amountType: "exactInput" as const,
     depositor: "0x1234567890123456789012345678901234567890",
+    recipient: "0x1234567890123456789012345678901234567890",
   };
 
   describe("#getSupportedBridgeStrategies()", () => {

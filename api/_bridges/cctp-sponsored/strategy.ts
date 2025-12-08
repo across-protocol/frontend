@@ -44,6 +44,7 @@ import { getCctpBridgeStrategy } from "../cctp/strategy";
 import { getDepositAccounts } from "./utils/svm";
 import { getDepositForBurnInstructionAsync } from "../../_svm-clients/SponsoredCctpSrcPeriphery/depositForBurn";
 import { getSVMRpc } from "../../_providers";
+import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibility";
 
 const name = "sponsored-cctp" as const;
 
@@ -364,7 +365,7 @@ async function _prepareSponsoredTx(params: {
   }
 
   // Calculate `maxBpsToSponsor` based on `maxFee` and est. swap slippage
-  const maxBpsToSponsor = params.isEligibleForSponsorship
+  const { maxBpsToSponsor, swapSlippageBps } = params.isEligibleForSponsorship
     ? // If eligible for sponsorship, we need to calculate the max fee based on the CCTP fees.
       await calculateMaxBpsToSponsor({
         inputToken: crossSwap.inputToken,
@@ -374,8 +375,22 @@ async function _prepareSponsoredTx(params: {
       })
     : // If not eligible for sponsorship, we use 0 bps as maxBpsToSponsor. This will
       // trigger the un-sponsored flow in the destination periphery contract.
-      0;
-  const maxBpsToSponsorBn = BigNumber.from(Math.ceil(maxBpsToSponsor));
+      {
+        maxBpsToSponsor: 0,
+        swapSlippageBps: 0,
+      };
+
+  // If maxBpsToSponsor is greater than 0, we need additional checks to ensure the
+  // sponsored amount can get covered.
+  if (maxBpsToSponsor > 0) {
+    await assertSponsoredAmountCanBeCovered({
+      inputToken: crossSwap.inputToken,
+      outputToken: crossSwap.outputToken,
+      maxBpsToSponsor,
+      swapSlippageBps,
+      inputAmount: bridgeQuote.inputAmount,
+    });
+  }
 
   // Convert slippage tolerance (expressed as 0 < slippage < 100, e.g. 1 = 1%) set by user to bps
   const maxUserSlippageBps = Math.floor(
@@ -397,7 +412,7 @@ async function _prepareSponsoredTx(params: {
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
     refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),
-    maxBpsToSponsor: maxBpsToSponsorBn,
+    maxBpsToSponsor: BigNumber.from(Math.ceil(maxBpsToSponsor)),
     maxUserSlippageBps,
     maxFee,
   });
@@ -425,6 +440,7 @@ export async function calculateMaxBpsToSponsor(params: {
     .div(inputAmount);
 
   let maxBpsToSponsor = maxFeeBps;
+  let swapSlippageBps = BigNumber.from(0);
 
   // Simple transfer flow: no swap needed, therefore `maxBpsToSponsor` is `maxFee` in bps
   if (outputToken.symbol === "USDC") {
@@ -454,13 +470,13 @@ export async function calculateMaxBpsToSponsor(params: {
       },
       inputAmount: bridgeOutputAmountOutputTokenDecimals,
     });
-    const slippageBps = BigNumber.from(
+    swapSlippageBps = BigNumber.from(
       Math.ceil(simResult.slippagePercent * 100)
     ).mul(utils.parseEther("1"));
 
     // Positive slippage indicates loss, so we add it to `maxFeeBps`
     if (simResult.slippagePercent > 0) {
-      maxBpsToSponsor = maxFeeBps.add(slippageBps);
+      maxBpsToSponsor = maxFeeBps.add(swapSlippageBps);
     }
     // Negative slippage indicates profit, so we return `maxFeeBps`
     else {
@@ -468,7 +484,10 @@ export async function calculateMaxBpsToSponsor(params: {
     }
   }
 
-  return parseFloat(utils.formatEther(maxBpsToSponsor));
+  return {
+    maxBpsToSponsor: parseFloat(utils.formatEther(maxBpsToSponsor)),
+    swapSlippageBps: parseFloat(utils.formatEther(swapSlippageBps)),
+  };
 }
 
 function assertSupportedRoute(params: {

@@ -19,10 +19,22 @@ import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
 import * as cctpFees from "../../../../api/_bridges/cctp/utils/fees";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES } from "../../../../api/_bridges/cctp-sponsored/utils/constants";
 import { getEnvs } from "../../../../api/_env";
+import * as sponsorshipEligibility from "../../../../api/_sponsorship-eligibility";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({
   getEnvs: jest.fn().mockReturnValue({}),
+  parseJsonSafe: jest.fn().mockReturnValue(undefined),
+}));
+
+// Mock logger for clean output
+jest.mock("../../../../api/_logger", () => ({
+  getLogger: jest.fn().mockReturnValue({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  }),
 }));
 
 const TEST_WALLET = ethers.Wallet.createRandom();
@@ -93,7 +105,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
     describe("USDC output (no swap needed)", () => {
       test("should return correct maxFeeBps", async () => {
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDC,
           maxFee,
@@ -101,13 +113,13 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps
-        expect(result).toBe(1);
+        expect(maxBpsToSponsor).toEqual(1);
       });
 
       test("should return correct maxFeeBps for different maxFee amounts", async () => {
         const largerMaxFee = utils.parseUnits("0.005", arbitrumUSDC.decimals); // 0.5% = 50 bps
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDC,
           maxFee: largerMaxFee,
@@ -115,13 +127,13 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.005 / 1 * 10000 = 50 bps
-        expect(result).toBe(50);
+        expect(maxBpsToSponsor).toEqual(50);
       });
 
       test("should return correct maxFeeBps for different input amount", async () => {
         const largerInputAmount = utils.parseUnits("10", arbitrumUSDC.decimals); // 10 USDC
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDC,
           maxFee,
@@ -129,7 +141,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 10 * 10000 = 0.1 bps
-        expect(result).toBe(0.1);
+        expect(maxBpsToSponsor).toEqual(0.1);
       });
     });
 
@@ -156,7 +168,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -164,7 +176,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps
-        expect(result).toBe(1);
+        expect(maxBpsToSponsor).toEqual(1);
       });
 
       test("should return maxFeeBps when swap has profit", async () => {
@@ -185,7 +197,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -193,7 +205,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage is negative (profit), so result = 1 bps
-        expect(result).toBe(1);
+        expect(maxBpsToSponsor).toEqual(1);
       });
 
       test("should calculate correct bps when swap has 1% loss", async () => {
@@ -214,7 +226,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -222,7 +234,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 1% = 100 bps, so result = 1 + 100 = 101 bps
-        expect(result).toBe(101);
+        expect(maxBpsToSponsor).toEqual(101);
       });
 
       test("should calculate correct bps when swap has 0.5% loss", async () => {
@@ -246,7 +258,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -254,7 +266,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0.5% = 50 bps, so result = 1 + 50 = 51 bps
-        expect(result).toBe(51);
+        expect(maxBpsToSponsor).toEqual(51);
       });
 
       test("should handle fractional slippage correctly", async () => {
@@ -278,7 +290,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -286,7 +298,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0.01% = 1 bps, so result = 1 + 1 = 2 bps
-        expect(result).toBe(2);
+        expect(maxBpsToSponsor).toEqual(2);
       });
 
       test("should handle zero slippage correctly", async () => {
@@ -306,7 +318,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           fullyFilled: true,
         });
 
-        const result = await calculateMaxBpsToSponsor({
+        const { maxBpsToSponsor } = await calculateMaxBpsToSponsor({
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDHSpot,
           maxFee,
@@ -314,7 +326,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         });
 
         // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps
-        expect(result).toBe(1);
+        expect(maxBpsToSponsor).toEqual(1);
       });
     });
 
@@ -459,13 +471,15 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         },
       };
 
-      // Mock getCctpFees
       jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
         ),
       });
+      jest
+        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
+        .mockResolvedValue(true);
 
       const result = await buildEvmTxForAllowanceHolder({
         quotes,
@@ -526,13 +540,15 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         },
       };
 
-      // Mock getCctpFees
       jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(
           utils.parseUnits("0.1", arbitrumUSDC.decimals)
         ),
       });
+      jest
+        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
+        .mockResolvedValue(true);
 
       // Mock simulateMarketOrder (called inside calculateMaxBpsToSponsor)
       // Calculate maxFee the same way buildEvmTxForAllowanceHolder does
@@ -741,11 +757,13 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         },
       };
 
-      // Mock getCctpFees
       jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
       });
+      jest
+        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
+        .mockResolvedValue(true);
 
       const result = await buildSvmTxForAllowanceHolder({
         quotes,
@@ -800,11 +818,13 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         },
       };
 
-      // Mock getCctpFees
       jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 10,
         forwardFee: BigNumber.from(utils.parseUnits("0.1", svmUSDC.decimals)),
       });
+      jest
+        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
+        .mockResolvedValue(true);
 
       await expect(
         buildSvmTxForAllowanceHolder({

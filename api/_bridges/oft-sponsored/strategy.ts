@@ -42,6 +42,7 @@ import { buildSponsoredOFTQuote } from "./utils/quote-builder";
 import { getSlippage } from "../../_slippage";
 import { ExecutionMode, generateQuoteNonce } from "../../_sponsorship-utils";
 import { toBytes32 } from "../../_address";
+import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibility";
 
 // We add some markup to the native fee for the initial quote to account for gas price
 // volatility. Expressed as a percentage, e.g., 0.01 = 1%.
@@ -282,12 +283,15 @@ export async function calculateMaxBpsToSponsor(params: {
   outputTokenSymbol: string;
   bridgeInputAmount: BigNumber;
   bridgeOutputAmount: BigNumber;
-}): Promise<BigNumber> {
+}) {
   const { outputTokenSymbol, bridgeInputAmount, bridgeOutputAmount } = params;
 
   if (outputTokenSymbol === "USDT-SPOT") {
     // USDT -> USDT: 0 bps (no swap needed, no sponsorship needed)
-    return BigNumber.from(0);
+    return {
+      maxBpsToSponsor: 0,
+      swapSlippageBps: 0,
+    };
   }
 
   if (outputTokenSymbol === "USDC") {
@@ -317,17 +321,26 @@ export async function calculateMaxBpsToSponsor(params: {
       SPOT_TOKEN_DECIMALS,
       TOKEN_SYMBOLS_MAP.USDT.decimals
     )(swapOutput);
+    const swapSlippageBps = Math.ceil(simulation.slippagePercent * 100);
 
     // Calculate loss if swap output is less than expected
     if (swapOutputInInputDecimals.lt(expectedOutput)) {
       const loss = expectedOutput.sub(swapOutputInInputDecimals);
       // Loss as basis points: (loss / input) * 10000
       const lossBps = loss.mul(10000).div(bridgeInputAmount);
-      return BigNumber.from(Math.ceil(lossBps.toNumber()));
+      const lossBpsNumber = Math.ceil(lossBps.toNumber());
+
+      return {
+        maxBpsToSponsor: lossBpsNumber,
+        swapSlippageBps,
+      };
     }
 
     // No loss or profit from swap, no sponsorship needed
-    return BigNumber.from(0);
+    return {
+      maxBpsToSponsor: 0,
+      swapSlippageBps: 0,
+    };
   }
 
   throw new InvalidParamError({
@@ -357,7 +370,7 @@ async function buildTransaction(params: {
     });
   }
 
-  const maxBpsToSponsor = isEligibleForSponsorship
+  const { maxBpsToSponsor, swapSlippageBps } = isEligibleForSponsorship
     ? // If eligible for sponsorship, we calculate the maxBpsToSponsor based on output
       // token and market simulation.
       await calculateMaxBpsToSponsor({
@@ -367,7 +380,10 @@ async function buildTransaction(params: {
       })
     : // If not eligible for sponsorship, we use 0 bps as maxBpsToSponsor. This will
       // trigger the un-sponsored flow in the destination periphery contract.
-      BigNumber.from(0);
+      {
+        maxBpsToSponsor: 0,
+        swapSlippageBps: 0,
+      };
 
   // Convert slippage tolerance to bps (slippageTolerance is a decimal, e.g., 0.5 = 0.5% = 50 bps)
   const maxUserSlippageBps = Math.floor(
@@ -382,6 +398,18 @@ async function buildTransaction(params: {
     }) * 100
   );
 
+  // If maxBpsToSponsor is greater than 0, we need additional checks to ensure the
+  // sponsored amount can get covered.
+  if (maxBpsToSponsor > 0) {
+    await assertSponsoredAmountCanBeCovered({
+      inputToken: crossSwap.inputToken,
+      outputToken: crossSwap.outputToken,
+      maxBpsToSponsor,
+      swapSlippageBps,
+      inputAmount: bridgeQuote.inputAmount,
+    });
+  }
+
   // Build signed quote with signature
   const { quote, signature } = buildSponsoredOFTQuote({
     inputToken: crossSwap.inputToken,
@@ -390,7 +418,7 @@ async function buildTransaction(params: {
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
     refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),
-    maxBpsToSponsor,
+    maxBpsToSponsor: BigNumber.from(Math.ceil(maxBpsToSponsor)),
     maxUserSlippageBps,
   });
 

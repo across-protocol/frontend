@@ -1,26 +1,32 @@
-import { getSponsoredCctpBridgeStrategy } from "./_bridges/cctp-sponsored/strategy";
-import { getOftSponsoredBridgeStrategy } from "./_bridges/oft-sponsored/strategy";
+import {
+  getSponsoredCctpBridgeStrategy,
+  isRouteSupported as isCctpRouteSupported,
+} from "./_bridges/cctp-sponsored/strategy";
+import {
+  getOftSponsoredBridgeStrategy,
+  isRouteSupported as isOftRouteSupported,
+} from "./_bridges/oft-sponsored/strategy";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
   RoutingRule,
 } from "./_bridges/types";
 import {
-  getSponsorshipEligibilityData,
-  SponsorshipEligibilityData,
-} from "./_sponsorship-utils";
+  SponsorshipEligibilityPreChecks,
+  getSponsorshipEligibilityPreChecks,
+} from "./_sponsorship-eligibility";
 import { getLogger } from "./_utils";
 import { Token } from "./_dexes/types";
 
 type SponsorshipRoutingRule = RoutingRule<
-  NonNullable<SponsorshipEligibilityData>
+  NonNullable<SponsorshipEligibilityPreChecks>
 >;
 
 const makeRoutingRuleGetStrategyFn =
   (isEligibleForSponsorship: boolean) => (inputToken?: Token) => {
-    if (inputToken?.symbol === "USDT") {
+    if (inputToken?.symbol?.includes("USDT")) {
       return getOftSponsoredBridgeStrategy(isEligibleForSponsorship);
-    } else if (inputToken?.symbol === "USDC") {
+    } else if (inputToken?.symbol?.includes("USDC")) {
       return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
     }
     return null;
@@ -41,20 +47,8 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
     reason: "User daily sponsorship limit exceeded",
   },
   {
-    name: "insufficient-vault-balance",
-    shouldApply: (data) => !data.hasVaultBalance,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Insufficient vault balance for sponsorship",
-  },
-  {
-    name: "slippage-too-high",
-    shouldApply: (data) => !data.isSlippageAcceptable,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Destination swap slippage exceeds acceptable bounds",
-  },
-  {
-    name: "invalid-account-creation",
-    shouldApply: (data) => !data.isAccountCreationValid,
+    name: "account-creation-limit-exceeded",
+    shouldApply: (data) => !data.isWithinAccountCreationDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Account creation requirements not met",
   },
@@ -63,9 +57,7 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
     shouldApply: (data) =>
       data.isWithinGlobalDailyLimit &&
       data.isWithinUserDailyLimit &&
-      data.hasVaultBalance &&
-      data.isSlippageAcceptable &&
-      data.isAccountCreationValid,
+      data.isWithinAccountCreationDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(true),
     reason: "All sponsorship eligibility criteria met",
   },
@@ -81,7 +73,12 @@ export async function routeStrategyForSponsorship(
   params: BridgeStrategyDataParams
 ): Promise<BridgeStrategy | null> {
   const logger = getLogger();
-  const eligibilityData = await getSponsorshipEligibilityData(params);
+
+  if (!isSponsoredRoute(params)) {
+    return null;
+  }
+
+  const eligibilityData = await getSponsorshipEligibilityPreChecks(params);
 
   if (!eligibilityData) {
     logger.warn({
@@ -121,4 +118,11 @@ export async function routeStrategyForSponsorship(
   });
 
   return strategy;
+}
+
+export function isSponsoredRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  return isCctpRouteSupported(params) || isOftRouteSupported(params);
 }
