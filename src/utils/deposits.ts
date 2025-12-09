@@ -161,17 +161,12 @@ export async function getDepositByTxHash(
     };
   }
 
-  const parseDepositLogArgs = {
+  const parsedDepositLog = makeDepositLogParser(bridgeProvider)({
     logs: depositTxReceipt.logs,
     originChainId: fromChainId,
     block,
     depositTxReceipt,
-  };
-  const parsedDepositLog = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
-    ? parseDepositForBurnLog(parseDepositLogArgs)
-    : ["oft", "sponsored-oft"].includes(bridgeProvider)
-      ? parseOftSentLog(parseDepositLogArgs)
-      : parseFundsDepositedLog(parseDepositLogArgs);
+  });
 
   if (!parsedDepositLog) {
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
@@ -182,6 +177,16 @@ export async function getDepositByTxHash(
     parsedDepositLog,
     depositTimestamp: block.timestamp,
   };
+}
+
+function makeDepositLogParser(bridgeProvider: BridgeProvider) {
+  if (["cctp", "sponsored-cctp"].includes(bridgeProvider)) {
+    return parseDepositForBurnLog;
+  }
+  if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
+    return parseOftSentLog;
+  }
+  return parseFundsDepositedLog;
 }
 
 // ====================================================== //
