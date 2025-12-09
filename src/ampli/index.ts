@@ -728,6 +728,15 @@ export interface FromChainSelectedProperties {
   fromChainId: string;
 }
 
+export interface InputAmountPercentClickedProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | 25, 50, 75, 100 |
+   */
+  percent: "25" | "50" | "75" | "100";
+}
+
 export interface MaxTokenAmountClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -2017,6 +2026,16 @@ export class FromChainSelected implements BaseEvent {
   }
 }
 
+export class InputAmountPercentClicked implements BaseEvent {
+  event_type = 'InputAmountPercentClicked';
+
+  constructor(
+    public event_properties: InputAmountPercentClickedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class MaxTokenAmountClicked implements BaseEvent {
   event_type = 'MaxTokenAmountClicked';
 
@@ -2583,6 +2602,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new FromChainSelected(properties), options);
+  }
+
+  /**
+   * InputAmountPercentClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/InputAmountPercentClicked)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. percent)
+   * @param options Amplitude event options.
+   */
+  inputAmountPercentClicked(
+    properties: InputAmountPercentClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new InputAmountPercentClicked(properties), options);
   }
 
   /**

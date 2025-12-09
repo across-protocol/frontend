@@ -8,6 +8,8 @@ import {
   compareAddressesSimple,
 } from "utils";
 import { useUserTokenBalances } from "hooks/useUserTokenBalances";
+import { useAmplitude } from "hooks/useAmplitude";
+import { ampli } from "ampli";
 
 type BalanceSelectorProps = {
   token: {
@@ -28,6 +30,7 @@ export function BalanceSelector({
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
   const tokenBalances = useUserTokenBalances();
+  const { addToAmpliQueue } = useAmplitude();
 
   // Derive the balance from the latest token balances
   const balance = useMemo(() => {
@@ -55,6 +58,14 @@ export function BalanceSelector({
   const percentages = ["25%", "50%", "75%", "MAX"];
 
   const handlePillClick = (percentage: string) => {
+    const percentValue =
+      percentage === "MAX" ? "100" : percentage.replace("%", "");
+    addToAmpliQueue(() => {
+      ampli.inputAmountPercentClicked({
+        percent: percentValue as "25" | "50" | "75" | "100",
+      });
+    });
+
     if (percentage === "MAX") {
       setAmount(balance);
     } else {
