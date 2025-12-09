@@ -32,7 +32,7 @@ export enum ExecutionMode {
  * Address of the donation box contract on HyperEVM
  */
 export const DONATION_BOX_ADDRESS = {
-  [CHAIN_IDs.HYPEREVM]: "0x90E2487764E5316a2e4109c2Ed40A3B3ad423659",
+  [CHAIN_IDs.HYPEREVM]: "0xbC217096db9EB6d2782c1d9E725D462077a4d1f6",
   // TODO: Add testnet donation box address
   [CHAIN_IDs.HYPEREVM_TESTNET]: "0x0000000000000000000000000000000000000000",
 };
