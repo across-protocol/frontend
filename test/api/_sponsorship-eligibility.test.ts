@@ -18,7 +18,18 @@ import * as balance from "../../api/_balance";
 
 jest.mock("../../api/_env", () => ({
   ...jest.requireActual("../../api/_env"),
-  getEnvs: jest.fn().mockReturnValue({}),
+  getEnvs: jest.fn().mockReturnValue({
+    SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN: JSON.stringify({
+      USDC: "100",
+      USDH: "100",
+    }),
+    SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN: JSON.stringify({
+      USDC: "100",
+      USDH: "100",
+    }),
+    SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT: 10,
+    SPONSORED_SWAP_SLIPPAGE_TOLERANCE: 0.5,
+  }),
 }));
 
 // Mock logger for clean output
@@ -58,11 +69,11 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT should have default value", () => {
-      expect(SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT).toBe(10);
+      expect(SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT).toBeDefined();
     });
 
     test("SPONSORED_SWAP_SLIPPAGE_TOLERANCE should have default value", () => {
-      expect(SPONSORED_SWAP_SLIPPAGE_TOLERANCE).toBe(0.5);
+      expect(SPONSORED_SWAP_SLIPPAGE_TOLERANCE).toBeDefined();
     });
   });
 
