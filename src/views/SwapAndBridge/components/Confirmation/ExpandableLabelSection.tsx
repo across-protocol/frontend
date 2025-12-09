@@ -1,7 +1,6 @@
 // Expandable label section component
 import React from "react";
-import { isBridgeProviderSponsored, PriceImpact } from "../../utils/fees";
-import { BridgeProvider } from "./provider";
+import { PriceImpact } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { BridgeButtonState, FreeTag } from "./ConfirmationButton";
@@ -13,6 +12,10 @@ import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
+import {
+  BridgeProvider,
+  isBridgeProviderSponsored,
+} from "../../utils/bridgeProvider";
 
 export const ExpandableLabelSection: React.FC<
   React.PropsWithChildren<{

@@ -2,10 +2,6 @@ import { utils } from "ethers";
 import { isDefined } from "utils/sdk";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { formatUSDString, roundToDecimalPlaces } from "utils/format";
-import {
-  BridgeProvider,
-  getProviderFromQuote,
-} from "../components/Confirmation/provider";
 
 export function formatFeeUsd(value: string): string {
   const numValue = Number(value);
@@ -60,21 +56,6 @@ export type PriceImpact = {
   priceImpact: number;
   priceImpactFormatted: string;
 };
-
-export function isSponsoredIntent(quote?: SwapApprovalQuote): boolean {
-  const provider = getProviderFromQuote(quote);
-  return isBridgeProviderSponsored(provider);
-}
-
-export function isBridgeProviderSponsored(
-  bridgeProvider: BridgeProvider
-): boolean {
-  return (
-    bridgeProvider === "sponsored-intent" ||
-    bridgeProvider === "sponsored-cctp" ||
-    bridgeProvider === "sponsored-oft"
-  );
-}
 
 export function getPriceImpact(
   quote: SwapApprovalQuote | undefined

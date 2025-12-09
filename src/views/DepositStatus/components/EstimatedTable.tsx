@@ -27,10 +27,8 @@ import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 import { LoadingSkeleton } from "components";
 import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
-import {
-  formatFeeUsd,
-  isSponsoredIntent,
-} from "../../SwapAndBridge/utils/fees";
+import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
+import { isQuoteSponsored } from "../../SwapAndBridge/utils/bridgeProvider";
 
 export type FeesCollapsibleProps = {
   isQuoteLoading: boolean;
@@ -112,7 +110,7 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const sponsoredIntent = isSponsoredIntent(universalSwapQuote);
+  const sponsoredIntent = isQuoteSponsored(universalSwapQuote);
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (

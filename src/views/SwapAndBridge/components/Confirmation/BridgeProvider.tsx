@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import React from "react";
-import { BridgeProvider, getProviderDisplay } from "./provider";
+import { getProviderDisplay } from "./provider";
 import { Tooltip } from "../../../../components/Tooltip";
+import { BridgeProvider } from "../../utils/bridgeProvider";
 
 export const ProviderBadge = ({
   provider,

@@ -1,23 +1,10 @@
-import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
 import { TokenImage } from "../../../../components";
 import React, { ReactElement } from "react";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Circle } from "assets/extern-logos/circle.svg";
 import usdt0Logo from "assets/token-logos/usdt0.svg";
 import hypeLogo from "assets/token-logos/hype.svg";
-
-export type BridgeProvider =
-  | "across"
-  | "hypercore"
-  | "cctp"
-  | "oft"
-  | "sponsored-intent"
-  | "sponsored-cctp"
-  | "sponsored-oft";
-
-export const getProviderFromQuote = (
-  swapQuote: SwapApprovalApiCallReturnType | undefined
-): BridgeProvider => swapQuote?.steps.bridge.provider || "across";
+import { BridgeProvider } from "../../utils/bridgeProvider";
 
 export const getProviderDisplay = (provider: BridgeProvider) => {
   return PROVIDER_DISPLAY[provider];

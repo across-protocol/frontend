@@ -9,13 +9,8 @@ import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import {
-  getPriceImpact,
-  getSwapQuoteFees,
-  isBridgeProviderSponsored,
-} from "../../utils/fees";
+import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
-import { getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
 import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
@@ -24,6 +19,10 @@ import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
 import { ExpandableLabelSection } from "./ExpandableLabelSection";
 import { CoreConfirmationButton } from "./CoreConfirmationButton";
+import {
+  getProviderFromQuote,
+  isBridgeProviderSponsored,
+} from "../../utils/bridgeProvider";
 
 export type BridgeButtonState =
   | "notConnected"

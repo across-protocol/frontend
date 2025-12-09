@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
-import { BridgeProvider } from "./provider";
 import { QuoteRequestProvider } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
+import { BridgeProvider } from "../../utils/bridgeProvider";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
