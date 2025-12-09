@@ -32,7 +32,7 @@ export const SPONSORED_OFT_INPUT_TOKENS = ["USDT"];
 /**
  * Supported output tokens for sponsored OFT flows
  */
-export const SPONSORED_OFT_OUTPUT_TOKENS = ["USDT-SPOT", "USDC"];
+export const SPONSORED_OFT_OUTPUT_TOKENS = ["USDT-SPOT", "USDC-SPOT"];
 
 /**
  * Supported destination chains for sponsored OFT flows
@@ -46,6 +46,6 @@ export const SPONSORED_OFT_FINAL_TOKEN_PER_OUTPUT_TOKEN: Record<
   string,
   (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP]
 > = {
-  USDC: TOKEN_SYMBOLS_MAP.USDC,
+  "USDC-SPOT": TOKEN_SYMBOLS_MAP.USDC,
   "USDT-SPOT": TOKEN_SYMBOLS_MAP.USDT,
 };

@@ -37,15 +37,6 @@ export const TOKEN_SYMBOLS_MAP = {
         "0x2222222222222222222222222222222222222222",
     },
   },
-  USDC: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDC,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
-      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
-      [CHAIN_IDs.HYPERCORE_TESTNET]:
-        "0x2000000000000000000000000000000000000000",
-    },
-  },
   USDT: {
     ...constants.TOKEN_SYMBOLS_MAP.USDT,
     addresses: {
@@ -63,6 +54,17 @@ export const TOKEN_SYMBOLS_MAP = {
         "0x2000000000000000000000000000000000000168",
     },
     coingeckoId: "usdh-2",
+  },
+  "USDC-SPOT": {
+    name: "USDC-SPOT",
+    symbol: "USDC-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
   },
 };
 
