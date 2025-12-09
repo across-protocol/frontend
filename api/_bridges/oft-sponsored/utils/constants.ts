@@ -14,7 +14,7 @@ export const SPONSORED_OFT_SRC_PERIPHERY: Record<number, string | undefined> = {
  * TODO: Update with actual deployed addresses
  */
 export const DST_OFT_HANDLER: Record<number, string | undefined> = {
-  [CHAIN_IDs.HYPEREVM]: "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461",
+  [CHAIN_IDs.HYPEREVM]: "0xc8786D517b4e224bB43985A38dBeF8588D7354CD",
 };
 
 /**
