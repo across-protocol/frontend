@@ -192,8 +192,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
 
   if (
     !totalSponsorshipsForSponsoredChain ||
-    !userSponsorshipsForSponsoredChain ||
-    !accountActivationsForSponsoredChain
+    !userSponsorshipsForSponsoredChain
   ) {
     return undefined;
   }
