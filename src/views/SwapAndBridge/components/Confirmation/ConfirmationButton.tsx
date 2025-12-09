@@ -9,7 +9,11 @@ import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
+import {
+  getPriceImpact,
+  getSwapQuoteFees,
+  isBridgeProviderSponsored,
+} from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
@@ -138,7 +142,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   }, [swapQuote]);
 
   const provider = getProviderFromQuote(swapQuote);
-  const isSponsoredIntent = provider === "sponsored-intent";
+  const isSponsoredIntent = isBridgeProviderSponsored(provider);
+
   const content = (
     <>
       <ExpandableLabelSection

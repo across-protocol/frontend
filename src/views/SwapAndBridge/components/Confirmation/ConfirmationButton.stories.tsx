@@ -316,6 +316,8 @@ const bridgeProviders = [
   "cctp",
   "oft",
   "sponsored-intent",
+  "sponsored-oft",
+  "sponsored-cctp",
   "hypercore",
 ] as const satisfies BridgeProvider[];
 
@@ -323,12 +325,15 @@ export const AllProvidersCollapsed: Story = {
   render: () => (
     <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
-        <ConfirmationButton
-          key={provider}
-          swapQuote={createQuoteWithProvider(provider)}
-          isQuoteLoading={false}
-          quoteError={null}
-        />
+        <>
+          <h1>{provider}</h1>
+          <ConfirmationButton
+            key={provider}
+            swapQuote={createQuoteWithProvider(provider)}
+            isQuoteLoading={false}
+            quoteError={null}
+          />
+        </>
       ))}
     </QuoteRequestProvider>
   ),
@@ -338,13 +343,16 @@ export const AllProvidersExpanded: Story = {
   render: () => (
     <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
-        <ConfirmationButton
-          key={provider}
-          swapQuote={createQuoteWithProvider(provider)}
-          isQuoteLoading={false}
-          quoteError={null}
-          initialExpanded
-        />
+        <>
+          <h1>{provider}</h1>
+          <ConfirmationButton
+            key={provider}
+            swapQuote={createQuoteWithProvider(provider)}
+            isQuoteLoading={false}
+            quoteError={null}
+            initialExpanded
+          />
+        </>
       ))}
     </QuoteRequestProvider>
   ),

@@ -25,6 +25,12 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
+import { LoadingSkeleton } from "components";
+import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
+import {
+  formatFeeUsd,
+  isSponsoredIntent,
+} from "../../SwapAndBridge/utils/fees";
 
 export type FeesCollapsibleProps = {
   isQuoteLoading: boolean;
@@ -49,10 +55,6 @@ export type FeesCollapsibleProps = {
   swapPriceImpact?: BigNumber;
   estimatedFillTimeSec?: number;
 };
-import { LoadingSkeleton } from "components";
-import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
-import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
-import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
 
 const formatFeeUsdInWei = (feeInWei: BigNumber) =>
   formatFeeUsd(utils.formatEther(feeInWei));
@@ -110,9 +112,7 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const isSponsoredIntent = isSponsoredIntentQuote(
-    universalSwapQuote ?? undefined
-  );
+  const sponsoredIntent = isSponsoredIntent(universalSwapQuote);
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
@@ -143,7 +143,7 @@ const EstimatedTable = ({
             }
           }}
         >
-          {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+          {sponsoredIntent && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
             {formatFeeUsdInWei(swapFeeAsBaseCurrency)}
           </Text>
@@ -167,7 +167,7 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <FeeValueWrapper>
-        {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        {sponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
         <Text color="grey-400" size="md">
           {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
             ? formatFeeUsdInWei(bridgeFeeAsBaseCurrency)
@@ -192,7 +192,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <FeeValueWrapper>
-          {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          {sponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
           <Text color="grey-400" size="md">
             {!showLoadingSkeleton
               ? formatFeeUsdInWei(swapFeeAsBaseCurrency)
@@ -298,7 +298,7 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
-            {isSponsoredIntent && !doesAmountExceedMaxDeposit && (
+            {sponsoredIntent && !doesAmountExceedMaxDeposit && (
               <FreeTag>FREE</FreeTag>
             )}
             <Text

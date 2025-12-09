@@ -1,6 +1,6 @@
 // Expandable label section component
 import React from "react";
-import { PriceImpact } from "../../utils/fees";
+import { isBridgeProviderSponsored, PriceImpact } from "../../utils/fees";
 import { BridgeProvider } from "./provider";
 import { ProviderBadge } from "./BridgeProvider";
 import { AnimatePresence, motion } from "framer-motion";
@@ -51,7 +51,7 @@ export const ExpandableLabelSection: React.FC<
     </>
   );
 
-  const isSponsoredIntent = provider === "sponsored-intent";
+  const sponsoredIntent = isBridgeProviderSponsored(provider);
 
   // Show quote breakdown when quote is available, otherwise show default state
   if (hasQuote) {
@@ -84,7 +84,7 @@ export const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
-                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                  {sponsoredIntent && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
