@@ -544,15 +544,19 @@ function getTotalFeeUsd(params: {
     outputAmountSansAppFeesUsd,
   } = params;
 
-  if (
-    ["sponsored-intent", "sponsored-oft", "sponsored-cctp"].includes(
-      bridgeProvider
-    )
-  ) {
+  if (["sponsored-intent", "sponsored-cctp"].includes(bridgeProvider)) {
     return 0;
   }
 
-  if (bridgeProvider === "oft" || bridgeProvider === "cctp") {
+  if (
+    [
+      "oft",
+      "cctp",
+      // NOTE: "sponsored-oft" is a special case because the bridge fees are paid in
+      // native tokens, so we need to return it.
+      "sponsored-oft",
+    ].includes(bridgeProvider)
+  ) {
     return bridgeFeesUsd;
   }
 
