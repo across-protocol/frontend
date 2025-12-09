@@ -1,5 +1,5 @@
 import axios from "axios";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "utils/constants";
 import { SwapToken } from "../types";
 
 export type SwapTokensApiCall = typeof swapTokensApiCall;
@@ -12,7 +12,7 @@ export async function swapTokensApiCall(
   query?: SwapTokensQuery
 ): Promise<SwapToken[]> {
   const response = await axios.get<SwapToken[]>(
-    `${"http://127.0.0.1:3000"}/api/swap/tokens`,
+    `${vercelApiBaseUrl}/api/swap/tokens`,
     {
       params: query,
     }
