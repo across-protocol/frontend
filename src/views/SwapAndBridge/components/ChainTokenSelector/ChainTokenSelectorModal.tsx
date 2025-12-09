@@ -19,7 +19,9 @@ import {
   QUERIES,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAmplitude } from "hooks/useAmplitude";
+import { ampli } from "ampli";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
@@ -98,6 +100,7 @@ export function ChainTokenSelectorModal({
 }: Props) {
   const crossChainRoutes = useEnrichedCrosschainBalances();
   const { isMobile } = useCurrentBreakpoint();
+  const { addToAmpliQueue } = useAmplitude();
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
     currentToken?.chainId ?? popularChains[0]
@@ -107,6 +110,50 @@ export function ChainTokenSelectorModal({
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
 
+  const trackChainSelected = useCallback(
+    (chainId: number | null) => {
+      if (chainId === null) return;
+      addToAmpliQueue(() => {
+        if (isOriginToken) {
+          ampli.originChainSelected({
+            action: "onClick",
+            chainId: String(chainId),
+          });
+        } else {
+          ampli.destinationChainSelected({
+            action: "onClick",
+            chainId: String(chainId),
+          });
+        }
+      });
+    },
+    [addToAmpliQueue, isOriginToken]
+  );
+
+  const trackTokenSelected = useCallback(
+    (token: EnrichedToken) => {
+      addToAmpliQueue(() => {
+        if (isOriginToken) {
+          ampli.originTokenSelected({
+            action: "onClick",
+            default: false,
+            tokenAddress: token.address,
+            tokenChainId: String(token.chainId),
+            tokenSymbol: token.symbol,
+          });
+        } else {
+          ampli.destinationTokenSelected({
+            action: "onClick",
+            default: false,
+            tokenAddress: token.address,
+            tokenChainId: String(token.chainId),
+            tokenSymbol: token.symbol,
+          });
+        }
+      });
+    },
+    [addToAmpliQueue, isOriginToken]
+  );
   // Reset mobile step when modal opens/closes
   useEffect(() => {
     setMobileStep("chain");
@@ -299,10 +346,14 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
+        trackChainSelected(chainId);
         setSelectedChain(chainId);
         setMobileStep("token");
       }}
-      onTokenSelect={onSelect}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   ) : (
@@ -317,8 +368,14 @@ export function ChainTokenSelectorModal({
       setTokenSearch={setTokenSearch}
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
-      onChainSelect={setSelectedChain}
-      onTokenSelect={onSelect}
+      onChainSelect={(chainId) => {
+        trackChainSelected(chainId);
+        setSelectedChain(chainId);
+      }}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   );

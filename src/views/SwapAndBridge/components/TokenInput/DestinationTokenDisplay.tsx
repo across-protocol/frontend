@@ -1,7 +1,8 @@
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { formatUSD } from "utils";
-import { UnitType, useTokenInput } from "hooks";
+import { UnitType, useTokenInput, useAmplitude } from "hooks";
+import { ampli } from "ampli";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
@@ -37,6 +38,7 @@ export const DestinationTokenDisplay = ({
     setOriginToken,
     setDestinationToken,
   } = useQuoteRequestContext();
+  const { addToAmpliQueue } = useAmplitude();
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
@@ -96,7 +98,19 @@ export const DestinationTokenDisplay = ({
           />
         </TokenAmountInputWrapper>
         <UnitToggleButtonWrapper>
-          <UnitToggleButton onClick={toggleUnit}>
+          <UnitToggleButton
+            onClick={() => {
+              addToAmpliQueue(() => {
+                ampli.changeUnitsButtonClicked({
+                  action: "onClick",
+                  element: "changeUnitsButton",
+                  page: "bridgePage",
+                  section: "bridgeForm",
+                });
+              });
+              toggleUnit();
+            }}
+          >
             <ArrowsCross width={16} height={16} />{" "}
             <span>{formattedConvertedAmount}</span>
           </UnitToggleButton>
