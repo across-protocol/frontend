@@ -94,7 +94,7 @@ export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
   },
 };
 
-export class SponsoredSwapSlippageToHighError extends InputError {
+export class SponsoredSwapSlippageTooHighError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
       {
@@ -234,7 +234,7 @@ export async function assertSponsoredAmountCanBeCovered(params: {
   const { swapSlippageBps } = params;
 
   if (!isSponsoredSwapSlippageTolerable(swapSlippageBps)) {
-    throw new SponsoredSwapSlippageToHighError({
+    throw new SponsoredSwapSlippageTooHighError({
       message: `Sponsored swap slippage is too high: ${swapSlippageBps} bps`,
     });
   }

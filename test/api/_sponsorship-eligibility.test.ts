@@ -4,7 +4,7 @@ import {
   assertSponsoredAmountCanBeCovered,
   isSponsoredSwapSlippageTolerable,
   hasDonationBoxEnoughFunds,
-  SponsoredSwapSlippageToHighError,
+  SponsoredSwapSlippageTooHighError,
   SponsoredDonationBoxFundsInsufficientError,
   SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN,
   SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN,
@@ -428,7 +428,7 @@ describe("api/_sponsorship-eligibility", () => {
           swapSlippageBps: 101, // Exceeds 1% tolerance
           inputAmount,
         })
-      ).rejects.toThrow(SponsoredSwapSlippageToHighError);
+      ).rejects.toThrow(SponsoredSwapSlippageTooHighError);
     });
 
     test("should throw SponsoredDonationBoxFundsInsufficientError when funds are insufficient", async () => {
