@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 // Public infura key published in @umaprotocol/packages/common/ProviderUtils
 import limitsHandler from "../../api/limits";
 import feesHandler from "../../api/suggested-fees";
@@ -17,20 +18,20 @@ process.env.REACT_APP_GOOGLE_SERVICE_ACCOUNT = "{}";
 
 const getMockedResponse = () => {
   const response: any = {};
-  response.status = jest.fn().mockReturnValue(response);
-  response.send = jest.fn();
-  response.setHeader = jest.fn();
-  response.json = jest.fn();
+  response.status = vi.fn().mockReturnValue(response);
+  response.send = vi.fn();
+  response.setHeader = vi.fn();
+  response.json = vi.fn();
   return response;
 };
 
 // mock the logger
-jest.mock("../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+vi.mock("../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   }),
 }));
 

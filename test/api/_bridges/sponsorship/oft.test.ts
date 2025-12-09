@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { ethers, utils } from "ethers";
 import { recoverMessageAddress } from "viem";
 import { hexToBytes } from "viem";
@@ -9,8 +10,8 @@ import {
 } from "../../../../api/_bridges/sponsorship";
 
 // Mock the environment variables to ensure tests are deterministic.
-jest.mock("../../../../api/_env", () => ({
-  getEnvs: jest.fn(),
+vi.mock("../../../../api/_env", () => ({
+  getEnvs: vi.fn(),
 }));
 
 // Create a random wallet for signing. This ensures that the tests are not dependent on a hardcoded private key.
@@ -24,7 +25,7 @@ const randomAddress = () =>
 describe("OFT Signature", () => {
   beforeEach(() => {
     // Before each test, mock the return value of getEnvs to provide our test private key.
-    (getEnvs as jest.Mock).mockReturnValue({
+    (getEnvs as ReturnType<typeof vi.fn>).mockReturnValue({
       SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
     });
   });

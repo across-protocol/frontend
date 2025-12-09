@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber } from "ethers";
 import { getUsdhIntentQuote } from "../../../../api/_bridges/sponsored-intent/utils/quote";
 import {
@@ -7,22 +8,22 @@ import {
 import { getCachedTokenBalance } from "../../../../api/_balance";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM } from "./utils";
 
-jest.mock("../../../../api/_utils", () => ({
-  ...jest.requireActual("../../../../api/_utils"),
-  getCachedTokenPrice: jest.fn(),
-  getRelayerFeeDetails: jest.fn(),
+vi.mock("../../../../api/_utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getCachedTokenPrice: vi.fn(),
+  getRelayerFeeDetails: vi.fn(),
 }));
-jest.mock("../../../../api/_balance");
-jest.mock("../../../../api/_hypercore");
-jest.mock("../../../../api/_relayer-address", () => ({
-  getFullRelayers: jest.fn().mockReturnValue(["0xRelayer"]),
-  getTransferRestrictedRelayers: jest.fn().mockReturnValue(["0xRelayer2"]),
-  getDefaultRelayerAddress: jest.fn().mockReturnValue("0xRelayer"),
+vi.mock("../../../../api/_balance");
+vi.mock("../../../../api/_hypercore");
+vi.mock("../../../../api/_relayer-address", () => ({
+  getFullRelayers: vi.fn().mockReturnValue(["0xRelayer"]),
+  getTransferRestrictedRelayers: vi.fn().mockReturnValue(["0xRelayer2"]),
+  getDefaultRelayerAddress: vi.fn().mockReturnValue("0xRelayer"),
 }));
 
 describe("api/_bridges/sponsored-intent/utils/quote", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getUsdhIntentQuote", () => {
@@ -36,11 +37,11 @@ describe("api/_bridges/sponsored-intent/utils/quote", () => {
     };
 
     it("should return valid quote", async () => {
-      (getCachedTokenPrice as jest.Mock).mockResolvedValue(1); // 1 USD
-      (getCachedTokenBalance as jest.Mock).mockResolvedValue(
+      (getCachedTokenPrice as ReturnType<typeof vi.fn>).mockResolvedValue(1); // 1 USD
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
         BigNumber.from("1000000000000")
       ); // Lots of balance
-      (getRelayerFeeDetails as jest.Mock).mockResolvedValue({
+      (getRelayerFeeDetails as ReturnType<typeof vi.fn>).mockResolvedValue({
         gasFeeTotal: BigNumber.from("0"), // Cheap gas
         relayerFeeTotal: BigNumber.from("0"),
         relayerFeePct: BigNumber.from("0"),
@@ -53,12 +54,12 @@ describe("api/_bridges/sponsored-intent/utils/quote", () => {
     });
 
     it("should throw if destination gas is too high", async () => {
-      (getCachedTokenPrice as jest.Mock).mockResolvedValue(1);
-      (getCachedTokenBalance as jest.Mock).mockResolvedValue(
+      (getCachedTokenPrice as ReturnType<typeof vi.fn>).mockResolvedValue(1);
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
         BigNumber.from("1000000000000")
       );
       // Return high gas cost
-      (getRelayerFeeDetails as jest.Mock).mockResolvedValue({
+      (getRelayerFeeDetails as ReturnType<typeof vi.fn>).mockResolvedValue({
         gasFeeTotal: BigNumber.from("1000000000000000000"), // 1 ETH (assumed high value for test)
         relayerFeeTotal: BigNumber.from("0"),
         relayerFeePct: BigNumber.from("0"),

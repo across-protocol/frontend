@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber } from "ethers";
 import { getUsdhIntentsBridgeStrategy } from "../../../../api/_bridges/sponsored-intent/strategy";
 import { getUsdhIntentQuote } from "../../../../api/_bridges/sponsored-intent/utils/quote";
@@ -10,14 +11,14 @@ import { Token } from "../../../../api/_dexes/types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
 
-jest.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
-jest.mock("../../../../api/_bridges/sponsored-intent/utils/tx-builder");
+vi.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
+vi.mock("../../../../api/_bridges/sponsored-intent/utils/tx-builder");
 
 describe("getUsdhIntentsBridgeStrategy", () => {
   const strategy = getUsdhIntentsBridgeStrategy();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getCrossSwapTypes", () => {
@@ -95,7 +96,9 @@ describe("getUsdhIntentsBridgeStrategy", () => {
         },
         message: "0x",
       };
-      (getUsdhIntentQuote as jest.Mock).mockResolvedValue(mockQuote);
+      (getUsdhIntentQuote as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockQuote
+      );
 
       const params = {
         inputToken: {} as Token,
@@ -124,7 +127,9 @@ describe("getUsdhIntentsBridgeStrategy", () => {
   describe("getQuoteForOutput", () => {
     it("should convert amount and return bridge quote", async () => {
       const mockQuote = { some: "quote" };
-      (getUsdhIntentQuote as jest.Mock).mockResolvedValue(mockQuote);
+      (getUsdhIntentQuote as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockQuote
+      );
 
       const params = {
         inputToken: USDC_ON_OPTIMISM,
@@ -157,7 +162,7 @@ describe("getUsdhIntentsBridgeStrategy", () => {
           crossSwap: { isOriginSvm: true },
         },
       };
-      (buildTxSvm as jest.Mock).mockResolvedValue("svm-tx");
+      (buildTxSvm as ReturnType<typeof vi.fn>).mockResolvedValue("svm-tx");
 
       const result = await strategy.buildTxForAllowanceHolder(params as any);
 
@@ -171,7 +176,7 @@ describe("getUsdhIntentsBridgeStrategy", () => {
           crossSwap: { isOriginSvm: false },
         },
       };
-      (buildTxEvm as jest.Mock).mockResolvedValue("evm-tx");
+      (buildTxEvm as ReturnType<typeof vi.fn>).mockResolvedValue("evm-tx");
 
       const result = await strategy.buildTxForAllowanceHolder(params as any);
 
