@@ -16,7 +16,7 @@ export default {
   blockTimeSeconds: 1,
   tokens: [],
   inputTokens: [],
-  outputTokens: ["USDH-SPOT"],
+  outputTokens: ["USDH-SPOT", "USDT-SPOT", "USDC-SPOT"],
   enableCCTP: false,
   omitViemConfig: true,
   nativeToken: "HYPE",

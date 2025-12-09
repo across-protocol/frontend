@@ -236,12 +236,7 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser =
-        bridgeProvider === "cctp"
-          ? parseOutputAmountFromMintAndWithdrawLog
-          : bridgeProvider === "oft"
-            ? parseOutputAmountFromOftReceivedLog
-            : parseFilledRelayLogOutputAmount;
+      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -275,6 +270,18 @@ export class EVMStrategy implements IChainStrategy {
       });
       return;
     }
+  }
+
+  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
+    if (["cctp", "sponsored-cctp"].includes(bridgeProvider)) {
+      return parseOutputAmountFromMintAndWithdrawLog;
+    }
+
+    if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
+      return parseOutputAmountFromOftReceivedLog;
+    }
+
+    return parseFilledRelayLogOutputAmount;
   }
 
   /**

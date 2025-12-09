@@ -1,4 +1,3 @@
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { writeFileSync } from "fs";
 import { getAddress, isAddress as isEvmAddress } from "viem";
 import { utils as sdkUtils } from "@across-protocol/sdk";
@@ -13,6 +12,7 @@ import {
   enabledIndirectMainnetChainConfigs,
   enabledIndirectSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
+import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../api/_constants";
 import assert from "assert";
 
 // TODO: replace with Address utilities from sdk

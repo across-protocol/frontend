@@ -14,9 +14,23 @@
       {
         "address": "0x2000000000000000000000000000000000000168",
         "symbol": "USDH-SPOT",
-        "name": "Hyperliquid USD",
+        "name": "USDH-SPOT",
         "decimals": 8,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdh-spot.svg"
+      },
+      {
+        "address": "0x200000000000000000000000000000000000010C",
+        "symbol": "USDT-SPOT",
+        "name": "Tether USD",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt-spot.svg"
+      },
+      {
+        "address": "0x2000000000000000000000000000000000000000",
+        "symbol": "USDC-SPOT",
+        "name": "USDC-SPOT",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc-spot.svg"
       }
     ]
   }
