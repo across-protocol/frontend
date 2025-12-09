@@ -88,7 +88,10 @@ export type BridgeStrategy = {
     isOutputNative: boolean;
   }) => CrossSwapType[];
 
-  getBridgeQuoteRecipient: (crossSwap: CrossSwap) => string;
+  getBridgeQuoteRecipient: (
+    crossSwap: CrossSwap,
+    hasOriginSwap?: boolean
+  ) => string;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,

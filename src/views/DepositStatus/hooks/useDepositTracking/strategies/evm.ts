@@ -22,7 +22,7 @@ import {
   IChainStrategy,
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../../../types";
 import { BigNumber } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,

@@ -24,13 +24,19 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
     swapQuote?.steps?.bridge?.provider || ""
   );
 
+  // show swap impact only if swaps involved
+  const showSwapImpact =
+    swapQuote?.steps?.originSwap || swapQuote?.steps?.destinationSwap;
+
   const rawValues = {
     totalFeeUsd: showZeroFee ? "0" : swapQuote?.fees?.total.amountUsd || "0",
     bridgeFeesUsd: showZeroFee
       ? "0"
       : swapQuote?.fees?.total.details.bridge.amountUsd || "0",
     appFeesUsd: swapQuote?.fees?.total.details.app.amountUsd || "0",
-    swapImpactUsd: swapQuote?.fees?.total.details.swapImpact.amountUsd || "0",
+    swapImpactUsd: showSwapImpact
+      ? swapQuote?.fees?.total.details.swapImpact.amountUsd || "0"
+      : "0",
   };
 
   return {
@@ -57,7 +63,9 @@ export function isSponsoredIntentQuote(quote?: SwapApprovalQuote): boolean {
   return quote?.steps?.bridge?.provider === "sponsored-intent";
 }
 
-export function getPriceImpact(quote?: SwapApprovalQuote): PriceImpact {
+export function getPriceImpact(
+  quote: SwapApprovalQuote | undefined
+): PriceImpact {
   if (
     !isDefined(quote?.fees?.total?.pct) ||
     (isDefined(quote?.fees?.total?.pct) && quote.fees.total.pct.lt(0))
