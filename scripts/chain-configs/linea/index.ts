@@ -18,7 +18,7 @@ export default {
   chainId,
   blockTimeSeconds: 2,
   publicRpcUrl: "https://rpc.linea.build",
-  tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+  tokens: [],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
