@@ -2,6 +2,7 @@ import {
   getHyperLiquidComposerMessage,
   isRouteSupported,
   getOftCrossSwapTypes,
+  TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS,
 } from "../../../../api/_bridges/oft/strategy";
 import {
   HYPEREVM_OFT_COMPOSER_ADDRESSES,
@@ -72,6 +73,12 @@ describe("OFT Strategy", () => {
             );
 
             const originChainId = supportedChains[originIndex];
+
+            if (TEMPORARILY_DISABLED_ORIGIN_CHAIN_IDS.includes(originChainId)) {
+              // Skip temporarily disabled origin chains
+              continue;
+            }
+
             const destinationChainId = supportedChains[destinationIndex];
             const params = {
               inputToken: {

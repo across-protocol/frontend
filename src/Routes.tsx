@@ -45,9 +45,6 @@ const ARBRebates = lazyWithRetry(
 const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
-const Send = lazyWithRetry(
-  () => import(/* webpackChunkName: "Send" */ "./views/Bridge")
-);
 const Transactions = lazyWithRetry(
   () => import(/* webpackChunkName: "Transactions" */ "./views/Transactions")
 );
@@ -192,7 +189,7 @@ const Routes: React.FC = () => {
                   key={`${chainId}:${projectId}`}
                   exact
                   path={`/${projectId}`}
-                  render={() => <Send />}
+                  render={() => <SwapAndBridge />}
                 />
               )),
             ]

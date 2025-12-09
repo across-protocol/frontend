@@ -18,4 +18,5 @@ export * from "./useQueue";
 export * from "./useAmplitude";
 export * from "./useRewardSummary";
 export * from "./useElapsedSeconds";
+export * from "./feature-flags/useFeatureFlag";
 export * from "./useTokenInput";

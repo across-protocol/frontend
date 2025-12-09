@@ -7,7 +7,8 @@ import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { COLORS, formatMaxFracDigits, getRewardToken } from "utils";
+import { COLORS, getRewardToken } from "utils";
+import { formatFeeUsd } from "views/SwapAndBridge/utils/fees";
 
 type Props = {
   deposit: Deposit;
@@ -38,7 +39,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
 
   return (
     <>
-      <Text color="light-200">${netFee.toFixed(2)}</Text>
+      <Text color="light-200">{formatFeeUsd(netFee.toString())}</Text>
       <LowerRow>
         <Text size="sm" color="grey-400">
           Fee breakdown
@@ -55,7 +56,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   Net fee
                 </Text>
                 <Text size="sm" color="light-100">
-                  ${formatMaxFracDigits(netFee, 2)}
+                  {formatFeeUsd(netFee.toString())}
                 </Text>
               </FeeBreakdownRow>
               <Divider />
@@ -66,7 +67,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <FeeValueWrapper>
                     <Text size="sm" color="grey-400">
-                      ${formatMaxFracDigits(swapFeeUsd, 2)}
+                      {formatFeeUsd(swapFeeUsd.toString())}
                     </Text>
                   </FeeValueWrapper>
                 </FeeBreakdownRow>
@@ -77,24 +78,24 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 </Text>
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
-                    ${formatMaxFracDigits(capitalAndLpFeeUsd, 2)}
+                    {formatFeeUsd(capitalAndLpFeeUsd.toString())}
                   </Text>
                 </FeeValueWrapper>
               </FeeBreakdownRow>
-              <FeeBreakdownRow>
-                <Text size="sm" color="grey-400">
-                  Destination gas fee
-                </Text>
-                <FeeValueWrapper>
+              {deposit.feeBreakdown?.relayGasFeeUsd && (
+                <FeeBreakdownRow>
                   <Text size="sm" color="grey-400">
-                    $
-                    {formatMaxFracDigits(
-                      Number(deposit.feeBreakdown?.relayGasFeeUsd || 0),
-                      4
-                    )}
+                    Destination gas fee
                   </Text>
-                </FeeValueWrapper>
-              </FeeBreakdownRow>
+                  <FeeValueWrapper>
+                    <Text size="sm" color="grey-400">
+                      {formatFeeUsd(
+                        deposit.feeBreakdown.relayGasFeeUsd.toString()
+                      )}
+                    </Text>
+                  </FeeValueWrapper>
+                </FeeBreakdownRow>
+              )}
               {deposit.rewards && rewardToken && (
                 <FeeBreakdownRow>
                   <Text size="sm" color="grey-400">
@@ -102,7 +103,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <FeeValueWrapper>
                     <Text size="sm" color="aqua">
-                      ${formatMaxFracDigits(Number(deposit.rewards.usd), 4)}
+                      {formatFeeUsd(deposit.rewards.usd.toString())}
                     </Text>
                     <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
                   </FeeValueWrapper>

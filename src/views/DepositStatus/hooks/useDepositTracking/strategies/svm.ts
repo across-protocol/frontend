@@ -9,6 +9,7 @@ import {
   FilledInfo,
   DepositData,
   DepositStatusResponse,
+  BridgeProvider,
 } from "../types";
 import {
   getSVMRpc,
@@ -19,15 +20,17 @@ import {
   findFillEvent,
   isBigNumberish,
   uint8ArrayToBigNumber,
+  getDepositBySignatureSVM,
 } from "utils";
 import { isSignature } from "@solana/kit";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../../../types";
 import { Deposit } from "hooks/useDeposits";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
 import { BigNumber } from "ethers";
 import { SvmSpokeClient } from "@across-protocol/contracts";
 import { hexlify } from "ethers/lib/utils";
 import { isHex } from "viem";
+import { getDepositForBurnBySignatureSVM } from "utils/cctp";
 
 /**
  * Strategy for handling Solana (SVM) chain operations
@@ -40,21 +43,25 @@ export class SVMStrategy implements IChainStrategy {
    * @param txSignature Solana transaction signature
    * @returns Deposit information
    */
-  async getDeposit(txSignature: string): Promise<DepositInfo> {
+  async getDeposit(
+    txSignature: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<DepositInfo> {
     try {
       if (!isSignature(txSignature)) {
         throw new Error(`Invalid signature: ${txSignature}`);
       }
-      const rpc = getSVMRpc(this.chainId);
-      const eventsClient = await SvmCpiEventsClient.create(rpc);
 
-      const depositEventsAtSignature =
-        await eventsClient.getDepositEventsFromSignature(
-          this.chainId,
-          txSignature
-        );
-
-      const tx = depositEventsAtSignature?.[0];
+      const tx =
+        bridgeProvider === "cctp"
+          ? await getDepositForBurnBySignatureSVM({
+              signature: txSignature,
+              chainId: this.chainId,
+            })
+          : await getDepositBySignatureSVM({
+              signature: txSignature,
+              chainId: this.chainId,
+            });
 
       if (!tx) {
         return {

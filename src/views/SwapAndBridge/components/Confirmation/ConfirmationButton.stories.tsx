@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
-import { BridgeButtonState, ConfirmationButton } from "./ConfirmationButton";
+import { ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
-import { PriceImpact } from "../../utils/fees";
 import { BridgeProvider } from "./provider";
+import { QuoteRequestProvider } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
@@ -183,16 +184,12 @@ const mockSwapQuote: SwapApprovalApiCallReturnType = {
   },
 };
 
-const mockPriceImpact: PriceImpact = {
-  tooHigh: false,
-  priceImpact: 0.005,
-  priceImpactFormatted: "0.5",
-};
-
-const mockHighPriceImpact: PriceImpact = {
-  tooHigh: true,
-  priceImpact: 0.15,
-  priceImpactFormatted: "15.0",
+const mockQuoteRequest: QuoteRequest = {
+  tradeType: "exactInput",
+  originToken: mockInputToken,
+  destinationToken: mockOutputToken,
+  customDestinationAccount: null,
+  amount: BigNumber.from("100000000"),
 };
 
 const createQuoteWithProvider = (
@@ -212,28 +209,11 @@ const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
   title: "Stories/ConfirmationButton",
   argTypes: {
-    buttonState: {
-      control: {
-        type: "select",
-      },
-      options: [
-        "notConnected",
-        "readyToConfirm",
-        "submitting",
-        "wrongNetwork",
-        "loadingQuote",
-        "validationError",
-        "apiError",
-      ] satisfies BridgeButtonState[],
-    },
-    buttonDisabled: {
+    isQuoteLoading: {
       control: { type: "boolean" },
     },
-    buttonLoading: {
+    initialExpanded: {
       control: { type: "boolean" },
-    },
-    buttonLabel: {
-      control: { type: "text" },
     },
     onConfirm: {
       table: { disable: true },
@@ -241,17 +221,19 @@ const meta: Meta<typeof ConfirmationButton> = {
   },
   decorators: [
     (Story) => (
-      <div
-        style={{
-          maxWidth: 648,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          flexDirection: "column",
-        }}
-      >
-        <Story />
-      </div>
+      <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
+        <div
+          style={{
+            maxWidth: 648,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            flexDirection: "column",
+          }}
+        >
+          <Story />
+        </div>
+      </QuoteRequestProvider>
     ),
   ],
 };
@@ -261,85 +243,36 @@ type Story = StoryObj<typeof ConfirmationButton>;
 
 export const Default: Story = {
   args: {
-    inputToken: mockInputToken,
-    outputToken: mockOutputToken,
-    amount: BigNumber.from("100000000"),
     swapQuote: mockSwapQuote,
     isQuoteLoading: false,
-    buttonState: "readyToConfirm",
-    buttonDisabled: false,
-    buttonLoading: false,
-    buttonLabel: "Confirm Swap",
-    priceImpact: mockPriceImpact,
+    quoteError: null,
     onConfirm: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     },
   },
 };
 
-export const NotConnected: Story = {
+export const NoQuote: Story = {
   args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonState: "notConnected",
-    buttonLabel: "Connect wallet",
+    swapQuote: undefined,
+    isQuoteLoading: false,
+    quoteError: null,
   },
 };
 
 export const LoadingQuote: Story = {
   args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonState: "loadingQuote",
-    buttonDisabled: true,
-    buttonLoading: true,
-    buttonLabel: "Fetching quote...",
+    swapQuote: undefined,
+    isQuoteLoading: true,
+    quoteError: null,
   },
 };
 
-export const Submitting: Story = {
+export const WithError: Story = {
   args: {
-    ...Default.args,
-    buttonState: "submitting",
-    buttonDisabled: true,
-    buttonLoading: true,
-    buttonLabel: "Confirming...",
-  },
-};
-
-export const WrongNetwork: Story = {
-  args: {
-    ...Default.args,
-    buttonState: "wrongNetwork",
-    buttonDisabled: true,
-    buttonLabel: "Switch network",
-  },
-};
-
-export const ValidationError: Story = {
-  args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonState: "validationError",
-    buttonDisabled: true,
-    buttonLabel: "Invalid amount",
-  },
-};
-
-export const ApiError: Story = {
-  args: {
-    ...Default.args,
-    swapQuote: null,
-    buttonState: "apiError",
-    buttonDisabled: true,
-    buttonLabel: "Failed to get quote",
-  },
-};
-
-export const WithHighPriceImpact: Story = {
-  args: {
-    ...Default.args,
-    priceImpact: mockHighPriceImpact,
+    swapQuote: undefined,
+    isQuoteLoading: false,
+    quoteError: new Error("Failed to fetch quote"),
   },
 };
 
@@ -350,15 +283,35 @@ export const Expanded: Story = {
   },
 };
 
-export const ExpandedWithHighPriceImpact: Story = {
+const highPriceImpactQuote: SwapApprovalApiCallReturnType = {
+  ...mockSwapQuote,
+  fees: {
+    ...mockSwapQuote.fees!,
+    total: {
+      ...mockSwapQuote.fees!.total,
+      pct: BigNumber.from("150000000000000000"), // 15% - above 10% threshold
+    },
+  },
+};
+
+export const HighPriceImpact: Story = {
   args: {
-    ...Default.args,
-    priceImpact: mockHighPriceImpact,
+    swapQuote: highPriceImpactQuote,
+    isQuoteLoading: false,
+    quoteError: null,
+  },
+};
+
+export const HighPriceImpactExpanded: Story = {
+  args: {
+    swapQuote: highPriceImpactQuote,
+    isQuoteLoading: false,
+    quoteError: null,
     initialExpanded: true,
   },
 };
 
-export const bridgeProviders = [
+const bridgeProviders = [
   "across",
   "cctp",
   "oft",
@@ -368,45 +321,31 @@ export const bridgeProviders = [
 
 export const AllProvidersCollapsed: Story = {
   render: () => (
-    <>
+    <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          inputToken={mockInputToken}
-          outputToken={mockOutputToken}
-          amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonState="readyToConfirm"
-          buttonDisabled={false}
-          buttonLoading={false}
-          buttonLabel="Confirm Swap"
-          priceImpact={mockPriceImpact}
+          quoteError={null}
         />
       ))}
-    </>
+    </QuoteRequestProvider>
   ),
 };
 
 export const AllProvidersExpanded: Story = {
   render: () => (
-    <>
+    <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
         <ConfirmationButton
           key={provider}
-          inputToken={mockInputToken}
-          outputToken={mockOutputToken}
-          amount={BigNumber.from("100000000")}
           swapQuote={createQuoteWithProvider(provider)}
           isQuoteLoading={false}
-          buttonState="readyToConfirm"
-          buttonDisabled={false}
-          buttonLoading={false}
-          buttonLabel="Confirm Swap"
-          priceImpact={mockPriceImpact}
+          quoteError={null}
           initialExpanded
         />
       ))}
-    </>
+    </QuoteRequestProvider>
   ),
 };

@@ -1,5 +1,5 @@
-import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import { getTokensForFeesCalc } from "views/Bridge/utils";
+import { useEstimatedRewards } from "./useEstimatedRewards";
+import { getTokensForFeesCalc } from "../utils";
 
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useToken } from "hooks/useToken";
@@ -44,8 +44,8 @@ export function useResolveFromBridgeAndSwapPagePayload(
     : "";
 
   const swapToken = useToken(swapTokenSymbol);
-  const outputToken = useToken(outputTokenSymbol);
-  const inputTokenFromHook = useToken(inputTokenSymbol);
+  const outputToken = useToken(outputTokenSymbol, toChainId);
+  const inputTokenFromHook = useToken(inputTokenSymbol, fromChainId);
 
   const {
     inputToken,

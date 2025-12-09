@@ -81,7 +81,10 @@ export type BridgeStrategy = {
     isOutputNative: boolean;
   }) => CrossSwapType[];
 
-  getBridgeQuoteRecipient: (crossSwap: CrossSwap) => string;
+  getBridgeQuoteRecipient: (
+    crossSwap: CrossSwap,
+    hasOriginSwap?: boolean
+  ) => string;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
@@ -113,10 +116,12 @@ export type BridgeStrategyData =
       canFillInstantly: boolean;
       isUtilizationHigh: boolean;
       isUsdcToUsdc: boolean;
-      isLargeDeposit: boolean;
+      isLargeCctpDeposit: boolean;
       isFastCctpEligible: boolean;
-      isLineaSource: boolean;
       isInThreshold: boolean;
+      isUsdtToUsdt: boolean;
+      isMonadTransfer: boolean;
+      isWithinMonadLimit: boolean;
     }
   | undefined;
 
@@ -125,6 +130,7 @@ export type BridgeStrategyDataParams = {
   outputToken: Token;
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
+  includesActions?: boolean;
   recipient?: string;
   depositor: string;
   logger?: Logger;
@@ -133,4 +139,5 @@ export type BridgeStrategyDataParams = {
 export type GetBridgeStrategyParams = {
   originChainId: number;
   destinationChainId: number;
+  routingPreference?: string;
 } & BridgeStrategyDataParams;

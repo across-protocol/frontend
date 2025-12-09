@@ -184,6 +184,8 @@ const chainsWithUsdt0Enabled = [
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.PLASMA,
+  CHAIN_IDs.MONAD,
+  CHAIN_IDs.UNICHAIN,
 ];
 
 // USDT0 logo URL (matches frontend logo)
@@ -297,6 +299,30 @@ function deduplicateTokens(tokens: SwapToken[]): SwapToken[] {
   return Array.from(seen.values());
 }
 
+function replaceUsdtOnNonAcrossChains(
+  tokens: SwapToken[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): SwapToken[] {
+  return tokens.map((token) => {
+    if (
+      token.address === "0x588CE4F028D8e7B53B687865d6A67b3A54C75518" &&
+      token.chainId === CHAIN_IDs.UNICHAIN
+    ) {
+      return {
+        chainId: CHAIN_IDs.UNICHAIN,
+        address: "0x9151434b16b9763660705744891fA906F660EcC5",
+        name: "USDT0",
+        symbol: "USDT0",
+        decimals: 6,
+        logoUrl: USDT0_LOGO_URL,
+        priceUsd:
+          pricesForLifiTokens[CHAIN_IDs.UNICHAIN]?.[token.address] || null,
+      };
+    }
+    return token;
+  });
+}
+
 export async function fetchSwapTokensData(
   filteredChainIds?: number[]
 ): Promise<SwapToken[]> {
@@ -356,5 +382,10 @@ export async function fetchSwapTokensData(
   // Deduplicate tokens (Across tokens take precedence)
   const deduplicatedTokens = deduplicateTokens(responseJson);
 
-  return deduplicatedTokens;
+  // Hacky solution to replace Unichain USDT with USDT0
+  const finalTokens = replaceUsdtOnNonAcrossChains(
+    deduplicatedTokens,
+    pricesForLifiTokens
+  );
+  return finalTokens;
 }

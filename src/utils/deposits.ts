@@ -1,4 +1,7 @@
-import { DepositData } from "views/DepositStatus/hooks/useDepositTracking/types";
+import {
+  BridgeProvider,
+  DepositData,
+} from "views/DepositStatus/hooks/useDepositTracking/types";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 
@@ -8,6 +11,10 @@ import {
   FilledRelayEvent,
 } from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
+import { parseDepositForBurnLog } from "./cctp";
+import { Signature } from "@solana/kit";
+import { getSVMRpc, SvmCpiEventsClient } from "utils";
+import { parseOftSentLog } from "./oft";
 
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
@@ -121,7 +128,8 @@ export function parseFilledRelayLogOutputAmount(logs: Log[]) {
 
 export async function getDepositByTxHash(
   depositTxHash: string,
-  fromChainId: number
+  fromChainId: number,
+  bridgeProvider: BridgeProvider
 ): Promise<
   | {
       depositTxReceipt: TransactionReceipt;
@@ -153,12 +161,18 @@ export async function getDepositByTxHash(
     };
   }
 
-  const parsedDepositLog = parseFundsDepositedLog({
+  const parseDepositLogArgs = {
     logs: depositTxReceipt.logs,
     originChainId: fromChainId,
     block,
     depositTxReceipt,
-  });
+  };
+  const parsedDepositLog =
+    bridgeProvider === "cctp"
+      ? parseDepositForBurnLog(parseDepositLogArgs)
+      : bridgeProvider === "oft"
+        ? parseOftSentLog(parseDepositLogArgs)
+        : parseFundsDepositedLog(parseDepositLogArgs);
 
   if (!parsedDepositLog) {
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
@@ -169,4 +183,26 @@ export async function getDepositByTxHash(
     parsedDepositLog,
     depositTimestamp: block.timestamp,
   };
+}
+
+// ====================================================== //
+// ========================= SVM ======================== //
+// ====================================================== //
+
+export async function getDepositBySignatureSVM(args: {
+  signature: Signature;
+  chainId: number;
+}): Promise<DepositData | undefined> {
+  const { signature, chainId } = args;
+
+  const rpc = getSVMRpc(chainId);
+
+  const eventsClient = await SvmCpiEventsClient.create(rpc);
+
+  const depositEventsAtSignature =
+    await eventsClient.getDepositEventsFromSignature(chainId, signature);
+
+  const tx = depositEventsAtSignature?.[0];
+
+  return tx ? (tx as DepositData) : undefined;
 }
