@@ -29,7 +29,9 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
     },
     [CHAIN_IDs.HYPERCORE]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
+        // TODO: Remove this once we know how to correctly route USDC -> USDH on HyperCore
+        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]:
+          getSponsoredCctpBridgeStrategy(true),
       },
       // NOTE: Disable origin BSC until we have an easier way to rebalance off BSC
       // [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
