@@ -1,4 +1,4 @@
-import { BigNumber, utils } from "ethers";
+import { BigNumber, utils, constants } from "ethers";
 
 import { Token } from "./_dexes/types";
 import { getEnvs, parseJsonSafe } from "./_env";
@@ -33,14 +33,8 @@ const {
 export const SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN = parseJsonSafe(
   _SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN,
   {
-    [TOKEN_SYMBOLS_MAP.USDC.symbol]: utils.parseUnits(
-      "100",
-      TOKEN_SYMBOLS_MAP.USDC.decimals
-    ),
-    [TOKEN_SYMBOLS_MAP.USDH.symbol]: utils.parseUnits(
-      "100",
-      TOKEN_SYMBOLS_MAP.USDH.decimals
-    ),
+    [TOKEN_SYMBOLS_MAP.USDC.symbol]: constants.MaxUint256,
+    [TOKEN_SYMBOLS_MAP.USDH.symbol]: constants.MaxUint256,
   }
 );
 
@@ -50,14 +44,8 @@ export const SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN = parseJsonSafe(
 export const SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN = parseJsonSafe(
   _SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN,
   {
-    [TOKEN_SYMBOLS_MAP.USDC.symbol]: utils.parseUnits(
-      "10",
-      TOKEN_SYMBOLS_MAP.USDC.decimals
-    ),
-    [TOKEN_SYMBOLS_MAP.USDH.symbol]: utils.parseUnits(
-      "10",
-      TOKEN_SYMBOLS_MAP.USDH.decimals
-    ),
+    [TOKEN_SYMBOLS_MAP.USDC.symbol]: constants.MaxUint256,
+    [TOKEN_SYMBOLS_MAP.USDH.symbol]: constants.MaxUint256,
   }
 );
 
@@ -67,7 +55,7 @@ export const SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN = parseJsonSafe(
 export const SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT =
   _SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT
     ? Number(_SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT)
-    : 10;
+    : 10_000_000;
 
 /**
  * Slippage tolerance for sponsored mint/burn transactions with swaps.
