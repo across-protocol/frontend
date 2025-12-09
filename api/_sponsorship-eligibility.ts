@@ -64,7 +64,7 @@ export const SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT =
 export const SPONSORED_SWAP_SLIPPAGE_TOLERANCE =
   _SPONSORED_SWAP_SLIPPAGE_TOLERANCE
     ? Number(_SPONSORED_SWAP_SLIPPAGE_TOLERANCE)
-    : 0.5;
+    : 1;
 
 /**
  * List of token pairs that are eligible for sponsorship.
@@ -255,7 +255,8 @@ export async function assertSponsoredAmountCanBeCovered(params: {
  * @returns True if the swap slippage is within the acceptable range, false otherwise.
  */
 export function isSponsoredSwapSlippageTolerable(swapSlippageBps: number) {
-  return swapSlippageBps <= SPONSORED_SWAP_SLIPPAGE_TOLERANCE;
+  const swapSlippage = swapSlippageBps / 100;
+  return swapSlippage <= SPONSORED_SWAP_SLIPPAGE_TOLERANCE;
 }
 
 /**

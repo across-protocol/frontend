@@ -79,11 +79,11 @@ describe("api/_sponsorship-eligibility", () => {
 
   describe("#isSponsoredSwapSlippageTolerable()", () => {
     test("should return true when slippage is below tolerance", () => {
-      expect(isSponsoredSwapSlippageTolerable(0.1)).toBe(true);
+      expect(isSponsoredSwapSlippageTolerable(1)).toBe(true);
     });
 
     test("should return false when slippage exceeds tolerance", () => {
-      expect(isSponsoredSwapSlippageTolerable(5)).toBe(false);
+      expect(isSponsoredSwapSlippageTolerable(101)).toBe(false);
     });
   });
 
@@ -425,7 +425,7 @@ describe("api/_sponsorship-eligibility", () => {
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDH,
           maxBpsToSponsor,
-          swapSlippageBps: 1.0, // Exceeds 0.5 tolerance
+          swapSlippageBps: 101, // Exceeds 1% tolerance
           inputAmount,
         })
       ).rejects.toThrow(SponsoredSwapSlippageToHighError);
@@ -443,7 +443,7 @@ describe("api/_sponsorship-eligibility", () => {
           inputToken: arbitrumUSDC,
           outputToken: hyperCoreUSDH,
           maxBpsToSponsor,
-          swapSlippageBps: 0.1, // Within tolerance
+          swapSlippageBps: 1, // Within tolerance
           inputAmount,
         })
       ).rejects.toThrow(SponsoredDonationBoxFundsInsufficientError);
