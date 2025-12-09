@@ -396,7 +396,10 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     capabilities,
     originTxNeedsAllowance: true,
     getCrossSwapTypes: getOftCrossSwapTypes,
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: (
+      crossSwap: CrossSwap,
+      _hasOriginSwap?: boolean
+    ) => {
       return crossSwap.recipient;
     },
     getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {

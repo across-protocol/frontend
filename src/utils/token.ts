@@ -222,7 +222,10 @@ const INTERMEDIARY_TOKEN_MAPPING: Record<
   number,
   Record<string, { symbol: string; chainId: number }>
 > = {
-  1337: { "USDH-SPOT": { symbol: "USDH", chainId: 999 } },
+  1337: {
+    "USDH-SPOT": { symbol: "USDH", chainId: 999 },
+    "USDT-SPOT": { symbol: "USDT", chainId: 999 },
+  },
 };
 
 export function getIntermediaryTokenInfo(tokenInfo: {

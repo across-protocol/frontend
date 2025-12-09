@@ -31,7 +31,10 @@ export const CCTP_SUPPORTED_CHAINS = [
   CHAIN_IDs.UNICHAIN_SEPOLIA,
 ];
 
-export const CCTP_SUPPORTED_TOKENS = [TOKEN_SYMBOLS_MAP.USDC];
+export const CCTP_SUPPORTED_TOKENS = [
+  TOKEN_SYMBOLS_MAP.USDC,
+  TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+];
 
 export const getCctpDomainId = (chainId: number): number => {
   const chainInfo = CHAINS[chainId];

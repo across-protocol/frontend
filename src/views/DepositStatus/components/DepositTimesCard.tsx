@@ -22,8 +22,8 @@ import { ampli } from "ampli";
 
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
-import TokenFee from "views/Bridge/components/TokenFee";
-import EstimatedTable from "views/Bridge/components/EstimatedTable";
+import TokenFee from "./TokenFee";
+import EstimatedTable from "./EstimatedTable";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
 import { useToken } from "hooks/useToken";

@@ -1,25 +1,25 @@
 "use client";
 import React, { ButtonHTMLAttributes, useEffect } from "react";
-import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Info } from "assets/icons/info.svg";
-import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
-import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Route } from "assets/icons/route.svg";
-import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-import { AnimatePresence, motion } from "framer-motion";
-import { BigNumber } from "ethers";
 import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
-import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { getSwapQuoteFees, PriceImpact } from "../../utils/fees";
+import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
-import { BridgeProvider, getProviderFromQuote } from "./provider";
+import { getProviderFromQuote } from "./provider";
+import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { useButtonState } from "../../hooks/useButtonState";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
+import { useOnConfirm } from "../../hooks/useOnConfirm";
+import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
+import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
+import { ExpandableLabelSection } from "./ExpandableLabelSection";
+import { CoreConfirmationButton } from "./CoreConfirmationButton";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -32,207 +32,63 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  inputToken: EnrichedToken | null;
-  outputToken: EnrichedToken | null;
-  amount: BigNumber | null;
-  swapQuote: SwapApprovalApiCallReturnType | null;
+  swapQuote: SwapApprovalApiCallReturnType | undefined;
   isQuoteLoading: boolean;
+  quoteError: Error | null;
   onConfirm?: () => Promise<void>;
-  // External state props
-  buttonState: BridgeButtonState;
-  buttonDisabled: boolean;
-  buttonLoading: boolean;
-  buttonLabel?: string;
-  priceImpact?: PriceImpact;
   initialExpanded?: boolean;
 }
 
-// Expandable label section component
-const ExpandableLabelSection: React.FC<
-  React.PropsWithChildren<{
-    fee: string;
-    time: string;
-    expanded: boolean;
-    onToggle: () => void;
-    visible: boolean;
-    state: BridgeButtonState;
-    hasQuote: boolean;
-    priceImpact?: PriceImpact;
-    provider: BridgeProvider;
-  }>
-> = ({
-  fee,
-  time,
-  expanded,
-  onToggle,
-  priceImpact,
-  children,
-  hasQuote,
-  provider,
-}) => {
-  // Render state-specific content
-  let content: React.ReactNode = null;
-
-  const defaultState = (
-    <>
-      <ExpandableLabelLeft>
-        <Shield width="16" height="16" />
-        <FastSecureText>Fast & Secure</FastSecureText>
-      </ExpandableLabelLeft>
-      <ExpandableLabelRightAccent>
-        Across V4. More Chains Faster. <Across width="16" height="16" />
-      </ExpandableLabelRightAccent>
-    </>
-  );
-
-  const isSponsoredIntent = provider === "sponsored-intent";
-
-  // Show quote breakdown when quote is available, otherwise show default state
-  if (hasQuote) {
-    // Show quote details when available
-    content = (
-      <>
-        <ExpandableLabelLeft>
-          <Shield width="16" height="16" />
-          <FastSecureText>Fast & Secure</FastSecureText>
-        </ExpandableLabelLeft>
-        {!expanded && (
-          <ExpandableLabelRight>
-            <ProviderBadge
-              expanded={expanded}
-              provider={provider}
-            ></ProviderBadge>
-            <Divider />
-            <FeeTimeItem>
-              {priceImpact?.tooHigh ? (
-                <FeeTimeItemRed>
-                  <Warning
-                    color="var(--functional-red)"
-                    width="16"
-                    height="16"
-                  />
-                  <span>
-                    {fee} (-{priceImpact.priceImpactFormatted}%)
-                  </span>
-                </FeeTimeItemRed>
-              ) : (
-                <>
-                  <Dollar width="16" height="16" />
-                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
-                  {fee}
-                </>
-              )}
-            </FeeTimeItem>
-            <Divider />
-            <FeeTimeItem>
-              <Time width="16" height="16" />
-              {time}
-            </FeeTimeItem>
-          </ExpandableLabelRight>
-        )}
-        <StyledChevronDown expanded={expanded} />
-      </>
-    );
-  } else {
-    // Default state - show Across V4 branding
-    content = defaultState;
-  }
-
-  return (
-    <>
-      <ExpandableLabelButton
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        disabled={!hasQuote}
-      >
-        {content}
-      </ExpandableLabelButton>
-      <AnimatePresence initial={false} mode="wait">
-        {expanded && (
-          <motion.div
-            key="expandable-content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{
-              height: "auto",
-              opacity: 1,
-              transition: {
-                type: "spring",
-                stiffness: 400,
-                damping: 25,
-                mass: 0.8,
-              },
-            }}
-            exit={{
-              height: 0,
-              opacity: 0,
-              transition: {
-                duration: 0.2,
-                ease: "easeInOut",
-              },
-            }}
-            style={{ overflow: "hidden", willChange: "height, opacity" }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
-
-// Core button component, used by all states
-const ButtonCore: React.FC<{
-  label: React.ReactNode;
-  loading?: boolean;
-  disabled?: boolean;
-  state: BridgeButtonState;
-  fullHeight?: boolean;
-  onClick?: () => void;
-}> = ({ label, loading, disabled, state, onClick, fullHeight }) => (
-  <StyledButton
-    data-cy="bridge-button"
-    disabled={disabled || loading}
-    onClick={onClick}
-    aqua={!disabled}
-    loading={loading}
-    fullHeight={fullHeight}
-  >
-    <ButtonContent>
-      {loading && <StyledLoadingIcon />}
-      {state === "notConnected" && (
-        <Wallet width={16} height={16} color="inherit" />
-      )}
-      {state === "apiError" && (
-        <Warning width={16} height={16} color="inherit" />
-      )}
-      {label}
-    </ButtonContent>
-  </StyledButton>
-);
-
 export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
-  inputToken,
-  outputToken,
-  amount,
   swapQuote,
-  onConfirm,
-  buttonState,
-  buttonDisabled,
-  buttonLoading,
-  buttonLabel,
-  priceImpact,
+  isQuoteLoading,
+  quoteError,
   initialExpanded = false,
 }) => {
-  const [expanded, setExpanded] = React.useState(initialExpanded);
+  const { quoteRequest } = useQuoteRequestContext();
 
-  const state = buttonState;
+  const { depositor } = useEcosystemAccounts({
+    originToken: quoteRequest.originToken,
+    destinationToken: quoteRequest.destinationToken,
+    customDestinationAccount: quoteRequest.customDestinationAccount,
+  });
+
+  const approvalAction = useSwapApprovalAction(
+    quoteRequest.originToken?.chainId || 0,
+    swapQuote
+  );
+
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
+
+  const validation = useValidateSwapAndBridge(
+    quoteRequest.amount,
+    quoteRequest.tradeType === "exactInput",
+    quoteRequest.originToken,
+    quoteRequest.destinationToken,
+    !!depositor,
+    swapQuote?.inputAmount
+  );
+
+  const buttonState = useButtonState(
+    quoteRequest,
+    approvalAction,
+    validation,
+    quoteError,
+    isQuoteLoading
+  );
+
+  const { originToken, destinationToken, amount } = quoteRequest;
+  const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
+    buttonState;
+  // Render unified group driven by state
+  const priceImpact = getPriceImpact(swapQuote);
+  const [expanded, setExpanded] = React.useState(initialExpanded);
 
   // Calculate display values from swapQuote
   // Resolve conversion helpers outside memo to respect hooks rules
 
   const displayValues = React.useMemo(() => {
-    if (!swapQuote || !inputToken || !outputToken || !swapQuote.fees) {
+    if (!swapQuote || !originToken || !destinationToken || !swapQuote.fees) {
       return {
         fee: "-",
         time: "-",
@@ -269,10 +125,11 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, inputToken, outputToken, amount]);
+  }, [swapQuote, originToken, destinationToken, amount]);
 
   // When notConnected, make button clickable so it can open wallet modal
-  const isButtonDisabled = state === "notConnected" ? false : buttonDisabled;
+  const isButtonDisabled =
+    buttonStatus === "notConnected" ? false : buttonDisabled;
 
   useEffect(() => {
     if (!swapQuote) {
@@ -282,7 +139,6 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 
   const provider = getProviderFromQuote(swapQuote);
   const isSponsoredIntent = provider === "sponsored-intent";
-  // Render unified group driven by state
   const content = (
     <>
       <ExpandableLabelSection
@@ -291,7 +147,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         expanded={expanded}
         onToggle={() => setExpanded((e) => !e)}
         visible={true}
-        state={state}
+        state={buttonStatus}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
         provider={provider}
@@ -385,12 +241,12 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           </FeeBreakdown>
         </ExpandedDetails>
       </ExpandableLabelSection>
-      <ButtonCore
-        state={state}
+      <CoreConfirmationButton
+        state={buttonStatus}
         label={buttonLabel}
         loading={buttonLoading}
         disabled={isButtonDisabled}
-        fullHeight={state !== "readyToConfirm"}
+        fullHeight={buttonStatus !== "readyToConfirm"}
         onClick={onConfirm}
       />
     </>
@@ -400,8 +256,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     <>
       <Container
         dark={
-          buttonState === "validationError" ||
-          buttonState === "apiError" ||
+          buttonStatus === "validationError" ||
+          buttonStatus === "apiError" ||
           buttonLoading
         }
       >
@@ -418,7 +274,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
 };
 
 // Styled components
-const Container = styled(motion.div)<{ dark: boolean }>`
+const Container = styled.div<{ dark: boolean }>`
   background: ${({ dark }) =>
     dark ? COLORS["grey-400-5"] : "rgba(108, 249, 216, 0.1)"};
   border-radius: 24px;
@@ -427,145 +283,7 @@ const Container = styled(motion.div)<{ dark: boolean }>`
   padding: 8px 12px 12px 12px;
   width: 100%;
   overflow: hidden;
-`;
-
-const ExpandableLabelButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 8px;
-  padding-bottom: 16px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-`;
-
-const ExpandableLabelLeft = styled.span`
-  color: ${COLORS.aqua};
-  font-weight: 600;
-  font-size: 14px;
-  flex: 1;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
-`;
-
-const FastSecureText = styled.span`
-  color: ${COLORS.aqua};
-`;
-
-const ExpandableLabelRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #e0f3ff;
-  justify-content: flex-end;
-`;
-
-const ExpandableLabelRightAccent = styled(ExpandableLabelLeft)`
-  text-align: right;
-  justify-content: flex-end;
-`;
-
-const FeeTimeItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%;
-`;
-
-const Divider = styled.span`
-  margin: 0 8px;
-  height: 16px;
-  width: 1px;
-  background: rgba(224, 243, 255, 0.5);
-`;
-
-const StyledChevronDown = styled(ChevronDownIcon)<{ expanded: boolean }>`
-  width: 20px;
-  height: 20px;
-  margin-left: 12px;
-  transition: transform 0.2s ease;
-  cursor: pointer;
-  color: #e0f3ff;
-  transform: ${({ expanded }) =>
-    expanded ? "rotate(180deg)" : "rotate(0deg)"};
-`;
-
-const StyledButton = styled.button<{
-  aqua?: boolean;
-  loading?: boolean;
-  fullHeight?: boolean;
-}>`
-  width: 100%;
-  height: 64px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease,
-    opacity 0.3s ease;
-  border: none;
-  cursor: pointer;
-
-  background: ${({ aqua }) =>
-    aqua ? COLORS.aqua : "rgba(224, 243, 255, 0.05)"};
-  color: ${({ aqua }) => (aqua ? "#2D2E33" : "#E0F3FF")};
-
-  &:not(:disabled):hover {
-    box-shadow: ${({ aqua }) =>
-      aqua
-        ? `0 0 10px 0 var(--Transparency-Bright-Gray-bright-gray-50, rgba(224, 243, 255, 0.50)) inset, 0 0 4px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 2px 12px 1px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20)), 0 4px 24px 2px var(--Transparency-Aqua-aqua-20, rgba(108, 249, 216, 0.20))`
-        : `
-      `};
-  }
-
-  &:not(:disabled):focus {
-    ${({ aqua }) => !aqua && `box-shadow: 0 0 16px 0 ${COLORS.aqua};`}
-  }
-
-  &:disabled {
-    cursor: ${({ loading }) => (loading ? "wait" : "not-allowed")};
-    box-shadow: none;
-    opacity: ${({ loading }) => (loading ? 0.9 : 0.6)};
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const ButtonContent = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-`;
-
-const StyledLoadingIcon = styled(LoadingIcon)`
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-  color: inherit;
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  transition: background 0.2s ease;
 `;
 
 const ExpandedDetails = styled.div`
@@ -631,18 +349,6 @@ const FeeBreakdownLabel = styled.span`
 
 const FeeBreakdownValue = styled(DetailRight)`
   color: #e0f3ff;
-`;
-
-const FeeTimeItemRed = styled(FeeTimeItem)`
-  background: rgba(255, 97, 102, 0.2);
-  border-radius: 999px;
-  height: 20px;
-  padding-inline: 6px;
-  margin-inline: -6px; // account for inline padding
-
-  span {
-    height: 100%;
-  }
 `;
 
 const FeeWarning = styled.div`

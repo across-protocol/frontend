@@ -1,10 +1,17 @@
+import { BigNumber } from "ethers";
 import {
   BridgeStrategy,
   GetExactInputBridgeQuoteParams,
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import {
+  CrossSwap,
+  CrossSwapQuotes,
+  FeeDetailsType,
+  SwapQuote,
+  Token,
+} from "../../_dexes/types";
 import {
   getBridgeQuoteForExactInput,
   getBridgeQuoteForOutput,
@@ -15,11 +22,9 @@ import {
   getBridgeQuoteRecipient,
   getBridgeQuoteMessage,
   getCrossSwapTypes,
+  AppFee,
 } from "../../_dexes/utils";
-import { AppFee } from "../../_dexes/utils";
-import { Token, FeeDetailsType } from "../../_dexes/types";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
-import { BigNumber } from "ethers";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -86,12 +91,19 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
       });
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
-      return getBridgeQuoteRecipient(crossSwap);
+    getBridgeQuoteRecipient: (
+      crossSwap: CrossSwap,
+      hasOriginSwap?: boolean
+    ) => {
+      return getBridgeQuoteRecipient(crossSwap, hasOriginSwap);
     },
 
-    getBridgeQuoteMessage: (crossSwap: CrossSwap, appFee?: AppFee) => {
-      return getBridgeQuoteMessage(crossSwap, appFee);
+    getBridgeQuoteMessage: (
+      crossSwap: CrossSwap,
+      appFee?: AppFee,
+      originSwapQuote?: SwapQuote
+    ) => {
+      return getBridgeQuoteMessage(crossSwap, appFee, originSwapQuote);
     },
 
     getQuoteForExactInput: async ({

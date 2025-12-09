@@ -9,6 +9,7 @@ import {
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 import * as hypercoreModule from "../../../../api/_hypercore";
+import { ConvertDecimals } from "../../../../api/_utils";
 
 // Mock all dependencies
 jest.mock("axios");
@@ -74,8 +75,8 @@ describe("bridges/cctp/strategy", () => {
   };
 
   const outputTokenHyperCore = {
-    ...TOKEN_SYMBOLS_MAP["USDC"],
-    address: TOKEN_SYMBOLS_MAP["USDC"].addresses[CHAIN_IDs.HYPERCORE],
+    ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+    address: TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
     chainId: CHAIN_IDs.HYPERCORE,
   };
 
@@ -140,10 +141,11 @@ describe("bridges/cctp/strategy", () => {
       const transferFee = exactInputAmount.mul(1).div(10000); // 10,000
       const maxFee = transferFee.add(200_000); // 210,000
       const inputAfterFee = exactInputAmount.sub(maxFee); // 99,790,000
+      const scaledInputAfterFee = ConvertDecimals(6, 8)(inputAfterFee);
 
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
-      expect(result.bridgeQuote.outputAmount).toEqual(inputAfterFee);
-      expect(result.bridgeQuote.minOutputAmount).toEqual(inputAfterFee);
+      expect(result.bridgeQuote.outputAmount).toEqual(scaledInputAfterFee);
+      expect(result.bridgeQuote.minOutputAmount).toEqual(scaledInputAfterFee);
       expect(result.bridgeQuote.fees.amount).toEqual(maxFee);
     });
 
@@ -173,10 +175,11 @@ describe("bridges/cctp/strategy", () => {
       const maxFee = transferFee.add(200_000); // 210,000
       const inputAfterFee = exactInputAmount.sub(maxFee); // 99,790,000
       const expectedOutput = inputAfterFee.sub(1_000_000); // 98,790,000 (minus 1 USDC account fee)
+      const scaledExpectedOutput = ConvertDecimals(6, 8)(expectedOutput);
 
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
-      expect(result.bridgeQuote.outputAmount).toEqual(expectedOutput);
-      expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutput);
+      expect(result.bridgeQuote.outputAmount).toEqual(scaledExpectedOutput);
+      expect(result.bridgeQuote.minOutputAmount).toEqual(scaledExpectedOutput);
       expect(result.bridgeQuote.fees.amount).toEqual(maxFee);
     });
 
@@ -205,7 +208,7 @@ describe("bridges/cctp/strategy", () => {
     test("should calculate correct input amount for existing HyperCore account", async () => {
       mockAccountExistsOnHyperCore.mockResolvedValue(true);
 
-      const minOutputAmount = BigNumber.from(100_000_000); // 100 USDC
+      const minOutputAmount = BigNumber.from(10_000_000_000); // 100 USDC in 8 decimals
       const recipient = "0x1234567890123456789012345678901234567890";
 
       const result = await strategy.getQuoteForOutput({
@@ -239,7 +242,7 @@ describe("bridges/cctp/strategy", () => {
     test("should calculate correct input amount for new HyperCore account", async () => {
       mockAccountExistsOnHyperCore.mockResolvedValue(false);
 
-      const minOutputAmount = BigNumber.from(100_000_000); // 100 USDC
+      const minOutputAmount = BigNumber.from(10_000_000_000); // 100 USDC in 8 decimals
       const recipient = "0x1234567890123456789012345678901234567890";
 
       const result = await strategy.getQuoteForOutput({

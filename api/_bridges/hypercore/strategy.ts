@@ -6,11 +6,9 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { ConvertDecimals } from "../../_utils";
-import { CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { AppFee } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
+import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
 import { encodeTransferCalldata } from "../../_multicall-handler";
@@ -121,7 +119,10 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       return [];
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: (
+      crossSwap: CrossSwap,
+      _hasOriginSwap?: boolean
+    ) => {
       return crossSwap.recipient;
     },
 

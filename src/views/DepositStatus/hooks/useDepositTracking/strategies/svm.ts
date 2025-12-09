@@ -23,7 +23,7 @@ import {
   getDepositBySignatureSVM,
 } from "utils";
 import { isSignature } from "@solana/kit";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../../../types";
 import { Deposit } from "hooks/useDeposits";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
 import { BigNumber } from "ethers";

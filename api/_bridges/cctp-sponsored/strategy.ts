@@ -443,7 +443,7 @@ export async function calculateMaxBpsToSponsor(params: {
   let swapSlippageBps = BigNumber.from(0);
 
   // Simple transfer flow: no swap needed, therefore `maxBpsToSponsor` is `maxFee` in bps
-  if (outputToken.symbol === "USDC") {
+  if (["USDC", "USDC-SPOT"].includes(outputToken.symbol)) {
     maxBpsToSponsor = maxFeeBps;
   }
   // Swap flow: `maxBpsToSponsor` is `maxFee` + est. swap slippage if slippage is positive

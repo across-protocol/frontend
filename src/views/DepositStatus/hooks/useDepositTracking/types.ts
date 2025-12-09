@@ -5,7 +5,7 @@ import type {
 import { BigNumber } from "ethers";
 
 import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../../types";
 
 export type BridgeProvider = "across" | "cctp" | "oft";
 

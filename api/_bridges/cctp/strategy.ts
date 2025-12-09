@@ -146,7 +146,10 @@ export function getCctpBridgeStrategy(
       return [];
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: (
+      crossSwap: CrossSwap,
+      _hasOriginSwap?: boolean
+    ) => {
       return crossSwap.recipient;
     },
 

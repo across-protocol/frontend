@@ -1,26 +1,18 @@
 import { BigNumber } from "ethers";
 import { quoteRequestReducer } from "./quoteRequestReducer";
 import { QuoteRequest } from "./quoteRequestAction";
-
-const initialState: QuoteRequest = {
-  tradeType: "exactInput",
-  originToken: null,
-  destinationToken: null,
-  originAccount: null,
-  destinationAccount: null,
-  amount: null,
-};
+import { initialQuote } from "./initialQuote";
 
 const mockToken = (symbol: string) =>
   ({ symbol, chainId: 1, address: "0x" }) as QuoteRequest["originToken"];
 
 const mockAccount = (address: string) =>
-  ({ accountType: "evm", address }) as QuoteRequest["originAccount"];
+  ({ accountType: "evm", address }) as QuoteRequest["customDestinationAccount"];
 
 describe("quoteRequestReducer", () => {
   it("sets origin token", () => {
     const token = mockToken("ETH");
-    const result = quoteRequestReducer(initialState, {
+    const result = quoteRequestReducer(initialQuote, {
       type: "SET_ORIGIN_TOKEN",
       payload: token,
     });
@@ -29,7 +21,7 @@ describe("quoteRequestReducer", () => {
 
   it("sets destination token", () => {
     const token = mockToken("USDC");
-    const result = quoteRequestReducer(initialState, {
+    const result = quoteRequestReducer(initialQuote, {
       type: "SET_DESTINATION_TOKEN",
       payload: token,
     });
@@ -38,7 +30,7 @@ describe("quoteRequestReducer", () => {
 
   it("sets origin amount with exactInput trade type", () => {
     const amount = BigNumber.from(100);
-    const result = quoteRequestReducer(initialState, {
+    const result = quoteRequestReducer(initialQuote, {
       type: "SET_ORIGIN_AMOUNT",
       payload: amount,
     });
@@ -48,7 +40,7 @@ describe("quoteRequestReducer", () => {
 
   it("sets destination amount with minOutput trade type", () => {
     const amount = BigNumber.from(100);
-    const result = quoteRequestReducer(initialState, {
+    const result = quoteRequestReducer(initialQuote, {
       type: "SET_DESTINATION_AMOUNT",
       payload: amount,
     });
@@ -56,22 +48,24 @@ describe("quoteRequestReducer", () => {
     expect(result.tradeType).toBe("minOutput");
   });
 
-  it("sets origin account", () => {
-    const account = mockAccount("0xabc");
-    const result = quoteRequestReducer(initialState, {
-      type: "SET_ORIGIN_ACCOUNT",
-      payload: account,
+  it("sets custom destination account", () => {
+    const account = mockAccount("0xdef");
+    const result = quoteRequestReducer(initialQuote, {
+      type: "SET_CUSTOM_DESTINATION_ACCOUNT",
+      payload: account!,
     });
-    expect(result.originAccount).toBe(account);
+    expect(result.customDestinationAccount).toBe(account);
   });
 
-  it("sets destination account", () => {
+  it("resets custom destination account", () => {
     const account = mockAccount("0xdef");
-    const result = quoteRequestReducer(initialState, {
-      type: "SET_DESTINATION_ACCOUNT",
-      payload: account,
-    });
-    expect(result.destinationAccount).toBe(account);
+    const result = quoteRequestReducer(
+      { ...initialQuote, customDestinationAccount: account },
+      {
+        type: "RESET_CUSTOM_DESTINATION_ACCOUNT",
+      }
+    );
+    expect(result.customDestinationAccount).toBe(null);
   });
 
   describe("QUICK_SWAP", () => {
@@ -79,7 +73,7 @@ describe("quoteRequestReducer", () => {
       const eth = mockToken("ETH");
       const usdc = mockToken("USDC");
       const state: QuoteRequest = {
-        ...initialState,
+        ...initialQuote,
         originToken: eth,
         destinationToken: usdc,
       };
@@ -94,7 +88,7 @@ describe("quoteRequestReducer", () => {
     });
 
     it("converts exactInput to minOutput", () => {
-      const state: QuoteRequest = { ...initialState, tradeType: "exactInput" };
+      const state: QuoteRequest = { ...initialQuote, tradeType: "exactInput" };
       const result = quoteRequestReducer(state, {
         type: "QUICK_SWAP",
         payload: undefined,
@@ -103,7 +97,7 @@ describe("quoteRequestReducer", () => {
     });
 
     it("converts minOutput to exactInput", () => {
-      const state: QuoteRequest = { ...initialState, tradeType: "minOutput" };
+      const state: QuoteRequest = { ...initialQuote, tradeType: "minOutput" };
       const result = quoteRequestReducer(state, {
         type: "QUICK_SWAP",
         payload: undefined,
@@ -113,10 +107,10 @@ describe("quoteRequestReducer", () => {
   });
 
   it("returns previous state for unknown action", () => {
-    const result = quoteRequestReducer(initialState, {
+    const result = quoteRequestReducer(initialQuote, {
       type: "UNKNOWN" as never,
       payload: undefined,
     });
-    expect(result).toBe(initialState);
+    expect(result).toBe(initialQuote);
   });
 });

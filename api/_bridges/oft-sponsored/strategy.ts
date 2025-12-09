@@ -294,7 +294,7 @@ export async function calculateMaxBpsToSponsor(params: {
     };
   }
 
-  if (outputTokenSymbol === "USDC") {
+  if (["USDC", "USDC-SPOT"].includes(outputTokenSymbol)) {
     // USDT -> USDC: Calculate sponsorship needed to guarantee 1:1 output
 
     // Simulate the swap on HyperCore to get estimated output
@@ -459,11 +459,7 @@ export function getOftSponsoredBridgeStrategy(
     },
 
     getCrossSwapTypes: ({ inputToken, outputToken }) => {
-      // Routes supported: USDT → USDT-SPOT or USDC
-      if (
-        inputToken.symbol === "USDT" &&
-        (outputToken.symbol === "USDT-SPOT" || outputToken.symbol === "USDC")
-      ) {
+      if (isRouteSupported({ inputToken, outputToken })) {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
       }
 
