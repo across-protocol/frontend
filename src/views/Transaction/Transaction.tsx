@@ -1,7 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
+import { COLORS, getChainInfo, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import { LayoutV2 } from "components";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
@@ -11,7 +11,7 @@ import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
 import { CopyableText } from "./components/CopyableText";
 import { CollapsibleSection } from "./components/CollapsibleSection";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import { shortenAddress } from "utils/format";
 import { TransactionSourceSection } from "./components/TransactionSourceSection";
 import { TransactionDestinationSection } from "./components/TransactionDestinationSection";
 import { TransactionFeeSection } from "./components/TransactionFeeSection";
@@ -142,21 +142,11 @@ export default function Transaction() {
   }
 
   const deposit = depositData.deposit;
-  const config = getConfig();
 
   const sourceChainId = parseInt(deposit.originChainId);
   const destinationChainId = parseInt(deposit.destinationChainId);
   const sourceChain = getChainInfo(sourceChainId);
   const destinationChain = getChainInfo(destinationChainId);
-
-  const inputToken = config.getTokenInfoByAddressSafe(
-    sourceChainId,
-    deposit.inputToken
-  );
-  const outputToken = config.getTokenInfoByAddressSafe(
-    destinationChainId,
-    deposit.outputToken
-  );
 
   const fillDuration = calculateFillDuration(
     deposit.depositBlockTimestamp,
@@ -369,7 +359,7 @@ const InnerSectionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px;
+  padding: 0;
   gap: 24px;
 
   width: 100%;
@@ -383,7 +373,7 @@ const BreadcrumbWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px;
+  padding: 0;
   gap: 12px;
   width: 100%;
 `;
@@ -398,7 +388,7 @@ const BreadcrumbContent = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px;
+  padding: 0;
   gap: 8px;
 `;
 
