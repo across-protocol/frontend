@@ -1196,11 +1196,30 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
 
 const ChainEntryItem = EntryItem;
 
+const UnreachableWarning = styled.div`
+  color: var(--base-bright-gray, #e0f3ff);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0.5;
+`;
+
 const TokenEntryItem = styled(EntryItem)`
   display: grid;
   grid-template-columns: 3fr 2fr 1fr; // [TOKEN_INFO - WARNING - BALANCE]
   gap: 8px;
   align-items: center;
+
+  &:hover ${UnreachableWarning} {
+    color: var(--functional-red);
+    opacity: 1;
+  }
 `;
 
 const ChainItemImage = styled.img`
@@ -1278,19 +1297,6 @@ const TokenBalanceUsd = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
   opacity: 0.5;
-`;
-
-const UnreachableWarning = styled.div`
-  color: var(--functional-red);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
 `;
 
 const SectionHeader = styled.div`
