@@ -35,6 +35,12 @@ const makeRoutingRuleGetStrategyFn =
 // Priority-ordered routing rules for sponsorship
 const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
   {
+    name: "is-eligible-token-pair",
+    shouldApply: (data) => !data.isEligibleTokenPair,
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
+    reason: "Not a sponsorship eligible token pair",
+  },
+  {
     name: "global-limit-exceeded",
     shouldApply: (data) => !data.isWithinGlobalDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(false),

@@ -43,9 +43,9 @@ jest.mock("../../api/_logger", () => ({
 }));
 
 describe("api/_sponsorship-eligibility", () => {
-  const hyperCoreUSDC: Token = {
-    ...TOKEN_SYMBOLS_MAP.USDC,
-    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPERCORE],
+  const hyperCoreUSDH: Token = {
+    ...TOKEN_SYMBOLS_MAP["USDH-SPOT"],
+    address: TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
     chainId: CHAIN_IDs.HYPERCORE,
   };
   const arbitrumUSDC: Token = {
@@ -95,7 +95,7 @@ describe("api/_sponsorship-eligibility", () => {
           finalTokens: [
             {
               tokenAddress:
-                TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM],
+                TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
               evmAmountSponsored: "0",
             },
           ],
@@ -110,7 +110,7 @@ describe("api/_sponsorship-eligibility", () => {
               finalTokens: [
                 {
                   tokenAddress:
-                    TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM],
+                    TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
                   evmAmountSponsored: "0",
                 },
               ],
@@ -125,6 +125,56 @@ describe("api/_sponsorship-eligibility", () => {
       jest.clearAllMocks();
     });
 
+    test("should return undefined when input amount exceeds limit", async () => {
+      const result = await getSponsorshipEligibilityPreChecks({
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("2000000", arbitrumUSDC.decimals), // 2M > 1M limit
+        outputToken: hyperCoreUSDH,
+        recipient: mockRecipient,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    test("should return undefined when token pair has no limit defined", async () => {
+      const arbitrumWETH: Token = {
+        ...TOKEN_SYMBOLS_MAP.WETH,
+        address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+        chainId: CHAIN_IDs.ARBITRUM,
+      };
+
+      const result = await getSponsorshipEligibilityPreChecks({
+        inputToken: arbitrumWETH,
+        amount: utils.parseUnits("1", arbitrumWETH.decimals),
+        outputToken: hyperCoreUSDH,
+        recipient: mockRecipient,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    test("should return all false when token pair is not eligible for sponsorship", async () => {
+      const hyperCoreUSDCSpot: Token = {
+        ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+        address: TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+        chainId: CHAIN_IDs.HYPERCORE,
+      };
+
+      const result = await getSponsorshipEligibilityPreChecks({
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDCSpot, // USDC → USDC-SPOT is not in SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS
+        recipient: mockRecipient,
+      });
+
+      expect(result).toEqual({
+        isEligibleTokenPair: false,
+        isWithinGlobalDailyLimit: false,
+        isWithinUserDailyLimit: false,
+        isWithinAccountCreationDailyLimit: false,
+      });
+    });
+
     test("should return undefined when totalSponsorships data is missing", async () => {
       jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
         totalSponsorships: [],
@@ -133,7 +183,9 @@ describe("api/_sponsorship-eligibility", () => {
       });
 
       const result = await getSponsorshipEligibilityPreChecks({
-        outputToken: hyperCoreUSDC,
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
       });
 
@@ -146,7 +198,9 @@ describe("api/_sponsorship-eligibility", () => {
         .mockResolvedValue(mockSponsorshipsData);
 
       const result = await getSponsorshipEligibilityPreChecks({
-        outputToken: hyperCoreUSDC,
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
       });
 
@@ -165,7 +219,7 @@ describe("api/_sponsorship-eligibility", () => {
             finalTokens: [
               {
                 tokenAddress:
-                  TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM],
+                  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
                 evmAmountSponsored: utils
                   .parseUnits("1000", TOKEN_SYMBOLS_MAP.USDC.decimals)
                   .toString(), // Exceeds 100 limit
@@ -180,7 +234,9 @@ describe("api/_sponsorship-eligibility", () => {
         .mockResolvedValue(exceededData);
 
       const result = await getSponsorshipEligibilityPreChecks({
-        outputToken: hyperCoreUSDC,
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
       });
 
@@ -200,7 +256,7 @@ describe("api/_sponsorship-eligibility", () => {
                 finalTokens: [
                   {
                     tokenAddress:
-                      TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.HYPEREVM],
+                      TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
                     evmAmountSponsored: utils
                       .parseUnits("100", TOKEN_SYMBOLS_MAP.USDC.decimals)
                       .toString(), // Exceeds 10 limit
@@ -217,7 +273,9 @@ describe("api/_sponsorship-eligibility", () => {
         .mockResolvedValue(exceededData);
 
       const result = await getSponsorshipEligibilityPreChecks({
-        outputToken: hyperCoreUSDC,
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
       });
 
@@ -236,7 +294,9 @@ describe("api/_sponsorship-eligibility", () => {
         .mockResolvedValue(exceededData);
 
       const result = await getSponsorshipEligibilityPreChecks({
-        outputToken: hyperCoreUSDC,
+        inputToken: arbitrumUSDC,
+        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
+        outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
       });
 
@@ -258,12 +318,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
         ); // 10 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         inputAmount,
       });
@@ -276,12 +336,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("0.5", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("0.5", TOKEN_SYMBOLS_MAP.USDH.decimals)
         ); // 0.5 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         inputAmount,
       });
@@ -299,7 +359,7 @@ describe("api/_sponsorship-eligibility", () => {
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         inputAmount,
       });
@@ -313,12 +373,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("3", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("3", TOKEN_SYMBOLS_MAP.USDH.decimals)
         ); // 3 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor: highBps,
         inputAmount,
       });
@@ -339,12 +399,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
         );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         swapSlippageBps: 0.1,
         inputAmount,
@@ -357,13 +417,13 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
         );
 
       await expect(
         assertSponsoredAmountCanBeCovered({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDC,
+          outputToken: hyperCoreUSDH,
           maxBpsToSponsor,
           swapSlippageBps: 1.0, // Exceeds 0.5 tolerance
           inputAmount,
@@ -375,13 +435,13 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("0.1", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("0.1", TOKEN_SYMBOLS_MAP.USDH.decimals)
         ); // Very low balance
 
       await expect(
         assertSponsoredAmountCanBeCovered({
           inputToken: arbitrumUSDC,
-          outputToken: hyperCoreUSDC,
+          outputToken: hyperCoreUSDH,
           maxBpsToSponsor,
           swapSlippageBps: 0.1, // Within tolerance
           inputAmount,
@@ -393,12 +453,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
         );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         swapSlippageBps: 0,
         inputAmount,
@@ -411,12 +471,12 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDC.decimals)
+          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
         );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,
-        outputToken: hyperCoreUSDC,
+        outputToken: hyperCoreUSDH,
         maxBpsToSponsor,
         swapSlippageBps: SPONSORED_SWAP_SLIPPAGE_TOLERANCE,
         inputAmount,

@@ -12,7 +12,7 @@ export async function swapTokensApiCall(
   query?: SwapTokensQuery
 ): Promise<SwapToken[]> {
   const response = await axios.get<SwapToken[]>(
-    `${vercelApiBaseUrl}/api/swap/tokens`,
+    `${"http://127.0.0.1:3000"}/api/swap/tokens`,
     {
       params: query,
     }

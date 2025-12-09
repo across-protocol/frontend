@@ -66,6 +66,34 @@ export const SPONSORED_SWAP_SLIPPAGE_TOLERANCE =
     ? Number(_SPONSORED_SWAP_SLIPPAGE_TOLERANCE)
     : 0.5;
 
+/**
+ * List of token pairs that are eligible for sponsorship.
+ */
+export const SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS = [
+  {
+    inputToken: "USDC",
+    outputToken: "USDH-SPOT",
+  },
+];
+
+/**
+ * Input amount limits per token pair in input token decimals.
+ */
+export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
+  [inputTokenSymbol: string]: {
+    [outputTokenSymbol: string]: BigNumber;
+  };
+} = {
+  USDC: {
+    "USDH-SPOT": utils.parseUnits("1000000", 6), // 1M USDC
+    "USDC-SPOT": utils.parseUnits("10000000", 6), // 10M USDC
+  },
+  USDT: {
+    "USDC-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
+    "USDT-SPOT": utils.parseUnits("10000000", 6), // 10M USDT
+  },
+};
+
 export class SponsoredSwapSlippageToHighError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
@@ -103,9 +131,37 @@ export class SponsoredDonationBoxFundsInsufficientError extends InputError {
  * @returns Eligibility pre-checks or undefined if check fails
  */
 export async function getSponsorshipEligibilityPreChecks(params: {
+  inputToken: Token;
+  amount: BigNumber;
   outputToken: Token;
   recipient: string;
 }) {
+  const inputAmountLimit =
+    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
+      params.outputToken.symbol
+    ];
+  // If input amount is greater than the limit, short-circuit with undefined.
+  // This will prevent routing via our sponsorship periphery contracts.
+  if (!inputAmountLimit || params.amount.gt(inputAmountLimit)) {
+    return undefined;
+  }
+
+  const isEligibleTokenPair = SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
+    (pair) =>
+      pair.inputToken === params.inputToken.symbol &&
+      pair.outputToken === params.outputToken.symbol
+  );
+  // If not eligible token pair, short-circuit with false values.
+  // This will route through the unsponsored flows via our sponsorship periphery contracts.
+  if (!isEligibleTokenPair) {
+    return {
+      isEligibleTokenPair: false,
+      isWithinGlobalDailyLimit: false,
+      isWithinUserDailyLimit: false,
+      isWithinAccountCreationDailyLimit: false,
+    };
+  }
+
   const { totalSponsorships, userSponsorships, accountActivations } =
     await getSponsorshipsFromIndexer();
 
@@ -150,6 +206,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     BigNumber.from(0);
 
   return {
+    isEligibleTokenPair,
     isWithinGlobalDailyLimit: BigNumber.from(
       totalSponsorshipsForSponsoredChain.evmAmountSponsored
     ).lt(globalDailyLimit),
