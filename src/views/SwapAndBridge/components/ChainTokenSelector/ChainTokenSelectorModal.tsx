@@ -145,14 +145,15 @@ export function ChainTokenSelectorModal({
     // Filter by search first
     const filteredTokens = enrichedTokens
       .filter((t) => {
+        // First filter by selected chain
+        if (selectedChain !== null && t.chainId !== selectedChain) {
+          return false;
+        }
+
         if (tokenSearch === "") {
           return true;
         }
 
-        // When a specific chain is selected, only show tokens from that chain
-        if (selectedChain !== null && t.chainId !== selectedChain) {
-          return false;
-        }
         const keywords = [
           t.symbol.toLowerCase().replaceAll(" ", ""),
           t.name.toLowerCase().replaceAll(" ", ""),
@@ -587,7 +588,7 @@ const MobileLayout = ({
                 <SectionHeader>Popular Tokens</SectionHeader>
                 {displayedTokens.popular.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -610,7 +611,7 @@ const MobileLayout = ({
                 <SectionHeader>All Tokens</SectionHeader>
                 {displayedTokens.all.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -770,7 +771,7 @@ const DesktopLayout = ({
               <SectionHeader>Popular Tokens</SectionHeader>
               {displayedTokens.popular.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
@@ -793,7 +794,7 @@ const DesktopLayout = ({
               <SectionHeader>All Tokens</SectionHeader>
               {displayedTokens.all.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
