@@ -36,8 +36,9 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
   };
 
   const hyperCoreUSDC: Token = {
-    ...TOKEN_SYMBOLS_MAP["USDC"],
-    address: TOKEN_SYMBOLS_MAP["USDC"].addresses[CHAIN_IDs.HYPERCORE_TESTNET],
+    ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+    address:
+      TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE_TESTNET],
     chainId: CHAIN_IDs.HYPERCORE_TESTNET,
   };
 
@@ -354,7 +355,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       expect(result.bridgeQuote.outputToken).toEqual(hyperCoreUSDC);
       expect(result.bridgeQuote.inputAmount).toEqual(exactInputAmount);
       // Output should be converted from 6 decimals to 6 decimals (HyperCore USDC perp)
-      expect(result.bridgeQuote.outputAmount.toString()).toBe("1000000"); // 1 USDC in 6 decimals
+      expect(result.bridgeQuote.outputAmount.toString()).toBe("100000000"); // 1 USDC in 8 decimals
       expect(result.bridgeQuote.minOutputAmount).toEqual(
         result.bridgeQuote.outputAmount
       );
