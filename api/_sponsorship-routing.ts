@@ -1,3 +1,5 @@
+import { BigNumber, utils } from "ethers";
+
 import {
   getSponsoredCctpBridgeStrategy,
   isRouteSupported as isCctpRouteSupported,
@@ -6,6 +8,8 @@ import {
   getOftSponsoredBridgeStrategy,
   isRouteSupported as isOftRouteSupported,
 } from "./_bridges/oft-sponsored/strategy";
+import { getUsdhIntentsBridgeStrategy } from "./_bridges/sponsored-intent/strategy";
+import { isRouteSupported as isSponsoredIntentSupported } from "./_bridges/sponsored-intent/utils/common";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
@@ -15,20 +19,67 @@ import {
   SponsorshipEligibilityPreChecks,
   getSponsorshipEligibilityPreChecks,
 } from "./_sponsorship-eligibility";
-import { getLogger } from "./_utils";
+import { getLogger, ConvertDecimals } from "./_utils";
 import { Token } from "./_dexes/types";
 
 type SponsorshipRoutingRule = RoutingRule<
   NonNullable<SponsorshipEligibilityPreChecks>
 >;
 
+// Amount threshold for routing USDC → USDH on HyperCore (in USD terms)
+// Amounts >= 10K USD use CCTP, amounts < 10K USD use intents
+// Note: Per-transaction limit of 1M USD is enforced in getSponsorshipEligibilityPreChecks
+const MIN_CCTP_AMOUNT_USD = 10000; // 10K USD
+
 const makeRoutingRuleGetStrategyFn =
-  (isEligibleForSponsorship: boolean) => (inputToken?: Token) => {
-    if (inputToken?.symbol?.includes("USDT")) {
+  (isEligibleForSponsorship: boolean) =>
+  (params?: BridgeStrategyDataParams) => {
+    if (!params) {
+      return null;
+    }
+
+    const { inputToken, outputToken, amount, amountType } = params;
+
+    // USDT always uses OFT with the eligibility flag
+    if (inputToken.symbol?.includes("USDT")) {
       return getOftSponsoredBridgeStrategy(isEligibleForSponsorship);
-    } else if (inputToken?.symbol?.includes("USDC")) {
+    }
+
+    // USDC routing logic
+    if (inputToken.symbol?.includes("USDC")) {
+      // Check if this is a USDC → USDH-SPOT route on HyperCore
+      const isUsdcToUsdhSpot =
+        outputToken.symbol === "USDH-SPOT" &&
+        isSponsoredIntentSupported({ inputToken, outputToken });
+
+      // If eligible for sponsorship AND USDC → USDH-SPOT, check amount
+      if (isEligibleForSponsorship && isUsdcToUsdhSpot) {
+        const inputAmount =
+          amountType === "exactInput"
+            ? amount
+            : ConvertDecimals(
+                outputToken.decimals,
+                inputToken.decimals
+              )(amount);
+        const minCctpAmount = utils.parseUnits(
+          MIN_CCTP_AMOUNT_USD.toString(),
+          inputToken.decimals
+        );
+
+        // Route based on amount:
+        // - amount >= 10K → Sponsored CCTP
+        // - amount < 10K → USDH intents
+        if (inputAmount.gte(minCctpAmount)) {
+          return getSponsoredCctpBridgeStrategy(true);
+        } else {
+          return getUsdhIntentsBridgeStrategy();
+        }
+      }
+
+      // Default USDC routing (not USDH-SPOT or not eligible)
       return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
     }
+
     return null;
   };
 
@@ -110,7 +161,7 @@ export async function routeStrategyForSponsorship(
     return null;
   }
 
-  const strategy = applicableRule.getStrategy(params.inputToken);
+  const strategy = applicableRule.getStrategy(params);
 
   logger.debug({
     at: "routeStrategyForSponsorship",
@@ -120,6 +171,7 @@ export async function routeStrategyForSponsorship(
     strategy: strategy?.name || "null",
     inputToken: params.inputToken.symbol,
     outputToken: params.outputToken.symbol,
+    amount: params.amount.toString(),
     eligibilityData,
   });
 
@@ -130,5 +182,9 @@ export function isSponsoredRoute(params: {
   inputToken: Token;
   outputToken: Token;
 }) {
-  return isCctpRouteSupported(params) || isOftRouteSupported(params);
+  return (
+    isCctpRouteSupported(params) ||
+    isOftRouteSupported(params) ||
+    isSponsoredIntentSupported(params)
+  );
 }

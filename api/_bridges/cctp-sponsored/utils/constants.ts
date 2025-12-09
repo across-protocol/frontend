@@ -23,13 +23,16 @@ export const SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES = {
   [CHAIN_IDs.HYPEREVM_TESTNET]: "0x06C61D54958a0772Ee8aF41789466d39FfeaeB13",
 };
 
+// Sponsored CCTP is only supported from specific origin chains:
+// Arbitrum, Base, Solana, Arbitrum Sepolia, Solana Devnet
 export const SPONSORED_CCTP_ORIGIN_CHAINS = CCTP_SUPPORTED_CHAINS.filter(
   (chainId) =>
-    ![
-      CHAIN_IDs.HYPERCORE,
-      CHAIN_IDs.HYPERCORE_TESTNET,
-      CHAIN_IDs.HYPEREVM,
-      CHAIN_IDs.HYPEREVM_TESTNET,
+    [
+      CHAIN_IDs.ARBITRUM,
+      CHAIN_IDs.BASE,
+      CHAIN_IDs.SOLANA,
+      CHAIN_IDs.ARBITRUM_SEPOLIA,
+      CHAIN_IDs.SOLANA_DEVNET,
     ].includes(chainId)
 );
 
