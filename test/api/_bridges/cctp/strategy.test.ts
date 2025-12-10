@@ -63,8 +63,10 @@ describe("bridges/cctp/strategy", () => {
     >;
 
   // Default transfer mode is "fast"
-  const strategy = getCctpBridgeStrategy("fast");
-  const strategyStandard = getCctpBridgeStrategy("standard");
+  const strategy = getCctpBridgeStrategy({ requestedTransferMode: "fast" });
+  const strategyStandard = getCctpBridgeStrategy({
+    requestedTransferMode: "standard",
+  });
 
   // Shared test tokens
   const inputToken = {

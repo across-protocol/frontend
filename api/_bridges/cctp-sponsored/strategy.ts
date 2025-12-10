@@ -88,11 +88,19 @@ export function getSponsoredCctpBridgeStrategy(
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
       isEligibleForSponsorship
         ? getQuoteForExactInput(params)
-        : getCctpBridgeStrategy().getQuoteForExactInput(params),
+        : getCctpBridgeStrategy({
+            // For unsponsored flows routed via our sponsorship periphery contract, we
+            // don't need to account for the forward fee.
+            useForwardFee: false,
+          }).getQuoteForExactInput(params),
     getQuoteForOutput: (params: GetOutputBridgeQuoteParams) =>
       isEligibleForSponsorship
         ? getQuoteForOutput(params)
-        : getCctpBridgeStrategy().getQuoteForOutput(params),
+        : getCctpBridgeStrategy({
+            // For unsponsored flows routed via our sponsorship periphery contract, we
+            // don't need to account for the forward fee.
+            useForwardFee: false,
+          }).getQuoteForOutput(params),
     buildTxForAllowanceHolder: (params: {
       quotes: CrossSwapQuotes;
       integratorId?: string;
