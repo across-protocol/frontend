@@ -167,7 +167,7 @@ export function getSupportedBridgeStrategies({
     }
 
     if (routingPreference === "sponsored-cctp") {
-      return strategyName === "sponsored-cctp";
+      return ["sponsored-cctp", "sponsored-oft"].includes(strategyName);
     }
 
     // Else use across bridge strategy
