@@ -145,14 +145,15 @@ export function ChainTokenSelectorModal({
     // Filter by search first
     const filteredTokens = enrichedTokens
       .filter((t) => {
+        // First filter by selected chain
+        if (selectedChain !== null && t.chainId !== selectedChain) {
+          return false;
+        }
+
         if (tokenSearch === "") {
           return true;
         }
 
-        // When a specific chain is selected, only show tokens from that chain
-        if (selectedChain !== null && t.chainId !== selectedChain) {
-          return false;
-        }
         const keywords = [
           t.symbol.toLowerCase().replaceAll(" ", ""),
           t.name.toLowerCase().replaceAll(" ", ""),
@@ -587,7 +588,7 @@ const MobileLayout = ({
                 <SectionHeader>Popular Tokens</SectionHeader>
                 {displayedTokens.popular.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -610,7 +611,7 @@ const MobileLayout = ({
                 <SectionHeader>All Tokens</SectionHeader>
                 {displayedTokens.all.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -770,7 +771,7 @@ const DesktopLayout = ({
               <SectionHeader>Popular Tokens</SectionHeader>
               {displayedTokens.popular.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
@@ -793,7 +794,7 @@ const DesktopLayout = ({
               <SectionHeader>All Tokens</SectionHeader>
               {displayedTokens.all.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
@@ -1204,11 +1205,30 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
 
 const ChainEntryItem = EntryItem;
 
+const UnreachableWarning = styled.div`
+  color: var(--base-bright-gray, #e0f3ff);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0.5;
+`;
+
 const TokenEntryItem = styled(EntryItem)`
   display: grid;
   grid-template-columns: 3fr 2fr 1fr; // [TOKEN_INFO - WARNING - BALANCE]
   gap: 8px;
   align-items: center;
+
+  &:hover ${UnreachableWarning} {
+    color: var(--functional-red);
+    opacity: 1;
+  }
 `;
 
 const ChainItemImage = styled.img`
@@ -1286,19 +1306,6 @@ const TokenBalanceUsd = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
   opacity: 0.5;
-`;
-
-const UnreachableWarning = styled.div`
-  color: var(--functional-red);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
 `;
 
 const SectionHeader = styled.div`

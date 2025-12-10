@@ -12,6 +12,7 @@
     "@amplitude/experiment-js-client": "^1.18.0",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@coral-xyz/borsh": "^0.30.1",
+    "@emotion/babel-plugin": "^11.13.5",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
