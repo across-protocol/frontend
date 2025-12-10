@@ -175,23 +175,6 @@ describe("api/_sponsorship-eligibility", () => {
       });
     });
 
-    test("should return undefined when totalSponsorships data is missing", async () => {
-      jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
-        totalSponsorships: [],
-        userSponsorships: mockSponsorshipsData.userSponsorships,
-        accountActivations: mockSponsorshipsData.accountActivations,
-      });
-
-      const result = await getSponsorshipEligibilityPreChecks({
-        inputToken: arbitrumUSDC,
-        amount: utils.parseUnits("100", arbitrumUSDC.decimals),
-        outputToken: hyperCoreUSDH,
-        recipient: mockRecipient,
-      });
-
-      expect(result).toBeUndefined();
-    });
-
     test("should return all checks passing when within limits", async () => {
       jest
         .spyOn(indexerApi, "getSponsorshipsFromIndexer")

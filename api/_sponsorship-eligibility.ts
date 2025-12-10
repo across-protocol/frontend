@@ -178,7 +178,10 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     ?.finalTokens.find(
       (token) =>
         token.tokenAddress.toLowerCase() === finalTokenAddress.toLowerCase()
-    );
+    ) || {
+    tokenAddress: finalTokenAddress,
+    evmAmountSponsored: BigNumber.from(0),
+  };
   const userSponsorshipsForSponsoredChain = userSponsorships
     .find((sponsorship) => sponsorship.finalRecipient === params.recipient)
     ?.sponsorships.find(
@@ -187,15 +190,11 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     ?.finalTokens.find(
       (token) =>
         token.tokenAddress.toLowerCase() === finalTokenAddress.toLowerCase()
-    );
+    ) || {
+    tokenAddress: finalTokenAddress,
+    evmAmountSponsored: BigNumber.from(0),
+  };
   const accountActivationsForSponsoredChain = accountActivations.length;
-
-  if (
-    !totalSponsorshipsForSponsoredChain ||
-    !userSponsorshipsForSponsoredChain
-  ) {
-    return undefined;
-  }
 
   const globalDailyLimit =
     SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN[finalTokenSymbol] ??
