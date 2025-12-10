@@ -166,6 +166,10 @@ export function getSupportedBridgeStrategies({
       return strategyName !== "across";
     }
 
+    if (routingPreference === "sponsored-cctp") {
+      return strategyName === "sponsored-cctp";
+    }
+
     // Else use across bridge strategy
     return strategyName === "across";
   };
