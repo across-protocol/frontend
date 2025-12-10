@@ -59,10 +59,6 @@ export type PriceImpact = {
   priceImpactFormatted: string;
 };
 
-export function isSponsoredIntentQuote(quote?: SwapApprovalQuote): boolean {
-  return quote?.steps?.bridge?.provider === "sponsored-intent";
-}
-
 export function getPriceImpact(
   quote: SwapApprovalQuote | undefined
 ): PriceImpact {
