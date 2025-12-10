@@ -224,7 +224,14 @@ const INTERMEDIARY_TOKEN_MAPPING: Record<
 > = {
   1337: {
     "USDH-SPOT": { symbol: "USDH", chainId: 999 },
-    "USDT-SPOT": { symbol: "USDT", chainId: 999 },
+    "USDC-SPOT": {
+      symbol: "USDC",
+      chainId: 999,
+    },
+    "USDT-SPOT": {
+      symbol: "USDT0",
+      chainId: 999,
+    },
   },
 };
 
