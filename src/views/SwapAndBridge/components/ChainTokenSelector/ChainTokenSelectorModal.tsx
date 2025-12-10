@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
 import {
-  LifiToken,
   getTokenDisplaySymbol,
+  LifiToken,
 } from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
@@ -878,6 +878,8 @@ const TokenEntry = ({
   warningMessage: string;
   tabIndex?: number;
 }) => {
+  const [symbolHover, setSymbolHover] = useState(false);
+
   const hasTokenBalance = token.balance.gt(0);
   const hasUsdBalance = token.balanceUsd >= 0.01;
 
@@ -887,21 +889,27 @@ const TokenEntry = ({
       isDisabled={false}
       onClick={onClick}
       tabIndex={tabIndex}
+      onMouseEnter={() => setSymbolHover(true)}
+      onMouseLeave={() => setSymbolHover(false)}
     >
       <TokenInfoWrapper dim={token.isUnreachable}>
         <TokenItemImage token={token} />
         <TokenNameSymbolWrapper>
           <TokenName>
             <span>{token.name}</span>
+            <TokenDispalySymbol>
+              {getTokenDisplaySymbol(token)}
+            </TokenDispalySymbol>
             <TokenLink
+              visible={symbolHover}
               href={getTokenExplorerLinkFromAddress(
                 token.chainId,
                 token.address
               )}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(event) => event.stopPropagation()}
             >
-              {getTokenDisplaySymbol(token)}
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>
@@ -1362,32 +1370,19 @@ const TokenName = styled.div`
   gap: 4px;
 `;
 
-const TokenLink = styled.a`
+const TokenDispalySymbol = styled.span`
+  opacity: 0.5;
+  font-weight: normal;
+`;
+
+const TokenLink = styled.a<{ visible: boolean }>`
+  visibility: ${(v) => (v.visible ? "visible" : "hidden")};
   display: inline-flex;
   flex-direction: row;
   gap: 4px;
   align-items: center;
-  text-decoration: none;
-  color: var(--base-bright-gray, #e0f3ff);
-  opacity: 0.5;
-  font-weight: 400;
-
-  svg,
-  span {
-    font-size: 14px;
-    display: none;
-    color: inherit;
-  }
-
-  &:hover {
-    text-decoration: underline;
-    color: ${COLORS.aqua};
-    opacity: 1;
-  }
-
-  &:hover {
-    svg {
-      display: inline;
-    }
+  color: ${COLORS.aqua};
+  svg {
+    display: inline;
   }
 `;
