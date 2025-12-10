@@ -11,8 +11,7 @@ const contestActiveParams = {
 
 const contestInactiveParams = {
   cardTitle: "Share your move.",
-  cardSubtitle:
-    "You get places fast, don't let your friends miss out!",
+  cardSubtitle: "You get places fast, don't let your friends miss out!",
   modalTitle: "Too Fast Not to Share",
 };
 
