@@ -10,7 +10,6 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { Token } from "../../../../api/_dexes/types";
 import * as hypercore from "../../../../api/_hypercore";
 import * as utils from "../../../../api/_utils";
-import * as swapUtils from "../../../../api/swap/_utils";
 import * as tokenInfo from "../../../../api/_token-info";
 
 describe("Sponsored OFT Strategy", () => {
@@ -180,7 +179,7 @@ describe("Sponsored OFT Strategy", () => {
           bridgeOutputAmount,
         });
 
-        expect(result.toNumber()).toBe(0);
+        expect(result.maxBpsToSponsor).toBe(0);
       });
     });
 
@@ -207,7 +206,7 @@ describe("Sponsored OFT Strategy", () => {
           bridgeOutputAmount,
         });
 
-        expect(result.toNumber()).toBe(0);
+        expect(result.maxBpsToSponsor).toBe(0);
       });
 
       it("should return 0 bps when swap has profit", async () => {
@@ -228,7 +227,7 @@ describe("Sponsored OFT Strategy", () => {
           bridgeOutputAmount,
         });
 
-        expect(result.toNumber()).toBe(0);
+        expect(result.maxBpsToSponsor).toBe(0);
       });
 
       it("should calculate correct bps when swap has 1% loss", async () => {
@@ -250,7 +249,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         // 1% loss = 100 bps
-        expect(result.toNumber()).toBe(100);
+        expect(result.maxBpsToSponsor).toBe(100);
       });
 
       it("should calculate correct bps when swap has 0.5% loss", async () => {
@@ -272,7 +271,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         // 0.5% loss = 50 bps
-        expect(result.toNumber()).toBe(50);
+        expect(result.maxBpsToSponsor).toBe(50);
       });
 
       it("should round up fractional bps", async () => {
@@ -294,7 +293,7 @@ describe("Sponsored OFT Strategy", () => {
         });
 
         // 0.01% loss = 1 bps (should round up)
-        expect(result.toNumber()).toBeGreaterThanOrEqual(1);
+        expect(result.maxBpsToSponsor).toBeGreaterThanOrEqual(1);
       });
     });
 

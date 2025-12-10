@@ -83,7 +83,9 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
-  routingPreference: optional(enums(["default", "across", "native"])),
+  routingPreference: optional(
+    enums(["default", "across", "native", "sponsored-cctp"])
+  ),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;

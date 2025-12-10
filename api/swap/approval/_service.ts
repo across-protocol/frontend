@@ -60,7 +60,7 @@ export async function handleApprovalSwap(
     amountType,
     refundOnOrigin,
     refundAddress,
-    recipient,
+    recipient: _recipient,
     depositor,
     slippageTolerance: _slippageTolerance, // DEPRECATED: slippage expressed as 0 <= slippage <= 100, 1 = 1%
     slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1% or "auto"
@@ -88,6 +88,8 @@ export async function handleApprovalSwap(
     _slippageTolerance ??
     (typeof slippage === "number" ? (slippage as number) * 100 : "auto");
 
+  const recipient = _recipient || depositor;
+
   const bridgeStrategy = await getBridgeStrategy({
     originChainId: inputToken.chainId,
     destinationChainId: outputToken.chainId,
@@ -107,7 +109,7 @@ export async function handleApprovalSwap(
       inputToken,
       outputToken,
       depositor,
-      recipient: recipient || depositor,
+      recipient,
       slippageTolerance,
       type: amountType,
       refundOnOrigin,

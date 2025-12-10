@@ -138,7 +138,7 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
-  recipient?: string;
+  recipient: string;
   depositor: string;
   logger?: Logger;
 };
@@ -152,7 +152,7 @@ export type GetBridgeStrategyParams = {
 export type RoutingRule<TEligibilityData> = {
   name: string;
   shouldApply: (data: TEligibilityData) => boolean;
-  getStrategy: (inputToken?: Token) => BridgeStrategy | null;
+  getStrategy: (params?: BridgeStrategyDataParams) => BridgeStrategy | null;
   reason: string;
 };
 

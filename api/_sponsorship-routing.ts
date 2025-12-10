@@ -1,33 +1,96 @@
-import { getSponsoredCctpBridgeStrategy } from "./_bridges/cctp-sponsored/strategy";
-import { getOftSponsoredBridgeStrategy } from "./_bridges/oft-sponsored/strategy";
+import { utils } from "ethers";
+
+import {
+  getSponsoredCctpBridgeStrategy,
+  isRouteSupported as isCctpRouteSupported,
+} from "./_bridges/cctp-sponsored/strategy";
+import {
+  getOftSponsoredBridgeStrategy,
+  isRouteSupported as isOftRouteSupported,
+} from "./_bridges/oft-sponsored/strategy";
+import { getUsdhIntentsBridgeStrategy } from "./_bridges/sponsored-intent/strategy";
+import { isRouteSupported as isSponsoredIntentSupported } from "./_bridges/sponsored-intent/utils/common";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
   RoutingRule,
 } from "./_bridges/types";
 import {
-  getSponsorshipEligibilityData,
-  SponsorshipEligibilityData,
-} from "./_sponsorship-utils";
-import { getLogger } from "./_utils";
+  SponsorshipEligibilityPreChecks,
+  getSponsorshipEligibilityPreChecks,
+} from "./_sponsorship-eligibility";
+import { getLogger, ConvertDecimals } from "./_utils";
 import { Token } from "./_dexes/types";
 
 type SponsorshipRoutingRule = RoutingRule<
-  NonNullable<SponsorshipEligibilityData>
+  NonNullable<SponsorshipEligibilityPreChecks>
 >;
 
+// Amount threshold for routing USDC → USDH on HyperCore (in USD terms)
+// Amounts >= 10K USD use CCTP, amounts < 10K USD use intents
+// Note: Per-transaction limit of 1M USD is enforced in getSponsorshipEligibilityPreChecks
+const MIN_CCTP_AMOUNT_USD = 10000; // 10K USD
+
 const makeRoutingRuleGetStrategyFn =
-  (isEligibleForSponsorship: boolean) => (inputToken?: Token) => {
-    if (inputToken?.symbol === "USDT") {
+  (isEligibleForSponsorship: boolean) =>
+  (params?: BridgeStrategyDataParams) => {
+    if (!params) {
+      return null;
+    }
+
+    const { inputToken, outputToken, amount, amountType } = params;
+
+    // USDT always uses OFT with the eligibility flag
+    if (inputToken.symbol?.includes("USDT")) {
       return getOftSponsoredBridgeStrategy(isEligibleForSponsorship);
-    } else if (inputToken?.symbol === "USDC") {
+    }
+
+    // USDC routing logic
+    if (inputToken.symbol?.includes("USDC")) {
+      // Check if this is a USDC → USDH-SPOT route on HyperCore
+      const isUsdcToUsdhSpot =
+        outputToken.symbol === "USDH-SPOT" &&
+        isSponsoredIntentSupported({ inputToken, outputToken });
+
+      // If eligible for sponsorship AND USDC → USDH-SPOT, check amount
+      if (isEligibleForSponsorship && isUsdcToUsdhSpot) {
+        const inputAmount =
+          amountType === "exactInput"
+            ? amount
+            : ConvertDecimals(
+                outputToken.decimals,
+                inputToken.decimals
+              )(amount);
+        const minCctpAmount = utils.parseUnits(
+          MIN_CCTP_AMOUNT_USD.toString(),
+          inputToken.decimals
+        );
+
+        // Route based on amount:
+        // - amount >= 10K → Sponsored CCTP
+        // - amount < 10K → USDH intents
+        if (inputAmount.gte(minCctpAmount)) {
+          return getSponsoredCctpBridgeStrategy(true);
+        } else {
+          return getUsdhIntentsBridgeStrategy();
+        }
+      }
+
+      // Default USDC routing (not USDH-SPOT or not eligible)
       return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
     }
+
     return null;
   };
 
 // Priority-ordered routing rules for sponsorship
 const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
+  {
+    name: "is-eligible-token-pair",
+    shouldApply: (data) => !data.isEligibleTokenPair,
+    getStrategy: makeRoutingRuleGetStrategyFn(false),
+    reason: "Not a sponsorship eligible token pair",
+  },
   {
     name: "global-limit-exceeded",
     shouldApply: (data) => !data.isWithinGlobalDailyLimit,
@@ -41,20 +104,8 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
     reason: "User daily sponsorship limit exceeded",
   },
   {
-    name: "insufficient-vault-balance",
-    shouldApply: (data) => !data.hasVaultBalance,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Insufficient vault balance for sponsorship",
-  },
-  {
-    name: "slippage-too-high",
-    shouldApply: (data) => !data.isSlippageAcceptable,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Destination swap slippage exceeds acceptable bounds",
-  },
-  {
-    name: "invalid-account-creation",
-    shouldApply: (data) => !data.isAccountCreationValid,
+    name: "account-creation-limit-exceeded",
+    shouldApply: (data) => !data.isWithinAccountCreationDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(false),
     reason: "Account creation requirements not met",
   },
@@ -63,9 +114,7 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
     shouldApply: (data) =>
       data.isWithinGlobalDailyLimit &&
       data.isWithinUserDailyLimit &&
-      data.hasVaultBalance &&
-      data.isSlippageAcceptable &&
-      data.isAccountCreationValid,
+      data.isWithinAccountCreationDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(true),
     reason: "All sponsorship eligibility criteria met",
   },
@@ -81,7 +130,12 @@ export async function routeStrategyForSponsorship(
   params: BridgeStrategyDataParams
 ): Promise<BridgeStrategy | null> {
   const logger = getLogger();
-  const eligibilityData = await getSponsorshipEligibilityData(params);
+
+  if (!isSponsoredRoute(params)) {
+    return null;
+  }
+
+  const eligibilityData = await getSponsorshipEligibilityPreChecks(params);
 
   if (!eligibilityData) {
     logger.warn({
@@ -107,7 +161,7 @@ export async function routeStrategyForSponsorship(
     return null;
   }
 
-  const strategy = applicableRule.getStrategy(params.inputToken);
+  const strategy = applicableRule.getStrategy(params);
 
   logger.debug({
     at: "routeStrategyForSponsorship",
@@ -117,8 +171,20 @@ export async function routeStrategyForSponsorship(
     strategy: strategy?.name || "null",
     inputToken: params.inputToken.symbol,
     outputToken: params.outputToken.symbol,
+    amount: params.amount.toString(),
     eligibilityData,
   });
 
   return strategy;
+}
+
+export function isSponsoredRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  return (
+    isCctpRouteSupported(params) ||
+    isOftRouteSupported(params) ||
+    isSponsoredIntentSupported(params)
+  );
 }

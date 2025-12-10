@@ -27,17 +27,12 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       //   [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
       // },
     },
-    [CHAIN_IDs.HYPERCORE]: {
-      [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        // TODO: Remove this once we know how to correctly route USDC -> USDH on HyperCore
-        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]:
-          getSponsoredCctpBridgeStrategy(true),
-      },
-      // NOTE: Disable origin BSC until we have an easier way to rebalance off BSC
-      // [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
-      //   [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
-      // },
-    },
+    // [CHAIN_IDs.HYPERCORE]: {
+    // NOTE: Disable origin BSC until we have an easier way to rebalance off BSC
+    // [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
+    //   [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
+    // },
+    // },
   },
   fromToChains: {
     [CHAIN_IDs.HYPEREVM]: {
@@ -48,13 +43,6 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
     },
   },
   inputTokens: {
-    USDT: {
-      // @TODO: Remove this once we can correctly route via eligibility checks.
-      // Currently we are using hardcoded true for eligibility checks.
-      [CHAIN_IDs.ARBITRUM]: {
-        [CHAIN_IDs.HYPERCORE]: getOftSponsoredBridgeStrategy(true),
-      },
-    },
     USDC: {
       // Testnet routes
       [CHAIN_IDs.HYPEREVM_TESTNET]: {
@@ -63,22 +51,9 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.SEPOLIA]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
-      // @TODO: Remove this once we can correctly route via eligibility checks.
-      // Currently we are using hardcoded true for eligibility checks.
-      [CHAIN_IDs.ARBITRUM_SEPOLIA]: {
-        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
-      },
-      [CHAIN_IDs.ARBITRUM]: {
-        [CHAIN_IDs.HYPERCORE]: getSponsoredCctpBridgeStrategy(true),
-      },
       // SVM → HyperCore routes
       [CHAIN_IDs.SOLANA]: {
         [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
-      // @TODO: Remove this once we can correctly route via eligibility checks.
-      // Currently we are using hardcoded true for eligibility checks.
-      [CHAIN_IDs.SOLANA_DEVNET]: {
-        [CHAIN_IDs.HYPERCORE_TESTNET]: getSponsoredCctpBridgeStrategy(true),
       },
     },
   },
@@ -88,6 +63,11 @@ export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
   getCctpBridgeStrategy(),
   getOftBridgeStrategy(),
+  // Sponsored strategies with eligibility flag set to true
+  // The actual eligibility is determined by routeStrategyForSponsorship
+  getSponsoredCctpBridgeStrategy(true),
+  getOftSponsoredBridgeStrategy(true),
+  getUsdhIntentsBridgeStrategy(),
 ];
 
 // Priority-ordered routing strategies
@@ -184,6 +164,10 @@ export function getSupportedBridgeStrategies({
     // If native routing preference, filter out 'across' bridge strategy
     if (routingPreference === "native") {
       return strategyName !== "across";
+    }
+
+    if (routingPreference === "sponsored-cctp") {
+      return strategyName === "sponsored-cctp";
     }
 
     // Else use across bridge strategy
