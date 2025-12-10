@@ -1,4 +1,5 @@
 import { BigNumber, utils } from "ethers";
+import { getDeployedAddress } from "@across-protocol/contracts";
 
 import { Token } from "./_dexes/types";
 import { toBytes32 } from "./_address";
@@ -27,15 +28,6 @@ export enum ExecutionMode {
   ArbitraryActionsToCore = 1, // Execute arbitrary actions then transfer to HyperCore
   ArbitraryActionsToEVM = 2, // Execute arbitrary actions then stay on EVM
 }
-
-/**
- * Address of the donation box contract on HyperEVM
- */
-export const DONATION_BOX_ADDRESS = {
-  [CHAIN_IDs.HYPEREVM]: "0xbC217096db9EB6d2782c1d9E725D462077a4d1f6",
-  // TODO: Add testnet donation box address
-  [CHAIN_IDs.HYPEREVM_TESTNET]: "0x0000000000000000000000000000000000000000",
-};
 
 /**
  * Map of destination chain to the sponsored chain, i.e. the EVM chain where the
@@ -86,7 +78,11 @@ export function getSponsoredEvmChainId(dstChainId: number) {
  */
 export function getDonationBoxAddress(dstChainId: number) {
   const sponsoredChainId = getSponsoredEvmChainId(dstChainId);
-  const donationBoxAddress = DONATION_BOX_ADDRESS[sponsoredChainId];
+  const donationBoxAddress = getDeployedAddress(
+    "DonationBox",
+    sponsoredChainId,
+    false
+  );
   if (!donationBoxAddress) {
     throw new Error(
       `Donation box address not found for chain ${sponsoredChainId}`
