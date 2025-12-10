@@ -80,7 +80,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     isQuoteLoading
   );
 
-  const { originToken, destinationToken, amount } = quoteRequest;
+  const { originToken, destinationToken } = quoteRequest;
   const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
     buttonState;
   // Render unified group driven by state
@@ -128,7 +128,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, originToken, destinationToken, amount]);
+  }, [swapQuote, originToken, destinationToken, priceImpact?.priceImpact]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled =

@@ -110,7 +110,7 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const sponsoredIntent = isQuoteSponsored(universalSwapQuote);
+  const sponsoredQuote = isQuoteSponsored(universalSwapQuote);
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
@@ -141,7 +141,7 @@ const EstimatedTable = ({
             }
           }}
         >
-          {sponsoredIntent && <FreeTag>FREE</FreeTag>}
+          {sponsoredQuote && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
             {formatFeeUsdInWei(swapFeeAsBaseCurrency)}
           </Text>
@@ -165,7 +165,7 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <FeeValueWrapper>
-        {sponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        {sponsoredQuote && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
         <Text color="grey-400" size="md">
           {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
             ? formatFeeUsdInWei(bridgeFeeAsBaseCurrency)
@@ -190,7 +190,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <FeeValueWrapper>
-          {sponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          {sponsoredQuote && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
           <Text color="grey-400" size="md">
             {!showLoadingSkeleton
               ? formatFeeUsdInWei(swapFeeAsBaseCurrency)
@@ -296,7 +296,7 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
-            {sponsoredIntent && !doesAmountExceedMaxDeposit && (
+            {sponsoredQuote && !doesAmountExceedMaxDeposit && (
               <FreeTag>FREE</FreeTag>
             )}
             <Text
