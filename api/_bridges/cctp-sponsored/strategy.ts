@@ -29,8 +29,8 @@ import {
   SPONSORED_CCTP_INPUT_TOKENS,
   SPONSORED_CCTP_ORIGIN_CHAINS,
   SPONSORED_CCTP_OUTPUT_TOKENS,
-  SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES,
   CCTP_TRANSFER_MODE,
+  getSponsoredCctpSrcPeripheryAddress,
 } from "./utils/constants";
 import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
@@ -332,7 +332,7 @@ async function _prepareSponsoredTx(params: {
 
   const originChainId = crossSwap.inputToken.chainId;
   const sponsoredCctpSrcPeripheryAddress =
-    SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES[originChainId];
+    getSponsoredCctpSrcPeripheryAddress(originChainId);
 
   if (!sponsoredCctpSrcPeripheryAddress) {
     throw new InvalidParamError({

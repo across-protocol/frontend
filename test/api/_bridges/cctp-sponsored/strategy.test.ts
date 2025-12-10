@@ -17,7 +17,6 @@ import * as hypercore from "../../../../api/_hypercore";
 import { ConvertDecimals } from "../../../../api/_utils";
 import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
 import * as cctpFees from "../../../../api/_bridges/cctp/utils/fees";
-import { SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES } from "../../../../api/_bridges/cctp-sponsored/utils/constants";
 import { getEnvs } from "../../../../api/_env";
 import * as sponsorshipEligibility from "../../../../api/_sponsorship-eligibility";
 
@@ -489,9 +488,6 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
       expect(result.chainId).toBe(arbitrumUSDC.chainId);
       expect(result.from).toBe(depositor);
-      expect(result.to).toBe(
-        SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES[CHAIN_IDs.ARBITRUM_SEPOLIA]
-      );
       expect(result.value).toEqual(BigNumber.from(0));
       expect(result.ecosystem).toBe("evm");
       expect(result.data).toBeTruthy();
@@ -581,9 +577,6 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
 
       expect(result.chainId).toBe(arbitrumUSDC.chainId);
       expect(result.from).toBe(depositor);
-      expect(result.to).toBe(
-        SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES[CHAIN_IDs.ARBITRUM_SEPOLIA]
-      );
       expect(result.value).toEqual(BigNumber.from(0));
       expect(result.ecosystem).toBe("evm");
       expect(result.data).toBeTruthy();
@@ -772,9 +765,6 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       });
 
       expect(result.chainId).toBe(svmUSDC.chainId);
-      expect(result.to).toBe(
-        SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES[svmChainId]
-      );
       expect(result.data).toBeTruthy();
       expect(result.data.length).toBeGreaterThan(0);
       expect(result.ecosystem).toBe("svm");

@@ -32,11 +32,11 @@ import {
 import { getNativeTokenInfo } from "../../_token-info";
 import { SPONSORED_OFT_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
-  DST_OFT_HANDLER,
   SPONSORED_OFT_DESTINATION_CHAINS,
   SPONSORED_OFT_INPUT_TOKENS,
   SPONSORED_OFT_OUTPUT_TOKENS,
-  SPONSORED_OFT_SRC_PERIPHERY,
+  getSponsoredOftSrcPeripheryAddress,
+  getSponsoredOftDstHandlerAddress,
 } from "./utils/constants";
 import { buildSponsoredOFTQuote } from "./utils/quote-builder";
 import { getSlippage } from "../../_slippage";
@@ -91,13 +91,13 @@ export function isRouteSupported(params: {
   }
 
   // Check if source periphery exists for input chain
-  if (!SPONSORED_OFT_SRC_PERIPHERY[inputToken.chainId]) {
+  if (!getSponsoredOftSrcPeripheryAddress(inputToken.chainId)) {
     return false;
   }
 
   // Check if destination handler exists for intermediary chain
   const intermediaryChain = CHAIN_IDs.HYPEREVM;
-  if (!DST_OFT_HANDLER[intermediaryChain]) {
+  if (!getSponsoredOftDstHandlerAddress(intermediaryChain)) {
     return false;
   }
 
@@ -363,7 +363,7 @@ async function buildTransaction(params: {
   const originChainId = crossSwap.inputToken.chainId;
 
   // Get source periphery contract address
-  const srcPeripheryAddress = SPONSORED_OFT_SRC_PERIPHERY[originChainId];
+  const srcPeripheryAddress = getSponsoredOftSrcPeripheryAddress(originChainId);
   if (!srcPeripheryAddress) {
     throw new InvalidParamError({
       message: `Sponsored OFT source periphery not found for chain ${originChainId}`,
