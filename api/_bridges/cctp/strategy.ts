@@ -72,8 +72,14 @@ const capabilities: BridgeCapabilities = {
  * Supports Circle's CCTP for burning USDC on source chain.
  */
 export function getCctpBridgeStrategy(
-  requestedTransferMode: "standard" | "fast" = "fast"
+  opt?: Partial<{
+    requestedTransferMode?: "standard" | "fast";
+    useForwardFee?: boolean;
+  }>
 ): BridgeStrategy {
+  const requestedTransferMode = opt?.requestedTransferMode ?? "fast";
+  const useForwardFee = opt?.useForwardFee;
+
   const isRouteSupported = (params: {
     inputToken: Token;
     outputToken: Token;
@@ -180,7 +186,7 @@ export function getCctpBridgeStrategy(
           inputToken,
           outputToken,
           transferMode,
-          useForwardFee: isDestinationHyperCore,
+          useForwardFee: useForwardFee ?? isDestinationHyperCore,
         });
 
         // Calculate actual fee:
