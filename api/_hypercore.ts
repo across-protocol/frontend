@@ -299,9 +299,15 @@ export async function simulateMarketOrder(params: {
     levelsConsumed++;
 
     // Prices are returned by the API in a parsed format, e.g. 0.987 USDC
-    const price = ethers.utils.parseUnits(level.px, tokenOut.decimals);
+    const price = ethers.utils.parseUnits(
+      Number(level.px).toFixed(tokenOut.decimals),
+      tokenOut.decimals
+    );
     // Level size is returned by the API in a parsed format, e.g. 1000 USDC
-    const levelSize = ethers.utils.parseUnits(level.sz, tokenIn.decimals);
+    const levelSize = ethers.utils.parseUnits(
+      Number(level.sz).toFixed(tokenIn.decimals),
+      tokenIn.decimals
+    );
 
     if (isBuyingBase) {
       // Buying base with quote
