@@ -122,8 +122,14 @@ function getJupiterTokens(
 }
 
 // Using hardcoded value until https://github.com/across-protocol/frontend/pull/1988 merged
-const USDH_LOGO_URL =
-  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
+const SPOT_TOKEN_LOGO_URLS: Record<string, string> = {
+  "USDH-SPOT":
+    "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+  "USDC-SPOT":
+    "https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042194",
+  "USDT-SPOT":
+    "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+};
 
 function getIndirectChainTokens(
   chainIds: number[],
@@ -143,6 +149,7 @@ function getIndirectChainTokens(
         TOKEN_SYMBOLS_MAP[
           equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
         ];
+      console.log("tokenInfo", tokenInfo);
 
       if (tokenInfo) {
         const l1Address = tokenInfo.addresses[CHAIN_IDs.MAINNET];
@@ -160,8 +167,8 @@ function getIndirectChainTokens(
       }
 
       let logoUrl = token.logoUrl;
-      if (token.symbol === "USDH-SPOT") {
-        logoUrl = USDH_LOGO_URL;
+      if (SPOT_TOKEN_LOGO_URLS[token.symbol]) {
+        logoUrl = SPOT_TOKEN_LOGO_URLS[token.symbol];
       }
 
       return {
@@ -337,7 +344,9 @@ export async function fetchSwapTokensData(
 
   const pricesForLifiTokens = getPricesForLifiTokens(
     lifiTokensResponse.data,
-    targetChainIds
+    Array.from(
+      new Set([...targetChainIds, CHAIN_IDs.MAINNET, CHAIN_IDs.HYPEREVM])
+    )
   );
 
   const responseJson: SwapToken[] = [];

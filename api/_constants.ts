@@ -44,8 +44,12 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
     },
   },
+  USDH: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDH,
+    name: "USDH",
+  },
   "USDH-SPOT": {
-    name: "USDH-SPOT",
+    name: "USDH",
     symbol: "USDH-SPOT",
     decimals: 8,
     addresses: {
@@ -56,7 +60,7 @@ export const TOKEN_SYMBOLS_MAP = {
     coingeckoId: "usdh-2",
   },
   "USDC-SPOT": {
-    name: "USDC-SPOT",
+    name: "USDC",
     symbol: "USDC-SPOT",
     decimals: 8,
     addresses: {
@@ -79,6 +83,8 @@ export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
 export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   ...constants.TOKEN_EQUIVALENCE_REMAPPING,
   "USDH-SPOT": "USDH",
+  "USDC-SPOT": "USDC",
+  "USDT-SPOT": "USDT",
 };
 export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 
