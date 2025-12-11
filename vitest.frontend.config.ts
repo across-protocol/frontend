@@ -11,6 +11,9 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", "api/**", "test/api/**", "e2e-api/**"],
     globals: true,
+    typecheck: {
+      tsconfig: "./tsconfig.test.json",
+    },
     server: {
       deps: {
         inline: [
