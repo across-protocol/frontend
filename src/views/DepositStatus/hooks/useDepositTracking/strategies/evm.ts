@@ -124,7 +124,11 @@ export class EVMStrategy implements IChainStrategy {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
 
-      const metadata = await this.getFillMetadata(fillTxHash, bridgeProvider);
+      const metadata = await this.getFillMetadata({
+        fillTxHash,
+        bridgeProvider,
+        depositedInfo: depositInfo,
+      });
 
       return {
         fillTxHash: metadata.fillTxHash,
@@ -215,14 +219,17 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getFillMetadata(
-    fillTxHash: string,
-    bridgeProvider: BridgeProvider
-  ): Promise<{
+  async getFillMetadata(params: {
+    fillTxHash: string;
+    bridgeProvider: BridgeProvider;
+    depositedInfo: DepositedInfo;
+  }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
+    const { fillTxHash, bridgeProvider, depositedInfo } = params;
+
     try {
       const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
@@ -236,7 +243,10 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
+      const outputAmountParser = this.getOutputAmountParser(
+        bridgeProvider,
+        depositedInfo
+      );
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -272,8 +282,23 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
-    if (["cctp", "sponsored-cctp"].includes(bridgeProvider)) {
+  private getOutputAmountParser(
+    bridgeProvider: BridgeProvider,
+    depositedInfo: DepositedInfo
+  ) {
+    // If the bridge provider is `sponsored-cctp`,`sponsored-oft` or `oft`, we assume
+    // input amount == output amount:
+    // - sponsored-cctp: input amount == output amount
+    // - sponsored-oft: input amount == output amount
+    // - oft: input amount == output amount because fees are paid in native token
+    if (["sponsored-cctp", "sponsored-oft", "oft"].includes(bridgeProvider)) {
+      return () => {
+        // TODO: Scale correctly
+        return depositedInfo.depositLog.inputAmount;
+      };
+    }
+
+    if (bridgeProvider === "cctp") {
       return parseOutputAmountFromMintAndWithdrawLog;
     }
 
