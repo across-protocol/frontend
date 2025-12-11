@@ -33,7 +33,6 @@ import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
-import { ConvertDecimals } from "utils/convertdecimals";
 
 /**
  * Strategy for handling EVM chain operations
@@ -293,26 +292,10 @@ export class EVMStrategy implements IChainStrategy {
     // - sponsored-oft: input amount == output amount
     // - oft: input amount == output amount because fees are paid in native token
     if (["sponsored-cctp", "sponsored-oft", "oft"].includes(bridgeProvider)) {
-      const inputToken = getConfig().getTokenInfoByAddressSafe(
-        depositedInfo.depositLog.originChainId,
-        depositedInfo.depositLog.inputToken.toNative()
-      );
-      const outputToken = getConfig().getTokenInfoByAddressSafe(
-        depositedInfo.depositLog.destinationChainId,
-        depositedInfo.depositLog.outputToken.toNative()
-      );
-      if (!inputToken || !outputToken) {
-        throw new Error(
-          `Can't parse output amount for '${bridgeProvider}' due to missing token info: ` +
-            `inputToken: ${depositedInfo.depositLog.inputToken.toNative()} (${depositedInfo.depositLog.originChainId}) or` +
-            `outputToken: ${depositedInfo.depositLog.outputToken.toNative()} (${depositedInfo.depositLog.destinationChainId})`
-        );
-      }
-      return () =>
-        ConvertDecimals(
-          inputToken.decimals,
-          outputToken.decimals
-        )(depositedInfo.depositLog.inputAmount);
+      return () => {
+        // TODO: Scale correctly
+        return depositedInfo.depositLog.inputAmount;
+      };
     }
 
     if (bridgeProvider === "cctp") {
