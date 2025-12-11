@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 import { renderHook } from "@testing-library/react";
 import { usePrevious } from "../usePrevious";
 const setUp = () =>
