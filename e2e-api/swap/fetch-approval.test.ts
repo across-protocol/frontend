@@ -322,7 +322,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("Wrapped Tokens", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const tokensToTest = [
       "WETH",
       "WBNB",
@@ -368,7 +367,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("Ambiguous Tokens", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const tokensToTest = ["USDC", "USDT"];
 
     for (const tokenSymbol of tokensToTest) {
@@ -404,7 +402,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("'slippage' query parameter", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const baseParams = {
       amount: ethers.utils.parseUnits("10", 6).toString(), // 10 USDC
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],

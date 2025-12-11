@@ -18,7 +18,8 @@
     "baseUrl": "src",
     "paths": {
       "*": ["./src/*"]
-    }
+    },
+    "types": ["vitest/globals"]
   },
-  "include": ["src", "test", "api"]
+  "include": ["src", "test", "api", "e2e-api"]
 }
