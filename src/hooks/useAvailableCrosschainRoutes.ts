@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSwapTokens } from "./useSwapTokens";
-import { CHAIN_IDs } from "utils";
 
 export type LifiToken = {
   chainId: number;
@@ -46,17 +45,12 @@ export default function useAvailableCrosschainRoutes(
             const address = token.addresses?.[chainId];
             if (!address) return;
 
-            const displaySymbol =
-              token.symbol === "USDH-SPOT" && chainId === CHAIN_IDs.HYPERCORE
-                ? "USDH"
-                : undefined;
-
             const mapped: LifiToken = {
               chainId: chainId,
               address: address,
               name: token.name,
               symbol: token.symbol,
-              displaySymbol,
+              displaySymbol: token.displaySymbol,
               decimals: token.decimals,
               logoURI: token.logoURI || "",
               priceUSD: token.priceUsd || "0", // Use price from SwapToken, fallback to "0" if not available
