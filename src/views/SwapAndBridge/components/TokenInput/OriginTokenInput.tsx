@@ -19,6 +19,7 @@ import {
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
+import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -64,9 +65,12 @@ export const OriginTokenInput = ({
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
+  const balance = useTokenBalance(quoteRequest?.originToken);
+
   const insufficientBalance = hasInsufficientBalance(
     quoteRequest,
-    expectedAmount
+    expectedAmount,
+    balance
   );
 
   useEffect(() => {

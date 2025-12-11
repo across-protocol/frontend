@@ -11,7 +11,6 @@ import { Tooltip } from "components/Tooltip";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
-import { getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
 import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
@@ -20,6 +19,10 @@ import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
 import { ExpandableLabelSection } from "./ExpandableLabelSection";
 import { CoreConfirmationButton } from "./CoreConfirmationButton";
+import {
+  getProviderFromQuote,
+  isBridgeProviderSponsored,
+} from "../../utils/bridgeProvider";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -77,7 +80,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     isQuoteLoading
   );
 
-  const { originToken, destinationToken, amount } = quoteRequest;
+  const { originToken, destinationToken } = quoteRequest;
   const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
     buttonState;
   // Render unified group driven by state
@@ -125,7 +128,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, originToken, destinationToken, amount]);
+  }, [swapQuote, originToken, destinationToken, priceImpact?.priceImpact]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled =
@@ -138,7 +141,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   }, [swapQuote]);
 
   const provider = getProviderFromQuote(swapQuote);
-  const isSponsoredIntent = provider === "sponsored-intent";
+  const isSponsoredIntent = isBridgeProviderSponsored(provider);
+
   const content = (
     <>
       <ExpandableLabelSection
