@@ -149,7 +149,6 @@ function getIndirectChainTokens(
         TOKEN_SYMBOLS_MAP[
           equivalentTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP
         ];
-      console.log("tokenInfo", tokenInfo);
 
       if (tokenInfo) {
         const l1Address = tokenInfo.addresses[CHAIN_IDs.MAINNET];
