@@ -13,8 +13,11 @@ export type BridgeProvider =
   | "sponsored-oft";
 
 export function isBridgeProviderSponsored(
-  bridgeProvider: BridgeProvider
+  bridgeProvider: BridgeProvider | undefined
 ): boolean {
+  if (!bridgeProvider) {
+    return false;
+  }
   return (
     bridgeProvider === "sponsored-intent" ||
     bridgeProvider === "sponsored-cctp" ||

@@ -18,6 +18,7 @@ import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { usePMFForm } from "hooks/usePMFForm";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
+import { isBridgeProviderSponsored } from "views/SwapAndBridge/utils/bridgeProvider";
 
 type Props = {
   depositTxHash: string;
@@ -67,6 +68,13 @@ export function DepositStatusUpperCard({
     depositQuery?.data?.status === "deposit-reverted"
       ? depositQuery.data.formattedError
       : undefined;
+
+  // If sponsored bridge, we can guarantee output amount is equal to input
+  const outputAmount =
+    isBridgeProviderSponsored(bridgeProvider) &&
+    fillQuery?.data?.status === "filled"
+      ? depositQuery.data?.depositLog?.inputAmount
+      : fillQuery?.data?.outputAmount;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -162,7 +170,7 @@ export function DepositStatusUpperCard({
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
           fillTxHash={fillQuery.data?.fillTxHash}
-          outputAmount={fillQuery.data?.outputAmount}
+          outputAmount={outputAmount}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}
