@@ -42,7 +42,7 @@ export function isNonEthChain(chainId: number): boolean {
 }
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
-  if (tokenSymbol.includes("SPOT")) {
+  if (tokenSymbol.endsWith("SPOT")) {
     return tokenSymbol.replace("-SPOT", "");
   }
   switch (tokenSymbol) {
