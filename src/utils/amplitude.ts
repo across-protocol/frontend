@@ -260,8 +260,10 @@ export function generateTransferQuote(
     fromChain: number;
     toChain: number;
     fromTokenAddress: string;
+    toTokenAddress: string;
     fromSpokeAddress: string;
     fromTokenSymbol: string;
+    toTokenSymbol: string;
     isNative: boolean;
     l1TokenAddress: string;
   },
@@ -274,9 +276,6 @@ export function generateTransferQuote(
   account?: string,
   toAddress?: string
 ): TransferQuoteReceivedProperties {
-  // Create a function that converts a wei amount into a formatted token amount
-  const formatTokens = (wei: BigNumber) =>
-    utils.formatUnits(wei, tokenInfo?.decimals ?? 18);
   // Create a function that converts a wei amount to a USD equivalent
   const usdEquivalent = (wei: BigNumber) =>
     tokenPrice
@@ -290,24 +289,27 @@ export function generateTransferQuote(
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
   const totalBridgeFee = fees.totalRelayFee.total;
-  const totalBridgeFeePct = fees.totalRelayFee.pct;
 
   return {
     capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
-    capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
     capitalFeeTotalUsd: usdEquivalentString(fees.relayerCapitalFee.total),
-    expectedFillTimeInMinutes: estimatedTimeToRelayObject.formattedString,
-    expectedFillTimeInMinutesLowerBound: estimatedTimeToRelayObject.lowEstimate,
-    expectedFillTimeInMinutesUpperBound:
-      estimatedTimeToRelayObject.highEstimate,
-    fromAmount: formatTokens(amount),
+    destinationSwapFeePct: "0",
+    ...(fees.isAmountTooLow && { error: "amountTooLow" as const }),
+    expectedFillTimeInSec: fees.estimatedFillTimeSec.toString(),
+    expectedFillTimeInSecLowerBound: estimatedTimeToRelayObject.lowEstimate
+      ? (estimatedTimeToRelayObject.lowEstimate * 60).toString()
+      : fees.estimatedFillTimeSec.toString(),
+    expectedFillTimeInSecUpperBound: estimatedTimeToRelayObject.highEstimate
+      ? (estimatedTimeToRelayObject.highEstimate * 60).toString()
+      : fees.estimatedFillTimeSec.toString(),
+    fromAmount: utils.formatUnits(amount, tokenInfo?.decimals ?? 18),
     fromAmountUsd: usdEquivalentString(amount),
     fromChainId: selectedRoute.fromChain.toString(),
     fromChainName: fromChainInfo.name,
-    isAmountTooLow: fees.isAmountTooLow,
+    fromTokenAddress: selectedRoute.fromTokenAddress,
+    fromTokenSymbol: selectedRoute.fromTokenSymbol,
     isSenderEqRecipient: account && toAddress ? toAddress === account : false,
     lpFeePct: formatWeiEtherPct(fees.lpFee.pct),
-    lpFeeTotal: formatTokens(fees.lpFee.total),
     lpFeeTotalUsd: usdEquivalentString(fees.lpFee.total),
     quoteLatencyMilliseconds: fees.quoteLatency.toString(),
     quoteTimestamp: String(fees.quoteTimestamp),
@@ -315,26 +317,23 @@ export function generateTransferQuote(
     relayFeePct: formatWeiEtherPct(
       fees.relayerGasFee.pct.add(fees.relayerCapitalFee.pct)
     ),
-    relayFeeTotal: formatTokens(
-      fees.relayerGasFee.total.add(fees.relayerCapitalFee.total)
-    ),
     relayFeeTotalUsd: usdEquivalentString(
       fees.relayerGasFee.total.add(fees.relayerCapitalFee.total)
     ),
     relayGasFeePct: formatWeiEtherPct(fees.relayerGasFee.pct),
-    relayGasFeeTotal: formatTokens(fees.relayerGasFee.total),
     relayGasFeeTotalUsd: usdEquivalentString(fees.relayerGasFee.total),
     sender: account || "not connected",
     routeChainIdFromTo: `${fromChainInfo.chainId}-${toChainInfo.chainId}`,
     routeChainNameFromTo: `${fromChainInfo.name}-${toChainInfo.name}`,
-    toAmount: formatTokens(amount.sub(totalBridgeFee)),
+    toAmount: utils.formatUnits(
+      amount.sub(totalBridgeFee),
+      tokenInfo?.decimals ?? 18
+    ),
     toAmountUsd: usdEquivalentString(amount.sub(totalBridgeFee)),
     toChainId: selectedRoute.toChain.toString(),
     toChainName: toChainInfo.name,
-    tokenSymbol: tokenInfo.symbol,
-    totalBridgeFee: formatTokens(totalBridgeFee),
-    totalBridgeFeeUsd: usdEquivalentString(totalBridgeFee),
-    totalBridgeFeePct: formatWeiEtherPct(totalBridgeFeePct),
+    toTokenAddress: selectedRoute.toTokenAddress,
+    toTokenSymbol: selectedRoute.toTokenSymbol,
     transferQuoteBlockNumber: fees.quoteBlock.toString(),
   };
 }
@@ -346,6 +345,9 @@ export function generateTransferSubmitted(
   initialQuoteTime: number,
   inputTokenAddress: string,
   outputTokenAddress: string,
+  estimatedTimeToRelayObject: ConfirmationDepositTimeType,
+  totalFeePct: string,
+  totalFeeUsd: string,
   externalProjectId?: string
 ): TransferSubmittedProperties {
   return {
@@ -358,6 +360,13 @@ export function generateTransferSubmitted(
     transferTimestamp: String(Date.now()),
     toTokenAddress: outputTokenAddress,
     externalProjectId: externalProjectNameToId(externalProjectId),
+    expectedFillTimeInMinutes: estimatedTimeToRelayObject.formattedString,
+    expectedFillTimeInMinutesLowerBound: estimatedTimeToRelayObject.lowEstimate,
+    expectedFillTimeInMinutesUpperBound:
+      estimatedTimeToRelayObject.highEstimate,
+    tokenSymbol: quote.fromTokenSymbol || "",
+    totalFeePct,
+    totalFeeUsd,
   };
 }
 
@@ -369,6 +378,11 @@ export function generateTransferSigned(
   txHash: string,
   inputTokenAddress: string,
   outputTokenAddress: string,
+  estimatedTimeToRelayObject: ConfirmationDepositTimeType,
+  capitalFeeTotal: string,
+  lpFeeTotal: string,
+  totalFeePct: string,
+  totalFeeUsd: string,
   externalProjectId?: string
 ): TransferSignedProperties {
   return {
@@ -381,6 +395,14 @@ export function generateTransferSigned(
     toTokenAddress: outputTokenAddress,
     transactionHash: txHash,
     externalProjectId: externalProjectNameToId(externalProjectId),
+    expectedFillTimeInMinutes: estimatedTimeToRelayObject.formattedString,
+    expectedFillTimeInMinutesLowerBound: estimatedTimeToRelayObject.lowEstimate,
+    expectedFillTimeInMinutesUpperBound:
+      estimatedTimeToRelayObject.highEstimate,
+    capitalFeeTotal,
+    lpFeeTotal,
+    totalFeePct,
+    totalFeeUsd,
   };
 }
 
@@ -393,7 +415,10 @@ export function generateDepositConfirmed(
   success: boolean,
   txCompletedTimestamp: number,
   inputTokenAddress: string,
-  outputTokenAddress: string
+  outputTokenAddress: string,
+  estimatedTimeToRelayObject: ConfirmationDepositTimeType,
+  totalFeePct: string,
+  totalFeeUsd: string
 ): TransferDepositCompletedProperties {
   return {
     ...quote,
@@ -406,9 +431,12 @@ export function generateDepositConfirmed(
       Date.now() - initialSignTime
     ),
     depositCompleteTimestamp: String(txCompletedTimestamp),
-    networkFeeNative: quote.relayGasFeeTotal,
-    networkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
-    networkFeeNativeToken: quote.tokenSymbol,
+    expectedFillTimeInMinutes: estimatedTimeToRelayObject.formattedString,
+    expectedFillTimeInMinutesLowerBound: estimatedTimeToRelayObject.lowEstimate,
+    expectedFillTimeInMinutesUpperBound:
+      estimatedTimeToRelayObject.highEstimate,
+    totalFeePct,
+    totalFeeUsd,
   };
 }
 

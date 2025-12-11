@@ -192,7 +192,7 @@ export interface ChangeUnitsButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -210,7 +210,8 @@ export interface ChangeUnitsButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -238,7 +239,7 @@ export interface ClickedFollowOnXButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -256,7 +257,8 @@ export interface ClickedFollowOnXButtonProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -284,7 +286,7 @@ export interface ClickedShareOnXButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -302,7 +304,8 @@ export interface ClickedShareOnXButtonProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -330,7 +333,7 @@ export interface ClickedShareOnXCopyOrDownloadButtonProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -348,7 +351,8 @@ export interface ClickedShareOnXCopyOrDownloadButtonProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -376,7 +380,7 @@ export interface ClickedShareOnXctaProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -394,7 +398,8 @@ export interface ClickedShareOnXctaProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -445,7 +450,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -463,7 +468,8 @@ export interface ConnectWalletButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -491,7 +497,7 @@ export interface CtaButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -509,7 +515,8 @@ export interface CtaButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -602,7 +609,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -620,7 +627,8 @@ export interface DisconnectWalletButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -671,7 +679,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -689,7 +697,8 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -893,7 +902,7 @@ export interface PageViewedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -911,7 +920,8 @@ export interface PageViewedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   path: string;
   /**
    * Address of referee, null if no referral used
@@ -931,7 +941,7 @@ export interface PmfButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -949,7 +959,8 @@ export interface PmfButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
 }
 
 export interface QuickSwapButtonClickedProperties {
@@ -979,7 +990,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -997,7 +1008,8 @@ export interface QuickSwapButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -1131,19 +1143,27 @@ export interface TrackInExplorerClickedProperties {
 }
 
 export interface TransferDepositCompletedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
   depositCompleteTimestamp: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | amountTooLow, noLiquidity |
+   */
+  error?: "amountTooLow" | "noLiquidity";
   /**
    * Expected fill time in minutes, as displayed in the UI for the asset and route selected
    */
@@ -1164,6 +1184,9 @@ export interface TransferDepositCompletedProperties {
    * | Type | number |
    */
   expectedFillTimeInMinutesUpperBound?: number;
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -1184,7 +1207,19 @@ export interface TransferDepositCompletedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   /**
    * Boolean if sender and recipient address are equal.
    */
@@ -1194,16 +1229,13 @@ export interface TransferDepositCompletedProperties {
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  networkFeeNative: string;
-  networkFeeNativeToken: string;
-  networkFeeUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * Latency for FE to recieve quote in millisec
    */
@@ -1225,10 +1257,6 @@ export interface TransferDepositCompletedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1236,10 +1264,6 @@ export interface TransferDepositCompletedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1261,6 +1285,12 @@ export interface TransferDepositCompletedProperties {
    */
   succeeded: boolean;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   */
+  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  /**
    * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
    */
   timeFromTransferSignedToTransferCompleteInMilliseconds: string;
@@ -1280,26 +1310,13 @@ export interface TransferDepositCompletedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
+  toTokenSymbol?: string;
   /**
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
@@ -1308,38 +1325,29 @@ export interface TransferDepositCompletedProperties {
 }
 
 export interface TransferQuoteReceivedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
   /**
-   * Expected fill time in minutes, as displayed in the UI for the asset and route selected
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
    * | Rule | Value |
    * |---|---|
-   * | Type | number |
+   * | Enum Values | amountTooLow, noLiquidity |
    */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -1356,7 +1364,23 @@ export interface TransferQuoteReceivedProperties {
    * From chain name
    */
   fromChainName: string;
-  isAmountTooLow: boolean;
+  /**
+   * Token address of bridge token on from chain
+   */
+  fromTokenAddress: string;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   /**
    * Boolean if sender and recipient address are equal.
    */
@@ -1366,13 +1390,13 @@ export interface TransferQuoteReceivedProperties {
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * Latency for FE to recieve quote in millisec
    */
@@ -1390,10 +1414,6 @@ export interface TransferQuoteReceivedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1401,10 +1421,6 @@ export interface TransferQuoteReceivedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1422,6 +1438,12 @@ export interface TransferQuoteReceivedProperties {
    */
   sender: string;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   */
+  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  /**
    * To amount of bridge token, in decimals
    */
   toAmount: string;
@@ -1438,25 +1460,18 @@ export interface TransferQuoteReceivedProperties {
    */
   toChainName: string;
   /**
-   * Symbol of bridge token
+   * Token address of bridge token on to chain
    */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  toTokenAddress: string;
+  toTokenSymbol?: string;
   transferQuoteBlockNumber: string;
 }
 
 export interface TransferSignedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
@@ -1469,6 +1484,14 @@ export interface TransferSignedProperties {
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | amountTooLow, noLiquidity |
+   */
+  error?: "amountTooLow" | "noLiquidity";
   /**
    * | Rule | Value |
    * |---|---|
@@ -1491,6 +1514,9 @@ export interface TransferSignedProperties {
    * | Type | number |
    */
   expectedFillTimeInMinutesUpperBound?: number;
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1517,7 +1543,19 @@ export interface TransferSignedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
@@ -1531,6 +1569,10 @@ export interface TransferSignedProperties {
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1556,10 +1598,6 @@ export interface TransferSignedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1567,10 +1605,6 @@ export interface TransferSignedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1587,6 +1621,12 @@ export interface TransferSignedProperties {
    * Sender wallet address
    */
   sender: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   */
+  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
   /**
    * Duration in milliseconds between TransferSubmitted event to the TransferSigned event
    */
@@ -1607,26 +1647,13 @@ export interface TransferSignedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
+  toTokenSymbol?: string;
   /**
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
@@ -1640,18 +1667,26 @@ export interface TransferSignedProperties {
 }
 
 export interface TransferSubmittedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | amountTooLow, noLiquidity |
+   */
+  error?: "amountTooLow" | "noLiquidity";
   /**
    * | Rule | Value |
    * |---|---|
@@ -1674,6 +1709,9 @@ export interface TransferSubmittedProperties {
    * | Type | number |
    */
   expectedFillTimeInMinutesUpperBound?: number;
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1700,20 +1738,32 @@ export interface TransferSubmittedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1739,10 +1789,6 @@ export interface TransferSubmittedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1750,10 +1796,6 @@ export interface TransferSubmittedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1770,6 +1812,12 @@ export interface TransferSubmittedProperties {
    * Sender wallet address
    */
   sender: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   */
+  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
   /**
    * Duration in milliseconds between first TransferQuoteRecieved event to the TransferSubmitted event
    */
@@ -1794,22 +1842,13 @@ export interface TransferSubmittedProperties {
    * Symbol of bridge token
    */
   tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
+  toTokenSymbol?: string;
   transferQuoteBlockNumber: string;
   /**
    * Timestamp when send button was clicked
@@ -2827,7 +2866,7 @@ export class Ampli {
    *
    * Owner: Dong-Ha Kim
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferDepositCompleted(
@@ -2846,7 +2885,7 @@ export class Ampli {
    *
    * Owner: Dong-Ha Kim
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferQuoteReceived(
@@ -2865,7 +2904,7 @@ export class Ampli {
    *
    * Owner: james@umaproject.org
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferSigned(
@@ -2884,7 +2923,7 @@ export class Ampli {
    *
    * Owner: james@umaproject.org
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferSubmitted(
