@@ -25,6 +25,7 @@ export type SwapToken = {
   address: string;
   name: string;
   symbol: string;
+  displaySymbol?: string;
   decimals: number;
   logoUrl: string;
   priceUsd: string | null;
@@ -121,14 +122,29 @@ function getJupiterTokens(
   }, []);
 }
 
-// Using hardcoded value until https://github.com/across-protocol/frontend/pull/1988 merged
-const SPOT_TOKEN_LOGO_URLS: Record<string, string> = {
-  "USDH-SPOT":
-    "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
-  "USDC-SPOT":
-    "https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042194",
-  "USDT-SPOT":
-    "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+const TOKEN_DISPLAY_OVERRIDES: Record<
+  number,
+  Record<string, { displaySymbol?: string; name?: string; logoUrl?: string }>
+> = {
+  [CHAIN_IDs.HYPERCORE]: {
+    "USDH-SPOT": {
+      displaySymbol: "USDH",
+      name: "Hyperliquid USD",
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+    },
+    "USDC-SPOT": {
+      name: "USD Coin",
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042194",
+    },
+    "USDT-SPOT": {
+      displaySymbol: "USDT",
+      name: "Tether USD",
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+    },
+  },
 };
 
 function getIndirectChainTokens(
@@ -165,18 +181,13 @@ function getIndirectChainTokens(
         }
       }
 
-      let logoUrl = token.logoUrl;
-      if (SPOT_TOKEN_LOGO_URLS[token.symbol]) {
-        logoUrl = SPOT_TOKEN_LOGO_URLS[token.symbol];
-      }
-
       return {
         chainId: chain.chainId,
         address: token.address,
         name: token.name,
         symbol: token.symbol,
         decimals: token.decimals,
-        logoUrl,
+        logoUrl: token.logoUrl,
         priceUsd,
       };
     });
@@ -329,6 +340,22 @@ function replaceUsdtOnNonAcrossChains(
   });
 }
 
+// apply some display overrides
+function applyTokenDisplayOverrides(tokens: SwapToken[]): SwapToken[] {
+  return tokens.map((token) => {
+    const chainOverrides =
+      TOKEN_DISPLAY_OVERRIDES?.[token.chainId]?.[token.symbol];
+    if (!chainOverrides) {
+      return token;
+    }
+
+    return {
+      ...token,
+      ...chainOverrides,
+    };
+  });
+}
+
 export async function fetchSwapTokensData(
   filteredChainIds?: number[]
 ): Promise<SwapToken[]> {
@@ -391,9 +418,13 @@ export async function fetchSwapTokensData(
   const deduplicatedTokens = deduplicateTokens(responseJson);
 
   // Hacky solution to replace Unichain USDT with USDT0
-  const finalTokens = replaceUsdtOnNonAcrossChains(
+  const tokensAfterUsdtReplacement = replaceUsdtOnNonAcrossChains(
     deduplicatedTokens,
     pricesForLifiTokens
   );
+
+  // Apply display overrides to all tokens
+  const finalTokens = applyTokenDisplayOverrides(tokensAfterUsdtReplacement);
+
   return finalTokens;
 }

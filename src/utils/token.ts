@@ -194,6 +194,8 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
       [swapToken.chainId]: swapToken.address,
     },
     priceUsd: swapToken.priceUsd,
+    // Use displaySymbol from API if available
+    displaySymbol: swapToken.displaySymbol,
   };
 
   // If we found a local token definition, merge in mainnetAddress and displaySymbol
@@ -201,7 +203,7 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
     return {
       ...baseTokenInfo,
       mainnetAddress: localToken.mainnetAddress,
-      displaySymbol: localToken.displaySymbol,
+      displaySymbol: swapToken.displaySymbol || localToken.displaySymbol,
       logoURI: localToken.logoURI || baseTokenInfo.logoURI, // Prefer local logo if available
     };
   }
