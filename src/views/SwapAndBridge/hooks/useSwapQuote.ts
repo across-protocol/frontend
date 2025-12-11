@@ -7,8 +7,13 @@ import {
 } from "utils/serverless-api/prod/swap-approval";
 import { useDebounce } from "@uidotdev/usehooks";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
-import { INTEGRATOR_ID_ACROSS } from "utils";
+import { INTEGRATOR_ID_ACROSS, getChainInfo } from "utils";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
+import { useAmplitude } from "../../../hooks";
+import { ampli } from "ampli";
+import { generateTransferQuoteFromSwapQuote } from "utils/amplitude";
+import { BigNumber } from "ethers";
+import { useEffect, useRef } from "react";
 
 export type SwapQuote = ReturnType<typeof useSwapQuote>["swapQuote"];
 
@@ -87,6 +92,50 @@ const useSwapQuote = ({
     refetchInterval: (query) =>
       query.state.status === "success" ? 10_000 : false,
   });
+
+  const { addToAmpliQueue } = useAmplitude();
+  const lastTrackedQuoteRef = useRef<string>();
+
+  useEffect(() => {
+    if (!data || !originToken || !destinationToken) {
+      return;
+    }
+
+    const quoteId = `${data.inputAmount.toString()}-${data.expectedOutputAmount.toString()}-${data.inputToken.chainId}-${data.outputToken.chainId}`;
+    if (lastTrackedQuoteRef.current === quoteId) {
+      return;
+    }
+
+    lastTrackedQuoteRef.current = quoteId;
+
+    const recipient = customDestinationAccount
+      ? customDestinationAccount.address
+      : recipientOrPlaceholder;
+
+    addToAmpliQueue(() => {
+      const fromChainInfo = getChainInfo(data.inputToken.chainId);
+      const toChainInfo = getChainInfo(data.outputToken.chainId);
+
+      const quoteProperties = generateTransferQuoteFromSwapQuote(
+        data,
+        fromChainInfo,
+        toChainInfo,
+        BigNumber.from(0),
+        depositor,
+        recipient
+      );
+
+      ampli.transferQuoteReceived(quoteProperties);
+    });
+  }, [
+    data,
+    originToken,
+    destinationToken,
+    depositor,
+    recipientOrPlaceholder,
+    customDestinationAccount,
+    addToAmpliQueue,
+  ]);
 
   return { swapQuote: data, isQuoteLoading: isLoading, quoteError: error };
 };

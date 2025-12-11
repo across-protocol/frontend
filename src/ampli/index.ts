@@ -1164,26 +1164,6 @@ export interface TransferDepositCompletedProperties {
    * | Enum Values | amountTooLow, noLiquidity |
    */
   error?: "amountTooLow" | "noLiquidity";
-  /**
-   * Expected fill time in minutes, as displayed in the UI for the asset and route selected
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
   expectedFillTimeInSec: string;
   expectedFillTimeInSecLowerBound: string;
   expectedFillTimeInSecUpperBound: string;
@@ -1492,28 +1472,6 @@ export interface TransferSignedProperties {
    * | Enum Values | amountTooLow, noLiquidity |
    */
   error?: "amountTooLow" | "noLiquidity";
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
   expectedFillTimeInSec: string;
   expectedFillTimeInSecLowerBound: string;
   expectedFillTimeInSecUpperBound: string;
@@ -1687,28 +1645,6 @@ export interface TransferSubmittedProperties {
    * | Enum Values | amountTooLow, noLiquidity |
    */
   error?: "amountTooLow" | "noLiquidity";
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
   expectedFillTimeInSec: string;
   expectedFillTimeInSecLowerBound: string;
   expectedFillTimeInSecUpperBound: string;
@@ -1838,10 +1774,6 @@ export interface TransferSubmittedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
   totalFeePct: string;
   totalFeeUsd: string;
   /**

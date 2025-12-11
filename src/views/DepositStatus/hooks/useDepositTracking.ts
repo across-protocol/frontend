@@ -1,22 +1,25 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useAmplitude } from "hooks";
 import {
-  getChainInfo,
-  NoFundsDepositedLogError,
   debug,
+  formatWeiPct,
+  getChainInfo,
   getEcosystem,
+  NoFundsDepositedLogError,
 } from "utils";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
-import { BridgeProvider } from "./useDepositTracking/types";
+import { BridgeProvider, DepositData } from "./useDepositTracking/types";
 import { DepositStatus } from "../types";
-import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useToken } from "hooks/useToken";
 import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
+import { ampli } from "ampli";
+import { generateTransferQuoteFromSwapQuote } from "utils/amplitude";
+import { BigNumber, ethers } from "ethers";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -172,41 +175,65 @@ export function useDepositTracking({
       type: "all", // Refetch both active and inactive queries
     });
 
-    // TODO
-    // // Remove existing deposit and add updated one with fill information
-    // const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    if (fromBridgeAndSwapPagePayload && fillInfo.status === "filled") {
+      const { swapQuote, timeSigned, referrer } = fromBridgeAndSwapPagePayload;
 
-    // if (localDepositByTxHash) {
-    //   removeLocalDeposits([depositTxHash]);
-    // }
+      const fromChainInfo = getChainInfo(swapQuote.inputToken.chainId);
+      const toChainInfo = getChainInfo(swapQuote.outputToken.chainId);
 
-    // TODO update deposit in localStorage. track in Amplitude
-    // if (fromBridgeAndSwapPagePayload) {
-    //   // Add to local storage with fill information
-    //   // Use the strategy-specific conversion method
-    //   const localDeposit = fillStrategy.convertForFillQuery(
-    //     fillInfo,
-    //     fromBridgeAndSwapPagePayload
-    //   );
-    //   addLocalDeposit(localDeposit);
+      const bridgeTokenDecimals = swapQuote.steps.bridge.tokenIn.decimals;
+      const totalBridgeFee = swapQuote.steps.bridge.fees.amount;
+      const totalBridgeFeePct = swapQuote.steps.bridge.fees.pct;
 
-    //   // Record transfer properties
-    //   const { swapQuote, depositArgs, tokenPrice } =
-    //     fromBridgeAndSwapPagePayload;
+      const quote = generateTransferQuoteFromSwapQuote(
+        swapQuote,
+        fromChainInfo,
+        toChainInfo,
+        BigNumber.from(0),
+        undefined,
+        undefined
+      );
 
-    //   // Only record if we have token info
-    //   if (tokenForAnalytics) {
-    //     recordTransferUserProperties(
-    //       BigNumber.from(depositArgs.amount),
-    //       BigNumber.from(tokenPrice),
-    //       tokenForAnalytics.decimals,
-    //       quoteForAnalytics.tokenSymbol.toLowerCase(),
-    //       Number(quoteForAnalytics.fromChainId),
-    //       Number(quoteForAnalytics.toChainId),
-    //       quoteForAnalytics.fromChainName
-    //     );
-    //   }
-    // }
+      const expectedFillTimeMinutes = Math.ceil(
+        swapQuote.expectedFillTime / 60
+      );
+      const expectedFillTime = {
+        formattedString: expectedFillTimeMinutes.toString(),
+        lowEstimate: expectedFillTimeMinutes,
+        highEstimate: expectedFillTimeMinutes,
+      };
+
+      const totalFeePct = formatWeiPct(totalBridgeFeePct)?.toString() || "0";
+      const totalFeeUsd = ethers.utils.formatUnits(
+        totalBridgeFee,
+        bridgeTokenDecimals
+      );
+
+      addToAmpliQueue(() => {
+        const transferDepositCompletedProperties = {
+          ...quote,
+          fromTokenAddress: swapQuote.inputToken.address,
+          referralProgramAddress: referrer || "",
+          toTokenAddress: swapQuote.outputToken.address,
+          transactionHash: depositTxHash,
+          succeeded: true,
+          timeFromTransferSignedToTransferCompleteInMilliseconds: String(
+            Date.now() - timeSigned
+          ),
+          depositCompleteTimestamp: String(
+            fillInfo.depositInfo.depositTimestamp ||
+              Math.floor(Date.now() / 1000)
+          ),
+          expectedFillTimeInMinutes: expectedFillTime.formattedString,
+          expectedFillTimeInMinutesLowerBound: expectedFillTime.lowEstimate,
+          expectedFillTimeInMinutesUpperBound: expectedFillTime.highEstimate,
+          totalFeePct,
+          totalFeeUsd,
+        };
+
+        ampli.transferDepositCompleted(transferDepositCompletedProperties);
+      });
+    }
   }, [
     fillQuery.data,
     depositTxHash,
@@ -218,6 +245,7 @@ export function useDepositTracking({
     toChainId,
     accountSVM,
     accountEVM,
+    addToAmpliQueue,
   ]);
 
   const status: DepositStatus = !depositQuery.data?.depositTimestamp
