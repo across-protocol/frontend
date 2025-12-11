@@ -1,48 +1,69 @@
-import { ethers } from "ethers";
+import { getDeployedAddress } from "@across-protocol/contracts";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
 import { CCTP_SUPPORTED_CHAINS } from "../../cctp/utils/constants";
-import { getEnvs } from "../../../_env";
 
 // NOTE: For now, we always use fast CCTP mode
 export const CCTP_TRANSFER_MODE = "fast" as const;
 
-export const SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS =
-  getEnvs().SPONSORED_CCTP_QUOTE_FINALIZER_ADDRESS ||
-  ethers.constants.AddressZero;
-
-export const SPONSORED_CCTP_SRC_PERIPHERY_ADDRESSES = {
-  [CHAIN_IDs.ARBITRUM]: "0xce1FFE01eBB4f8521C12e74363A396ee3d337E1B",
-  [CHAIN_IDs.BASE]: "0xA7A8d1efC1EE3E69999D370380949092251a5c20",
+const SPONSORED_CCTP_SRC_PERIPHERY_ADDRESS_OVERRIDES: Record<number, string> = {
   [CHAIN_IDs.ARBITRUM_SEPOLIA]: "0x79176E2E91c77b57AC11c6fe2d2Ab2203D87AF85",
   [CHAIN_IDs.SOLANA_DEVNET]: "CPr4bRvkVKcSCLyrQpkZrRrwGzQeVAXutFU8WupuBLXq",
 };
 
-export const SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES = {
-  [CHAIN_IDs.HYPEREVM]: "0xb63c02e60C05F05975653edC83F876C334E07C6d",
+export const SPONSORED_CCTP_DST_PERIPHERY_ADDRESS_OVERRIDES: Record<
+  number,
+  string
+> = {
   [CHAIN_IDs.HYPEREVM_TESTNET]: "0x06C61D54958a0772Ee8aF41789466d39FfeaeB13",
 };
 
-// Sponsored CCTP is only supported from specific origin chains:
-// Arbitrum, Base, Solana, Arbitrum Sepolia, Solana Devnet
+export function getSponsoredCctpSrcPeripheryAddress(
+  chainId: number,
+  throwIfNotFound: boolean = false
+) {
+  if (SPONSORED_CCTP_SRC_PERIPHERY_ADDRESS_OVERRIDES[chainId]) {
+    return SPONSORED_CCTP_SRC_PERIPHERY_ADDRESS_OVERRIDES[chainId];
+  }
+
+  const address = getDeployedAddress(
+    "SponsoredCCTPSrcPeriphery",
+    chainId,
+    throwIfNotFound
+  );
+
+  return address;
+}
+
+export function getSponsoredCctpDstPeripheryAddress(
+  chainId: number,
+  throwIfNotFound: boolean = false
+) {
+  if (SPONSORED_CCTP_DST_PERIPHERY_ADDRESS_OVERRIDES[chainId]) {
+    return SPONSORED_CCTP_DST_PERIPHERY_ADDRESS_OVERRIDES[chainId];
+  }
+
+  const address = getDeployedAddress(
+    "SponsoredCCTPDstPeriphery",
+    chainId,
+    throwIfNotFound
+  );
+  return address;
+}
+
 export const SPONSORED_CCTP_ORIGIN_CHAINS = CCTP_SUPPORTED_CHAINS.filter(
   (chainId) =>
-    [
-      CHAIN_IDs.ARBITRUM,
-      CHAIN_IDs.BASE,
-      CHAIN_IDs.SOLANA,
-      CHAIN_IDs.ARBITRUM_SEPOLIA,
-      CHAIN_IDs.SOLANA_DEVNET,
+    ![
+      CHAIN_IDs.HYPERCORE,
+      CHAIN_IDs.HYPERCORE_TESTNET,
+      CHAIN_IDs.HYPEREVM,
+      CHAIN_IDs.HYPEREVM_TESTNET,
     ].includes(chainId)
 );
 
 export const SPONSORED_CCTP_INPUT_TOKENS = ["USDC"];
 
-export const SPONSORED_CCTP_OUTPUT_TOKENS = [
-  "USDC-SPOT",
-  "USDH-SPOT",
-  "USDT-SPOT",
-];
+export const SPONSORED_CCTP_OUTPUT_TOKENS = ["USDC-SPOT", "USDH-SPOT"];
 
 export const SPONSORED_CCTP_FINAL_TOKEN_PER_OUTPUT_TOKEN: Record<
   string,
@@ -50,7 +71,6 @@ export const SPONSORED_CCTP_FINAL_TOKEN_PER_OUTPUT_TOKEN: Record<
 > = {
   "USDC-SPOT": TOKEN_SYMBOLS_MAP.USDC,
   "USDH-SPOT": TOKEN_SYMBOLS_MAP.USDH,
-  "USDT-SPOT": TOKEN_SYMBOLS_MAP.USDT,
 };
 
 export const SPONSORED_CCTP_DESTINATION_CHAINS = [

@@ -9,7 +9,7 @@ import { getOftEndpointId } from "../../oft/utils/constants";
 import {
   DEFAULT_LZ_RECEIVE_GAS_LIMIT,
   DEFAULT_LZ_COMPOSE_GAS_LIMIT,
-  DST_OFT_HANDLER,
+  getSponsoredOftDstHandlerAddress,
 } from "./constants";
 import { CHAIN_IDs } from "../../../_constants";
 import {
@@ -54,7 +54,8 @@ export function buildSponsoredOFTQuote(params: BuildSponsoredQuoteParams): {
   const dstEid = getOftEndpointId(intermediaryChainId);
 
   // Get destination handler address for intermediary chain
-  const destinationHandlerAddress = DST_OFT_HANDLER[intermediaryChainId];
+  const destinationHandlerAddress =
+    getSponsoredOftDstHandlerAddress(intermediaryChainId);
   if (!destinationHandlerAddress) {
     throw new Error(
       `Destination handler not found for intermediary chain ${intermediaryChainId}`

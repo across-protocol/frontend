@@ -14,7 +14,7 @@ import {
 } from "../../cctp/utils/constants";
 import { isToHyperCore } from "../../cctp/utils/hypercore";
 import {
-  SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES,
+  getSponsoredCctpDstPeripheryAddress,
   CCTP_TRANSFER_MODE,
 } from "./constants";
 import { getSponsoredCctpFinalTokenAddress } from "./final-token";
@@ -56,7 +56,7 @@ export function buildSponsoredCCTPQuote(
       : CHAIN_IDs.HYPEREVM_TESTNET;
 
   const sponsoredCCTPDstPeripheryAddress =
-    SPONSORED_CCTP_DST_PERIPHERY_ADDRESSES[intermediaryChainId];
+    getSponsoredCctpDstPeripheryAddress(intermediaryChainId);
   if (!sponsoredCCTPDstPeripheryAddress) {
     throw new Error(
       `'SponsoredCCTPDstPeriphery' not found for intermediary chain ${intermediaryChainId}`

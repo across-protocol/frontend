@@ -1,21 +1,24 @@
+import { getDeployedAddress } from "@across-protocol/contracts";
+
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
 
-/**
- * SponsoredOFTSrcPeriphery contract addresses per chain
- * TODO: Update with actual deployed addresses
- */
-export const SPONSORED_OFT_SRC_PERIPHERY: Record<number, string | undefined> = {
-  [CHAIN_IDs.MAINNET]: "0x4607BceaF7b22cb0c46882FFc9fAB3c6efe66e5a",
-  [CHAIN_IDs.ARBITRUM]: "0x2ac5Ee3796E027dA274fbDe84c82173a65868940",
-};
+export function getSponsoredOftSrcPeripheryAddress(
+  chainId: number,
+  throwIfNotFound: boolean = false
+) {
+  return getDeployedAddress(
+    "SponsoredOFTSrcPeriphery",
+    chainId,
+    throwIfNotFound
+  );
+}
 
-/**
- * DstOFTHandler contract addresses per chain
- * TODO: Update with actual deployed addresses
- */
-export const DST_OFT_HANDLER: Record<number, string | undefined> = {
-  [CHAIN_IDs.HYPEREVM]: "0xc8786D517b4e224bB43985A38dBeF8588D7354CD",
-};
+export function getSponsoredOftDstHandlerAddress(
+  chainId: number,
+  throwIfNotFound: boolean = false
+) {
+  return getDeployedAddress("DstOFTHandler", chainId, throwIfNotFound);
+}
 
 /**
  * Default gas limits for LayerZero execution

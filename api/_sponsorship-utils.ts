@@ -28,13 +28,19 @@ export enum ExecutionMode {
   ArbitraryActionsToEVM = 2, // Execute arbitrary actions then stay on EVM
 }
 
-/**
- * Address of the donation box contract on HyperEVM
- */
-export const DONATION_BOX_ADDRESS = {
-  [CHAIN_IDs.HYPEREVM]: "0xbC217096db9EB6d2782c1d9E725D462077a4d1f6",
-  // TODO: Add testnet donation box address
-  [CHAIN_IDs.HYPEREVM_TESTNET]: "0x0000000000000000000000000000000000000000",
+// Taken by calling `donationBox` on the dst handler contracts:
+// - OFT: https://hyperevmscan.io/address/0xc8786d517b4e224bb43985a38dbef8588d7354cd#code
+// - CCTP: https://hyperevmscan.io/address/0x1c709Fd0Db6A6B877Ddb19ae3D485B7b4ADD879f#code
+const DONATION_BOX_ADDRESS_PER_DST_HANDLER: Record<
+  "oft" | "cctp",
+  Record<number, string>
+> = {
+  oft: {
+    [CHAIN_IDs.HYPEREVM]: "0x3D589D40312Bf2d20f13cD0AF26A11144a9cA844",
+  },
+  cctp: {
+    [CHAIN_IDs.HYPEREVM]: "0x039d62C549F27ead0eB9B567d8776289e5020583",
+  },
 };
 
 /**
@@ -84,12 +90,16 @@ export function getSponsoredEvmChainId(dstChainId: number) {
  * @param dstChainId - The destination chain ID.
  * @returns The donation box address.
  */
-export function getDonationBoxAddress(dstChainId: number) {
+export function getDonationBoxAddress(
+  dstChainId: number,
+  oftOrCctp: "oft" | "cctp"
+) {
   const sponsoredChainId = getSponsoredEvmChainId(dstChainId);
-  const donationBoxAddress = DONATION_BOX_ADDRESS[sponsoredChainId];
+  const donationBoxAddress =
+    DONATION_BOX_ADDRESS_PER_DST_HANDLER[oftOrCctp][sponsoredChainId];
   if (!donationBoxAddress) {
     throw new Error(
-      `Donation box address not found for chain ${sponsoredChainId}`
+      `Donation box address not found for ${oftOrCctp} on chain ${dstChainId}`
     );
   }
   return donationBoxAddress;

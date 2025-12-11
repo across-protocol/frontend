@@ -277,7 +277,11 @@ export async function hasDonationBoxEnoughFunds(params: {
 
   const { finalTokenAddress, finalTokenDecimals } =
     getSponsoredFinalToken(outputToken);
-  const donationBoxAddress = getDonationBoxAddress(outputToken.chainId);
+  const oftOrCctp = inputToken.symbol.includes("USDC") ? "cctp" : "oft";
+  const donationBoxAddress = getDonationBoxAddress(
+    outputToken.chainId,
+    oftOrCctp
+  );
 
   const maxSponsoredAmountInInputTokenDecimals = inputAmount
     .mul(utils.parseEther(maxBpsToSponsor.toString()))
