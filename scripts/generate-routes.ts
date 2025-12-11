@@ -42,6 +42,9 @@ export function isNonEthChain(chainId: number): boolean {
 }
 
 function getTokenSymbolForLogo(tokenSymbol: string): string {
+  if (tokenSymbol.endsWith("SPOT")) {
+    return tokenSymbol.replace("-SPOT", "");
+  }
   switch (tokenSymbol) {
     case "USDC.e":
     case "USDbC":
