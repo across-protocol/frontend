@@ -29,6 +29,7 @@ import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromB
 import { useToken } from "hooks/useToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { getIntermediaryTokenInfo } from "utils/token";
+import { ConvertDecimals } from "utils/convertdecimals";
 
 type Props = {
   status: DepositStatus;
@@ -125,6 +126,15 @@ export function DepositTimesCard({
   const isDepositReverted = status === "deposit-reverted";
   const { addToAmpliQueue } = useAmplitude();
 
+  // in rare cases where input/output decimals are different, we should scale these amounts
+  const outputAmountScaled =
+    outputTokenForConversion?.decimals && outputAmount
+      ? ConvertDecimals(
+          inputToken.decimals,
+          outputTokenForConversion?.decimals
+        )(outputAmount)
+      : outputAmount;
+
   return (
     <CardWrapper>
       <Row>
@@ -217,7 +227,7 @@ export function DepositTimesCard({
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputAmount) &&
+      {isDefined(outputAmountScaled) &&
         outputTokenForDisplay &&
         isDefined(finalOutputAmountUsd) && (
           <Row>
@@ -230,7 +240,7 @@ export function DepositTimesCard({
                     outputTokenForConversion?.decimals ??
                     outputTokenForDisplay.decimals,
                 }}
-                amount={outputAmount}
+                amount={outputAmountScaled}
                 tokenChainId={toChainId}
                 tokenFirst
                 showTokenLinkOnHover
