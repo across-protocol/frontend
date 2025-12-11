@@ -29,6 +29,7 @@ type SponsorshipRoutingRule = RoutingRule<
 // Amount threshold for routing USDC → USDH on HyperCore (in USD terms)
 // Amounts >= 10K USD use CCTP, amounts < 10K USD use intents
 // Note: Per-transaction limit of 1M USD is enforced in getSponsorshipEligibilityPreChecks
+// Testing
 const MIN_CCTP_AMOUNT_USD = 10000; // 10K USD
 
 const makeRoutingRuleGetStrategyFn =
