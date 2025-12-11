@@ -18,5 +18,5 @@
     "baseUrl": "src"
   },
   "include": ["src", "api", "*.ts", "*.js"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "node_modules"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "node_modules", "vitest.*.ts"]
 }
