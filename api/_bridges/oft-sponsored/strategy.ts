@@ -48,7 +48,9 @@ import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibilit
 // volatility. Expressed as a percentage, e.g., 0.01 = 1%.
 const INITIAL_QUOTE_NATIVE_FEE_MARKUP = 0.1;
 
-const name = "sponsored-oft" as const;
+// We return "oft" instead of "sponsored-oft" because quotes routed our sponsorship periphery
+// are not sponsored.
+const name = "oft" as const;
 
 const capabilities: BridgeCapabilities = {
   ecosystems: ["evm"],
