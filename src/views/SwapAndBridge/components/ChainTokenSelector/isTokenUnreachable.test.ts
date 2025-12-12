@@ -246,6 +246,8 @@ describe("isTokenUnreachable", () => {
       { pattern: "*USDC*", value: "wrappedUSDC", expected: true },
       { pattern: "*USDC*", value: "USDC.e", expected: true },
       { pattern: "*USDC*", value: "USDT", expected: false },
+      { pattern: "USDT*", value: "USDT0", expected: true },
+      { pattern: "USDT*", value: "USDT", expected: true },
       // Only ! (negation)
       { pattern: "!USDC", value: "USDC", expected: false },
       { pattern: "!USDC", value: "USDT", expected: true },

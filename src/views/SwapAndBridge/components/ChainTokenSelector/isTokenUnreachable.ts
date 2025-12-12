@@ -20,6 +20,12 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
   },
+  {
+    fromChainId: "*",
+    fromSymbol: ["USDT*"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDH-SPOT"],
+  },
   // only allow bridegable output to SOlana
   {
     fromChainId: "*",
