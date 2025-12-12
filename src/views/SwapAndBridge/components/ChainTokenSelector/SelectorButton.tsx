@@ -111,7 +111,7 @@ export default function SelectorButton({
 
 const Wrapper = styled.button`
   --height: 48px;
-  --padding: 8px;
+  --padding: 6px;
   height: var(--height);
   position: relative;
   display: flex;
@@ -186,15 +186,15 @@ const TokenStack = styled.div`
   padding-inline: var(--padding);
   position: relative;
   flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const TokenImg = styled(TokenImage)`
   border-radius: 50%;
-  position: absolute;
-  top: var(--padding);
-  left: var(--padding);
-  width: calc(var(--height) * 0.66);
-  height: calc(var(--height) * 0.66);
+  width: 32px;
+  height: 32px;
   z-index: 1;
 `;
 
@@ -202,11 +202,11 @@ const ChainImg = styled(TokenImage)`
   border-radius: 50%;
   border: 1px solid transparent;
   background: ${COLORS["grey-600"]};
+  width: 14px;
+  height: 14px;
   position: absolute;
-  bottom: calc(var(--padding) / 2);
-  right: calc(var(--padding) / 2);
-  width: 30%;
-  height: 30%;
+  bottom: 4px;
+  left: 34px;
   z-index: 2;
 `;
 
