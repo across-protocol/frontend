@@ -14,6 +14,10 @@ import {
   getCctpTokenMessengerAddress,
 } from "../../cctp/utils/constants";
 
+// https://explorer.solana.com/address/BbcsRrKAuPCg7nAze9hRaBwvYus1aWS2HPhxCKZajhhZ
+export const SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS =
+  "BbcsRrKAuPCg7nAze9hRaBwvYus1aWS2HPhxCKZajhhZ";
+
 export async function getDepositAccounts(params: {
   originChainId: number;
   depositor: string;
