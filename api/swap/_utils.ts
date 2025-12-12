@@ -53,7 +53,6 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
-import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
