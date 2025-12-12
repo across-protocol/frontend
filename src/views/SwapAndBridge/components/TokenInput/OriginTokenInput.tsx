@@ -1,7 +1,4 @@
 import { useEffect, useRef } from "react";
-import { formatUnits } from "ethers/lib/utils";
-import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
@@ -12,13 +9,12 @@ import {
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
-  UnitToggleButton,
-  UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
+import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -82,15 +78,6 @@ export const OriginTokenInput = ({
     }
   }, [inputDisabled]);
 
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, originToken?.decimals)} ${originToken?.symbol}`;
-  })();
-
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
@@ -113,12 +100,12 @@ export const OriginTokenInput = ({
             error={insufficientBalance}
           />
         </TokenAmountInputWrapper>
-        <UnitToggleButtonWrapper>
-          <UnitToggleButton onClick={toggleUnit}>
-            <ArrowsCross width={16} height={16} />{" "}
-            <span>{formattedConvertedAmount}</span>
-          </UnitToggleButton>
-        </UnitToggleButtonWrapper>
+        <ToggleUnitButton
+          onClick={toggleUnit}
+          unit={unit}
+          token={originToken}
+          convertedAmount={convertedAmount}
+        />
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton

@@ -33,6 +33,8 @@ import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 import { isTokenUnreachable } from "./isTokenUnreachable";
+import { useTrackChainSelected } from "./useTrackChainSelected";
+import { useTrackTokenSelected } from "./useTrackTokenSelected";
 
 const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
@@ -106,6 +108,9 @@ export function ChainTokenSelectorModal({
 
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
+
+  const trackChainSelected = useTrackChainSelected();
+  const trackTokenSelected = useTrackTokenSelected();
 
   // Reset mobile step when modal opens/closes
   useEffect(() => {
@@ -300,10 +305,14 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
         setSelectedChain(chainId);
         setMobileStep("token");
       }}
-      onTokenSelect={onSelect}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   ) : (
@@ -318,8 +327,14 @@ export function ChainTokenSelectorModal({
       setTokenSearch={setTokenSearch}
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
-      onChainSelect={setSelectedChain}
-      onTokenSelect={onSelect}
+      onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
+        setSelectedChain(chainId);
+      }}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   );

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS, withOpacity } from "utils";
+import { COLORS } from "utils";
 
 export const TokenInputWrapper = styled.div`
   display: flex;
@@ -110,38 +110,5 @@ export const TokenAmountInput = styled.input<{
   &::placeholder {
     color: var(--base-bright-gray, #e0f3ff);
     opacity: 0.5;
-  }
-`;
-
-export const UnitToggleButtonWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  align-items: center;
-`;
-
-export const UnitToggleButton = styled.button`
-  color: ${withOpacity("#e0f3ff", 0.5)};
-
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  overflow: hidden;
-
-  &:hover:not(:disabled) {
-    svg {
-      color: #e0f3ff;
-    }
-  }
-
-  span {
-    color: inherit;
-    overflow: hidden;
-    white-space: nowrap;
-    min-width: 0;
-    text-overflow: ellipsis;
-  }
-
-  svg {
-    color: inherit;
   }
 `;
