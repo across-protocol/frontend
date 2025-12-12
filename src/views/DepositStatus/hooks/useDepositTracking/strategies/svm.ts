@@ -21,13 +21,12 @@ import {
   isBigNumberish,
   uint8ArrayToBigNumber,
   getDepositBySignatureSVM,
-  formatWeiPct,
 } from "utils";
 import { isSignature } from "@solana/kit";
 import { FromBridgePagePayload } from "../../../types";
 import { Deposit } from "hooks/useDeposits";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import { SvmSpokeClient } from "@across-protocol/contracts";
 import { hexlify } from "ethers/lib/utils";
 import { isHex } from "viem";
@@ -247,7 +246,7 @@ export class SVMStrategy implements IChainStrategy {
     fromBridgePagePayload: FromBridgePagePayload
   ): Deposit {
     const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics, quote } =
+    const { selectedRoute, depositArgs, quoteForAnalytics } =
       fromBridgePagePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       depositInfo.depositLog;
@@ -263,9 +262,6 @@ export class SVMStrategy implements IChainStrategy {
       selectedRoute.fromChain,
       selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
     );
-
-    const formatTokenAmount = (wei: ethers.BigNumber) =>
-      ethers.utils.formatUnits(wei, inputToken?.decimals ?? 18);
 
     return {
       depositId: depositId.toString(),
@@ -292,17 +288,16 @@ export class SVMStrategy implements IChainStrategy {
       feeBreakdown: {
         lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
         lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: formatTokenAmount(quote.lpFee.total),
+        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
         relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
         relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: formatTokenAmount(quote.relayerCapitalFee.total),
+        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
         relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
         relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: formatTokenAmount(quote.relayerGasFee.total),
-        totalBridgeFeeUsd: quoteForAnalytics.relayFeeTotalUsd,
-        totalBridgeFeePct:
-          formatWeiPct(quote.totalRelayFee.pct)?.toString() || "0",
-        totalBridgeFeeAmount: formatTokenAmount(quote.totalRelayFee.total),
+        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
       },
       token: inputToken,
       outputToken,
@@ -322,8 +317,7 @@ export class SVMStrategy implements IChainStrategy {
     bridgePayload: FromBridgePagePayload
   ): Deposit {
     const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics, quote } =
-      bridgePayload;
+    const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
     const { depositId, depositor, recipient, message, inputAmount } =
       fillInfo.depositInfo.depositLog;
     const inputToken = config.getTokenInfoBySymbolSafe(
@@ -338,9 +332,6 @@ export class SVMStrategy implements IChainStrategy {
       selectedRoute.fromChain,
       selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
     );
-
-    const formatTokenAmount = (wei: ethers.BigNumber) =>
-      ethers.utils.formatUnits(wei, inputToken?.decimals ?? 18);
 
     return {
       depositId: depositId.toString(),
@@ -367,17 +358,16 @@ export class SVMStrategy implements IChainStrategy {
       feeBreakdown: {
         lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
         lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: formatTokenAmount(quote.lpFee.total),
+        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
         relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
         relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: formatTokenAmount(quote.relayerCapitalFee.total),
+        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
         relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
         relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: formatTokenAmount(quote.relayerGasFee.total),
-        totalBridgeFeeUsd: quoteForAnalytics.relayFeeTotalUsd,
-        totalBridgeFeePct:
-          formatWeiPct(quote.totalRelayFee.pct)?.toString() || "0",
-        totalBridgeFeeAmount: formatTokenAmount(quote.totalRelayFee.total),
+        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
+        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
+        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
+        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
       },
       token: inputToken,
       outputToken,

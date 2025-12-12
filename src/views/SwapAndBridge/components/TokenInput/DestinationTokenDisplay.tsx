@@ -1,8 +1,4 @@
-import { formatUnits } from "ethers/lib/utils";
-import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
-import { UnitType, useTokenInput, useAmplitude } from "hooks";
-import { ampli } from "ampli";
+import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
@@ -13,11 +9,10 @@ import {
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
-  UnitToggleButton,
-  UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
+import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: BigNumber | undefined;
@@ -38,7 +33,6 @@ export const DestinationTokenDisplay = ({
     setOriginToken,
     setDestinationToken,
   } = useQuoteRequestContext();
-  const { addToAmpliQueue } = useAmplitude();
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
@@ -65,15 +59,6 @@ export const DestinationTokenDisplay = ({
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, destinationToken?.decimals)} ${destinationToken?.symbol}`;
-  })();
-
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
@@ -97,24 +82,12 @@ export const DestinationTokenDisplay = ({
             error={false}
           />
         </TokenAmountInputWrapper>
-        <UnitToggleButtonWrapper>
-          <UnitToggleButton
-            onClick={() => {
-              addToAmpliQueue(() => {
-                ampli.changeUnitsButtonClicked({
-                  action: "onClick",
-                  element: "changeUnitsButton",
-                  page: "bridgePage",
-                  section: "bridgeForm",
-                });
-              });
-              toggleUnit();
-            }}
-          >
-            <ArrowsCross width={16} height={16} />{" "}
-            <span>{formattedConvertedAmount}</span>
-          </UnitToggleButton>
-        </UnitToggleButtonWrapper>
+        <ToggleUnitButton
+          onClick={toggleUnit}
+          unit={unit}
+          token={destinationToken}
+          convertedAmount={convertedAmount}
+        />
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton

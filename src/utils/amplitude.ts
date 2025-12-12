@@ -6,17 +6,9 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
   MaxTokenAmountClickedProperties,
-  TransferQuoteReceivedProperties,
 } from "ampli";
-import {
-  ChainId,
-  ChainInfo,
-  fixedPointAdjustment,
-  getChainInfo,
-  getToken,
-} from "./constants";
-import { ConvertDecimals } from "./convertdecimals";
-import { convertToCapitalCase, formatWeiPct } from "./format";
+import { ChainId, getChainInfo, getToken } from "./constants";
+import { convertToCapitalCase } from "./format";
 import { getConfig } from "./config";
 import { categorizeNumberInRange } from "./math";
 import { range } from "lodash";
@@ -51,8 +43,6 @@ export const pageLookup: Record<
       {}
     ),
 };
-
-export type ExternalProjectId = "hyper-liquid";
 
 export function getPageValue() {
   // Resolve the sanitized pathname
@@ -113,12 +103,6 @@ export function trackWalletConnectTransactionCompleted(
     walletAddress: connectedWallet,
     walletType,
   });
-}
-
-export function externalProjectNameToId(
-  projectName?: string
-): ExternalProjectId | undefined {
-  return projectName === "hyperliquid" ? "hyper-liquid" : undefined;
 }
 
 export function trackDisconnectWalletButtonClicked(
@@ -194,6 +178,8 @@ export function trackMaxButtonClicked(
   });
 }
 
+// generate transfer confirmed quote
+
 export function reportTokenBalance(
   chainId: ChainId,
   balance: BigNumber,
@@ -230,116 +216,4 @@ export function reportTotalWalletUsdBalance(totalBalance: number) {
     totalBalanceStringRange
   );
   ampli.client?.identify(identifyObj);
-}
-
-// Generate transfer quote from swap approval API response
-export function generateTransferQuoteFromSwapQuote(
-  swapQuote: any,
-  fromChainInfo: ChainInfo,
-  toChainInfo: ChainInfo,
-  tokenPrice: BigNumber,
-  account?: string,
-  recipient?: string
-): TransferQuoteReceivedProperties {
-  const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
-  const usdEquivalent = (wei: BigNumber, decimals: number) =>
-    tokenPrice
-      .mul(ConvertDecimals(decimals, 18)(wei ?? BigNumber.from(0)))
-      .div(fixedPointAdjustment);
-  const usdEquivalentString = (wei: BigNumber, decimals: number) =>
-    utils.formatEther(usdEquivalent(wei, decimals)).replaceAll(",", "");
-
-  const bridgeTokenDecimals = swapQuote.steps.bridge.tokenIn.decimals;
-  const bridgeFees = swapQuote.steps.bridge.fees;
-  const totalBridgeFee = bridgeFees.amount;
-  const acrossFees = bridgeFees.details;
-
-  const lpFee = acrossFees?.lp.amount || BigNumber.from(0);
-  const capitalFee = acrossFees?.relayerCapital.amount || BigNumber.from(0);
-  const gasFee = acrossFees?.destinationGas.amount || BigNumber.from(0);
-
-  const originSwapFee = swapQuote.steps.originSwap
-    ? swapQuote.steps.originSwap.inputAmount.sub(
-        swapQuote.steps.originSwap.outputAmount
-      )
-    : BigNumber.from(0);
-
-  const destinationSwapFee = swapQuote.steps.destinationSwap
-    ? swapQuote.steps.destinationSwap.inputAmount.sub(
-        swapQuote.steps.destinationSwap.outputAmount
-      )
-    : BigNumber.from(0);
-
-  return {
-    capitalFeePct: acrossFees
-      ? formatWeiEtherPct(acrossFees.relayerCapital.pct)
-      : "0",
-    capitalFeeTotalUsd: usdEquivalentString(capitalFee, bridgeTokenDecimals),
-    destinationSwapFeePct: swapQuote.steps.destinationSwap
-      ? formatWeiEtherPct(
-          destinationSwapFee
-            .mul(fixedPointAdjustment)
-            .div(swapQuote.steps.destinationSwap.inputAmount)
-        )
-      : "0",
-    ...(swapQuote.steps.destinationSwap && {
-      destinationSwapFeeUsd: usdEquivalentString(
-        destinationSwapFee,
-        bridgeTokenDecimals
-      ),
-    }),
-    expectedFillTimeInSec: swapQuote.expectedFillTime.toString(),
-    expectedFillTimeInSecLowerBound: swapQuote.expectedFillTime.toString(),
-    expectedFillTimeInSecUpperBound: swapQuote.expectedFillTime.toString(),
-    fromAmount: utils.formatUnits(
-      swapQuote.inputAmount,
-      swapQuote.inputToken.chainId === swapQuote.inputToken.chainId
-        ? bridgeTokenDecimals
-        : 18
-    ),
-    fromAmountUsd: usdEquivalentString(
-      swapQuote.inputAmount,
-      bridgeTokenDecimals
-    ),
-    fromChainId: swapQuote.inputToken.chainId.toString(),
-    fromChainName: fromChainInfo.name,
-    fromTokenAddress: swapQuote.inputToken.address,
-    fromTokenSymbol: swapQuote.inputToken.symbol,
-    isSenderEqRecipient: account && recipient ? recipient === account : false,
-    lpFeePct: acrossFees ? formatWeiEtherPct(acrossFees.lp.pct) : "0",
-    lpFeeTotalUsd: usdEquivalentString(lpFee, bridgeTokenDecimals),
-    ...(swapQuote.steps.originSwap && {
-      originSwapFeePct: formatWeiEtherPct(
-        originSwapFee
-          .mul(fixedPointAdjustment)
-          .div(swapQuote.steps.originSwap.inputAmount)
-      ),
-      originSwapFeeUsd: usdEquivalentString(originSwapFee, bridgeTokenDecimals),
-    }),
-    quoteLatencyMilliseconds: "0",
-    quoteTimestamp: String(Date.now()),
-    recipient: recipient || "not connected",
-    relayFeePct: formatWeiEtherPct(bridgeFees.pct),
-    relayFeeTotalUsd: usdEquivalentString(totalBridgeFee, bridgeTokenDecimals),
-    relayGasFeePct: acrossFees
-      ? formatWeiEtherPct(acrossFees.destinationGas.pct)
-      : "0",
-    relayGasFeeTotalUsd: usdEquivalentString(gasFee, bridgeTokenDecimals),
-    routeChainIdFromTo: `${fromChainInfo.chainId}-${toChainInfo.chainId}`,
-    routeChainNameFromTo: `${fromChainInfo.name}-${toChainInfo.name}`,
-    sender: account || "not connected",
-    toAmount: utils.formatUnits(
-      swapQuote.expectedOutputAmount,
-      bridgeTokenDecimals
-    ),
-    toAmountUsd: usdEquivalentString(
-      swapQuote.expectedOutputAmount,
-      bridgeTokenDecimals
-    ),
-    toChainId: swapQuote.outputToken.chainId.toString(),
-    toChainName: toChainInfo.name,
-    toTokenAddress: swapQuote.outputToken.address,
-    toTokenSymbol: swapQuote.outputToken.symbol,
-    transferQuoteBlockNumber: "0",
-  };
 }
