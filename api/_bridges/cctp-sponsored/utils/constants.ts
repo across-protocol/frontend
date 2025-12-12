@@ -1,4 +1,5 @@
 import { getDeployedAddress } from "@across-protocol/contracts";
+import * as sdk from "@across-protocol/sdk";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../_constants";
 import { CCTP_SUPPORTED_CHAINS } from "../../cctp/utils/constants";
@@ -27,7 +28,9 @@ export function getSponsoredCctpSrcPeripheryAddress(
   }
 
   const address = getDeployedAddress(
-    "SponsoredCCTPSrcPeriphery",
+    sdk.utils.chainIsSvm(chainId)
+      ? "SponsoredCctpSrcPeriphery"
+      : "SponsoredCCTPSrcPeriphery",
     chainId,
     throwIfNotFound
   );

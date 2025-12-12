@@ -53,7 +53,6 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
-import { isToHyperCore } from "../_bridges/cctp/utils/hypercore";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
@@ -191,24 +190,19 @@ export async function handleBaseSwapQueryParams(
       destinationChainId
     );
 
-    // Allows USDH output from SVM
-    const isToUsdh = !![
+    // Allows whitelisted output tokens with origin SVM
+    const isToWhitelistedOutputToken = !![
       TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
       TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+      TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
+      TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
     ]
       .filter(Boolean)
       .find(
         (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
       );
 
-    // HyperCore uses special system addresses (0x20...) that aren't in standard enabled routes
-    // Allow HyperCore as destination if output token is USDC on HyperCore
-    const isHyperCoreUsdcDestination =
-      isToHyperCore(destinationChainId) &&
-      outputTokenAddress.toLowerCase() ===
-        TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId]?.toLowerCase();
-
-    if (!outputBridgeable && !isToUsdh && !isHyperCoreUsdcDestination) {
+    if (!outputBridgeable && !isToWhitelistedOutputToken) {
       throw new InvalidParamError({
         param: "outputToken",
         message:

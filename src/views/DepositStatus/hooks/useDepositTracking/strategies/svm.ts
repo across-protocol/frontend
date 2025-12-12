@@ -52,16 +52,15 @@ export class SVMStrategy implements IChainStrategy {
         throw new Error(`Invalid signature: ${txSignature}`);
       }
 
-      const tx =
-        bridgeProvider === "cctp"
-          ? await getDepositForBurnBySignatureSVM({
-              signature: txSignature,
-              chainId: this.chainId,
-            })
-          : await getDepositBySignatureSVM({
-              signature: txSignature,
-              chainId: this.chainId,
-            });
+      const tx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+        ? await getDepositForBurnBySignatureSVM({
+            signature: txSignature,
+            chainId: this.chainId,
+          })
+        : await getDepositBySignatureSVM({
+            signature: txSignature,
+            chainId: this.chainId,
+          });
 
       if (!tx) {
         return {
