@@ -137,6 +137,11 @@ export async function getQuoteForExactInput(
 
   let outputAmount: BigNumber;
   let provider: "sponsored-cctp" | "cctp" = "sponsored-cctp";
+  let fees: {
+    amount: BigNumber;
+    token: Token;
+    pct: BigNumber;
+  } = getZeroBridgeFees(inputToken);
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
@@ -148,7 +153,10 @@ export async function getQuoteForExactInput(
     const isSwapPair =
       inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
     const {
-      bridgeQuote: { outputAmount: unsponsoredOutputAmount },
+      bridgeQuote: {
+        outputAmount: unsponsoredOutputAmount,
+        fees: unsponsoredFees,
+      },
     } = await getCctpBridgeStrategy({
       // For unsponsored flows routed via our sponsorship periphery contract, we
       // don't need to account for the forward fee.
@@ -168,6 +176,7 @@ export async function getQuoteForExactInput(
     });
     outputAmount = unsponsoredOutputAmount;
     provider = "cctp";
+    fees = unsponsoredFees;
   }
 
   return {
@@ -182,7 +191,7 @@ export async function getQuoteForExactInput(
         CCTP_TRANSFER_MODE
       ),
       provider,
-      fees: getZeroBridgeFees(inputToken),
+      fees,
     },
   };
 }
@@ -196,6 +205,11 @@ export async function getQuoteForOutput(
 
   let inputAmount: BigNumber;
   let provider: "sponsored-cctp" | "cctp" = "sponsored-cctp";
+  let fees: {
+    amount: BigNumber;
+    token: Token;
+    pct: BigNumber;
+  } = getZeroBridgeFees(inputToken);
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
@@ -207,7 +221,10 @@ export async function getQuoteForOutput(
     const isSwapPair =
       inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
     const {
-      bridgeQuote: { inputAmount: unsponsoredInputAmount },
+      bridgeQuote: {
+        inputAmount: unsponsoredInputAmount,
+        fees: unsponsoredFees,
+      },
     } = await getCctpBridgeStrategy({
       // For unsponsored flows routed via our sponsorship periphery contract, we
       // don't need to account for the forward fee.
@@ -227,6 +244,7 @@ export async function getQuoteForOutput(
     });
     inputAmount = unsponsoredInputAmount;
     provider = "cctp";
+    fees = unsponsoredFees;
   }
 
   return {
@@ -241,7 +259,7 @@ export async function getQuoteForOutput(
         CCTP_TRANSFER_MODE
       ),
       provider,
-      fees: getZeroBridgeFees(inputToken),
+      fees,
     },
   };
 }
