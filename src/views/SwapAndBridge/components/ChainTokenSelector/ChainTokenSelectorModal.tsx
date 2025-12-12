@@ -19,9 +19,7 @@ import {
   QUERIES,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAmplitude } from "hooks/useAmplitude";
-import { ampli } from "ampli";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { ReactComponent as SearchResults } from "assets/icons/search_results.svg";
@@ -35,6 +33,8 @@ import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
 import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 import { isTokenUnreachable } from "./isTokenUnreachable";
+import { useTrackChainSelected } from "./useTrackChainSelected";
+import { useTrackTokenSelected } from "./useTrackTokenSelected";
 
 const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
@@ -100,7 +100,6 @@ export function ChainTokenSelectorModal({
 }: Props) {
   const crossChainRoutes = useEnrichedCrosschainBalances();
   const { isMobile } = useCurrentBreakpoint();
-  const { addToAmpliQueue } = useAmplitude();
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
     currentToken?.chainId ?? popularChains[0]
@@ -110,50 +109,9 @@ export function ChainTokenSelectorModal({
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
 
-  const trackChainSelected = useCallback(
-    (chainId: number | null) => {
-      if (chainId === null) return;
-      addToAmpliQueue(() => {
-        if (isOriginToken) {
-          ampli.originChainSelected({
-            action: "onClick",
-            chainId: String(chainId),
-          });
-        } else {
-          ampli.destinationChainSelected({
-            action: "onClick",
-            chainId: String(chainId),
-          });
-        }
-      });
-    },
-    [addToAmpliQueue, isOriginToken]
-  );
+  const trackChainSelected = useTrackChainSelected();
+  const trackTokenSelected = useTrackTokenSelected();
 
-  const trackTokenSelected = useCallback(
-    (token: EnrichedToken) => {
-      addToAmpliQueue(() => {
-        if (isOriginToken) {
-          ampli.originTokenSelected({
-            action: "onClick",
-            default: false,
-            tokenAddress: token.address,
-            tokenChainId: String(token.chainId),
-            tokenSymbol: token.symbol,
-          });
-        } else {
-          ampli.destinationTokenSelected({
-            action: "onClick",
-            default: false,
-            tokenAddress: token.address,
-            tokenChainId: String(token.chainId),
-            tokenSymbol: token.symbol,
-          });
-        }
-      });
-    },
-    [addToAmpliQueue, isOriginToken]
-  );
   // Reset mobile step when modal opens/closes
   useEffect(() => {
     setMobileStep("chain");
@@ -347,12 +305,12 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
-        trackChainSelected(chainId);
+        trackChainSelected(chainId, isOriginToken);
         setSelectedChain(chainId);
         setMobileStep("token");
       }}
       onTokenSelect={(token) => {
-        trackTokenSelected(token);
+        trackTokenSelected(token, isOriginToken);
         onSelect(token);
       }}
       onSelectOtherToken={onSelectOtherToken}
@@ -370,11 +328,11 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
-        trackChainSelected(chainId);
+        trackChainSelected(chainId, isOriginToken);
         setSelectedChain(chainId);
       }}
       onTokenSelect={(token) => {
-        trackTokenSelected(token);
+        trackTokenSelected(token, isOriginToken);
         onSelect(token);
       }}
       onSelectOtherToken={onSelectOtherToken}
