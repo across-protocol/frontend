@@ -22,12 +22,6 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
   },
   {
     fromChainId: "*",
-    fromSymbol: ["USDC"],
-    toChainId: [CHAIN_IDs.HYPERCORE],
-    toSymbol: ["USDT-SPOT"],
-  },
-  {
-    fromChainId: "*",
     fromSymbol: ["USDT*"],
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
