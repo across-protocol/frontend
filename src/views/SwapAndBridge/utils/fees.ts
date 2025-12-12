@@ -20,7 +20,9 @@ export function formatFeeUsd(value: string): string {
 
 export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
   // show fees as 0 for OFT until we have designs to show fees in native tokens
-  const showZeroFee = swapQuote?.steps?.bridge?.provider === "oft";
+  const showZeroFee = ["oft", "sponsored-oft"].includes(
+    swapQuote?.steps?.bridge?.provider || ""
+  );
 
   // show swap impact only if swaps involved
   const showSwapImpact =

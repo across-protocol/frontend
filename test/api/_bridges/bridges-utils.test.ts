@@ -81,6 +81,7 @@ const wethArbitrum = createToken("WETH", CHAIN_IDs.ARBITRUM);
 describe("#getBridgeStrategyData()", () => {
   const baseParams = {
     depositor: "0x1234567890123456789012345678901234567890",
+    recipient: "0x1234567890123456789012345678901234567890",
     amountType: "exactInput" as const,
   };
 
