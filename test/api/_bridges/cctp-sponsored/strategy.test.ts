@@ -354,7 +354,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
   });
 
   describe("#getQuoteForExactInput()", () => {
-    test("should return correct bridge quote with converted decimals", async () => {
+    test("should return correct bridge quote with converted decimals - eligible for sponsorship", async () => {
       const exactInputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
 
       const result = await getQuoteForExactInput({
@@ -362,6 +362,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         outputToken: hyperCoreUSDC,
         exactInputAmount,
         recipient: TEST_WALLET.address,
+        isEligibleForSponsorship: true,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
@@ -383,13 +384,14 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           outputToken: baseWETH,
           exactInputAmount: utils.parseUnits("1", arbitrumUSDC.decimals),
           recipient: TEST_WALLET.address,
+          isEligibleForSponsorship: true,
         })
       ).rejects.toThrow();
     });
   });
 
   describe("#getQuoteForOutput()", () => {
-    test("should return correct bridge quote with converted decimals", async () => {
+    test("should return correct bridge quote with converted decimals - eligible for sponsorship", async () => {
       const minOutputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
 
       const result = await getQuoteForOutput({
@@ -397,6 +399,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         outputToken: hyperCoreUSDC,
         minOutputAmount,
         recipient: TEST_WALLET.address,
+        isEligibleForSponsorship: true,
       });
 
       expect(result.bridgeQuote.inputToken).toEqual(arbitrumUSDC);
@@ -416,6 +419,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           outputToken: baseWETH,
           minOutputAmount: utils.parseUnits("1", baseWETH.decimals),
           recipient: TEST_WALLET.address,
+          isEligibleForSponsorship: true,
         })
       ).rejects.toThrow();
     });

@@ -35,7 +35,11 @@ import {
   CCTP_TRANSFER_MODE,
   getSponsoredCctpSrcPeripheryAddress,
 } from "./utils/constants";
-import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
+import {
+  getNormalizedSpotTokenSymbol,
+  simulateMarketOrder,
+  SPOT_TOKEN_DECIMALS,
+} from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
   SWAP_CALLDATA_MARKER,
@@ -50,6 +54,7 @@ import {
 } from "./utils/svm";
 import { getSVMRpc } from "../../_providers";
 import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibility";
+import { TOKEN_SYMBOLS_MAP } from "../../_constants";
 
 const name = "sponsored-cctp" as const;
 
@@ -91,21 +96,9 @@ export function getSponsoredCctpBridgeStrategy(
       return "0x";
     },
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
-      isEligibleForSponsorship
-        ? getQuoteForExactInput(params)
-        : getCctpBridgeStrategy({
-            // For unsponsored flows routed via our sponsorship periphery contract, we
-            // don't need to account for the forward fee.
-            useForwardFee: false,
-          }).getQuoteForExactInput(params),
+      getQuoteForExactInput({ ...params, isEligibleForSponsorship }),
     getQuoteForOutput: (params: GetOutputBridgeQuoteParams) =>
-      isEligibleForSponsorship
-        ? getQuoteForOutput(params)
-        : getCctpBridgeStrategy({
-            // For unsponsored flows routed via our sponsorship periphery contract, we
-            // don't need to account for the forward fee.
-            useForwardFee: false,
-          }).getQuoteForOutput(params),
+      getQuoteForOutput({ ...params, isEligibleForSponsorship }),
     buildTxForAllowanceHolder: (params: {
       quotes: CrossSwapQuotes;
       integratorId?: string;
@@ -140,18 +133,56 @@ export function isRouteSupported(params: {
   );
 }
 
-export async function getQuoteForExactInput({
-  inputToken,
-  outputToken,
-  exactInputAmount,
-}: GetExactInputBridgeQuoteParams) {
+export async function getQuoteForExactInput(
+  params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+) {
+  const { inputToken, outputToken, exactInputAmount } = params;
+
   assertSupportedRoute({ inputToken, outputToken });
 
+  let outputAmount: BigNumber;
+  let provider: "sponsored-cctp" | "cctp" = "sponsored-cctp";
+  let fees: {
+    amount: BigNumber;
+    token: Token;
+    pct: BigNumber;
+  } = getZeroBridgeFees(inputToken);
+
   // We guarantee input amount == output amount for sponsored flows
-  const outputAmount = ConvertDecimals(
-    inputToken.decimals,
-    outputToken.decimals
-  )(exactInputAmount);
+  if (params.isEligibleForSponsorship) {
+    outputAmount = ConvertDecimals(
+      inputToken.decimals,
+      outputToken.decimals
+    )(exactInputAmount);
+  } else {
+    const isSwapPair =
+      inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
+    const {
+      bridgeQuote: {
+        outputAmount: unsponsoredOutputAmount,
+        fees: unsponsoredFees,
+      },
+    } = await getCctpBridgeStrategy({
+      // For unsponsored flows routed via our sponsorship periphery contract, we
+      // don't need to account for the forward fee.
+      useForwardFee: false,
+    }).getQuoteForExactInput({
+      ...params,
+      outputToken: isSwapPair
+        ? {
+            ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+            address:
+              TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
+                params.outputToken.chainId
+              ],
+            chainId: params.outputToken.chainId,
+          }
+        : params.outputToken,
+    });
+    outputAmount = unsponsoredOutputAmount;
+    provider = "cctp";
+    fees = unsponsoredFees;
+  }
 
   return {
     bridgeQuote: {
@@ -164,24 +195,62 @@ export async function getQuoteForExactInput({
         inputToken.chainId,
         CCTP_TRANSFER_MODE
       ),
-      provider: name,
-      fees: getZeroBridgeFees(inputToken),
+      provider,
+      fees,
     },
   };
 }
 
-export async function getQuoteForOutput({
-  inputToken,
-  outputToken,
-  minOutputAmount,
-}: GetOutputBridgeQuoteParams) {
+export async function getQuoteForOutput(
+  params: GetOutputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+) {
+  const { inputToken, outputToken, minOutputAmount } = params;
+
   assertSupportedRoute({ inputToken, outputToken });
 
+  let inputAmount: BigNumber;
+  let provider: "sponsored-cctp" | "cctp" = "sponsored-cctp";
+  let fees: {
+    amount: BigNumber;
+    token: Token;
+    pct: BigNumber;
+  } = getZeroBridgeFees(inputToken);
+
   // We guarantee input amount == output amount for sponsored flows
-  const inputAmount = ConvertDecimals(
-    outputToken.decimals,
-    inputToken.decimals
-  )(minOutputAmount);
+  if (params.isEligibleForSponsorship) {
+    inputAmount = ConvertDecimals(
+      outputToken.decimals,
+      inputToken.decimals
+    )(minOutputAmount);
+  } else {
+    const isSwapPair =
+      inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
+    const {
+      bridgeQuote: {
+        inputAmount: unsponsoredInputAmount,
+        fees: unsponsoredFees,
+      },
+    } = await getCctpBridgeStrategy({
+      // For unsponsored flows routed via our sponsorship periphery contract, we
+      // don't need to account for the forward fee.
+      useForwardFee: false,
+    }).getQuoteForOutput({
+      ...params,
+      outputToken: isSwapPair
+        ? {
+            ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+            address:
+              TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
+                params.outputToken.chainId
+              ],
+            chainId: params.outputToken.chainId,
+          }
+        : params.outputToken,
+    });
+    inputAmount = unsponsoredInputAmount;
+    provider = "cctp";
+    fees = unsponsoredFees;
+  }
 
   return {
     bridgeQuote: {
@@ -194,8 +263,8 @@ export async function getQuoteForOutput({
         inputToken.chainId,
         CCTP_TRANSFER_MODE
       ),
-      provider: name,
-      fees: getZeroBridgeFees(inputToken),
+      provider,
+      fees,
     },
   };
 }

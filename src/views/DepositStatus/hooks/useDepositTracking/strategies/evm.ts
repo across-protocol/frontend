@@ -23,7 +23,7 @@ import {
 } from "../types";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "../../../types";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
@@ -33,6 +33,7 @@ import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
+import { parseOutputAmountFromHyperCoreFlowLogs } from "utils/hypercore-executor";
 
 /**
  * Strategy for handling EVM chain operations
@@ -127,7 +128,6 @@ export class EVMStrategy implements IChainStrategy {
       const metadata = await this.getFillMetadata({
         fillTxHash,
         bridgeProvider,
-        depositedInfo: depositInfo,
       });
 
       return {
@@ -222,13 +222,12 @@ export class EVMStrategy implements IChainStrategy {
   async getFillMetadata(params: {
     fillTxHash: string;
     bridgeProvider: BridgeProvider;
-    depositedInfo: DepositedInfo;
   }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
-    const { fillTxHash, bridgeProvider, depositedInfo } = params;
+    const { fillTxHash, bridgeProvider } = params;
 
     try {
       const fillChainId = this.getFillChain();
@@ -243,10 +242,7 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser = this.getOutputAmountParser(
-        bridgeProvider,
-        depositedInfo
-      );
+      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -282,28 +278,33 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  private getOutputAmountParser(
-    bridgeProvider: BridgeProvider,
-    depositedInfo: DepositedInfo
-  ) {
-    // If the bridge provider is `sponsored-cctp`,`sponsored-oft` or `oft`, we assume
-    // input amount == output amount:
-    // - sponsored-cctp: input amount == output amount
-    // - sponsored-oft: input amount == output amount
-    // - oft: input amount == output amount because fees are paid in native token
-    if (["sponsored-cctp", "sponsored-oft", "oft"].includes(bridgeProvider)) {
-      return () => {
-        // TODO: Scale correctly
-        return depositedInfo.depositLog.inputAmount;
+  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
+    if (["sponsored-cctp", "cctp"].includes(bridgeProvider)) {
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
+        }
+
+        // if we didn't find anything, return cctp output amount
+        return parseOutputAmountFromMintAndWithdrawLog(logs);
       };
     }
 
-    if (bridgeProvider === "cctp") {
-      return parseOutputAmountFromMintAndWithdrawLog;
-    }
-
     if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
-      return parseOutputAmountFromOftReceivedLog;
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from oft received logs
+        const outputAmountFromOftReceivedLogs =
+          parseOutputAmountFromOftReceivedLog(logs);
+        if (outputAmountFromOftReceivedLogs) {
+          return outputAmountFromOftReceivedLogs;
+        }
+
+        // if we didn't find anything, return oft output amount
+        return parseOutputAmountFromOftReceivedLog(logs);
+      };
     }
 
     return parseFilledRelayLogOutputAmount;
