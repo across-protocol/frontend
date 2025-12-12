@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from "ethers";
+import { ConvertDecimals } from "./convertdecimals";
 
 /**
  * ABI for HyperCoreFlowExecutor events
@@ -296,7 +297,9 @@ export function parseOutputAmountFromHyperCoreFlowLogs(
   const swapFinalizedEvent = parseSwapFlowFinalizedLog(logs);
   if (swapFinalizedEvent) {
     // Output = totalSent (the amount sent to user on HyperCore)
-    return swapFinalizedEvent.totalSent;
+    // Need to convert from 8 decimals to 6 decimals because `totalSent` is in HyperCore
+    // decimals (8 decimals)
+    return ConvertDecimals(8, 6)(swapFinalizedEvent.totalSent);
   }
 
   return undefined;
