@@ -8,6 +8,7 @@ import { PersonalTransactions } from "./components/PersonalTransactions";
 import { DepositStatusFilter } from "./types";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
+import { AllTransactions } from "./components/AllTransactions";
 
 const statusFilterOptions: DepositStatusFilter[] = [
   "all",
@@ -17,35 +18,51 @@ const statusFilterOptions: DepositStatusFilter[] = [
 ];
 
 export function Transactions() {
-  const [activeTab, setActiveTab] = useState<"personal" | "all">("personal");
+  const [activeTab, setActiveTab] = useState<"personal" | "all">("all");
   const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>(
     statusFilterOptions[0]
   );
+  const NO_TAB_POC = true;
 
   return (
     <LayoutV2 maxWidth={1484}>
       <Wrapper>
-        <BreadcrumbV2 />
-        <FilterWrapper>
-          <TabWrapper>
-            <Tab
-              onClick={() => setActiveTab("personal")}
-              active={activeTab === "personal"}
-            >
-              Personal
-            </Tab>
-          </TabWrapper>
-          <FilterDropdown
-            filterLabel="Status"
-            filterOptions={statusFilterOptions}
-            selectedFilter={statusFilter}
-            onSelectFilter={(filter) =>
-              setStatusFilter(filter as DepositStatusFilter)
-            }
-          />
-        </FilterWrapper>
+        {activeTab !== "all" && <BreadcrumbV2 />}
+        {!NO_TAB_POC && (
+          <FilterWrapper>
+            (
+            <TabWrapper>
+              <Tab
+                onClick={() => setActiveTab("all")}
+                active={activeTab === "all"}
+              >
+                All
+              </Tab>
+              <Tab
+                onClick={() => setActiveTab("personal")}
+                active={activeTab === "personal"}
+              >
+                Personal
+              </Tab>
+            </TabWrapper>
+            )
+            {activeTab !== "all" && (
+              <FilterDropdown
+                filterLabel="Status"
+                filterOptions={statusFilterOptions}
+                selectedFilter={statusFilter}
+                onSelectFilter={(filter) =>
+                  setStatusFilter(filter as DepositStatusFilter)
+                }
+              />
+            )}
+          </FilterWrapper>
+        )}
         <BodyWrapper>
-          <PersonalTransactions statusFilter={statusFilter} />
+          {activeTab === "personal" && (
+            <PersonalTransactions statusFilter={statusFilter} />
+          )}
+          {activeTab === "all" && <AllTransactions />}
         </BodyWrapper>
       </Wrapper>
     </LayoutV2>

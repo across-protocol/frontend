@@ -100,6 +100,7 @@ const GenericRewardsProgram = ({
                 totalCount={depositsCount}
                 initialPageSize={pageSize}
                 disabledColumns={["actions", "bridgeFee"]}
+                hasNoResults={false}
               />
             </TableWrapper>
           )}
