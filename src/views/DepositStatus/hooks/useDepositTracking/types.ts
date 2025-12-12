@@ -7,7 +7,12 @@ import { BigNumber } from "ethers";
 import { Deposit } from "hooks/useDeposits";
 import { FromBridgePagePayload } from "../../types";
 
-export type BridgeProvider = "across" | "cctp" | "oft";
+export type BridgeProvider =
+  | "across"
+  | "cctp"
+  | "oft"
+  | "sponsored-cctp"
+  | "sponsored-oft";
 
 /**
  * Common types for deposit & fill information

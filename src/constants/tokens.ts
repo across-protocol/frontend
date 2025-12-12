@@ -123,4 +123,8 @@ export const orderedTokenLogos = {
   SOL: solLogo,
   USDH: usdhLogo,
   "USDH-SPOT": usdhLogo,
-} as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;
+  "USDC-SPOT": usdcLogo,
+  "USDT-SPOT": usdtLogo,
+} as const satisfies Partial<
+  Record<keyof typeof TOKEN_SYMBOLS_MAP | "USDC-SPOT", string>
+>;

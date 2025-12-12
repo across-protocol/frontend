@@ -1,5 +1,5 @@
 import { BigNumberish, utils } from "ethers";
-import { signMessageWithSponsor } from "./utils";
+import { signDigestWithSponsor } from "../../../_sponsorship-signature";
 
 /**
  * Represents the signed parameters of a sponsored OFT quote.
@@ -19,6 +19,25 @@ export interface SignedQuoteParams {
   finalToken: string;
   lzReceiveGasLimit: BigNumberish;
   lzComposeGasLimit: BigNumberish;
+  executionMode: number;
+  actionData: string;
+}
+
+/**
+ * Represents the unsigned parameters of a sponsored OFT quote.
+ * These parameters are not part of the signature but are still required for the deposit call.
+ */
+export interface UnsignedQuoteParams {
+  maxUserSlippageBps: BigNumberish;
+  refundRecipient: string;
+}
+
+/**
+ * Complete quote structure matching the contract's Quote struct
+ */
+export interface SponsoredOFTQuote {
+  signedParams: SignedQuoteParams;
+  unsignedParams: UnsignedQuoteParams;
 }
 
 /**
@@ -29,10 +48,11 @@ export interface SignedQuoteParams {
  * @returns A promise that resolves to an object containing the signature and the hash that was signed.
  * @see https://github.com/across-protocol/contracts/blob/7b37bbee4e8c71f2d3cffb28defe1c1e26583cb0/contracts/periphery/mintburn/sponsored-oft/QuoteSignLib.sol
  */
-export const createOftSignature = async (
+export const createOftSignature = (
   quote: SignedQuoteParams
-): Promise<{ signature: string; hash: string }> => {
+): { signature: string; hash: string } => {
   // ABI-encode all parameters and hash the result to create the digest to be signed.
+  // Note: actionData is hashed before encoding to match the contract's behavior
   const encodedData = utils.defaultAbiCoder.encode(
     [
       "uint32",
@@ -46,6 +66,8 @@ export const createOftSignature = async (
       "bytes32",
       "uint256",
       "uint256",
+      "uint8",
+      "bytes32",
     ],
     [
       quote.srcEid,
@@ -59,11 +81,13 @@ export const createOftSignature = async (
       quote.finalToken,
       quote.lzReceiveGasLimit,
       quote.lzComposeGasLimit,
+      quote.executionMode,
+      utils.keccak256(quote.actionData),
     ]
   );
 
   const hash = utils.keccak256(encodedData);
-  // The OFT contract expects an EIP-191 compliant signature, so we sign the prefixed hash of the digest.
-  const signature = await signMessageWithSponsor(utils.arrayify(hash));
+  // The OFT contract uses ECDSA.recover(digest, signature) which expects a signature over the raw digest.
+  const signature = signDigestWithSponsor(hash);
   return { signature, hash };
 };
