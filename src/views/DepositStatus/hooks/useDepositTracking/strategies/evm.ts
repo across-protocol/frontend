@@ -295,11 +295,11 @@ export class EVMStrategy implements IChainStrategy {
 
     if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
       return (logs: ethers.providers.Log[]) => {
-        // try to parse output amount from oft received logs
-        const outputAmountFromOftReceivedLogs =
-          parseOutputAmountFromOftReceivedLog(logs);
-        if (outputAmountFromOftReceivedLogs) {
-          return outputAmountFromOftReceivedLogs;
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
         }
 
         // if we didn't find anything, return oft output amount
