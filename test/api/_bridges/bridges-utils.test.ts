@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
@@ -9,15 +10,18 @@ import { LimitsResponse } from "../../../api/_types";
 import { getCachedLimits } from "../../../api/_utils";
 import { getTransferMode } from "../../../api/_bridges/cctp/utils/fill-times";
 
-jest.mock("../../../api/_utils", () => ({
-  ...jest.requireActual("../../../api/_utils"),
-  getCachedLimits: jest.fn(),
+vi.mock("../../../api/_utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getCachedLimits: vi.fn(),
 }));
 
-jest.mock("../../../api/_bridges/cctp/utils/fill-times", () => ({
-  ...jest.requireActual("../../../api/_bridges/cctp/utils/fill-times"),
-  getTransferMode: jest.fn(),
-}));
+vi.mock(
+  "../../../api/_bridges/cctp/utils/fill-times",
+  async (importOriginal) => ({
+    ...(await importOriginal()),
+    getTransferMode: vi.fn(),
+  })
+);
 
 // Helper function to create a token on a specific chain
 const createToken = (
@@ -86,8 +90,10 @@ describe("#getBridgeStrategyData()", () => {
 
   beforeEach(() => {
     // Reset and setup mock before each test
-    (getCachedLimits as jest.Mock).mockReset();
-    (getCachedLimits as jest.Mock).mockResolvedValue(mockLimitsResponse());
+    (getCachedLimits as ReturnType<typeof vi.fn>).mockReset();
+    (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockLimitsResponse()
+    );
   });
 
   describe("Utilization checks", () => {
@@ -218,7 +224,7 @@ describe("#getBridgeStrategyData()", () => {
         const limits = mockLimitsResponse({
           maxDepositInstant: "100000000", // 100 USDC
         });
-        (getCachedLimits as jest.Mock).mockResolvedValue(limits);
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(limits);
 
         const result = await getBridgeStrategyData({
           ...baseParams,
@@ -235,7 +241,7 @@ describe("#getBridgeStrategyData()", () => {
         const limits = mockLimitsResponse({
           maxDepositInstant: "100000000", // 100 USDC
         });
-        (getCachedLimits as jest.Mock).mockResolvedValue(limits);
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(limits);
 
         const result = await getBridgeStrategyData({
           ...baseParams,
@@ -257,7 +263,7 @@ describe("#getBridgeStrategyData()", () => {
             utilizedReserves: "500000000000", // 83.3% utilization
           },
         });
-        (getCachedLimits as jest.Mock).mockResolvedValue(limits);
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(limits);
 
         const result = await getBridgeStrategyData({
           ...baseParams,
@@ -277,7 +283,7 @@ describe("#getBridgeStrategyData()", () => {
             utilizedReserves: "100000000000", // 33.3% utilization
           },
         });
-        (getCachedLimits as jest.Mock).mockResolvedValue(limits);
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(limits);
 
         const result = await getBridgeStrategyData({
           ...baseParams,
@@ -385,13 +391,15 @@ describe("#getBridgeStrategyData()", () => {
       describe("Linea fast mode eligibility", () => {
         beforeEach(() => {
           // Reset getTransferMode mock before each test
-          (getTransferMode as jest.Mock).mockReset();
+          (getTransferMode as ReturnType<typeof vi.fn>).mockReset();
         });
 
         test("should mark Linea as Fast CCTP eligible when fast mode is available", async () => {
           const amount = BigNumber.from("15000000000"); // 15,000 USDC
           // Mock getTransferMode to return "fast" mode
-          (getTransferMode as jest.Mock).mockResolvedValue("fast");
+          (getTransferMode as ReturnType<typeof vi.fn>).mockResolvedValue(
+            "fast"
+          );
 
           const result = await getBridgeStrategyData({
             ...baseParams,
@@ -412,7 +420,9 @@ describe("#getBridgeStrategyData()", () => {
         test("should not mark Linea as Fast CCTP eligible when fast mode is unavailable", async () => {
           const amount = BigNumber.from("15000000000"); // 15,000 USDC
           // Mock getTransferMode to return "standard" mode (fast mode not available)
-          (getTransferMode as jest.Mock).mockResolvedValue("standard");
+          (getTransferMode as ReturnType<typeof vi.fn>).mockResolvedValue(
+            "standard"
+          );
 
           const result = await getBridgeStrategyData({
             ...baseParams,
@@ -484,7 +494,7 @@ describe("#getBridgeStrategyData()", () => {
         const limits = mockLimitsResponse({
           maxDepositInstant: "1000000", // Should match converted amount
         });
-        (getCachedLimits as jest.Mock).mockResolvedValue(limits);
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockResolvedValue(limits);
 
         const result = await getBridgeStrategyData({
           ...baseParams,
@@ -516,7 +526,7 @@ describe("#getBridgeStrategyData()", () => {
     describe("Error handling", () => {
       test("should return undefined when getCachedLimits throws error", async () => {
         const amount = BigNumber.from("1000000");
-        (getCachedLimits as jest.Mock).mockRejectedValue(
+        (getCachedLimits as ReturnType<typeof vi.fn>).mockRejectedValue(
           new Error("API error")
         );
 

@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
@@ -6,33 +7,33 @@ import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 
 // Mock only the SVM utilities we need
-jest.mock("@across-protocol/sdk", () => {
-  const actual = jest.requireActual("@across-protocol/sdk");
+vi.mock("@across-protocol/sdk", async (importOriginal) => {
+  const actual = await importOriginal<typeof sdk>();
   return {
     ...actual,
     arch: {
       ...actual.arch,
       svm: {
-        getAssociatedTokenAddress: jest.fn(),
+        getAssociatedTokenAddress: vi.fn(),
       },
     },
   };
 });
 
 // Mock CCTP utilities
-jest.mock("../../../../api/_bridges/cctp/utils/constants", () => ({
-  encodeDepositForBurn: jest.fn(
+vi.mock("../../../../api/_bridges/cctp/utils/constants", () => ({
+  encodeDepositForBurn: vi.fn(
     (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
   ),
 }));
 
-jest.mock("../../../../api/_integrator-id", () => ({
-  tagSwapApiMarker: jest.fn((data) => data),
+vi.mock("../../../../api/_integrator-id", () => ({
+  tagSwapApiMarker: vi.fn((data) => data),
 }));
 
 describe("CCTP Strategy - EVM to Solana mint recipient", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should derive recipient token account when destination is Solana", async () => {
@@ -41,9 +42,9 @@ describe("CCTP Strategy - EVM to Solana mint recipient", () => {
     const solanaTokenAccount = "5fE2vJ4f41PgDWyR2HFdKcYRuckFX8PwKH2kL7jPU6TC";
 
     // Mock the getAssociatedTokenAddress function to return the test token account
-    (sdk.arch.svm.getAssociatedTokenAddress as jest.Mock).mockResolvedValue(
-      solanaTokenAccount
-    );
+    (
+      sdk.arch.svm.getAssociatedTokenAddress as ReturnType<typeof vi.fn>
+    ).mockResolvedValue(solanaTokenAccount);
 
     const quotes: CrossSwapQuotes = {
       crossSwap: {

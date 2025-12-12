@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber, utils, constants } from "ethers";
 import { calculateSwapFees } from "../../../api/swap/_swap-fees";
 import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../api/_constants";
@@ -43,10 +44,10 @@ describe("calculateSwapFees", () => {
 
   // Mock logger
   const logger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
 
   const verifyFeeDetailsAddUp = (

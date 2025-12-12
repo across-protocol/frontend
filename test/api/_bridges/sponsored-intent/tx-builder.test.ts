@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { BigNumber } from "ethers";
 import {
   buildTxEvm,
@@ -8,31 +9,31 @@ import { getSVMRpc } from "../../../../api/_providers";
 import { CHAIN_IDs } from "../../../../api/_constants";
 import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 
-jest.mock("../../../../api/_spoke-pool");
-jest.mock("../../../../api/_providers");
+vi.mock("../../../../api/_spoke-pool");
+vi.mock("../../../../api/_providers");
 
-jest.mock("@across-protocol/sdk", () => {
-  const actual = jest.requireActual("@across-protocol/sdk");
+vi.mock("@across-protocol/sdk", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@across-protocol/sdk")>();
   return {
     ...actual,
     arch: {
       ...actual.arch,
       svm: {
-        getDepositDelegatePda: jest.fn(),
-        getStatePda: jest.fn(),
-        getEventAuthority: jest.fn(),
-        getAssociatedTokenAddress: jest.fn(),
-        createDepositInstruction: jest
+        getDepositDelegatePda: vi.fn(),
+        getStatePda: vi.fn(),
+        getEventAuthority: vi.fn(),
+        getAssociatedTokenAddress: vi.fn(),
+        createDepositInstruction: vi
           .fn()
           .mockResolvedValue({ instructions: [] }),
-        createDefaultTransaction: jest.fn().mockResolvedValue({}),
-        bigToU8a32: jest.fn(),
+        createDefaultTransaction: vi.fn().mockResolvedValue({}),
+        bigToU8a32: vi.fn(),
       },
     },
     utils: {
       ...actual.utils,
-      getCurrentTime: jest.fn().mockReturnValue(1000000),
-      toAddressType: jest.fn((addr) => ({
+      getCurrentTime: vi.fn().mockReturnValue(1000000),
+      toAddressType: vi.fn((addr) => ({
         toBytes32: () => "0xBytes32",
         toBase58: () => addr,
         forceSvmAddress: () => addr,
@@ -41,23 +42,23 @@ jest.mock("@across-protocol/sdk", () => {
   };
 });
 
-jest.mock("@solana-program/memo", () => ({
-  getAddMemoInstruction: jest.fn().mockReturnValue({}),
+vi.mock("@solana-program/memo", () => ({
+  getAddMemoInstruction: vi.fn().mockReturnValue({}),
 }));
-jest.mock("@solana/transaction-messages", () => ({
-  appendTransactionMessageInstruction: jest.fn().mockReturnValue({}),
+vi.mock("@solana/transaction-messages", () => ({
+  appendTransactionMessageInstruction: vi.fn().mockReturnValue({}),
 }));
-jest.mock("@solana/kit", () => ({
-  address: jest.fn().mockReturnValue("address"),
-  compileTransaction: jest.fn(),
-  createNoopSigner: jest.fn(),
-  getBase64EncodedWireTransaction: jest.fn().mockReturnValue("encodedTx"),
-  pipe: jest.fn((val) => val),
+vi.mock("@solana/kit", () => ({
+  address: vi.fn().mockReturnValue("address"),
+  compileTransaction: vi.fn(),
+  createNoopSigner: vi.fn(),
+  getBase64EncodedWireTransaction: vi.fn().mockReturnValue("encodedTx"),
+  pipe: vi.fn((val) => val),
 }));
 
 describe("Tx Builder", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("buildTxEvm", () => {
@@ -65,10 +66,10 @@ describe("Tx Builder", () => {
       const spokePoolMock = {
         address: "0xSpokePool",
         populateTransaction: {
-          deposit: jest.fn().mockResolvedValue({ data: "0xdeadbeef" }),
+          deposit: vi.fn().mockResolvedValue({ data: "0xdeadbeef" }),
         },
       };
-      (getSpokePool as jest.Mock).mockReturnValue(spokePoolMock);
+      (getSpokePool as ReturnType<typeof vi.fn>).mockReturnValue(spokePoolMock);
 
       const quotes = {
         crossSwap: {
@@ -107,7 +108,7 @@ describe("Tx Builder", () => {
 
   describe("buildTxSvm", () => {
     it("should build SVM transaction", async () => {
-      (getSVMRpc as jest.Mock).mockReturnValue({});
+      (getSVMRpc as ReturnType<typeof vi.fn>).mockReturnValue({});
 
       const quotes = {
         crossSwap: {

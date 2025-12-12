@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import * as sdk from "@across-protocol/sdk";
 import { BigNumber } from "ethers";
 
@@ -6,21 +7,21 @@ import { validateDepositMessage } from "../../api/_message";
 import { InvalidParamError } from "../../api/_errors";
 
 // Mock dependencies
-const mockIsContractCacheGet = jest.fn();
+const mockIsContractCacheGet = vi.fn();
 
-jest.mock("../../api/_cache", () => ({
-  buildInternalCacheKey: jest.fn(),
-  makeCacheGetterAndSetter: jest.fn(() => ({
+vi.mock("../../api/_cache", () => ({
+  buildInternalCacheKey: vi.fn(),
+  makeCacheGetterAndSetter: vi.fn(() => ({
     get: mockIsContractCacheGet,
   })),
 }));
 
-jest.mock("../../api/_providers", () => ({
-  getProvider: jest.fn(),
+vi.mock("../../api/_providers", () => ({
+  getProvider: vi.fn(),
 }));
 
-jest.mock("../../api/_balance", () => ({
-  getCachedTokenBalance: jest.fn(),
+vi.mock("../../api/_balance", () => ({
+  getCachedTokenBalance: vi.fn(),
 }));
 
 // Helper to create an encoded AcrossPlusMessage
@@ -60,7 +61,7 @@ describe("api/_message", () => {
   const TOKEN_ADDRESS = TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SOLANA];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("validateDepositMessage", () => {

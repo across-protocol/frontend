@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import {
   executeStrategies,
   selectBestCrossSwapQuote,
@@ -10,25 +11,25 @@ import {
 import { BigNumber } from "ethers";
 
 // format the following
-jest.mock("../../../api/_utils", () => ({
-  getBridgeQuoteForMinOutput: jest.fn(),
-  getRouteByInputTokenAndDestinationChain: jest.fn(),
-  getRouteByOutputTokenAndOriginChain: jest.fn(),
-  getRoutesByChainIds: jest.fn(),
-  getTokenByAddress: jest.fn(),
-  getBridgeQuoteForExactInput: jest.fn(),
-  addTimeoutToPromise: jest.fn((promise) => promise),
-  getRejectedReasons: jest.fn(),
-  getLogger: jest.fn(() => ({ debug: jest.fn() })),
+vi.mock("../../../api/_utils", () => ({
+  getBridgeQuoteForMinOutput: vi.fn(),
+  getRouteByInputTokenAndDestinationChain: vi.fn(),
+  getRouteByOutputTokenAndOriginChain: vi.fn(),
+  getRoutesByChainIds: vi.fn(),
+  getTokenByAddress: vi.fn(),
+  getBridgeQuoteForExactInput: vi.fn(),
+  addTimeoutToPromise: vi.fn((promise) => promise),
+  getRejectedReasons: vi.fn(),
+  getLogger: vi.fn(() => ({ debug: vi.fn() })),
 }));
 
-jest.mock("../../../api/_dexes/utils", () => ({
-  buildExactInputBridgeTokenMessage: jest.fn(),
-  buildExactOutputBridgeTokenMessage: jest.fn(),
-  buildMinOutputBridgeTokenMessage: jest.fn(),
-  getCrossSwapTypes: jest.fn(),
-  getPreferredBridgeTokens: jest.fn(),
-  getQuoteFetchStrategies: jest.fn(),
+vi.mock("../../../api/_dexes/utils", () => ({
+  buildExactInputBridgeTokenMessage: vi.fn(),
+  buildExactOutputBridgeTokenMessage: vi.fn(),
+  buildMinOutputBridgeTokenMessage: vi.fn(),
+  getCrossSwapTypes: vi.fn(),
+  getPreferredBridgeTokens: vi.fn(),
+  getQuoteFetchStrategies: vi.fn(),
   defaultQuoteFetchStrategies: {},
   AMOUNT_TYPE: {
     EXACT_INPUT: "exactInput",
@@ -41,17 +42,17 @@ jest.mock("../../../api/_dexes/utils", () => ({
     ANY_TO_BRIDGEABLE: "anyToBridgeable",
     ANY_TO_ANY: "anyToAny",
   },
-  buildDestinationSwapCrossChainMessage: jest.fn(),
-  assertMinOutputAmount: jest.fn(),
+  buildDestinationSwapCrossChainMessage: vi.fn(),
+  assertMinOutputAmount: vi.fn(),
 }));
 
-jest.mock("../../../api/_multicall-handler", () => ({
-  getMultiCallHandlerAddress: jest.fn(),
+vi.mock("../../../api/_multicall-handler", () => ({
+  getMultiCallHandlerAddress: vi.fn(),
 }));
 
 describe("#executeStrategies()", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("equal-speed mode", () => {

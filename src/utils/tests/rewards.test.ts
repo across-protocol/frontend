@@ -1,11 +1,10 @@
 import { BigNumber } from "ethers";
 import { parseEtherLike } from "utils/format";
+import { vi } from "vitest";
 
 import { getBaseRewardsApr } from "../rewards";
 
-// Enums break ts-jest
-// https://github.com/kulshekhar/ts-jest/issues/3397
-jest.mock("../providers.ts", () => ({
+vi.mock("../providers.ts", () => ({
   ChainId: {
     MAINNET: 1,
   },

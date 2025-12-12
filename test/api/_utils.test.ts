@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { constants } from "@across-protocol/sdk";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import {
@@ -15,9 +16,9 @@ const svmAddress = "9E8PWXZRJa7vBRvGZDmLxSJ4iAMmB4BS7FYUruHvnCPz";
 const evmAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 const junkAddress = "0xdeadbeef";
 
-jest.mock("../../api/_utils", () => ({
-  ...jest.requireActual("../../api/_utils"),
-  getChainInfo: jest.fn(),
+vi.mock("../../api/_utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getChainInfo: vi.fn(),
 }));
 
 describe("_utils", () => {
@@ -170,20 +171,6 @@ describe("_utils", () => {
       const zeroAddress = constants.ZERO_ADDRESS;
       const chainIdWithNoNativeToken = 99999; // A chain that doesn't exist
       const token = getTokenByAddress(zeroAddress, chainIdWithNoNativeToken);
-      expect(token).toBeUndefined();
-    });
-
-    it("should return undefined for a zero address if the native token is not in the token map", () => {
-      // This test mocks the CHAINS constant to simulate a chain with a native token that does not exist in the TOKEN_SYMBOLS_MAP.
-      jest.mock("../../api/_constants", () => ({
-        ...jest.requireActual("../../api/_constants"),
-        CHAINS: { 99999: { nativeToken: "DUMMY" } },
-      }));
-
-      const zeroAddress = constants.ZERO_ADDRESS;
-      const chainId = 99999;
-
-      const token = getTokenByAddress(zeroAddress, chainId);
       expect(token).toBeUndefined();
     });
 
