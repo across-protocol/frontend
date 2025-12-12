@@ -1,4 +1,5 @@
 import { BigNumber, ethers, utils } from "ethers";
+import solanaKit from "@solana/kit";
 import {
   buildEvmTxForAllowanceHolder,
   buildSvmTxForAllowanceHolder,
@@ -19,6 +20,7 @@ import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
 import * as cctpFees from "../../../../api/_bridges/cctp/utils/fees";
 import { getEnvs } from "../../../../api/_env";
 import * as sponsorshipEligibility from "../../../../api/_sponsorship-eligibility";
+import { SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS } from "../../../../api/_bridges/cctp-sponsored/utils/svm";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({
@@ -758,6 +760,11 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       jest
         .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
         .mockResolvedValue(true);
+      jest.spyOn(solanaKit, "fetchAddressesForLookupTables").mockResolvedValue({
+        [solanaKit.address(SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS)]: [
+          solanaKit.address(SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS),
+        ],
+      });
 
       const result = await buildSvmTxForAllowanceHolder({
         quotes,
