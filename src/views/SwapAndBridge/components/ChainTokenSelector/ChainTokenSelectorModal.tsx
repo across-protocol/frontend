@@ -39,7 +39,7 @@ const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 const popularChains = [
   CHAIN_IDs.MAINNET,
   CHAIN_IDs.BASE,
-  CHAIN_IDs.UNICHAIN,
+  CHAIN_IDs.HYPERCORE,
   CHAIN_IDs.ARBITRUM,
   CHAIN_IDs.SOLANA,
 ];
@@ -50,6 +50,8 @@ const popularTokens = [
   TOKEN_SYMBOLS_MAP.ETH.symbol,
   TOKEN_SYMBOLS_MAP.WETH.symbol,
   TOKEN_SYMBOLS_MAP.WBTC.symbol,
+  TOKEN_SYMBOLS_MAP.USDH.symbol,
+  TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
   "USDT0", // hardcoded symbol while we wait for support in @across-protocol/constants
 ];
 
