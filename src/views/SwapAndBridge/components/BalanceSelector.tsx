@@ -1,15 +1,14 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
 import {
   COLORS,
-  formatUnitsWithMaxFractions,
   compareAddressesSimple,
+  formatUnitsWithMaxFractions,
 } from "utils";
 import { useUserTokenBalances } from "hooks/useUserTokenBalances";
-import { useAmplitude } from "hooks/useAmplitude";
-import { ampli } from "ampli";
+import { useTrackBalanceSelectorClick } from "./useTrackBalanceSelectorClick";
 
 type BalanceSelectorProps = {
   token: {
@@ -22,6 +21,9 @@ type BalanceSelectorProps = {
   error?: boolean;
 };
 
+const percentages = ["25%", "50%", "75%", "MAX"] as const;
+export type BalanceSelectorPercentage = (typeof percentages)[number];
+
 export function BalanceSelector({
   token,
   setAmount,
@@ -30,7 +32,8 @@ export function BalanceSelector({
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
   const tokenBalances = useUserTokenBalances();
-  const { addToAmpliQueue } = useAmplitude();
+
+  const trackBalanceSelectorClick = useTrackBalanceSelectorClick();
 
   // Derive the balance from the latest token balances
   const balance = useMemo(() => {
@@ -55,16 +58,8 @@ export function BalanceSelector({
       : BigNumber.from(0);
   }, [tokenBalances.data, token.chainId, token.address]);
 
-  const percentages = ["25%", "50%", "75%", "MAX"];
-
-  const handlePillClick = (percentage: string) => {
-    const percentValue =
-      percentage === "MAX" ? "100" : percentage.replace("%", "");
-    addToAmpliQueue(() => {
-      ampli.inputAmountPercentClicked({
-        percent: percentValue as "25" | "50" | "75" | "100",
-      });
-    });
+  const handlePillClick = (percentage: BalanceSelectorPercentage) => {
+    trackBalanceSelectorClick(percentage);
 
     if (percentage === "MAX") {
       setAmount(balance);
