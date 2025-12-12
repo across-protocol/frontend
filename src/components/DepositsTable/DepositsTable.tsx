@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 
 import {
-  HeadRow,
-  headerCells,
   ColumnKey,
   ColumnTooltipRecord,
+  headerCells,
+  HeadRow,
 } from "./HeadRow";
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
