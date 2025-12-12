@@ -15,7 +15,7 @@ Web UI for Across.
 ### Requirements
 
 - [yarn v1.22.22](https://classic.yarnpkg.com/en/docs/install)
-- NodeJS >=v20
+- NodeJS >=22.18.0
 - [Vercel CLI (35 or higher)](https://vercel.com/docs/cli)
 
 ### Local setup
