@@ -8,6 +8,7 @@ import {
 } from "@solana/kit";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import * as sdk from "@across-protocol/sdk";
+import { getDepositForBurnInstructionAsync } from "@across-protocol/contracts/dist/src/svm/clients/SponsoredCctpSrcPeriphery";
 
 import {
   BridgeStrategy,
@@ -42,7 +43,6 @@ import {
 import { getSlippage } from "../../_slippage";
 import { getCctpBridgeStrategy } from "../cctp/strategy";
 import { getDepositAccounts } from "./utils/svm";
-import { getDepositForBurnInstructionAsync } from "../../_svm-clients/SponsoredCctpSrcPeriphery/depositForBurn";
 import { getSVMRpc } from "../../_providers";
 import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibility";
 

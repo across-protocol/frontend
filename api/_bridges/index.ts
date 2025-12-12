@@ -51,10 +51,6 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.SEPOLIA]: {
         [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
       },
-      // SVM → HyperCore routes
-      [CHAIN_IDs.SOLANA]: {
-        [CHAIN_IDs.HYPERCORE]: getCctpBridgeStrategy(),
-      },
     },
   },
 };
