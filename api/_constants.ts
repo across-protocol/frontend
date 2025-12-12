@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 import {
+  constants as sdkConstants,
   relayFeeCalculator,
   utils,
-  constants as sdkConstants,
 } from "@across-protocol/sdk";
 import * as constants from "@across-protocol/constants";
 import { getEnvs } from "./_env";
@@ -47,6 +47,10 @@ export const TOKEN_SYMBOLS_MAP = {
   USDH: {
     ...constants.TOKEN_SYMBOLS_MAP.USDH,
     name: "USDH",
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDH.addresses,
+      [CHAIN_IDs.HYPEREVM]: "0x111111a1a0667d36bD57c0A9f569b98057111111",
+    },
   },
   "USDH-SPOT": {
     name: "USDH",
