@@ -199,11 +199,6 @@ export async function getQuoteForExactInput(
       isSwapPair && ["USDT", "USDT-SPOT"].includes(outputToken.symbol);
 
     if (isUsdcToUsdtSwap) {
-      const bridgeOutputAmountOutputTokenDecimals = ConvertDecimals(
-        inputToken.decimals,
-        SPOT_TOKEN_DECIMALS
-      )(unsponsoredOutputAmount);
-
       const simResult = await simulateMarketOrder({
         chainId: outputToken.chainId,
         tokenIn: {
@@ -214,7 +209,7 @@ export async function getQuoteForExactInput(
           symbol: "USDT",
           decimals: SPOT_TOKEN_DECIMALS,
         },
-        inputAmount: bridgeOutputAmountOutputTokenDecimals,
+        inputAmount: unsponsoredOutputAmount,
       });
 
       outputAmount = ConvertDecimals(
