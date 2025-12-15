@@ -544,12 +544,12 @@ function getTotalFeeUsd(params: {
     outputAmountSansAppFeesUsd,
   } = params;
 
-  if (
-    ["sponsored-intent", "sponsored-oft", "sponsored-cctp"].includes(
-      bridgeProvider
-    )
-  ) {
+  if (["sponsored-intent", "sponsored-cctp"].includes(bridgeProvider)) {
     return 0;
+  }
+
+  if (["sponsored-oft"].includes(bridgeProvider)) {
+    return bridgeFeesUsd;
   }
 
   return parseFloat((inputAmountUsd - outputAmountSansAppFeesUsd).toFixed(4));

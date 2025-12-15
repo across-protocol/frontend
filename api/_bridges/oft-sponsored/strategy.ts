@@ -194,7 +194,7 @@ export async function getSponsoredOftQuoteForExactInput(
   if (isUsdtToUsdcSwap) {
     // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
     const bridgeOutputInSpotDecimals = ConvertDecimals(
-      intermediaryToken.decimals,
+      TOKEN_SYMBOLS_MAP.USDT.decimals,
       SPOT_TOKEN_DECIMALS
     )(outputAmount);
 
@@ -296,7 +296,7 @@ export async function getSponsoredOftQuoteForOutput(
   if (isUsdtToUsdcSwap) {
     // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
     const bridgeOutputInSpotDecimals = ConvertDecimals(
-      intermediaryToken.decimals,
+      TOKEN_SYMBOLS_MAP.USDT.decimals,
       SPOT_TOKEN_DECIMALS
     )(intermediaryOutputAmount);
 

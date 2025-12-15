@@ -25,8 +25,22 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
   );
 
   // show swap impact only if swaps involved
+  const inputSymbol = swapQuote?.inputToken?.symbol;
+  const outputSymbol = swapQuote?.outputToken?.symbol;
+  const bridgeProvider = swapQuote?.steps?.bridge?.provider;
+
+  const isHyperCoreSwap =
+    (inputSymbol === "USDC" &&
+      outputSymbol === "USDT-SPOT" &&
+      bridgeProvider === "cctp") ||
+    (inputSymbol === "USDT" &&
+      outputSymbol === "USDC-SPOT" &&
+      bridgeProvider === "oft");
+
   const showSwapImpact =
-    swapQuote?.steps?.originSwap || swapQuote?.steps?.destinationSwap;
+    swapQuote?.steps?.originSwap ||
+    swapQuote?.steps?.destinationSwap ||
+    isHyperCoreSwap;
 
   const rawValues = {
     totalFeeUsd: showZeroFee ? "0" : swapQuote?.fees?.total.amountUsd || "0",
