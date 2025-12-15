@@ -698,8 +698,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
   describe("#buildSvmTxForAllowanceHolder() - eligible for sponsorship", () => {
     const depositorSvm = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
     const recipientEvm = "0x0000000000000000000000000000000000000002";
-    const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
-    const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
+    const inputAmount = utils.parseUnits("10", arbitrumUSDC.decimals);
+    const outputAmount = utils.parseUnits("10", hyperCoreUSDC.decimals);
 
     // Mock SVM chain ID - using a test SVM chain
     const svmChainId = CHAIN_IDs.SOLANA_DEVNET;
