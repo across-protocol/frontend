@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatAmountForDisplay, formatUSD } from "utils";
+import { formatAmountForDisplay, formatUSD, parseInputValue } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
@@ -41,28 +41,43 @@ export const OriginTokenInput = ({
   const isUserInput = quoteRequest.userInputField === "origin";
 
   const handleSetInputValue = useCallback(
-    (value: string, amount: BigNumber | null) => {
-      setUserInput("origin", value, amount);
+    (value: string) => {
+      if (!originToken) {
+        setUserInput("origin", value, null);
+        return;
+      }
+
+      try {
+        const parsed = parseInputValue(value, originToken, unit);
+        setUserInput("origin", value, parsed);
+      } catch (e) {
+        setUserInput("origin", value, null);
+      }
     },
-    [setUserInput]
+    [setUserInput, originToken, unit]
   );
 
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: originToken,
-    inputValue: quoteRequest.userInputValue,
-    setInputValue: handleSetInputValue,
-    isUserInput,
-    quoteOutputAmount: quoteRequest.quoteOutputAmount,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
+  const handleBalanceClick = useCallback(
+    (amount: BigNumber) => {
+      if (!originToken) return;
+
+      const formatted = formatAmountForDisplay(amount, originToken, unit);
+      setUserInput("origin", formatted, amount);
+    },
+    [originToken, unit, setUserInput]
+  );
+
+  const { amountString, convertedAmount, toggleUnit, handleInputChange } =
+    useTokenInput({
+      token: originToken,
+      inputValue: quoteRequest.userInputValue,
+      setInputValue: handleSetInputValue,
+      isUserInput,
+      quoteOutputAmount: quoteRequest.quoteOutputAmount,
+      isUpdateLoading,
+      unit,
+      setUnit,
+    });
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
@@ -139,7 +154,7 @@ export const OriginTokenInput = ({
             error={insufficientBalance}
             setAmount={(amount) => {
               if (amount) {
-                handleBalanceClick(amount, originToken.decimals);
+                handleBalanceClick(amount);
               }
             }}
           />

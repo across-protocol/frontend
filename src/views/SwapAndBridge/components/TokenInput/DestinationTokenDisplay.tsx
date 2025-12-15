@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
+import { formatAmountForDisplay, formatUSD, parseInputValue } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
@@ -38,28 +38,43 @@ export const DestinationTokenDisplay = ({
   const isUserInput = quoteRequest.userInputField === "destination";
 
   const handleSetInputValue = useCallback(
-    (value: string, amount: BigNumber | null) => {
-      setUserInput("destination", value, amount);
+    (value: string) => {
+      if (!destinationToken) {
+        setUserInput("destination", value, null);
+        return;
+      }
+
+      try {
+        const parsed = parseInputValue(value, destinationToken, unit);
+        setUserInput("destination", value, parsed);
+      } catch (e) {
+        setUserInput("destination", value, null);
+      }
     },
-    [setUserInput]
+    [setUserInput, destinationToken, unit]
   );
 
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: destinationToken,
-    inputValue: quoteRequest.userInputValue,
-    setInputValue: handleSetInputValue,
-    isUserInput,
-    quoteOutputAmount: quoteRequest.quoteOutputAmount,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
+  const handleBalanceClick = useCallback(
+    (amount: BigNumber) => {
+      if (!destinationToken) return;
+
+      const formatted = formatAmountForDisplay(amount, destinationToken, unit);
+      setUserInput("destination", formatted, amount);
+    },
+    [destinationToken, unit, setUserInput]
+  );
+
+  const { amountString, convertedAmount, toggleUnit, handleInputChange } =
+    useTokenInput({
+      token: destinationToken,
+      inputValue: quoteRequest.userInputValue,
+      setInputValue: handleSetInputValue,
+      isUserInput,
+      quoteOutputAmount: quoteRequest.quoteOutputAmount,
+      isUpdateLoading,
+      unit,
+      setUnit,
+    });
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
@@ -122,7 +137,7 @@ export const DestinationTokenDisplay = ({
             error={false}
             setAmount={(amount) => {
               if (amount) {
-                handleBalanceClick(amount, destinationToken.decimals);
+                handleBalanceClick(amount);
               }
             }}
           />

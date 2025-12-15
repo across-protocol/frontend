@@ -5,7 +5,6 @@ import {
   convertUSDToToken,
   formatAmountForDisplay,
   isValidNumberInput,
-  parseInputValue,
 } from "utils";
 import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 
@@ -14,7 +13,7 @@ export type UnitType = "usd" | "token";
 type UseTokenInputProps = {
   token: EnrichedToken | null;
   inputValue: string;
-  setInputValue: (value: string, amount: BigNumber | null) => void;
+  setInputValue: (value: string) => void;
   isUserInput: boolean;
   quoteOutputAmount: BigNumber | null | undefined;
   isUpdateLoading: boolean;
@@ -27,7 +26,6 @@ type UseTokenInputReturn = {
   convertedAmount: BigNumber | undefined;
   toggleUnit: () => void;
   handleInputChange: (value: string) => void;
-  handleBalanceClick: (amount: BigNumber, decimals: number) => void;
 };
 
 export function useTokenInput({
@@ -82,10 +80,9 @@ export function useTokenInput({
       if (inputValue && token && convertedAmount) {
         try {
           const a = utils.formatUnits(convertedAmount, 18);
-          const parsed = parseInputValue(a, token, "usd");
-          setInputValue(a, parsed);
+          setInputValue(a);
         } catch (e) {
-          setInputValue("0", null);
+          setInputValue("0");
         }
       }
       setUnit("usd");
@@ -93,10 +90,9 @@ export function useTokenInput({
       if (inputValue && token && convertedAmount) {
         try {
           const a = utils.formatUnits(convertedAmount, token.decimals);
-          const parsed = parseInputValue(a, token, "token");
-          setInputValue(a, parsed);
+          setInputValue(a);
         } catch (e) {
-          setInputValue("0", null);
+          setInputValue("0");
         }
       }
       setUnit("token");
@@ -109,28 +105,9 @@ export function useTokenInput({
         return;
       }
 
-      if (!token) {
-        setInputValue(value, null);
-        return;
-      }
-
-      try {
-        const parsed = parseInputValue(value, token, unit);
-        setInputValue(value, parsed);
-      } catch (e) {
-        setInputValue(value, null);
-      }
+      setInputValue(value);
     },
-    [token, unit, setInputValue]
-  );
-
-  const handleBalanceClick = useCallback(
-    (amount: BigNumber, _decimals: number) => {
-      if (token) {
-        setInputValue(formatAmountForDisplay(amount, token, unit), amount);
-      }
-    },
-    [unit, token, setInputValue]
+    [setInputValue]
   );
 
   return {
@@ -138,6 +115,5 @@ export function useTokenInput({
     convertedAmount,
     toggleUnit,
     handleInputChange,
-    handleBalanceClick,
   };
 }
