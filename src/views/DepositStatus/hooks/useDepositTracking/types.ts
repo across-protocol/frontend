@@ -130,28 +130,6 @@ export interface IChainStrategy {
   getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
 
   /**
-   * Convert deposit information to local storage format
-   * @param depositInfo Normalized deposit information
-   * @param fromBridgePagePayload Bridge page payload containing route and quote details
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit;
-
-  /**
-   * Convert fill information to local storage format
-   * @param fillInfo Normalized fill information
-   * @param bridgePayload Bridge payload information
-   * @returns Local deposit format with fill information
-   */
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit;
-
-  /**
    * The chain ID this strategy handles
    */
   readonly chainId: number;

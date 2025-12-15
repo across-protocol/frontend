@@ -9,7 +9,7 @@ export function useElapsedSeconds(
   const [elapsedSeconds, setElapsedSeconds] = useState<number | undefined>();
 
   useEffect(() => {
-    let interval: number;
+    let interval: Timer;
     if (startDateTimestampInSeconds && endDateTimestampInSeconds) {
       setElapsedSeconds(
         Math.max(endDateTimestampInSeconds - startDateTimestampInSeconds, 0)
