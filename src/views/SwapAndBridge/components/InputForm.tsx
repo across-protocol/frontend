@@ -2,28 +2,17 @@ import { COLORS } from "utils";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
-import { UnitType } from "hooks";
 import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
-import { BigNumber } from "ethers";
-import { OriginTokenInput } from "./TokenInput/OriginTokenInput";
-import { DestinationTokenDisplay } from "./TokenInput/DestinationTokenDisplay";
+import { OriginTokenInput, UnitType } from "./TokenInput/OriginTokenInput";
+import { DestinationTokenInput } from "./TokenInput/DestinationTokenInput";
 
-export const InputForm = ({
-  isQuoteLoading,
-  expectedOutputAmount,
-  expectedInputAmount,
-}: {
-  isQuoteLoading: boolean;
-  expectedOutputAmount: BigNumber | undefined;
-  expectedInputAmount: BigNumber | undefined;
-}) => {
+export const InputForm = ({ isQuoteLoading }: { isQuoteLoading: boolean }) => {
   const { quickSwap } = useQuoteRequestContext();
   const [unit, setUnit] = useState<UnitType>("token");
 
   return (
     <Wrapper>
       <OriginTokenInput
-        expectedAmount={expectedInputAmount}
         isUpdateLoading={isQuoteLoading}
         unit={unit}
         setUnit={setUnit}
@@ -31,8 +20,7 @@ export const InputForm = ({
       <QuickSwapButton onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
-      <DestinationTokenDisplay
-        expectedOutputAmount={expectedOutputAmount}
+      <DestinationTokenInput
         isUpdateLoading={isQuoteLoading}
         unit={unit}
         setUnit={setUnit}

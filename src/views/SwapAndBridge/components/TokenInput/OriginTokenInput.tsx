@@ -1,12 +1,9 @@
 import { useEffect, useRef } from "react";
-import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
-import { UnitType, useTokenInput } from "hooks";
+import { FormattedTokenInput } from "./FormattedTokenInput";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
   TokenAmountInputWrapper,
   TokenAmountStack,
@@ -16,60 +13,50 @@ import {
   UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
-import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
+import { useTokenAmountInput } from "../../hooks";
+
+export type UnitType = "usd" | "token";
 
 type OriginTokenInputProps = {
-  expectedAmount: BigNumber | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
 };
 
 export const OriginTokenInput = ({
-  expectedAmount,
   isUpdateLoading,
   unit,
   setUnit,
 }: OriginTokenInputProps) => {
-  const { quoteRequest, setOriginAmount, setOriginToken, setDestinationToken } =
+  const { quoteRequest, setUserInput, setOriginToken, setDestinationToken } =
     useQuoteRequestContext();
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
   const { originToken, destinationToken } = quoteRequest;
 
-  const shouldUpdate = quoteRequest.tradeType === "minOutput";
-
   const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
+    displayValue,
+    formattedConvertedAmount,
+    inputDisabled,
     handleInputChange,
     handleBalanceClick,
-  } = useTokenInput({
+    toggleUnit,
+  } = useTokenAmountInput({
     token: originToken,
-    setAmount: setOriginAmount,
-    expectedAmount,
-    shouldUpdate,
-    isUpdateLoading,
+    fieldName: "origin",
     unit,
     setUnit,
+    isUpdateLoading,
+    setUserInput,
+    quoteRequest,
   });
-
-  const inputDisabled = (() => {
-    if (!quoteRequest.destinationToken) return true;
-    return Boolean(shouldUpdate && isUpdateLoading);
-  })();
 
   const balance = useTokenBalance(quoteRequest?.originToken);
 
-  const insufficientBalance = hasInsufficientBalance(
-    quoteRequest,
-    expectedAmount,
-    balance
-  );
+  const insufficientBalance = hasInsufficientBalance(quoteRequest, balance);
 
   useEffect(() => {
     if (
@@ -82,15 +69,6 @@ export const OriginTokenInput = ({
     }
   }, [inputDisabled]);
 
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, originToken?.decimals)} ${originToken?.symbol}`;
-  })();
-
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
@@ -98,19 +76,20 @@ export const OriginTokenInput = ({
 
         <TokenAmountInputWrapper
           showPrefix={unit === "usd"}
-          value={amountString}
+          value={displayValue}
           error={insufficientBalance}
         >
-          <TokenAmountInput
+          <FormattedTokenInput
+            ref={amountInputRef}
             id="origin-amount-input"
             name="origin-amount-input"
             data-testid="bridge-amount-input"
-            ref={amountInputRef}
+            value={displayValue}
+            onChange={handleInputChange}
             placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
             disabled={inputDisabled}
             error={insufficientBalance}
+            maxDecimals={18}
           />
         </TokenAmountInputWrapper>
         <UnitToggleButtonWrapper>
@@ -137,7 +116,7 @@ export const OriginTokenInput = ({
             error={insufficientBalance}
             setAmount={(amount) => {
               if (amount) {
-                handleBalanceClick(amount, originToken.decimals);
+                handleBalanceClick(amount);
               }
             }}
           />

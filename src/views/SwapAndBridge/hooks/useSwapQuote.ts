@@ -13,11 +13,11 @@ import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 export type SwapQuote = ReturnType<typeof useSwapQuote>["swapQuote"];
 
 const useSwapQuote = ({
-  amount,
+  userInputAmount,
+  userInputField,
   customDestinationAccount,
   destinationToken,
   originToken,
-  tradeType,
 }: QuoteRequest) => {
   const { depositor, depositorOrPlaceholder, recipientOrPlaceholder } =
     useEcosystemAccounts({
@@ -26,7 +26,9 @@ const useSwapQuote = ({
       customDestinationAccount,
     });
 
-  const debouncedAmount = useDebounce(amount, 300);
+  const debouncedAmount = useDebounce(userInputAmount, 300);
+
+  const tradeType = userInputField === "origin" ? "exactInput" : "minOutput";
 
   const skipOriginTxEstimation = !depositor;
 
@@ -34,12 +36,12 @@ const useSwapQuote = ({
     queryKey: [
       "swap-quote",
       debouncedAmount,
+      userInputField,
       customDestinationAccount?.address,
       destinationToken?.address,
       destinationToken?.chainId,
       originToken?.address,
       originToken?.chainId,
-      tradeType,
       depositor,
       depositorOrPlaceholder,
       recipientOrPlaceholder,

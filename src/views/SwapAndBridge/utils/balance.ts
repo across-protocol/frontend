@@ -2,20 +2,18 @@ import { QuoteRequest } from "../hooks/useQuoteRequest/quoteRequestAction";
 import { BigNumber } from "ethers";
 
 export const hasInsufficientBalance = (
-  { amount, tradeType }: QuoteRequest,
-  expectedAmount: BigNumber | undefined,
+  { userInputAmount, userInputField, quoteOutputAmount }: QuoteRequest,
   balance: BigNumber | undefined
 ) => {
-  if (!amount) {
+  if (!userInputAmount) {
     return false;
   }
-  if (tradeType === "exactInput" && balance) {
-    // isAmountorigin
-    if (amount.gt(balance)) {
+  if (userInputField === "origin" && balance) {
+    if (userInputAmount.gt(balance)) {
       return true;
     }
-  } else if (tradeType === "minOutput" && expectedAmount && balance) {
-    if (expectedAmount.gt(balance)) {
+  } else if (userInputField === "destination" && quoteOutputAmount && balance) {
+    if (quoteOutputAmount.gt(balance)) {
       return true;
     }
   }

@@ -343,3 +343,57 @@ export function parseUnitsWithExtendedDecimals(
   }
   return ethers.utils.parseUnits(valueToParse, decimals);
 }
+
+export function formatNumberWithSeparators(
+  value: string,
+  maxDecimals: number = 18
+): string {
+  if (!value || value === ".") return value;
+
+  const parts = value.split(".");
+  const integerPart = parts[0] || "0";
+  const decimalPart = parts[1];
+
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (parts.length === 2) {
+    const limitedDecimals = decimalPart.substring(0, maxDecimals);
+    return `${formattedInteger}.${limitedDecimals}`;
+  } else if (value.endsWith(".")) {
+    return `${formattedInteger}.`;
+  }
+
+  return formattedInteger;
+}
+
+export function parseFormattedNumber(value: string): string {
+  return value.replace(/,/g, "");
+}
+
+export function calculateCursorPosition(
+  previousValue: string,
+  newValue: string,
+  previousCursor: number,
+  wasDeleting: boolean
+): number {
+  const commasBefore = (
+    previousValue.slice(0, previousCursor).match(/,/g) || []
+  ).length;
+  const rawCursorPosition = previousCursor - commasBefore;
+
+  let newCursor = 0;
+  let rawPosition = 0;
+
+  for (let i = 0; i < newValue.length && rawPosition < rawCursorPosition; i++) {
+    if (newValue[i] !== ",") {
+      rawPosition++;
+    }
+    newCursor++;
+  }
+
+  if (wasDeleting && newValue[newCursor] === ",") {
+    newCursor++;
+  }
+
+  return newCursor;
+}

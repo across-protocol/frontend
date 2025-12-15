@@ -6,31 +6,25 @@ import {
   useQuoteRequestContext,
 } from "./hooks/useQuoteRequest/QuoteRequestContext";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
-import { useMemo } from "react";
+import { useEffect } from "react";
 import useSwapQuote from "./hooks/useSwapQuote";
 import { useDefaultRoute } from "./hooks/useDefaultRoute";
 
 function SwapAndBridgeContent() {
-  const { quoteRequest, setOriginToken, setDestinationToken } =
+  const { quoteRequest, setOriginToken, setDestinationToken, setQuoteOutput } =
     useQuoteRequestContext();
+
   useDefaultRoute(setOriginToken, setDestinationToken);
 
   const { swapQuote, quoteError, isQuoteLoading } = useSwapQuote(quoteRequest);
 
-  const expectedInputAmount = useMemo(() => {
-    return swapQuote?.inputAmount;
-  }, [swapQuote]);
-  const expectedOutputAmount = useMemo(() => {
-    return swapQuote?.expectedOutputAmount;
-  }, [swapQuote]);
+  useEffect(() => {
+    setQuoteOutput(swapQuote?.expectedOutputAmount ?? null);
+  }, [swapQuote, setQuoteOutput]);
 
   return (
     <Wrapper>
-      <InputForm
-        expectedInputAmount={expectedInputAmount}
-        expectedOutputAmount={expectedOutputAmount}
-        isQuoteLoading={isQuoteLoading}
-      />
+      <InputForm isQuoteLoading={isQuoteLoading} />
       <ConfirmationButton
         isQuoteLoading={isQuoteLoading}
         quoteError={quoteError}

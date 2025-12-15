@@ -14,11 +14,14 @@ export type QuoteRequestAction =
       payload: EnrichedToken | null;
     }
   | {
-      type: "SET_ORIGIN_AMOUNT";
-      payload: BigNumber | null;
+      type: "SET_USER_INPUT";
+      payload: {
+        field: "origin" | "destination";
+        amount: BigNumber | null;
+      };
     }
   | {
-      type: "SET_DESTINATION_AMOUNT";
+      type: "SET_QUOTE_OUTPUT";
       payload: BigNumber | null;
     }
   | { type: "SET_CUSTOM_DESTINATION_ACCOUNT"; payload: QuoteAccount }
@@ -26,9 +29,10 @@ export type QuoteRequestAction =
   | { type: "QUICK_SWAP"; payload: undefined };
 
 export interface QuoteRequest {
-  tradeType: "minOutput" | "exactInput";
   originToken: EnrichedToken | null;
   destinationToken: EnrichedToken | null;
   customDestinationAccount: QuoteAccount | null;
-  amount: BigNumber | null;
+  userInputField: "origin" | "destination";
+  userInputAmount: BigNumber | null;
+  quoteOutputAmount: BigNumber | null;
 }

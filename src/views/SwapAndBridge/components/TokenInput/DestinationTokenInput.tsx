@@ -1,12 +1,9 @@
-import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
-import { UnitType, useTokenInput } from "hooks";
+import { FormattedTokenInput } from "./FormattedTokenInput";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
   TokenAmountInputWrapper,
   TokenAmountStack,
@@ -16,61 +13,42 @@ import {
   UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
-import { BigNumber } from "ethers";
+import { useTokenAmountInput } from "../../hooks";
+
+export type UnitType = "usd" | "token";
 
 type DestinationTokenDisplayProps = {
-  expectedOutputAmount: BigNumber | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
 };
 
-export const DestinationTokenDisplay = ({
-  expectedOutputAmount,
+export const DestinationTokenInput = ({
   isUpdateLoading,
   unit,
   setUnit,
 }: DestinationTokenDisplayProps) => {
-  const {
-    quoteRequest,
-    setDestinationAmount,
-    setOriginToken,
-    setDestinationToken,
-  } = useQuoteRequestContext();
-
-  const shouldUpdate = quoteRequest.tradeType === "exactInput";
+  const { quoteRequest, setUserInput, setOriginToken, setDestinationToken } =
+    useQuoteRequestContext();
 
   const { destinationToken, originToken } = quoteRequest;
 
   const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
+    displayValue,
+    formattedConvertedAmount,
+    inputDisabled,
     handleInputChange,
     handleBalanceClick,
-  } = useTokenInput({
+    toggleUnit,
+  } = useTokenAmountInput({
     token: destinationToken,
-    setAmount: setDestinationAmount,
-    expectedAmount: expectedOutputAmount,
-    shouldUpdate,
-    isUpdateLoading,
+    fieldName: "destination",
     unit,
     setUnit,
+    isUpdateLoading,
+    setUserInput,
+    quoteRequest,
   });
-
-  const inputDisabled = (() => {
-    if (!quoteRequest.destinationToken) return true;
-    return Boolean(shouldUpdate && isUpdateLoading);
-  })();
-
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, destinationToken?.decimals)} ${destinationToken?.symbol}`;
-  })();
 
   return (
     <TokenInputWrapper>
@@ -82,17 +60,18 @@ export const DestinationTokenDisplay = ({
 
         <TokenAmountInputWrapper
           showPrefix={unit === "usd"}
-          value={amountString}
+          value={displayValue}
           error={false}
         >
-          <TokenAmountInput
+          <FormattedTokenInput
             id="destination-amount-input"
             name="destination-amount-input"
+            value={displayValue}
+            onChange={handleInputChange}
             placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
             disabled={inputDisabled}
             error={false}
+            maxDecimals={18}
           />
         </TokenAmountInputWrapper>
         <UnitToggleButtonWrapper>
@@ -119,7 +98,7 @@ export const DestinationTokenDisplay = ({
             error={false}
             setAmount={(amount) => {
               if (amount) {
-                handleBalanceClick(amount, destinationToken.decimals);
+                handleBalanceClick(amount);
               }
             }}
           />

@@ -117,14 +117,14 @@ export const useButtonState = (
       !!validation.error ||
       !quoteRequest.originToken ||
       !quoteRequest.destinationToken ||
-      !quoteRequest.amount ||
-      quoteRequest.amount.lte(0),
+      !quoteRequest.userInputAmount ||
+      quoteRequest.userInputAmount.lte(0),
     [
       approvalAction.buttonDisabled,
       validation.error,
       quoteRequest.originToken,
       quoteRequest.destinationToken,
-      quoteRequest.amount,
+      quoteRequest.userInputAmount,
     ]
   );
 
