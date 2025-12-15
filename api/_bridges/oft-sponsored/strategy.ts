@@ -22,7 +22,12 @@ import {
   getFallbackRecipient,
 } from "../../_dexes/utils";
 import { InvalidParamError } from "../../_errors";
-import { simulateMarketOrder, SPOT_TOKEN_DECIMALS } from "../../_hypercore";
+import {
+  assertAccountExistsOnHyperCore,
+  simulateMarketOrder,
+  SPOT_TOKEN_DECIMALS,
+  isToHyperCore,
+} from "../../_hypercore";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import {
   addMarkupToAmount,
@@ -134,6 +139,15 @@ export async function getSponsoredOftQuoteForExactInput(
 ) {
   const { inputToken, outputToken, exactInputAmount, recipient } = params;
 
+  // If recipient does not exist on HyperCore, then we error.
+  // This is temporary until we can support account creation for sponsored mint/burn routes.
+  if (isToHyperCore(outputToken.chainId)) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+    });
+  }
+
   // Get intermediary token (HyperEVM USDT)
   // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
   const intermediaryToken = await getIntermediaryToken();
@@ -210,6 +224,15 @@ export async function getSponsoredOftQuoteForOutput(
   params: GetOutputBridgeQuoteParams
 ) {
   const { inputToken, outputToken, minOutputAmount, recipient } = params;
+
+  // If recipient does not exist on HyperCore, then we error.
+  // This is temporary until we can support account creation for sponsored mint/burn routes.
+  if (isToHyperCore(outputToken.chainId)) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+    });
+  }
 
   // Get intermediary token (HyperEVM USDT)
   // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination

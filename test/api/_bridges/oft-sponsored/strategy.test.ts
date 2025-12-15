@@ -13,6 +13,10 @@ import * as utils from "../../../../api/_utils";
 import * as tokenInfo from "../../../../api/_token-info";
 
 describe("Sponsored OFT Strategy", () => {
+  beforeEach(() => {
+    jest.spyOn(hypercore, "assertAccountExistsOnHyperCore").mockResolvedValue();
+  });
+
   // Shared test fixtures
   const arbitrumUSDT: Token = {
     address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],

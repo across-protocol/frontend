@@ -5,13 +5,22 @@ import {
   getL2OrderBookForPair,
   simulateMarketOrder,
   isHyperEvmToHyperCoreRoute,
+  assertAccountExistsOnHyperCore,
+  HypercoreAccountNotInitializedError,
 } from "../../api/_hypercore";
 import { TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { CHAIN_IDs } from "../../api/_constants";
+import { getProvider } from "../../api/_providers";
 
 jest.mock("axios");
+jest.mock("../../api/_providers", () => ({
+  getProvider: jest.fn(),
+}));
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedGetProvider = getProvider as jest.MockedFunction<
+  typeof getProvider
+>;
 
 type MockOrderBookData = Awaited<ReturnType<typeof getL2OrderBookForPair>>;
 
@@ -427,6 +436,44 @@ describe("api/_hypercore.ts", () => {
       };
       const isRouteSupported = isHyperEvmToHyperCoreRoute(params);
       expect(isRouteSupported).toEqual(false);
+    });
+  });
+
+  describe("#assertAccountExistsOnHyperCore()", () => {
+    const mockProvider = (exists: boolean) => {
+      const encodedResult = ethers.utils.defaultAbiCoder.encode(
+        ["bool"],
+        [exists]
+      );
+      return {
+        call: jest.fn().mockResolvedValue(encodedResult),
+      };
+    };
+
+    test("should throw error if account does not exist on HyperCore", async () => {
+      mockedGetProvider.mockReturnValue(mockProvider(false) as any);
+
+      await expect(
+        assertAccountExistsOnHyperCore({
+          account: "0x1234567890123456789012345678901234567890",
+          chainId: CHAIN_IDs.HYPERCORE,
+        })
+      ).rejects.toThrow(HypercoreAccountNotInitializedError);
+
+      expect(mockedGetProvider).toHaveBeenCalledWith(CHAIN_IDs.HYPEREVM);
+    });
+
+    test("should not throw error if account exists on HyperCore", async () => {
+      mockedGetProvider.mockReturnValue(mockProvider(true) as any);
+
+      await expect(
+        assertAccountExistsOnHyperCore({
+          account: "0x1234567890123456789012345678901234567890",
+          chainId: CHAIN_IDs.HYPERCORE,
+        })
+      ).resolves.not.toThrow(HypercoreAccountNotInitializedError);
+
+      expect(mockedGetProvider).toHaveBeenCalledWith(CHAIN_IDs.HYPEREVM);
     });
   });
 });
