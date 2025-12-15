@@ -5,6 +5,7 @@ import {
   CHAIN_IDs,
 } from "./_constants";
 import { OriginOrDestination, Token } from "./_dexes/types";
+import { SwapSlippageInsufficientError } from "./_errors";
 
 export const STABLE_COIN_SWAP_SLIPPAGE = {
   origin: 0.25, // 0.25%
@@ -146,4 +147,44 @@ function isMajorTokenSymbol(symbol: string, chainId: number) {
     (majorTokenSymbol) =>
       majorTokenSymbol.toUpperCase() === symbol.toUpperCase()
   );
+}
+
+/**
+ * Validates that user-provided slippage is sufficient for destination swaps.
+ * Throws an error if the user slippage is less than the auto (recommended) slippage.
+ * Only validates when slippage is explicitly set by the user.
+ *
+ * @param params.tokenIn - The input token for the destination swap
+ * @param params.tokenOut - The output token for the destination swap
+ * @param params.slippageTolerance - The user-provided slippage tolerance
+ * @param params.splitSlippage - Whether slippage is being split between origin and destination
+ * @throws {InputError} When user slippage is less than auto slippage
+ */
+export function validateDestinationSwapSlippage(params: {
+  tokenIn: Token;
+  tokenOut: Token;
+  slippageTolerance: number | "auto";
+  splitSlippage?: boolean;
+}) {
+  // Only validate if user explicitly provided a slippage value
+  if (params.slippageTolerance === "auto") {
+    return;
+  }
+
+  const autoSlippage = resolveAutoSlippage({
+    tokenIn: params.tokenIn,
+    tokenOut: params.tokenOut,
+    originOrDestination: "destination",
+  });
+
+  // Calculate the effective user slippage (accounting for split if applicable)
+  const userSlippage = params.splitSlippage
+    ? params.slippageTolerance / 2
+    : params.slippageTolerance;
+
+  if (userSlippage < autoSlippage) {
+    throw new SwapSlippageInsufficientError({
+      message: `Insufficient slippage.`,
+    });
+  }
 }
