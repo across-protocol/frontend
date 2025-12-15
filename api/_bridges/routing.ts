@@ -32,6 +32,15 @@ export async function routeMintAndBurnStrategy(
     return getAcrossBridgeStrategy();
   }
 
+  // We route HyperCore destination routes through our own sponsorship periphery contract
+  // instead of directly via CCTP or OFT. We shouldn't get to this point but if we do, we
+  // need to throw.
+  if (bridgeStrategyData.isHyperCoreDestination) {
+    throw new Error(
+      "HyperCore destination should not be routed directly via mint/burn."
+    );
+  }
+
   const decision = decideBurnAndMintStrategy(bridgeStrategyData);
 
   logger.debug({
