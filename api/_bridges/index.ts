@@ -17,6 +17,18 @@ import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
+  tokenPairPerRoute: {
+    // TODO: remove once we support Solana origin routes
+    [CHAIN_IDs.SOLANA]: {
+      [CHAIN_IDs.HYPERCORE]: {
+        [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
+          [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]:
+            getUsdhIntentsBridgeStrategy(),
+          [TOKEN_SYMBOLS_MAP["USDC-SPOT"].symbol]: getAcrossBridgeStrategy(),
+        },
+      },
+    },
+  },
   tokenPairPerToChain: {
     [CHAIN_IDs.HYPEREVM]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
@@ -86,6 +98,14 @@ export async function getBridgeStrategy({
   includesActions,
   routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const tokenPairPerRouteOverride =
+    bridgeStrategies.tokenPairPerRoute?.[originChainId]?.[destinationChainId]?.[
+      inputToken.symbol
+    ]?.[outputToken.symbol];
+  if (tokenPairPerRouteOverride) {
+    return tokenPairPerRouteOverride;
+  }
+
   const tokenPairPerToChainOverride =
     bridgeStrategies.tokenPairPerToChain?.[destinationChainId]?.[
       inputToken.symbol

@@ -6,6 +6,15 @@ import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
+  tokenPairPerRoute?: {
+    [originChainId: number]: {
+      [destinationChainId: number]: {
+        [inputToken: string]: {
+          [outputToken: string]: BridgeStrategy;
+        };
+      };
+    };
+  };
   tokenPairPerToChain?: {
     [toChainId: number]: {
       [inputToken: string]: {
