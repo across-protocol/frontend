@@ -5,7 +5,6 @@ export const initialQuote: QuoteRequest = {
   destinationToken: null,
   customDestinationAccount: null,
   userInputField: "origin",
-  userInputValue: "",
   userInputAmount: null,
   quoteOutputAmount: null,
 };

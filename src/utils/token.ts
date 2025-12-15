@@ -14,7 +14,7 @@ import { SwapToken } from "utils/serverless-api/types";
 import { TokenInfo } from "constants/tokens";
 import { chainsWithUsdt0Enabled, getToken, tokenTable } from "utils/constants";
 import usdt0Logo from "assets/token-logos/usdt0.svg";
-import { UnitType } from "hooks/useTokenInput";
+import { UnitType } from "views/SwapAndBridge/components/TokenInput/OriginTokenInput";
 
 export async function getNativeBalance(
   chainId: ChainId,

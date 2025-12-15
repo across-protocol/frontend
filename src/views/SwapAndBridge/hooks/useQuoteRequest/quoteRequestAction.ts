@@ -17,7 +17,6 @@ export type QuoteRequestAction =
       type: "SET_USER_INPUT";
       payload: {
         field: "origin" | "destination";
-        value: string;
         amount: BigNumber | null;
       };
     }
@@ -34,7 +33,6 @@ export interface QuoteRequest {
   destinationToken: EnrichedToken | null;
   customDestinationAccount: QuoteAccount | null;
   userInputField: "origin" | "destination";
-  userInputValue: string;
   userInputAmount: BigNumber | null;
   quoteOutputAmount: BigNumber | null;
 }

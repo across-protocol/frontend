@@ -2,9 +2,8 @@ import { COLORS } from "utils";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
-import { UnitType } from "hooks";
 import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
-import { OriginTokenInput } from "./TokenInput/OriginTokenInput";
+import { OriginTokenInput, UnitType } from "./TokenInput/OriginTokenInput";
 import { DestinationTokenDisplay } from "./TokenInput/DestinationTokenDisplay";
 
 export const InputForm = ({ isQuoteLoading }: { isQuoteLoading: boolean }) => {

@@ -186,7 +186,6 @@ const mockSwapQuote: SwapApprovalApiCallReturnType = {
 
 const mockQuoteRequest: QuoteRequest = {
   userInputField: "origin",
-  userInputValue: "100",
   userInputAmount: BigNumber.from("100000000"),
   quoteOutputAmount: BigNumber.from("99500000"),
   originToken: mockInputToken,

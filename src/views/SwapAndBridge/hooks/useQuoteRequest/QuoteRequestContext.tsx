@@ -11,7 +11,6 @@ interface QuoteRequestContextValue {
   setDestinationToken: (token: EnrichedToken | null) => void;
   setUserInput: (
     field: "origin" | "destination",
-    value: string,
     amount: BigNumber | null
   ) => void;
   setQuoteOutput: (amount: BigNumber | null) => void;
@@ -45,12 +44,8 @@ export const QuoteRequestProvider = ({
   }, []);
 
   const setUserInput = useCallback(
-    (
-      field: "origin" | "destination",
-      value: string,
-      amount: BigNumber | null
-    ) => {
-      dispatch({ type: "SET_USER_INPUT", payload: { field, value, amount } });
+    (field: "origin" | "destination", amount: BigNumber | null) => {
+      dispatch({ type: "SET_USER_INPUT", payload: { field, amount } });
     },
     []
   );

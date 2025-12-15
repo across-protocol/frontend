@@ -32,10 +32,9 @@ describe("quoteRequestReducer", () => {
     const amount = BigNumber.from(100);
     const result = quoteRequestReducer(initialQuote, {
       type: "SET_USER_INPUT",
-      payload: { field: "origin", value: "100", amount },
+      payload: { field: "origin", amount },
     });
     expect(result.userInputAmount).toBe(amount);
-    expect(result.userInputValue).toBe("100");
     expect(result.userInputField).toBe("origin");
   });
 
@@ -43,10 +42,9 @@ describe("quoteRequestReducer", () => {
     const amount = BigNumber.from(100);
     const result = quoteRequestReducer(initialQuote, {
       type: "SET_USER_INPUT",
-      payload: { field: "destination", value: "100", amount },
+      payload: { field: "destination", amount },
     });
     expect(result.userInputAmount).toBe(amount);
-    expect(result.userInputValue).toBe("100");
     expect(result.userInputField).toBe("destination");
   });
 

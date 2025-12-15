@@ -9,7 +9,6 @@ export const quoteRequestReducer = (
       return {
         ...prevState,
         originToken: action.payload,
-        userInputValue: "",
         userInputAmount: null,
         quoteOutputAmount: null,
       };
@@ -17,7 +16,6 @@ export const quoteRequestReducer = (
       return {
         ...prevState,
         destinationToken: action.payload,
-        userInputValue: "",
         userInputAmount: null,
         quoteOutputAmount: null,
       };
@@ -25,7 +23,6 @@ export const quoteRequestReducer = (
       return {
         ...prevState,
         userInputField: action.payload.field,
-        userInputValue: action.payload.value,
         userInputAmount: action.payload.amount,
       };
     case "SET_QUOTE_OUTPUT":
