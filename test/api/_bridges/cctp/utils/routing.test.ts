@@ -62,6 +62,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isUsdtToUsdt: false,
       isMonadTransfer: false,
       isWithinMonadLimit: false,
+      isHyperCoreDestination: false,
       ...overrides,
     });
 
