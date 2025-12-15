@@ -45,7 +45,6 @@ export function useTokenInput({
   const [localInputValue, setLocalInputValue] = useState<string>("");
   const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
-  const [justTyped, setJustTyped] = useState(false);
 
   const unit = externalUnit ?? internalUnit;
   const setUnit = externalSetUnit ?? setInternalUnit;
@@ -72,23 +71,6 @@ export function useTokenInput({
   }, [displayValue]);
 
   useEffect(() => {
-    if (!justTyped) {
-      return;
-    }
-    setJustTyped(false);
-    try {
-      if (!token) {
-        setAmount(null);
-        return;
-      }
-      const parsed = parseInputValue(localInputValue, token, unit);
-      setAmount(parsed);
-    } catch (e) {
-      setAmount(null);
-    }
-  }, [localInputValue, justTyped, token, unit, setAmount]);
-
-  useEffect(() => {
     if (token) {
       setLocalInputValue("");
       setConvertedAmount(undefined);
@@ -96,22 +78,6 @@ export function useTokenInput({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.chainId, token?.symbol]);
-
-  useEffect(() => {
-    if (shouldUpdate && isUpdateLoading) {
-      setAmountString("");
-    }
-
-    if (shouldUpdate && token) {
-      if (!expectedAmount && !isUpdateLoading) {
-        setAmountString("");
-      } else {
-        if (expectedAmount) {
-          setAmountString(formatAmountForDisplay(expectedAmount, token, unit));
-        }
-      }
-    }
-  }, [expectedAmount, isUpdateLoading, shouldUpdate, token, unit]);
 
   useEffect(() => {
     if (!token || !displayValue) {
@@ -162,7 +128,6 @@ export function useTokenInput({
       }
 
       setLocalInputValue(value);
-      setJustTyped(true);
 
       if (!token) {
         setAmount(null);
