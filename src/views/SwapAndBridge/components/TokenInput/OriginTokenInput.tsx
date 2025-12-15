@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
+import { formatAmountForDisplay, formatUSD } from "utils";
 import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";

@@ -18,13 +18,12 @@ type UseTokenInputProps = {
   isUserInput: boolean;
   quoteOutputAmount: BigNumber | null | undefined;
   isUpdateLoading: boolean;
-  unit?: UnitType;
-  setUnit?: (unit: UnitType) => void;
+  unit: UnitType;
+  setUnit: (unit: UnitType) => void;
 };
 
 type UseTokenInputReturn = {
   amountString: string;
-  unit: UnitType;
   convertedAmount: BigNumber | undefined;
   toggleUnit: () => void;
   handleInputChange: (value: string) => void;
@@ -38,14 +37,10 @@ export function useTokenInput({
   isUserInput,
   quoteOutputAmount,
   isUpdateLoading,
-  unit: externalUnit,
-  setUnit: externalSetUnit,
+  unit,
+  setUnit,
 }: UseTokenInputProps): UseTokenInputReturn {
-  const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
-
-  const unit = externalUnit ?? internalUnit;
-  const setUnit = externalSetUnit ?? setInternalUnit;
 
   const displayValue = useMemo(() => {
     if (!isUserInput && isUpdateLoading) {
@@ -140,7 +135,6 @@ export function useTokenInput({
 
   return {
     amountString: displayValue,
-    unit,
     convertedAmount,
     toggleUnit,
     handleInputChange,
