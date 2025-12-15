@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BigNumber, utils } from "ethers";
-import { convertTokenToUSD, convertUSDToToken } from "utils";
+import {
+  convertTokenToUSD,
+  convertUSDToToken,
+  formatAmountForDisplay,
+  parseInputValue,
+  isValidNumberInput,
+} from "utils";
 import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
-import { formatUnitsWithMaxFractions } from "utils";
 
 export type UnitType = "usd" | "token";
 
@@ -37,15 +42,35 @@ export function useTokenInput({
   setUnit: externalSetUnit,
 }: UseTokenInputProps): UseTokenInputReturn {
   const [amountString, setAmountString] = useState<string>("");
+  const [localInputValue, setLocalInputValue] = useState<string>("");
   const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
   const [justTyped, setJustTyped] = useState(false);
 
-  // Use external unit if provided, otherwise use internal state
   const unit = externalUnit ?? internalUnit;
   const setUnit = externalSetUnit ?? setInternalUnit;
 
-  // Handle user input changes - propagate to parent
+  const displayValue = useMemo(() => {
+    if (shouldUpdate && isUpdateLoading) {
+      return "";
+    }
+    if (shouldUpdate && expectedAmount && token) {
+      return formatAmountForDisplay(expectedAmount, token, unit);
+    }
+    return localInputValue;
+  }, [
+    shouldUpdate,
+    isUpdateLoading,
+    expectedAmount,
+    token,
+    unit,
+    localInputValue,
+  ]);
+
+  useEffect(() => {
+    setAmountString(displayValue);
+  }, [displayValue]);
+
   useEffect(() => {
     if (!justTyped) {
       return;
@@ -56,150 +81,109 @@ export function useTokenInput({
         setAmount(null);
         return;
       }
-      // If the input is empty or effectively zero, set amount to null
-      if (!amountString || !Number(amountString)) {
-        setAmount(null);
-        return;
-      }
-      if (unit === "token") {
-        const parsed = utils.parseUnits(amountString, token.decimals);
-        // If parsed amount is zero or negative, set to null
-        if (parsed.lte(0)) {
-          setAmount(null);
-          return;
-        }
-        setAmount(parsed);
-      } else {
-        const tokenValue = convertUSDToToken(amountString, token);
-        // If converted value is zero or negative, set to null
-        if (tokenValue.lte(0)) {
-          setAmount(null);
-          return;
-        }
-        setAmount(tokenValue);
-      }
+      const parsed = parseInputValue(localInputValue, token, unit);
+      setAmount(parsed);
     } catch (e) {
       setAmount(null);
     }
-  }, [amountString, justTyped, token, unit, setAmount]);
+  }, [localInputValue, justTyped, token, unit, setAmount]);
 
-  // Reset amount when token changes
   useEffect(() => {
     if (token) {
-      setAmountString("");
+      setLocalInputValue("");
       setConvertedAmount(undefined);
       setAmount(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token?.chainId, token?.symbol]);
 
-  // Handle quote updates - only update the field that should receive the quote
   useEffect(() => {
     if (shouldUpdate && isUpdateLoading) {
       setAmountString("");
     }
 
     if (shouldUpdate && token) {
-      // Clear the field when there's no expected amount and not loading
       if (!expectedAmount && !isUpdateLoading) {
         setAmountString("");
       } else {
         if (expectedAmount) {
-          if (unit === "token") {
-            // Display as token amount
-            setAmountString(
-              formatUnitsWithMaxFractions(expectedAmount, token.decimals)
-            );
-          } else {
-            // Display as USD amount - convert token to USD
-            const tokenAmountFormatted = formatUnitsWithMaxFractions(
-              expectedAmount,
-              token.decimals
-            );
-            const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-            // convertTokenToUSD returns in 18 decimal precision
-            setAmountString(utils.formatUnits(usdValue, 18));
-          }
+          setAmountString(formatAmountForDisplay(expectedAmount, token, unit));
         }
       }
     }
   }, [expectedAmount, isUpdateLoading, shouldUpdate, token, unit]);
 
-  // Set converted value for display
   useEffect(() => {
-    if (!token || !amountString) {
+    if (!token || !displayValue) {
       setConvertedAmount(undefined);
       return;
     }
     try {
       if (unit === "token") {
-        // User typed token amount - convert to USD for display
-        const usdValue = convertTokenToUSD(amountString, token);
+        const usdValue = convertTokenToUSD(displayValue, token);
         setConvertedAmount(usdValue);
       } else {
-        // User typed USD amount - convert to token for display
-        const tokenValue = convertUSDToToken(amountString, token);
+        const tokenValue = convertUSDToToken(displayValue, token);
         setConvertedAmount(tokenValue);
       }
     } catch (e) {
-      // getting an underflow error here
       setConvertedAmount(undefined);
     }
-  }, [token, amountString, unit]);
+  }, [token, displayValue, unit]);
 
-  // Toggle between token and USD units
   const toggleUnit = useCallback(() => {
     if (unit === "token") {
-      // Convert token amount to USD string for display
-      if (amountString && token && convertedAmount) {
+      if (localInputValue && token && convertedAmount) {
         try {
-          // convertedAmount is USD value in 18 decimals
           const a = utils.formatUnits(convertedAmount, 18);
-          setAmountString(a);
+          setLocalInputValue(a);
         } catch (e) {
-          setAmountString("0");
+          setLocalInputValue("0");
         }
       }
       setUnit("usd");
     } else {
-      // Convert USD amount to token string for display
-      if (amountString && token && convertedAmount) {
+      if (localInputValue && token && convertedAmount) {
         try {
-          // convertedAmount is token value in token's native decimals
           const a = utils.formatUnits(convertedAmount, token.decimals);
-          setAmountString(a);
+          setLocalInputValue(a);
         } catch (e) {
-          setAmountString("0");
+          setLocalInputValue("0");
         }
       }
       setUnit("token");
     }
-  }, [unit, amountString, token, convertedAmount, setUnit]);
+  }, [unit, localInputValue, token, convertedAmount, setUnit]);
 
-  // Handle input field changes
-  const handleInputChange = useCallback((value: string) => {
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+  const handleInputChange = useCallback(
+    (value: string) => {
+      if (!isValidNumberInput(value)) {
+        return;
+      }
+
+      setLocalInputValue(value);
       setJustTyped(true);
-      setAmountString(value);
-    }
-  }, []);
 
-  // Handle balance selector click
+      if (!token) {
+        setAmount(null);
+        return;
+      }
+
+      try {
+        const parsed = parseInputValue(value, token, unit);
+        setAmount(parsed);
+      } catch (e) {
+        setAmount(null);
+      }
+    },
+    [token, unit, setAmount]
+  );
+
   const handleBalanceClick = useCallback(
-    (amount: BigNumber, decimals: number) => {
+    (amount: BigNumber, _decimals: number) => {
       setAmount(amount);
-      if (unit === "usd" && token) {
-        // Convert token amount to USD for display
-        const tokenAmountFormatted = formatUnitsWithMaxFractions(
-          amount,
-          decimals
-        );
-        const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-        // convertTokenToUSD returns in 18 decimal precision
-        setAmountString(utils.formatUnits(usdValue, 18));
-      } else {
-        // Display as token amount
-        setAmountString(formatUnitsWithMaxFractions(amount, decimals));
+      if (token) {
+        setLocalInputValue(formatAmountForDisplay(amount, token, unit));
       }
     },
     [setAmount, unit, token]

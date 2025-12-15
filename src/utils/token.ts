@@ -8,11 +8,13 @@ import {
   getChainInfo,
   parseUnits,
 } from "utils";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { ERC20__factory } from "utils/typechain";
 import { SwapToken } from "utils/serverless-api/types";
 import { TokenInfo } from "constants/tokens";
 import { chainsWithUsdt0Enabled, getToken, tokenTable } from "utils/constants";
 import usdt0Logo from "assets/token-logos/usdt0.svg";
+import { UnitType } from "hooks/useTokenInput";
 
 export async function getNativeBalance(
   chainId: ChainId,
@@ -230,4 +232,40 @@ export function getIntermediaryTokenInfo(tokenInfo: {
   chainId: number;
 }): { symbol: string; chainId: number } | undefined {
   return INTERMEDIARY_TOKEN_MAPPING?.[tokenInfo.chainId]?.[tokenInfo.symbol];
+}
+
+export function formatAmountForDisplay(
+  amount: BigNumber,
+  token: LifiToken,
+  unit: UnitType
+): string {
+  if (unit === "token") {
+    return formatUnitsWithMaxFractions(amount, token.decimals);
+  } else {
+    const tokenFormatted = formatUnitsWithMaxFractions(amount, token.decimals);
+    const usdValue = convertTokenToUSD(tokenFormatted, token);
+    return ethers.utils.formatUnits(usdValue, 18);
+  }
+}
+
+export function parseInputValue(
+  input: string,
+  token: LifiToken,
+  unit: UnitType
+): BigNumber | null {
+  if (!input || !Number(input)) {
+    return null;
+  }
+
+  if (unit === "token") {
+    const parsed = ethers.utils.parseUnits(input, token.decimals);
+    return parsed.lte(0) ? null : parsed;
+  } else {
+    const tokenValue = convertUSDToToken(input, token);
+    return tokenValue.lte(0) ? null : tokenValue;
+  }
+}
+
+export function isValidNumberInput(value: string): boolean {
+  return value === "" || /^\d*\.?\d*$/.test(value);
 }
