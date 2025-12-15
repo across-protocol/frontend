@@ -1,9 +1,11 @@
 import { QuoteRequest } from "./quoteRequestAction";
 
 export const initialQuote: QuoteRequest = {
-  tradeType: "exactInput",
   originToken: null,
   destinationToken: null,
   customDestinationAccount: null,
-  amount: null,
+  userInputField: "origin",
+  userInputValue: "",
+  userInputAmount: null,
+  quoteOutputAmount: null,
 };

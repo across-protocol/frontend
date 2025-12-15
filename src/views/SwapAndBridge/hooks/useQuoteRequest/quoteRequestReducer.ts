@@ -6,20 +6,32 @@ export const quoteRequestReducer = (
 ): QuoteRequest => {
   switch (action.type) {
     case "SET_ORIGIN_TOKEN":
-      return { ...prevState, originToken: action.payload };
-    case "SET_DESTINATION_TOKEN":
-      return { ...prevState, destinationToken: action.payload };
-    case "SET_DESTINATION_AMOUNT":
       return {
         ...prevState,
-        amount: action.payload,
-        tradeType: "minOutput",
+        originToken: action.payload,
+        userInputValue: "",
+        userInputAmount: null,
+        quoteOutputAmount: null,
       };
-    case "SET_ORIGIN_AMOUNT":
+    case "SET_DESTINATION_TOKEN":
       return {
         ...prevState,
-        amount: action.payload,
-        tradeType: "exactInput",
+        destinationToken: action.payload,
+        userInputValue: "",
+        userInputAmount: null,
+        quoteOutputAmount: null,
+      };
+    case "SET_USER_INPUT":
+      return {
+        ...prevState,
+        userInputField: action.payload.field,
+        userInputValue: action.payload.value,
+        userInputAmount: action.payload.amount,
+      };
+    case "SET_QUOTE_OUTPUT":
+      return {
+        ...prevState,
+        quoteOutputAmount: action.payload,
       };
     case "SET_CUSTOM_DESTINATION_ACCOUNT":
       return { ...prevState, customDestinationAccount: action.payload };
@@ -30,8 +42,8 @@ export const quoteRequestReducer = (
         ...prevState,
         originToken: prevState.destinationToken,
         destinationToken: prevState.originToken,
-        tradeType:
-          prevState.tradeType === "exactInput" ? "minOutput" : "exactInput",
+        userInputField:
+          prevState.userInputField === "origin" ? "destination" : "origin",
       };
     default:
       return prevState;

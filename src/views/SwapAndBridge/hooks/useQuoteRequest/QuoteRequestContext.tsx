@@ -9,8 +9,12 @@ interface QuoteRequestContextValue {
   quoteRequest: QuoteRequest;
   setOriginToken: (token: EnrichedToken | null) => void;
   setDestinationToken: (token: EnrichedToken | null) => void;
-  setOriginAmount: (amount: BigNumber | null) => void;
-  setDestinationAmount: (amount: BigNumber | null) => void;
+  setUserInput: (
+    field: "origin" | "destination",
+    value: string,
+    amount: BigNumber | null
+  ) => void;
+  setQuoteOutput: (amount: BigNumber | null) => void;
   setCustomDestinationAccount: (account: QuoteAccount) => void;
   resetCustomDestinationAccount: () => void;
   quickSwap: () => void;
@@ -40,12 +44,19 @@ export const QuoteRequestProvider = ({
     dispatch({ type: "SET_DESTINATION_TOKEN", payload: token });
   }, []);
 
-  const setOriginAmount = useCallback((amount: BigNumber | null) => {
-    dispatch({ type: "SET_ORIGIN_AMOUNT", payload: amount });
-  }, []);
+  const setUserInput = useCallback(
+    (
+      field: "origin" | "destination",
+      value: string,
+      amount: BigNumber | null
+    ) => {
+      dispatch({ type: "SET_USER_INPUT", payload: { field, value, amount } });
+    },
+    []
+  );
 
-  const setDestinationAmount = useCallback((amount: BigNumber | null) => {
-    dispatch({ type: "SET_DESTINATION_AMOUNT", payload: amount });
+  const setQuoteOutput = useCallback((amount: BigNumber | null) => {
+    dispatch({ type: "SET_QUOTE_OUTPUT", payload: amount });
   }, []);
 
   const setCustomDestinationAccount = useCallback((account: QuoteAccount) => {
@@ -66,8 +77,8 @@ export const QuoteRequestProvider = ({
         quoteRequest,
         setOriginToken,
         setDestinationToken,
-        setOriginAmount,
-        setDestinationAmount,
+        setUserInput,
+        setQuoteOutput,
         setCustomDestinationAccount,
         resetCustomDestinationAccount,
         quickSwap,
