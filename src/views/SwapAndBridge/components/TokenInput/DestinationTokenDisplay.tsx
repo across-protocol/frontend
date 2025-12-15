@@ -20,14 +20,12 @@ import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequest
 import { BigNumber } from "ethers";
 
 type DestinationTokenDisplayProps = {
-  expectedOutputAmount: BigNumber | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
 };
 
 export const DestinationTokenDisplay = ({
-  expectedOutputAmount,
   isUpdateLoading,
   unit,
   setUnit,

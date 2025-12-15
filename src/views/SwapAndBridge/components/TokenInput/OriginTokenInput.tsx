@@ -21,14 +21,12 @@ import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
 
 type OriginTokenInputProps = {
-  expectedAmount: BigNumber | undefined;
   isUpdateLoading: boolean;
   unit: UnitType;
   setUnit: (unit: UnitType) => void;
 };
 
 export const OriginTokenInput = ({
-  expectedAmount,
   isUpdateLoading,
   unit,
   setUnit,
@@ -73,11 +71,7 @@ export const OriginTokenInput = ({
 
   const balance = useTokenBalance(quoteRequest?.originToken);
 
-  const insufficientBalance = hasInsufficientBalance(
-    quoteRequest,
-    expectedAmount,
-    balance
-  );
+  const insufficientBalance = hasInsufficientBalance(quoteRequest, balance);
 
   useEffect(() => {
     if (

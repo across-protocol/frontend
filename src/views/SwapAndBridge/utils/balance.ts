@@ -2,8 +2,7 @@ import { QuoteRequest } from "../hooks/useQuoteRequest/quoteRequestAction";
 import { BigNumber } from "ethers";
 
 export const hasInsufficientBalance = (
-  { userInputAmount, userInputField }: QuoteRequest,
-  expectedAmount: BigNumber | undefined,
+  { userInputAmount, userInputField, quoteOutputAmount }: QuoteRequest,
   balance: BigNumber | undefined
 ) => {
   if (!userInputAmount) {
@@ -13,8 +12,8 @@ export const hasInsufficientBalance = (
     if (userInputAmount.gt(balance)) {
       return true;
     }
-  } else if (userInputField === "destination" && expectedAmount && balance) {
-    if (expectedAmount.gt(balance)) {
+  } else if (userInputField === "destination" && quoteOutputAmount && balance) {
+    if (quoteOutputAmount.gt(balance)) {
       return true;
     }
   }
