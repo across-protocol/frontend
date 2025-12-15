@@ -107,11 +107,12 @@ const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
     name: "account-creation-limit-exceeded",
     shouldApply: (data) => !data.isWithinAccountCreationDailyLimit,
     getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Account creation requirements not met",
+    reason: "Account creation daily limit exceeded",
   },
   {
     name: "eligible-for-sponsorship",
     shouldApply: (data) =>
+      data.isEligibleTokenPair &&
       data.isWithinGlobalDailyLimit &&
       data.isWithinUserDailyLimit &&
       data.isWithinAccountCreationDailyLimit,

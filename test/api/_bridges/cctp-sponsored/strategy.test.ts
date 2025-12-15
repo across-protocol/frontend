@@ -40,6 +40,10 @@ const TEST_WALLET = ethers.Wallet.createRandom();
 const TEST_PRIVATE_KEY = TEST_WALLET.privateKey;
 
 describe("api/_bridges/cctp-sponsored/strategy", () => {
+  beforeEach(() => {
+    jest.spyOn(hypercore, "assertAccountExistsOnHyperCore").mockResolvedValue();
+  });
+
   const arbitrumUSDC: Token = {
     ...TOKEN_SYMBOLS_MAP.USDC,
     address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM_SEPOLIA],

@@ -4,11 +4,25 @@ import axios from "axios";
 import { getProvider } from "./_providers";
 import { CHAIN_IDs } from "./_constants";
 import { Token } from "./_dexes/types";
+import { AcrossErrorCode, InputError } from "./_errors";
 
 const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
 const HYPERLIQUID_API_BASE_URL_TESTNET = "https://api.hyperliquid-testnet.xyz";
 
 export const SPOT_TOKEN_DECIMALS = 8;
+
+export class HypercoreAccountNotInitializedError extends InputError {
+  constructor(args: { message: string; param?: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.HYPERCORE_ACCOUNT_NOT_INITIALIZED,
+        param: args.param,
+      },
+      opts
+    );
+  }
+}
 
 // Maps <TOKEN_IN_SYMBOL>/<TOKEN_OUT_SYMBOL> to the coin identifier to be used to
 // retrieve the L2 order book for a given pair via the Hyperliquid API.
@@ -111,13 +125,14 @@ export async function accountExistsOnHyperCore(params: {
   account: string;
   chainId?: number;
 }) {
-  const chainId = params.chainId ?? CHAIN_IDs.HYPEREVM;
+  const chainId = params.chainId ?? CHAIN_IDs.HYPERCORE;
 
-  if (isToHyperCore(chainId)) {
+  if (!isToHyperCore(chainId)) {
     throw new Error("Can't check account existence on non-HyperCore chain");
   }
 
-  const provider = getProvider(CHAIN_IDs.HYPEREVM);
+  const evmChainId = getHyperEvmChainId(chainId);
+  const provider = getProvider(evmChainId);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address"],
     [params.account]
@@ -131,6 +146,21 @@ export async function accountExistsOnHyperCore(params: {
     queryResult
   );
   return Boolean(decodedQueryResult[0]);
+}
+
+export async function assertAccountExistsOnHyperCore(params: {
+  account: string;
+  chainId?: number;
+  paramName?: string;
+}) {
+  const { account, chainId } = params;
+  const exists = await accountExistsOnHyperCore({ account, chainId });
+  if (!exists) {
+    throw new HypercoreAccountNotInitializedError({
+      message: `Account ${account} is not initialized on HyperCore`,
+      param: params.paramName,
+    });
+  }
 }
 
 // https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#l2-book-snapshot
