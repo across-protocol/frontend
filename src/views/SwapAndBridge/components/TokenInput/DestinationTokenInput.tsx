@@ -33,7 +33,7 @@ type DestinationTokenDisplayProps = {
   setUnit: (unit: UnitType) => void;
 };
 
-export const DestinationTokenDisplay = ({
+export const DestinationTokenInput = ({
   isUpdateLoading,
   unit,
   setUnit,
