@@ -4,8 +4,8 @@ import {
   convertTokenToUSD,
   convertUSDToToken,
   formatAmountForDisplay,
-  parseInputValue,
   isValidNumberInput,
+  parseInputValue,
 } from "utils";
 import { EnrichedToken } from "views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 
@@ -24,7 +24,6 @@ type UseTokenInputProps = {
 
 type UseTokenInputReturn = {
   amountString: string;
-  setAmountString: (value: string) => void;
   unit: UnitType;
   convertedAmount: BigNumber | undefined;
   toggleUnit: () => void;
@@ -41,7 +40,6 @@ export function useTokenInput({
   unit: externalUnit,
   setUnit: externalSetUnit,
 }: UseTokenInputProps): UseTokenInputReturn {
-  const [amountString, setAmountString] = useState<string>("");
   const [localInputValue, setLocalInputValue] = useState<string>("");
   const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
@@ -65,10 +63,6 @@ export function useTokenInput({
     unit,
     localInputValue,
   ]);
-
-  useEffect(() => {
-    setAmountString(displayValue);
-  }, [displayValue]);
 
   useEffect(() => {
     if (token) {
@@ -155,8 +149,7 @@ export function useTokenInput({
   );
 
   return {
-    amountString,
-    setAmountString,
+    amountString: displayValue,
     unit,
     convertedAmount,
     toggleUnit,
