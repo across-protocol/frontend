@@ -215,6 +215,15 @@ describe("api/_slippage", () => {
           splitSlippage: false,
         })
       ).toThrow(SwapSlippageInsufficientError);
+
+      expect(() =>
+        validateDestinationSwapSlippage({
+          tokenIn: usdcMainnet,
+          tokenOut: usdtMainnet,
+          slippageTolerance: 0.3,
+          splitSlippage: false,
+        })
+      ).toThrow(/Minimum recommended slippage is 0\.0050/);
     });
 
     test("should throw SwapSlippageInsufficientError when user slippage < auto for major pair", () => {
@@ -227,18 +236,36 @@ describe("api/_slippage", () => {
           splitSlippage: false,
         })
       ).toThrow(SwapSlippageInsufficientError);
+
+      expect(() =>
+        validateDestinationSwapSlippage({
+          tokenIn: wethMainnet,
+          tokenOut: usdcMainnet,
+          slippageTolerance: 1.0,
+          splitSlippage: false,
+        })
+      ).toThrow(/Minimum recommended slippage is 0\.0500/);
     });
 
     test("should throw SwapSlippageInsufficientError when user slippage < auto for long tail pair", () => {
-      // Long tail pair (PEPE/USDC) destination slippage = 5.0%, user provides 3.0%
+      // Long tail pair (PEPE/USDT) destination slippage = 5.0%, user provides 3.0%
       expect(() =>
         validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
+          tokenIn: usdtMainnet,
           tokenOut: pepeMainnet,
           slippageTolerance: 3.0,
           splitSlippage: false,
         })
       ).toThrow(SwapSlippageInsufficientError);
+
+      expect(() =>
+        validateDestinationSwapSlippage({
+          tokenIn: usdtMainnet,
+          tokenOut: pepeMainnet,
+          slippageTolerance: 3.0,
+          splitSlippage: false,
+        })
+      ).toThrow(/Minimum recommended slippage is 0\.0500/);
     });
 
     test("should account for split slippage in validation", () => {
@@ -253,6 +280,15 @@ describe("api/_slippage", () => {
           splitSlippage: true,
         })
       ).toThrow(SwapSlippageInsufficientError);
+
+      expect(() =>
+        validateDestinationSwapSlippage({
+          tokenIn: wethMainnet,
+          tokenOut: usdcMainnet,
+          slippageTolerance: 2.0,
+          splitSlippage: true,
+        })
+      ).toThrow(/Minimum recommended slippage is 0\.0150/);
     });
 
     test("should pass validation with split slippage when sufficient", () => {

@@ -184,7 +184,9 @@ export function validateDestinationSwapSlippage(params: {
 
   if (userSlippage < autoSlippage) {
     throw new SwapSlippageInsufficientError({
-      message: `Insufficient slippage.`,
+      message: `Insufficient slippage tolerance. Minimum recommended slippage is ${(
+        autoSlippage / 100
+      ).toFixed(4)} for this token pair.`,
     });
   }
 }
