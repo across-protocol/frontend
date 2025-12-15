@@ -1,4 +1,5 @@
 import { BigNumber, ethers, utils } from "ethers";
+import solanaKit from "@solana/kit";
 import {
   buildEvmTxForAllowanceHolder,
   buildSvmTxForAllowanceHolder,
@@ -19,6 +20,7 @@ import { AMOUNT_TYPE } from "../../../../api/_dexes/utils";
 import * as cctpFees from "../../../../api/_bridges/cctp/utils/fees";
 import { getEnvs } from "../../../../api/_env";
 import * as sponsorshipEligibility from "../../../../api/_sponsorship-eligibility";
+import { SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS } from "../../../../api/_bridges/cctp-sponsored/utils/svm";
 
 // Mock the environment variables to ensure tests are deterministic.
 jest.mock("../../../../api/_env", () => ({
@@ -700,8 +702,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
   describe("#buildSvmTxForAllowanceHolder() - eligible for sponsorship", () => {
     const depositorSvm = "FmMK62wrtWVb5SVoTZftSCGw3nEDA79hDbZNTRnC1R6t";
     const recipientEvm = "0x0000000000000000000000000000000000000002";
-    const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
-    const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
+    const inputAmount = utils.parseUnits("10", arbitrumUSDC.decimals);
+    const outputAmount = utils.parseUnits("10", hyperCoreUSDC.decimals);
 
     // Mock SVM chain ID - using a test SVM chain
     const svmChainId = CHAIN_IDs.SOLANA_DEVNET;
@@ -766,6 +768,11 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       jest
         .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
         .mockResolvedValue(true);
+      jest.spyOn(solanaKit, "fetchAddressesForLookupTables").mockResolvedValue({
+        [solanaKit.address(SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS)]: [
+          solanaKit.address(SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS),
+        ],
+      });
 
       const result = await buildSvmTxForAllowanceHolder({
         quotes,

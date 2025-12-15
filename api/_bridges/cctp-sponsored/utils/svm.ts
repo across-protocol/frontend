@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import {
   address,
   createNoopSigner,
@@ -13,6 +13,14 @@ import {
   getCctpMessageTransmitterAddress,
   getCctpTokenMessengerAddress,
 } from "../../cctp/utils/constants";
+
+// https://explorer.solana.com/address/BbcsRrKAuPCg7nAze9hRaBwvYus1aWS2HPhxCKZajhhZ
+export const SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS =
+  "BbcsRrKAuPCg7nAze9hRaBwvYus1aWS2HPhxCKZajhhZ";
+
+// We enforce a min. deposit on Solana to protect draining the rent_fund account with
+// dust deposits.
+export const SPONSORED_CCTP_MIN_DEPOSIT_USDC_SVM = utils.parseUnits("10", 6); // 10 USDC
 
 export async function getDepositAccounts(params: {
   originChainId: number;
