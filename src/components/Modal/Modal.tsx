@@ -85,7 +85,7 @@ const Modal = ({
 
   const container = useRef(document.getElementById("modal"));
   const modalContentRef = useRef<HTMLDivElement>(null);
-  const exitAnimationTimeoutId = useRef<Timer>();
+  const exitAnimationTimeoutId = useRef<number>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
   const { lockScroll, unlockScroll } = usePageScrollLock();
 
