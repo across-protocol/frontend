@@ -49,6 +49,7 @@ const mockBridgeStrategyData = (
   isUsdtToUsdt: false,
   isMonadTransfer: false,
   isWithinMonadLimit: false,
+  isHyperCoreDestination: false,
   ...overrides,
 });
 

@@ -12,6 +12,7 @@ import {
   CCTP_FILL_TIME_ESTIMATES,
   getTransferMode,
 } from "./cctp/utils/fill-times";
+import { isToHyperCore } from "../_hypercore";
 
 const ACROSS_THRESHOLD = 10_000; // 10K USD
 // https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
@@ -145,6 +146,7 @@ export async function getBridgeStrategyData({
       isUsdtToUsdt,
       isMonadTransfer,
       isWithinMonadLimit,
+      isHyperCoreDestination: isToHyperCore(outputToken.chainId),
     };
   } catch (error) {
     if (logger) {

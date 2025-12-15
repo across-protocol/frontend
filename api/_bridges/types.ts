@@ -129,6 +129,7 @@ export type BridgeStrategyData =
       isUsdtToUsdt: boolean;
       isMonadTransfer: boolean;
       isWithinMonadLimit: boolean;
+      isHyperCoreDestination: boolean;
     }
   | undefined;
 
