@@ -64,8 +64,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   const onConfirm = useOnConfirm(quoteRequest, approvalAction);
 
   const validation = useValidateSwapAndBridge(
-    quoteRequest.amount,
-    quoteRequest.tradeType === "exactInput",
+    quoteRequest.userInputAmount,
+    quoteRequest.userInputField === "origin",
     quoteRequest.originToken,
     quoteRequest.destinationToken,
     !!depositor,

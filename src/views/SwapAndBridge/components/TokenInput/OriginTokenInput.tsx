@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { formatUSD } from "utils";
@@ -33,14 +33,21 @@ export const OriginTokenInput = ({
   unit,
   setUnit,
 }: OriginTokenInputProps) => {
-  const { quoteRequest, setOriginAmount, setOriginToken, setDestinationToken } =
+  const { quoteRequest, setUserInput, setOriginToken, setDestinationToken } =
     useQuoteRequestContext();
   const amountInputRef = useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = useRef(false);
 
   const { originToken, destinationToken } = quoteRequest;
 
-  const shouldUpdate = quoteRequest.tradeType === "minOutput";
+  const isUserInput = quoteRequest.userInputField === "origin";
+
+  const handleSetInputValue = useCallback(
+    (value: string, amount: BigNumber | null) => {
+      setUserInput("origin", value, amount);
+    },
+    [setUserInput]
+  );
 
   const {
     amountString,
@@ -50,9 +57,10 @@ export const OriginTokenInput = ({
     handleBalanceClick,
   } = useTokenInput({
     token: originToken,
-    setAmount: setOriginAmount,
-    expectedAmount,
-    shouldUpdate,
+    inputValue: quoteRequest.userInputValue,
+    setInputValue: handleSetInputValue,
+    isUserInput,
+    quoteOutputAmount: quoteRequest.quoteOutputAmount,
     isUpdateLoading,
     unit,
     setUnit,
@@ -60,7 +68,7 @@ export const OriginTokenInput = ({
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
-    return Boolean(shouldUpdate && isUpdateLoading);
+    return Boolean(!isUserInput && isUpdateLoading);
   })();
 
   const balance = useTokenBalance(quoteRequest?.originToken);

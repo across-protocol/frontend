@@ -13,11 +13,11 @@ export type UnitType = "usd" | "token";
 
 type UseTokenInputProps = {
   token: EnrichedToken | null;
-  setAmount: (amount: BigNumber | null) => void;
-  expectedAmount: BigNumber | undefined;
-  shouldUpdate: boolean;
+  inputValue: string;
+  setInputValue: (value: string, amount: BigNumber | null) => void;
+  isUserInput: boolean;
+  quoteOutputAmount: BigNumber | null | undefined;
   isUpdateLoading: boolean;
-  // Optional: Allow unit state to be controlled from parent
   unit?: UnitType;
   setUnit?: (unit: UnitType) => void;
 };
@@ -33,14 +33,14 @@ type UseTokenInputReturn = {
 
 export function useTokenInput({
   token,
-  setAmount,
-  expectedAmount,
-  shouldUpdate,
+  inputValue,
+  setInputValue,
+  isUserInput,
+  quoteOutputAmount,
   isUpdateLoading,
   unit: externalUnit,
   setUnit: externalSetUnit,
 }: UseTokenInputProps): UseTokenInputReturn {
-  const [localInputValue, setLocalInputValue] = useState<string>("");
   const [internalUnit, setInternalUnit] = useState<UnitType>("token");
   const [convertedAmount, setConvertedAmount] = useState<BigNumber>();
 
@@ -48,30 +48,21 @@ export function useTokenInput({
   const setUnit = externalSetUnit ?? setInternalUnit;
 
   const displayValue = useMemo(() => {
-    if (shouldUpdate && isUpdateLoading) {
+    if (!isUserInput && isUpdateLoading) {
       return "";
     }
-    if (shouldUpdate && expectedAmount && token) {
-      return formatAmountForDisplay(expectedAmount, token, unit);
+    if (!isUserInput && quoteOutputAmount && token) {
+      return formatAmountForDisplay(quoteOutputAmount, token, unit);
     }
-    return localInputValue;
+    return inputValue;
   }, [
-    shouldUpdate,
+    isUserInput,
     isUpdateLoading,
-    expectedAmount,
+    quoteOutputAmount,
     token,
     unit,
-    localInputValue,
+    inputValue,
   ]);
-
-  useEffect(() => {
-    if (token) {
-      setLocalInputValue("");
-      setConvertedAmount(undefined);
-      setAmount(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token?.chainId, token?.symbol]);
 
   useEffect(() => {
     if (!token || !displayValue) {
@@ -93,27 +84,29 @@ export function useTokenInput({
 
   const toggleUnit = useCallback(() => {
     if (unit === "token") {
-      if (localInputValue && token && convertedAmount) {
+      if (inputValue && token && convertedAmount) {
         try {
           const a = utils.formatUnits(convertedAmount, 18);
-          setLocalInputValue(a);
+          const parsed = parseInputValue(a, token, "usd");
+          setInputValue(a, parsed);
         } catch (e) {
-          setLocalInputValue("0");
+          setInputValue("0", null);
         }
       }
       setUnit("usd");
     } else {
-      if (localInputValue && token && convertedAmount) {
+      if (inputValue && token && convertedAmount) {
         try {
           const a = utils.formatUnits(convertedAmount, token.decimals);
-          setLocalInputValue(a);
+          const parsed = parseInputValue(a, token, "token");
+          setInputValue(a, parsed);
         } catch (e) {
-          setLocalInputValue("0");
+          setInputValue("0", null);
         }
       }
       setUnit("token");
     }
-  }, [unit, localInputValue, token, convertedAmount, setUnit]);
+  }, [unit, inputValue, token, convertedAmount, setUnit, setInputValue]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -121,31 +114,28 @@ export function useTokenInput({
         return;
       }
 
-      setLocalInputValue(value);
-
       if (!token) {
-        setAmount(null);
+        setInputValue(value, null);
         return;
       }
 
       try {
         const parsed = parseInputValue(value, token, unit);
-        setAmount(parsed);
+        setInputValue(value, parsed);
       } catch (e) {
-        setAmount(null);
+        setInputValue(value, null);
       }
     },
-    [token, unit, setAmount]
+    [token, unit, setInputValue]
   );
 
   const handleBalanceClick = useCallback(
     (amount: BigNumber, _decimals: number) => {
-      setAmount(amount);
       if (token) {
-        setLocalInputValue(formatAmountForDisplay(amount, token, unit));
+        setInputValue(formatAmountForDisplay(amount, token, unit), amount);
       }
     },
-    [setAmount, unit, token]
+    [unit, token, setInputValue]
   );
 
   return {

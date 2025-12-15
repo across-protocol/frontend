@@ -28,24 +28,35 @@ describe("quoteRequestReducer", () => {
     expect(result.destinationToken).toBe(token);
   });
 
-  it("sets origin amount with exactInput trade type", () => {
+  it("sets user input for origin field", () => {
     const amount = BigNumber.from(100);
     const result = quoteRequestReducer(initialQuote, {
-      type: "SET_ORIGIN_AMOUNT",
-      payload: amount,
+      type: "SET_USER_INPUT",
+      payload: { field: "origin", value: "100", amount },
     });
-    expect(result.amount).toBe(amount);
-    expect(result.tradeType).toBe("exactInput");
+    expect(result.userInputAmount).toBe(amount);
+    expect(result.userInputValue).toBe("100");
+    expect(result.userInputField).toBe("origin");
   });
 
-  it("sets destination amount with minOutput trade type", () => {
+  it("sets user input for destination field", () => {
     const amount = BigNumber.from(100);
     const result = quoteRequestReducer(initialQuote, {
-      type: "SET_DESTINATION_AMOUNT",
+      type: "SET_USER_INPUT",
+      payload: { field: "destination", value: "100", amount },
+    });
+    expect(result.userInputAmount).toBe(amount);
+    expect(result.userInputValue).toBe("100");
+    expect(result.userInputField).toBe("destination");
+  });
+
+  it("sets quote output amount", () => {
+    const amount = BigNumber.from(200);
+    const result = quoteRequestReducer(initialQuote, {
+      type: "SET_QUOTE_OUTPUT",
       payload: amount,
     });
-    expect(result.amount).toBe(amount);
-    expect(result.tradeType).toBe("minOutput");
+    expect(result.quoteOutputAmount).toBe(amount);
   });
 
   it("sets custom destination account", () => {
@@ -87,22 +98,28 @@ describe("quoteRequestReducer", () => {
       expect(result.destinationToken).toBe(eth);
     });
 
-    it("converts exactInput to minOutput", () => {
-      const state: QuoteRequest = { ...initialQuote, tradeType: "exactInput" };
+    it("converts origin input field to destination", () => {
+      const state: QuoteRequest = {
+        ...initialQuote,
+        userInputField: "origin",
+      };
       const result = quoteRequestReducer(state, {
         type: "QUICK_SWAP",
         payload: undefined,
       });
-      expect(result.tradeType).toBe("minOutput");
+      expect(result.userInputField).toBe("destination");
     });
 
-    it("converts minOutput to exactInput", () => {
-      const state: QuoteRequest = { ...initialQuote, tradeType: "minOutput" };
+    it("converts destination input field to origin", () => {
+      const state: QuoteRequest = {
+        ...initialQuote,
+        userInputField: "destination",
+      };
       const result = quoteRequestReducer(state, {
         type: "QUICK_SWAP",
         payload: undefined,
       });
-      expect(result.tradeType).toBe("exactInput");
+      expect(result.userInputField).toBe("origin");
     });
   });
 

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { formatUnits } from "ethers/lib/utils";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
 import { formatUSD } from "utils";
@@ -31,16 +32,19 @@ export const DestinationTokenDisplay = ({
   unit,
   setUnit,
 }: DestinationTokenDisplayProps) => {
-  const {
-    quoteRequest,
-    setDestinationAmount,
-    setOriginToken,
-    setDestinationToken,
-  } = useQuoteRequestContext();
-
-  const shouldUpdate = quoteRequest.tradeType === "exactInput";
+  const { quoteRequest, setUserInput, setOriginToken, setDestinationToken } =
+    useQuoteRequestContext();
 
   const { destinationToken, originToken } = quoteRequest;
+
+  const isUserInput = quoteRequest.userInputField === "destination";
+
+  const handleSetInputValue = useCallback(
+    (value: string, amount: BigNumber | null) => {
+      setUserInput("destination", value, amount);
+    },
+    [setUserInput]
+  );
 
   const {
     amountString,
@@ -50,9 +54,10 @@ export const DestinationTokenDisplay = ({
     handleBalanceClick,
   } = useTokenInput({
     token: destinationToken,
-    setAmount: setDestinationAmount,
-    expectedAmount: expectedOutputAmount,
-    shouldUpdate,
+    inputValue: quoteRequest.userInputValue,
+    setInputValue: handleSetInputValue,
+    isUserInput,
+    quoteOutputAmount: quoteRequest.quoteOutputAmount,
     isUpdateLoading,
     unit,
     setUnit,
@@ -60,7 +65,7 @@ export const DestinationTokenDisplay = ({
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
-    return Boolean(shouldUpdate && isUpdateLoading);
+    return Boolean(!isUserInput && isUpdateLoading);
   })();
 
   const formattedConvertedAmount = (() => {

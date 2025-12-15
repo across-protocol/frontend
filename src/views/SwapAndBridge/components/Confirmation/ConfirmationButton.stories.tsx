@@ -185,11 +185,13 @@ const mockSwapQuote: SwapApprovalApiCallReturnType = {
 };
 
 const mockQuoteRequest: QuoteRequest = {
-  tradeType: "exactInput",
+  userInputField: "origin",
+  userInputValue: "100",
+  userInputAmount: BigNumber.from("100000000"),
+  quoteOutputAmount: BigNumber.from("99500000"),
   originToken: mockInputToken,
   destinationToken: mockOutputToken,
   customDestinationAccount: null,
-  amount: BigNumber.from("100000000"),
 };
 
 const createQuoteWithProvider = (
