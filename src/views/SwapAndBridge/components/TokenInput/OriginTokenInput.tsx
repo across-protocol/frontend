@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
+import { FormattedTokenInput } from "./FormattedTokenInput";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
   TokenAmountInputWrapper,
   TokenAmountStack,
@@ -79,16 +79,17 @@ export const OriginTokenInput = ({
           value={displayValue}
           error={insufficientBalance}
         >
-          <TokenAmountInput
+          <FormattedTokenInput
+            ref={amountInputRef}
             id="origin-amount-input"
             name="origin-amount-input"
             data-testid="bridge-amount-input"
-            ref={amountInputRef}
-            placeholder="0.00"
             value={displayValue}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={handleInputChange}
+            placeholder="0.00"
             disabled={inputDisabled}
             error={insufficientBalance}
+            maxDecimals={18}
           />
         </TokenAmountInputWrapper>
         <UnitToggleButtonWrapper>

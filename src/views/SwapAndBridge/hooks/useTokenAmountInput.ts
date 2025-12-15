@@ -6,6 +6,7 @@ import {
   convertUSDToToken,
   formatAmountForDisplay,
   formatUSD,
+  formatNumberWithSeparators,
   isValidNumberInput,
   parseInputValue,
 } from "utils";
@@ -86,7 +87,9 @@ export const useTokenAmountInput = ({
       return "";
     }
 
-    return formatAmountForDisplay(amount, token, unit);
+    const rawFormatted = formatAmountForDisplay(amount, token, unit);
+
+    return formatNumberWithSeparators(rawFormatted, 18);
   }, [
     isUserInput,
     isUpdateLoading,
@@ -153,9 +156,6 @@ export const useTokenAmountInput = ({
 
   const handleInputChange = useCallback(
     (value: string) => {
-      if (!isValidNumberInput(value)) {
-        return;
-      }
       handleSetInputValue(value);
     },
     [handleSetInputValue]
