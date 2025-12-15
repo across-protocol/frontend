@@ -20,7 +20,7 @@ import {
 } from "../types";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { InvalidParamError } from "../../_errors";
+import { AmountTooLowError, InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
 import { getFallbackRecipient } from "../../_dexes/utils";
 import { getEstimatedFillTime } from "../cctp/utils/fill-times";
@@ -50,6 +50,7 @@ import { getSlippage } from "../../_slippage";
 import { getCctpBridgeStrategy } from "../cctp/strategy";
 import {
   getDepositAccounts,
+  SPONSORED_CCTP_MIN_DEPOSIT_USDC_SVM,
   SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS,
 } from "./utils/svm";
 import { getSVMRpc } from "../../_providers";
@@ -433,6 +434,18 @@ async function _prepareSponsoredTx(params: {
   if (originSwapQuote || destinationSwapQuote) {
     throw new InvalidParamError({
       message: `Sponsored CCTP: Origin/destination swaps are not supported`,
+    });
+  }
+
+  if (
+    sdk.utils.chainIsSvm(originChainId) &&
+    bridgeQuote.inputAmount.lt(SPONSORED_CCTP_MIN_DEPOSIT_USDC_SVM)
+  ) {
+    throw new AmountTooLowError({
+      message: `Sponsored CCTP: Solana origin requires a min. deposit of ${utils.formatUnits(
+        SPONSORED_CCTP_MIN_DEPOSIT_USDC_SVM,
+        6
+      )} USDC`,
     });
   }
 
