@@ -703,7 +703,7 @@ export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
 
 // This will override the routing preference for the swap API. Useful for testing burn/mint routes.
 export const swapApiRoutingPreference =
-  (["default", "native", "across"] as const).find(
+  (["default", "native", "across", "sponsored-cctp"] as const).find(
     (preference) =>
       preference.toLowerCase() ===
       process.env.REACT_APP_SWAP_API_ROUTING_PREFERENCE?.toLowerCase()

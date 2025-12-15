@@ -1,14 +1,12 @@
 import { BigNumber } from "ethers";
 import {
   assertSufficientBalanceOnHyperEvm,
-  assertAccountExistsOnHyperCore,
   getHyperEvmChainId,
   getBridgeableOutputToken,
   getDepositRecipient,
   getDepositMessage,
 } from "../../../../api/_bridges/sponsored-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
-import { accountExistsOnHyperCore } from "../../../../api/_hypercore";
 import {
   getFullRelayers,
   getTransferRestrictedRelayers,
@@ -91,28 +89,6 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
           outputToken,
         })
       ).rejects.toThrow("Amount exceeds max. deposit limit");
-    });
-  });
-
-  describe("assertAccountExistsOnHyperCore", () => {
-    it("should resolve if account exists", async () => {
-      (accountExistsOnHyperCore as jest.Mock).mockResolvedValue(true);
-      await expect(
-        assertAccountExistsOnHyperCore({
-          account: "0x123",
-          errorMessagePrefix: "Error",
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it("should throw if account does not exist", async () => {
-      (accountExistsOnHyperCore as jest.Mock).mockResolvedValue(false);
-      await expect(
-        assertAccountExistsOnHyperCore({
-          account: "0x123",
-          errorMessagePrefix: "Error",
-        })
-      ).rejects.toThrow("Error: Account 0x123 is not initialized on HyperCore");
     });
   });
 

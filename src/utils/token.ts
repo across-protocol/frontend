@@ -194,6 +194,8 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
       [swapToken.chainId]: swapToken.address,
     },
     priceUsd: swapToken.priceUsd,
+    // Use displaySymbol from API if available
+    displaySymbol: swapToken.displaySymbol,
   };
 
   // If we found a local token definition, merge in mainnetAddress and displaySymbol
@@ -201,7 +203,7 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
     return {
       ...baseTokenInfo,
       mainnetAddress: localToken.mainnetAddress,
-      displaySymbol: localToken.displaySymbol,
+      displaySymbol: swapToken.displaySymbol || localToken.displaySymbol,
       logoURI: localToken.logoURI || baseTokenInfo.logoURI, // Prefer local logo if available
     };
   }
@@ -222,7 +224,17 @@ const INTERMEDIARY_TOKEN_MAPPING: Record<
   number,
   Record<string, { symbol: string; chainId: number }>
 > = {
-  1337: { "USDH-SPOT": { symbol: "USDH", chainId: 999 } },
+  1337: {
+    "USDH-SPOT": { symbol: "USDH", chainId: 999 },
+    "USDC-SPOT": {
+      symbol: "USDC",
+      chainId: 999,
+    },
+    "USDT-SPOT": {
+      symbol: "USDT0",
+      chainId: 999,
+    },
+  },
 };
 
 export function getIntermediaryTokenInfo(tokenInfo: {
