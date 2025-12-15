@@ -188,11 +188,39 @@ export async function getSponsoredOftQuoteForExactInput(
 
   const nativeToken = getNativeTokenInfo(inputToken.chainId);
 
-  // Convert output amount from intermediary token decimals to final output token decimals
-  const finalOutputAmount = ConvertDecimals(
-    intermediaryToken.decimals,
-    outputToken.decimals
-  )(outputAmount);
+  const isUsdtToUsdcSwap = outputToken.symbol === "USDC-SPOT";
+
+  let finalOutputAmount: BigNumber;
+  if (isUsdtToUsdcSwap) {
+    // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
+    const bridgeOutputInSpotDecimals = ConvertDecimals(
+      intermediaryToken.decimals,
+      SPOT_TOKEN_DECIMALS
+    )(outputAmount);
+
+    const simResult = await simulateMarketOrder({
+      chainId: outputToken.chainId,
+      tokenIn: {
+        symbol: "USDT",
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      tokenOut: {
+        symbol: "USDC",
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      inputAmount: bridgeOutputInSpotDecimals,
+    });
+
+    finalOutputAmount = ConvertDecimals(
+      SPOT_TOKEN_DECIMALS,
+      outputToken.decimals
+    )(simResult.outputAmount);
+  } else {
+    finalOutputAmount = ConvertDecimals(
+      intermediaryToken.decimals,
+      outputToken.decimals
+    )(outputAmount);
+  }
 
   return {
     bridgeQuote: {
@@ -262,11 +290,39 @@ export async function getSponsoredOftQuoteForOutput(
     ),
   ]);
 
-  // Convert output amount from intermediary token decimals to output token decimals
-  const finalOutputAmount = ConvertDecimals(
-    intermediaryToken.decimals,
-    outputToken.decimals
-  )(intermediaryOutputAmount);
+  const isUsdtToUsdcSwap = outputToken.symbol === "USDC-SPOT";
+
+  let finalOutputAmount: BigNumber;
+  if (isUsdtToUsdcSwap) {
+    // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
+    const bridgeOutputInSpotDecimals = ConvertDecimals(
+      intermediaryToken.decimals,
+      SPOT_TOKEN_DECIMALS
+    )(intermediaryOutputAmount);
+
+    const simResult = await simulateMarketOrder({
+      chainId: outputToken.chainId,
+      tokenIn: {
+        symbol: "USDT",
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      tokenOut: {
+        symbol: "USDC",
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      inputAmount: bridgeOutputInSpotDecimals,
+    });
+
+    finalOutputAmount = ConvertDecimals(
+      SPOT_TOKEN_DECIMALS,
+      outputToken.decimals
+    )(simResult.outputAmount);
+  } else {
+    finalOutputAmount = ConvertDecimals(
+      intermediaryToken.decimals,
+      outputToken.decimals
+    )(intermediaryOutputAmount);
+  }
 
   // OFT precision limitations may prevent delivering the exact minimum amount
   // We validate against the rounded amount (maximum possible given shared decimals)

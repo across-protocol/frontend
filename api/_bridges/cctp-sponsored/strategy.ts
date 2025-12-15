@@ -192,7 +192,39 @@ export async function getQuoteForExactInput(
           }
         : params.outputToken,
     });
-    outputAmount = unsponsoredOutputAmount;
+
+    // For USDC to USDT-SPOT unsponsored flows, simulate the HyperLiquid market order
+    // to get the actual output amount with swap impact.
+    const isUsdcToUsdtSwap =
+      isSwapPair && ["USDT", "USDT-SPOT"].includes(outputToken.symbol);
+
+    if (isUsdcToUsdtSwap) {
+      const bridgeOutputAmountOutputTokenDecimals = ConvertDecimals(
+        inputToken.decimals,
+        SPOT_TOKEN_DECIMALS
+      )(unsponsoredOutputAmount);
+
+      const simResult = await simulateMarketOrder({
+        chainId: outputToken.chainId,
+        tokenIn: {
+          symbol: "USDC",
+          decimals: SPOT_TOKEN_DECIMALS,
+        },
+        tokenOut: {
+          symbol: "USDT",
+          decimals: SPOT_TOKEN_DECIMALS,
+        },
+        inputAmount: bridgeOutputAmountOutputTokenDecimals,
+      });
+
+      outputAmount = ConvertDecimals(
+        SPOT_TOKEN_DECIMALS,
+        outputToken.decimals
+      )(simResult.outputAmount);
+    } else {
+      outputAmount = unsponsoredOutputAmount;
+    }
+
     provider = "cctp";
     fees = unsponsoredFees;
   }
@@ -222,6 +254,7 @@ export async function getQuoteForOutput(
   assertSupportedRoute({ inputToken, outputToken });
 
   let inputAmount: BigNumber;
+  let outputAmount: BigNumber = minOutputAmount;
   let provider: "sponsored-cctp" | "cctp" = "sponsored-cctp";
   let fees: {
     amount: BigNumber;
@@ -247,6 +280,41 @@ export async function getQuoteForOutput(
   } else {
     const isSwapPair =
       inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
+
+    const isUsdcToUsdtSwap =
+      isSwapPair && ["USDT", "USDT-SPOT"].includes(outputToken.symbol);
+
+    let bridgeOutputRequired = minOutputAmount;
+    if (isUsdcToUsdtSwap) {
+      // For USDC to USDT-SPOT unsponsored flows, simulate the swap to determine
+      // how much USDC-SPOT we need to get the desired output
+      const simResult = await simulateMarketOrder({
+        chainId: outputToken.chainId,
+        tokenIn: {
+          symbol: "USDC",
+          decimals: SPOT_TOKEN_DECIMALS,
+        },
+        tokenOut: {
+          symbol: "USDT",
+          decimals: SPOT_TOKEN_DECIMALS,
+        },
+        inputAmount: ConvertDecimals(
+          outputToken.decimals,
+          SPOT_TOKEN_DECIMALS
+        )(minOutputAmount),
+      });
+
+      // Use the simulation result to estimate the actual output with swap impact
+      outputAmount = ConvertDecimals(
+        SPOT_TOKEN_DECIMALS,
+        outputToken.decimals
+      )(simResult.outputAmount);
+      bridgeOutputRequired = ConvertDecimals(
+        SPOT_TOKEN_DECIMALS,
+        outputToken.decimals
+      )(simResult.inputAmount);
+    }
+
     const {
       bridgeQuote: {
         inputAmount: unsponsoredInputAmount,
@@ -258,6 +326,9 @@ export async function getQuoteForOutput(
       useForwardFee: false,
     }).getQuoteForOutput({
       ...params,
+      minOutputAmount: isUsdcToUsdtSwap
+        ? bridgeOutputRequired
+        : minOutputAmount,
       outputToken: isSwapPair
         ? {
             ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
@@ -279,8 +350,8 @@ export async function getQuoteForOutput(
       inputToken,
       outputToken,
       inputAmount,
-      outputAmount: minOutputAmount,
-      minOutputAmount,
+      outputAmount,
+      minOutputAmount: outputAmount,
       estimatedFillTimeSec: getEstimatedFillTime(
         inputToken.chainId,
         CCTP_TRANSFER_MODE
