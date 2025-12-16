@@ -152,14 +152,14 @@ export function getCctpBridgeStrategy(
       return [];
     },
 
-    getBridgeQuoteRecipient: (
+    getBridgeQuoteRecipient: async (
       crossSwap: CrossSwap,
       _hasOriginSwap?: boolean
     ) => {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
 
