@@ -480,7 +480,7 @@ async function _prepareSponsoredTx(params: {
       outputToken: crossSwap.outputToken,
       transferMode: CCTP_TRANSFER_MODE,
       useSandbox: sdk.utils.chainIsProd(originChainId),
-      // For sponsored flows, we don't need to account for the forward fee as the we
+      // For sponsored flows, we don't need to account for the forward fee as we
       // route through our own sponsorship periphery contract.
       useForwardFee: false,
     });
