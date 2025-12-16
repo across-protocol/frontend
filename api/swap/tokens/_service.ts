@@ -194,6 +194,38 @@ function getIndirectChainTokens(
   });
 }
 
+/**
+ * Returns USDH on HyperEVM as a destination token
+ * for the sponsored-intent flow (USDC to USDH)
+ */
+function getSponsoredIntentOutputTokens(
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): SwapToken[] {
+  if (!chainIds.includes(CHAIN_IDs.HYPEREVM)) {
+    return [];
+  }
+
+  const usdhToken = TOKEN_SYMBOLS_MAP.USDH;
+  const usdhAddress = usdhToken.addresses[CHAIN_IDs.HYPEREVM];
+  if (!usdhAddress) {
+    return [];
+  }
+
+  return [
+    {
+      chainId: CHAIN_IDs.HYPEREVM,
+      address: usdhAddress,
+      name: usdhToken.name,
+      symbol: usdhToken.symbol,
+      decimals: usdhToken.decimals,
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+      priceUsd: pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[usdhAddress] || "1",
+    },
+  ];
+}
+
 // Chains where USDT should be displayed as USDT0
 // Temporary list until all chains migrate to USDT0
 const chainsWithUsdt0Enabled = [
@@ -390,6 +422,12 @@ export async function fetchSwapTokensData(
     pricesForLifiTokens
   );
   responseJson.push(...indirectChainTokens);
+
+  const sponsoredIntentOutputTokens = getSponsoredIntentOutputTokens(
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...sponsoredIntentOutputTokens);
 
   // Add Uniswap tokens
   const uniswapTokens = getUniswapTokens(
