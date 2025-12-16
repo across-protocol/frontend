@@ -1,16 +1,20 @@
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
-  Switch,
-  Route,
-  useLocation,
-  useHistory,
   Redirect,
+  Route,
+  Switch,
+  useHistory,
+  useLocation,
 } from "react-router-dom";
 import { Header, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
-import { stringValueInArray, getConfig, chainEndpointToId } from "utils";
+import {
+  chainEndpointToId,
+  enableMigration,
+  getConfig,
+  stringValueInArray,
+} from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { enableMigration } from "utils";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
@@ -55,6 +59,10 @@ const SwapAndBridge = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/SwapAndBridge")
 );
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
+
+const Transaction = lazyWithRetry(
+  () => import(/* webpackChunkName: "Transaction" */ "./views/Transaction")
+);
 
 function useRoutes() {
   const [enableACXBanner, setEnableACXBanner] = useState(true);
@@ -113,6 +121,11 @@ const Routes: React.FC = () => {
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
           <Route exact path="/transactions" component={Transactions} />
+          <Route
+            exact
+            path="/transaction/:depositTxnRef"
+            component={Transaction}
+          />
           <Route exact path="/pool" component={LiquidityPool} />
           <Route
             exact
