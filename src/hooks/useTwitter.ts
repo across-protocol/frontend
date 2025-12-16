@@ -10,13 +10,13 @@ const contestActiveParams = {
 };
 
 const contestInactiveParams = {
-  cardTitle: "Share your move.",
-  cardSubtitle: "You get places fast, don't let your friends miss out!",
+  cardTitle: "That was fast! Tell the world!",
+  cardSubtitle: "",
   modalTitle: "Too Fast Not to Share",
 };
 
 const tweetText =
-  "Check out how fast I just bridged with @AcrossProtocol.\n\nPowered by Intents. ⛺";
+  "Check out how fast I just bridged.\n\nGet there with @AcrossProtocol";
 
 export function useTwitter() {
   const { helpers } = useCurrentBreakpoint();
