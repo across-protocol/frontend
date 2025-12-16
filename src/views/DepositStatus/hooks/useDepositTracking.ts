@@ -159,7 +159,6 @@ export function useDepositTracking({
     enabled: !!depositQuery.data && depositQuery.data.status === "deposited",
   });
 
-  // Track fill in local storage
   useEffect(() => {
     const fillInfo = fillQuery.data;
 
@@ -171,42 +170,6 @@ export function useDepositTracking({
       queryKey: makeUseUserTokenBalancesQueryKey(),
       type: "all", // Refetch both active and inactive queries
     });
-
-    // TODO
-    // // Remove existing deposit and add updated one with fill information
-    // const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
-
-    // if (localDepositByTxHash) {
-    //   removeLocalDeposits([depositTxHash]);
-    // }
-
-    // TODO update deposit in localStorage. track in Amplitude
-    // if (fromBridgeAndSwapPagePayload) {
-    //   // Add to local storage with fill information
-    //   // Use the strategy-specific conversion method
-    //   const localDeposit = fillStrategy.convertForFillQuery(
-    //     fillInfo,
-    //     fromBridgeAndSwapPagePayload
-    //   );
-    //   addLocalDeposit(localDeposit);
-
-    //   // Record transfer properties
-    //   const { swapQuote, depositArgs, tokenPrice } =
-    //     fromBridgeAndSwapPagePayload;
-
-    //   // Only record if we have token info
-    //   if (tokenForAnalytics) {
-    //     recordTransferUserProperties(
-    //       BigNumber.from(depositArgs.amount),
-    //       BigNumber.from(tokenPrice),
-    //       tokenForAnalytics.decimals,
-    //       quoteForAnalytics.tokenSymbol.toLowerCase(),
-    //       Number(quoteForAnalytics.fromChainId),
-    //       Number(quoteForAnalytics.toChainId),
-    //       quoteForAnalytics.fromChainName
-    //     );
-    //   }
-    // }
   }, [
     fillQuery.data,
     depositTxHash,
