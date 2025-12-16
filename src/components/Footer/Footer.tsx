@@ -34,10 +34,19 @@ export const NAV_LINKS = [
     url: "https://twitter.com/AcrossProtocol",
     icon: StyledTwitterIcon,
   },
+];
+
+const LEGAL_LINKS = [
   {
     key: "terms_of_service",
     name: "Terms of Service",
     url: "https://across.to/terms-of-service",
+    icon: undefined,
+  },
+  {
+    key: "privacy_policy",
+    name: "Privacy Policy",
+    url: "https://across.to/privacy-policy",
     icon: undefined,
   },
 ];
@@ -55,6 +64,19 @@ const Footer = () => {
             rel="noopener noreferrer"
           >
             {link.icon ? <link.icon /> : null}
+            {link.name}
+          </Link>
+        ))}
+      </LinksContainer>
+
+      <LinksContainer>
+        {LEGAL_LINKS.map((link) => (
+          <Link
+            key={link.key}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {link.name}
           </Link>
         ))}
