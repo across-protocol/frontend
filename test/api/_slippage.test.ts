@@ -244,7 +244,7 @@ describe("api/_slippage", () => {
           slippageTolerance: 1.0,
           splitSlippage: false,
         })
-      ).toThrow(/Minimum recommended slippage is 0\.0500/);
+      ).toThrow(/Minimum recommended slippage is 0\.0150/);
     });
 
     test("should throw SwapSlippageInsufficientError when user slippage < auto for long tail pair", () => {
