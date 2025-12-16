@@ -4,18 +4,46 @@ import { useConnectionEVM } from "../../../hooks/useConnectionEVM";
 import { useConnectionSVM } from "../../../hooks/useConnectionSVM";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 import { useCallback } from "react";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
+import { useTrackTransferSubmitted } from "./useTrackTransferSubmitted";
+import { useTrackTransferSigned } from "./useTrackTransferSigned";
 
 export function useOnConfirm(
   quoteRequest: QuoteRequest,
-  approvalAction: SwapApproval
+  approvalAction: SwapApproval,
+  swapQuote: SwapApprovalQuote | undefined
 ) {
   const { connect: connectEVM } = useConnectionEVM();
   const { connect: connectSVM } = useConnectionSVM();
 
-  const { originEcosystem, depositor, recipient, destinationEcosystem } =
-    useEcosystemAccounts({
-      originToken: quoteRequest.originToken,
-      destinationToken: quoteRequest.destinationToken,
+  const {
+    originEcosystem,
+    depositor,
+    depositorOrPlaceholder,
+    recipient,
+    recipientOrPlaceholder,
+    destinationEcosystem,
+  } = useEcosystemAccounts({
+    originToken: quoteRequest.originToken,
+    destinationToken: quoteRequest.destinationToken,
+    customDestinationAccount: quoteRequest.customDestinationAccount,
+  });
+
+  const { trackTransferSubmitted } = useTrackTransferSubmitted({
+    quote: swapQuote,
+    quoteRequest,
+    depositorOrPlaceholder,
+    recipientOrPlaceholder,
+    customDestinationAddress: quoteRequest.customDestinationAccount?.address,
+  });
+
+  const { trackTransferSigned, setTransferSubmittedTimestamp } =
+    useTrackTransferSigned({
+      quote: swapQuote,
+      quoteRequest,
+      depositorOrPlaceholder,
+      recipientOrPlaceholder,
+      customDestinationAddress: quoteRequest.customDestinationAccount?.address,
     });
 
   return useCallback(async () => {
@@ -41,8 +69,17 @@ export function useOnConfirm(
       }
     }
 
-    // Otherwise, proceed with the transaction
-    await approvalAction.buttonActionHandler();
+    // Track transfer submitted before executing
+    trackTransferSubmitted();
+    setTransferSubmittedTimestamp();
+
+    // Proceed with the transaction
+    const txHash = await approvalAction.buttonActionHandler();
+
+    // Track transfer signed after successful execution
+    if (txHash) {
+      trackTransferSigned(txHash);
+    }
   }, [
     depositor,
     recipient,
@@ -51,5 +88,8 @@ export function useOnConfirm(
     approvalAction,
     connectEVM,
     connectSVM,
+    trackTransferSubmitted,
+    trackTransferSigned,
+    setTransferSubmittedTimestamp,
   ]);
 }

@@ -1217,10 +1217,6 @@ export interface TransferDepositCompletedProperties {
   originSwapFeePct?: string;
   originSwapFeeUsd?: string;
   /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
-  /**
    * Timestamp the FE recieves quote (may be different from the event timestamp)
    */
   quoteTimestamp: string;
@@ -1301,7 +1297,157 @@ export interface TransferDepositCompletedProperties {
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  transferQuoteBlockNumber: string;
+}
+
+export interface TransferFillCompletedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
+  /**
+   * Capital fee percent, in decimals
+   */
+  capitalFeePct: string;
+  /**
+   * Capital fee in USD
+   */
+  capitalFeeTotalUsd: string;
+  depositCompleteTimestamp: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | amountTooLow, noLiquidity |
+   */
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
+  fillAmount: string;
+  fillAmountUsd: string;
+  fillCompleteTimestamp: string;
+  fillTimeInMs: string;
+  /**
+   * From amount in the bridge token, in decimals
+   */
+  fromAmount: string;
+  /**
+   * From amount in USD
+   */
+  fromAmountUsd: string;
+  /**
+   * Id of the fromChain
+   */
+  fromChainId: string;
+  /**
+   * From chain name
+   */
+  fromChainName: string;
+  /**
+   * Token address of bridge token on from chain
+   */
+  fromTokenAddress: string;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
+  /**
+   * Lp fee percent, in decimals
+   */
+  lpFeePct: string;
+  /**
+   * Lp fee in USD
+   */
+  lpFeeTotalUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
+  /**
+   * Recipient wallet address
+   */
+  recipient: string;
+  /**
+   * Address of referee, null if no referral used
+   */
+  referralProgramAddress?: string;
+  /**
+   * Relay fee percent, in decimals
+   */
+  relayFeePct: string;
+  /**
+   * Relay fee in USD
+   */
+  relayFeeTotalUsd: string;
+  /**
+   * Relayer gas fee percent, in decimals
+   */
+  relayGasFeePct: string;
+  /**
+   * Relayer fee in USD
+   */
+  relayGasFeeTotalUsd: string;
+  /**
+   * Route "{fromChainId}-{toChainId}"
+   */
+  routeChainIdFromTo: string;
+  /**
+   * Route "{fromChainName}-{toChainName}"
+   */
+  routeChainNameFromTo: string;
+  /**
+   * Sender wallet address
+   */
+  sender: string;
+  /**
+   * Result of user signing or rejecting wallet connection
+   */
+  succeeded: boolean;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   */
+  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  /**
+   * To amount of bridge token, in decimals
+   */
+  toAmount: string;
+  /**
+   * To amount in USD
+   */
+  toAmountUsd: string;
+  /**
+   * Id of the toChain
+   */
+  toChainId: string;
+  /**
+   * Name of the toChain
+   */
+  toChainName: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
+  totalFilledAmount: string;
+  totalFilledAmountUsd: string;
+  /**
+   * Token address of bridge token on to chain
+   */
+  toTokenAddress: string;
+  toTokenSymbol?: string;
+  /**
+   * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
+   */
+  transactionHash: string;
 }
 
 export interface TransferQuoteReceivedProperties {
@@ -1378,10 +1524,6 @@ export interface TransferQuoteReceivedProperties {
   originSwapFeePct?: string;
   originSwapFeeUsd?: string;
   /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
-  /**
    * Timestamp the FE recieves quote (may be different from the event timestamp)
    */
   quoteTimestamp: string;
@@ -1444,7 +1586,6 @@ export interface TransferQuoteReceivedProperties {
    */
   toTokenAddress: string;
   toTokenSymbol?: string;
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSignedProperties {
@@ -1536,12 +1677,6 @@ export interface TransferSignedProperties {
    * |---|---|
    * | Regex |  |
    */
-  quoteLatencyMilliseconds: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
   quoteTimestamp: string;
   /**
    * Recipient wallet address
@@ -1616,12 +1751,6 @@ export interface TransferSignedProperties {
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSubmittedProperties {
@@ -1705,12 +1834,6 @@ export interface TransferSubmittedProperties {
    * |---|---|
    * | Regex |  |
    */
-  quoteLatencyMilliseconds: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
   quoteTimestamp: string;
   /**
    * Recipient wallet address
@@ -1781,7 +1904,6 @@ export interface TransferSubmittedProperties {
    */
   toTokenAddress: string;
   toTokenSymbol?: string;
-  transferQuoteBlockNumber: string;
   /**
    * Timestamp when send button was clicked
    */
@@ -2122,6 +2244,16 @@ export class TransferDepositCompleted implements BaseEvent {
 
   constructor(
     public event_properties: TransferDepositCompletedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class TransferFillCompleted implements BaseEvent {
+  event_type = 'TransferFillCompleted';
+
+  constructor(
+    public event_properties: TransferFillCompletedProperties,
   ) {
     this.event_properties = event_properties;
   }
@@ -2806,6 +2938,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new TransferDepositCompleted(properties), options);
+  }
+
+  /**
+   * TransferFillCompleted
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferFillCompleted)
+   *
+   * Owner: Dong-Ha Kim
+   *
+   * @param properties The event's properties (e.g. appFeePct)
+   * @param options Amplitude event options.
+   */
+  transferFillCompleted(
+    properties: TransferFillCompletedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new TransferFillCompleted(properties), options);
   }
 
   /**
