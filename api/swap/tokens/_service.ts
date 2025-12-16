@@ -20,6 +20,7 @@ const indirectChains = indirectChainsImport as Array<
     intermediaryChain: number;
   }
 >;
+
 export type SwapToken = {
   chainId: number;
   address: string;
@@ -33,6 +34,12 @@ export type SwapToken = {
 
 const chains = mainnetChains;
 const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
+
+// USDT0 logo URL (matches frontend logo)
+const USDT0_LOGO_URL =
+  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
+const USDH_LOGO_URL =
+  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
 
 function getUniswapTokens(
   uniswapResponse: any,
@@ -130,8 +137,7 @@ const TOKEN_DISPLAY_OVERRIDES: Record<
     "USDH-SPOT": {
       displaySymbol: "USDH",
       name: "Hyperliquid USD",
-      logoUrl:
-        "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+      logoUrl: USDH_LOGO_URL,
     },
     "USDC-SPOT": {
       name: "USD Coin",
@@ -219,8 +225,7 @@ function getSponsoredIntentOutputTokens(
       name: usdhToken.name,
       symbol: usdhToken.symbol,
       decimals: usdhToken.decimals,
-      logoUrl:
-        "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+      logoUrl: USDH_LOGO_URL,
       priceUsd: pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[usdhAddress] || "1",
     },
   ];
@@ -236,10 +241,6 @@ const chainsWithUsdt0Enabled = [
   CHAIN_IDs.MONAD,
   CHAIN_IDs.UNICHAIN,
 ];
-
-// USDT0 logo URL (matches frontend logo)
-const USDT0_LOGO_URL =
-  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
 
 function getTokensFromEnabledRoutes(
   chainIds: number[],
