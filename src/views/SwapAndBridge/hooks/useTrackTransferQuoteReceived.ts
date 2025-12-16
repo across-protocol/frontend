@@ -1,0 +1,114 @@
+import { useCallback } from "react";
+import { ampli, TransferQuoteReceivedProperties } from "ampli";
+import { useAmplitude } from "hooks";
+import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { getChainInfo } from "utils";
+import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
+
+type TrackTransferQuoteReceivedParams = {
+  quote: SwapApprovalApiCallReturnType;
+  quoteRequest: QuoteRequest;
+  quoteLatencyMilliseconds: number;
+  sender: string;
+  recipient: string;
+};
+
+export function useTrackTransferQuoteReceived() {
+  const { addToAmpliQueue } = useAmplitude();
+
+  const trackTransferQuoteReceived = useCallback(
+    (params: TrackTransferQuoteReceivedParams) => {
+      const {
+        quote,
+        quoteRequest,
+        quoteLatencyMilliseconds,
+        sender,
+        recipient,
+      } = params;
+
+      const fromChainInfo = getChainInfo(quote.inputToken.chainId);
+      const toChainInfo = getChainInfo(quote.outputToken.chainId);
+      const bridgeStep = quote.steps.bridge;
+      const bridgeFeeDetails = bridgeStep.fees.details;
+
+      const swapType = getSwapType(quote.crossSwapType);
+      const quoteTimestamp = Date.now();
+
+      const properties: TransferQuoteReceivedProperties = {
+        fromChainId: String(quote.inputToken.chainId),
+        fromChainName: fromChainInfo.name,
+        toChainId: String(quote.outputToken.chainId),
+        toChainName: toChainInfo.name,
+        fromTokenAddress: quote.inputToken.address,
+        fromTokenSymbol: quote.inputToken.symbol,
+        toTokenAddress: quote.outputToken.address,
+        toTokenSymbol: quote.outputToken.symbol,
+        bridgeTokenAddress: bridgeStep.tokenIn.address,
+        bridgeTokenSymbol: bridgeStep.tokenIn.symbol,
+        fromAmount: quote.inputAmount.toString(),
+        fromAmountUsd: quote.fees?.total.details.swapImpact.amountUsd ?? "0",
+        toAmount: quote.expectedOutputAmount.toString(),
+        toAmountUsd: quote.fees?.total.amountUsd ?? "0",
+        sender,
+        recipient,
+        isSenderEqRecipient: sender.toLowerCase() === recipient.toLowerCase(),
+        routeChainIdFromTo: `${quote.inputToken.chainId}-${quote.outputToken.chainId}`,
+        routeChainNameFromTo: `${fromChainInfo.name}-${toChainInfo.name}`,
+        expectedFillTimeInSec: String(quote.expectedFillTime),
+        expectedFillTimeInSecLowerBound: String(quote.expectedFillTime),
+        expectedFillTimeInSecUpperBound: String(quote.expectedFillTime),
+        lpFeePct: bridgeFeeDetails?.lp.pct.toString() ?? "0",
+        lpFeeTotalUsd: bridgeFeeDetails?.lp.amount.toString() ?? "0",
+        capitalFeePct: bridgeFeeDetails?.relayerCapital.pct.toString() ?? "0",
+        capitalFeeTotalUsd:
+          bridgeFeeDetails?.relayerCapital.amount.toString() ?? "0",
+        relayGasFeePct: bridgeFeeDetails?.destinationGas.pct.toString() ?? "0",
+        relayGasFeeTotalUsd:
+          bridgeFeeDetails?.destinationGas.amount.toString() ?? "0",
+        relayFeePct: bridgeStep.fees.pct.toString(),
+        relayFeeTotalUsd: bridgeStep.fees.amount.toString(),
+        quoteLatencyMilliseconds: String(quoteLatencyMilliseconds),
+        quoteTimestamp: String(quoteTimestamp),
+        transferQuoteBlockNumber: "0",
+        swapType,
+        inputType: quoteRequest.tradeType,
+        inputUnits: "token",
+        destinationSwapFeePct:
+          quote.fees?.total.details.swapImpact.pct?.toString() ?? "0",
+        destinationSwapFeeUsd:
+          quote.fees?.total.details.swapImpact.amountUsd ?? "0",
+        originSwapFeePct:
+          quote.fees?.total.details.swapImpact.pct?.toString() ?? "0",
+        originSwapFeeUsd: quote.fees?.total.details.swapImpact.amountUsd ?? "0",
+        originGasFeePct: quote.fees?.originGas.pct?.toString() ?? "0",
+        originGasFeeUsd: quote.fees?.originGas.amountUsd ?? "0",
+        appFeePct: quote.fees?.total.details.app.pct?.toString() ?? "0",
+        appFeeUsd: quote.fees?.total.details.app.amountUsd ?? "0",
+      };
+
+      addToAmpliQueue(() => {
+        ampli.transferQuoteReceived(properties);
+      });
+    },
+    [addToAmpliQueue]
+  );
+
+  return { trackTransferQuoteReceived };
+}
+
+function getSwapType(
+  crossSwapType: string
+): TransferQuoteReceivedProperties["swapType"] {
+  switch (crossSwapType) {
+    case "anyToAny":
+      return "anyToAny";
+    case "bridgeToAny":
+      return "bridgeToAny";
+    case "anyToBridge":
+      return "anyToBridge";
+    case "bridgeToBridge":
+      return "bridgeToBridge";
+    default:
+      return undefined;
+  }
+}
