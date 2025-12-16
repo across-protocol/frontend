@@ -50,35 +50,6 @@ export function shortenString(
   )}`;
 }
 
-/**
- * Shortens an arbitrary string to a fixed number of characters, mindful of the character length of the delimiter
- * @param str The string to be potentially shortened
- * @param delimiter The delimiter
- * @param maxChars The number of characters to constrain this string
- * @returns `str` if string is less than maxChars. The first `maxChars` chars if the delimiter is too large. A collapsed version with the delimiter in the middle.
- */
-export function shortenStringToLength(
-  str: string,
-  delimiter: string,
-  maxChars: number
-) {
-  if (str.length <= maxChars) {
-    return str;
-  } else {
-    const charsNeeded = maxChars - delimiter.length;
-    // Delimiter is out of bounds
-    if (charsNeeded <= 0) {
-      return str.slice(0, maxChars);
-    } else {
-      const charDivision = charsNeeded / 2;
-      const left = str.slice(0, Math.ceil(charDivision));
-      const right =
-        charDivision < 1 ? "" : str.slice(-Math.floor(charDivision));
-      return `${left}${delimiter}${right}`;
-    }
-  }
-}
-
 export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
@@ -128,19 +99,8 @@ export function formatUnitsWithMaxFractionsFnBuilder(decimals: number) {
   return closure;
 }
 
-export function formatEtherRaw(wei: ethers.BigNumberish): string {
-  return ethers.utils.formatUnits(wei, 18);
-}
-
 export function parseUnits(value: string, decimals: number): ethers.BigNumber {
   return ethers.utils.parseUnits(value, decimals);
-}
-
-export function parseUnitsFnBuilder(decimals: number) {
-  function closure(value: string) {
-    return parseUnits(value, decimals);
-  }
-  return closure;
 }
 
 export function parseEtherLike(value: string): ethers.BigNumber {
@@ -182,10 +142,6 @@ export function formattedBigNumberToNumber(
   }
 }
 
-export function stringToHex(value: string) {
-  return ethers.utils.hexlify(ethers.utils.toUtf8Bytes(value));
-}
-
 // appends hex tag to data
 export function tagHex(
   dataHex: string,
@@ -194,11 +150,6 @@ export function tagHex(
 ) {
   assert(ethers.utils.isHexString(dataHex), "Data must be valid hex string");
   return ethers.utils.hexConcat([dataHex, delimitterHex, tagHex]);
-}
-
-// converts a string tag to hex and appends, currently not in use
-export function tagString(dataHex: string, tagString: string) {
-  return tagHex(dataHex, stringToHex(tagString));
 }
 
 // tags only an address
@@ -227,13 +178,6 @@ export function convertToCapitalCase(str: string) {
     .join(" ");
 }
 
-const twoSigFormatter = new Intl.NumberFormat("en-US", {
-  maximumSignificantDigits: 2,
-});
-
-export const formatNumberTwoSigDigits =
-  twoSigFormatter.format.bind(twoSigFormatter);
-
 const threeMaxFracFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 3,
 });
@@ -242,27 +186,11 @@ export const formatNumberMaxFracDigits = threeMaxFracFormatter.format.bind(
   threeMaxFracFormatter
 );
 
-const twoMaxFracFormatter = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 2,
-});
-
-export const formatNumberTwoFracDigits =
-  twoMaxFracFormatter.format.bind(twoMaxFracFormatter);
-
 export function formatMaxFracDigits(number: number, maxFracDigits: number) {
   const formatter = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: maxFracDigits,
   });
   return formatter.format(number);
-}
-
-export function formatPoolAPY(
-  wei: ethers.BigNumberish,
-  decimals: number
-): string {
-  return formatNumberMaxFracDigits(
-    Number(ethers.utils.formatUnits(wei, decimals))
-  );
 }
 
 export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
@@ -273,20 +201,6 @@ export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: precision,
   }).format(Number(ethers.utils.formatEther(wei)) * 100);
-}
-
-/**
- * Formats a number into a human readable format
- * @param num The number to format
- * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
- */
-export function humanReadableNumber(num: number, decimals = 0): string {
-  if (num <= 0) return "0";
-  return (
-    numeral(num)
-      .format(decimals <= 0 ? "0a" : `0.${"0".repeat(decimals)}a`)
-      .toUpperCase() + "+"
-  );
 }
 
 /**
@@ -342,4 +256,26 @@ export function parseUnitsWithExtendedDecimals(
     valueToParse = `${whole}.${(fraction ?? "").slice(0, decimals)}`;
   }
   return ethers.utils.parseUnits(valueToParse, decimals);
+}
+
+export function formatNumberWithSeparators(
+  value: string,
+  maxDecimals: number = 18
+): string {
+  if (!value || value === ".") return value;
+
+  const parts = value.split(".");
+  const integerPart = parts[0] || "0";
+  const decimalPart = parts[1];
+
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (parts.length === 2) {
+    const limitedDecimals = decimalPart.substring(0, maxDecimals);
+    return `${formattedInteger}.${limitedDecimals}`;
+  } else if (value.endsWith(".")) {
+    return `${formattedInteger}.`;
+  }
+
+  return formattedInteger;
 }

@@ -1,13 +1,15 @@
 import { utils } from "ethers";
 
 import {
+  formatNumberWithSeparators,
+  formatUSD,
   isValidString,
   shortenAddress,
   shortenString,
   shortenTransactionHash,
   smallNumberFormatter,
-  formatUSD,
 } from "../format";
+
 const VALID_ADDRESS = "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828";
 const TX_HASH =
   "0xe5a0c976ca4d09ce6ea034101e78b1a6a9536940cb8f246e7b54d1fe16b8c125";
@@ -70,5 +72,33 @@ describe("#formatUSD", () => {
 
   it("should format a large wei BigNumber to 2 decimal places", () => {
     expect(formatUSD(utils.parseEther("100000.123456"))).toEqual("100,000.12");
+  });
+});
+
+describe("#formatNumberWithSeparators", () => {
+  it("adds thousand separators to integers", () => {
+    expect(formatNumberWithSeparators("1234567")).toEqual("1,234,567");
+  });
+
+  it("preserves decimals while adding separators", () => {
+    expect(formatNumberWithSeparators("1234567.89")).toEqual("1,234,567.89");
+  });
+
+  it("handles numbers under 1000", () => {
+    expect(formatNumberWithSeparators("999")).toEqual("999");
+    expect(formatNumberWithSeparators("42.5")).toEqual("42.5");
+  });
+
+  it("preserves trailing decimal point during input", () => {
+    expect(formatNumberWithSeparators("1234.")).toEqual("1,234.");
+  });
+
+  it("truncates decimals to maxDecimals", () => {
+    expect(formatNumberWithSeparators("1.123456789", 4)).toEqual("1.1234");
+  });
+
+  it("returns empty/special values unchanged", () => {
+    expect(formatNumberWithSeparators("")).toEqual("");
+    expect(formatNumberWithSeparators(".")).toEqual(".");
   });
 });
