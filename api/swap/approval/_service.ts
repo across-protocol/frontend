@@ -27,8 +27,14 @@ import { quoteFetchStrategies } from "../_configs";
 import { getBridgeStrategy } from "../../_bridges";
 import { TypedVercelRequest } from "../../_types";
 import { AcrossErrorCode } from "../../_errors";
+import { CHAIN_IDs } from "../../_constants";
 
 const logger = getLogger();
+
+// Allows us to redirect the gas price cache chain ID to the mainnet chain ID for testnet chains
+const gasPriceCacheChainIdRedirects: Record<number, number> = {
+  [CHAIN_IDs.HYPEREVM_TESTNET]: CHAIN_IDs.HYPEREVM,
+};
 
 export async function handleApprovalSwap(
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
@@ -54,7 +60,7 @@ export async function handleApprovalSwap(
     amountType,
     refundOnOrigin,
     refundAddress,
-    recipient,
+    recipient: _recipient,
     depositor,
     slippageTolerance: _slippageTolerance, // DEPRECATED: slippage expressed as 0 <= slippage <= 100, 1 = 1%
     slippage, // slippage expressed as 0 <= slippage <= 1, 0.01 = 1% or "auto"
@@ -82,6 +88,8 @@ export async function handleApprovalSwap(
     _slippageTolerance ??
     (typeof slippage === "number" ? (slippage as number) * 100 : "auto");
 
+  const recipient = _recipient || depositor;
+
   const bridgeStrategy = await getBridgeStrategy({
     originChainId: inputToken.chainId,
     destinationChainId: outputToken.chainId,
@@ -101,7 +109,7 @@ export async function handleApprovalSwap(
       inputToken,
       outputToken,
       depositor,
-      recipient: recipient || depositor,
+      recipient,
       slippageTolerance,
       type: amountType,
       refundOnOrigin,
@@ -229,7 +237,9 @@ export async function handleApprovalSwap(
   ] = await Promise.all([
     getOriginTxGas(),
     crossSwapTx.ecosystem === "evm"
-      ? latestGasPriceCache(originTxChainId).get()
+      ? latestGasPriceCache(
+          gasPriceCacheChainIdRedirects[originTxChainId] ?? originTxChainId
+        ).get()
       : undefined,
     getCachedTokenPrice({
       symbol: inputToken.symbol,

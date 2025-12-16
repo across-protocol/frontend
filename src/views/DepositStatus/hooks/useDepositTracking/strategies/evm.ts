@@ -17,13 +17,10 @@ import {
   DepositedInfo,
   DepositInfo,
   DepositStatusResponse,
-  FilledInfo,
   FillInfo,
   IChainStrategy,
 } from "../types";
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "../../../types";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
@@ -33,6 +30,7 @@ import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
+import { parseOutputAmountFromHyperCoreFlowLogs } from "utils/hypercore-executor";
 
 /**
  * Strategy for handling EVM chain operations
@@ -124,7 +122,10 @@ export class EVMStrategy implements IChainStrategy {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
 
-      const metadata = await this.getFillMetadata(fillTxHash, bridgeProvider);
+      const metadata = await this.getFillMetadata({
+        fillTxHash,
+        bridgeProvider,
+      });
 
       return {
         fillTxHash: metadata.fillTxHash,
@@ -215,14 +216,16 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getFillMetadata(
-    fillTxHash: string,
-    bridgeProvider: BridgeProvider
-  ): Promise<{
+  async getFillMetadata(params: {
+    fillTxHash: string;
+    bridgeProvider: BridgeProvider;
+  }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
+    const { fillTxHash, bridgeProvider } = params;
+
     try {
       const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
@@ -236,12 +239,7 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser =
-        bridgeProvider === "cctp"
-          ? parseOutputAmountFromMintAndWithdrawLog
-          : bridgeProvider === "oft"
-            ? parseOutputAmountFromOftReceivedLog
-            : parseFilledRelayLogOutputAmount;
+      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -275,5 +273,37 @@ export class EVMStrategy implements IChainStrategy {
       });
       return;
     }
+  }
+
+  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
+    if (["sponsored-cctp", "cctp"].includes(bridgeProvider)) {
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
+        }
+
+        // if we didn't find anything, return cctp output amount
+        return parseOutputAmountFromMintAndWithdrawLog(logs);
+      };
+    }
+
+    if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
+        }
+
+        // if we didn't find anything, return oft output amount
+        return parseOutputAmountFromOftReceivedLog(logs);
+      };
+    }
+
+    return parseFilledRelayLogOutputAmount;
   }
 }
