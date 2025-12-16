@@ -87,7 +87,6 @@ function useTrackTransferQuoteReceived() {
       const bridgeStep = quote.steps.bridge;
       const bridgeFeeDetails = bridgeStep.fees.details;
 
-      const swapType = getSwapType(quote.crossSwapType);
       const quoteTimestamp = Date.now();
 
       const properties: TransferQuoteReceivedProperties = {
@@ -126,7 +125,8 @@ function useTrackTransferQuoteReceived() {
         quoteLatencyMilliseconds: String(quoteLatencyMilliseconds),
         quoteTimestamp: String(quoteTimestamp),
         transferQuoteBlockNumber: "0",
-        swapType,
+        swapType:
+          quote.crossSwapType as TransferQuoteReceivedProperties["swapType"],
         inputType: quoteRequest.tradeType,
         inputUnits: "token",
         destinationSwapFeePct:
@@ -150,21 +150,4 @@ function useTrackTransferQuoteReceived() {
   );
 
   return { trackTransferQuoteReceived };
-}
-
-function getSwapType(
-  crossSwapType: string
-): TransferQuoteReceivedProperties["swapType"] {
-  switch (crossSwapType) {
-    case "anyToAny":
-      return "anyToAny";
-    case "bridgeToAny":
-      return "bridgeToAny";
-    case "anyToBridge":
-      return "anyToBridge";
-    case "bridgeToBridge":
-      return "bridgeToBridge";
-    default:
-      return undefined;
-  }
 }

@@ -61,7 +61,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     swapQuote
   );
 
-  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction, swapQuote);
 
   const validation = useValidateSwapAndBridge(
     quoteRequest.amount,
