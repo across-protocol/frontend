@@ -13,7 +13,6 @@ import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
-import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 import { useOnConfirm } from "../../hooks/useOnConfirm";
 import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
@@ -23,6 +22,7 @@ import {
   getProviderFromQuote,
   isBridgeProviderSponsored,
 } from "../../utils/bridgeProvider";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction/useSwapApprovalAction";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -56,10 +56,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     customDestinationAccount: quoteRequest.customDestinationAccount,
   });
 
-  const approvalAction = useSwapApprovalAction(
-    quoteRequest.originToken?.chainId || 0,
-    swapQuote
-  );
+  const approvalAction = useSwapApprovalAction(quoteRequest, swapQuote);
 
   const onConfirm = useOnConfirm(quoteRequest, approvalAction, swapQuote);
 

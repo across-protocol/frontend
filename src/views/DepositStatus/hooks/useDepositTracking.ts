@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 
-import { useAmplitude } from "hooks";
 import {
   getChainInfo,
   NoFundsDepositedLogError,
@@ -17,6 +16,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useToken } from "hooks/useToken";
 import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
+import { useTrackTransferDepositCompleted } from "./useTrackTransferDepositCompleted";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -43,11 +43,14 @@ export function useDepositTracking({
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
   const queryClient = useQueryClient();
-  const { addToAmpliQueue } = useAmplitude();
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
   const account =
     getEcosystem(fromChainId) === "evm" ? accountEVM : accountSVM?.toBase58();
+
+  const { trackTransferDepositCompleted } = useTrackTransferDepositCompleted(
+    fromBridgeAndSwapPagePayload
+  );
 
   // Resolve token info for analytics
   const tokenForAnalytics = useToken(
@@ -80,7 +83,7 @@ export function useDepositTracking({
     retryDelay: getRetryDelay(fromChainId),
   });
 
-  // Track deposit in Amplitude and add to local storage
+  // Track deposit completion in Amplitude
   useEffect(() => {
     const depositInfo = depositQuery.data;
 
@@ -89,51 +92,15 @@ export function useDepositTracking({
       return;
     }
 
-    // TODO
-    // // Check if deposit is already in local storage
-    // const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    const succeeded = depositInfo.status === "deposited";
+    const depositCompleteTimestamp = depositInfo.depositTimestamp || Date.now();
 
-    // if (!localDepositByTxHash) {
-    //   // Optimistically add deposit to local storage for instant visibility
-    //   // Use the strategy-specific conversion method
-    //   const localDeposit = depositStrategy.convertForDepositQuery(
-    //     depositInfo,
-    //     fromBridgeAndSwapPagePayload
-    //   );
-    //   addLocalDeposit(localDeposit);
-    // }
-
-    // Check if the deposit is from the current user
-    // const isFromCurrentUser =
-    //   depositInfo.depositLog.depositor.toNative() === account;
-    // if (!isFromCurrentUser) {
-    //   return;
-    // }
-
-    // TODO
-    //  Track deposit in Amplitude
-    // addToAmpliQueue(() => {
-    //   ampli.transferDepositCompleted(
-    //     generateDepositConfirmed(
-    //       fromBridgeAndSwapPagePayload.quoteForAnalytics,
-    //       fromBridgeAndSwapPagePayload.referrer,
-    //       fromBridgeAndSwapPagePayload.timeSigned,
-    //       depositInfo.depositTxHash,
-    //       true,
-    //       depositInfo.depositTimestamp,
-    //       fromBridgeAndSwapPagePayload.selectedRoute.fromTokenAddress,
-    //       fromBridgeAndSwapPagePayload.selectedRoute.toTokenAddress
-    //     )
-    //   );
-    // });
-  }, [
-    depositQuery.data,
-    addToAmpliQueue,
-    fromBridgeAndSwapPagePayload,
-    account,
-    depositTxHash,
-    depositStrategy,
-  ]);
+    trackTransferDepositCompleted({
+      transactionHash: depositInfo.depositTxHash,
+      succeeded,
+      depositCompleteTimestamp,
+    });
+  }, [depositQuery.data, trackTransferDepositCompleted]);
 
   // Query for fill information
   const fillQuery = useQuery({
