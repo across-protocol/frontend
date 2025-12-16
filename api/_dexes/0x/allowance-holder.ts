@@ -29,7 +29,7 @@ const { API_KEY_0X } = getEnvs();
 // sold. If the actual amount to be sold is higher than `sellAmount`, then the swap will
 // fail. See https://0x.org/docs/0x-swap-api/advanced-topics/sell-entire-balance for
 // more details.
-const SELL_ENTIRE_BALANCE_AMOUNT_MARKUP = 0.01; // 1%
+const SELL_ENTIRE_BALANCE_AMOUNT_MARKUP = 0.05; // 5%
 
 export const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
 
