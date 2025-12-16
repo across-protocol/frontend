@@ -74,13 +74,7 @@ function useTrackTransferQuoteReceived() {
 
   const trackTransferQuoteReceived = useCallback(
     (params: TrackTransferQuoteReceivedParams) => {
-      const {
-        quote,
-        quoteRequest,
-        quoteLatencyMilliseconds,
-        sender,
-        recipient,
-      } = params;
+      const { quote, quoteRequest, sender, recipient } = params;
 
       const coreProperties = buildCoreTransferProperties({
         quote,
@@ -91,9 +85,7 @@ function useTrackTransferQuoteReceived() {
 
       const properties: TransferQuoteReceivedProperties = {
         ...coreProperties,
-        quoteLatencyMilliseconds: String(quoteLatencyMilliseconds),
         quoteTimestamp: String(Date.now()),
-        transferQuoteBlockNumber: "0",
       };
 
       addToAmpliQueue(() => {

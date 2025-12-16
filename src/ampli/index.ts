@@ -1217,10 +1217,6 @@ export interface TransferDepositCompletedProperties {
   originSwapFeePct?: string;
   originSwapFeeUsd?: string;
   /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
-  /**
    * Timestamp the FE recieves quote (may be different from the event timestamp)
    */
   quoteTimestamp: string;
@@ -1301,7 +1297,6 @@ export interface TransferDepositCompletedProperties {
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferFillCompletedProperties {
@@ -1529,10 +1524,6 @@ export interface TransferQuoteReceivedProperties {
   originSwapFeePct?: string;
   originSwapFeeUsd?: string;
   /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
-  /**
    * Timestamp the FE recieves quote (may be different from the event timestamp)
    */
   quoteTimestamp: string;
@@ -1595,7 +1586,6 @@ export interface TransferQuoteReceivedProperties {
    */
   toTokenAddress: string;
   toTokenSymbol?: string;
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSignedProperties {
@@ -1687,12 +1677,6 @@ export interface TransferSignedProperties {
    * |---|---|
    * | Regex |  |
    */
-  quoteLatencyMilliseconds: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
   quoteTimestamp: string;
   /**
    * Recipient wallet address
@@ -1767,12 +1751,6 @@ export interface TransferSignedProperties {
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSubmittedProperties {
@@ -1856,12 +1834,6 @@ export interface TransferSubmittedProperties {
    * |---|---|
    * | Regex |  |
    */
-  quoteLatencyMilliseconds: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
   quoteTimestamp: string;
   /**
    * Recipient wallet address
@@ -1932,7 +1904,6 @@ export interface TransferSubmittedProperties {
    */
   toTokenAddress: string;
   toTokenSymbol?: string;
-  transferQuoteBlockNumber: string;
   /**
    * Timestamp when send button was clicked
    */

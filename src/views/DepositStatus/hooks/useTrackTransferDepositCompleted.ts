@@ -51,9 +51,7 @@ export function useTrackTransferDepositCompleted(
         timeFromTransferSignedToTransferCompleteInMilliseconds: String(
           timeFromTransferSignedToTransferCompleteInMilliseconds
         ),
-        quoteLatencyMilliseconds: "0",
         quoteTimestamp: String(timeSigned),
-        transferQuoteBlockNumber: "0",
         totalFeePct: swapQuote.fees?.total.pct?.toString() ?? "0",
         totalFeeUsd: swapQuote.fees?.total.amountUsd ?? "0",
         referralProgramAddress: referrer || undefined,

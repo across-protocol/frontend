@@ -57,9 +57,7 @@ export function useTrackTransferSigned({
         lpFeeTotal: bridgeFeeDetails?.lp.amount.toString() ?? "0",
         capitalFeeTotal:
           bridgeFeeDetails?.relayerCapital.amount.toString() ?? "0",
-        quoteLatencyMilliseconds: "0",
         quoteTimestamp: String(transferSubmittedTimestampRef.current),
-        transferQuoteBlockNumber: "0",
         totalFeePct: quote.fees?.total.pct?.toString() ?? "0",
         totalFeeUsd: quote.fees?.total.amountUsd ?? "0",
         timeFromTransferSubmittedToTransferSignedInMilliseconds: String(

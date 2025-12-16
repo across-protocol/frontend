@@ -52,9 +52,7 @@ export function useTrackTransferSubmitted({
 
     const properties: TransferSubmittedProperties = {
       ...coreProperties,
-      quoteLatencyMilliseconds: "0",
       quoteTimestamp: String(firstQuoteTimestampRef.current),
-      transferQuoteBlockNumber: "0",
       totalFeePct: quote.fees?.total.pct?.toString() ?? "0",
       totalFeeUsd: quote.fees?.total.amountUsd ?? "0",
       transferTimestamp: String(transferTimestamp),
