@@ -4,7 +4,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), svgr()],
+  // The as any typecast is necessary here due to the discrepancy between the vitest and the vite versions in this
+  plugins: [react() as any, tsconfigPaths() as any, svgr() as any],
   test: {
     environment: "node",
     setupFiles: ["./setup.vitest.ts"],

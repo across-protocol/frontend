@@ -1,4 +1,4 @@
-import { vi, MockedFunction } from "vitest";
+import { vi, MockedFunction, describe, test, expect, beforeEach } from "vitest";
 import { utils } from "ethers";
 import {
   getSponsorshipEligibilityPreChecks,

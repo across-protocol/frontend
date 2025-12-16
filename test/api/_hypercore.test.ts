@@ -1,4 +1,13 @@
-import { vi, Mock, MockedFunction } from "vitest";
+import {
+  vi,
+  Mock,
+  MockedFunction,
+  Mocked,
+  describe,
+  test,
+  expect,
+  beforeEach,
+} from "vitest";
 import { ethers } from "ethers";
 import axios from "axios";
 
@@ -18,7 +27,7 @@ vi.mock("../../api/_providers", () => ({
   getProvider: vi.fn(),
 }));
 
-const mockedAxios = axios as vi.Mocked<typeof axios>;
+const mockedAxios = axios as Mocked<typeof axios>;
 const mockedGetProvider = getProvider as MockedFunction<typeof getProvider>;
 
 type MockOrderBookData = Awaited<ReturnType<typeof getL2OrderBookForPair>>;

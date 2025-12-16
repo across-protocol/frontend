@@ -1,4 +1,12 @@
-import { vi } from "vitest";
+import {
+  vi,
+  describe,
+  test,
+  expect,
+  beforeEach,
+  Mocked,
+  MockedFunction,
+} from "vitest";
 import { BigNumber } from "ethers";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk";
@@ -59,11 +67,11 @@ vi.mock("../../../../api/_integrator-id", () => ({
   tagSwapApiMarker: vi.fn((data) => data),
 }));
 
-const mockedAxios = axios as vi.Mocked<typeof axios>;
+const mockedAxios = axios as Mocked<typeof axios>;
 
 describe("bridges/cctp/strategy", () => {
   const mockAccountExistsOnHyperCore =
-    hypercoreModule.accountExistsOnHyperCore as vi.MockedFunction<
+    hypercoreModule.accountExistsOnHyperCore as MockedFunction<
       typeof hypercoreModule.accountExistsOnHyperCore
     >;
 

@@ -3,7 +3,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  // The as any typecast is necessary here due to the discrepancy between the vitest and the vite versions in this repo
+  plugins: [tsconfigPaths() as any],
   resolve: {
     alias: {
       api: path.resolve(__dirname, "./api"),

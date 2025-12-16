@@ -1,4 +1,12 @@
-import { vi, MockedFunction } from "vitest";
+import {
+  vi,
+  MockedFunction,
+  Mocked,
+  describe,
+  test,
+  expect,
+  beforeEach,
+} from "vitest";
 import { BigNumber } from "ethers";
 import axios from "axios";
 
@@ -14,7 +22,7 @@ describe("bridges/cctp/utils/fees", () => {
   });
 
   describe("#getCctpFees()", () => {
-    const mockAxios = axios as vi.Mocked<typeof axios>;
+    const mockAxios = axios as Mocked<typeof axios>;
 
     beforeEach(() => {
       vi.clearAllMocks();
