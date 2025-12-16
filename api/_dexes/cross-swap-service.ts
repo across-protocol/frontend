@@ -709,7 +709,6 @@ function _prepCrossSwapQuotesRetrievalB2A(
     chainId: destinationSwapChainId,
   };
 
-  // Validate slippage for destination swap
   validateDestinationSwapSlippage({
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
@@ -1649,7 +1648,6 @@ function _prepCrossSwapQuotesRetrievalA2A(params: {
     chainId: bridgeRoute.toChain,
   };
 
-  // Validate slippage for destination swap
   validateDestinationSwapSlippage({
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
