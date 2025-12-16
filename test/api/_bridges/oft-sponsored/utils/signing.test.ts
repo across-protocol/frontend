@@ -1,16 +1,14 @@
 import { vi } from "vitest";
 import { ethers, utils } from "ethers";
-import { recoverMessageAddress } from "viem";
-import { hexToBytes } from "viem";
 
-import { getEnvs } from "../../../../api/_env";
+import { getEnvs } from "../../../../../api/_env";
 import {
   createOftSignature,
   SignedQuoteParams,
-} from "../../../../api/_bridges/sponsorship";
+} from "../../../../../api/_bridges/oft-sponsored/utils/signing";
 
 // Mock the environment variables to ensure tests are deterministic.
-vi.mock("../../../../api/_env", () => ({
+vi.mock("../../../../../api/_env", () => ({
   getEnvs: vi.fn(),
 }));
 
@@ -44,6 +42,8 @@ describe("OFT Signature", () => {
       finalToken: randomAddress(),
       lzReceiveGasLimit: "200000",
       lzComposeGasLimit: "400000",
+      executionMode: 0,
+      actionData: "0x",
     };
 
     // Create the signature and get the hash that was signed.
@@ -51,11 +51,8 @@ describe("OFT Signature", () => {
 
     // Recover the address from the signature and the hash.
     // This simulates the on-chain validation by checking if the signature was created by the expected signer.
-    // The OFT contract expects an EIP-191 compliant signature, so we use `recoverMessageAddress`.
-    const recoveredAddress = await recoverMessageAddress({
-      message: { raw: hexToBytes(hash as `0x${string}`) },
-      signature: signature as `0x${string}`,
-    });
+    // The OFT contract uses ECDSA.recover(digest, signature) which expects a signature over the raw digest.
+    const recoveredAddress = utils.recoverAddress(hash, signature);
 
     // Assert that the recovered address matches the address of our test wallet.
     expect(recoveredAddress).toEqual(TEST_WALLET.address);

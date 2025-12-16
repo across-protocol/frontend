@@ -936,7 +936,9 @@ export function buildDestinationSwapCrossChainMessage({
           target: bridgeableOutputToken.address,
           callData: encodeApproveCalldata(
             router.address,
-            destinationSwapQuote.maximumAmountIn
+            // Approve max to allow routers (e.g. 0x AllowanceHolder) to pull the full
+            // bridged balance when they size the swap using on-chain balance.
+            constants.MaxUint256
           ),
           value: "0",
         };

@@ -151,7 +151,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Routing preference.",
         type: "string",
         default: "default",
-        choices: ["default", "across", "native"],
+        choices: ["default", "across", "native", "sponsored-cctp"],
       });
   })
   .option("host", {

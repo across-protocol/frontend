@@ -1,7 +1,6 @@
 // Expandable label section component
 import React from "react";
 import { PriceImpact } from "../../utils/fees";
-import { BridgeProvider } from "./provider";
 import { ProviderBadge } from "./BridgeProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { BridgeButtonState, FreeTag } from "./ConfirmationButton";
@@ -13,6 +12,10 @@ import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
+import {
+  BridgeProvider,
+  isBridgeProviderSponsored,
+} from "../../utils/bridgeProvider";
 
 export const ExpandableLabelSection: React.FC<
   React.PropsWithChildren<{
@@ -37,7 +40,7 @@ export const ExpandableLabelSection: React.FC<
   provider,
 }) => {
   // Render state-specific content
-  let content: React.ReactNode = null;
+  let content: React.ReactNode;
 
   const defaultState = (
     <>
@@ -51,7 +54,7 @@ export const ExpandableLabelSection: React.FC<
     </>
   );
 
-  const isSponsoredIntent = provider === "sponsored-intent";
+  const sponsoredBridge = isBridgeProviderSponsored(provider);
 
   // Show quote breakdown when quote is available, otherwise show default state
   if (hasQuote) {
@@ -84,7 +87,7 @@ export const ExpandableLabelSection: React.FC<
               ) : (
                 <>
                   <Dollar width="16" height="16" />
-                  {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+                  {sponsoredBridge && <FreeTag>FREE</FreeTag>}
                   {fee}
                 </>
               )}
@@ -152,8 +155,7 @@ const ExpandableLabelButton = styled.button`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px;
-  padding-bottom: 16px;
+  padding: 8px 8px 16px;
   background: transparent;
   border: none;
   cursor: pointer;

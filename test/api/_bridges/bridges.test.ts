@@ -8,6 +8,25 @@ import {
 import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
+import * as indexerApi from "../../../api/_indexer-api";
+
+jest.mock("../../../api/_logger", () => ({
+  getLogger: jest.fn().mockReturnValue({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  }),
+}));
+
+jest.mock("../../../api/_indexer-api", () => ({
+  ...jest.requireActual("../../../api/_indexer-api"),
+  getSponsorshipsFromIndexer: jest.fn().mockResolvedValue({
+    totalSponsorships: [],
+    userSponsorships: [],
+    accountActivations: [],
+  }),
+}));
 
 // Helper function to create a token on a specific chain
 const createToken = (
@@ -31,6 +50,7 @@ const mockBridgeStrategyData = (
   isUsdtToUsdt: false,
   isMonadTransfer: false,
   isWithinMonadLimit: false,
+  isHyperCoreDestination: false,
   ...overrides,
 });
 
@@ -48,12 +68,14 @@ const wethArbitrum = createToken("WETH", CHAIN_IDs.ARBITRUM);
 const wethHyperEvm = createToken("WETH", CHAIN_IDs.HYPEREVM);
 const wethHyperCore = createToken("WETH", CHAIN_IDs.HYPERCORE);
 const usdhHyperEvm = createToken("USDH", CHAIN_IDs.HYPEREVM);
+const usdhSpotHyperCore = createToken("USDH-SPOT", CHAIN_IDs.HYPERCORE);
 
 describe("api/_bridges/index", () => {
   const baseParams = {
     amount: BigNumber.from("1000000"), // 1 USDC
     amountType: "exactInput" as const,
     depositor: "0x1234567890123456789012345678901234567890",
+    recipient: "0x1234567890123456789012345678901234567890",
   };
 
   describe("#getSupportedBridgeStrategies()", () => {
@@ -472,6 +494,108 @@ describe("api/_bridges/index", () => {
         });
 
         expect(strategy.name).toBe("hypercore");
+      });
+    });
+
+    describe("Sponsored USDC → USDH-SPOT amount-based routing", () => {
+      beforeEach(() => {
+        // Mock sponsorship eligibility to pass all checks for both USDH (HyperEVM) and USDH-SPOT (HyperCore)
+        jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
+          totalSponsorships: [
+            {
+              chainId: CHAIN_IDs.HYPEREVM,
+              finalTokens: [
+                {
+                  tokenAddress:
+                    TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
+                  evmAmountSponsored: "0",
+                },
+              ],
+            },
+            {
+              chainId: CHAIN_IDs.HYPERCORE,
+              finalTokens: [
+                {
+                  tokenAddress:
+                    TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[
+                      CHAIN_IDs.HYPERCORE
+                    ],
+                  evmAmountSponsored: "0",
+                },
+              ],
+            },
+          ],
+          userSponsorships: [
+            {
+              finalRecipient: baseParams.recipient,
+              sponsorships: [
+                {
+                  chainId: CHAIN_IDs.HYPEREVM,
+                  finalTokens: [
+                    {
+                      tokenAddress:
+                        TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
+                      evmAmountSponsored: "0",
+                    },
+                  ],
+                },
+                {
+                  chainId: CHAIN_IDs.HYPERCORE,
+                  finalTokens: [
+                    {
+                      tokenAddress:
+                        TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[
+                          CHAIN_IDs.HYPERCORE
+                        ],
+                      evmAmountSponsored: "0",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          accountActivations: [{ finalRecipient: baseParams.recipient }],
+        });
+      });
+
+      test("should use sponsored-intent for amounts below 10K USDC", async () => {
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          amount: BigNumber.from("5000000000"), // 5K USDC (6 decimals)
+          originChainId: CHAIN_IDs.ARBITRUM,
+          destinationChainId: CHAIN_IDs.HYPERCORE,
+          inputToken: usdcArbitrum,
+          outputToken: usdhSpotHyperCore,
+        });
+
+        expect(strategy.name).toBe("sponsored-intent");
+      });
+
+      test("should use sponsored-cctp for amounts between 10K and 1M USDC", async () => {
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          amount: BigNumber.from("50000000000"), // 50K USDC (6 decimals)
+          originChainId: CHAIN_IDs.ARBITRUM,
+          destinationChainId: CHAIN_IDs.HYPERCORE,
+          inputToken: usdcArbitrum,
+          outputToken: usdhSpotHyperCore,
+        });
+
+        expect(strategy.name).toBe("sponsored-cctp");
+      });
+
+      test("should use across for amounts above 1M USDC (exceeds per-tx limit)", async () => {
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          amount: BigNumber.from("2000000000000"), // 2M USDC (exceeds 1M limit)
+          originChainId: CHAIN_IDs.ARBITRUM,
+          destinationChainId: CHAIN_IDs.HYPERCORE,
+          inputToken: usdcArbitrum,
+          outputToken: usdhSpotHyperCore,
+        });
+
+        // Amounts over 1M USDC exceed the per-transaction limit for sponsorship
+        expect(strategy.name).toBe("across");
       });
     });
 

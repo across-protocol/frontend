@@ -12,8 +12,16 @@ export function useUserTokenBalances() {
   const svmAccountString = svmAccount?.toString();
 
   return useQuery({
-    queryKey: makeUseUserTokenBalancesQueryKey([evmAccount, svmAccountString]),
+    queryKey: ["userTokenBalances", evmAccount, svmAccountString],
     queryFn: async (): Promise<UserTokenBalancesResponse> => {
+      // If no accounts are connected, return empty balances to clear stale data
+      if (!evmAccount && !svmAccountString) {
+        return {
+          account: "",
+          balances: [],
+        };
+      }
+
       // Fetch balances for both accounts if they exist
       const promises: Promise<UserTokenBalancesResponse>[] = [];
 
@@ -23,10 +31,6 @@ export function useUserTokenBalances() {
 
       if (svmAccountString) {
         promises.push(getApiEndpoint().userTokenBalances(svmAccountString));
-      }
-
-      if (promises.length === 0) {
-        throw new Error("No account connected");
       }
 
       // Fetch all balances in parallel
@@ -43,9 +47,9 @@ export function useUserTokenBalances() {
         balances: results.flatMap((result) => result.balances),
       };
     },
-    enabled: !!evmAccount || !!svmAccountString,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-    staleTime: 3 * 60 * 1000, // Consider data stale after 3 minutes
+    // Always enable the query so it refetches when wallets disconnect and clears stale data
+    refetchInterval: 60 * 1000, // Refetch every minute
+    staleTime: 60 * 1000 * 0.8, // Consider data stale after 80% of refetch interval (48 seconds)
   });
 }
 

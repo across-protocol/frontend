@@ -2,7 +2,7 @@ import { BigNumber, ethers } from "ethers";
 
 import { SwapQuote, Token } from "../../../_dexes/types";
 import { AmountTooHighError, InvalidParamError } from "../../../_errors";
-import { accountExistsOnHyperCore, isToHyperCore } from "../../../_hypercore";
+import { isToHyperCore } from "../../../_hypercore";
 import { AppFee } from "../../../_dexes/utils";
 import { CHAIN_IDs } from "../../../_constants";
 import {
@@ -113,23 +113,6 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
         maxDeposit,
         params.inputToken.decimals
       )} ${params.inputToken.symbol} on HyperEVM`,
-    });
-  }
-}
-
-export async function assertAccountExistsOnHyperCore(params: {
-  account: string;
-  errorMessagePrefix: string;
-}) {
-  const { account, errorMessagePrefix } = params;
-
-  const depositorExists = await accountExistsOnHyperCore({
-    account,
-  });
-
-  if (!depositorExists) {
-    throw new InvalidParamError({
-      message: `${errorMessagePrefix}: Account ${account} is not initialized on HyperCore`,
     });
   }
 }

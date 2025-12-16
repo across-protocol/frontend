@@ -131,6 +131,7 @@ export type SwapToken = {
   address: string;
   name: string;
   symbol: string;
+  displaySymbol?: string;
   decimals: number;
   logoUrl?: string;
   priceUsd: string | null;
