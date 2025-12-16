@@ -10,18 +10,18 @@ import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
 import * as indexerApi from "../../../api/_indexer-api";
 
-jest.mock("../../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+vi.mock("../../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   }),
 }));
 
-jest.mock("../../../api/_indexer-api", () => ({
-  ...jest.requireActual("../../../api/_indexer-api"),
-  getSponsorshipsFromIndexer: jest.fn().mockResolvedValue({
+vi.mock("../../../api/_indexer-api", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getSponsorshipsFromIndexer: vi.fn().mockResolvedValue({
     totalSponsorships: [],
     userSponsorships: [],
     accountActivations: [],
@@ -500,7 +500,7 @@ describe("api/_bridges/index", () => {
     describe("Sponsored USDC → USDH-SPOT amount-based routing", () => {
       beforeEach(() => {
         // Mock sponsorship eligibility to pass all checks for both USDH (HyperEVM) and USDH-SPOT (HyperCore)
-        jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
+        vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
           totalSponsorships: [
             {
               chainId: CHAIN_IDs.HYPEREVM,

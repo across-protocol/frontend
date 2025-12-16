@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { parseEtherLike } from "utils/format";
+import { parseEtherLike } from "../format";
 import { vi } from "vitest";
 
 import { getBaseRewardsApr } from "../rewards";

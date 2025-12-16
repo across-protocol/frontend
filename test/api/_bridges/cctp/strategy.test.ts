@@ -15,12 +15,12 @@ import { ConvertDecimals } from "../../../../api/_utils";
 // Mock all dependencies
 vi.mock("axios");
 
-// Only mock subset of functions we need
-jest.mock("../../../../api/_hypercore", () => {
-  const actual = jest.requireActual("../../../../api/_hypercore");
+vi.mock("../../../../api/_hypercore", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../../api/_hypercore")>();
   return {
     ...actual,
-    accountExistsOnHyperCore: jest.fn(),
+    accountExistsOnHyperCore: vi.fn(),
   };
 });
 
@@ -39,17 +39,21 @@ vi.mock("@across-protocol/sdk", async (importOriginal) => {
 });
 
 // Mock only the specific functions we need to mock
-vi.mock("../../../../api/_bridges/cctp/utils/constants", () => {
-  const actual = vi.requireActual(
-    "../../../../api/_bridges/cctp/utils/constants"
-  );
-  return {
-    ...actual,
-    encodeDepositForBurn: vi.fn(
-      (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
-    ),
-  };
-});
+vi.mock(
+  "../../../../api/_bridges/cctp/utils/constants",
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import("../../../../api/_bridges/cctp/utils/constants")
+      >();
+    return {
+      ...actual,
+      encodeDepositForBurn: vi.fn(
+        (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
+      ),
+    };
+  }
+);
 
 vi.mock("../../../../api/_integrator-id", () => ({
   tagSwapApiMarker: vi.fn((data) => data),

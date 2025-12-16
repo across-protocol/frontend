@@ -1,3 +1,4 @@
+import { vi, MockedFunction } from "vitest";
 import { BigNumber } from "ethers";
 import axios from "axios";
 
@@ -5,18 +6,18 @@ import { getCctpFees } from "../../../../../api/_bridges/cctp/utils/fees";
 import { CHAIN_IDs } from "../../../../../api/_constants";
 import { TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 
-jest.mock("axios");
+vi.mock("axios");
 
 describe("bridges/cctp/utils/fees", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("#getCctpFees()", () => {
-    const mockAxios = axios as jest.Mocked<typeof axios>;
+    const mockAxios = axios as vi.Mocked<typeof axios>;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     // Mock Circle API response with multiple finality threshold configs
