@@ -6,6 +6,7 @@ import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 import { useCallback } from "react";
 import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
 import { useTrackTransferSubmitted } from "./useTrackTransferSubmitted";
+import { useTrackTransferSigned } from "./useTrackTransferSigned";
 
 export function useOnConfirm(
   quoteRequest: QuoteRequest,
@@ -36,6 +37,15 @@ export function useOnConfirm(
     customDestinationAddress: quoteRequest.customDestinationAccount?.address,
   });
 
+  const { trackTransferSigned, setTransferSubmittedTimestamp } =
+    useTrackTransferSigned({
+      quote: swapQuote,
+      quoteRequest,
+      depositorOrPlaceholder,
+      recipientOrPlaceholder,
+      customDestinationAddress: quoteRequest.customDestinationAccount?.address,
+    });
+
   return useCallback(async () => {
     // If origin wallet is not connected, connect it first
     if (!depositor) {
@@ -61,9 +71,15 @@ export function useOnConfirm(
 
     // Track transfer submitted before executing
     trackTransferSubmitted();
+    setTransferSubmittedTimestamp();
 
     // Proceed with the transaction
-    await approvalAction.buttonActionHandler();
+    const txHash = await approvalAction.buttonActionHandler();
+
+    // Track transfer signed after successful execution
+    if (txHash) {
+      trackTransferSigned(txHash);
+    }
   }, [
     depositor,
     recipient,
@@ -73,5 +89,7 @@ export function useOnConfirm(
     connectEVM,
     connectSVM,
     trackTransferSubmitted,
+    trackTransferSigned,
+    setTransferSubmittedTimestamp,
   ]);
 }
