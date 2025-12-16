@@ -235,25 +235,31 @@ export type MarketOrderSimulationResult = {
 
 /**
  * Simulates a market order by walking through the order book levels.
- * Calculates execution price, slippage, and output amounts.
+ * Calculates execution price, slippage, and input/output amounts.
  *
  * @param tokenIn - Token being sold
  * @param tokenOut - Token being bought
- * @param inputAmount - Amount of input token to sell (as BigNumber)
+ * @param amount - Amount to simulate (interpretation depends on amountType)
+ * @param amountType - "input" to specify input amount (calculate output),
+ *                     "output" to specify desired output amount (calculate required input)
  * @returns Simulation result with execution details and slippage
  *
  * @example
- * // Simulate selling 1000 USDC for USDH
+ * // Simulate selling 1000 USDC for USDH (input amount type)
  * const result = await simulateMarketOrder({
- *   tokenIn: {
- *     symbol: "USDC",
- *     decimals: 8,
- *   },
- *   tokenOut: {
- *     symbol: "USDH",
- *     decimals: 8,
- *   },
- *   inputAmount: ethers.utils.parseUnits("1000", 8),
+ *   tokenIn: { symbol: "USDC", decimals: 8 },
+ *   tokenOut: { symbol: "USDH", decimals: 8 },
+ *   amount: ethers.utils.parseUnits("1000", 8),
+ *   amountType: "input",
+ * });
+ *
+ * @example
+ * // Simulate how much USDC is needed to receive 500 USDH (output amount type)
+ * const result = await simulateMarketOrder({
+ *   tokenIn: { symbol: "USDC", decimals: 8 },
+ *   tokenOut: { symbol: "USDH", decimals: 8 },
+ *   amount: ethers.utils.parseUnits("500", 8),
+ *   amountType: "output",
  * });
  */
 export async function simulateMarketOrder(params: {
@@ -266,13 +272,15 @@ export async function simulateMarketOrder(params: {
     symbol: string;
     decimals: number;
   };
-  inputAmount: BigNumber;
+  amount: BigNumber;
+  amountType: "input" | "output";
 }): Promise<MarketOrderSimulationResult> {
   const {
     chainId = CHAIN_IDs.HYPERCORE,
     tokenIn,
     tokenOut,
-    inputAmount,
+    amount,
+    amountType,
   } = params;
 
   const orderBook = await getL2OrderBookForPair({
@@ -319,12 +327,13 @@ export async function simulateMarketOrder(params: {
   const bestPrice = levels[0].px;
 
   // Walk through order book levels
-  let remainingInput = inputAmount;
+  let totalInput = BigNumber.from(0);
   let totalOutput = BigNumber.from(0);
+  let remaining = amount;
   let levelsConsumed = 0;
 
   for (const level of levels) {
-    if (remainingInput.lte(0)) break;
+    if (remaining.lte(0)) break;
 
     levelsConsumed++;
 
@@ -333,76 +342,70 @@ export async function simulateMarketOrder(params: {
       Number(level.px).toFixed(tokenOut.decimals),
       tokenOut.decimals
     );
-    // Level size is returned by the API in a parsed format, e.g. 1000 USDC
-    const levelSize = ethers.utils.parseUnits(
+    // Level size (base amount) is returned by the API in a parsed format
+    const baseAvailable = ethers.utils.parseUnits(
       Number(level.sz).toFixed(tokenIn.decimals),
       tokenIn.decimals
     );
+    // Calculate quote equivalent for this level
+    const quoteAvailable = isBuyingBase
+      ? baseAvailable
+          .mul(price)
+          .div(ethers.utils.parseUnits("1", tokenOut.decimals))
+      : baseAvailable
+          .mul(price)
+          .div(ethers.utils.parseUnits("1", tokenIn.decimals));
 
-    if (isBuyingBase) {
-      // Buying base with quote
-      // We have quote currency (input) and want base currency (output)
-      // price = quote per base, so base amount = quote amount / price
+    // Determine available and consumed amounts based on direction and amount type
+    // isBuyingBase: input=quote, output=base
+    // !isBuyingBase (selling base): input=base, output=quote
+    const inputAvailable = isBuyingBase ? quoteAvailable : baseAvailable;
+    const outputAvailable = isBuyingBase ? baseAvailable : quoteAvailable;
 
-      // Calculate how much base currency is available at this level
-      const baseAvailable = levelSize;
+    let inputConsumed: BigNumber;
+    let outputConsumed: BigNumber;
 
-      // Calculate how much quote we need to buy this base
-      const quoteNeeded = baseAvailable
-        .mul(price)
-        .div(ethers.utils.parseUnits("1", tokenOut.decimals));
-
-      if (remainingInput.gte(quoteNeeded)) {
-        // We can consume this entire level
-        totalOutput = totalOutput.add(baseAvailable);
-        remainingInput = remainingInput.sub(quoteNeeded);
+    if (amountType === "input") {
+      // Constrained by input - calculate how much output we get
+      if (remaining.gte(inputAvailable)) {
+        inputConsumed = inputAvailable;
+        outputConsumed = outputAvailable;
       } else {
-        // Partial fill - only consume part of this level
-        const baseAmount = remainingInput
-          .mul(ethers.utils.parseUnits("1", tokenOut.decimals))
-          .div(price);
-        totalOutput = totalOutput.add(baseAmount);
-        remainingInput = BigNumber.from(0);
+        inputConsumed = remaining;
+        // Partial fill: scale output proportionally
+        outputConsumed = outputAvailable.mul(remaining).div(inputAvailable);
       }
     } else {
-      // Selling base for quote
-      // We have base currency (input) and want quote currency (output)
-      // price = quote per base, so quote amount = base amount * price
-
-      // Level size represents how much base can be sold at this price
-      const baseAvailable = levelSize;
-
-      if (remainingInput.gte(baseAvailable)) {
-        // We can consume this entire level
-        const quoteAmount = baseAvailable
-          .mul(price)
-          .div(ethers.utils.parseUnits("1", tokenIn.decimals));
-        totalOutput = totalOutput.add(quoteAmount);
-        remainingInput = remainingInput.sub(baseAvailable);
+      // Constrained by output - calculate how much input we need
+      if (remaining.gte(outputAvailable)) {
+        inputConsumed = inputAvailable;
+        outputConsumed = outputAvailable;
       } else {
-        // Partial fill
-        const quoteAmount = remainingInput
-          .mul(price)
-          .div(ethers.utils.parseUnits("1", tokenIn.decimals));
-        totalOutput = totalOutput.add(quoteAmount);
-        remainingInput = BigNumber.from(0);
+        outputConsumed = remaining;
+        // Partial fill: scale input proportionally
+        inputConsumed = inputAvailable.mul(remaining).div(outputAvailable);
       }
     }
+
+    totalInput = totalInput.add(inputConsumed);
+    totalOutput = totalOutput.add(outputConsumed);
+    remaining = remaining.sub(
+      amountType === "input" ? inputConsumed : outputConsumed
+    );
   }
 
-  const fullyFilled = remainingInput.eq(0);
-  const filledInputAmount = inputAmount.sub(remainingInput);
+  const fullyFilled = remaining.eq(0);
 
   // Calculate average execution price
   // Price should be in same format as order book: quote per base
   let averageExecutionPrice = "0";
-  if (filledInputAmount.gt(0) && totalOutput.gt(0)) {
+  if (totalInput.gt(0) && totalOutput.gt(0)) {
     // Calculate with proper decimal handling
     const outputFormatted = parseFloat(
       ethers.utils.formatUnits(totalOutput, tokenOut.decimals)
     );
     const inputFormatted = parseFloat(
-      ethers.utils.formatUnits(filledInputAmount, tokenIn.decimals)
+      ethers.utils.formatUnits(totalInput, tokenIn.decimals)
     );
 
     // When buying base (input=quote, output=base): price = input/output (quote per base)
@@ -432,7 +435,7 @@ export async function simulateMarketOrder(params: {
 
   return {
     averageExecutionPrice,
-    inputAmount: filledInputAmount,
+    inputAmount: totalInput,
     outputAmount: totalOutput,
     slippagePercent,
     bestPrice,
