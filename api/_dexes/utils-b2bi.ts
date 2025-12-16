@@ -29,6 +29,10 @@ const ENABLED_INDIRECT_TOKEN_PAIRS: {
     inputToken: "USDT",
     outputToken: "USDT-SPOT",
   },
+  {
+    inputToken: "USDT-BNB",
+    outputToken: "USDT-SPOT",
+  },
 ];
 
 export function isIndirectDestinationRouteSupported(params: {
