@@ -20,6 +20,7 @@ const indirectChains = indirectChainsImport as Array<
     intermediaryChain: number;
   }
 >;
+
 export type SwapToken = {
   chainId: number;
   address: string;
@@ -33,6 +34,12 @@ export type SwapToken = {
 
 const chains = mainnetChains;
 const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
+
+// USDT0 logo URL (matches frontend logo)
+const USDT0_LOGO_URL =
+  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
+const USDH_LOGO_URL =
+  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
 
 function getUniswapTokens(
   uniswapResponse: any,
@@ -130,8 +137,7 @@ const TOKEN_DISPLAY_OVERRIDES: Record<
     "USDH-SPOT": {
       displaySymbol: "USDH",
       name: "Hyperliquid USD",
-      logoUrl:
-        "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903",
+      logoUrl: USDH_LOGO_URL,
     },
     "USDC-SPOT": {
       name: "USD Coin",
@@ -194,6 +200,37 @@ function getIndirectChainTokens(
   });
 }
 
+/**
+ * Returns USDH on HyperEVM as a destination token
+ * for the sponsored-intent flow (USDC to USDH)
+ */
+function getSponsoredIntentOutputTokens(
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): SwapToken[] {
+  if (!chainIds.includes(CHAIN_IDs.HYPEREVM)) {
+    return [];
+  }
+
+  const usdhToken = TOKEN_SYMBOLS_MAP.USDH;
+  const usdhAddress = usdhToken.addresses[CHAIN_IDs.HYPEREVM];
+  if (!usdhAddress) {
+    return [];
+  }
+
+  return [
+    {
+      chainId: CHAIN_IDs.HYPEREVM,
+      address: usdhAddress,
+      name: usdhToken.name,
+      symbol: usdhToken.symbol,
+      decimals: usdhToken.decimals,
+      logoUrl: USDH_LOGO_URL,
+      priceUsd: pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[usdhAddress] || "1",
+    },
+  ];
+}
+
 // Chains where USDT should be displayed as USDT0
 // Temporary list until all chains migrate to USDT0
 const chainsWithUsdt0Enabled = [
@@ -204,10 +241,6 @@ const chainsWithUsdt0Enabled = [
   CHAIN_IDs.MONAD,
   CHAIN_IDs.UNICHAIN,
 ];
-
-// USDT0 logo URL (matches frontend logo)
-const USDT0_LOGO_URL =
-  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
 
 function getTokensFromEnabledRoutes(
   chainIds: number[],
