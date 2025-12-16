@@ -46,7 +46,7 @@ type MaxTotalFeeBreakdownDetails = {
 };
 
 export type SwapApprovalApiResponse = {
-  crossSwapType: string;
+  crossSwapType: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
   amountType: string;
   checks: {
     allowance: {
@@ -376,7 +376,3 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
     eip712: result.eip712,
   };
 }
-
-export type SwapApprovalApiCallReturnType = Awaited<
-  ReturnType<typeof swapApprovalApiCall>
->;

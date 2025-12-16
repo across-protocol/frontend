@@ -4,14 +4,14 @@ import { useConnectionEVM } from "../../../hooks/useConnectionEVM";
 import { useConnectionSVM } from "../../../hooks/useConnectionSVM";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 import { useCallback } from "react";
-import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { useTrackTransferSubmitted } from "./useTrackTransferSubmitted";
 import { useTrackTransferSigned } from "./useTrackTransferSigned";
 
 export function useOnConfirm(
   quoteRequest: QuoteRequest,
   approvalAction: SwapApproval,
-  swapQuote: SwapApprovalApiCallReturnType | undefined
+  swapQuote: SwapApprovalQuote | undefined
 ) {
   const { connect: connectEVM } = useConnectionEVM();
   const { connect: connectSVM } = useConnectionSVM();

@@ -1,7 +1,4 @@
-import {
-  SwapApprovalApiCallReturnType,
-  SwapApprovalQuote,
-} from "../../../utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "../../../utils/serverless-api/prod/swap-approval";
 
 export type BridgeProvider =
   | "across"
@@ -23,7 +20,7 @@ export function isBridgeProviderSponsored(
 }
 
 export const getProviderFromQuote = (
-  swapQuote: SwapApprovalApiCallReturnType | undefined
+  swapQuote: SwapApprovalQuote | undefined
 ): BridgeProvider => swapQuote?.steps.bridge.provider || "across";
 
 export function isQuoteSponsored(quote?: SwapApprovalQuote): boolean {

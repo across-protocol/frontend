@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
   swapApprovalApiCall,
-  SwapApprovalApiCallReturnType,
+  SwapApprovalQuote,
   SwapApprovalApiQueryParams,
 } from "utils/serverless-api/prod/swap-approval";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -50,7 +50,7 @@ const useSwapQuote = (quoteRequest: QuoteRequest) => {
       recipientOrPlaceholder,
       skipOriginTxEstimation,
     ],
-    queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
+    queryFn: (): Promise<SwapApprovalQuote | undefined> => {
       quoteStartTimeRef.current = Date.now();
 
       if (Number(debouncedAmount) <= 0) {

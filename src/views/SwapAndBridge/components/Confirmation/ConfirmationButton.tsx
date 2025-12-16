@@ -8,7 +8,7 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
-import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
@@ -22,7 +22,7 @@ import {
   getProviderFromQuote,
   isBridgeProviderSponsored,
 } from "../../utils/bridgeProvider";
-import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction/useSwapApprovalAction";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -35,7 +35,7 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  swapQuote: SwapApprovalApiCallReturnType | undefined;
+  swapQuote: SwapApprovalQuote | undefined;
   isQuoteLoading: boolean;
   quoteError: Error | null;
   onConfirm?: () => Promise<void>;
