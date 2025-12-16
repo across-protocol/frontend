@@ -480,7 +480,9 @@ async function _prepareSponsoredTx(params: {
       outputToken: crossSwap.outputToken,
       transferMode: CCTP_TRANSFER_MODE,
       useSandbox: sdk.utils.chainIsProd(originChainId),
-      useForwardFee: true,
+      // For sponsored flows, we don't need to account for the forward fee as we
+      // route through our own sponsorship periphery contract.
+      useForwardFee: false,
     });
     const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
     maxFee = transferFee.add(forwardFee);
