@@ -14,9 +14,9 @@ import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { useToken } from "hooks/useToken";
 import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
 import { useTrackTransferDepositCompleted } from "./useTrackTransferDepositCompleted";
+import { useTrackTransferFillCompleted } from "./useTrackTransferFillCompleted";
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -52,9 +52,8 @@ export function useDepositTracking({
     fromBridgeAndSwapPagePayload
   );
 
-  // Resolve token info for analytics
-  const tokenForAnalytics = useToken(
-    fromBridgeAndSwapPagePayload?.swapQuote.inputToken.symbol || ""
+  const { trackTransferFillCompleted } = useTrackTransferFillCompleted(
+    fromBridgeAndSwapPagePayload
   );
 
   // Create appropriate strategy for the source chain
@@ -132,23 +131,28 @@ export function useDepositTracking({
     if (!fillInfo || fillInfo.status === "filling") {
       return;
     }
+
+    // Track fill completion
+    const succeeded = fillInfo.status === "filled";
+    const fillCompleteTimestamp = fillInfo.fillTxTimestamp || Date.now();
+    const depositCompleteTimestamp =
+      fillInfo.depositInfo.depositTimestamp || Date.now();
+
+    trackTransferFillCompleted({
+      fillTxHash: fillInfo.fillTxHash,
+      succeeded,
+      fillCompleteTimestamp,
+      depositCompleteTimestamp,
+      fillAmount: fillInfo.outputAmount?.toString() ?? "0",
+      totalFilledAmount: fillInfo.outputAmount?.toString() ?? "0",
+    });
+
     // Refetch user balances
     queryClient.refetchQueries({
       queryKey: makeUseUserTokenBalancesQueryKey(),
       type: "all", // Refetch both active and inactive queries
     });
-  }, [
-    fillQuery.data,
-    depositTxHash,
-    fromBridgeAndSwapPagePayload,
-    fillStrategy,
-    tokenForAnalytics,
-    queryClient,
-    fromChainId,
-    toChainId,
-    accountSVM,
-    accountEVM,
-  ]);
+  }, [fillQuery.data, queryClient, trackTransferFillCompleted]);
 
   const status: DepositStatus = !depositQuery.data?.depositTimestamp
     ? "depositing"

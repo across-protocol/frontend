@@ -1,55 +1,59 @@
 import { useCallback, useRef } from "react";
-import {
-  ampli,
-  TransferDepositCompletedProperties,
-  TransferFillCompletedProperties,
-} from "ampli";
+import { ampli, TransferFillCompletedProperties } from "ampli";
 import { useAmplitude } from "hooks";
 import { getChainInfo } from "utils";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 
-type TrackTransferDepositCompletedParams = {
-  transactionHash: string;
+type TrackTransferFillCompletedParams = {
+  fillTxHash: string;
   succeeded: boolean;
+  fillCompleteTimestamp: number;
   depositCompleteTimestamp: number;
+  fillAmount: string;
+  totalFilledAmount: string;
 };
 
-export function useTrackTransferDepositCompleted(
+export function useTrackTransferFillCompleted(
   fromBridgeAndSwapPagePayload: FromBridgeAndSwapPagePayload | undefined
 ) {
   const { addToAmpliQueue } = useAmplitude();
   const hasTrackedRef = useRef(false);
 
-  const trackTransferDepositCompleted = useCallback(
-    (params: TrackTransferDepositCompletedParams) => {
-      // If we do not have a fromBridgeAndSwapPagePayload here, it means that the
-      // user has Access the page through the URL and not through the in-app
-      // rounding, and we do not want to track the event.
+  const trackTransferFillCompleted = useCallback(
+    (params: TrackTransferFillCompletedParams) => {
       if (!fromBridgeAndSwapPagePayload || hasTrackedRef.current) return;
       hasTrackedRef.current = true;
 
-      const { transactionHash, succeeded, depositCompleteTimestamp } = params;
-      const { swapQuote, timeSigned, referrer, tradeType } =
-        fromBridgeAndSwapPagePayload;
+      const {
+        fillTxHash,
+        succeeded,
+        fillCompleteTimestamp,
+        depositCompleteTimestamp,
+        fillAmount,
+        totalFilledAmount,
+      } = params;
+      const { swapQuote, referrer, tradeType } = fromBridgeAndSwapPagePayload;
 
-      const timeFromTransferSignedToTransferCompleteInMilliseconds =
-        timeSigned > 0 ? depositCompleteTimestamp - timeSigned : 0;
+      const fillTimeInMs =
+        depositCompleteTimestamp > 0
+          ? fillCompleteTimestamp - depositCompleteTimestamp
+          : 0;
 
       const fromChainInfo = getChainInfo(swapQuote.inputToken.chainId);
       const toChainInfo = getChainInfo(swapQuote.outputToken.chainId);
       const bridgeStep = swapQuote.steps.bridge;
       const bridgeFeeDetails = bridgeStep.fees.details;
 
-      const sender = fromBridgeAndSwapPagePayload.sender;
-      const recipient = fromBridgeAndSwapPagePayload.recipient;
-
-      const properties: TransferDepositCompletedProperties = {
-        transactionHash,
+      const properties: TransferFillCompletedProperties = {
+        transactionHash: fillTxHash,
         succeeded,
+        fillCompleteTimestamp: String(fillCompleteTimestamp),
         depositCompleteTimestamp: String(depositCompleteTimestamp),
-        timeFromTransferSignedToTransferCompleteInMilliseconds: String(
-          timeFromTransferSignedToTransferCompleteInMilliseconds
-        ),
+        fillTimeInMs: String(fillTimeInMs),
+        fillAmount,
+        fillAmountUsd: swapQuote.fees?.total.amountUsd ?? "0",
+        totalFilledAmount,
+        totalFilledAmountUsd: swapQuote.fees?.total.amountUsd ?? "0",
         fromChainId: String(swapQuote.inputToken.chainId),
         fromChainName: fromChainInfo.name,
         toChainId: String(swapQuote.outputToken.chainId),
@@ -65,9 +69,8 @@ export function useTrackTransferDepositCompleted(
           swapQuote.fees?.total.details.swapImpact.amountUsd ?? "0",
         toAmount: swapQuote.expectedOutputAmount.toString(),
         toAmountUsd: swapQuote.fees?.total.amountUsd ?? "0",
-        sender,
-        recipient,
-        isSenderEqRecipient: sender.toLowerCase() === recipient.toLowerCase(),
+        sender: fromBridgeAndSwapPagePayload.sender,
+        recipient: fromBridgeAndSwapPagePayload.recipient,
         routeChainIdFromTo: `${swapQuote.inputToken.chainId}-${swapQuote.outputToken.chainId}`,
         routeChainNameFromTo: `${fromChainInfo.name}-${toChainInfo.name}`,
         expectedFillTimeInSec: String(swapQuote.expectedFillTime),
@@ -83,9 +86,6 @@ export function useTrackTransferDepositCompleted(
           bridgeFeeDetails?.destinationGas.amount.toString() ?? "0",
         relayFeePct: bridgeStep.fees.pct.toString(),
         relayFeeTotalUsd: bridgeStep.fees.amount.toString(),
-        quoteLatencyMilliseconds: "0",
-        quoteTimestamp: String(timeSigned),
-        transferQuoteBlockNumber: "0",
         swapType:
           swapQuote.crossSwapType as TransferFillCompletedProperties["swapType"],
         inputType: tradeType,
@@ -108,11 +108,11 @@ export function useTrackTransferDepositCompleted(
       };
 
       addToAmpliQueue(() => {
-        ampli.transferDepositCompleted(properties);
+        ampli.transferFillCompleted(properties);
       });
     },
     [fromBridgeAndSwapPagePayload, addToAmpliQueue]
   );
 
-  return { trackTransferDepositCompleted };
+  return { trackTransferFillCompleted };
 }
