@@ -4,9 +4,6 @@ import type {
 } from "@across-protocol/sdk/dist/esm/arch/svm";
 import { BigNumber } from "ethers";
 
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "../../types";
-
 export type BridgeProvider =
   | "across"
   | "cctp"
