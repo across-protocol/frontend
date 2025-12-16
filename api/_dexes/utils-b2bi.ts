@@ -18,28 +18,18 @@ import {
   buildMulticallHandlerMessage,
 } from "../_multicall-handler";
 
-import indirectChainsImport from "../../src/data/indirect_chains_1.json";
-import mainnetChains from "../../src/data/chains_1.json";
+import indirectChains from "../../src/data/indirect_chains_1.json";
 import { CrossSwap, IndirectDestinationRoute } from "./types";
 
 const ENABLED_INDIRECT_TOKEN_PAIRS: {
   inputToken: string;
   outputToken: string;
 }[] = [
-  // TODO: Enable this once we replace MulticallHandler on HyperEVM with HyperliquidDepositHandler
-  // {
-  //   inputToken: "USDT",
-  //   outputToken: "USDT-SPOT",
-  // },
+  {
+    inputToken: "USDT",
+    outputToken: "USDT-SPOT",
+  },
 ];
-
-// Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json or any of its nested arrays are empty.
-// Extends mainnetChains type with intermediaryChain property specific to indirect chains.
-const indirectChains = indirectChainsImport as Array<
-  (typeof mainnetChains)[number] & {
-    intermediaryChain: number;
-  }
->;
 
 export function isIndirectDestinationRouteSupported(params: {
   originChainId: number;
