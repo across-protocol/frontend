@@ -424,6 +424,12 @@ export async function fetchSwapTokensData(
   );
   responseJson.push(...indirectChainTokens);
 
+  const sponsoredIntentOutputTokens = getSponsoredIntentOutputTokens(
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...sponsoredIntentOutputTokens);
+
   // Add Uniswap tokens
   const uniswapTokens = getUniswapTokens(
     uniswapTokensResponse.data,
