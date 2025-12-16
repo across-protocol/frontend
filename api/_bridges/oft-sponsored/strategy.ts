@@ -27,6 +27,7 @@ import {
   simulateMarketOrder,
   SPOT_TOKEN_DECIMALS,
   isToHyperCore,
+  getNormalizedSpotTokenSymbol,
 } from "../../_hypercore";
 import { tagIntegratorId, tagSwapApiMarker } from "../../_integrator-id";
 import {
@@ -188,11 +189,12 @@ export async function getSponsoredOftQuoteForExactInput(
 
   const nativeToken = getNativeTokenInfo(inputToken.chainId);
 
-  const isUsdtToUsdcSwap = outputToken.symbol === "USDC-SPOT";
+  const isSwapPair =
+    inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
 
   let finalOutputAmount: BigNumber;
-  if (isUsdtToUsdcSwap) {
-    // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
+  if (isSwapPair) {
+    // For swap pairs, simulate the HyperLiquid market order to get actual output with swap impact
     const bridgeOutputInSpotDecimals = ConvertDecimals(
       TOKEN_SYMBOLS_MAP.USDT.decimals,
       SPOT_TOKEN_DECIMALS
@@ -205,10 +207,11 @@ export async function getSponsoredOftQuoteForExactInput(
         decimals: SPOT_TOKEN_DECIMALS,
       },
       tokenOut: {
-        symbol: "USDC",
+        symbol: getNormalizedSpotTokenSymbol(outputToken.symbol),
         decimals: SPOT_TOKEN_DECIMALS,
       },
-      inputAmount: bridgeOutputInSpotDecimals,
+      amount: bridgeOutputInSpotDecimals,
+      amountType: "input",
     });
 
     finalOutputAmount = ConvertDecimals(
@@ -266,13 +269,53 @@ export async function getSponsoredOftQuoteForOutput(
   // All sponsored OFT transfers route through HyperEVM USDT before reaching final destination
   const intermediaryToken = await getIntermediaryToken();
 
-  // Convert minOutputAmount to input token decimals
-  const minOutputInInputDecimals = ConvertDecimals(
-    outputToken.decimals,
-    inputToken.decimals
-  )(minOutputAmount);
+  const isSwapPair =
+    inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
 
-  // Get OFT quote to intermediary token and estimated fill time
+  let bridgeOutputRequired: BigNumber;
+  let finalOutputAmount: BigNumber;
+
+  if (isSwapPair) {
+    // For swap pairs, simulate the HyperLiquid market order to get actual input needed with swap impact
+    const simResult = await simulateMarketOrder({
+      chainId: outputToken.chainId,
+      tokenIn: {
+        symbol: "USDT",
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      tokenOut: {
+        symbol: getNormalizedSpotTokenSymbol(outputToken.symbol),
+        decimals: SPOT_TOKEN_DECIMALS,
+      },
+      amount: ConvertDecimals(
+        outputToken.decimals,
+        SPOT_TOKEN_DECIMALS
+      )(minOutputAmount),
+      amountType: "output",
+    });
+
+    bridgeOutputRequired = ConvertDecimals(
+      SPOT_TOKEN_DECIMALS,
+      TOKEN_SYMBOLS_MAP.USDT.decimals
+    )(simResult.inputAmount);
+    finalOutputAmount = ConvertDecimals(
+      SPOT_TOKEN_DECIMALS,
+      outputToken.decimals
+    )(simResult.outputAmount);
+  } else {
+    bridgeOutputRequired = ConvertDecimals(
+      outputToken.decimals,
+      intermediaryToken.decimals
+    )(minOutputAmount);
+    finalOutputAmount = minOutputAmount;
+  }
+
+  // Convert bridge output required to input token decimals for OFT quote
+  const bridgeOutputInInputDecimals = ConvertDecimals(
+    intermediaryToken.decimals,
+    inputToken.decimals
+  )(bridgeOutputRequired);
+
   const [
     { inputAmount, outputAmount: intermediaryOutputAmount, nativeFee },
     estimatedFillTimeSec,
@@ -280,7 +323,7 @@ export async function getSponsoredOftQuoteForOutput(
     getQuote({
       inputToken,
       outputToken: intermediaryToken,
-      inputAmount: minOutputInInputDecimals,
+      inputAmount: bridgeOutputInInputDecimals,
       recipient: recipient!,
     }),
     getEstimatedFillTime(
@@ -290,34 +333,8 @@ export async function getSponsoredOftQuoteForOutput(
     ),
   ]);
 
-  const isUsdtToUsdcSwap = outputToken.symbol === "USDC-SPOT";
-
-  let finalOutputAmount: BigNumber;
-  if (isUsdtToUsdcSwap) {
-    // For USDT to USDC-SPOT, simulate the HyperLiquid market order to get actual output with swap impact
-    const bridgeOutputInSpotDecimals = ConvertDecimals(
-      TOKEN_SYMBOLS_MAP.USDT.decimals,
-      SPOT_TOKEN_DECIMALS
-    )(intermediaryOutputAmount);
-
-    const simResult = await simulateMarketOrder({
-      chainId: outputToken.chainId,
-      tokenIn: {
-        symbol: "USDT",
-        decimals: SPOT_TOKEN_DECIMALS,
-      },
-      tokenOut: {
-        symbol: "USDC",
-        decimals: SPOT_TOKEN_DECIMALS,
-      },
-      inputAmount: bridgeOutputInSpotDecimals,
-    });
-
-    finalOutputAmount = ConvertDecimals(
-      SPOT_TOKEN_DECIMALS,
-      outputToken.decimals
-    )(simResult.outputAmount);
-  } else {
+  // For non-swap case, update finalOutputAmount based on actual bridge output
+  if (!isSwapPair) {
     finalOutputAmount = ConvertDecimals(
       intermediaryToken.decimals,
       outputToken.decimals

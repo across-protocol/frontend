@@ -193,12 +193,8 @@ export async function getQuoteForExactInput(
         : params.outputToken,
     });
 
-    // For USDC to USDT-SPOT unsponsored flows, simulate the HyperLiquid market order
-    // to get the actual output amount with swap impact.
-    const isUsdcToUsdtSwap =
-      isSwapPair && ["USDT", "USDT-SPOT"].includes(outputToken.symbol);
-
-    if (isUsdcToUsdtSwap) {
+    // For swap pairs, simulate the HyperLiquid market order to get actual output with swap impact
+    if (isSwapPair) {
       const simResult = await simulateMarketOrder({
         chainId: outputToken.chainId,
         tokenIn: {
@@ -206,10 +202,11 @@ export async function getQuoteForExactInput(
           decimals: SPOT_TOKEN_DECIMALS,
         },
         tokenOut: {
-          symbol: "USDT",
+          symbol: getNormalizedSpotTokenSymbol(outputToken.symbol),
           decimals: SPOT_TOKEN_DECIMALS,
         },
-        inputAmount: unsponsoredOutputAmount,
+        amount: unsponsoredOutputAmount,
+        amountType: "input",
       });
 
       outputAmount = ConvertDecimals(
@@ -276,13 +273,9 @@ export async function getQuoteForOutput(
     const isSwapPair =
       inputToken.symbol !== getNormalizedSpotTokenSymbol(outputToken.symbol);
 
-    const isUsdcToUsdtSwap =
-      isSwapPair && ["USDT", "USDT-SPOT"].includes(outputToken.symbol);
-
     let bridgeOutputRequired = minOutputAmount;
-    if (isUsdcToUsdtSwap) {
-      // For USDC to USDT-SPOT unsponsored flows, simulate the swap to determine
-      // how much USDC-SPOT we need to get the desired output
+    if (isSwapPair) {
+      // For swap pairs, simulate to determine how much bridge output we need
       const simResult = await simulateMarketOrder({
         chainId: outputToken.chainId,
         tokenIn: {
@@ -290,16 +283,16 @@ export async function getQuoteForOutput(
           decimals: SPOT_TOKEN_DECIMALS,
         },
         tokenOut: {
-          symbol: "USDT",
+          symbol: getNormalizedSpotTokenSymbol(outputToken.symbol),
           decimals: SPOT_TOKEN_DECIMALS,
         },
-        inputAmount: ConvertDecimals(
+        amount: ConvertDecimals(
           outputToken.decimals,
           SPOT_TOKEN_DECIMALS
         )(minOutputAmount),
+        amountType: "output",
       });
 
-      // Use the simulation result to estimate the actual output with swap impact
       outputAmount = ConvertDecimals(
         SPOT_TOKEN_DECIMALS,
         outputToken.decimals
@@ -321,9 +314,7 @@ export async function getQuoteForOutput(
       useForwardFee: false,
     }).getQuoteForOutput({
       ...params,
-      minOutputAmount: isUsdcToUsdtSwap
-        ? bridgeOutputRequired
-        : minOutputAmount,
+      minOutputAmount: isSwapPair ? bridgeOutputRequired : minOutputAmount,
       outputToken: isSwapPair
         ? {
             ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
