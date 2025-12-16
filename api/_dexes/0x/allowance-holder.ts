@@ -26,7 +26,7 @@ const { API_KEY_0X } = getEnvs();
 
 // We apply an additional markup when using 0x's `sellEntireBalance` feature. This is
 // required because `sellAmount` needs to be a upper limit of the actual amount to be
-// sold. If the actual amount to be sold is less than `sellAmount`, then the swap will
+// sold. If the actual amount to be sold is higher than `sellAmount`, then the swap will
 // fail. See https://0x.org/docs/0x-swap-api/advanced-topics/sell-entire-balance for
 // more details.
 const SELL_ENTIRE_BALANCE_AMOUNT_MARKUP = 0.01; // 1%
