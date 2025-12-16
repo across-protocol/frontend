@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { Protocol } from "@uniswap/router-sdk";
 import { SwapRouter, RouterTradeAdapter } from "@uniswap/universal-router-sdk";
@@ -7,6 +7,7 @@ import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
 import {
   getUniswapClassicQuoteFromApi,
+  UNISWAP_API_INTEGRATOR_ID,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
@@ -177,9 +178,16 @@ export function buildUniversalRouterSwapTx(
     slippageTolerance: floatToPercent(quote.slippage),
     useRouterBalance: true,
   });
+
+  // Append integrator ID issued by Uniswap to calldata to allow for tracking of swaps
+  // issued by our API.
+  const taggedCalldata = utils.hexlify(
+    utils.concat([calldata, UNISWAP_API_INTEGRATOR_ID])
+  );
+
   return {
     ecosystem: "evm" as const,
-    data: calldata,
+    data: taggedCalldata,
     value,
     to: UNIVERSAL_ROUTER_02_ADDRESS[swap.chainId],
   };
