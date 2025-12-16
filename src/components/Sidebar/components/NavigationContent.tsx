@@ -4,7 +4,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { AccountContent } from "./AccountContent";
 import { SidebarItem } from "./SidebarItem";
-import { TermsOfServiceDisclaimer } from "./TermsOfServiceDisclaimer";
+import { LegalDisclaimer } from "./LegalDisclaimer";
 import { NAVIGATION_LINKS } from "Routes";
 
 type NavigationLInk = {
@@ -55,6 +55,11 @@ const sidebarAboutLinks = [
     link: "https://across.to/terms-of-service",
     isExternalLink: true,
   },
+  {
+    title: "Privacy Policy",
+    link: "https://across.to/privacy-policy",
+    isExternalLink: true,
+  },
 ];
 
 export function NavigationContent() {
@@ -92,7 +97,7 @@ export function NavigationContent() {
           href: item.link,
         }))}
       />
-      <TermsOfServiceDisclaimer />
+      <LegalDisclaimer />
     </>
   );
 }
