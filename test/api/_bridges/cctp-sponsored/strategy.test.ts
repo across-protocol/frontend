@@ -156,7 +156,7 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
         jest.clearAllMocks();
       });
 
-      test("should return maxFeeBps when swap has no loss", async () => {
+      test("should return maxFeeBps 5 bps when swap has no loss", async () => {
         // Mock simulateMarketOrder to return exactly 1:1 output (no loss)
         const bridgeOutputAmountInputTokenDecimals = inputAmount.sub(maxFee);
         const bridgeOutputAmountOutputTokenDecimals = ConvertDecimals(
@@ -181,11 +181,11 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputAmount,
         });
 
-        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps
-        expect(maxBpsToSponsor).toEqual(1);
+        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps < 5 bps, so result = 5 bps
+        expect(maxBpsToSponsor).toEqual(5);
       });
 
-      test("should return maxFeeBps when swap has profit", async () => {
+      test("should return maxFeeBps 5 bps when swap has profit", async () => {
         const bridgeOutputAmountInputTokenDecimals = inputAmount.sub(maxFee);
         const bridgeOutputAmountOutputTokenDecimals = ConvertDecimals(
           arbitrumUSDC.decimals,
@@ -210,8 +210,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputAmount,
         });
 
-        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage is negative (profit), so result = 1 bps
-        expect(maxBpsToSponsor).toEqual(1);
+        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage is negative (profit), so result = 1 bps < 5 bps, so result = 5 bps
+        expect(maxBpsToSponsor).toEqual(5);
       });
 
       test("should calculate correct bps when swap has 1% loss", async () => {
@@ -303,8 +303,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputAmount,
         });
 
-        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0.01% = 1 bps, so result = 1 + 1 = 2 bps
-        expect(maxBpsToSponsor).toEqual(2);
+        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0.01% = 1 bps, so result = 1 + 1 = 2 bps < 5 bps, so result = 5 bps
+        expect(maxBpsToSponsor).toEqual(5);
       });
 
       test("should handle zero slippage correctly", async () => {
@@ -331,8 +331,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           inputAmount,
         });
 
-        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps
-        expect(maxBpsToSponsor).toEqual(1);
+        // maxFeeBps = 0.0001 / 1 * 10000 = 1 bps, slippage = 0, so result = 1 bps < 5 bps, so result = 5 bps
+        expect(maxBpsToSponsor).toEqual(5);
       });
     });
 

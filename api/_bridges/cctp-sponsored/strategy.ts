@@ -56,7 +56,10 @@ import {
   SPONSORED_CCTP_SRC_PERIPHERY_ALT_ADDRESS,
 } from "./utils/svm";
 import { getSVMRpc } from "../../_providers";
-import { assertSponsoredAmountCanBeCovered } from "../../_sponsorship-eligibility";
+import {
+  assertSponsoredAmountCanBeCovered,
+  MAX_BPS_TO_SPONSOR_LIMIT,
+} from "../../_sponsorship-eligibility";
 import { TOKEN_SYMBOLS_MAP } from "../../_constants";
 
 const name = "sponsored-cctp" as const;
@@ -567,16 +570,12 @@ export async function calculateMaxBpsToSponsor(params: {
     .mul(utils.parseEther("1"))
     .div(inputAmount);
 
-  let maxBpsToSponsor = maxFeeBps;
+  let maxBpsToSponsor = parseFloat(utils.formatEther(maxFeeBps));
   let swapSlippageBps = BigNumber.from(0);
 
-  // Simple transfer flow: no swap needed, therefore `maxBpsToSponsor` is `maxFee` in bps
-  if (["USDC", "USDC-SPOT"].includes(outputToken.symbol)) {
-    maxBpsToSponsor = maxFeeBps;
-  }
   // Swap flow: `maxBpsToSponsor` is `maxFee` + est. swap slippage if slippage is positive
   // or only `maxFee` if slippage is negative.
-  else {
+  if (!["USDC", "USDC-SPOT"].includes(outputToken.symbol)) {
     const bridgeOutputAmountInputTokenDecimals = params.inputAmount.sub(
       params.maxFee
     );
@@ -604,16 +603,21 @@ export async function calculateMaxBpsToSponsor(params: {
 
     // Positive slippage indicates loss, so we add it to `maxFeeBps`
     if (simResult.slippagePercent > 0) {
-      maxBpsToSponsor = maxFeeBps.add(swapSlippageBps);
+      maxBpsToSponsor = parseFloat(
+        utils.formatEther(maxFeeBps.add(swapSlippageBps))
+      );
     }
     // Negative slippage indicates profit, so we return `maxFeeBps`
     else {
-      maxBpsToSponsor = maxFeeBps;
+      maxBpsToSponsor = parseFloat(utils.formatEther(maxFeeBps));
     }
+
+    // Ensure maxBpsToSponsor is at least MAX_BPS_TO_SPONSOR_LIMIT
+    maxBpsToSponsor = Math.max(MAX_BPS_TO_SPONSOR_LIMIT, maxBpsToSponsor);
   }
 
   return {
-    maxBpsToSponsor: parseFloat(utils.formatEther(maxBpsToSponsor)),
+    maxBpsToSponsor,
     swapSlippageBps: parseFloat(utils.formatEther(swapSlippageBps)),
   };
 }
