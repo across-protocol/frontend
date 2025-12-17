@@ -1,27 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { NumericFormat } from "react-number-format";
+import { useEffect, useMemo, useRef } from "react";
 import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
-  TokenAmountInputWrapper,
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
-import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import {
   convertTokenToUSD,
   convertUSDToToken,
   formatUnitsWithMaxFractions,
 } from "../../../../utils";
+import { AmountInput } from "./AmountInput";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -44,7 +41,6 @@ export const OriginTokenInput = ({
   const { originToken, destinationToken } = quoteRequest;
 
   const shouldUpdate = quoteRequest.tradeType === "minOutput";
-  const [isFocused, setIsFocused] = useState(false);
 
   const { toggleUnit, handleInputChange, handleBalanceClick } = useTokenInput({
     token: originToken,
@@ -77,80 +73,39 @@ export const OriginTokenInput = ({
     }
   }, [inputDisabled]);
 
-  const getAmount = useCallback(() => {
-    if (shouldUpdate) {
-      return fromBignumberToString(unit, expectedAmount, originToken);
-    } else {
-      return fromBignumberToString(unit, quoteRequest.amount, originToken);
-    }
-  }, [expectedAmount, quoteRequest.amount, originToken, shouldUpdate, unit]);
-
-  function fromBignumberToString(
-    unit: "usd" | "token",
-    amount: BigNumber | null | undefined,
-    token: EnrichedToken | null
-  ) {
-    if (!amount || !token) {
-      return "";
-    }
-    if (unit === "token") {
-      // Display as token amount
-      return formatUnitsWithMaxFractions(amount, token.decimals);
-    } else {
-      // Display as USD amount - convert token to USD
-      const tokenAmountFormatted = formatUnitsWithMaxFractions(
-        amount,
-        token.decimals
-      );
-      const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-      // convertTokenToUSD returns in 18 decimal precision
-      return utils.formatUnits(usdValue, 18);
-    }
-  }
+  const displayAmount = shouldUpdate ? expectedAmount : quoteRequest.amount;
 
   const convertedAmount = useMemo(() => {
-    const amount = shouldUpdate ? expectedAmount : quoteRequest.amount;
-    if (!amount || !originToken) return undefined;
-    const amountStr = formatUnitsWithMaxFractions(amount, originToken.decimals);
+    if (!displayAmount || !originToken) return undefined;
+    const amountStr = formatUnitsWithMaxFractions(
+      displayAmount,
+      originToken.decimals
+    );
     if (unit === "token") {
       return convertTokenToUSD(amountStr, originToken);
     } else {
       return convertUSDToToken(amountStr, originToken);
     }
-  }, [shouldUpdate, expectedAmount, quoteRequest.amount, originToken, unit]);
+  }, [displayAmount, originToken, unit]);
 
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
         <TokenAmountInputTitle>From</TokenAmountInputTitle>
 
-        <TokenAmountInputWrapper
-          showPrefix={unit === "usd"}
-          value={getAmount()}
+        <AmountInput
+          id="origin-amount-input"
+          name="origin-amount-input"
+          testId="bridge-amount-input"
+          amount={displayAmount}
+          token={originToken}
+          unit={unit}
+          shouldUpdate={shouldUpdate}
+          disabled={inputDisabled}
           error={insufficientBalance}
-        >
-          <NumericFormat
-            customInput={TokenAmountInput}
-            getInputRef={amountInputRef}
-            id="origin-amount-input"
-            name="origin-amount-input"
-            data-testid="bridge-amount-input"
-            placeholder="0.00"
-            value={isFocused && !shouldUpdate ? undefined : getAmount()}
-            onValueChange={(values, sourceInfo) => {
-              if (sourceInfo.source === "event" && isFocused) {
-                handleInputChange(values.floatValue);
-              }
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            thousandSeparator=","
-            decimalSeparator="."
-            allowNegative={false}
-            disabled={inputDisabled}
-            error={insufficientBalance}
-          />
-        </TokenAmountInputWrapper>
+          onInputChange={handleInputChange}
+          inputRef={amountInputRef}
+        />
         <ToggleUnitButton
           onClick={toggleUnit}
           unit={unit}
