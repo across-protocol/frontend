@@ -10,6 +10,7 @@ import {
   SPONSORED_USER_DAILY_LIMIT_PER_FINAL_TOKEN,
   SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT,
   SPONSORED_SWAP_SLIPPAGE_TOLERANCE,
+  MaxBpsToSponsorTooHighError,
 } from "../../api/_sponsorship-eligibility";
 import { Token } from "../../api/_dexes/types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
@@ -372,7 +373,7 @@ describe("api/_sponsorship-eligibility", () => {
 
   describe("#assertSponsoredAmountCanBeCovered()", () => {
     const inputAmount = utils.parseUnits("100", arbitrumUSDC.decimals);
-    const maxBpsToSponsor = 100; // 1%
+    const maxBpsToSponsor = 1; // 0.01%
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -418,7 +419,7 @@ describe("api/_sponsorship-eligibility", () => {
       jest
         .spyOn(balance, "getCachedTokenBalance")
         .mockResolvedValue(
-          utils.parseUnits("0.1", TOKEN_SYMBOLS_MAP.USDH.decimals)
+          utils.parseUnits("0.0001", TOKEN_SYMBOLS_MAP.USDH.decimals)
         ); // Very low balance
 
       await expect(
@@ -466,6 +467,18 @@ describe("api/_sponsorship-eligibility", () => {
       });
 
       expect(result).toBe(true);
+    });
+
+    test("should throw MaxBpsToSponsorTooHighError when maxBpsToSponsor exceeds limit", async () => {
+      await expect(
+        assertSponsoredAmountCanBeCovered({
+          inputToken: arbitrumUSDC,
+          outputToken: hyperCoreUSDH,
+          maxBpsToSponsor: 101,
+          swapSlippageBps: 0,
+          inputAmount,
+        })
+      ).rejects.toThrow(MaxBpsToSponsorTooHighError);
     });
   });
 });
