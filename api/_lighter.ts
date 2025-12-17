@@ -1,7 +1,10 @@
 import { utils, BigNumber } from "ethers";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
-import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
+import {
+  encodeMakeCallWithBalanceCalldata,
+  getMultiCallHandlerAddress,
+} from "./_multicall-handler";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -95,6 +98,8 @@ export function buildLighterDepositActionData(params: {
     [recipient, assetIndex, routeType, amount]
   );
 
+  const multicallHandlerAddress =
+    getMultiCallHandlerAddress(intermediaryChainId);
   // Dynamically inject the received amount on the intermediary chain into above deposit
   // call
   const makeCallWithBalanceCalldata = encodeMakeCallWithBalanceCalldata(
@@ -112,7 +117,7 @@ export function buildLighterDepositActionData(params: {
   // Compress calls for ArbitraryEVMFlowExecutor
   const compressedCalls = [
     {
-      target: lighterAddress,
+      target: multicallHandlerAddress,
       callData: makeCallWithBalanceCalldata,
     },
   ];
