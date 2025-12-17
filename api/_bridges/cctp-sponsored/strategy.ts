@@ -612,7 +612,7 @@ export async function calculateMaxBpsToSponsor(params: {
       maxBpsToSponsor = parseFloat(utils.formatEther(maxFeeBps));
     }
 
-    // Cap maxBpsToSponsor at MAX_BPS_TO_SPONSOR_LIMIT
+    // Ensure maxBpsToSponsor is at least MAX_BPS_TO_SPONSOR_LIMIT
     maxBpsToSponsor = Math.max(MAX_BPS_TO_SPONSOR_LIMIT, maxBpsToSponsor);
   }
 
