@@ -17,10 +17,19 @@ const {
 export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
+  LIGHTER: 2337,
 };
 
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
+  WETH: {
+    ...constants.TOKEN_SYMBOLS_MAP.WETH,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.WETH.addresses,
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+    },
+  },
   POL: {
     ...constants.TOKEN_SYMBOLS_MAP.POL,
     addresses: {
@@ -35,6 +44,13 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
       [CHAIN_IDs.HYPERCORE_TESTNET]:
         "0x2222222222222222222222222222222222222222",
+    },
+  },
+  USDC: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+      [CHAIN_IDs.LIGHTER]: "0x2337000000000000000000000000000000000003",
     },
   },
   USDT: {
@@ -77,6 +93,17 @@ export const CHAINS = {
   [CHAIN_IDs.HYPERCORE_TESTNET]: {
     ...constants.PUBLIC_NETWORKS[CHAIN_IDs.HYPERCORE],
     chainId: CHAIN_IDs.HYPERCORE_TESTNET,
+  },
+  [CHAIN_IDs.LIGHTER]: {
+    name: "Lighter",
+    family: constants.ChainFamily.NONE,
+    nativeToken: "ETH",
+    publicRPC: "https://rpc.lighter.xyz",
+    blockExplorer: "https://app.lighter.xyz/explorer",
+    cctpDomain: constants.CCTP_NO_DOMAIN,
+    oftEid: constants.OFT_NO_EID,
+    hypDomainId: constants.HYPERLANE_NO_DOMAIN_ID,
+    chainId: CHAIN_IDs.LIGHTER,
   },
 };
 export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));

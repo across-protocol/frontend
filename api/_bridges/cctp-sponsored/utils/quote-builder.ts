@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
 import { createCctpSignature, SponsoredCCTPQuote } from "./signing";
 import { toBytes32 } from "../../../_address";
-import { CHAIN_IDs } from "../../../_constants";
 import {
   generateQuoteNonce,
   ExecutionMode,
@@ -14,10 +13,16 @@ import {
 } from "../../cctp/utils/constants";
 import { isToHyperCore } from "../../cctp/utils/hypercore";
 import {
+  buildLighterDepositActionData,
+  getLighterIntermediaryChainId,
+  isToLighter,
+} from "../../../_lighter";
+import {
   getSponsoredCctpDstPeripheryAddress,
   CCTP_TRANSFER_MODE,
 } from "./constants";
 import { getSponsoredCctpFinalTokenAddress } from "./final-token";
+import { getHyperEvmChainId } from "../../../_hypercore";
 
 /**
  * Builds a complete sponsored CCTP quote with signature
@@ -39,21 +44,21 @@ export function buildSponsoredCCTPQuote(
   } = params;
 
   const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
+  const isDestinationLighter = isToLighter(outputToken.chainId);
 
-  if (!isDestinationHyperCore) {
+  if (!isDestinationHyperCore && !isDestinationLighter) {
     throw new Error(
-      "Can't build sponsored CCTP quote for non-HyperCore destination"
+      "Can't build sponsored CCTP quote for non-HyperCore or non-Lighter destination"
     );
   }
+
+  const intermediaryChainId = isDestinationLighter
+    ? getLighterIntermediaryChainId(outputToken.chainId)
+    : getHyperEvmChainId(outputToken.chainId);
 
   const nonce = generateQuoteNonce(depositor);
 
   const deadline = Math.floor(Date.now() / 1000) + DEFAULT_QUOTE_EXPIRY_SECONDS;
-
-  const intermediaryChainId =
-    outputToken.chainId === CHAIN_IDs.HYPERCORE
-      ? CHAIN_IDs.HYPEREVM
-      : CHAIN_IDs.HYPEREVM_TESTNET;
 
   const sponsoredCCTPDstPeripheryAddress =
     getSponsoredCctpDstPeripheryAddress(intermediaryChainId);
@@ -67,6 +72,19 @@ export function buildSponsoredCCTPQuote(
     outputToken.symbol,
     intermediaryChainId
   );
+
+  const actionData = isDestinationLighter
+    ? buildLighterDepositActionData({
+        recipient,
+        outputTokenSymbol: outputToken.symbol,
+        routeType: 0,
+        amount: inputAmount,
+        destinationChainId: outputToken.chainId,
+      })
+    : "0x";
+  const executionMode = isDestinationLighter
+    ? ExecutionMode.ArbitraryActionsToEVM
+    : ExecutionMode.Default;
 
   const sponsoredCCTPQuote: SponsoredCCTPQuote = {
     sourceDomain: getCctpDomainId(inputToken.chainId),
@@ -83,8 +101,8 @@ export function buildSponsoredCCTPQuote(
     maxUserSlippageBps,
     finalRecipient: toBytes32(recipient),
     finalToken: toBytes32(finalToken),
-    executionMode: ExecutionMode.Default, // Default HyperCore flow
-    actionData: "0x", // Empty for default flow
+    executionMode,
+    actionData,
   };
 
   const { signature, typedDataHash } = createCctpSignature(sponsoredCCTPQuote);
