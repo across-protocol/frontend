@@ -613,7 +613,11 @@ export async function calculateMaxBpsToSponsor(params: {
   }
 
   return {
-    maxBpsToSponsor: parseFloat(utils.formatEther(maxBpsToSponsor)),
+    // TODO: This is a hack fix to ensure that the maxBpsToSponsor is at least 5 bps.
+    maxBpsToSponsor: Math.max(
+      5,
+      parseFloat(utils.formatEther(maxBpsToSponsor))
+    ),
     swapSlippageBps: parseFloat(utils.formatEther(swapSlippageBps)),
   };
 }
