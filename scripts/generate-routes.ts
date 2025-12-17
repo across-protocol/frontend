@@ -485,6 +485,17 @@ function processTokenRoutes(
 
     // Handle native USDC -> bridged USDC routes
     if (tokenSymbol === "USDC") {
+      // Handle USDC -> USDH on HyperEVM (via intents)
+      if (toConfig.tokens.includes("USDH")) {
+        return [
+          "USDC",
+          {
+            inputTokenSymbol: "USDC",
+            outputTokenSymbol: "USDH",
+          },
+        ];
+      }
+
       if (toConfig.enableCCTP) {
         // Some chains only have native CCTP USDC
         if (hasBridgedUsdcOrVariant(toConfig.chainId)) {
@@ -927,7 +938,7 @@ function transformToRoute(
     route.fromChain,
     hubPoolChainId
   );
-  const outputToken = getTokenBySymbol(
+  let outputToken = getTokenBySymbol(
     outputTokenSymbol,
     toChain.chainId,
     hubPoolChainId
@@ -938,6 +949,14 @@ function transformToRoute(
 
   if (fromChain.chainId === CHAIN_IDs.LENS && inputTokenSymbol === "GHO") {
     inputToken = getTokenBySymbol("WGHO", route.fromChain, hubPoolChainId);
+  }
+
+  // Handle USDC -> USDH routes: USDH doesn't have a mainnet address, so use USDC's L1 address
+  if (outputTokenSymbol === "USDH" && inputTokenSymbol === "USDC") {
+    outputToken = {
+      ...outputToken,
+      l1TokenAddress: inputToken.l1TokenAddress,
+    };
   }
 
   if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
@@ -983,8 +1002,13 @@ function getTokenBySymbol(
         ? "USDT"
         : tokenSymbol
   ) as keyof typeof TOKEN_SYMBOLS_MAP;
-  const l1TokenAddress =
-    TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
+
+  // USDH doesn't have a mainnet address, so use USDC's L1 address (they're both USD-pegged)
+  let l1TokenAddress = TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
+
+  if (!l1TokenAddress && tokenSymbol === "USDH") {
+    l1TokenAddress = TOKEN_SYMBOLS_MAP.USDC.addresses[l1ChainId];
+  }
 
   if (!l1TokenAddress) {
     throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
