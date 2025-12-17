@@ -37,10 +37,8 @@ import {
 } from "./utils/constants";
 import {
   getNormalizedSpotTokenSymbol,
-  isToHyperCore,
   simulateMarketOrder,
   SPOT_TOKEN_DECIMALS,
-  assertAccountExistsOnHyperCore,
 } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
@@ -154,16 +152,6 @@ export async function getQuoteForExactInput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
-  // If recipient does not exist on HyperCore, then we error.
-  // This is temporary until we can support account creation for sponsored mint/burn routes.
-  if (isToHyperCore(params.outputToken.chainId)) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-      paramName: "recipient",
-    });
-  }
-
   if (params.isEligibleForSponsorship) {
     // We guarantee input amount == output amount for sponsored flows
     outputAmount = ConvertDecimals(
@@ -231,15 +219,6 @@ export async function getQuoteForOutput(
     token: Token;
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
-
-  // If recipient does not exist on HyperCore, then we error.
-  // This is temporary until we can support account creation for sponsored mint/burn routes.
-  if (isToHyperCore(params.outputToken.chainId)) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-    });
-  }
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
