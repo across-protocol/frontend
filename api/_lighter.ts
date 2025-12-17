@@ -4,6 +4,7 @@ import { SponsoredCCTPDstPeriphery__factory } from "@across-protocol/contracts/d
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
 import { getProvider } from "./_providers";
+import { AmountTooLowError } from "./_errors";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -33,6 +34,10 @@ const LIGHTER_DEPOSIT_ABI = [
   },
 ];
 
+const LIGHTER_MIN_DEPOSIT_AMOUNT = {
+  [TOKEN_SYMBOLS_MAP.USDC.symbol]: BigNumber.from(1000000),
+};
+
 export function isToLighter(chainId: number) {
   return [CHAIN_IDs.LIGHTER].includes(chainId);
 }
@@ -52,7 +57,7 @@ export async function buildLighterDepositActionData(params: {
   recipient: string;
   outputTokenSymbol: string;
   routeType: number;
-  amount: BigNumber;
+  outputAmount: BigNumber;
   destinationChainId: number;
   sponsoredCCTPDstPeripheryAddress: string;
 }) {
@@ -60,7 +65,7 @@ export async function buildLighterDepositActionData(params: {
     recipient,
     outputTokenSymbol,
     routeType,
-    amount,
+    outputAmount,
     destinationChainId,
     sponsoredCCTPDstPeripheryAddress,
   } = params;
@@ -70,6 +75,19 @@ export async function buildLighterDepositActionData(params: {
     throw new Error(
       `Lighter 'assetIndex' not found for token symbol ${outputTokenSymbol}`
     );
+  }
+
+  const minDepositAmount = LIGHTER_MIN_DEPOSIT_AMOUNT[outputTokenSymbol];
+  if (!minDepositAmount) {
+    throw new Error(
+      `Lighter 'minDepositAmount' not found for token symbol ${outputTokenSymbol}`
+    );
+  }
+
+  if (outputAmount.lt(minDepositAmount)) {
+    throw new AmountTooLowError({
+      message: "Amount too low for Lighter deposit.",
+    });
   }
 
   const intermediaryChainId = getLighterIntermediaryChainId(destinationChainId);
@@ -96,7 +114,7 @@ export async function buildLighterDepositActionData(params: {
   const lighterDepositInterface = new utils.Interface(LIGHTER_DEPOSIT_ABI);
   const lighterDepositCalldata = lighterDepositInterface.encodeFunctionData(
     "deposit",
-    [recipient, assetIndex, routeType, amount]
+    [recipient, assetIndex, routeType, BigNumber.from(0)] // Placeholder amount, will be replaced
   );
 
   const sponsoredCCTPDstPeripheryContract =

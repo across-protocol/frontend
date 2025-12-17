@@ -30,12 +30,16 @@ import { getHyperEvmChainId } from "../../../_hypercore";
  * @returns Complete quote with signed and unsigned params, plus signature
  */
 export async function buildSponsoredCCTPQuote(
-  params: BuildSponsoredQuoteParams & { maxFee: BigNumber }
+  params: BuildSponsoredQuoteParams & {
+    maxFee: BigNumber;
+    outputAmount: BigNumber;
+  }
 ) {
   const {
     inputToken,
     outputToken,
     inputAmount,
+    outputAmount,
     recipient,
     depositor,
     maxBpsToSponsor,
@@ -78,7 +82,7 @@ export async function buildSponsoredCCTPQuote(
         recipient,
         outputTokenSymbol: outputToken.symbol,
         routeType: 0,
-        amount: inputAmount,
+        outputAmount,
         destinationChainId: outputToken.chainId,
         sponsoredCCTPDstPeripheryAddress,
       })

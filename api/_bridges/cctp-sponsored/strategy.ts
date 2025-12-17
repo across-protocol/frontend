@@ -540,6 +540,7 @@ async function _prepareSponsoredTx(params: {
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     inputAmount: bridgeQuote.inputAmount,
+    outputAmount: bridgeQuote.outputAmount,
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
     refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),
