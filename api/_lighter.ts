@@ -1,10 +1,9 @@
 import { utils, BigNumber } from "ethers";
+import { SponsoredCCTPDstPeriphery__factory } from "@across-protocol/contracts/dist/typechain";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
-import {
-  encodeMakeCallWithBalanceCalldata,
-  getMultiCallHandlerAddress,
-} from "./_multicall-handler";
+import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
+import { getProvider } from "./_providers";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -49,12 +48,13 @@ export function getLighterIntermediaryChainId(destinationChainId: number) {
   return intermediaryChainId;
 }
 
-export function buildLighterDepositActionData(params: {
+export async function buildLighterDepositActionData(params: {
   recipient: string;
   outputTokenSymbol: string;
   routeType: number;
   amount: BigNumber;
   destinationChainId: number;
+  sponsoredCCTPDstPeripheryAddress: string;
 }) {
   const {
     recipient,
@@ -62,6 +62,7 @@ export function buildLighterDepositActionData(params: {
     routeType,
     amount,
     destinationChainId,
+    sponsoredCCTPDstPeripheryAddress,
   } = params;
 
   const assetIndex = LIGHTER_ASSET_INDICES_PER_TOKEN[outputTokenSymbol];
@@ -98,8 +99,15 @@ export function buildLighterDepositActionData(params: {
     [recipient, assetIndex, routeType, amount]
   );
 
-  const multicallHandlerAddress =
-    getMultiCallHandlerAddress(intermediaryChainId);
+  const sponsoredCCTPDstPeripheryContract =
+    SponsoredCCTPDstPeriphery__factory.connect(
+      sponsoredCCTPDstPeripheryAddress,
+      getProvider(intermediaryChainId)
+    );
+  // Get the PermissionedMulticallHandler address from the SponsoredCCTPDstPeriphery contract
+  const permissionedMulticallHandlerAddress =
+    await sponsoredCCTPDstPeripheryContract.multicallHandler();
+
   // Dynamically inject the received amount on the intermediary chain into above deposit
   // call
   const makeCallWithBalanceCalldata = encodeMakeCallWithBalanceCalldata(
@@ -117,7 +125,7 @@ export function buildLighterDepositActionData(params: {
   // Compress calls for ArbitraryEVMFlowExecutor
   const compressedCalls = [
     {
-      target: multicallHandlerAddress,
+      target: permissionedMulticallHandlerAddress,
       callData: makeCallWithBalanceCalldata,
     },
   ];
