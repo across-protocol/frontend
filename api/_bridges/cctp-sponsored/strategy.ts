@@ -595,7 +595,8 @@ export async function calculateMaxBpsToSponsor(params: {
         symbol: outputToken.symbol,
         decimals: outputToken.decimals,
       },
-      inputAmount: bridgeOutputAmountOutputTokenDecimals,
+      amount: bridgeOutputAmountOutputTokenDecimals,
+      amountType: "input",
     });
     swapSlippageBps = BigNumber.from(
       Math.ceil(simResult.slippagePercent * 100)
