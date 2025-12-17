@@ -1,3 +1,5 @@
+import { useCallback, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
@@ -11,8 +13,14 @@ import {
   TokenSelectorColumn,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
+import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
+import {
+  convertTokenToUSD,
+  convertUSDToToken,
+  formatUnitsWithMaxFractions,
+} from "../../../../utils";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: BigNumber | undefined;
@@ -35,21 +43,13 @@ export const DestinationTokenDisplay = ({
   } = useQuoteRequestContext();
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
+  const [isFocused, setIsFocused] = useState(false);
 
   const { destinationToken, originToken } = quoteRequest;
 
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
+  const { toggleUnit, handleInputChange, handleBalanceClick } = useTokenInput({
     token: destinationToken,
     setAmount: setDestinationAmount,
-    expectedAmount: expectedOutputAmount,
-    shouldUpdate,
-    isUpdateLoading,
     unit,
     setUnit,
   });
@@ -58,6 +58,67 @@ export const DestinationTokenDisplay = ({
     if (!quoteRequest.destinationToken) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
+
+  const getAmount = useCallback(() => {
+    if (shouldUpdate) {
+      return fromBignumberToString(
+        unit,
+        expectedOutputAmount,
+        destinationToken
+      );
+    } else {
+      return fromBignumberToString(unit, quoteRequest.amount, destinationToken);
+    }
+  }, [
+    expectedOutputAmount,
+    quoteRequest.amount,
+    destinationToken,
+    shouldUpdate,
+    unit,
+  ]);
+
+  function fromBignumberToString(
+    unit: "usd" | "token",
+    amount: BigNumber | null | undefined,
+    token: EnrichedToken | null
+  ) {
+    if (!amount || !token) {
+      return "";
+    }
+    if (unit === "token") {
+      // Display as token amount
+      return formatUnitsWithMaxFractions(amount, token.decimals);
+    } else {
+      // Display as USD amount - convert token to USD
+      const tokenAmountFormatted = formatUnitsWithMaxFractions(
+        amount,
+        token.decimals
+      );
+      const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
+      // convertTokenToUSD returns in 18 decimal precision
+      return utils.formatUnits(usdValue, 18);
+    }
+  }
+
+  const convertedAmount = useMemo(() => {
+    const amount = shouldUpdate ? expectedOutputAmount : quoteRequest.amount;
+    if (!amount || !destinationToken) return undefined;
+    const amountStr = formatUnitsWithMaxFractions(
+      amount,
+      destinationToken.decimals
+    );
+    if (unit === "token") {
+      return convertTokenToUSD(amountStr, destinationToken);
+    } else {
+      return convertUSDToToken(amountStr, destinationToken);
+    }
+  }, [
+    shouldUpdate,
+    expectedOutputAmount,
+    quoteRequest.amount,
+    destinationToken,
+    unit,
+  ]);
 
   return (
     <TokenInputWrapper>
@@ -69,15 +130,25 @@ export const DestinationTokenDisplay = ({
 
         <TokenAmountInputWrapper
           showPrefix={unit === "usd"}
-          value={amountString}
+          value={getAmount()}
           error={false}
         >
-          <TokenAmountInput
+          <NumericFormat
+            customInput={TokenAmountInput}
             id="destination-amount-input"
             name="destination-amount-input"
             placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
+            value={isFocused && !shouldUpdate ? undefined : getAmount()}
+            onValueChange={(values, sourceInfo) => {
+              if (sourceInfo.source === "event" && isFocused) {
+                handleInputChange(values.floatValue);
+              }
+            }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            thousandSeparator=","
+            decimalSeparator="."
+            allowNegative={false}
             disabled={inputDisabled}
             error={false}
           />
@@ -106,7 +177,7 @@ export const DestinationTokenDisplay = ({
             error={false}
             setAmount={(amount) => {
               if (amount) {
-                handleBalanceClick(amount, destinationToken.decimals);
+                handleBalanceClick(amount);
               }
             }}
           />
