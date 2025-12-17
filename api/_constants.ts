@@ -50,7 +50,8 @@ export const TOKEN_SYMBOLS_MAP = {
     ...constants.TOKEN_SYMBOLS_MAP.USDC,
     addresses: {
       ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
-      [CHAIN_IDs.LIGHTER]: "0x2337000000000000000000000000000000000003",
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
     },
   },
   USDT: {
