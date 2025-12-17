@@ -307,8 +307,21 @@ function deduplicateTokens(tokens: SwapToken[]): SwapToken[] {
       if (seen.has(usdt0Key)) return; // Skip this USDT, we already have USDT0
     }
 
-    // Keep first occurrence
-    if (!seen.has(key)) {
+    // Merge tokens
+    if (seen.has(key)) {
+      const existingToken = seen.get(key)!;
+      const mergedToken: SwapToken = {
+        chainId: existingToken.chainId,
+        address: existingToken.address,
+        name: existingToken.name || token.name,
+        symbol: existingToken.symbol || token.symbol,
+        displaySymbol: existingToken.displaySymbol || token.displaySymbol,
+        decimals: existingToken.decimals || token.decimals,
+        logoUrl: existingToken.logoUrl || token.logoUrl,
+        priceUsd: existingToken.priceUsd || token.priceUsd,
+      };
+      seen.set(key, mergedToken);
+    } else {
       seen.set(key, token);
     }
   });
