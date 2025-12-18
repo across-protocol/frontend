@@ -3,11 +3,11 @@
  * Currently, the packages `@across-protocol/contracts` and `@across-protocol/across-token` are not optimized for tree-shaking.
  * This is a temporary solution until we can fix the issue upstream.
  */
-export { AcrossMerkleDistributor__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/merkle-distributor/AcrossMerkleDistributor__factory";
-export { HubPool__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/HubPool__factory";
-export { SpokePool__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/SpokePool__factory";
-export { SpokePoolVerifier__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
-export { ERC20__factory } from "@across-protocol/contracts/dist/typechain/factories/@openzeppelin/contracts-v4/token/ERC20/ERC20__factory";
+export { AcrossMerkleDistributor__factory } from "@across-protocol/contracts/dist/typechain/factories/AcrossMerkleDistributor__factory";
+export { HubPool__factory } from "@across-protocol/contracts/dist/typechain/factories/HubPool__factory";
+export { SpokePool__factory } from "@across-protocol/contracts/dist/typechain/factories/SpokePool__factory";
+export { SpokePoolVerifier__factory } from "@across-protocol/contracts/dist/typechain/factories/SpokePoolVerifier__factory";
+export { ERC20__factory } from "@across-protocol/contracts/dist/typechain/factories/ERC20__factory";
 export { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain/factories/AcceleratingDistributor__factory";
 export { ClaimAndStake__factory } from "@across-protocol/across-token/dist/typechain/factories/ClaimAndStake__factory";
 
@@ -20,14 +20,14 @@ export type {
   SwapAndBridge,
 } from "@across-protocol/contracts-v4.1.1/dist/typechain/contracts/SwapAndBridge.sol";
 
-export type { AcrossMerkleDistributor } from "@across-protocol/contracts/dist/typechain/contracts/merkle-distributor/AcrossMerkleDistributor";
-export type { HubPool } from "@across-protocol/contracts/dist/typechain/contracts/HubPool";
+export type { AcrossMerkleDistributor } from "@across-protocol/contracts/dist/typechain/AcrossMerkleDistributor";
+export type { HubPool } from "@across-protocol/contracts/dist/typechain/HubPool";
 export type {
   SpokePool,
   FilledV3RelayEvent,
   FilledRelayEvent,
-} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
-export type { SpokePoolVerifier } from "@across-protocol/contracts/dist/typechain/contracts/SpokePoolVerifier";
+} from "@across-protocol/contracts/dist/typechain/SpokePool";
+export type { SpokePoolVerifier } from "@across-protocol/contracts/dist/typechain/SpokePoolVerifier";
 export type { AcceleratingDistributor } from "@across-protocol/across-token/dist/typechain/AcceleratingDistributor";
 export type { ClaimAndStake } from "@across-protocol/across-token/dist/typechain/ClaimAndStake";
 export type {
