@@ -19,6 +19,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.hyperliquid.xyz/evm",
   blockTimeSeconds: 1,
-  tokens: ["USDC", "USDT"],
+  tokens: ["USDC", "USDT", "USDH"],
   enableCCTP: true,
 } as ChainConfig;

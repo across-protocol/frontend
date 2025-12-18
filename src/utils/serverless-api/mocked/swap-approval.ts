@@ -42,7 +42,7 @@ export async function swapApprovalApiCall(
   };
 
   return {
-    crossSwapType: "bridgeToBridge",
+    crossSwapType: "bridgeableToBridgeable",
     amountType: params.tradeType || "exactInput",
     checks: {
       allowance: {

@@ -52,7 +52,7 @@ const mockOutputApiToken = {
 };
 
 const mockSwapQuote: SwapApprovalQuote = {
-  crossSwapType: "bridgeToBridge",
+  crossSwapType: "bridgeableToBridgeable",
   amountType: "exactInput",
   approvalTxns: undefined,
   eip712: undefined,
