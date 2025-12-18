@@ -536,10 +536,11 @@ async function _prepareSponsoredTx(params: {
     }) * 100
   );
 
-  const { quote, signature } = buildSponsoredCCTPQuote({
+  const { quote, signature } = await buildSponsoredCCTPQuote({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     inputAmount: bridgeQuote.inputAmount,
+    outputAmount: bridgeQuote.outputAmount,
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
     refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),

@@ -1,7 +1,10 @@
 import { utils, BigNumber } from "ethers";
+import { SponsoredCCTPDstPeriphery__factory } from "@across-protocol/contracts/dist/typechain";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
+import { getProvider } from "./_providers";
+import { AmountTooLowError } from "./_errors";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -31,6 +34,13 @@ const LIGHTER_DEPOSIT_ABI = [
   },
 ];
 
+// Sources:
+// - https://mainnet.zklighter.elliot.ai/api/v1/assetDetails
+// - https://etherscan.io/address/0xe5fb592ef1b620909000af0d5fb55a3593026142#code#F1#L132
+const LIGHTER_MIN_DEPOSIT_AMOUNT = {
+  [TOKEN_SYMBOLS_MAP.USDC.symbol]: BigNumber.from(1000000),
+};
+
 export function isToLighter(chainId: number) {
   return [CHAIN_IDs.LIGHTER].includes(chainId);
 }
@@ -46,19 +56,21 @@ export function getLighterIntermediaryChainId(destinationChainId: number) {
   return intermediaryChainId;
 }
 
-export function buildLighterDepositActionData(params: {
+export async function buildLighterDepositActionData(params: {
   recipient: string;
   outputTokenSymbol: string;
   routeType: number;
-  amount: BigNumber;
+  outputAmount: BigNumber;
   destinationChainId: number;
+  sponsoredCCTPDstPeripheryAddress: string;
 }) {
   const {
     recipient,
     outputTokenSymbol,
     routeType,
-    amount,
+    outputAmount,
     destinationChainId,
+    sponsoredCCTPDstPeripheryAddress,
   } = params;
 
   const assetIndex = LIGHTER_ASSET_INDICES_PER_TOKEN[outputTokenSymbol];
@@ -66,6 +78,19 @@ export function buildLighterDepositActionData(params: {
     throw new Error(
       `Lighter 'assetIndex' not found for token symbol ${outputTokenSymbol}`
     );
+  }
+
+  const minDepositAmount = LIGHTER_MIN_DEPOSIT_AMOUNT[outputTokenSymbol];
+  if (!minDepositAmount) {
+    throw new Error(
+      `Lighter 'minDepositAmount' not found for token symbol ${outputTokenSymbol}`
+    );
+  }
+
+  if (outputAmount.lt(minDepositAmount)) {
+    throw new AmountTooLowError({
+      message: "Amount too low for Lighter deposit.",
+    });
   }
 
   const intermediaryChainId = getLighterIntermediaryChainId(destinationChainId);
@@ -92,8 +117,17 @@ export function buildLighterDepositActionData(params: {
   const lighterDepositInterface = new utils.Interface(LIGHTER_DEPOSIT_ABI);
   const lighterDepositCalldata = lighterDepositInterface.encodeFunctionData(
     "deposit",
-    [recipient, assetIndex, routeType, amount]
+    [recipient, assetIndex, routeType, BigNumber.from(0)] // Placeholder amount, will be replaced
   );
+
+  const sponsoredCCTPDstPeripheryContract =
+    SponsoredCCTPDstPeriphery__factory.connect(
+      sponsoredCCTPDstPeripheryAddress,
+      getProvider(intermediaryChainId)
+    );
+  // Get the PermissionedMulticallHandler address from the SponsoredCCTPDstPeriphery contract
+  const permissionedMulticallHandlerAddress =
+    await sponsoredCCTPDstPeripheryContract.multicallHandler();
 
   // Dynamically inject the received amount on the intermediary chain into above deposit
   // call
@@ -112,7 +146,7 @@ export function buildLighterDepositActionData(params: {
   // Compress calls for ArbitraryEVMFlowExecutor
   const compressedCalls = [
     {
-      target: lighterAddress,
+      target: permissionedMulticallHandlerAddress,
       callData: makeCallWithBalanceCalldata,
     },
   ];
