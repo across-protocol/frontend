@@ -83,6 +83,16 @@ export function useTokenInput({
     }
   }, [amountString, justTyped, token, unit, setAmount]);
 
+  // Reset amount when token changes
+  useEffect(() => {
+    if (token) {
+      setAmountString("");
+      setConvertedAmount(undefined);
+      setAmount(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token?.chainId, token?.symbol]);
+
   // Handle quote updates - only update the field that should receive the quote
   useEffect(() => {
     if (shouldUpdate && isUpdateLoading) {
