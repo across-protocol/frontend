@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
-import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
-  TokenAmountInputWrapper,
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
@@ -15,6 +12,8 @@ import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
+import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -37,22 +36,6 @@ export const OriginTokenInput = ({
   const { originToken, destinationToken } = quoteRequest;
 
   const shouldUpdate = quoteRequest.tradeType === "minOutput";
-
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: originToken,
-    setAmount: setOriginAmount,
-    expectedAmount,
-    shouldUpdate,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
@@ -78,33 +61,30 @@ export const OriginTokenInput = ({
     }
   }, [inputDisabled]);
 
+  const displayAmount = shouldUpdate ? expectedAmount : quoteRequest.amount;
+
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
         <TokenAmountInputTitle>From</TokenAmountInputTitle>
-
-        <TokenAmountInputWrapper
-          showPrefix={unit === "usd"}
-          value={amountString}
-          error={insufficientBalance}
-        >
-          <TokenAmountInput
-            id="origin-amount-input"
-            name="origin-amount-input"
-            data-testid="bridge-amount-input"
-            ref={amountInputRef}
-            placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
-            disabled={inputDisabled}
-            error={insufficientBalance}
-          />
-        </TokenAmountInputWrapper>
-        <ToggleUnitButton
-          onClick={toggleUnit}
-          unit={unit}
+        <AmountInput
+          id="origin-amount-input"
+          name="origin-amount-input"
+          testId="bridge-amount-input"
+          amount={displayAmount}
           token={originToken}
-          convertedAmount={convertedAmount}
+          unit={unit}
+          shouldUpdate={shouldUpdate}
+          disabled={inputDisabled}
+          error={insufficientBalance}
+          setAmount={setOriginAmount}
+          inputRef={amountInputRef}
+        />
+        <ToggleUnitButton
+          unit={unit}
+          setUnit={setUnit}
+          token={originToken}
+          amount={displayAmount}
         />
       </TokenAmountStack>
       <TokenSelectorColumn>
@@ -122,11 +102,7 @@ export const OriginTokenInput = ({
             token={originToken}
             disableHover={false}
             error={insufficientBalance}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount, originToken.decimals);
-              }
-            }}
+            setAmount={setOriginAmount}
           />
         )}
       </TokenSelectorColumn>

@@ -3,8 +3,13 @@ import { quoteRequestReducer } from "./quoteRequestReducer";
 import { QuoteRequest } from "./quoteRequestAction";
 import { initialQuote } from "./initialQuote";
 
-const mockToken = (symbol: string) =>
-  ({ symbol, chainId: 1, address: "0x" }) as QuoteRequest["originToken"];
+const mockToken = (symbol: string, decimals = 18) =>
+  ({
+    symbol,
+    chainId: 1,
+    address: "0x",
+    decimals,
+  }) as QuoteRequest["originToken"];
 
 const mockAccount = (address: string) =>
   ({ accountType: "evm", address }) as QuoteRequest["customDestinationAccount"];
@@ -103,6 +108,26 @@ describe("quoteRequestReducer", () => {
         payload: undefined,
       });
       expect(result.tradeType).toBe("exactInput");
+    });
+
+    it("preserves amount when swapping", () => {
+      const usdc1 = mockToken("USDC", 6);
+      const usdc2 = mockToken("USDC.e", 6);
+
+      const state: QuoteRequest = {
+        ...initialQuote,
+        originToken: usdc1,
+        destinationToken: usdc2,
+        tradeType: "exactInput",
+        amount: BigNumber.from("10000000"),
+      };
+
+      const result = quoteRequestReducer(state, {
+        type: "QUICK_SWAP",
+        payload: undefined,
+      });
+
+      expect(result.amount?.toString()).toBe("10000000");
     });
   });
 

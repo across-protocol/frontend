@@ -207,7 +207,7 @@ const createQuoteWithProvider = (
 
 const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
-  title: "Stories/ConfirmationButton",
+  title: "Bridge/ConfirmationButton",
   argTypes: {
     isQuoteLoading: {
       control: { type: "boolean" },
