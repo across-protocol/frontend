@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { BigNumber, utils } from "ethers";
-import { UnitType } from "hooks";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { TokenAmountInput, TokenAmountInputWrapper } from "./styles";
 import {
   convertTokenToUSD,
+  convertUSDToToken,
   formatUnitsWithMaxFractions,
 } from "../../../../utils";
+import { UnitType } from "../../types";
 
 export function formatAmountForDisplay(
   amount: BigNumber | null | undefined,
@@ -36,7 +37,7 @@ type AmountInputProps = {
   shouldUpdate: boolean;
   disabled: boolean;
   error: boolean;
-  onInputChange: (value: number | undefined) => void;
+  setAmount: (amount: BigNumber | null) => void;
   inputRef?: React.RefObject<HTMLInputElement>;
 };
 
@@ -50,12 +51,33 @@ export const AmountInput = ({
   shouldUpdate,
   disabled,
   error,
-  onInputChange,
+  setAmount,
   inputRef,
 }: AmountInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   const displayValue = formatAmountForDisplay(amount, token, unit);
+
+  const handleValueChange = useCallback(
+    (value: number | undefined) => {
+      if (value === undefined || value <= 0) {
+        setAmount(null);
+        return;
+      }
+      if (!token) {
+        setAmount(null);
+        return;
+      }
+      if (unit === "token") {
+        const parsed = utils.parseUnits(value.toString(), token.decimals);
+        setAmount(parsed);
+      } else {
+        const tokenValue = convertUSDToToken(value.toString(), token);
+        setAmount(tokenValue);
+      }
+    },
+    [setAmount, token, unit]
+  );
 
   return (
     <TokenAmountInputWrapper
@@ -73,7 +95,7 @@ export const AmountInput = ({
         value={isFocused && !shouldUpdate ? undefined : displayValue}
         onValueChange={(values, sourceInfo) => {
           if (sourceInfo.source === "event" && isFocused) {
-            onInputChange(values.floatValue);
+            handleValueChange(values.floatValue);
           }
         }}
         onFocus={() => setIsFocused(true)}

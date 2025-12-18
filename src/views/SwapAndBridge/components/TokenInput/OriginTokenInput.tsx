@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
-import { UnitType, useTokenInput } from "hooks";
+import { useEffect, useRef } from "react";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
@@ -13,12 +12,8 @@ import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
 import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
-import {
-  convertTokenToUSD,
-  convertUSDToToken,
-  formatUnitsWithMaxFractions,
-} from "../../../../utils";
 import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -41,13 +36,6 @@ export const OriginTokenInput = ({
   const { originToken, destinationToken } = quoteRequest;
 
   const shouldUpdate = quoteRequest.tradeType === "minOutput";
-
-  const { toggleUnit, handleInputChange, handleBalanceClick } = useTokenInput({
-    token: originToken,
-    setAmount: setOriginAmount,
-    unit,
-    setUnit,
-  });
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
@@ -75,24 +63,10 @@ export const OriginTokenInput = ({
 
   const displayAmount = shouldUpdate ? expectedAmount : quoteRequest.amount;
 
-  const convertedAmount = useMemo(() => {
-    if (!displayAmount || !originToken) return undefined;
-    const amountStr = formatUnitsWithMaxFractions(
-      displayAmount,
-      originToken.decimals
-    );
-    if (unit === "token") {
-      return convertTokenToUSD(amountStr, originToken);
-    } else {
-      return convertUSDToToken(amountStr, originToken);
-    }
-  }, [displayAmount, originToken, unit]);
-
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
         <TokenAmountInputTitle>From</TokenAmountInputTitle>
-
         <AmountInput
           id="origin-amount-input"
           name="origin-amount-input"
@@ -103,14 +77,14 @@ export const OriginTokenInput = ({
           shouldUpdate={shouldUpdate}
           disabled={inputDisabled}
           error={insufficientBalance}
-          onInputChange={handleInputChange}
+          setAmount={setOriginAmount}
           inputRef={amountInputRef}
         />
         <ToggleUnitButton
-          onClick={toggleUnit}
           unit={unit}
+          setUnit={setUnit}
           token={originToken}
-          convertedAmount={convertedAmount}
+          amount={displayAmount}
         />
       </TokenAmountStack>
       <TokenSelectorColumn>
@@ -128,11 +102,7 @@ export const OriginTokenInput = ({
             token={originToken}
             disableHover={false}
             error={insufficientBalance}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount);
-              }
-            }}
+            setAmount={setOriginAmount}
           />
         )}
       </TokenSelectorColumn>

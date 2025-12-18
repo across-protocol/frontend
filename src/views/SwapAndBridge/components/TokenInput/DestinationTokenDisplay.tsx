@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
@@ -12,12 +10,8 @@ import {
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
-import {
-  convertTokenToUSD,
-  convertUSDToToken,
-  formatUnitsWithMaxFractions,
-} from "../../../../utils";
 import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: BigNumber | undefined;
@@ -43,13 +37,6 @@ export const DestinationTokenDisplay = ({
 
   const { destinationToken, originToken } = quoteRequest;
 
-  const { toggleUnit, handleInputChange, handleBalanceClick } = useTokenInput({
-    token: destinationToken,
-    setAmount: setDestinationAmount,
-    unit,
-    setUnit,
-  });
-
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
@@ -58,19 +45,6 @@ export const DestinationTokenDisplay = ({
   const displayAmount = shouldUpdate
     ? expectedOutputAmount
     : quoteRequest.amount;
-
-  const convertedAmount = useMemo(() => {
-    if (!displayAmount || !destinationToken) return undefined;
-    const amountStr = formatUnitsWithMaxFractions(
-      displayAmount,
-      destinationToken.decimals
-    );
-    if (unit === "token") {
-      return convertTokenToUSD(amountStr, destinationToken);
-    } else {
-      return convertUSDToToken(amountStr, destinationToken);
-    }
-  }, [displayAmount, destinationToken, unit]);
 
   return (
     <TokenInputWrapper>
@@ -89,13 +63,13 @@ export const DestinationTokenDisplay = ({
           shouldUpdate={shouldUpdate}
           disabled={inputDisabled}
           error={false}
-          onInputChange={handleInputChange}
+          setAmount={setDestinationAmount}
         />
         <ToggleUnitButton
-          onClick={toggleUnit}
+          setUnit={setUnit}
           unit={unit}
           token={destinationToken}
-          convertedAmount={convertedAmount}
+          amount={displayAmount}
         />
       </TokenAmountStack>
       <TokenSelectorColumn>
@@ -113,11 +87,7 @@ export const DestinationTokenDisplay = ({
             token={destinationToken}
             disableHover={true}
             error={false}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount);
-              }
-            }}
+            setAmount={setDestinationAmount}
           />
         )}
       </TokenSelectorColumn>

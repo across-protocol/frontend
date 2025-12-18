@@ -19,5 +19,3 @@ export * from "./useAmplitude";
 export * from "./useRewardSummary";
 export * from "./useElapsedSeconds";
 export * from "./feature-flags/useFeatureFlag";
-export * from "./useTokenInput";
-export { default as useTokenInput } from "./useTokenInput";
