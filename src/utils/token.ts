@@ -40,7 +40,7 @@ export async function getNativeBalance(
  * @param blockNumber The block number to execute the query.
  * @returns a Promise that resolves to the balance of the account
  */
-export async function getBalance(
+export async function getEvmBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
@@ -101,7 +101,7 @@ export async function getTokenBalance(
 ) {
   return chainIsSvm(chainId)
     ? getSvmBalance(chainId, account, tokenAddress)
-    : getBalance(chainId, account, tokenAddress);
+    : getEvmBalance(chainId, account, tokenAddress);
 }
 
 /**
