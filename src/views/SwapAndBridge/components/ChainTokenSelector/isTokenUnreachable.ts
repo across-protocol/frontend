@@ -45,13 +45,6 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPEREVM],
     toSymbol: ["USDH"],
   },
-  // USDH on HyperEVM can only be a destination token
-  {
-    fromChainId: [CHAIN_IDs.HYPEREVM],
-    fromSymbol: ["USDH"],
-    toChainId: "*",
-    toSymbol: "*",
-  },
   // only allow bridegable output to SOlana
   {
     fromChainId: "*",
