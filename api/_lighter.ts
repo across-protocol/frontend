@@ -34,6 +34,9 @@ const LIGHTER_DEPOSIT_ABI = [
   },
 ];
 
+// Sources:
+// - https://mainnet.zklighter.elliot.ai/api/v1/assetDetails
+// - https://etherscan.io/address/0xe5fb592ef1b620909000af0d5fb55a3593026142#code#F1#L132
 const LIGHTER_MIN_DEPOSIT_AMOUNT = {
   [TOKEN_SYMBOLS_MAP.USDC.symbol]: BigNumber.from(1000000),
 };
