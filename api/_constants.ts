@@ -96,6 +96,7 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.MAINNET]:
         constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
     },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
   },
   "USDC-PERPS-LIGHTER": {
     name: "USDC",
@@ -106,6 +107,7 @@ export const TOKEN_SYMBOLS_MAP = {
       [CHAIN_IDs.MAINNET]:
         constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
     },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
   },
 };
 
