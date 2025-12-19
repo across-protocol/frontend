@@ -288,8 +288,12 @@ export function getCctpBridgeStrategy(
         // Rearranging: inputAmount * (1 - bps/10000) = amountToArriveOnDestination + forwardFee
         // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
         // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
+        // Use ceiling division to ensure we request enough input to cover fees and desired output
         const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
-        inputAmount = inputAmount.add(forwardFee).mul(10000).div(bpsFactor);
+        inputAmount = divCeil(
+          inputAmount.add(forwardFee).mul(10000),
+          bpsFactor
+        );
 
         // Calculate total CCTP fee (transfer fee + forward fee)
         // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution

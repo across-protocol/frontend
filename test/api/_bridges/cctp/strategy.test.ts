@@ -247,14 +247,13 @@ describe("bridges/cctp/strategy", () => {
       // Expected calculation:
       // Step 1: amountToArriveOnDestination = 100 USDC (no account creation fee)
       // Step 2: Solve algebraic formula
-      //   inputAmount = (100 + 0.2) * 10000 / (10000 - 1)
-      //   inputAmount = 100.2 * 10000 / 9999
-      //   inputAmount = 100,200,000 / 9999 ≈ 100,210,021
-
-      const expectedInputAmount = BigNumber.from(100_000_000)
-        .add(200_000)
-        .mul(10000)
-        .div(9999);
+      //   inputAmount = ceil(((100 + 0.2) * 10000 / (10000 - 1)))
+      //   inputAmount = ceil(100.2 * 10000 / 9999)
+      //   inputAmount = ceil(1,002,000 / 9999)) = 100,210,022
+      const expectedInputAmount = divCeil(
+        BigNumber.from(100_000_000).add(200_000).mul(10000),
+        BigNumber.from(9999)
+      );
 
       expect(result.bridgeQuote.inputAmount).toEqual(expectedInputAmount);
       expect(result.bridgeQuote.outputAmount).toEqual(minOutputAmount);
@@ -286,10 +285,10 @@ describe("bridges/cctp/strategy", () => {
       //   inputAmount = 101,200,000 / 9999 ≈ 101,210,121
 
       const amountToArriveOnDestination = BigNumber.from(101_000_000); // 100 + 1 USDC
-      const expectedInputAmount = amountToArriveOnDestination
-        .add(200_000)
-        .mul(10000)
-        .div(9999);
+      const expectedInputAmount = divCeil(
+        amountToArriveOnDestination.add(200_000).mul(10000),
+        BigNumber.from(9999)
+      );
 
       expect(result.bridgeQuote.inputAmount).toEqual(expectedInputAmount);
       expect(result.bridgeQuote.outputAmount).toEqual(minOutputAmount);
@@ -316,7 +315,10 @@ describe("bridges/cctp/strategy", () => {
       //   inputAmount = minOutputAmount * 10000 / (10000 - transferFeeBps)
       const transferFeeBps = BigNumber.from(1);
       const bpsFactor = BigNumber.from(10000).sub(transferFeeBps); // 9999
-      const expectedInputAmount = minOutputAmount.mul(10000).div(bpsFactor);
+      const expectedInputAmount = divCeil(
+        minOutputAmount.mul(10000),
+        bpsFactor
+      );
 
       // Step 2: Calculate transfer fee using divCeil
       const expectedTransferFee = divCeil(
