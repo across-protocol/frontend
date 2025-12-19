@@ -6,6 +6,7 @@ import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
 import { getProvider } from "./_providers";
 import { AmountTooLowError } from "./_errors";
 import { Token } from "./_dexes/types";
+import { getCachedTokenInfo } from "./_utils";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -35,7 +36,8 @@ const LIGHTER_DEPOSIT_ABI = [
 // - https://mainnet.zklighter.elliot.ai/api/v1/assetDetails
 // - https://etherscan.io/address/0xe5fb592ef1b620909000af0d5fb55a3593026142#code#F1#L132
 const LIGHTER_MIN_DEPOSIT_AMOUNT = {
-  [TOKEN_SYMBOLS_MAP.USDC.symbol]: BigNumber.from(1000000),
+  [TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"].symbol]: BigNumber.from(1000000),
+  [TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"].symbol]: BigNumber.from(1000000),
 };
 
 export function isToLighter(chainId: number) {
@@ -83,16 +85,8 @@ export async function buildLighterDepositActionData(params: {
     outputToken.chainId
   );
 
-  const intermediaryTokenAddress =
-    TOKEN_SYMBOLS_MAP[outputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
-      ?.addresses[intermediaryChainId];
-  if (!intermediaryTokenAddress) {
-    throw new Error(
-      `Lighter 'intermediaryTokenAddress' not found for token symbol ${
-        outputToken.symbol
-      } on chain ${intermediaryChainId}`
-    );
-  }
+  const intermediaryToken = await getIntermediaryToken(intermediaryChainId);
+  const intermediaryTokenAddress = intermediaryToken.address;
 
   const lighterAddress = ZK_LIGHTER_ADDRESSES[intermediaryChainId];
   if (!lighterAddress) {
@@ -153,4 +147,24 @@ export function decodeLighterTokenAddress(tokenAddress: string) {
   const assetIndex = tokenAddressBytes.slice(17, 19); // uint16 from bytes 17-18
   const routeType = tokenAddressBytes.slice(19, 20); // uint8 from byte 19
   return { assetIndex, routeType };
+}
+
+async function getIntermediaryToken(
+  intermediaryChainId: number
+): Promise<Token> {
+  const intermediaryUsdcAddress =
+    TOKEN_SYMBOLS_MAP["USDC"].addresses[intermediaryChainId];
+
+  if (!intermediaryUsdcAddress) {
+    throw new Error(
+      `Intermediary USDC address not found for chain ${intermediaryChainId}`
+    );
+  }
+
+  const tokenInfo = await getCachedTokenInfo({
+    address: intermediaryUsdcAddress,
+    chainId: intermediaryChainId,
+  });
+
+  return tokenInfo;
 }
