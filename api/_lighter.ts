@@ -1,10 +1,11 @@
-import { utils, BigNumber } from "ethers";
+import { utils, BigNumber, ethers } from "ethers";
 import { SponsoredCCTPDstPeriphery__factory } from "@across-protocol/contracts/dist/typechain";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { encodeMakeCallWithBalanceCalldata } from "./_multicall-handler";
 import { getProvider } from "./_providers";
 import { AmountTooLowError } from "./_errors";
+import { Token } from "./_dexes/types";
 
 const ZK_LIGHTER_ADDRESSES = {
   // https://etherscan.io/address/0x3B4D794a66304F130a4Db8F2551B0070dfCf5ca7
@@ -13,10 +14,6 @@ const ZK_LIGHTER_ADDRESSES = {
 
 const LIGHTER_INTERMEDIARY_CHAIN_IDS = {
   [CHAIN_IDs.LIGHTER]: CHAIN_IDs.MAINNET,
-};
-
-const LIGHTER_ASSET_INDICES_PER_TOKEN = {
-  [TOKEN_SYMBOLS_MAP.USDC.symbol]: 3,
 };
 
 const LIGHTER_DEPOSIT_ABI = [
@@ -58,32 +55,21 @@ export function getLighterIntermediaryChainId(destinationChainId: number) {
 
 export async function buildLighterDepositActionData(params: {
   recipient: string;
-  outputTokenSymbol: string;
-  routeType: number;
   outputAmount: BigNumber;
-  destinationChainId: number;
+  outputToken: Token;
   sponsoredCCTPDstPeripheryAddress: string;
 }) {
   const {
     recipient,
-    outputTokenSymbol,
-    routeType,
     outputAmount,
-    destinationChainId,
+    outputToken,
     sponsoredCCTPDstPeripheryAddress,
   } = params;
 
-  const assetIndex = LIGHTER_ASSET_INDICES_PER_TOKEN[outputTokenSymbol];
-  if (!assetIndex) {
-    throw new Error(
-      `Lighter 'assetIndex' not found for token symbol ${outputTokenSymbol}`
-    );
-  }
-
-  const minDepositAmount = LIGHTER_MIN_DEPOSIT_AMOUNT[outputTokenSymbol];
+  const minDepositAmount = LIGHTER_MIN_DEPOSIT_AMOUNT[outputToken.symbol];
   if (!minDepositAmount) {
     throw new Error(
-      `Lighter 'minDepositAmount' not found for token symbol ${outputTokenSymbol}`
+      `Lighter 'minDepositAmount' not found for token symbol ${outputToken.symbol}`
     );
   }
 
@@ -93,15 +79,17 @@ export async function buildLighterDepositActionData(params: {
     });
   }
 
-  const intermediaryChainId = getLighterIntermediaryChainId(destinationChainId);
+  const intermediaryChainId = getLighterIntermediaryChainId(
+    outputToken.chainId
+  );
 
   const intermediaryTokenAddress =
-    TOKEN_SYMBOLS_MAP[outputTokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+    TOKEN_SYMBOLS_MAP[outputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
       ?.addresses[intermediaryChainId];
   if (!intermediaryTokenAddress) {
     throw new Error(
       `Lighter 'intermediaryTokenAddress' not found for token symbol ${
-        outputTokenSymbol
+        outputToken.symbol
       } on chain ${intermediaryChainId}`
     );
   }
@@ -112,6 +100,10 @@ export async function buildLighterDepositActionData(params: {
       `'ZkLighter' address not found for chain ${intermediaryChainId}`
     );
   }
+
+  const { assetIndex, routeType } = decodeLighterTokenAddress(
+    outputToken.address
+  );
 
   // Calldata for calling the Lighter's 'deposit' function on the intermediary chain
   const lighterDepositInterface = new utils.Interface(LIGHTER_DEPOSIT_ABI);
@@ -154,4 +146,11 @@ export async function buildLighterDepositActionData(params: {
     ["tuple(address target, bytes callData)[]"],
     [compressedCalls]
   );
+}
+
+export function decodeLighterTokenAddress(tokenAddress: string) {
+  const tokenAddressBytes = ethers.utils.arrayify(tokenAddress);
+  const assetIndex = tokenAddressBytes.slice(17, 19); // uint16 from bytes 17-18
+  const routeType = tokenAddressBytes.slice(19, 20); // uint8 from byte 19
+  return { assetIndex, routeType };
 }

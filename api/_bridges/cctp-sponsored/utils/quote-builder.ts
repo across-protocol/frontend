@@ -80,10 +80,8 @@ export async function buildSponsoredCCTPQuote(
   const actionData = isDestinationLighter
     ? await buildLighterDepositActionData({
         recipient,
-        outputTokenSymbol: outputToken.symbol,
-        routeType: 0,
         outputAmount,
-        destinationChainId: outputToken.chainId,
+        outputToken,
         sponsoredCCTPDstPeripheryAddress,
       })
     : "0x";
