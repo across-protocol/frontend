@@ -8,6 +8,7 @@ import {
   DepositStatusResponse,
   FillInfo,
   IChainStrategy,
+  FillMetadata,
 } from "../types";
 import {
   findFillEvent,
@@ -26,7 +27,11 @@ import { BigNumber } from "ethers";
 import { SvmSpokeClient } from "@across-protocol/contracts";
 import { hexlify } from "ethers/lib/utils";
 import { isHex } from "viem";
-import { getDepositForBurnBySignatureSVM } from "utils/cctp";
+import {
+  getDepositForBurnBySignatureSVM,
+  getMintAndBurnBySignatureSVM,
+} from "utils/cctp";
+import { getFillTxBySignature } from "utils/fills";
 
 /**
  * Strategy for handling Solana (SVM) chain operations
@@ -84,21 +89,33 @@ export class SVMStrategy implements IChainStrategy {
    * @param depositInfo Deposit information
    * @returns Fill information
    */
-  async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
+  async getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider = "across"
+  ): Promise<FillInfo> {
     const { depositId } = depositInfo.depositLog;
     const fillChainId = this.chainId;
 
     try {
       const fillTxSignature = await Promise.any([
         this.getFillFromIndexer(depositInfo),
-        this.getFillFromRpc(depositInfo),
+        this.getFillFromRpc(depositInfo, bridgeProvider),
       ]);
 
       if (!fillTxSignature) {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
 
-      const metadata = await this.getFillMetadata(fillTxSignature);
+      const metadata = await this.getFillMetadata(
+        fillTxSignature,
+        bridgeProvider
+      );
+
+      if (!metadata) {
+        throw new Error(
+          `Unable to parse fill tx logs for signature: ${fillTxSignature}`
+        );
+      }
 
       return {
         fillTxHash: metadata.fillTxHash,
@@ -153,7 +170,10 @@ export class SVMStrategy implements IChainStrategy {
    * @param depositInfo Deposit information
    * @returns Fill transaction hash (signature)
    */
-  async getFillFromRpc(depositInfo: DepositedInfo): Promise<string> {
+  async getFillFromRpc(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<string> {
     const { depositId } = depositInfo.depositLog;
 
     try {
@@ -166,20 +186,28 @@ export class SVMStrategy implements IChainStrategy {
         )
       )?.number;
 
-      const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
+      let fillEventTxRef = "";
 
-      const fillEvent = await findFillEvent(
-        formattedRelayData,
-        this.chainId,
-        eventsClient,
-        fromSlot
-      );
-
-      if (!fillEvent) {
+      if (bridgeProvider === "cctp") {
+        // todo
         throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+      } else {
+        const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
+
+        const fillEvent = await findFillEvent(
+          formattedRelayData,
+          this.chainId,
+          eventsClient,
+          fromSlot
+        );
+
+        if (!fillEvent) {
+          throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+        }
+        fillEventTxRef = fillEvent.txnRef;
       }
 
-      return fillEvent.txnRef;
+      return fillEventTxRef;
     } catch (error) {
       console.error("Error fetching Solana fill from RPC:", error);
       throw error;
@@ -191,25 +219,25 @@ export class SVMStrategy implements IChainStrategy {
    * @param fillTxHash Fill transaction hash (signature)
    * @returns Fill metadata
    */
-  async getFillMetadata(fillTxHash: string): Promise<{
-    fillTxHash: string;
-    fillTxTimestamp: number;
-    outputAmount: BigNumber | undefined;
-  }> {
+  async getFillMetadata(
+    fillTxHash: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<FillMetadata | undefined> {
     try {
       if (!isSignature(fillTxHash)) {
         throw new Error(`Invalid tx signature: ${fillTxHash}`);
       }
-      const rpc = getSVMRpc(this.chainId);
-      const eventsClient = await SvmCpiEventsClient.create(rpc);
-      // We skip fetching swap metadata on Solana, since we don't support destination chain swaps yet
-      const fillTx = await eventsClient.getFillEventsFromSignature(
-        this.chainId,
-        fillTxHash
-      );
+      const fillTx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+        ? await getMintAndBurnBySignatureSVM({
+            signature: fillTxHash,
+            chainId: this.chainId,
+          })
+        : await getFillTxBySignature({
+            signature: fillTxHash,
+            chainId: this.chainId,
+          });
 
-      const fillTxDetails = fillTx?.[0];
-      if (!fillTxDetails) {
+      if (!fillTx) {
         throw new Error(
           `Unable to find fill with signature ${fillTxHash} on chain ${this.chainId}`
         );
@@ -217,8 +245,8 @@ export class SVMStrategy implements IChainStrategy {
 
       return {
         fillTxHash,
-        fillTxTimestamp: Number(fillTxDetails.fillTimestamp),
-        outputAmount: BigNumber.from(fillTxDetails.outputAmount),
+        fillTxTimestamp: Number(fillTx.fillTxTimestamp),
+        outputAmount: BigNumber.from(fillTx.outputAmount),
       };
     } catch (error) {
       console.error(

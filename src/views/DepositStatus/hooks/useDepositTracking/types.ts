@@ -94,6 +94,18 @@ export type DepositForBurnEvent = {
   mintRecipient: string; // base58 account (20 byte evm address)
 };
 
+export type MintAndWithdrawEvent = {
+  mintRecipient: string;
+  amount: bigint;
+  mintToken: string;
+};
+
+export type FillMetadata = {
+  fillTxHash: string;
+  fillTxTimestamp: number;
+  outputAmount: BigNumber | undefined;
+};
+
 /**
  * Common chain strategy interface
  * Each chain implementation adapts its native types to these normalized interfaces
@@ -121,7 +133,10 @@ export interface IChainStrategy {
    * @param bridgeProvider Bridge provider
    * @returns Normalized fill information
    */
-  getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;
+  getFillFromRpc(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<string>;
 
   /**
    * Get fill information for a deposit
