@@ -10,6 +10,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 import * as hypercoreModule from "../../../../api/_hypercore";
 import { ConvertDecimals } from "../../../../api/_utils";
+import { divCeil } from "../../../../api/_bignumber";
 
 // Mock all dependencies
 jest.mock("axios");
@@ -185,6 +186,29 @@ describe("bridges/cctp/strategy", () => {
       expect(result.bridgeQuote.fees.amount).toEqual(maxFee);
     });
 
+    test("should round up transfer fee using divCeil for fast mode", async () => {
+      // Use an amount that will create a remainder when calculating transfer fee
+      // 999,999,999 * 1 bps / 10000 = 99,999.9999 -> should round up to 100,000
+      const exactInputAmount = BigNumber.from(999_999_999);
+
+      const result = await strategy.getQuoteForExactInput({
+        inputToken,
+        outputToken: outputTokenBase,
+        exactInputAmount,
+        recipient: "0x1234567890123456789012345678901234567890",
+      });
+
+      // Expected calculation with divCeil (fast mode):
+      // transferFee = ceil(999,999,999 * 1 / 10000) = ceil(99,999.9999) = 100,000
+      // maxFee = 100,000 (no forward fee)
+      const expectedMaxFee = BigNumber.from(100_000);
+      expect(result.bridgeQuote.fees.amount).toEqual(expectedMaxFee);
+
+      // Verify output is calculated correctly after rounded fee
+      const inputMinusFee = exactInputAmount.sub(expectedMaxFee);
+      expect(result.bridgeQuote.outputAmount).toEqual(inputMinusFee);
+    });
+
     test("should calculate correct output amount for non-HyperCore route with zero fees", async () => {
       const exactInputAmount = BigNumber.from(100_000_000); // 100 USDC
 
@@ -274,6 +298,36 @@ describe("bridges/cctp/strategy", () => {
       // Verify CCTP fee = inputAmount - amountToArriveOnDestination
       const expectedFee = expectedInputAmount.sub(amountToArriveOnDestination);
       expect(result.bridgeQuote.fees.amount).toEqual(expectedFee);
+    });
+
+    test("should round up transfer fee using divCeil for fast mode with non-HyperCore route", async () => {
+      const minOutputAmount = BigNumber.from(999_999_999); // Amount that creates remainder
+      const recipient = "0x1234567890123456789012345678901234567890";
+
+      const result = await strategy.getQuoteForOutput({
+        inputToken,
+        outputToken: outputTokenBase,
+        minOutputAmount,
+        recipient,
+      });
+
+      // Expected calculation (fast mode:
+      // Step 1: Calculate required inputAmount using the same formula as the implementation
+      //   inputAmount = minOutputAmount * 10000 / (10000 - transferFeeBps)
+      const transferFeeBps = BigNumber.from(1);
+      const bpsFactor = BigNumber.from(10000).sub(transferFeeBps); // 9999
+      const expectedInputAmount = minOutputAmount.mul(10000).div(bpsFactor);
+
+      // Step 2: Calculate transfer fee using divCeil
+      const expectedTransferFee = divCeil(
+        expectedInputAmount.mul(transferFeeBps),
+        BigNumber.from(10000)
+      );
+
+      expect(result.bridgeQuote.inputAmount).toEqual(expectedInputAmount);
+      expect(result.bridgeQuote.fees.amount).toEqual(expectedTransferFee);
+      expect(result.bridgeQuote.outputAmount).toEqual(minOutputAmount);
+      expect(result.bridgeQuote.minOutputAmount).toEqual(minOutputAmount);
     });
   });
 

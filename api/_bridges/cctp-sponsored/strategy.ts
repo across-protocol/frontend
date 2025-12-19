@@ -425,7 +425,7 @@ export async function buildSvmTxForAllowanceHolder(params: {
   };
 }
 
-async function _prepareSponsoredTx(params: {
+export async function _prepareSponsoredTx(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
   isEligibleForSponsorship: boolean;
@@ -491,6 +491,7 @@ async function _prepareSponsoredTx(params: {
       // route through our own sponsorship periphery contract.
       useForwardFee: false,
     });
+    // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
     maxFee = divCeil(
       bridgeQuote.inputAmount.mul(transferFeeBps),
       BigNumber.from(10_000)
