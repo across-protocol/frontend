@@ -95,10 +95,10 @@ export function getSponsoredCctpBridgeStrategy(
       return [];
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: async (crossSwap: CrossSwap) => {
       return crossSwap.recipient;
     },
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
