@@ -19,10 +19,14 @@ import {
   GetOutputBridgeQuoteParams,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
-import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
+import {
+  AppFee,
+  CROSS_SWAP_TYPE,
+  getFallbackRecipient,
+} from "../../_dexes/utils";
 import { AmountTooLowError, InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
-import { getFallbackRecipient } from "../../_dexes/utils";
+import { divCeil } from "../../_bignumber";
 import { getEstimatedFillTime } from "../cctp/utils/fill-times";
 import { getZeroBridgeFees } from "../utils";
 import { getCctpFees } from "../cctp/utils/fees";
@@ -421,7 +425,7 @@ export async function buildSvmTxForAllowanceHolder(params: {
   };
 }
 
-async function _prepareSponsoredTx(params: {
+export async function _prepareSponsoredTx(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
   isEligibleForSponsorship: boolean;
@@ -478,7 +482,7 @@ async function _prepareSponsoredTx(params: {
 
   // If eligible for sponsorship, we need to calculate the max fee based on the CCTP fees.
   if (params.isEligibleForSponsorship) {
-    const { transferFeeBps, forwardFee } = await getCctpFees({
+    const { transferFeeBps } = await getCctpFees({
       inputToken: crossSwap.inputToken,
       outputToken: crossSwap.outputToken,
       transferMode: CCTP_TRANSFER_MODE,
@@ -487,8 +491,11 @@ async function _prepareSponsoredTx(params: {
       // route through our own sponsorship periphery contract.
       useForwardFee: false,
     });
-    const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
-    maxFee = transferFee.add(forwardFee);
+    // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
+    maxFee = divCeil(
+      bridgeQuote.inputAmount.mul(transferFeeBps),
+      BigNumber.from(10_000)
+    );
   }
   // If not eligible for sponsorship, we use the pre-calculated max fee from the bridge quote.
   else {

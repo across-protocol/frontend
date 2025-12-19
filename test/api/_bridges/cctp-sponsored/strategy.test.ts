@@ -7,6 +7,7 @@ import {
   getQuoteForExactInput,
   getQuoteForOutput,
   isRouteSupported,
+  _prepareSponsoredTx,
 } from "../../../../api/_bridges/cctp-sponsored/strategy";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import {
@@ -426,6 +427,134 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
           isEligibleForSponsorship: true,
         })
       ).rejects.toThrow();
+    });
+  });
+
+  describe("#_prepareSponsoredTx()", () => {
+    const depositor = "0x0000000000000000000000000000000000000001";
+    const recipient = "0x0000000000000000000000000000000000000002";
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (getEnvs as jest.Mock).mockReturnValue({
+        SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
+      });
+    });
+
+    test("should round up maxFee using divCeil when eligible for sponsorship", async () => {
+      // Use an amount that creates a remainder: 999,999,999 * 1 bps / 10000 = 99,999.9999
+      const inputAmount = BigNumber.from(999_999_999);
+      const outputAmount = ConvertDecimals(
+        arbitrumUSDC.decimals,
+        hyperCoreUSDC.decimals
+      )(inputAmount);
+
+      const crossSwap: CrossSwap = {
+        amount: inputAmount,
+        inputToken: arbitrumUSDC,
+        outputToken: hyperCoreUSDC,
+        depositor,
+        recipient,
+        slippageTolerance: 1,
+        type: AMOUNT_TYPE.EXACT_INPUT,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+      };
+
+      const quotes: CrossSwapQuotes = {
+        crossSwap,
+        bridgeQuote: {
+          inputToken: arbitrumUSDC,
+          outputToken: hyperCoreUSDC,
+          inputAmount,
+          outputAmount,
+          minOutputAmount: outputAmount,
+          estimatedFillTimeSec: 300,
+          provider: "sponsored-cctp",
+          fees: {
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
+            amount: BigNumber.from(0),
+          },
+        },
+        contracts: {
+          depositEntryPoint: {
+            address: "0x0000000000000000000000000000000000000000",
+            name: "SpokePoolPeriphery",
+          },
+        },
+      };
+
+      // Mock CCTP fees with 1 bps
+      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
+        transferFeeBps: 1,
+        forwardFee: BigNumber.from(0),
+      });
+      jest
+        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
+        .mockResolvedValue(true);
+
+      const result = await _prepareSponsoredTx({
+        quotes,
+        isEligibleForSponsorship: true,
+      });
+
+      // Expected maxFee with divCeil:
+      // ceil(999,999,999 * 1 / 10000) = ceil(99,999.9999) = 100,000
+      const expectedMaxFee = BigNumber.from(100_000);
+      expect(result.quote.maxFee).toEqual(expectedMaxFee);
+    });
+
+    test("should use pre-calculated maxFee when not eligible for sponsorship", async () => {
+      const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
+      const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
+      const preCalculatedFee = BigNumber.from(200_000); // 0.2 USDC
+
+      const crossSwap: CrossSwap = {
+        amount: inputAmount,
+        inputToken: arbitrumUSDC,
+        outputToken: hyperCoreUSDC,
+        depositor,
+        recipient,
+        slippageTolerance: 1,
+        type: AMOUNT_TYPE.EXACT_INPUT,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+      };
+
+      const quotes: CrossSwapQuotes = {
+        crossSwap,
+        bridgeQuote: {
+          inputToken: arbitrumUSDC,
+          outputToken: hyperCoreUSDC,
+          inputAmount,
+          outputAmount,
+          minOutputAmount: outputAmount,
+          estimatedFillTimeSec: 300,
+          provider: "sponsored-cctp",
+          fees: {
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
+            amount: preCalculatedFee,
+          },
+        },
+        contracts: {
+          depositEntryPoint: {
+            address: "0x0000000000000000000000000000000000000000",
+            name: "SpokePoolPeriphery",
+          },
+        },
+      };
+
+      const result = await _prepareSponsoredTx({
+        quotes,
+        isEligibleForSponsorship: false,
+      });
+
+      // Should use the pre-calculated fee from bridgeQuote
+      expect(result.quote.maxFee).toEqual(preCalculatedFee);
     });
   });
 
