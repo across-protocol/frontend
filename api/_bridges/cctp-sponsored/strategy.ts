@@ -61,6 +61,7 @@ import {
   MAX_BPS_TO_SPONSOR_LIMIT,
 } from "../../_sponsorship-eligibility";
 import { TOKEN_SYMBOLS_MAP } from "../../_constants";
+import { isToLighter } from "../../_lighter";
 
 const name = "sponsored-cctp" as const;
 
@@ -184,16 +185,17 @@ export async function getQuoteForExactInput(
       useForwardFee: false,
     }).getQuoteForExactInput({
       ...params,
-      outputToken: isSwapPair
-        ? {
-            ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
-            address:
-              TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
-                params.outputToken.chainId
-              ],
-            chainId: params.outputToken.chainId,
-          }
-        : params.outputToken,
+      outputToken:
+        isSwapPair && !isToLighter(params.outputToken.chainId)
+          ? {
+              ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+              address:
+                TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
+                  params.outputToken.chainId
+                ],
+              chainId: params.outputToken.chainId,
+            }
+          : params.outputToken,
     });
     outputAmount = unsponsoredOutputAmount;
     provider = "cctp";

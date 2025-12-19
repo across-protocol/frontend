@@ -143,10 +143,16 @@ export async function buildLighterDepositActionData(params: {
 }
 
 export function decodeLighterTokenAddress(tokenAddress: string) {
-  const tokenAddressBytes = ethers.utils.arrayify(tokenAddress);
-  const assetIndex = tokenAddressBytes.slice(17, 19); // uint16 from bytes 17-18
-  const routeType = tokenAddressBytes.slice(19, 20); // uint8 from byte 19
-  return { assetIndex, routeType };
+  const assetIndex = ethers.utils.hexlify(
+    ethers.utils.arrayify(tokenAddress).slice(17, 19)
+  );
+  const routeType = ethers.utils.hexlify(
+    ethers.utils.arrayify(tokenAddress).slice(19)
+  );
+  return {
+    assetIndex: parseInt(assetIndex, 16),
+    routeType: parseInt(routeType, 16),
+  };
 }
 
 async function getIntermediaryToken(
