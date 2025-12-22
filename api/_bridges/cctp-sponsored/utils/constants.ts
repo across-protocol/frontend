@@ -9,7 +9,6 @@ export const CCTP_TRANSFER_MODE = "fast" as const;
 
 const SPONSORED_CCTP_SRC_PERIPHERY_ADDRESS_OVERRIDES: Record<number, string> = {
   // NOTE: Used for Lighter with owner set to dev wallet for testing
-  [CHAIN_IDs.ARBITRUM]: "0xAA4958EFa0Cf6DdD87e354a90785f1D7291a82c7",
   [CHAIN_IDs.ARBITRUM_SEPOLIA]: "0x79176E2E91c77b57AC11c6fe2d2Ab2203D87AF85",
   [CHAIN_IDs.SOLANA_DEVNET]: "CPr4bRvkVKcSCLyrQpkZrRrwGzQeVAXutFU8WupuBLXq",
 };
