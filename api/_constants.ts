@@ -87,6 +87,28 @@ export const TOKEN_SYMBOLS_MAP = {
     },
     coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
   },
+  "USDC-SPOT-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-SPOT-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000301",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+  "USDC-PERPS-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-PERPS-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000300",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
 };
 
 export const CHAINS = {
@@ -113,6 +135,8 @@ export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   "USDH-SPOT": "USDH",
   "USDC-SPOT": "USDC",
   "USDT-SPOT": "USDT",
+  "USDC-SPOT-LIGHTER": "USDC",
+  "USDC-PERPS-LIGHTER": "USDC",
 };
 export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 

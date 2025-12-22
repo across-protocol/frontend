@@ -35,6 +35,8 @@ export const CCTP_SUPPORTED_CHAINS = [
 export const CCTP_SUPPORTED_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
   TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+  TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"],
+  TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"],
 ];
 
 export const getCctpDomainId = (chainId: number): number => {
