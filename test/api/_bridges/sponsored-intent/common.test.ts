@@ -17,6 +17,7 @@ import {
   HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS,
 } from "../../../../api/_bridges/sponsored-intent/utils/constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
+import { signDigestWithSponsor } from "../../../../api/_sponsorship-signature";
 
 jest.mock("../../../../api/_balance");
 jest.mock("../../../../api/_hypercore", () => ({
@@ -24,6 +25,9 @@ jest.mock("../../../../api/_hypercore", () => ({
   accountExistsOnHyperCore: jest.fn(),
 }));
 jest.mock("../../../../api/_relayer-address");
+jest.mock("../../../../api/_sponsorship-signature", () => ({
+  signDigestWithSponsor: jest.fn(),
+}));
 
 describe("api/_bridges/sponsored-intent/utils/common", () => {
   beforeEach(() => {
@@ -108,6 +112,12 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
   });
 
   describe("getDepositMessage", () => {
+    beforeEach(() => {
+      (signDigestWithSponsor as jest.Mock).mockReturnValue(
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+      );
+    });
+
     it("should return encoded address if to HyperCore", () => {
       const recipient = "0x0000000000000000000000000000000000000123";
       const outputToken = USDH_ON_HYPERCORE;

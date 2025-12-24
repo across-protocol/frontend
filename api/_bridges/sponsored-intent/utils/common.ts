@@ -20,6 +20,7 @@ import {
   getFullRelayers,
   getTransferRestrictedRelayers,
 } from "../../../_relayer-address";
+import { signDigestWithSponsor } from "../../../_sponsorship-signature";
 
 export function getHyperEvmChainId(destinationChainId: number) {
   return [CHAIN_IDs.HYPEREVM, CHAIN_IDs.HYPERCORE].includes(destinationChainId)
@@ -60,7 +61,16 @@ export function getDepositMessage(params: {
 }) {
   const { outputToken, recipient } = params;
   if (isToHyperCore(outputToken.chainId)) {
-    return ethers.utils.defaultAbiCoder.encode(["address"], [recipient]);
+    const encodedRecipient = ethers.utils.defaultAbiCoder.encode(
+      ["address"],
+      [recipient]
+    );
+    const hashedRecipient = ethers.utils.keccak256(encodedRecipient);
+    const signature = signDigestWithSponsor(hashedRecipient);
+    return ethers.utils.defaultAbiCoder.encode(
+      ["address", "bytes"],
+      [recipient, signature]
+    );
   }
   return "0x";
 }

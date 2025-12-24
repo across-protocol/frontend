@@ -23,7 +23,7 @@ export const getSponsorshipSigner = (): ethers.Wallet => {
 
 /**
  * Signs a raw digest with the sponsorship signer.
- * This is used for CCTP signatures where the contract expects a signature on the unprefixed hash.
+ * This is used for sponsored signatures where the contract expects a signature on the unprefixed hash.
  * @param {string} digest The raw digest to sign.
  * @returns {string} The signature string.
  */
@@ -33,18 +33,4 @@ export const signDigestWithSponsor = (digest: string): string => {
   // This is necessary because `signer.signMessage` would prefix the hash.
   const signature = signer._signingKey().signDigest(digest);
   return utils.joinSignature(signature);
-};
-
-/**
- * Signs a message with the sponsorship signer.
- * This adds the EIP-191 prefix to the message before signing.
- * Use this when the contract expects `toEthSignedMessageHash().recover()`.
- * @param {Uint8Array} message The message to sign.
- * @returns {Promise<string>} The signature string.
- */
-export const signMessageWithSponsor = (
-  message: Uint8Array
-): Promise<string> => {
-  const signer = getSponsorshipSigner();
-  return signer.signMessage(message);
 };
