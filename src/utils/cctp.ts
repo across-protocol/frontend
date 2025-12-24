@@ -9,6 +9,8 @@ import {
 import {
   DepositData,
   DepositForBurnEvent,
+  MintAndWithdrawEvent,
+  FillMetadata,
 } from "views/DepositStatus/hooks/useDepositTracking/types";
 import {
   TokenMessengerMinterV2Client,
@@ -257,6 +259,20 @@ export class SvmCctpEventsClient extends SvmCpiEventsClient {
     const events = await this.readEventsFromSignature(signature);
     return events.filter((event) => event.name === "DepositForBurn");
   }
+
+  async queryMintAndWithdrawEvents(fromSlot?: bigint, toSlot?: bigint) {
+    return await this.queryEvents(
+      "MintAndWithdraw" as any, // Maybe override queryEvents method
+      fromSlot,
+      toSlot,
+      { limit: 1000, commitment: "confirmed" }
+    );
+  }
+
+  async getMintAndWithdrawEventsFromSignature(signature: Signature) {
+    const events = await this.readEventsFromSignature(signature);
+    return events.filter((event) => event.name === "MintAndWithdraw");
+  }
 }
 
 export async function getDepositForBurnBySignatureSVM({
@@ -318,5 +334,41 @@ export async function getDepositForBurnBySignatureSVM({
     };
 
     return convertedLog;
+  }
+}
+
+export async function getMintAndBurnBySignatureSVM({
+  signature,
+  chainId,
+}: {
+  signature: Signature;
+  chainId: number;
+}): Promise<FillMetadata | undefined> {
+  // init events client
+  const eventsClient = await SvmCctpEventsClient.create();
+  const rpc = getSVMRpc(chainId);
+  const [mintAndWithdrawEvents, fillTx] = await Promise.all([
+    eventsClient.getMintAndWithdrawEventsFromSignature(signature),
+    rpc
+      .getTransaction(signature, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      })
+      .send(),
+  ]);
+
+  if (mintAndWithdrawEvents?.length) {
+    const event = mintAndWithdrawEvents[0];
+    const data = event.data as MintAndWithdrawEvent;
+
+    const blockTimestamp = Number(fillTx?.blockTime);
+
+    const metadata: FillMetadata = {
+      fillTxHash: signature,
+      fillTxTimestamp: blockTimestamp,
+      outputAmount: BigNumber.from(data.amount?.toString?.() ?? "0"),
+    };
+
+    return metadata;
   }
 }
