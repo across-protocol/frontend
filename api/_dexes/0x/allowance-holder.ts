@@ -179,8 +179,17 @@ export function get0xStrategy(
       const expectedAmountIn = BigNumber.from(initialSwapAmount);
       const maximumAmountIn = BigNumber.from(quote.sellAmount);
 
-      const expectedAmountOut = BigNumber.from(quote.buyAmount);
+      let expectedAmountOut = BigNumber.from(quote.buyAmount);
       const minAmountOut = BigNumber.from(quote.minBuyAmount);
+
+      // When using sellEntireBalance, the quote is based on the
+      // marked-up input amount (e.g., 105 ETH), but the expected output should reflect
+      // the actual expected input amount (e.g., 100 ETH). Scale down accordingly.
+      if (opts?.sellEntireBalance && !maximumAmountIn.isZero()) {
+        expectedAmountOut = expectedAmountOut
+          .mul(expectedAmountIn)
+          .div(maximumAmountIn);
+      }
 
       const swapTx = opts?.useIndicativeQuote
         ? {
