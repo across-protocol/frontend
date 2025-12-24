@@ -5,19 +5,18 @@ import { twitterShareContestActive } from "utils";
 const contestActiveParams = {
   cardTitle: "Win 1,000 ACX!",
   cardSubtitle:
-    "Post your transaction speed on X for a chance to win this week's 1,000 ACX giveaway #PoweredByIntents",
+    "Post your transaction speed on X for a chance to win this week's 1,000 ACX giveaway. Powered by Intents.",
   modalTitle: "Share for a Chance to Win 1,000 ACX!",
 };
 
 const contestInactiveParams = {
-  cardTitle: "Wow, that was fast!",
-  cardSubtitle:
-    "This deserves a tweet. Show your friends how fast you bridged! #PoweredByIntents",
+  cardTitle: "That was fast! Tell the world!",
+  cardSubtitle: "",
   modalTitle: "Too Fast Not to Share",
 };
 
 const tweetText =
-  "Check out how fast I just bridged with @AcrossProtocol\n #PoweredByIntents ⛺";
+  "Check out how fast I just bridged.\n\nGet there with @AcrossProtocol";
 
 export function useTwitter() {
   const { helpers } = useCurrentBreakpoint();
