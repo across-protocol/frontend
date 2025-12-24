@@ -18,7 +18,7 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.redstonechain.com",
   blockTimeSeconds: 2,
-  tokens: ["WETH", "ETH"],
+  tokens: [],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
