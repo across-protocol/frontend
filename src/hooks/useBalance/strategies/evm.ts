@@ -1,6 +1,6 @@
 import { Balance, BalanceStrategy } from "./types";
 import {
-  getBalance,
+  getEvmBalance,
   getNativeBalance,
   getConfig,
   getProvider,
@@ -61,7 +61,7 @@ export class EVMBalanceStrategy implements BalanceStrategy {
 
     const balance = tokenInfo?.isNative
       ? await getNativeBalance(chainId, account, "latest", provider)
-      : await getBalance(chainId, account, tokenAddress, "latest", provider);
+      : await getEvmBalance(chainId, account, tokenAddress, "latest", provider);
     const balanceDecimals = tokenInfo?.decimals ?? 18;
     return {
       balance,

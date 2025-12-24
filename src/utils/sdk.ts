@@ -1,6 +1,8 @@
 import { BigNumber, providers } from "ethers";
 import { EVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/evm/BlockUtils";
 import { toAddressType as _toAddressType } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
+export { getAssociatedTokenAddress } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
+export { toAddress } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
 export { getCCTPDepositAccounts } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
 
 export { SVMBlockFinder } from "@across-protocol/sdk/dist/esm/arch/svm/BlockUtils";
