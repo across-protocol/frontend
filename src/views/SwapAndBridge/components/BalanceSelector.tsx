@@ -1,14 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
-import {
-  COLORS,
-  compareAddressesSimple,
-  formatUnitsWithMaxFractions,
-} from "utils";
-import { useUserTokenBalances } from "hooks/useUserTokenBalances";
+import { COLORS, formatUnitsWithMaxFractions } from "utils";
 import { useTrackBalanceSelectorClick } from "./useTrackBalanceSelectorClick";
+import { useTokenBalance } from "../hooks/useTokenBalance";
 
 type BalanceSelectorProps = {
   token: {
@@ -31,32 +27,9 @@ export function BalanceSelector({
   error = false,
 }: BalanceSelectorProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const tokenBalances = useUserTokenBalances();
+  const balance = useTokenBalance(token);
 
   const trackBalanceSelectorClick = useTrackBalanceSelectorClick();
-
-  // Derive the balance from the latest token balances
-  const balance = useMemo(() => {
-    if (!tokenBalances.data?.balances) {
-      return BigNumber.from(0);
-    }
-
-    const chainBalances = tokenBalances.data.balances.find(
-      (cb) => cb.chainId === String(token.chainId)
-    );
-
-    if (!chainBalances) {
-      return BigNumber.from(0);
-    }
-
-    const tokenBalance = chainBalances.balances.find((b) =>
-      compareAddressesSimple(b.address, token.address)
-    );
-
-    return tokenBalance?.balance
-      ? BigNumber.from(tokenBalance.balance)
-      : BigNumber.from(0);
-  }, [tokenBalances.data, token.chainId, token.address]);
 
   const handlePillClick = (percentage: BalanceSelectorPercentage) => {
     trackBalanceSelectorClick(percentage);
