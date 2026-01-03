@@ -98,6 +98,7 @@ export function TwitterShareCard(props: TwitterShareProps) {
 }
 
 const Card = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -171,5 +172,6 @@ const Button = styled(SecondaryButton)`
 
   @media ${QUERIES.tabletAndUp} {
     width: unset;
+    margin-left: auto;
   }
 `;
