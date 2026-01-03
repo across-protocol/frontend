@@ -9,8 +9,9 @@ export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
 // TODO: Pull from @across-protocol/contracts once `HyperliquidDepositHandler`
 // deployments are available upstream.
+// Taken from https://hyperevmscan.io/address/0x420D76Aa59A56953C920a1D1451b0B73147334F1
 export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
-  "0x861E127036B28D32f3777B4676F6bbb9e007d195";
+  "0x420D76Aa59A56953C920a1D1451b0B73147334F1";
 
 export const SUPPORTED_INPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
