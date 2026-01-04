@@ -18,6 +18,10 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
     // getUniversalRouter02Strategy(),
     getLifiStrategy("SpokePoolPeriphery"),
   ],
+  originChains: {
+    // Disable origin swaps on Blast for now
+    [CHAIN_IDs.BLAST]: [],
+  },
   chains: {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
