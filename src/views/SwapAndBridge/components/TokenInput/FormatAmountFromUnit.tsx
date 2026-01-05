@@ -3,6 +3,7 @@ import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { UnitType } from "../../types";
 import {
   convertTokenToUSD,
+  formatNumberTwoFracDigits,
   formatUnitsWithMaxFractions,
 } from "../../../../utils";
 
@@ -20,6 +21,6 @@ export function formatAmountFromUnit(
       token.decimals
     );
     const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-    return utils.formatUnits(usdValue, 18);
+    return formatNumberTwoFracDigits(Number(utils.formatUnits(usdValue, 18)));
   }
 }
