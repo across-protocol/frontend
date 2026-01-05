@@ -1,13 +1,13 @@
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { TokenImage } from "components/TokenImage";
 import {
   ChainTokenSelectorModal,
   EnrichedToken,
 } from "./ChainTokenSelectorModal";
 import { getTokenDisplaySymbol } from "hooks/useAvailableCrosschainRoutes";
+import { TokenAndChainLogo } from "./TokenAndChainLogo";
 
 type Props = {
   selectedToken: EnrichedToken | null;
@@ -75,10 +75,11 @@ export default function SelectorButton({
         className={className}
         onClick={() => setDisplayModal(true)}
       >
-        <TokenStack>
-          <TokenImg src={selectedToken.logoURI} alt={selectedToken.symbol} />
-          <ChainImg src={chain.logoURI} alt={chain.name} />
-        </TokenStack>
+        <TokenAndChainLogo
+          src={selectedToken.logoURI}
+          alt={selectedToken.symbol}
+          chain={chain}
+        />
         <VerticalDivider />
         <NamesStack>
           <TokenName>{getTokenDisplaySymbol(selectedToken)}</TokenName>
@@ -104,7 +105,7 @@ export default function SelectorButton({
 
 const Wrapper = styled.button`
   --height: 48px;
-  --padding: 6px;
+  --padding: 8px;
   height: var(--height);
   position: relative;
   display: flex;
@@ -171,36 +172,6 @@ const ChainName = styled.div`
   line-height: 100%;
   color: var(--base-bright-gray, #e0f3ff);
   opacity: 0.5;
-`;
-
-const TokenStack = styled.div`
-  height: 100%;
-  width: var(--height);
-  padding-inline: var(--padding);
-  position: relative;
-  flex-grow: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const TokenImg = styled(TokenImage)`
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  z-index: 1;
-`;
-
-const ChainImg = styled(TokenImage)`
-  border-radius: 50%;
-  border: 1px solid transparent;
-  background: ${COLORS["grey-600"]};
-  width: 14px;
-  height: 14px;
-  position: absolute;
-  bottom: 4px;
-  left: 34px;
-  z-index: 2;
 `;
 
 const ChevronDown = styled(ChevronDownIcon)`
