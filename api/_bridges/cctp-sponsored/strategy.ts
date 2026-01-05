@@ -34,11 +34,14 @@ import {
   SPONSORED_CCTP_OUTPUT_TOKENS,
   CCTP_TRANSFER_MODE,
   getSponsoredCctpSrcPeripheryAddress,
+  ACCOUNT_CREATION_SUPPORTED_ROUTES,
 } from "./utils/constants";
 import {
   getNormalizedSpotTokenSymbol,
+  isToHyperCore,
   simulateMarketOrder,
   SPOT_TOKEN_DECIMALS,
+  assertAccountExistsOnHyperCore,
 } from "../../_hypercore";
 import { SPONSORED_CCTP_SRC_PERIPHERY_ABI } from "./utils/abi";
 import {
@@ -152,6 +155,23 @@ export async function getQuoteForExactInput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
+  // If recipient does not exist on HyperCore, then we error if route is not supported
+  // for account creation.
+  if (
+    !ACCOUNT_CREATION_SUPPORTED_ROUTES.find(
+      (route) =>
+        route.inputTokenSymbol === inputToken.symbol &&
+        route.outputTokenSymbol === outputToken.symbol
+    ) &&
+    isToHyperCore(params.outputToken.chainId)
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: params.recipient,
+      chainId: params.outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
+
   if (params.isEligibleForSponsorship) {
     // We guarantee input amount == output amount for sponsored flows
     outputAmount = ConvertDecimals(
@@ -219,6 +239,23 @@ export async function getQuoteForOutput(
     token: Token;
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
+
+  // If recipient does not exist on HyperCore, then we error if route is not supported
+  // for account creation.
+  if (
+    !ACCOUNT_CREATION_SUPPORTED_ROUTES.find(
+      (route) =>
+        route.inputTokenSymbol === inputToken.symbol &&
+        route.outputTokenSymbol === outputToken.symbol
+    ) &&
+    isToHyperCore(params.outputToken.chainId)
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: params.recipient,
+      chainId: params.outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
