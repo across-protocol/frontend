@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { BigNumber, utils } from "ethers";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
@@ -35,8 +35,15 @@ export const AmountInput = ({
   inputRef,
 }: AmountInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [userInput, setUserInput] = useState<string | null>(null);
 
   const displayValue = formatAmountFromUnit(amount, token, unit);
+
+  useEffect(() => {
+    if (shouldUpdate) {
+      setUserInput(null);
+    }
+  }, [shouldUpdate]);
 
   const handleValueChange = useCallback(
     (value: number | undefined) => {
@@ -72,10 +79,13 @@ export const AmountInput = ({
         name={name}
         data-testid={testId}
         placeholder="0.00"
-        value={isFocused && !shouldUpdate ? undefined : displayValue}
+        value={
+          isFocused && !shouldUpdate ? undefined : (userInput ?? displayValue)
+        }
         onValueChange={(values, sourceInfo) => {
           if (sourceInfo.source === "event" && isFocused) {
             handleValueChange(values.floatValue);
+            setUserInput(values.value);
           }
         }}
         onFocus={() => setIsFocused(true)}
