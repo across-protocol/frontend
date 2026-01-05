@@ -127,7 +127,7 @@ function isNonBridgeableSvmTokenUnreachable(
   const isSolanaDestination = token.chainId === CHAIN_IDs.SOLANA;
 
   // If Solana is not involved, don't mark as unreachable
-  if (!isSolanaOrigin && !isSolanaDestination) return false;
+  if (!(isSolanaOrigin || isSolanaDestination)) return false;
 
   // If Solana is involved, check if token is bridgeable
   const bridgeableSvmTokenSymbols = [
