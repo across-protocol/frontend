@@ -34,7 +34,12 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
+    }),
     svgr(),
     tsconfigPaths(),
     eslint({

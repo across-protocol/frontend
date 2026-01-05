@@ -5,13 +5,26 @@ import { useHistory } from "react-router-dom";
 import { buildSearchParams } from "utils";
 import useReferrer from "hooks/useReferrer";
 import { createFromBridgeAndSwapPagePayload } from "utils/local-deposits";
+import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
+import { QuoteRequest } from "../useQuoteRequest/quoteRequestAction";
 
 export function createSwapApprovalActionHook(
   strategy: SwapApprovalActionStrategy
 ) {
-  return function useSwapApprovalAction(swapQuote?: SwapApprovalQuote) {
+  return function useSwapApprovalAction(
+    quoteRequest: QuoteRequest,
+    swapQuote?: SwapApprovalQuote
+  ) {
     const history = useHistory();
     const { referrer } = useReferrer();
+
+    const { depositorOrPlaceholder, recipientOrPlaceholder } =
+      useEcosystemAccounts({
+        originToken: quoteRequest.originToken,
+        destinationToken: quoteRequest.destinationToken,
+        customDestinationAccount: quoteRequest.customDestinationAccount,
+      });
+
     const isConnected = strategy.isConnected();
     const isWrongNetwork = swapQuote
       ? strategy.isWrongNetwork(swapQuote.swapTx.chainId)
@@ -32,8 +45,13 @@ export function createSwapApprovalActionHook(
             bridgeProvider: swapQuote?.steps.bridge.provider || "across",
           });
 
-        const fromBridgeAndSwapPagePayload =
-          createFromBridgeAndSwapPagePayload(swapQuote);
+        const fromBridgeAndSwapPagePayload = createFromBridgeAndSwapPagePayload(
+          swapQuote,
+          referrer,
+          quoteRequest.tradeType,
+          depositorOrPlaceholder,
+          recipientOrPlaceholder
+        );
         if (txHash) {
           history.push(url, { fromBridgeAndSwapPagePayload });
         }

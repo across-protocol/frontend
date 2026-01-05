@@ -21,6 +21,7 @@ import {
   CROSS_SWAP_TYPE,
   buildDestinationSwapCrossChainMessage,
   assertMinOutputAmount,
+  createPlaceholderOriginSwapQuote,
 } from "./utils";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 import {
@@ -149,8 +150,8 @@ export async function getCrossSwapQuotesForExactInputB2B(
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwap),
-    message: bridge.getBridgeQuoteMessage(crossSwap),
+    recipient: await bridge.getBridgeQuoteRecipient(crossSwap),
+    message: await bridge.getBridgeQuoteMessage(crossSwap),
   });
 
   const appFee = calculateAppFee({
@@ -160,7 +161,7 @@ export async function getCrossSwapQuotesForExactInputB2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
+  bridgeQuote.message = await bridge.getBridgeQuoteMessage(crossSwap, appFee);
 
   return {
     crossSwap,
@@ -189,8 +190,8 @@ export async function getCrossSwapQuotesForOutputB2B(
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: outputAmountWithAppFee,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwap),
-    message: bridge.getBridgeQuoteMessage(crossSwap),
+    recipient: await bridge.getBridgeQuoteRecipient(crossSwap),
+    message: await bridge.getBridgeQuoteMessage(crossSwap),
     forceExactOutput: crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
@@ -208,7 +209,7 @@ export async function getCrossSwapQuotesForOutputB2B(
     crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT ||
     (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT && appFee.feeAmount.gt(0))
   ) {
-    bridgeQuote.message = bridge.getBridgeQuoteMessage(crossSwap, appFee);
+    bridgeQuote.message = await bridge.getBridgeQuoteMessage(crossSwap, appFee);
   }
 
   return {
@@ -821,8 +822,12 @@ export async function getCrossSwapQuotesForExactInputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwap),
-    message: bridge.getBridgeQuoteMessage(crossSwap),
+    recipient: await bridge.getBridgeQuoteRecipient(crossSwap, true), // A2B flow: has origin swap
+    message: await bridge.getBridgeQuoteMessage(
+      crossSwap,
+      undefined,
+      prioritizedStrategy.originSwapQuote
+    ),
   });
 
   const appFee = calculateAppFee({
@@ -832,7 +837,7 @@ export async function getCrossSwapQuotesForExactInputA2B(
     appFeeRecipient: crossSwap.appFeeRecipient,
     isNative: crossSwap.isOutputNative,
   });
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+  bridgeQuote.message = await bridge.getBridgeQuoteMessage(
     crossSwap,
     appFee,
     prioritizedStrategy.originSwapQuote
@@ -880,12 +885,23 @@ export async function getCrossSwapQuotesForOutputA2B(
   const { originSwapChainId, bridgeableInputToken } = results[0];
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
+  // For A2B flows, we need accurate gas estimation that includes the cost of processing
+  // a message with origin swap metadata. Use a placeholder quote to ensure accurate fees.
+  const placeholderOriginSwapQuote = createPlaceholderOriginSwapQuote(
+    crossSwapWithAppFee,
+    bridgeableInputToken
+  );
+
   const { bridgeQuote } = await bridge.getQuoteForOutput({
     inputToken: bridgeableInputToken,
     outputToken: crossSwapWithAppFee.outputToken,
     minOutputAmount: crossSwapWithAppFee.amount,
-    recipient: bridge.getBridgeQuoteRecipient(crossSwapWithAppFee),
-    message: bridge.getBridgeQuoteMessage(crossSwapWithAppFee),
+    recipient: await bridge.getBridgeQuoteRecipient(crossSwapWithAppFee, true), // A2B flow: has origin swap
+    message: await bridge.getBridgeQuoteMessage(
+      crossSwapWithAppFee,
+      undefined,
+      placeholderOriginSwapQuote
+    ),
     forceExactOutput: crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
@@ -942,7 +958,7 @@ export async function getCrossSwapQuotesForOutputA2B(
     isNative: crossSwapWithAppFee.isOutputNative,
   });
 
-  bridgeQuote.message = bridge.getBridgeQuoteMessage(
+  bridgeQuote.message = await bridge.getBridgeQuoteMessage(
     crossSwapWithAppFee,
     appFee,
     prioritizedStrategy.originSwapQuote

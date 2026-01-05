@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
 import { ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
-import { BridgeProvider } from "./provider";
+import { SwapApprovalQuote } from "../../../../utils/serverless-api/prod/swap-approval";
 import { QuoteRequestProvider } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
+import { BridgeProvider } from "../../utils/bridgeProvider";
 
 const mockInputToken: EnrichedToken = {
   chainId: 1,
@@ -51,8 +51,8 @@ const mockOutputApiToken = {
   symbol: "USDC",
 };
 
-const mockSwapQuote: SwapApprovalApiCallReturnType = {
-  crossSwapType: "bridgeOnly",
+const mockSwapQuote: SwapApprovalQuote = {
+  crossSwapType: "bridgeableToBridgeable",
   amountType: "exactInput",
   approvalTxns: undefined,
   eip712: undefined,
@@ -194,7 +194,7 @@ const mockQuoteRequest: QuoteRequest = {
 
 const createQuoteWithProvider = (
   provider: BridgeProvider
-): SwapApprovalApiCallReturnType => ({
+): SwapApprovalQuote => ({
   ...mockSwapQuote,
   steps: {
     ...mockSwapQuote.steps,
@@ -283,7 +283,7 @@ export const Expanded: Story = {
   },
 };
 
-const highPriceImpactQuote: SwapApprovalApiCallReturnType = {
+const highPriceImpactQuote: SwapApprovalQuote = {
   ...mockSwapQuote,
   fees: {
     ...mockSwapQuote.fees!,
@@ -316,6 +316,8 @@ const bridgeProviders = [
   "cctp",
   "oft",
   "sponsored-intent",
+  "sponsored-oft",
+  "sponsored-cctp",
   "hypercore",
 ] as const satisfies BridgeProvider[];
 
@@ -323,12 +325,15 @@ export const AllProvidersCollapsed: Story = {
   render: () => (
     <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
-        <ConfirmationButton
-          key={provider}
-          swapQuote={createQuoteWithProvider(provider)}
-          isQuoteLoading={false}
-          quoteError={null}
-        />
+        <>
+          <h1>{provider}</h1>
+          <ConfirmationButton
+            key={provider}
+            swapQuote={createQuoteWithProvider(provider)}
+            isQuoteLoading={false}
+            quoteError={null}
+          />
+        </>
       ))}
     </QuoteRequestProvider>
   ),
@@ -338,13 +343,16 @@ export const AllProvidersExpanded: Story = {
   render: () => (
     <QuoteRequestProvider initialQuoteRequest={mockQuoteRequest}>
       {bridgeProviders.map((provider) => (
-        <ConfirmationButton
-          key={provider}
-          swapQuote={createQuoteWithProvider(provider)}
-          isQuoteLoading={false}
-          quoteError={null}
-          initialExpanded
-        />
+        <>
+          <h1>{provider}</h1>
+          <ConfirmationButton
+            key={provider}
+            swapQuote={createQuoteWithProvider(provider)}
+            isQuoteLoading={false}
+            quoteError={null}
+            initialExpanded
+          />
+        </>
       ))}
     </QuoteRequestProvider>
   ),

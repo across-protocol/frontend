@@ -29,13 +29,6 @@ export default function SelectorButton({
 }: Props) {
   const [displayModal, setDisplayModal] = useState(false);
 
-  useEffect(() => {
-    if (selectedToken) {
-      onSelect?.(selectedToken);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedToken]);
-
   const setSelectedToken = useCallback(
     (token: EnrichedToken) => {
       onSelect?.(token);

@@ -4,10 +4,12 @@ import type {
 } from "@across-protocol/sdk/dist/esm/arch/svm";
 import { BigNumber } from "ethers";
 
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-
-export type BridgeProvider = "across" | "cctp" | "oft";
+export type BridgeProvider =
+  | "across"
+  | "cctp"
+  | "oft"
+  | "sponsored-cctp"
+  | "sponsored-oft";
 
 /**
  * Common types for deposit & fill information
@@ -128,28 +130,6 @@ export interface IChainStrategy {
    * @returns Normalized fill information
    */
   getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
-
-  /**
-   * Convert deposit information to local storage format
-   * @param depositInfo Normalized deposit information
-   * @param fromBridgePagePayload Bridge page payload containing route and quote details
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit;
-
-  /**
-   * Convert fill information to local storage format
-   * @param fillInfo Normalized fill information
-   * @param bridgePayload Bridge payload information
-   * @returns Local deposit format with fill information
-   */
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit;
 
   /**
    * The chain ID this strategy handles

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 
-import { AmountInputError } from "../../Bridge/utils";
+import { AmountInputError, validationErrorTextMap } from "../utils/validation";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
-import { validationErrorTextMap } from "views/Bridge/components/AmountInput";
+import { useTokenBalance } from "./useTokenBalance";
 
 export type ValidationResult = {
   error?: AmountInputError;
@@ -19,6 +19,9 @@ export function useValidateSwapAndBridge(
   isConnected: boolean,
   swapQuoteInputAmount: BigNumber | undefined
 ): ValidationResult {
+  // use up-to-date balances
+  const inputTokenBalance = useTokenBalance(inputToken);
+
   const validation = useMemo(() => {
     let errorType: AmountInputError | undefined = undefined;
 
@@ -41,12 +44,12 @@ export function useValidateSwapAndBridge(
         errorType = AmountInputError.INVALID;
       }
       // balance check for origin-side inputs
-      else if (isAmountOrigin && inputToken?.balance) {
-        if (amount.gt(inputToken.balance)) {
+      else if (isAmountOrigin && inputTokenBalance) {
+        if (amount.gt(inputTokenBalance)) {
           errorType = AmountInputError.INSUFFICIENT_BALANCE;
         }
-      } else if (!isAmountOrigin && swapQuoteInputAmount) {
-        if (swapQuoteInputAmount?.gt(inputToken.balance)) {
+      } else if (!isAmountOrigin && swapQuoteInputAmount && inputTokenBalance) {
+        if (swapQuoteInputAmount?.gt(inputTokenBalance)) {
           errorType = AmountInputError.INSUFFICIENT_BALANCE;
         }
       }
@@ -66,6 +69,7 @@ export function useValidateSwapAndBridge(
     outputToken,
     amount,
     isAmountOrigin,
+    inputTokenBalance,
     swapQuoteInputAmount,
   ]);
 

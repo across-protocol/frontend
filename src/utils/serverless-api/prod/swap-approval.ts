@@ -1,7 +1,8 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
 import { swapApiRoutingPreference, vercelApiBaseUrl } from "utils";
-import { BridgeProvider } from "../../../views/SwapAndBridge/components/Confirmation/provider";
+
+import { BridgeProvider } from "../../../views/SwapAndBridge/utils/bridgeProvider";
 
 export type SwapApprovalApiCall = typeof swapApprovalApiCall;
 
@@ -45,7 +46,11 @@ type MaxTotalFeeBreakdownDetails = {
 };
 
 export type SwapApprovalApiResponse = {
-  crossSwapType: string;
+  crossSwapType:
+    | "anyToAny"
+    | "bridgeableToAny"
+    | "anyToBridgeable"
+    | "bridgeableToBridgeable";
   amountType: string;
   checks: {
     allowance: {
@@ -375,7 +380,3 @@ export async function swapApprovalApiCall(params: SwapApprovalApiQueryParams) {
     eip712: result.eip712,
   };
 }
-
-export type SwapApprovalApiCallReturnType = Awaited<
-  ReturnType<typeof swapApprovalApiCall>
->;

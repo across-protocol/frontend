@@ -6,11 +6,9 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes } from "../../_dexes/types";
+import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { ConvertDecimals } from "../../_utils";
-import { CROSS_SWAP_TYPE } from "../../_dexes/utils";
-import { AppFee } from "../../_dexes/utils";
-import { Token } from "../../_dexes/types";
+import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
 import { InvalidParamError } from "../../_errors";
 import { encodeTransferCalldata } from "../../_multicall-handler";
@@ -21,6 +19,7 @@ import {
   encodeTransferOnCoreCalldata,
   isToHyperCore as _isToHyperCore,
 } from "../../_hypercore";
+import { getZeroBridgeFees } from "../utils";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -120,11 +119,14 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       return [];
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: async (
+      crossSwap: CrossSwap,
+      _hasOriginSwap?: boolean
+    ) => {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
 
@@ -273,14 +275,5 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
     },
 
     isRouteSupported,
-  };
-}
-
-function getZeroBridgeFees(inputToken: Token) {
-  const zeroBN = BigNumber.from(0);
-  return {
-    pct: zeroBN,
-    amount: zeroBN,
-    token: inputToken,
   };
 }

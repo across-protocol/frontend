@@ -17,9 +17,19 @@ const {
 export const CHAIN_IDs = {
   ...constants.CHAIN_IDs,
   HYPERCORE_TESTNET: 13372,
+  LIGHTER: 2337,
 };
+
 export const TOKEN_SYMBOLS_MAP = {
   ...constants.TOKEN_SYMBOLS_MAP,
+  WETH: {
+    ...constants.TOKEN_SYMBOLS_MAP.WETH,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.WETH.addresses,
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+    },
+  },
   POL: {
     ...constants.TOKEN_SYMBOLS_MAP.POL,
     addresses: {
@@ -32,10 +42,31 @@ export const TOKEN_SYMBOLS_MAP = {
     addresses: {
       ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
       [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2222222222222222222222222222222222222222",
     },
   },
+  USDC: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+  },
+  USDT: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDT,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
+      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
+    },
+  },
+  USDH: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDH,
+    name: "USDH",
+  },
   "USDH-SPOT": {
-    name: "Hyperliquid USD",
+    name: "USDH",
     symbol: "USDH-SPOT",
     decimals: 8,
     addresses: {
@@ -45,19 +76,67 @@ export const TOKEN_SYMBOLS_MAP = {
     },
     coingeckoId: "usdh-2",
   },
-  USDT: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDT,
+  "USDC-SPOT": {
+    name: "USDC",
+    symbol: "USDC-SPOT",
+    decimals: 8,
     addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
-      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
     },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+  "USDC-SPOT-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-SPOT-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000301",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+  "USDC-PERPS-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-PERPS-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000300",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
   },
 };
-export const CHAINS = constants.PUBLIC_NETWORKS;
+
+export const CHAINS = {
+  ...constants.PUBLIC_NETWORKS,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: {
+    ...constants.PUBLIC_NETWORKS[CHAIN_IDs.HYPERCORE],
+    chainId: CHAIN_IDs.HYPERCORE_TESTNET,
+  },
+  [CHAIN_IDs.LIGHTER]: {
+    name: "Lighter",
+    family: constants.ChainFamily.NONE,
+    nativeToken: "ETH",
+    publicRPC: "https://rpc.lighter.xyz",
+    blockExplorer: "https://app.lighter.xyz/explorer",
+    cctpDomain: constants.CCTP_NO_DOMAIN,
+    oftEid: constants.OFT_NO_EID,
+    hypDomainId: constants.HYPERLANE_NO_DOMAIN_ID,
+    chainId: CHAIN_IDs.LIGHTER,
+  },
+};
 export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
 export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
   ...constants.TOKEN_EQUIVALENCE_REMAPPING,
   "USDH-SPOT": "USDH",
+  "USDC-SPOT": "USDC",
+  "USDT-SPOT": "USDT",
+  "USDC-SPOT-LIGHTER": "USDC",
+  "USDC-PERPS-LIGHTER": "USDC",
 };
 export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 

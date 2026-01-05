@@ -20,11 +20,13 @@ const indirectChains = indirectChainsImport as Array<
     intermediaryChain: number;
   }
 >;
+
 export type SwapToken = {
   chainId: number;
   address: string;
   name: string;
   symbol: string;
+  displaySymbol?: string;
   decimals: number;
   logoUrl: string;
   priceUsd: string | null;
@@ -32,6 +34,12 @@ export type SwapToken = {
 
 const chains = mainnetChains;
 const chainIds = [...chains, ...indirectChains].map((chain) => chain.chainId);
+
+// USDT0 logo URL (matches frontend logo)
+const USDT0_LOGO_URL =
+  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
+const USDH_LOGO_URL =
+  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
 
 function getUniswapTokens(
   uniswapResponse: any,
@@ -121,9 +129,29 @@ function getJupiterTokens(
   }, []);
 }
 
-// Using hardcoded value until https://github.com/across-protocol/frontend/pull/1988 merged
-const USDH_LOGO_URL =
-  "https://coin-images.coingecko.com/coins/images/69484/large/usdh.png?1758728903";
+const TOKEN_DISPLAY_OVERRIDES: Record<
+  number,
+  Record<string, { displaySymbol?: string; name?: string; logoUrl?: string }>
+> = {
+  [CHAIN_IDs.HYPERCORE]: {
+    "USDH-SPOT": {
+      displaySymbol: "USDH",
+      name: "Hyperliquid USD",
+      logoUrl: USDH_LOGO_URL,
+    },
+    "USDC-SPOT": {
+      name: "USD Coin",
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042194",
+    },
+    "USDT-SPOT": {
+      displaySymbol: "USDT",
+      name: "Tether USD",
+      logoUrl:
+        "https://coin-images.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+    },
+  },
+};
 
 function getIndirectChainTokens(
   chainIds: number[],
@@ -159,22 +187,48 @@ function getIndirectChainTokens(
         }
       }
 
-      let logoUrl = token.logoUrl;
-      if (token.symbol === "USDH-SPOT") {
-        logoUrl = USDH_LOGO_URL;
-      }
-
       return {
         chainId: chain.chainId,
         address: token.address,
         name: token.name,
         symbol: token.symbol,
         decimals: token.decimals,
-        logoUrl,
+        logoUrl: token.logoUrl,
         priceUsd,
       };
     });
   });
+}
+
+/**
+ * Returns USDH on HyperEVM as a destination token
+ * for the sponsored-intent flow (USDC to USDH)
+ */
+function getSponsoredIntentOutputTokens(
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): SwapToken[] {
+  if (!chainIds.includes(CHAIN_IDs.HYPEREVM)) {
+    return [];
+  }
+
+  const usdhToken = TOKEN_SYMBOLS_MAP.USDH;
+  const usdhAddress = usdhToken.addresses[CHAIN_IDs.HYPEREVM];
+  if (!usdhAddress) {
+    return [];
+  }
+
+  return [
+    {
+      chainId: CHAIN_IDs.HYPEREVM,
+      address: usdhAddress,
+      name: usdhToken.name,
+      symbol: usdhToken.symbol,
+      decimals: usdhToken.decimals,
+      logoUrl: USDH_LOGO_URL,
+      priceUsd: pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[usdhAddress] || "1",
+    },
+  ];
 }
 
 // Chains where USDT should be displayed as USDT0
@@ -187,10 +241,6 @@ const chainsWithUsdt0Enabled = [
   CHAIN_IDs.MONAD,
   CHAIN_IDs.UNICHAIN,
 ];
-
-// USDT0 logo URL (matches frontend logo)
-const USDT0_LOGO_URL =
-  "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt0.svg";
 
 function getTokensFromEnabledRoutes(
   chainIds: number[],
@@ -290,8 +340,21 @@ function deduplicateTokens(tokens: SwapToken[]): SwapToken[] {
       if (seen.has(usdt0Key)) return; // Skip this USDT, we already have USDT0
     }
 
-    // Keep first occurrence
-    if (!seen.has(key)) {
+    // Merge tokens
+    if (seen.has(key)) {
+      const existingToken = seen.get(key)!;
+      const mergedToken: SwapToken = {
+        chainId: existingToken.chainId,
+        address: existingToken.address,
+        name: existingToken.name || token.name,
+        symbol: existingToken.symbol || token.symbol,
+        displaySymbol: existingToken.displaySymbol || token.displaySymbol,
+        decimals: existingToken.decimals || token.decimals,
+        logoUrl: existingToken.logoUrl || token.logoUrl,
+        priceUsd: existingToken.priceUsd || token.priceUsd,
+      };
+      seen.set(key, mergedToken);
+    } else {
       seen.set(key, token);
     }
   });
@@ -323,6 +386,22 @@ function replaceUsdtOnNonAcrossChains(
   });
 }
 
+// apply some display overrides
+function applyTokenDisplayOverrides(tokens: SwapToken[]): SwapToken[] {
+  return tokens.map((token) => {
+    const chainOverrides =
+      TOKEN_DISPLAY_OVERRIDES?.[token.chainId]?.[token.symbol];
+    if (!chainOverrides) {
+      return token;
+    }
+
+    return {
+      ...token,
+      ...chainOverrides,
+    };
+  });
+}
+
 export async function fetchSwapTokensData(
   filteredChainIds?: number[]
 ): Promise<SwapToken[]> {
@@ -337,7 +416,9 @@ export async function fetchSwapTokensData(
 
   const pricesForLifiTokens = getPricesForLifiTokens(
     lifiTokensResponse.data,
-    targetChainIds
+    Array.from(
+      new Set([...targetChainIds, CHAIN_IDs.MAINNET, CHAIN_IDs.HYPEREVM])
+    )
   );
 
   const responseJson: SwapToken[] = [];
@@ -355,6 +436,12 @@ export async function fetchSwapTokensData(
     pricesForLifiTokens
   );
   responseJson.push(...indirectChainTokens);
+
+  const sponsoredIntentOutputTokens = getSponsoredIntentOutputTokens(
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...sponsoredIntentOutputTokens);
 
   // Add Uniswap tokens
   const uniswapTokens = getUniswapTokens(
@@ -383,9 +470,13 @@ export async function fetchSwapTokensData(
   const deduplicatedTokens = deduplicateTokens(responseJson);
 
   // Hacky solution to replace Unichain USDT with USDT0
-  const finalTokens = replaceUsdtOnNonAcrossChains(
+  const tokensAfterUsdtReplacement = replaceUsdtOnNonAcrossChains(
     deduplicatedTokens,
     pricesForLifiTokens
   );
+
+  // Apply display overrides to all tokens
+  const finalTokens = applyTokenDisplayOverrides(tokensAfterUsdtReplacement);
+
   return finalTokens;
 }

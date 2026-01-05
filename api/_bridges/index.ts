@@ -1,17 +1,19 @@
 import {
   BridgeStrategiesConfig,
   BridgeStrategy,
-  BridgeStrategyData,
-  BridgeStrategyDataParams,
   GetBridgeStrategyParams,
+  RouteStrategyFunction,
 } from "./types";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
-import { getBridgeStrategyData } from "./utils";
-import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getCctpBridgeStrategy } from "./cctp/strategy";
+import { routeStrategyForSponsorship } from "../_sponsorship-routing";
+import { getSponsoredCctpBridgeStrategy } from "./cctp-sponsored/strategy";
+import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
+import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
 import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
+import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
@@ -20,19 +22,18 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
         [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
       },
-      // NOTE: Disable origin BSC until we have an easier way to rebalance off BSC
-      // [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
-      //   [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
-      // },
     },
+    // NOTE: Disable subset of HyperCore destination routes via mint/burn routes until we
+    // fully support them. We force return the Across bridge strategy here to avoid
+    // routing to via our algorithm. TODO until we can enable these routes:
+    // - https://linear.app/uma/issue/ACX-4895/api-return-swap-fees-for-unsponsored-flows
     [CHAIN_IDs.HYPERCORE]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
+        [TOKEN_SYMBOLS_MAP["USDT-SPOT"].symbol]: getAcrossBridgeStrategy(),
       },
-      // NOTE: Disable origin BSC until we have an easier way to rebalance off BSC
-      // [TOKEN_SYMBOLS_MAP["USDC-BNB"].symbol]: {
-      //   [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]: getUsdhIntentsBridgeStrategy(),
-      // },
+      [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
+        [TOKEN_SYMBOLS_MAP["USDC-SPOT"].symbol]: getAcrossBridgeStrategy(),
+      },
     },
   },
   fromToChains: {
@@ -43,13 +44,34 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
       [CHAIN_IDs.HYPEREVM]: getHyperCoreBridgeStrategy(),
     },
   },
-  // TODO: Add CCTP routes when ready
+  inputTokens: {
+    USDC: {
+      // Testnet routes
+      [CHAIN_IDs.HYPEREVM_TESTNET]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+      [CHAIN_IDs.SEPOLIA]: {
+        [CHAIN_IDs.HYPERCORE_TESTNET]: getCctpBridgeStrategy(),
+      },
+    },
+  },
 };
 
 export const routableBridgeStrategies = [
   getAcrossBridgeStrategy(),
   getCctpBridgeStrategy(),
   getOftBridgeStrategy(),
+  // Sponsored strategies with eligibility flag set to true
+  // The actual eligibility is determined by routeStrategyForSponsorship
+  getSponsoredCctpBridgeStrategy(true),
+  getOftSponsoredBridgeStrategy(true),
+  getUsdhIntentsBridgeStrategy(),
+];
+
+// Priority-ordered routing strategies
+const ROUTING_STRATEGIES: RouteStrategyFunction[] = [
+  routeStrategyForSponsorship,
+  routeMintAndBurnStrategy,
 ];
 
 export async function getBridgeStrategy({
@@ -64,12 +86,28 @@ export async function getBridgeStrategy({
   includesActions,
   routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  const tokenPairPerRouteOverride =
+    bridgeStrategies.tokenPairPerRoute?.[originChainId]?.[destinationChainId]?.[
+      inputToken.symbol
+    ]?.[outputToken.symbol];
+  if (tokenPairPerRouteOverride) {
+    return tokenPairPerRouteOverride;
+  }
+
   const tokenPairPerToChainOverride =
     bridgeStrategies.tokenPairPerToChain?.[destinationChainId]?.[
       inputToken.symbol
     ]?.[outputToken.symbol];
   if (tokenPairPerToChainOverride) {
     return tokenPairPerToChainOverride;
+  }
+
+  const inputTokenOverride =
+    bridgeStrategies.inputTokens?.[inputToken.symbol]?.[originChainId]?.[
+      destinationChainId
+    ];
+  if (inputTokenOverride) {
+    return inputTokenOverride;
   }
 
   const fromToChainOverride =
@@ -92,14 +130,9 @@ export async function getBridgeStrategy({
   if (supportedBridgeStrategies.length === 1) {
     return supportedBridgeStrategies[0];
   }
-  if (
-    supportedBridgeStrategies.some(
-      (strategy) =>
-        strategy.name === getCctpBridgeStrategy().name ||
-        strategy.name === getOftBridgeStrategy().name
-    )
-  ) {
-    return routeMintAndBurnStrategy({
+
+  for (const routeStrategy of ROUTING_STRATEGIES) {
+    const strategy = await routeStrategy({
       inputToken,
       outputToken,
       amount,
@@ -107,7 +140,15 @@ export async function getBridgeStrategy({
       recipient,
       depositor,
     });
+
+    if (
+      strategy &&
+      supportedBridgeStrategies.some((s) => s.name === strategy.name)
+    ) {
+      return strategy;
+    }
   }
+
   return getAcrossBridgeStrategy();
 }
 
@@ -131,6 +172,10 @@ export function getSupportedBridgeStrategies({
       return strategyName !== "across";
     }
 
+    if (routingPreference === "sponsored-cctp") {
+      return ["sponsored-cctp", "sponsored-oft"].includes(strategyName);
+    }
+
     // Else use across bridge strategy
     return strategyName === "across";
   };
@@ -140,82 +185,4 @@ export function getSupportedBridgeStrategies({
       routingPreferenceFilter(strategy.name)
   );
   return supportedBridgeStrategies;
-}
-
-async function routeMintAndBurnStrategy({
-  inputToken,
-  outputToken,
-  amount,
-  amountType,
-  recipient,
-  depositor,
-}: BridgeStrategyDataParams): Promise<BridgeStrategy> {
-  const bridgeStrategyData = await getBridgeStrategyData({
-    inputToken,
-    outputToken,
-    amount,
-    amountType,
-    recipient,
-    depositor,
-  });
-
-  if (!bridgeStrategyData) {
-    return bridgeStrategies.default;
-  }
-
-  if (bridgeStrategyData.isMonadTransfer) {
-    if (bridgeStrategyData.isWithinMonadLimit) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdtToUsdt) {
-      return getOftBridgeStrategy();
-    }
-    if (bridgeStrategyData.isUsdcToUsdc) {
-      return getCctpBridgeStrategy();
-    } else {
-      return getAcrossBridgeStrategy();
-    }
-  }
-  if (!bridgeStrategyData.isUsdcToUsdc && !bridgeStrategyData.isUsdtToUsdt) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUtilizationHigh) {
-    return getBurnAndMintStrategy(bridgeStrategyData);
-  }
-
-  if (bridgeStrategyData.isFastCctpEligible) {
-    if (bridgeStrategyData.isInThreshold) {
-      return getAcrossBridgeStrategy();
-    }
-    if (bridgeStrategyData.isLargeCctpDeposit) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-  if (bridgeStrategyData.canFillInstantly) {
-    return getAcrossBridgeStrategy();
-  } else {
-    if (
-      bridgeStrategyData.isUsdcToUsdc &&
-      bridgeStrategyData.isLargeCctpDeposit
-    ) {
-      return getAcrossBridgeStrategy();
-    } else {
-      return getBurnAndMintStrategy(bridgeStrategyData);
-    }
-  }
-}
-
-function getBurnAndMintStrategy(bridgeStrategyData: BridgeStrategyData) {
-  if (!bridgeStrategyData) {
-    return getAcrossBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdcToUsdc) {
-    return getCctpBridgeStrategy();
-  }
-  if (bridgeStrategyData.isUsdtToUsdt) {
-    return getOftBridgeStrategy();
-  }
-  return getAcrossBridgeStrategy();
 }
