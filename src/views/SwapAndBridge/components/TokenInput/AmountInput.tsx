@@ -3,29 +3,9 @@ import { NumericFormat } from "react-number-format";
 import { BigNumber, utils } from "ethers";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { TokenAmountInput, TokenAmountInputWrapper } from "./styles";
-import {
-  convertTokenToUSD,
-  convertUSDToToken,
-  formatUnitsWithMaxFractions,
-} from "../../../../utils";
+import { convertUSDToToken } from "../../../../utils";
 import { UnitType } from "../../types";
-
-export function formatAmountForDisplay(
-  amount: BigNumber | null | undefined,
-  token: EnrichedToken | null,
-  unit: UnitType
-): string {
-  if (!amount || !token) return "";
-  if (unit === "token") {
-    return formatUnitsWithMaxFractions(amount, token.decimals);
-  }
-  const tokenAmountFormatted = formatUnitsWithMaxFractions(
-    amount,
-    token.decimals
-  );
-  const usdValue = convertTokenToUSD(tokenAmountFormatted, token);
-  return utils.formatUnits(usdValue, 18);
-}
+import { formatAmountFromUnit } from "./FormatAmountFromUnit";
 
 type AmountInputProps = {
   id: string;
@@ -56,7 +36,7 @@ export const AmountInput = ({
 }: AmountInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const displayValue = formatAmountForDisplay(amount, token, unit);
+  const displayValue = formatAmountFromUnit(amount, token, unit);
 
   const handleValueChange = useCallback(
     (value: number | undefined) => {
