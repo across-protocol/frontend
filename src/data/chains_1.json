@@ -1410,17 +1410,6 @@
     ]
   },
   {
-    "chainId": 690,
-    "name": "Redstone",
-    "publicRpcUrl": "https://rpc.redstonechain.com",
-    "explorerUrl": "https://explorer.redstone.xyz",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/redstone/assets/logo.svg",
-    "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
-    "spokePoolBlock": 5512122,
-    "inputTokens": [],
-    "outputTokens": []
-  },
-  {
     "chainId": 7777777,
     "name": "Zora",
     "publicRpcUrl": "https://rpc.zora.energy",
