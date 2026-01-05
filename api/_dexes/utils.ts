@@ -42,6 +42,7 @@ import {
   getSpokePool,
   getSpokePoolAddress,
   getWrappedNativeTokenAddress,
+  isContractCache,
 } from "../_utils";
 import { CHAIN_IDs } from "../_constants";
 import {
@@ -213,18 +214,39 @@ export function getCrossSwapTypes(params: {
 }
 
 /**
- * Helper function to determine if MultiCallHandler can be bypassed for a simple bridge.
- * Returns true when ALL of the following conditions are met:
- * - Amount type is exactInput or minOutput
- * - No origin swap is needed. For origin swaps, we need to use MulticallHandler to emit metadata events.
- * - No app fees are specified
- * - No native output token (no unwrapping needed)
- * - No destination actions
+ * Determines if MultiCallHandler can be bypassed for a simple bridge.
+ *
+ * ## Prerequisites
+ *
+ * ALL of the following must be true:
+ * - Amount type is exactInput or minOutput (exactOutput needs precise handling & refunds)
+ * - No origin swap (origin swaps need MulticallHandler for metadata events)
+ * - No app fees
+ * - No embedded actions
+ *
+ * ## Output Token Rules
+ *
+ * If output is neither native nor wrapped native:
+ * - OK to bypass
+ *
+ * If destination is zkSync or Lens:
+ * - Needs message for native/wrapped native tokens
+ *
+ * For native output:
+ * - EOA recipient: OK to bypass (protocol sends native directly)
+ * - Contract recipient: Needs message (protocol needs instructions to unwrap)
+ *
+ * For wrapped native output:
+ * - EOA recipient: Needs message (protocol needs instructions to wrap)
+ * - Contract recipient: OK to bypass (protocol sends wrapped native directly)
+ *
+ * @see https://docs.across.to/introduction/technical-faq#what-is-the-behavior-of-eth-weth-in-transfers
+ * @returns `true` if MultiCallHandler can be bypassed, `false` otherwise
  */
-function shouldBypassMultiCallHandler(
+async function shouldBypassMultiCallHandler(
   crossSwap: CrossSwap,
   hasOriginSwap: boolean
-): boolean {
+): Promise<boolean> {
   // Only bypass for exactInput and minOutput trade types
   // exactOutput is excluded since it requires MultiCallHandler to handle precise output transfers and potential refunds
   const isValidAmountType =
@@ -237,8 +259,17 @@ function shouldBypassMultiCallHandler(
     crossSwap.appFeePercent > 0 &&
     crossSwap.appFeeRecipient !== undefined;
 
-  // Check if output requires special handling
-  const isOutputNative = crossSwap.isOutputNative; // We need to unwrap for the user
+  // Check if there are embedded actions
+  const hasEmbeddedActions =
+    crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
+
+  // Early exit if basic conditions aren't met
+  if (!isValidAmountType || hasOriginSwap || hasAppFees || hasEmbeddedActions) {
+    return false;
+  }
+
+  // Check if output token is native or wrapped native
+  const isOutputNative = crossSwap.isOutputNative;
   const wrappedNativeTokenAddress = getWrappedNativeTokenAddress(
     crossSwap.outputToken.chainId
   );
@@ -246,24 +277,40 @@ function shouldBypassMultiCallHandler(
     crossSwap.outputToken.address.toLowerCase() ===
     wrappedNativeTokenAddress.toLowerCase();
 
-  // Since the protocol has special rules for handling native tokens on the destination chain
-  // depending on whether the recipient is a contract or an EOA, we have to handle both cases
-  // where the output token is native or wrapped native.
-  // See: https://docs.across.to/introduction/technical-faq#what-is-the-behavior-of-eth-weth-in-transfers
-  const needsOutputTokenHandling = isOutputNative || isOutputWrappedNative;
+  // If output is neither native nor wrapped native, we can bypass
+  if (!isOutputNative && !isOutputWrappedNative) {
+    return true;
+  }
 
-  // Check if there are embedded actions
-  const hasEmbeddedActions =
-    crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
+  // zkSync and Lens always require messages for native/wrapped native tokens
+  const destinationChainId = crossSwap.outputToken.chainId;
+  if (
+    destinationChainId === CHAIN_IDs.ZK_SYNC ||
+    destinationChainId === CHAIN_IDs.LENS
+  ) {
+    return false;
+  }
 
-  // Can bypass only if amount type is valid AND none of the special handling conditions are present
-  return (
-    isValidAmountType &&
-    !hasOriginSwap &&
-    !hasAppFees &&
-    !needsOutputTokenHandling &&
-    !hasEmbeddedActions
-  );
+  // For native/wrapped native tokens, check if recipient is a contract or EOA
+  const recipientIsContract = await isContractCache(
+    destinationChainId,
+    crossSwap.recipient
+  ).get();
+
+  // NOTE: The isOutputNative flag takes precedence for determining intent since ETH and WETH use the same address
+  // and both isOutputNative and isOutputWrappedNative are true when isOutputNative is set.
+  if (isOutputNative) {
+    // Native output: bypass only if recipient is EOA. Otherwise, we need message with unwrap instructions.
+    return !recipientIsContract;
+  }
+
+  if (isOutputWrappedNative) {
+    // Wrapped native output: bypass only if recipient is contract. Otherwise, we need message with wrap instructions.
+    return recipientIsContract;
+  }
+
+  // All other cases need the message
+  return false;
 }
 
 /**
@@ -291,7 +338,7 @@ export function createPlaceholderOriginSwapQuote(
   };
 }
 
-export function getBridgeQuoteRecipient(
+export async function getBridgeQuoteRecipient(
   crossSwap: CrossSwap,
   hasOriginSwap: boolean = false
 ) {
@@ -305,14 +352,14 @@ export function getBridgeQuoteRecipient(
   // - amount type is exactInput or minOutput
   // - no origin swap is needed
   // - no app fees, native output, or embedded actions are present
-  if (shouldBypassMultiCallHandler(crossSwap, hasOriginSwap)) {
+  if (await shouldBypassMultiCallHandler(crossSwap, hasOriginSwap)) {
     return crossSwap.recipient;
   }
 
   return getMultiCallHandlerAddress(crossSwap.outputToken.chainId);
 }
 
-export function getBridgeQuoteMessage(
+export async function getBridgeQuoteMessage(
   crossSwap: CrossSwap,
   appFee?: AppFee,
   originSwapQuote?: SwapQuote
@@ -323,7 +370,7 @@ export function getBridgeQuoteMessage(
   }
 
   // For simple B2B transfers we don't need to build a message
-  if (shouldBypassMultiCallHandler(crossSwap, !!originSwapQuote)) {
+  if (await shouldBypassMultiCallHandler(crossSwap, !!originSwapQuote)) {
     return undefined;
   }
 

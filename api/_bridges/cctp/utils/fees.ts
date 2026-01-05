@@ -4,6 +4,7 @@ import axios from "axios";
 import { CCTP_FINALITY_THRESHOLDS, getCctpDomainId } from "./constants";
 import { Token } from "../../../_dexes/types";
 import { getHyperEvmChainId, isToHyperCore } from "../../../_hypercore";
+import { getLighterIntermediaryChainId, isToLighter } from "../../../_lighter";
 
 /**
  * CCTP fee configuration type from Circle API
@@ -52,13 +53,10 @@ export async function getCctpFees(params: {
 
   // Check if destination is HyperCore (requires forward fee)
   const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
-
   const shouldUseForwardFee = useForwardFee ?? isDestinationHyperCore;
 
-  // Determine the CCTP destination domain (use HyperEVM domain for HyperCore)
-  const destinationChainIdForCctp = isDestinationHyperCore
-    ? getHyperEvmChainId(outputToken.chainId)
-    : outputToken.chainId;
+  // Determine the CCTP destination domain
+  const destinationChainIdForCctp = getDestinationChainIdForCctp(outputToken);
 
   // Get CCTP domain IDs
   const sourceDomainId = getCctpDomainId(inputToken.chainId);
@@ -89,4 +87,19 @@ export async function getCctpFees(params: {
     transferFeeBps: transferConfig.minimumFee,
     forwardFee: BigNumber.from(forwardFee),
   };
+}
+
+function getDestinationChainIdForCctp(outputToken: Token) {
+  const isDestinationHyperCore = isToHyperCore(outputToken.chainId);
+  const isDestinationLighter = isToLighter(outputToken.chainId);
+
+  if (isDestinationHyperCore) {
+    return getHyperEvmChainId(outputToken.chainId);
+  }
+
+  if (isDestinationLighter) {
+    return getLighterIntermediaryChainId(outputToken.chainId);
+  }
+
+  return outputToken.chainId;
 }

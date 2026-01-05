@@ -96,6 +96,8 @@ export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
     "USDH-SPOT": utils.parseUnits("1000000", 6), // 1M USDC
     "USDT-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
     "USDC-SPOT": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-SPOT-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-PERPS-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
   },
   USDT: {
     "USDC-SPOT": utils.parseUnits("1000000", 6), // 1M USDT

@@ -81,12 +81,6 @@ export function get0xStrategy(
       });
       let initialSwapAmount = swap.amount;
 
-      if (opts?.sellEntireBalance) {
-        swap.amount = addMarkupToAmount(
-          BigNumber.from(swap.amount),
-          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
-        ).toString();
-      }
       let swapAmount = swap.amount;
       const sources = opts?.sources;
       const sourcesParams: Record<string, string> | undefined =
@@ -120,6 +114,13 @@ export function get0xStrategy(
           sourcesParams
         );
         initialSwapAmount = swapAmount;
+      }
+
+      if (opts?.sellEntireBalance) {
+        swapAmount = addMarkupToAmount(
+          BigNumber.from(swapAmount),
+          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
+        ).toString();
       }
 
       // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
@@ -179,8 +180,17 @@ export function get0xStrategy(
       const expectedAmountIn = BigNumber.from(initialSwapAmount);
       const maximumAmountIn = BigNumber.from(quote.sellAmount);
 
-      const expectedAmountOut = BigNumber.from(quote.buyAmount);
+      let expectedAmountOut = BigNumber.from(quote.buyAmount);
       const minAmountOut = BigNumber.from(quote.minBuyAmount);
+
+      // When using sellEntireBalance, the quote is based on the
+      // marked-up input amount (e.g., 105 ETH), but the expected output should reflect
+      // the actual expected input amount (e.g., 100 ETH). Scale down accordingly.
+      if (opts?.sellEntireBalance && !maximumAmountIn.isZero()) {
+        expectedAmountOut = expectedAmountOut
+          .mul(expectedAmountIn)
+          .div(maximumAmountIn);
+      }
 
       const swapTx = opts?.useIndicativeQuote
         ? {
