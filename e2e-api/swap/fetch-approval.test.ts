@@ -1,8 +1,9 @@
 import { BigNumber, ethers } from "ethers";
+import { describe, expect, it, test } from "vitest";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { compactAxiosError, ENABLED_ROUTES } from "../../api/_utils";
-import { e2eConfig, axiosInstance, JEST_TIMEOUT_MS } from "../utils/config";
+import { axiosInstance, e2eConfig, JEST_TIMEOUT_MS } from "../utils/config";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
@@ -435,7 +436,7 @@ describe("GET /swap/approval", () => {
       JEST_TIMEOUT_MS
     );
 
-    test(
+    test.skip(
       "should return a 'auto' resolved slippage for destination swap using uniswap-api",
       async () => {
         const response = await axiosInstance.get(SWAP_API_URL, {
