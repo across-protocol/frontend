@@ -1,28 +1,20 @@
-import {
-  vi,
-  Mock,
-  MockedFunction,
-  describe,
-  test,
-  expect,
-  beforeEach,
-} from "vitest";
+import { beforeEach, describe, expect, Mock, test, vi } from "vitest";
 import { BigNumber, ethers, utils } from "ethers";
 import solanaKit from "@solana/kit";
 import {
+  _prepareSponsoredTx,
   buildEvmTxForAllowanceHolder,
   buildSvmTxForAllowanceHolder,
   calculateMaxBpsToSponsor,
   getQuoteForExactInput,
   getQuoteForOutput,
   isRouteSupported,
-  _prepareSponsoredTx,
 } from "../../../../api/_bridges/cctp-sponsored/strategy";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
 import {
-  Token,
-  CrossSwapQuotes,
   CrossSwap,
+  CrossSwapQuotes,
+  Token,
 } from "../../../../api/_dexes/types";
 import * as hypercore from "../../../../api/_hypercore";
 import { ConvertDecimals } from "../../../../api/_utils";

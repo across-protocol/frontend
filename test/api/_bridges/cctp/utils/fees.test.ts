@@ -1,18 +1,9 @@
-import {
-  vi,
-  MockedFunction,
-  Mocked,
-  describe,
-  test,
-  expect,
-  beforeEach,
-} from "vitest";
+import { beforeEach, describe, expect, Mocked, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import axios from "axios";
 
 import { getCctpFees } from "../../../../../api/_bridges/cctp/utils/fees";
-import { CHAIN_IDs } from "../../../../../api/_constants";
-import { TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 
 vi.mock("axios");
 

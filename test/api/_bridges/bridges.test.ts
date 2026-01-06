@@ -1,9 +1,9 @@
-import { vi, describe, test, expect, beforeEach, it } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
-  getSupportedBridgeStrategies,
   getBridgeStrategy,
+  getSupportedBridgeStrategies,
 } from "../../../api/_bridges/index";
 import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
