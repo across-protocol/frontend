@@ -100,13 +100,13 @@ export type BridgeStrategy = {
   getBridgeQuoteRecipient: (
     crossSwap: CrossSwap,
     hasOriginSwap?: boolean
-  ) => string;
+  ) => Promise<string>;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
     appFee?: AppFee,
     originSwapQuote?: SwapQuote
-  ) => string | undefined;
+  ) => Promise<string | undefined>;
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];

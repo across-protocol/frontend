@@ -1263,9 +1263,9 @@ export interface TransferDepositCompletedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
    */
-  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
    */
@@ -1416,9 +1416,9 @@ export interface TransferFillCompletedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
    */
-  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * To amount of bridge token, in decimals
    */
@@ -1562,9 +1562,9 @@ export interface TransferQuoteReceivedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
    */
-  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * To amount of bridge token, in decimals
    */
@@ -1717,9 +1717,9 @@ export interface TransferSignedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
    */
-  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * Duration in milliseconds between TransferSubmitted event to the TransferSigned event
    */
@@ -1874,9 +1874,9 @@ export interface TransferSubmittedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | anyToAny, bridgeToAny, anyToBridge, bridgeToBridge |
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
    */
-  swapType?: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * Duration in milliseconds between first TransferQuoteRecieved event to the TransferSubmitted event
    */

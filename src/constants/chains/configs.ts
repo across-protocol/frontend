@@ -121,11 +121,6 @@ import polygonAmoyGrayscaleLogo from "assets/chain-logos/polygon-amoy-grayscale.
 import { ReactComponent as polygonAmoyLogoSvg } from "assets/chain-logos/polygon-amoy.svg";
 import { ReactComponent as polygonAmoyGrayscaleLogoSvg } from "assets/chain-logos/polygon-amoy-grayscale.svg";
 
-import redstoneLogo from "assets/chain-logos/redstone.svg";
-import redstoneGrayscaleLogo from "assets/chain-logos/redstone-grayscale.svg";
-import { ReactComponent as redstoneLogoSvg } from "assets/chain-logos/redstone.svg";
-import { ReactComponent as redstoneGrayscaleLogoSvg } from "assets/chain-logos/redstone-grayscale.svg";
-
 import scrollLogo from "assets/chain-logos/scroll.svg";
 import scrollGrayscaleLogo from "assets/chain-logos/scroll-grayscale.svg";
 import { ReactComponent as scrollLogoSvg } from "assets/chain-logos/scroll.svg";
@@ -1118,47 +1113,6 @@ export const polygonAmoy_viem = defineChain({
   },
 });
 
-export const redstone = {
-  name: "Redstone",
-  fullName: "Redstone",
-  chainId: 690,
-  logoURI: redstoneLogo,
-  grayscaleLogoURI: redstoneGrayscaleLogo,
-  logoSvg: redstoneLogoSvg,
-  grayscaleLogoSvg: redstoneGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.redstonechain.com",
-  explorerUrl: "https://explorer.redstone.xyz",
-  constructExplorerLink: (txHash: string) =>
-    `${redstone.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_690_CUSTOM_RPC_URL,
-  pollingInterval: 2000,
-};
-
-export const redstone_viem = defineChain({
-  id: redstone.chainId,
-  name: redstone.name,
-  nativeCurrency: {
-    name: redstone.nativeCurrencySymbol,
-    symbol: redstone.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        redstone.customRpcUrl ? redstone.customRpcUrl : [],
-        redstone.rpcUrl,
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: redstone.name + " Explorer",
-      url: redstone.explorerUrl,
-    },
-  },
-});
-
 export const scroll = {
   name: "Scroll",
   fullName: "Scroll",
@@ -1596,7 +1550,6 @@ export const chainConfigs = [
   plasma,
   polygon,
   polygonAmoy,
-  redstone,
   scroll,
   sepolia,
   solana,
@@ -1640,7 +1593,6 @@ export const chains_viem = [
   plasma_viem,
   polygon_viem,
   polygonAmoy_viem,
-  redstone_viem,
   scroll_viem,
   sepolia_viem,
   soneium_viem,

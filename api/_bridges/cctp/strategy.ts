@@ -22,6 +22,7 @@ import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
+import { divCeil } from "../../_bignumber";
 import {
   assertValidIntegratorId,
   SWAP_CALLDATA_MARKER,
@@ -152,14 +153,14 @@ export function getCctpBridgeStrategy(
       return [];
     },
 
-    getBridgeQuoteRecipient: (
+    getBridgeQuoteRecipient: async (
       crossSwap: CrossSwap,
       _hasOriginSwap?: boolean
     ) => {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
 
@@ -192,7 +193,11 @@ export function getCctpBridgeStrategy(
         // Calculate actual fee:
         // transferFee = input * (bps / 10000)
         // maxFee = transferFee + forwardFee
-        const transferFee = exactInputAmount.mul(transferFeeBps).div(10000);
+        // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
+        const transferFee = divCeil(
+          exactInputAmount.mul(transferFeeBps),
+          BigNumber.from(10000)
+        );
         maxFee = transferFee.add(forwardFee);
       }
 
@@ -283,11 +288,19 @@ export function getCctpBridgeStrategy(
         // Rearranging: inputAmount * (1 - bps/10000) = amountToArriveOnDestination + forwardFee
         // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
         // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
+        // Use ceiling division to ensure we request enough input to cover fees and desired output
         const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
-        inputAmount = inputAmount.add(forwardFee).mul(10000).div(bpsFactor);
+        inputAmount = divCeil(
+          inputAmount.add(forwardFee).mul(10000),
+          bpsFactor
+        );
 
         // Calculate total CCTP fee (transfer fee + forward fee)
-        const transferFee = inputAmount.mul(transferFeeBps).div(10000);
+        // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
+        const transferFee = divCeil(
+          inputAmount.mul(transferFeeBps),
+          BigNumber.from(10000)
+        );
         maxFee = transferFee.add(forwardFee);
       }
 
@@ -360,11 +373,8 @@ export function getCctpBridgeStrategy(
       // Get CCTP domain IDs and addresses
       const destinationDomain = getCctpDomainId(destinationChainIdForCctp);
       const tokenMessenger = getCctpTokenMessengerAddress(originChainId);
-      // Circle's API returns a minimum fee. Add 1 unit as buffer to ensure the transfer meets the threshold for fast mode eligibility.
-      const hasFastFee = bridgeQuote.fees.amount.gt(0);
-      const maxFee = hasFastFee
-        ? bridgeQuote.fees.amount.add(1)
-        : bridgeQuote.fees.amount;
+      const maxFee = bridgeQuote.fees.amount;
+      const hasFastFee = maxFee.gt(0);
       const minFinalityThreshold = hasFastFee
         ? CCTP_FINALITY_THRESHOLDS.fast
         : CCTP_FINALITY_THRESHOLDS.standard;

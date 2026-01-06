@@ -12,7 +12,6 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.BLAST,
   chainConfigs.LISK,
   chainConfigs.SCROLL,
-  chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
   chainConfigs.INK,
