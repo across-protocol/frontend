@@ -246,27 +246,9 @@ export class SvmCctpEventsClient extends SvmCpiEventsClient {
     );
   }
 
-  async queryDepositForBurnEvents(fromSlot?: bigint, toSlot?: bigint) {
-    return await this.queryEvents(
-      "DepositForBurn" as any, // Maybe override queryEvents method
-      fromSlot,
-      toSlot,
-      { limit: 1000, commitment: "confirmed" }
-    );
-  }
-
   async getDepositForBurnFromSignature(signature: Signature) {
     const events = await this.readEventsFromSignature(signature);
     return events.filter((event) => event.name === "DepositForBurn");
-  }
-
-  async queryMintAndWithdrawEvents(fromSlot?: bigint, toSlot?: bigint) {
-    return await this.queryEvents(
-      "MintAndWithdraw" as any, // Maybe override queryEvents method
-      fromSlot,
-      toSlot,
-      { limit: 1000, commitment: "confirmed" }
-    );
   }
 
   async getMintAndWithdrawEventsFromSignature(signature: Signature) {
