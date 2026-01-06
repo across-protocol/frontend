@@ -146,12 +146,17 @@ export async function getCrossSwapQuotesForExactInputB2B(
 ): Promise<CrossSwapQuotes> {
   const { depositEntryPoint } = _prepCrossSwapQuotesRetrievalB2B(crossSwap);
 
+  const [recipient, message] = await Promise.all([
+    bridge.getBridgeQuoteRecipient(crossSwap),
+    bridge.getBridgeQuoteMessage(crossSwap),
+  ]);
+
   const { bridgeQuote } = await bridge.getQuoteForExactInput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     exactInputAmount: crossSwap.amount,
-    recipient: await bridge.getBridgeQuoteRecipient(crossSwap),
-    message: await bridge.getBridgeQuoteMessage(crossSwap),
+    recipient,
+    message,
   });
 
   const appFee = calculateAppFee({
@@ -186,12 +191,18 @@ export async function getCrossSwapQuotesForOutputB2B(
     ? addMarkupToAmount(crossSwap.amount, crossSwap.appFeePercent)
     : crossSwap.amount;
 
+  // Parallelize recipient and message fetching (they're independent)
+  const [recipient, message] = await Promise.all([
+    bridge.getBridgeQuoteRecipient(crossSwap),
+    bridge.getBridgeQuoteMessage(crossSwap),
+  ]);
+
   const { bridgeQuote } = await bridge.getQuoteForOutput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: outputAmountWithAppFee,
-    recipient: await bridge.getBridgeQuoteRecipient(crossSwap),
-    message: await bridge.getBridgeQuoteMessage(crossSwap),
+    recipient,
+    message,
     forceExactOutput: crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 
@@ -818,16 +829,21 @@ export async function getCrossSwapQuotesForExactInputA2B(
   } = prioritizedStrategy.result;
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
-  const { bridgeQuote } = await bridge.getQuoteForExactInput({
-    inputToken: bridgeableInputToken,
-    outputToken: crossSwap.outputToken,
-    exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
-    recipient: await bridge.getBridgeQuoteRecipient(crossSwap, true), // A2B flow: has origin swap
-    message: await bridge.getBridgeQuoteMessage(
+  const [recipient, message] = await Promise.all([
+    bridge.getBridgeQuoteRecipient(crossSwap, true), // A2B flow: has origin swap
+    bridge.getBridgeQuoteMessage(
       crossSwap,
       undefined,
       prioritizedStrategy.originSwapQuote
     ),
+  ]);
+
+  const { bridgeQuote } = await bridge.getQuoteForExactInput({
+    inputToken: bridgeableInputToken,
+    outputToken: crossSwap.outputToken,
+    exactInputAmount: prioritizedStrategy.originSwapQuote.minAmountOut,
+    recipient,
+    message,
   });
 
   const appFee = calculateAppFee({
@@ -892,16 +908,21 @@ export async function getCrossSwapQuotesForOutputA2B(
     bridgeableInputToken
   );
 
-  const { bridgeQuote } = await bridge.getQuoteForOutput({
-    inputToken: bridgeableInputToken,
-    outputToken: crossSwapWithAppFee.outputToken,
-    minOutputAmount: crossSwapWithAppFee.amount,
-    recipient: await bridge.getBridgeQuoteRecipient(crossSwapWithAppFee, true), // A2B flow: has origin swap
-    message: await bridge.getBridgeQuoteMessage(
+  const [recipient, message] = await Promise.all([
+    bridge.getBridgeQuoteRecipient(crossSwapWithAppFee, true), // A2B flow: has origin swap
+    bridge.getBridgeQuoteMessage(
       crossSwapWithAppFee,
       undefined,
       placeholderOriginSwapQuote
     ),
+  ]);
+
+  const { bridgeQuote } = await bridge.getQuoteForOutput({
+    inputToken: bridgeableInputToken,
+    outputToken: crossSwapWithAppFee.outputToken,
+    minOutputAmount: crossSwapWithAppFee.amount,
+    recipient,
+    message,
     forceExactOutput: crossSwapWithAppFee.type === AMOUNT_TYPE.EXACT_OUTPUT,
   });
 

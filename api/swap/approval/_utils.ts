@@ -374,21 +374,22 @@ async function _buildDepositTxForAllowanceHolderSvm(
     message,
   };
 
-  const depositDelegatePda = await sdk.arch.svm.getDepositDelegatePda(
-    depositDataSeed,
-    spokePoolProgramId
-  );
-  const statePda = await sdk.arch.svm.getStatePda(spokePoolProgramId);
-  const eventAuthorityPda =
-    await sdk.arch.svm.getEventAuthority(spokePoolProgramId);
-  const vaultPda = await sdk.arch.svm.getAssociatedTokenAddress(
-    sdk.utils.toAddressType(statePda, originChainId).forceSvmAddress(),
-    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
-  );
-  const depositorTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
-    sdk.utils.toAddressType(depositor, originChainId).forceSvmAddress(),
-    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
-  );
+  const [depositDelegatePda, statePda, eventAuthorityPda] = await Promise.all([
+    sdk.arch.svm.getDepositDelegatePda(depositDataSeed, spokePoolProgramId),
+    sdk.arch.svm.getStatePda(spokePoolProgramId),
+    sdk.arch.svm.getEventAuthority(spokePoolProgramId),
+  ]);
+
+  const [vaultPda, depositorTokenAccount] = await Promise.all([
+    sdk.arch.svm.getAssociatedTokenAddress(
+      sdk.utils.toAddressType(statePda, originChainId).forceSvmAddress(),
+      sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+    ),
+    sdk.arch.svm.getAssociatedTokenAddress(
+      sdk.utils.toAddressType(depositor, originChainId).forceSvmAddress(),
+      sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+    ),
+  ]);
   const tokenDecimals = crossSwapQuotes.bridgeQuote.inputToken.decimals;
 
   const depositIx = await sdk.arch.svm.createDepositInstruction(
