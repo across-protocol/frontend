@@ -189,7 +189,7 @@ export class SVMStrategy implements IChainStrategy {
       let fillEventTxRef = "";
 
       if (bridgeProvider === "cctp") {
-        // todo
+        // noop
         throw new NoFilledRelayLogError(Number(depositId), this.chainId);
       } else {
         const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
