@@ -64,7 +64,7 @@ E2E_MM_PASSWORD=
 E2E_INFURA_ID=
 ```
 
-To run the tests locally, first make sure to have a local dev sever running:
+To run the tests locally, first make sure to have a local dev server running:
 
 ```bash
 PORT=3000 yarn dev
