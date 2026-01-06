@@ -1,12 +1,8 @@
 import assert from "assert";
 import { BigNumber, BigNumberish } from "ethers";
-import { utils as sdkUtils } from "@across-protocol/sdk";
 
-// Re-export types and utilities for use throughout api/_pool
+// Re-export types for use throughout api/_pool
 export type { BigNumber, BigNumberish } from "ethers";
-export const { delay } = sdkUtils;
-
-const { delay: sleep } = sdkUtils;
 
 // check if a value is not null or undefined, useful for numbers which could be 0.
 // "is" syntax: https://stackoverflow.com/questions/40081332/what-does-the-is-keyword-do-in-typescript
@@ -46,19 +42,4 @@ export function Balances(balances: Balances = {}) {
     return create(id);
   }
   return { create, add, sub, get, balances, set, has, getOrCreate };
-}
-
-// Loop forever but wait until execution is finished before starting next timer. Throw an error to break this
-// or add another utility function if you need it to end on condition.
-
-export async function loop(
-  fn: (...args: any[]) => any,
-  delay: number,
-  ...args: any[]
-) {
-  do {
-    await fn(...args);
-    await sleep(delay);
-    /* eslint-disable-next-line no-constant-condition */
-  } while (true);
 }
