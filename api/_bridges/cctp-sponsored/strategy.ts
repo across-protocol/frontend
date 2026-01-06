@@ -140,6 +140,30 @@ export function isRouteSupported(params: {
   );
 }
 
+/**
+ * If recipient does not exist on HyperCore, then we error if route is not
+ * supported for account creation.
+ */
+async function assertAccountExistsForUnsupportedRoutes(params: {
+  inputToken: Token;
+  outputToken: Token;
+  recipient: string;
+}) {
+  const { inputToken, outputToken, recipient } = params;
+  const isAccountCreationSupported = ACCOUNT_CREATION_SUPPORTED_ROUTES.some(
+    (route) =>
+      route.inputTokenSymbol === inputToken.symbol &&
+      route.outputTokenSymbol === outputToken.symbol
+  );
+  if (!isAccountCreationSupported && isToHyperCore(outputToken.chainId)) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
+}
+
 export async function getQuoteForExactInput(
   params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
 ) {
@@ -155,22 +179,11 @@ export async function getQuoteForExactInput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
-  // If recipient does not exist on HyperCore, then we error if route is not supported
-  // for account creation.
-  if (
-    !ACCOUNT_CREATION_SUPPORTED_ROUTES.find(
-      (route) =>
-        route.inputTokenSymbol === inputToken.symbol &&
-        route.outputTokenSymbol === outputToken.symbol
-    ) &&
-    isToHyperCore(params.outputToken.chainId)
-  ) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-      paramName: "recipient",
-    });
-  }
+  await assertAccountExistsForUnsupportedRoutes({
+    inputToken,
+    outputToken,
+    recipient: params.recipient,
+  });
 
   if (params.isEligibleForSponsorship) {
     // We guarantee input amount == output amount for sponsored flows
@@ -240,22 +253,11 @@ export async function getQuoteForOutput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
-  // If recipient does not exist on HyperCore, then we error if route is not supported
-  // for account creation.
-  if (
-    !ACCOUNT_CREATION_SUPPORTED_ROUTES.find(
-      (route) =>
-        route.inputTokenSymbol === inputToken.symbol &&
-        route.outputTokenSymbol === outputToken.symbol
-    ) &&
-    isToHyperCore(params.outputToken.chainId)
-  ) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-      paramName: "recipient",
-    });
-  }
+  await assertAccountExistsForUnsupportedRoutes({
+    inputToken,
+    outputToken,
+    recipient: params.recipient,
+  });
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
