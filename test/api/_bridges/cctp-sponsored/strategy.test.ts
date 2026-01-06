@@ -446,8 +446,8 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
     const recipient = "0x0000000000000000000000000000000000000002";
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (getEnvs as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      vi.mocked(getEnvs).mockReturnValue({
         SPONSORSHIP_SIGNER_PRIVATE_KEY: TEST_PRIVATE_KEY,
       });
     });
@@ -498,13 +498,14 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       };
 
       // Mock CCTP fees with 1 bps
-      jest.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
+      vi.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
         transferFeeBps: 1,
         forwardFee: BigNumber.from(0),
       });
-      jest
-        .spyOn(sponsorshipEligibility, "assertSponsoredAmountCanBeCovered")
-        .mockResolvedValue(true);
+      vi.spyOn(
+        sponsorshipEligibility,
+        "assertSponsoredAmountCanBeCovered"
+      ).mockResolvedValue(true);
 
       const result = await _prepareSponsoredTx({
         quotes,
