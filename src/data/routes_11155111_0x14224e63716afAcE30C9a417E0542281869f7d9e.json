@@ -13,9 +13,6 @@
       "11155420": "0x17496824Ba574A4e9De80110A91207c4c63e552a"
     }
   },
-  "universalSwapAndBridgeAddresses": {
-    "uniswap-v3/swap-router-02": {}
-  },
   "spokePoolPeripheryAddresses": {},
   "swapProxyAddresses": {},
   "routes": [

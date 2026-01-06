@@ -50,7 +50,6 @@ import {
   TransferType,
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
 import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
@@ -89,8 +88,8 @@ export type QuoteFetchPrioritizationMode =
  *
  * @example
  * {
- *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
- *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
+ *   default: [getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("SpokePoolPeriphery", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
@@ -148,7 +147,7 @@ export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
     mode: "priority-speed",
     priorityChunkSize: 1,
   },
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+  default: [getSwapRouter02Strategy("SpokePoolPeriphery")],
 };
 
 export function getPreferredBridgeTokens(
@@ -1146,22 +1145,6 @@ export function getOriginSwapEntryPoints(
       deposit: {
         name: "SpokePoolPeriphery",
         address: getSpokePoolPeripheryAddress(chainId),
-      },
-    } as const;
-  } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-    return {
-      originSwapInitialRecipient: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-      },
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-        dex,
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
       },
     } as const;
   }
