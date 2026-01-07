@@ -1,13 +1,16 @@
 import axios from "axios";
+import { describe, expect, it } from "vitest";
+
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { Address, parseUnits, PrivateKeyAccount } from "viem";
 
 import { e2eConfig, JEST_TIMEOUT_MS } from "../utils/config";
-import { executeApprovalAndDeposit } from "../utils/deposit";
+import {
+  executeApprovalAndDeposit,
+  type SwapQuoteResponse,
+} from "../utils/deposit";
 import { executeFill } from "../utils/fill";
 import { getBalance } from "../utils/token";
-
-import { type SwapQuoteResponse } from "../utils/deposit";
 
 type TradeType = "exactInput" | "exactOutput" | "minOutput";
 

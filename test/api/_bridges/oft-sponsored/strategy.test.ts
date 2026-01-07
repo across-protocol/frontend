@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BigNumber } from "ethers";
 import {
   calculateMaxBpsToSponsor,
@@ -14,7 +15,7 @@ import * as tokenInfo from "../../../../api/_token-info";
 
 describe("Sponsored OFT Strategy", () => {
   beforeEach(() => {
-    jest.spyOn(hypercore, "assertAccountExistsOnHyperCore").mockResolvedValue();
+    vi.spyOn(hypercore, "assertAccountExistsOnHyperCore").mockResolvedValue();
   });
 
   // Shared test fixtures
@@ -189,12 +190,12 @@ describe("Sponsored OFT Strategy", () => {
 
     describe("USDC output", () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it("should return 0 bps when swap has no loss", async () => {
         // Mock simulateMarketOrder to return exactly 1:1 output (no loss)
-        jest.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
+        vi.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
           outputAmount: BigNumber.from("100000000"), // Exactly 1 USDC worth in 8 decimals
           inputAmount: bridgeOutputAmount,
           averageExecutionPrice: "1.0",
@@ -215,7 +216,7 @@ describe("Sponsored OFT Strategy", () => {
 
       it("should return 0 bps when swap has profit", async () => {
         // Mock simulateMarketOrder to return more than expected (profit scenario)
-        jest.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
+        vi.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
           outputAmount: BigNumber.from("101000000"), // 1.01 USDC (8 decimals on HyperCore)
           inputAmount: bridgeOutputAmount,
           averageExecutionPrice: "1.01",
@@ -236,7 +237,7 @@ describe("Sponsored OFT Strategy", () => {
 
       it("should calculate correct bps when swap has 1% loss", async () => {
         // Mock simulateMarketOrder to return 0.99 USDT (1% loss)
-        jest.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
+        vi.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
           outputAmount: BigNumber.from("99000000"), // 0.99 USDC (8 decimals on HyperCore)
           inputAmount: bridgeOutputAmount,
           averageExecutionPrice: "0.99",
@@ -258,7 +259,7 @@ describe("Sponsored OFT Strategy", () => {
 
       it("should calculate correct bps when swap has 0.5% loss", async () => {
         // Mock simulateMarketOrder to return 0.995 USDT (0.5% loss)
-        jest.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
+        vi.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
           outputAmount: BigNumber.from("99500000"), // 0.995 USDC (8 decimals on HyperCore)
           inputAmount: bridgeOutputAmount,
           averageExecutionPrice: "0.995",
@@ -280,7 +281,7 @@ describe("Sponsored OFT Strategy", () => {
 
       it("should round up fractional bps", async () => {
         // Mock simulateMarketOrder to return slightly less (0.01% loss)
-        jest.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
+        vi.spyOn(hypercore, "simulateMarketOrder").mockResolvedValue({
           outputAmount: BigNumber.from("99990000"), // 0.9999 USDC (8 decimals on HyperCore)
           inputAmount: bridgeOutputAmount,
           averageExecutionPrice: "0.9999",
@@ -318,16 +319,16 @@ describe("Sponsored OFT Strategy", () => {
     const exactInputAmount = BigNumber.from("1000000"); // 1 USDT (6 decimals)
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Mock getCachedTokenInfo to return HyperEVM USDT as intermediary
-      jest.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
+      vi.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
         ...hyperevmUSDT,
         name: "USDT",
       });
 
       // Mock getNativeTokenInfo
-      jest.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
+      vi.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
         address: "0x0000000000000000000000000000000000000000",
         symbol: "ETH",
         decimals: 18,
@@ -337,14 +338,14 @@ describe("Sponsored OFT Strategy", () => {
 
     it("should convert output from intermediary decimals (6) to output decimals (8)", async () => {
       // Mock getQuote to return 1 USDT in intermediary token decimals (6 decimals)
-      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+      vi.spyOn(oftUtils, "getQuote").mockResolvedValue({
         inputAmount: exactInputAmount,
         outputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals (HyperEVM)
         nativeFee: BigNumber.from("100000000000000"), // 0.0001 ETH
         oftFeeAmount: BigNumber.from(0),
       });
 
-      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+      vi.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
 
       const result = await getSponsoredOftQuoteForExactInput({
         inputToken: arbitrumUSDT,
@@ -362,14 +363,14 @@ describe("Sponsored OFT Strategy", () => {
     it("should maintain correct decimal precision for larger amounts", async () => {
       const largeAmount = BigNumber.from("1000000000"); // 1000 USDT (6 decimals)
 
-      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+      vi.spyOn(oftUtils, "getQuote").mockResolvedValue({
         inputAmount: largeAmount,
         outputAmount: BigNumber.from("1000000000"), // 1000 USDT in 6 decimals
         nativeFee: BigNumber.from("100000000000000"),
         oftFeeAmount: BigNumber.from(0),
       });
 
-      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+      vi.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
 
       const result = await getSponsoredOftQuoteForExactInput({
         inputToken: arbitrumUSDT,
@@ -387,16 +388,16 @@ describe("Sponsored OFT Strategy", () => {
     const minOutputAmount = BigNumber.from("100000000"); // 1 USDT (8 decimals)
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Mock getCachedTokenInfo to return HyperEVM USDT as intermediary
-      jest.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
+      vi.spyOn(utils, "getCachedTokenInfo").mockResolvedValue({
         ...hyperevmUSDT,
         name: "USDT",
       });
 
       // Mock getNativeTokenInfo
-      jest.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
+      vi.spyOn(tokenInfo, "getNativeTokenInfo").mockReturnValue({
         address: "0x0000000000000000000000000000000000000000",
         symbol: "ETH",
         decimals: 18,
@@ -404,21 +405,21 @@ describe("Sponsored OFT Strategy", () => {
       });
 
       // Mock roundAmountToSharedDecimals
-      jest
-        .spyOn(oftUtils, "roundAmountToSharedDecimals")
-        .mockReturnValue(minOutputAmount);
+      vi.spyOn(oftUtils, "roundAmountToSharedDecimals").mockReturnValue(
+        minOutputAmount
+      );
     });
 
     it("should convert input from output decimals (8) to input decimals (6) and back", async () => {
       // Mock getQuote to return intermediary token output (6 decimals)
-      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+      vi.spyOn(oftUtils, "getQuote").mockResolvedValue({
         inputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals
         outputAmount: BigNumber.from("1000000"), // 1 USDT in 6 decimals (intermediary)
         nativeFee: BigNumber.from("100000000000000"),
         oftFeeAmount: BigNumber.from(0),
       });
 
-      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+      vi.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
 
       const result = await getSponsoredOftQuoteForOutput({
         inputToken: arbitrumUSDT,
@@ -435,14 +436,14 @@ describe("Sponsored OFT Strategy", () => {
 
     it("should throw error when output is below minimum", async () => {
       // Mock getQuote to return less than minimum
-      jest.spyOn(oftUtils, "getQuote").mockResolvedValue({
+      vi.spyOn(oftUtils, "getQuote").mockResolvedValue({
         inputAmount: BigNumber.from("1000000"),
         outputAmount: BigNumber.from("900000"), // 0.9 USDT in 6 decimals (less than expected)
         nativeFee: BigNumber.from("100000000000000"),
         oftFeeAmount: BigNumber.from(0),
       });
 
-      jest.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
+      vi.spyOn(oftUtils, "getEstimatedFillTime").mockResolvedValue(300);
 
       await expect(
         getSponsoredOftQuoteForOutput({

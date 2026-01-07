@@ -1,9 +1,11 @@
 import { BigNumber } from "ethers";
+import { describe, expect, test, vi } from "vitest";
+
 import {
-  getCrossSwapTypes,
   CROSS_SWAP_TYPE,
-  getBridgeQuoteRecipient,
   getBridgeQuoteMessage,
+  getBridgeQuoteRecipient,
+  getCrossSwapTypes,
 } from "../../../api/_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import { CrossSwap } from "../../../api/_dexes/types";
@@ -14,16 +16,19 @@ const MOCK_EOA_ADDRESS = "0xEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
 const MOCK_CONTRACT_ADDRESS = "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
 
 // Mock isContractCache to control EOA vs Contract detection
-jest.mock("../../../api/_utils", () => ({
-  ...jest.requireActual("../../../api/_utils"),
-  isContractCache: jest.fn((_chainId: number, address: string) => {
-    const isContract =
-      address.toLowerCase() === MOCK_CONTRACT_ADDRESS.toLowerCase();
-    return {
-      get: jest.fn(() => Promise.resolve(isContract)),
-    };
-  }),
-}));
+vi.mock("../../../api/_utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../api/_utils")>();
+  return {
+    ...actual,
+    isContractCache: vi.fn((_chainId: number, address: string) => {
+      const isContract =
+        address.toLowerCase() === MOCK_CONTRACT_ADDRESS.toLowerCase();
+      return {
+        get: vi.fn(() => Promise.resolve(isContract)),
+      };
+    }),
+  };
+});
 
 describe("_dexes/utils", () => {
   describe("#getCrossSwapType()", () => {

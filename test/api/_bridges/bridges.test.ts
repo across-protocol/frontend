@@ -1,26 +1,27 @@
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
-  getSupportedBridgeStrategies,
   getBridgeStrategy,
+  getSupportedBridgeStrategies,
 } from "../../../api/_bridges/index";
 import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
 import * as indexerApi from "../../../api/_indexer-api";
 
-jest.mock("../../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+vi.mock("../../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   }),
 }));
 
-jest.mock("../../../api/_indexer-api", () => ({
-  ...jest.requireActual("../../../api/_indexer-api"),
-  getSponsorshipsFromIndexer: jest.fn().mockResolvedValue({
+vi.mock("../../../api/_indexer-api", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getSponsorshipsFromIndexer: vi.fn().mockResolvedValue({
     totalSponsorships: [],
     userSponsorships: [],
     accountActivations: [],
@@ -150,9 +151,9 @@ describe("api/_bridges/index", () => {
       });
 
       test("should fallback to Across when getBridgeStrategyData returns undefined", async () => {
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(undefined);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          undefined
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -168,13 +169,13 @@ describe("api/_bridges/index", () => {
   });
 
   describe("#getBridgeStrategy()", () => {
-    jest.mock("../../../api/_utils", () => ({
-      ...jest.requireActual("../../../api/_utils"),
-      getCachedLimits: jest.fn(),
+    vi.mock("../../../api/_utils", async (importOriginal) => ({
+      ...(await importOriginal()),
+      getCachedLimits: vi.fn(),
     }));
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe("Monad transfer routing", () => {
@@ -184,9 +185,9 @@ describe("api/_bridges/index", () => {
           isWithinMonadLimit: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -205,9 +206,9 @@ describe("api/_bridges/index", () => {
           isWithinMonadLimit: false,
           isUsdtToUsdt: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -226,9 +227,9 @@ describe("api/_bridges/index", () => {
           isWithinMonadLimit: false,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -248,9 +249,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: false,
           isUsdtToUsdt: false,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -270,9 +271,9 @@ describe("api/_bridges/index", () => {
           isUtilizationHigh: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -290,9 +291,9 @@ describe("api/_bridges/index", () => {
           isUtilizationHigh: true,
           isUsdtToUsdt: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -311,9 +312,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: false,
           isUsdtToUsdt: false,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -334,9 +335,9 @@ describe("api/_bridges/index", () => {
           isInThreshold: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -356,9 +357,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -378,9 +379,9 @@ describe("api/_bridges/index", () => {
           canFillInstantly: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -399,9 +400,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -421,9 +422,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: false,
           isUsdtToUsdt: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -442,9 +443,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: false,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -499,7 +500,7 @@ describe("api/_bridges/index", () => {
     describe("Sponsored USDC → USDH-SPOT amount-based routing", () => {
       beforeEach(() => {
         // Mock sponsorship eligibility to pass all checks for both USDH (HyperEVM) and USDH-SPOT (HyperCore)
-        jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
+        vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
           totalSponsorships: [
             {
               chainId: CHAIN_IDs.HYPEREVM,
@@ -604,9 +605,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: true,
           isUtilizationHigh: true, // Even with high utilization
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -625,9 +626,9 @@ describe("api/_bridges/index", () => {
           isUsdtToUsdt: true,
           isUtilizationHigh: true, // Even with high utilization
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
