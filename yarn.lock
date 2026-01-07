@@ -95,10 +95,10 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/contracts@^4.1.19-alpha.3":
-  version "4.1.19-alpha.3"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.19-alpha.3.tgz#2ddbbd4f87e7b846392540e885f47bfe8d7dfcf3"
-  integrity sha512-2cr1KqEpZF4H/kYxSkojSVno81AF23i+/MmGOD2LXsV36MFFUr2VzZXf2wdiU/uuPUxPwCGQJmZd5SRf+Vx1/A==
+"@across-protocol/contracts@^4.1.19-alpha.5":
+  version "4.1.19-alpha.5"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.19-alpha.5.tgz#89e1a4e06555fcae1118f350f093c466cdc1f268"
+  integrity sha512-pBw4jG+NBzv9R74gQwYBRY1IpGyFViyLbGkJ8L9qbkUCNqiR473Yq8FNE0g3wxj6aToUARR3AVA974F6h41EFg==
   dependencies:
     "@across-protocol/constants" "^3.1.88"
     "@coral-xyz/anchor" "^0.31.1"
