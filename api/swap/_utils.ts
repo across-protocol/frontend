@@ -174,6 +174,21 @@ export async function handleBaseSwapQueryParams(
     destinationChainId
   );
 
+  // Whitelisted output tokens that behave like bridgeable tokens
+  const isToWhitelistedOutputToken = !![
+    TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
+  ]
+    .filter(Boolean)
+    .find(
+      (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+    );
+
+  const isOutputBridgeableOrWhitelisted =
+    outputBridgeable || isToWhitelistedOutputToken;
+
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
@@ -189,20 +204,8 @@ export async function handleBaseSwapQueryParams(
       });
     }
 
-    // Allows whitelisted output tokens with origin SVM
-    const isToWhitelistedOutputToken = !![
-      TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
-    ]
-      .filter(Boolean)
-      .find(
-        (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
-      );
-
     // Restrict SVM ↔ EVM combinations that require a destination swap
-    if (!outputBridgeable && !isToWhitelistedOutputToken) {
+    if (!isOutputBridgeableOrWhitelisted) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
@@ -269,7 +272,7 @@ export async function handleBaseSwapQueryParams(
   const refundOnOrigin =
     _refundOnOrigin !== undefined
       ? _refundOnOrigin === "true"
-      : outputBridgeable;
+      : isOutputBridgeableOrWhitelisted;
 
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
