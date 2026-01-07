@@ -105,7 +105,7 @@ export async function handleBaseSwapQueryParams(
     depositor,
     integratorId,
     refundAddress,
-    refundOnOrigin: _refundOnOrigin = "true",
+    refundOnOrigin: _refundOnOrigin = "false",
     slippageTolerance,
     slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
