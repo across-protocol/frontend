@@ -144,13 +144,7 @@ describe("execute response of GET /swap/approval", () => {
       account: depositor,
       amount: parseUnits(TOKEN_FUND_AMOUNT.toString(), inputToken.decimals),
     });
-    await originClient.tevmMine({
-      blockCount: 1,
-      onBlock: (block, next) => {
-        console.log("block", block.header.number, block.header.timestamp);
-        next?.();
-      },
-    });
+    await originClient.tevmMine({ blockCount: 1 });
 
     const [swapQuote, inputTokenBalanceBefore, outputTokenBalanceBefore] =
       await Promise.all([
