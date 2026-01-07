@@ -1,5 +1,9 @@
 import { BigNumber } from "ethers";
-import { stringifyBigNumProps } from "../../../api/swap/_utils";
+import {
+  stringifyBigNumProps,
+  handleBaseSwapQueryParams,
+} from "../../../api/swap/_utils";
+import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../api/_constants";
 
 describe("stringifyBigNumProps", () => {
   describe("BigNumber detection and conversion", () => {
@@ -224,6 +228,94 @@ describe("stringifyBigNumProps", () => {
       expect(result.checks.allowance.expected).toBe("689821235147287");
       expect(result.checks.balance.actual).toBe("689821235147287");
       expect(result.checks.balance.expected).toBe("689821235147287");
+    });
+  });
+});
+
+describe("handleBaseSwapQueryParams - refundOnOrigin default behavior", () => {
+  const baseQueryParams = {
+    amount: "1000000",
+    originChainId: CHAIN_IDs.MAINNET.toString(),
+    destinationChainId: CHAIN_IDs.OPTIMISM.toString(),
+    depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+  };
+
+  describe("Routes without destination swaps (should default to refundOnOrigin=true)", () => {
+    test("should default refundOnOrigin to true for B2B route (USDC->USDC) when not specified", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+        // refundOnOrigin not specified
+      });
+
+      expect(result.refundOnOrigin).toBe(true);
+    });
+
+    test("should default refundOnOrigin to true for B2B route (USDT->USDT)", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.MAINNET],
+        outputToken: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM],
+      });
+
+      expect(result.refundOnOrigin).toBe(true);
+    });
+
+    test("should respect explicit refundOnOrigin=true for B2B route", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+        refundOnOrigin: "true",
+      });
+
+      expect(result.refundOnOrigin).toBe(true);
+    });
+
+    test("should respect explicit refundOnOrigin=false for B2B route even though it will fail validation", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+        refundOnOrigin: "false",
+      });
+
+      expect(result.refundOnOrigin).toBe(false);
+    });
+  });
+
+  describe("Routes with destination swaps (should default to refundOnOrigin=false)", () => {
+    test("should default refundOnOrigin to false for B2A route (USDC->AAVE) when not specified", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: "0xba5DdD1f9d7F570dc94a51479a000E3BCE967196", // AAVE on Arbitrum (not bridgeable)
+      });
+
+      expect(result.refundOnOrigin).toBe(false);
+    });
+
+    test("should respect explicit refundOnOrigin=true for B2A route", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: "0xba5DdD1f9d7F570dc94a51479a000E3BCE967196", // AAVE on Arbitrum (not bridgeable)
+        refundOnOrigin: "true",
+      });
+
+      expect(result.refundOnOrigin).toBe(true);
+    });
+
+    test("should respect explicit refundOnOrigin=false for B2A route", async () => {
+      const result = await handleBaseSwapQueryParams({
+        ...baseQueryParams,
+        inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+        outputToken: "0xba5DdD1f9d7F570dc94a51479a000E3BCE967196", // AAVE on Arbitrum (not bridgeable)
+        refundOnOrigin: "false",
+      });
+
+      expect(result.refundOnOrigin).toBe(false);
     });
   });
 });

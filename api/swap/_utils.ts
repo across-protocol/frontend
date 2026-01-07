@@ -105,7 +105,7 @@ export async function handleBaseSwapQueryParams(
     depositor,
     integratorId,
     refundAddress,
-    refundOnOrigin: _refundOnOrigin = "false",
+    refundOnOrigin: _refundOnOrigin,
     slippageTolerance,
     slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
@@ -120,7 +120,6 @@ export async function handleBaseSwapQueryParams(
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
-  const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
   const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
@@ -168,6 +167,13 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
+  // Check if output token is bridgeable (used for refundOnOrigin default and SVM validation)
+  const outputBridgeable = isOutputTokenBridgeable(
+    outputTokenAddress,
+    originChainId,
+    destinationChainId
+  );
+
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
@@ -183,13 +189,6 @@ export async function handleBaseSwapQueryParams(
       });
     }
 
-    // Restrict SVM ↔ EVM combinations that require a destination swap
-    const outputBridgeable = isOutputTokenBridgeable(
-      outputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
-
     // Allows whitelisted output tokens with origin SVM
     const isToWhitelistedOutputToken = !![
       TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
@@ -202,6 +201,7 @@ export async function handleBaseSwapQueryParams(
         (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
       );
 
+    // Restrict SVM ↔ EVM combinations that require a destination swap
     if (!outputBridgeable && !isToWhitelistedOutputToken) {
       throw new InvalidParamError({
         param: "outputToken",
@@ -262,6 +262,14 @@ export async function handleBaseSwapQueryParams(
       message: "Invalid input or output token address",
     });
   }
+
+  // For refundOnOrigin, use explicit value if provided, otherwise default based on output bridgeability:
+  // - Bridgeable output (B2B, B2BI, A2B): refund on origin (true)
+  // - Non-bridgeable output (B2A, A2A): refund on destination (false)
+  const refundOnOrigin =
+    _refundOnOrigin !== undefined
+      ? _refundOnOrigin === "true"
+      : outputBridgeable;
 
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
