@@ -98,7 +98,10 @@ describe("execute response of GET /swap/approval", () => {
     slippage: number | "auto";
   }) {
     const response = await axios.get(SWAP_API_URL, {
-      params,
+      params: {
+        ...params,
+        includeSources: "uniswap-api",
+      },
     });
     expect(response.status).toBe(200);
     expect(response.data).toBeDefined();

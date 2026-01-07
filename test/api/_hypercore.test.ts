@@ -1,12 +1,11 @@
 import {
-  vi,
-  Mock,
-  MockedFunction,
-  Mocked,
-  describe,
-  test,
-  expect,
   beforeEach,
+  describe,
+  expect,
+  Mocked,
+  MockedFunction,
+  test,
+  vi,
 } from "vitest";
 import { ethers } from "ethers";
 import axios from "axios";

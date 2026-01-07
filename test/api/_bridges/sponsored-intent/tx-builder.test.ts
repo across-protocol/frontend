@@ -1,4 +1,4 @@
-import { vi, describe, test, expect, beforeEach, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BigNumber } from "ethers";
 import {
   buildTxEvm,

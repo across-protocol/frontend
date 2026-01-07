@@ -1,4 +1,12 @@
-import { vi, describe, test, expect, beforeEach, it, afterAll } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from "vitest";
 // Public infura key published in @umaprotocol/packages/common/ProviderUtils
 import limitsHandler from "../../api/limits";
 import feesHandler from "../../api/suggested-fees";
