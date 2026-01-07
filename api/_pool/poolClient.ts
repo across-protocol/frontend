@@ -6,12 +6,7 @@ import {
   utils as sdkUtils,
 } from "@across-protocol/sdk";
 import { ethers, Signer, BigNumber, type BigNumberish } from "ethers";
-import type { Overrides } from "@ethersproject/contracts";
-import {
-  TransactionRequest,
-  TransactionReceipt,
-  Log,
-} from "@ethersproject/abstract-provider";
+import { Log, TransactionReceipt } from "@ethersproject/abstract-provider";
 import { Provider, Block } from "@ethersproject/providers";
 import set from "lodash/set";
 import get from "lodash/get";
@@ -25,9 +20,8 @@ import {
 import type { TypedEventEthers as TypedEvent } from "@uma/contracts-node";
 
 const { erc20 } = uma.clients;
-const { loop } = uma.utils;
-const { TransactionManager } = uma.across;
-const { SECONDS_PER_YEAR, DEFAULT_BLOCK_DELTA } = uma.across.constants;
+const SECONDS_PER_YEAR = 31557600;
+const DEFAULT_BLOCK_DELTA = 10;
 const { calculateInstantaneousRate } = lpFeeCalculator;
 const { hubPool, acrossConfigStore } = contracts;
 const { AddressZero } = ethers.constants;
@@ -87,18 +81,6 @@ export type User = {
   totalDeposited: string;
   feesEarned: string;
 };
-export type Transaction = {
-  id: string;
-  state: "requested" | "submitted" | "mined" | "error";
-  toAddress: string;
-  fromAddress: string;
-  type: "Add Liquidity" | "Remove Liquidity";
-  description: string;
-  request?: TransactionRequest;
-  hash?: string;
-  receipt?: TransactionReceipt;
-  error?: Error;
-};
 export type Token = {
   decimals: string;
   symbol: string;
@@ -107,13 +89,9 @@ export type Token = {
 export type State = {
   pools: Record<string, Pool>;
   users: Record<string, Record<string, User>>;
-  transactions: Record<string, Transaction>;
   error?: Error;
 };
-export type EmitState = (
-  path: string[],
-  data: Pool | User | Transaction | Error
-) => void;
+export type EmitState = (path: string[], data: Pool | User | Error) => void;
 export type PooledToken = {
   // LP token given to LPs of a specific L1 token.
   lpToken: string;
@@ -253,7 +231,7 @@ export class PoolEventState {
   getL1TokenFromReceipt(receipt: TransactionReceipt): string {
     const events = receipt.logs
       .filter(
-        (log) =>
+        (log: Log) =>
           ethers.utils.getAddress(log.address) ===
           ethers.utils.getAddress(this.contract.address)
       )
@@ -272,7 +250,7 @@ export class PoolEventState {
   readTxReceipt(receipt: TransactionReceipt): contracts.hubPool.EventState {
     const events = receipt.logs
       .filter(
-        (log) =>
+        (log: Log) =>
           ethers.utils.getAddress(log.address) ===
           ethers.utils.getAddress(this.contract.address)
       )
@@ -383,36 +361,6 @@ class UserState {
   }
 }
 
-export function calculateRemoval(amountWei: BigNumber, percentWei: BigNumber) {
-  const receive = amountWei.mul(percentWei).div(fixedPointAdjustment);
-  const remain = amountWei.sub(receive);
-  return {
-    receive: receive.toString(),
-    remain: remain.toString(),
-  };
-}
-// params here mimic the user object type
-export function previewRemoval(
-  values: {
-    positionValue: BigNumberish;
-    feesEarned: BigNumberish;
-    totalDeposited: BigNumberish;
-  },
-  percentFloat: number
-) {
-  const percentWei = toBNWei(percentFloat);
-  return {
-    position: {
-      ...calculateRemoval(BigNumber.from(values.totalDeposited), percentWei),
-    },
-    fees: {
-      ...calculateRemoval(BigNumber.from(values.feesEarned), percentWei),
-    },
-    total: {
-      ...calculateRemoval(BigNumber.from(values.positionValue), percentWei),
-    },
-  };
-}
 function joinUserState(
   poolState: Pool,
   tokenEventState: contracts.hubPool.TokenEventState,
@@ -492,51 +440,13 @@ function joinPoolState(
     liquidityUtilizationCurrent,
   };
 }
-export class ReadPoolClient {
-  private poolState: PoolState;
-  private contract: contracts.hubPool.Instance;
-  constructor(
-    private address: string,
-    private provider: Provider
-  ) {
-    this.contract = hubPool.connect(address, this.provider);
-    this.poolState = new PoolState(this.contract, this.address);
-  }
-  public read(tokenAddress: string, latestBlock: number) {
-    return this.poolState.read(tokenAddress, latestBlock);
-  }
-}
-export function validateWithdraw(
-  pool: Pool,
-  user: User,
-  lpTokenAmount: BigNumberish
-) {
-  const l1TokensToReturn = BigNumber.from(lpTokenAmount)
-    .mul(pool.exchangeRateCurrent)
-    .div(fixedPointAdjustment);
-  assert(
-    BigNumber.from(l1TokensToReturn).gt("0"),
-    "Must withdraw amount greater than 0"
-  );
-  assert(
-    BigNumber.from(lpTokenAmount).lte(user.lpTokens),
-    "You cannot withdraw more than you have"
-  );
-  return { lpTokenAmount, l1TokensToReturn: l1TokensToReturn.toString() };
-}
-
 export class Client {
-  private transactionManagers: Record<
-    string,
-    ReturnType<typeof TransactionManager>
-  > = {};
   private hubPool: contracts.hubPool.Instance;
   private acceleratingDistributor: AcceleratingDistributor;
   private merkleDistributor: MerkleDistributor;
-  public readonly state: State = { pools: {}, users: {}, transactions: {} };
+  public readonly state: State = { pools: {}, users: {} };
   private poolEvents: PoolEventState;
   private erc20s: Record<string, uma.clients.erc20.Instance> = {};
-  private intervalStarted = false;
   private configStoreClient: contracts.acrossConfigStore.Client;
   private exchangeRateTable: Record<string, Record<number, BigNumberish>> = {};
   private userServices: Record<string, Record<string, UserState>> = {};
@@ -732,186 +642,6 @@ export class Client {
       return result;
     }, bnZero);
   }
-  private getOrCreateTransactionManager(signer: Signer, address: string) {
-    if (this.transactionManagers[address])
-      return this.transactionManagers[address];
-    const txman = TransactionManager(
-      { confirmations: this.config.confirmations },
-      signer,
-      (event, id, data) => {
-        if (event === "submitted") {
-          this.state.transactions[id].state = event;
-          this.state.transactions[id].hash = data as string;
-          this.emit(["transactions", id], { ...this.state.transactions[id] });
-        }
-        if (event === "mined") {
-          const txReceipt = data as TransactionReceipt;
-          this.state.transactions[id].state = event;
-          this.state.transactions[id].receipt = txReceipt;
-          this.emit(["transactions", id], { ...this.state.transactions[id] });
-          // trigger pool and user update for a known mined transaction
-          const tx = this.state.transactions[id];
-          this.updateUserWithTransaction(tx.fromAddress, txReceipt).catch(
-            (err) => {
-              this.emit(["error"], err);
-            }
-          );
-        }
-        if (event === "error") {
-          this.state.transactions[id].state = event;
-          this.state.transactions[id].error = data as Error;
-          this.emit(["transactions", id], { ...this.state.transactions[id] });
-        }
-      }
-    );
-    this.transactionManagers[address] = txman;
-    return txman;
-  }
-  async addEthLiquidity(
-    signer: Signer,
-    l1TokenAmount: BigNumberish,
-    overrides: Overrides = {}
-  ) {
-    const { hubPoolAddress, wethAddress: l1Token } = this.config;
-    const userAddress = await signer.getAddress();
-    const contract = this.getOrCreatePoolContract();
-    const txman = this.getOrCreateTransactionManager(signer, userAddress);
-
-    // dont allow override value here
-    const request = await contract.populateTransaction.addLiquidity(
-      l1Token,
-      l1TokenAmount,
-      {
-        ...overrides,
-        value: l1TokenAmount,
-      }
-    );
-    const id = txman.request(request);
-
-    this.state.transactions[id] = {
-      id,
-      state: "requested",
-      toAddress: hubPoolAddress,
-      fromAddress: userAddress,
-      type: "Add Liquidity",
-      description: "Adding ETH to pool",
-      request,
-    };
-    this.emit(["transactions", id], { ...this.state.transactions[id] });
-    await txman.update();
-    return id;
-  }
-  async addTokenLiquidity(
-    signer: Signer,
-    l1Token: string,
-    l1TokenAmount: BigNumberish,
-    overrides: Overrides = {}
-  ) {
-    const { hubPoolAddress } = this.config;
-    const userAddress = await signer.getAddress();
-    const contract = this.getOrCreatePoolContract();
-    const txman = this.getOrCreateTransactionManager(signer, userAddress);
-
-    const request = await contract.populateTransaction.addLiquidity(
-      l1Token,
-      l1TokenAmount,
-      overrides
-    );
-    const id = await txman.request(request);
-
-    this.state.transactions[id] = {
-      id,
-      state: "requested",
-      toAddress: hubPoolAddress,
-      fromAddress: userAddress,
-      type: "Add Liquidity",
-      description: "Adding Tokens to pool",
-      request,
-    };
-
-    this.emit(["transactions", id], { ...this.state.transactions[id] });
-    await txman.update();
-    return id;
-  }
-  async validateWithdraw(
-    l1Token: string,
-    userAddress: string,
-    lpAmount: BigNumberish
-  ) {
-    await this.updatePool(l1Token);
-    const poolState = this.getPoolState(l1Token);
-    if (!this.hasUserState(l1Token, userAddress)) {
-      await this.updateUser(l1Token, userAddress);
-    }
-    const userState = this.getUserState(poolState.l1Token, userAddress);
-    return validateWithdraw(poolState, userState, lpAmount);
-  }
-  async removeTokenLiquidity(
-    signer: Signer,
-    l1Token: string,
-    lpTokenAmount: BigNumberish,
-    overrides: Overrides = {}
-  ) {
-    const { hubPoolAddress } = this.config;
-    const userAddress = await signer.getAddress();
-    await this.validateWithdraw(l1Token, userAddress, lpTokenAmount);
-    const contract = this.getOrCreatePoolContract();
-    const txman = this.getOrCreateTransactionManager(signer, userAddress);
-
-    const request = await contract.populateTransaction.removeLiquidity(
-      l1Token,
-      lpTokenAmount,
-      false,
-      overrides
-    );
-    const id = await txman.request(request);
-
-    this.state.transactions[id] = {
-      id,
-      state: "requested",
-      toAddress: hubPoolAddress,
-      fromAddress: userAddress,
-      type: "Remove Liquidity",
-      description: "Withdrawing Tokens from pool",
-      request,
-    };
-
-    this.emit(["transactions", id], { ...this.state.transactions[id] });
-    await txman.update();
-    return id;
-  }
-  async removeEthliquidity(
-    signer: Signer,
-    lpTokenAmount: BigNumberish,
-    overrides: Overrides = {}
-  ) {
-    const { hubPoolAddress, wethAddress: l1Token } = this.config;
-    const userAddress = await signer.getAddress();
-    await this.validateWithdraw(l1Token, userAddress, lpTokenAmount);
-    const contract = this.getOrCreatePoolContract();
-    const txman = this.getOrCreateTransactionManager(signer, userAddress);
-
-    const request = await contract.populateTransaction.removeLiquidity(
-      l1Token,
-      lpTokenAmount,
-      true,
-      overrides
-    );
-    const id = await txman.request(request);
-
-    this.state.transactions[id] = {
-      id,
-      state: "requested",
-      toAddress: hubPoolAddress,
-      fromAddress: userAddress,
-      type: "Remove Liquidity",
-      description: "Withdrawing Eth from pool",
-      request,
-    };
-    this.emit(["transactions", id], { ...this.state.transactions[id] });
-    await txman.update();
-    return id;
-  }
   getPoolState(l1TokenAddress: string): Pool {
     return this.state.pools[l1TokenAddress];
   }
@@ -927,12 +657,6 @@ export class Client {
   }
   hasUserState(l1TokenAddress: string, userAddress: string): boolean {
     return has(this.state, ["users", userAddress, l1TokenAddress]);
-  }
-  hasTxState(id: string): boolean {
-    return has(this.state, ["transactions", id]);
-  }
-  getTxState(id: string): Transaction {
-    return get(this.state, ["transactions", id]);
   }
   private async updateAndEmitUser(
     userState: Awaited<ReturnType<UserState["read"]>>,
@@ -1037,32 +761,5 @@ export class Client {
       rateModel
     );
     this.emit(["pools", l1TokenAddress], this.state.pools[l1TokenAddress]);
-  }
-  async updateTransactions(): Promise<void> {
-    for (const txMan of Object.values(this.transactionManagers)) {
-      try {
-        await txMan.update();
-      } catch (err) {
-        this.emit(["error"], err as unknown as Error);
-      }
-    }
-  }
-  // starts transaction checking intervals, defaults to 30 seconds
-  startInterval(delayMs = 30000) {
-    assert(
-      !this.intervalStarted,
-      "Interval already started, try stopping first"
-    );
-    this.intervalStarted = true;
-    loop(async () => {
-      assert(this.intervalStarted, "HubPool Interval Stopped");
-      await this.updateTransactions();
-    }, delayMs).catch((err) => {
-      this.emit(["error"], err);
-    });
-  }
-  // starts transaction checking intervals
-  stopInterval() {
-    this.intervalStarted = false;
   }
 }

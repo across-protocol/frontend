@@ -4,7 +4,6 @@ import type {
   TypedEventEthers as TypedEvent,
 } from "@uma/contracts-node";
 
-export * as across from "./across";
 export * as clients from "./clients";
 export * as oracle from "./oracle";
 export * as utils from "./utils";
