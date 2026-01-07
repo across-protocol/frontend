@@ -236,7 +236,7 @@ describe("handleBaseSwapQueryParams - refundOnOrigin default behavior", () => {
   const baseQueryParams = {
     amount: "1000000",
     originChainId: CHAIN_IDs.MAINNET.toString(),
-    destinationChainId: CHAIN_IDs.OPTIMISM.toString(),
+    destinationChainId: CHAIN_IDs.ARBITRUM.toString(),
     depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
   };
 
