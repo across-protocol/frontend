@@ -436,7 +436,7 @@ describe("GET /swap/approval", () => {
       JEST_TIMEOUT_MS
     );
 
-    test.skip(
+    test(
       "should return a 'auto' resolved slippage for destination swap using uniswap-api",
       async () => {
         const response = await axiosInstance.get(SWAP_API_URL, {
