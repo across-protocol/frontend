@@ -19,6 +19,14 @@ const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
 const SLIPPAGE = "auto";
 
+const USDS = {
+  symbol: "USDS",
+  decimals: 18,
+  addresses: {
+    [CHAIN_IDs.BASE]: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
+  },
+};
+
 const B2B_BASE_TEST_CASE = {
   amounts: {
     exactInput: parseUnits("1", 6), // 1 USDC
@@ -35,43 +43,37 @@ const B2B_BASE_TEST_CASE = {
 const B2A_BASE_TEST_CASE = {
   amounts: {
     exactInput: parseUnits("1", 6), // 1 USDC
-    exactOutput: parseUnits("1", 18), // 1 OP
-    minOutput: parseUnits("1", 18), // 1 OP
+    exactOutput: parseUnits("1", 18), // 1 USDS
+    minOutput: parseUnits("1", 18), // 1 USDS
   },
   inputToken: TOKEN_SYMBOLS_MAP.USDC,
-  outputToken: TOKEN_SYMBOLS_MAP.OP,
-  originChainId: CHAIN_IDs.BASE,
-  destinationChainId: CHAIN_IDs.OPTIMISM,
-  slippage: SLIPPAGE,
-} as const;
-
-const A2B_BASE_TEST_CASE = {
-  amounts: {
-    exactInput: parseUnits("1", 18), // 1 OP
-    exactOutput: parseUnits("1", 6), // 1 USDC
-    minOutput: parseUnits("1", 6), // 1 USDC
-  },
-  inputToken: TOKEN_SYMBOLS_MAP.OP,
-  outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   slippage: SLIPPAGE,
 } as const;
 
+const A2B_BASE_TEST_CASE = {
+  amounts: {
+    exactInput: parseUnits("1", 18), // 1 USDS
+    exactOutput: parseUnits("1", 6), // 1 USDC
+    minOutput: parseUnits("1", 6), // 1 USDC
+  },
+  inputToken: USDS,
+  outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  originChainId: CHAIN_IDs.BASE,
+  destinationChainId: CHAIN_IDs.OPTIMISM,
+  slippage: SLIPPAGE,
+} as const;
+
 const A2A_BASE_TEST_CASE = {
   amounts: {
-    exactInput: parseUnits("1", 18), // 1 OP
+    exactInput: parseUnits("1", 6), // 1 USDC.e
     exactOutput: parseUnits("1", 18), // 1 USDS
     minOutput: parseUnits("1", 18), // 1 USDS
   },
-  inputToken: TOKEN_SYMBOLS_MAP.OP,
-  outputToken: {
-    symbol: "USDS",
-    decimals: 18,
-    addresses: {
-      [CHAIN_IDs.BASE]: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
-    },
-  },
+  inputToken: TOKEN_SYMBOLS_MAP["USDC.e"],
+  outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   slippage: SLIPPAGE,
