@@ -177,13 +177,13 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.11.0.tgz#42cc67c5baa407ac25059fcd7d405cc5ecdb0c33"
   integrity sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg==
 
-"@alcalzone/ansi-tokenize@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@alcalzone/ansi-tokenize/-/ansi-tokenize-0.1.3.tgz#9f89839561325a8e9a0c32360b8d17e48489993f"
-  integrity sha512-3yWxPTq3UQ/FY9p1ErPxIyfT64elWaMvM9lIHnaqpyft63tkxodF5aUElYHrdisWve5cETkh1+KBw1yJuW0aRw==
+"@alcalzone/ansi-tokenize@^0.2.1":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@alcalzone/ansi-tokenize/-/ansi-tokenize-0.2.3.tgz#16b3728b96c845546191c28ce511766b52794e68"
+  integrity sha512-jsElTJ0sQ4wHRz+C45tfect76BwbTbgkgKByOzpCN9xG61N5V6u/glvg1CsNJhq2xJIFpKHSwG3D2wPPuEYOrQ==
   dependencies:
     ansi-styles "^6.2.1"
-    is-fullwidth-code-point "^4.0.0"
+    is-fullwidth-code-point "^5.0.0"
 
 "@amplitude/ampli@^1.34.0":
   version "1.34.0"
@@ -4226,6 +4226,13 @@
   dependencies:
     "@noble/hashes" "1.8.0"
 
+"@noble/curves@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-2.0.1.tgz#64ba8bd5e8564a02942655602515646df1cdb3ad"
+  integrity sha512-vs1Az2OOTBiP4q0pwjW5aF0xp9n4MxVrmkFBxc6EKZc6ddYx5gaZiAsZoq0uRRXWbi3AT/sBqn05eRPtn1JCPw==
+  dependencies:
+    "@noble/hashes" "2.0.1"
+
 "@noble/hashes@1.2.0", "@noble/hashes@~1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.2.0.tgz#a3150eeb09cc7ab207ebf6d7b9ad311a9bdbed12"
@@ -4260,6 +4267,11 @@
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
   integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
+
+"@noble/hashes@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-2.0.1.tgz#fc1a928061d1232b0a52bb754393c37a5216c89e"
+  integrity sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw==
 
 "@noble/hashes@~1.3.0", "@noble/hashes@~1.3.2":
   version "1.3.3"
@@ -5049,10 +5061,10 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.0.2.tgz#b1d03075e49290d06570b2fd42154d76c2a5d210"
   integrity sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==
 
-"@openzeppelin/contracts@5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.3.0.tgz#0a90ce16f5c855e3c8239691f1722cd4999ae741"
-  integrity sha512-zj/KGoW7zxWUE8qOI++rUM18v+VeLTTzKs/DJFkSzHpQFPD/jKKF0TrMxBfGLl3kpdELCNccvB3zmofSzm4nlA==
+"@openzeppelin/contracts@5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.4.0.tgz#177594bdb2d86c71f5d1052fe40cb4edb95fb20f"
+  integrity sha512-eCYgWnLg6WO+X52I16TZt8uEjbtdkgLC0SUX/xnAksjjrQI4Xfn4iBRoI5j55dmlOhDv1Y7BoR3cU7e3WWhC6A==
 
 "@openzeppelin/contracts@5.5.0":
   version "5.5.0"
@@ -5134,6 +5146,11 @@
     is-ipfs "^0.6.0"
     path "^0.12.7"
 
+"@pinojs/redact@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@pinojs/redact/-/redact-0.4.0.tgz#c3de060dd12640dcc838516aa2a6803cc7b2e9d6"
+  integrity sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -5151,10 +5168,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.29.tgz#5a40109a1ab5f84d6fd8fc928b19f367cbe7e7b1"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
 
-"@ponder/utils@^0.2.7":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@ponder/utils/-/utils-0.2.12.tgz#bb89c0f9a09d2f7d7af9e367a6c67d1eec82d742"
-  integrity sha512-pIlunpEoXXJlqSucidJl4r4s66DOnPRbqPY3lZ02uhBr6e2GYK7iNRg4IW7v4WnIhVoSugnWIRiEQYWA0yNLiw==
+"@ponder/utils@^0.2.13":
+  version "0.2.17"
+  resolved "https://registry.yarnpkg.com/@ponder/utils/-/utils-0.2.17.tgz#300f00de43f0ff3d0eca37f1ccc3a40d7922dbc1"
+  integrity sha512-ins3XXzm+2jMGa0aTc1N10JG0Sau9Vvk71llOatkEOkncMne9m/mMYxJsV6WfRaZGlo4FB8OoRM6DVPHZlRGHA==
 
 "@popperjs/core@^2.11.6":
   version "2.11.8"
@@ -8356,10 +8373,10 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.65.0.tgz#6b7c7087a36867361535b613ff39b633808052fd"
   integrity sha512-Bnnq/1axf00r2grRT6gUyIkZRKzhHs+p4DijrCQ3wMlA3D3TTT71gtaSLtqnzGddj73/7X5JDGyjiSLdjvQN4w==
 
-"@tanstack/query-core@5.89.0":
-  version "5.89.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.89.0.tgz#67862fa9aa036942b1906bc51385115a2bbec45a"
-  integrity sha512-joFV1MuPhSLsKfTzwjmPDrp8ENfZ9N23ymFu07nLfn3JCkSHy0CFgsyhHTJOmWaumC/WiNIKM0EJyduCF/Ih/Q==
+"@tanstack/query-core@5.90.16":
+  version "5.90.16"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.90.16.tgz#19a972c2ffbc47727ab6649028af1bee70e28cdf"
+  integrity sha512-MvtWckSVufs/ja463/K4PyJeqT+HMlJWtw6PrCpywznd2NSgO3m4KwO9RqbFqGg6iDE8vVMFWMeQI4Io3eEYww==
 
 "@tanstack/query-devtools@5.65.0":
   version "5.65.0"
@@ -8373,12 +8390,12 @@
   dependencies:
     "@tanstack/query-devtools" "5.65.0"
 
-"@tanstack/react-query@^5.77.2":
-  version "5.89.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.89.0.tgz#ae295ced60d1aee555337a572ad4045e2af3d00a"
-  integrity sha512-SXbtWSTSRXyBOe80mszPxpEbaN4XPRUp/i0EfQK1uyj3KCk/c8FuPJNIRwzOVe/OU3rzxrYtiNabsAmk1l714A==
+"@tanstack/react-query@^5.90.2":
+  version "5.90.16"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.90.16.tgz#76955d7027b5bff3d7f51163db7ea1c0bd430cb5"
+  integrity sha512-bpMGOmV4OPmif7TNMteU/Ehf/hoC0Kf98PDc0F4BZkFrEapRMEqI/V6YS0lyzwSV6PQpY1y4xxArUIfBW5LVxQ==
   dependencies:
-    "@tanstack/query-core" "5.89.0"
+    "@tanstack/query-core" "5.90.16"
 
 "@tanstack/react-query@v5":
   version "5.65.0"
@@ -8427,122 +8444,121 @@
   resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.5.1.tgz#27337d72046d5236b32fd977edee3f74c71d332f"
   integrity sha512-UCcUKrUYGj7ClomOo2SpNVvx4/fkd/2BbIHDCle8A0ax+P3bU7yJwDBDrS6ZwdTMARWTGODX1hEsCcO+7beJjg==
 
-"@tevm/actions@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/actions/-/actions-1.0.0-next.147.tgz#34c447e49f935198ec1005e7a33b7b2d1af8f728"
-  integrity sha512-jrgv8yCWHjSrgZI1DvDpKxz0yE6M2AteIxI+Ry02wcA4ffWuFuivZfUCo3zPN6udwqIBJ4cVsTy76N9krYPqEA==
+"@tevm/actions@^1.0.0-next.148", "@tevm/actions@^1.0.0-next.149":
+  version "1.0.0-next.149"
+  resolved "https://registry.yarnpkg.com/@tevm/actions/-/actions-1.0.0-next.149.tgz#6ef9d4429e4e672a561e618403c449d3cfd3e28a"
+  integrity sha512-cFM2HVYg/rXykL83QFGqIU6Eg7M1d0/O67f2tbrakQAJOpMRzW3lwEDjpuRp154t4aPwrmGDOzQCI3DAH94tng==
   dependencies:
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/node" "^1.0.0-next.147"
-    "@tevm/receipt-manager" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/txpool" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@tevm/vm" "^1.0.0-next.147"
-    zod "^3.25.30"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.149"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/node" "^1.0.0-next.148"
+    "@tevm/receipt-manager" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/txpool" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@tevm/vm" "^1.0.0-next.148"
 
-"@tevm/address@1.0.0-next.146", "@tevm/address@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/address/-/address-1.0.0-next.146.tgz#8057e8c0729045bfa9e38017fd9ad0ead7f94681"
-  integrity sha512-jLn+5A6tZUXqZgZ/Jv6z6TlPFQxo3zmUdXr2e+9XnwXgZXfPd+reqrftnyMHMvAgF2ulA4kqJD9KxJJ28VPmEg==
+"@tevm/address@1.0.0-next.148", "@tevm/address@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/address/-/address-1.0.0-next.148.tgz#ee218120757641716e44f1935d4be3bee79b1c01"
+  integrity sha512-yBPMy8DbveoM/+lyvYtS+Pjdehi3la9Ppxtt7+YMwDkmZZlcx53Ws1qByIaaiDjFsq0ZhWHGSagOfpUS3kRjDg==
   dependencies:
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/base-bundler@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/base-bundler/-/base-bundler-1.0.0-next.146.tgz#c40682882ebef93d11fb42b1a37fb10d8292e61e"
-  integrity sha512-hPmsJ/ibKLPg6TaZ3a5sOsqpGyemAviUcbeLYCCht2LttfuFknYzvHs8zB/TWJjsndStgR2Q4YEn+aZd3Bq1rQ==
+"@tevm/base-bundler@^1.0.0-next.148", "@tevm/base-bundler@^1.0.0-next.149":
+  version "1.0.0-next.149"
+  resolved "https://registry.yarnpkg.com/@tevm/base-bundler/-/base-bundler-1.0.0-next.149.tgz#1e6ed500b1cd7c2952a5aafdc0284ace59a077c7"
+  integrity sha512-HwGX3C7ehWkJCJnRtgBvGProdurGskiCADPzagBjPLcF4a19lp4u/Ti8yiDyQrJ4tV3b8OPIjLviiBT3ZvA0MQ==
   dependencies:
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@tevm/compiler" "^1.0.0-next.146"
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/runtime" "^1.0.0-next.146"
-    "@tevm/solc" "^1.0.0-next.146"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@tevm/compiler" "^1.0.0-next.148"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/runtime" "^1.0.0-next.148"
+    "@tevm/solc" "^1.0.0-next.148"
     "@tevm/tsconfig" "^1.0.0-next.142"
-    "@tevm/tsupconfig" "^1.0.0-next.146"
-    "@types/node" "^22.15.21"
-    effect "3.15.4"
+    "@tevm/tsupconfig" "^1.0.0-next.148"
+    "@types/node" "^24.6.1"
+    effect "3.18.1"
     solc "0.8.30"
-    solidity-ast "^0.4.60"
+    solidity-ast "^0.4.61"
 
-"@tevm/block@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/block/-/block-1.0.0-next.146.tgz#125f58dc718b5f4b119685f845a836a1f2736618"
-  integrity sha512-rk1ZCoDMUcKucWTLeF9CyiacM+BfOzd3hJU6VocdwS8aop7BT3QTuKsrjAA20SYDXgBtqzdm1C06SoC7pK0nww==
+"@tevm/block@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/block/-/block-1.0.0-next.148.tgz#0e03e679613c9170742a819bf96d1ce0057677c6"
+  integrity sha512-HQbwKIaoWzXGdAfSR7SyhMHP+0Dx6ObRL4ealAU7zpfd3PqQIB4Ga7hIDDxox0YYkaNmFvJKKq3jjKdplk7FrQ==
   dependencies:
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/rlp" "^1.0.0-next.146"
-    "@tevm/trie" "^1.0.0-next.142"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/rlp" "^1.0.0-next.148"
+    "@tevm/trie" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/blockchain@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/blockchain/-/blockchain-1.0.0-next.146.tgz#60d2369925ca6953ff4374d4d500fb6d2fe537f6"
-  integrity sha512-egiDCepl63nNml4b85BeX2dqrhFtbEjjk9vwrGZK/VbRAe04lWCjjP82L3F/xDuOilOce4Fx+0th2xrNASsrTQ==
+"@tevm/blockchain@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/blockchain/-/blockchain-1.0.0-next.148.tgz#bfc718e6dbfc40957fdd3beb551e57028c144cfd"
+  integrity sha512-y7evKF2TVtYNCjM3744R6eVQyeoyhdo4J4eOH4IdMpR4YIfoa1QueJ7vNftvzp0BHhjMRoz8WXdTZrUwsh9lYw==
   dependencies:
     "@ethereumjs/blockchain" "^10.0.0"
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/logger" "^1.0.0-next.146"
-    "@tevm/trie" "^1.0.0-next.142"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/logger" "^1.0.0-next.148"
+    "@tevm/trie" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/bun-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/bun-plugin/-/bun-plugin-1.0.0-next.146.tgz#977fd1640a096813e438295e74682a5e2a176aac"
-  integrity sha512-jk2RokcJVWIiSYgRpAdYLupk3wxPIKcf3Y/CUS+ifzIPMFhnuoatK5zP/KLBpQhEOtnE1DbSjmGGq0TjxrRLDw==
+"@tevm/bun-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/bun-plugin/-/bun-plugin-1.0.0-next.148.tgz#2cac82b2c286306aef062a11c23d09ae4dd62fe7"
+  integrity sha512-dld2rLNxdsgcxivBbJcc1z/FdLAww57JfBZwf2GGhpeCkl7cvjzy7bsJ9/AfgbGGJFRXJ9ECMQDgL6L+9ax2Vw==
   dependencies:
-    "@tevm/base-bundler" "^1.0.0-next.146"
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/solc" "^1.0.0-next.146"
-    effect "3.15.4"
+    "@tevm/base-bundler" "^1.0.0-next.148"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/solc" "^1.0.0-next.148"
+    effect "3.18.1"
     solc "0.8.30"
 
-"@tevm/bundler-cache@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/bundler-cache/-/bundler-cache-1.0.0-next.146.tgz#e9b0d62b3e63cc8704ac035c6c49c8c949a2c644"
-  integrity sha512-UwhryZONofpmUs0Cfuj2654F8NhmL8nEHlQlj+77V6j3cBHx5BkHcEGrQPyRH/mZwsbngc+MRa+Q4N8Foxo2Dg==
+"@tevm/bundler-cache@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/bundler-cache/-/bundler-cache-1.0.0-next.148.tgz#d967b09076f13b250a708fdd4fe76fa9557e0e3f"
+  integrity sha512-5T89klJ4waDPBh5n2TInmZM1K53Dc+NWjQAJDguWGdqkaUZF4Z2eBlL+mBDJcxLQIUWktRBhBRzqj2/A3+n0VQ==
   dependencies:
-    "@tevm/compiler" "^1.0.0-next.146"
+    "@tevm/compiler" "^1.0.0-next.148"
     "@tevm/tsconfig" "^1.0.0-next.142"
-    "@tevm/tsupconfig" "^1.0.0-next.146"
-    "@types/node" "^22.15.21"
+    "@tevm/tsupconfig" "^1.0.0-next.148"
+    "@types/node" "^24.6.1"
 
-"@tevm/cli@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/cli/-/cli-1.0.0-next.147.tgz#b7de0c6be5022ccf8082ed8baca22abd7f4bb9b1"
-  integrity sha512-Rw921OOufT52OSH5XyRNIiG8rYM6hcqtUpgyjmy+SyWVQtBebisqeV1A2/Nvgo9+Yde/IdSq63P0fsyPzc8E/A==
+"@tevm/cli@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/cli/-/cli-1.0.0-next.148.tgz#f9c047fd3f71deb675ad0b56fc46f60158956e58"
+  integrity sha512-mMXqaoN8RY3NMl+9rLTIEx4nuqtfGxfhdBuWq4Z7OUU9aZlXlUg3sa3lqx7KweAHcAfV9XlY7zPuJJcW3H7csQ==
   dependencies:
-    "@tanstack/react-query" "^5.77.2"
-    "@tevm/actions" "^1.0.0-next.147"
-    "@tevm/base-bundler" "^1.0.0-next.146"
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/memory-client" "^1.0.0-next.147"
-    "@tevm/server" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@types/glob" "^8.1.0"
+    "@tanstack/react-query" "^5.90.2"
+    "@tevm/actions" "^1.0.0-next.148"
+    "@tevm/base-bundler" "^1.0.0-next.148"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/memory-client" "^1.0.0-next.148"
+    "@tevm/server" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@types/glob" "^9.0.0"
     "@types/json-bigint" "^1.0.4"
-    effect "3.15.4"
+    effect "3.18.1"
     figures "^6.1.0"
-    glob "^11.0.2"
-    ink "^5.2.1"
+    glob "^11.0.3"
+    ink "^6.3.1"
     ink-big-text "^2.0.0"
     ink-gradient "^3.0.0"
     ink-select-input "^6.2.0"
@@ -8550,420 +8566,423 @@
     ink-text-input "^6.0.0"
     json-bigint "^1.0.0"
     pastel "^3.0.0"
-    react "^19.1.0"
+    react "^19.1.1"
     solc "^0.8.30"
-    tiny-jsonc "^1.0.2"
-    viem "^2.30.1"
-    zod "^3.25.30"
-    zustand "^5.0.5"
+    viem "^2.37.9"
+    zod "^4.1.11"
+    zustand "^5.0.8"
 
-"@tevm/client-types@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/client-types/-/client-types-1.0.0-next.146.tgz#bfd5a19db6b39e0492d82e1f1f87c41dfd2f95c7"
-  integrity sha512-DXv5uXqnTblQh2mB8fp1esLhBbgJvRPRCoKduwYV8P2jOBkd+L4anmC5Xf4ggLDFOvyzAV9xlGe8i0DCWqdBuQ==
+"@tevm/client-types@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/client-types/-/client-types-1.0.0-next.148.tgz#d81158c5d26dae9a41e7108c273b6c5fae933cd6"
+  integrity sha512-GOgZ38g/zRlb2jYOEBnZjZ9FmkiWb3pHcBPIWerNgPbLpkD3pPDHkxuTQ0Xw6Q5qqtJRFe4P++rAIDFNpCDh8g==
   dependencies:
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/actions" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/common@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/common/-/common-1.0.0-next.146.tgz#13988760919b11f7e5c3c491820a01ea8b1e3609"
-  integrity sha512-hC9ctzq4YeaElhNskFIRv4KCgXgl+3EDTWj1GXJfkXxdNOJPOkSaZCCqnSf7Bnom2+80a7e4L6iryTZkuKEX2w==
+"@tevm/common@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/common/-/common-1.0.0-next.148.tgz#a7a926cb0815fb06250b9c25bd1d78bbeb7d169c"
+  integrity sha512-JFi0FJRsSjR8lEeS5U2CYM8u5HZh0mijZADjHjh89yohfV4SATolHJ5wdKGkoa4Y4HGA+qXs62BX7HsgKFj/TA==
   dependencies:
     "@ethereumjs/common" "^10.0.0"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/logger" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/logger" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/compiler@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/compiler/-/compiler-1.0.0-next.146.tgz#41e41961207c0b64ea775a9aaace2065900dee86"
-  integrity sha512-Tc/fr8aB3J5oRfoxGJSGzbtqzhSMWMW8VTIUYfUmrMR+rSjW1zQP5h1OD+n3Jv9Hn9gB+HQNGpoVikeDmXC3GA==
+"@tevm/compiler@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/compiler/-/compiler-1.0.0-next.148.tgz#22fe271932a6a80f8ad1368abfc00754f0ab2c4a"
+  integrity sha512-bi5+2FBccxi3og+S6lkhxy5KGntNTK28fsOzoT4OxfdfXfTrpzPfqgLTayCT874PsGJPqjlvfF1YE0Tu0EfcHw==
   dependencies:
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/resolutions" "^1.0.0-next.146"
-    "@tevm/solc" "^1.0.0-next.146"
-    "@types/node" "^22.15.21"
-    effect "3.15.4"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/resolutions" "^1.0.0-next.148"
+    "@tevm/solc" "^1.0.0-next.148"
+    "@types/node" "^24.6.1"
+    effect "3.18.1"
     resolve "^1.22.10"
-    solidity-ast "^0.4.60"
+    solidity-ast "^0.4.61"
 
-"@tevm/config@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/config/-/config-1.0.0-next.146.tgz#c77cf2c020e3b85bb79cd1c4865ccafc8b4af2aa"
-  integrity sha512-V1sAOCzHGMha0aDdhPmH36hnraDEuAYkpZ7FDaYtVcYR9GAsRoCVmWlh5vyKfQT9/dWOmy456nzOBHDd8AWRHQ==
+"@tevm/config@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/config/-/config-1.0.0-next.148.tgz#689b737d2762467e8b0c5d98fa8e2587855f4cff"
+  integrity sha512-/ztk5eQqmExLYvf9ZGnQJS4NQEBzq6hkVYjmFmQLyainDL5meWrnmr/5nUuneu74fczAhPkHB3AKUzcqqmx/aQ==
   dependencies:
     "@effect/schema" "0.75.5"
-    "@tevm/effect" "^1.0.0-next.146"
-    "@types/node" "^22.15.21"
-    effect "3.15.4"
-    zod "^3.25.30"
+    "@tevm/effect" "^1.0.0-next.148"
+    "@types/node" "^24.6.1"
+    effect "3.18.1"
+    zod "^4.1.11"
 
-"@tevm/contract@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/contract/-/contract-1.0.0-next.146.tgz#3a4ccdd0eca8a835bba2a2e3004675bfab384718"
-  integrity sha512-Y1nHn4/+N3RZRQBQDUvASAh4AWCuV8wKZA1/ep08EOyRv+KZjFrb03JAui7n2vxs5pCe9j/atNR8cmVR4I2uuQ==
+"@tevm/contract@^1.0.0-next.148", "@tevm/contract@^1.0.0-next.149":
+  version "1.0.0-next.149"
+  resolved "https://registry.yarnpkg.com/@tevm/contract/-/contract-1.0.0-next.149.tgz#4c7b4560198f190b8ea24dc78c687977dca02e68"
+  integrity sha512-mMkiO4cg5XggXW+ihsw5L5IW3KuImOZgNE756VTAEN8jexpSXR+XyCTADyxSZKdDFsrKkaqHtRwo559bTDE1IA==
   dependencies:
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/decorators@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/decorators/-/decorators-1.0.0-next.147.tgz#df27d79abc830e6d88b707c280e37ee6f0a93adb"
-  integrity sha512-zYqKc1TJ4zkNvi07XfMJstU5o4WxmVIfBZQnJqN4JWPF8Y/vwiJPdl8yFsVoEb6FaFnfKaLPJenM3Jx+uDPtbQ==
+"@tevm/decorators@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/decorators/-/decorators-1.0.0-next.148.tgz#d08e33cd9f07d334b9b905d4629a4ebb79b50893"
+  integrity sha512-gopWEBlub28wBDZ0XZb3O5bFtblh+lBNE/Srf1hSvr2sYrt6xTLXf098vnJMQbCZAV/nRlTRjZg1kKlXVCa9+A==
   dependencies:
-    "@tevm/actions" "^1.0.0-next.147"
-    "@tevm/node" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/actions" "^1.0.0-next.148"
+    "@tevm/node" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/effect@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/effect/-/effect-1.0.0-next.146.tgz#1aadac0aba9db9ee0b2da23094851eace1d4fe3e"
-  integrity sha512-GjElguOAsfcRBurHVCbLQPyuGB9nlMzdFb5EcKB1e01qr8fnqBD28/0UfxByCu4BA1yri+UTFIcV53ctt+DdjA==
+"@tevm/effect@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/effect/-/effect-1.0.0-next.148.tgz#f49aefda8f1822673a113b1614fa7e62ab50d86e"
+  integrity sha512-/QpAXSdM75IBtAd5ju4LP+8IddyoDz03i7WDHcQUNPP4wzQ2Db+pEeiSLErFJd5qQr9EeerhCQpNKy4kQapfgw==
   dependencies:
-    effect "3.15.4"
+    effect "3.18.1"
     jsonc-parser "^3.3.1"
     resolve "^1.22.10"
 
-"@tevm/errors@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/errors/-/errors-1.0.0-next.146.tgz#cfd2589131a64386ea5cf45946f79e6e83f61069"
-  integrity sha512-tR1+LUKqviEXctiWOknunGpqlkgJDjaxIqCsBQs7u6wgu4NCCZ6bBRZ4lAJmsqBEltu1Kv74TOyEa88Yj+yQdw==
+"@tevm/errors@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/errors/-/errors-1.0.0-next.148.tgz#096a1bc9c861e6fecf81056fd86ced8f03218c9e"
+  integrity sha512-/VspnlMGtHPtT6AYJX2xSBLK+kohNvC3gX872q13YH7/XtiVmrJVlsa6zrpD1Uw4Ln567yoLfGYI2SelYkFY3w==
   dependencies:
     "@ethereumjs/evm" "^10.0.0"
-    viem "^2.30.1"
+    viem "^2.37.9"
 
-"@tevm/esbuild-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/esbuild-plugin/-/esbuild-plugin-1.0.0-next.146.tgz#7168cd6f6d4a72f56de5efe1a4447f34a5de2bd7"
-  integrity sha512-Hj8LeSzf886WidBiCkOickpfSeZIFwCuvqsv+frUrzrbbH1I62KJYsrUCvW/skRPZDBMavKCVQiYFxhgPyT7BQ==
+"@tevm/esbuild-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/esbuild-plugin/-/esbuild-plugin-1.0.0-next.148.tgz#5792599b178aa9ba14ffd4b1ec1074807e41a2df"
+  integrity sha512-qLa2LE/ncqpYSZWGjCjdMSUtW33MevCoA5qsCKMMiauDUBCkTn+4XuL+ysBcyAOIQbtsTx82Q0Qg8sw2Qy4hVg==
   dependencies:
-    "@tevm/unplugin" "^1.0.0-next.146"
+    "@tevm/unplugin" "^1.0.0-next.148"
 
-"@tevm/evm@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/evm/-/evm-1.0.0-next.146.tgz#717b10e3a75b7b746d9bcd6b3a2dc060d7fc0919"
-  integrity sha512-jb0z9ntkTmH+xNW4nIXjh8bgXtlwUwP6/GwvNviuswLg4HNxbTH2YVxzL6A2kiCouPSfQiVdVLRp+NYluIgxPg==
+"@tevm/evm@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/evm/-/evm-1.0.0-next.148.tgz#d5b2e2aaf6750f91f98b0ea214994847f5f30bcc"
+  integrity sha512-r92OtsI3oE996AZw1xpbgbpwZYZYAtLAs3CzuQXTz2PjpW2jNFbrcN3VCQz3/f1rzCO7dOXRfqQfYbO60mROaA==
   dependencies:
     "@ethereumjs/evm" "^10.0.0"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/logger" "^1.0.0-next.146"
-    "@tevm/predeploys" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/logger" "^1.0.0-next.148"
+    "@tevm/predeploys" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/http-client@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/http-client/-/http-client-1.0.0-next.147.tgz#4b833d9faa1b20f4b95b2db48dd24a73eeab2be6"
-  integrity sha512-k8EfzlpuFLJKp/gfuQqpjSs8Zc7SJ92pl7rq3TzEi3Irf3HXkzCX5JiNaHYwO10clWKnA/wUuIvt/lfLhidP4A==
+"@tevm/http-client@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/http-client/-/http-client-1.0.0-next.148.tgz#ea89b36afdaa270243bcc347471da5a8b873eebd"
+  integrity sha512-XMHnVR/YeJiTbWx5/sVu4tbgQ2nxeQxWjcYMcoxppO/k/NAh1v5IAfCBVp5W1aaTvfUXZfykoXUIPnsZ7sedNA==
   dependencies:
-    "@tevm/address" "1.0.0-next.146"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/memory-client" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@tevm/viem" "^1.0.0-next.147"
+    "@tevm/address" "1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.148"
+    "@tevm/memory-client" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@tevm/viem" "^1.0.0-next.148"
 
-"@tevm/jsonrpc@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/jsonrpc/-/jsonrpc-1.0.0-next.146.tgz#189a5a44b64966c3fc20fc1d579ce92eb85e57c3"
-  integrity sha512-QFwIVYBWg/VjfsymkNm3frZllq8Xidm/lTGSYp6KlDLFFENBO8HS/CtKZCFbNz33jJvITl7eBH9AxKXUfMNz9Q==
+"@tevm/jsonrpc@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/jsonrpc/-/jsonrpc-1.0.0-next.148.tgz#9f74ad6f4e89ba8db45cf6be42a4b5ba9aff658a"
+  integrity sha512-e+Sln2MzdjvdgRpbu5iGui8YNbUo/riPMu+BSu5feCnVurEtCo0RYZ6ineOK1j2pKSIan3d9aAHqvwFlGJIsbQ==
   dependencies:
-    "@ponder/utils" "^0.2.7"
+    "@ponder/utils" "^0.2.13"
 
-"@tevm/logger@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/logger/-/logger-1.0.0-next.146.tgz#e57c4d3349fd1bc48076fe220e7fb05b62958a98"
-  integrity sha512-tAU98/OymKwOS2jbqoUT1IYywEaAgBWfYrKGMfOwmXWJo9eU4JFIIeKCvngt5y8utDRya6hbWWvvurZ/290GPA==
+"@tevm/logger@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/logger/-/logger-1.0.0-next.148.tgz#a21903576f22c496e7a72e924184d6f2838586f3"
+  integrity sha512-B8o0V9tW6IwQffN4b8cC8SUk9bWv6AEcupgsqh5o19YyWjZKbZX/Dp3eVyv0h9FD3IsZYl70Fef3Bx7iUrVLAg==
   dependencies:
-    pino "^9.7.0"
+    pino "^9.12.0"
 
-"@tevm/memory-client@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/memory-client/-/memory-client-1.0.0-next.147.tgz#60b4b497eed85535e7e31d954635b2461ef257eb"
-  integrity sha512-PbE8x3nc+fOgSdjH+JoKfI0I3hho11PinPRzi5CXSfjhlTET0wfS+u0RMbvZHzlH+K5yEH5ywZYeASZ9/h+7JQ==
+"@tevm/memory-client@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/memory-client/-/memory-client-1.0.0-next.148.tgz#3d54e81d6e740f6d722d40c866974901d12e7327"
+  integrity sha512-4aMYnKMJtGXdmZDAuNpoYuu+InK1QOZ6eIGMzzkcgwOHyOSSzaq3eMbyHLQ4hDYxgQPDbSRHYmy5l8ltymce8A==
   dependencies:
-    "@tevm/actions" "^1.0.0-next.147"
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/decorators" "^1.0.0-next.147"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/node" "^1.0.0-next.147"
-    "@tevm/predeploys" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/actions" "^1.0.0-next.148"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.148"
+    "@tevm/decorators" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/node" "^1.0.0-next.148"
+    "@tevm/predeploys" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
     kzg-wasm "^0.5.0"
-    vitest "^3.1.4"
+    vitest "^3.2.4"
 
-"@tevm/node@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/node/-/node-1.0.0-next.147.tgz#eb27b2dbc94f319ffd32625df10bee18fccb17a8"
-  integrity sha512-roH2ReEpwWNaogS4nU+LICkAse7Eyjq0qICtV4wEJaWSMxp8IBY1GOonTuD9PuoZjs/IVyHhDXvl+UXFwtiIqw==
+"@tevm/node@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/node/-/node-1.0.0-next.148.tgz#02df71440de8d0d779354f36a727867a10acb626"
+  integrity sha512-xzMjuUgzTlGzryJfoNqlfqAWJHDgHlNJSj4zuHiK/24dJXWN0Gs3jsHln4bASZJhn+1IPT/qSNfifrwBeNZ9ug==
   dependencies:
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/logger" "^1.0.0-next.146"
-    "@tevm/predeploys" "^1.0.0-next.146"
-    "@tevm/receipt-manager" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/sync-storage-persister" "^1.0.0-next.146"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/txpool" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@tevm/vm" "^1.0.0-next.147"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/logger" "^1.0.0-next.148"
+    "@tevm/precompiles" "^1.0.0-next.148"
+    "@tevm/predeploys" "^1.0.0-next.148"
+    "@tevm/receipt-manager" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/sync-storage-persister" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/txpool" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@tevm/vm" "^1.0.0-next.148"
 
-"@tevm/precompiles@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/precompiles/-/precompiles-1.0.0-next.146.tgz#0ed24dd0411588ba89e4e91aeab8946780f4d8dc"
-  integrity sha512-Uz3I9Sq7jFEEBTaxbnPJC43y2hqniYz6ytzEjt0tjymKrqlGe57xc69IN4wI8qyq8DsYV29RX/zBpvTUJis57g==
+"@tevm/precompiles@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/precompiles/-/precompiles-1.0.0-next.148.tgz#7036139933bd164f4af4f238abeae52b59d2a230"
+  integrity sha512-uteo0jtWqNe5B1PJUPX5vMfk4PvLKJo+hDcHnB1/XOAmnq4eawA6czbcDZC/gRZbZzE8Gjb3tT2+MD8oBUJEIw==
   dependencies:
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@noble/curves" "^2.0.1"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/predeploys@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/predeploys/-/predeploys-1.0.0-next.146.tgz#6db3e9f4d164e6c1146e2ce0e0eba70cab2c0bb0"
-  integrity sha512-LY+Tee0Nv6VAbktCO5Ne4n7/MGGXZ9Mlf2dRDEmwU7V2vfj6JrY1lP9mn020ECQjkbEUBpIyWHxR1II8ZQhVDw==
+"@tevm/predeploys@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/predeploys/-/predeploys-1.0.0-next.148.tgz#ea7ef0055477f2266dd5091496208a695b0e3ef3"
+  integrity sha512-h95fBhVIsADvbkVIkZ8kWxXnmmhPc6bCTtgL224or3OjFvrJIjV6OfiNR6thmmRQiZmybApg0qpbyeA9jNRmvw==
   dependencies:
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/receipt-manager@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/receipt-manager/-/receipt-manager-1.0.0-next.146.tgz#faefa734ae18f77da16bd7e27884b8448fcf6480"
-  integrity sha512-pGfYtZl/r6YzZBfN+rz9fuzsWpqjKynqvSSPgqm81nj9GMe6UXWj7X792iLjKwMYhYMGwJOxKS8wiXN7lGCwow==
+"@tevm/receipt-manager@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/receipt-manager/-/receipt-manager-1.0.0-next.148.tgz#33c1473bd241d6ccf2b57acdc1ac9a338e794a60"
+  integrity sha512-81ScweBmdzZET8HZ0CIWnzof7t4T0TMrEkrO1syARIpcKuvuhsoyIrkCEFmUbU7T/TxAeHGMFVep7skT1me2ZA==
   dependencies:
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/rlp" "^1.0.0-next.146"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/rlp" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/resolutions@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/resolutions/-/resolutions-1.0.0-next.146.tgz#aa91e1982eb5069dfa71e826d65f55625134681e"
-  integrity sha512-W86XO5T8Zmzd3ZS1gbzkzdmNJ7RTTyxLnADok4FIfJjNS3E4bgW/awN51gyT0HERv3hrUJH8IkibcNpmCLHAqA==
+"@tevm/resolutions@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/resolutions/-/resolutions-1.0.0-next.148.tgz#64236fb27042e51b3fe1c1655aaa649e0d0cc386"
+  integrity sha512-IWrhb/kicpx/AMCX/HGP10sYSbWGqBDjMsP3jSG/csnYGVnK+D2ekQLxXxSd6Axgw3VkUFgY9qYw7rSg9k9Mjw==
   dependencies:
     "@tevm/tsconfig" "^1.0.0-next.142"
-    "@tevm/tsupconfig" "^1.0.0-next.146"
-    "@types/node" "^22.15.21"
-    effect "3.15.4"
+    "@tevm/tsupconfig" "^1.0.0-next.148"
+    "@types/node" "^24.6.1"
+    effect "3.18.1"
     resolve "^1.22.10"
 
-"@tevm/rlp@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/rlp/-/rlp-1.0.0-next.146.tgz#0fc20d7626f27666cb00085372f903d5cad34ec6"
-  integrity sha512-PZ+O/Dlq4aKykM5J1tzGe6eT284z6sNDUksnwBsAbjki3vKb+93ZBs4qNbbJobPXUGZilVNHtCtVwq3TgG/xWA==
+"@tevm/rlp@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/rlp/-/rlp-1.0.0-next.148.tgz#c68b573225249b69ac710f08a1f862097de4c5b8"
+  integrity sha512-XvOmCi0rAPG3nKkXkkE2SIGA/KD7nezGz67bRlLMcCrxovZ0uSKAivPrEw6uI3sKZ2IqBCYUDmJedlpttm9U6A==
   dependencies:
     "@ethereumjs/rlp" "^10.0.0"
 
-"@tevm/rollup-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/rollup-plugin/-/rollup-plugin-1.0.0-next.146.tgz#0ffcea91db34ddd5f5571204613da7a18525949f"
-  integrity sha512-MLapNe6q1alRdlEOxiGykW5Gi7s5JiOsbu9RagAGsoNDKE+qKRNRQwyCAISkpkc7OpWB3bFI5MVf1TOmV5f5EA==
+"@tevm/rollup-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/rollup-plugin/-/rollup-plugin-1.0.0-next.148.tgz#150b643beb2612637c1bc37e378d25ce286c8ab8"
+  integrity sha512-wBhWxjnNdzI6mlsFhNoXLX6e3PvnYZd4+yLt0PaXpUu1AyoNsUamRJE0ARReNAqqI8rvtrjbMwJuMDjme/7ymA==
   dependencies:
-    "@tevm/unplugin" "^1.0.0-next.146"
+    "@tevm/unplugin" "^1.0.0-next.148"
 
-"@tevm/rspack-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/rspack-plugin/-/rspack-plugin-1.0.0-next.146.tgz#0ed053c0a755c575408e77d162b1308ac7480c32"
-  integrity sha512-Zey3Ud/F2ieypmAB+wiTrwTObsu1v5wRQrFph+ogFOeLs9fnIstgrK15W9zVnO5R5xm8jkVwIocKfjD0o46vVQ==
+"@tevm/rspack-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/rspack-plugin/-/rspack-plugin-1.0.0-next.148.tgz#8e1fd2ed21d08ee77b1823f4206437a88e4990f2"
+  integrity sha512-oC21VqYdDUcIOUrEVFeIx4DJ1PMPkPB82q71l81PomZblSW0wpM/ZWIWY6Hj0+FvVoGr91kNdBnuoxdUP94eNw==
   dependencies:
-    "@tevm/unplugin" "^1.0.0-next.146"
+    "@tevm/unplugin" "^1.0.0-next.148"
 
-"@tevm/runtime@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/runtime/-/runtime-1.0.0-next.146.tgz#d4108f9476031946c49e31002cefa7c0165251af"
-  integrity sha512-AdNBh+e7Nqdq2SwDhLOnPTQw+xjqrTr2v4kmtDCncg32+2aoq4psfYPIUxcDaGHyDeMRxhVFfYzfKlA+uIP6mw==
-  dependencies:
-    "@tevm/tsconfig" "^1.0.0-next.142"
-    "@tevm/tsupconfig" "^1.0.0-next.146"
-    effect "3.15.4"
-
-"@tevm/server@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/server/-/server-1.0.0-next.147.tgz#38f675271f2fa19cfad08fe50cef1d464ba2a82b"
-  integrity sha512-MHiKyqynf3Ol1HriVizHVRMRe9KOwz2XvdL19Btekt+sGap1u6rO/Bp2UAsNzGtxF9p8lVOHKV4vqLrwrYGobQ==
-  dependencies:
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/decorators" "^1.0.0-next.147"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/memory-client" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    zod "^3.25.30"
-
-"@tevm/solc@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/solc/-/solc-1.0.0-next.146.tgz#6cd89503a7a13ae50aa3442f2125372f980ed967"
-  integrity sha512-QiuTbHP+ja/jlQIRoUWtLfQCKdie59X3nJKcxiuvtzmMofxFyOHVCywDa78csYd9JWNHvBKnobg1tTEw7iw9OQ==
+"@tevm/runtime@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/runtime/-/runtime-1.0.0-next.148.tgz#9983759c329b5dd7607aa9d70e558604d9ae7f24"
+  integrity sha512-Xq9VEF1vJCVxYkZb8xcQPi05f45qIxXfV9P0K0adlrX66nYwJLB0EZraqVxgT4SjgCzHEEl1/l2jVlkLoa5EYw==
   dependencies:
     "@tevm/tsconfig" "^1.0.0-next.142"
-    "@tevm/tsupconfig" "^1.0.0-next.146"
+    "@tevm/tsupconfig" "^1.0.0-next.148"
+    effect "3.18.1"
 
-"@tevm/state@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/state/-/state-1.0.0-next.146.tgz#32925ebf5cc75bc01189a9ee77a4a9e6f2ef65bc"
-  integrity sha512-gXGFolPUxJmly5TiFVNgin8WmM4cR1cD+CZyuo1FvObe5vY5bc7Fxd+DELZN1RvvWWlxXHCXJfO1pO4fQJfcZw==
+"@tevm/server@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/server/-/server-1.0.0-next.148.tgz#4d11692f5dae2a6be882a3f1f25b2c17f3c5a600"
+  integrity sha512-cdDpFT/Ci+jQFkuor7yQKUVh0m6S/j9631RLZGaBGN034J9d3tM98F0f2/NI+60Fqa/2JFB5ytl6TFJApyF/MQ==
+  dependencies:
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/decorators" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/memory-client" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    zod "^4.1.11"
+
+"@tevm/solc@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/solc/-/solc-1.0.0-next.148.tgz#bfcc62787ecbc9ddb41335faacafabc3b4063a0f"
+  integrity sha512-GhE+cQKo/xvwMFMqIryaQfp4UyncJOEefc3dzNHCB7F27pqiPcYvdsx+t7CK6SK/ahdRcG7eSQ+/3f9VYKulXA==
+  dependencies:
+    "@tevm/tsconfig" "^1.0.0-next.142"
+    "@tevm/tsupconfig" "^1.0.0-next.148"
+
+"@tevm/state@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/state/-/state-1.0.0-next.148.tgz#8173fdda2c095b9aad80e54559ded85987528c26"
+  integrity sha512-by8U3/fAGKf8HTdRAANePMwGdzDLb+Kz5shH0+p5Qd4BOef70/7Cwy/HovwF4gAFA59GsAQrE51ZSPIWJzfqwg==
   dependencies:
     "@ethereumjs/statemanager" "^10.0.0"
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/logger" "^1.0.0-next.146"
-    "@tevm/rlp" "^1.0.0-next.146"
-    "@tevm/test-utils" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/logger" "^1.0.0-next.148"
+    "@tevm/rlp" "^1.0.0-next.148"
+    "@tevm/test-utils" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
     ethereum-cryptography "^3.2.0"
 
-"@tevm/sync-storage-persister@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/sync-storage-persister/-/sync-storage-persister-1.0.0-next.146.tgz#53b4493c4bd08dfc743ef442a3c320023355b4cb"
-  integrity sha512-mU0r1VKt16NJ0r3BT8AJ90SyOojsguzOJG2Wa3DWiUwdkzf8Z9LXC2B8J0eZCOAxhOE4Jpr60aUHf8uctgU97A==
+"@tevm/sync-storage-persister@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/sync-storage-persister/-/sync-storage-persister-1.0.0-next.148.tgz#5d2379e3b8cc7285f600cab25e7d406f9fdb50a9"
+  integrity sha512-UHqWFKpHKDzRcb09J8Qo49z2x0wTl4YSCKkwz1pUNpRrOjuiqcVywh/Q+3iwvWC88gxSWsrIG7kQz1Iave6v/Q==
   dependencies:
-    "@tevm/state" "^1.0.0-next.146"
+    "@tevm/state" "^1.0.0-next.148"
 
-"@tevm/test-utils@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/test-utils/-/test-utils-1.0.0-next.146.tgz#679fc448b7e3541e31aa3d23a419147a937829ba"
-  integrity sha512-769eX9hicunnGe3OUzKNH/QYTUKkiKzDohouo1ZvvQ1pUOhuPYluxzjweWd/1ylZ/IUCEM17QraBuR7mFLYGCA==
+"@tevm/test-utils@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/test-utils/-/test-utils-1.0.0-next.148.tgz#b279135f124cc02a000b7c6e2e9fb94b1552a3ae"
+  integrity sha512-K86d7NO12S3Us5TD92nma5jbvQK/ovwX1uu3CUsBBy+WS25Dz0FC9Lw4+5aI/EM198FP4CfdCe7O9Qt6Pk8tsw==
   dependencies:
-    "@openzeppelin/contracts" "5.3.0"
-    "@ponder/utils" "^0.2.7"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/esbuild-plugin" "^1.0.0-next.146"
-    "@tevm/ts-plugin" "^1.0.0-next.146"
+    "@openzeppelin/contracts" "5.4.0"
+    "@ponder/utils" "^0.2.13"
+    "@tevm/contract" "^1.0.0-next.148"
+    "@tevm/esbuild-plugin" "^1.0.0-next.148"
+    "@tevm/ts-plugin" "^1.0.0-next.148"
 
-"@tevm/trie@^1.0.0-next.142":
-  version "1.0.0-next.142"
-  resolved "https://registry.yarnpkg.com/@tevm/trie/-/trie-1.0.0-next.142.tgz#9aedfacc469d167bd112b7b5a14c8e40eacc7211"
-  integrity sha512-FPNj81nyeF6wb3725wFL7bUo0OwFNEcNgaFGjizT7xPnfH/c0LF5DVtTLARIJWJnpSuqNuC2I3ENBmBDCKj3uA==
+"@tevm/trie@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/trie/-/trie-1.0.0-next.148.tgz#b22a9116a5bc24532284f748aa4e47bb7da104a3"
+  integrity sha512-mHQPPDOvZQUze7g+FFC0jiPy/qcVDLvADpDdVfkiAWlZ2DJiNfq8MOxLikDUv8SGosgKMyMwuBbSbNrNVdAPHw==
   dependencies:
     "@ethereumjs/trie" "6.2.1"
 
-"@tevm/ts-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/ts-plugin/-/ts-plugin-1.0.0-next.146.tgz#8813c0adbed336e18d3a7a53e0d7c02536510018"
-  integrity sha512-NRBv5r7Dn4wbkOs58h184BZWhh6SdUU0DtfBPVXCFzhRQcMq8ZXikzK4jYSgtkr268vuWOqmPTJ6U7LeILgoEg==
+"@tevm/ts-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/ts-plugin/-/ts-plugin-1.0.0-next.148.tgz#679333b703f4235996f48795e87a1db1f95a4665"
+  integrity sha512-uKl3loZHLzkFwjBiJc57S7npxlTExqEg8C6wCzZ7gcCCBuwu7cHe5+QU1R90MMamclV+jsgqVNEL33CkGcIWsw==
   dependencies:
-    "@tevm/base-bundler" "^1.0.0-next.146"
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@types/minimatch" "^5.1.2"
-    effect "3.15.4"
-    glob "^11.0.2"
-    minimatch "^10.0.1"
+    "@tevm/base-bundler" "^1.0.0-next.148"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@types/minimatch" "^6.0.0"
+    effect "3.18.1"
+    glob "^11.0.3"
+    minimatch "^10.0.3"
     solc "0.8.30"
-    solidity-ast "^0.4.60"
+    solidity-ast "^0.4.61"
 
 "@tevm/tsconfig@^1.0.0-next.142":
   version "1.0.0-next.142"
   resolved "https://registry.yarnpkg.com/@tevm/tsconfig/-/tsconfig-1.0.0-next.142.tgz#18259d511a60ae6fa607b7166d9f8e436809e88e"
   integrity sha512-wSs3HmnIsToNzT3j/p+AYW3KTQ3PvWhLKHvTQh1FpbWG4FiwG4dNO46BsoWAGsr59CLjn/+YUcbt5xFbaMVoUQ==
 
-"@tevm/tsupconfig@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/tsupconfig/-/tsupconfig-1.0.0-next.146.tgz#b254fc18957eb8462789ef9da0d60e536e10ad89"
-  integrity sha512-akD/J180mJwze8e6Vluq0NfAjYwPEAPFiCv5wnxrOgyfGCwj3bVjWjIlzJty0V1p+BA5C57O0/pQoDrHKeZN0g==
+"@tevm/tsupconfig@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/tsupconfig/-/tsupconfig-1.0.0-next.148.tgz#6ee269f8f20e7d1ba4aaf21b9475719fd82b1b97"
+  integrity sha512-kJblIsgZl7REGfpvm1gQN3aTue0nC4jQ5Orh0D4Wmos2OnTwR3+QHkvINnCzOdFDveqcF/LlrRgZb2FkgSKOzg==
   dependencies:
     "@tevm/tsconfig" "^1.0.0-next.142"
-    "@types/node" "^22.15.21"
+    "@types/node" "^24.6.1"
 
-"@tevm/tx@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/tx/-/tx-1.0.0-next.146.tgz#f98126607c645018281fac8f7840ed71fe65003a"
-  integrity sha512-ppDCwAWnHUxhW0GOE9IrMRfPLDo5JwkORX+D/Z04rmO9caNuZcGPzIIH15GKd/GgI43Hly2KCnTCHkcObDHywA==
+"@tevm/tx@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/tx/-/tx-1.0.0-next.148.tgz#26b815e20cb6b55dd3b542b3081daca8df24af92"
+  integrity sha512-omQMr5cOVVFulrc2jFJHdlLm9Dck1uRGOHtrJO+BGHo9NaMu6vE+rhfOkUiBpGSUvxdVtgyp9eoFehnvu1MNYw==
   dependencies:
     "@ethereumjs/tx" "^10.0.0"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
 
-"@tevm/txpool@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/txpool/-/txpool-1.0.0-next.147.tgz#8aabe60a0e8f58b4a4e9b839d71048410ee42297"
-  integrity sha512-/piGwoo8+D//5N3W1BtmWp23KvRQ94WsmqnRBwH+5XFwPGzBUTVAEL0neYUmif1SXKcWhTiMv5VmlqKXna0XFQ==
+"@tevm/txpool@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/txpool/-/txpool-1.0.0-next.148.tgz#f95226b5c721f99b7b528220deadc5bb7c00b1ff"
+  integrity sha512-/RJ/4eJ4fl4VUk9GaCqOuNem0OyF6kkePAh/n2BjDH6KiEwQ54Wn3xknJZwZKHYHYJBzZGE0VtDGlSl86PPtnA==
   dependencies:
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@tevm/vm" "^1.0.0-next.147"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@tevm/vm" "^1.0.0-next.148"
     qheap "^1.4.0"
 
-"@tevm/unplugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/unplugin/-/unplugin-1.0.0-next.146.tgz#3c52ba3c803c7b30a10e8c5b43a4f2e1ae02a520"
-  integrity sha512-3TjoQKPqn/L5Gl3ryw2et2aPqnae9utIpDhHq6QCdQBp8tsf7V5mqcJFPO777umx4acxjGIniIzZPgO+9IKpUw==
+"@tevm/unplugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/unplugin/-/unplugin-1.0.0-next.148.tgz#8ac24e9aa7f114ca62992bf82d2632ff5e647326"
+  integrity sha512-VoLvZuUXX4Rv/HK2j50qEso9Wjv3Bp6lbhLX+CeGdNDlEYwA2Ovw5D7D7tjAhcxQEk1FuouJ4WzMPMqByXmFYw==
   dependencies:
-    "@tevm/base-bundler" "^1.0.0-next.146"
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/solc" "^1.0.0-next.146"
-    effect "3.15.4"
+    "@tevm/base-bundler" "^1.0.0-next.148"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/solc" "^1.0.0-next.148"
+    effect "3.18.1"
     solc "0.8.30"
-    unplugin "^2.3.5"
-    zod "^3.25.30"
+    unplugin "^2.3.10"
+    zod "^4.1.11"
 
-"@tevm/utils@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/utils/-/utils-1.0.0-next.146.tgz#545ee7cbb73d6125f9b5a9d9bda2f78d50210ccd"
-  integrity sha512-WHNzZCizy1ekdMIADdykszJ4fVoZZCdfSY2oUMMTmhZdpZY2eGpHlsfG3GXV6t6B7tROMUiFJylJPiLfzHaEPg==
+"@tevm/utils@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/utils/-/utils-1.0.0-next.148.tgz#9ae5fa94b71ec2841bfd678663552c000b8fdeab"
+  integrity sha512-J5uXzviEo8e2Mhp+Rpapi5fT/DO5EwNsqtJCvZKbeCWcROpTwfWR7CqEFWuU7MYf05T1sWtaqWudP7Tf/KQN7w==
   dependencies:
     "@ethereumjs/evm" "^10.0.0"
     "@ethereumjs/util" "^10.0.0"
-    "@tevm/errors" "^1.0.0-next.146"
-    abitype "^1.0.8"
+    "@tevm/errors" "^1.0.0-next.148"
+    abitype "^1.1.1"
 
-"@tevm/viem@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/viem/-/viem-1.0.0-next.147.tgz#daa506f29178922e2724d519edaa2aa7f97b9231"
-  integrity sha512-eenVLiWC9lUHzhtdWRdzJ1ApaqRSfCF6RpYRy71jAHvjbc7UD0k43xF7sChrQpwe5lDLwuonJ3L3BVY1tRVyGw==
+"@tevm/viem@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/viem/-/viem-1.0.0-next.148.tgz#b98cb6fb9ebf0a3603c1645d6d1f5c752ebd096f"
+  integrity sha512-+EQzYbtuY2yAPjxS8nGUHt/O9Po0n4q/pzFQAHSx3KDtK8LmNmJS+jX1lH3yXcKnx0h5DJmzTqswMDcmrap8DQ==
   dependencies:
-    "@tevm/decorators" "^1.0.0-next.147"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/node" "^1.0.0-next.147"
+    "@tevm/decorators" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/node" "^1.0.0-next.148"
 
-"@tevm/vite-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/vite-plugin/-/vite-plugin-1.0.0-next.146.tgz#247aa8870478211e948a7b8bba8e2df155778613"
-  integrity sha512-BkXkLpe6YXYtdQnknrZPTBC80hFGlR4Fgy12Cm8y3Iu2cGTWAwTizYy+ZqlQzMH493X5dIG06o4tB0/TrKmnOA==
+"@tevm/vite-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/vite-plugin/-/vite-plugin-1.0.0-next.148.tgz#66a0256d96ee57a919df8d537d0c44878fd36bc8"
+  integrity sha512-K8EVdywxqulnoQl0YcW8kzv44Niyd7/JsK5PywX5QkoDy5EXQadFI9nQ6xNZ5EW3936FhH7esFDGsQS8xTuraA==
   dependencies:
-    "@tevm/unplugin" "^1.0.0-next.146"
+    "@tevm/unplugin" "^1.0.0-next.148"
 
-"@tevm/vm@^1.0.0-next.147":
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/@tevm/vm/-/vm-1.0.0-next.147.tgz#b83ea6c67e43010359ebeb1134ed20e3820d2f74"
-  integrity sha512-6F91MGAgqpji98RpFs/9kGU6QQyq7kWTr9cYCF36l5bKTKQ/+mnNuG8zaMxdZNUjUjMWBkd1dgLY11seIxMeQw==
+"@tevm/vm@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/vm/-/vm-1.0.0-next.148.tgz#cf23030e6359ff1b3e44e02035f54f02690a73ce"
+  integrity sha512-OHca31KH6soIlOaN2RyFqh9iX2QuuMdPf38W7Wlt3tBssujrq6Xwi9Mv5qXiK8BfM/ysTjoTREXv5nPNnE4Xvg==
   dependencies:
     "@ethereumjs/vm" "^10.0.0"
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/rlp" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/trie" "^1.0.0-next.142"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/utils" "^1.0.0-next.146"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/rlp" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/trie" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
     eventemitter3 "^5.0.1"
 
-"@tevm/webpack-plugin@^1.0.0-next.146":
-  version "1.0.0-next.146"
-  resolved "https://registry.yarnpkg.com/@tevm/webpack-plugin/-/webpack-plugin-1.0.0-next.146.tgz#a55d8363dafd72184f993e54c762ee9e5b077b6a"
-  integrity sha512-1LFY1mQ7P2Wpaj3kiTIqutmJ7kfiOhk0kyGw2Wsk/kNA4CQqgmA4Ue4GYd27INsLk10aAaCa8ZngNsFcMkAn0A==
+"@tevm/webpack-plugin@^1.0.0-next.148":
+  version "1.0.0-next.148"
+  resolved "https://registry.yarnpkg.com/@tevm/webpack-plugin/-/webpack-plugin-1.0.0-next.148.tgz#b01335a5a91300e94ccc3c4801e860ff794cca83"
+  integrity sha512-88yGm/5/ByLPHn9ss4kxor1BKmNaCUi1RVf+1FlWZnlEHU8ZApdh2g9WrP3XC5HMMpJFxA713TgVYVUvJ5f6pQ==
   dependencies:
-    "@tevm/unplugin" "^1.0.0-next.146"
+    "@tevm/unplugin" "^1.0.0-next.148"
 
 "@tootallnate/once@2", "@tootallnate/once@2.0.0":
   version "2.0.0"
@@ -9729,7 +9748,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/glob@*", "@types/glob@^8.1.0":
+"@types/glob@*":
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-8.1.0.tgz#b63e70155391b0584dce44e7ea25190bbc38f2fc"
   integrity sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==
@@ -9744,6 +9763,13 @@
   dependencies:
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/glob@^9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-9.0.0.tgz#7b942fafe09c55671912b34f04e8e4676faf32b1"
+  integrity sha512-00UxlRaIUvYm4R4W9WYkN8/J+kV8fmOQ7okeH6YFtGWFMt3odD45tpG5yA5wnL7HE6lLgjaTW5n14ju2hl2NNA==
+  dependencies:
+    glob "*"
 
 "@types/graceful-fs@^4.1.3":
   version "4.1.6"
@@ -9887,6 +9913,13 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
 
+"@types/minimatch@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-6.0.0.tgz#4d207b1cc941367bdcd195a3a781a7e4fc3b1e03"
+  integrity sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==
+  dependencies:
+    minimatch "*"
+
 "@types/mocha@^10.0.1":
   version "10.0.6"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-10.0.6.tgz#818551d39113081048bdddbef96701b4e8bb9d1b"
@@ -9941,12 +9974,12 @@
   dependencies:
     undici-types "~6.21.0"
 
-"@types/node@^22.15.21":
-  version "22.18.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.5.tgz#6b90a0087660cce4e956c3932c7f4357ef06bccf"
-  integrity sha512-g9BpPfJvxYBXUWI9bV37j6d6LTMNQ88hPwdWWUeYZnMhlo66FIg9gCc1/DZb15QylJSKwOZjwrckvOTWpOiChg==
+"@types/node@^24.6.1":
+  version "24.10.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.4.tgz#9d27c032a1b2c42a4eab8fb65c5856a8b8e098c4"
+  integrity sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==
   dependencies:
-    undici-types "~6.21.0"
+    undici-types "~7.16.0"
 
 "@types/node@^8.0.0":
   version "8.10.66"
@@ -11629,10 +11662,15 @@ abitype@1.0.8, abitype@^1.0.6:
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.0.8.tgz#3554f28b2e9d6e9f35eb59878193eabd1b9f46ba"
   integrity sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg==
 
-abitype@1.1.0, abitype@^1.0.8, abitype@^1.0.9:
+abitype@1.1.0, abitype@^1.0.9:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.1.0.tgz#510c5b3f92901877977af5e864841f443bf55406"
   integrity sha512-6Vh4HcRxNMLA0puzPjM5GBgT4aAcFGKZzSgAXvuZ27shJP6NEpielTuqbBmZILR5/xd0PizkBGy5hReKz9jl5A==
+
+abitype@1.2.3, abitype@^1.1.1, abitype@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.2.3.tgz#bec3e09dea97d99ef6c719140bee663a329ad1f4"
+  integrity sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==
 
 abitype@^1.0.2:
   version "1.1.1"
@@ -11831,10 +11869,10 @@ ansi-escapes@^4.2.1, ansi-escapes@^4.3.0, ansi-escapes@^4.3.2:
   dependencies:
     type-fest "^0.21.3"
 
-ansi-escapes@^7.0.0:
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-7.1.0.tgz#91983a524b64e49f8e46fb962bfb7f375ced2ad5"
-  integrity sha512-YdhtCd19sKRKfAAUsrcC1wzm4JuzJoiX4pOJqIoW2qmKj5WzG/dL8uUJ0361zaXtHqK7gEhOwtAtz7t3Yq3X5g==
+ansi-escapes@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-7.2.0.tgz#31b25afa3edd3efc09d98c2fee831d460ff06b49"
+  integrity sha512-g6LhBsl+GBPRWGWsBtutpzBYuIIdBkLEvad5C/va/74Db018+5TZiyA26cZJAr3Rft5lprVqOIPxf5Vid6tqAw==
   dependencies:
     environment "^1.0.0"
 
@@ -13235,6 +13273,11 @@ chalk@^4.0.0, chalk@^4.0.2, chalk@^4.1.0, chalk@^4.1.1, chalk@^4.1.2:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
+chalk@^5.6.0:
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-5.6.2.tgz#b1238b6e23ea337af71c7f8a295db5af0c158aea"
+  integrity sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==
+
 change-case@3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/change-case/-/change-case-3.0.2.tgz#fd48746cce02f03f0a672577d1d3a8dc2eceb037"
@@ -13523,13 +13566,13 @@ cli-truncate@^3.1.0:
     slice-ansi "^5.0.0"
     string-width "^5.0.0"
 
-cli-truncate@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/cli-truncate/-/cli-truncate-4.0.0.tgz#6cc28a2924fee9e25ce91e973db56c7066e6172a"
-  integrity sha512-nPdaFdQ0h/GEigbPClz11D0v/ZJEwxmeVZGeMo3Z5StPtUTkA9o1lD6QwoirYiSDzbcwn2XcjwmCp68W1IS4TA==
+cli-truncate@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/cli-truncate/-/cli-truncate-5.1.1.tgz#455476face9904d94b7d11e98d9adbca15292ea5"
+  integrity sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==
   dependencies:
-    slice-ansi "^5.0.0"
-    string-width "^7.0.0"
+    slice-ansi "^7.1.0"
+    string-width "^8.0.0"
 
 cli-ux@^5.2.1, cli-ux@^5.5.1:
   version "5.6.7"
@@ -13763,10 +13806,10 @@ commander@^13.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-13.1.0.tgz#776167db68c78f38dcce1f9b8d7b8b9a488abf46"
   integrity sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==
 
-commander@^14.0.0:
-  version "14.0.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-14.0.1.tgz#2f9225c19e6ebd0dc4404dd45821b2caa17ea09b"
-  integrity sha512-2JkV3gUZUVrbNA+1sjBOYLsMZ5cEEl8GTFP2a4AVz5hvasAMCQ1D2l2le/cX+pV4N6ZU17zjUahLpIXRrnWL8A==
+commander@^14.0.1:
+  version "14.0.2"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-14.0.2.tgz#b71fd37fe4069e4c3c7c13925252ada4eba14e8e"
+  integrity sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==
 
 commander@^2.19.0, commander@^2.20.3:
   version "2.20.3"
@@ -14823,10 +14866,10 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
-effect@3.15.4:
-  version "3.15.4"
-  resolved "https://registry.yarnpkg.com/effect/-/effect-3.15.4.tgz#bc16e30c84bcccb684a9dd40c4a260cd1b1f27c8"
-  integrity sha512-bcikyXIhzIEsUNjlgNhEC3J6xAn8iDM8z/x9k52fb3daN5iKm1rlr6Ho3TNgXM48tUUYBnTAyunk+kVzx/u8kA==
+effect@3.18.1:
+  version "3.18.1"
+  resolved "https://registry.yarnpkg.com/effect/-/effect-3.18.1.tgz#9986969676a57cfd69f28ca64dc518d70e378061"
+  integrity sha512-5aJ7yRlvvkBplMSnhPyol7WYvPenvau12asO3HJhG/126SySWV9D8bscGTbV52XxtC5bwO/VUd5ffjE6uep/1A==
   dependencies:
     "@standard-schema/spec" "^1.0.0"
     fast-check "^3.23.1"
@@ -15149,10 +15192,10 @@ es-toolkit@1.33.0:
   resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.33.0.tgz#bcc9d92ef2e1ed4618c00dd30dfda9faddf4a0b7"
   integrity sha512-X13Q/ZSc+vsO1q600bvNK4bxgXMkHcf//RxCmYDaRY5DAcT+eoXjY5hoAPGMdRnWQjvyLEcyauG3b6hz76LNqg==
 
-es-toolkit@^1.22.0:
-  version "1.39.10"
-  resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.39.10.tgz#513407af73e79f9940e7ec7650f2e6dceeaf1d81"
-  integrity sha512-E0iGnTtbDhkeczB0T+mxmoVlT4YNweEKBLq7oaU4p11mecdsZpNWOglI4895Vh4usbQ+LsJiuLuI2L0Vdmfm2w==
+es-toolkit@^1.39.10:
+  version "1.43.0"
+  resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.43.0.tgz#2c278d55ffeb30421e6e73a009738ed37b10ef61"
+  integrity sha512-SKCT8AsWvYzBBuUqMk4NPwFlSdqLpJwmy6AP322ERn8W2YLIB6JBXnwMI2Qsh2gfphT3q7EKAxKb23cvFHFwKA==
 
 es5-ext@^0.10.35, es5-ext@^0.10.62, es5-ext@^0.10.63, es5-ext@^0.10.64, es5-ext@~0.10.14:
   version "0.10.64"
@@ -16426,11 +16469,6 @@ fast-redact@^3.0.0:
   resolved "https://registry.yarnpkg.com/fast-redact/-/fast-redact-3.2.0.tgz#b1e2d39bc731376d28bde844454fa23e26919987"
   integrity sha512-zaTadChr+NekyzallAMXATXLOR8MNx3zqpZ0MUF2aGf4EathnG0f32VLODNlY8IuGY3HoRO2L6/6fSzNsLaHIw==
 
-fast-redact@^3.1.1:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/fast-redact/-/fast-redact-3.5.0.tgz#e9ea02f7e57d0cd8438180083e93077e496285e4"
-  integrity sha512-dwsoQlS7h9hMeYUq1W++23NDcBLV4KqONnITDV9DjfS3q1SgDGVrBdvvTLUotWtPSD7asWDV9/CmsZPy8Hf70A==
-
 fast-safe-stringify@^2.0.6, fast-safe-stringify@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
@@ -17008,7 +17046,7 @@ get-caller-file@^2.0.1, get-caller-file@^2.0.5:
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
-get-east-asian-width@^1.0.0, get-east-asian-width@^1.3.1:
+get-east-asian-width@^1.0.0, get-east-asian-width@^1.3.0, get-east-asian-width@^1.3.1:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/get-east-asian-width/-/get-east-asian-width-1.4.0.tgz#9bc4caa131702b4b61729cb7e42735bc550c9ee6"
   integrity sha512-QZjmEOC+IT1uk6Rx0sX22V6uHWVwbdbxf1faPqJ1QhLdGgsRGCZoyaQBm/piRdJy/D2um6hM1UP7ZEeQ4EkP+Q==
@@ -17176,6 +17214,15 @@ glob-to-regexp@^0.4.1:
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.1.tgz#c75297087c851b9a578bd217dd59a92f59fe546e"
   integrity sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==
 
+glob@*:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-13.0.0.tgz#9d9233a4a274fc28ef7adce5508b7ef6237a1be3"
+  integrity sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==
+  dependencies:
+    minimatch "^10.1.1"
+    minipass "^7.1.2"
+    path-scurry "^2.0.0"
+
 glob@10.3.10:
   version "10.3.10"
   resolved "https://registry.yarnpkg.com/glob/-/glob-10.3.10.tgz#0351ebb809fd187fe421ab96af83d3a70715df4b"
@@ -17222,14 +17269,14 @@ glob@^10.0.0, glob@^10.2.2, glob@^10.3.10, glob@^10.3.7:
     package-json-from-dist "^1.0.0"
     path-scurry "^1.11.1"
 
-glob@^11.0.2:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-11.0.3.tgz#9d8087e6d72ddb3c4707b1d2778f80ea3eaefcd6"
-  integrity sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==
+glob@^11.0.3:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-11.1.0.tgz#4f826576e4eb99c7dad383793d2f9f08f67e50a6"
+  integrity sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==
   dependencies:
     foreground-child "^3.3.1"
     jackspeak "^4.1.1"
-    minimatch "^10.0.3"
+    minimatch "^10.1.1"
     minipass "^7.1.2"
     package-json-from-dist "^1.0.0"
     path-scurry "^2.0.0"
@@ -18164,30 +18211,29 @@ ink-text-input@^6.0.0:
     chalk "^5.3.0"
     type-fest "^4.18.2"
 
-ink@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/ink/-/ink-5.2.1.tgz#b9ea59f0d1eab2b4566903b35b54fd34323d1694"
-  integrity sha512-BqcUyWrG9zq5HIwW6JcfFHsIYebJkWWb4fczNah1goUO0vv5vneIlfwuS85twyJ5hYR/y18FlAYUxrO9ChIWVg==
+ink@^6.3.1:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/ink/-/ink-6.6.0.tgz#a060a4764336106510adb7d64299a53d40d479ca"
+  integrity sha512-QDt6FgJxgmSxAelcOvOHUvFxbIUjVpCH5bx+Slvc5m7IEcpGt3dYwbz/L+oRnqEGeRvwy1tineKK4ect3nW1vQ==
   dependencies:
-    "@alcalzone/ansi-tokenize" "^0.1.3"
-    ansi-escapes "^7.0.0"
+    "@alcalzone/ansi-tokenize" "^0.2.1"
+    ansi-escapes "^7.2.0"
     ansi-styles "^6.2.1"
     auto-bind "^5.0.1"
-    chalk "^5.3.0"
+    chalk "^5.6.0"
     cli-boxes "^3.0.0"
     cli-cursor "^4.0.0"
-    cli-truncate "^4.0.0"
+    cli-truncate "^5.1.1"
     code-excerpt "^4.0.0"
-    es-toolkit "^1.22.0"
+    es-toolkit "^1.39.10"
     indent-string "^5.0.0"
-    is-in-ci "^1.0.0"
+    is-in-ci "^2.0.0"
     patch-console "^2.0.0"
-    react-reconciler "^0.29.0"
-    scheduler "^0.23.0"
+    react-reconciler "^0.33.0"
     signal-exit "^3.0.7"
     slice-ansi "^7.1.0"
     stack-utils "^2.0.6"
-    string-width "^7.2.0"
+    string-width "^8.1.0"
     type-fest "^4.27.0"
     widest-line "^5.0.0"
     wrap-ansi "^9.0.0"
@@ -18509,10 +18555,10 @@ is-hex-prefixed@1.0.0:
   resolved "https://registry.yarnpkg.com/is-hex-prefixed/-/is-hex-prefixed-1.0.0.tgz#7d8d37e6ad77e5d127148913c573e082d777f554"
   integrity sha512-WvtOiug1VFrE9v1Cydwm+FnXd3+w9GaeVUss5W4v/SLy3UW00vP+6iNF2SdnfiBoLy4bTqVdkftNGTUeOFVsbA==
 
-is-in-ci@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/is-in-ci/-/is-in-ci-1.0.0.tgz#9a86bbda7e42c6129902e0574c54b018fbb6ab88"
-  integrity sha512-eUuAjybVTHMYWm/U+vBO1sY/JOCgoPCXRxzdju0K+K0BiGW0SChEL1MLC0PoCIR1OlPo5YAp8HuQoUlsWEICwg==
+is-in-ci@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/is-in-ci/-/is-in-ci-2.0.0.tgz#e4b3471c555b47509a8311869c377c234967079f"
+  integrity sha512-cFeerHriAnhrQSbpAxL37W1wcJKUUX07HyLWZCW1URJT/ra3GyUTzBgUnh24TMVfNTV2Hij2HLxkPHFZfOZy5w==
 
 is-interactive@^1.0.0:
   version "1.0.0"
@@ -20209,6 +20255,13 @@ minimalistic-crypto-utils@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==
 
+minimatch@*, minimatch@^10.1.1:
+  version "10.1.1"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-10.1.1.tgz#e6e61b9b0c1dcab116b5a7d1458e8b6ae9e73a55"
+  integrity sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==
+  dependencies:
+    "@isaacs/brace-expansion" "^5.0.0"
+
 "minimatch@2 || 3", minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.0.5, minimatch@^3.1.1, minimatch@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
@@ -20223,7 +20276,7 @@ minimatch@5.0.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@^10.0.1, minimatch@^10.0.3:
+minimatch@^10.0.3:
   version "10.0.3"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-10.0.3.tgz#cf7a0314a16c4d9ab73a7730a0e8e3c3502d47aa"
   integrity sha512-IPZ167aShDZZUMdRk66cyQAW3qr0WzbHkPdMYa8bzZhlHhO3jALbKdxcaak7W9FfT2rZNpQuUu4Od7ILEpXSaw==
@@ -21203,6 +21256,20 @@ own-keys@^1.0.1:
     object-keys "^1.1.1"
     safe-push-apply "^1.0.0"
 
+ox@0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/ox/-/ox-0.11.1.tgz#ee1d1b88e794533db244e90bf7fb3863293169f3"
+  integrity sha512-1l1gOLAqg0S0xiN1dH5nkPna8PucrZgrIJOfS49MLNiMevxu07Iz4ZjuJS9N+xifvT+PsZyIptS7WHM8nC+0+A==
+  dependencies:
+    "@adraffy/ens-normalize" "^1.11.0"
+    "@noble/ciphers" "^1.3.0"
+    "@noble/curves" "1.9.1"
+    "@noble/hashes" "^1.8.0"
+    "@scure/bip32" "^1.7.0"
+    "@scure/bip39" "^1.6.0"
+    abitype "^1.2.3"
+    eventemitter3 "5.0.1"
+
 ox@0.6.7:
   version "0.6.7"
   resolved "https://registry.yarnpkg.com/ox/-/ox-0.6.7.tgz#afd53f2ecef68b8526660e9d29dee6e6b599a832"
@@ -21227,20 +21294,6 @@ ox@0.6.9:
     "@scure/bip32" "^1.5.0"
     "@scure/bip39" "^1.4.0"
     abitype "^1.0.6"
-    eventemitter3 "5.0.1"
-
-ox@0.9.3:
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/ox/-/ox-0.9.3.tgz#92cc1008dcd913e919364fd4175c860b3eeb18db"
-  integrity sha512-KzyJP+fPV4uhuuqrTZyok4DC7vFzi7HLUFiUNEmpbyh59htKWkOC98IONC1zgXJPbHAhQgqs6B0Z6StCGhmQvg==
-  dependencies:
-    "@adraffy/ens-normalize" "^1.11.0"
-    "@noble/ciphers" "^1.3.0"
-    "@noble/curves" "1.9.1"
-    "@noble/hashes" "^1.8.0"
-    "@scure/bip32" "^1.7.0"
-    "@scure/bip39" "^1.6.0"
-    abitype "^1.0.9"
     eventemitter3 "5.0.1"
 
 ox@0.9.6:
@@ -21799,13 +21852,13 @@ pino@7.11.0:
     sonic-boom "^2.2.1"
     thread-stream "^0.15.1"
 
-pino@^9.7.0:
-  version "9.9.5"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-9.9.5.tgz#f06a5a0b4c715e34606290070dbb938c27eddd8b"
-  integrity sha512-d1s98p8/4TfYhsJ09r/Azt30aYELRi6NNnZtEbqFw6BoGsdPVf5lKNK3kUwH8BmJJfpTLNuicjUQjaMbd93dVg==
+pino@^9.12.0:
+  version "9.14.0"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-9.14.0.tgz#673d9711c2d1e64d18670c1ec05ef7ba14562556"
+  integrity sha512-8OEwKp5juEvb/MjpIc4hjqfgCNysrS94RIOMXYvpYCdm/jglrKEiAYmiumbmGhCvs+IcInsphYDFwqrjr7398w==
   dependencies:
+    "@pinojs/redact" "^0.4.0"
     atomic-sleep "^1.0.0"
-    fast-redact "^3.1.1"
     on-exit-leak-free "^2.1.0"
     pino-abstract-transport "^2.0.0"
     pino-std-serializers "^7.0.0"
@@ -22653,13 +22706,12 @@ react-qr-reader@^2.2.1:
     prop-types "^15.7.2"
     webrtc-adapter "^7.2.1"
 
-react-reconciler@^0.29.0:
-  version "0.29.2"
-  resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.29.2.tgz#8ecfafca63549a4f4f3e4c1e049dd5ad9ac3a54f"
-  integrity sha512-zZQqIiYgDCTP/f1N/mAR10nJGrPD2ZR+jDSEsKWJHYC7Cm2wodlwbR3upZRdC3cjIjSlTLNVyO7Iu0Yy7t2AYg==
+react-reconciler@^0.33.0:
+  version "0.33.0"
+  resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.33.0.tgz#9dd20208d45baa5b0b4701781f858236657f15e1"
+  integrity sha512-KetWRytFv1epdpJc3J4G75I4WrplZE5jOL7Yq0p34+OVOKF4Se7WrdIdVC45XsSSmUTlht2FM/fM1FZb1mfQeA==
   dependencies:
-    loose-envify "^1.1.0"
-    scheduler "^0.23.2"
+    scheduler "^0.27.0"
 
 react-refresh@^0.14.0, react-refresh@^0.14.2:
   version "0.14.2"
@@ -22730,10 +22782,10 @@ react-tooltip@^5.18.0:
     "@floating-ui/dom" "^1.0.0"
     classnames "^2.3.0"
 
-react@^19.1.0:
-  version "19.1.1"
-  resolved "https://registry.yarnpkg.com/react/-/react-19.1.1.tgz#06d9149ec5e083a67f9a1e39ce97b06a03b644af"
-  integrity sha512-w8nqGImo45dmMIfljjMwOGtbmC/mk4CMYhWIicdSflH91J9TyCyczcPFXJzrZ/ZXcgGRFeP6BU0BEJTw6tZdfQ==
+react@^19.1.1:
+  version "19.2.3"
+  resolved "https://registry.yarnpkg.com/react/-/react-19.2.3.tgz#d83e5e8e7a258cf6b4fe28640515f99b87cd19b8"
+  integrity sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==
 
 react@v18:
   version "18.3.1"
@@ -23522,12 +23574,17 @@ sc-istanbul@^0.4.5:
     which "^1.1.1"
     wordwrap "^1.0.0"
 
-scheduler@^0.23.0, scheduler@^0.23.2:
+scheduler@^0.23.2:
   version "0.23.2"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.23.2.tgz#414ba64a3b282892e944cf2108ecc078d115cdc3"
   integrity sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==
   dependencies:
     loose-envify "^1.1.0"
+
+scheduler@^0.27.0:
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.27.0.tgz#0c4ef82d67d1e5c1e359e8fc76d3a87f045fe5bd"
+  integrity sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==
 
 schema-utils@^2.6.5:
   version "2.7.1"
@@ -24059,7 +24116,7 @@ solc@^0.4.20:
     semver "^5.3.0"
     yargs "^4.7.1"
 
-solidity-ast@^0.4.60:
+solidity-ast@^0.4.61:
   version "0.4.61"
   resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.61.tgz#b51720ece553a2c7d84551ee5a7a2306080d23d0"
   integrity sha512-OYBJYcYyG7gLV0VuXl9CUrvgJXjV/v0XnR4+1YomVe3q+QyENQXJJxAEASUz4vN6lMAl+C8RSRSr5MBAz09f6w==
@@ -24407,13 +24464,21 @@ string-width@^5.0.0, string-width@^5.0.1, string-width@^5.1.2:
     emoji-regex "^9.2.2"
     strip-ansi "^7.0.1"
 
-string-width@^7.0.0, string-width@^7.2.0:
+string-width@^7.0.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-7.2.0.tgz#b5bb8e2165ce275d4d43476dd2700ad9091db6dc"
   integrity sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ==
   dependencies:
     emoji-regex "^10.3.0"
     get-east-asian-width "^1.0.0"
+    strip-ansi "^7.1.0"
+
+string-width@^8.0.0, string-width@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-8.1.0.tgz#9e9fb305174947cf45c30529414b5da916e9e8d1"
+  integrity sha512-Kxl3KJGb/gxkaUMOjRsQ8IrXiGW75O4E3RPjFIINOVH8AMl2SQ/yWdTzWwF3FevIX9LcMAjJW+GRwAlAbTSXdg==
+  dependencies:
+    get-east-asian-width "^1.3.0"
     strip-ansi "^7.1.0"
 
 string.prototype.matchall@^4.0.12:
@@ -24868,52 +24933,52 @@ testrpc@0.0.1:
   resolved "https://registry.yarnpkg.com/testrpc/-/testrpc-0.0.1.tgz#83e2195b1f5873aec7be1af8cbe6dcf39edb7aed"
   integrity sha512-afH1hO+SQ/VPlmaLUFj2636QMeDvPCeQMc/9RBMW0IfjNe9gFD9Ra3ShqYkB7py0do1ZcCna/9acHyzTJ+GcNA==
 
-tevm@^1.0.0-next.147:
-  version "1.0.0-next.147"
-  resolved "https://registry.yarnpkg.com/tevm/-/tevm-1.0.0-next.147.tgz#760dabfa75dbab7102656e6be1b822f310d1dadf"
-  integrity sha512-c7QNiC63UhDXaXFETBYNr1k3TdGUXZ9uY+GKyj+t1F24PxNKOMZ9mpOoRCSyBDI2AfTrs5UI5hXn6tz7ydND/w==
+tevm@^1.0.0-next.149:
+  version "1.0.0-next.149"
+  resolved "https://registry.yarnpkg.com/tevm/-/tevm-1.0.0-next.149.tgz#2df1e4e7274047dbf5519635a4c407eb3ffa765d"
+  integrity sha512-3/9T8BogaN5LuqdOCkSonjyWcO7wmo+cap+jps3L3FjYl87SvcozXWLTUM4aTxS0G6HJTlJBIVEUqvvndwDKWw==
   dependencies:
-    "@tevm/actions" "^1.0.0-next.147"
-    "@tevm/address" "^1.0.0-next.146"
-    "@tevm/base-bundler" "^1.0.0-next.146"
-    "@tevm/block" "^1.0.0-next.146"
-    "@tevm/blockchain" "^1.0.0-next.146"
-    "@tevm/bun-plugin" "^1.0.0-next.146"
-    "@tevm/bundler-cache" "^1.0.0-next.146"
-    "@tevm/cli" "^1.0.0-next.147"
-    "@tevm/client-types" "^1.0.0-next.146"
-    "@tevm/common" "^1.0.0-next.146"
-    "@tevm/compiler" "^1.0.0-next.146"
-    "@tevm/config" "^1.0.0-next.146"
-    "@tevm/contract" "^1.0.0-next.146"
-    "@tevm/decorators" "^1.0.0-next.147"
-    "@tevm/errors" "^1.0.0-next.146"
-    "@tevm/esbuild-plugin" "^1.0.0-next.146"
-    "@tevm/evm" "^1.0.0-next.146"
-    "@tevm/http-client" "^1.0.0-next.147"
-    "@tevm/jsonrpc" "^1.0.0-next.146"
-    "@tevm/memory-client" "^1.0.0-next.147"
-    "@tevm/node" "^1.0.0-next.147"
-    "@tevm/precompiles" "^1.0.0-next.146"
-    "@tevm/predeploys" "^1.0.0-next.146"
-    "@tevm/receipt-manager" "^1.0.0-next.146"
-    "@tevm/rollup-plugin" "^1.0.0-next.146"
-    "@tevm/rspack-plugin" "^1.0.0-next.146"
-    "@tevm/server" "^1.0.0-next.147"
-    "@tevm/solc" "^1.0.0-next.146"
-    "@tevm/state" "^1.0.0-next.146"
-    "@tevm/sync-storage-persister" "^1.0.0-next.146"
-    "@tevm/ts-plugin" "^1.0.0-next.146"
-    "@tevm/tx" "^1.0.0-next.146"
-    "@tevm/txpool" "^1.0.0-next.147"
-    "@tevm/utils" "^1.0.0-next.146"
-    "@tevm/viem" "^1.0.0-next.147"
-    "@tevm/vite-plugin" "^1.0.0-next.146"
-    "@tevm/vm" "^1.0.0-next.147"
-    "@tevm/webpack-plugin" "^1.0.0-next.146"
-    commander "^14.0.0"
-    effect "3.15.4"
-    glob "^11.0.2"
+    "@tevm/actions" "^1.0.0-next.149"
+    "@tevm/address" "^1.0.0-next.148"
+    "@tevm/base-bundler" "^1.0.0-next.149"
+    "@tevm/block" "^1.0.0-next.148"
+    "@tevm/blockchain" "^1.0.0-next.148"
+    "@tevm/bun-plugin" "^1.0.0-next.148"
+    "@tevm/bundler-cache" "^1.0.0-next.148"
+    "@tevm/cli" "^1.0.0-next.148"
+    "@tevm/client-types" "^1.0.0-next.148"
+    "@tevm/common" "^1.0.0-next.148"
+    "@tevm/compiler" "^1.0.0-next.148"
+    "@tevm/config" "^1.0.0-next.148"
+    "@tevm/contract" "^1.0.0-next.149"
+    "@tevm/decorators" "^1.0.0-next.148"
+    "@tevm/errors" "^1.0.0-next.148"
+    "@tevm/esbuild-plugin" "^1.0.0-next.148"
+    "@tevm/evm" "^1.0.0-next.148"
+    "@tevm/http-client" "^1.0.0-next.148"
+    "@tevm/jsonrpc" "^1.0.0-next.148"
+    "@tevm/memory-client" "^1.0.0-next.148"
+    "@tevm/node" "^1.0.0-next.148"
+    "@tevm/precompiles" "^1.0.0-next.148"
+    "@tevm/predeploys" "^1.0.0-next.148"
+    "@tevm/receipt-manager" "^1.0.0-next.148"
+    "@tevm/rollup-plugin" "^1.0.0-next.148"
+    "@tevm/rspack-plugin" "^1.0.0-next.148"
+    "@tevm/server" "^1.0.0-next.148"
+    "@tevm/solc" "^1.0.0-next.148"
+    "@tevm/state" "^1.0.0-next.148"
+    "@tevm/sync-storage-persister" "^1.0.0-next.148"
+    "@tevm/ts-plugin" "^1.0.0-next.148"
+    "@tevm/tx" "^1.0.0-next.148"
+    "@tevm/txpool" "^1.0.0-next.148"
+    "@tevm/utils" "^1.0.0-next.148"
+    "@tevm/viem" "^1.0.0-next.148"
+    "@tevm/vite-plugin" "^1.0.0-next.148"
+    "@tevm/vm" "^1.0.0-next.148"
+    "@tevm/webpack-plugin" "^1.0.0-next.148"
+    commander "^14.0.1"
+    effect "3.18.1"
+    glob "^11.0.3"
     solc "^0.8.30"
 
 text-encoding-utf-8@^1.0.2:
@@ -25017,11 +25082,6 @@ tiny-invariant@^1.0.2, tiny-invariant@^1.1.0, tiny-invariant@^1.3.1:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.3.3.tgz#46680b7a873a0d5d10005995eb90a70d74d60127"
   integrity sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==
-
-tiny-jsonc@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/tiny-jsonc/-/tiny-jsonc-1.0.2.tgz#208df4c437684199cc724f31c2b91ee39c349678"
-  integrity sha512-f5QDAfLq6zIVSyCZQZhhyl0QS6MvAyTxgz4X4x3+EoCktNWEYJ6PeoEA97fyb98njpBNNi88ybpD7m+BDFXaCw==
 
 tiny-secp256k1@^1.1.6:
   version "1.1.7"
@@ -25630,6 +25690,11 @@ undici-types@~6.21.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
+undici-types@~7.16.0:
+  version "7.16.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.16.0.tgz#ffccdff36aea4884cbfce9a750a0580224f58a46"
+  integrity sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==
+
 undici@5.28.4, undici@^5.14.0:
   version "5.28.4"
   resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.4.tgz#6b280408edb6a1a604a9b20340f45b422e373068"
@@ -25761,10 +25826,10 @@ unplugin@^1.3.1:
     webpack-sources "^3.2.3"
     webpack-virtual-modules "^0.5.0"
 
-unplugin@^2.3.5:
-  version "2.3.10"
-  resolved "https://registry.yarnpkg.com/unplugin/-/unplugin-2.3.10.tgz#15e75fec9384743335be7e54e5c88b5c187a3e94"
-  integrity sha512-6NCPkv1ClwH+/BGE9QeoTIl09nuiAt0gS28nn1PvYXsGKRwM2TCbFA2QiilmehPDTXIe684k4rZI1yl3A1PCUw==
+unplugin@^2.3.10:
+  version "2.3.11"
+  resolved "https://registry.yarnpkg.com/unplugin/-/unplugin-2.3.11.tgz#411e020dd2ba90e2fbe1e7bd63a5a399e6ee3b54"
+  integrity sha512-5uKD0nqiYVzlmCRs01Fhs2BdkEgBS3SAVP6ndrBsuK42iC2+JHyxM05Rm9G8+5mkmRtzMZGY8Ct5+mliZxU/Ww==
   dependencies:
     "@jridgewell/remapping" "^2.3.5"
     acorn "^8.15.0"
@@ -26117,18 +26182,18 @@ viem@^2.21.8:
     ox "0.9.6"
     ws "8.18.3"
 
-viem@^2.30.1:
-  version "2.37.6"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.37.6.tgz#3b05586555bd4b2c1b7351ed148f9fa98df72027"
-  integrity sha512-b+1IozQ8TciVQNdQUkOH5xtFR0z7ZxR8pyloENi/a+RA408lv4LoX12ofwoiT3ip0VRhO5ni1em//X0jn/eW0g==
+viem@^2.37.9:
+  version "2.43.5"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.43.5.tgz#450529892ee106132e9aa45bfc11e2641624190f"
+  integrity sha512-QuJpuEMEPM3EreN+vX4mVY68Sci0+zDxozYfbh/WfV+SSy/Gthm74PH8XmitXdty1xY54uTCJ+/Gbbd1IiMPSA==
   dependencies:
     "@noble/curves" "1.9.1"
     "@noble/hashes" "1.8.0"
     "@scure/bip32" "1.7.0"
     "@scure/bip39" "1.6.0"
-    abitype "1.1.0"
+    abitype "1.2.3"
     isows "1.0.7"
-    ox "0.9.3"
+    ox "0.11.1"
     ws "8.18.3"
 
 vite-node@3.2.4:
@@ -26221,7 +26286,7 @@ vite@^4.5.6:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest@^3.1.4:
+vitest@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-3.2.4.tgz#0637b903ad79d1539a25bc34c0ed54b5c67702ea"
   integrity sha512-LUCP5ev3GURDysTWiP47wRRUpLKMOfPh+yKTx3kVIEiu5KOMeqzpnYNsKyOoVrULivR8tLcks4+lga33Whn90A==
@@ -27938,17 +28003,17 @@ zod@3.22.4:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
   integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
 
-zod@^3.25.30:
-  version "3.25.76"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
-  integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
+zod@^4.1.11:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.5.tgz#aeb269a6f9fc259b1212c348c7c5432aaa474d2a"
+  integrity sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==
 
 zustand@5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.0.tgz#71f8aaecf185592a3ba2743d7516607361899da9"
   integrity sha512-LE+VcmbartOPM+auOjCCLQOsQ05zUTp8RkgwRzefUk+2jISdMMFnxvyTjA4YNWr5ZGXYbVsEMZosttuxUBkojQ==
 
-zustand@^5.0.5:
-  version "5.0.8"
-  resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.8.tgz#b998a0c088c7027a20f2709141a91cb07ac57f8a"
-  integrity sha512-gyPKpIaxY9XcO2vSMrLbiER7QMAMGOQZVRdJ6Zi782jkbzZygq5GI9nG8g+sMgitRtndwaBSl7uiqC49o1SSiw==
+zustand@^5.0.8:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.9.tgz#389dcd0309b9c545d7a461bd3c54955962847654"
+  integrity sha512-ALBtUj0AfjJt3uNRQoL1tL2tMvj6Gp/6e39dnfT6uzpelGru8v1tPOGBzayOWbPJvujM8JojDk3E1LxeFisBNg==

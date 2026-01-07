@@ -133,8 +133,10 @@ describe("execute response of GET /swap/approval", () => {
     ] as Address;
     const originClient = e2eConfig.getClient(originChainId);
     const destinationClient = e2eConfig.getClient(destinationChainId);
-    await originClient.tevmReady();
-    await destinationClient.tevmReady();
+    await Promise.all([
+      originClient.tevmReady(),
+      destinationClient.tevmReady(),
+    ]);
 
     // Set funds for depositor
     await originClient.tevmDeal({
@@ -326,6 +328,7 @@ describe("execute response of GET /swap/approval", () => {
             "exactInput",
             B2A_BASE_TEST_CASE
           );
+          const blockNumber = await originClient.getBlockNumber();
 
           // Mine next block to make the deposit expired (2 minutes from now)
           await originClient.tevmMine({ blockCount: 2, interval: 2 * 60 });
@@ -333,6 +336,8 @@ describe("execute response of GET /swap/approval", () => {
           await expect(executeApprovalAndDeposit(swapQuote)).rejects.toThrow(
             /revert/
           );
+
+          await originClient.reset({ blockNumber });
         },
         JEST_TIMEOUT_MS
       );
