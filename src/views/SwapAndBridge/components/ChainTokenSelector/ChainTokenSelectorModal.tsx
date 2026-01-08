@@ -17,6 +17,7 @@ import {
   INDIRECT_CHAINS,
   parseUnits,
   QUERIES,
+  shortenAddress,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -490,7 +491,6 @@ const DesktopModal = ({
 
 // Mobile Layout Component - 2-step process
 const MobileLayout = ({
-  isOriginToken,
   mobileStep,
   selectedChain,
   chainSearch,
@@ -603,6 +603,7 @@ const MobileLayout = ({
                 <SectionHeader>Popular Tokens</SectionHeader>
                 {displayedTokens.popular.map((token) => (
                   <TokenEntry
+                    isMobile={true}
                     key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
@@ -626,6 +627,7 @@ const MobileLayout = ({
                 <SectionHeader>All Tokens</SectionHeader>
                 {displayedTokens.all.map((token) => (
                   <TokenEntry
+                    isMobile={true}
                     key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
@@ -887,11 +889,13 @@ const TokenEntry = ({
   onClick,
   tabIndex,
   warningMessage,
+  isMobile = false,
 }: {
   token: EnrichedTokenWithReachability;
   isSelected: boolean;
   onClick: () => void;
   warningMessage: string;
+  isMobile?: boolean;
   tabIndex?: number;
 }) => {
   const [symbolHover, setSymbolHover] = useState(false);
@@ -917,7 +921,7 @@ const TokenEntry = ({
               {getTokenDisplaySymbol(token)}
             </TokenDispalySymbol>
             <TokenLink
-              visible={symbolHover}
+              visible={symbolHover && !isMobile}
               href={getTokenExplorerLinkFromAddress(
                 token.chainId,
                 token.address
@@ -929,7 +933,15 @@ const TokenEntry = ({
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>
-          <TokenSymbol>{getChainInfo(token.chainId).name}</TokenSymbol>
+          <TokenSymbol>
+            {getChainInfo(token.chainId).name}{" "}
+            {isMobile && (
+              <TokenAddress>
+                {" "}
+                {shortenAddress(token.address, "...", 4)}
+              </TokenAddress>
+            )}
+          </TokenSymbol>
         </TokenNameSymbolWrapper>
       </TokenInfoWrapper>
 
@@ -1290,6 +1302,10 @@ const TokenSymbol = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
 
+  opacity: 0.5;
+`;
+
+const TokenAddress = styled.span`
   opacity: 0.5;
 `;
 
