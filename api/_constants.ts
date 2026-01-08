@@ -274,16 +274,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
   } = {};
   const tokensWithSameConfig = [
     ["USDT", "USDT-BNB"],
-    [
-      "USDC",
-      "USDC.e",
-      "USDC-BNB",
-      "USDzC",
-      "TATARA-USDC",
-      "TATARA-USDT",
-      "TATARA-USDS",
-    ],
-    ["WBTC", "TATARA-WBTC"],
+    ["USDC", "USDC.e", "USDC-BNB", "USDzC"],
+    ["WBTC"],
     ["DAI", "USDB"],
     ["GHO", "WGHO"],
     ["BNB", "WBNB"],
@@ -429,7 +421,6 @@ export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
-  ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
