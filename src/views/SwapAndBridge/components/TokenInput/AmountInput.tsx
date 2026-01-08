@@ -78,6 +78,7 @@ export const AmountInput = ({
         id={id}
         name={name}
         data-testid={testId}
+        inputMode="decimal"
         placeholder="0.00"
         value={
           isFocused && !shouldUpdate ? undefined : (userInput ?? displayValue)
