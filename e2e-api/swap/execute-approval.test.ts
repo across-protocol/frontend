@@ -50,6 +50,7 @@ const B2A_BASE_TEST_CASE = {
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
@@ -76,6 +77,7 @@ const A2A_BASE_TEST_CASE = {
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
