@@ -4,7 +4,6 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
 import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
@@ -15,7 +14,6 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
-import { usePMFForm } from "hooks/usePMFForm";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
 
@@ -60,8 +58,6 @@ export function DepositStatusUpperCard({
     depositTxCompletedTime,
     fillTxCompletedTime
   );
-
-  const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
 
   const depositRevertMessage =
     depositQuery?.data?.status === "deposit-reverted"
@@ -171,12 +167,6 @@ export function DepositStatusUpperCard({
           fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
-      {isPMFormAvailable && (
-        <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
-          <MegaphoneIcon />
-          <span>Help improve Across—1 min survey</span>
-        </PMFFormButton>
-      )}
     </Wrapper>
   );
 }
@@ -254,23 +244,4 @@ const DepositRevertedRow = styled.div`
       stroke: ${COLORS.warning};
     }
   }
-`;
-
-const PMFFormButton = styled.div`
-  display: flex;
-  height: 64px;
-
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  border-radius: 12px;
-  background: ${COLORS["aqua-15"]};
-  width: 100%;
-  cursor: pointer;
-
-  color: ${COLORS["aqua"]};
-  font-weight: 500;
-
-  margin-top: -8px;
-  margin-bottom: -8px;
 `;
