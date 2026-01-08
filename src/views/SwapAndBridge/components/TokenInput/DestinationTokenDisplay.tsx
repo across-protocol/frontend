@@ -35,7 +35,8 @@ export const DestinationTokenDisplay = ({
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
-  const { destinationToken, originToken } = quoteRequest;
+  const { destinationToken, originToken, customDestinationAccount } =
+    quoteRequest;
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
@@ -82,7 +83,7 @@ export const DestinationTokenDisplay = ({
           otherToken={originToken}
         />
 
-        {destinationToken && (
+        {destinationToken && !customDestinationAccount && (
           <BalanceSelector
             token={destinationToken}
             disableHover={true}
