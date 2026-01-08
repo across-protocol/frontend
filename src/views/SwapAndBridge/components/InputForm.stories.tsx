@@ -60,6 +60,17 @@ const mockQuoteRequestMinOutput: QuoteRequest = {
   amount: BigNumber.from("99500000"),
 };
 
+const mockQuoteRequestWithCustomRecipient: QuoteRequest = {
+  tradeType: "exactInput",
+  originToken: mockInputToken,
+  destinationToken: mockOutputToken,
+  customDestinationAccount: {
+    accountType: "evm",
+    address: "0x1234567890123456789012345678901234567890",
+  },
+  amount: BigNumber.from("100000000"),
+};
+
 const meta: Meta<typeof InputForm> = {
   component: InputForm,
   title: "Bridge/InputForm",
@@ -151,6 +162,17 @@ export const LargeAmount: Story = {
       ...mockQuoteRequest,
       amount: BigNumber.from("1234567890123"),
     },
+  },
+};
+
+export const WithCustomRecipient: Story = {
+  args: {
+    isQuoteLoading: false,
+    expectedInputAmount: undefined,
+    expectedOutputAmount: BigNumber.from("99500000"),
+  },
+  parameters: {
+    quoteRequest: mockQuoteRequestWithCustomRecipient,
   },
 };
 
