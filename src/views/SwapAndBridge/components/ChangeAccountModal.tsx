@@ -151,19 +151,16 @@ export const ChangeAccountModal = () => {
               <StyledCrossIcon />
             </CrossIconWrapper>
           </InputGroup>
-          {isName && resolvedAddress && (
-            <ResolvedAddressRow>
-              Resolves to: {shortenAddress(resolvedAddress, "..", 6)}
-            </ResolvedAddressRow>
-          )}
-          {isName && isResolvingName && (
-            <ResolvedAddressRow>Resolving...</ResolvedAddressRow>
-          )}
-          {isName && !isResolvingName && !resolvedAddress && (
-            <ResolvedAddressRow error>
-              Could not resolve name
-            </ResolvedAddressRow>
-          )}
+          <ResolvedAddressRow
+            error={isName && !isResolvingName && !resolvedAddress}
+            visible={isName}
+          >
+            {isResolvingName
+              ? "Resolving..."
+              : resolvedAddress
+                ? `Resolves to: ${shortenAddress(resolvedAddress, "..", 6)}`
+                : "Could not resolve name"}
+          </ResolvedAddressRow>
           <Warning>
             {destinationEcosystem === "evm" ? (
               <>
@@ -243,11 +240,13 @@ const Warning = styled.span`
   margin-bottom: 12px;
 `;
 
-const ResolvedAddressRow = styled.div<{ error?: boolean }>`
+const ResolvedAddressRow = styled.div<{ error?: boolean; visible?: boolean }>`
   width: 100%;
+  height: 18px;
   font-size: 14px;
   color: ${({ error }) => (error ? COLORS.red : COLORS.aqua)};
   margin-top: -8px;
+  visibility: ${({ visible }) => (visible ? "visible" : "hidden")};
 `;
 
 const Wrapper = styled.div`

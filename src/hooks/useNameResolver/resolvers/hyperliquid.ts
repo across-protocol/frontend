@@ -17,6 +17,6 @@ export const hyperliquidResolver: NameResolver = {
       },
     }).then((res) => res.json());
 
-    return response.data?.address ?? null;
+    return response?.address ?? null;
   },
 };
