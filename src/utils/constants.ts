@@ -698,8 +698,6 @@ export const acrossPlusMulticallHandler: Record<number, string> = {
 
 export const chainsWithSpeedupDisabled = [CHAIN_IDs.SOLANA];
 
-export const pmfSurveyGFormUrl = process.env.REACT_APP_PMF_SURVEY_GFORM_URL;
-
 // This will override the routing preference for the swap API. Useful for testing burn/mint routes.
 export const swapApiRoutingPreference =
   (["default", "native", "across", "sponsored-cctp"] as const).find(
