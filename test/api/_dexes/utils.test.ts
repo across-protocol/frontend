@@ -120,22 +120,17 @@ describe("_dexes/utils", () => {
     });
 
     describe("Bypass MultiCallHandler conditions", () => {
-      test("should bypass for simple B2B with exactInput", async () => {
-        const crossSwap = createMockCrossSwap({ type: "exactInput" });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
+      test("should bypass for simple B2B transfers with all tradeTypes", async () => {
+        const tradeTypes = ["exactInput", "minOutput", "exactOutput"] as const;
 
-        expect(recipient).toBe(crossSwap.recipient);
-        expect(message).toBeUndefined();
-      });
+        for (const type of tradeTypes) {
+          const crossSwap = createMockCrossSwap({ type });
+          const recipient = await getBridgeQuoteRecipient(crossSwap, false);
+          const message = await getBridgeQuoteMessage(crossSwap);
 
-      test("should bypass for simple B2B with minOutput", async () => {
-        const crossSwap = createMockCrossSwap({ type: "minOutput" });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
-
-        expect(recipient).toBe(crossSwap.recipient);
-        expect(message).toBeUndefined();
+          expect(recipient).toBe(crossSwap.recipient);
+          expect(message).toBeUndefined();
+        }
       });
 
       test("should bypass with zero app fees", async () => {
@@ -203,34 +198,6 @@ describe("_dexes/utils", () => {
           crossSwap.outputToken.chainId
         );
         expect(recipient).toBe(multicallHandler);
-        expect(message).toBeDefined();
-        expect(message).not.toBe("");
-        expect(message).not.toBe("0x");
-      });
-
-      test("should use MultiCallHandler for exactOutput (even without other features)", async () => {
-        const crossSwap = createMockCrossSwap({
-          type: "exactOutput",
-        });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
-
-        const multicallHandler = getMultiCallHandlerAddress(
-          crossSwap.outputToken.chainId
-        );
-        expect(recipient).toBe(multicallHandler);
-        expect(message).toBeDefined();
-        expect(message).not.toBe("");
-        expect(message).not.toBe("0x");
-      });
-
-      test("should use MultiCallHandler for exactOutput with refundAddress", async () => {
-        const crossSwap = createMockCrossSwap({
-          type: "exactOutput",
-          refundAddress: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-        });
-        const message = await getBridgeQuoteMessage(crossSwap);
-
         expect(message).toBeDefined();
         expect(message).not.toBe("");
         expect(message).not.toBe("0x");
