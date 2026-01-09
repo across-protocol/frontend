@@ -37,6 +37,7 @@ const B2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
@@ -50,6 +51,7 @@ const B2A_BASE_TEST_CASE = {
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
@@ -63,6 +65,7 @@ const A2B_BASE_TEST_CASE = {
   outputToken: TOKEN_SYMBOLS_MAP.USDC,
   originChainId: CHAIN_IDs.BASE,
   destinationChainId: CHAIN_IDs.OPTIMISM,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
@@ -76,6 +79,7 @@ const A2A_BASE_TEST_CASE = {
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
+  refundOnOrigin: true,
   slippage: SLIPPAGE,
 } as const;
 
@@ -96,6 +100,7 @@ describe("execute response of GET /swap/approval", () => {
     depositor: string;
     recipient: string;
     slippage: number | "auto";
+    refundOnOrigin: boolean;
   }) {
     const response = await axios.get(SWAP_API_URL, {
       params: {
@@ -120,6 +125,7 @@ describe("execute response of GET /swap/approval", () => {
       outputToken,
       amounts,
       slippage,
+      refundOnOrigin,
     } = testCase;
     const amount = amounts[tradeType];
     const depositor = opts?.freshDepositorWallet
@@ -158,6 +164,7 @@ describe("execute response of GET /swap/approval", () => {
           depositor,
           recipient,
           slippage,
+          refundOnOrigin,
         }),
         getBalance(originChainId, inputTokenAddress, depositor),
         getBalance(destinationChainId, outputTokenAddress, recipient),
