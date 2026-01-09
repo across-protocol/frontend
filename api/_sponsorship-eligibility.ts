@@ -25,6 +25,7 @@ const {
   SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT:
     _SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT,
   SPONSORED_SWAP_SLIPPAGE_TOLERANCE: _SPONSORED_SWAP_SLIPPAGE_TOLERANCE,
+  MAX_BPS_TO_SPONSOR_LIMIT: _MAX_BPS_TO_SPONSOR_LIMIT,
 } = getEnvs();
 
 /**
@@ -67,6 +68,13 @@ export const SPONSORED_SWAP_SLIPPAGE_TOLERANCE =
     : 1;
 
 /**
+ * Maximum bps to sponsor limit for sponsored mint/burn transactions.
+ */
+export const MAX_BPS_TO_SPONSOR_LIMIT = _MAX_BPS_TO_SPONSOR_LIMIT
+  ? Number(_MAX_BPS_TO_SPONSOR_LIMIT)
+  : 5;
+
+/**
  * List of token pairs that are eligible for sponsorship.
  */
 export const SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS = [
@@ -88,6 +96,8 @@ export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
     "USDH-SPOT": utils.parseUnits("1000000", 6), // 1M USDC
     "USDT-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
     "USDC-SPOT": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-SPOT-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-PERPS-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
   },
   USDT: {
     "USDC-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
@@ -101,6 +111,18 @@ export class SponsoredSwapSlippageTooHighError extends InputError {
       {
         message: args.message,
         code: AcrossErrorCode.SPONSORED_SWAP_SLIPPAGE_TOO_HIGH,
+      },
+      opts
+    );
+  }
+}
+
+export class MaxBpsToSponsorTooHighError extends InputError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.MAX_BPS_TO_SPONSOR_TOO_HIGH,
       },
       opts
     );
@@ -230,11 +252,17 @@ export async function assertSponsoredAmountCanBeCovered(params: {
   swapSlippageBps: number;
   inputAmount: BigNumber;
 }) {
-  const { swapSlippageBps } = params;
+  const { swapSlippageBps, maxBpsToSponsor } = params;
 
   if (!isSponsoredSwapSlippageTolerable(swapSlippageBps)) {
     throw new SponsoredSwapSlippageTooHighError({
       message: `Sponsored swap slippage is too high: ${swapSlippageBps} bps`,
+    });
+  }
+
+  if (!isMaxBpsToSponsorTolerable(maxBpsToSponsor)) {
+    throw new MaxBpsToSponsorTooHighError({
+      message: `Max bps to sponsor is too high: ${maxBpsToSponsor} bps`,
     });
   }
 
@@ -256,6 +284,16 @@ export async function assertSponsoredAmountCanBeCovered(params: {
 export function isSponsoredSwapSlippageTolerable(swapSlippageBps: number) {
   const swapSlippage = swapSlippageBps / 100;
   return swapSlippage <= SPONSORED_SWAP_SLIPPAGE_TOLERANCE;
+}
+
+/**
+ * Checks if maxBpsToSponsor is within the acceptable range. Checked after the
+ * sponsorship amounts are calculated.
+ * @param maxBpsToSponsor - The calculated maxBpsToSponsor in bps.
+ * @returns True if the maxBpsToSponsor is within the acceptable range, false otherwise.
+ */
+export function isMaxBpsToSponsorTolerable(maxBpsToSponsor: number) {
+  return maxBpsToSponsor <= MAX_BPS_TO_SPONSOR_LIMIT;
 }
 
 /**

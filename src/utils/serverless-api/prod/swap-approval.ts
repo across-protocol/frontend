@@ -46,7 +46,11 @@ type MaxTotalFeeBreakdownDetails = {
 };
 
 export type SwapApprovalApiResponse = {
-  crossSwapType: "anyToAny" | "bridgeToAny" | "anyToBridge" | "bridgeToBridge";
+  crossSwapType:
+    | "anyToAny"
+    | "bridgeableToAny"
+    | "anyToBridgeable"
+    | "bridgeableToBridgeable";
   amountType: string;
   checks: {
     allowance: {

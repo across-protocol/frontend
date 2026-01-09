@@ -1,13 +1,16 @@
 import axios from "axios";
+import { describe, expect, it } from "vitest";
+
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { Address, parseUnits, PrivateKeyAccount } from "viem";
 
 import { e2eConfig, JEST_TIMEOUT_MS } from "../utils/config";
-import { executeApprovalAndDeposit } from "../utils/deposit";
+import {
+  executeApprovalAndDeposit,
+  type SwapQuoteResponse,
+} from "../utils/deposit";
 import { executeFill } from "../utils/fill";
 import { getBalance } from "../utils/token";
-
-import { type SwapQuoteResponse } from "../utils/deposit";
 
 type TradeType = "exactInput" | "exactOutput" | "minOutput";
 
@@ -15,6 +18,14 @@ const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
 const SLIPPAGE = "auto";
+
+const USDS = {
+  symbol: "USDS",
+  decimals: 18,
+  addresses: {
+    [CHAIN_IDs.BASE]: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
+  },
+};
 
 const B2B_BASE_TEST_CASE = {
   amounts: {
@@ -32,43 +43,37 @@ const B2B_BASE_TEST_CASE = {
 const B2A_BASE_TEST_CASE = {
   amounts: {
     exactInput: parseUnits("1", 6), // 1 USDC
-    exactOutput: parseUnits("1", 18), // 1 OP
-    minOutput: parseUnits("1", 18), // 1 OP
+    exactOutput: parseUnits("1", 18), // 1 USDS
+    minOutput: parseUnits("1", 18), // 1 USDS
   },
   inputToken: TOKEN_SYMBOLS_MAP.USDC,
-  outputToken: TOKEN_SYMBOLS_MAP.OP,
-  originChainId: CHAIN_IDs.BASE,
-  destinationChainId: CHAIN_IDs.OPTIMISM,
-  slippage: SLIPPAGE,
-} as const;
-
-const A2B_BASE_TEST_CASE = {
-  amounts: {
-    exactInput: parseUnits("1", 18), // 1 OP
-    exactOutput: parseUnits("1", 6), // 1 USDC
-    minOutput: parseUnits("1", 6), // 1 USDC
-  },
-  inputToken: TOKEN_SYMBOLS_MAP.OP,
-  outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   slippage: SLIPPAGE,
 } as const;
 
+const A2B_BASE_TEST_CASE = {
+  amounts: {
+    exactInput: parseUnits("1", 18), // 1 USDS
+    exactOutput: parseUnits("1", 6), // 1 USDC
+    minOutput: parseUnits("1", 6), // 1 USDC
+  },
+  inputToken: USDS,
+  outputToken: TOKEN_SYMBOLS_MAP.USDC,
+  originChainId: CHAIN_IDs.BASE,
+  destinationChainId: CHAIN_IDs.OPTIMISM,
+  slippage: SLIPPAGE,
+} as const;
+
 const A2A_BASE_TEST_CASE = {
   amounts: {
-    exactInput: parseUnits("1", 18), // 1 OP
+    exactInput: parseUnits("1", 6), // 1 USDC.e
     exactOutput: parseUnits("1", 18), // 1 USDS
     minOutput: parseUnits("1", 18), // 1 USDS
   },
-  inputToken: TOKEN_SYMBOLS_MAP.OP,
-  outputToken: {
-    symbol: "USDS",
-    decimals: 18,
-    addresses: {
-      [CHAIN_IDs.BASE]: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
-    },
-  },
+  inputToken: TOKEN_SYMBOLS_MAP["USDC.e"],
+  outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   slippage: SLIPPAGE,
@@ -128,8 +133,10 @@ describe("execute response of GET /swap/approval", () => {
     ] as Address;
     const originClient = e2eConfig.getClient(originChainId);
     const destinationClient = e2eConfig.getClient(destinationChainId);
-    await originClient.tevmReady();
-    await destinationClient.tevmReady();
+    await Promise.all([
+      originClient.tevmReady(),
+      destinationClient.tevmReady(),
+    ]);
 
     // Set funds for depositor
     await originClient.tevmDeal({
@@ -321,6 +328,7 @@ describe("execute response of GET /swap/approval", () => {
             "exactInput",
             B2A_BASE_TEST_CASE
           );
+          const blockNumber = await originClient.getBlockNumber();
 
           // Mine next block to make the deposit expired (2 minutes from now)
           await originClient.tevmMine({ blockCount: 2, interval: 2 * 60 });
@@ -328,6 +336,8 @@ describe("execute response of GET /swap/approval", () => {
           await expect(executeApprovalAndDeposit(swapQuote)).rejects.toThrow(
             /revert/
           );
+
+          await originClient.reset({ blockNumber });
         },
         JEST_TIMEOUT_MS
       );

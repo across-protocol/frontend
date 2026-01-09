@@ -1,11 +1,8 @@
-import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
-  TokenAmountInputWrapper,
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
@@ -13,6 +10,8 @@ import {
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
 import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
+import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: BigNumber | undefined;
@@ -36,28 +35,17 @@ export const DestinationTokenDisplay = ({
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
-  const { destinationToken, originToken } = quoteRequest;
-
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: destinationToken,
-    setAmount: setDestinationAmount,
-    expectedAmount: expectedOutputAmount,
-    shouldUpdate,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
+  const { destinationToken, originToken, customDestinationAccount } =
+    quoteRequest;
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
+
+  const displayAmount = shouldUpdate
+    ? expectedOutputAmount
+    : quoteRequest.amount;
 
   return (
     <TokenInputWrapper>
@@ -67,26 +55,22 @@ export const DestinationTokenDisplay = ({
           <ChangeAccountModal />
         </TokenAmountInputTitle>
 
-        <TokenAmountInputWrapper
-          showPrefix={unit === "usd"}
-          value={amountString}
+        <AmountInput
+          id="destination-amount-input"
+          name="destination-amount-input"
+          amount={displayAmount}
+          token={destinationToken}
+          unit={unit}
+          shouldUpdate={shouldUpdate}
+          disabled={inputDisabled}
           error={false}
-        >
-          <TokenAmountInput
-            id="destination-amount-input"
-            name="destination-amount-input"
-            placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
-            disabled={inputDisabled}
-            error={false}
-          />
-        </TokenAmountInputWrapper>
+          setAmount={setDestinationAmount}
+        />
         <ToggleUnitButton
-          onClick={toggleUnit}
+          setUnit={setUnit}
           unit={unit}
           token={destinationToken}
-          convertedAmount={convertedAmount}
+          amount={displayAmount}
         />
       </TokenAmountStack>
       <TokenSelectorColumn>
@@ -99,16 +83,12 @@ export const DestinationTokenDisplay = ({
           otherToken={originToken}
         />
 
-        {destinationToken && (
+        {destinationToken && !customDestinationAccount && (
           <BalanceSelector
             token={destinationToken}
             disableHover={true}
             error={false}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount, destinationToken.decimals);
-              }
-            }}
+            setAmount={setDestinationAmount}
           />
         )}
       </TokenSelectorColumn>

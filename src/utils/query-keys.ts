@@ -171,3 +171,7 @@ export function universalSwapQuoteQueryKey(
 ) {
   return ["universal-swap-quote", params] as const;
 }
+
+export function nameResolverQueryKey(name: string | undefined) {
+  return ["nameResolver", name] as const;
+}

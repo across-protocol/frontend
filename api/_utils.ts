@@ -95,6 +95,7 @@ import { isMessageTooLong } from "./_message";
 import { getSvmTokenInfo } from "./_svm-tokens";
 import { Span } from "@opentelemetry/api";
 import { getNormalizedSpotTokenSymbol } from "./_hypercore";
+import * as pool from "./_pool";
 
 export const { Profiler, toAddressType } = sdk.utils;
 export {
@@ -486,7 +487,6 @@ export const getTokenByAddress = (
       "WETH",
       "WPOL",
       "WHYPE",
-      "TATARA-WBTC",
       "WBNB",
       "WGHO",
       "WGRASS",
@@ -592,7 +592,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
  */
 export const getHubPoolClient = () => {
   const hubPoolConfig = makeHubPoolClientConfig(HUB_POOL_CHAIN_ID);
-  return new sdk.pool.Client(
+  return new pool.Client(
     hubPoolConfig,
     {
       provider: getProvider(HUB_POOL_CHAIN_ID),

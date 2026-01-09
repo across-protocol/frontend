@@ -52,7 +52,7 @@ const mockOutputApiToken = {
 };
 
 const mockSwapQuote: SwapApprovalQuote = {
-  crossSwapType: "bridgeToBridge",
+  crossSwapType: "bridgeableToBridgeable",
   amountType: "exactInput",
   approvalTxns: undefined,
   eip712: undefined,
@@ -207,7 +207,7 @@ const createQuoteWithProvider = (
 
 const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
-  title: "Stories/ConfirmationButton",
+  title: "Bridge/ConfirmationButton",
   argTypes: {
     isQuoteLoading: {
       control: { type: "boolean" },
