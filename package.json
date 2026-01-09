@@ -72,7 +72,7 @@
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
     "dev:api": "vercel dev --listen 127.0.0.1:3000",
-    "build": "tsc && vite build",
+    "build": "NODE_OPTIONS='--max-old-space-size=16384' tsc && NODE_OPTIONS='--max-old-space-size=16384' vite build",
     "prebuild": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && yarn remote-config && yarn remote-env && yarn cache-swap-tokens",
     "remote-config": "tsx scripts/fetch-remote-config.ts",
     "remote-env": "tsx ./scripts/fetch-remote-env.ts",
