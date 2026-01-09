@@ -98,6 +98,9 @@ export type QuoteFetchStrategies = Partial<{
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
   };
+  inputTokens: {
+    [inputTokenSymbol: string]: QuoteFetchStrategy[];
+  };
   swapPairs: {
     [chainId: number]: {
       [tokenInSymbol: string]: {
@@ -804,6 +807,7 @@ export function getQuoteFetchStrategies(
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
     strategies.chains?.[chainId] ??
+    strategies.inputTokens?.[tokenInSymbol] ??
     strategies.default ??
     defaultQuoteFetchStrategies.default!
   );
