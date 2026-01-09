@@ -38,6 +38,7 @@ export const enabledSepoliaChainConfigs = [
   chainConfigs.LISK_SEPOLIA,
   chainConfigs.LENS_SEPOLIA,
   chainConfigs.UNICHAIN_SEPOLIA,
+  chainConfigs.TATARA,
   chainConfigs.SOLANA_DEVNET,
 ];
 

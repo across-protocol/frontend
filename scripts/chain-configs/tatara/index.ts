@@ -4,20 +4,21 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.SEPOLIA;
+const chainId = CHAIN_IDs.TATARA;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  logoPath: "../mainnet/assets/logo.svg",
-  grayscaleLogoPath: "../mainnet/assets/grayscale-logo.svg",
+  logoPath: "./assets/logo.svg",
+  grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
     address: getDeployedAddress("SpokePool", chainId),
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://gateway.tenderly.co/public/sepolia",
-  tokens: ["WETH", "ETH", "USDC", "GRASS", "XYZ", "TATARA-USDC"],
+  publicRpcUrl:
+    "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
+  blockTimeSeconds: 1,
+  tokens: ["TATARA-USDC", "WETH"],
   enableCCTP: false,
-  swapTokens: [],
 } as ChainConfig;

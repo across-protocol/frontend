@@ -42,6 +42,7 @@ describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
 
     const usdcDecimals = TOKEN_SYMBOLS_MAP.USDC.decimals; // 6
     const usdcBnbDecimals = TOKEN_SYMBOLS_MAP["USDC-BNB"].decimals; // 18
+    const tataraUsdsDecimals = TOKEN_SYMBOLS_MAP["TATARA-USDS"].decimals; // 18
 
     const result = populateDefaultRelayerFeeCapitalCostConfig(baseConfig);
 
@@ -62,9 +63,26 @@ describe("populateDefaultRelayerFeeCapitalCostConfig", () => {
       ...usdcBaseConfig,
       decimals: usdcBnbDecimals,
     });
+    // TATARA-USDS (18 decimals)
+    expect(result["TATARA-USDS"]).toEqual({
+      ...usdcBaseConfig,
+      decimals: tataraUsdsDecimals,
+    });
+    // TATARA-USDC (6 decimals)
+    expect(result["TATARA-USDC"]).toEqual({
+      ...usdcBaseConfig,
+      decimals: TOKEN_SYMBOLS_MAP["TATARA-USDC"].decimals,
+    });
 
     // Ensure all expected equivalents are present
-    const expectedEquivalents = ["USDC.e", "USDC-BNB", "USDzC"];
+    const expectedEquivalents = [
+      "USDC.e",
+      "USDC-BNB",
+      "USDzC",
+      "TATARA-USDC",
+      "TATARA-USDT",
+      "TATARA-USDS",
+    ];
     expectedEquivalents.forEach((eqSymbol) => {
       expect(result[eqSymbol]).toBeDefined();
     });

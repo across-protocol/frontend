@@ -27,6 +27,7 @@ export { default as SEPOLIA } from "./sepolia";
 export { default as SOLANA } from "./solana";
 export { default as SOLANA_DEVNET } from "./solana-devnet";
 export { default as SONEIUM } from "./soneium";
+export { default as TATARA } from "./tatara";
 export { default as UNICHAIN } from "./unichain";
 export { default as UNICHAIN_SEPOLIA } from "./unichain-sepolia";
 export { default as WORLD_CHAIN } from "./world-chain";
