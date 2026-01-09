@@ -32,7 +32,6 @@ import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
-import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 import { isTokenUnreachable } from "./isTokenUnreachable";
 import { useTrackChainSelected } from "./useTrackChainSelected";
 import { useTrackTokenSelected } from "./useTrackTokenSelected";
@@ -149,27 +148,25 @@ export function ChainTokenSelectorModal({
     });
 
     // Filter by search first
-    const filteredTokens = enrichedTokens
-      .filter((t) => {
-        // First filter by selected chain
-        if (selectedChain !== null && t.chainId !== selectedChain) {
-          return false;
-        }
+    const filteredTokens = enrichedTokens.filter((t) => {
+      // First filter by selected chain
+      if (selectedChain !== null && t.chainId !== selectedChain) {
+        return false;
+      }
 
-        if (tokenSearch === "") {
-          return true;
-        }
+      if (tokenSearch === "") {
+        return true;
+      }
 
-        const keywords = [
-          t.symbol.toLowerCase().replaceAll(" ", ""),
-          t.name.toLowerCase().replaceAll(" ", ""),
-          t.address.toLowerCase().replaceAll(" ", ""),
-        ];
-        return keywords.some((keyword) =>
-          keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
-        );
-      })
-      .filter(getBridgeableSvmTokenFilterPredicate(isOriginToken, otherToken));
+      const keywords = [
+        t.symbol.toLowerCase().replaceAll(" ", ""),
+        t.name.toLowerCase().replaceAll(" ", ""),
+        t.address.toLowerCase().replaceAll(" ", ""),
+      ];
+      return keywords.some((keyword) =>
+        keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
+      );
+    });
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
