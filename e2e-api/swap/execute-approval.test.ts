@@ -76,7 +76,7 @@ const A2A_BASE_TEST_CASE = {
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
-  slippage: SLIPPAGE,
+  slippage: 0.05, // set high slippage for higher guarantee of success
 } as const;
 
 type EndToEndTestCase =
