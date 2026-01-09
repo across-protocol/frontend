@@ -62,26 +62,26 @@ function getUniswapTokens(
   }, []);
 }
 
-function getLifiTokens(
+function getNativeTokensFromLifiTokens(
   lifiTokensResponse: any,
-  chainIds: number[]
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
 ): SwapToken[] {
   return chainIds.reduce((acc: SwapToken[], chainId) => {
-    const tokens = lifiTokensResponse?.tokens?.[chainId];
-    if (!tokens) {
-      return acc;
-    }
-    tokens.forEach((token: any) => {
+    const nativeToken = lifiTokensResponse?.tokens?.[chainId]?.find(
+      (token: any) => token.address === constants.AddressZero
+    );
+    if (nativeToken) {
       acc.push({
         chainId,
-        address: token.address,
-        name: token.name,
-        symbol: token.symbol,
-        decimals: token.decimals,
-        logoUrl: token.logoURI,
-        priceUsd: token.priceUSD || null,
+        address: nativeToken.address,
+        name: nativeToken.name,
+        symbol: nativeToken.symbol,
+        decimals: nativeToken.decimals,
+        logoUrl: nativeToken.logoURI,
+        priceUsd: pricesForLifiTokens[chainId]?.[nativeToken.address] || null,
       });
-    });
+    }
     return acc;
   }, []);
 }
@@ -451,9 +451,13 @@ export async function fetchSwapTokensData(
   );
   responseJson.push(...uniswapTokens);
 
-  // Add LiFi token
-  const lifiTokens = getLifiTokens(lifiTokensResponse.data, targetChainIds);
-  responseJson.push(...lifiTokens);
+  // Add native tokens from LiFi
+  const nativeTokens = getNativeTokensFromLifiTokens(
+    lifiTokensResponse.data,
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...nativeTokens);
 
   // Add Jupiter tokens
   const jupiterTokens = getJupiterTokens(
