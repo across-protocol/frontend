@@ -50,13 +50,6 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPEREVM],
     toSymbol: ["USDH"],
   },
-  // only allow bridegable output to SOlana
-  {
-    fromChainId: "*",
-    fromSymbol: ["*"],
-    toChainId: [CHAIN_IDs.SOLANA],
-    toSymbol: ["!USDC"],
-  },
 ];
 
 // simple glob tester. supports only:  ["*" , "!"]
