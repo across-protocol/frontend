@@ -44,7 +44,11 @@ export function FallbackComponent(props: { error: Error }) {
 export function ErrorBoundary(props: { children: React.ReactNode }) {
   return (
     <Sentry.ErrorBoundary
-      fallback={({ error }) => <FallbackComponent error={error} />}
+      fallback={({ error }) => (
+        <FallbackComponent
+          error={error instanceof Error ? error : new Error(String(error))}
+        />
+      )}
       beforeCapture={(scope) => scope.setLevel("fatal")}
     >
       {props.children}
