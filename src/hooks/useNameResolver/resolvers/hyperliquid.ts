@@ -1,6 +1,8 @@
 import { NameResolver } from "./types";
 
 const HYPERLIQUID_NAMES_API_URL = "https://api.hlnames.xyz/resolve/address";
+const HYPERLIQUID_NAMES_API_URL_REVERSE =
+  "https://api.hlnames.xyz/resolve/primary_name";
 const HYPERLIQUID_NAMES_API_KEY = "CPEPKMI-HUSUX6I-SE2DHEA-YYWFG5Y";
 
 export const hyperliquidResolver: NameResolver = {
@@ -20,3 +22,27 @@ export const hyperliquidResolver: NameResolver = {
     return response?.address ?? null;
   },
 };
+
+export async function reverseResolveHyperliquid(
+  address: string
+): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `${HYPERLIQUID_NAMES_API_URL_REVERSE}/${address}`,
+      {
+        headers: {
+          "X-API-Key": HYPERLIQUID_NAMES_API_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data?.name ?? data?.domain ?? null;
+  } catch {
+    return null;
+  }
+}
