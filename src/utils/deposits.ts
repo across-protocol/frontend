@@ -9,7 +9,7 @@ import { TransactionReceipt, Log } from "@ethersproject/providers";
 import {
   FundsDepositedEvent,
   FilledRelayEvent,
-} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
+} from "@across-protocol/contracts/dist/typechain/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
 import { Signature } from "@solana/kit";
