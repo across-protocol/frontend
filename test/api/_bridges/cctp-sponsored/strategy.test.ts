@@ -518,6 +518,73 @@ describe("api/_bridges/cctp-sponsored/strategy", () => {
       expect(result.quote.maxFee).toEqual(expectedMaxFee);
     });
 
+    test("should handle float transferFeeBps correctly", async () => {
+      // Use an amount to verify float handling: 1,000,000 * 1.5 bps / 10000 = 150
+      const inputAmount = BigNumber.from(1_000_000);
+      const outputAmount = ConvertDecimals(
+        arbitrumUSDC.decimals,
+        hyperCoreUSDC.decimals
+      )(inputAmount);
+
+      const crossSwap: CrossSwap = {
+        amount: inputAmount,
+        inputToken: arbitrumUSDC,
+        outputToken: hyperCoreUSDC,
+        depositor,
+        recipient,
+        slippageTolerance: 1,
+        type: AMOUNT_TYPE.EXACT_INPUT,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+      };
+
+      const quotes: CrossSwapQuotes = {
+        crossSwap,
+        bridgeQuote: {
+          inputToken: arbitrumUSDC,
+          outputToken: hyperCoreUSDC,
+          inputAmount,
+          outputAmount,
+          minOutputAmount: outputAmount,
+          estimatedFillTimeSec: 300,
+          provider: "sponsored-cctp",
+          fees: {
+            token: arbitrumUSDC,
+            pct: BigNumber.from(0),
+            amount: BigNumber.from(0),
+          },
+        },
+        contracts: {
+          depositEntryPoint: {
+            address: "0x0000000000000000000000000000000000000000",
+            name: "SpokePoolPeriphery",
+          },
+        },
+      };
+
+      // Mock CCTP fees with 1.5 bps (a float value)
+      vi.spyOn(cctpFees, "getCctpFees").mockResolvedValue({
+        transferFeeBps: 1.5,
+        forwardFee: BigNumber.from(0),
+      });
+      vi.spyOn(
+        sponsorshipEligibility,
+        "assertSponsoredAmountCanBeCovered"
+      ).mockResolvedValue(true);
+
+      const result = await _prepareSponsoredTx({
+        quotes,
+        isEligibleForSponsorship: true,
+      });
+
+      // Expected maxFee with float bps:
+      // transferFeeBpsScaled = 1.5 * 100 = 150
+      // maxFee = ceil(1,000,000 * 150 / 1,000,000) = ceil(150) = 150
+      const expectedMaxFee = BigNumber.from(150);
+      expect(result.quote.maxFee).toEqual(expectedMaxFee);
+    });
+
     test("should use pre-calculated maxFee when not eligible for sponsorship", async () => {
       const inputAmount = utils.parseUnits("1", arbitrumUSDC.decimals);
       const outputAmount = utils.parseUnits("1", hyperCoreUSDC.decimals);
