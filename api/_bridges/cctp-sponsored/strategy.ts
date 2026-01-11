@@ -511,10 +511,13 @@ export async function _prepareSponsoredTx(params: {
       // route through our own sponsorship periphery contract.
       useForwardFee: false,
     });
+    const floatBpsScaler = 100;
+    // transferFeeBps can be a float
+    const transferFeeBpsScaled = transferFeeBps * floatBpsScaler;
     // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
     maxFee = divCeil(
-      bridgeQuote.inputAmount.mul(transferFeeBps),
-      BigNumber.from(10_000)
+      bridgeQuote.inputAmount.mul(transferFeeBpsScaled),
+      BigNumber.from(10_000 * floatBpsScaler)
     );
   }
   // If not eligible for sponsorship, we use the pre-calculated max fee from the bridge quote.
