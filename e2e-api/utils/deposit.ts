@@ -4,6 +4,7 @@ import { e2eConfig } from "./config";
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { SpokePoolAbi } from "./abis";
 import { handleTevmError } from "./tevm";
+import { MemoryClient } from "tevm";
 
 export type SwapQuoteResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
@@ -46,18 +47,19 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
   return receipts;
 }
 
-export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
+export async function executeApprovalAndDeposit(
+  swapQuote: SwapQuoteResponse,
+  originClient: MemoryClient
+) {
   const approvalReceipts = await executeApprovalTxnsIfAny(swapQuote);
 
   if (!swapQuote.swapTx) {
     throw new Error("swapQuote.swapTx is required");
   }
 
-  const { chainId } = swapQuote.swapTx;
   const depositor = e2eConfig.getAccount("depositor");
-  const client = e2eConfig.getClient(chainId);
 
-  const swapCallResult = await client.tevmCall({
+  const swapCallResult = await originClient.tevmCall({
     to: swapQuote.swapTx.to as Address,
     data: swapQuote.swapTx.data as Hex,
     value: BigInt(swapQuote.swapTx.value || 0),
@@ -65,13 +67,13 @@ export async function executeApprovalAndDeposit(swapQuote: SwapQuoteResponse) {
     onAfterMessage: handleTevmError,
     addToBlockchain: true,
   });
-  await client.tevmMine({ blockCount: 1 });
+  await originClient.tevmMine({ blockCount: 1 });
 
   if (!swapCallResult.txHash) {
     throw new Error("Swap call failed");
   }
 
-  const swapReceipt = await client.waitForTransactionReceipt({
+  const swapReceipt = await originClient.waitForTransactionReceipt({
     hash: swapCallResult.txHash,
   });
 

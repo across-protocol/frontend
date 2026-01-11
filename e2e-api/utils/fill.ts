@@ -6,6 +6,7 @@ import {
   parseEventLogs,
   zeroAddress,
 } from "viem";
+import { MemoryClient } from "tevm";
 
 import { e2eConfig, getSpokePoolAddress } from "./config";
 import { setAllowance } from "./token";
@@ -19,12 +20,12 @@ export type ExecuteFillParams = {
   originChainId: number;
   repaymentChainId?: number;
   repaymentAddress?: string;
+  destinationClient: MemoryClient;
 };
 
 export async function executeFill(params: ExecuteFillParams) {
-  const { depositEvent, originChainId } = params;
+  const { depositEvent, originChainId, destinationClient } = params;
   const destinationChainId = Number(depositEvent.args.destinationChainId);
-  const destinationClient = e2eConfig.getClient(destinationChainId);
   const relayer = e2eConfig.getAccount("relayer");
 
   const repaymentChainId = params.repaymentChainId ?? destinationChainId;
