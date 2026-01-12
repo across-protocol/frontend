@@ -73,7 +73,7 @@ const Wallet = () => {
   );
 };
 
-const ConnectedAccount = (props: {
+export const ConnectedAccount = (props: {
   chainLogoUrl: string;
   chainName: string;
   address: string;
