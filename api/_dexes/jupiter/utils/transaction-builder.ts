@@ -3,7 +3,10 @@ import {
   AccountRole,
   pipe,
   appendTransactionMessageInstruction,
+  appendTransactionMessageInstructions,
+  Instruction,
 } from "@solana/kit";
+import type { BaseTransactionMessage } from "@solana/kit";
 import { JupiterIx, JupiterSwapIxs } from "./api";
 
 /**
@@ -47,21 +50,17 @@ export function processJupiterIxs(jupiterResponse: JupiterSwapIxs) {
 /**
  * Append Jupiter swap instructions to a base transaction
  */
-export function appendJupiterIxs(baseTxn: any, ixs: JupiterSwapIxs) {
+export function appendJupiterIxs<T extends BaseTransactionMessage>(
+  baseTxn: T,
+  ixs: JupiterSwapIxs
+) {
   const processedIxs = processJupiterIxs(ixs);
   const txn = pipe(
     baseTxn,
     // NOTE: Order matters when appending instructions
     (tx) =>
-      processedIxs.computeBudgetIxs.reduce(
-        (acc, ix) => appendTransactionMessageInstruction(ix, acc),
-        tx
-      ),
-    (tx) =>
-      processedIxs.setupIxs.reduce(
-        (acc, ix) => appendTransactionMessageInstruction(ix, acc),
-        tx
-      ),
+      appendTransactionMessageInstructions(processedIxs.computeBudgetIxs, tx),
+    (tx) => appendTransactionMessageInstructions(processedIxs.setupIxs, tx),
     (tx) =>
       processedIxs.tokenLedgerIx
         ? appendTransactionMessageInstruction(processedIxs.tokenLedgerIx, tx)
