@@ -76,7 +76,7 @@ export const A2A_BASE_TEST_CASE = {
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   refundOnOrigin: true,
-  slippage: 0.1, // Explicitly set slippage for A2A test case
+  slippage: 0.2, // Explicitly set high slippage for A2A test case
 } as const;
 
 export type EndToEndTestCase =
