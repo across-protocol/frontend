@@ -221,7 +221,6 @@ export function getCrossSwapTypes(params: {
  * ## Prerequisites
  *
  * ALL of the following must be true:
- * - Amount type is exactInput or minOutput (exactOutput needs precise handling & refunds)
  * - No origin swap (origin swaps need MulticallHandler for metadata events)
  * - No app fees
  * - No embedded actions
@@ -249,12 +248,6 @@ async function shouldBypassMultiCallHandler(
   crossSwap: CrossSwap,
   hasOriginSwap: boolean
 ): Promise<boolean> {
-  // Only bypass for exactInput and minOutput trade types
-  // exactOutput is excluded since it requires MultiCallHandler to handle precise output transfers and potential refunds
-  const isValidAmountType =
-    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT ||
-    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT;
-
   // Check if app fees are specified
   const hasAppFees =
     crossSwap.appFeePercent !== undefined &&
@@ -266,7 +259,7 @@ async function shouldBypassMultiCallHandler(
     crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
 
   // Early exit if basic conditions aren't met
-  if (!isValidAmountType || hasOriginSwap || hasAppFees || hasEmbeddedActions) {
+  if (hasOriginSwap || hasAppFees || hasEmbeddedActions) {
     return false;
   }
 
