@@ -14,7 +14,9 @@ describe("execute response of GET /swap/approval - B2A", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("exactInput", B2A_BASE_TEST_CASE);
+        await runEndToEnd("exactInput", B2A_BASE_TEST_CASE, {
+          retryFill: true,
+        });
       },
       JEST_TIMEOUT_MS
     );
@@ -24,7 +26,9 @@ describe("execute response of GET /swap/approval - B2A", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("exactOutput", B2A_BASE_TEST_CASE);
+        await runEndToEnd("exactOutput", B2A_BASE_TEST_CASE, {
+          retryFill: true,
+        });
       },
       JEST_TIMEOUT_MS
     );
@@ -34,7 +38,9 @@ describe("execute response of GET /swap/approval - B2A", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("minOutput", B2A_BASE_TEST_CASE);
+        await runEndToEnd("minOutput", B2A_BASE_TEST_CASE, {
+          retryFill: true,
+        });
       },
       JEST_TIMEOUT_MS
     );

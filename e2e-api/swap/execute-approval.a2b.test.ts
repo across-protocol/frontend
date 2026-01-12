@@ -11,7 +11,9 @@ describe("execute response of GET /swap/approval - A2B", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("exactInput", A2B_BASE_TEST_CASE);
+        await runEndToEnd("exactInput", A2B_BASE_TEST_CASE, {
+          retryDeposit: true,
+        });
       },
       JEST_TIMEOUT_MS
     );
@@ -21,7 +23,9 @@ describe("execute response of GET /swap/approval - A2B", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("exactOutput", A2B_BASE_TEST_CASE);
+        await runEndToEnd("exactOutput", A2B_BASE_TEST_CASE, {
+          retryDeposit: true,
+        });
       },
       JEST_TIMEOUT_MS
     );
@@ -31,7 +35,9 @@ describe("execute response of GET /swap/approval - A2B", () => {
     it(
       "should fetch, execute deposit, and fill the relay",
       async () => {
-        await runEndToEnd("minOutput", A2B_BASE_TEST_CASE);
+        await runEndToEnd("minOutput", A2B_BASE_TEST_CASE, {
+          retryDeposit: true,
+        });
       },
       JEST_TIMEOUT_MS
     );

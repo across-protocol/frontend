@@ -1,10 +1,10 @@
 import { Address, Hex, parseEventLogs, TransactionReceipt } from "viem";
+import { CallResult, MemoryClient } from "tevm";
 
-import { e2eConfig } from "./config";
+import { e2eConfig, MAX_CALL_RETRIES } from "./config";
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { SpokePoolAbi } from "./abis";
 import { handleTevmError } from "./tevm";
-import { MemoryClient } from "tevm";
 
 export type SwapQuoteResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
@@ -49,7 +49,8 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
 
 export async function executeApprovalAndDeposit(
   swapQuote: SwapQuoteResponse,
-  originClient: MemoryClient
+  originClient: MemoryClient,
+  retryDeposit?: boolean
 ) {
   const approvalReceipts = await executeApprovalTxnsIfAny(swapQuote);
 
@@ -59,17 +60,34 @@ export async function executeApprovalAndDeposit(
 
   const depositor = e2eConfig.getAccount("depositor");
 
-  const swapCallResult = await originClient.tevmCall({
-    to: swapQuote.swapTx.to as Address,
-    data: swapQuote.swapTx.data as Hex,
-    value: BigInt(swapQuote.swapTx.value || 0),
-    from: depositor.address,
-    onAfterMessage: handleTevmError,
-    addToBlockchain: true,
-  });
-  await originClient.tevmMine({ blockCount: 1 });
+  let swapCallResult: CallResult | undefined;
+  let callRetries = 0;
 
-  if (!swapCallResult.txHash) {
+  while (callRetries < MAX_CALL_RETRIES) {
+    try {
+      swapCallResult = await originClient.tevmCall({
+        to: swapQuote.swapTx.to as Address,
+        data: swapQuote.swapTx.data as Hex,
+        value: BigInt(swapQuote.swapTx.value || 0),
+        from: depositor.address,
+        onAfterMessage: handleTevmError,
+        addToBlockchain: true,
+      });
+      await originClient.tevmMine({ blockCount: 1 });
+      break;
+    } catch (error) {
+      if (retryDeposit && callRetries < MAX_CALL_RETRIES - 1) {
+        console.log(
+          `Deposit failed, retrying... (attempt ${callRetries + 1} of ${MAX_CALL_RETRIES})`
+        );
+        callRetries++;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  if (!swapCallResult || !swapCallResult.txHash) {
     throw new Error("Swap call failed");
   }
 

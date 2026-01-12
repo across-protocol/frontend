@@ -184,7 +184,11 @@ export async function prepEndToEndExecution(
 export async function runEndToEnd(
   tradeType: TradeType,
   testCase: EndToEndTestCase,
-  opts?: { freshDepositorWallet?: PrivateKeyAccount }
+  opts?: {
+    freshDepositorWallet?: PrivateKeyAccount;
+    retryDeposit?: boolean;
+    retryFill?: boolean;
+  }
 ) {
   const {
     originChainId,
@@ -203,13 +207,18 @@ export async function runEndToEnd(
 
   // Execute swap tx
   const { approvalReceipts, swapReceipt, depositEvent } =
-    await executeApprovalAndDeposit(swapQuote, originClient);
+    await executeApprovalAndDeposit(
+      swapQuote,
+      originClient,
+      opts?.retryDeposit
+    );
 
   // Fill the relay
   await executeFill({
     depositEvent,
     originChainId,
     destinationClient,
+    retryFill: opts?.retryFill,
   });
 
   // Balances AFTER swap and fill executions

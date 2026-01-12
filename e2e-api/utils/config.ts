@@ -1,11 +1,6 @@
 import dotenv from "dotenv";
 import * as sdk from "@across-protocol/sdk";
-import {
-  createMemoryClient,
-  http,
-  PREFUNDED_ACCOUNTS,
-  createTevmNode,
-} from "tevm";
+import { createMemoryClient, http, PREFUNDED_ACCOUNTS } from "tevm";
 import { optimism, base } from "tevm/common";
 import axios from "axios";
 import nodeHttp from "http";
@@ -14,6 +9,8 @@ import https from "https";
 dotenv.config({ path: [".env.e2e", ".env.local", ".env"] });
 
 export const JEST_TIMEOUT_MS = 180_000;
+
+export const MAX_CALL_RETRIES = 5;
 
 export const axiosInstance = axios.create({
   httpAgent: new nodeHttp.Agent({ keepAlive: false }),
