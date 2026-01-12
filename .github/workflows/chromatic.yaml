@@ -1,16 +1,19 @@
 name: Chromatic
 
 on:
-  # manual trigger
   workflow_dispatch:
+  push:
+    branches:
+      - master
   pull_request:
 
 jobs:
   chromatic-deployment:
-    if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup
       - name: Publish to Chromatic
         uses: chromaui/action@v11
