@@ -1,3 +1,5 @@
+import "@emotion/react";
+import "@emotion/styled";
 import { Preview } from "@storybook/react";
 import { MemoryRouter } from "react-router-dom";
 

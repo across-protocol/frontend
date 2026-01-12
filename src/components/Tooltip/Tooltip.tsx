@@ -9,7 +9,7 @@ import {
   TitleSecondary,
   Wrapper,
 } from "./Tooltip.styles";
-import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
+import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle-icon.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";

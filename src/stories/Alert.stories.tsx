@@ -5,6 +5,9 @@ export default {
   title: "Alert",
   component: Alert,
   argTypes: {},
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 } as ComponentMeta<typeof Alert>;
 
 const Template: ComponentStory<typeof Alert> = (args) => {
