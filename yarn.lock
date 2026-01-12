@@ -26,6 +26,11 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.96.tgz#b3d1d0ddbb71256f329e3a77026f8ffbda4d8828"
   integrity sha512-VlQd9I0huMkQGS4vI9FUcByB/qDh6pbVo6qK/IS/a/Yi0qAQQURjX/K5k3Erf2H9lI7tnTdJIqsJ/tIHS5IrXg==
 
+"@across-protocol/constants@^3.1.95":
+  version "3.1.97"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.97.tgz#a9df3ca45475863b809622cdac4d2a411e0d3450"
+  integrity sha512-W2Q6bxcKNJ2QHtgIfOuCWOv/AmUyhPlXoJSiYZ9C3Ldk+fWupHkvbQ+4Ngg+1CCGD4HJLhyF1eLyxL3zg9tkUA==
+
 "@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.1.tgz#91c8e0fc867911a17f21b2d79d586f95417cb912"
@@ -54,6 +59,38 @@
     axios "^1.7.4"
     bs58 "^6.0.0"
     prettier-plugin-rust "^0.1.9"
+    yargs "^17.7.2"
+    zksync-web3 "^0.14.3"
+
+"@across-protocol/contracts@4.1.19":
+  version "4.1.19"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.19.tgz#77bd0867c5b152ffbdd6e4b786e63fde5027bc72"
+  integrity sha512-362X2tTMCwr9qQJiUX5VRwo3vucgmXALajQisW9dwVBV4NmDtCP+upw5d9okQGsktaRP6nqziSzc4q5NOeJQCg==
+  dependencies:
+    "@across-protocol/constants" "^3.1.95"
+    "@coral-xyz/anchor" "^0.31.1"
+    "@eth-optimism/contracts" "^0.5.40"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@openzeppelin/contracts" "5.5.0"
+    "@openzeppelin/contracts-upgradeable" "5.5.0"
+    "@openzeppelin/contracts-upgradeable-v4" "npm:@openzeppelin/contracts-upgradeable@4.9.6"
+    "@openzeppelin/contracts-v4" "npm:@openzeppelin/contracts@4.9.6"
+    "@openzeppelin/foundry-upgrades" "^0.4.0"
+    "@safe-global/protocol-kit" "^6.1.1"
+    "@scroll-tech/contracts" "^0.1.0"
+    "@solana-developers/helpers" "^2.4.0"
+    "@solana-program/address-lookup-table" "^0.7.0"
+    "@solana-program/token" "^0.5.1"
+    "@solana/kit" "^2.3.0"
+    "@solana/spl-token" "^0.4.6"
+    "@solana/web3.js" "1.98.2"
+    "@types/yargs" "^17.0.33"
+    "@uma/common" "^2.37.3"
+    "@uma/contracts-node" "^0.4.17"
+    axios "^1.7.4"
+    bs58 "^6.0.0"
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
