@@ -71,7 +71,7 @@ export const A2A_BASE_TEST_CASE = {
     exactOutput: parseUnits("1", 18), // 1 USDS
     minOutput: parseUnits("1", 18), // 1 USDS
   },
-  inputToken: TOKEN_SYMBOLS_MAP.OP,
+  inputToken: TOKEN_SYMBOLS_MAP["USDC.e"],
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
