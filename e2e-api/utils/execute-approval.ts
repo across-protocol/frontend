@@ -132,6 +132,9 @@ export async function fetchSwapQuote(
       return response.data as SwapQuoteResponse;
     } catch (error) {
       if (opts?.retry && callRetries < MAX_CALL_RETRIES - 1) {
+        console.log(
+          `Failed to fetch swap quote, retrying... (attempt ${callRetries + 1} of ${MAX_CALL_RETRIES})`
+        );
         await delay(RETRY_DELAY_MS);
         callRetries++;
         continue;
