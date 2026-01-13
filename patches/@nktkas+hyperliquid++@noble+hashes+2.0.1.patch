@@ -1,5 +1,5 @@
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
-index 3573ee9..fce8c4d 100644
+index 3573ee9..0a67c1f 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
 @@ -2,13 +2,13 @@
@@ -35,19 +35,17 @@ index 3573ee9..fce8c4d 100644
      a = (a + b + x) | 0;
      d = rotr(d ^ a, 8);
      c = (c + d) | 0;
-@@ -43,3 +43,9 @@ export function G2s(a, b, c, d, x) {
+@@ -43,3 +43,7 @@ export function G2s(a, b, c, d, x) {
      return { a, b, c, d };
  }
  //# sourceMappingURL=_blake.js.map
 +
 +module.exports = {
 +  BSIGMA,
-+  G1s,
-+  G2s
-+};
++  G1s,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
-index 9dd5b61..c9b944c 100644
+index 9dd5b61..53d62b1 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
 @@ -2,20 +2,20 @@
@@ -75,7 +73,7 @@ index 9dd5b61..c9b944c 100644
      blockLen;
      outputLen;
      padOffset;
-@@ -127,21 +127,31 @@ export class HashMD {
+@@ -127,21 +127,29 @@ export class HashMD {
   * Check out `test/misc/sha2-gen-iv.js` for recomputation guide.
   */
  /** Initial SHA256 state. Bits 0..32 of frac part of sqrt of primes 2..19 */
@@ -108,12 +106,10 @@ index 9dd5b61..c9b944c 100644
 +  HashMD,
 +  SHA256_IV,
 +  SHA224_IV,
-+  SHA384_IV,
-+  SHA512_IV
-+};
++  SHA384_IV,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
-index 6519354..0858168 100644
+index 6519354..2db8292 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
 @@ -53,7 +53,7 @@ const add4H = (low, Ah, Bh, Ch, Dh) => (Ah + Bh + Ch + Dh + ((low / 2 ** 32) | 0
@@ -125,9 +121,11 @@ index 6519354..0858168 100644
  // prettier-ignore
  const u64 = {
      fromBig, split, toBig,
-@@ -65,3 +65,28 @@ const u64 = {
+@@ -63,5 +63,27 @@ const u64 = {
+     rotlSH, rotlSL, rotlBH, rotlBL,
+     add, add3L, add3H, add4L, add4H, add5H, add5L,
  };
- export default u64;
+-export default u64;
  //# sourceMappingURL=_u64.js.map
 +
 +module.exports = {
@@ -151,12 +149,9 @@ index 6519354..0858168 100644
 +  rotrSL,
 +  shrSH,
 +  shrSL,
-+  split,
-+  toBig
-+};
-\ No newline at end of file
++  split};
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
-index eb8f313..3464656 100644
+index eb8f313..9ab7c53 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
 @@ -8,9 +8,9 @@
@@ -187,7 +182,7 @@ index eb8f313..3464656 100644
  async function argon2Async(type, password, salt, opts) {
      const { mP, p, t, version, B, laneLen, lanes, segmentLen, dkLen, perBlock, asyncTick } = argon2Init(password, salt, type, opts);
      // Pre-loop setup
-@@ -383,9 +383,18 @@ async function argon2Async(type, password, salt, opts) {
+@@ -383,9 +383,16 @@ async function argon2Async(type, password, salt, opts) {
      return argon2Output(B, p, laneLen, dkLen);
  }
  /** argon2d async GPU-resistant version. */
@@ -206,12 +201,10 @@ index eb8f313..3464656 100644
 +  argon2i,
 +  argon2id,
 +  argon2dAsync,
-+  argon2iAsync,
-+  argon2idAsync
-+};
++  argon2iAsync,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
-index 1472b71..dbcf3db 100644
+index 1472b71..73c9b73 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
 @@ -22,11 +22,11 @@
@@ -230,7 +223,7 @@ index 1472b71..dbcf3db 100644
  // Empty zero-filled salt
  const EMPTY_SALT = /* @__PURE__ */ new Uint32Array(8);
  class BLAKE1 {
-@@ -451,35 +451,46 @@ class BLAKE1_64B extends BLAKE1 {
+@@ -451,35 +451,44 @@ class BLAKE1_64B extends BLAKE1 {
      }
  }
  /** Internal blake1-224 hash class. */
@@ -282,12 +275,10 @@ index 1472b71..dbcf3db 100644
 +  _BLAKE512,
 +  blake224,
 +  blake256,
-+  blake384,
-+  blake512
-+};
++  blake384,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
-index 792e689..df10b4f 100644
+index 792e689..a04b56f 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
 @@ -3,11 +3,11 @@
@@ -346,7 +337,7 @@ index 792e689..df10b4f 100644
      // Internal state, same as SHA-256
      v0 = B2S_IV[0] | 0;
      v1 = B2S_IV[1] | 0;
-@@ -413,5 +413,14 @@ export class _BLAKE2s extends _BLAKE2 {
+@@ -413,5 +413,12 @@ export class _BLAKE2s extends _BLAKE2 {
   * @param msg - message that would be hashed
   * @param opts - dkLen output length, key for MAC mode, salt, personalization
   */
@@ -359,12 +350,10 @@ index 792e689..df10b4f 100644
 +  _BLAKE2b,
 +  blake2b,
 +  compress,
-+  _BLAKE2s,
-+  blake2s
-+};
++  _BLAKE2s,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
-index 59e0aa1..13766ed 100644
+index 59e0aa1..5f733de 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
 @@ -11,11 +11,11 @@
@@ -392,7 +381,7 @@ index 59e0aa1..13766ed 100644
      chunkPos = 0; // Position of current block in chunk
      chunksDone = 0; // How many chunks we already have
      flags = 0 | 0;
-@@ -251,5 +251,10 @@ export class _BLAKE3 extends _BLAKE2 {
+@@ -251,5 +251,9 @@ export class _BLAKE3 extends _BLAKE2 {
   * const mac = blake3(data, { key: new Uint8Array(32) });
   * const kdf = blake3(data, { context: 'application name' });
   */
@@ -402,11 +391,10 @@ index 59e0aa1..13766ed 100644
 +
 +module.exports = {
 +  _BLAKE3,
-+  blake3
-+};
++  blake3};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
-index 3d417c1..d678aa6 100644
+index 3d417c1..dae2e6a 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
 @@ -2,22 +2,22 @@
@@ -419,8 +407,8 @@ index 3d417c1..d678aa6 100644
 -import { sha256 } from "./sha2.js";
 -import { abytes, bytesToHex, clean, createView, hexToBytes, kdfInputToBytes } from "./utils.js";
 +const { hkdf } = require('./hkdf.js');
-+const { pbkdf2 as _pbkdf2 } = require('./pbkdf2.js');
-+const { scrypt as _scrypt } = require('./scrypt.js');
++const { pbkdf2: _pbkdf2 } = require('./pbkdf2.js');
++const { scrypt: _scrypt } = require('./scrypt.js');
 +const { sha256 } = require('./sha2.js');
 +const { abytes, bytesToHex, clean, createView, hexToBytes, kdfInputToBytes } = require('./utils.js');
  // A tiny KDF for various applications like AES key-gen.
@@ -448,19 +436,26 @@ index 3d417c1..d678aa6 100644
      if (!strHasLength(username, 8, 255))
          throw new Error('invalid username');
      if (!strHasLength(password, 8, 255))
-@@ -159,3 +159,9 @@ export async function eskdf(username, password) {
+@@ -134,7 +134,7 @@ function modReduceKey(key, modulus) {
+  * console.log(kdf.fingerprint);
+  * kdf.expire();
+  */
+-export async function eskdf(username, password) {
++async function eskdf(username, password) {
+     // We are using closure + object instead of class because
+     // we want to make `seed` non-accessible for any external function.
+     let seed = deriveMainSeed(username, password);
+@@ -159,3 +159,7 @@ export async function eskdf(username, password) {
      return Object.freeze({ deriveChildKey: deriveCK, expire, fingerprint });
  }
  //# sourceMappingURL=eskdf.js.map
 +
 +module.exports = {
 +  scrypt,
-+  pbkdf2,
-+  deriveMainSeed
-+};
++  pbkdf2,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
-index e418526..ef8940f 100644
+index e418526..d8d12a6 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
 @@ -3,8 +3,8 @@
@@ -492,7 +487,7 @@ index e418526..ef8940f 100644
      ahash(hash);
      anumber(length, 'length');
      const olen = hash.outputLen;
-@@ -80,5 +80,11 @@ export function expand(hash, prk, info, length = 32) {
+@@ -80,5 +80,9 @@ export function expand(hash, prk, info, length = 32) {
   * const info = 'application-key';
   * const hk1 = hkdf(sha256, inputKey, salt, info, 32);
   */
@@ -502,12 +497,10 @@ index e418526..ef8940f 100644
 +
 +module.exports = {
 +  extract,
-+  expand,
-+  hkdf
-+};
++  expand,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
-index 1d9ff79..0000b92 100644
+index 1d9ff79..f1b5f47 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
 @@ -2,9 +2,9 @@
@@ -522,7 +515,7 @@ index 1d9ff79..0000b92 100644
      oHash;
      iHash;
      blockLen;
-@@ -85,6 +85,11 @@ export class _HMAC {
+@@ -85,6 +85,10 @@ export class _HMAC {
   * import { sha256 } from '@noble/hashes/sha2';
   * const mac1 = hmac(sha256, 'key', 'message');
   */
@@ -533,14 +526,13 @@ index 1d9ff79..0000b92 100644
 +
 +module.exports = {
 +  _HMAC,
-+  hmac
-+};
++  hmac};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
-index 56354cb..faf4d00 100644
+index 56354cb..8a3b941 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
-@@ -3,30 +3,24 @@
+@@ -3,32 +3,25 @@
   * @module
   * @example
  ```js
@@ -584,8 +576,11 @@ index 56354cb..faf4d00 100644
  ```
   */
  throw new Error('root module cannot be imported: import submodules instead. Check out README');
+-export {};
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
-index 841667a..9569ab0 100644
+index 841667a..b3f4e33 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
 @@ -8,8 +8,8 @@ Don't use them in a new protocol. What "weak" means:
@@ -644,7 +639,7 @@ index 841667a..9569ab0 100644
      h0 = 0x67452301 | 0;
      h1 = 0xefcdab89 | 0;
      h2 = 0x98badcfe | 0;
-@@ -277,5 +277,14 @@ export class _RIPEMD160 extends HashMD {
+@@ -277,5 +277,12 @@ export class _RIPEMD160 extends HashMD {
   * * https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
   * * https://homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
   */
@@ -657,12 +652,10 @@ index 841667a..9569ab0 100644
 +  sha1,
 +  _MD5,
 +  md5,
-+  _RIPEMD160,
-+  ripemd160
-+};
++  _RIPEMD160,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
-index 927b025..e367d76 100644
+index 927b025..a4d22c2 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
 @@ -2,9 +2,9 @@
@@ -686,17 +679,25 @@ index 927b025..e367d76 100644
      const { c, dkLen, DK, PRF, PRFSalt } = pbkdf2Init(hash, password, salt, opts);
      let prfW; // Working copy
      const arr = new Uint8Array(4);
-@@ -95,3 +95,7 @@ export async function pbkdf2Async(hash, password, salt, opts) {
+@@ -70,7 +70,7 @@ export function pbkdf2(hash, password, salt, opts) {
+  * @example
+  * await pbkdf2Async(sha256, 'password', 'salt', { dkLen: 32, c: 500_000 });
+  */
+-export async function pbkdf2Async(hash, password, salt, opts) {
++async function pbkdf2Async(hash, password, salt, opts) {
+     const { c, dkLen, asyncTick, DK, PRF, PRFSalt } = pbkdf2Init(hash, password, salt, opts);
+     let prfW; // Working copy
+     const arr = new Uint8Array(4);
+@@ -95,3 +95,6 @@ export async function pbkdf2Async(hash, password, salt, opts) {
      return pbkdf2Output(PRF, PRFSalt, DK, prfW, u);
  }
  //# sourceMappingURL=pbkdf2.js.map
 +
 +module.exports = {
-+  pbkdf2
-+};
++  pbkdf2};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
-index cb71fe8..75240c5 100644
+index cb71fe8..e1676ba 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
 @@ -2,10 +2,10 @@
@@ -722,17 +723,25 @@ index cb71fe8..75240c5 100644
      const { N, r, p, dkLen, blockSize32, V, B32, B, tmp, blockMixCb } = scryptInit(password, salt, opts);
      swap32IfBE(B32);
      for (let pi = 0; pi < p; pi++) {
-@@ -214,3 +214,7 @@ export async function scryptAsync(password, salt, opts) {
+@@ -186,7 +186,7 @@ export function scrypt(password, salt, opts) {
+  * @example
+  * await scryptAsync('password', 'salt', { N: 2**18, r: 8, p: 1, dkLen: 32 });
+  */
+-export async function scryptAsync(password, salt, opts) {
++async function scryptAsync(password, salt, opts) {
+     const { N, r, p, dkLen, blockSize32, V, B32, B, tmp, blockMixCb, asyncTick } = scryptInit(password, salt, opts);
+     swap32IfBE(B32);
+     for (let pi = 0; pi < p; pi++) {
+@@ -214,3 +214,6 @@ export async function scryptAsync(password, salt, opts) {
      return scryptOutput(password, dkLen, B, V, tmp);
  }
  //# sourceMappingURL=scrypt.js.map
 +
 +module.exports = {
-+  scrypt
-+};
++  scrypt};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
-index 21553b1..50277d2 100644
+index 21553b1..7d3e58a 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
 @@ -5,9 +5,9 @@
@@ -802,7 +811,7 @@ index 21553b1..50277d2 100644
      Ah = T256_IV[0] | 0;
      Al = T256_IV[1] | 0;
      Bh = T256_IV[2] | 0;
-@@ -371,27 +371,42 @@ export class _SHA512_256 extends SHA2_64B {
+@@ -371,27 +371,40 @@ export class _SHA512_256 extends SHA2_64B {
   * - Each sha256 hash is executing 2^18 bit operations.
   * - Good 2024 ASICs can do 200Th/sec with 3500 watts of power, corresponding to 2^36 hashes/joule.
   */
@@ -848,12 +857,10 @@ index 21553b1..50277d2 100644
 +  sha224,
 +  sha512,
 +  sha384,
-+  sha512_256,
-+  sha512_224
-+};
++  sha512_256,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
-index 50e34ad..f46b370 100644
+index 50e34ad..439381e 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
 @@ -8,8 +8,8 @@
@@ -992,7 +999,7 @@ index 50e34ad..f46b370 100644
      rate;
      constructor(capacity) {
          anumber(capacity);
-@@ -416,5 +416,34 @@ export class _KeccakPRG extends Keccak {
+@@ -416,5 +416,32 @@ export class _KeccakPRG extends Keccak {
      }
  }
  /** KeccakPRG: Pseudo-random generator based on Keccak. https://keccak.team/files/CSF-0.1.pdf */
@@ -1025,12 +1032,10 @@ index 50e34ad..f46b370 100644
 +  kt256,
 +  HopMAC128,
 +  HopMAC256,
-+  _KeccakPRG,
-+  keccakprg
-+};
++  _KeccakPRG,};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
-index 055bd7b..1057e44 100644
+index 055bd7b..d97ab8d 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
 @@ -9,9 +9,9 @@
@@ -1063,7 +1068,7 @@ index 055bd7b..1057e44 100644
      state;
      pos = 0;
      posOut = 0;
-@@ -215,40 +215,57 @@ export class Keccak {
+@@ -215,40 +215,56 @@ export class Keccak {
  }
  const genKeccak = (suffix, blockLen, outputLen, info = {}) => createHasher(() => new Keccak(blockLen, suffix, outputLen), info);
  /** SHA3-224 hash function. */
@@ -1131,11 +1136,9 @@ index 055bd7b..1057e44 100644
 +  shake128,
 +  shake256,
 +  shake128_32,
-+  shake256_64
-+};
-\ No newline at end of file
++  shake256_64};
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
-index f8b81c1..08af75d 100644
+index f8b81c1..200ef99 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
 @@ -4,18 +4,18 @@
@@ -1267,15 +1270,18 @@ index f8b81c1..08af75d 100644
      if (typeof hex !== 'string')
          throw new Error('hex string expected, got ' + typeof hex);
      // @ts-ignore
-@@ -162,7 +162,7 @@ export function hexToBytes(hex) {
+@@ -162,9 +162,9 @@ export function hexToBytes(hex) {
   * Call of async fn will return Promise, which will be fullfiled only on
   * next scheduler queue processing step and this is exactly what we need.
   */
 -export const nextTick = async () => { };
 +const nextTick = async () => { };
  /** Returns control to thread each 'tick' ms to avoid blocking. */
- export async function asyncLoop(iters, tick, cb) {
+-export async function asyncLoop(iters, tick, cb) {
++async function asyncLoop(iters, tick, cb) {
      let ts = Date.now();
+     for (let i = 0; i < iters; i++) {
+         cb(i);
 @@ -181,7 +181,7 @@ export async function asyncLoop(iters, tick, cb) {
   * Built-in doesn't validate input to be string: we do the check.
   * @example utf8ToBytes('abc') // Uint8Array.from([97, 98, 99])
@@ -1363,11 +1369,10 @@ index f8b81c1..08af75d 100644
 +  checkOpts,
 +  createHasher,
 +  randomBytes,
-+  oidNist
-+};
-\ No newline at end of file
++  oidNist,
++  asyncLoop};
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
-index df96f36..2bc3111 100644
+index df96f36..9744e05 100644
 --- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
 +++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
 @@ -1,5 +1,5 @@
@@ -1401,7 +1406,25 @@ index df96f36..2bc3111 100644
      const hmac_ = async (hash, key, message) => {
          const crypto = _subtle();
          abytes(key, undefined, 'key');
-@@ -124,3 +124,10 @@ export async function pbkdf2(hash, password, salt, opts) {
+@@ -79,7 +79,7 @@ export const hmac = /* @__PURE__ */ (() => {
+  * const hk1w = await hkdf(sha256, inputKey, salt, info, 32);
+  * ```
+  */
+-export async function hkdf(hash, ikm, salt, info, length) {
++async function hkdf(hash, ikm, salt, info, length) {
+     const crypto = _subtle();
+     ahashWeb(hash);
+     abytes(ikm, undefined, 'ikm');
+@@ -108,7 +108,7 @@ export async function hkdf(hash, ikm, salt, info, length) {
+  * const key = await pbkdf2(sha256, 'password', 'salt', { dkLen: 32, c: Math.pow(2, 18) });
+  * ```
+  */
+-export async function pbkdf2(hash, password, salt, opts) {
++async function pbkdf2(hash, password, salt, opts) {
+     const crypto = _subtle();
+     ahashWeb(hash);
+     const _opts = checkOpts({ dkLen: 32 }, opts);
+@@ -124,3 +124,7 @@ export async function pbkdf2(hash, password, salt, opts) {
      return new Uint8Array(await crypto.deriveBits(deriveOpts, key, 8 * dkLen));
  }
  //# sourceMappingURL=webcrypto.js.map
@@ -1409,9 +1432,6 @@ index df96f36..2bc3111 100644
 +module.exports = {
 +  sha256,
 +  sha384,
-+  sha512,
-+  hmac
-+};
 \ No newline at end of file
 diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json
 index a1b2c3d..e4f5g6h 100644
