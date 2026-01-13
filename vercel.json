@@ -1,7 +1,7 @@
 {
   "devCommand": "yarn dev",
   "env": {
-    "NODE_OPTIONS": "--experimental-require-module"
+    "NODE_OPTIONS": "--experimental-require-module --experimental-vm-modules"
   },
   "crons": [
     {
