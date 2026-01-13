@@ -3537,11 +3537,6 @@
     protobufjs "^7.2.5"
     yargs "^17.7.2"
 
-"@henrygd/semaphore@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@henrygd/semaphore/-/semaphore-0.1.0.tgz#92edf8e441b4f565d046d5de8c8d92437b5df26d"
-  integrity sha512-5wRPsfP9iWnOTFRd7QKdHlWTgY9xw9GAHSkQP/Q05ZTKUBdfTj44BhsnADPfvBoUQVGDtP2Nd0UShVdeTLuLwA==
-
 "@humanwhocodes/module-importer@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz#af5b2691a22b44be847b0ca81641c5fb6ad0172c"
@@ -4144,11 +4139,6 @@
     "@motionone/dom" "^10.16.2"
     tslib "^2.3.1"
 
-"@msgpack/msgpack@^3.1.2":
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-3.1.3.tgz#c4bff2b9539faf0882f3ee03537a7e9a4b3a7864"
-  integrity sha512-47XIizs9XZXvuJgoaJUIE2lFoID8ugvc0jzSHP+Ptfk8nTbnR8g788wv48N03Kx0UkAv559HWRQ3yzOgzlRNUA==
-
 "@ndelangen/get-tarball@^3.0.7":
   version "3.0.9"
   resolved "https://registry.yarnpkg.com/@ndelangen/get-tarball/-/get-tarball-3.0.9.tgz#727ff4454e65f34707e742a59e5e6b1f525d8964"
@@ -4171,17 +4161,20 @@
     jsbi "^3.1.5"
     sha.js "^2.4.11"
 
-"@nktkas/hyperliquid@^0.25.9":
-  version "0.25.9"
-  resolved "https://registry.yarnpkg.com/@nktkas/hyperliquid/-/hyperliquid-0.25.9.tgz#69b8bef3065322ea5346f67067a43077e64f89e1"
-  integrity sha512-rNqRG4LWeCmnWUNV5XQAl+XLH7uzShvwXj3Z7JsWC45QgU8RlSv/MODUP9CE3Xv/avXWkEEhwy/BkLQkN85s+g==
+"@nktkas/hyperliquid@^0.25.9", "@nktkas/hyperliquid@^0.30.2":
+  version "0.30.2"
+  resolved "https://registry.yarnpkg.com/@nktkas/hyperliquid/-/hyperliquid-0.30.2.tgz#91095eb68372e3de677f39d264ff697cb544aff8"
+  integrity sha512-xz1/oGRunLxY1z1FOsCsXUFOWx8ADL3vL87pQkpl68gIxHT6Duf5z18uxFQWxlPPyB5PHYmpudlziJ6xVPB4Vw==
   dependencies:
-    "@henrygd/semaphore" "0.1.0"
-    "@msgpack/msgpack" "^3.1.2"
+    "@nktkas/rews" "^1.2.3"
     "@noble/hashes" "^2.0.1"
-    "@noble/secp256k1" "^3.0.0"
-    typescript-event-target "1.1.1"
-    valibot "1.1.0"
+    micro-eth-signer "^0.18.1"
+    valibot "1.2.0"
+
+"@nktkas/rews@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@nktkas/rews/-/rews-1.2.3.tgz#e0f91757e402e04289e504c36f024b1b057c1fb5"
+  integrity sha512-cpfcIlkUpYlbAI1cvfCTBCajWZfUM6gWyuCJXszECKxdetsU3vURKC8Sz//MDR6RWoULk9T48eJ+0agxT7yB1w==
 
 "@noble/ciphers@1.2.1", "@noble/ciphers@^1.0.0":
   version "1.2.1"
@@ -4249,7 +4242,7 @@
   dependencies:
     "@noble/hashes" "1.8.0"
 
-"@noble/curves@^2.0.1":
+"@noble/curves@^2.0.0", "@noble/curves@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-2.0.1.tgz#64ba8bd5e8564a02942655602515646df1cdb3ad"
   integrity sha512-vs1Az2OOTBiP4q0pwjW5aF0xp9n4MxVrmkFBxc6EKZc6ddYx5gaZiAsZoq0uRRXWbi3AT/sBqn05eRPtn1JCPw==
@@ -4291,7 +4284,7 @@
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
   integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
 
-"@noble/hashes@2.0.1", "@noble/hashes@^2.0.1":
+"@noble/hashes@2.0.1", "@noble/hashes@^2.0.0", "@noble/hashes@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-2.0.1.tgz#fc1a928061d1232b0a52bb754393c37a5216c89e"
   integrity sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw==
@@ -4305,11 +4298,6 @@
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-1.7.1.tgz#b251c70f824ce3ca7f8dc3df08d58f005cc0507c"
   integrity sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==
-
-"@noble/secp256k1@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-3.0.0.tgz#29711361db8f37b1b7e0b8d80c933013fc887475"
-  integrity sha512-NJBaR352KyIvj3t6sgT/+7xrNyF9Xk9QlLSIqUGVUYlsnDTAUqY8LOmwpcgEx4AMJXRITQ5XEVHD+mMaPfr3mg==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -6058,6 +6046,11 @@
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@scroll-tech/contracts/-/contracts-0.1.0.tgz#ccea8db1b3df7d740e4b7843ac01b5bd25b4438b"
   integrity sha512-aBbDOc3WB/WveZdpJYcrfvMYMz7ZTEiW8M9XMJLba8p9FAR5KGYB/cV+8+EUsq3MKt7C1BfR+WnXoTVdvwIY6w==
+
+"@scure/base@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@scure/base/-/base-2.0.0.tgz#ba6371fddf92c2727e88ad6ab485db6e624f9a98"
+  integrity sha512-3E1kpuZginKkek01ovG8krQ0Z44E3DHPjc5S2rjJw9lZn3KSQOs8S7wqikF/AH7iRanHypj85uGyxk0XAyC37w==
 
 "@scure/base@^1.1.3", "@scure/base@~1.2.2", "@scure/base@~1.2.4", "@scure/base@~1.2.5":
   version "1.2.5"
@@ -20177,10 +20170,26 @@ micro-eth-signer@0.14.0:
     "@noble/hashes" "~1.7.1"
     micro-packed "~0.7.2"
 
+micro-eth-signer@^0.18.1:
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/micro-eth-signer/-/micro-eth-signer-0.18.1.tgz#3a37e5ddff6a13c1bffe6eddb8774e8242cea2ee"
+  integrity sha512-vXKhCZxrytpl+dXR9JeaE41ZVFndi7wCKc1Jd22smOMAeDErvRcXaTxhYUf1yQxis4n2kIdv/pH7iuf+5/cj+Q==
+  dependencies:
+    "@noble/curves" "^2.0.0"
+    "@noble/hashes" "^2.0.0"
+    micro-packed "^0.8.0"
+
 micro-ftch@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/micro-ftch/-/micro-ftch-0.3.1.tgz#6cb83388de4c1f279a034fb0cf96dfc050853c5f"
   integrity sha512-/0LLxhzP0tfiR5hcQebtudP56gUurs2CLkGarnCiB/OqEyUFQ6U3paQi/tgLv0hBJYt2rnr9MNpxz4fiiugstg==
+
+micro-packed@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/micro-packed/-/micro-packed-0.8.0.tgz#fe516c50b7150fd84728b8456731f79e2925eaf8"
+  integrity sha512-AKb8znIvg9sooythbXzyFeChEY0SkW0C6iXECpy/ls0e5BtwXO45J9wD9SLzBztnS4XmF/5kwZknsq+jyynd/A==
+  dependencies:
+    "@scure/base" "2.0.0"
 
 micro-packed@~0.7.2:
   version "0.7.3"
@@ -25613,11 +25622,6 @@ typescript-eslint@^7.13.1:
     "@typescript-eslint/parser" "7.13.1"
     "@typescript-eslint/utils" "7.13.1"
 
-typescript-event-target@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/typescript-event-target/-/typescript-event-target-1.1.1.tgz#20a6d491b77d2e37dc432c5394ab74c0d7065539"
-  integrity sha512-dFSOFBKV6uwaloBCCUhxlD3Pr/P1a/tJdcmPrTXCHlEFD3faj0mztjcGn6VBAhQ0/Bdy8K3VWrrqwbt/ffsYsg==
-
 typescript@4.9.5, typescript@5.7.3, typescript@^5.7.3:
   version "5.7.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.3.tgz#919b44a7dbb8583a9b856d162be24a54bf80073e"
@@ -26070,10 +26074,10 @@ v8-compile-cache-lib@^3.0.1:
   resolved "https://registry.yarnpkg.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz#6336e8d71965cb3d35a1bbb7868445a7c05264bf"
   integrity sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==
 
-valibot@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/valibot/-/valibot-1.1.0.tgz#873bb1af9e1577391690307bfe0520bd1360ec2d"
-  integrity sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw==
+valibot@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/valibot/-/valibot-1.2.0.tgz#8fc720d9e4082ba16e30a914064a39619b2f1d6f"
+  integrity sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==
 
 validate-npm-package-license@^3.0.1, validate-npm-package-license@^3.0.4:
   version "3.0.4"
