@@ -1,0 +1,1427 @@
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
+index 3573ee9..fce8c4d 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_blake.js
+@@ -2,13 +2,13 @@
+  * Internal helpers for blake hash.
+  * @module
+  */
+-import { rotr } from "./utils.js";
++const { rotr } = require('./utils.js');
+ /**
+  * Internal blake variable.
+  * For BLAKE2b, the two extra permutations for rounds 10 and 11 are SIGMA[10..11] = SIGMA[0..1].
+  */
+ // prettier-ignore
+-export const BSIGMA = /* @__PURE__ */ Uint8Array.from([
++const BSIGMA = /* @__PURE__ */ Uint8Array.from([
+     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+     14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3,
+     11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4,
+@@ -28,14 +28,14 @@ export const BSIGMA = /* @__PURE__ */ Uint8Array.from([
+     2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9,
+ ]);
+ // Mixing function G splitted in two halfs
+-export function G1s(a, b, c, d, x) {
++function G1s(a, b, c, d, x) {
+     a = (a + b + x) | 0;
+     d = rotr(d ^ a, 16);
+     c = (c + d) | 0;
+     b = rotr(b ^ c, 12);
+     return { a, b, c, d };
+ }
+-export function G2s(a, b, c, d, x) {
++function G2s(a, b, c, d, x) {
+     a = (a + b + x) | 0;
+     d = rotr(d ^ a, 8);
+     c = (c + d) | 0;
+@@ -43,3 +43,9 @@ export function G2s(a, b, c, d, x) {
+     return { a, b, c, d };
+ }
+ //# sourceMappingURL=_blake.js.map
++
++module.exports = {
++  BSIGMA,
++  G1s,
++  G2s
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
+index 9dd5b61..c9b944c 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_md.js
+@@ -2,20 +2,20 @@
+  * Internal Merkle-Damgard hash utils.
+  * @module
+  */
+-import { abytes, aexists, aoutput, clean, createView } from "./utils.js";
++const { abytes, aexists, aoutput, clean, createView } = require('./utils.js');
+ /** Choice: a ? b : c */
+-export function Chi(a, b, c) {
++function Chi(a, b, c) {
+     return (a & b) ^ (~a & c);
+ }
+ /** Majority function, true if any two inputs is true. */
+-export function Maj(a, b, c) {
++function Maj(a, b, c) {
+     return (a & b) ^ (a & c) ^ (b & c);
+ }
+ /**
+  * Merkle-Damgard hash construction base class.
+  * Could be used to create MD5, RIPEMD, SHA1, SHA2.
+  */
+-export class HashMD {
++class HashMD {
+     blockLen;
+     outputLen;
+     padOffset;
+@@ -127,21 +127,31 @@ export class HashMD {
+  * Check out `test/misc/sha2-gen-iv.js` for recomputation guide.
+  */
+ /** Initial SHA256 state. Bits 0..32 of frac part of sqrt of primes 2..19 */
+-export const SHA256_IV = /* @__PURE__ */ Uint32Array.from([
++const SHA256_IV = /* @__PURE__ */ Uint32Array.from([
+     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+ ]);
+ /** Initial SHA224 state. Bits 32..64 of frac part of sqrt of primes 23..53 */
+-export const SHA224_IV = /* @__PURE__ */ Uint32Array.from([
++const SHA224_IV = /* @__PURE__ */ Uint32Array.from([
+     0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4,
+ ]);
+ /** Initial SHA384 state. Bits 0..64 of frac part of sqrt of primes 23..53 */
+-export const SHA384_IV = /* @__PURE__ */ Uint32Array.from([
++const SHA384_IV = /* @__PURE__ */ Uint32Array.from([
+     0xcbbb9d5d, 0xc1059ed8, 0x629a292a, 0x367cd507, 0x9159015a, 0x3070dd17, 0x152fecd8, 0xf70e5939,
+     0x67332667, 0xffc00b31, 0x8eb44a87, 0x68581511, 0xdb0c2e0d, 0x64f98fa7, 0x47b5481d, 0xbefa4fa4,
+ ]);
+ /** Initial SHA512 state. Bits 0..64 of frac part of sqrt of primes 2..19 */
+-export const SHA512_IV = /* @__PURE__ */ Uint32Array.from([
++const SHA512_IV = /* @__PURE__ */ Uint32Array.from([
+     0x6a09e667, 0xf3bcc908, 0xbb67ae85, 0x84caa73b, 0x3c6ef372, 0xfe94f82b, 0xa54ff53a, 0x5f1d36f1,
+     0x510e527f, 0xade682d1, 0x9b05688c, 0x2b3e6c1f, 0x1f83d9ab, 0xfb41bd6b, 0x5be0cd19, 0x137e2179,
+ ]);
+ //# sourceMappingURL=_md.js.map
++
++module.exports = {
++  Chi,
++  Maj,
++  HashMD,
++  SHA256_IV,
++  SHA224_IV,
++  SHA384_IV,
++  SHA512_IV
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
+index 6519354..0858168 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/_u64.js
+@@ -53,7 +53,7 @@ const add4H = (low, Ah, Bh, Ch, Dh) => (Ah + Bh + Ch + Dh + ((low / 2 ** 32) | 0
+ const add5L = (Al, Bl, Cl, Dl, El) => (Al >>> 0) + (Bl >>> 0) + (Cl >>> 0) + (Dl >>> 0) + (El >>> 0);
+ const add5H = (low, Ah, Bh, Ch, Dh, Eh) => (Ah + Bh + Ch + Dh + Eh + ((low / 2 ** 32) | 0)) | 0;
+ // prettier-ignore
+-export { add, add3H, add3L, add4H, add4L, add5H, add5L, fromBig, rotlBH, rotlBL, rotlSH, rotlSL, rotr32H, rotr32L, rotrBH, rotrBL, rotrSH, rotrSL, shrSH, shrSL, split, toBig };
++
+ // prettier-ignore
+ const u64 = {
+     fromBig, split, toBig,
+@@ -65,3 +65,28 @@ const u64 = {
+ };
+ export default u64;
+ //# sourceMappingURL=_u64.js.map
++
++module.exports = {
++  add,
++  add3H,
++  add3L,
++  add4H,
++  add4L,
++  add5H,
++  add5L,
++  fromBig,
++  rotlBH,
++  rotlBL,
++  rotlSH,
++  rotlSL,
++  rotr32H,
++  rotr32L,
++  rotrBH,
++  rotrBL,
++  rotrSH,
++  rotrSL,
++  shrSH,
++  shrSL,
++  split,
++  toBig
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
+index eb8f313..3464656 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/argon2.js
+@@ -8,9 +8,9 @@
+  * * JS arrays do slow bound checks, so reading from `A2_BUF` slows it down
+  * @module
+  */
+-import { add3H, add3L, rotr32H, rotr32L, rotrBH, rotrBL, rotrSH, rotrSL } from "./_u64.js";
+-import { blake2b } from "./blake2.js";
+-import { anumber, clean, kdfInputToBytes, nextTick, u32, u8 } from "./utils.js";
++const { add3H, add3L, rotr32H, rotr32L, rotrBH, rotrBL, rotrSH, rotrSL } = require('./_u64.js');
++const { blake2b } = require('./blake2.js');
++const { anumber, clean, kdfInputToBytes, nextTick, u32, u8 } = require('./utils.js');
+ const AT = { Argond2d: 0, Argon2i: 1, Argon2id: 2 };
+ const ARGON2_SYNC_POINTS = 4;
+ const abytesOrZero = (buf, errorTitle = '') => {
+@@ -330,11 +330,11 @@ function argon2(type, password, salt, opts) {
+     return argon2Output(B, p, laneLen, dkLen);
+ }
+ /** argon2d GPU-resistant version. */
+-export const argon2d = (password, salt, opts) => argon2(AT.Argond2d, password, salt, opts);
++const argon2d = (password, salt, opts) => argon2(AT.Argond2d, password, salt, opts);
+ /** argon2i side-channel-resistant version. */
+-export const argon2i = (password, salt, opts) => argon2(AT.Argon2i, password, salt, opts);
++const argon2i = (password, salt, opts) => argon2(AT.Argon2i, password, salt, opts);
+ /** argon2id, combining i+d, the most popular version from RFC 9106 */
+-export const argon2id = (password, salt, opts) => argon2(AT.Argon2id, password, salt, opts);
++const argon2id = (password, salt, opts) => argon2(AT.Argon2id, password, salt, opts);
+ async function argon2Async(type, password, salt, opts) {
+     const { mP, p, t, version, B, laneLen, lanes, segmentLen, dkLen, perBlock, asyncTick } = argon2Init(password, salt, type, opts);
+     // Pre-loop setup
+@@ -383,9 +383,18 @@ async function argon2Async(type, password, salt, opts) {
+     return argon2Output(B, p, laneLen, dkLen);
+ }
+ /** argon2d async GPU-resistant version. */
+-export const argon2dAsync = (password, salt, opts) => argon2Async(AT.Argond2d, password, salt, opts);
++const argon2dAsync = (password, salt, opts) => argon2Async(AT.Argond2d, password, salt, opts);
+ /** argon2i async side-channel-resistant version. */
+-export const argon2iAsync = (password, salt, opts) => argon2Async(AT.Argon2i, password, salt, opts);
++const argon2iAsync = (password, salt, opts) => argon2Async(AT.Argon2i, password, salt, opts);
+ /** argon2id async, combining i+d, the most popular version from RFC 9106 */
+-export const argon2idAsync = (password, salt, opts) => argon2Async(AT.Argon2id, password, salt, opts);
++const argon2idAsync = (password, salt, opts) => argon2Async(AT.Argon2id, password, salt, opts);
+ //# sourceMappingURL=argon2.js.map
++
++module.exports = {
++  argon2d,
++  argon2i,
++  argon2id,
++  argon2dAsync,
++  argon2iAsync,
++  argon2idAsync
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
+index 1472b71..dbcf3db 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake1.js
+@@ -22,11 +22,11 @@
+  * - blake512: G1b: rotr 24 -> 25, G2b: rotr 63 -> 11
+  * @module
+  */
+-import { BSIGMA, G1s, G2s } from "./_blake.js";
+-import { SHA224_IV, SHA256_IV, SHA384_IV, SHA512_IV } from "./_md.js";
+-import * as u64 from "./_u64.js";
++const { BSIGMA, G1s, G2s } = require('./_blake.js');
++const { SHA224_IV, SHA256_IV, SHA384_IV, SHA512_IV } = require('./_md.js');
++const u64 = require('./_u64.js');
+ // prettier-ignore
+-import { abytes, aexists, aoutput, clean, createHasher, createView } from "./utils.js";
++const { abytes, aexists, aoutput, clean, createHasher, createView } = require('./utils.js');
+ // Empty zero-filled salt
+ const EMPTY_SALT = /* @__PURE__ */ new Uint32Array(8);
+ class BLAKE1 {
+@@ -451,35 +451,46 @@ class BLAKE1_64B extends BLAKE1 {
+     }
+ }
+ /** Internal blake1-224 hash class. */
+-export class _BLAKE224 extends BLAKE1_32B {
++class _BLAKE224 extends BLAKE1_32B {
+     constructor(opts = {}) {
+         super(28, B224_IV, 0b0000_0000, opts);
+     }
+ }
+ /** Internal blake1-256 hash class. */
+-export class _BLAKE256 extends BLAKE1_32B {
++class _BLAKE256 extends BLAKE1_32B {
+     constructor(opts = {}) {
+         super(32, B256_IV, 0b0000_0001, opts);
+     }
+ }
+ /** Internal blake1-384 hash class. */
+-export class _BLAKE384 extends BLAKE1_64B {
++class _BLAKE384 extends BLAKE1_64B {
+     constructor(opts = {}) {
+         super(48, B384_IV, 0b0000_0000, opts);
+     }
+ }
+ /** Internal blake1-512 hash class. */
+-export class _BLAKE512 extends BLAKE1_64B {
++class _BLAKE512 extends BLAKE1_64B {
+     constructor(opts = {}) {
+         super(64, B512_IV, 0b0000_0001, opts);
+     }
+ }
+ /** blake1-224 hash function */
+-export const blake224 = /* @__PURE__ */ createHasher((opts) => new _BLAKE224(opts));
++const blake224 = /* @__PURE__ */ createHasher((opts) => new _BLAKE224(opts));
+ /** blake1-256 hash function */
+-export const blake256 = /* @__PURE__ */ createHasher((opts) => new _BLAKE256(opts));
++const blake256 = /* @__PURE__ */ createHasher((opts) => new _BLAKE256(opts));
+ /** blake1-384 hash function */
+-export const blake384 = /* @__PURE__ */ createHasher((opts) => new _BLAKE384(opts));
++const blake384 = /* @__PURE__ */ createHasher((opts) => new _BLAKE384(opts));
+ /** blake1-512 hash function */
+-export const blake512 = /* @__PURE__ */ createHasher((opts) => new _BLAKE512(opts));
++const blake512 = /* @__PURE__ */ createHasher((opts) => new _BLAKE512(opts));
+ //# sourceMappingURL=blake1.js.map
++
++module.exports = {
++  _BLAKE224,
++  _BLAKE256,
++  _BLAKE384,
++  _BLAKE512,
++  blake224,
++  blake256,
++  blake384,
++  blake512
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
+index 792e689..df10b4f 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake2.js
+@@ -3,11 +3,11 @@
+  * b could have been faster, but there is no fast u64 in js, so s is 1.5x faster.
+  * @module
+  */
+-import { BSIGMA, G1s, G2s } from "./_blake.js";
+-import { SHA256_IV } from "./_md.js";
+-import * as u64 from "./_u64.js";
++const { BSIGMA, G1s, G2s } = require('./_blake.js');
++const { SHA256_IV } = require('./_md.js');
++const u64 = require('./_u64.js');
+ // prettier-ignore
+-import { abytes, aexists, anumber, aoutput, clean, createHasher, swap32IfBE, swap8IfBE, u32 } from "./utils.js";
++const { abytes, aexists, anumber, aoutput, clean, createHasher, swap32IfBE, swap8IfBE, u32 } = require('./utils.js');
+ // Same as SHA512_IV, but swapped endianness: LE instead of BE. iv[1] is iv[0], etc.
+ const B2B_IV = /* @__PURE__ */ Uint32Array.from([
+     0xf3bcc908, 0x6a09e667, 0x84caa73b, 0xbb67ae85, 0xfe94f82b, 0x3c6ef372, 0x5f1d36f1, 0xa54ff53a,
+@@ -77,7 +77,7 @@ function checkBlake2Opts(outputLen, opts = {}, keyLen, saltLen, persLen) {
+         abytes(personalization, persLen, 'personalization');
+ }
+ /** Internal base class for BLAKE2. */
+-export class _BLAKE2 {
++class _BLAKE2 {
+     buffer;
+     buffer32;
+     finished = false;
+@@ -171,7 +171,7 @@ export class _BLAKE2 {
+     }
+ }
+ /** Internal blake2b hash class. */
+-export class _BLAKE2b extends _BLAKE2 {
++class _BLAKE2b extends _BLAKE2 {
+     // Same as SHA-512, but LE
+     v0l = B2B_IV[0] | 0;
+     v0h = B2B_IV[1] | 0;
+@@ -307,10 +307,10 @@ export class _BLAKE2b extends _BLAKE2 {
+  * @param msg - message that would be hashed
+  * @param opts - dkLen output length, key for MAC mode, salt, personalization
+  */
+-export const blake2b = /* @__PURE__ */ createHasher((opts) => new _BLAKE2b(opts));
++const blake2b = /* @__PURE__ */ createHasher((opts) => new _BLAKE2b(opts));
+ /** BLAKE2-compress core method. */
+ // prettier-ignore
+-export function compress(s, offset, msg, rounds, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) {
++function compress(s, offset, msg, rounds, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) {
+     let j = 0;
+     for (let i = 0; i < rounds; i++) {
+         ({ a: v0, b: v4, c: v8, d: v12 } = G1s(v0, v4, v8, v12, msg[offset + s[j++]]));
+@@ -334,7 +334,7 @@ export function compress(s, offset, msg, rounds, v0, v1, v2, v3, v4, v5, v6, v7,
+ }
+ const B2S_IV = /* @__PURE__ */ SHA256_IV.slice();
+ /** Internal blake2s hash class. */
+-export class _BLAKE2s extends _BLAKE2 {
++class _BLAKE2s extends _BLAKE2 {
+     // Internal state, same as SHA-256
+     v0 = B2S_IV[0] | 0;
+     v1 = B2S_IV[1] | 0;
+@@ -413,5 +413,14 @@ export class _BLAKE2s extends _BLAKE2 {
+  * @param msg - message that would be hashed
+  * @param opts - dkLen output length, key for MAC mode, salt, personalization
+  */
+-export const blake2s = /* @__PURE__ */ createHasher((opts) => new _BLAKE2s(opts));
++const blake2s = /* @__PURE__ */ createHasher((opts) => new _BLAKE2s(opts));
+ //# sourceMappingURL=blake2.js.map
++
++module.exports = {
++  _BLAKE2,
++  _BLAKE2b,
++  blake2b,
++  compress,
++  _BLAKE2s,
++  blake2s
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
+index 59e0aa1..13766ed 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/blake3.js
+@@ -11,11 +11,11 @@
+  * * It is still possible to make it faster using: a) loop unrolling b) web workers c) wasm
+  * @module
+  */
+-import { SHA256_IV } from "./_md.js";
+-import { fromBig } from "./_u64.js";
+-import { _BLAKE2, compress } from "./blake2.js";
++const { SHA256_IV } = require('./_md.js');
++const { fromBig } = require('./_u64.js');
++const { _BLAKE2, compress } = require('./blake2.js');
+ // prettier-ignore
+-import { abytes, aexists, anumber, aoutput, clean, createHasher, swap32IfBE, u32, u8 } from "./utils.js";
++const { abytes, aexists, anumber, aoutput, clean, createHasher, swap32IfBE, u32, u8 } = require('./utils.js');
+ // Flag bitset
+ const B3_Flags = {
+     CHUNK_START: 0b1,
+@@ -36,7 +36,7 @@ const B3_SIGMA = /* @__PURE__ */ (() => {
+     return Uint8Array.from(res);
+ })();
+ /** Blake3 hash. Can be used as MAC and KDF. */
+-export class _BLAKE3 extends _BLAKE2 {
++class _BLAKE3 extends _BLAKE2 {
+     chunkPos = 0; // Position of current block in chunk
+     chunksDone = 0; // How many chunks we already have
+     flags = 0 | 0;
+@@ -251,5 +251,10 @@ export class _BLAKE3 extends _BLAKE2 {
+  * const mac = blake3(data, { key: new Uint8Array(32) });
+  * const kdf = blake3(data, { context: 'application name' });
+  */
+-export const blake3 = /* @__PURE__ */ createHasher((opts = {}) => new _BLAKE3(opts));
++const blake3 = /* @__PURE__ */ createHasher((opts = {}) => new _BLAKE3(opts));
+ //# sourceMappingURL=blake3.js.map
++
++module.exports = {
++  _BLAKE3,
++  blake3
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
+index 3d417c1..d678aa6 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/eskdf.js
+@@ -2,22 +2,22 @@
+  * Experimental KDF for AES.
+  * @module
+  */
+-import { hkdf } from "./hkdf.js";
+-import { pbkdf2 as _pbkdf2 } from "./pbkdf2.js";
+-import { scrypt as _scrypt } from "./scrypt.js";
+-import { sha256 } from "./sha2.js";
+-import { abytes, bytesToHex, clean, createView, hexToBytes, kdfInputToBytes } from "./utils.js";
++const { hkdf } = require('./hkdf.js');
++const { pbkdf2 as _pbkdf2 } = require('./pbkdf2.js');
++const { scrypt as _scrypt } = require('./scrypt.js');
++const { sha256 } = require('./sha2.js');
++const { abytes, bytesToHex, clean, createView, hexToBytes, kdfInputToBytes } = require('./utils.js');
+ // A tiny KDF for various applications like AES key-gen.
+ // Uses HKDF in a non-standard way, so it's not "KDF-secure", only "PRF-secure".
+ // Which is good enough: assume sha2-256 retained preimage resistance.
+ const SCRYPT_FACTOR = 2 ** 19;
+ const PBKDF2_FACTOR = 2 ** 17;
+ /** Scrypt KDF */
+-export function scrypt(password, salt) {
++function scrypt(password, salt) {
+     return _scrypt(password, salt, { N: SCRYPT_FACTOR, r: 8, p: 1, dkLen: 32 });
+ }
+ /** PBKDF2-HMAC-SHA256 */
+-export function pbkdf2(password, salt) {
++function pbkdf2(password, salt) {
+     return _pbkdf2(sha256, password, salt, { c: PBKDF2_FACTOR, dkLen: 32 });
+ }
+ // Combines two 32-byte byte arrays
+@@ -36,7 +36,7 @@ function strHasLength(str, min, max) {
+ /**
+  * Derives main seed. Takes a lot of time. Prefer `eskdf` method instead.
+  */
+-export function deriveMainSeed(username, password) {
++function deriveMainSeed(username, password) {
+     if (!strHasLength(username, 8, 255))
+         throw new Error('invalid username');
+     if (!strHasLength(password, 8, 255))
+@@ -159,3 +159,9 @@ export async function eskdf(username, password) {
+     return Object.freeze({ deriveChildKey: deriveCK, expire, fingerprint });
+ }
+ //# sourceMappingURL=eskdf.js.map
++
++module.exports = {
++  scrypt,
++  pbkdf2,
++  deriveMainSeed
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
+index e418526..ef8940f 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hkdf.js
+@@ -3,8 +3,8 @@
+  * See https://soatok.blog/2021/11/17/understanding-hkdf/.
+  * @module
+  */
+-import { hmac } from "./hmac.js";
+-import { abytes, ahash, anumber, clean } from "./utils.js";
++const { hmac } = require('./hmac.js');
++const { abytes, ahash, anumber, clean } = require('./utils.js');
+ /**
+  * HKDF-extract from spec. Less important part. `HKDF-Extract(IKM, salt) -> PRK`
+  * Arguments position differs from spec (IKM is first one, since it is not optional)
+@@ -12,7 +12,7 @@ import { abytes, ahash, anumber, clean } from "./utils.js";
+  * @param ikm - input keying material, the initial key
+  * @param salt - optional salt value (a non-secret random value)
+  */
+-export function extract(hash, ikm, salt) {
++function extract(hash, ikm, salt) {
+     ahash(hash);
+     // NOTE: some libraries treat zero-length array as 'not provided';
+     // we don't, since we have undefined as 'not provided'
+@@ -30,7 +30,7 @@ const EMPTY_BUFFER = /* @__PURE__ */ Uint8Array.of();
+  * @param info - optional context and application specific information (can be a zero-length string)
+  * @param length - length of output keying material in bytes
+  */
+-export function expand(hash, prk, info, length = 32) {
++function expand(hash, prk, info, length = 32) {
+     ahash(hash);
+     anumber(length, 'length');
+     const olen = hash.outputLen;
+@@ -80,5 +80,11 @@ export function expand(hash, prk, info, length = 32) {
+  * const info = 'application-key';
+  * const hk1 = hkdf(sha256, inputKey, salt, info, 32);
+  */
+-export const hkdf = (hash, ikm, salt, info, length) => expand(hash, extract(hash, ikm, salt), info, length);
++const hkdf = (hash, ikm, salt, info, length) => expand(hash, extract(hash, ikm, salt), info, length);
+ //# sourceMappingURL=hkdf.js.map
++
++module.exports = {
++  extract,
++  expand,
++  hkdf
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
+index 1d9ff79..0000b92 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/hmac.js
+@@ -2,9 +2,9 @@
+  * HMAC: RFC2104 message authentication code.
+  * @module
+  */
+-import { abytes, aexists, ahash, clean } from "./utils.js";
++const { abytes, aexists, ahash, clean } = require('./utils.js');
+ /** Internal class for HMAC. */
+-export class _HMAC {
++class _HMAC {
+     oHash;
+     iHash;
+     blockLen;
+@@ -85,6 +85,11 @@ export class _HMAC {
+  * import { sha256 } from '@noble/hashes/sha2';
+  * const mac1 = hmac(sha256, 'key', 'message');
+  */
+-export const hmac = (hash, key, message) => new _HMAC(hash, key).update(message).digest();
++const hmac = (hash, key, message) => new _HMAC(hash, key).update(message).digest();
+ hmac.create = (hash, key) => new _HMAC(hash, key);
+ //# sourceMappingURL=hmac.js.map
++
++module.exports = {
++  _HMAC,
++  hmac
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
+index 56354cb..faf4d00 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/index.js
+@@ -3,30 +3,24 @@
+  * @module
+  * @example
+ ```js
+-import {
+-  sha256, sha384, sha512, sha224, sha512_224, sha512_256
+-} from '@noble/hashes/sha2.js';
+-import {
+-  sha3_224, sha3_256, sha3_384, sha3_512,
++const { sha256, sha384, sha512, sha224, sha512_224, sha512_256 } = require('@noble/hashes/sha2.js');
++const { sha3_224, sha3_256, sha3_384, sha3_512,
+   keccak_224, keccak_256, keccak_384, keccak_512,
+-  shake128, shake256
+-} from '@noble/hashes/sha3.js';
+-import {
+-  cshake128, cshake256,
++  shake128, shake256 } = require('@noble/hashes/sha3.js');
++const { cshake128, cshake256,
+   turboshake128, turboshake256,
+   kt128, kt256,
+   kmac128, kmac256,
+   tuplehash256, parallelhash256,
+-  keccakprg
+-} from '@noble/hashes/sha3-addons.js';
+-import { blake3 } from '@noble/hashes/blake3.js';
+-import { blake2b, blake2s } from '@noble/hashes/blake2.js';
+-import { hmac } from '@noble/hashes/hmac.js';
+-import { hkdf } from '@noble/hashes/hkdf.js';
+-import { pbkdf2, pbkdf2Async } from '@noble/hashes/pbkdf2.js';
+-import { scrypt, scryptAsync } from '@noble/hashes/scrypt.js';
+-import { md5, ripemd160, sha1 } from '@noble/hashes/legacy.js';
+-import * as utils from '@noble/hashes/utils.js';
++  keccakprg } = require('@noble/hashes/sha3-addons.js');
++const { blake3 } = require('@noble/hashes/blake3.js');
++const { blake2b, blake2s } = require('@noble/hashes/blake2.js');
++const { hmac } = require('@noble/hashes/hmac.js');
++const { hkdf } = require('@noble/hashes/hkdf.js');
++const { pbkdf2, pbkdf2Async } = require('@noble/hashes/pbkdf2.js');
++const { scrypt, scryptAsync } = require('@noble/hashes/scrypt.js');
++const { md5, ripemd160, sha1 } = require('@noble/hashes/legacy.js');
++const utils = require('@noble/hashes/utils.js');
+ ```
+  */
+ throw new Error('root module cannot be imported: import submodules instead. Check out README');
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
+index 841667a..9569ab0 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/legacy.js
+@@ -8,8 +8,8 @@ Don't use them in a new protocol. What "weak" means:
+ - HMAC seems kinda ok: https://www.rfc-editor.org/rfc/rfc6151
+  * @module
+  */
+-import { Chi, HashMD, Maj } from "./_md.js";
+-import { clean, createHasher, rotl } from "./utils.js";
++const { Chi, HashMD, Maj } = require('./_md.js');
++const { clean, createHasher, rotl } = require('./utils.js');
+ /** Initial SHA1 state */
+ const SHA1_IV = /* @__PURE__ */ Uint32Array.from([
+     0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0,
+@@ -17,7 +17,7 @@ const SHA1_IV = /* @__PURE__ */ Uint32Array.from([
+ // Reusable temporary buffer
+ const SHA1_W = /* @__PURE__ */ new Uint32Array(80);
+ /** Internal SHA1 legacy hash class. */
+-export class _SHA1 extends HashMD {
++class _SHA1 extends HashMD {
+     A = SHA1_IV[0] | 0;
+     B = SHA1_IV[1] | 0;
+     C = SHA1_IV[2] | 0;
+@@ -86,7 +86,7 @@ export class _SHA1 extends HashMD {
+     }
+ }
+ /** SHA1 (RFC 3174) legacy hash function. It was cryptographically broken. */
+-export const sha1 = /* @__PURE__ */ createHasher(() => new _SHA1());
++const sha1 = /* @__PURE__ */ createHasher(() => new _SHA1());
+ /** Per-round constants */
+ const p32 = /* @__PURE__ */ Math.pow(2, 32);
+ const K = /* @__PURE__ */ Array.from({ length: 64 }, (_, i) => Math.floor(p32 * Math.abs(Math.sin(i + 1))));
+@@ -95,7 +95,7 @@ const MD5_IV = /* @__PURE__ */ SHA1_IV.slice(0, 4);
+ // Reusable temporary buffer
+ const MD5_W = /* @__PURE__ */ new Uint32Array(16);
+ /** Internal MD5 legacy hash class. */
+-export class _MD5 extends HashMD {
++class _MD5 extends HashMD {
+     A = MD5_IV[0] | 0;
+     B = MD5_IV[1] | 0;
+     C = MD5_IV[2] | 0;
+@@ -170,7 +170,7 @@ export class _MD5 extends HashMD {
+  * - Non-linear index selection: huge speed-up for unroll
+  * - Per round constants: more memory accesses, additional speed-up for unroll
+  */
+-export const md5 = /* @__PURE__ */ createHasher(() => new _MD5());
++const md5 = /* @__PURE__ */ createHasher(() => new _MD5());
+ // RIPEMD-160
+ const Rho160 = /* @__PURE__ */ Uint8Array.from([
+     7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
+@@ -218,7 +218,7 @@ function ripemd_f(group, x, y, z) {
+ }
+ // Reusable temporary buffer
+ const BUF_160 = /* @__PURE__ */ new Uint32Array(16);
+-export class _RIPEMD160 extends HashMD {
++class _RIPEMD160 extends HashMD {
+     h0 = 0x67452301 | 0;
+     h1 = 0xefcdab89 | 0;
+     h2 = 0x98badcfe | 0;
+@@ -277,5 +277,14 @@ export class _RIPEMD160 extends HashMD {
+  * * https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
+  * * https://homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
+  */
+-export const ripemd160 = /* @__PURE__ */ createHasher(() => new _RIPEMD160());
++const ripemd160 = /* @__PURE__ */ createHasher(() => new _RIPEMD160());
+ //# sourceMappingURL=legacy.js.map
++
++module.exports = {
++  _SHA1,
++  sha1,
++  _MD5,
++  md5,
++  _RIPEMD160,
++  ripemd160
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
+index 927b025..e367d76 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/pbkdf2.js
+@@ -2,9 +2,9 @@
+  * PBKDF (RFC 2898). Can be used to create a key from password and salt.
+  * @module
+  */
+-import { hmac } from "./hmac.js";
++const { hmac } = require('./hmac.js');
+ // prettier-ignore
+-import { ahash, anumber, asyncLoop, checkOpts, clean, createView, kdfInputToBytes } from "./utils.js";
++const { ahash, anumber, asyncLoop, checkOpts, clean, createView, kdfInputToBytes } = require('./utils.js');
+ // Common start and end for sync/async functions
+ function pbkdf2Init(hash, _password, _salt, _opts) {
+     ahash(hash);
+@@ -41,7 +41,7 @@ function pbkdf2Output(PRF, PRFSalt, DK, prfW, u) {
+  * @example
+  * const key = pbkdf2(sha256, 'password', 'salt', { dkLen: 32, c: Math.pow(2, 18) });
+  */
+-export function pbkdf2(hash, password, salt, opts) {
++function pbkdf2(hash, password, salt, opts) {
+     const { c, dkLen, DK, PRF, PRFSalt } = pbkdf2Init(hash, password, salt, opts);
+     let prfW; // Working copy
+     const arr = new Uint8Array(4);
+@@ -95,3 +95,7 @@ export async function pbkdf2Async(hash, password, salt, opts) {
+     return pbkdf2Output(PRF, PRFSalt, DK, prfW, u);
+ }
+ //# sourceMappingURL=pbkdf2.js.map
++
++module.exports = {
++  pbkdf2
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
+index cb71fe8..75240c5 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/scrypt.js
+@@ -2,10 +2,10 @@
+  * RFC 7914 Scrypt KDF. Can be used to create a key from password and salt.
+  * @module
+  */
+-import { pbkdf2 } from "./pbkdf2.js";
+-import { sha256 } from "./sha2.js";
++const { pbkdf2 } = require('./pbkdf2.js');
++const { sha256 } = require('./sha2.js');
+ // prettier-ignore
+-import { anumber, asyncLoop, checkOpts, clean, rotl, swap32IfBE, u32 } from "./utils.js";
++const { anumber, asyncLoop, checkOpts, clean, rotl, swap32IfBE, u32 } = require('./utils.js');
+ // The main Scrypt loop: uses Salsa extensively.
+ // Six versions of the function were tried, this is the fastest one.
+ // prettier-ignore
+@@ -155,7 +155,7 @@ function scryptOutput(password, dkLen, B, V, tmp) {
+  * @example
+  * scrypt('password', 'salt', { N: 2**18, r: 8, p: 1, dkLen: 32 });
+  */
+-export function scrypt(password, salt, opts) {
++function scrypt(password, salt, opts) {
+     const { N, r, p, dkLen, blockSize32, V, B32, B, tmp, blockMixCb } = scryptInit(password, salt, opts);
+     swap32IfBE(B32);
+     for (let pi = 0; pi < p; pi++) {
+@@ -214,3 +214,7 @@ export async function scryptAsync(password, salt, opts) {
+     return scryptOutput(password, dkLen, B, V, tmp);
+ }
+ //# sourceMappingURL=scrypt.js.map
++
++module.exports = {
++  scrypt
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
+index 21553b1..50277d2 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha2.js
+@@ -5,9 +5,9 @@
+  * [FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf).
+  * @module
+  */
+-import { Chi, HashMD, Maj, SHA224_IV, SHA256_IV, SHA384_IV, SHA512_IV } from "./_md.js";
+-import * as u64 from "./_u64.js";
+-import { clean, createHasher, oidNist, rotr } from "./utils.js";
++const { Chi, HashMD, Maj, SHA224_IV, SHA256_IV, SHA384_IV, SHA512_IV } = require('./_md.js');
++const u64 = require('./_u64.js');
++const { clean, createHasher, oidNist, rotr } = require('./utils.js');
+ /**
+  * Round constants:
+  * First 32 bits of fractional parts of the cube roots of the first 64 primes 2..311)
+@@ -92,7 +92,7 @@ class SHA2_32B extends HashMD {
+     }
+ }
+ /** Internal SHA2-256 hash class. */
+-export class _SHA256 extends SHA2_32B {
++class _SHA256 extends SHA2_32B {
+     // We cannot use array here since array allows indexing by variable
+     // which means optimizer/compiler cannot use registers.
+     A = SHA256_IV[0] | 0;
+@@ -108,7 +108,7 @@ export class _SHA256 extends SHA2_32B {
+     }
+ }
+ /** Internal SHA2-224 hash class. */
+-export class _SHA224 extends SHA2_32B {
++class _SHA224 extends SHA2_32B {
+     A = SHA224_IV[0] | 0;
+     B = SHA224_IV[1] | 0;
+     C = SHA224_IV[2] | 0;
+@@ -260,7 +260,7 @@ class SHA2_64B extends HashMD {
+     }
+ }
+ /** Internal SHA2-512 hash class. */
+-export class _SHA512 extends SHA2_64B {
++class _SHA512 extends SHA2_64B {
+     Ah = SHA512_IV[0] | 0;
+     Al = SHA512_IV[1] | 0;
+     Bh = SHA512_IV[2] | 0;
+@@ -282,7 +282,7 @@ export class _SHA512 extends SHA2_64B {
+     }
+ }
+ /** Internal SHA2-384 hash class. */
+-export class _SHA384 extends SHA2_64B {
++class _SHA384 extends SHA2_64B {
+     Ah = SHA384_IV[0] | 0;
+     Al = SHA384_IV[1] | 0;
+     Bh = SHA384_IV[2] | 0;
+@@ -320,7 +320,7 @@ const T256_IV = /* @__PURE__ */ Uint32Array.from([
+     0x96283ee2, 0xa88effe3, 0xbe5e1e25, 0x53863992, 0x2b0199fc, 0x2c85b8aa, 0x0eb72ddc, 0x81c52ca2,
+ ]);
+ /** Internal SHA2-512/224 hash class. */
+-export class _SHA512_224 extends SHA2_64B {
++class _SHA512_224 extends SHA2_64B {
+     Ah = T224_IV[0] | 0;
+     Al = T224_IV[1] | 0;
+     Bh = T224_IV[2] | 0;
+@@ -342,7 +342,7 @@ export class _SHA512_224 extends SHA2_64B {
+     }
+ }
+ /** Internal SHA2-512/256 hash class. */
+-export class _SHA512_256 extends SHA2_64B {
++class _SHA512_256 extends SHA2_64B {
+     Ah = T256_IV[0] | 0;
+     Al = T256_IV[1] | 0;
+     Bh = T256_IV[2] | 0;
+@@ -371,27 +371,42 @@ export class _SHA512_256 extends SHA2_64B {
+  * - Each sha256 hash is executing 2^18 bit operations.
+  * - Good 2024 ASICs can do 200Th/sec with 3500 watts of power, corresponding to 2^36 hashes/joule.
+  */
+-export const sha256 = /* @__PURE__ */ createHasher(() => new _SHA256(), 
++const sha256 = /* @__PURE__ */ createHasher(() => new _SHA256(), 
+ /* @__PURE__ */ oidNist(0x01));
+ /** SHA2-224 hash function from RFC 4634 */
+-export const sha224 = /* @__PURE__ */ createHasher(() => new _SHA224(), 
++const sha224 = /* @__PURE__ */ createHasher(() => new _SHA224(), 
+ /* @__PURE__ */ oidNist(0x04));
+ /** SHA2-512 hash function from RFC 4634. */
+-export const sha512 = /* @__PURE__ */ createHasher(() => new _SHA512(), 
++const sha512 = /* @__PURE__ */ createHasher(() => new _SHA512(), 
+ /* @__PURE__ */ oidNist(0x03));
+ /** SHA2-384 hash function from RFC 4634. */
+-export const sha384 = /* @__PURE__ */ createHasher(() => new _SHA384(), 
++const sha384 = /* @__PURE__ */ createHasher(() => new _SHA384(), 
+ /* @__PURE__ */ oidNist(0x02));
+ /**
+  * SHA2-512/256 "truncated" hash function, with improved resistance to length extension attacks.
+  * See the paper on [truncated SHA512](https://eprint.iacr.org/2010/548.pdf).
+  */
+-export const sha512_256 = /* @__PURE__ */ createHasher(() => new _SHA512_256(), 
++const sha512_256 = /* @__PURE__ */ createHasher(() => new _SHA512_256(), 
+ /* @__PURE__ */ oidNist(0x06));
+ /**
+  * SHA2-512/224 "truncated" hash function, with improved resistance to length extension attacks.
+  * See the paper on [truncated SHA512](https://eprint.iacr.org/2010/548.pdf).
+  */
+-export const sha512_224 = /* @__PURE__ */ createHasher(() => new _SHA512_224(), 
++const sha512_224 = /* @__PURE__ */ createHasher(() => new _SHA512_224(), 
+ /* @__PURE__ */ oidNist(0x05));
+ //# sourceMappingURL=sha2.js.map
++
++module.exports = {
++  _SHA256,
++  _SHA224,
++  _SHA512,
++  _SHA384,
++  _SHA512_224,
++  _SHA512_256,
++  sha256,
++  sha224,
++  sha512,
++  sha384,
++  sha512_256,
++  sha512_224
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
+index 50e34ad..f46b370 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3-addons.js
+@@ -8,8 +8,8 @@
+  * * KeccakPRG: Pseudo-random generator based on Keccak [(pdf)](https://keccak.team/files/CSF-0.1.pdf)
+  * @module
+  */
+-import { Keccak } from "./sha3.js";
+-import { abytes, anumber, createHasher, kdfInputToBytes, u32, } from "./utils.js";
++const { Keccak } = require('./sha3.js');
++const { abytes, anumber, createHasher, kdfInputToBytes, u32, } = require('./utils.js');
+ // cSHAKE && KMAC (NIST SP800-185)
+ const _8n = /* @__PURE__ */ BigInt(8);
+ const _ffn = /* @__PURE__ */ BigInt(0xff);
+@@ -65,11 +65,11 @@ function cshakePers(hash, opts = {}) {
+ }
+ const gencShake = (suffix, blockLen, outputLen) => createHasher((opts = {}) => cshakePers(new Keccak(blockLen, suffix, chooseLen(opts, outputLen), true), opts));
+ /** 128-bit NIST cSHAKE XOF. */
+-export const cshake128 = /* @__PURE__ */ gencShake(0x1f, 168, 16);
++const cshake128 = /* @__PURE__ */ gencShake(0x1f, 168, 16);
+ /** 256-bit NIST cSHAKE XOF. */
+-export const cshake256 = /* @__PURE__ */ gencShake(0x1f, 136, 32);
++const cshake256 = /* @__PURE__ */ gencShake(0x1f, 136, 32);
+ /** Internal KMAC mac class. */
+-export class _KMAC extends Keccak {
++class _KMAC extends Keccak {
+     constructor(blockLen, outputLen, enableXOF, key, opts = {}) {
+         super(blockLen, 0x1f, outputLen, enableXOF);
+         cshakePers(this, { NISTfn: 'KMAC', personalization: opts.personalization });
+@@ -107,15 +107,15 @@ function genKmac(blockLen, outputLen, xof = false) {
+     return kmac;
+ }
+ /** 128-bit Keccak MAC. */
+-export const kmac128 = /* @__PURE__ */ genKmac(168, 16);
++const kmac128 = /* @__PURE__ */ genKmac(168, 16);
+ /** 256-bit Keccak MAC. */
+-export const kmac256 = /* @__PURE__ */ genKmac(136, 32);
++const kmac256 = /* @__PURE__ */ genKmac(136, 32);
+ /** 128-bit Keccak-MAC XOF. */
+-export const kmac128xof = /* @__PURE__ */ genKmac(168, 16, true);
++const kmac128xof = /* @__PURE__ */ genKmac(168, 16, true);
+ /** 256-bit Keccak-MAC XOF. */
+-export const kmac256xof = /* @__PURE__ */ genKmac(136, 32, true);
++const kmac256xof = /* @__PURE__ */ genKmac(136, 32, true);
+ /** Internal TupleHash class. */
+-export class _TupleHash extends Keccak {
++class _TupleHash extends Keccak {
+     constructor(blockLen, outputLen, enableXOF, opts = {}) {
+         super(blockLen, 0x1f, outputLen, enableXOF);
+         cshakePers(this, { NISTfn: 'TupleHash', personalization: opts.personalization });
+@@ -153,15 +153,15 @@ function genTuple(blockLen, outputLen, xof = false) {
+     return tuple;
+ }
+ /** 128-bit TupleHASH. tuple(['ab', 'cd']) != tuple(['a', 'bcd']) */
+-export const tuplehash128 = /* @__PURE__ */ genTuple(168, 16);
++const tuplehash128 = /* @__PURE__ */ genTuple(168, 16);
+ /** 256-bit TupleHASH. tuple(['ab', 'cd']) != tuple(['a', 'bcd']) */
+-export const tuplehash256 = /* @__PURE__ */ genTuple(136, 32);
++const tuplehash256 = /* @__PURE__ */ genTuple(136, 32);
+ /** 128-bit TupleHASH XOF. */
+-export const tuplehash128xof = /* @__PURE__ */ genTuple(168, 16, true);
++const tuplehash128xof = /* @__PURE__ */ genTuple(168, 16, true);
+ /** 256-bit TupleHASH XOF. */
+-export const tuplehash256xof = /* @__PURE__ */ genTuple(136, 32, true);
++const tuplehash256xof = /* @__PURE__ */ genTuple(136, 32, true);
+ /** Internal Parallel Keccak Hash class. */
+-export class _ParallelHash extends Keccak {
++class _ParallelHash extends Keccak {
+     leafHash;
+     leafCons;
+     chunkPos = 0; // Position of current block in chunk
+@@ -233,13 +233,13 @@ function genPrl(blockLen, outputLen, leaf, xof = false) {
+     return parallel;
+ }
+ /** 128-bit ParallelHash. In JS, it is not parallel. */
+-export const parallelhash128 = /* @__PURE__ */ genPrl(168, 16, cshake128);
++const parallelhash128 = /* @__PURE__ */ genPrl(168, 16, cshake128);
+ /** 256-bit ParallelHash. In JS, it is not parallel. */
+-export const parallelhash256 = /* @__PURE__ */ genPrl(136, 32, cshake256);
++const parallelhash256 = /* @__PURE__ */ genPrl(136, 32, cshake256);
+ /** 128-bit ParallelHash XOF. In JS, it is not parallel. */
+-export const parallelhash128xof = /* @__PURE__ */ genPrl(168, 16, cshake128, true);
++const parallelhash128xof = /* @__PURE__ */ genPrl(168, 16, cshake128, true);
+ /** 256-bit ParallelHash. In JS, it is not parallel. */
+-export const parallelhash256xof = /* @__PURE__ */ genPrl(136, 32, cshake256, true);
++const parallelhash256xof = /* @__PURE__ */ genPrl(136, 32, cshake256, true);
+ const genTurbo = (blockLen, outputLen) => createHasher((opts = {}) => {
+     const D = opts.D === undefined ? 0x1f : opts.D;
+     // Section 2.1 of https://datatracker.ietf.org/doc/draft-irtf-cfrg-kangarootwelve/17/
+@@ -251,9 +251,9 @@ const genTurbo = (blockLen, outputLen) => createHasher((opts = {}) => {
+  * TurboSHAKE 128-bit: reduced 12-round keccak.
+  * Should've been a simple "shake with 12 rounds", but we got a whole new spec about Turbo SHAKE Pro MAX.
+  */
+-export const turboshake128 = /* @__PURE__ */ genTurbo(168, 32);
++const turboshake128 = /* @__PURE__ */ genTurbo(168, 32);
+ /** TurboSHAKE 256-bit: reduced 12-round keccak. */
+-export const turboshake256 = /* @__PURE__ */ genTurbo(136, 64);
++const turboshake256 = /* @__PURE__ */ genTurbo(136, 64);
+ // Same as NIST rightEncode, but returns [0] for zero string
+ function rightEncodeK12(n) {
+     n = BigInt(n);
+@@ -265,7 +265,7 @@ function rightEncodeK12(n) {
+ }
+ const EMPTY_BUFFER = /* @__PURE__ */ Uint8Array.of();
+ /** Internal K12 hash class. */
+-export class _KangarooTwelve extends Keccak {
++class _KangarooTwelve extends Keccak {
+     chunkLen = 8192;
+     leafHash;
+     leafLen;
+@@ -340,9 +340,9 @@ export class _KangarooTwelve extends Keccak {
+     }
+ }
+ /** 128-bit KangarooTwelve (k12): reduced 12-round keccak. */
+-export const kt128 = /* @__PURE__ */ createHasher((opts = {}) => new _KangarooTwelve(168, 32, chooseLen(opts, 32), 12, opts));
++const kt128 = /* @__PURE__ */ createHasher((opts = {}) => new _KangarooTwelve(168, 32, chooseLen(opts, 32), 12, opts));
+ /** 256-bit KangarooTwelve (k12): reduced 12-round keccak. */
+-export const kt256 = /* @__PURE__ */ createHasher((opts = {}) => new _KangarooTwelve(136, 64, chooseLen(opts, 64), 12, opts));
++const kt256 = /* @__PURE__ */ createHasher((opts = {}) => new _KangarooTwelve(136, 64, chooseLen(opts, 64), 12, opts));
+ const genHopMAC = (hash) => (key, message, personalization, dkLen) => hash(key, { personalization: hash(message, { personalization }), dkLen });
+ /**
+  * 128-bit KangarooTwelve-based MAC.
+@@ -351,13 +351,13 @@ const genHopMAC = (hash) => (key, message, personalization, dkLen) => hash(key,
+  * HopMAC128(Key, M, C, L) = KT128(Key, KT128(M, C, 32), L)
+  * HopMAC256(Key, M, C, L) = KT256(Key, KT256(M, C, 64), L)
+  */
+-export const HopMAC128 = /* @__PURE__ */ genHopMAC(kt128);
++const HopMAC128 = /* @__PURE__ */ genHopMAC(kt128);
+ /** 256-bit KangarooTwelve-based MAC. */
+-export const HopMAC256 = /* @__PURE__ */ genHopMAC(kt256);
++const HopMAC256 = /* @__PURE__ */ genHopMAC(kt256);
+ /**
+  * More at https://github.com/XKCP/XKCP/tree/master/lib/high/Keccak/PRG.
+  */
+-export class _KeccakPRG extends Keccak {
++class _KeccakPRG extends Keccak {
+     rate;
+     constructor(capacity) {
+         anumber(capacity);
+@@ -416,5 +416,34 @@ export class _KeccakPRG extends Keccak {
+     }
+ }
+ /** KeccakPRG: Pseudo-random generator based on Keccak. https://keccak.team/files/CSF-0.1.pdf */
+-export const keccakprg = (capacity = 254) => new _KeccakPRG(capacity);
++const keccakprg = (capacity = 254) => new _KeccakPRG(capacity);
+ //# sourceMappingURL=sha3-addons.js.map
++
++module.exports = {
++  cshake128,
++  cshake256,
++  _KMAC,
++  kmac128,
++  kmac256,
++  kmac128xof,
++  kmac256xof,
++  _TupleHash,
++  tuplehash128,
++  tuplehash256,
++  tuplehash128xof,
++  tuplehash256xof,
++  _ParallelHash,
++  parallelhash128,
++  parallelhash256,
++  parallelhash128xof,
++  parallelhash256xof,
++  turboshake128,
++  turboshake256,
++  _KangarooTwelve,
++  kt128,
++  kt256,
++  HopMAC128,
++  HopMAC256,
++  _KeccakPRG,
++  keccakprg
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
+index 055bd7b..1057e44 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/sha3.js
+@@ -9,9 +9,9 @@
+  * Check out `sha3-addons` module for cSHAKE, k12, and others.
+  * @module
+  */
+-import { rotlBH, rotlBL, rotlSH, rotlSL, split } from "./_u64.js";
++const { rotlBH, rotlBL, rotlSH, rotlSL, split } = require('./_u64.js');
+ // prettier-ignore
+-import { abytes, aexists, anumber, aoutput, clean, createHasher, oidNist, swap32IfBE, u32 } from "./utils.js";
++const { abytes, aexists, anumber, aoutput, clean, createHasher, oidNist, swap32IfBE, u32 } = require('./utils.js');
+ // No __PURE__ annotations in sha3 header:
+ // EVERYTHING is in fact used on every export.
+ // Various per round constants calculations
+@@ -46,7 +46,7 @@ const SHA3_IOTA_L = IOTAS[1];
+ const rotlH = (h, l, s) => (s > 32 ? rotlBH(h, l, s) : rotlSH(h, l, s));
+ const rotlL = (h, l, s) => (s > 32 ? rotlBL(h, l, s) : rotlSL(h, l, s));
+ /** `keccakf1600` internal function, additionally allows to adjust round count. */
+-export function keccakP(s, rounds = 24) {
++function keccakP(s, rounds = 24) {
+     const B = new Uint32Array(5 * 2);
+     // NOTE: all indices are x2 since we store state as u32 instead of u64 (bigints to slow in js)
+     for (let round = 24 - rounds; round < 24; round++) {
+@@ -92,7 +92,7 @@ export function keccakP(s, rounds = 24) {
+     clean(B);
+ }
+ /** Keccak sponge function. */
+-export class Keccak {
++class Keccak {
+     state;
+     pos = 0;
+     posOut = 0;
+@@ -215,40 +215,57 @@ export class Keccak {
+ }
+ const genKeccak = (suffix, blockLen, outputLen, info = {}) => createHasher(() => new Keccak(blockLen, suffix, outputLen), info);
+ /** SHA3-224 hash function. */
+-export const sha3_224 = /* @__PURE__ */ genKeccak(0x06, 144, 28, 
++const sha3_224 = /* @__PURE__ */ genKeccak(0x06, 144, 28, 
+ /* @__PURE__ */ oidNist(0x07));
+ /** SHA3-256 hash function. Different from keccak-256. */
+-export const sha3_256 = /* @__PURE__ */ genKeccak(0x06, 136, 32, 
++const sha3_256 = /* @__PURE__ */ genKeccak(0x06, 136, 32, 
+ /* @__PURE__ */ oidNist(0x08));
+ /** SHA3-384 hash function. */
+-export const sha3_384 = /* @__PURE__ */ genKeccak(0x06, 104, 48, 
++const sha3_384 = /* @__PURE__ */ genKeccak(0x06, 104, 48, 
+ /* @__PURE__ */ oidNist(0x09));
+ /** SHA3-512 hash function. */
+-export const sha3_512 = /* @__PURE__ */ genKeccak(0x06, 72, 64, 
++const sha3_512 = /* @__PURE__ */ genKeccak(0x06, 72, 64, 
+ /* @__PURE__ */ oidNist(0x0a));
+ /** keccak-224 hash function. */
+-export const keccak_224 = /* @__PURE__ */ genKeccak(0x01, 144, 28);
++const keccak_224 = /* @__PURE__ */ genKeccak(0x01, 144, 28);
+ /** keccak-256 hash function. Different from SHA3-256. */
+-export const keccak_256 = /* @__PURE__ */ genKeccak(0x01, 136, 32);
++const keccak_256 = /* @__PURE__ */ genKeccak(0x01, 136, 32);
+ /** keccak-384 hash function. */
+-export const keccak_384 = /* @__PURE__ */ genKeccak(0x01, 104, 48);
++const keccak_384 = /* @__PURE__ */ genKeccak(0x01, 104, 48);
+ /** keccak-512 hash function. */
+-export const keccak_512 = /* @__PURE__ */ genKeccak(0x01, 72, 64);
++const keccak_512 = /* @__PURE__ */ genKeccak(0x01, 72, 64);
+ const genShake = (suffix, blockLen, outputLen, info = {}) => createHasher((opts = {}) => new Keccak(blockLen, suffix, opts.dkLen === undefined ? outputLen : opts.dkLen, true), info);
+ /** SHAKE128 XOF with 128-bit security. */
+-export const shake128 = 
++const shake128 = 
+ /* @__PURE__ */
+ genShake(0x1f, 168, 16, /* @__PURE__ */ oidNist(0x0b));
+ /** SHAKE256 XOF with 256-bit security. */
+-export const shake256 = 
++const shake256 = 
+ /* @__PURE__ */
+ genShake(0x1f, 136, 32, /* @__PURE__ */ oidNist(0x0c));
+ /** SHAKE128 XOF with 256-bit output (NIST version). */
+-export const shake128_32 = 
++const shake128_32 = 
+ /* @__PURE__ */
+ genShake(0x1f, 168, 32, /* @__PURE__ */ oidNist(0x0b));
+ /** SHAKE256 XOF with 512-bit output (NIST version). */
+-export const shake256_64 = 
++const shake256_64 = 
+ /* @__PURE__ */
+ genShake(0x1f, 136, 64, /* @__PURE__ */ oidNist(0x0c));
+ //# sourceMappingURL=sha3.js.map
++
++module.exports = {
++  keccakP,
++  Keccak,
++  sha3_224,
++  sha3_256,
++  sha3_384,
++  sha3_512,
++  keccak_224,
++  keccak_256,
++  keccak_384,
++  keccak_512,
++  shake128,
++  shake256,
++  shake128_32,
++  shake256_64
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
+index f8b81c1..08af75d 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/utils.js
+@@ -4,18 +4,18 @@
+  */
+ /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+ /** Checks if something is Uint8Array. Be careful: nodejs Buffer will return true. */
+-export function isBytes(a) {
++function isBytes(a) {
+     return a instanceof Uint8Array || (ArrayBuffer.isView(a) && a.constructor.name === 'Uint8Array');
+ }
+ /** Asserts something is positive integer. */
+-export function anumber(n, title = '') {
++function anumber(n, title = '') {
+     if (!Number.isSafeInteger(n) || n < 0) {
+         const prefix = title && `"${title}" `;
+         throw new Error(`${prefix}expected integer >= 0, got ${n}`);
+     }
+ }
+ /** Asserts something is Uint8Array. */
+-export function abytes(value, length, title = '') {
++function abytes(value, length, title = '') {
+     const bytes = isBytes(value);
+     const len = value?.length;
+     const needsLen = length !== undefined;
+@@ -28,21 +28,21 @@ export function abytes(value, length, title = '') {
+     return value;
+ }
+ /** Asserts something is hash */
+-export function ahash(h) {
++function ahash(h) {
+     if (typeof h !== 'function' || typeof h.create !== 'function')
+         throw new Error('Hash must wrapped by utils.createHasher');
+     anumber(h.outputLen);
+     anumber(h.blockLen);
+ }
+ /** Asserts a hash instance has not been destroyed / finished */
+-export function aexists(instance, checkFinished = true) {
++function aexists(instance, checkFinished = true) {
+     if (instance.destroyed)
+         throw new Error('Hash instance has been destroyed');
+     if (checkFinished && instance.finished)
+         throw new Error('Hash#digest() has already been called');
+ }
+ /** Asserts output is properly-sized byte array */
+-export function aoutput(out, instance) {
++function aoutput(out, instance) {
+     abytes(out, undefined, 'digestInto() output');
+     const min = instance.outputLen;
+     if (out.length < min) {
+@@ -50,52 +50,52 @@ export function aoutput(out, instance) {
+     }
+ }
+ /** Cast u8 / u16 / u32 to u8. */
+-export function u8(arr) {
++function u8(arr) {
+     return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
+ }
+ /** Cast u8 / u16 / u32 to u32. */
+-export function u32(arr) {
++function u32(arr) {
+     return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
+ }
+ /** Zeroize a byte array. Warning: JS provides no guarantees. */
+-export function clean(...arrays) {
++function clean(...arrays) {
+     for (let i = 0; i < arrays.length; i++) {
+         arrays[i].fill(0);
+     }
+ }
+ /** Create DataView of an array for easy byte-level manipulation. */
+-export function createView(arr) {
++function createView(arr) {
+     return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+ }
+ /** The rotate right (circular right shift) operation for uint32 */
+-export function rotr(word, shift) {
++function rotr(word, shift) {
+     return (word << (32 - shift)) | (word >>> shift);
+ }
+ /** The rotate left (circular left shift) operation for uint32 */
+-export function rotl(word, shift) {
++function rotl(word, shift) {
+     return (word << shift) | ((word >>> (32 - shift)) >>> 0);
+ }
+ /** Is current platform little-endian? Most are. Big-Endian platform: IBM */
+-export const isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([0x11223344]).buffer)[0] === 0x44)();
++const isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([0x11223344]).buffer)[0] === 0x44)();
+ /** The byte swap operation for uint32 */
+-export function byteSwap(word) {
++function byteSwap(word) {
+     return (((word << 24) & 0xff000000) |
+         ((word << 8) & 0xff0000) |
+         ((word >>> 8) & 0xff00) |
+         ((word >>> 24) & 0xff));
+ }
+ /** Conditionally byte swap if on a big-endian platform */
+-export const swap8IfBE = isLE
++const swap8IfBE = isLE
+     ? (n) => n
+     : (n) => byteSwap(n);
+ /** In place byte swap for Uint32Array */
+-export function byteSwap32(arr) {
++function byteSwap32(arr) {
+     for (let i = 0; i < arr.length; i++) {
+         arr[i] = byteSwap(arr[i]);
+     }
+     return arr;
+ }
+-export const swap32IfBE = isLE
++const swap32IfBE = isLE
+     ? (u) => u
+     : byteSwap32;
+ // Built-in hex conversion https://caniuse.com/mdn-javascript_builtins_uint8array_fromhex
+@@ -108,7 +108,7 @@ const hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_, i) => i.toString(1
+  * Convert byte array to hex string. Uses built-in function, when available.
+  * @example bytesToHex(Uint8Array.from([0xca, 0xfe, 0x01, 0x23])) // 'cafe0123'
+  */
+-export function bytesToHex(bytes) {
++function bytesToHex(bytes) {
+     abytes(bytes);
+     // @ts-ignore
+     if (hasHexBuiltin)
+@@ -135,7 +135,7 @@ function asciiToBase16(ch) {
+  * Convert hex string to byte array. Uses built-in function, when available.
+  * @example hexToBytes('cafe0123') // Uint8Array.from([0xca, 0xfe, 0x01, 0x23])
+  */
+-export function hexToBytes(hex) {
++function hexToBytes(hex) {
+     if (typeof hex !== 'string')
+         throw new Error('hex string expected, got ' + typeof hex);
+     // @ts-ignore
+@@ -162,7 +162,7 @@ export function hexToBytes(hex) {
+  * Call of async fn will return Promise, which will be fullfiled only on
+  * next scheduler queue processing step and this is exactly what we need.
+  */
+-export const nextTick = async () => { };
++const nextTick = async () => { };
+ /** Returns control to thread each 'tick' ms to avoid blocking. */
+ export async function asyncLoop(iters, tick, cb) {
+     let ts = Date.now();
+@@ -181,7 +181,7 @@ export async function asyncLoop(iters, tick, cb) {
+  * Built-in doesn't validate input to be string: we do the check.
+  * @example utf8ToBytes('abc') // Uint8Array.from([97, 98, 99])
+  */
+-export function utf8ToBytes(str) {
++function utf8ToBytes(str) {
+     if (typeof str !== 'string')
+         throw new Error('string expected');
+     return new Uint8Array(new TextEncoder().encode(str)); // https://bugzil.la/1681809
+@@ -190,13 +190,13 @@ export function utf8ToBytes(str) {
+  * Helper for KDFs: consumes uint8array or string.
+  * When string is passed, does utf8 decoding, using TextDecoder.
+  */
+-export function kdfInputToBytes(data, errorTitle = '') {
++function kdfInputToBytes(data, errorTitle = '') {
+     if (typeof data === 'string')
+         return utf8ToBytes(data);
+     return abytes(data, undefined, errorTitle);
+ }
+ /** Copies several Uint8Arrays into one. */
+-export function concatBytes(...arrays) {
++function concatBytes(...arrays) {
+     let sum = 0;
+     for (let i = 0; i < arrays.length; i++) {
+         const a = arrays[i];
+@@ -212,14 +212,14 @@ export function concatBytes(...arrays) {
+     return res;
+ }
+ /** Merges default options and passed options. */
+-export function checkOpts(defaults, opts) {
++function checkOpts(defaults, opts) {
+     if (opts !== undefined && {}.toString.call(opts) !== '[object Object]')
+         throw new Error('options must be object or undefined');
+     const merged = Object.assign(defaults, opts);
+     return merged;
+ }
+ /** Creates function with outputLen, blockLen, create properties from a class constructor. */
+-export function createHasher(hashCons, info = {}) {
++function createHasher(hashCons, info = {}) {
+     const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
+     const tmp = hashCons(undefined);
+     hashC.outputLen = tmp.outputLen;
+@@ -229,14 +229,44 @@ export function createHasher(hashCons, info = {}) {
+     return Object.freeze(hashC);
+ }
+ /** Cryptographically secure PRNG. Uses internal OS-level `crypto.getRandomValues`. */
+-export function randomBytes(bytesLength = 32) {
++function randomBytes(bytesLength = 32) {
+     const cr = typeof globalThis === 'object' ? globalThis.crypto : null;
+     if (typeof cr?.getRandomValues !== 'function')
+         throw new Error('crypto.getRandomValues must be defined');
+     return cr.getRandomValues(new Uint8Array(bytesLength));
+ }
+ /** Creates OID opts for NIST hashes, with prefix 06 09 60 86 48 01 65 03 04 02. */
+-export const oidNist = (suffix) => ({
++const oidNist = (suffix) => ({
+     oid: Uint8Array.from([0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, suffix]),
+ });
+ //# sourceMappingURL=utils.js.map
++
++module.exports = {
++  isBytes,
++  anumber,
++  abytes,
++  ahash,
++  aexists,
++  aoutput,
++  u8,
++  u32,
++  clean,
++  createView,
++  rotr,
++  rotl,
++  isLE,
++  byteSwap,
++  swap8IfBE,
++  byteSwap32,
++  swap32IfBE,
++  bytesToHex,
++  hexToBytes,
++  nextTick,
++  utf8ToBytes,
++  kdfInputToBytes,
++  concatBytes,
++  checkOpts,
++  createHasher,
++  randomBytes,
++  oidNist
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
+index df96f36..2bc3111 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/webcrypto.js
+@@ -1,5 +1,5 @@
+ import {} from "./pbkdf2.js";
+-import { abytes, ahash, anumber, checkOpts, kdfInputToBytes, } from "./utils.js";
++const { abytes, ahash, anumber, checkOpts, kdfInputToBytes, } = require('./utils.js');
+ function _subtle() {
+     const cr = typeof globalThis === 'object' ? globalThis.crypto : null;
+     const sb = cr?.subtle;
+@@ -29,11 +29,11 @@ function ahashWeb(hash) {
+ /** WebCrypto SHA1 (RFC 3174) legacy hash function. It was cryptographically broken. */
+ // export const sha1: WebHash = createHash('SHA-1', 64, 20);
+ /** WebCrypto SHA2-256 hash function from RFC 4634. */
+-export const sha256 = /* @__PURE__ */ createWebHash('SHA-256', 64, 32);
++const sha256 = /* @__PURE__ */ createWebHash('SHA-256', 64, 32);
+ /** WebCrypto SHA2-384 hash function from RFC 4634. */
+-export const sha384 = /* @__PURE__ */ createWebHash('SHA-384', 128, 48);
++const sha384 = /* @__PURE__ */ createWebHash('SHA-384', 128, 48);
+ /** WebCrypto SHA2-512 hash function from RFC 4634. */
+-export const sha512 = /* @__PURE__ */ createWebHash('SHA-512', 128, 64);
++const sha512 = /* @__PURE__ */ createWebHash('SHA-512', 128, 64);
+ /**
+  * WebCrypto HMAC: RFC2104 message authentication code.
+  * @param hash - function that would be used e.g. sha256. Webcrypto version.
+@@ -45,7 +45,7 @@ export const sha512 = /* @__PURE__ */ createWebHash('SHA-512', 128, 64);
+  * const mac1 = await hmac(sha256, 'key', 'message');
+  * ```
+  */
+-export const hmac = /* @__PURE__ */ (() => {
++const hmac = /* @__PURE__ */ (() => {
+     const hmac_ = async (hash, key, message) => {
+         const crypto = _subtle();
+         abytes(key, undefined, 'key');
+@@ -124,3 +124,10 @@ export async function pbkdf2(hash, password, salt, opts) {
+     return new Uint8Array(await crypto.deriveBits(deriveOpts, key, 8 * dkLen));
+ }
+ //# sourceMappingURL=webcrypto.js.map
++
++module.exports = {
++  sha256,
++  sha384,
++  sha512,
++  hmac
++};
+\ No newline at end of file
+diff --git a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json
+index a1b2c3d..e4f5g6h 100644
+--- a/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json
++++ b/node_modules/@nktkas/hyperliquid/node_modules/@noble/hashes/package.json
+@@ -82,7 +82,6 @@
+     "type": "git",
+     "url": "git+https://github.com/paulmillr/noble-hashes.git"
+   },
+-  "type": "module",
+   "main": "index.js",
+   "module": "index.js",
+   "types": "index.d.ts",
