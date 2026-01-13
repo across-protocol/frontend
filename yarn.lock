@@ -98,10 +98,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk@4.3.111-alpha.1":
-  version "4.3.111-alpha.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.111-alpha.1.tgz#e5637325e1b0c25df6235a23fa0164311d1d116c"
-  integrity sha512-cfymn+jBkM1iEci7lnlN6nmeEj8IwKi/bjEZD+C8z3oD5b2cK6HWJSrmqGHQD18Hze4pHjgVPP1b3BAP7K5kMQ==
+"@across-protocol/sdk@4.3.111-alpha.2":
+  version "4.3.111-alpha.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.111-alpha.2.tgz#7205cda88747323e90c7557c6ccefdba9c87c0db"
+  integrity sha512-2layOTdC5QkQ2M00Li0wXGuwN9wGkFhCKMC4O3ejKYdinbPagsvCo+V/OiZNLyp0f9elOyMlUtsXxHB/P/4vbg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.97"
@@ -130,7 +130,7 @@
     node-gyp "^11.0.0"
     superstruct "^0.15.4"
     tslib "^2.6.2"
-    viem "^2.43.0"
+    viem "^2.44"
 
 "@adraffy/ens-normalize@1.10.0":
   version "1.10.0"
@@ -26528,20 +26528,6 @@ viem@2.23.2:
     ox "0.6.7"
     ws "8.18.0"
 
-viem@2.43, viem@^2.37.9:
-  version "2.43.5"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.43.5.tgz#450529892ee106132e9aa45bfc11e2641624190f"
-  integrity sha512-QuJpuEMEPM3EreN+vX4mVY68Sci0+zDxozYfbh/WfV+SSy/Gthm74PH8XmitXdty1xY54uTCJ+/Gbbd1IiMPSA==
-  dependencies:
-    "@noble/curves" "1.9.1"
-    "@noble/hashes" "1.8.0"
-    "@scure/bip32" "1.7.0"
-    "@scure/bip39" "1.6.0"
-    abitype "1.2.3"
-    isows "1.0.7"
-    ox "0.11.1"
-    ws "8.18.3"
-
 viem@2.9.9:
   version "2.9.9"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.9.9.tgz#c89e6f402ae06601579a7e3069de76eb08c60adb"
@@ -26599,7 +26585,21 @@ viem@^2.21.8:
     ox "0.9.6"
     ws "8.18.3"
 
-viem@^2.43.0:
+viem@^2.37.9:
+  version "2.43.5"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.43.5.tgz#450529892ee106132e9aa45bfc11e2641624190f"
+  integrity sha512-QuJpuEMEPM3EreN+vX4mVY68Sci0+zDxozYfbh/WfV+SSy/Gthm74PH8XmitXdty1xY54uTCJ+/Gbbd1IiMPSA==
+  dependencies:
+    "@noble/curves" "1.9.1"
+    "@noble/hashes" "1.8.0"
+    "@scure/bip32" "1.7.0"
+    "@scure/bip39" "1.6.0"
+    abitype "1.2.3"
+    isows "1.0.7"
+    ox "0.11.1"
+    ws "8.18.3"
+
+viem@^2.44:
   version "2.44.1"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.44.1.tgz#7ada715b4dc704b25a7826466b8563c9100f674c"
   integrity sha512-wfQda7PIJeF9hWiGKV628AfBwyYxyoc89OcgF4s4/chs2PY8ibUA7IG+DWdU4oAkjhHm9w47w1m2dwwOPBU+ng==
