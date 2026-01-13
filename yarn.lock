@@ -4171,7 +4171,7 @@
     jsbi "^3.1.5"
     sha.js "^2.4.11"
 
-"@nktkas/hyperliquid@^0.25.9":
+"@nktkas/hyperliquid@0.25.9", "@nktkas/hyperliquid@^0.25.9":
   version "0.25.9"
   resolved "https://registry.yarnpkg.com/@nktkas/hyperliquid/-/hyperliquid-0.25.9.tgz#69b8bef3065322ea5346f67067a43077e64f89e1"
   integrity sha512-rNqRG4LWeCmnWUNV5XQAl+XLH7uzShvwXj3Z7JsWC45QgU8RlSv/MODUP9CE3Xv/avXWkEEhwy/BkLQkN85s+g==
