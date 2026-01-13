@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
 import * as sdk from "@across-protocol/sdk";
-import { createMemoryClient, http, PREFUNDED_ACCOUNTS } from "tevm";
+import {
+  createMemoryClient,
+  http,
+  MemoryClient,
+  PREFUNDED_ACCOUNTS,
+} from "tevm";
 import { optimism, base } from "tevm/common";
 import axios from "axios";
 import nodeHttp from "http";
@@ -9,6 +14,9 @@ import https from "https";
 dotenv.config({ path: [".env.e2e", ".env.local", ".env"] });
 
 export const JEST_TIMEOUT_MS = 180_000;
+
+export const MAX_CALL_RETRIES = 5;
+export const RETRY_DELAY_MS = 1000;
 
 export const axiosInstance = axios.create({
   httpAgent: new nodeHttp.Agent({ keepAlive: false }),
@@ -52,8 +60,8 @@ export function makeE2EConfig() {
     const [depositor, relayer, recipient] = PREFUNDED_ACCOUNTS.slice(1);
 
     const rpcUrls = buildRpcUrlMapFromEnv();
-    const nodes = {
-      [base.id]: createMemoryClient({
+    const nodeConfigs = {
+      [base.id]: {
         common: base,
         fork: {
           transport: http(rpcUrls[base.id])({}),
@@ -63,8 +71,8 @@ export function makeE2EConfig() {
           type: "manual",
         },
         loggingLevel: "error",
-      }),
-      [optimism.id]: createMemoryClient({
+      },
+      [optimism.id]: {
         common: optimism,
         fork: {
           transport: http(rpcUrls[optimism.id])({}),
@@ -74,19 +82,22 @@ export function makeE2EConfig() {
           type: "manual",
         },
         loggingLevel: "error",
-      }),
-    };
+      },
+    } as const;
+    const cachedNodes: Record<number, MemoryClient> = {};
 
     const swapApiBaseUrl =
       process.env.E2E_TESTS_SWAP_API_BASE_URL || "https://app.across.to";
 
-    const getClient = (chainId: number) => {
-      const client = nodes[chainId];
-      if (!client) {
-        throw new Error(
-          `Missing RPC URL for chainId ${chainId}. Set E2E_RPC_URL_${chainId}.`
-        );
+    const getClient = (chainId: number, opts?: { fresh?: boolean }) => {
+      if (opts?.fresh) {
+        return createMemoryClient(nodeConfigs[chainId]);
       }
+      if (cachedNodes[chainId]) {
+        return cachedNodes[chainId];
+      }
+      const client = createMemoryClient(nodeConfigs[chainId]);
+      cachedNodes[chainId] = client;
       return client;
     };
 
