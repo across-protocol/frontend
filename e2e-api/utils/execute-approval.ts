@@ -1,7 +1,7 @@
 import axios from "axios";
 import { expect } from "vitest";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { Address, parseUnits, PrivateKeyAccount } from "viem";
+import { Address, parseUnits } from "viem";
 
 import { e2eConfig, JEST_TIMEOUT_MS } from "./config";
 import { executeApprovalAndDeposit, type SwapQuoteResponse } from "./deposit";
@@ -113,7 +113,9 @@ export async function fetchSwapQuote(params: {
 export async function prepEndToEndExecution(
   tradeType: TradeType,
   testCase: EndToEndTestCase,
-  opts?: { freshDepositorWallet?: PrivateKeyAccount }
+  opts?: Partial<{
+    useFreshClients: boolean;
+  }>
 ) {
   const {
     originChainId,
@@ -125,17 +127,19 @@ export async function prepEndToEndExecution(
     refundOnOrigin,
   } = testCase;
   const amount = amounts[tradeType];
-  const depositor = opts?.freshDepositorWallet
-    ? opts.freshDepositorWallet.address
-    : e2eConfig.addresses.depositor;
+  const depositor = e2eConfig.addresses.depositor;
   const recipient = e2eConfig.addresses.recipient;
 
   const inputTokenAddress = inputToken.addresses[originChainId] as Address;
   const outputTokenAddress = outputToken.addresses[
     destinationChainId
   ] as Address;
-  const originClient = e2eConfig.getClient(originChainId);
-  const destinationClient = e2eConfig.getClient(destinationChainId);
+  const originClient = e2eConfig.getClient(originChainId, {
+    fresh: opts?.useFreshClients,
+  });
+  const destinationClient = e2eConfig.getClient(destinationChainId, {
+    fresh: opts?.useFreshClients,
+  });
   await Promise.all([originClient.tevmReady(), destinationClient.tevmReady()]);
 
   // Set funds for depositor
@@ -160,8 +164,8 @@ export async function prepEndToEndExecution(
         slippage,
         refundOnOrigin,
       }),
-      getBalance(originChainId, inputTokenAddress, depositor),
-      getBalance(destinationChainId, outputTokenAddress, recipient),
+      getBalance(originClient, inputTokenAddress, depositor),
+      getBalance(destinationClient, outputTokenAddress, recipient),
     ]);
 
   return {
@@ -184,15 +188,14 @@ export async function prepEndToEndExecution(
 export async function runEndToEnd(
   tradeType: TradeType,
   testCase: EndToEndTestCase,
-  opts?: {
-    freshDepositorWallet?: PrivateKeyAccount;
-    retryDeposit?: boolean;
-    retryFill?: boolean;
-  }
+  opts?: Partial<{
+    retryDeposit: boolean;
+    retryFill: boolean;
+    useFreshClients: boolean;
+  }>
 ) {
   const {
     originChainId,
-    destinationChainId,
     inputTokenAddress,
     outputTokenAddress,
     depositor,
@@ -223,12 +226,12 @@ export async function runEndToEnd(
 
   // Balances AFTER swap and fill executions
   const inputTokenBalanceAfter = await getBalance(
-    originChainId,
+    originClient,
     inputTokenAddress,
     depositor
   );
   const outputTokenBalanceAfter = await getBalance(
-    destinationChainId,
+    destinationClient,
     outputTokenAddress,
     recipient
   );

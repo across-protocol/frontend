@@ -14,6 +14,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
         await runEndToEnd("exactInput", A2A_BASE_TEST_CASE, {
           retryDeposit: true,
           retryFill: true,
+          useFreshClients: true,
         });
       },
       JEST_TIMEOUT_MS
@@ -27,6 +28,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
         await runEndToEnd("exactOutput", A2A_BASE_TEST_CASE, {
           retryDeposit: true,
           retryFill: true,
+          useFreshClients: true,
         });
       },
       JEST_TIMEOUT_MS
@@ -40,6 +42,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
         await runEndToEnd("minOutput", A2A_BASE_TEST_CASE, {
           retryDeposit: true,
           retryFill: true,
+          useFreshClients: true,
         });
       },
       JEST_TIMEOUT_MS

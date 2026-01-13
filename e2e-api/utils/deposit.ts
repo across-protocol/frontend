@@ -14,7 +14,10 @@ export type SubmittedTxReceipts = Awaited<
   ReturnType<typeof executeApprovalAndDeposit>
 >;
 
-async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
+async function executeApprovalTxnsIfAny(
+  swapQuote: SwapQuoteResponse,
+  originClient: MemoryClient
+) {
   const receipts: TransactionReceipt[] = [];
   if (!swapQuote.approvalTxns || swapQuote.approvalTxns.length === 0) {
     return receipts;
@@ -23,22 +26,21 @@ async function executeApprovalTxnsIfAny(swapQuote: SwapQuoteResponse) {
   // Send approvals per their declared chain
   for (const tx of swapQuote.approvalTxns) {
     const signer = e2eConfig.getAccount("depositor");
-    const client = e2eConfig.getClient(tx.chainId);
 
-    const approvalCallResult = await client.tevmCall({
+    const approvalCallResult = await originClient.tevmCall({
       to: tx.to as Address,
       data: tx.data as Hex,
       from: signer.address,
       addToBlockchain: true,
       onAfterMessage: handleTevmError,
     });
-    await client.tevmMine({ blockCount: 1 });
+    await originClient.tevmMine({ blockCount: 1 });
 
     if (!approvalCallResult.txHash) {
       throw new Error("Approval call failed");
     }
 
-    const approvalReceipt = await client.waitForTransactionReceipt({
+    const approvalReceipt = await originClient.waitForTransactionReceipt({
       hash: approvalCallResult.txHash,
     });
 
@@ -52,7 +54,10 @@ export async function executeApprovalAndDeposit(
   originClient: MemoryClient,
   retryDeposit?: boolean
 ) {
-  const approvalReceipts = await executeApprovalTxnsIfAny(swapQuote);
+  const approvalReceipts = await executeApprovalTxnsIfAny(
+    swapQuote,
+    originClient
+  );
 
   if (!swapQuote.swapTx) {
     throw new Error("swapQuote.swapTx is required");

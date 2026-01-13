@@ -81,6 +81,7 @@ export async function executeFill(params: ExecuteFillParams) {
     spender: spokeAddress.toEvmAddress() as Address,
     amount: BigInt(outputAmount.toString()),
     from: relayerAddressToUse,
+    client: destinationClient,
   });
 
   // Fill relay
