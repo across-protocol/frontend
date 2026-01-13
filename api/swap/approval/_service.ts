@@ -100,6 +100,7 @@ export async function handleApprovalSwap(
     recipient,
     depositor,
     includesActions: actions.length > 0,
+    includesAppFee: !!appFeePercent && appFeePercent > 0,
     routingPreference,
   });
 
