@@ -22,7 +22,9 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
     }
     experimentClientRef.current = Experiment.initializeWithAmplitudeAnalytics(
       publicDeploymentKey,
-      {}
+      {
+        serverUrl: "https://across.to/experiment",
+      }
     );
     // set flags from localstorage cache before a fetch is initialized
     setFlags(experimentClientRef.current.all());

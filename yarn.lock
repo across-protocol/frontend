@@ -287,20 +287,20 @@
   resolved "https://registry.yarnpkg.com/@amplitude/analytics-types/-/analytics-types-2.3.1.tgz#a0ed8ab5304536c29d8f7f1ad7574eff1a4def7b"
   integrity sha512-yojBG20qvph0rpCJKb4i/FJa+otqLINEwv//hfzvjnCOcPPyS0YscI8oiRBM0rG7kZIDgaL9a6jPwkqK4ACmcw==
 
-"@amplitude/experiment-core@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@amplitude/experiment-core/-/experiment-core-0.11.1.tgz#31eb485dc40b65f4cc2f15adab9b62f0df622065"
-  integrity sha512-fHVJazCwwgjUcj49N+yFSLMSroyY0eHImrsmd1ipIjIT1Cez8mh+TvwJQ0LGSdyYvL2NAZM2J5vpXrR1nHgdzg==
+"@amplitude/experiment-core@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/experiment-core/-/experiment-core-0.12.0.tgz#9a2ee4c054da6dd629bbabbcbbf20188cdece3dd"
+  integrity sha512-EiLLxcyJD8T3GFsMPxBfWx9n9fBw6rC0RJwccPXLzResE0HnGZZpVWF86ZndnYmEMD1lUUjWi41N1ymEzodI5w==
   dependencies:
     js-base64 "^3.7.5"
 
-"@amplitude/experiment-js-client@^1.18.0":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@amplitude/experiment-js-client/-/experiment-js-client-1.18.0.tgz#00e96aac951abcde1c7754322a26833765d82743"
-  integrity sha512-3UbR1WWhGNXYBcq3XzgO9Q2TgNPELUqqWHCU7sHIhHp8dDKVrkE6OPNFQsmrlPXfo+iAk63BFY/PjxGP+2BJLw==
+"@amplitude/experiment-js-client@^1.19.0":
+  version "1.20.1"
+  resolved "https://registry.yarnpkg.com/@amplitude/experiment-js-client/-/experiment-js-client-1.20.1.tgz#769aeb52850fadb1bc60b0900048776f3b54ba4e"
+  integrity sha512-pNcEPVBxhn13x85aDrTo8bEnBvG97v2P7cObMi8snLxNaUAKatkITPC//I0+daU7zwX2M3c+yeGmrU0Fmk08OA==
   dependencies:
     "@amplitude/analytics-connector" "^1.6.4"
-    "@amplitude/experiment-core" "^0.11.1"
+    "@amplitude/experiment-core" "^0.12.0"
     "@amplitude/ua-parser-js" "^0.7.31"
     base64-js "1.5.1"
     unfetch "4.1.0"
