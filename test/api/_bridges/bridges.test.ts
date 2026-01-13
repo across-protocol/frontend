@@ -642,5 +642,49 @@ describe("api/_bridges/index", () => {
         expect(strategy.name).toBe("across");
       });
     });
+
+    describe("App fee routing", () => {
+      test("should use Across when app fees are present for USDC transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdcToUsdc: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.OPTIMISM,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdcOptimism,
+          outputToken: usdcArbitrum,
+          includesAppFee: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+
+      test("should use Across when app fees are present for USDT transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdtToUsdt: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.MAINNET,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdtMainnet,
+          outputToken: usdtArbitrum,
+          includesAppFee: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+    });
   });
 });

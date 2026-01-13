@@ -84,6 +84,7 @@ export async function getBridgeStrategy({
   recipient,
   depositor,
   includesActions,
+  includesAppFee,
   routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const tokenPairPerRouteOverride =
@@ -116,8 +117,8 @@ export async function getBridgeStrategy({
     return fromToChainOverride;
   }
 
-  // Always use Across when actions are present
-  if (includesActions) {
+  // Always use Across when actions or app fees are present
+  if (includesActions || includesAppFee) {
     return getAcrossBridgeStrategy();
   }
 
