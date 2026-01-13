@@ -121,11 +121,6 @@ import polygonAmoyGrayscaleLogo from "assets/chain-logos/polygon-amoy-grayscale.
 import { ReactComponent as polygonAmoyLogoSvg } from "assets/chain-logos/polygon-amoy.svg";
 import { ReactComponent as polygonAmoyGrayscaleLogoSvg } from "assets/chain-logos/polygon-amoy-grayscale.svg";
 
-import redstoneLogo from "assets/chain-logos/redstone.svg";
-import redstoneGrayscaleLogo from "assets/chain-logos/redstone-grayscale.svg";
-import { ReactComponent as redstoneLogoSvg } from "assets/chain-logos/redstone.svg";
-import { ReactComponent as redstoneGrayscaleLogoSvg } from "assets/chain-logos/redstone-grayscale.svg";
-
 import scrollLogo from "assets/chain-logos/scroll.svg";
 import scrollGrayscaleLogo from "assets/chain-logos/scroll-grayscale.svg";
 import { ReactComponent as scrollLogoSvg } from "assets/chain-logos/scroll.svg";
@@ -150,11 +145,6 @@ import soneiumLogo from "assets/chain-logos/soneium.svg";
 import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
-
-import tataraLogo from "assets/chain-logos/tatara.svg";
-import tataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
-import { ReactComponent as tataraLogoSvg } from "assets/chain-logos/tatara.svg";
-import { ReactComponent as tataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
 
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
@@ -1118,47 +1108,6 @@ export const polygonAmoy_viem = defineChain({
   },
 });
 
-export const redstone = {
-  name: "Redstone",
-  fullName: "Redstone",
-  chainId: 690,
-  logoURI: redstoneLogo,
-  grayscaleLogoURI: redstoneGrayscaleLogo,
-  logoSvg: redstoneLogoSvg,
-  grayscaleLogoSvg: redstoneGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.redstonechain.com",
-  explorerUrl: "https://explorer.redstone.xyz",
-  constructExplorerLink: (txHash: string) =>
-    `${redstone.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_690_CUSTOM_RPC_URL,
-  pollingInterval: 2000,
-};
-
-export const redstone_viem = defineChain({
-  id: redstone.chainId,
-  name: redstone.name,
-  nativeCurrency: {
-    name: redstone.nativeCurrencySymbol,
-    symbol: redstone.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        redstone.customRpcUrl ? redstone.customRpcUrl : [],
-        redstone.rpcUrl,
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: redstone.name + " Explorer",
-      url: redstone.explorerUrl,
-    },
-  },
-});
-
 export const scroll = {
   name: "Scroll",
   fullName: "Scroll",
@@ -1312,47 +1261,6 @@ export const soneium_viem = defineChain({
     default: {
       name: soneium.name + " Explorer",
       url: soneium.explorerUrl,
-    },
-  },
-});
-
-export const tatara = {
-  name: "Tatara",
-  fullName: "Tatara",
-  chainId: 129399,
-  logoURI: tataraLogo,
-  grayscaleLogoURI: tataraGrayscaleLogo,
-  logoSvg: tataraLogoSvg,
-  grayscaleLogoSvg: tataraGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
-  explorerUrl: "https://explorer.tatara.katana.network",
-  constructExplorerLink: (txHash: string) =>
-    `${tatara.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
-  pollingInterval: 1000,
-};
-
-export const tatara_viem = defineChain({
-  id: tatara.chainId,
-  name: tatara.name,
-  nativeCurrency: {
-    name: tatara.nativeCurrencySymbol,
-    symbol: tatara.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        tatara.customRpcUrl ? tatara.customRpcUrl : [],
-        tatara.rpcUrl,
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: tatara.name + " Explorer",
-      url: tatara.explorerUrl,
     },
   },
 });
@@ -1596,13 +1504,11 @@ export const chainConfigs = [
   plasma,
   polygon,
   polygonAmoy,
-  redstone,
   scroll,
   sepolia,
   solana,
   solanaDevnet,
   soneium,
-  tatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1640,11 +1546,9 @@ export const chains_viem = [
   plasma_viem,
   polygon_viem,
   polygonAmoy_viem,
-  redstone_viem,
   scroll_viem,
   sepolia_viem,
   soneium_viem,
-  tatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,

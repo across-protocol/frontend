@@ -51,14 +51,14 @@ export function getUsdhIntentsBridgeStrategy(): BridgeStrategy {
       return [];
     },
 
-    getBridgeQuoteRecipient: (
+    getBridgeQuoteRecipient: async (
       crossSwap: CrossSwap,
       _hasOriginSwap?: boolean
     ) => {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (crossSwap: CrossSwap, _appFee?: AppFee) => {
       return getDepositMessage({
         outputToken: crossSwap.outputToken,
         recipient: crossSwap.recipient,

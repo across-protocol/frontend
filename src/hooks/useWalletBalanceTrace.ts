@@ -3,7 +3,7 @@ import { useConnection } from "hooks";
 import {
   ChainId,
   fixedPointAdjustment,
-  getBalance,
+  getEvmBalance,
   getConfig,
   getNativeBalance,
   getRoutes,
@@ -85,7 +85,7 @@ const calculateUsdBalances = async (account: string) => {
             fromChainId: Number(chainId),
             fromTokenSymbol,
             fromTokenAddress,
-            balance: await getBalance(
+            balance: await getEvmBalance(
               Number(chainId),
               account,
               fromTokenAddress

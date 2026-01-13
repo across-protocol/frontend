@@ -19,10 +19,14 @@ import {
   GetOutputBridgeQuoteParams,
 } from "../types";
 import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
-import { AppFee, CROSS_SWAP_TYPE } from "../../_dexes/utils";
+import {
+  AppFee,
+  CROSS_SWAP_TYPE,
+  getFallbackRecipient,
+} from "../../_dexes/utils";
 import { AmountTooLowError, InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
-import { getFallbackRecipient } from "../../_dexes/utils";
+import { divCeil } from "../../_bignumber";
 import { getEstimatedFillTime } from "../cctp/utils/fill-times";
 import { getZeroBridgeFees } from "../utils";
 import { getCctpFees } from "../cctp/utils/fees";
@@ -34,6 +38,7 @@ import {
   SPONSORED_CCTP_OUTPUT_TOKENS,
   CCTP_TRANSFER_MODE,
   getSponsoredCctpSrcPeripheryAddress,
+  ACCOUNT_CREATION_SUPPORTED_ROUTES,
 } from "./utils/constants";
 import {
   getNormalizedSpotTokenSymbol,
@@ -61,6 +66,7 @@ import {
   MAX_BPS_TO_SPONSOR_LIMIT,
 } from "../../_sponsorship-eligibility";
 import { TOKEN_SYMBOLS_MAP } from "../../_constants";
+import { isToLighter } from "../../_lighter";
 
 const name = "sponsored-cctp" as const;
 
@@ -95,10 +101,10 @@ export function getSponsoredCctpBridgeStrategy(
       return [];
     },
 
-    getBridgeQuoteRecipient: (crossSwap: CrossSwap) => {
+    getBridgeQuoteRecipient: async (crossSwap: CrossSwap) => {
       return crossSwap.recipient;
     },
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
@@ -139,6 +145,30 @@ export function isRouteSupported(params: {
   );
 }
 
+/**
+ * If recipient does not exist on HyperCore, then we error if route is not
+ * supported for account creation.
+ */
+async function assertAccountExistsForUnsupportedRoutes(params: {
+  inputToken: Token;
+  outputToken: Token;
+  recipient: string;
+}) {
+  const { inputToken, outputToken, recipient } = params;
+  const isAccountCreationSupported = ACCOUNT_CREATION_SUPPORTED_ROUTES.some(
+    (route) =>
+      route.inputTokenSymbol === inputToken.symbol &&
+      route.outputTokenSymbol === outputToken.symbol
+  );
+  if (!isAccountCreationSupported && isToHyperCore(outputToken.chainId)) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
+}
+
 export async function getQuoteForExactInput(
   params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
 ) {
@@ -154,15 +184,11 @@ export async function getQuoteForExactInput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
-  // If recipient does not exist on HyperCore, then we error.
-  // This is temporary until we can support account creation for sponsored mint/burn routes.
-  if (isToHyperCore(params.outputToken.chainId)) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-      paramName: "recipient",
-    });
-  }
+  await assertAccountExistsForUnsupportedRoutes({
+    inputToken,
+    outputToken,
+    recipient: params.recipient,
+  });
 
   if (params.isEligibleForSponsorship) {
     // We guarantee input amount == output amount for sponsored flows
@@ -184,16 +210,17 @@ export async function getQuoteForExactInput(
       useForwardFee: false,
     }).getQuoteForExactInput({
       ...params,
-      outputToken: isSwapPair
-        ? {
-            ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
-            address:
-              TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
-                params.outputToken.chainId
-              ],
-            chainId: params.outputToken.chainId,
-          }
-        : params.outputToken,
+      outputToken:
+        isSwapPair && !isToLighter(params.outputToken.chainId)
+          ? {
+              ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+              address:
+                TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[
+                  params.outputToken.chainId
+                ],
+              chainId: params.outputToken.chainId,
+            }
+          : params.outputToken,
     });
     outputAmount = unsponsoredOutputAmount;
     provider = "cctp";
@@ -232,14 +259,11 @@ export async function getQuoteForOutput(
     pct: BigNumber;
   } = getZeroBridgeFees(inputToken);
 
-  // If recipient does not exist on HyperCore, then we error.
-  // This is temporary until we can support account creation for sponsored mint/burn routes.
-  if (isToHyperCore(params.outputToken.chainId)) {
-    await assertAccountExistsOnHyperCore({
-      account: params.recipient,
-      chainId: params.outputToken.chainId,
-    });
-  }
+  await assertAccountExistsForUnsupportedRoutes({
+    inputToken,
+    outputToken,
+    recipient: params.recipient,
+  });
 
   // We guarantee input amount == output amount for sponsored flows
   if (params.isEligibleForSponsorship) {
@@ -421,7 +445,7 @@ export async function buildSvmTxForAllowanceHolder(params: {
   };
 }
 
-async function _prepareSponsoredTx(params: {
+export async function _prepareSponsoredTx(params: {
   quotes: CrossSwapQuotes;
   integratorId?: string;
   isEligibleForSponsorship: boolean;
@@ -478,7 +502,7 @@ async function _prepareSponsoredTx(params: {
 
   // If eligible for sponsorship, we need to calculate the max fee based on the CCTP fees.
   if (params.isEligibleForSponsorship) {
-    const { transferFeeBps, forwardFee } = await getCctpFees({
+    const { transferFeeBps } = await getCctpFees({
       inputToken: crossSwap.inputToken,
       outputToken: crossSwap.outputToken,
       transferMode: CCTP_TRANSFER_MODE,
@@ -487,8 +511,14 @@ async function _prepareSponsoredTx(params: {
       // route through our own sponsorship periphery contract.
       useForwardFee: false,
     });
-    const transferFee = bridgeQuote.inputAmount.mul(transferFeeBps).div(10_000);
-    maxFee = transferFee.add(forwardFee);
+    const floatBpsScaler = 100;
+    // transferFeeBps can be a float
+    const transferFeeBpsScaled = transferFeeBps * floatBpsScaler;
+    // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
+    maxFee = divCeil(
+      bridgeQuote.inputAmount.mul(transferFeeBpsScaled),
+      BigNumber.from(10_000 * floatBpsScaler)
+    );
   }
   // If not eligible for sponsorship, we use the pre-calculated max fee from the bridge quote.
   else {
@@ -536,10 +566,11 @@ async function _prepareSponsoredTx(params: {
     }) * 100
   );
 
-  const { quote, signature } = buildSponsoredCCTPQuote({
+  const { quote, signature } = await buildSponsoredCCTPQuote({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     inputAmount: bridgeQuote.inputAmount,
+    outputAmount: bridgeQuote.outputAmount,
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
     refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),

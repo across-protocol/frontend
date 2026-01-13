@@ -1,14 +1,13 @@
 import { Address, parseAbi, zeroAddress, encodeFunctionData } from "viem";
+import { MemoryClient } from "tevm";
 
-import { e2eConfig } from "./config";
 import { handleTevmError } from "./tevm";
 
 export async function getBalance(
-  chainId: number,
+  client: MemoryClient,
   tokenAddress: Address,
   accountAddress: Address
 ) {
-  const client = e2eConfig.getClient(chainId);
   if (zeroAddress === tokenAddress) {
     return client.getBalance({
       address: accountAddress,
@@ -30,9 +29,9 @@ export async function setAllowance(params: {
   spender: Address;
   amount: bigint;
   from: Address;
+  client: MemoryClient;
 }) {
-  const { chainId, tokenAddress, spender, amount, from } = params;
-  const client = e2eConfig.getClient(chainId);
+  const { client, tokenAddress, spender, amount, from } = params;
   await client.tevmCall({
     from,
     to: tokenAddress,

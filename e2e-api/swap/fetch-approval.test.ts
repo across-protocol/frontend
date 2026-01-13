@@ -1,8 +1,10 @@
 import { BigNumber, ethers } from "ethers";
+import { describe, expect, it, test } from "vitest";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { compactAxiosError, ENABLED_ROUTES } from "../../api/_utils";
-import { e2eConfig, axiosInstance, JEST_TIMEOUT_MS } from "../utils/config";
+import { axiosInstance, e2eConfig, JEST_TIMEOUT_MS } from "../utils/config";
+import { AcrossErrorCode } from "../../api/_errors";
 
 const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
@@ -322,7 +324,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("Wrapped Tokens", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const tokensToTest = [
       "WETH",
       "WBNB",
@@ -368,7 +369,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("Ambiguous Tokens", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const tokensToTest = ["USDC", "USDT"];
 
     for (const tokenSymbol of tokensToTest) {
@@ -404,7 +404,6 @@ describe("GET /swap/approval", () => {
   });
 
   describe("'slippage' query parameter", () => {
-    jest.setTimeout(JEST_TIMEOUT_MS);
     const baseParams = {
       amount: ethers.utils.parseUnits("10", 6).toString(), // 10 USDC
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
@@ -466,12 +465,32 @@ describe("GET /swap/approval", () => {
         const response = await axiosInstance.get(SWAP_API_URL, {
           params: {
             ...baseParams,
-            slippage: 0.01,
+            slippage: 0.06,
           },
         });
         expect(response.status).toBe(200);
         expect(response.data.steps.destinationSwap).toBeDefined();
-        expect(response.data.steps.destinationSwap.slippage).toBe(0.01);
+        expect(response.data.steps.destinationSwap.slippage).toBe(0.06);
+      },
+      JEST_TIMEOUT_MS
+    );
+
+    test(
+      "should error if slippage is less than auto slippage",
+      async () => {
+        try {
+          await axiosInstance.get(SWAP_API_URL, {
+            params: {
+              ...baseParams,
+              slippage: 0.01,
+            },
+          });
+        } catch (error: any) {
+          expect(error.response?.status).toBe(400);
+          expect(error.response?.data.code).toBe(
+            AcrossErrorCode.SWAP_SLIPPAGE_INSUFFICIENT
+          );
+        }
       },
       JEST_TIMEOUT_MS
     );

@@ -24,6 +24,13 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
     ],
     [CHAIN_IDs.SOLANA]: [getJupiterStrategy()],
   },
+  inputTokens: {
+    // NOTE: 0x is not a reliable source for DAI -> ANY swaps
+    DAI: [
+      getUniversalRouter02Strategy(),
+      getLifiStrategy("SpokePoolPeriphery"),
+    ],
+  },
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {
       GHO: {

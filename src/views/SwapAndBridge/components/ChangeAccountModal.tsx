@@ -10,7 +10,7 @@ import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { ReactComponent as PencilIcon } from "assets/icons/pencil.svg";
 
 import { ampli } from "ampli";
-import { useAmplitude } from "hooks";
+import { useAmplitude, useNameResolver } from "hooks";
 import { useDisallowList } from "hooks/useDisallowList";
 import { COLORS, shortenAddress } from "utils";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -38,6 +38,11 @@ export const ChangeAccountModal = () => {
   const [validInput, setValidInput] = useState(false);
 
   const { isBlocked, isLoading } = useDisallowList(userInput ?? "");
+  const {
+    resolvedAddress,
+    isLoading: isResolvingName,
+    isName,
+  } = useNameResolver(userInput);
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -51,31 +56,41 @@ export const ChangeAccountModal = () => {
   }, [displayModal, currentRecipientAccount]);
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || isResolvingName) {
       return;
     }
 
-    const isValidAddressEVM = ethers.utils.isAddress(userInput) && !isBlocked;
-    const isValidAddressSVM = isSvmAddress(userInput) && !isBlocked;
+    const addressToValidate = resolvedAddress ?? userInput;
+    const isValidAddressEVM =
+      ethers.utils.isAddress(addressToValidate) && !isBlocked;
+    const isValidAddressSVM = isSvmAddress(addressToValidate) && !isBlocked;
 
     setValidInput(
       destinationEcosystem === "evm" ? isValidAddressEVM : isValidAddressSVM
     );
-  }, [userInput, isBlocked, isLoading, destinationEcosystem]);
+  }, [
+    userInput,
+    resolvedAddress,
+    isBlocked,
+    isLoading,
+    isResolvingName,
+    destinationEcosystem,
+  ]);
 
   const handleClickSave = () => {
-    if (validInput || userInput === "") {
-      if (userInput && userInput !== recipient) {
+    const finalAddress = resolvedAddress ?? userInput;
+    if (validInput || finalAddress === "") {
+      if (finalAddress && finalAddress !== recipient) {
         setCustomDestinationAccount({
           accountType: destinationEcosystem,
-          address: userInput,
+          address: finalAddress,
         });
       } else {
         resetCustomDestinationAccount();
       }
       addToAmpliQueue(() => {
         ampli.toAccountChanged({
-          toWalletAddress: userInput,
+          toWalletAddress: finalAddress,
         });
       });
       onCloseModal();
@@ -136,12 +151,28 @@ export const ChangeAccountModal = () => {
               <StyledCrossIcon />
             </CrossIconWrapper>
           </InputGroup>
+          <ResolvedAddressRow
+            error={isName && !isResolvingName && !resolvedAddress}
+            visible={isName}
+          >
+            {isResolvingName
+              ? "Resolving..."
+              : resolvedAddress
+                ? `Resolves to: ${shortenAddress(resolvedAddress, "..", 6)}`
+                : "Could not resolve name"}
+          </ResolvedAddressRow>
           <Warning>
-            Note that only{" "}
-            <BoldText>
-              {destinationEcosystem === "evm" ? "Ethereum" : "Solana"}
-            </BoldText>{" "}
-            addresses are valid.
+            {destinationEcosystem === "evm" ? (
+              <>
+                Note that only <BoldText>Ethereum addresses</BoldText>,{" "}
+                <BoldText>ENS names</BoldText>, or{" "}
+                <BoldText>Hyperliquid names</BoldText> are valid.
+              </>
+            ) : (
+              <>
+                Note that only <BoldText>Solana</BoldText> addresses are valid.
+              </>
+            )}
           </Warning>
           <ButtonWrapper>
             <SaveButton
@@ -207,6 +238,15 @@ const Warning = styled.span`
   line-height: 130%;
   margin-top: 4px;
   margin-bottom: 12px;
+`;
+
+const ResolvedAddressRow = styled.div<{ error?: boolean; visible?: boolean }>`
+  width: 100%;
+  height: 18px;
+  font-size: 14px;
+  color: ${({ error }) => (error ? COLORS.red : COLORS.aqua)};
+  margin-top: -8px;
+  visibility: ${({ visible }) => (visible ? "visible" : "hidden")};
 `;
 
 const Wrapper = styled.div`

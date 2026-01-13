@@ -1,3 +1,12 @@
+import {
+  beforeEach,
+  describe,
+  expect,
+  Mocked,
+  MockedFunction,
+  test,
+  vi,
+} from "vitest";
 import { ethers } from "ethers";
 import axios from "axios";
 
@@ -12,15 +21,13 @@ import { TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { CHAIN_IDs } from "../../api/_constants";
 import { getProvider } from "../../api/_providers";
 
-jest.mock("axios");
-jest.mock("../../api/_providers", () => ({
-  getProvider: jest.fn(),
+vi.mock("axios");
+vi.mock("../../api/_providers", () => ({
+  getProvider: vi.fn(),
 }));
 
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-const mockedGetProvider = getProvider as jest.MockedFunction<
-  typeof getProvider
->;
+const mockedAxios = axios as Mocked<typeof axios>;
+const mockedGetProvider = getProvider as MockedFunction<typeof getProvider>;
 
 type MockOrderBookData = Awaited<ReturnType<typeof getL2OrderBookForPair>>;
 
@@ -35,7 +42,7 @@ describe("api/_hypercore.ts", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("#simulateMarketOrder()", () => {
@@ -610,7 +617,7 @@ describe("api/_hypercore.ts", () => {
         [exists]
       );
       return {
-        call: jest.fn().mockResolvedValue(encodedResult),
+        call: vi.fn().mockResolvedValue(encodedResult),
       };
     };
 

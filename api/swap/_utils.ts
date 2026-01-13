@@ -105,7 +105,7 @@ export async function handleBaseSwapQueryParams(
     depositor,
     integratorId,
     refundAddress,
-    refundOnOrigin: _refundOnOrigin = "true",
+    refundOnOrigin: _refundOnOrigin,
     slippageTolerance,
     slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
@@ -120,7 +120,6 @@ export async function handleBaseSwapQueryParams(
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
-  const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
   const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
@@ -168,6 +167,30 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
+  // Check if output token is bridgeable (used for refundOnOrigin default and SVM validation)
+  const outputBridgeable = isOutputTokenBridgeable(
+    outputTokenAddress,
+    originChainId,
+    destinationChainId
+  );
+
+  // Whitelisted output tokens that behave like bridgeable tokens
+  const isToWhitelistedOutputToken = !![
+    TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"].addresses[destinationChainId],
+  ]
+    .filter(Boolean)
+    .find(
+      (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+    );
+
+  const isOutputBridgeableOrWhitelisted =
+    outputBridgeable || isToWhitelistedOutputToken;
+
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
@@ -184,25 +207,7 @@ export async function handleBaseSwapQueryParams(
     }
 
     // Restrict SVM ↔ EVM combinations that require a destination swap
-    const outputBridgeable = isOutputTokenBridgeable(
-      outputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
-
-    // Allows whitelisted output tokens with origin SVM
-    const isToWhitelistedOutputToken = !![
-      TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
-    ]
-      .filter(Boolean)
-      .find(
-        (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
-      );
-
-    if (!outputBridgeable && !isToWhitelistedOutputToken) {
+    if (!isOutputBridgeableOrWhitelisted) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
@@ -262,6 +267,14 @@ export async function handleBaseSwapQueryParams(
       message: "Invalid input or output token address",
     });
   }
+
+  // For refundOnOrigin, use explicit value if provided, otherwise default based on output bridgeability:
+  // - Bridgeable output (B2B, B2BI, A2B): refund on origin (true)
+  // - Non-bridgeable output (B2A, A2A): refund on destination (false)
+  const refundOnOrigin =
+    _refundOnOrigin !== undefined
+      ? _refundOnOrigin === "true"
+      : isOutputBridgeableOrWhitelisted;
 
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);

@@ -755,7 +755,7 @@
     "chainId": 324,
     "name": "zkSync",
     "publicRpcUrl": "https://mainnet.era.zksync.io",
-    "explorerUrl": "https://era.zksync.network",
+    "explorerUrl": "https://explorer.zksync.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zk-sync/assets/logo.svg",
     "spokePool": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
     "spokePoolBlock": 10352565,
@@ -1406,47 +1406,6 @@
         "name": "PoolTogether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/pool.svg"
-      }
-    ]
-  },
-  {
-    "chainId": 690,
-    "name": "Redstone",
-    "publicRpcUrl": "https://rpc.redstonechain.com",
-    "explorerUrl": "https://explorer.redstone.xyz",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/redstone/assets/logo.svg",
-    "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
-    "spokePoolBlock": 5512122,
-    "inputTokens": [
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      }
-    ],
-    "outputTokens": [
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       }
     ]
   },

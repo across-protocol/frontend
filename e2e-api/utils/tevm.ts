@@ -24,3 +24,7 @@ export function handleTevmError(result: EVMResult, next: any) {
   }
   next?.();
 }
+
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -18,7 +18,7 @@ export default {
   },
   chainId,
   publicRpcUrl: "https://rpc-amoy.polygon.technology",
-  tokens: ["WETH", "TATARA-USDC"],
+  tokens: ["WETH"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
