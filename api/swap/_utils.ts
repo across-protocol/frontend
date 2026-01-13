@@ -180,6 +180,8 @@ export async function handleBaseSwapQueryParams(
     TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
     TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
     TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"].addresses[destinationChainId],
   ]
     .filter(Boolean)
     .find(
