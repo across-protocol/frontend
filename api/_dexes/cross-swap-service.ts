@@ -1444,6 +1444,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
         TradeType.EXACT_OUTPUT,
         {
           sources: destinationSources,
+          splitSlippage: true,
         }
       );
       assertMinOutputAmount(
@@ -1559,6 +1560,7 @@ export async function getCrossSwapQuotesForOutputByRouteA2A(
             TradeType.EXACT_OUTPUT,
             {
               sources: originSources,
+              splitSlippage: true,
             }
           );
         },
