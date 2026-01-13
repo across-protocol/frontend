@@ -15,7 +15,8 @@ dotenv.config({ path: [".env.e2e", ".env.local", ".env"] });
 
 export const JEST_TIMEOUT_MS = 180_000;
 
-export const MAX_CALL_RETRIES = 5;
+export const MAX_CALL_RETRIES = 10;
+export const RETRY_DELAY_MS = 1000;
 
 export const axiosInstance = axios.create({
   httpAgent: new nodeHttp.Agent({ keepAlive: false }),

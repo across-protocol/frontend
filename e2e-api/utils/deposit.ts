@@ -1,10 +1,10 @@
 import { Address, Hex, parseEventLogs, TransactionReceipt } from "viem";
 import { CallResult, MemoryClient } from "tevm";
 
-import { e2eConfig, MAX_CALL_RETRIES } from "./config";
+import { e2eConfig, MAX_CALL_RETRIES, RETRY_DELAY_MS } from "./config";
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { SpokePoolAbi } from "./abis";
-import { handleTevmError } from "./tevm";
+import { handleTevmError, delay } from "./tevm";
 
 export type SwapQuoteResponse = Awaited<
   ReturnType<typeof buildBaseSwapResponseJson>
@@ -85,6 +85,8 @@ export async function executeApprovalAndDeposit(
         console.log(
           `Deposit failed, retrying... (attempt ${callRetries + 1} of ${MAX_CALL_RETRIES})`
         );
+        await originClient.tevmMine({ blockCount: 1 });
+        await delay(RETRY_DELAY_MS);
         callRetries++;
         continue;
       }

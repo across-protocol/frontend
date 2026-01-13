@@ -3,10 +3,16 @@ import { expect } from "vitest";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { Address, parseUnits } from "viem";
 
-import { e2eConfig, JEST_TIMEOUT_MS } from "./config";
+import {
+  e2eConfig,
+  JEST_TIMEOUT_MS,
+  MAX_CALL_RETRIES,
+  RETRY_DELAY_MS,
+} from "./config";
 import { executeApprovalAndDeposit, type SwapQuoteResponse } from "./deposit";
 import { executeFill } from "./fill";
 import { getBalance } from "./token";
+import { delay } from "./tevm";
 
 export type TradeType = "exactInput" | "exactOutput" | "minOutput";
 
@@ -14,6 +20,14 @@ const SWAP_API_BASE_URL = e2eConfig.swapApiBaseUrl;
 const SWAP_API_URL = `${SWAP_API_BASE_URL}/api/swap/approval`;
 const TOKEN_FUND_AMOUNT = 1_000_000; // Unparsed amount of tokens to fund the depositor and relayer, e.g. 1_000_000 USDC
 const SLIPPAGE = "auto";
+
+export const sUSD = {
+  symbol: "sUSD",
+  decimals: 18,
+  addresses: {
+    [CHAIN_IDs.OPTIMISM]: "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
+  },
+};
 
 export const USDS = {
   symbol: "USDS",
@@ -67,16 +81,16 @@ export const A2B_BASE_TEST_CASE = {
 
 export const A2A_BASE_TEST_CASE = {
   amounts: {
-    exactInput: parseUnits("1", 6), // 1 USDC.e
+    exactInput: parseUnits("1", 18), // 1 sUSD
     exactOutput: parseUnits("1", 18), // 1 USDS
     minOutput: parseUnits("1", 18), // 1 USDS
   },
-  inputToken: TOKEN_SYMBOLS_MAP["USDC.e"],
+  inputToken: sUSD,
   outputToken: USDS,
   originChainId: CHAIN_IDs.OPTIMISM,
   destinationChainId: CHAIN_IDs.BASE,
   refundOnOrigin: true,
-  slippage: 0.2, // Explicitly set high slippage for A2A test case
+  slippage: 0.4, // Explicitly set high slippage for A2A test case
 } as const;
 
 export type EndToEndTestCase =
@@ -87,27 +101,45 @@ export type EndToEndTestCase =
 
 export { JEST_TIMEOUT_MS };
 
-export async function fetchSwapQuote(params: {
-  amount: string;
-  tradeType: TradeType;
-  inputToken: string;
-  outputToken: string;
-  originChainId: number;
-  destinationChainId: number;
-  depositor: string;
-  recipient: string;
-  slippage: number | "auto";
-  refundOnOrigin: boolean;
-}) {
-  const response = await axios.get(SWAP_API_URL, {
-    params: {
-      ...params,
-      includeSources: "uniswap-api",
-    },
-  });
-  expect(response.status).toBe(200);
-  expect(response.data).toBeDefined();
-  return response.data as SwapQuoteResponse;
+export async function fetchSwapQuote(
+  params: {
+    amount: string;
+    tradeType: TradeType;
+    inputToken: string;
+    outputToken: string;
+    originChainId: number;
+    destinationChainId: number;
+    depositor: string;
+    recipient: string;
+    slippage: number | "auto";
+    refundOnOrigin: boolean;
+  },
+  opts?: Partial<{
+    retry: boolean;
+  }>
+) {
+  let callRetries = 0;
+  while (callRetries < MAX_CALL_RETRIES) {
+    try {
+      const response = await axios.get(SWAP_API_URL, {
+        params: {
+          ...params,
+          includeSources: "uniswap-api",
+        },
+      });
+      expect(response.status).toBe(200);
+      expect(response.data).toBeDefined();
+      return response.data as SwapQuoteResponse;
+    } catch (error) {
+      if (opts?.retry && callRetries < MAX_CALL_RETRIES - 1) {
+        await delay(RETRY_DELAY_MS);
+        callRetries++;
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error("Failed to fetch swap quote");
 }
 
 export async function prepEndToEndExecution(
@@ -115,6 +147,7 @@ export async function prepEndToEndExecution(
   testCase: EndToEndTestCase,
   opts?: Partial<{
     useFreshClients: boolean;
+    retryFetchSwapQuote: boolean;
   }>
 ) {
   const {
@@ -152,18 +185,23 @@ export async function prepEndToEndExecution(
 
   const [swapQuote, inputTokenBalanceBefore, outputTokenBalanceBefore] =
     await Promise.all([
-      fetchSwapQuote({
-        amount: amount.toString(),
-        tradeType,
-        inputToken: inputTokenAddress,
-        outputToken: outputTokenAddress,
-        originChainId,
-        destinationChainId,
-        depositor,
-        recipient,
-        slippage,
-        refundOnOrigin,
-      }),
+      fetchSwapQuote(
+        {
+          amount: amount.toString(),
+          tradeType,
+          inputToken: inputTokenAddress,
+          outputToken: outputTokenAddress,
+          originChainId,
+          destinationChainId,
+          depositor,
+          recipient,
+          slippage,
+          refundOnOrigin,
+        },
+        {
+          retry: opts?.retryFetchSwapQuote,
+        }
+      ),
       getBalance(originClient, inputTokenAddress, depositor),
       getBalance(destinationClient, outputTokenAddress, recipient),
     ]);
@@ -192,6 +230,7 @@ export async function runEndToEnd(
     retryDeposit: boolean;
     retryFill: boolean;
     useFreshClients: boolean;
+    retryFetchSwapQuote: boolean;
   }>
 ) {
   const {

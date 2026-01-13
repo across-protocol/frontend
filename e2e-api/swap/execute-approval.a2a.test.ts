@@ -15,6 +15,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
           retryDeposit: true,
           retryFill: true,
           useFreshClients: true,
+          retryFetchSwapQuote: true,
         });
       },
       JEST_TIMEOUT_MS
@@ -29,6 +30,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
           retryDeposit: true,
           retryFill: true,
           useFreshClients: true,
+          retryFetchSwapQuote: true,
         });
       },
       JEST_TIMEOUT_MS
@@ -43,6 +45,7 @@ describe("execute response of GET /swap/approval - A2A", () => {
           retryDeposit: true,
           retryFill: true,
           useFreshClients: true,
+          retryFetchSwapQuote: true,
         });
       },
       JEST_TIMEOUT_MS

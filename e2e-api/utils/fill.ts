@@ -8,10 +8,15 @@ import {
 } from "viem";
 import { CallResult, MemoryClient } from "tevm";
 
-import { e2eConfig, getSpokePoolAddress, MAX_CALL_RETRIES } from "./config";
+import {
+  e2eConfig,
+  getSpokePoolAddress,
+  MAX_CALL_RETRIES,
+  RETRY_DELAY_MS,
+} from "./config";
 import { setAllowance } from "./token";
 import { SpokePoolAbi } from "./abis";
-import { handleTevmError } from "./tevm";
+import { handleTevmError, delay } from "./tevm";
 
 import type { SubmittedTxReceipts } from "./deposit";
 
@@ -125,6 +130,8 @@ export async function executeFill(params: ExecuteFillParams) {
         console.log(
           `Fill failed, retrying... (attempt ${callRetries + 1} of ${MAX_CALL_RETRIES})`
         );
+        await destinationClient.tevmMine({ blockCount: 1 });
+        await delay(RETRY_DELAY_MS);
         callRetries++;
         continue;
       }
