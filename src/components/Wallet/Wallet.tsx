@@ -1,4 +1,4 @@
-import { shortenAddress, isSupportedChainId, getChainInfo } from "utils";
+import { getChainInfo, isSupportedChainId, shortenAddress } from "utils";
 
 import solanaLogo from "assets/wallet-logos/solana.svg";
 import Web3Subscribe from "./Web3Subscribe";
@@ -10,12 +10,12 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 import {
-  ConnectButton,
   BalanceButton,
-  Separator,
-  WalletWrapper,
+  ConnectButton,
   ConnectedAccountChainLogoContainer,
   ConnectedAccountContainer,
+  Separator,
+  WalletWrapper,
 } from "./Wallet.styles";
 
 const Wallet = () => {
@@ -103,14 +103,11 @@ function formatDisplayName(
   ensName: string | null | undefined,
   hlName: string | null | undefined
 ): string {
-  if (ensName && hlName) {
-    return `${ensName} / ${hlName}`;
+  if (hlName) {
+    return hlName;
   }
   if (ensName) {
     return ensName;
-  }
-  if (hlName) {
-    return hlName;
   }
   return shortenAddress(address, "...", 4);
 }

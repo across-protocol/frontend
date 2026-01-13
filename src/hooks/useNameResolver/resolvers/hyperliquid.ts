@@ -39,9 +39,8 @@ export async function reverseResolveHyperliquid(
     if (!response.ok) {
       return null;
     }
-
     const data = await response.json();
-    return data?.name ?? data?.domain ?? null;
+    return data?.primaryName ?? null;
   } catch {
     return null;
   }
