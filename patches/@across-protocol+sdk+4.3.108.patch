@@ -1,0 +1,12 @@
+diff --git a/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js b/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
+index c68d54f..e748391 100644
+--- a/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
++++ b/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
+@@ -31,5 +31,5 @@ tslib_1.__exportStar(require("./ValidatorUtils"), exports);
+ tslib_1.__exportStar(require("./AddressUtils"), exports);
+ tslib_1.__exportStar(require("./SpokeUtils"), exports);
+ tslib_1.__exportStar(require("./CCTPUtils"), exports);
+-tslib_1.__exportStar(require("./HyperLiquidUtils"), exports);
++// tslib_1.__exportStar(require("./HyperLiquidUtils"), exports);
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file
