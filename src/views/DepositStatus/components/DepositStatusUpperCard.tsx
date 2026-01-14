@@ -6,7 +6,13 @@ import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text, Badge } from "components";
 
-import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
+import {
+  COLORS,
+  NoFundsDepositedLogError,
+  TransactionNotFoundError,
+  TransactionFailedError,
+  getChainInfo,
+} from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -99,19 +105,6 @@ export function DepositStatusUpperCard({
         </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
-          {depositTxElapsedSeconds ? (
-            <ElapsedTime
-              textSize="3xl"
-              elapsedSeconds={depositTxElapsedSeconds}
-              textColor="warning"
-            />
-          ) : (
-            <Text size="3xl" color="warning">
-              {DateTime.fromSeconds(
-                depositTxCompletedTime || Date.now()
-              ).toFormat("d MMM yyyy - t")}
-            </Text>
-          )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
               {depositRevertMessage ?? "Deposit unsuccessful"}
