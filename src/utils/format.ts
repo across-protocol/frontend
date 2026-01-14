@@ -132,8 +132,17 @@ export function formatEtherRaw(wei: ethers.BigNumberish): string {
   return ethers.utils.formatUnits(wei, 18);
 }
 
+function expandScientificNotation(value: string, decimals: number): string {
+  if (!value.includes("e") && !value.includes("E")) {
+    return value;
+  }
+  const num = Number(value);
+  return Number.isNaN(num) ? value : num.toFixed(decimals);
+}
+
 export function parseUnits(value: string, decimals: number): ethers.BigNumber {
-  return ethers.utils.parseUnits(value, decimals);
+  const expanded = expandScientificNotation(value, decimals);
+  return parseUnitsWithExtendedDecimals(expanded, decimals);
 }
 
 export function parseUnitsFnBuilder(decimals: number) {
