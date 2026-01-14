@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 
 import {
@@ -50,7 +49,7 @@ import { BridgeStrategy } from "../_bridges/types";
 import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
 import { accountExistsOnHyperCore } from "../_hypercore";
 import { CHAIN_IDs } from "../_constants";
-import { validateDestinationSwapSlippage } from "../_slippage";
+import { BigNumber } from "ethers";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
 
@@ -719,13 +718,6 @@ function _prepCrossSwapQuotesRetrievalB2A(
     symbol: _bridgeableOutputToken.symbol,
     chainId: destinationSwapChainId,
   };
-
-  validateDestinationSwapSlippage({
-    tokenIn: bridgeableOutputToken,
-    tokenOut: crossSwap.outputToken,
-    slippageTolerance: crossSwap.slippageTolerance,
-    splitSlippage: false,
-  });
 
   const destinationSwap = {
     chainId: destinationSwapChainId,
@@ -1670,13 +1662,6 @@ function _prepCrossSwapQuotesRetrievalA2A(params: {
     symbol: _bridgeableOutputToken.symbol,
     chainId: bridgeRoute.toChain,
   };
-
-  validateDestinationSwapSlippage({
-    tokenIn: bridgeableOutputToken,
-    tokenOut: crossSwap.outputToken,
-    slippageTolerance: crossSwap.slippageTolerance,
-    splitSlippage: true, // A2A splits slippage between origin and destination swaps
-  });
 
   const originStrategies = getQuoteFetchStrategies(
     originSwapChainId,
