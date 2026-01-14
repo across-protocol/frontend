@@ -173,10 +173,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           <DetailRow>
             <DetailLeft>
               <Dollar width="16px" height="16px" />
-              <span>Total Fee</span>
+              <span>Net Cost</span>
               <Tooltip
-                tooltipId="ConfirmationButton - total fee"
-                body="Sum of bridge and swap fees"
+                tooltipId="ConfirmationButton - net cost"
+                body="The difference between your input amount and final output. This includes bridge fees and any swap impact caused by market liquidity. Swap impact is not a protocol fee and may vary based on trade size and conditions."
               >
                 <Info color="inherit" width="16px" height="16px" />
               </Tooltip>
