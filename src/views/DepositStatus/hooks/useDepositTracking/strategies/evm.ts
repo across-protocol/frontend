@@ -125,6 +125,8 @@ export class EVMStrategy implements IChainStrategy {
       const metadata = await this.getFillMetadata({
         fillTxHash,
         bridgeProvider,
+        depositId,
+        originChainId: depositInfo.depositLog.originChainId,
       });
 
       return {
@@ -219,12 +221,14 @@ export class EVMStrategy implements IChainStrategy {
   async getFillMetadata(params: {
     fillTxHash: string;
     bridgeProvider: BridgeProvider;
+    depositId: BigNumber;
+    originChainId: number;
   }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
-    const { fillTxHash, bridgeProvider } = params;
+    const { fillTxHash, bridgeProvider, depositId, originChainId } = params;
 
     try {
       const fillChainId = this.getFillChain();
@@ -239,7 +243,11 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
+      const outputAmountParser = this.getOutputAmountParser(
+        bridgeProvider,
+        depositId,
+        originChainId
+      );
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -275,7 +283,11 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
+  private getOutputAmountParser(
+    bridgeProvider: BridgeProvider,
+    depositId: BigNumber,
+    originChainId: number
+  ) {
     if (["sponsored-cctp", "cctp"].includes(bridgeProvider)) {
       return (logs: ethers.providers.Log[]) => {
         // try to parse output amount from hypercore flow executor logs
@@ -304,6 +316,7 @@ export class EVMStrategy implements IChainStrategy {
       };
     }
 
-    return parseFilledRelayLogOutputAmount;
+    return (logs: ethers.providers.Log[]) =>
+      parseFilledRelayLogOutputAmount(logs, depositId, originChainId);
   }
 }
