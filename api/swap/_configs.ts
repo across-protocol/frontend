@@ -18,9 +18,12 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
     getUniversalRouter02Strategy(),
     getLifiStrategy("SpokePoolPeriphery"),
   ],
-  originChains: {
-    // Disable origin swaps on Blast for now
-    [CHAIN_IDs.BLAST]: [],
+  destinationChains: {
+    // Override BSC destination swaps to use only Uniswap and LiFi
+    [CHAIN_IDs.BNB]: [
+      getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
+      getLifiStrategy("SpokePoolPeriphery"),
+    ],
   },
   chains: {
     [CHAIN_IDs.LENS]: [
