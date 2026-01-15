@@ -6,19 +6,12 @@ import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text, Badge } from "components";
 
-import {
-  COLORS,
-  NoFundsDepositedLogError,
-  TransactionNotFoundError,
-  TransactionFailedError,
-  getChainInfo,
-} from "utils";
+import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
