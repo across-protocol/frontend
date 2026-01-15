@@ -175,26 +175,17 @@ export async function getDepositByTxHash(
     await fromProvider.getTransactionReceipt(depositTxHash);
 
   if (!depositTxReceipt) {
+    let tx;
     try {
-      const tx = await fromProvider.getTransaction(depositTxHash);
-
-      if (tx) {
-        // tx exists, not confirmed
-        throw new TransactionPendingError(depositTxHash, fromChainId);
-      } else {
-        // tx dropped
-        throw new TransactionNotFoundError(depositTxHash, fromChainId);
-      }
-    } catch (error) {
-      if (
-        error instanceof TransactionPendingError ||
-        error instanceof TransactionNotFoundError
-      ) {
-        throw error;
-      }
-      // tx dropped / not found
+      tx = await fromProvider.getTransaction(depositTxHash);
+    } catch {
       throw new TransactionNotFoundError(depositTxHash, fromChainId);
     }
+
+    if (tx) {
+      throw new TransactionPendingError(depositTxHash, fromChainId);
+    }
+    throw new TransactionNotFoundError(depositTxHash, fromChainId);
   }
 
   const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
