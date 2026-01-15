@@ -156,7 +156,7 @@ const EstimatedTable = ({
         </Text>
         <Tooltip
           title="Bridge fee"
-          body="Fee paid to Across Liquidity Providers and Relayers."
+          body="Includes destination gas, relayer fees, and LP fees"
           placement="bottom-start"
         >
           <InfoIconWrapper>
@@ -181,7 +181,7 @@ const EstimatedTable = ({
           </Text>
           <Tooltip
             title="Swap Impact"
-            body="Fee to cover gas for destination chain fill transaction."
+            body="Estimated price difference from pool depth and trade size"
             placement="bottom-start"
           >
             <InfoIconWrapper>
