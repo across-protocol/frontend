@@ -7,7 +7,6 @@ import {
   StyledTwitterIcon,
 } from "./Footer.styles";
 import { ReactComponent as DiscordLogo } from "assets/icons/discord.svg";
-import { useFeatureFlag } from "../../hooks";
 
 export const NAV_LINKS = [
   {
@@ -52,7 +51,6 @@ const LEGAL_LINKS = [
 ];
 
 const Footer = () => {
-  const hasDemoFlag = useFeatureFlag("demo-flag");
   return (
     <Wrapper>
       <LinksContainer>
@@ -87,7 +85,6 @@ const Footer = () => {
         rel="noopener noreferrer"
       >
         <FooterLogo />
-        {hasDemoFlag && <p> - Demo feature flag active</p>}
       </AccentLink>
     </Wrapper>
   );
