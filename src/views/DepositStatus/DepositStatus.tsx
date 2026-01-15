@@ -47,10 +47,11 @@ export default function DepositStatus() {
 
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
   const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
-  const { elapsedSeconds: fillTxElapsedSeconds } = useElapsedSeconds(
+  const { elapsedSeconds } = useElapsedSeconds(
     depositTxCompletedTime,
     fillTxCompletedTime
   );
+  const fillTxElapsedSeconds = fillTxCompletedTime ? elapsedSeconds : undefined;
 
   if (
     !depositTxHash ||
