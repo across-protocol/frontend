@@ -1,12 +1,10 @@
 import {
   getSlippage,
-  validateDestinationSwapSlippage,
   STABLE_COIN_SWAP_SLIPPAGE,
   MAJOR_PAIR_SLIPPAGE,
   LONG_TAIL_SLIPPAGE,
 } from "../../api/_slippage";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
-import { SwapSlippageInsufficientError } from "../../api/_errors";
 
 describe("api/_slippage", () => {
   const wethMainnet = {
@@ -166,143 +164,6 @@ describe("api/_slippage", () => {
           originOrDestination: "origin",
         })
       ).toThrow("Can't resolve auto slippage for tokens on different chains");
-    });
-  });
-
-  describe("#validateDestinationSwapSlippage()", () => {
-    test("should not throw when slippage is 'auto'", () => {
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
-          tokenOut: usdtMainnet,
-          slippageTolerance: "auto",
-          splitSlippage: false,
-        })
-      ).not.toThrow();
-    });
-
-    test("should not throw when user slippage equals auto slippage", () => {
-      // Stable coin pair destination slippage = 0.5%
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
-          tokenOut: usdtMainnet,
-          slippageTolerance: STABLE_COIN_SWAP_SLIPPAGE.destination,
-          splitSlippage: false,
-        })
-      ).not.toThrow();
-    });
-
-    test("should not throw when user slippage is greater than auto slippage", () => {
-      // Stable coin pair destination slippage = 0.5%, user provides 1.0%
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
-          tokenOut: usdtMainnet,
-          slippageTolerance: 1.0,
-          splitSlippage: false,
-        })
-      ).not.toThrow();
-    });
-
-    test("should throw SwapSlippageInsufficientError when user slippage < auto for stable coins", () => {
-      // Stable coin pair destination slippage = 0.5%, user provides 0.3%
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
-          tokenOut: usdtMainnet,
-          slippageTolerance: 0.3,
-          splitSlippage: false,
-        })
-      ).toThrow(SwapSlippageInsufficientError);
-
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdcMainnet,
-          tokenOut: usdtMainnet,
-          slippageTolerance: 0.3,
-          splitSlippage: false,
-        })
-      ).toThrow(/Minimum recommended slippage is 0\.0050/);
-    });
-
-    test("should throw SwapSlippageInsufficientError when user slippage < auto for major pair", () => {
-      // Major pair (WETH/USDC) destination slippage = 1.5%, user provides 1.0%
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: wethMainnet,
-          tokenOut: usdcMainnet,
-          slippageTolerance: 1.0,
-          splitSlippage: false,
-        })
-      ).toThrow(SwapSlippageInsufficientError);
-
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: wethMainnet,
-          tokenOut: usdcMainnet,
-          slippageTolerance: 1.0,
-          splitSlippage: false,
-        })
-      ).toThrow(/Minimum recommended slippage is 0\.0150/);
-    });
-
-    test("should throw SwapSlippageInsufficientError when user slippage < auto for long tail pair", () => {
-      // Long tail pair (PEPE/USDT) destination slippage = 5.0%, user provides 3.0%
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdtMainnet,
-          tokenOut: pepeMainnet,
-          slippageTolerance: 3.0,
-          splitSlippage: false,
-        })
-      ).toThrow(SwapSlippageInsufficientError);
-
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: usdtMainnet,
-          tokenOut: pepeMainnet,
-          slippageTolerance: 3.0,
-          splitSlippage: false,
-        })
-      ).toThrow(/Minimum recommended slippage is 0\.0500/);
-    });
-
-    test("should account for split slippage in validation", () => {
-      // User provides 2.0% with splitSlippage: true
-      // Effective slippage = 1.0%
-      // Major pair auto = 1.5%, so should throw
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: wethMainnet,
-          tokenOut: usdcMainnet,
-          slippageTolerance: 2.0,
-          splitSlippage: true,
-        })
-      ).toThrow(SwapSlippageInsufficientError);
-
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: wethMainnet,
-          tokenOut: usdcMainnet,
-          slippageTolerance: 2.0,
-          splitSlippage: true,
-        })
-      ).toThrow(/Minimum recommended slippage is 0\.0150/);
-    });
-
-    test("should pass validation with split slippage when sufficient", () => {
-      // User provides 4.0% with splitSlippage: true
-      // Effective slippage = 2.0% (4.0% / 2)
-      // Major pair auto = 1.5%, so should pass
-      expect(() =>
-        validateDestinationSwapSlippage({
-          tokenIn: wethMainnet,
-          tokenOut: usdcMainnet,
-          slippageTolerance: 4.0,
-          splitSlippage: true,
-        })
-      ).not.toThrow();
     });
   });
 });

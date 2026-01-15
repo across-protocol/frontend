@@ -45,7 +45,6 @@ export const AcrossErrorCode = {
   ROUTE_NOT_ENABLED: "ROUTE_NOT_ENABLED",
   SWAP_LIQUIDITY_INSUFFICIENT: "SWAP_LIQUIDITY_INSUFFICIENT",
   SWAP_QUOTE_UNAVAILABLE: "SWAP_QUOTE_UNAVAILABLE",
-  SWAP_SLIPPAGE_INSUFFICIENT: "SWAP_SLIPPAGE_INSUFFICIENT",
   SWAP_TYPE_NOT_GUARANTEED: "SWAP_TYPE_NOT_GUARANTEED",
   ABI_ENCODING_ERROR: "ABI_ENCODING_ERROR",
   SPONSORED_SWAP_SLIPPAGE_TOO_HIGH: "SPONSORED_SWAP_SLIPPAGE_TOO_HIGH",
@@ -249,16 +248,6 @@ export class AmountTooHighError extends InputError {
       },
       opts
     );
-  }
-}
-
-export class SwapSlippageInsufficientError extends InputError {
-  constructor(args: { message: string }) {
-    super({
-      message: args.message,
-      code: AcrossErrorCode.SWAP_SLIPPAGE_INSUFFICIENT,
-      param: "slippage",
-    });
   }
 }
 
