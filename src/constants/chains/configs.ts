@@ -793,7 +793,7 @@ export const ethereum_viem = defineChain({
 });
 
 export const megaEth = {
-  name: "MegaETH",
+  name: "MegaETH1",
   fullName: "Megaeth",
   chainId: 4326,
   logoURI: megaEthLogo,
