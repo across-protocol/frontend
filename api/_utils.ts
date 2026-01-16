@@ -760,9 +760,7 @@ export const getRelayerFeeCalculatorQueries = (
   return sdk.relayFeeCalculator.QueryBase__factory.create(
     baseArgs.chainId,
     getProvider(destinationChainId, { useSpeedProvider: true }),
-    baseArgs.symbolMapping as unknown as Parameters<
-      typeof sdk.relayFeeCalculator.QueryBase__factory.create
-    >[2],
+    baseArgs.symbolMapping,
     baseArgs.spokePoolAddress.toEvmAddress(),
     baseArgs.relayerAddress as sdk.utils.EvmAddress,
     baseArgs.coingeckoProApiKey,

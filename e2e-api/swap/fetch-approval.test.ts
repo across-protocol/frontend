@@ -329,7 +329,6 @@ describe("GET /swap/approval", () => {
       "WBNB",
       "WPOL",
       "WHYPE",
-      "TATARA-WBTC",
       "WGHO",
       "WGRASS",
       "WSOL",

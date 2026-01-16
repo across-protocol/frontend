@@ -196,7 +196,6 @@ describe("_utils", () => {
         "WETH",
         "WPOL",
         "WHYPE",
-        "TATARA-WBTC",
         "WBNB",
         "WGHO",
         "WGRASS",
