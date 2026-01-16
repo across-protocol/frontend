@@ -1566,7 +1566,7 @@ export const chainConfigs = [
     acc[chain.chainId] = chain;
     return acc;
   },
-  {} as Record<number, typeof arbitrum>,
+  {} as Record<number, typeof arbitrum>
 );
 
 export const chains_viem = [
@@ -1609,5 +1609,5 @@ export const externConfigs = [hyperliquid].reduce(
     acc[extern.projectId] = extern;
     return acc;
   },
-  {} as Record<string, typeof hyperliquid>,
+  {} as Record<string, typeof hyperliquid>
 );
