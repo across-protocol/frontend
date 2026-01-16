@@ -36,7 +36,7 @@ if (isSentryEnabled) {
     tracesSampleRate: sentryEnv === "production" ? 0.1 : 1.0,
 
     replaysSessionSampleRate: 0.01,
-    replaysOnErrorSampleRate: 0.5,
+    replaysOnErrorSampleRate: 0.01,
   });
 }
 
