@@ -81,6 +81,11 @@ import ethereumGrayscaleLogo from "assets/chain-logos/mainnet-grayscale.svg";
 import { ReactComponent as ethereumLogoSvg } from "assets/chain-logos/mainnet.svg";
 import { ReactComponent as ethereumGrayscaleLogoSvg } from "assets/chain-logos/mainnet-grayscale.svg";
 
+import megaEthLogo from "assets/chain-logos/megaeth.svg";
+import megaEthGrayscaleLogo from "assets/chain-logos/megaeth-grayscale.svg";
+import { ReactComponent as megaEthLogoSvg } from "assets/chain-logos/megaeth.svg";
+import { ReactComponent as megaEthGrayscaleLogoSvg } from "assets/chain-logos/megaeth-grayscale.svg";
+
 import modeLogo from "assets/chain-logos/mode.svg";
 import modeGrayscaleLogo from "assets/chain-logos/mode-grayscale.svg";
 import { ReactComponent as modeLogoSvg } from "assets/chain-logos/mode.svg";
@@ -787,6 +792,47 @@ export const ethereum_viem = defineChain({
   },
 });
 
+export const megaEth = {
+  name: "MegaETH",
+  fullName: "Megaeth",
+  chainId: 4326,
+  logoURI: megaEthLogo,
+  grayscaleLogoURI: megaEthGrayscaleLogo,
+  logoSvg: megaEthLogoSvg,
+  grayscaleLogoSvg: megaEthGrayscaleLogoSvg,
+  rpcUrl: "https://mainnet.megaeth.com/rpc",
+  explorerUrl: "https://megaeth.blockscout.com",
+  constructExplorerLink: (txHash: string) =>
+    `${megaEth.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_4326_CUSTOM_RPC_URL,
+  pollingInterval: 1000,
+};
+
+export const megaEth_viem = defineChain({
+  id: megaEth.chainId,
+  name: megaEth.name,
+  nativeCurrency: {
+    name: megaEth.nativeCurrencySymbol,
+    symbol: megaEth.nativeCurrencySymbol,
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        megaEth.customRpcUrl ? megaEth.customRpcUrl : [],
+        megaEth.rpcUrl,
+      ].flat(),
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: megaEth.name + " Explorer",
+      url: megaEth.explorerUrl,
+    },
+  },
+});
+
 export const mode = {
   name: "Mode",
   fullName: "Mode",
@@ -1397,7 +1443,7 @@ export const zkSync = {
   logoSvg: zkSyncLogoSvg,
   grayscaleLogoSvg: zkSyncGrayscaleLogoSvg,
   rpcUrl: "https://mainnet.era.zksync.io",
-  explorerUrl: "https://era.zksync.network",
+  explorerUrl: "https://explorer.zksync.io",
   constructExplorerLink: (txHash: string) =>
     `${zkSync.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
@@ -1496,6 +1542,7 @@ export const chainConfigs = [
   lisk,
   liskSepolia,
   ethereum,
+  megaEth,
   mode,
   modeSepolia,
   monad,
@@ -1538,6 +1585,7 @@ export const chains_viem = [
   lisk_viem,
   liskSepolia_viem,
   ethereum_viem,
+  megaEth_viem,
   mode_viem,
   modeSepolia_viem,
   monad_viem,
