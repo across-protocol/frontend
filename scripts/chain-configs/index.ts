@@ -14,6 +14,7 @@ export { default as LINEA } from "./linea";
 export { default as LISK } from "./lisk";
 export { default as LISK_SEPOLIA } from "./lisk-sepolia";
 export { default as MAINNET } from "./mainnet";
+export { default as MEGAETH } from "./megaeth";
 export { default as MODE } from "./mode";
 export { default as MODE_SEPOLIA } from "./mode-sepolia";
 export { default as MONAD } from "./monad";
