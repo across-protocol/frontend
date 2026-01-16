@@ -8,7 +8,7 @@ import {
   isDefined,
 } from "utils";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 
@@ -64,7 +64,8 @@ export function useTokenBalanceLocal(
     enabled:
       (isDefined(evmAccount) || isDefined(svmAccountString)) &&
       isDefined(token),
-    refetchInterval: 10_000, // 10 seconds
-    staleTime: 5_000, // 5 seconds
+    refetchInterval: 10_000,
+    staleTime: 5_000,
+    placeholderData: keepPreviousData,
   });
 }

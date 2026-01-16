@@ -81,6 +81,11 @@ export const TokenAmountInputWrapper = styled.div<{
   `}
 `;
 
+export const BalancePlaceholder = styled.div`
+  height: 18px;
+  margin-top: 8px;
+`;
+
 export const TokenAmountInput = styled.input<{
   value: string;
   error: boolean;

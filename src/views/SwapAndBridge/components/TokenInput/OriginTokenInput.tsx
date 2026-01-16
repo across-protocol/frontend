@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
+  BalancePlaceholder,
   TokenAmountInputTitle,
   TokenAmountStack,
   TokenInputWrapper,
@@ -92,18 +93,19 @@ export const OriginTokenInput = ({
           onSelect={setOriginToken}
           onSelectOtherToken={setDestinationToken}
           isOriginToken={true}
-          marginBottom={originToken ? "24px" : "0px"}
           selectedToken={originToken}
           otherToken={destinationToken}
         />
 
-        {originToken && (
+        {originToken ? (
           <BalanceSelector
             token={originToken}
             disableHover={false}
             error={insufficientBalance}
             setAmount={setOriginAmount}
           />
+        ) : (
+          <BalancePlaceholder />
         )}
       </TokenSelectorColumn>
     </TokenInputWrapper>
