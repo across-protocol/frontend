@@ -119,7 +119,7 @@ export function get0xStrategy(
       if (opts?.sellEntireBalance) {
         swapAmount = addMarkupToAmount(
           BigNumber.from(swapAmount),
-          SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
+          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
         ).toString();
       }
 
