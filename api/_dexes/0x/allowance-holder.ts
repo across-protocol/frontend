@@ -134,7 +134,14 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.round(slippageTolerance * 100), // needs to be an integer
+            slippageBps: Math.round(
+              (slippageTolerance +
+                (opts?.sellEntireBalance
+                  ? // We need to take the markup into account for the slippage when fetching a quote
+                    slippageTolerance + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
+                  : 0)) *
+                100
+            ),
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
