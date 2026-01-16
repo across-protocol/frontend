@@ -119,7 +119,7 @@ export function get0xStrategy(
       if (opts?.sellEntireBalance) {
         swapAmount = addMarkupToAmount(
           BigNumber.from(swapAmount),
-          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
+          SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
         ).toString();
       }
 
@@ -138,7 +138,7 @@ export function get0xStrategy(
               (slippageTolerance +
                 (opts?.sellEntireBalance
                   ? // We need to take the markup into account for the slippage when fetching a quote
-                    slippageTolerance + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
+                    SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
                   : 0)) *
                 100
             ),
