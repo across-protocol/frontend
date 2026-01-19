@@ -37,7 +37,7 @@ export function DepositStatusUpperCard({
   outputTokenSymbol,
   fromBridgeAndSwapPagePayload,
 }: Props) {
-  const { depositQuery, fillQuery, status } = useDepositTracking({
+  const { depositQuery, status, deposit, fill } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
@@ -46,8 +46,8 @@ export function DepositStatusUpperCard({
   });
 
   const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
-  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
-  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
+  const depositTxCompletedTime = deposit?.depositTimestamp;
+  const fillTxCompletedTime = fill?.fillTxTimestamp;
 
   const { elapsedSeconds: depositTxElapsedSeconds } = useElapsedSeconds(
     depositTxSentTime ? Math.floor(depositTxSentTime / 1000) : undefined,
@@ -59,9 +59,7 @@ export function DepositStatusUpperCard({
   );
 
   const depositRevertMessage =
-    depositQuery?.data?.status === "deposit-reverted"
-      ? depositQuery.data.formattedError
-      : undefined;
+    deposit?.status === "deposit-reverted" ? deposit.formattedError : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -143,8 +141,8 @@ export function DepositStatusUpperCard({
           depositTxCompletedTimestampSeconds={depositTxCompletedTime}
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
-          fillTxHash={fillQuery.data?.fillTxHash}
-          outputAmount={fillQuery.data?.outputAmount}
+          fillTxHash={fill?.fillTxHash}
+          outputAmount={fill?.outputAmount}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

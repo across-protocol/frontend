@@ -2,10 +2,9 @@ import { getProvider } from "utils/providers";
 import {
   getDepositByTxHash,
   NoFilledRelayLogError,
+  FillPendingError,
+  FillMetadataParseError,
   parseFilledRelayLogOutputAmount,
-  TransactionPendingError,
-  TransactionFailedError,
-  TransactionNotFoundError,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
@@ -18,9 +17,8 @@ import axios from "axios";
 import {
   BridgeProvider,
   DepositedInfo,
-  DepositInfo,
   DepositStatusResponse,
-  FillInfo,
+  FilledInfo,
   IChainStrategy,
 } from "../types";
 import { BigNumber, ethers } from "ethers";
@@ -44,64 +42,24 @@ export class EVMStrategy implements IChainStrategy {
    * Get deposit information from an EVM transaction hash
    * @param txHash Transaction hash
    * @param bridgeProvider Bridge provider
-   * @returns Deposit information
+   * @returns Success case deposit information, or throws an error for non-success states
    */
   async getDeposit(
     txHash: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo> {
-    try {
-      // success
-      const deposit = await getDepositByTxHash(
-        txHash,
-        this.chainId,
-        bridgeProvider
-      );
+  ): Promise<DepositedInfo> {
+    const deposit = await getDepositByTxHash(
+      txHash,
+      this.chainId,
+      bridgeProvider
+    );
 
-      return {
-        depositTxHash: deposit.depositTxReceipt.transactionHash,
-        depositTimestamp: deposit.depositTimestamp,
-        status: "deposited",
-        depositLog: deposit.parsedDepositLog,
-      };
-    } catch (error) {
-      // pending
-      if (error instanceof TransactionPendingError) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
-
-      // failed
-      if (error instanceof TransactionFailedError) {
-        return {
-          depositTxHash: txHash,
-          depositTimestamp: undefined,
-          status: "deposit-reverted" as const,
-          depositLog: undefined,
-          error: error.error,
-          formattedError: error.formattedError,
-        };
-      }
-
-      if (error instanceof TransactionNotFoundError) {
-        return {
-          depositTxHash: txHash,
-          depositTimestamp: undefined,
-          status: "deposit-reverted" as const,
-          depositLog: undefined,
-          error: undefined,
-          formattedError: undefined,
-        };
-      }
-
-      // Other errors are re-thrown
-      console.error("Error fetching EVM deposit:", error);
-      throw error;
-    }
+    return {
+      depositTxHash: deposit.depositTxReceipt.transactionHash,
+      depositTimestamp: deposit.depositTimestamp,
+      status: "deposited",
+      depositLog: deposit.parsedDepositLog,
+    };
   }
 
   getFillChain(): number {
@@ -111,12 +69,13 @@ export class EVMStrategy implements IChainStrategy {
   /**
    * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
-   * @returns Fill information
+   * @param bridgeProvider Bridge provider
+   * @returns Success case fill information, or throws an error for non-success states
    */
   async getFill(
     depositInfo: DepositedInfo,
     bridgeProvider: BridgeProvider
-  ): Promise<FillInfo> {
+  ): Promise<FilledInfo> {
     const depositId = depositInfo.depositLog.depositId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
@@ -124,32 +83,27 @@ export class EVMStrategy implements IChainStrategy {
 
     const fillChainId = this.getFillChain();
 
-    try {
-      const fillTxHash = await Promise.any([
-        this.getFillFromIndexer(depositInfo),
-        this.getFillFromRpc(depositInfo),
-      ]);
+    const fillTxHash = await Promise.any([
+      this.getFillFromIndexer(depositInfo),
+      this.getFillFromRpc(depositInfo),
+    ]);
 
-      if (!fillTxHash) {
-        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
-      }
-
-      const metadata = await this.getFillMetadata({
-        fillTxHash,
-        bridgeProvider,
-      });
-
-      return {
-        fillTxHash: metadata.fillTxHash,
-        fillTxTimestamp: metadata.fillTxTimestamp,
-        depositInfo,
-        outputAmount: metadata.outputAmount || BigNumber.from(0),
-        status: "filled",
-      };
-    } catch (error) {
-      // Both rejected - throw error so we can retry
+    if (!fillTxHash) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
+
+    const metadata = await this.getFillMetadata({
+      fillTxHash,
+      bridgeProvider,
+    });
+
+    return {
+      fillTxHash: metadata.fillTxHash,
+      fillTxTimestamp: metadata.fillTxTimestamp,
+      depositInfo,
+      outputAmount: metadata.outputAmount || BigNumber.from(0),
+      status: "filled",
+    };
   }
 
   /**
@@ -175,7 +129,7 @@ export class EVMStrategy implements IChainStrategy {
         return data.fillTxnRef;
       }
 
-      throw new Error("Indexer response still pending");
+      throw new FillPendingError("Indexer response still pending");
     } catch (error) {
       console.warn("Error fetching fill from indexer:", error);
       throw error;
@@ -237,9 +191,9 @@ export class EVMStrategy implements IChainStrategy {
     outputAmount: BigNumber | undefined;
   }> {
     const { fillTxHash, bridgeProvider } = params;
+    const fillChainId = this.getFillChain();
 
     try {
-      const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
       const fillTxReceipt = await provider.getTransactionReceipt(fillTxHash);
       const [fillTxBlock, swapMetadata] = await Promise.all([
@@ -263,8 +217,8 @@ export class EVMStrategy implements IChainStrategy {
         outputAmount,
       };
     } catch (e) {
-      console.error(`Unable to get fill metadata fro tx hash: ${fillTxHash}`);
-      throw e;
+      console.error(`Unable to get fill metadata for tx hash: ${fillTxHash}`);
+      throw new FillMetadataParseError(fillTxHash, fillChainId);
     }
   }
 

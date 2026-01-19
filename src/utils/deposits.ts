@@ -67,6 +67,20 @@ export class NoFilledRelayLogError extends Error {
   }
 }
 
+export class FillPendingError extends Error {
+  constructor(message?: string) {
+    super(message || "Fill is still pending");
+  }
+}
+
+export class FillMetadataParseError extends Error {
+  constructor(fillTxHash: string, chainId: number) {
+    super(
+      `Unable to parse fill metadata from transaction ${shortenAddress(fillTxHash, "...", 5)} on chain ${chainId}`
+    );
+  }
+}
+
 export function parseFundsDepositedLog(params: {
   logs: Log[];
   originChainId: number;
