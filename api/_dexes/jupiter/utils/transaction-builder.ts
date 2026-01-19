@@ -4,7 +4,6 @@ import {
   pipe,
   appendTransactionMessageInstruction,
   appendTransactionMessageInstructions,
-  Instruction,
 } from "@solana/kit";
 import type { BaseTransactionMessage } from "@solana/kit";
 import { JupiterIx, JupiterSwapIxs } from "./api";

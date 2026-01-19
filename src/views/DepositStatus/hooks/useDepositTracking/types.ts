@@ -29,7 +29,7 @@ export type DepositInfo =
     }
   | {
       depositTxHash: string;
-      depositTimestamp: number;
+      depositTimestamp: number | undefined;
       status: "deposit-reverted";
       depositLog: undefined;
       error?: string | undefined;

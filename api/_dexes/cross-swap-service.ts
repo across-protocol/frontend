@@ -739,7 +739,8 @@ function _prepCrossSwapQuotesRetrievalB2A(
     destinationSwap.chainId,
     destinationSwap.tokenIn.symbol,
     destinationSwap.tokenOut.symbol,
-    strategies
+    strategies,
+    "destination"
   );
 
   // Resolve deposit entry point
@@ -1051,7 +1052,8 @@ function _prepCrossSwapQuotesRetrievalA2B(
     originSwapChainId,
     crossSwap.inputToken.symbol,
     bridgeableInputToken.symbol,
-    strategies
+    strategies,
+    "origin"
   );
 
   // Return a list of results for each origin strategy
@@ -1682,13 +1684,15 @@ function _prepCrossSwapQuotesRetrievalA2A(params: {
     originSwapChainId,
     crossSwap.inputToken.symbol,
     bridgeableInputToken.symbol,
-    strategies
+    strategies,
+    "origin"
   );
   const destinationStrategies = getQuoteFetchStrategies(
     destinationSwapChainId,
     bridgeableOutputToken.symbol,
     crossSwap.outputToken.symbol,
-    strategies
+    strategies,
+    "destination"
   );
 
   const baseStrategies =
