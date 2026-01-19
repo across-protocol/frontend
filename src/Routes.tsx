@@ -59,9 +59,6 @@ const SwapAndBridge = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/SwapAndBridge")
 );
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
-const Transaction = lazyWithRetry(
-  () => import(/* webpackChunkName: "Transaction" */ "./views/Transaction")
-);
 
 const Transaction = lazyWithRetry(
   () => import(/* webpackChunkName: "Transaction" */ "./views/Transaction")

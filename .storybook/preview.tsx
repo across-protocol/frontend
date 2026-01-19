@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { default as GlobalStyles } from "../src/components/GlobalStyles/GlobalStyles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WalletProvider } from "../src/providers/wallet/WalletProvider";
+import { FeatureFlagsProvider } from "../src/hooks/feature-flags/featureFlagsProvider";
 
 const preview: Preview = {
   decorators: [
@@ -11,8 +12,10 @@ const preview: Preview = {
       <MemoryRouter initialEntries={["/"]}>
         <WalletProvider>
           <QueryClientProvider client={new QueryClient()}>
-            <GlobalStyles />
-            <Story />
+            <FeatureFlagsProvider>
+              <GlobalStyles />
+              <Story />
+            </FeatureFlagsProvider>
           </QueryClientProvider>
         </WalletProvider>
       </MemoryRouter>

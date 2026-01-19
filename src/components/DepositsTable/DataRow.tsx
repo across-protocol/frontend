@@ -131,7 +131,7 @@ export function DataRow({
   );
 }
 
-const StyledRow = styled(motion.tr)`
+const StyledRow = styled(motion.tr)<{ hasTransactionFlag: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -148,8 +148,6 @@ const StyledRow = styled(motion.tr)`
       transition: background-color 0.2s;
       cursor: pointer;
       transform-origin: top;
-      transition: background-color 0.2s;
-
       &:hover {
         background-color: ${COLORS["grey-500"]};
       }
