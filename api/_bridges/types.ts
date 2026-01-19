@@ -139,6 +139,7 @@ export type BridgeStrategyData =
       isMonadTransfer: boolean;
       isWithinMonadLimit: boolean;
       isHyperCoreDestination: boolean;
+      hasFastStandardFill: boolean;
     }
   | undefined;
 

@@ -113,7 +113,7 @@ function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
     };
   }
 
-  if (data.isFastCctpEligible) {
+  if (data.isFastCctpEligible || data.hasFastStandardFill) {
     if (data.isInThreshold || data.isLargeCctpDeposit) {
       return {
         strategy: acrossStrategy,
