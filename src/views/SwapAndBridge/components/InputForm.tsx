@@ -68,7 +68,6 @@ const QuickSwapButton = styled.button`
   z-index: 4;
   cursor: pointer;
 
-  /* todo: style */
   &:disabled {
     svg {
       opacity: 0.5;
