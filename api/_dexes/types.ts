@@ -22,7 +22,9 @@ export type BridgeProvider =
   | "hypercore"
   | "cctp"
   | "oft"
-  | "sponsored-intent";
+  | "sponsored-intent"
+  | "sponsored-oft"
+  | "sponsored-cctp";
 
 export type { AmountType, CrossSwapType };
 
@@ -175,7 +177,7 @@ export type CrossSwapQuotes = {
 };
 
 export type OriginSwapEntryPointContract = {
-  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery" | "SvmSpoke";
+  name: "SpokePoolPeriphery" | "SvmSpoke";
   address: string;
   dex?: SupportedDex;
 };
@@ -249,14 +251,11 @@ export type QuoteFetchOpts = Partial<{
   splitSlippage: boolean;
 }>;
 
-export type OriginEntryPointContractName =
-  | "SpokePoolPeriphery"
-  | "UniversalSwapAndBridge"
-  | "SvmSpoke";
+export type OriginEntryPointContractName = "SpokePoolPeriphery" | "SvmSpoke";
 
 export type OriginEntryPoints = {
   originSwapInitialRecipient: {
-    name: "UniversalSwapAndBridge" | "SwapProxy" | "SvmSpoke";
+    name: "SwapProxy" | "SvmSpoke";
     address: string;
   };
   swapAndBridge: OriginSwapEntryPointContract;

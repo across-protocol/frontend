@@ -1,14 +1,13 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BigNumber } from "ethers";
 import {
   assertSufficientBalanceOnHyperEvm,
-  assertAccountExistsOnHyperCore,
   getHyperEvmChainId,
   getBridgeableOutputToken,
   getDepositRecipient,
   getDepositMessage,
 } from "../../../../api/_bridges/sponsored-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
-import { accountExistsOnHyperCore } from "../../../../api/_hypercore";
 import {
   getFullRelayers,
   getTransferRestrictedRelayers,
@@ -20,16 +19,16 @@ import {
 } from "../../../../api/_bridges/sponsored-intent/utils/constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
 
-jest.mock("../../../../api/_balance");
-jest.mock("../../../../api/_hypercore", () => ({
-  ...jest.requireActual("../../../../api/_hypercore"),
-  accountExistsOnHyperCore: jest.fn(),
+vi.mock("../../../../api/_balance");
+vi.mock("../../../../api/_hypercore", async (importOriginal) => ({
+  ...(await importOriginal()),
+  accountExistsOnHyperCore: vi.fn(),
 }));
-jest.mock("../../../../api/_relayer-address");
+vi.mock("../../../../api/_relayer-address");
 
 describe("api/_bridges/sponsored-intent/utils/common", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getHyperEvmChainId", () => {
@@ -57,15 +56,17 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
     const outputToken = USDH_ON_HYPEREVM;
 
     beforeEach(() => {
-      (getFullRelayers as jest.Mock).mockReturnValue(["0xRelayer1"]);
-      (getTransferRestrictedRelayers as jest.Mock).mockReturnValue([
-        "0xRelayer2",
+      (getFullRelayers as ReturnType<typeof vi.fn>).mockReturnValue([
+        "0xRelayer1",
       ]);
+      (
+        getTransferRestrictedRelayers as ReturnType<typeof vi.fn>
+      ).mockReturnValue(["0xRelayer2"]);
     });
 
     it("should resolve if balance is sufficient", async () => {
       // Max balance on relayer: 1000. Input amount: 500.
-      (getCachedTokenBalance as jest.Mock).mockResolvedValue(
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
         BigNumber.from("1000000000")
       );
 
@@ -80,7 +81,7 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
 
     it("should throw if balance is insufficient", async () => {
       // Max balance: 100. Input: 500.
-      (getCachedTokenBalance as jest.Mock).mockResolvedValue(
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
         BigNumber.from("100000000")
       );
 
@@ -91,28 +92,6 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
           outputToken,
         })
       ).rejects.toThrow("Amount exceeds max. deposit limit");
-    });
-  });
-
-  describe("assertAccountExistsOnHyperCore", () => {
-    it("should resolve if account exists", async () => {
-      (accountExistsOnHyperCore as jest.Mock).mockResolvedValue(true);
-      await expect(
-        assertAccountExistsOnHyperCore({
-          account: "0x123",
-          errorMessagePrefix: "Error",
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it("should throw if account does not exist", async () => {
-      (accountExistsOnHyperCore as jest.Mock).mockResolvedValue(false);
-      await expect(
-        assertAccountExistsOnHyperCore({
-          account: "0x123",
-          errorMessagePrefix: "Error",
-        })
-      ).rejects.toThrow("Error: Account 0x123 is not initialized on HyperCore");
     });
   });
 

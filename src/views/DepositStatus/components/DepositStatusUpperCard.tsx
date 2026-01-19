@@ -4,7 +4,6 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
 import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
@@ -13,9 +12,7 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
-import { usePMFForm } from "hooks/usePMFForm";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
 
@@ -61,8 +58,6 @@ export function DepositStatusUpperCard({
     fillTxCompletedTime
   );
 
-  const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
-
   const depositRevertMessage =
     depositQuery?.data?.status === "deposit-reverted"
       ? depositQuery.data.formattedError
@@ -103,19 +98,6 @@ export function DepositStatusUpperCard({
         </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
-          {depositTxElapsedSeconds ? (
-            <ElapsedTime
-              textSize="3xl"
-              elapsedSeconds={depositTxElapsedSeconds}
-              textColor="warning"
-            />
-          ) : (
-            <Text size="3xl" color="warning">
-              {DateTime.fromSeconds(
-                depositTxCompletedTime || Date.now()
-              ).toFormat("d MMM yyyy - t")}
-            </Text>
-          )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
               {depositRevertMessage ?? "Deposit unsuccessful"}
@@ -171,12 +153,6 @@ export function DepositStatusUpperCard({
           fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
-      {isPMFormAvailable && (
-        <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
-          <MegaphoneIcon />
-          <span>Help improve Across—1 min survey</span>
-        </PMFFormButton>
-      )}
     </Wrapper>
   );
 }
@@ -254,23 +230,4 @@ const DepositRevertedRow = styled.div`
       stroke: ${COLORS.warning};
     }
   }
-`;
-
-const PMFFormButton = styled.div`
-  display: flex;
-  height: 64px;
-
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  border-radius: 12px;
-  background: ${COLORS["aqua-15"]};
-  width: 100%;
-  cursor: pointer;
-
-  color: ${COLORS["aqua"]};
-  font-weight: 500;
-
-  margin-top: -8px;
-  margin-bottom: -8px;
 `;

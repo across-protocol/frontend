@@ -25,6 +25,10 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
+import { LoadingSkeleton } from "components";
+import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
+import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
+import { isQuoteSponsored } from "../../SwapAndBridge/utils/bridgeProvider";
 
 export type FeesCollapsibleProps = {
   isQuoteLoading: boolean;
@@ -49,10 +53,6 @@ export type FeesCollapsibleProps = {
   swapPriceImpact?: BigNumber;
   estimatedFillTimeSec?: number;
 };
-import { LoadingSkeleton } from "components";
-import { isSponsoredIntentQuote } from "views/SwapAndBridge/utils/fees";
-import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
-import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
 
 const formatFeeUsdInWei = (feeInWei: BigNumber) =>
   formatFeeUsd(utils.formatEther(feeInWei));
@@ -110,9 +110,7 @@ const EstimatedTable = ({
     swapFeeAsBaseCurrency &&
     !doesAmountExceedMaxDeposit;
 
-  const isSponsoredIntent = isSponsoredIntentQuote(
-    universalSwapQuote ?? undefined
-  );
+  const sponsoredQuote = isQuoteSponsored(universalSwapQuote);
 
   const nestedFeesRowElements = [
     showSwapFeeRow ? (
@@ -143,7 +141,7 @@ const EstimatedTable = ({
             }
           }}
         >
-          {isSponsoredIntent && <FreeTag>FREE</FreeTag>}
+          {sponsoredQuote && <FreeTag>FREE</FreeTag>}
           <Text size="md" color="grey-400">
             {formatFeeUsdInWei(swapFeeAsBaseCurrency)}
           </Text>
@@ -158,7 +156,7 @@ const EstimatedTable = ({
         </Text>
         <Tooltip
           title="Bridge fee"
-          body="Fee paid to Across Liquidity Providers and Relayers."
+          body="Includes destination gas, relayer fees, and LP fees"
           placement="bottom-start"
         >
           <InfoIconWrapper>
@@ -167,7 +165,7 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <FeeValueWrapper>
-        {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+        {sponsoredQuote && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
         <Text color="grey-400" size="md">
           {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
             ? formatFeeUsdInWei(bridgeFeeAsBaseCurrency)
@@ -183,7 +181,7 @@ const EstimatedTable = ({
           </Text>
           <Tooltip
             title="Swap Impact"
-            body="Fee to cover gas for destination chain fill transaction."
+            body="Estimated price difference from pool depth and trade size"
             placement="bottom-start"
           >
             <InfoIconWrapper>
@@ -192,7 +190,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <FeeValueWrapper>
-          {isSponsoredIntent && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
+          {sponsoredQuote && !showLoadingSkeleton && <FreeTag>FREE</FreeTag>}
           <Text color="grey-400" size="md">
             {!showLoadingSkeleton
               ? formatFeeUsdInWei(swapFeeAsBaseCurrency)
@@ -298,7 +296,7 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <ChevronIconWrapper>
-            {isSponsoredIntent && !doesAmountExceedMaxDeposit && (
+            {sponsoredQuote && !doesAmountExceedMaxDeposit && (
               <FreeTag>FREE</FreeTag>
             )}
             <Text

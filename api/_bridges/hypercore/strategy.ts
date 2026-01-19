@@ -19,6 +19,7 @@ import {
   encodeTransferOnCoreCalldata,
   isToHyperCore as _isToHyperCore,
 } from "../../_hypercore";
+import { getZeroBridgeFees } from "../utils";
 
 const supportedTokens = [TOKEN_SYMBOLS_MAP["USDT-SPOT"]];
 
@@ -118,14 +119,14 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
       return [];
     },
 
-    getBridgeQuoteRecipient: (
+    getBridgeQuoteRecipient: async (
       crossSwap: CrossSwap,
       _hasOriginSwap?: boolean
     ) => {
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
 
@@ -274,14 +275,5 @@ export function getHyperCoreBridgeStrategy(): BridgeStrategy {
     },
 
     isRouteSupported,
-  };
-}
-
-function getZeroBridgeFees(inputToken: Token) {
-  const zeroBN = BigNumber.from(0);
-  return {
-    pct: zeroBN,
-    amount: zeroBN,
-    token: inputToken,
   };
 }

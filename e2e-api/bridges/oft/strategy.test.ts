@@ -1,14 +1,16 @@
-import {
-  getQuote,
-  getEstimatedFillTime,
-  getOftQuoteForExactInput,
-  getRequiredDVNCount,
-  buildOftTx,
-} from "../../../api/_bridges/oft/strategy";
-import { CHAIN_IDs } from "@across-protocol/constants";
-import { CrossSwapQuotes, Token } from "../../../api/_dexes/types";
+import { expect, it, describe } from "vitest";
 import { BigNumber } from "ethers";
-import { TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
+import {
+  buildOftTx,
+  getOftQuoteForExactInput,
+} from "../../../api/_bridges/oft/strategy";
+import { CrossSwapQuotes, Token } from "../../../api/_dexes/types";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
+import {
+  getEstimatedFillTime,
+  getQuote,
+  getRequiredDVNCount,
+} from "../../../api/_bridges/oft/utils/shared";
 
 describe("OFT Strategy", () => {
   const arbitrumUSDT: Token = {

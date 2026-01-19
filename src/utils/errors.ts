@@ -106,6 +106,9 @@ export function getQuoteWarningMessage(error: Error | null): string | null {
     case "ROUTE_NOT_ENABLED":
       return "This route is currently unavailable. Try different chains or tokens.";
 
+    case "HYPERCORE_ACCOUNT_NOT_INITIALIZED":
+      return "HyperCore account is not activated. Deposit at least 1 USDC on app.hyperliquid.xyz/portfolio to activate your HyperCore account.";
+
     case "INVALID_PARAM":
       // return "Invalid parameters. Please check your input and try again.";
       if (!message) {

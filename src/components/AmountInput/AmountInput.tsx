@@ -103,6 +103,7 @@ export function AmountInput({
         ) : null}
         <Input
           type="number"
+          inputMode="decimal"
           validationLevel={validationLevel}
           placeholder="Enter amount"
           value={amountInput}

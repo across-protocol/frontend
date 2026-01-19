@@ -20,6 +20,18 @@ import {
 
 import indirectChainsImport from "../../src/data/indirect_chains_1.json";
 import mainnetChains from "../../src/data/chains_1.json";
+import { CrossSwap, IndirectDestinationRoute } from "./types";
+
+const ENABLED_INDIRECT_TOKEN_PAIRS: {
+  inputToken: string;
+  outputToken: string;
+}[] = [
+  // TODO: Enable this once we replace MulticallHandler on HyperEVM with HyperliquidDepositHandler
+  // {
+  //   inputToken: "USDT",
+  //   outputToken: "USDT-SPOT",
+  // },
+];
 
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json or any of its nested arrays are empty.
 // Extends mainnetChains type with intermediaryChain property specific to indirect chains.
@@ -28,8 +40,6 @@ const indirectChains = indirectChainsImport as Array<
     intermediaryChain: number;
   }
 >;
-
-import { CrossSwap, IndirectDestinationRoute } from "./types";
 
 export function isIndirectDestinationRouteSupported(params: {
   originChainId: number;
@@ -123,7 +133,7 @@ export function getIndirectDestinationRoute(params: {
     return;
   }
 
-  return {
+  const indirectDestinationRoute: IndirectDestinationRoute = {
     inputToken: {
       symbol: inputToken.symbol,
       decimals: inputToken.decimals,
@@ -143,6 +153,19 @@ export function getIndirectDestinationRoute(params: {
       chainId: params.destinationChainId,
     },
   };
+
+  const isEnabled = ENABLED_INDIRECT_TOKEN_PAIRS.find((pair) => {
+    return (
+      pair.inputToken === indirectDestinationRoute.inputToken.symbol &&
+      pair.outputToken === indirectDestinationRoute.outputToken.symbol
+    );
+  });
+
+  if (!isEnabled) {
+    return;
+  }
+
+  return indirectDestinationRoute;
 }
 
 export function getIndirectBridgeQuoteMessage(

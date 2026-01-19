@@ -6,6 +6,15 @@ import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
+  tokenPairPerRoute?: {
+    [originChainId: number]: {
+      [destinationChainId: number]: {
+        [inputToken: string]: {
+          [outputToken: string]: BridgeStrategy;
+        };
+      };
+    };
+  };
   tokenPairPerToChain?: {
     [toChainId: number]: {
       [inputToken: string]: {
@@ -16,6 +25,13 @@ export type BridgeStrategiesConfig = {
   fromToChains?: {
     [fromChainId: number]: {
       [toChainId: number]: BridgeStrategy;
+    };
+  };
+  inputTokens?: {
+    [inputTokenSymbol: string]: {
+      [fromChainId: number]: {
+        [toChainId: number]: BridgeStrategy;
+      };
     };
   };
 };
@@ -84,13 +100,13 @@ export type BridgeStrategy = {
   getBridgeQuoteRecipient: (
     crossSwap: CrossSwap,
     hasOriginSwap?: boolean
-  ) => string;
+  ) => Promise<string>;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
     appFee?: AppFee,
     originSwapQuote?: SwapQuote
-  ) => string | undefined;
+  ) => Promise<string | undefined>;
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -122,6 +138,7 @@ export type BridgeStrategyData =
       isUsdtToUsdt: boolean;
       isMonadTransfer: boolean;
       isWithinMonadLimit: boolean;
+      isHyperCoreDestination: boolean;
     }
   | undefined;
 
@@ -131,7 +148,8 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
-  recipient?: string;
+  includesAppFee?: boolean;
+  recipient: string;
   depositor: string;
   logger?: Logger;
 };
@@ -141,3 +159,14 @@ export type GetBridgeStrategyParams = {
   destinationChainId: number;
   routingPreference?: string;
 } & BridgeStrategyDataParams;
+
+export type RoutingRule<TEligibilityData> = {
+  name: string;
+  shouldApply: (data: TEligibilityData) => boolean;
+  getStrategy: (params?: BridgeStrategyDataParams) => BridgeStrategy | null;
+  reason: string;
+};
+
+export type RouteStrategyFunction = (
+  params: BridgeStrategyDataParams
+) => Promise<BridgeStrategy | null>;

@@ -1,7 +1,36 @@
 import { BigNumber, ethers } from "ethers";
+import axios from "axios";
 
 import { getProvider } from "./_providers";
 import { CHAIN_IDs } from "./_constants";
+import { Token } from "./_dexes/types";
+import { AcrossErrorCode, InputError } from "./_errors";
+
+const HYPERLIQUID_API_BASE_URL = "https://api.hyperliquid.xyz";
+const HYPERLIQUID_API_BASE_URL_TESTNET = "https://api.hyperliquid-testnet.xyz";
+
+export const SPOT_TOKEN_DECIMALS = 8;
+
+export class HypercoreAccountNotInitializedError extends InputError {
+  constructor(args: { message: string; param?: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.HYPERCORE_ACCOUNT_NOT_INITIALIZED,
+        param: args.param,
+      },
+      opts
+    );
+  }
+}
+
+// Maps <TOKEN_IN_SYMBOL>/<TOKEN_OUT_SYMBOL> to the coin identifier to be used to
+// retrieve the L2 order book for a given pair via the Hyperliquid API.
+// See: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#perpetuals-vs-spot
+const L2_ORDER_BOOK_COIN_MAP: Record<string, string> = {
+  "USDH/USDC": "@230",
+  "USDT/USDC": "@166",
+};
 
 // Contract used to query Hypercore balances from EVM
 export const CORE_BALANCE_SYSTEM_PRECOMPILE =
@@ -92,8 +121,18 @@ export function getTokenIndexFromSystemAddress(systemAddress: string) {
   return parseInt(systemAddress.replace("0x20", ""), 16);
 }
 
-export async function accountExistsOnHyperCore(params: { account: string }) {
-  const provider = getProvider(CHAIN_IDs.HYPEREVM);
+export async function accountExistsOnHyperCore(params: {
+  account: string;
+  chainId?: number;
+}) {
+  const chainId = params.chainId ?? CHAIN_IDs.HYPERCORE;
+
+  if (!isToHyperCore(chainId)) {
+    throw new Error("Can't check account existence on non-HyperCore chain");
+  }
+
+  const evmChainId = getHyperEvmChainId(chainId);
+  const provider = getProvider(evmChainId);
   const balanceCoreCalldata = ethers.utils.defaultAbiCoder.encode(
     ["address"],
     [params.account]
@@ -109,6 +148,308 @@ export async function accountExistsOnHyperCore(params: { account: string }) {
   return Boolean(decodedQueryResult[0]);
 }
 
+export async function assertAccountExistsOnHyperCore(params: {
+  account: string;
+  chainId?: number;
+  paramName?: string;
+}) {
+  const { account, chainId } = params;
+  const exists = await accountExistsOnHyperCore({ account, chainId });
+  if (!exists) {
+    throw new HypercoreAccountNotInitializedError({
+      message: `Account ${account} is not initialized on HyperCore`,
+      param: params.paramName,
+    });
+  }
+}
+
+// https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#l2-book-snapshot
+export async function getL2OrderBookForPair(params: {
+  chainId?: number;
+  tokenInSymbol: string;
+  tokenOutSymbol: string;
+}) {
+  const {
+    chainId = CHAIN_IDs.HYPERCORE,
+    tokenInSymbol: _tokenInSymbol,
+    tokenOutSymbol: _tokenOutSymbol,
+  } = params;
+
+  const tokenInSymbol = getNormalizedSpotTokenSymbol(_tokenInSymbol);
+  const tokenOutSymbol = getNormalizedSpotTokenSymbol(_tokenOutSymbol);
+
+  if (![CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId)) {
+    throw new Error("Can't get L2 order book for non-HyperCore chain");
+  }
+
+  const baseUrl =
+    chainId === CHAIN_IDs.HYPERCORE_TESTNET
+      ? HYPERLIQUID_API_BASE_URL_TESTNET
+      : HYPERLIQUID_API_BASE_URL;
+
+  // Try both directions since the pair might be stored either way
+  let coin =
+    L2_ORDER_BOOK_COIN_MAP[`${tokenInSymbol}/${tokenOutSymbol}`] ||
+    L2_ORDER_BOOK_COIN_MAP[`${tokenOutSymbol}/${tokenInSymbol}`];
+
+  if (!coin) {
+    throw new Error(
+      `No L2 order book coin found for pair ${tokenInSymbol}/${tokenOutSymbol}`
+    );
+  }
+
+  const response = await axios.post<{
+    coin: string;
+    time: number;
+    levels: [
+      { px: string; sz: string; n: number }[], // bids sorted by price descending
+      { px: string; sz: string; n: number }[], // asks sorted by price ascending
+    ];
+  }>(`${baseUrl}/info`, {
+    type: "l2Book",
+    coin,
+  });
+
+  if (!response.data) {
+    throw new Error(
+      `Hyperliquid API: Unexpected L2OrderBook value '${response.data}'`
+    );
+  }
+
+  if (response.data?.levels.length < 2) {
+    throw new Error("Hyperliquid API: Unexpected L2OrderBook 'levels' length");
+  }
+
+  return response.data;
+}
+
+export type MarketOrderSimulationResult = {
+  averageExecutionPrice: string; // Human-readable price
+  inputAmount: BigNumber;
+  outputAmount: BigNumber;
+  slippagePercent: number;
+  bestPrice: string; // Best available price (first level)
+  levelsConsumed: number;
+  fullyFilled: boolean;
+};
+
+/**
+ * Simulates a market order by walking through the order book levels.
+ * Calculates execution price, slippage, and input/output amounts.
+ *
+ * @param tokenIn - Token being sold
+ * @param tokenOut - Token being bought
+ * @param amount - Amount to simulate (interpretation depends on amountType)
+ * @param amountType - "input" to specify input amount (calculate output),
+ *                     "output" to specify desired output amount (calculate required input)
+ * @returns Simulation result with execution details and slippage
+ *
+ * @example
+ * // Simulate selling 1000 USDC for USDH (input amount type)
+ * const result = await simulateMarketOrder({
+ *   tokenIn: { symbol: "USDC", decimals: 8 },
+ *   tokenOut: { symbol: "USDH", decimals: 8 },
+ *   amount: ethers.utils.parseUnits("1000", 8),
+ *   amountType: "input",
+ * });
+ *
+ * @example
+ * // Simulate how much USDC is needed to receive 500 USDH (output amount type)
+ * const result = await simulateMarketOrder({
+ *   tokenIn: { symbol: "USDC", decimals: 8 },
+ *   tokenOut: { symbol: "USDH", decimals: 8 },
+ *   amount: ethers.utils.parseUnits("500", 8),
+ *   amountType: "output",
+ * });
+ */
+export async function simulateMarketOrder(params: {
+  chainId?: number;
+  tokenIn: {
+    symbol: string;
+    decimals: number;
+  };
+  tokenOut: {
+    symbol: string;
+    decimals: number;
+  };
+  amount: BigNumber;
+  amountType: "input" | "output";
+}): Promise<MarketOrderSimulationResult> {
+  const {
+    chainId = CHAIN_IDs.HYPERCORE,
+    tokenIn,
+    tokenOut,
+    amount,
+    amountType,
+  } = params;
+
+  const orderBook = await getL2OrderBookForPair({
+    chainId,
+    tokenInSymbol: tokenIn.symbol,
+    tokenOutSymbol: tokenOut.symbol,
+  });
+
+  const tokenInSymbol = getNormalizedSpotTokenSymbol(tokenIn.symbol);
+  const tokenOutSymbol = getNormalizedSpotTokenSymbol(tokenOut.symbol);
+
+  // Determine which side of the order book to use
+  // We need to figure out the pair direction from L2_ORDER_BOOK_COIN_MAP
+  const pairKey = `${tokenInSymbol}/${tokenOutSymbol}`;
+  const reversePairKey = `${tokenOutSymbol}/${tokenInSymbol}`;
+
+  let baseCurrency = "";
+
+  if (L2_ORDER_BOOK_COIN_MAP[pairKey]) {
+    // Normal direction: tokenIn/tokenOut exists in map
+    baseCurrency = tokenInSymbol;
+  } else if (L2_ORDER_BOOK_COIN_MAP[reversePairKey]) {
+    // Reverse direction: tokenOut/tokenIn exists in map
+    baseCurrency = tokenOutSymbol;
+  } else {
+    throw new Error(
+      `No L2 order book key configured for pair ${tokenInSymbol}/${tokenOutSymbol}`
+    );
+  }
+
+  // Determine which side to use:
+  // - If buying base (quote → base): use asks
+  // - If selling base (base → quote): use bids
+  const isBuyingBase = tokenOutSymbol === baseCurrency;
+  const levels = isBuyingBase ? orderBook.levels[1] : orderBook.levels[0]; // asks : bids
+
+  if (levels.length === 0) {
+    throw new Error(
+      `No liquidity available for ${tokenInSymbol}/${tokenOutSymbol}`
+    );
+  }
+
+  // Get best price for slippage calculation
+  const bestPrice = levels[0].px;
+
+  // Walk through order book levels
+  let totalInput = BigNumber.from(0);
+  let totalOutput = BigNumber.from(0);
+  let remaining = amount;
+  let levelsConsumed = 0;
+
+  for (const level of levels) {
+    if (remaining.lte(0)) break;
+
+    levelsConsumed++;
+
+    // Prices are returned by the API in a parsed format, e.g. 0.987 USDC
+    const price = ethers.utils.parseUnits(
+      Number(level.px).toFixed(tokenOut.decimals),
+      tokenOut.decimals
+    );
+    // Level size (base amount) is returned by the API in a parsed format
+    const baseAvailable = ethers.utils.parseUnits(
+      Number(level.sz).toFixed(tokenIn.decimals),
+      tokenIn.decimals
+    );
+    // Calculate quote equivalent for this level
+    const quoteAvailable = isBuyingBase
+      ? baseAvailable
+          .mul(price)
+          .div(ethers.utils.parseUnits("1", tokenOut.decimals))
+      : baseAvailable
+          .mul(price)
+          .div(ethers.utils.parseUnits("1", tokenIn.decimals));
+
+    // Determine available and consumed amounts based on direction and amount type
+    // isBuyingBase: input=quote, output=base
+    // !isBuyingBase (selling base): input=base, output=quote
+    const inputAvailable = isBuyingBase ? quoteAvailable : baseAvailable;
+    const outputAvailable = isBuyingBase ? baseAvailable : quoteAvailable;
+
+    let inputConsumed: BigNumber;
+    let outputConsumed: BigNumber;
+
+    if (amountType === "input") {
+      // Constrained by input - calculate how much output we get
+      if (remaining.gte(inputAvailable)) {
+        inputConsumed = inputAvailable;
+        outputConsumed = outputAvailable;
+      } else {
+        inputConsumed = remaining;
+        // Partial fill: scale output proportionally
+        outputConsumed = outputAvailable.mul(remaining).div(inputAvailable);
+      }
+    } else {
+      // Constrained by output - calculate how much input we need
+      if (remaining.gte(outputAvailable)) {
+        inputConsumed = inputAvailable;
+        outputConsumed = outputAvailable;
+      } else {
+        outputConsumed = remaining;
+        // Partial fill: scale input proportionally
+        inputConsumed = inputAvailable.mul(remaining).div(outputAvailable);
+      }
+    }
+
+    totalInput = totalInput.add(inputConsumed);
+    totalOutput = totalOutput.add(outputConsumed);
+    remaining = remaining.sub(
+      amountType === "input" ? inputConsumed : outputConsumed
+    );
+  }
+
+  const fullyFilled = remaining.eq(0);
+
+  // Calculate average execution price
+  // Price should be in same format as order book: quote per base
+  let averageExecutionPrice = "0";
+  if (totalInput.gt(0) && totalOutput.gt(0)) {
+    // Calculate with proper decimal handling
+    const outputFormatted = parseFloat(
+      ethers.utils.formatUnits(totalOutput, tokenOut.decimals)
+    );
+    const inputFormatted = parseFloat(
+      ethers.utils.formatUnits(totalInput, tokenIn.decimals)
+    );
+
+    // When buying base (input=quote, output=base): price = input/output (quote per base)
+    // When selling base (input=base, output=quote): price = output/input (quote per base)
+    if (isBuyingBase) {
+      averageExecutionPrice = (inputFormatted / outputFormatted).toString();
+    } else {
+      averageExecutionPrice = (outputFormatted / inputFormatted).toString();
+    }
+  }
+
+  // Calculate slippage percentage
+  // slippage = ((avgPrice - bestPrice) / bestPrice) * 100
+  let slippagePercent = 0;
+  if (parseFloat(averageExecutionPrice) > 0 && parseFloat(bestPrice) > 0) {
+    const avgPriceNum = parseFloat(averageExecutionPrice);
+    const bestPriceNum = parseFloat(bestPrice);
+
+    if (isBuyingBase) {
+      // When buying, higher price is worse
+      slippagePercent = ((avgPriceNum - bestPriceNum) / bestPriceNum) * 100;
+    } else {
+      // When selling, lower price is worse
+      slippagePercent = ((bestPriceNum - avgPriceNum) / bestPriceNum) * 100;
+    }
+  }
+
+  return {
+    averageExecutionPrice,
+    inputAmount: totalInput,
+    outputAmount: totalOutput,
+    slippagePercent,
+    bestPrice,
+    levelsConsumed,
+    fullyFilled,
+  };
+}
+
+export function getNormalizedSpotTokenSymbol(symbol: string): string {
+  return ["USDT-SPOT", "USDH-SPOT", "USDC-SPOT"].includes(symbol.toUpperCase())
+    ? symbol.toUpperCase().replace("-SPOT", "")
+    : symbol.toUpperCase();
+}
+
 export function getHyperEvmChainId(hyperCoreChainId: number): number {
   return hyperCoreChainId === CHAIN_IDs.HYPERCORE
     ? CHAIN_IDs.HYPEREVM
@@ -117,4 +458,17 @@ export function getHyperEvmChainId(hyperCoreChainId: number): number {
 
 export function isToHyperCore(chainId: number) {
   return [CHAIN_IDs.HYPERCORE, CHAIN_IDs.HYPERCORE_TESTNET].includes(chainId);
+}
+
+export function isHyperEvmToHyperCoreRoute(params: {
+  inputToken: Token;
+  outputToken: Token;
+}) {
+  // Mainnet or testnet route
+  return (
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE) ||
+    (params.inputToken.chainId === CHAIN_IDs.HYPEREVM_TESTNET &&
+      params.outputToken.chainId === CHAIN_IDs.HYPERCORE_TESTNET)
+  );
 }

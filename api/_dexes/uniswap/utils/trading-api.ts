@@ -42,6 +42,9 @@ export const UNISWAP_TRADING_API_BASE_URL =
 export const UNISWAP_API_KEY =
   process.env.UNISWAP_API_KEY || "JoyCGj29tT4pymvhaGciK4r1aIPvqW6W53xT1fwo";
 
+// Assigned by Uniswap for tracking swaps issued by our API
+export const UNISWAP_API_INTEGRATOR_ID = "0x756e6978000000000031";
+
 /**
  * Based on https://api-docs.uniswap.org/api-reference/swapping/quote
  */
@@ -95,7 +98,7 @@ export async function getUniswapClassicQuoteFromApi(
       amount: swap.amount,
       urgency: "urgent",
       protocols: swap.protocols || ["V2", "V3", "V4"],
-      routingPreference: "FASTEST",
+      routingPreference: "BEST_PRICE",
       ...slippageParams,
     },
     {

@@ -4,10 +4,12 @@ import type {
 } from "@across-protocol/sdk/dist/esm/arch/svm";
 import { BigNumber } from "ethers";
 
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "../../types";
-
-export type BridgeProvider = "across" | "cctp" | "oft";
+export type BridgeProvider =
+  | "across"
+  | "cctp"
+  | "oft"
+  | "sponsored-cctp"
+  | "sponsored-oft";
 
 /**
  * Common types for deposit & fill information
@@ -27,7 +29,7 @@ export type DepositInfo =
     }
   | {
       depositTxHash: string;
-      depositTimestamp: number;
+      depositTimestamp: number | undefined;
       status: "deposit-reverted";
       depositLog: undefined;
       error?: string | undefined;
@@ -92,6 +94,18 @@ export type DepositForBurnEvent = {
   mintRecipient: string; // base58 account (20 byte evm address)
 };
 
+export type MintAndWithdrawEvent = {
+  mintRecipient: string;
+  amount: bigint;
+  mintToken: string;
+};
+
+export type FillMetadata = {
+  fillTxHash: string;
+  fillTxTimestamp: number;
+  outputAmount: BigNumber | undefined;
+};
+
 /**
  * Common chain strategy interface
  * Each chain implementation adapts its native types to these normalized interfaces
@@ -119,7 +133,10 @@ export interface IChainStrategy {
    * @param bridgeProvider Bridge provider
    * @returns Normalized fill information
    */
-  getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;
+  getFillFromRpc(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<string>;
 
   /**
    * Get fill information for a deposit
@@ -128,28 +145,6 @@ export interface IChainStrategy {
    * @returns Normalized fill information
    */
   getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
-
-  /**
-   * Convert deposit information to local storage format
-   * @param depositInfo Normalized deposit information
-   * @param fromBridgePagePayload Bridge page payload containing route and quote details
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit;
-
-  /**
-   * Convert fill information to local storage format
-   * @param fillInfo Normalized fill information
-   * @param bridgePayload Bridge payload information
-   * @returns Local deposit format with fill information
-   */
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit;
 
   /**
    * The chain ID this strategy handles

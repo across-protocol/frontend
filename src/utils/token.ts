@@ -7,6 +7,12 @@ import {
   getConfig,
   getChainInfo,
   parseUnits,
+  getSVMRpc,
+  toAddressType,
+  toAddress,
+  Address,
+  getAssociatedTokenAddress,
+  chainIsSvm,
 } from "utils";
 import { ERC20__factory } from "utils/typechain";
 import { SwapToken } from "utils/serverless-api/types";
@@ -34,7 +40,7 @@ export async function getNativeBalance(
  * @param blockNumber The block number to execute the query.
  * @returns a Promise that resolves to the balance of the account
  */
-export async function getBalance(
+export async function getEvmBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
@@ -47,6 +53,55 @@ export async function getBalance(
   const contract = ERC20__factory.connect(tokenAddress, provider);
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
   return balance;
+}
+
+export function toSolanaKitAddress(address: Address) {
+  return toAddress(address);
+}
+
+export async function getSvmBalance(
+  chainId: string | number,
+  account: string,
+  token: string
+) {
+  const tokenMint = toAddressType(token, Number(chainId));
+  const owner = toAddressType(account, Number(chainId));
+  const svmProvider = getSVMRpc(Number(chainId));
+
+  if (tokenMint.isZeroAddress()) {
+    const address = toSolanaKitAddress(owner);
+    const balance = await svmProvider.getBalance(address).send();
+    return BigNumber.from(balance.value);
+  }
+
+  // Get the associated token account address
+  const tokenAccount = await getAssociatedTokenAddress(
+    owner.forceSvmAddress(),
+    tokenMint.forceSvmAddress()
+  );
+
+  let balance: BigNumber;
+  try {
+    // Get token account info
+    const tokenAccountInfo = await svmProvider
+      .getTokenAccountBalance(tokenAccount)
+      .send();
+    balance = BigNumber.from(tokenAccountInfo.value.amount);
+  } catch (error) {
+    // If token account doesn't exist or other error, return 0 balance
+    balance = BigNumber.from(0);
+  }
+  return balance;
+}
+
+export async function getTokenBalance(
+  chainId: number,
+  account: string,
+  tokenAddress: string
+) {
+  return chainIsSvm(chainId)
+    ? getSvmBalance(chainId, account, tokenAddress)
+    : getEvmBalance(chainId, account, tokenAddress);
 }
 
 /**
@@ -194,6 +249,8 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
       [swapToken.chainId]: swapToken.address,
     },
     priceUsd: swapToken.priceUsd,
+    // Use displaySymbol from API if available
+    displaySymbol: swapToken.displaySymbol,
   };
 
   // If we found a local token definition, merge in mainnetAddress and displaySymbol
@@ -201,7 +258,7 @@ export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
     return {
       ...baseTokenInfo,
       mainnetAddress: localToken.mainnetAddress,
-      displaySymbol: localToken.displaySymbol,
+      displaySymbol: swapToken.displaySymbol || localToken.displaySymbol,
       logoURI: localToken.logoURI || baseTokenInfo.logoURI, // Prefer local logo if available
     };
   }
@@ -222,7 +279,17 @@ const INTERMEDIARY_TOKEN_MAPPING: Record<
   number,
   Record<string, { symbol: string; chainId: number }>
 > = {
-  1337: { "USDH-SPOT": { symbol: "USDH", chainId: 999 } },
+  1337: {
+    "USDH-SPOT": { symbol: "USDH", chainId: 999 },
+    "USDC-SPOT": {
+      symbol: "USDC",
+      chainId: 999,
+    },
+    "USDT-SPOT": {
+      symbol: "USDT0",
+      chainId: 999,
+    },
+  },
 };
 
 export function getIntermediaryTokenInfo(tokenInfo: {

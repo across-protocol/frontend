@@ -111,10 +111,6 @@ export const orderedTokenLogos = {
   GHO: ghoLogo,
   WGHO: ghoLogo,
   WLD: wldLogo,
-  "TATARA-USDC": usdcLogo,
-  "TATARA-USDS": unknownLogo,
-  "TATARA-USDT": usdtLogo,
-  "TATARA-WBTC": wbtcLogo,
   CAKE: cakeLogo,
   BNB: bnbLogo,
   WBNB: bnbLogo,
@@ -123,4 +119,8 @@ export const orderedTokenLogos = {
   SOL: solLogo,
   USDH: usdhLogo,
   "USDH-SPOT": usdhLogo,
-} as const satisfies Partial<Record<keyof typeof TOKEN_SYMBOLS_MAP, string>>;
+  "USDC-SPOT": usdcLogo,
+  "USDT-SPOT": usdtLogo,
+} as const satisfies Partial<
+  Record<keyof typeof TOKEN_SYMBOLS_MAP | "USDC-SPOT", string>
+>;

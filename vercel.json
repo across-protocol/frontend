@@ -1,5 +1,8 @@
 {
   "devCommand": "yarn dev",
+  "env": {
+    "NODE_OPTIONS": "--experimental-require-module --experimental-vm-modules"
+  },
   "crons": [
     {
       "path": "/api/cron-cache-balances",

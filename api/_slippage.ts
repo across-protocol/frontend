@@ -2,12 +2,23 @@ import {
   STABLE_COIN_SYMBOLS,
   TOKEN_SYMBOLS_MAP,
   CUSTOM_GAS_TOKENS,
+  CHAIN_IDs,
 } from "./_constants";
 import { OriginOrDestination, Token } from "./_dexes/types";
+import { SwapSlippageInsufficientError } from "./_errors";
 
 export const STABLE_COIN_SWAP_SLIPPAGE = {
   origin: 0.25, // 0.25%
   destination: 0.5, // 0.5%
+};
+export const STABLE_COIN_SWAP_SLIPPAGE_BY_CHAIN: Record<
+  number,
+  typeof STABLE_COIN_SWAP_SLIPPAGE
+> = {
+  [CHAIN_IDs.HYPERCORE]: {
+    origin: 0.5, // 0.5%
+    destination: 1, // 1%
+  },
 };
 export const MAJOR_PAIR_SLIPPAGE = {
   origin: 0.75, // 0.75%
@@ -101,7 +112,10 @@ function resolveAutoSlippage(params: {
     isStableCoinSymbol(params.tokenOut.symbol);
 
   if (isStableCoinSwap) {
-    return STABLE_COIN_SWAP_SLIPPAGE[params.originOrDestination];
+    const stableCoinSwapSlippage =
+      STABLE_COIN_SWAP_SLIPPAGE_BY_CHAIN[params.tokenIn.chainId] ||
+      STABLE_COIN_SWAP_SLIPPAGE;
+    return stableCoinSwapSlippage[params.originOrDestination];
   }
 
   const isTokenInStableOrMajor =
@@ -133,4 +147,46 @@ function isMajorTokenSymbol(symbol: string, chainId: number) {
     (majorTokenSymbol) =>
       majorTokenSymbol.toUpperCase() === symbol.toUpperCase()
   );
+}
+
+/**
+ * Validates that user-provided slippage is sufficient for destination swaps.
+ * Throws an error if the user slippage is less than the auto (recommended) slippage.
+ * Only validates when slippage is explicitly set by the user.
+ *
+ * @param params.tokenIn - The input token for the destination swap
+ * @param params.tokenOut - The output token for the destination swap
+ * @param params.slippageTolerance - The user-provided slippage tolerance
+ * @param params.splitSlippage - Whether slippage is being split between origin and destination
+ * @throws {InputError} When user slippage is less than auto slippage
+ */
+export function validateDestinationSwapSlippage(params: {
+  tokenIn: Token;
+  tokenOut: Token;
+  slippageTolerance: number | "auto";
+  splitSlippage?: boolean;
+}) {
+  // Only validate if user explicitly provided a slippage value
+  if (params.slippageTolerance === "auto") {
+    return;
+  }
+
+  const autoSlippage = resolveAutoSlippage({
+    tokenIn: params.tokenIn,
+    tokenOut: params.tokenOut,
+    originOrDestination: "destination",
+  });
+
+  // Calculate the effective user slippage (accounting for split if applicable)
+  const userSlippage = params.splitSlippage
+    ? params.slippageTolerance / 2
+    : params.slippageTolerance;
+
+  if (userSlippage < autoSlippage) {
+    throw new SwapSlippageInsufficientError({
+      message: `Insufficient slippage tolerance. Minimum recommended slippage is ${(
+        autoSlippage / 100
+      ).toFixed(4)} for this token pair.`,
+    });
+  }
 }

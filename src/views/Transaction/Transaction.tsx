@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
@@ -11,7 +11,7 @@ import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
 import { CopyableText } from "./components/CopyableText";
 import { CollapsibleSection } from "./components/CollapsibleSection";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import { shortenAddress } from "utils/format";
 import { TransactionSourceSection } from "./components/TransactionSourceSection";
 import { TransactionDestinationSection } from "./components/TransactionDestinationSection";
 import { TransactionFeeSection } from "./components/TransactionFeeSection";
@@ -369,7 +369,7 @@ const InnerSectionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px;
+  padding: 0;
   gap: 24px;
 
   width: 100%;
@@ -383,7 +383,7 @@ const BreadcrumbWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px;
+  padding: 0;
   gap: 12px;
   width: 100%;
 `;
@@ -398,7 +398,7 @@ const BreadcrumbContent = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px;
+  padding: 0;
   gap: 8px;
 `;
 

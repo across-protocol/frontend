@@ -3,6 +3,9 @@ import {
   getDepositByTxHash,
   NoFilledRelayLogError,
   parseFilledRelayLogOutputAmount,
+  TransactionPendingError,
+  TransactionFailedError,
+  TransactionNotFoundError,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
@@ -17,22 +20,19 @@ import {
   DepositedInfo,
   DepositInfo,
   DepositStatusResponse,
-  FilledInfo,
   FillInfo,
   IChainStrategy,
 } from "../types";
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "../../../types";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   findSwapMetaDataEventsFromTxHash,
   SwapMetaData,
   SwapSide,
 } from "utils/swapMetadata";
-import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
+import { parseOutputAmountFromHyperCoreFlowLogs } from "utils/hypercore-executor";
 
 /**
  * Strategy for handling EVM chain operations
@@ -51,37 +51,13 @@ export class EVMStrategy implements IChainStrategy {
     bridgeProvider: BridgeProvider
   ): Promise<DepositInfo> {
     try {
+      // success
       const deposit = await getDepositByTxHash(
         txHash,
         this.chainId,
         bridgeProvider
       );
 
-      if (deposit.depositTxReceipt.status === 0) {
-        const revertReason = await getSpokepoolRevertReason(
-          deposit.depositTxReceipt,
-          this.chainId
-        );
-
-        return {
-          depositTxHash: deposit.depositTxReceipt.transactionHash,
-          depositTimestamp: deposit.depositTimestamp,
-          status: "deposit-reverted",
-          depositLog: undefined,
-          error: revertReason?.error,
-          formattedError: revertReason?.formattedError,
-        };
-      }
-
-      // Create a normalized response
-      if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
       return {
         depositTxHash: deposit.depositTxReceipt.transactionHash,
         depositTimestamp: deposit.depositTimestamp,
@@ -89,6 +65,40 @@ export class EVMStrategy implements IChainStrategy {
         depositLog: deposit.parsedDepositLog,
       };
     } catch (error) {
+      // pending
+      if (error instanceof TransactionPendingError) {
+        return {
+          depositTxHash: undefined,
+          depositTimestamp: undefined,
+          status: "depositing",
+          depositLog: undefined,
+        };
+      }
+
+      // failed
+      if (error instanceof TransactionFailedError) {
+        return {
+          depositTxHash: txHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted" as const,
+          depositLog: undefined,
+          error: error.error,
+          formattedError: error.formattedError,
+        };
+      }
+
+      if (error instanceof TransactionNotFoundError) {
+        return {
+          depositTxHash: txHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted" as const,
+          depositLog: undefined,
+          error: undefined,
+          formattedError: undefined,
+        };
+      }
+
+      // Other errors are re-thrown
       console.error("Error fetching EVM deposit:", error);
       throw error;
     }
@@ -124,7 +134,12 @@ export class EVMStrategy implements IChainStrategy {
         throw new NoFilledRelayLogError(Number(depositId), fillChainId);
       }
 
-      const metadata = await this.getFillMetadata(fillTxHash, bridgeProvider);
+      const metadata = await this.getFillMetadata({
+        fillTxHash,
+        bridgeProvider,
+        depositId,
+        originChainId: depositInfo.depositLog.originChainId,
+      });
 
       return {
         fillTxHash: metadata.fillTxHash,
@@ -215,14 +230,18 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  async getFillMetadata(
-    fillTxHash: string,
-    bridgeProvider: BridgeProvider
-  ): Promise<{
+  async getFillMetadata(params: {
+    fillTxHash: string;
+    bridgeProvider: BridgeProvider;
+    depositId: BigNumber;
+    originChainId: number;
+  }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
+    const { fillTxHash, bridgeProvider, depositId, originChainId } = params;
+
     try {
       const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
@@ -236,12 +255,11 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser =
-        bridgeProvider === "cctp"
-          ? parseOutputAmountFromMintAndWithdrawLog
-          : bridgeProvider === "oft"
-            ? parseOutputAmountFromOftReceivedLog
-            : parseFilledRelayLogOutputAmount;
+      const outputAmountParser = this.getOutputAmountParser(
+        bridgeProvider,
+        depositId,
+        originChainId
+      );
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -277,144 +295,40 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  /**
-   * Convert deposit information to local storage format for EVM chains
-   * @param depositInfo Deposit information
-   * @param bridgePayload Bridge page payload
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload?: FromBridgePagePayload
-  ): Deposit {
-    throw new Error("Method not implemented.");
-    // const config = getConfig();
-    // const { selectedRoute, depositArgs, quoteForAnalytics } =
-    //   fromBridgePagePayload;
-    // const { depositId, depositor, recipient, message, inputAmount } =
-    //   depositInfo.depositLog;
-    // const inputToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.fromChain,
-    //   selectedRoute.fromTokenSymbol
-    // );
-    // const outputToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.toChain,
-    //   selectedRoute.toTokenSymbol
-    // );
-    // const swapToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.fromChain,
-    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    // );
+  private getOutputAmountParser(
+    bridgeProvider: BridgeProvider,
+    depositId: BigNumber,
+    originChainId: number
+  ) {
+    if (["sponsored-cctp", "cctp"].includes(bridgeProvider)) {
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
+        }
 
-    // return {
-    //   depositId: depositId.toString(),
-    //   depositTime:
-    //     depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-    //   status: "pending" as const,
-    //   filled: "0",
-    //   sourceChainId: selectedRoute.fromChain,
-    //   destinationChainId: selectedRoute.toChain,
-    //   assetAddr:
-    //     selectedRoute.type === "swap"
-    //       ? selectedRoute.swapTokenAddress
-    //       : selectedRoute.fromTokenAddress,
-    //   depositorAddr: depositor.toBase58(),
-    //   recipientAddr: recipient.toBase58(),
-    //   message: message || "0x",
-    //   amount: inputAmount.toString(),
-    //   depositTxHash: depositInfo.depositTxHash,
-    //   fillTx: "",
-    //   speedUps: [],
-    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   feeBreakdown: {
-    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-    //     lpFeePct: quoteForAnalytics.lpFeePct,
-    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-    //   },
-    //   token: inputToken,
-    //   outputToken,
-    //   swapToken,
-    // };
-  }
+        // if we didn't find anything, return cctp output amount
+        return parseOutputAmountFromMintAndWithdrawLog(logs);
+      };
+    }
 
-  /**
-   * Convert fill information to local storage format for EVM chains
-   * @param fillInfo Fill information
-   * @param bridgePayload Bridge page payload
-   * @returns Local deposit format with fill information
-   */
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit {
-    throw new Error("Method not implemented.");
-    // const config = getConfig();
-    // const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
-    // const { depositId, depositor, recipient, message, inputAmount } =
-    //   fillInfo.depositInfo.depositLog;
-    // const inputToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.fromChain,
-    //   selectedRoute.fromTokenSymbol
-    // );
-    // const outputToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.toChain,
-    //   selectedRoute.toTokenSymbol
-    // );
-    // const swapToken = config.getTokenInfoBySymbolSafe(
-    //   selectedRoute.fromChain,
-    //   selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    // );
+    if (["oft", "sponsored-oft"].includes(bridgeProvider)) {
+      return (logs: ethers.providers.Log[]) => {
+        // try to parse output amount from hypercore flow executor logs
+        const outputAmountFromHyperCoreFlowLogs =
+          parseOutputAmountFromHyperCoreFlowLogs(logs);
+        if (outputAmountFromHyperCoreFlowLogs) {
+          return outputAmountFromHyperCoreFlowLogs;
+        }
 
-    // return {
-    //   depositId: depositId.toString(),
-    //   depositTime:
-    //     fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-    //   status: "filled" as const,
-    //   filled: inputAmount.toString(),
-    //   sourceChainId: selectedRoute.fromChain,
-    //   destinationChainId: selectedRoute.toChain,
-    //   assetAddr:
-    //     selectedRoute.type === "swap"
-    //       ? selectedRoute.swapTokenAddress
-    //       : selectedRoute.fromTokenAddress,
-    //   depositorAddr: depositor.toBytes32(),
-    //   recipientAddr: recipient.toBytes32(),
-    //   message: message || "0x",
-    //   amount: inputAmount.toString(),
-    //   depositTxHash: fillInfo.depositInfo.depositTxHash,
-    //   fillTx: fillInfo.fillTxHash || "",
-    //   speedUps: [],
-    //   depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-    //   feeBreakdown: {
-    //     lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-    //     lpFeePct: quoteForAnalytics.lpFeePct,
-    //     lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-    //     relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-    //     relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-    //     relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-    //     relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-    //     relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-    //     relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-    //     totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-    //     totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-    //     totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-    //   },
-    //   token: inputToken,
-    //   outputToken,
-    //   swapToken,
-    // };
+        // if we didn't find anything, return oft output amount
+        return parseOutputAmountFromOftReceivedLog(logs);
+      };
+    }
+
+    return (logs: ethers.providers.Log[]) =>
+      parseFilledRelayLogOutputAmount(logs, depositId, originChainId);
   }
 }

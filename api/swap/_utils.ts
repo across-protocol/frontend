@@ -82,7 +82,9 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
-  routingPreference: optional(enums(["default", "across", "native"])),
+  routingPreference: optional(
+    enums(["default", "across", "native", "sponsored-cctp"])
+  ),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -103,7 +105,7 @@ export async function handleBaseSwapQueryParams(
     depositor,
     integratorId,
     refundAddress,
-    refundOnOrigin: _refundOnOrigin = "true",
+    refundOnOrigin: _refundOnOrigin,
     slippageTolerance,
     slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
@@ -118,7 +120,6 @@ export async function handleBaseSwapQueryParams(
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
-  const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
   const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
@@ -166,6 +167,30 @@ export async function handleBaseSwapQueryParams(
     ? paramToArray(_includeSources)
     : undefined;
 
+  // Check if output token is bridgeable (used for refundOnOrigin default and SVM validation)
+  const outputBridgeable = isOutputTokenBridgeable(
+    outputTokenAddress,
+    originChainId,
+    destinationChainId
+  );
+
+  // Whitelisted output tokens that behave like bridgeable tokens
+  const isToWhitelistedOutputToken = !![
+    TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"].addresses[destinationChainId],
+  ]
+    .filter(Boolean)
+    .find(
+      (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+    );
+
+  const isOutputBridgeableOrWhitelisted =
+    outputBridgeable || isToWhitelistedOutputToken;
+
   if (isOriginSvm || isDestinationSvm) {
     if (!recipient) {
       throw new InvalidParamError({
@@ -182,29 +207,34 @@ export async function handleBaseSwapQueryParams(
     }
 
     // Restrict SVM ↔ EVM combinations that require a destination swap
-    const outputBridgeable = isOutputTokenBridgeable(
-      outputTokenAddress,
-      originChainId,
-      destinationChainId
-    );
-
-    // Allows USDH output from SVM
-    const isToUsdh = !![
-      TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
-      TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
-    ]
-      .filter(Boolean)
-      .find(
-        (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
-      );
-
-    if (!outputBridgeable && !isToUsdh) {
+    if (!isOutputBridgeableOrWhitelisted) {
       throw new InvalidParamError({
         param: "outputToken",
         message:
           "Destination swaps are not supported yet for routes involving Solana.",
       });
     }
+  }
+
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
+    });
+  }
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
+    });
   }
 
   if (excludeSources && includeSources) {
@@ -231,26 +261,20 @@ export async function handleBaseSwapQueryParams(
     });
   }
 
-  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
-  assertValidAddressChainCombination({
-    address: depositor,
-    chainId: originChainId,
-    paramName: "depositor",
-  });
-  if (recipient) {
-    assertValidAddressChainCombination({
-      address: recipient,
-      chainId: destinationChainId,
-      paramName: "recipient",
+  if (!inputTokenAddress || !outputTokenAddress) {
+    throw new InvalidParamError({
+      param: "inputToken, outputToken",
+      message: "Invalid input or output token address",
     });
   }
-  if (appFeeRecipient) {
-    assertValidAddressChainCombination({
-      address: appFeeRecipient,
-      chainId: destinationChainId,
-      paramName: "appFeeRecipient",
-    });
-  }
+
+  // For refundOnOrigin, use explicit value if provided, otherwise default based on output bridgeability:
+  // - Bridgeable output (B2B, B2BI, A2B): refund on origin (true)
+  // - Non-bridgeable output (B2A, A2A): refund on destination (false)
+  const refundOnOrigin =
+    _refundOnOrigin !== undefined
+      ? _refundOnOrigin === "true"
+      : isOutputBridgeableOrWhitelisted;
 
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);

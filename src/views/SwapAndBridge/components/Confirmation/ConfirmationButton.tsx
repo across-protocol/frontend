@@ -8,18 +8,21 @@ import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.
 import { COLORS, isDefined } from "utils";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
-import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
-import { getProviderFromQuote } from "./provider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
-import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 import { useOnConfirm } from "../../hooks/useOnConfirm";
 import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
 import { ExpandableLabelSection } from "./ExpandableLabelSection";
 import { CoreConfirmationButton } from "./CoreConfirmationButton";
+import {
+  getProviderFromQuote,
+  isBridgeProviderSponsored,
+} from "../../utils/bridgeProvider";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -32,7 +35,7 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  swapQuote: SwapApprovalApiCallReturnType | undefined;
+  swapQuote: SwapApprovalQuote | undefined;
   isQuoteLoading: boolean;
   quoteError: Error | null;
   onConfirm?: () => Promise<void>;
@@ -53,12 +56,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     customDestinationAccount: quoteRequest.customDestinationAccount,
   });
 
-  const approvalAction = useSwapApprovalAction(
-    quoteRequest.originToken?.chainId || 0,
-    swapQuote
-  );
+  const approvalAction = useSwapApprovalAction(quoteRequest, swapQuote);
 
-  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction, swapQuote);
 
   const validation = useValidateSwapAndBridge(
     quoteRequest.amount,
@@ -77,7 +77,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     isQuoteLoading
   );
 
-  const { originToken, destinationToken, amount } = quoteRequest;
+  const { originToken, destinationToken } = quoteRequest;
   const { buttonStatus, buttonLoading, buttonLabel, buttonDisabled } =
     buttonState;
   // Render unified group driven by state
@@ -125,7 +125,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
     };
-  }, [swapQuote, originToken, destinationToken, amount]);
+  }, [swapQuote, originToken, destinationToken, priceImpact?.priceImpact]);
 
   // When notConnected, make button clickable so it can open wallet modal
   const isButtonDisabled =
@@ -138,7 +138,8 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
   }, [swapQuote]);
 
   const provider = getProviderFromQuote(swapQuote);
-  const isSponsoredIntent = provider === "sponsored-intent";
+  const isSponsoredIntent = isBridgeProviderSponsored(provider);
+
   const content = (
     <>
       <ExpandableLabelSection
@@ -172,10 +173,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           <DetailRow>
             <DetailLeft>
               <Dollar width="16px" height="16px" />
-              <span>Total Fee</span>
+              <span>Net Cost</span>
               <Tooltip
-                tooltipId="ConfirmationButton - total fee"
-                body="Sum of bridge and swap fees"
+                tooltipId="ConfirmationButton - net cost"
+                body="The difference between your input amount and final output. This includes bridge fees and any swap impact caused by market liquidity. Swap impact is not a protocol fee and may vary based on trade size and conditions."
               >
                 <Info color="inherit" width="16px" height="16px" />
               </Tooltip>

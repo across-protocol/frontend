@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import { Searchbar } from "./Searchbar";
 import TokenMask from "assets/mask/token-mask-corner.svg";
 import {
-  LifiToken,
   getTokenDisplaySymbol,
+  LifiToken,
 } from "hooks/useAvailableCrosschainRoutes";
 import {
   CHAIN_IDs,
@@ -17,6 +17,7 @@ import {
   INDIRECT_CHAINS,
   parseUnits,
   QUERIES,
+  shortenAddress,
   TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -31,8 +32,9 @@ import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
 import { Text, TokenImage } from "components";
 import { useHotkeys } from "react-hotkeys-hook";
-import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 import { isTokenUnreachable } from "./isTokenUnreachable";
+import { useTrackChainSelected } from "./useTrackChainSelected";
+import { useTrackTokenSelected } from "./useTrackTokenSelected";
 
 const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
@@ -107,6 +109,9 @@ export function ChainTokenSelectorModal({
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
 
+  const trackChainSelected = useTrackChainSelected();
+  const trackTokenSelected = useTrackTokenSelected();
+
   // Reset mobile step when modal opens/closes
   useEffect(() => {
     setMobileStep("chain");
@@ -143,26 +148,25 @@ export function ChainTokenSelectorModal({
     });
 
     // Filter by search first
-    const filteredTokens = enrichedTokens
-      .filter((t) => {
-        if (tokenSearch === "") {
-          return true;
-        }
+    const filteredTokens = enrichedTokens.filter((t) => {
+      // First filter by selected chain
+      if (selectedChain !== null && t.chainId !== selectedChain) {
+        return false;
+      }
 
-        // When a specific chain is selected, only show tokens from that chain
-        if (selectedChain !== null && t.chainId !== selectedChain) {
-          return false;
-        }
-        const keywords = [
-          t.symbol.toLowerCase().replaceAll(" ", ""),
-          t.name.toLowerCase().replaceAll(" ", ""),
-          t.address.toLowerCase().replaceAll(" ", ""),
-        ];
-        return keywords.some((keyword) =>
-          keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
-        );
-      })
-      .filter(getBridgeableSvmTokenFilterPredicate(isOriginToken, otherToken));
+      if (tokenSearch === "") {
+        return true;
+      }
+
+      const keywords = [
+        t.symbol.toLowerCase().replaceAll(" ", ""),
+        t.name.toLowerCase().replaceAll(" ", ""),
+        t.address.toLowerCase().replaceAll(" ", ""),
+      ];
+      return keywords.some((keyword) =>
+        keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
+      );
+    });
 
     // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
     const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
@@ -299,10 +303,14 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
         setSelectedChain(chainId);
         setMobileStep("token");
       }}
-      onTokenSelect={onSelect}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   ) : (
@@ -317,8 +325,14 @@ export function ChainTokenSelectorModal({
       setTokenSearch={setTokenSearch}
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
-      onChainSelect={setSelectedChain}
-      onTokenSelect={onSelect}
+      onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
+        setSelectedChain(chainId);
+      }}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   );
@@ -474,7 +488,6 @@ const DesktopModal = ({
 
 // Mobile Layout Component - 2-step process
 const MobileLayout = ({
-  isOriginToken,
   mobileStep,
   selectedChain,
   chainSearch,
@@ -587,7 +600,8 @@ const MobileLayout = ({
                 <SectionHeader>Popular Tokens</SectionHeader>
                 {displayedTokens.popular.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    isMobile={true}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -610,7 +624,8 @@ const MobileLayout = ({
                 <SectionHeader>All Tokens</SectionHeader>
                 {displayedTokens.all.map((token) => (
                   <TokenEntry
-                    key={token.address + token.chainId}
+                    isMobile={true}
+                    key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
                     warningMessage={warningMessage}
@@ -770,7 +785,7 @@ const DesktopLayout = ({
               <SectionHeader>Popular Tokens</SectionHeader>
               {displayedTokens.popular.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
@@ -793,7 +808,7 @@ const DesktopLayout = ({
               <SectionHeader>All Tokens</SectionHeader>
               {displayedTokens.all.map((token, index) => (
                 <TokenEntry
-                  key={token.address + token.chainId}
+                  key={token.address + token.chainId + token.symbol}
                   token={token}
                   isSelected={false}
                   warningMessage={warningMessage}
@@ -871,13 +886,17 @@ const TokenEntry = ({
   onClick,
   tabIndex,
   warningMessage,
+  isMobile = false,
 }: {
   token: EnrichedTokenWithReachability;
   isSelected: boolean;
   onClick: () => void;
   warningMessage: string;
+  isMobile?: boolean;
   tabIndex?: number;
 }) => {
+  const [symbolHover, setSymbolHover] = useState(false);
+
   const hasTokenBalance = token.balance.gt(0);
   const hasUsdBalance = token.balanceUsd >= 0.01;
 
@@ -887,25 +906,39 @@ const TokenEntry = ({
       isDisabled={false}
       onClick={onClick}
       tabIndex={tabIndex}
+      onMouseEnter={() => setSymbolHover(true)}
+      onMouseLeave={() => setSymbolHover(false)}
     >
       <TokenInfoWrapper dim={token.isUnreachable}>
         <TokenItemImage token={token} />
         <TokenNameSymbolWrapper>
           <TokenName>
             <span>{token.name}</span>
+            <TokenDispalySymbol>
+              {getTokenDisplaySymbol(token)}
+            </TokenDispalySymbol>
             <TokenLink
+              visible={symbolHover && !isMobile}
               href={getTokenExplorerLinkFromAddress(
                 token.chainId,
                 token.address
               )}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(event) => event.stopPropagation()}
             >
-              {getTokenDisplaySymbol(token)}
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>
-          <TokenSymbol>{getChainInfo(token.chainId).name}</TokenSymbol>
+          <TokenSymbol>
+            {getChainInfo(token.chainId).name}{" "}
+            {isMobile && (
+              <TokenAddress>
+                {" "}
+                {shortenAddress(token.address, "...", 4)}
+              </TokenAddress>
+            )}
+          </TokenSymbol>
         </TokenNameSymbolWrapper>
       </TokenInfoWrapper>
 
@@ -1196,11 +1229,30 @@ const EntryItem = styled.button<{ isSelected: boolean; isDisabled?: boolean }>`
 
 const ChainEntryItem = EntryItem;
 
+const UnreachableWarning = styled.div`
+  color: var(--base-bright-gray, #e0f3ff);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0.5;
+`;
+
 const TokenEntryItem = styled(EntryItem)`
   display: grid;
   grid-template-columns: 3fr 2fr 1fr; // [TOKEN_INFO - WARNING - BALANCE]
   gap: 8px;
   align-items: center;
+
+  &:hover ${UnreachableWarning} {
+    color: var(--functional-red);
+    opacity: 1;
+  }
 `;
 
 const ChainItemImage = styled.img`
@@ -1250,6 +1302,10 @@ const TokenSymbol = styled.div`
   opacity: 0.5;
 `;
 
+const TokenAddress = styled.span`
+  opacity: 0.5;
+`;
+
 const TokenBalanceStack = styled.div<{ dim?: boolean }>`
   display: flex;
   flex-direction: column;
@@ -1278,19 +1334,6 @@ const TokenBalanceUsd = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
   opacity: 0.5;
-`;
-
-const UnreachableWarning = styled.div`
-  color: var(--functional-red);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 130%;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
 `;
 
 const SectionHeader = styled.div`
@@ -1362,32 +1405,19 @@ const TokenName = styled.div`
   gap: 4px;
 `;
 
-const TokenLink = styled.a`
+const TokenDispalySymbol = styled.span`
+  opacity: 0.5;
+  font-weight: normal;
+`;
+
+const TokenLink = styled.a<{ visible: boolean }>`
+  visibility: ${(v) => (v.visible ? "visible" : "hidden")};
   display: inline-flex;
   flex-direction: row;
   gap: 4px;
   align-items: center;
-  text-decoration: none;
-  color: var(--base-bright-gray, #e0f3ff);
-  opacity: 0.5;
-  font-weight: 400;
-
-  svg,
-  span {
-    font-size: 14px;
-    display: none;
-    color: inherit;
-  }
-
-  &:hover {
-    text-decoration: underline;
-    color: ${COLORS.aqua};
-    opacity: 1;
-  }
-
-  &:hover {
-    svg {
-      display: inline;
-    }
+  color: ${COLORS.aqua};
+  svg {
+    display: inline;
   }
 `;

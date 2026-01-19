@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { indexerApiBaseUrl } from "utils";
 
@@ -53,6 +53,11 @@ export type IndexerDepositResponse = {
   };
 };
 
+const isClientError = (error: Error | null) => {
+  const status = (error as AxiosError)?.response?.status;
+  return status !== undefined && status >= 400 && status < 500;
+};
+
 export function useDepositByTxHash(depositTxHash?: string) {
   return useQuery({
     queryKey: ["deposit", depositTxHash],
@@ -64,6 +69,11 @@ export function useDepositByTxHash(depositTxHash?: string) {
       return data;
     },
     enabled: !!depositTxHash,
-    refetchInterval: 10000,
+    retry: (_failureCount, error) => !isClientError(error),
+    refetchInterval: (query) => {
+      if (isClientError(query.state.error)) return false;
+      if (query.state.data?.deposit.status === "filled") return false;
+      return 10000;
+    },
   });
 }

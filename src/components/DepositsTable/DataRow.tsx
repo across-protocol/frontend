@@ -1,9 +1,10 @@
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
-import { COLORS, getConfig } from "utils";
+import { COLORS } from "utils";
 
 import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
@@ -22,6 +23,7 @@ import { useTokenFromAddress } from "hooks/useToken";
 import { TimeAgoCell } from "./cells/TimeAgoCell";
 import { useDepositRowAnimation } from "./hooks/useDepositRowAnimation";
 import { AnimatedColorOverlay } from "./AnimatedColorOverlay";
+import { useFeatureFlag } from "../../hooks";
 
 type Props = {
   deposit: Deposit;
@@ -40,6 +42,7 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
+  const hasTransactionFlag = useFeatureFlag("transaction-page");
   const history = useHistory();
   const { rowAnimation, overlayProps } = useDepositRowAnimation(deposit);
 
@@ -64,11 +67,17 @@ export function DataRow({
   }
 
   const handleRowClick = () => {
-    history.push(`/transaction/${deposit.depositTxHash}`);
+    if (hasTransactionFlag) {
+      history.push(`/transaction/${deposit.depositTxHash}`);
+    }
   };
 
   return (
-    <StyledRow onClick={handleRowClick} {...rowAnimation}>
+    <StyledRow
+      onClick={handleRowClick}
+      hasTransactionFlag={hasTransactionFlag}
+      {...rowAnimation}
+    >
       <AnimatedColorOverlay overlay={overlayProps} />
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
@@ -123,7 +132,6 @@ export function DataRow({
 }
 
 const StyledRow = styled(motion.tr)`
-  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -133,14 +141,19 @@ const StyledRow = styled(motion.tr)`
   border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
-  cursor: pointer;
-  overflow: hidden;
-  transform-origin: top;
-  transition: background-color 0.2s;
 
-  &:hover {
-    background-color: ${COLORS["grey-500"]};
-  }
+  ${({ hasTransactionFlag }) =>
+    hasTransactionFlag &&
+    css`
+      transition: background-color 0.2s;
+      cursor: pointer;
+      transform-origin: top;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: ${COLORS["grey-500"]};
+      }
+    `}
 
   & > td,
   & > div:not(.color-overlay) {

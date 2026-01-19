@@ -1,22 +1,17 @@
-import { formatUnits } from "ethers/lib/utils";
-import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
-import { UnitType, useTokenInput } from "hooks";
 import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
-  TokenAmountInputWrapper,
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
-  UnitToggleButton,
-  UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
+import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
+import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type DestinationTokenDisplayProps = {
   expectedOutputAmount: BigNumber | undefined;
@@ -40,37 +35,17 @@ export const DestinationTokenDisplay = ({
 
   const shouldUpdate = quoteRequest.tradeType === "exactInput";
 
-  const { destinationToken, originToken } = quoteRequest;
-
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: destinationToken,
-    setAmount: setDestinationAmount,
-    expectedAmount: expectedOutputAmount,
-    shouldUpdate,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
+  const { destinationToken, originToken, customDestinationAccount } =
+    quoteRequest;
 
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, destinationToken?.decimals)} ${destinationToken?.symbol}`;
-  })();
+  const displayAmount = shouldUpdate
+    ? expectedOutputAmount
+    : quoteRequest.amount;
 
   return (
     <TokenInputWrapper>
@@ -80,27 +55,23 @@ export const DestinationTokenDisplay = ({
           <ChangeAccountModal />
         </TokenAmountInputTitle>
 
-        <TokenAmountInputWrapper
-          showPrefix={unit === "usd"}
-          value={amountString}
+        <AmountInput
+          id="destination-amount-input"
+          name="destination-amount-input"
+          amount={displayAmount}
+          token={destinationToken}
+          unit={unit}
+          shouldUpdate={shouldUpdate}
+          disabled={inputDisabled}
           error={false}
-        >
-          <TokenAmountInput
-            id="destination-amount-input"
-            name="destination-amount-input"
-            placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
-            disabled={inputDisabled}
-            error={false}
-          />
-        </TokenAmountInputWrapper>
-        <UnitToggleButtonWrapper>
-          <UnitToggleButton onClick={toggleUnit}>
-            <ArrowsCross width={16} height={16} />{" "}
-            <span>{formattedConvertedAmount}</span>
-          </UnitToggleButton>
-        </UnitToggleButtonWrapper>
+          setAmount={setDestinationAmount}
+        />
+        <ToggleUnitButton
+          setUnit={setUnit}
+          unit={unit}
+          token={destinationToken}
+          amount={displayAmount}
+        />
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton
@@ -112,16 +83,12 @@ export const DestinationTokenDisplay = ({
           otherToken={originToken}
         />
 
-        {destinationToken && (
+        {destinationToken && !customDestinationAccount && (
           <BalanceSelector
             token={destinationToken}
             disableHover={true}
             error={false}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount, destinationToken.decimals);
-              }
-            }}
+            setAmount={setDestinationAmount}
           />
         )}
       </TokenSelectorColumn>

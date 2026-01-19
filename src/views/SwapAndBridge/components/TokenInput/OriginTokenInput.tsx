@@ -1,23 +1,19 @@
 import { useEffect, useRef } from "react";
-import { formatUnits } from "ethers/lib/utils";
-import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
-import { formatUSD } from "utils";
-import { UnitType, useTokenInput } from "hooks";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
-  TokenAmountInput,
   TokenAmountInputTitle,
-  TokenAmountInputWrapper,
   TokenAmountStack,
   TokenInputWrapper,
   TokenSelectorColumn,
-  UnitToggleButton,
-  UnitToggleButtonWrapper,
 } from "./styles";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { BigNumber } from "ethers";
 import { hasInsufficientBalance } from "../../utils/balance";
+import { useTokenBalance } from "views/SwapAndBridge/hooks/useTokenBalance";
+import { ToggleUnitButton } from "./ToggleUnit/ToggleUnitButton";
+import { AmountInput } from "./AmountInput";
+import { UnitType } from "../../types";
 
 type OriginTokenInputProps = {
   expectedAmount: BigNumber | undefined;
@@ -41,30 +37,17 @@ export const OriginTokenInput = ({
 
   const shouldUpdate = quoteRequest.tradeType === "minOutput";
 
-  const {
-    amountString,
-    convertedAmount,
-    toggleUnit,
-    handleInputChange,
-    handleBalanceClick,
-  } = useTokenInput({
-    token: originToken,
-    setAmount: setOriginAmount,
-    expectedAmount,
-    shouldUpdate,
-    isUpdateLoading,
-    unit,
-    setUnit,
-  });
-
   const inputDisabled = (() => {
     if (!quoteRequest.destinationToken) return true;
     return Boolean(shouldUpdate && isUpdateLoading);
   })();
 
+  const balance = useTokenBalance(quoteRequest?.originToken);
+
   const insufficientBalance = hasInsufficientBalance(
     quoteRequest,
-    expectedAmount
+    expectedAmount,
+    balance
   );
 
   useEffect(() => {
@@ -78,43 +61,31 @@ export const OriginTokenInput = ({
     }
   }, [inputDisabled]);
 
-  const formattedConvertedAmount = (() => {
-    if (unit === "token") {
-      if (!convertedAmount) return "$0.00";
-      return "$" + formatUSD(convertedAmount);
-    }
-    if (!convertedAmount) return "0.00";
-    return `${formatUnits(convertedAmount, originToken?.decimals)} ${originToken?.symbol}`;
-  })();
+  const displayAmount = shouldUpdate ? expectedAmount : quoteRequest.amount;
 
   return (
     <TokenInputWrapper>
       <TokenAmountStack>
         <TokenAmountInputTitle>From</TokenAmountInputTitle>
-
-        <TokenAmountInputWrapper
-          showPrefix={unit === "usd"}
-          value={amountString}
+        <AmountInput
+          id="origin-amount-input"
+          name="origin-amount-input"
+          testId="bridge-amount-input"
+          amount={displayAmount}
+          token={originToken}
+          unit={unit}
+          shouldUpdate={shouldUpdate}
+          disabled={inputDisabled}
           error={insufficientBalance}
-        >
-          <TokenAmountInput
-            id="origin-amount-input"
-            name="origin-amount-input"
-            data-testid="bridge-amount-input"
-            ref={amountInputRef}
-            placeholder="0.00"
-            value={amountString}
-            onChange={(e) => handleInputChange(e.target.value)}
-            disabled={inputDisabled}
-            error={insufficientBalance}
-          />
-        </TokenAmountInputWrapper>
-        <UnitToggleButtonWrapper>
-          <UnitToggleButton onClick={toggleUnit}>
-            <ArrowsCross width={16} height={16} />{" "}
-            <span>{formattedConvertedAmount}</span>
-          </UnitToggleButton>
-        </UnitToggleButtonWrapper>
+          setAmount={setOriginAmount}
+          inputRef={amountInputRef}
+        />
+        <ToggleUnitButton
+          unit={unit}
+          setUnit={setUnit}
+          token={originToken}
+          amount={displayAmount}
+        />
       </TokenAmountStack>
       <TokenSelectorColumn>
         <SelectorButton
@@ -131,11 +102,7 @@ export const OriginTokenInput = ({
             token={originToken}
             disableHover={false}
             error={insufficientBalance}
-            setAmount={(amount) => {
-              if (amount) {
-                handleBalanceClick(amount, originToken.decimals);
-              }
-            }}
+            setAmount={setOriginAmount}
           />
         )}
       </TokenSelectorColumn>
