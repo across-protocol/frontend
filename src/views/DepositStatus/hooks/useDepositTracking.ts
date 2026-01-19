@@ -4,8 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import {
   getChainInfo,
   NoFundsDepositedLogError,
-  TransactionNotFoundError,
-  TransactionFailedError,
   debug,
   getEcosystem,
 } from "utils";
@@ -73,11 +71,7 @@ export function useDepositTracking({
         return depositStrategy.getDeposit(depositTxHash, bridgeProvider);
       } catch (e) {
         // Don't retry if the deposit doesn't exist or is invalid
-        if (
-          e instanceof NoFundsDepositedLogError ||
-          e instanceof TransactionNotFoundError ||
-          e instanceof TransactionFailedError
-        ) {
+        if (e instanceof NoFundsDepositedLogError) {
           setShouldRetryDepositQuery(false);
         }
         throw e;
@@ -160,23 +154,13 @@ export function useDepositTracking({
     });
   }, [fillQuery.data, queryClient, trackTransferFillCompleted]);
 
-  const depositStatus = depositQuery.data?.status;
-
-  const status: DepositStatus = (() => {
-    if (depositStatus === "depositing") {
-      return "depositing";
-    } else if (depositStatus === "deposit-reverted") {
-      return "deposit-reverted";
-    } else if (depositStatus === "deposited") {
-      if (fillQuery.data?.fillTxTimestamp) {
-        return "filled";
-      } else {
-        return "filling";
-      }
-    } else {
-      return "depositing";
-    }
-  })();
+  const status: DepositStatus = !depositQuery.data?.depositTimestamp
+    ? "depositing"
+    : depositQuery.data?.status === "deposit-reverted"
+      ? "deposit-reverted"
+      : !fillQuery.data?.fillTxTimestamp
+        ? "filling"
+        : "filled";
 
   return {
     depositQuery,
