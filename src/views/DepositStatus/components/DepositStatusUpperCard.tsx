@@ -12,6 +12,7 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
+import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
@@ -98,6 +99,19 @@ export function DepositStatusUpperCard({
         </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
+          {depositTxElapsedSeconds ? (
+            <ElapsedTime
+              textSize="3xl"
+              elapsedSeconds={depositTxElapsedSeconds}
+              textColor="warning"
+            />
+          ) : (
+            <Text size="3xl" color="warning">
+              {DateTime.fromSeconds(
+                depositTxCompletedTime || Date.now()
+              ).toFormat("d MMM yyyy - t")}
+            </Text>
+          )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
               {depositRevertMessage ?? "Deposit unsuccessful"}
