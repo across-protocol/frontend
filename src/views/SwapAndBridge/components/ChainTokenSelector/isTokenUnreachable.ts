@@ -199,15 +199,12 @@ export function isTokenUnreachable(
   );
 }
 
-export function isReverseRouteRestricted({
-  originToken,
-  destinationToken,
-}: {
+export function isReverseRouteRestricted(params: {
   originToken: EnrichedToken | null;
   destinationToken: EnrichedToken | null;
 }): boolean {
-  const _originToken = destinationToken;
-  const _destinationToken = originToken;
-  if (!_originToken || !_destinationToken) return false;
-  return isTokenUnreachable(_destinationToken, false, _originToken);
+  const originToken = params.destinationToken;
+  const destinationToken = params.originToken;
+  if (!originToken || !destinationToken) return false;
+  return isTokenUnreachable(destinationToken, false, originToken);
 }
