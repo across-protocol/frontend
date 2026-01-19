@@ -3,6 +3,9 @@ import {
   getDepositByTxHash,
   NoFilledRelayLogError,
   parseFilledRelayLogOutputAmount,
+  TransactionPendingError,
+  TransactionFailedError,
+  TransactionNotFoundError,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
 import { getBlockForTimestamp, paginatedEventQuery } from "utils/sdk";
@@ -26,7 +29,6 @@ import {
   SwapMetaData,
   SwapSide,
 } from "utils/swapMetadata";
-import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
@@ -49,37 +51,13 @@ export class EVMStrategy implements IChainStrategy {
     bridgeProvider: BridgeProvider
   ): Promise<DepositInfo> {
     try {
+      // success
       const deposit = await getDepositByTxHash(
         txHash,
         this.chainId,
         bridgeProvider
       );
 
-      if (deposit.depositTxReceipt.status === 0) {
-        const revertReason = await getSpokepoolRevertReason(
-          deposit.depositTxReceipt,
-          this.chainId
-        );
-
-        return {
-          depositTxHash: deposit.depositTxReceipt.transactionHash,
-          depositTimestamp: deposit.depositTimestamp,
-          status: "deposit-reverted",
-          depositLog: undefined,
-          error: revertReason?.error,
-          formattedError: revertReason?.formattedError,
-        };
-      }
-
-      // Create a normalized response
-      if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
       return {
         depositTxHash: deposit.depositTxReceipt.transactionHash,
         depositTimestamp: deposit.depositTimestamp,
@@ -87,6 +65,40 @@ export class EVMStrategy implements IChainStrategy {
         depositLog: deposit.parsedDepositLog,
       };
     } catch (error) {
+      // pending
+      if (error instanceof TransactionPendingError) {
+        return {
+          depositTxHash: undefined,
+          depositTimestamp: undefined,
+          status: "depositing",
+          depositLog: undefined,
+        };
+      }
+
+      // failed
+      if (error instanceof TransactionFailedError) {
+        return {
+          depositTxHash: txHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted" as const,
+          depositLog: undefined,
+          error: error.error,
+          formattedError: error.formattedError,
+        };
+      }
+
+      if (error instanceof TransactionNotFoundError) {
+        return {
+          depositTxHash: txHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted" as const,
+          depositLog: undefined,
+          error: undefined,
+          formattedError: undefined,
+        };
+      }
+
+      // Other errors are re-thrown
       console.error("Error fetching EVM deposit:", error);
       throw error;
     }
