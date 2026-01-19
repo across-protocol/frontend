@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://mainnet.megaeth.com/rpc",
   blockTimeSeconds: 1,
-  tokens: ["WETH"],
+  tokens: ["USDT", "WETH"],
   enableCCTP: false,
 } as ChainConfig;
