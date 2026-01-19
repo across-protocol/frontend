@@ -273,6 +273,7 @@ export async function getDepositForBurnBySignatureSVM({
       .getTransaction(signature, {
         commitment: "confirmed",
         maxSupportedTransactionVersion: 0,
+        encoding: "json",
       })
       .send(),
   ]);
@@ -335,6 +336,7 @@ export async function getMintAndBurnBySignatureSVM({
       .getTransaction(signature, {
         commitment: "confirmed",
         maxSupportedTransactionVersion: 0,
+        encoding: "json",
       })
       .send(),
   ]);
