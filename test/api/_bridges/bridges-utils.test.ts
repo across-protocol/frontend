@@ -363,32 +363,6 @@ describe("#getBridgeStrategyData()", () => {
         expect(result?.isMonadTransfer).toBe(true);
       });
 
-      test("should check if within Monad limit (25K)", async () => {
-        const amount = BigNumber.from("20000000000"); // 20,000 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isWithinMonadLimit).toBe(true);
-      });
-
-      test("should check if exceeding Monad limit (25K)", async () => {
-        const amount = BigNumber.from("30000000000"); // 30,000 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isWithinMonadLimit).toBe(false);
-      });
-
       describe("Linea fast mode eligibility", () => {
         beforeEach(() => {
           // Reset getTransferMode mock before each test

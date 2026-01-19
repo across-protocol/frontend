@@ -142,8 +142,6 @@ export async function getBridgeStrategyData({
         outputToken.chainId !== CHAIN_IDs.SOLANA) ||
       outputToken.chainId === CHAIN_IDs.MONAD;
 
-    const isWithinMonadLimit = depositAmountUsd < MONAD_LIMIT;
-
     return {
       canFillInstantly,
       isUtilizationHigh,
@@ -154,7 +152,6 @@ export async function getBridgeStrategyData({
       hasFastStandardFill,
       isUsdtToUsdt,
       isMonadTransfer,
-      isWithinMonadLimit,
       isHyperCoreDestination: isToHyperCore(outputToken.chainId),
     };
   } catch (error) {

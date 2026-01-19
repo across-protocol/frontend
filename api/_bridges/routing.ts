@@ -74,14 +74,6 @@ function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
   }
 
   if (data.isMonadTransfer) {
-    if (data.isWithinMonadLimit) {
-      return {
-        strategy: acrossStrategy,
-        rule: "monad-within-limit",
-        reason: "Monad routes within the lite limit use Across",
-      };
-    }
-
     if (data.isUsdtToUsdt) {
       return {
         strategy: getOftBridgeStrategy(),

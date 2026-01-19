@@ -61,7 +61,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isInThreshold: false,
       isUsdtToUsdt: false,
       isMonadTransfer: false,
-      isWithinMonadLimit: false,
       isHyperCoreDestination: false,
       hasFastStandardFill: false,
       ...overrides,
@@ -84,7 +83,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isMonadTransfer: true,
-          isWithinMonadLimit: true,
         })
       );
 
@@ -97,7 +95,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isMonadTransfer: true,
-          isWithinMonadLimit: false,
           isUsdcToUsdc: false,
           isUsdtToUsdt: true,
         })
@@ -112,7 +109,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isMonadTransfer: true,
-          isWithinMonadLimit: false,
           isUsdcToUsdc: true,
         })
       );

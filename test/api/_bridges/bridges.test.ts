@@ -49,7 +49,6 @@ const mockBridgeStrategyData = (
   isInThreshold: false,
   isUsdtToUsdt: false,
   isMonadTransfer: false,
-  isWithinMonadLimit: false,
   isHyperCoreDestination: false,
   ...overrides,
 });
@@ -176,93 +175,6 @@ describe("api/_bridges/index", () => {
 
     afterAll(() => {
       vi.clearAllMocks();
-    });
-
-    describe("Monad transfer routing", () => {
-      test("should use Across for Monad transfers within 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: true,
-          isUsdcToUsdc: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
-
-      test("should use OFT for Monad USDT transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdtToUsdt: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdtMonad,
-          outputToken: usdtArbitrum,
-        });
-
-        expect(strategy.name).toBe("oft");
-      });
-
-      test("should use Fast CCTP for Monad USDC transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("cctp");
-      });
-
-      test("should use Across for Monad other token transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: false,
-          isUsdtToUsdt: false,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.OPTIMISM,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: wethOptimism,
-          outputToken: wethArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
     });
 
     describe("High utilization routing", () => {
