@@ -8,6 +8,8 @@ import { PersonalTransactions } from "./components/PersonalTransactions";
 import { DepositStatusFilter } from "./types";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
+import { useFeatureFlag } from "../../hooks";
+import { AcrossScan } from "../AcrossScan/AcrossScan";
 
 const statusFilterOptions: DepositStatusFilter[] = [
   "all",
@@ -21,6 +23,12 @@ export function Transactions() {
   const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>(
     statusFilterOptions[0]
   );
+
+  const hasTransactionFlag = useFeatureFlag("transaction-page");
+
+  if (hasTransactionFlag) {
+    return <AcrossScan></AcrossScan>;
+  }
 
   return (
     <LayoutV2 maxWidth={1484}>
