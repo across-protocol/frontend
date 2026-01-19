@@ -3,7 +3,6 @@ import {
   INDIRECT_CHAINS,
   interchangeableTokensMap,
 } from "../../../../utils/constants";
-import { solana } from "../../../../constants/chains/configs";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 
 export type RouteParams = {
@@ -198,4 +197,17 @@ export function isTokenUnreachable(
   return (
     isSameChain || isRestrictedOrigin || isRestrictedRoute || isNonBridgeableSvm
   );
+}
+
+export function isReverseRouteRestricted({
+  originToken,
+  destinationToken,
+}: {
+  originToken: EnrichedToken | null;
+  destinationToken: EnrichedToken | null;
+}): boolean {
+  const _originToken = destinationToken;
+  const _destinationToken = originToken;
+  if (!_originToken || !_destinationToken) return false;
+  return isTokenUnreachable(_destinationToken, false, _originToken);
 }
