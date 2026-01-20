@@ -21,7 +21,7 @@ import { parseOftSentLog } from "./oft";
 export class NoFundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
     super(
-      `Could not parse log FundsDeposited in tx ${shortenAddress(depositTxHash, "...", 5)} on chain ${chainId}`
+      `Could not parse log FundsDeposited in tx ${depositTxHash} on chain ${chainId}`
     );
   }
 }
@@ -29,7 +29,7 @@ export class NoFundsDepositedLogError extends Error {
 export class TransactionNotFoundError extends Error {
   constructor(depositTxHash: string, chainId: number) {
     super(
-      `Transaction ${shortenAddress(depositTxHash, "...", 5)} not found on chain ${chainId}. It may have been dropped from the mempool or replaced.`
+      `Transaction ${depositTxHash} not found on chain ${chainId}. It may have been dropped from the mempool or replaced.`
     );
   }
 }
@@ -37,7 +37,7 @@ export class TransactionNotFoundError extends Error {
 export class TransactionPendingError extends Error {
   constructor(depositTxHash: string, chainId: number) {
     super(
-      `Transaction ${shortenAddress(depositTxHash, "...", 5)} is pending on chain ${chainId}. Receipt not available yet.`
+      `Transaction ${depositTxHash} is pending on chain ${chainId}. Receipt not available yet.`
     );
   }
 }
@@ -51,12 +51,14 @@ export class TransactionFailedError extends Error {
     chainId: number,
     revertReason?: { error: string; formattedError: string } | null
   ) {
-    const message = revertReason?.formattedError
-      ? `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}: ${revertReason.formattedError}`
-      : `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}.`;
+    const message = revertReason?.error
+      ? `Transaction ${depositTxHash} reverted on chain ${chainId}: ${revertReason.error}`
+      : `Transaction ${depositTxHash} reverted on chain ${chainId}.`;
     super(message);
     this.error = revertReason?.error;
-    this.formattedError = revertReason?.formattedError;
+    this.formattedError = revertReason?.formattedError
+      ? `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}: ${revertReason.formattedError}`
+      : `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}.`;
   }
 }
 
@@ -77,7 +79,7 @@ export class FillPendingError extends Error {
 export class FillMetadataParseError extends Error {
   constructor(fillTxHash: string, chainId: number) {
     super(
-      `Unable to parse fill metadata from transaction ${shortenAddress(fillTxHash, "...", 5)} on chain ${chainId}`
+      `Unable to parse fill metadata from transaction ${fillTxHash} on chain ${chainId}`
     );
   }
 }
