@@ -30,6 +30,9 @@ const API_HEADERS = {
   ...(API_KEY_LIFI ? { "x-lifi-api-key": `${API_KEY_LIFI}` } : {}),
 };
 
+// Assigned by LiFi for tracking Across requests
+const LIFI_INTEGRATOR_ID = "across";
+
 const SWAP_PROVIDER_NAME = "lifi";
 
 export function getLifiStrategy(
@@ -109,6 +112,7 @@ export function getLifiStrategy(
         skipSimulation: true,
         swapStepTimingStrategies,
         slippage: slippageTolerance / 100,
+        integrator: LIFI_INTEGRATOR_ID,
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
           : { toAmount: swap.amount }),

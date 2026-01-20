@@ -2,6 +2,8 @@ import { getProvider } from "utils/providers";
 import {
   getDepositByTxHash,
   NoFilledRelayLogError,
+  FillPendingError,
+  FillMetadataParseError,
   parseFilledRelayLogOutputAmount,
 } from "utils/deposits";
 import { getConfig } from "utils/config";
@@ -15,9 +17,8 @@ import axios from "axios";
 import {
   BridgeProvider,
   DepositedInfo,
-  DepositInfo,
   DepositStatusResponse,
-  FillInfo,
+  FilledInfo,
   IChainStrategy,
 } from "../types";
 import { BigNumber, ethers } from "ethers";
@@ -26,7 +27,6 @@ import {
   SwapMetaData,
   SwapSide,
 } from "utils/swapMetadata";
-import { getSpokepoolRevertReason } from "utils";
 import { FilledRelayEvent } from "utils/typechain";
 import { parseOutputAmountFromMintAndWithdrawLog } from "utils/cctp";
 import { parseOutputAmountFromOftReceivedLog } from "utils/oft";
@@ -42,54 +42,24 @@ export class EVMStrategy implements IChainStrategy {
    * Get deposit information from an EVM transaction hash
    * @param txHash Transaction hash
    * @param bridgeProvider Bridge provider
-   * @returns Deposit information
+   * @returns Success case deposit information, or throws an error for non-success states
    */
   async getDeposit(
     txHash: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo> {
-    try {
-      const deposit = await getDepositByTxHash(
-        txHash,
-        this.chainId,
-        bridgeProvider
-      );
+  ): Promise<DepositedInfo> {
+    const deposit = await getDepositByTxHash(
+      txHash,
+      this.chainId,
+      bridgeProvider
+    );
 
-      if (deposit.depositTxReceipt.status === 0) {
-        const revertReason = await getSpokepoolRevertReason(
-          deposit.depositTxReceipt,
-          this.chainId
-        );
-
-        return {
-          depositTxHash: deposit.depositTxReceipt.transactionHash,
-          depositTimestamp: deposit.depositTimestamp,
-          status: "deposit-reverted",
-          depositLog: undefined,
-          error: revertReason?.error,
-          formattedError: revertReason?.formattedError,
-        };
-      }
-
-      // Create a normalized response
-      if (!deposit.depositTimestamp || !deposit.parsedDepositLog) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
-      return {
-        depositTxHash: deposit.depositTxReceipt.transactionHash,
-        depositTimestamp: deposit.depositTimestamp,
-        status: "deposited",
-        depositLog: deposit.parsedDepositLog,
-      };
-    } catch (error) {
-      console.error("Error fetching EVM deposit:", error);
-      throw error;
-    }
+    return {
+      depositTxHash: deposit.depositTxReceipt.transactionHash,
+      depositTimestamp: deposit.depositTimestamp,
+      status: "deposited",
+      depositLog: deposit.parsedDepositLog,
+    };
   }
 
   getFillChain(): number {
@@ -99,12 +69,13 @@ export class EVMStrategy implements IChainStrategy {
   /**
    * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
-   * @returns Fill information
+   * @param bridgeProvider Bridge provider
+   * @returns Success case fill information, or throws an error for non-success states
    */
   async getFill(
     depositInfo: DepositedInfo,
     bridgeProvider: BridgeProvider
-  ): Promise<FillInfo> {
+  ): Promise<FilledInfo> {
     const depositId = depositInfo.depositLog.depositId;
     if (!depositId) {
       throw new Error("Deposit ID not found in deposit information");
@@ -112,32 +83,29 @@ export class EVMStrategy implements IChainStrategy {
 
     const fillChainId = this.getFillChain();
 
-    try {
-      const fillTxHash = await Promise.any([
-        this.getFillFromIndexer(depositInfo),
-        this.getFillFromRpc(depositInfo),
-      ]);
+    const fillTxHash = await Promise.any([
+      this.getFillFromIndexer(depositInfo),
+      this.getFillFromRpc(depositInfo),
+    ]);
 
-      if (!fillTxHash) {
-        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
-      }
-
-      const metadata = await this.getFillMetadata({
-        fillTxHash,
-        bridgeProvider,
-      });
-
-      return {
-        fillTxHash: metadata.fillTxHash,
-        fillTxTimestamp: metadata.fillTxTimestamp,
-        depositInfo,
-        outputAmount: metadata.outputAmount || BigNumber.from(0),
-        status: "filled",
-      };
-    } catch (error) {
-      // Both rejected - throw error so we can retry
+    if (!fillTxHash) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
+
+    const metadata = await this.getFillMetadata({
+      fillTxHash,
+      bridgeProvider,
+      depositId,
+      originChainId: depositInfo.depositLog.originChainId,
+    });
+
+    return {
+      fillTxHash: metadata.fillTxHash,
+      fillTxTimestamp: metadata.fillTxTimestamp,
+      depositInfo,
+      outputAmount: metadata.outputAmount || BigNumber.from(0),
+      status: "filled",
+    };
   }
 
   /**
@@ -163,7 +131,7 @@ export class EVMStrategy implements IChainStrategy {
         return data.fillTxnRef;
       }
 
-      throw new Error("Indexer response still pending");
+      throw new FillPendingError();
     } catch (error) {
       console.warn("Error fetching fill from indexer:", error);
       throw error;
@@ -219,15 +187,17 @@ export class EVMStrategy implements IChainStrategy {
   async getFillMetadata(params: {
     fillTxHash: string;
     bridgeProvider: BridgeProvider;
+    depositId: BigNumber;
+    originChainId: number;
   }): Promise<{
     fillTxHash: string;
     fillTxTimestamp: number;
     outputAmount: BigNumber | undefined;
   }> {
-    const { fillTxHash, bridgeProvider } = params;
+    const { fillTxHash, bridgeProvider, depositId, originChainId } = params;
+    const fillChainId = this.getFillChain();
 
     try {
-      const fillChainId = this.getFillChain();
       const provider = getProvider(fillChainId);
       const fillTxReceipt = await provider.getTransactionReceipt(fillTxHash);
       const [fillTxBlock, swapMetadata] = await Promise.all([
@@ -239,7 +209,11 @@ export class EVMStrategy implements IChainStrategy {
         (metadata) => metadata.side === SwapSide.DESTINATION_SWAP
       );
 
-      const outputAmountParser = this.getOutputAmountParser(bridgeProvider);
+      const outputAmountParser = this.getOutputAmountParser(
+        bridgeProvider,
+        depositId,
+        originChainId
+      );
 
       const outputAmount = destinationSwapMetadata
         ? BigNumber.from(destinationSwapMetadata.expectedAmountOut)
@@ -251,8 +225,10 @@ export class EVMStrategy implements IChainStrategy {
         outputAmount,
       };
     } catch (e) {
-      console.error(`Unable to get fill metadata fro tx hash: ${fillTxHash}`);
-      throw e;
+      console.error(`Unable to get fill metadata for tx hash: ${fillTxHash}`, {
+        cause: e,
+      });
+      throw new FillMetadataParseError(fillTxHash, fillChainId);
     }
   }
 
@@ -275,7 +251,11 @@ export class EVMStrategy implements IChainStrategy {
     }
   }
 
-  private getOutputAmountParser(bridgeProvider: BridgeProvider) {
+  private getOutputAmountParser(
+    bridgeProvider: BridgeProvider,
+    depositId: BigNumber,
+    originChainId: number
+  ) {
     if (["sponsored-cctp", "cctp"].includes(bridgeProvider)) {
       return (logs: ethers.providers.Log[]) => {
         // try to parse output amount from hypercore flow executor logs
@@ -304,6 +284,7 @@ export class EVMStrategy implements IChainStrategy {
       };
     }
 
-    return parseFilledRelayLogOutputAmount;
+    return (logs: ethers.providers.Log[]) =>
+      parseFilledRelayLogOutputAmount(logs, depositId, originChainId);
   }
 }
