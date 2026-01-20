@@ -98,6 +98,12 @@ export type QuoteFetchStrategies = Partial<{
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
   };
+  originChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
+  destinationChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
   inputTokens: {
     [inputTokenSymbol: string]: QuoteFetchStrategy[];
   };
@@ -795,11 +801,18 @@ export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
-  strategies: QuoteFetchStrategies
+  strategies: QuoteFetchStrategies,
+  swapSide: "origin" | "destination"
 ): QuoteFetchStrategy[] {
+  const strategiesForChain =
+    (swapSide === "origin"
+      ? strategies.originChains?.[chainId]
+      : strategies.destinationChains?.[chainId]) ||
+    strategies.chains?.[chainId];
+
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
-    strategies.chains?.[chainId] ??
+    strategiesForChain ??
     strategies.inputTokens?.[tokenInSymbol] ??
     strategies.default ??
     defaultQuoteFetchStrategies.default!

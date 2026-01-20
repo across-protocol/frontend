@@ -7,6 +7,7 @@ import { SpokePool__factory } from "./typechain";
 import { getSpokepoolRevertReason } from "./errors";
 
 import { TransactionReceipt, Log } from "@ethersproject/providers";
+import { BigNumber } from "ethers";
 import {
   FundsDepositedEvent,
   FilledRelayEvent,
@@ -147,7 +148,11 @@ export function parseFundsDepositedLog(params: {
   return depositData;
 }
 
-export function parseFilledRelayLogOutputAmount(logs: Log[]) {
+export function parseFilledRelayLogOutputAmount(
+  logs: Log[],
+  depositId: BigNumber,
+  originChainId: number
+) {
   const spokePoolIface = SpokePool__factory.createInterface();
   const parsedLogs = logs.flatMap((log) => {
     try {
@@ -161,15 +166,32 @@ export function parseFilledRelayLogOutputAmount(logs: Log[]) {
     return undefined;
   }
 
-  const filledRelayLog = parsedLogs.find(({ name }) =>
-    [
-      "FilledV3Relay", // NOTE: kept for backwards compatibility
-      "FilledRelay", // NOTE: this is the new name for the event
-    ].includes(name)
-  ) as unknown as FilledRelayEvent;
+  const filledRelayLog = parsedLogs.find(({ name, args }) => {
+    if (
+      ![
+        "FilledV3Relay", // NOTE: kept for backwards compatibility
+        "FilledRelay", // NOTE: this is the new name for the event
+      ].includes(name)
+    ) {
+      return false;
+    }
+
+    return (
+      args.depositId &&
+      args.originChainId &&
+      args.depositId.eq(depositId) &&
+      Number(args.originChainId) === originChainId
+    );
+  }) as unknown as FilledRelayEvent;
 
   if (!filledRelayLog) {
     return undefined;
+  }
+
+  // Prefer updatedOutputAmount from relayExecutionInfo if available (V3 format)
+  const args = filledRelayLog.args;
+  if (args.relayExecutionInfo && args.relayExecutionInfo.updatedOutputAmount) {
+    return args.relayExecutionInfo.updatedOutputAmount;
   }
 
   return filledRelayLog.args.outputAmount;
