@@ -477,7 +477,7 @@ export function buildExactInputBridgeTokenMessage(
     : [];
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -560,7 +560,7 @@ export function buildExactOutputBridgeTokenMessage(
     : [];
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -667,7 +667,7 @@ export function buildMinOutputBridgeTokenMessage(
       )
     : [];
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -690,13 +690,25 @@ export function buildMinOutputBridgeTokenMessage(
   });
 }
 
-export function getFallbackRecipient(
+/**
+ * Gets the fallback recipient for Across bridge messages.
+ * When refundOnOrigin=true, returns AddressZero to signal the MultiCallHandler
+ * to refund deposits with unexecutable actions back to the origin chain.
+ */
+export function getAcrossFallbackRecipient(
   crossSwap: CrossSwap,
   destinationRecipient?: string
 ) {
   return crossSwap.refundOnOrigin
     ? constants.AddressZero
     : (crossSwap.refundAddress ?? destinationRecipient ?? crossSwap.depositor);
+}
+
+export function getMintBurnRefundRecipient(
+  crossSwap: CrossSwap,
+  defaultRecipient?: string
+): string {
+  return crossSwap.refundAddress ?? defaultRecipient ?? crossSwap.depositor;
 }
 
 export async function extractDepositDataStruct(
@@ -1059,7 +1071,10 @@ export function buildDestinationSwapCrossChainMessage({
   }
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap, destinationRecipient),
+    fallbackRecipient: getAcrossFallbackRecipient(
+      crossSwap,
+      destinationRecipient
+    ),
     actions: [
       routerTransferAction,
       // swap bridgeable output token -> cross swap output token
