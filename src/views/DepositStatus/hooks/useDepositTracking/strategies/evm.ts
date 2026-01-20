@@ -131,7 +131,7 @@ export class EVMStrategy implements IChainStrategy {
         return data.fillTxnRef;
       }
 
-      throw new FillPendingError("Indexer response still pending");
+      throw new FillPendingError();
     } catch (error) {
       console.warn("Error fetching fill from indexer:", error);
       throw error;
@@ -225,7 +225,9 @@ export class EVMStrategy implements IChainStrategy {
         outputAmount,
       };
     } catch (e) {
-      console.error(`Unable to get fill metadata for tx hash: ${fillTxHash}`);
+      console.error(`Unable to get fill metadata for tx hash: ${fillTxHash}`, {
+        cause: e,
+      });
       throw new FillMetadataParseError(fillTxHash, fillChainId);
     }
   }
