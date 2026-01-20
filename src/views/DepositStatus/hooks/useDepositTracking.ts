@@ -14,10 +14,8 @@ import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
 import {
   BridgeProvider,
-  DepositedInfo,
   DepositInfo,
   FillInfo,
-  FilledInfo,
 } from "./useDepositTracking/types";
 import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
@@ -26,6 +24,8 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
 import { useTrackTransferDepositCompleted } from "./useTrackTransferDepositCompleted";
 import { useTrackTransferFillCompleted } from "./useTrackTransferFillCompleted";
+
+const MAX_RETRIES = 3;
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -77,22 +77,85 @@ export function useDepositTracking({
     },
     staleTime: Infinity,
     retryDelay: getRetryDelay(fromChainId),
-    retry: (_, error) => {
-      // Only retry on pending transactions
-      return error instanceof TransactionPendingError;
+    retry: (failureCount, error) => {
+      if (error instanceof TransactionPendingError) {
+        return true;
+      }
+      if (error instanceof TransactionNotFoundError) {
+        return failureCount < MAX_RETRIES;
+      }
+      return false;
     },
   });
 
   // Infer deposit state from query data and error
-  const deposit = useMemo(
-    () =>
-      inferDepositState({
-        data: depositQuery.data,
-        error: depositQuery.error,
+  const deposit = useMemo((): DepositInfo | undefined => {
+    if (depositQuery.data) {
+      return depositQuery.data;
+    }
+
+    const error = depositQuery.error;
+
+    if (!error || error instanceof TransactionPendingError) {
+      return {
+        depositTxHash: undefined,
+        depositTimestamp: undefined,
+        status: "depositing",
+        depositLog: undefined,
+      };
+    }
+
+    if (error instanceof TransactionFailedError) {
+      return {
         depositTxHash,
-      }),
-    [depositQuery.data, depositQuery.error, depositTxHash]
-  );
+        depositTimestamp: undefined,
+        status: "deposit-reverted",
+        depositLog: undefined,
+        error: error.error,
+        formattedError: error.formattedError,
+      };
+    }
+
+    if (error instanceof TransactionNotFoundError) {
+      // retries exhausted
+      if (depositQuery.isError) {
+        return {
+          depositTxHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted",
+          depositLog: undefined,
+          error: undefined,
+          formattedError:
+            "Transaction not found. It may have been dropped from the mempool.",
+        };
+      }
+      // retrying...
+      return {
+        depositTxHash: undefined,
+        depositTimestamp: undefined,
+        status: "depositing",
+        depositLog: undefined,
+      };
+    }
+
+    if (error instanceof NoFundsDepositedLogError) {
+      return {
+        depositTxHash,
+        depositTimestamp: undefined,
+        status: "deposit-reverted",
+        depositLog: undefined,
+        error: undefined,
+        formattedError: undefined,
+      };
+    }
+
+    return undefined;
+  }, [
+    depositQuery.data,
+    depositQuery.error,
+    depositTxHash,
+    depositQuery.isError,
+  ]);
 
   // Track deposit completion in Amplitude
   useEffect(() => {
@@ -134,15 +197,26 @@ export function useDepositTracking({
   });
 
   // Infer fill state from query data and error
-  const fill = useMemo(
-    () =>
-      inferFillState({
-        data: fillQuery.data,
-        error: fillQuery.error,
-        depositData: depositQuery.data,
-      }),
-    [fillQuery.data, fillQuery.error, depositQuery.data]
-  );
+  const fill = useMemo((): FillInfo | undefined => {
+    const depositData = depositQuery.data;
+
+    if (!depositData) {
+      return undefined;
+    }
+
+    if (fillQuery.data) {
+      return fillQuery.data;
+    }
+
+    // Still loading or retrying
+    return {
+      fillTxHash: undefined,
+      fillTxTimestamp: undefined,
+      depositInfo: depositData,
+      status: "filling",
+      outputAmount: undefined,
+    };
+  }, [fillQuery.data, depositQuery.data]);
 
   // Track fill completion in Amplitude
   useEffect(() => {
@@ -198,116 +272,7 @@ export function useDepositTracking({
 
 function getRetryDelay(chainId: number) {
   const pollingInterval = getChainInfo(chainId).pollingInterval || 1_000;
-  return Math.floor(pollingInterval / 3);
-}
-
-/**
- * Infers the deposit state from query data and error
- */
-function inferDepositState({
-  data,
-  error,
-  depositTxHash,
-}: {
-  data: DepositedInfo | undefined;
-  error: Error | null;
-  depositTxHash: string;
-}): DepositInfo | undefined {
-  // Success case - query returned data
-  if (data) {
-    return data;
-  }
-
-  // No error yet - still loading/pending
-  if (!error) {
-    return {
-      depositTxHash: undefined,
-      depositTimestamp: undefined,
-      status: "depositing",
-      depositLog: undefined,
-    };
-  }
-
-  // Infer state from error type
-  if (error instanceof TransactionPendingError) {
-    return {
-      depositTxHash: undefined,
-      depositTimestamp: undefined,
-      status: "depositing",
-      depositLog: undefined,
-    };
-  }
-
-  if (error instanceof TransactionFailedError) {
-    return {
-      depositTxHash,
-      depositTimestamp: undefined,
-      status: "deposit-reverted",
-      depositLog: undefined,
-      error: error.error,
-      formattedError: error.formattedError,
-    };
-  }
-
-  if (
-    error instanceof TransactionNotFoundError ||
-    error instanceof NoFundsDepositedLogError
-  ) {
-    return {
-      depositTxHash,
-      depositTimestamp: undefined,
-      status: "deposit-reverted",
-      depositLog: undefined,
-      error: undefined,
-      formattedError: undefined,
-    };
-  }
-
-  // Unknown error - return undefined to indicate unknown state
-  return undefined;
-}
-
-/**
- * Infers the fill state from query data and error
- */
-function inferFillState({
-  data,
-  error,
-  depositData,
-}: {
-  data: FilledInfo | undefined;
-  error: Error | null;
-  depositData: DepositedInfo | undefined;
-}): FillInfo | undefined {
-  // Can't infer fill state without deposit data
-  if (!depositData) {
-    return undefined;
-  }
-
-  // Success case - query returned data
-  if (data) {
-    return data;
-  }
-
-  // No error yet - still loading/filling
-  if (!error) {
-    return {
-      fillTxHash: undefined,
-      fillTxTimestamp: undefined,
-      depositInfo: depositData,
-      status: "filling",
-      outputAmount: undefined,
-    };
-  }
-
-  // Error case - still filling (will retry)
-  return {
-    fillTxHash: undefined,
-    fillTxTimestamp: undefined,
-    depositInfo: depositData,
-    status: "filling",
-    outputAmount: undefined,
-  };
+  return Math.floor(pollingInterval / MAX_RETRIES);
 }
 
 // https://github.com/across-protocol/contracts/blob/master/scripts/svm/simpleFill.ts
