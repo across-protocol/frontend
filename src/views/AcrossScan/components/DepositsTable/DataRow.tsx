@@ -14,7 +14,6 @@ import { DateCell } from "./cells/DateCell";
 import { StatusCell } from "./cells/StatusCell";
 import { TxCell } from "./cells/TxCell";
 import { NetFeeCell } from "./cells/NetFeeCell";
-import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
@@ -101,7 +100,7 @@ export function DataRow({
         <TxCell deposit={deposit} width={headerCells.transactions.width} />
       )}
       {isColumnDisabled(disabledColumns, "bridgeFee") ? null : (
-        <BridgeFeeCell deposit={deposit} width={headerCells.netFee.width} />
+        <NetFeeCell deposit={deposit} width={headerCells.netFee.width} />
       )}
       {isColumnDisabled(disabledColumns, "netFee") ? null : (
         <NetFeeCell deposit={deposit} width={headerCells.netFee.width} />

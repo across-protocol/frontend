@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 type UseLiveModeParams = {
   refetchFn: () => Promise<any>;
@@ -26,6 +26,14 @@ export function useLiveMode({
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
 
+  const refetchFnRef = useRef(refetchFn);
+  const onResetRef = useRef(onReset);
+
+  useEffect(() => {
+    refetchFnRef.current = refetchFn;
+    onResetRef.current = onReset;
+  });
+
   useEffect(() => {
     if (!enabled) {
       setIsLiveMode(false);
@@ -33,23 +41,20 @@ export function useLiveMode({
   }, [enabled]);
 
   useEffect(() => {
-    // TODO, test if this is needed
     const handleVisibilityChange = async () => {
       const isVisible = !document.hidden;
       setIsPageVisible(isVisible);
 
       if (isVisible && isLiveMode && enabled && !isLoading) {
-        onReset?.();
-        await refetchFn();
+        onResetRef.current?.();
+        await refetchFnRef.current();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
+    return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [isLiveMode, enabled, isLoading, refetchFn, onReset]);
+  }, [isLiveMode, enabled, isLoading]);
 
   useEffect(() => {
     const shouldRefetch = isLiveMode && enabled && isPageVisible && !isLoading;
@@ -60,20 +65,17 @@ export function useLiveMode({
 
     const intervalId = setInterval(() => {
       if (!isFetching) {
-        void refetchFn();
+        void refetchFnRef.current();
       }
     }, refetchInterval);
 
-    return () => {
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [
     isLiveMode,
     enabled,
     isPageVisible,
     isLoading,
     isFetching,
-    refetchFn,
     refetchInterval,
   ]);
 
