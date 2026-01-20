@@ -139,6 +139,7 @@ export type BridgeStrategyData =
       isMonadTransfer: boolean;
       isWithinMonadLimit: boolean;
       isHyperCoreDestination: boolean;
+      hasFastStandardFill: boolean;
     }
   | undefined;
 
@@ -148,6 +149,7 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
+  includesAppFee?: boolean;
   recipient: string;
   depositor: string;
   logger?: Logger;

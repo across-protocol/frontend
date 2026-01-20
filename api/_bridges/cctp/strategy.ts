@@ -189,14 +189,16 @@ export function getCctpBridgeStrategy(
           transferMode,
           useForwardFee: useForwardFee ?? isDestinationHyperCore,
         });
+        const floatBpsScaler = 100;
+        const transferFeeBpsScaled = transferFeeBps * floatBpsScaler;
 
         // Calculate actual fee:
         // transferFee = input * (bps / 10000)
         // maxFee = transferFee + forwardFee
         // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
         const transferFee = divCeil(
-          exactInputAmount.mul(transferFeeBps),
-          BigNumber.from(10000)
+          exactInputAmount.mul(transferFeeBpsScaled),
+          BigNumber.from(10_000 * floatBpsScaler)
         );
         maxFee = transferFee.add(forwardFee);
       }
@@ -282,6 +284,8 @@ export function getCctpBridgeStrategy(
           transferMode,
           useForwardFee: isDestinationHyperCore,
         });
+        const floatBpsScaler = 100;
+        const transferFeeBpsScaled = transferFeeBps * floatBpsScaler;
 
         // Solve for required input based on the following equation:
         // inputAmount - (inputAmount * bps / 10000) - forwardFee = amountToArriveOnDestination
@@ -289,17 +293,19 @@ export function getCctpBridgeStrategy(
         // Therefore: inputAmount = (amountToArriveOnDestination + forwardFee) * 10000 / (10000 - bps)
         // Note: 10000 converts basis points to the same scale as amounts (1 bps = 1/10000 of the total)
         // Use ceiling division to ensure we request enough input to cover fees and desired output
-        const bpsFactor = BigNumber.from(10000).sub(transferFeeBps);
+        const bpsFactor = BigNumber.from(10_000 * floatBpsScaler).sub(
+          transferFeeBpsScaled
+        );
         inputAmount = divCeil(
-          inputAmount.add(forwardFee).mul(10000),
+          inputAmount.add(forwardFee).mul(10_000 * floatBpsScaler),
           bpsFactor
         );
 
         // Calculate total CCTP fee (transfer fee + forward fee)
         // Use ceiling division to ensure fee rounds up, guaranteeing sufficient fee for fast execution
         const transferFee = divCeil(
-          inputAmount.mul(transferFeeBps),
-          BigNumber.from(10000)
+          inputAmount.mul(transferFeeBpsScaled),
+          BigNumber.from(10_000 * floatBpsScaler)
         );
         maxFee = transferFee.add(forwardFee);
       }

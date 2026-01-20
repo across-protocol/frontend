@@ -1,3 +1,4 @@
+import { vi, MockedFunction, describe, test, expect, beforeEach } from "vitest";
 import { BigNumber } from "ethers";
 
 import { getAmountToHyperCore } from "../../../../../api/_bridges/cctp/utils/hypercore";
@@ -5,17 +6,17 @@ import { CHAIN_IDs } from "../../../../../api/_constants";
 import { TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 import * as hypercoreModule from "../../../../../api/_hypercore";
 
-jest.mock("../../../../../api/_hypercore");
-jest.mock("axios");
+vi.mock("../../../../../api/_hypercore");
+vi.mock("axios");
 
 describe("bridges/cctp/utils/hypercore", () => {
   const mockAccountExistsOnHyperCore =
-    hypercoreModule.accountExistsOnHyperCore as jest.MockedFunction<
+    hypercoreModule.accountExistsOnHyperCore as MockedFunction<
       typeof hypercoreModule.accountExistsOnHyperCore
     >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("#getAmountToHyperCore()", () => {

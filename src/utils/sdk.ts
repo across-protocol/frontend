@@ -36,7 +36,10 @@ export {
 export { getMessageHash } from "@across-protocol/sdk/dist/esm/utils/SpokeUtils";
 export { SvmCpiEventsClient } from "@across-protocol/sdk/dist/esm/arch/svm/eventsClient";
 export { findFillEvent } from "@across-protocol/sdk/dist/esm/arch/svm/SpokeUtils";
-export { bigToU8a32 } from "@across-protocol/sdk/dist/esm/arch/svm/utils";
+export {
+  bigToU8a32,
+  getNearestSlotTime,
+} from "@across-protocol/sdk/dist/esm/arch/svm/utils";
 export { paginatedEventQuery } from "@across-protocol/sdk/dist/esm/utils/EventUtils";
 export { getCctpDestinationChainFromDomain } from "@across-protocol/sdk/dist/esm/utils/CCTPUtils";
 export type { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm/types";

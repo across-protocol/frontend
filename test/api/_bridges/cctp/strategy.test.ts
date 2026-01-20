@@ -1,3 +1,12 @@
+import {
+  vi,
+  describe,
+  test,
+  expect,
+  beforeEach,
+  Mocked,
+  MockedFunction,
+} from "vitest";
 import { BigNumber } from "ethers";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk";
@@ -13,53 +22,57 @@ import { ConvertDecimals } from "../../../../api/_utils";
 import { divCeil } from "../../../../api/_bignumber";
 
 // Mock all dependencies
-jest.mock("axios");
+vi.mock("axios");
 
-// Only mock subset of functions we need
-jest.mock("../../../../api/_hypercore", () => {
-  const actual = jest.requireActual("../../../../api/_hypercore");
+vi.mock("../../../../api/_hypercore", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../../api/_hypercore")>();
   return {
     ...actual,
-    accountExistsOnHyperCore: jest.fn(),
+    accountExistsOnHyperCore: vi.fn(),
   };
 });
 
 // Mock SDK - only the SVM utilities we need
-jest.mock("@across-protocol/sdk", () => {
-  const actual = jest.requireActual("@across-protocol/sdk");
+vi.mock("@across-protocol/sdk", async (importOriginal) => {
+  const actual = await importOriginal<typeof sdk>();
   return {
     ...actual,
     arch: {
       ...actual.arch,
       svm: {
-        getAssociatedTokenAddress: jest.fn(),
+        getAssociatedTokenAddress: vi.fn(),
       },
     },
   };
 });
 
 // Mock only the specific functions we need to mock
-jest.mock("../../../../api/_bridges/cctp/utils/constants", () => {
-  const actual = jest.requireActual(
-    "../../../../api/_bridges/cctp/utils/constants"
-  );
-  return {
-    ...actual,
-    encodeDepositForBurn: jest.fn(
-      (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
-    ),
-  };
-});
+vi.mock(
+  "../../../../api/_bridges/cctp/utils/constants",
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import("../../../../api/_bridges/cctp/utils/constants")
+      >();
+    return {
+      ...actual,
+      encodeDepositForBurn: vi.fn(
+        (params) => `0xencoded-mintRecipient:${params.mintRecipient}`
+      ),
+    };
+  }
+);
 
-jest.mock("../../../../api/_integrator-id", () => ({
-  tagSwapApiMarker: jest.fn((data) => data),
+vi.mock("../../../../api/_integrator-id", () => ({
+  tagSwapApiMarker: vi.fn((data) => data),
 }));
 
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedAxios = axios as Mocked<typeof axios>;
 
 describe("bridges/cctp/strategy", () => {
   const mockAccountExistsOnHyperCore =
-    hypercoreModule.accountExistsOnHyperCore as jest.MockedFunction<
+    hypercoreModule.accountExistsOnHyperCore as MockedFunction<
       typeof hypercoreModule.accountExistsOnHyperCore
     >;
 
@@ -112,7 +125,7 @@ describe("bridges/cctp/strategy", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAxios.get.mockResolvedValue({
       data: mockCctpFeeResponse,
     });
@@ -340,9 +353,9 @@ describe("bridges/cctp/strategy", () => {
       const solanaTokenAccount = "5fE2vJ4f41PgDWyR2HFdKcYRuckFX8PwKH2kL7jPU6TC";
 
       // Mock the getAssociatedTokenAddress function to return the test token account
-      (sdk.arch.svm.getAssociatedTokenAddress as jest.Mock).mockResolvedValue(
-        solanaTokenAccount
-      );
+      (
+        sdk.arch.svm.getAssociatedTokenAddress as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(solanaTokenAccount);
 
       const quotes: CrossSwapQuotes = {
         crossSwap: {

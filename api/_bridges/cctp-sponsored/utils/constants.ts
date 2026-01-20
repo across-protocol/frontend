@@ -96,3 +96,10 @@ export const SPONSORED_CCTP_DESTINATION_CHAINS = [
   CHAIN_IDs.HYPERCORE_TESTNET,
   CHAIN_IDs.LIGHTER,
 ];
+
+export const ACCOUNT_CREATION_SUPPORTED_ROUTES = [
+  {
+    inputTokenSymbol: "USDC",
+    outputTokenSymbol: "USDH-SPOT",
+  },
+];

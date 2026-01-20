@@ -146,11 +146,6 @@ import soneiumGrayscaleLogo from "assets/chain-logos/soneium-grayscale.svg";
 import { ReactComponent as soneiumLogoSvg } from "assets/chain-logos/soneium.svg";
 import { ReactComponent as soneiumGrayscaleLogoSvg } from "assets/chain-logos/soneium-grayscale.svg";
 
-import tataraLogo from "assets/chain-logos/tatara.svg";
-import tataraGrayscaleLogo from "assets/chain-logos/tatara-grayscale.svg";
-import { ReactComponent as tataraLogoSvg } from "assets/chain-logos/tatara.svg";
-import { ReactComponent as tataraGrayscaleLogoSvg } from "assets/chain-logos/tatara-grayscale.svg";
-
 import unichainLogo from "assets/chain-logos/unichain.svg";
 import unichainGrayscaleLogo from "assets/chain-logos/unichain-grayscale.svg";
 import { ReactComponent as unichainLogoSvg } from "assets/chain-logos/unichain.svg";
@@ -1270,47 +1265,6 @@ export const soneium_viem = defineChain({
   },
 });
 
-export const tatara = {
-  name: "Tatara",
-  fullName: "Tatara",
-  chainId: 129399,
-  logoURI: tataraLogo,
-  grayscaleLogoURI: tataraGrayscaleLogo,
-  logoSvg: tataraLogoSvg,
-  grayscaleLogoSvg: tataraGrayscaleLogoSvg,
-  rpcUrl: "https://rpc.tatara.katanarpc.com/DYsaaqa6zme7taA8LskCQnkAZghSPtPQk",
-  explorerUrl: "https://explorer.tatara.katana.network",
-  constructExplorerLink: (txHash: string) =>
-    `${tatara.explorerUrl}/tx/${txHash}`,
-  nativeCurrencySymbol: "ETH",
-  customRpcUrl: process.env.REACT_APP_CHAIN_129399_CUSTOM_RPC_URL,
-  pollingInterval: 1000,
-};
-
-export const tatara_viem = defineChain({
-  id: tatara.chainId,
-  name: tatara.name,
-  nativeCurrency: {
-    name: tatara.nativeCurrencySymbol,
-    symbol: tatara.nativeCurrencySymbol,
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [
-        tatara.customRpcUrl ? tatara.customRpcUrl : [],
-        tatara.rpcUrl,
-      ].flat(),
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: tatara.name + " Explorer",
-      url: tatara.explorerUrl,
-    },
-  },
-});
-
 export const unichain = {
   name: "Unichain",
   fullName: "Unichain",
@@ -1555,7 +1509,6 @@ export const chainConfigs = [
   solana,
   solanaDevnet,
   soneium,
-  tatara,
   unichain,
   unichainSepolia,
   worldChain,
@@ -1596,7 +1549,6 @@ export const chains_viem = [
   scroll_viem,
   sepolia_viem,
   soneium_viem,
-  tatara_viem,
   unichain_viem,
   unichainSepolia_viem,
   worldChain_viem,

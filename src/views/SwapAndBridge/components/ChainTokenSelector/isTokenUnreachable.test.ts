@@ -195,36 +195,92 @@ describe("isTokenUnreachable", () => {
     });
   });
 
-  it("should restrict ANY output tokens to Solana", () => {
-    const inputToken = {
-      chainId: CHAIN_IDs.MAINNET,
-      symbol: "USDC",
-    } as EnrichedToken;
+  describe("bridgeable SVM token restrictions", () => {
+    describe("when Solana is origin chain", () => {
+      it("should mark non-bridgeable destination tokens as unreachable", () => {
+        const originToken = {
+          chainId: CHAIN_IDs.SOLANA,
+          symbol: "USDC",
+        } as EnrichedToken;
 
-    const outputToken = {
-      chainId: CHAIN_IDs.SOLANA,
-      symbol: "USDT", // not bridgeable
-    } as EnrichedToken;
+        const destinationToken = {
+          chainId: CHAIN_IDs.MAINNET,
+          symbol: "ETH", // not bridgeable
+        } as EnrichedToken;
 
-    const isUnreachable = isTokenUnreachable(inputToken, true, outputToken);
+        // Selecting destination token (isOriginToken = false)
+        const isUnreachable = isTokenUnreachable(
+          destinationToken,
+          false,
+          originToken
+        );
 
-    expect(isUnreachable).toBe(true);
-  });
+        expect(isUnreachable).toBe(true);
+      });
 
-  it("should NOT restrict BRIDGEABLE output tokens to Solana", () => {
-    const inputToken = {
-      chainId: CHAIN_IDs.MAINNET,
-      symbol: "USDC",
-    } as EnrichedToken;
+      it("should NOT mark bridgeable destination tokens as unreachable", () => {
+        const originToken = {
+          chainId: CHAIN_IDs.SOLANA,
+          symbol: "USDC",
+        } as EnrichedToken;
 
-    const outputToken = {
-      chainId: CHAIN_IDs.SOLANA,
-      symbol: "USDC", // not bridgeable
-    } as EnrichedToken;
+        const destinationToken = {
+          chainId: CHAIN_IDs.MAINNET,
+          symbol: "USDC", // bridgeable
+        } as EnrichedToken;
 
-    const isUnreachable = isTokenUnreachable(inputToken, true, outputToken);
+        const isUnreachable = isTokenUnreachable(
+          destinationToken,
+          false,
+          originToken
+        );
 
-    expect(isUnreachable).toBe(false);
+        expect(isUnreachable).toBe(false);
+      });
+    });
+
+    describe("when Solana is destination chain", () => {
+      it("should mark non-bridgeable destination tokens as unreachable", () => {
+        const originToken = {
+          chainId: CHAIN_IDs.MAINNET,
+          symbol: "USDC",
+        } as EnrichedToken;
+
+        const destinationToken = {
+          chainId: CHAIN_IDs.SOLANA,
+          symbol: "ETH", // not bridgeable
+        } as EnrichedToken;
+
+        // Selecting destination token (isOriginToken = false)
+        const isUnreachable = isTokenUnreachable(
+          destinationToken,
+          false,
+          originToken
+        );
+
+        expect(isUnreachable).toBe(true);
+      });
+
+      it("should NOT mark bridgeable destination tokens as unreachable", () => {
+        const originToken = {
+          chainId: CHAIN_IDs.MAINNET,
+          symbol: "USDC",
+        } as EnrichedToken;
+
+        const destinationToken = {
+          chainId: CHAIN_IDs.SOLANA,
+          symbol: "USDC", // bridgeable
+        } as EnrichedToken;
+
+        const isUnreachable = isTokenUnreachable(
+          destinationToken,
+          false,
+          originToken
+        );
+
+        expect(isUnreachable).toBe(false);
+      });
+    });
   });
 
   describe("matchesGlob", () => {

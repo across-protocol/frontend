@@ -50,7 +50,6 @@ import {
   TransferType,
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
 import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
 import { InvalidParamError } from "../_errors";
@@ -89,8 +88,8 @@ export type QuoteFetchPrioritizationMode =
  *
  * @example
  * {
- *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
- *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
+ *   default: [getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("SpokePoolPeriphery", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
@@ -98,6 +97,15 @@ export type QuoteFetchStrategies = Partial<{
   default: QuoteFetchStrategy[];
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
+  };
+  originChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
+  destinationChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
+  inputTokens: {
+    [inputTokenSymbol: string]: QuoteFetchStrategy[];
   };
   swapPairs: {
     [chainId: number]: {
@@ -148,7 +156,7 @@ export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
     mode: "priority-speed",
     priorityChunkSize: 1,
   },
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+  default: [getSwapRouter02Strategy("SpokePoolPeriphery")],
 };
 
 export function getPreferredBridgeTokens(
@@ -219,7 +227,6 @@ export function getCrossSwapTypes(params: {
  * ## Prerequisites
  *
  * ALL of the following must be true:
- * - Amount type is exactInput or minOutput (exactOutput needs precise handling & refunds)
  * - No origin swap (origin swaps need MulticallHandler for metadata events)
  * - No app fees
  * - No embedded actions
@@ -247,12 +254,6 @@ async function shouldBypassMultiCallHandler(
   crossSwap: CrossSwap,
   hasOriginSwap: boolean
 ): Promise<boolean> {
-  // Only bypass for exactInput and minOutput trade types
-  // exactOutput is excluded since it requires MultiCallHandler to handle precise output transfers and potential refunds
-  const isValidAmountType =
-    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT ||
-    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT;
-
   // Check if app fees are specified
   const hasAppFees =
     crossSwap.appFeePercent !== undefined &&
@@ -264,7 +265,7 @@ async function shouldBypassMultiCallHandler(
     crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
 
   // Early exit if basic conditions aren't met
-  if (!isValidAmountType || hasOriginSwap || hasAppFees || hasEmbeddedActions) {
+  if (hasOriginSwap || hasAppFees || hasEmbeddedActions) {
     return false;
   }
 
@@ -800,11 +801,19 @@ export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
-  strategies: QuoteFetchStrategies
+  strategies: QuoteFetchStrategies,
+  swapSide: "origin" | "destination"
 ): QuoteFetchStrategy[] {
+  const strategiesForChain =
+    (swapSide === "origin"
+      ? strategies.originChains?.[chainId]
+      : strategies.destinationChains?.[chainId]) ||
+    strategies.chains?.[chainId];
+
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
-    strategies.chains?.[chainId] ??
+    strategiesForChain ??
+    strategies.inputTokens?.[tokenInSymbol] ??
     strategies.default ??
     defaultQuoteFetchStrategies.default!
   );
@@ -1146,22 +1155,6 @@ export function getOriginSwapEntryPoints(
       deposit: {
         name: "SpokePoolPeriphery",
         address: getSpokePoolPeripheryAddress(chainId),
-      },
-    } as const;
-  } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-    return {
-      originSwapInitialRecipient: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-      },
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-        dex,
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
       },
     } as const;
   }

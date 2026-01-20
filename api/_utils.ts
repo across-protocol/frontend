@@ -487,7 +487,6 @@ export const getTokenByAddress = (
       "WETH",
       "WPOL",
       "WHYPE",
-      "TATARA-WBTC",
       "WBNB",
       "WGHO",
       "WGRASS",

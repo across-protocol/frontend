@@ -1,12 +1,16 @@
 import { BigNumber } from "ethers";
+import { describe, expect, test, vi } from "vitest";
+
 import {
-  getCrossSwapTypes,
   CROSS_SWAP_TYPE,
-  getBridgeQuoteRecipient,
   getBridgeQuoteMessage,
+  getBridgeQuoteRecipient,
+  getCrossSwapTypes,
+  getQuoteFetchStrategies,
+  QuoteFetchStrategies,
 } from "../../../api/_dexes/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
-import { CrossSwap } from "../../../api/_dexes/types";
+import { CrossSwap, QuoteFetchStrategy } from "../../../api/_dexes/types";
 import { getMultiCallHandlerAddress } from "../../../api/_multicall-handler";
 
 // Mock addresses for testing EOA vs Contract behavior
@@ -14,16 +18,19 @@ const MOCK_EOA_ADDRESS = "0xEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
 const MOCK_CONTRACT_ADDRESS = "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
 
 // Mock isContractCache to control EOA vs Contract detection
-jest.mock("../../../api/_utils", () => ({
-  ...jest.requireActual("../../../api/_utils"),
-  isContractCache: jest.fn((_chainId: number, address: string) => {
-    const isContract =
-      address.toLowerCase() === MOCK_CONTRACT_ADDRESS.toLowerCase();
-    return {
-      get: jest.fn(() => Promise.resolve(isContract)),
-    };
-  }),
-}));
+vi.mock("../../../api/_utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../api/_utils")>();
+  return {
+    ...actual,
+    isContractCache: vi.fn((_chainId: number, address: string) => {
+      const isContract =
+        address.toLowerCase() === MOCK_CONTRACT_ADDRESS.toLowerCase();
+      return {
+        get: vi.fn(() => Promise.resolve(isContract)),
+      };
+    }),
+  };
+});
 
 describe("_dexes/utils", () => {
   describe("#getCrossSwapType()", () => {
@@ -113,22 +120,17 @@ describe("_dexes/utils", () => {
     });
 
     describe("Bypass MultiCallHandler conditions", () => {
-      test("should bypass for simple B2B with exactInput", async () => {
-        const crossSwap = createMockCrossSwap({ type: "exactInput" });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
+      test("should bypass for simple B2B transfers with all tradeTypes", async () => {
+        const tradeTypes = ["exactInput", "minOutput", "exactOutput"] as const;
 
-        expect(recipient).toBe(crossSwap.recipient);
-        expect(message).toBeUndefined();
-      });
+        for (const type of tradeTypes) {
+          const crossSwap = createMockCrossSwap({ type });
+          const recipient = await getBridgeQuoteRecipient(crossSwap, false);
+          const message = await getBridgeQuoteMessage(crossSwap);
 
-      test("should bypass for simple B2B with minOutput", async () => {
-        const crossSwap = createMockCrossSwap({ type: "minOutput" });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
-
-        expect(recipient).toBe(crossSwap.recipient);
-        expect(message).toBeUndefined();
+          expect(recipient).toBe(crossSwap.recipient);
+          expect(message).toBeUndefined();
+        }
       });
 
       test("should bypass with zero app fees", async () => {
@@ -196,34 +198,6 @@ describe("_dexes/utils", () => {
           crossSwap.outputToken.chainId
         );
         expect(recipient).toBe(multicallHandler);
-        expect(message).toBeDefined();
-        expect(message).not.toBe("");
-        expect(message).not.toBe("0x");
-      });
-
-      test("should use MultiCallHandler for exactOutput (even without other features)", async () => {
-        const crossSwap = createMockCrossSwap({
-          type: "exactOutput",
-        });
-        const recipient = await getBridgeQuoteRecipient(crossSwap, false);
-        const message = await getBridgeQuoteMessage(crossSwap);
-
-        const multicallHandler = getMultiCallHandlerAddress(
-          crossSwap.outputToken.chainId
-        );
-        expect(recipient).toBe(multicallHandler);
-        expect(message).toBeDefined();
-        expect(message).not.toBe("");
-        expect(message).not.toBe("0x");
-      });
-
-      test("should use MultiCallHandler for exactOutput with refundAddress", async () => {
-        const crossSwap = createMockCrossSwap({
-          type: "exactOutput",
-          refundAddress: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-        });
-        const message = await getBridgeQuoteMessage(crossSwap);
-
         expect(message).toBeDefined();
         expect(message).not.toBe("");
         expect(message).not.toBe("0x");
@@ -521,6 +495,186 @@ describe("_dexes/utils", () => {
           expect(message).toBeUndefined();
         });
       });
+    });
+  });
+
+  describe("#getQuoteFetchStrategies()", () => {
+    const createMockStrategy = (name: string): QuoteFetchStrategy => ({
+      strategyName: name,
+      getRouter: vi.fn(),
+      getOriginEntryPoints: vi.fn(),
+      fetchFn: vi.fn(),
+      getSources: vi.fn(),
+      assertSellEntireBalanceSupported: vi.fn(),
+    });
+
+    const defaultStrategy = createMockStrategy("default-strategy");
+    const chainStrategy = createMockStrategy("chain-strategy");
+    const inputTokenStrategy = createMockStrategy("input-token-strategy");
+    const exactPairStrategy = createMockStrategy("exact-pair-strategy");
+
+    test("should return exact pair match with highest priority", () => {
+      const strategies: QuoteFetchStrategies = {
+        default: [defaultStrategy],
+        chains: {
+          [CHAIN_IDs.MAINNET]: [chainStrategy],
+        },
+        inputTokens: {
+          GHO: [inputTokenStrategy],
+        },
+        swapPairs: {
+          [CHAIN_IDs.MAINNET]: {
+            GHO: {
+              WGHO: [exactPairStrategy],
+            },
+          },
+        },
+      };
+
+      const result = getQuoteFetchStrategies(
+        CHAIN_IDs.MAINNET,
+        "GHO",
+        "WGHO",
+        strategies
+      );
+
+      expect(result).toEqual([exactPairStrategy]);
+    });
+
+    test("should fallback to chain strategy when no swapPairs match", () => {
+      const strategies: QuoteFetchStrategies = {
+        default: [defaultStrategy],
+        chains: {
+          [CHAIN_IDs.MAINNET]: [chainStrategy],
+        },
+        inputTokens: {
+          GHO: [inputTokenStrategy],
+        },
+        swapPairs: {
+          [CHAIN_IDs.MAINNET]: {
+            DAI: {
+              USDC: [exactPairStrategy],
+            },
+          },
+        },
+      };
+
+      const result = getQuoteFetchStrategies(
+        CHAIN_IDs.MAINNET,
+        "WETH",
+        "USDC",
+        strategies
+      );
+
+      expect(result).toEqual([chainStrategy]);
+    });
+
+    test("should fallback to inputTokens strategy when no swapPairs or chain match", () => {
+      const strategies: QuoteFetchStrategies = {
+        default: [defaultStrategy],
+        inputTokens: {
+          DAI: [inputTokenStrategy],
+        },
+        swapPairs: {
+          [CHAIN_IDs.MAINNET]: {
+            GHO: {
+              WGHO: [exactPairStrategy],
+            },
+          },
+        },
+      };
+
+      const result = getQuoteFetchStrategies(
+        CHAIN_IDs.ARBITRUM,
+        "DAI",
+        "USDC",
+        strategies
+      );
+
+      expect(result).toEqual([inputTokenStrategy]);
+    });
+
+    test("should fallback to default strategy when nothing matches", () => {
+      const strategies: QuoteFetchStrategies = {
+        default: [defaultStrategy],
+        inputTokens: {
+          DAI: [inputTokenStrategy],
+        },
+      };
+
+      const result = getQuoteFetchStrategies(
+        CHAIN_IDs.ARBITRUM,
+        "WETH",
+        "USDC",
+        strategies
+      );
+
+      expect(result).toEqual([defaultStrategy]);
+    });
+
+    test("should respect lookup hierarchy: swapPairs > chains > inputTokens > default", () => {
+      const strategies: QuoteFetchStrategies = {
+        default: [defaultStrategy],
+        chains: {
+          [CHAIN_IDs.MAINNET]: [chainStrategy],
+        },
+        inputTokens: {
+          GHO: [inputTokenStrategy],
+        },
+        swapPairs: {
+          [CHAIN_IDs.MAINNET]: {
+            GHO: {
+              WGHO: [exactPairStrategy],
+            },
+          },
+        },
+      };
+
+      const exactPairResult = getQuoteFetchStrategies(
+        CHAIN_IDs.MAINNET,
+        "GHO",
+        "WGHO",
+        strategies
+      );
+      expect(exactPairResult).toEqual([exactPairStrategy]);
+
+      const chainResult = getQuoteFetchStrategies(
+        CHAIN_IDs.MAINNET,
+        "WETH",
+        "USDC",
+        strategies
+      );
+      expect(chainResult).toEqual([chainStrategy]);
+
+      const inputTokenResult = getQuoteFetchStrategies(
+        CHAIN_IDs.ARBITRUM,
+        "GHO",
+        "USDC",
+        strategies
+      );
+      expect(inputTokenResult).toEqual([inputTokenStrategy]);
+
+      const defaultResult = getQuoteFetchStrategies(
+        CHAIN_IDs.ARBITRUM,
+        "WETH",
+        "USDC",
+        strategies
+      );
+      expect(defaultResult).toEqual([defaultStrategy]);
+    });
+
+    test("should return hardcoded fallback when no strategies provided", () => {
+      const strategies: QuoteFetchStrategies = {};
+
+      const result = getQuoteFetchStrategies(
+        CHAIN_IDs.MAINNET,
+        "WETH",
+        "USDC",
+        strategies
+      );
+
+      expect(result).toBeDefined();
+      expect(result.length).toBeGreaterThan(0);
     });
   });
 });

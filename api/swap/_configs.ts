@@ -18,11 +18,25 @@ export const quoteFetchStrategies: QuoteFetchStrategies = {
     getUniversalRouter02Strategy(),
     getLifiStrategy("SpokePoolPeriphery"),
   ],
+  destinationChains: {
+    // Override BSC destination swaps to use only Uniswap and LiFi
+    [CHAIN_IDs.BSC]: [
+      getUniversalRouter02Strategy(),
+      getLifiStrategy("SpokePoolPeriphery"),
+    ],
+  },
   chains: {
     [CHAIN_IDs.LENS]: [
       getSwapRouter02Strategy("SpokePoolPeriphery", "sdk-swap-quoter"),
     ],
     [CHAIN_IDs.SOLANA]: [getJupiterStrategy()],
+  },
+  inputTokens: {
+    // NOTE: 0x is not a reliable source for DAI -> ANY swaps
+    DAI: [
+      getUniversalRouter02Strategy(),
+      getLifiStrategy("SpokePoolPeriphery"),
+    ],
   },
   swapPairs: {
     [CHAIN_IDs.MAINNET]: {

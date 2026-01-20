@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { utils } from "ethers";
 import {
   getSponsorshipEligibilityPreChecks,
@@ -17,9 +18,9 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import * as indexerApi from "../../api/_indexer-api";
 import * as balance from "../../api/_balance";
 
-jest.mock("../../api/_env", () => ({
-  ...jest.requireActual("../../api/_env"),
-  getEnvs: jest.fn().mockReturnValue({
+vi.mock("../../api/_env", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getEnvs: vi.fn().mockReturnValue({
     SPONSORED_GLOBAL_DAILY_LIMIT_PER_FINAL_TOKEN: JSON.stringify({
       USDC: "100",
       USDH: "100",
@@ -33,13 +34,12 @@ jest.mock("../../api/_env", () => ({
   }),
 }));
 
-// Mock logger for clean output
-jest.mock("../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
+vi.mock("../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
   }),
 }));
 
@@ -123,7 +123,7 @@ describe("api/_sponsorship-eligibility", () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test("should return undefined when input amount exceeds limit", async () => {
@@ -177,9 +177,9 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("should return all checks passing when within limits", async () => {
-      jest
-        .spyOn(indexerApi, "getSponsorshipsFromIndexer")
-        .mockResolvedValue(mockSponsorshipsData);
+      vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue(
+        mockSponsorshipsData
+      );
 
       const result = await getSponsorshipEligibilityPreChecks({
         inputToken: arbitrumUSDC,
@@ -213,9 +213,9 @@ describe("api/_sponsorship-eligibility", () => {
         ],
       };
 
-      jest
-        .spyOn(indexerApi, "getSponsorshipsFromIndexer")
-        .mockResolvedValue(exceededData);
+      vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue(
+        exceededData
+      );
 
       const result = await getSponsorshipEligibilityPreChecks({
         inputToken: arbitrumUSDC,
@@ -252,9 +252,9 @@ describe("api/_sponsorship-eligibility", () => {
         ],
       };
 
-      jest
-        .spyOn(indexerApi, "getSponsorshipsFromIndexer")
-        .mockResolvedValue(exceededData);
+      vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue(
+        exceededData
+      );
 
       const result = await getSponsorshipEligibilityPreChecks({
         inputToken: arbitrumUSDC,
@@ -273,9 +273,9 @@ describe("api/_sponsorship-eligibility", () => {
         accountActivations: Array(15).fill({ finalRecipient: mockRecipient }), // 15 > 10 limit
       };
 
-      jest
-        .spyOn(indexerApi, "getSponsorshipsFromIndexer")
-        .mockResolvedValue(exceededData);
+      vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue(
+        exceededData
+      );
 
       const result = await getSponsorshipEligibilityPreChecks({
         inputToken: arbitrumUSDC,
@@ -294,16 +294,14 @@ describe("api/_sponsorship-eligibility", () => {
     const maxBpsToSponsor = 100; // 1%
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test("should return true when donation box has sufficient funds", async () => {
       // maxSponsoredAmount = 100 * 100 / 10000 = 1 USDC
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        ); // 10 USDC
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      ); // 10 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
@@ -317,11 +315,9 @@ describe("api/_sponsorship-eligibility", () => {
 
     test("should return false when donation box has insufficient funds", async () => {
       // maxSponsoredAmount = 100 * 100 / 10000 = 1 USDC
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("0.5", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        ); // 0.5 USDC
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("0.5", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      ); // 0.5 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
@@ -335,11 +331,9 @@ describe("api/_sponsorship-eligibility", () => {
 
     test("should return true when donation box balance equals max sponsored amount", async () => {
       // maxSponsoredAmount = 100 * 100 / 10000 = 1 USDC
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("1", TOKEN_SYMBOLS_MAP.USDC.decimals)
-        ); // 1 USDC
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("1", TOKEN_SYMBOLS_MAP.USDC.decimals)
+      ); // 1 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
@@ -354,11 +348,9 @@ describe("api/_sponsorship-eligibility", () => {
     test("should handle higher maxBpsToSponsor correctly", async () => {
       const highBps = 500; // 5%
       // maxSponsoredAmount = 100 * 500 / 10000 = 5 USDC
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("3", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        ); // 3 USDC
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("3", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      ); // 3 USDC
 
       const result = await hasDonationBoxEnoughFunds({
         inputToken: arbitrumUSDC,
@@ -376,15 +368,13 @@ describe("api/_sponsorship-eligibility", () => {
     const maxBpsToSponsor = 1; // 0.01%
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test("should return true when slippage is tolerable and funds are sufficient", async () => {
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        );
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,
@@ -398,11 +388,9 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("should throw SponsoredSwapSlippageToHighError when slippage exceeds tolerance", async () => {
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        );
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      );
 
       await expect(
         assertSponsoredAmountCanBeCovered({
@@ -416,11 +404,9 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("should throw SponsoredDonationBoxFundsInsufficientError when funds are insufficient", async () => {
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("0.0001", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        ); // Very low balance
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("0.0001", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      ); // Very low balance
 
       await expect(
         assertSponsoredAmountCanBeCovered({
@@ -434,11 +420,9 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("should pass with zero slippage", async () => {
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        );
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,
@@ -452,11 +436,9 @@ describe("api/_sponsorship-eligibility", () => {
     });
 
     test("should pass with slippage at tolerance boundary", async () => {
-      jest
-        .spyOn(balance, "getCachedTokenBalance")
-        .mockResolvedValue(
-          utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
-        );
+      vi.spyOn(balance, "getCachedTokenBalance").mockResolvedValue(
+        utils.parseUnits("10", TOKEN_SYMBOLS_MAP.USDH.decimals)
+      );
 
       const result = await assertSponsoredAmountCanBeCovered({
         inputToken: arbitrumUSDC,

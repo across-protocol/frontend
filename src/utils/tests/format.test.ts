@@ -7,6 +7,7 @@ import {
   shortenTransactionHash,
   smallNumberFormatter,
   formatUSD,
+  parseUnits,
 } from "../format";
 const VALID_ADDRESS = "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828";
 const TX_HASH =
@@ -70,5 +71,39 @@ describe("#formatUSD", () => {
 
   it("should format a large wei BigNumber to 2 decimal places", () => {
     expect(formatUSD(utils.parseEther("100000.123456"))).toEqual("100,000.12");
+  });
+});
+
+describe("#parseUnits", () => {
+  it("should parse normal decimal strings", () => {
+    expect(parseUnits("1.5", 18).toString()).toEqual(
+      utils.parseUnits("1.5", 18).toString()
+    );
+  });
+
+  it("should handle scientific notation with positive exponent", () => {
+    expect(parseUnits("1e18", 18).toString()).toEqual(
+      utils.parseUnits("1000000000000000000", 18).toString()
+    );
+  });
+
+  it("should handle scientific notation with negative exponent", () => {
+    const result = parseUnits("1.5e-7", 18);
+    expect(result.gt(0)).toBe(true);
+    expect(result.toString()).toEqual(
+      utils.parseUnits("0.00000015", 18).toString()
+    );
+  });
+
+  it("should handle very small numbers in scientific notation", () => {
+    const result = parseUnits("2.5e-10", 18);
+    expect(result.gt(0)).toBe(true);
+  });
+
+  it("should truncate excess decimal places", () => {
+    const result = parseUnits("0.123456789012345678901234", 18);
+    expect(result.toString()).toEqual(
+      utils.parseUnits("0.123456789012345678", 18).toString()
+    );
   });
 });

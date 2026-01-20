@@ -1,23 +1,23 @@
+import { vi, MockedFunction, describe, expect, beforeEach, it } from "vitest";
 import { BigNumber } from "ethers";
 import { routeMintAndBurnStrategy } from "../../../../../api/_bridges/routing";
 import * as bridgeUtils from "../../../../../api/_bridges/utils";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../../api/_constants";
 import { BridgeStrategyData } from "../../../../../api/_bridges/types";
 
-jest.mock("../../../../../api/_bridges/utils");
+vi.mock("../../../../../api/_bridges/utils");
 
-// mock the logger
-jest.mock("../../../../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+vi.mock("../../../../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   }),
 }));
 
 const mockedGetBridgeStrategyData =
-  bridgeUtils.getBridgeStrategyData as jest.MockedFunction<
+  bridgeUtils.getBridgeStrategyData as MockedFunction<
     typeof bridgeUtils.getBridgeStrategyData
   >;
 
@@ -46,7 +46,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("routeMintAndBurnStrategy", () => {
@@ -63,6 +63,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isMonadTransfer: false,
       isWithinMonadLimit: false,
       isHyperCoreDestination: false,
+      hasFastStandardFill: false,
       ...overrides,
     });
 
@@ -137,6 +138,20 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isFastCctpEligible: true,
+          isInThreshold: false,
+          isLargeCctpDeposit: false,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("cctp");
+    });
+
+    it("uses burn-and-mint on fast standard CCTP chains for medium deposits", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          hasFastStandardFill: true,
           isInThreshold: false,
           isLargeCctpDeposit: false,
         })
