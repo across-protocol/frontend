@@ -7,7 +7,6 @@ import { COLORS, getChainInfo } from "utils";
 
 import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AmountWithIconsCell } from "./cells/AmountWithIconsCell";
-import { RouteCell } from "./cells/RouteCell";
 import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
 import { StatusCell } from "./cells/StatusCell";
@@ -86,9 +85,6 @@ export function DataRow({
           chain={getChainInfo(deposit.destinationChainId)}
           width={headerCells.amountReceived.width}
         />
-      )}
-      {isColumnDisabled(disabledColumns, "route") ? null : (
-        <RouteCell deposit={deposit} width={headerCells.route.width} />
       )}
       {isColumnDisabled(disabledColumns, "address") ? null : (
         <AddressCell deposit={deposit} width={headerCells.address.width} />

@@ -19,10 +19,6 @@ export const headerCells = {
     label: "Amount received",
     width: 160,
   },
-  route: {
-    label: "Route",
-    width: 152,
-  },
   address: {
     label: "Address",
     width: 108,
