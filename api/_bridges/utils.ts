@@ -18,6 +18,7 @@ const ACROSS_THRESHOLD = 10_000; // 10K USD
 // https://developers.circle.com/cctp/evm-smart-contracts#tokenmessengerv2
 const LARGE_CCTP_DEPOSIT_THRESHOLD = 10_000_000; // 10M USD
 const MONAD_LIMIT = 25_000; // 25K USD
+const FAST_STANDARD_FILL_THRESHOLD = 10; // seconds - chains with standard fill < this are "fast enough"
 
 export function isFullyUtilized(limits: LimitsResponse): boolean {
   // Check if utilization is high (>80%)
@@ -113,6 +114,13 @@ export async function getBridgeStrategyData({
     let isFastCctpEligible =
       isFastCctpChain && depositAmountUsd > ACROSS_THRESHOLD;
 
+    // Has fast standard fill time
+    const standardFillTime =
+      CCTP_FILL_TIME_ESTIMATES.standard[outputToken.chainId];
+    const hasFastStandardFill =
+      standardFillTime !== undefined &&
+      standardFillTime <= FAST_STANDARD_FILL_THRESHOLD;
+
     // For Linea origin, verify that fast mode would actually be available. If not, don't use CCTP
     if (inputToken.chainId === CHAIN_IDs.LINEA && isFastCctpEligible) {
       const transferMode = await getTransferMode(
@@ -143,6 +151,7 @@ export async function getBridgeStrategyData({
       isLargeCctpDeposit,
       isInThreshold,
       isFastCctpEligible,
+      hasFastStandardFill,
       isUsdtToUsdt,
       isMonadTransfer,
       isWithinMonadLimit,

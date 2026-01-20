@@ -31,7 +31,6 @@ import {
 } from "../../_dexes/utils";
 import { JupiterSwapIxs } from "../../_dexes/jupiter/utils/api";
 import { appendJupiterIxs } from "../../_dexes/jupiter/utils/transaction-builder";
-import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
 import { getSVMRpc } from "../../_providers";
 import { getFillDeadlineBuffer } from "../../_fill-deadline";
 import { getQuoteTimestampArg } from "../../_quote-timestamp";
@@ -122,59 +121,6 @@ async function _buildDepositTxForAllowanceHolderEvm(
         }
       );
       toAddress = spokePoolPeriphery.address;
-    }
-    // NOTE: Left for backwards compatibility with the old `UniversalSwapAndBridge`
-    // contract. Should be removed once we've migrated to the new `SpokePoolPeriphery`.
-    else if (originSwapEntryPoint.name === "UniversalSwapAndBridge") {
-      const universalSwapAndBridge = getUniversalSwapAndBridge(
-        originSwapEntryPoint.dex || "unknown",
-        originChainId
-      );
-      if (originSwapQuote.swapTxns.length !== 1) {
-        throw new Error(
-          "Expected exactly 1 swap transaction for origin swap via `UniversalSwapAndBridge`"
-        );
-      }
-      const swapTxn = originSwapQuote.swapTxns[0] as EvmSwapTxn;
-      tx = await universalSwapAndBridge.populateTransaction.swapAndBridge(
-        originSwapQuote.tokenIn.address,
-        originSwapQuote.tokenOut.address,
-        swapTxn.data,
-        originSwapQuote.maximumAmountIn,
-        originSwapQuote.minAmountOut,
-        {
-          ...swapAndDepositData.depositData,
-          depositor: sdk.utils
-            .toAddressType(
-              swapAndDepositData.depositData.depositor,
-              originChainId
-            )
-            .toEvmAddress(),
-          recipient: sdk.utils
-            .toAddressType(
-              swapAndDepositData.depositData.recipient,
-              destinationChainId
-            )
-            .toEvmAddress(),
-          outputToken: sdk.utils
-            .toAddressType(
-              swapAndDepositData.depositData.outputToken,
-              destinationChainId
-            )
-            .toEvmAddress(),
-          exclusiveRelayer: sdk.utils
-            .toAddressType(
-              swapAndDepositData.depositData.exclusiveRelayer,
-              destinationChainId
-            )
-            .toEvmAddress(),
-          exclusivityDeadline:
-            swapAndDepositData.depositData.exclusivityParameter,
-          // Typo in the contract
-          destinationChainid: swapAndDepositData.depositData.destinationChainId,
-        }
-      );
-      toAddress = universalSwapAndBridge.address;
     } else {
       throw new Error(
         `Could not build 'swapAndBridge' tx for unknown entry point contract`
@@ -374,21 +320,22 @@ async function _buildDepositTxForAllowanceHolderSvm(
     message,
   };
 
-  const depositDelegatePda = await sdk.arch.svm.getDepositDelegatePda(
-    depositDataSeed,
-    spokePoolProgramId
-  );
-  const statePda = await sdk.arch.svm.getStatePda(spokePoolProgramId);
-  const eventAuthorityPda =
-    await sdk.arch.svm.getEventAuthority(spokePoolProgramId);
-  const vaultPda = await sdk.arch.svm.getAssociatedTokenAddress(
-    sdk.utils.toAddressType(statePda, originChainId).forceSvmAddress(),
-    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
-  );
-  const depositorTokenAccount = await sdk.arch.svm.getAssociatedTokenAddress(
-    sdk.utils.toAddressType(depositor, originChainId).forceSvmAddress(),
-    sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
-  );
+  const [depositDelegatePda, statePda, eventAuthorityPda] = await Promise.all([
+    sdk.arch.svm.getDepositDelegatePda(depositDataSeed, spokePoolProgramId),
+    sdk.arch.svm.getStatePda(spokePoolProgramId),
+    sdk.arch.svm.getEventAuthority(spokePoolProgramId),
+  ]);
+
+  const [vaultPda, depositorTokenAccount] = await Promise.all([
+    sdk.arch.svm.getAssociatedTokenAddress(
+      sdk.utils.toAddressType(statePda, originChainId).forceSvmAddress(),
+      sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+    ),
+    sdk.arch.svm.getAssociatedTokenAddress(
+      sdk.utils.toAddressType(depositor, originChainId).forceSvmAddress(),
+      sdk.utils.toAddressType(inputToken, originChainId).forceSvmAddress()
+    ),
+  ]);
   const tokenDecimals = crossSwapQuotes.bridgeQuote.inputToken.decimals;
 
   const depositIx = await sdk.arch.svm.createDepositInstruction(

@@ -100,13 +100,13 @@ export type BridgeStrategy = {
   getBridgeQuoteRecipient: (
     crossSwap: CrossSwap,
     hasOriginSwap?: boolean
-  ) => string;
+  ) => Promise<string>;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
     appFee?: AppFee,
     originSwapQuote?: SwapQuote
-  ) => string | undefined;
+  ) => Promise<string | undefined>;
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -139,6 +139,7 @@ export type BridgeStrategyData =
       isMonadTransfer: boolean;
       isWithinMonadLimit: boolean;
       isHyperCoreDestination: boolean;
+      hasFastStandardFill: boolean;
     }
   | undefined;
 
@@ -148,6 +149,7 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
+  includesAppFee?: boolean;
   recipient: string;
   depositor: string;
   logger?: Logger;

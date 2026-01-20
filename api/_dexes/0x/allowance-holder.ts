@@ -81,12 +81,6 @@ export function get0xStrategy(
       });
       let initialSwapAmount = swap.amount;
 
-      if (opts?.sellEntireBalance) {
-        swap.amount = addMarkupToAmount(
-          BigNumber.from(swap.amount),
-          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
-        ).toString();
-      }
       let swapAmount = swap.amount;
       const sources = opts?.sources;
       const sourcesParams: Record<string, string> | undefined =
@@ -122,6 +116,13 @@ export function get0xStrategy(
         initialSwapAmount = swapAmount;
       }
 
+      if (opts?.sellEntireBalance) {
+        swapAmount = addMarkupToAmount(
+          BigNumber.from(swapAmount),
+          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
+        ).toString();
+      }
+
       // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
       const response = await axios.get(
         `${API_BASE_URL}/${opts?.useIndicativeQuote ? "price" : "quote"}`,
@@ -133,7 +134,14 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.round(slippageTolerance * 100), // needs to be an integer
+            slippageBps: Math.round(
+              (slippageTolerance +
+                (opts?.sellEntireBalance
+                  ? // We need to take the markup into account for the slippage when fetching a quote
+                    SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
+                  : 0)) *
+                100
+            ),
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
@@ -179,8 +187,17 @@ export function get0xStrategy(
       const expectedAmountIn = BigNumber.from(initialSwapAmount);
       const maximumAmountIn = BigNumber.from(quote.sellAmount);
 
-      const expectedAmountOut = BigNumber.from(quote.buyAmount);
+      let expectedAmountOut = BigNumber.from(quote.buyAmount);
       const minAmountOut = BigNumber.from(quote.minBuyAmount);
+
+      // When using sellEntireBalance, the quote is based on the
+      // marked-up input amount (e.g., 105 ETH), but the expected and min. output amounts should reflect
+      // the actual expected input amount (e.g., 100 ETH). Scale down accordingly.
+      if (opts?.sellEntireBalance && !maximumAmountIn.isZero()) {
+        expectedAmountOut = expectedAmountOut
+          .mul(expectedAmountIn)
+          .div(maximumAmountIn);
+      }
 
       const swapTx = opts?.useIndicativeQuote
         ? {

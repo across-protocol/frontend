@@ -1,24 +1,45 @@
-import { UnitType } from "../../../../../hooks";
+import { useCallback, useMemo } from "react";
 import { BigNumber } from "ethers";
 import { EnrichedToken } from "../../ChainTokenSelector/ChainTokenSelectorModal";
-import { formatUSD, withOpacity } from "../../../../../utils";
+import {
+  convertTokenToUSD,
+  convertUSDToToken,
+  formatUnitsWithMaxFractions,
+  formatUSD,
+  withOpacity,
+} from "../../../../../utils";
 import { formatUnits } from "ethers/lib/utils";
 import styled from "@emotion/styled";
 import { useTrackToggleUnit } from "./useTrackToggleUnit";
 import { ReactComponent as ArrowsCross } from "assets/icons/arrows-cross.svg";
+import { UnitType } from "../../../types";
 
 export function ToggleUnitButton({
-  onClick,
   unit,
-  convertedAmount,
+  setUnit,
+  amount,
   token,
 }: {
-  onClick: () => void;
   unit: UnitType;
-  convertedAmount: BigNumber | undefined;
+  setUnit: (unit: UnitType) => void;
+  amount: BigNumber | null | undefined;
   token: EnrichedToken | null;
 }) {
   const trackToggleUnit = useTrackToggleUnit();
+
+  const convertedAmount = useMemo(() => {
+    if (!amount || !token) return undefined;
+    const amountStr = formatUnitsWithMaxFractions(amount, token.decimals);
+    if (unit === "token") {
+      return convertTokenToUSD(amountStr, token);
+    } else {
+      return convertUSDToToken(amountStr, token);
+    }
+  }, [amount, token, unit]);
+
+  const toggleUnit = useCallback(() => {
+    setUnit(unit === "token" ? "usd" : "token");
+  }, [unit, setUnit]);
 
   const formattedConvertedAmount = (() => {
     if (unit === "token") {
@@ -34,7 +55,7 @@ export function ToggleUnitButton({
       <UnitToggleButton
         onClick={() => {
           trackToggleUnit();
-          onClick();
+          toggleUnit();
         }}
       >
         <ArrowsCross width={16} height={16} />{" "}
