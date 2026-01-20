@@ -3,11 +3,10 @@ import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
-import { COLORS } from "utils";
+import { COLORS, getChainInfo } from "utils";
 
 import { ColumnKey, HeaderCells } from "./HeadRow";
-import { AssetCell } from "./cells/AssetCell";
-import { AmountCell } from "./cells/AmountCell";
+import { AmountWithIconsCell } from "./cells/AmountWithIconsCell";
 import { RouteCell } from "./cells/RouteCell";
 import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
@@ -18,7 +17,6 @@ import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
 import { useTokenFromAddress } from "hooks/useToken";
-import { TimeAgoCell } from "./cells/TimeAgoCell";
 import { useDepositRowAnimation } from "./hooks/useDepositRowAnimation";
 import { AnimatedColorOverlay } from "./AnimatedColorOverlay";
 
@@ -69,19 +67,24 @@ export function DataRow({
   return (
     <StyledRow onClick={handleRowClick} {...rowAnimation}>
       <AnimatedColorOverlay overlay={overlayProps} />
-      {isColumnDisabled(disabledColumns, "asset") ? null : (
-        <AssetCell
-          inputToken={inputToken}
-          outputToken={outputToken}
-          swapToken={swapToken}
-          width={headerCells.asset.width}
+      {isColumnDisabled(disabledColumns, "amountSent") ? null : (
+        <AmountWithIconsCell
+          amount={deposit.swapTokenAmount || deposit.amount}
+          token={swapToken || inputToken}
+          chain={getChainInfo(deposit.sourceChainId)}
+          width={headerCells.amountSent.width}
         />
       )}
-      {isColumnDisabled(disabledColumns, "amount") ? null : (
-        <AmountCell
-          deposit={deposit}
-          token={swapToken || inputToken}
-          width={headerCells.amount.width}
+      {isColumnDisabled(disabledColumns, "amountReceived") ? null : (
+        <AmountWithIconsCell
+          amount={
+            deposit.swapOutputTokenAmount ||
+            deposit.outputAmount ||
+            deposit.amount
+          }
+          token={outputToken || inputToken}
+          chain={getChainInfo(deposit.destinationChainId)}
+          width={headerCells.amountReceived.width}
         />
       )}
       {isColumnDisabled(disabledColumns, "route") ? null : (
@@ -110,9 +113,6 @@ export function DataRow({
       )}
       {isColumnDisabled(disabledColumns, "rewards") ? null : (
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />
-      )}
-      {isColumnDisabled(disabledColumns, "timeAgo") ? null : (
-        <TimeAgoCell deposit={deposit} width={headerCells.timeAgo.width} />
       )}
       {isColumnDisabled(disabledColumns, "actions") ? null : (
         <ActionsCell deposit={deposit} onClickSpeedUp={onClickSpeedUp} />

@@ -49,6 +49,9 @@ export function convertIndexerDepositToDeposit(
     },
     swapTokenAmount: indexerDeposit.swapTokenAmount,
     swapTokenAddress: indexerDeposit.swapToken,
+    swapOutputToken: indexerDeposit.swapOutputToken,
+    swapOutputTokenAmount: indexerDeposit.swapOutputTokenAmount,
+    outputAmount: indexerDeposit.outputAmount,
 
     speedUps: indexerDeposit.speedups,
     fillDeadline: indexerDeposit.fillDeadline,

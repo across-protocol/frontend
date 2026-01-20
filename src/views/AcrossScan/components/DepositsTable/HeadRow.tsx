@@ -11,13 +11,13 @@ export type ColumnTooltipRecord = Partial<
 >;
 
 export const headerCells = {
-  asset: {
-    label: "Asset",
-    width: 136,
+  amountSent: {
+    label: "Amount sent",
+    width: 160,
   },
-  amount: {
-    label: "Amount",
-    width: 96,
+  amountReceived: {
+    label: "Amount received",
+    width: 160,
   },
   route: {
     label: "Route",
@@ -54,10 +54,6 @@ export const headerCells = {
   rewards: {
     label: "Rewards",
     width: 128,
-  },
-  timeAgo: {
-    label: "Time",
-    width: 84,
   },
   actions: {
     label: "",
