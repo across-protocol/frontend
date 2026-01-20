@@ -4,6 +4,7 @@ import {
 } from "views/DepositStatus/hooks/useDepositTracking/types";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
+import { getSpokepoolRevertReason } from "./errors";
 
 import { TransactionReceipt, Log } from "@ethersproject/providers";
 import { BigNumber } from "ethers";
@@ -14,7 +15,7 @@ import {
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
 import { Signature } from "@solana/kit";
-import { getSVMRpc, SvmCpiEventsClient } from "utils";
+import { getSVMRpc, shortenAddress, SvmCpiEventsClient } from "utils";
 import { parseOftSentLog } from "./oft";
 
 export class NoFundsDepositedLogError extends Error {
@@ -25,10 +26,60 @@ export class NoFundsDepositedLogError extends Error {
   }
 }
 
+export class TransactionNotFoundError extends Error {
+  constructor(depositTxHash: string, chainId: number) {
+    super(
+      `Transaction ${depositTxHash} not found on chain ${chainId}. It may have been dropped from the mempool or replaced.`
+    );
+  }
+}
+
+export class TransactionPendingError extends Error {
+  constructor(depositTxHash: string, chainId: number) {
+    super(
+      `Transaction ${depositTxHash} is pending on chain ${chainId}. Receipt not available yet.`
+    );
+  }
+}
+
+export class TransactionFailedError extends Error {
+  error?: string;
+  formattedError?: string;
+
+  constructor(
+    depositTxHash: string,
+    chainId: number,
+    revertReason?: { error: string; formattedError: string } | null
+  ) {
+    const message = revertReason?.error
+      ? `Transaction ${depositTxHash} reverted on chain ${chainId}: ${revertReason.error}`
+      : `Transaction ${depositTxHash} reverted on chain ${chainId}.`;
+    super(message);
+    this.error = revertReason?.error;
+    this.formattedError = revertReason?.formattedError
+      ? `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}: ${revertReason.formattedError}`
+      : `Transaction ${shortenAddress(depositTxHash, "...", 5)} reverted on chain ${chainId}.`;
+  }
+}
+
 export class NoFilledRelayLogError extends Error {
   constructor(depositId: number, chainId: number) {
     super(
       `Couldn't find related FilledV3Relay or FilledRelay for Deposit #${depositId} on chain ${chainId}`
+    );
+  }
+}
+
+export class FillPendingError extends Error {
+  constructor(message?: string) {
+    super(message || "Fill is still pending");
+  }
+}
+
+export class FillMetadataParseError extends Error {
+  constructor(fillTxHash: string, chainId: number) {
+    super(
+      `Unable to parse fill metadata from transaction ${fillTxHash} on chain ${chainId}`
     );
   }
 }
@@ -152,35 +203,38 @@ export async function getDepositByTxHash(
   depositTxHash: string,
   fromChainId: number,
   bridgeProvider: BridgeProvider
-): Promise<
-  | {
-      depositTxReceipt: TransactionReceipt;
-      parsedDepositLog: DepositData;
-      depositTimestamp: number;
-    }
-  | {
-      depositTxReceipt: TransactionReceipt;
-      parsedDepositLog: undefined;
-      depositTimestamp: number;
-    }
-> {
+): Promise<{
+  depositTxReceipt: TransactionReceipt;
+  parsedDepositLog: DepositData;
+  depositTimestamp: number;
+}> {
   const fromProvider = getProvider(fromChainId);
   const depositTxReceipt =
     await fromProvider.getTransactionReceipt(depositTxHash);
+
   if (!depositTxReceipt) {
-    throw new Error(
-      `Could not fetch tx receipt for ${depositTxHash} on chain ${fromChainId}`
-    );
+    let tx;
+    try {
+      tx = await fromProvider.getTransaction(depositTxHash);
+    } catch {
+      throw new TransactionNotFoundError(depositTxHash, fromChainId);
+    }
+
+    if (tx) {
+      throw new TransactionPendingError(depositTxHash, fromChainId);
+    }
+    throw new TransactionNotFoundError(depositTxHash, fromChainId);
   }
 
   const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
 
   if (depositTxReceipt.status === 0) {
-    return {
+    // Tx Receipt exists but tx failed
+    const revertReason = await getSpokepoolRevertReason(
       depositTxReceipt,
-      parsedDepositLog: undefined,
-      depositTimestamp: block.timestamp,
-    };
+      fromChainId
+    );
+    throw new TransactionFailedError(depositTxHash, fromChainId, revertReason);
   }
 
   const parsedDepositLog = makeDepositLogParser(bridgeProvider)({
@@ -194,6 +248,7 @@ export async function getDepositByTxHash(
     throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
   }
 
+  // success
   return {
     depositTxReceipt,
     parsedDepositLog,

@@ -1,15 +1,22 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   getChainInfo,
   NoFundsDepositedLogError,
+  TransactionNotFoundError,
+  TransactionFailedError,
+  TransactionPendingError,
   debug,
   getEcosystem,
 } from "utils";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
-import { BridgeProvider } from "./useDepositTracking/types";
+import {
+  BridgeProvider,
+  DepositInfo,
+  FillInfo,
+} from "./useDepositTracking/types";
 import { DepositStatus } from "../types";
 import { DepositData } from "./useDepositTracking/types";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
@@ -17,6 +24,8 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { makeUseUserTokenBalancesQueryKey } from "hooks/useUserTokenBalances";
 import { useTrackTransferDepositCompleted } from "./useTrackTransferDepositCompleted";
 import { useTrackTransferFillCompleted } from "./useTrackTransferFillCompleted";
+
+const MAX_RETRIES = 3;
 
 /**
  * Hook to track deposit and fill status across EVM and SVM chains
@@ -40,8 +49,6 @@ export function useDepositTracking({
   bridgeProvider?: BridgeProvider;
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
 }) {
-  const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
-
   const queryClient = useQueryClient();
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
@@ -66,40 +73,106 @@ export function useDepositTracking({
   const depositQuery = useQuery({
     queryKey: ["deposit", bridgeProvider, depositTxHash, fromChainId, account],
     queryFn: async () => {
-      try {
-        // Use the strategy to get deposit information through the normalized interface
-        return depositStrategy.getDeposit(depositTxHash, bridgeProvider);
-      } catch (e) {
-        // Don't retry if the deposit doesn't exist or is invalid
-        if (e instanceof NoFundsDepositedLogError) {
-          setShouldRetryDepositQuery(false);
-        }
-        throw e;
-      }
+      return await depositStrategy.getDeposit(depositTxHash, bridgeProvider);
     },
     staleTime: Infinity,
-    enabled: shouldRetryDepositQuery,
     retryDelay: getRetryDelay(fromChainId),
+    retry: (failureCount, error) => {
+      if (error instanceof TransactionPendingError) {
+        return true;
+      }
+      if (error instanceof TransactionNotFoundError) {
+        return failureCount < MAX_RETRIES;
+      }
+      return false;
+    },
   });
+
+  // Infer deposit state from query data and error
+  const deposit = useMemo((): DepositInfo | undefined => {
+    if (depositQuery.data) {
+      return depositQuery.data;
+    }
+
+    const error = depositQuery.error;
+
+    if (!error || error instanceof TransactionPendingError) {
+      return {
+        depositTxHash: undefined,
+        depositTimestamp: undefined,
+        status: "depositing",
+        depositLog: undefined,
+      };
+    }
+
+    if (error instanceof TransactionFailedError) {
+      return {
+        depositTxHash,
+        depositTimestamp: undefined,
+        status: "deposit-reverted",
+        depositLog: undefined,
+        error: error.error,
+        formattedError: error.formattedError,
+      };
+    }
+
+    if (error instanceof TransactionNotFoundError) {
+      // retries exhausted
+      if (depositQuery.isError) {
+        return {
+          depositTxHash,
+          depositTimestamp: undefined,
+          status: "deposit-reverted",
+          depositLog: undefined,
+          error: undefined,
+          formattedError:
+            "Transaction not found. It may have been dropped from the mempool.",
+        };
+      }
+      // retrying...
+      return {
+        depositTxHash: undefined,
+        depositTimestamp: undefined,
+        status: "depositing",
+        depositLog: undefined,
+      };
+    }
+
+    if (error instanceof NoFundsDepositedLogError) {
+      return {
+        depositTxHash,
+        depositTimestamp: undefined,
+        status: "deposit-reverted",
+        depositLog: undefined,
+        error: undefined,
+        formattedError: undefined,
+      };
+    }
+
+    return undefined;
+  }, [
+    depositQuery.data,
+    depositQuery.error,
+    depositTxHash,
+    depositQuery.isError,
+  ]);
 
   // Track deposit completion in Amplitude
   useEffect(() => {
-    const depositInfo = depositQuery.data;
-
     // Wait for a successful deposit (or a revert)
-    if (!depositInfo || depositInfo.status === "depositing") {
+    if (!deposit || deposit.status === "depositing") {
       return;
     }
 
-    const succeeded = depositInfo.status === "deposited";
-    const depositCompleteTimestamp = depositInfo.depositTimestamp || Date.now();
+    const succeeded = deposit.status === "deposited";
+    const depositCompleteTimestamp = deposit.depositTimestamp || Date.now();
 
     trackTransferDepositCompleted({
-      transactionHash: depositInfo.depositTxHash,
+      transactionHash: deposit.depositTxHash || depositTxHash,
       succeeded,
       depositCompleteTimestamp,
     });
-  }, [depositQuery.data, trackTransferDepositCompleted]);
+  }, [deposit, depositTxHash, trackTransferDepositCompleted]);
 
   // Query for fill information
   const fillQuery = useQuery({
@@ -110,68 +183,96 @@ export function useDepositTracking({
       toChainId,
     ],
     queryFn: async () => {
-      const depositInfo = depositQuery.data;
-
-      if (depositInfo?.status !== "deposited") {
-        return;
+      const depositData = depositQuery.data;
+      if (!depositData) {
+        throw new Error("Deposit data not available");
       }
-      logRelayData(depositInfo.depositLog);
-      // Use the strategy to get fill information through the normalized interface
-      return await fillStrategy.getFill(depositInfo, bridgeProvider);
+      logRelayData(depositData.depositLog);
+      return await fillStrategy.getFill(depositData, bridgeProvider);
     },
     staleTime: Infinity,
     retry: true,
     retryDelay: getRetryDelay(toChainId),
-    enabled: !!depositQuery.data && depositQuery.data.status === "deposited",
+    enabled: !!depositQuery.data,
   });
 
-  useEffect(() => {
-    const fillInfo = fillQuery.data;
+  // Infer fill state from query data and error
+  const fill = useMemo((): FillInfo | undefined => {
+    const depositData = depositQuery.data;
 
-    if (!fillInfo || fillInfo.status === "filling") {
+    if (!depositData) {
+      return undefined;
+    }
+
+    if (fillQuery.data) {
+      return fillQuery.data;
+    }
+
+    // Still loading or retrying
+    return {
+      fillTxHash: undefined,
+      fillTxTimestamp: undefined,
+      depositInfo: depositData,
+      status: "filling",
+      outputAmount: undefined,
+    };
+  }, [fillQuery.data, depositQuery.data]);
+
+  // Track fill completion in Amplitude
+  useEffect(() => {
+    if (!fill || fill.status === "filling") {
       return;
     }
 
-    // Track fill completion
-    const succeeded = fillInfo.status === "filled";
-    const fillCompleteTimestamp = fillInfo.fillTxTimestamp || Date.now();
+    const succeeded = fill.status === "filled";
+    const fillCompleteTimestamp = fill.fillTxTimestamp || Date.now();
     const depositCompleteTimestamp =
-      fillInfo.depositInfo.depositTimestamp || Date.now();
+      fill.depositInfo.depositTimestamp || Date.now();
 
     trackTransferFillCompleted({
-      fillTxHash: fillInfo.fillTxHash,
+      fillTxHash: fill.fillTxHash,
       succeeded,
       fillCompleteTimestamp,
       depositCompleteTimestamp,
-      fillAmount: fillInfo.outputAmount?.toString() ?? "0",
-      totalFilledAmount: fillInfo.outputAmount?.toString() ?? "0",
+      fillAmount: fill.outputAmount?.toString() ?? "0",
+      totalFilledAmount: fill.outputAmount?.toString() ?? "0",
     });
 
     // Refetch user balances
     queryClient.refetchQueries({
       queryKey: makeUseUserTokenBalancesQueryKey(),
-      type: "all", // Refetch both active and inactive queries
+      type: "all",
     });
-  }, [fillQuery.data, queryClient, trackTransferFillCompleted]);
+  }, [fill, queryClient, trackTransferFillCompleted]);
 
-  const status: DepositStatus = !depositQuery.data?.depositTimestamp
-    ? "depositing"
-    : depositQuery.data?.status === "deposit-reverted"
-      ? "deposit-reverted"
-      : !fillQuery.data?.fillTxTimestamp
-        ? "filling"
-        : "filled";
+  // Compute overall status from deposit and fill states
+  const status: DepositStatus = (() => {
+    if (!deposit || deposit.status === "depositing") {
+      return "depositing";
+    } else if (deposit.status === "deposit-reverted") {
+      return "deposit-reverted";
+    } else if (deposit.status === "deposited") {
+      if (fill?.status === "filled") {
+        return "filled";
+      } else {
+        return "filling";
+      }
+    }
+    return "depositing";
+  })();
 
   return {
     depositQuery,
     fillQuery,
     status,
+    deposit,
+    fill,
   };
 }
 
 function getRetryDelay(chainId: number) {
   const pollingInterval = getChainInfo(chainId).pollingInterval || 1_000;
-  return Math.floor(pollingInterval / 3);
+  return Math.floor(pollingInterval / MAX_RETRIES);
 }
 
 // https://github.com/across-protocol/contracts/blob/master/scripts/svm/simpleFill.ts

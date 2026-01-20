@@ -63,6 +63,7 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isMonadTransfer: false,
       isWithinMonadLimit: false,
       isHyperCoreDestination: false,
+      hasFastStandardFill: false,
       ...overrides,
     });
 
@@ -137,6 +138,20 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isFastCctpEligible: true,
+          isInThreshold: false,
+          isLargeCctpDeposit: false,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("cctp");
+    });
+
+    it("uses burn-and-mint on fast standard CCTP chains for medium deposits", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          hasFastStandardFill: true,
           isInThreshold: false,
           isLargeCctpDeposit: false,
         })
