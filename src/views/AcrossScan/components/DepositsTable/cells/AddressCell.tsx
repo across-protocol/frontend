@@ -25,9 +25,11 @@ export function AddressCell({ deposit, width }: Props) {
       <Text color="light-200">
         → {recipientEns ?? shortenAddress(deposit.recipientAddr, "...", 4)}
       </Text>
-      <Text size="sm" color="grey-400">
-        {depositorEns ?? shortenAddress(deposit.depositorAddr, "...", 4)}
-      </Text>
+      {deposit.recipientAddr !== deposit.depositorAddr ? (
+        <Text size="sm" color="grey-400">
+          {depositorEns ?? shortenAddress(deposit.depositorAddr, "...", 4)}
+        </Text>
+      ) : null}
     </StyledAddressCell>
   );
 }
