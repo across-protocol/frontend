@@ -1590,13 +1590,6 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
-        "address": "0x0200C29006150606B650577BBE7B6248F58470c1",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ],
     "outputTokens": [
@@ -1620,13 +1613,6 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
-        "address": "0x0200C29006150606B650577BBE7B6248F58470c1",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ]
   },
@@ -1714,13 +1700,6 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
-        "address": "0x9151434b16b9763660705744891fA906F660EcC5",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ],
     "outputTokens": [
@@ -1744,13 +1723,6 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
-      },
-      {
-        "address": "0x9151434b16b9763660705744891fA906F660EcC5",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ]
   },

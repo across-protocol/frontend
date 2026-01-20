@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://mainnet.unichain.org",
   blockTimeSeconds: 1,
-  tokens: ["ETH", "WETH", "USDC", "USDT"],
+  tokens: ["ETH", "WETH", "USDC"],
   enableCCTP: true,
 } as ChainConfig;
