@@ -12,7 +12,7 @@ import {
   encodeTransferOnCoreCalldata,
 } from "../_hypercore";
 import { InvalidParamError } from "../_errors";
-import { getFallbackRecipient, type AppFee } from "./utils";
+import { getAcrossFallbackRecipient, type AppFee } from "./utils";
 import {
   encodeTransferCalldata,
   buildMulticallHandlerMessage,
@@ -309,7 +309,7 @@ function _buildBridgeQuoteMessageToHyperCore(
   ];
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       ...transferToHyperCoreActions,
       ...appFeeActions,
