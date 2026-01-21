@@ -50,12 +50,6 @@ const FilterSection = styled.div`
   min-width: 240px;
 `;
 
-const FilterLabel = styled.div`
-  display: flex;
-  align-items: center;
-  padding-left: 2px;
-`;
-
 const FilterInputWrapper = styled.div`
   max-width: 600px;
   width: 100%;

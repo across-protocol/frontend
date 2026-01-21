@@ -37,7 +37,7 @@ export function AnimatedColorOverlay({ overlay }: Props) {
   );
 }
 
-const ColorOverlay = styled(motion.div)<{ color: "aqua" | "yellow" | "white" }>`
+const ColorOverlay = styled(motion.div)<{ color: "aqua" | "white" }>`
   position: absolute;
   top: 0;
   left: 0;

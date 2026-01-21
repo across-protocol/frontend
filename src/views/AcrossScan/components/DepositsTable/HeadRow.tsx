@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as II } from "assets/icons/info.svg";
+import { ReactComponent as InfoIconSvg } from "assets/icons/info.svg";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { COLORS } from "utils";
@@ -117,7 +117,7 @@ const StyledCell = styled.th<{ width: number }>`
   padding-right: 4px;
 `;
 
-const InfoIcon = styled(II)`
+const InfoIcon = styled(InfoIconSvg)`
   height: 14px;
   width: 14px;
   margin-bottom: -3px;

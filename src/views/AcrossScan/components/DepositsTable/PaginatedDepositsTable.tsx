@@ -1,5 +1,3 @@
-import styled from "@emotion/styled";
-
 import Pagination, { paginate } from "components/Pagination";
 import { DepositsTable, DepositsTableProps } from "./DepositsTable";
 
@@ -39,7 +37,7 @@ export function PaginatedDepositsTable({
     <>
       <DepositsTable {...depositsTableProps} />
       {!hasNoResults && (
-        <PaginationWrapper>
+        <div>
           <Pagination
             displayPageNumbers={displayPageNumbers}
             onPageChange={onPageChange}
@@ -55,10 +53,8 @@ export function PaginatedDepositsTable({
             pageSize={currentPageSize}
             pageSizes={pageSizes}
           />
-        </PaginationWrapper>
+        </div>
       )}
     </>
   );
 }
-
-const PaginationWrapper = styled.div``;
