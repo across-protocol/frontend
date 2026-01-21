@@ -95,7 +95,8 @@ export function AllTransactions() {
           <WalletAddressFilter
             value={walletAddressFilter}
             onChange={setWalletAddressFilter}
-            connectedAddress={account}
+            evmAddress={accountEVM}
+            svmAddress={accountSVM?.toString()}
           />
           <LiveToggle
             isLiveMode={isLiveMode}
