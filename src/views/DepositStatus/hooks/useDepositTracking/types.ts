@@ -29,7 +29,7 @@ export type DepositInfo =
     }
   | {
       depositTxHash: string;
-      depositTimestamp: number;
+      depositTimestamp: number | undefined;
       status: "deposit-reverted";
       depositLog: undefined;
       error?: string | undefined;
@@ -59,14 +59,19 @@ export type FillInfo =
       fillTxHash: string;
       fillTxTimestamp: number;
       depositInfo: DepositedInfo;
-      status: "filled" | "fill-reverted";
+      status: "filled";
+      outputAmount: BigNumber;
+    }
+  | {
+      fillTxHash: string;
+      fillTxTimestamp: number;
+      depositInfo: DepositedInfo;
+      status: "fill-reverted";
       outputAmount: BigNumber;
     };
 
-export type FilledInfo = Extract<
-  FillInfo,
-  { status: "filled" | "fill-reverted" }
->;
+export type FilledInfo = Extract<FillInfo, { status: "filled" }>;
+
 // partial taken from https://docs.across.to/reference/api-reference#get-deposit-status
 export type DepositStatusResponse =
   | {
@@ -115,17 +120,23 @@ export interface IChainStrategy {
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
    * @param bridgeProvider Bridge provider
-   * @returns Normalized deposit information
+   * @returns Success case deposit information, or throws an error for non-success states
    */
   getDeposit(
     txIdOrSignature: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo>;
+  ): Promise<DepositedInfo>;
 
+  /**
+   * Get fill information for a deposit
+   * @param depositInfo Deposit information
+   * @param bridgeProvider Bridge provider
+   * @returns Success case fill information, or throws an error for non-success states
+   */
   getFill(
     depositInfo: DepositedInfo,
     bridgeProvider: BridgeProvider
-  ): Promise<FillInfo>;
+  ): Promise<FilledInfo>;
 
   /**
    * Get fill information for a deposit

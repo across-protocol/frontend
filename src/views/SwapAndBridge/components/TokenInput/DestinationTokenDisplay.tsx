@@ -2,6 +2,7 @@ import { ChangeAccountModal } from "../ChangeAccountModal";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
+  BalancePlaceholder,
   TokenAmountInputTitle,
   TokenAmountStack,
   TokenInputWrapper,
@@ -78,18 +79,19 @@ export const DestinationTokenDisplay = ({
           onSelect={setDestinationToken}
           onSelectOtherToken={setOriginToken}
           isOriginToken={false}
-          marginBottom={destinationToken ? "24px" : "0px"}
           selectedToken={destinationToken}
           otherToken={originToken}
         />
 
-        {destinationToken && !customDestinationAccount && (
+        {destinationToken && !customDestinationAccount ? (
           <BalanceSelector
             token={destinationToken}
             disableHover={true}
             error={false}
             setAmount={setDestinationAmount}
           />
+        ) : (
+          <BalancePlaceholder />
         )}
       </TokenSelectorColumn>
     </TokenInputWrapper>

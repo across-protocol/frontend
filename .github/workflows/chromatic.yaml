@@ -10,10 +10,10 @@ jobs:
     if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - name: Publish to Chromatic
-        uses: chromaui/action@v11
+        uses: chromaui/action@v13
         env:
           REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
           REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}

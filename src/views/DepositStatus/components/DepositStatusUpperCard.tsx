@@ -12,7 +12,6 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
@@ -38,7 +37,7 @@ export function DepositStatusUpperCard({
   outputTokenSymbol,
   fromBridgeAndSwapPagePayload,
 }: Props) {
-  const { depositQuery, fillQuery, status } = useDepositTracking({
+  const { depositQuery, status, deposit, fill } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
@@ -47,8 +46,8 @@ export function DepositStatusUpperCard({
   });
 
   const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
-  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
-  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
+  const depositTxCompletedTime = deposit?.depositTimestamp;
+  const fillTxCompletedTime = fill?.fillTxTimestamp;
 
   const { elapsedSeconds: depositTxElapsedSeconds } = useElapsedSeconds(
     depositTxSentTime ? Math.floor(depositTxSentTime / 1000) : undefined,
@@ -60,9 +59,7 @@ export function DepositStatusUpperCard({
   );
 
   const depositRevertMessage =
-    depositQuery?.data?.status === "deposit-reverted"
-      ? depositQuery.data.formattedError
-      : undefined;
+    deposit?.status === "deposit-reverted" ? deposit.formattedError : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -99,19 +96,6 @@ export function DepositStatusUpperCard({
         </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
-          {depositTxElapsedSeconds ? (
-            <ElapsedTime
-              textSize="3xl"
-              elapsedSeconds={depositTxElapsedSeconds}
-              textColor="warning"
-            />
-          ) : (
-            <Text size="3xl" color="warning">
-              {DateTime.fromSeconds(
-                depositTxCompletedTime || Date.now()
-              ).toFormat("d MMM yyyy - t")}
-            </Text>
-          )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
               {depositRevertMessage ?? "Deposit unsuccessful"}
@@ -157,8 +141,8 @@ export function DepositStatusUpperCard({
           depositTxCompletedTimestampSeconds={depositTxCompletedTime}
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
-          fillTxHash={fillQuery.data?.fillTxHash}
-          outputAmount={fillQuery.data?.outputAmount}
+          fillTxHash={fill?.fillTxHash}
+          outputAmount={fill?.outputAmount}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}

@@ -4,9 +4,8 @@ import {
   BridgeProvider,
   DepositData,
   DepositedInfo,
-  DepositInfo,
   DepositStatusResponse,
-  FillInfo,
+  FilledInfo,
   IChainStrategy,
   FillMetadata,
 } from "../types";
@@ -16,6 +15,10 @@ import {
   getSVMRpc,
   isBigNumberish,
   NoFilledRelayLogError,
+  FillPendingError,
+  FillMetadataParseError,
+  TransactionPendingError,
+  TransactionNotFoundError,
   SVMBlockFinder,
   SvmCpiEventsClient,
   toAddressType,
@@ -42,92 +45,77 @@ export class SVMStrategy implements IChainStrategy {
   /**
    * Get deposit information from a Solana transaction signature
    * @param txSignature Solana transaction signature
+   * @param bridgeProvider across intents, cctp, oft etc.
    * @returns Deposit information
    */
   async getDeposit(
     txSignature: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo> {
-    try {
-      if (!isSignature(txSignature)) {
-        throw new Error(`Invalid signature: ${txSignature}`);
-      }
-
-      const tx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
-        ? await getDepositForBurnBySignatureSVM({
-            signature: txSignature,
-            chainId: this.chainId,
-          })
-        : await getDepositBySignatureSVM({
-            signature: txSignature,
-            chainId: this.chainId,
-          });
-
-      if (!tx) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
-
-      return {
-        depositTxHash: txSignature,
-        depositTimestamp: tx.depositTimestamp,
-        status: "deposited",
-        depositLog: tx satisfies DepositData,
-      };
-    } catch (error) {
-      console.error("Error fetching Solana deposit:", error);
-      throw error;
+  ): Promise<DepositedInfo> {
+    if (!isSignature(txSignature)) {
+      throw new TransactionNotFoundError(txSignature, this.chainId);
     }
+
+    const tx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+      ? await getDepositForBurnBySignatureSVM({
+          signature: txSignature,
+          chainId: this.chainId,
+        })
+      : await getDepositBySignatureSVM({
+          signature: txSignature,
+          chainId: this.chainId,
+        });
+
+    if (!tx) {
+      throw new TransactionPendingError(txSignature, this.chainId);
+    }
+
+    return {
+      depositTxHash: txSignature,
+      depositTimestamp: tx.depositTimestamp,
+      status: "deposited",
+      depositLog: tx satisfies DepositData,
+    };
   }
 
   /**
    * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
+   * @param bridgeProvider across intents, cctp, oft etc.
    * @returns Fill information
    */
   async getFill(
     depositInfo: DepositedInfo,
     bridgeProvider: BridgeProvider = "across"
-  ): Promise<FillInfo> {
+  ): Promise<FilledInfo> {
     const { depositId } = depositInfo.depositLog;
     const fillChainId = this.chainId;
 
-    try {
-      const fillTxSignature = await Promise.any([
-        this.getFillFromIndexer(depositInfo),
-        this.getFillFromRpc(depositInfo, bridgeProvider),
-      ]);
+    const fillTxSignature = await Promise.any([
+      this.getFillFromIndexer(depositInfo),
+      this.getFillFromRpc(depositInfo, bridgeProvider),
+    ]);
 
-      if (!fillTxSignature) {
-        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
-      }
-
-      const metadata = await this.getFillMetadata(
-        fillTxSignature,
-        bridgeProvider
-      );
-
-      if (!metadata) {
-        throw new Error(
-          `Unable to parse fill tx logs for signature: ${fillTxSignature}`
-        );
-      }
-
-      return {
-        fillTxHash: metadata.fillTxHash,
-        fillTxTimestamp: metadata.fillTxTimestamp,
-        depositInfo,
-        status: "filled",
-        outputAmount: metadata.outputAmount || BigNumber.from(0),
-      };
-    } catch (error) {
-      // Both rejected - throw error so we can retry
+    if (!fillTxSignature) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
+
+    const metadata = await this.getFillMetadata(
+      fillTxSignature,
+      bridgeProvider
+    );
+
+    if (!metadata) {
+      throw new FillMetadataParseError(fillTxSignature, fillChainId);
+    }
+
+    return {
+      fillTxHash: metadata.fillTxHash,
+      fillTxTimestamp: metadata.fillTxTimestamp,
+      depositInfo,
+      status: "filled",
+      outputAmount: metadata.outputAmount || BigNumber.from(0),
+    };
   }
 
   /**
@@ -151,14 +139,12 @@ export class SVMStrategy implements IChainStrategy {
 
       if (data?.status === "filled" && data.fillTxnRef) {
         if (!isSignature(data.fillTxnRef)) {
-          throw new Error(
-            `Invalid Signature: ${data.fillTxnRef}. \nChain ${this.chainId} is likely not an svm chain.`
-          );
+          throw new FillMetadataParseError(data.fillTxnRef, this.chainId);
         }
         return data.fillTxnRef;
       }
 
-      throw new Error("Indexer response still pending");
+      throw new FillPendingError("Indexer response still pending");
     } catch (error) {
       console.warn("Error fetching fill from indexer:", error);
       throw error;
@@ -225,7 +211,7 @@ export class SVMStrategy implements IChainStrategy {
   ): Promise<FillMetadata | undefined> {
     try {
       if (!isSignature(fillTxHash)) {
-        throw new Error(`Invalid tx signature: ${fillTxHash}`);
+        throw new FillMetadataParseError(fillTxHash, this.chainId);
       }
       const fillTx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
         ? await getMintAndBurnBySignatureSVM({
@@ -238,9 +224,7 @@ export class SVMStrategy implements IChainStrategy {
           });
 
       if (!fillTx) {
-        throw new Error(
-          `Unable to find fill with signature ${fillTxHash} on chain ${this.chainId}`
-        );
+        throw new FillMetadataParseError(fillTxHash, this.chainId);
       }
 
       return {

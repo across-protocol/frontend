@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { UserTokenBalancesResponse } from "utils/serverless-api/types";
 import getApiEndpoint from "utils/serverless-api";
 import { useConnectionEVM } from "./useConnectionEVM";
@@ -50,6 +50,7 @@ export function useUserTokenBalances() {
     // Always enable the query so it refetches when wallets disconnect and clears stale data
     refetchInterval: 60 * 1000, // Refetch every minute
     staleTime: 60 * 1000 * 0.8, // Consider data stale after 80% of refetch interval (48 seconds)
+    placeholderData: keepPreviousData,
   });
 }
 
