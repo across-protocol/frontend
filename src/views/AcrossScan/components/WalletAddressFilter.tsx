@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { COLORS } from "utils";
+import { isValidTxHash } from "utils/transactions";
 
 type FilterMode = "all" | "evm" | "svm";
 
@@ -17,7 +19,9 @@ export function WalletAddressFilter({
   evmAddress,
   svmAddress,
 }: WalletAddressFilterProps) {
+  const history = useHistory();
   const hasMultipleWallets = Boolean(evmAddress && svmAddress);
+  const isTxHash = isValidTxHash(value.trim());
 
   const getFilterMode = (): FilterMode => {
     if (evmAddress && value === evmAddress) return "evm";
@@ -46,47 +50,55 @@ export function WalletAddressFilter({
         <StyledSearchIcon />
         <SearchInput
           type="text"
-          placeholder="Search Wallet Address"
+          placeholder="Search by wallet or tx hash"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
       </SearchInputWrapper>
-      <SegmentedToggle>
-        <ToggleButton
-          isActive={filterMode === "all"}
-          onClick={() => handleModeChange("all")}
+      {isTxHash ? (
+        <ViewTransactionButton
+          onClick={() => history.push(`/transaction/${value.trim()}`)}
         >
-          Show All
-        </ToggleButton>
-        {hasMultipleWallets ? (
-          <>
-            <ToggleButton
-              isActive={filterMode === "evm"}
-              onClick={() => handleModeChange("evm")}
-            >
-              EVM Wallet
-            </ToggleButton>
-            <ToggleButton
-              isActive={filterMode === "svm"}
-              onClick={() => handleModeChange("svm")}
-            >
-              SVM Wallet
-            </ToggleButton>
-          </>
-        ) : (
+          View transaction
+        </ViewTransactionButton>
+      ) : (
+        <SegmentedToggle>
           <ToggleButton
-            isActive={filterMode !== "all"}
-            onClick={() => {
-              if (singleWalletAddress) {
-                onChange(singleWalletAddress);
-              }
-            }}
-            disabled={!hasAnyWallet}
+            isActive={filterMode === "all"}
+            onClick={() => handleModeChange("all")}
           >
-            My Wallet
+            Show All
           </ToggleButton>
-        )}
-      </SegmentedToggle>
+          {hasMultipleWallets ? (
+            <>
+              <ToggleButton
+                isActive={filterMode === "evm"}
+                onClick={() => handleModeChange("evm")}
+              >
+                EVM Wallet
+              </ToggleButton>
+              <ToggleButton
+                isActive={filterMode === "svm"}
+                onClick={() => handleModeChange("svm")}
+              >
+                SVM Wallet
+              </ToggleButton>
+            </>
+          ) : (
+            <ToggleButton
+              isActive={filterMode !== "all"}
+              onClick={() => {
+                if (singleWalletAddress) {
+                  onChange(singleWalletAddress);
+                }
+              }}
+              disabled={!hasAnyWallet}
+            >
+              My Wallet
+            </ToggleButton>
+          )}
+        </SegmentedToggle>
+      )}
     </FilterContainer>
   );
 }
@@ -168,5 +180,24 @@ const ToggleButton = styled.button<{ isActive: boolean; disabled?: boolean }>`
     color: ${({ isActive }) => (isActive ? COLORS.white : COLORS["grey-400"])};
     background: ${({ isActive }) =>
       isActive ? COLORS["grey-500"] : "rgba(255, 255, 255, 0.05)"};
+  }
+`;
+
+const ViewTransactionButton = styled.button`
+  padding: 8px 16px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Barlow, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  background: ${COLORS.aqua};
+  color: ${COLORS["black-800"]};
+
+  &:hover {
+    opacity: 0.9;
   }
 `;
