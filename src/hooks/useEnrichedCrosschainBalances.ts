@@ -11,7 +11,7 @@ export function useEnrichedCrosschainBalances() {
   const availableCrosschainRoutes = useAvailableCrosschainRoutes();
 
   return useMemo(() => {
-    if (availableCrosschainRoutes.isLoading || tokenBalances.isLoading) {
+    if (availableCrosschainRoutes.isLoading) {
       return {};
     }
     const chains = Object.keys(availableCrosschainRoutes.data || {});
@@ -63,6 +63,5 @@ export function useEnrichedCrosschainBalances() {
     availableCrosschainRoutes.data,
     availableCrosschainRoutes.isLoading,
     tokenBalances.data,
-    tokenBalances.isLoading,
   ]);
 }
