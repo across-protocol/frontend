@@ -51,13 +51,13 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
 
     await this.switchNetwork(swapTx.chainId);
     await this.assertCorrectNetwork(swapTx.chainId);
-    const tx = await signer.sendTransaction({
+    const hash = await signer.sendUncheckedTransaction({
       to: swapTx.to,
       data: swapTx.data,
       value: swapTx.value,
       chainId: swapTx.chainId,
     });
-    return tx.hash;
+    return hash;
   }
 
   async execute(swapQuote: SwapApprovalQuote): Promise<string> {
