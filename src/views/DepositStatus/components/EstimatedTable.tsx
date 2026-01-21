@@ -67,7 +67,6 @@ const EstimatedTable = ({
   toChainId,
   inputToken,
   referralRewardAsBaseCurrency,
-  gasFeeAsBaseCurrency,
   bridgeFeeAsBaseCurrency,
   netFeeAsBaseCurrency,
   swapFeeAsBaseCurrency,
