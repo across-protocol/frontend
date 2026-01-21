@@ -212,6 +212,7 @@
     }
   },
   "resolutions": {
+    "@coinbase/wallet-sdk": "4.3.0",
     "babel-loader": "8.1.0",
     "base-x": "4.0.0",
     "bs58": "^5.0.0",
