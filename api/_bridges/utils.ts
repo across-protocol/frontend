@@ -137,11 +137,6 @@ export async function getBridgeStrategyData({
     const isUsdtToUsdt =
       inputToken.symbol === "USDT" && outputToken.symbol === "USDT";
 
-    const isMonadTransfer =
-      (inputToken.chainId === CHAIN_IDs.MONAD &&
-        outputToken.chainId !== CHAIN_IDs.SOLANA) ||
-      outputToken.chainId === CHAIN_IDs.MONAD;
-
     return {
       canFillInstantly,
       isUtilizationHigh,
@@ -151,7 +146,6 @@ export async function getBridgeStrategyData({
       isFastCctpEligible,
       hasFastStandardFill,
       isUsdtToUsdt,
-      isMonadTransfer,
       isHyperCoreDestination: isToHyperCore(outputToken.chainId),
     };
   } catch (error) {

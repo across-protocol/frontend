@@ -337,32 +337,6 @@ describe("#getBridgeStrategyData()", () => {
         expect(result?.isFastCctpEligible).toBe(false);
       });
 
-      test("should identify transfers from Monad", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isMonadTransfer).toBe(true);
-      });
-
-      test("should identify transfers to Monad", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcOptimism,
-          outputToken: usdcMonad,
-          amount,
-        });
-
-        expect(result?.isMonadTransfer).toBe(true);
-      });
-
       describe("Linea fast mode eligibility", () => {
         beforeEach(() => {
           // Reset getTransferMode mock before each test

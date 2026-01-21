@@ -48,7 +48,6 @@ const mockBridgeStrategyData = (
   isFastCctpEligible: false,
   isInThreshold: false,
   isUsdtToUsdt: false,
-  isMonadTransfer: false,
   isHyperCoreDestination: false,
   ...overrides,
 });
@@ -56,12 +55,10 @@ const mockBridgeStrategyData = (
 // Common test tokens
 const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
-const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
 const usdcBase = createToken("USDC", CHAIN_IDs.BASE);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
-const usdtMonad = createToken("USDT", CHAIN_IDs.MONAD);
 const wethOptimism = createToken("WETH", CHAIN_IDs.OPTIMISM);
 const wethArbitrum = createToken("WETH", CHAIN_IDs.ARBITRUM);
 const wethHyperEvm = createToken("WETH", CHAIN_IDs.HYPEREVM);
