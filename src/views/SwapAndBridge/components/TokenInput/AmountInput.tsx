@@ -93,6 +93,7 @@ export const AmountInput = ({
         onBlur={() => setIsFocused(false)}
         thousandSeparator=","
         decimalSeparator="."
+        allowedDecimalSeparators={[",", "."]}
         allowNegative={false}
         disabled={disabled}
         error={error}
