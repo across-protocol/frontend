@@ -3,8 +3,8 @@ import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 type CoreTransferPropertiesParams = {
   quote: SwapApprovalQuote;
-  sender: string;
-  recipient: string;
+  sender: string | null | undefined;
+  recipient: string | null | undefined;
   tradeType: "exactInput" | "exactOutput" | "minOutput";
 };
 
