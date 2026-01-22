@@ -47,13 +47,14 @@ export const QUOTER_CONTRACT_ADDRESS = {
 };
 
 // https://api-docs.uniswap.org/guides/supported_chains
-// https://github.com/Uniswap/sdks/blob/6413af9bcda811c76157e14d6e0ff6924e1959f2/sdks/universal-router-sdk/src/utils/constants.ts#L21
+// https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/utils/constants.ts
 export const UNIVERSAL_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ARBITRUM]: "0xa51afafe0263b40edaef0df8781ea9aa03e381a3",
   [CHAIN_IDs.BASE]: "0x6ff5693b99212da76ad316178a184ab56d299b43",
   [CHAIN_IDs.BLAST]: "0xeabbcb3e8e415306207ef514f660a3f820025be3",
   [CHAIN_IDs.BSC]: "0x1906c1d672b88cd1b9ac7593301ca990f94eae07",
   [CHAIN_IDs.MAINNET]: "0x66a9893cc07d91d95644aedd05d03f95e1dba8af",
+  [CHAIN_IDs.MONAD]: "0x0d97dc33264bfc1c226207428a79b26757fb9dc3",
   [CHAIN_IDs.OPTIMISM]: "0x851116d9223fabed8e56c0e6b8ad0c31d98b3507",
   [CHAIN_IDs.POLYGON]: "0x1095692a6237d83c6a72f3f5efedb9a670c49223",
   [CHAIN_IDs.SONEIUM]: "0x0e2850543f69f678257266e0907ff9a58b3f13de",

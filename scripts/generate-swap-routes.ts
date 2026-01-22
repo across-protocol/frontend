@@ -4,6 +4,7 @@ import * as prettier from "prettier";
 import { ethers } from "ethers";
 import {
   enabledMainnetChainConfigs,
+  enabledIndirectMainnetChainConfigs,
   enabledSepoliaChainConfigs,
 } from "./utils/enabled-chain-configs";
 
@@ -42,7 +43,6 @@ const enabledSwapRoutes: {
     [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
       all: {
         disabledOriginChains: [
-          CHAIN_IDs.ALEPH_ZERO, // Not bridgeable
           CHAIN_IDs.LINEA, // Not bridgeable
           CHAIN_IDs.SOLANA, // Not available yet
         ],
@@ -52,7 +52,7 @@ const enabledSwapRoutes: {
     },
     [TOKEN_SYMBOLS_MAP["USDC.e"].symbol]: {
       all: {
-        disabledOriginChains: [CHAIN_IDs.MAINNET, CHAIN_IDs.ALEPH_ZERO],
+        disabledOriginChains: [CHAIN_IDs.MAINNET],
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
       },
@@ -72,6 +72,11 @@ const enabledSwapRoutes: {
       },
     },
     [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
+      // TODO: Enable once FE is able to handle USDT-SPOT and HyperCore
+      // all: {
+      //   enabledDestinationChains: [CHAIN_IDs.HYPERCORE],
+      //   enabledOutputTokens: ["USDT-SPOT"],
+      // },
       [CHAIN_IDs.MAINNET]: {
         enabledDestinationChains: [CHAIN_IDs.LENS],
         enabledOutputTokens: ["GHO"],
@@ -90,7 +95,7 @@ const enabledSwapRoutes: {
 async function generateSwapRoutes(hubPoolChainId = 1) {
   const enabledChains =
     hubPoolChainId === 1
-      ? enabledMainnetChainConfigs
+      ? [...enabledMainnetChainConfigs, ...enabledIndirectMainnetChainConfigs]
       : enabledSepoliaChainConfigs;
 
   const swapRoutes: any[] = [];

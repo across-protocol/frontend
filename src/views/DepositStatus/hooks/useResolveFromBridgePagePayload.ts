@@ -1,12 +1,9 @@
-import { getToken } from "utils";
-import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import {
-  calcFeesForEstimatedTable,
-  getTokensForFeesCalc,
-} from "views/Bridge/utils";
+import { useEstimatedRewards } from "./useEstimatedRewards";
+import { calcFeesForEstimatedTable, getTokensForFeesCalc } from "../utils";
 
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { FromBridgePagePayload } from "../types";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import { useToken } from "hooks/useToken";
 import { bigNumberifyObject } from "utils/bignumber";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
@@ -31,27 +28,32 @@ export function useResolveFromBridgePagePayload(
 
   const isSwap = selectedRoute?.type === "swap";
   const isUniversalSwap = selectedRoute?.type === "universal-swap";
-  const swapToken = isSwap
-    ? getToken(selectedRoute.swapTokenSymbol)
-    : undefined;
-  const outputToken = getToken(outputTokenSymbol);
-  const { inputToken, bridgeToken } = getTokensForFeesCalc({
-    inputToken: getToken(inputTokenSymbol),
-    outputToken,
-    isUniversalSwap: !!universalSwapQuote,
-    universalSwapQuote,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-  });
+  const swapTokenSymbol = isSwap ? selectedRoute.swapTokenSymbol : "";
+
+  const swapToken = useToken(swapTokenSymbol);
+  const outputToken = useToken(outputTokenSymbol);
+  const inputTokenFromHook = useToken(inputTokenSymbol);
+
+  const { inputToken, bridgeToken } =
+    inputTokenFromHook && outputToken
+      ? getTokensForFeesCalc({
+          inputToken: inputTokenFromHook,
+          outputToken,
+          isUniversalSwap: !!universalSwapQuote,
+          universalSwapQuote,
+          fromChainId: fromChainId,
+          toChainId: toChainId,
+        })
+      : { inputToken: inputTokenFromHook!, bridgeToken: inputTokenFromHook! };
 
   const { convertTokenToBaseCurrency: convertInputTokenToUsd } =
-    useTokenConversion(inputToken.symbol, "usd");
+    useTokenConversion(inputToken?.symbol || inputTokenSymbol, "usd");
   const {
     convertTokenToBaseCurrency: convertBridgeTokenToUsd,
     convertBaseCurrencyToToken: convertUsdToBridgeToken,
-  } = useTokenConversion(bridgeToken.symbol, "usd");
+  } = useTokenConversion(bridgeToken?.symbol || inputTokenSymbol, "usd");
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
-    useTokenConversion(outputToken.symbol, "usd");
+    useTokenConversion(outputToken?.symbol || outputTokenSymbol, "usd");
 
   const {
     bridgeFeeUsd,
@@ -82,13 +84,12 @@ export function useResolveFromBridgePagePayload(
   const capitalFee = convertUsdToBridgeToken(capitalFeeUsd);
 
   const estimatedRewards = useEstimatedRewards(
-    bridgeToken,
+    bridgeToken!,
     toChainId,
     isSwap || isUniversalSwap,
     parsedAmount,
     gasFee,
-    bridgeFee,
-    swapFee
+    bridgeFee
   );
 
   return {

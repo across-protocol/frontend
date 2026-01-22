@@ -5,14 +5,24 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "@across-protocol/sdk";
+import {
+  KeyPairSigner,
+  getTransactionDecoder,
+  signTransaction,
+  sendTransactionWithoutConfirmingFactory,
+  getSignatureFromTransaction,
+} from "@solana/kit";
 
 import { buildBaseSwapResponseJson } from "../../api/swap/_utils";
 import { buildSearchParams } from "../../api/_utils";
+import { getSVMRpc } from "../../api/_providers";
 import {
   MIN_OUTPUT_CASES,
   EXACT_OUTPUT_CASES,
   EXACT_INPUT_CASES,
   LENS_CASES,
+  SOLANA_CASES,
+  USDT_OFT_COMPOSER_CASE,
 } from "./_swap-cases";
 
 dotenv.config({
@@ -81,15 +91,18 @@ export const argsFromCli = yargs(hideBin(process.argv))
       })
       .option("recipient", {
         alias: "r",
+        type: "string",
         description: "Recipient address.",
       })
       .option("depositor", {
         alias: "d",
         description: "Depositor address.",
+        type: "string",
         default: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       })
       .option("refundAddress", {
         alias: "ra",
+        type: "string",
         description: "Refund address.",
       })
       .option("refundOnOrigin", {
@@ -105,6 +118,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
       .option("integratorId", {
         alias: "i",
         description: "Integrator ID.",
+        type: "string",
       })
       .option("includeSources", {
         alias: "is",
@@ -131,6 +145,13 @@ export const argsFromCli = yargs(hideBin(process.argv))
         description: "Strict trade type.",
         type: "boolean",
         default: true,
+      })
+      .option("routingPreference", {
+        alias: "rp",
+        description: "Routing preference.",
+        type: "string",
+        default: "default",
+        choices: ["default", "across", "native", "sponsored-cctp"],
       });
   })
   .option("host", {
@@ -207,6 +228,8 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
+      routingPreference,
     } = argsFromCli;
     const params = {
       originChainId,
@@ -231,6 +254,8 @@ export async function fetchSwapQuotes() {
       appFee,
       appFeeRecipient,
       strictTradeType,
+      integratorId,
+      routingPreference,
     };
     console.log("Params:", params);
 
@@ -247,6 +272,7 @@ export async function fetchSwapQuotes() {
       ...EXACT_OUTPUT_CASES,
       ...EXACT_INPUT_CASES,
       ...LENS_CASES,
+      ...SOLANA_CASES,
     ];
     const filteredTestCases = filterTestCases(testCases, filterString);
 
@@ -261,11 +287,7 @@ export async function fetchSwapQuotes() {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
       console.log("Body:", JSON.stringify(body, null, 2));
-      const response = await axios.post(
-        `${SWAP_API_BASE_URL}/api/swap${slug ? `/${slug}` : ""}`,
-        body,
-        { params: testCase.params }
-      );
+      const response = await axios.post(url, body, { params: testCase.params });
       swapQuotes.push(response.data as BaseSwapResponse);
     }
   }
@@ -348,11 +370,44 @@ export async function signAndWaitAllowanceFlow(params: {
       data: params.swapResponse.swapTx.data,
       value: params.swapResponse.swapTx.value,
       gasLimit: params.swapResponse.swapTx.gas,
+      maxFeePerGas: params.swapResponse.swapTx.maxFeePerGas,
+      maxPriorityFeePerGas: params.swapResponse.swapTx.maxPriorityFeePerGas,
     });
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
     console.log("Tx mined");
     const fillTxnRef = await trackFill(tx.hash);
+    if (fillTxnRef) {
+      console.log("Fill txn ref:", fillTxnRef);
+    } else {
+      console.log("Fill txn ref not found");
+    }
+  } catch (e) {
+    console.error("Tx reverted", e);
+  }
+}
+
+export async function signAndWaitAllowanceFlowSvm(params: {
+  wallet: KeyPairSigner;
+  swapResponse: BaseSwapResponse;
+}) {
+  if (!params.swapResponse.swapTx || !("data" in params.swapResponse.swapTx)) {
+    throw new Error("No swap tx for allowance flow");
+  }
+
+  try {
+    const txBuffer = Buffer.from(params.swapResponse.swapTx.data, "base64");
+    const decodedTx = getTransactionDecoder().decode(txBuffer);
+    const signedTx = await signTransaction([params.wallet.keyPair], decodedTx);
+    const signature = getSignatureFromTransaction(signedTx);
+    console.log("Signed SVM tx:", signature.toString());
+
+    const sendTx = sendTransactionWithoutConfirmingFactory({
+      rpc: getSVMRpc(params.swapResponse.swapTx.chainId),
+    });
+    await sendTx(signedTx, { commitment: "confirmed" });
+    console.log("Tx sent and confirmed");
+    const fillTxnRef = await trackFill(signature.toString());
     if (fillTxnRef) {
       console.log("Fill txn ref:", fillTxnRef);
     } else {
@@ -470,4 +525,19 @@ export async function getERC20DestinationAction(testCase: {
       },
     ],
   };
+}
+
+export function getSvmSignerSeed() {
+  const seedBytesStr = process.env.DEV_WALLET_KEY_PAIR_SVM;
+  if (!seedBytesStr) {
+    throw new Error(
+      "Can't get SVM signer seed. Set 'DEV_WALLET_KEY_PAIR_SVM' in .env.local"
+    );
+  }
+  const parsedSeedArray = seedBytesStr
+    .replace("[", "")
+    .replace("]", "")
+    .split(",")
+    .map((str) => parseInt(str));
+  return new Uint8Array(parsedSeedArray);
 }

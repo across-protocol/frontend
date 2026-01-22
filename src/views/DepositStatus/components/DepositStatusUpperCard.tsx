@@ -4,7 +4,6 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { ReactComponent as MegaphoneIcon } from "assets/icons/megaphone.svg";
 import { Text, Badge } from "components";
 
 import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
@@ -13,10 +12,9 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import { DateTime } from "luxon";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
-import { usePMFForm } from "hooks/usePMFForm";
+import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
+import { BridgeProvider } from "../hooks/useDepositTracking/types";
 
 type Props = {
   depositTxHash: string;
@@ -25,28 +23,31 @@ type Props = {
   externalProjectId?: string;
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
-  fromBridgePagePayload?: FromBridgePagePayload;
+  fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  bridgeProvider?: BridgeProvider;
 };
 
 export function DepositStatusUpperCard({
   depositTxHash,
   fromChainId,
   toChainId,
+  bridgeProvider,
   externalProjectId,
   inputTokenSymbol,
   outputTokenSymbol,
-  fromBridgePagePayload,
+  fromBridgeAndSwapPagePayload,
 }: Props) {
-  const { depositQuery, fillQuery, status } = useDepositTracking({
+  const { depositQuery, status, deposit, fill } = useDepositTracking({
     depositTxHash,
     fromChainId,
     toChainId,
-    fromBridgePagePayload,
+    bridgeProvider,
+    fromBridgeAndSwapPagePayload,
   });
 
-  const depositTxSentTime = fromBridgePagePayload?.timeSigned;
-  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
-  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
+  const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
+  const depositTxCompletedTime = deposit?.depositTimestamp;
+  const fillTxCompletedTime = fill?.fillTxTimestamp;
 
   const { elapsedSeconds: depositTxElapsedSeconds } = useElapsedSeconds(
     depositTxSentTime ? Math.floor(depositTxSentTime / 1000) : undefined,
@@ -57,7 +58,8 @@ export function DepositStatusUpperCard({
     fillTxCompletedTime
   );
 
-  const { isPMFormAvailable, handleNavigateToPMFGoogleForm } = usePMFForm();
+  const depositRevertMessage =
+    deposit?.status === "deposit-reverted" ? deposit.formattedError : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -94,22 +96,9 @@ export function DepositStatusUpperCard({
         </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
-          {depositTxElapsedSeconds ? (
-            <ElapsedTime
-              textSize="3xl"
-              elapsedSeconds={depositTxElapsedSeconds}
-              textColor="warning"
-            />
-          ) : (
-            <Text size="3xl" color="warning">
-              {DateTime.fromSeconds(
-                depositTxCompletedTime || Date.now()
-              ).toFormat("d MMM yyyy - t")}
-            </Text>
-          )}
           <DepositRevertedRow>
             <Text size="lg" color="warning">
-              Deposit unsuccessful
+              {depositRevertMessage ?? "Deposit unsuccessful"}
             </Text>
             <a
               href={`${
@@ -152,21 +141,16 @@ export function DepositStatusUpperCard({
           depositTxCompletedTimestampSeconds={depositTxCompletedTime}
           depositTxElapsedSeconds={depositTxElapsedSeconds}
           fillTxElapsedSeconds={fillTxElapsedSeconds}
-          fillTxHash={fillQuery.data?.fillTxHash}
+          fillTxHash={fill?.fillTxHash}
+          outputAmount={fill?.outputAmount}
           depositTxHash={depositTxHash}
           fromChainId={fromChainId}
           toChainId={toChainId}
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
-          fromBridgePagePayload={fromBridgePagePayload}
+          fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
         />
       </DepositTimeCardSocialSharedWrapper>
-      {isPMFormAvailable && (
-        <PMFFormButton onClick={handleNavigateToPMFGoogleForm}>
-          <MegaphoneIcon />
-          <span>Help improve Across—1 min survey</span>
-        </PMFFormButton>
-      )}
     </Wrapper>
   );
 }
@@ -244,23 +228,4 @@ const DepositRevertedRow = styled.div`
       stroke: ${COLORS.warning};
     }
   }
-`;
-
-const PMFFormButton = styled.div`
-  display: flex;
-  height: 64px;
-
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  border-radius: 12px;
-  background: ${COLORS["aqua-15"]};
-  width: 100%;
-  cursor: pointer;
-
-  color: ${COLORS["aqua"]};
-  font-weight: 500;
-
-  margin-top: -8px;
-  margin-bottom: -8px;
 `;

@@ -1,10 +1,30 @@
 import { BigNumber } from "ethers";
+import { Address } from "@solana/kit";
 import { TradeType } from "@uniswap/sdk-core";
 
 import { getSuggestedFees } from "../_utils";
 import { AmountType, AppFee, CrossSwapType } from "./utils";
 import { Action } from "../swap/_utils";
 import { TransferType } from "../_spoke-pool-periphery";
+
+export enum FeeDetailsType {
+  TOTAL_BREAKDOWN = "total-breakdown",
+  MAX_TOTAL_BREAKDOWN = "max-total-breakdown",
+  ACROSS = "across",
+}
+
+export type SlippageTolerance = number | "auto";
+
+export type OriginOrDestination = "origin" | "destination";
+
+export type BridgeProvider =
+  | "across"
+  | "hypercore"
+  | "cctp"
+  | "oft"
+  | "sponsored-intent"
+  | "sponsored-oft"
+  | "sponsored-cctp";
 
 export type { AmountType, CrossSwapType };
 
@@ -22,10 +42,11 @@ export type Swap = {
   amount: string;
   depositor?: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   isInputNative?: boolean;
   isOutputNative?: boolean;
+  originOrDestination: OriginOrDestination;
 };
 
 export type CrossSwap = {
@@ -34,7 +55,7 @@ export type CrossSwap = {
   outputToken: Token;
   depositor: string;
   recipient: string;
-  slippageTolerance: number;
+  slippageTolerance: SlippageTolerance;
   type: AmountType;
   refundOnOrigin: boolean;
   refundAddress?: string;
@@ -46,6 +67,8 @@ export type CrossSwap = {
   appFeePercent?: number;
   appFeeRecipient?: string;
   strictTradeType: boolean;
+  isDestinationSvm?: boolean;
+  isOriginSvm?: boolean;
 };
 
 export type SupportedDex =
@@ -56,7 +79,8 @@ export type SupportedDex =
   | "gho-multicall3"
   | "wrapped-gho"
   | "lifi"
-  | "0x";
+  | "0x"
+  | "jupiter";
 
 export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
@@ -67,23 +91,57 @@ export type OriginSwapQuoteAndCalldata = {
   slippage: number;
 };
 
+export type EvmSwapTxn = {
+  ecosystem: "evm";
+  to: string;
+  data: string;
+  value: string;
+};
+
+export type SvmSwapTxn = {
+  ecosystem: "svm";
+  to: string;
+  instructions?: Record<string, unknown>;
+  lookupTables?: Address[];
+};
+
+export type SwapTxn = EvmSwapTxn | SvmSwapTxn;
+
+export function isEvmSwapTxn(swapTxn: SwapTxn): swapTxn is EvmSwapTxn {
+  return swapTxn.ecosystem === "evm";
+}
+
+export function isSvmSwapTxn(swapTxn: SwapTxn): swapTxn is SvmSwapTxn {
+  return swapTxn.ecosystem === "svm";
+}
+
 export type SwapQuote = {
   maximumAmountIn: BigNumber;
   minAmountOut: BigNumber;
   expectedAmountOut: BigNumber;
   expectedAmountIn: BigNumber;
   slippageTolerance: number;
-  swapTxns: {
-    to: string;
-    data: string;
-    value: string;
-  }[];
+  swapTxns: (EvmSwapTxn | SvmSwapTxn)[];
   tokenIn: Token;
   tokenOut: Token;
   swapProvider: {
     name: string;
     sources: string[];
   };
+};
+
+type AcrossBridgeFeeDetails = {
+  type: FeeDetailsType.ACROSS;
+  lp: FeeComponent;
+  relayerCapital: FeeComponent;
+  destinationGas: FeeComponent;
+};
+
+type FeeComponent = {
+  amount: BigNumber;
+  pct: BigNumber;
+  token: Token;
+  details?: AcrossBridgeFeeDetails;
 };
 
 export type CrossSwapQuotes = {
@@ -95,8 +153,17 @@ export type CrossSwapQuotes = {
     inputAmount: BigNumber;
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;
-    suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
-  };
+    estimatedFillTimeSec: number;
+    fees: FeeComponent;
+  } & (
+    | {
+        provider: "across";
+        suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
+      }
+    | {
+        provider: Exclude<BridgeProvider, "across">;
+      }
+  );
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
   contracts: {
@@ -106,16 +173,17 @@ export type CrossSwapQuotes = {
     originSwapEntryPoint?: OriginSwapEntryPointContract;
   };
   appFee?: AppFee;
+  indirectDestinationRoute?: IndirectDestinationRoute;
 };
 
 export type OriginSwapEntryPointContract = {
-  name: "UniversalSwapAndBridge" | "SpokePoolPeriphery";
+  name: "SpokePoolPeriphery" | "SvmSpoke";
   address: string;
   dex?: SupportedDex;
 };
 
 export type DepositEntryPointContract = {
-  name: "SpokePoolPeriphery" | "SpokePool";
+  name: "SpokePoolPeriphery" | "SpokePool" | "SvmSpoke";
   address: string;
 };
 export type RouterContract = {
@@ -176,24 +244,23 @@ export type QuoteFetchFn = (
 
 export type QuoteFetchOpts = Partial<{
   useIndicativeQuote: boolean;
-  sources?: ReturnType<GetSourcesFn>;
-  sellEntireBalance?: boolean;
-  throwIfSellEntireBalanceUnsupported?: boolean;
-  quoteBuffer?: number;
+  sources: ReturnType<GetSourcesFn>;
+  sellEntireBalance: boolean;
+  throwIfSellEntireBalanceUnsupported: boolean;
+  quoteBuffer: number;
+  splitSlippage: boolean;
 }>;
 
-export type OriginEntryPointContractName =
-  | "SpokePoolPeriphery"
-  | "UniversalSwapAndBridge";
+export type OriginEntryPointContractName = "SpokePoolPeriphery" | "SvmSpoke";
 
 export type OriginEntryPoints = {
   originSwapInitialRecipient: {
-    name: "UniversalSwapAndBridge" | "SwapProxy";
+    name: "SwapProxy" | "SvmSpoke";
     address: string;
   };
   swapAndBridge: OriginSwapEntryPointContract;
   deposit: {
-    name: "SpokePoolPeriphery" | "SpokePool";
+    name: "SpokePoolPeriphery" | "SpokePool" | "SvmSpoke";
     address: string;
   };
 };
@@ -205,16 +272,14 @@ export type CrossSwapQuotesRetrievalB2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
-  originRouter: SwapRouter;
   destinationRouter: SwapRouter;
   depositEntryPoint: DepositEntryPoint;
   bridgeableOutputToken: Token;
   destinationSwapChainId: number;
   destinationStrategy: QuoteFetchStrategy;
-  originStrategy: QuoteFetchStrategy;
 };
 
 export type CrossSwapQuotesRetrievalA2BResult = {
@@ -223,7 +288,7 @@ export type CrossSwapQuotesRetrievalA2BResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
@@ -239,7 +304,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   destinationSwap: {
@@ -247,7 +312,7 @@ export type CrossSwapQuotesRetrievalA2AResult = {
     tokenIn: Token;
     tokenOut: Token;
     recipient: string;
-    slippageTolerance: number;
+    slippageTolerance: SlippageTolerance;
     type: AmountType;
   };
   originStrategy: QuoteFetchStrategy;
@@ -270,4 +335,10 @@ export type DexSources = {
       names: string[]; // Source names that match the key
     }[];
   };
+};
+
+export type IndirectDestinationRoute = {
+  inputToken: Token;
+  intermediaryOutputToken: Token;
+  outputToken: Token;
 };

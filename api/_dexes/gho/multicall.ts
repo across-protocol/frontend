@@ -6,7 +6,7 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "../../_constants";
 import { getMulticall3, getMulticall3Address } from "../../_utils";
-import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap, EvmSwapTxn } from "../types";
 import { getWghoContract } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
@@ -16,6 +16,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const SWAP_PROVIDER_NAME = "gho-multicall3";
 
@@ -61,6 +62,14 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
 
     const { tokenIn, tokenOut, amount, chainId } = swap;
 
+    const slippageTolerance = getSlippage({
+      tokenIn: swap.tokenIn,
+      tokenOut: swap.tokenOut,
+      slippageTolerance: swap.slippageTolerance,
+      originOrDestination: swap.originOrDestination,
+      splitSlippage: opts?.splitSlippage,
+    });
+
     // Only support:
     // - L1 USDC/DAI/USDT -> L1 WGHO
     if (![CHAIN_IDs.MAINNET].includes(chainId)) {
@@ -105,6 +114,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
     );
     const ghoSwap = {
       ...swap,
+      slippageTolerance,
       recipient: getRouter(chainId).address,
       tokenOut: {
         address: TOKEN_SYMBOLS_MAP.GHO.addresses[chainId],
@@ -136,9 +146,10 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       );
     }
     // 2.2. Perform the Stable -> GHO swap via `SwapRouter02`
+    const swapTxn = ghoSwapQuote.swapTxns[0] as EvmSwapTxn;
     const swapCall = {
-      callData: ghoSwapQuote.swapTxns[0].data,
-      target: ghoSwapQuote.swapTxns[0].to,
+      callData: swapTxn.data,
+      target: swapTxn.to,
     };
 
     // 3. Perform wrap via `WGHO`
@@ -167,6 +178,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       wrapCall,
     ];
     const aggregateTx = {
+      ecosystem: "evm" as const,
       data: multicall3.interface.encodeFunctionData("aggregate", [calls]),
       to: getRouter(chainId).address,
       value: "0",
@@ -179,7 +191,7 @@ export function getWghoMulticallStrategy(): QuoteFetchStrategy {
       minAmountOut: ghoSwapQuote.minAmountOut,
       expectedAmountOut: ghoSwapQuote.expectedAmountOut,
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
-      slippageTolerance: swap.slippageTolerance,
+      slippageTolerance,
       swapTxns: [aggregateTx],
       swapProvider: {
         name: SWAP_PROVIDER_NAME,

@@ -1,10 +1,15 @@
 import { TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
+import {
+  V2PoolInRoute,
+  V3PoolInRoute,
+  V4PoolInRoute,
+} from "@uniswap/universal-router-sdk";
 
 import { Swap } from "../../types";
-import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 import { getMulticall3Address } from "../../../_utils";
 import { CHAIN_IDs } from "../../../_constants";
+import { getSlippage } from "../../../_slippage";
 
 export type UniswapClassicQuoteFromApi = {
   chainId: number;
@@ -18,7 +23,7 @@ export type UniswapClassicQuoteFromApi = {
     recipient: string;
   };
   swapper: string;
-  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>;
+  route: Array<(V3PoolInRoute | V2PoolInRoute | V4PoolInRoute)[]>;
   slippage: number;
   tradeType: "EXACT_OUTPUT" | "EXACT_INPUT";
   quoteId: string;
@@ -26,7 +31,7 @@ export type UniswapClassicQuoteFromApi = {
 
 export type UniswapParamForApi = Omit<Swap, "type" | "slippageTolerance"> & {
   swapper: string;
-  slippageTolerance?: number;
+  slippageTolerance?: number | "auto";
   protocols?: ("V2" | "V3" | "V4")[];
 };
 
@@ -37,12 +42,18 @@ export const UNISWAP_TRADING_API_BASE_URL =
 export const UNISWAP_API_KEY =
   process.env.UNISWAP_API_KEY || "JoyCGj29tT4pymvhaGciK4r1aIPvqW6W53xT1fwo";
 
+// Assigned by Uniswap for tracking swaps issued by our API
+export const UNISWAP_API_INTEGRATOR_ID = "0x756e6978000000000031";
+
 /**
  * Based on https://api-docs.uniswap.org/api-reference/swapping/quote
  */
 export async function getUniswapClassicQuoteFromApi(
   swap: UniswapParamForApi,
-  tradeType: TradeType
+  tradeType: TradeType,
+  opts?: {
+    splitSlippage?: boolean;
+  }
 ) {
   // NOTE: Temporary fix Stablecoin Mainnet -> Lens. The Multicall3 address is currently blocked
   // by the Uniswap API. We use a dummy address for just fetching the quote.
@@ -51,6 +62,24 @@ export async function getUniswapClassicQuoteFromApi(
     swap.tokenIn.chainId === CHAIN_IDs.MAINNET &&
     swap.swapper === getMulticall3Address(swap.tokenIn.chainId);
   const dummySwapperAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+
+  // Uniswap API supports auto slippage via the `autoSlippage` parameter. Therefore, we
+  // don't need to resolve the slippage via our own logic.
+  const slippageParams =
+    swap.slippageTolerance === undefined || swap.slippageTolerance === "auto"
+      ? {
+          // https://api-docs.uniswap.org/api-reference/swapping/quote#body-slippage-tolerance
+          autoSlippage: "DEFAULT",
+        }
+      : {
+          slippageTolerance: getSlippage({
+            tokenIn: swap.tokenIn,
+            tokenOut: swap.tokenOut,
+            slippageTolerance: swap.slippageTolerance,
+            originOrDestination: swap.originOrDestination,
+            splitSlippage: opts?.splitSlippage,
+          }),
+        };
 
   const response = await axios.post<{
     requestId: string;
@@ -66,12 +95,11 @@ export async function getUniswapClassicQuoteFromApi(
       tokenIn: swap.tokenIn.address,
       tokenOut: swap.tokenOut.address,
       swapper: shouldUseDummySwapper ? dummySwapperAddress : swap.swapper,
-      slippageTolerance: swap.slippageTolerance,
-      autoSlippage: swap.slippageTolerance ? undefined : "DEFAULT",
       amount: swap.amount,
       urgency: "urgent",
       protocols: swap.protocols || ["V2", "V3", "V4"],
-      routingPreference: "FASTEST",
+      routingPreference: "BEST_PRICE",
+      ...slippageParams,
     },
     {
       headers: {

@@ -11,6 +11,9 @@ type Props = {
 export function Breadcrumb({ depositTxHash }: Props) {
   return (
     <BreadcrumbV2
+      customAncestorRoutes={[
+        { path: "/bridge-and-swap", name: "Bridge & Swap" },
+      ]}
       customCurrentRoute={
         <Wrapper>
           <Text size="lg">{shortenString(depositTxHash, "..", 4)}</Text>

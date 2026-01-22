@@ -1,15 +1,19 @@
 import styled from "@emotion/styled";
 import { ReactComponent as UmaLogo } from "assets/icons/powered-by-uma.svg";
 import { ReactComponent as TwitterLogo } from "assets/icons/x-white.svg";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   padding: 25px 16px;
+  flex-direction: column;
+  align-items: center;
   display: flex;
   justify-content: space-between;
   color: #9daab2;
+  gap: 12px;
 
-  @media (max-width: 428px) {
-    flex-direction: column;
+  @media ${QUERIES.tabletAndUp} {
+    flex-direction: row;
     align-items: center;
   }
 `;
@@ -17,10 +21,6 @@ export const Wrapper = styled.div`
 export const LinksContainer = styled.div`
   display: flex;
   align-items: center;
-
-  @media (max-width: 428px) {
-    margin: 0 0 24px;
-  }
 `;
 
 export const Link = styled.a`
@@ -59,6 +59,10 @@ export const AccentLink = styled(Link)`
     svg path {
       fill: white;
     }
+  }
+
+  @media ${QUERIES.tabletAndUp} {
+    margin-left: auto;
   }
 `;
 

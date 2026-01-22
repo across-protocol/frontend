@@ -1,7 +1,9 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { chainConfigs } from "./configs";
 
-export type ChainInfo = (typeof chainConfigs)[0];
+export type ChainInfo = (typeof chainConfigs)[0] & {
+  intermediaryChain?: number;
+};
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
 export type ChainId = (typeof CHAIN_IDs)[keyof typeof CHAIN_IDs];
@@ -21,16 +23,18 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.BLAST,
   CHAIN_IDs.LENS,
   CHAIN_IDs.LISK,
-  CHAIN_IDs.REDSTONE,
   CHAIN_IDs.SCROLL,
   CHAIN_IDs.ZORA,
   CHAIN_IDs.WORLD_CHAIN,
-  CHAIN_IDs.ALEPH_ZERO,
   CHAIN_IDs.INK,
   CHAIN_IDs.SONEIUM,
   CHAIN_IDs.UNICHAIN,
   CHAIN_IDs.SOLANA,
   CHAIN_IDs.BSC,
+  CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.PLASMA,
+  CHAIN_IDs.HYPERCORE,
+  CHAIN_IDs.MONAD,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,
@@ -42,7 +46,6 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.LISK_SEPOLIA,
   CHAIN_IDs.LENS_SEPOLIA,
   CHAIN_IDs.UNICHAIN_SEPOLIA,
-  CHAIN_IDs.TATARA,
   CHAIN_IDs.SOLANA_DEVNET,
 ];
 

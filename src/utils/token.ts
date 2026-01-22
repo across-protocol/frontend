@@ -1,7 +1,24 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
+import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
 
-import { getProvider, ChainId, getConfig, getChainInfo } from "utils";
+import {
+  getProvider,
+  ChainId,
+  getConfig,
+  getChainInfo,
+  parseUnits,
+  getSVMRpc,
+  toAddressType,
+  toAddress,
+  Address,
+  getAssociatedTokenAddress,
+  chainIsSvm,
+} from "utils";
 import { ERC20__factory } from "utils/typechain";
+import { SwapToken } from "utils/serverless-api/types";
+import { TokenInfo } from "constants/tokens";
+import { chainsWithUsdt0Enabled, getToken, tokenTable } from "utils/constants";
+import usdt0Logo from "assets/token-logos/usdt0.svg";
 
 export async function getNativeBalance(
   chainId: ChainId,
@@ -23,7 +40,7 @@ export async function getNativeBalance(
  * @param blockNumber The block number to execute the query.
  * @returns a Promise that resolves to the balance of the account
  */
-export async function getBalance(
+export async function getEvmBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
@@ -36,6 +53,55 @@ export async function getBalance(
   const contract = ERC20__factory.connect(tokenAddress, provider);
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
   return balance;
+}
+
+export function toSolanaKitAddress(address: Address) {
+  return toAddress(address);
+}
+
+export async function getSvmBalance(
+  chainId: string | number,
+  account: string,
+  token: string
+) {
+  const tokenMint = toAddressType(token, Number(chainId));
+  const owner = toAddressType(account, Number(chainId));
+  const svmProvider = getSVMRpc(Number(chainId));
+
+  if (tokenMint.isZeroAddress()) {
+    const address = toSolanaKitAddress(owner);
+    const balance = await svmProvider.getBalance(address).send();
+    return BigNumber.from(balance.value);
+  }
+
+  // Get the associated token account address
+  const tokenAccount = await getAssociatedTokenAddress(
+    owner.forceSvmAddress(),
+    tokenMint.forceSvmAddress()
+  );
+
+  let balance: BigNumber;
+  try {
+    // Get token account info
+    const tokenAccountInfo = await svmProvider
+      .getTokenAccountBalance(tokenAccount)
+      .send();
+    balance = BigNumber.from(tokenAccountInfo.value.amount);
+  } catch (error) {
+    // If token account doesn't exist or other error, return 0 balance
+    balance = BigNumber.from(0);
+  }
+  return balance;
+}
+
+export async function getTokenBalance(
+  chainId: number,
+  account: string,
+  tokenAddress: string
+) {
+  return chainIsSvm(chainId)
+    ? getSvmBalance(chainId, account, tokenAddress)
+    : getEvmBalance(chainId, account, tokenAddress);
 }
 
 /**
@@ -74,4 +140,161 @@ export function getExplorerLinkForToken(
   tokenChainId: number
 ) {
   return `${getChainInfo(tokenChainId).explorerUrl}/address/${tokenAddress}`;
+}
+
+// Standard precision for intermediate calculations (matches Ethereum wei)
+const PRECISION = 18;
+
+/**
+ * Limits a decimal string to a maximum number of decimal places without losing precision
+ * @param value - The decimal string to limit
+ * @param maxDecimals - Maximum number of decimal places
+ * @returns The limited string
+ */
+function limitDecimals(value: string, maxDecimals: number): string {
+  const sanitized = value.replace(/,/g, "");
+  const parts = sanitized.split(".");
+  if (parts.length === 1) {
+    return sanitized;
+  }
+  if (parts[1].length <= maxDecimals) {
+    return sanitized;
+  }
+  return parts[0] + "." + parts[1].substring(0, maxDecimals);
+}
+
+/**
+ * Converts a token amount to USD value
+ * @param tokenAmount - The token amount as a string (decimal format)
+ * @param token - The token object containing price and decimals
+ * @returns The USD value as a BigNumber (18 decimals)
+ */
+export function convertTokenToUSD(
+  tokenAmount: string,
+  token: LifiToken
+): BigNumber {
+  // Use 18 decimals for maximum precision in calculations
+  const normalizedAmount = limitDecimals(tokenAmount, PRECISION);
+  const tokenScaled = parseUnits(normalizedAmount, PRECISION);
+  const priceScaled = parseUnits(token.priceUSD, PRECISION);
+  return tokenScaled.mul(priceScaled).div(parseUnits("1", PRECISION));
+}
+
+/**
+ * Converts a USD amount to token amount
+ * @param usdAmount - The USD amount as a string (decimal format)
+ * @param token - The token object containing price and decimals
+ * @returns The token amount as a BigNumber (in token's native decimals)
+ */
+export function convertUSDToToken(
+  usdAmount: string,
+  token: LifiToken
+): BigNumber {
+  // Use 18 decimals for maximum precision in calculations
+  const normalizedAmount = limitDecimals(usdAmount, PRECISION);
+  const usdScaled = parseUnits(normalizedAmount, PRECISION);
+  const priceScaled = parseUnits(token.priceUSD, PRECISION);
+  const result18Dec = usdScaled
+    .mul(parseUnits("1", PRECISION))
+    .div(priceScaled);
+
+  // Convert from 18 decimals to token's native decimals
+  const decimalDiff = PRECISION - token.decimals;
+  if (decimalDiff > 0) {
+    return result18Dec.div(BigNumber.from(10).pow(decimalDiff));
+  } else if (decimalDiff < 0) {
+    return result18Dec.mul(BigNumber.from(10).pow(-decimalDiff));
+  }
+  return result18Dec;
+}
+
+/**
+ * Gets token info with chain-specific display modifications (temporary for USDT0)
+ * This is a temporary function that will be removed once all chains migrate to USDT0
+ */
+export const getTokenForChain = (
+  symbol: string,
+  chainId: number
+): TokenInfo => {
+  const token = getToken(symbol);
+
+  // Handle USDT -> USDT0 display for specific chains
+  if (token.symbol === "USDT" && chainsWithUsdt0Enabled.includes(chainId)) {
+    return {
+      ...token,
+      displaySymbol: "USDT0",
+      logoURI: usdt0Logo,
+    };
+  }
+
+  return token;
+};
+
+/**
+ * Attempts to coerce a SwapToken into a TokenInfo type
+ * Checks local token definitions to enrich with mainnetAddress and displaySymbol
+ * @param swapToken - The SwapToken to convert
+ * @returns A TokenInfo object with available properties mapped
+ */
+export function swapTokenToTokenInfo(swapToken: SwapToken): TokenInfo {
+  // Try to find the token in our local token definitions
+  const localToken = tokenTable?.[swapToken.symbol.toUpperCase()];
+
+  const baseTokenInfo: TokenInfo = {
+    name: swapToken.name,
+    symbol: swapToken.symbol,
+    decimals: swapToken.decimals,
+    logoURI: swapToken.logoUrl || "",
+    addresses: {
+      [swapToken.chainId]: swapToken.address,
+    },
+    priceUsd: swapToken.priceUsd,
+    // Use displaySymbol from API if available
+    displaySymbol: swapToken.displaySymbol,
+  };
+
+  // If we found a local token definition, merge in mainnetAddress and displaySymbol
+  if (localToken) {
+    return {
+      ...baseTokenInfo,
+      mainnetAddress: localToken.mainnetAddress,
+      displaySymbol: swapToken.displaySymbol || localToken.displaySymbol,
+      logoURI: localToken.logoURI || baseTokenInfo.logoURI, // Prefer local logo if available
+    };
+  }
+
+  return baseTokenInfo;
+}
+
+export function getTokenExplorerLinkFromAddress(
+  chainId: number,
+  address: string
+) {
+  const explorerBaseUrl = getChainInfo(chainId).explorerUrl;
+  return `${explorerBaseUrl}/address/${address}`;
+}
+
+// mapping to resolve intermediary token info
+const INTERMEDIARY_TOKEN_MAPPING: Record<
+  number,
+  Record<string, { symbol: string; chainId: number }>
+> = {
+  1337: {
+    "USDH-SPOT": { symbol: "USDH", chainId: 999 },
+    "USDC-SPOT": {
+      symbol: "USDC",
+      chainId: 999,
+    },
+    "USDT-SPOT": {
+      symbol: "USDT0",
+      chainId: 999,
+    },
+  },
+};
+
+export function getIntermediaryTokenInfo(tokenInfo: {
+  symbol: string;
+  chainId: number;
+}): { symbol: string; chainId: number } | undefined {
+  return INTERMEDIARY_TOKEN_MAPPING?.[tokenInfo.chainId]?.[tokenInfo.symbol];
 }

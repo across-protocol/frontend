@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
+import { TokenImage } from "components/TokenImage";
 import { Deposit } from "hooks/useDeposits";
 
 import {
@@ -22,7 +23,7 @@ export function RewardsCell({ deposit, width }: Props) {
       {deposit.rewards && rewardToken ? (
         <>
           <TitleWrapper>
-            <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
+            <TokenImage src={rewardToken.logoURI} alt={rewardToken.symbol} />
             <Text color="light-200">
               {formatUnitsWithMaxFractions(
                 deposit.rewards.amount,

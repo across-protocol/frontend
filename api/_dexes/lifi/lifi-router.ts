@@ -11,7 +11,7 @@ import {
   SwapQuote,
 } from "../types";
 import { getEnvs } from "../../_env";
-import { LIFI_ROUTER_ADDRESS } from "./utils/addresses";
+import { LIFI_DIAMOND_ADDRESS } from "./utils/addresses";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { SOURCES } from "./utils/sources";
 import {
@@ -19,6 +19,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const { API_KEY_LIFI } = getEnvs();
 
@@ -29,19 +30,24 @@ const API_HEADERS = {
   ...(API_KEY_LIFI ? { "x-lifi-api-key": `${API_KEY_LIFI}` } : {}),
 };
 
+// Assigned by LiFi for tracking Across requests
+const LIFI_INTEGRATOR_ID = "across";
+
 const SWAP_PROVIDER_NAME = "lifi";
 
 export function getLifiStrategy(
   originSwapEntryPointContractName: OriginEntryPointContractName
 ): QuoteFetchStrategy {
   const getRouter = (chainId: number) => {
-    const address = LIFI_ROUTER_ADDRESS[chainId];
+    const address = LIFI_DIAMOND_ADDRESS[chainId];
     if (!address) {
-      throw new Error(`LI.FI router address not found for chain id ${chainId}`);
+      throw new Error(
+        `'LiFiDiamond' address not found for chain id ${chainId}`
+      );
     }
     return {
       address,
-      name: "LifiRouter",
+      name: "LiFiDiamond",
     };
   };
 
@@ -71,6 +77,14 @@ export function getLifiStrategy(
         assertSellEntireBalanceSupported();
       }
 
+      const slippageTolerance = getSlippage({
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
+      });
+
       const sources = opts?.sources;
       const sourcesParams =
         sources?.sourcesType === "exclude"
@@ -87,7 +101,7 @@ export function getLifiStrategy(
       // Improves latency as we care about speed. This configuration returns the first
       // available quote with 600ms delay.
       // See https://docs.li.fi/guides/integration-tips/latency#selecting-timing-strategies
-      const swapStepTimingStrategies = "minWaitTime-600-2-300";
+      const swapStepTimingStrategies = "minWaitTime-600-3-300";
 
       const params = {
         fromChain: swap.chainId,
@@ -97,7 +111,8 @@ export function getLifiStrategy(
         fromAddress: swap.recipient,
         skipSimulation: true,
         swapStepTimingStrategies,
-        slippage: Math.floor(swap.slippageTolerance / 100),
+        slippage: slippageTolerance / 100,
+        integrator: LIFI_INTEGRATOR_ID,
         ...(tradeType === TradeType.EXACT_INPUT
           ? { fromAmount: swap.amount }
           : { toAmount: swap.amount }),
@@ -123,11 +138,13 @@ export function getLifiStrategy(
 
       const swapTx = opts?.useIndicativeQuote
         ? {
+            ecosystem: "evm" as const,
             to: "0x0",
             data: "0x0",
             value: "0x0",
           }
         : {
+            ecosystem: "evm" as const,
             to: quote.transactionRequest.to,
             data: quote.transactionRequest.data,
             value: quote.transactionRequest.value,
@@ -140,7 +157,7 @@ export function getLifiStrategy(
         minAmountOut,
         expectedAmountOut,
         expectedAmountIn,
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -160,6 +177,7 @@ export function getLifiStrategy(
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;
@@ -207,6 +225,7 @@ export function parseLiFiError(error: unknown) {
 
     if (
       [
+        1001, // FailedToBuildTransactionError
         1002, // NoQuoteError
         1003, // NotFoundError
       ].includes(data.code)

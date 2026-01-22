@@ -1,11 +1,11 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { GlobalStyles, ErrorBoundary } from "components";
+import { ErrorBoundary, GlobalStyles } from "components";
 import {
-  QueryClientProvider,
-  QueryClient,
-  QueryCache,
   MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -14,9 +14,11 @@ import { ErrorProvider } from "hooks";
 import { ToastProvider } from "components/Toast/useToast";
 import { AmpliProvider } from "hooks/useAmplitude";
 import { SidebarProvider } from "providers/SidebarProvider";
+import { SentryProvider } from "providers/SentryProvider";
 import { enableReactQueryDevTools } from "utils";
 import Sentry from "utils/sentry";
 import { WalletProvider } from "providers/wallet/WalletProvider";
+import { FeatureFlagsProvider } from "./hooks/feature-flags/featureFlagsProvider";
 
 const client = new QueryClient({
   queryCache: new QueryCache({
@@ -49,18 +51,22 @@ root.render(
     <GlobalStyles />
     <ErrorBoundary>
       <WalletProvider>
-        <QueryClientProvider client={client}>
-          <AmpliProvider>
-            <ErrorProvider>
-              <ToastProvider>
-                <SidebarProvider>
-                  <App />
-                </SidebarProvider>
-              </ToastProvider>
-            </ErrorProvider>
-            {enableReactQueryDevTools && <ReactQueryDevtools />}
-          </AmpliProvider>
-        </QueryClientProvider>
+        <SentryProvider>
+          <QueryClientProvider client={client}>
+            <FeatureFlagsProvider>
+              <AmpliProvider>
+                <ErrorProvider>
+                  <ToastProvider>
+                    <SidebarProvider>
+                      <App />
+                    </SidebarProvider>
+                  </ToastProvider>
+                </ErrorProvider>
+                {enableReactQueryDevTools && <ReactQueryDevtools />}
+              </AmpliProvider>
+            </FeatureFlagsProvider>
+          </QueryClientProvider>
+        </SentryProvider>
       </WalletProvider>
     </ErrorBoundary>
   </React.StrictMode>

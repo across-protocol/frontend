@@ -8,6 +8,7 @@ import EnvironmentPlugin from "vite-plugin-environment";
 import { visualizer } from "rollup-plugin-visualizer";
 import inject from "@rollup/plugin-inject";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import dotenv from "dotenv";
 
 dotenv.config({
@@ -15,12 +16,14 @@ dotenv.config({
 });
 
 const IS_DEBUG = process.env.REACT_APP_DEBUG === "true";
+const SENTRY_AUTH_TOKEN = process.env.SENTRY_AUTH_TOKEN;
 
 export default defineConfig({
   build: {
     // convenience for local dev
     minify: !IS_DEBUG,
     outDir: "build",
+    sourcemap: SENTRY_AUTH_TOKEN ? "hidden" : false,
     commonjsOptions: {
       include: [],
     },
@@ -34,7 +37,12 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
+    }),
     svgr(),
     tsconfigPaths(),
     eslint({
@@ -55,7 +63,19 @@ export default defineConfig({
         Buffer: true,
       },
     }),
-  ],
+    SENTRY_AUTH_TOKEN &&
+      sentryVitePlugin({
+        org: "risk-labs-m6",
+        project: "across-frontend",
+        authToken: SENTRY_AUTH_TOKEN,
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
+        },
+        release: {
+          name: process.env.REACT_APP_GIT_COMMIT_HASH,
+        },
+      }),
+  ].filter(Boolean),
   optimizeDeps: {
     disabled: false,
     include: [

@@ -1,18 +1,19 @@
 import { BigNumber, ethers } from "ethers";
+import { utils } from "@across-protocol/sdk";
 import { CHAIN_IDs } from "./_constants";
 
 export function getMultiCallHandlerAddress(chainId: number) {
-  const defaultAddress = "0x0F7Ae28dE1C8532170AD4ee566B5801485c13a0E";
-  switch (chainId) {
-    case CHAIN_IDs.LENS:
-      return "0x1Ed0D59019a52870337b51DEe8190486a8663037";
-    case CHAIN_IDs.ZK_SYNC:
-      return "0x68d3806E57148D6c6793C78EbDDbc272fE605dbf";
-    case CHAIN_IDs.LINEA:
-      return "0xdF1C940487574EEfa79989a79a4936A0F979cDa2";
-    default:
-      return defaultAddress;
+  // TODO: Remove this once the correct address of the MulticallHandler is updated upstream
+  // in @across-protocol/contracts
+  if (chainId === CHAIN_IDs.BSC) {
+    return "0x0F7Ae28dE1C8532170AD4ee566B5801485c13a0E";
   }
+  const addressFromSdk = utils.getDeployedAddress(
+    "MulticallHandler",
+    chainId,
+    true
+  );
+  return addressFromSdk!;
 }
 
 export function buildMulticallHandlerMessage(params: {

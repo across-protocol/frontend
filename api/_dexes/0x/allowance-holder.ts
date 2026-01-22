@@ -20,8 +20,16 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
 } from "../../_errors";
 import { estimateInputForExactOutput } from "./utils/utils";
+import { getSlippage } from "../../_slippage";
 
 const { API_KEY_0X } = getEnvs();
+
+// We apply an additional markup when using 0x's `sellEntireBalance` feature. This is
+// required because `sellAmount` needs to be a upper limit of the actual amount to be
+// sold. If the actual amount to be sold is higher than `sellAmount`, then the swap will
+// fail. See https://0x.org/docs/0x-swap-api/advanced-topics/sell-entire-balance for
+// more details.
+const SELL_ENTIRE_BALANCE_AMOUNT_MARKUP = 0.05; // 5%
 
 export const API_BASE_URL = "https://api.0x.org/swap/allowance-holder";
 
@@ -64,12 +72,15 @@ export function get0xStrategy(
     opts?: QuoteFetchOpts
   ) => {
     try {
-      if (opts?.sellEntireBalance && opts.quoteBuffer) {
-        swap.amount = addMarkupToAmount(
-          BigNumber.from(swap.amount),
-          opts.quoteBuffer + swap.slippageTolerance / 100
-        ).toString();
-      }
+      const slippageTolerance = getSlippage({
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        slippageTolerance: swap.slippageTolerance,
+        originOrDestination: swap.originOrDestination,
+        splitSlippage: opts?.splitSlippage,
+      });
+      let initialSwapAmount = swap.amount;
+
       let swapAmount = swap.amount;
       const sources = opts?.sources;
       const sourcesParams: Record<string, string> | undefined =
@@ -102,6 +113,14 @@ export function get0xStrategy(
           SWAP_PROVIDER_NAME,
           sourcesParams
         );
+        initialSwapAmount = swapAmount;
+      }
+
+      if (opts?.sellEntireBalance) {
+        swapAmount = addMarkupToAmount(
+          BigNumber.from(swapAmount),
+          slippageTolerance / 100 + SELL_ENTIRE_BALANCE_AMOUNT_MARKUP
+        ).toString();
       }
 
       // https://0x.org/docs/api#tag/Swap/operation/swap::allowanceHolder::getQuote
@@ -115,7 +134,14 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.floor(swap.slippageTolerance * 100),
+            slippageBps: Math.round(
+              (slippageTolerance +
+                (opts?.sellEntireBalance
+                  ? // We need to take the markup into account for the slippage when fetching a quote
+                    SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
+                  : 0)) *
+                100
+            ),
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
@@ -134,8 +160,12 @@ export function get0xStrategy(
         });
       }
 
-      const usedSources: string[] = quote.route.fills.map(
-        (fill: { source: string }) => fill.source.toLowerCase()
+      const usedSources: string[] = Array.from(
+        new Set(
+          quote.route.fills.map((fill: { source: string }) =>
+            fill.source.toLowerCase()
+          )
+        )
       );
 
       if (
@@ -154,19 +184,30 @@ export function get0xStrategy(
         });
       }
 
-      const expectedAmountIn = BigNumber.from(quote.sellAmount);
-      const maximumAmountIn = expectedAmountIn;
+      const expectedAmountIn = BigNumber.from(initialSwapAmount);
+      const maximumAmountIn = BigNumber.from(quote.sellAmount);
 
-      const expectedAmountOut = BigNumber.from(quote.buyAmount);
+      let expectedAmountOut = BigNumber.from(quote.buyAmount);
       const minAmountOut = BigNumber.from(quote.minBuyAmount);
+
+      // When using sellEntireBalance, the quote is based on the
+      // marked-up input amount (e.g., 105 ETH), but the expected and min. output amounts should reflect
+      // the actual expected input amount (e.g., 100 ETH). Scale down accordingly.
+      if (opts?.sellEntireBalance && !maximumAmountIn.isZero()) {
+        expectedAmountOut = expectedAmountOut
+          .mul(expectedAmountIn)
+          .div(maximumAmountIn);
+      }
 
       const swapTx = opts?.useIndicativeQuote
         ? {
+            ecosystem: "evm" as const,
             to: "0x0",
             data: "0x0",
             value: "0x0",
           }
         : {
+            ecosystem: "evm" as const,
             to: quote.transaction.to,
             data: quote.transaction.data,
             value: quote.transaction.value,
@@ -179,7 +220,7 @@ export function get0xStrategy(
         minAmountOut,
         expectedAmountOut,
         expectedAmountIn,
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns: [swapTx],
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -199,6 +240,7 @@ export function get0xStrategy(
         minAmountOut: swapQuote.minAmountOut.toString(),
         expectedAmountOut: swapQuote.expectedAmountOut.toString(),
         expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+        slippage: `${swapQuote.slippageTolerance}%`,
       });
 
       return swapQuote;

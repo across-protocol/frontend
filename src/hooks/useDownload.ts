@@ -1,39 +1,34 @@
 import { useCallback } from "react";
 
-export function useDownload(targetUrl: string, fileName?: string) {
-  const handleDownload = useCallback(async () => {
+export function useDownload(url: string, filename: string) {
+  const download = useCallback(async () => {
     try {
-      const response = await fetch(targetUrl);
+      // Fetch the file
+      const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch file: ${response.statusText}`);
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
       }
 
       const blob = await response.blob();
-      const objectUrl = window.URL.createObjectURL(blob);
+
+      const objectUrl = URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = objectUrl;
-
-      if (!fileName) {
-        // Open in new tab if no filename provided
-        link.target = "_blank";
-      } else {
-        link.download = fileName;
-      }
+      link.download = filename;
 
       document.body.appendChild(link);
       link.click();
 
-      // Cleanup
+      // clean up
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(objectUrl);
-
-      return true;
+      URL.revokeObjectURL(objectUrl);
     } catch (error) {
       console.error("Download failed:", error);
-      return false;
+      // Fallback: open image in new tab
+      window.open(url, "_blank");
     }
-  }, [targetUrl, fileName]);
+  }, [url, filename]);
 
-  return handleDownload;
+  return download;
 }

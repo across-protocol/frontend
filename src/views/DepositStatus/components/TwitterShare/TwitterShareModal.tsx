@@ -2,18 +2,17 @@ import styled from "@emotion/styled";
 import { LoadingSkeleton, SecondaryButton, Text } from "components";
 import Modal from "components/Modal";
 import { ModalProps } from "components/Modal/Modal";
-import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
-import {
-  COLORS,
-  QUERIES,
-  twitterParams,
-  twitterShareContestActive,
-} from "utils";
+import { COLORS, QUERIES, twitterShareContestActive } from "utils";
+import { useTwitter } from "hooks/useTwitter";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
+import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
 import { useState } from "react";
 import { useCopyToClipboard } from "hooks/useCopyToClipboard";
 import { CopyButton } from "../CopyButton";
 import { css } from "@emotion/react";
+import { useDownload } from "hooks/useDownload";
+import { useAmplitude } from "hooks";
+import { ampli } from "ampli";
 
 type TwitterShareModalProps = ModalProps & {
   imageUrl: string;
@@ -23,8 +22,10 @@ export function TwitterShareModal({
   imageUrl,
   ...props
 }: TwitterShareModalProps) {
-  const { isMobile } = useCurrentBreakpoint();
+  const { twitterParams, copyConfig, shareConfig, tweetText, isLaptopAndUp } =
+    useTwitter();
   const [isImageLoading, setIsImageLoading] = useState(true);
+  const { addToAmpliQueue } = useAmplitude();
 
   const {
     copyToClipboard,
@@ -41,12 +42,30 @@ export function TwitterShareModal({
   });
 
   const handleCopyToClipboard = async () => {
-    const tweetText =
-      "Check out how fast I just bridged with @AcrossProtocol\n #PoweredByIntents ⛺";
+    addToAmpliQueue(() => {
+      ampli.clickedShareOnXCopyOrDownloadButton({
+        page: "depositStatusPage",
+        section: "xShare",
+      });
+    });
     await copyToClipboard([
       { content: tweetText },
       { content: imageUrl, remote: true },
     ]);
+  };
+
+  const handleDownloadImageBase = useDownload(
+    imageUrl,
+    "across-bridge-share.png"
+  );
+  const handleDownloadImage = () => {
+    addToAmpliQueue(() => {
+      ampli.clickedShareOnXCopyOrDownloadButton({
+        page: "depositStatusPage",
+        section: "xShare",
+      });
+    });
+    handleDownloadImageBase();
   };
 
   return (
@@ -56,8 +75,8 @@ export function TwitterShareModal({
         desktop: "top",
         mobile: "bottom",
       }}
-      topYOffset={isMobile ? undefined : 112}
-      bottomYOffset={isMobile ? 16 : undefined}
+      topYOffset={isLaptopAndUp ? 112 : undefined}
+      bottomYOffset={isLaptopAndUp ? undefined : 16}
       exitOnOutsideClick
       title={twitterParams.modalTitle}
       padding="normal"
@@ -80,18 +99,28 @@ export function TwitterShareModal({
         <TextColumn>
           <TextInnerColumn>
             <Text size="xl" color="white">
-              1. Copy image to clipboard
+              1. {copyConfig.stepTitle}
             </Text>
-            <Text size="md">Copy your Across flex image to clipboard.</Text>
+            <Text size="md">{copyConfig.stepDescription}</Text>
             <ButtonRow>
-              <StyledCopyButton
-                size="md"
-                onClick={handleCopyToClipboard}
-                disabled={isImageLoading || isCopying}
-                copyState={
-                  copySuccess ? "success" : copyError ? "error" : "ready"
-                }
-              />
+              {copyConfig.showCopyButton ? (
+                <StyledCopyButton
+                  size="md"
+                  onClick={handleCopyToClipboard}
+                  disabled={isImageLoading || isCopying}
+                  copyState={
+                    copySuccess ? "success" : copyError ? "error" : "ready"
+                  }
+                />
+              ) : (
+                <DownloadButton
+                  size="md"
+                  onClick={handleDownloadImage}
+                  disabled={isImageLoading}
+                >
+                  <DownloadIcon width={16} height={16} />
+                </DownloadButton>
+              )}
             </ButtonRow>
           </TextInnerColumn>
 
@@ -99,14 +128,24 @@ export function TwitterShareModal({
             <Text size="xl" color="white">
               2. Share on X (Twitter)
             </Text>
-            <Text size="md">Just paste (Ctrl+V / ⌘+V) before posting!</Text>
+            {shareConfig.stepDescription.map((line) => (
+              <Text size="md" key={line}>
+                {line}
+              </Text>
+            ))}
 
             <ButtonRow>
               <Button
                 size="md"
                 textColor="aqua"
                 onClick={() => {
-                  window.open("https://twitter.com/intent/tweet", "__blank");
+                  addToAmpliQueue(() => {
+                    ampli.clickedShareOnXButton({
+                      page: "depositStatusPage",
+                      section: "xShare",
+                    });
+                  });
+                  window.open(shareConfig.twitterUrl, "_blank");
                 }}
               >
                 SHARE ON <XIcon />
@@ -118,7 +157,18 @@ export function TwitterShareModal({
             <TextInnerColumn>
               <Text size="xl" color="white">
                 3. Follow{" "}
-                <Link href="https://x.com/AcrossProtocol" target="_blank">
+                <Link
+                  href="https://x.com/AcrossProtocol"
+                  target="_blank"
+                  onClick={() => {
+                    addToAmpliQueue(() => {
+                      ampli.clickedFollowOnXButton({
+                        page: "depositStatusPage",
+                        section: "xShare",
+                      });
+                    });
+                  }}
+                >
                   @AcrossProtocol
                 </Link>
               </Text>
@@ -135,17 +185,6 @@ export function TwitterShareModal({
   );
 }
 
-const Link = styled.a`
-  font-size: inherit;
-  color: ${COLORS.aqua};
-  text-decoration: none;
-  transition: opacity 0.1s;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const ButtonStyled = css`
   height: 40px;
   border-radius: 8px;
@@ -158,6 +197,30 @@ const ButtonStyled = css`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+`;
+
+const DownloadButton = styled(SecondaryButton)`
+  ${ButtonStyled}
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const DownloadIcon = styled(Download)`
+  color: ${COLORS["aqua"]};
+  flex-shrink: 0;
+`;
+
+const Link = styled.a`
+  font-size: inherit;
+  color: ${COLORS.aqua};
+  text-decoration: none;
+  transition: opacity 0.1s;
+
+  &:hover {
+    opacity: 0.8;
   }
 `;
 

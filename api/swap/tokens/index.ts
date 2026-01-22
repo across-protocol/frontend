@@ -1,19 +1,27 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
-import axios from "axios";
-import { constants } from "ethers";
+import { VercelResponse } from "@vercel/node";
+import { type, assert, Infer, optional, array, union } from "superstruct";
 
-import { getLogger, handleErrorCondition } from "../../_utils";
+import {
+  getLogger,
+  handleErrorCondition,
+  paramToArray,
+  positiveIntStr,
+} from "../../_utils";
+import { TypedVercelRequest } from "../../_types";
 
-import mainnetChains from "../../../src/data/chains_1.json";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
+import { fetchSwapTokensData, SwapToken } from "./_service";
 
-const chains = mainnetChains;
-const chainIds = chains.map((chain) => chain.chainId);
+const SwapTokensQueryParamsSchema = type({
+  chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
+});
+
+type SwapTokensQueryParams = Infer<typeof SwapTokensQueryParamsSchema>;
 
 export default async function handler(
-  request: VercelRequest,
+  request: TypedVercelRequest<SwapTokensQueryParams>,
   response: VercelResponse
 ) {
   const logger = getLogger();
@@ -27,49 +35,16 @@ export default async function handler(
     setRequestSpanAttributes(request, span, requestId);
 
     try {
-      const [uniswapTokensResponse, lifiTokensResponse] = await Promise.all([
-        axios.get("https://tokens.uniswap.org"),
-        axios.get("https://li.quest/v1/tokens"),
-      ]);
-      const nativeTokens = getNativeTokensFromLifiTokens(
-        lifiTokensResponse.data,
-        chainIds
-      );
-      const pricesForLifiTokens = getPricesForLifiTokens(
-        lifiTokensResponse.data,
-        chainIds
-      );
+      const { query } = request;
+      assert(query, SwapTokensQueryParamsSchema);
 
-      const responseJson = uniswapTokensResponse.data.tokens.reduce(
-        (acc: any, token: any) => {
-          if (chainIds.includes(token.chainId)) {
-            acc.push({
-              chainId: token.chainId,
-              address: token.address,
-              name: token.name,
-              symbol: token.symbol,
-              decimals: token.decimals,
-              logoUrl: token.logoURI,
-              priceUsd:
-                pricesForLifiTokens[token.chainId]?.[token.address] || null,
-            });
-          }
-          return acc;
-        },
-        []
-      );
+      const { chainId } = query;
+      const filteredChainIds = chainId
+        ? paramToArray(chainId)?.map(Number)
+        : undefined;
 
-      responseJson.push(
-        ...nativeTokens.map((token: any) => ({
-          chainId: token.chainId,
-          address: token.address,
-          name: token.name,
-          symbol: token.symbol,
-          decimals: token.decimals,
-          logoUrl: token.logoURI,
-          priceUsd: pricesForLifiTokens[token.chainId]?.[token.address] || null,
-        }))
-      );
+      const responseJson: SwapToken[] =
+        await fetchSwapTokensData(filteredChainIds);
 
       logger.debug({
         at: "swap/tokens",
@@ -98,38 +73,4 @@ export default async function handler(
       processor.forceFlush();
     }
   });
-}
-
-function getNativeTokensFromLifiTokens(
-  lifiTokensResponse: any,
-  chainIds: number[]
-) {
-  return chainIds.reduce((acc, chainId) => {
-    const nativeToken = lifiTokensResponse?.tokens?.[chainId]?.find(
-      (token: any) => token.address === constants.AddressZero
-    );
-    if (nativeToken) {
-      acc.push(nativeToken);
-    }
-    return acc;
-  }, [] as any[]);
-}
-
-function getPricesForLifiTokens(lifiTokensResponse: any, chainIds: number[]) {
-  return chainIds.reduce(
-    (acc, chainId) => {
-      const tokens = lifiTokensResponse.tokens[chainId];
-      if (!tokens) {
-        return acc;
-      }
-      tokens.forEach((token: any) => {
-        if (!acc[chainId]) {
-          acc[chainId] = {};
-        }
-        acc[chainId][token.address] = token.priceUSD;
-      });
-      return acc;
-    },
-    {} as Record<number, Record<string, string>>
-  ); // chainId -> tokenAddress -> price
 }

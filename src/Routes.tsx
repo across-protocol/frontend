@@ -1,27 +1,35 @@
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
-  Switch,
-  Route,
-  useLocation,
-  useHistory,
   Redirect,
+  Route,
+  Switch,
+  useHistory,
+  useLocation,
 } from "react-router-dom";
 import { Header, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
 import {
-  enableMigration,
-  stringValueInArray,
-  getConfig,
   chainEndpointToId,
+  enableMigration,
+  getConfig,
+  stringValueInArray,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
 import Banners from "components/Banners";
+
+export const NAVIGATION_LINKS = !enableMigration
+  ? [
+      { href: "/bridge-and-swap", name: "Bridge & Swap" },
+      { href: "/pool", name: "Pool" },
+      { href: "/rewards", name: "Rewards" },
+      { href: "/transactions", name: "Transactions" },
+    ]
+  : [];
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -41,16 +49,20 @@ const ARBRebates = lazyWithRetry(
 const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
-const Send = lazyWithRetry(
-  () => import(/* webpackChunkName: "Send" */ "./views/Bridge")
-);
 const Transactions = lazyWithRetry(
   () => import(/* webpackChunkName: "Transactions" */ "./views/Transactions")
 );
 const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
+const SwapAndBridge = lazyWithRetry(
+  () => import(/* webpackChunkName: "RewardStaking" */ "./views/SwapAndBridge")
+);
 const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
+
+const Transaction = lazyWithRetry(
+  () => import(/* webpackChunkName: "Transaction" */ "./views/Transaction")
+);
 
 function useRoutes() {
   const [enableACXBanner, setEnableACXBanner] = useState(true);
@@ -109,6 +121,11 @@ const Routes: React.FC = () => {
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
           <Route exact path="/transactions" component={Transactions} />
+          <Route
+            exact
+            path="/transaction/:depositTxnRef"
+            component={Transaction}
+          />
           <Route exact path="/pool" component={LiquidityPool} />
           <Route
             exact
@@ -137,27 +154,47 @@ const Routes: React.FC = () => {
               }
             }}
           />
-          <Route exact path="/bridge" component={Send} />
-          <Route path="/bridge/:depositTxHash" component={DepositStatus} />
+          <Route exact path="/bridge-and-swap" component={SwapAndBridge} />
+          <Route
+            path="/bridge-and-swap/:depositTxHash"
+            component={DepositStatus}
+          />
+          <Redirect exact from="/bridge" to="/bridge-and-swap" />
+          <Route
+            path="/bridge/:depositTxHash"
+            render={({ match, location: routeLocation }) => (
+              <Redirect
+                to={{
+                  pathname: `/bridge-and-swap/${match.params.depositTxHash}`,
+                  search: routeLocation.search,
+                }}
+              />
+            )}
+          />
           <Redirect
             exact
             path="/"
             to={{
-              pathname: "/bridge",
+              pathname: "/bridge-and-swap",
               search: location.search,
             }}
           />
           {Object.values(chainEndpointToId).flatMap(
             ({ chainId, associatedProjectIds, vanity }) => [
               vanity.map((v) => (
-                <Route key={v} exact path={`/${v}`} render={() => <Send />} />
+                <Route
+                  key={v}
+                  exact
+                  path={`/${v}`}
+                  render={() => <SwapAndBridge />}
+                />
               )),
               associatedProjectIds.map((projectId) => (
                 <Route
                   key={`${chainId}:${projectId}`}
                   exact
                   path={`/${projectId}`}
-                  render={() => <Send />}
+                  render={() => <SwapAndBridge />}
                 />
               )),
             ]

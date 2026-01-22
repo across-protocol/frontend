@@ -14,9 +14,131 @@ const {
   RELAYER_FEE_CAPITAL_COST_ORIGIN_CHAIN_OVERRIDES,
 } = getEnvs();
 
-export const CHAIN_IDs = constants.CHAIN_IDs;
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
-export const CHAINS = constants.PUBLIC_NETWORKS;
+export const CHAIN_IDs = {
+  ...constants.CHAIN_IDs,
+  HYPERCORE_TESTNET: 13372,
+  LIGHTER: 2337,
+};
+
+export const TOKEN_SYMBOLS_MAP = {
+  ...constants.TOKEN_SYMBOLS_MAP,
+  WETH: {
+    ...constants.TOKEN_SYMBOLS_MAP.WETH,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.WETH.addresses,
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+    },
+  },
+  POL: {
+    ...constants.TOKEN_SYMBOLS_MAP.POL,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.POL.addresses,
+      [CHAIN_IDs.POLYGON]: "0x0000000000000000000000000000000000001010",
+    },
+  },
+  WHYPE: {
+    ...constants.TOKEN_SYMBOLS_MAP.WHYPE,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.HYPE.addresses,
+      [CHAIN_IDs.HYPERCORE]: "0x2222222222222222222222222222222222222222",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2222222222222222222222222222222222222222",
+    },
+  },
+  USDC: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDC,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+      [CHAIN_IDs.LIGHTER]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+  },
+  USDT: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDT,
+    addresses: {
+      ...constants.TOKEN_SYMBOLS_MAP.USDT.addresses,
+      [CHAIN_IDs.UNICHAIN]: "0x9151434b16b9763660705744891fA906F660EcC5",
+    },
+  },
+  USDH: {
+    ...constants.TOKEN_SYMBOLS_MAP.USDH,
+    name: "USDH",
+  },
+  "USDH-SPOT": {
+    name: "USDH",
+    symbol: "USDH-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000168",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000168",
+    },
+    coingeckoId: "usdh-2",
+  },
+  "USDC-SPOT": {
+    name: "USDC",
+    symbol: "USDC-SPOT",
+    decimals: 8,
+    addresses: {
+      [CHAIN_IDs.HYPERCORE]: "0x2000000000000000000000000000000000000000",
+      [CHAIN_IDs.HYPERCORE_TESTNET]:
+        "0x2000000000000000000000000000000000000000",
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+  "USDC-SPOT-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-SPOT-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000301",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+  "USDC-PERPS-LIGHTER": {
+    name: "USDC",
+    symbol: "USDC-PERPS-LIGHTER",
+    decimals: 6,
+    addresses: {
+      [CHAIN_IDs.LIGHTER]: "0x0000000000000000000000000000000000000300",
+      [CHAIN_IDs.MAINNET]:
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET],
+    },
+    coingeckoId: constants.TOKEN_SYMBOLS_MAP.USDC.coingeckoId,
+  },
+};
+
+export const CHAINS = {
+  ...constants.PUBLIC_NETWORKS,
+  [CHAIN_IDs.HYPERCORE_TESTNET]: {
+    ...constants.PUBLIC_NETWORKS[CHAIN_IDs.HYPERCORE],
+    chainId: CHAIN_IDs.HYPERCORE_TESTNET,
+  },
+  [CHAIN_IDs.LIGHTER]: {
+    name: "Lighter",
+    family: constants.ChainFamily.NONE,
+    nativeToken: "ETH",
+    publicRPC: "https://rpc.lighter.xyz",
+    blockExplorer: "https://app.lighter.xyz/explorer",
+    cctpDomain: constants.CCTP_NO_DOMAIN,
+    oftEid: constants.OFT_NO_EID,
+    hypDomainId: constants.HYPERLANE_NO_DOMAIN_ID,
+    chainId: CHAIN_IDs.LIGHTER,
+  },
+};
+export const KNOWN_CHAIN_IDS = new Set(Object.values(CHAIN_IDs));
+export const TOKEN_EQUIVALENCE_REMAPPING: Record<string, string> = {
+  ...constants.TOKEN_EQUIVALENCE_REMAPPING,
+  "USDH-SPOT": "USDH",
+  "USDC-SPOT": "USDC",
+  "USDT-SPOT": "USDT",
+  "USDC-SPOT-LIGHTER": "USDC",
+  "USDC-PERPS-LIGHTER": "USDC",
+};
+export const CCTP_NO_DOMAIN = constants.CCTP_NO_DOMAIN;
 
 export const maxRelayFeePct = 0.25;
 
@@ -122,6 +244,11 @@ const _defaultRelayerFeeCapitalCostConfig: {
     upperBound: ethers.utils.parseUnits("0.5").toString(),
     cutoff: ethers.utils.parseUnits("1").toString(),
   },
+  VLR: {
+    lowerBound: ethers.utils.parseUnits("0").toString(),
+    upperBound: ethers.utils.parseUnits("0").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+  },
   WLD: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0005").toString(),
@@ -147,16 +274,8 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
   } = {};
   const tokensWithSameConfig = [
     ["USDT", "USDT-BNB"],
-    [
-      "USDC",
-      "USDC.e",
-      "USDC-BNB",
-      "USDzC",
-      "TATARA-USDC",
-      "TATARA-USDT",
-      "TATARA-USDS",
-    ],
-    ["WBTC", "TATARA-WBTC"],
+    ["USDC", "USDC.e", "USDC-BNB", "USDzC"],
+    ["WBTC"],
     ["DAI", "USDB"],
     ["GHO", "WGHO"],
     ["BNB", "WBNB"],
@@ -203,6 +322,13 @@ export function populateDefaultRelayerFeeCapitalCostConfig(
 
 export const coinGeckoAssetPlatformLookup: Record<string, number> = {
   "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
+  "0x5555555555555555555555555555555555555555": CHAIN_IDs.HYPEREVM,
+  [TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD].toLowerCase()]:
+    CHAIN_IDs.MONAD,
+  [TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA].toLowerCase()]:
+    CHAIN_IDs.PLASMA,
+  [TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM].toLowerCase()]:
+    CHAIN_IDs.HYPEREVM,
 };
 
 export const graphAPIKey = GRAPH_API_KEY;
@@ -286,18 +412,28 @@ export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set([
   "gho",
   "bnb",
   "sol",
+  "hype",
+  "xpl",
+  "pol",
+  "mon",
 ]);
 export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
   TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.WGHO.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.GHO.addresses[CHAIN_IDs.MAINNET],
-  ...Object.values(TOKEN_SYMBOLS_MAP["TATARA-USDC"].addresses),
   TOKEN_SYMBOLS_MAP.BNB.addresses[CHAIN_IDs.MAINNET],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
   TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
-  TOKEN_SYMBOLS_MAP.VLR.addresses[CHAIN_IDs.MAINNET],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA],
-  TOKEN_SYMBOLS_MAP.SOL.addresses[CHAIN_IDs.SOLANA_DEVNET],
+  TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM],
+  TOKEN_SYMBOLS_MAP.HYPE.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA],
+  TOKEN_SYMBOLS_MAP.XPL.addresses[CHAIN_IDs.PLASMA_TESTNET],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM],
+  TOKEN_SYMBOLS_MAP.USDH.addresses[CHAIN_IDs.HYPEREVM_TESTNET],
+  TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD],
+  TOKEN_SYMBOLS_MAP.MON.addresses[CHAIN_IDs.MONAD_TESTNET],
 ]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
@@ -318,13 +454,13 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.WGHO,
   TOKEN_SYMBOLS_MAP.LSK,
   TOKEN_SYMBOLS_MAP.WLD,
+  TOKEN_SYMBOLS_MAP.VLR,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
 
 export const MULTICALL3_ADDRESS = "0xcA11bde05977b3631167028862bE2a173976CA11";
 export const MULTICALL3_ADDRESS_OVERRIDES = {
-  [CHAIN_IDs.ALEPH_ZERO]: "0x3CA11702f7c0F28e0b4e03C31F7492969862C569",
   [CHAIN_IDs.LENS]: "0xeee5a340Cdc9c179Db25dea45AcfD5FE8d4d3eB8",
   [CHAIN_IDs.ZK_SYNC]: "0xF9cda624FBC7e059355ce98a31693d299FACd963",
 };
@@ -340,10 +476,38 @@ export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
 
 export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";
 
-export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 3.25 * 60 * 60; // 3.25 hours
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2 * 60 * 60; // 2 hours
 
-export const CUSTOM_GAS_TOKENS = {
+export const CUSTOM_GAS_TOKENS: Record<number, string> = {
   ...sdkConstants.CUSTOM_GAS_TOKENS,
-  [CHAIN_IDs.LENS]: "GHO",
-  [CHAIN_IDs.BSC]: "BNB",
+  [CHAIN_IDs.HYPERCORE_TESTNET]: "HYPE",
 };
+
+export const EVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family !== constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
+
+export const SVM_CHAIN_IDs = Object.entries(constants.PUBLIC_NETWORKS)
+  .filter(([_, chain]) => chain.family === constants.ChainFamily.SVM)
+  .map(([chainId]) => Number(chainId));
+
+export const STABLE_COIN_SYMBOLS = Array.from(
+  new Set([
+    ...sdkConstants.STABLE_COIN_SYMBOLS,
+    "USDe",
+    "USDS",
+    "USDf",
+    "USDTB",
+    "PYUSD",
+    "USD1",
+    "USDF",
+    "BFUSD",
+    "FDUSD",
+    "USDG",
+    "RLUSD",
+    "USD0",
+    "TUSD",
+    "USDD",
+    "EURC",
+  ])
+);

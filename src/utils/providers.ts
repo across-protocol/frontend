@@ -6,7 +6,7 @@ import {
   vercelApiBaseUrl,
 } from "./constants";
 import { createSolanaRpc, MainnetUrl } from "@solana/kit";
-import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
+import { SVMProvider } from "./sdk";
 
 export function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =

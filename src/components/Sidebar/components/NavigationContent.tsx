@@ -4,27 +4,21 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { AccountContent } from "./AccountContent";
 import { SidebarItem } from "./SidebarItem";
+import { LegalDisclaimer } from "./LegalDisclaimer";
+import { NAVIGATION_LINKS } from "Routes";
 
-const sidebarNavigationLinks = [
+type NavigationLInk = {
+  href: string;
+  name: string;
+  isExternalLink?: boolean;
+  rightIcon?: React.ReactNode;
+};
+
+const sidebarNavigationLinks: NavigationLInk[] = [
+  ...NAVIGATION_LINKS,
   {
-    pathName: "/bridge",
-    title: "Bridge",
-  },
-  {
-    pathName: "/pool",
-    title: "Pool",
-  },
-  {
-    pathName: "/rewards",
-    title: "Rewards",
-  },
-  {
-    pathName: "/transactions",
-    title: "Transactions",
-  },
-  {
-    pathName: "https://docs.across.to/",
-    title: "Docs",
+    href: "https://docs.across.to/",
+    name: "Docs",
     isExternalLink: true,
     rightIcon: <ExternalLinkIcon />,
   },
@@ -61,6 +55,11 @@ const sidebarAboutLinks = [
     link: "https://across.to/terms-of-service",
     isExternalLink: true,
   },
+  {
+    title: "Privacy Policy",
+    link: "https://across.to/privacy-policy",
+    isExternalLink: true,
+  },
 ];
 
 export function NavigationContent() {
@@ -74,20 +73,20 @@ export function NavigationContent() {
     <>
       <AccountContent />
       {sidebarNavigationLinks.map((item) =>
-        item.isExternalLink ? (
+        item?.isExternalLink ? (
           <SidebarItem.ExternalLink
-            key={item.title}
+            key={item.name}
             onClick={handleClickNavLink}
-            label={item.title}
-            linkTo={item.pathName}
+            label={item.name}
+            linkTo={item.href}
             rightIcon={item.rightIcon}
           />
         ) : (
           <SidebarItem.InternalLink
-            key={item.title}
+            key={item.name}
             onClick={handleClickNavLink}
-            label={item.title}
-            path={item.pathName}
+            label={item.name}
+            path={item.href}
           />
         )
       )}
@@ -98,6 +97,7 @@ export function NavigationContent() {
           href: item.link,
         }))}
       />
+      <LegalDisclaimer />
     </>
   );
 }

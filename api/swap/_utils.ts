@@ -15,7 +15,7 @@ import {
   refine,
   defaulted,
 } from "superstruct";
-import { BigNumber, constants, ethers, utils } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import { TypedVercelRequest } from "../_types";
@@ -28,23 +28,37 @@ import {
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
   paramToArray,
-  getChainInfo,
-  getCachedTokenPrice,
+  ConvertDecimals,
+  isOutputTokenBridgeable,
+  addMarkupToAmount,
 } from "../_utils";
 import { AbiEncodingError, InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
-import { CrossSwapQuotes, SwapQuote, Token, AmountType } from "../_dexes/types";
-import { AMOUNT_TYPE, AppFee, CrossSwapType } from "../_dexes/utils";
+import {
+  CrossSwapQuotes,
+  SwapQuote,
+  Token,
+  AmountType,
+  IndirectDestinationRoute,
+} from "../_dexes/types";
+import {
+  AMOUNT_TYPE,
+  AppFee,
+  CROSS_SWAP_TYPE,
+  CrossSwapType,
+} from "../_dexes/utils";
 import {
   encodeApproveCalldata,
   encodeDrainCalldata,
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
-import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
-
-const PRICE_DIFFERENCE_TOLERANCE = 0.01;
+import { calculateSwapFees } from "./_swap-fees";
+import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
+import { assertValidAddressChainCombination } from "./_validations";
+import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
+import { getNativeTokenInfo } from "../_token-info";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -60,7 +74,7 @@ export const BaseSwapQueryParamsSchema = type({
   refundOnOrigin: optional(boolStr()),
   // DEPRECATED: Use `slippage` instead
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
-  slippage: optional(positiveFloatStr(0.5)), // max. 50% slippage
+  slippage: optional(union([positiveFloatStr(0.5), enums(["auto"])])), // max. 50% slippage
   skipOriginTxEstimation: optional(boolStr()),
   excludeSources: optional(union([array(string()), string()])),
   includeSources: optional(union([array(string()), string()])),
@@ -68,6 +82,9 @@ export const BaseSwapQueryParamsSchema = type({
   appFeeRecipient: optional(validAddress()),
   strictTradeType: optional(boolStr()),
   skipChecks: optional(boolStr()),
+  routingPreference: optional(
+    enums(["default", "across", "native", "sponsored-cctp"])
+  ),
 });
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
@@ -88,9 +105,9 @@ export async function handleBaseSwapQueryParams(
     depositor,
     integratorId,
     refundAddress,
-    refundOnOrigin: _refundOnOrigin = "true",
+    refundOnOrigin: _refundOnOrigin,
     slippageTolerance,
-    slippage = "0.01", // Default to 1% slippage
+    slippage = "auto", // Default to auto slippage
     skipOriginTxEstimation: _skipOriginTxEstimation = "false",
     excludeSources: _excludeSources,
     includeSources: _includeSources,
@@ -98,28 +115,127 @@ export async function handleBaseSwapQueryParams(
     appFeeRecipient,
     strictTradeType: _strictTradeType = "true",
     skipChecks: _skipChecks = "false",
+    routingPreference = "default",
   } = query;
 
   const originChainId = Number(_originChainId);
   const destinationChainId = Number(_destinationChainId);
-  const refundOnOrigin = _refundOnOrigin === "true";
   const skipOriginTxEstimation = _skipOriginTxEstimation === "true";
   const skipChecks = _skipChecks === "true";
   const strictTradeType = _strictTradeType === "true";
-  const isInputNative = _inputTokenAddress === constants.AddressZero;
-  const isOutputNative = _outputTokenAddress === constants.AddressZero;
+  const isInputNative = isNativeToken(_inputTokenAddress, originChainId);
+  const isOutputNative = isNativeToken(_outputTokenAddress, destinationChainId);
+  const isDestinationSvm = sdk.utils.chainIsSvm(destinationChainId);
+  const isOriginSvm = sdk.utils.chainIsSvm(originChainId);
+
+  if (
+    !KNOWN_CHAIN_IDS.has(originChainId) ||
+    !KNOWN_CHAIN_IDS.has(destinationChainId)
+  ) {
+    const unknownChainIdParam = !KNOWN_CHAIN_IDS.has(originChainId)
+      ? "originChainId"
+      : "destinationChainId";
+    throw new InvalidParamError({
+      param: unknownChainIdParam,
+      message: `Unsupported chain id: ${originChainId}`,
+    });
+  }
+
+  assertValidAddressChainCombination({
+    address: _inputTokenAddress,
+    chainId: originChainId,
+    paramName: "inputToken",
+  });
+  assertValidAddressChainCombination({
+    address: _outputTokenAddress,
+    chainId: destinationChainId,
+    paramName: "outputToken",
+  });
+
   const inputTokenAddress = isInputNative
     ? getWrappedNativeTokenAddress(originChainId)
-    : utils.getAddress(_inputTokenAddress);
+    : sdk.utils.toAddressType(_inputTokenAddress, originChainId).toNative();
   const outputTokenAddress = isOutputNative
     ? getWrappedNativeTokenAddress(destinationChainId)
-    : utils.getAddress(_outputTokenAddress);
+    : sdk.utils
+        .toAddressType(_outputTokenAddress, destinationChainId)
+        .toNative();
   const excludeSources = _excludeSources
     ? paramToArray(_excludeSources)
     : undefined;
   const includeSources = _includeSources
     ? paramToArray(_includeSources)
     : undefined;
+
+  // Check if output token is bridgeable (used for refundOnOrigin default and SVM validation)
+  const outputBridgeable = isOutputTokenBridgeable(
+    outputTokenAddress,
+    originChainId,
+    destinationChainId
+  );
+
+  // Whitelisted output tokens that behave like bridgeable tokens
+  const isToWhitelistedOutputToken = !![
+    TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP.USDH.addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"].addresses[destinationChainId],
+    TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"].addresses[destinationChainId],
+  ]
+    .filter(Boolean)
+    .find(
+      (address) => address.toLowerCase() === outputTokenAddress.toLowerCase()
+    );
+
+  const isOutputBridgeableOrWhitelisted =
+    outputBridgeable || isToWhitelistedOutputToken;
+
+  if (isOriginSvm || isDestinationSvm) {
+    if (!recipient) {
+      throw new InvalidParamError({
+        param: "recipient",
+        message: "Recipient is required for routes involving Solana",
+      });
+    }
+
+    if (appFee || appFeeRecipient) {
+      throw new InvalidParamError({
+        param: "appFee, appFeeRecipient",
+        message: "App fee is not supported for routes involving Solana",
+      });
+    }
+
+    // Restrict SVM ↔ EVM combinations that require a destination swap
+    if (!isOutputBridgeableOrWhitelisted) {
+      throw new InvalidParamError({
+        param: "outputToken",
+        message:
+          "Destination swaps are not supported yet for routes involving Solana.",
+      });
+    }
+  }
+
+  // 'depositor', 'recipient' and 'appFeeRecipient' address type validations
+  assertValidAddressChainCombination({
+    address: depositor,
+    chainId: originChainId,
+    paramName: "depositor",
+  });
+  if (recipient) {
+    assertValidAddressChainCombination({
+      address: recipient,
+      chainId: destinationChainId,
+      paramName: "recipient",
+    });
+  }
+  if (appFeeRecipient) {
+    assertValidAddressChainCombination({
+      address: appFeeRecipient,
+      chainId: destinationChainId,
+      paramName: "appFeeRecipient",
+    });
+  }
 
   if (excludeSources && includeSources) {
     throw new InvalidParamError({
@@ -152,12 +268,13 @@ export async function handleBaseSwapQueryParams(
     });
   }
 
-  if (integratorId && !isValidIntegratorId(integratorId)) {
-    throw new InvalidParamError({
-      param: "integratorId",
-      message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
-    });
-  }
+  // For refundOnOrigin, use explicit value if provided, otherwise default based on output bridgeability:
+  // - Bridgeable output (B2B, B2BI, A2B): refund on origin (true)
+  // - Non-bridgeable output (B2A, A2A): refund on destination (false)
+  const refundOnOrigin =
+    _refundOnOrigin !== undefined
+      ? _refundOnOrigin === "true"
+      : isOutputBridgeableOrWhitelisted;
 
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
@@ -165,7 +282,8 @@ export async function handleBaseSwapQueryParams(
   const slippageToleranceNum = slippageTolerance
     ? parseFloat(slippageTolerance)
     : undefined;
-  const slippageNum = parseFloat(slippage);
+  const slippageNumOrStr =
+    slippage === "auto" ? slippage : parseFloat(slippage);
   const appFeeNum = appFee ? parseFloat(appFee) : undefined;
 
   const [inputToken, outputToken] = await Promise.all([
@@ -193,15 +311,26 @@ export async function handleBaseSwapQueryParams(
     recipient,
     depositor,
     slippageTolerance: slippageToleranceNum,
-    slippage: slippageNum,
+    slippage: slippageNumOrStr,
     excludeSources,
     includeSources,
     appFeePercent: appFeeNum,
     appFeeRecipient,
     strictTradeType,
     skipChecks,
+    isDestinationSvm,
+    isOriginSvm,
+    routingPreference,
   };
 }
+
+const isNativeToken = (tokenAddress: string, chainId: number) => {
+  if (tokenAddress === constants.AddressZero) return true;
+  return (
+    chainId === CHAIN_IDs.POLYGON &&
+    tokenAddress === TOKEN_SYMBOLS_MAP.POL.addresses[chainId]
+  );
+};
 
 // Schema definitions for embedded actions
 // Input param for a function call
@@ -244,7 +373,24 @@ const SwapBody = type({
 
 export type SwapBody = Infer<typeof SwapBody>;
 
-export function handleSwapBody(body: SwapBody, destinationChainId: number) {
+export function handleSwapBody(
+  body: SwapBody,
+  destinationChainId: number,
+  originChainId: number
+) {
+  // Disable actions when origin or destination is SVM
+  if (
+    sdk.utils.chainIsSvm(originChainId) ||
+    sdk.utils.chainIsSvm(destinationChainId)
+  ) {
+    if (body.actions && body.actions.length > 0) {
+      throw new InvalidParamError({
+        param: "actions",
+        message: "Actions are not supported yet for routes involving Solana.",
+      });
+    }
+  }
+
   // Validate rules for each action. We have to validate the input before default values are applied.
   body.actions?.forEach((action, index) => {
     // 1. Validate that value is provided when populateCallValueDynamically is false or omitted
@@ -513,288 +659,18 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
   ) as T;
 }
 
-export async function calculateSwapFees(params: {
-  inputAmount: BigNumber;
-  originSwapQuote?: SwapQuote;
-  bridgeQuote: CrossSwapQuotes["bridgeQuote"];
-  destinationSwapQuote?: SwapQuote;
-  appFeePercent?: number;
-  appFee?: AppFee;
-  originTxGas?: BigNumber;
-  originTxGasPrice?: BigNumber;
-  inputTokenPriceUsd: number;
-  outputTokenPriceUsd: number;
-  originNativePriceUsd: number;
-  destinationNativePriceUsd: number;
-  bridgeQuoteInputTokenPriceUsd: number;
-  appFeeTokenPriceUsd: number;
-  minOutputAmountSansAppFees: BigNumber;
-  originChainId: number;
-  destinationChainId: number;
-  logger: Logger;
-}) {
-  const {
-    inputAmount,
-    originSwapQuote,
-    bridgeQuote,
-    destinationSwapQuote,
-    appFee,
-    originTxGas,
-    originTxGasPrice,
-    inputTokenPriceUsd: _inputTokenPriceUsd,
-    outputTokenPriceUsd: _outputTokenPriceUsd,
-    originNativePriceUsd,
-    destinationNativePriceUsd,
-    bridgeQuoteInputTokenPriceUsd,
-    appFeeTokenPriceUsd,
-    minOutputAmountSansAppFees,
-    originChainId,
-    destinationChainId,
-    logger,
-  } = params;
-
-  try {
-    if (
-      _inputTokenPriceUsd === 0 ||
-      _outputTokenPriceUsd === 0 ||
-      originNativePriceUsd === 0 ||
-      destinationNativePriceUsd === 0 ||
-      bridgeQuoteInputTokenPriceUsd === 0
-    ) {
-      logger.debug({
-        at: "calculateSwapFees",
-        message: "Error calculating swap fees. Could not resolve USD prices.",
-        _inputTokenPriceUsd,
-        _outputTokenPriceUsd,
-        originNativePriceUsd,
-        destinationNativePriceUsd,
-        bridgeQuoteInputTokenPriceUsd,
-      });
-      return {};
-    }
-
-    const inputToken = originSwapQuote?.tokenIn ?? bridgeQuote.inputToken;
-    const outputToken =
-      destinationSwapQuote?.tokenOut ?? bridgeQuote.outputToken;
-
-    const priceDifference = Math.abs(
-      _inputTokenPriceUsd - _outputTokenPriceUsd
-    );
-    const priceDifferencePercentage = priceDifference / _inputTokenPriceUsd;
-
-    let inputTokenPriceUsd = _inputTokenPriceUsd;
-    let outputTokenPriceUsd = _outputTokenPriceUsd;
-
-    if (
-      inputToken.symbol === outputToken.symbol &&
-      (priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
-        outputTokenPriceUsd > inputTokenPriceUsd)
-    ) {
-      [inputTokenPriceUsd, outputTokenPriceUsd] = await Promise.all([
-        getCachedTokenPrice({
-          symbol: inputToken.symbol,
-          tokenAddress: inputToken.address,
-          chainId: inputToken.chainId,
-          fallbackResolver: "lifi",
-        }),
-        getCachedTokenPrice({
-          symbol: outputToken.symbol,
-          tokenAddress: outputToken.address,
-          chainId: outputToken.chainId,
-          fallbackResolver: "lifi",
-        }),
-      ]);
-
-      if (
-        priceDifferencePercentage > PRICE_DIFFERENCE_TOLERANCE ||
-        outputTokenPriceUsd > inputTokenPriceUsd ||
-        outputTokenPriceUsd === 0 ||
-        inputTokenPriceUsd === 0
-      ) {
-        logger.debug({
-          at: "calculateSwapFees",
-          message:
-            "Error calculating swap fees. USD prices are not consistent.",
-          _inputTokenPriceUsd,
-          _outputTokenPriceUsd,
-          inputTokenPriceUsd,
-          outputTokenPriceUsd,
-        });
-        return {};
-      }
-    }
-
-    const originGas =
-      originTxGas && originTxGasPrice
-        ? originTxGas.mul(originTxGasPrice)
-        : BigNumber.from(0);
-
-    const appFeeAmount = appFee?.feeAmount || BigNumber.from(0);
-    const appFeeToken = appFee?.feeToken || outputToken;
-    const appFeeUsd =
-      parseFloat(utils.formatUnits(appFeeAmount, appFeeToken.decimals)) *
-      appFeeTokenPriceUsd;
-
-    const bridgeFees = bridgeQuote.suggestedFees;
-    const relayerCapital = bridgeFees.relayerCapitalFee;
-    const destinationGas = bridgeFees.relayerGasFee;
-    const lpFee = bridgeFees.lpFee;
-    const relayerTotal = bridgeFees.totalRelayFee;
-
-    const originGasToken = getNativeTokenInfo(originChainId);
-    const destinationGasToken = getNativeTokenInfo(destinationChainId);
-
-    // Calculate USD amounts
-    const originGasUsd =
-      parseFloat(utils.formatUnits(originGas, originGasToken.decimals)) *
-      originNativePriceUsd;
-    // We need to use bridge input token price for destination gas since
-    // suggested fees returns the gas total in input token decimals
-    const destinationGasUsd =
-      parseFloat(
-        utils.formatUnits(destinationGas.total, bridgeQuote.inputToken.decimals)
-      ) * bridgeQuoteInputTokenPriceUsd;
-    const relayerCapitalUsd =
-      parseFloat(
-        utils.formatUnits(relayerCapital.total, bridgeQuote.inputToken.decimals)
-      ) * bridgeQuoteInputTokenPriceUsd;
-    const lpFeeUsd =
-      parseFloat(
-        utils.formatUnits(lpFee.total, bridgeQuote.inputToken.decimals)
-      ) * bridgeQuoteInputTokenPriceUsd;
-    const relayerTotalUsd =
-      parseFloat(
-        utils.formatUnits(relayerTotal.total, bridgeQuote.inputToken.decimals)
-      ) * bridgeQuoteInputTokenPriceUsd;
-    const inputAmountUsd =
-      parseFloat(utils.formatUnits(inputAmount, inputToken.decimals)) *
-      inputTokenPriceUsd;
-    const outputMinAmountSansAppFeesUsd =
-      parseFloat(
-        utils.formatUnits(minOutputAmountSansAppFees, outputToken.decimals)
-      ) * outputTokenPriceUsd;
-
-    const totalFeeUsd = inputAmountUsd - outputMinAmountSansAppFeesUsd;
-    const totalFeePct = totalFeeUsd / inputAmountUsd;
-    const totalFeeAmount = inputAmount
-      .mul(utils.parseEther(totalFeePct.toFixed(18)))
-      .div(sdk.utils.fixedPointAdjustment);
-
-    return {
-      total: {
-        amount: totalFeeAmount,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(totalFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(totalFeePct.toFixed(18)),
-        token: inputToken,
-      },
-      originGas: {
-        amount: originGas,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(originGasUsd.toFixed(18))
-        ),
-        token: originGasToken,
-      },
-      destinationGas: {
-        amount: safeUsdToTokenAmount(
-          destinationGasUsd,
-          destinationNativePriceUsd,
-          destinationGasToken.decimals
-        ),
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(destinationGasUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (destinationGasUsd / inputAmountUsd).toFixed(18)
-        ),
-        token: destinationGasToken,
-      },
-      relayerCapital: {
-        amount: relayerCapital.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(relayerCapitalUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (relayerCapitalUsd / inputAmountUsd).toFixed(18)
-        ),
-        token: bridgeQuote.inputToken,
-      },
-      lpFee: {
-        amount: lpFee.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(lpFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther((lpFeeUsd / inputAmountUsd).toFixed(18)),
-        token: bridgeQuote.inputToken,
-      },
-      relayerTotal: {
-        amount: relayerTotal.total,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(relayerTotalUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther(
-          (relayerTotalUsd / inputAmountUsd).toFixed(18)
-        ),
-        token: bridgeQuote.inputToken,
-      },
-      app: {
-        amount: appFeeAmount,
-        amountUsd: ethers.utils.formatEther(
-          ethers.utils.parseEther(appFeeUsd.toFixed(18))
-        ),
-        pct: ethers.utils.parseEther((appFeeUsd / inputAmountUsd).toFixed(18)),
-        token: appFeeToken,
-      },
-    };
-  } catch (error) {
-    logger.debug({
-      at: "calculateSwapFees",
-      message: "Error calculating swap fees",
-      error,
-    });
-    return {};
-  }
-}
-
-function getNativeTokenInfo(chainId: number): Token {
-  const chainInfo = getChainInfo(chainId);
-  const token =
-    TOKEN_SYMBOLS_MAP[chainInfo.nativeToken as keyof typeof TOKEN_SYMBOLS_MAP];
-  return {
-    chainId,
-    address: ethers.constants.AddressZero,
-    decimals: token.decimals,
-    symbol: token.symbol,
-  };
-}
-
-function safeUsdToTokenAmount(
-  usdAmount: number,
-  tokenPriceUsd: number,
-  decimals: number
-) {
-  if (tokenPriceUsd === 0) return utils.parseUnits("0", decimals);
-  const tokenAmount = usdAmount / tokenPriceUsd;
-  if (tokenAmount <= 0 || isNaN(tokenAmount) || !isFinite(tokenAmount)) {
-    return utils.parseUnits("0", decimals);
-  }
-  return utils.parseUnits(
-    tokenAmount.toFixed(Math.min(decimals, 18)),
-    decimals
-  );
-}
-
 export async function buildBaseSwapResponseJson(params: {
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
+  outputTokenAddress: string;
   originChainId: number;
   destinationChainId: number;
   inputAmount: BigNumber;
   allowance: BigNumber;
   balance: BigNumber;
   approvalTxns?: {
+    chainId: number;
     to: string;
     data: string;
   }[];
@@ -802,15 +678,22 @@ export async function buildBaseSwapResponseJson(params: {
   bridgeQuote: CrossSwapQuotes["bridgeQuote"];
   destinationSwapQuote?: SwapQuote;
   refundOnOrigin: boolean;
-  approvalSwapTx?: {
-    from: string;
-    to: string;
-    data: string;
-    value?: BigNumber;
-    gas?: BigNumber;
-    maxFeePerGas?: BigNumber;
-    maxPriorityFeePerGas?: BigNumber;
-  };
+  approvalSwapTx?:
+    | {
+        ecosystem: "evm";
+        from: string;
+        to: string;
+        data: string;
+        value?: BigNumber;
+        gas?: BigNumber;
+        maxFeePerGas?: BigNumber;
+        maxPriorityFeePerGas?: BigNumber;
+      }
+    | {
+        ecosystem: "svm";
+        data: string;
+        to: string;
+      };
   permitSwapTx?: any; // TODO: Add type
   appFeePercent?: number;
   appFee?: AppFee;
@@ -820,30 +703,29 @@ export async function buildBaseSwapResponseJson(params: {
   destinationNativePriceUsd: number;
   bridgeQuoteInputTokenPriceUsd: number;
   crossSwapType: CrossSwapType;
+  indirectDestinationRoute?: IndirectDestinationRoute;
   logger: Logger;
 }) {
   const refundToken = params.refundOnOrigin
     ? params.bridgeQuote.inputToken
     : params.bridgeQuote.outputToken;
+  const inputToken =
+    params.inputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.originChainId)
+      : (params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken);
+  const outputToken =
+    params.outputTokenAddress === constants.AddressZero
+      ? getNativeTokenInfo(params.destinationChainId)
+      : (params.indirectDestinationRoute?.outputToken ??
+        params.destinationSwapQuote?.tokenOut ??
+        params.bridgeQuote.outputToken);
 
-  const minOutputAmount =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : (params.destinationSwapQuote?.minAmountOut ??
-        params.bridgeQuote.outputAmount);
-  const minOutputAmountSansAppFees =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : minOutputAmount.sub(params.appFee?.feeAmount ?? 0);
-  const expectedOutputAmount =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : (params.destinationSwapQuote?.expectedAmountOut ??
-        params.bridgeQuote.outputAmount);
-  const expectedOutputAmountSansAppFees =
-    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
-      ? params.amount
-      : expectedOutputAmount.sub(params.appFee?.feeAmount ?? 0);
+  const {
+    inputAmount,
+    maxInputAmount,
+    minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
+  } = getAmounts(params);
 
   return stringifyBigNumProps({
     crossSwapType: params.crossSwapType,
@@ -880,6 +762,7 @@ export async function buildBaseSwapResponseJson(params: {
             minOutputAmount: params.originSwapQuote.minAmountOut,
             maxInputAmount: params.originSwapQuote.maximumAmountIn,
             swapProvider: params.originSwapQuote.swapProvider,
+            slippage: params.originSwapQuote.slippageTolerance / 100,
           }
         : undefined,
       bridge: {
@@ -887,12 +770,8 @@ export async function buildBaseSwapResponseJson(params: {
         outputAmount: params.bridgeQuote.outputAmount,
         tokenIn: params.bridgeQuote.inputToken,
         tokenOut: params.bridgeQuote.outputToken,
-        fees: {
-          totalRelay: params.bridgeQuote.suggestedFees.totalRelayFee,
-          relayerCapital: params.bridgeQuote.suggestedFees.relayerCapitalFee,
-          relayerGas: params.bridgeQuote.suggestedFees.relayerGasFee,
-          lp: params.bridgeQuote.suggestedFees.lpFee,
-        },
+        fees: params.bridgeQuote.fees,
+        provider: params.bridgeQuote.provider,
       },
       destinationSwap: params.destinationSwapQuote
         ? {
@@ -903,29 +782,28 @@ export async function buildBaseSwapResponseJson(params: {
             outputAmount: params.destinationSwapQuote.expectedAmountOut,
             minOutputAmount: params.destinationSwapQuote.minAmountOut,
             swapProvider: params.destinationSwapQuote.swapProvider,
+            slippage: params.destinationSwapQuote.slippageTolerance / 100,
           }
         : undefined,
     },
-    inputToken:
-      params.originSwapQuote?.tokenIn ?? params.bridgeQuote.inputToken,
-    outputToken:
-      params.destinationSwapQuote?.tokenOut ?? params.bridgeQuote.outputToken,
-    refundToken:
-      refundToken.symbol === "ETH"
-        ? {
-            ...refundToken,
-            symbol: "WETH",
-          }
-        : refundToken,
+    inputToken,
+    outputToken,
+    refundToken,
     fees: await calculateSwapFees({
-      inputAmount: params.inputAmount,
+      inputAmount,
       originSwapQuote: params.originSwapQuote,
       bridgeQuote: params.bridgeQuote,
       destinationSwapQuote: params.destinationSwapQuote,
       appFeePercent: params.appFeePercent,
       appFee: params.appFee,
-      originTxGas: params.approvalSwapTx?.gas,
-      originTxGasPrice: params.approvalSwapTx?.maxFeePerGas,
+      originTxGas:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.gas
+          : undefined,
+      originTxGasPrice:
+        params.approvalSwapTx?.ecosystem === "evm"
+          ? params.approvalSwapTx?.maxFeePerGas
+          : undefined,
       inputTokenPriceUsd: params.inputTokenPriceUsd,
       outputTokenPriceUsd: params.outputTokenPriceUsd,
       originNativePriceUsd: params.originNativePriceUsd,
@@ -933,32 +811,153 @@ export async function buildBaseSwapResponseJson(params: {
       bridgeQuoteInputTokenPriceUsd: params.bridgeQuoteInputTokenPriceUsd,
       appFeeTokenPriceUsd: params.outputTokenPriceUsd,
       minOutputAmountSansAppFees,
+      expectedOutputAmountSansAppFees,
       originChainId: params.originChainId,
       destinationChainId: params.destinationChainId,
+      indirectDestinationRoute: params.indirectDestinationRoute,
       logger: params.logger,
+      bridgeProvider: params.bridgeQuote.provider,
     }),
-    inputAmount:
-      params.amountType === AMOUNT_TYPE.EXACT_INPUT
-        ? params.amount
-        : (params.originSwapQuote?.expectedAmountIn ??
-          params.bridgeQuote.inputAmount),
+    inputAmount,
+    maxInputAmount,
     expectedOutputAmount: expectedOutputAmountSansAppFees,
     minOutputAmount: minOutputAmountSansAppFees,
-    expectedFillTime: params.bridgeQuote.suggestedFees.estimatedFillTimeSec,
-    swapTx: params.approvalSwapTx
-      ? {
-          simulationSuccess: !!params.approvalSwapTx.gas,
-          chainId: params.originChainId,
-          to: params.approvalSwapTx.to,
-          data: params.approvalSwapTx.data,
-          value: params.approvalSwapTx.value,
-          gas: params.approvalSwapTx.gas,
-          maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
-          maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
-        }
-      : params.permitSwapTx
-        ? params.permitSwapTx.swapTx
-        : undefined,
+    expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
+    swapTx: getSwapTx(params),
     eip712: params.permitSwapTx?.eip712,
+    quoteExpiryTimestamp:
+      params.bridgeQuote.provider === "across"
+        ? getQuoteExpiryTimestamp(
+            params.bridgeQuote.suggestedFees.timestamp,
+            params.destinationSwapQuote?.tokenOut.chainId
+          )
+        : 0, // Implies no quote expiry
   });
+}
+
+function getAmounts(params: Parameters<typeof buildBaseSwapResponseJson>[0]) {
+  let inputAmount = BigNumber.from(0);
+  let maxInputAmount = BigNumber.from(0);
+  let minOutputAmount = BigNumber.from(0);
+  let expectedOutputAmount = BigNumber.from(0);
+
+  const appFeeAmount = params.appFee?.feeAmount ?? 0;
+  const originSlippage = (params.originSwapQuote?.slippageTolerance ?? 0) / 100;
+
+  if (params.amountType === AMOUNT_TYPE.EXACT_INPUT) {
+    inputAmount = params.amount;
+    maxInputAmount = params.amount;
+
+    // If the cross swap type B2BI, we need to convert the output amounts to correct chain decimals
+    if (
+      params.crossSwapType ===
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT &&
+      params.indirectDestinationRoute
+    ) {
+      const { intermediaryOutputToken, outputToken } =
+        params.indirectDestinationRoute;
+      minOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+      expectedOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+    } else {
+      minOutputAmount =
+        params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount;
+      expectedOutputAmount =
+        params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount;
+    }
+  } else if (params.amountType === AMOUNT_TYPE.EXACT_OUTPUT) {
+    inputAmount =
+      params.originSwapQuote?.expectedAmountIn ??
+      params.bridgeQuote.inputAmount;
+    maxInputAmount =
+      params.originSwapQuote?.maximumAmountIn ?? params.bridgeQuote.inputAmount;
+    minOutputAmount = params.amount;
+    expectedOutputAmount = params.amount;
+  } else if (params.amountType === AMOUNT_TYPE.MIN_OUTPUT) {
+    inputAmount =
+      params.originSwapQuote?.expectedAmountIn ??
+      params.bridgeQuote.inputAmount;
+    maxInputAmount =
+      params.originSwapQuote?.maximumAmountIn ?? params.bridgeQuote.inputAmount;
+
+    // If the cross swap type B2BI, we need to convert the output amounts to correct chain decimals
+    if (
+      params.crossSwapType ===
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT &&
+      params.indirectDestinationRoute
+    ) {
+      const { intermediaryOutputToken, outputToken } =
+        params.indirectDestinationRoute;
+      minOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+      expectedOutputAmount = ConvertDecimals(
+        intermediaryOutputToken.decimals,
+        outputToken.decimals
+      )(params.bridgeQuote.outputAmount);
+    } else {
+      minOutputAmount =
+        params.destinationSwapQuote?.minAmountOut ??
+        params.bridgeQuote.outputAmount;
+      expectedOutputAmount =
+        params.destinationSwapQuote?.expectedAmountOut ??
+        params.bridgeQuote.outputAmount;
+    }
+  }
+
+  const minOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? minOutputAmount
+      : minOutputAmount.sub(appFeeAmount);
+  const expectedOutputAmountSansAppFees =
+    params.amountType === AMOUNT_TYPE.EXACT_OUTPUT
+      ? expectedOutputAmount
+      : addMarkupToAmount(expectedOutputAmount, originSlippage).sub(
+          appFeeAmount
+        );
+
+  return {
+    inputAmount,
+    maxInputAmount,
+    minOutputAmount,
+    expectedOutputAmount,
+    minOutputAmountSansAppFees,
+    expectedOutputAmountSansAppFees,
+  };
+}
+
+export function getSwapTx(
+  params: Parameters<typeof buildBaseSwapResponseJson>[0]
+) {
+  if (params.approvalSwapTx?.ecosystem === "evm") {
+    return {
+      simulationSuccess: !!params.approvalSwapTx.gas,
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+      value: params.approvalSwapTx.value,
+      gas: params.approvalSwapTx.gas,
+      maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
+      maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
+    };
+  }
+
+  if (params.approvalSwapTx?.ecosystem === "svm") {
+    return {
+      simulationSuccess: false, // TODO: Figure out if we should simulate the tx on SVM
+      chainId: params.originChainId,
+      to: params.approvalSwapTx.to,
+      data: params.approvalSwapTx.data,
+    };
+  }
+
+  return params.permitSwapTx?.swapTx;
 }

@@ -1,0 +1,161 @@
+import * as sdk from "@across-protocol/sdk";
+import {
+  Address,
+  encodeFunctionData,
+  Hex,
+  parseEventLogs,
+  zeroAddress,
+} from "viem";
+import { CallResult, MemoryClient } from "tevm";
+
+import {
+  e2eConfig,
+  getSpokePoolAddress,
+  MAX_CALL_RETRIES,
+  RETRY_DELAY_MS,
+} from "./config";
+import { setAllowance } from "./token";
+import { SpokePoolAbi } from "./abis";
+import { handleTevmError, delay } from "./tevm";
+
+import type { SubmittedTxReceipts } from "./deposit";
+
+export type ExecuteFillParams = {
+  depositEvent: SubmittedTxReceipts["depositEvent"];
+  originChainId: number;
+  repaymentChainId?: number;
+  repaymentAddress?: string;
+  destinationClient: MemoryClient;
+  retryFill?: boolean;
+};
+
+export async function executeFill(params: ExecuteFillParams) {
+  const { depositEvent, originChainId, destinationClient } = params;
+  const destinationChainId = Number(depositEvent.args.destinationChainId);
+  const relayer = e2eConfig.getAccount("relayer");
+
+  const repaymentChainId = params.repaymentChainId ?? destinationChainId;
+  const repaymentAddressBytes32 = sdk.utils
+    .toAddressType(params.repaymentAddress ?? relayer.address, repaymentChainId)
+    .toBytes32();
+
+  const _spokeAddress = getSpokePoolAddress(destinationChainId);
+  const {
+    outputToken: _outputToken,
+    outputAmount,
+    exclusiveRelayer: _exclusiveRelayer,
+    depositor: _depositor,
+    recipient: _recipient,
+    inputToken: _inputToken,
+    inputAmount,
+    depositId,
+    fillDeadline,
+    exclusivityDeadline,
+    message,
+  } = depositEvent.args;
+  const depositor = sdk.utils.toAddressType(_depositor, originChainId);
+  const recipient = sdk.utils.toAddressType(_recipient, destinationChainId);
+  const inputToken = sdk.utils.toAddressType(_inputToken, originChainId);
+  const outputToken = sdk.utils.toAddressType(_outputToken, destinationChainId);
+  const spokeAddress = sdk.utils.toAddressType(
+    _spokeAddress,
+    destinationChainId
+  );
+  const exclusiveRelayer = sdk.utils.toAddressType(
+    _exclusiveRelayer,
+    destinationChainId
+  );
+  const relayerAddressToUse =
+    zeroAddress === exclusiveRelayer.toEvmAddress()
+      ? (relayer.address as Address)
+      : (exclusiveRelayer.toEvmAddress() as Address);
+
+  // Set bridging funds for relayer
+  await destinationClient.tevmDeal({
+    erc20: outputToken.toEvmAddress() as Address,
+    account: relayerAddressToUse,
+    amount: outputAmount,
+  });
+  await destinationClient.tevmMine({ blockCount: 1 });
+
+  // Approve destination SpokePool
+  await setAllowance({
+    chainId: destinationChainId,
+    tokenAddress: outputToken.toEvmAddress() as Address,
+    account: relayerAddressToUse,
+    spender: spokeAddress.toEvmAddress() as Address,
+    amount: BigInt(outputAmount.toString()),
+    from: relayerAddressToUse,
+    client: destinationClient,
+  });
+
+  // Fill relay
+  let fillCallResult: CallResult | undefined;
+  let callRetries = 0;
+
+  while (callRetries < MAX_CALL_RETRIES) {
+    try {
+      fillCallResult = await destinationClient.tevmCall({
+        from: relayerAddressToUse,
+        to: spokeAddress.toEvmAddress() as Address,
+        addToBlockchain: true,
+        data: encodeFunctionData({
+          abi: SpokePoolAbi,
+          functionName: "fillRelay",
+          args: [
+            {
+              depositor: depositor.toBytes32() as Hex,
+              recipient: recipient.toBytes32() as Hex,
+              exclusiveRelayer: exclusiveRelayer.toBytes32() as Hex,
+              inputToken: inputToken.toBytes32() as Hex,
+              outputToken: outputToken.toBytes32() as Hex,
+              inputAmount,
+              outputAmount,
+              originChainId: BigInt(originChainId),
+              depositId,
+              fillDeadline,
+              exclusivityDeadline,
+              message,
+            },
+            BigInt(repaymentChainId),
+            repaymentAddressBytes32 as Hex,
+          ],
+        }),
+        onAfterMessage: handleTevmError,
+      });
+      await destinationClient.tevmMine({ blockCount: 1 });
+      break;
+    } catch (error) {
+      if (params.retryFill && callRetries < MAX_CALL_RETRIES - 1) {
+        console.log(
+          `Fill failed, retrying... (attempt ${callRetries + 1} of ${MAX_CALL_RETRIES})`
+        );
+        await destinationClient.tevmMine({ blockCount: 1 });
+        await delay(RETRY_DELAY_MS);
+        callRetries++;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  if (!fillCallResult || !fillCallResult.txHash) {
+    throw new Error("Fill call failed");
+  }
+
+  const fillReceipt = await destinationClient.waitForTransactionReceipt({
+    hash: fillCallResult.txHash,
+  });
+
+  const fillEvents = parseEventLogs({
+    eventName: "FilledRelay",
+    abi: SpokePoolAbi,
+    logs: fillReceipt.logs,
+  });
+
+  if (!fillEvents || fillEvents.length === 0) {
+    throw new Error("No fill event found");
+  }
+
+  return { fillReceipt, fillEvents: fillEvents[0] };
+}

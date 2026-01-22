@@ -1,9 +1,10 @@
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
 import { Deposit } from "hooks/useDeposits";
-import { COLORS, getConfig } from "utils";
+import { COLORS } from "utils";
 
-import { HeaderCells, ColumnKey } from "./HeadRow";
+import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
 import { AmountCell } from "./cells/AmountCell";
 import { RouteCell } from "./cells/RouteCell";
@@ -16,6 +17,9 @@ import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
+import { useTokenFromAddress } from "hooks/useToken";
+import { useFeatureFlag } from "../../hooks";
+import { useHistory } from "react-router-dom";
 
 type Props = {
   deposit: Deposit;
@@ -23,8 +27,6 @@ type Props = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
 };
-
-const config = getConfig();
 
 function isColumnDisabled(disabledColumns: ColumnKey[], column: ColumnKey) {
   return disabledColumns.includes(column);
@@ -36,17 +38,23 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
-  const swapToken = config.getTokenInfoByAddressSafe(
-    deposit.sourceChainId,
-    deposit.swapToken?.address || ""
+  const hasTransactionFlag = useFeatureFlag("transaction-page");
+  const history = useHistory();
+
+  const swapToken = useTokenFromAddress(
+    deposit.swapToken?.address || "",
+    deposit.sourceChainId
   );
-  const inputToken = config.getTokenInfoByAddressSafe(
-    deposit.sourceChainId,
-    deposit.token?.address || deposit.assetAddr
+
+  const inputToken = useTokenFromAddress(
+    deposit.token?.address || deposit.assetAddr,
+    deposit.sourceChainId
   );
-  const outputToken = config.getTokenInfoByAddressSafe(
-    deposit.destinationChainId,
-    deposit.outputToken?.address || ""
+  const outputToken = useTokenFromAddress(
+    deposit.swapOutputToken ||
+      deposit.outputToken?.address ||
+      deposit.assetAddr,
+    deposit.destinationChainId
   );
 
   // Hide unsupported or unknown token deposits
@@ -54,8 +62,14 @@ export function DataRow({
     return null;
   }
 
+  const handleRowClick = () => {
+    if (hasTransactionFlag) {
+      history.push(`/transaction/${deposit.depositTxHash}`);
+    }
+  };
+
   return (
-    <StyledRow>
+    <StyledRow onClick={handleRowClick} hasTransactionFlag={hasTransactionFlag}>
       {isColumnDisabled(disabledColumns, "asset") ? null : (
         <AssetCell
           inputToken={inputToken}
@@ -105,7 +119,7 @@ export function DataRow({
   );
 }
 
-const StyledRow = styled.tr`
+const StyledRow = styled.tr<{ hasTransactionFlag: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -114,4 +128,14 @@ const StyledRow = styled.tr`
   border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
+
+  ${({ hasTransactionFlag }) =>
+    hasTransactionFlag &&
+    css`
+      transition: background-color 0.2s;
+      cursor: pointer;
+      &:hover {
+        background-color: ${COLORS["grey-500"]};
+      }
+    `}
 `;

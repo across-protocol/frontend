@@ -87,6 +87,12 @@ export const StakingForm = ({
   const lpFmt = poolData.lpTokenFormatter;
   const isStakingPoolEnabled = poolData.poolEnabled;
 
+  // Disable staking to Balancer 50wstETH-50ACX pool. Only allow unstaking.
+  // TODO: Remove this once Balancer V2 hack is fixed
+  const isStakingToBalancer50wstETH50ACX =
+    stakingAction === "stake" &&
+    poolData.tokenSymbol.toLowerCase() === "50wsteth-50acx";
+
   return (
     <SectionTitleWrapperV2 title="Staking">
       <CardWrapper>
@@ -133,7 +139,10 @@ export const StakingForm = ({
                 displayLoader={isMutating}
                 warningButtonColor={stakingAction === "unstake"}
                 disableInput={
-                  isDataLoading || isMutating || !poolData.poolEnabled
+                  isDataLoading ||
+                  isMutating ||
+                  !poolData.poolEnabled ||
+                  isStakingToBalancer50wstETH50ACX
                 }
               />
             )

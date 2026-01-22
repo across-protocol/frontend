@@ -1,30 +1,35 @@
-import { executeStrategies } from "../../../api/_dexes/cross-swap-service";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  executeStrategies,
+  selectBestCrossSwapQuote,
+} from "../../../api/_dexes/cross-swap-service";
 import {
   SwapQuoteUnavailableError,
   InvalidParamError,
   AcrossErrorCode,
 } from "../../../api/_errors";
+import { BigNumber } from "ethers";
 
 // format the following
-jest.mock("../../../api/_utils", () => ({
-  getBridgeQuoteForMinOutput: jest.fn(),
-  getRouteByInputTokenAndDestinationChain: jest.fn(),
-  getRouteByOutputTokenAndOriginChain: jest.fn(),
-  getRoutesByChainIds: jest.fn(),
-  getTokenByAddress: jest.fn(),
-  getBridgeQuoteForExactInput: jest.fn(),
-  addTimeoutToPromise: jest.fn(),
-  getRejectedReasons: jest.fn(),
-  getLogger: jest.fn(() => ({ debug: jest.fn() })),
+vi.mock("../../../api/_utils", () => ({
+  getBridgeQuoteForMinOutput: vi.fn(),
+  getRouteByInputTokenAndDestinationChain: vi.fn(),
+  getRouteByOutputTokenAndOriginChain: vi.fn(),
+  getRoutesByChainIds: vi.fn(),
+  getTokenByAddress: vi.fn(),
+  getBridgeQuoteForExactInput: vi.fn(),
+  addTimeoutToPromise: vi.fn((promise) => promise),
+  getRejectedReasons: vi.fn(),
+  getLogger: vi.fn(() => ({ debug: vi.fn() })),
 }));
 
-jest.mock("../../../api/_dexes/utils", () => ({
-  buildExactInputBridgeTokenMessage: jest.fn(),
-  buildExactOutputBridgeTokenMessage: jest.fn(),
-  buildMinOutputBridgeTokenMessage: jest.fn(),
-  getCrossSwapTypes: jest.fn(),
-  getPreferredBridgeTokens: jest.fn(),
-  getQuoteFetchStrategies: jest.fn(),
+vi.mock("../../../api/_dexes/utils", () => ({
+  buildExactInputBridgeTokenMessage: vi.fn(),
+  buildExactOutputBridgeTokenMessage: vi.fn(),
+  buildMinOutputBridgeTokenMessage: vi.fn(),
+  getCrossSwapTypes: vi.fn(),
+  getPreferredBridgeTokens: vi.fn(),
+  getQuoteFetchStrategies: vi.fn(),
   defaultQuoteFetchStrategies: {},
   AMOUNT_TYPE: {
     EXACT_INPUT: "exactInput",
@@ -37,17 +42,17 @@ jest.mock("../../../api/_dexes/utils", () => ({
     ANY_TO_BRIDGEABLE: "anyToBridgeable",
     ANY_TO_ANY: "anyToAny",
   },
-  buildDestinationSwapCrossChainMessage: jest.fn(),
-  assertMinOutputAmount: jest.fn(),
+  buildDestinationSwapCrossChainMessage: vi.fn(),
+  assertMinOutputAmount: vi.fn(),
 }));
 
-jest.mock("../../../api/_multicall-handler", () => ({
-  getMultiCallHandlerAddress: jest.fn(),
+vi.mock("../../../api/_multicall-handler", () => ({
+  getMultiCallHandlerAddress: vi.fn(),
 }));
 
 describe("#executeStrategies()", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("equal-speed mode", () => {
@@ -302,5 +307,119 @@ describe("#executeStrategies()", () => {
         InvalidParamError
       );
     });
+  });
+});
+
+describe("#selectBestCrossSwapQuote() - origin swap preference", () => {
+  const mockToken = {
+    address: "0x1234567890123456789012345678901234567890",
+    symbol: "TEST",
+    decimals: 18,
+    chainId: 1,
+  };
+
+  const mockFees = {
+    totalRelay: {
+      pct: BigNumber.from("1"),
+      total: BigNumber.from("1000"),
+      token: mockToken,
+    },
+    relayerCapital: {
+      pct: BigNumber.from("5"),
+      total: BigNumber.from("500"),
+      token: mockToken,
+    },
+    relayerGas: {
+      pct: BigNumber.from("3"),
+      total: BigNumber.from("300"),
+      token: mockToken,
+    },
+    lp: {
+      pct: BigNumber.from("2"),
+      total: BigNumber.from("200"),
+      token: mockToken,
+    },
+    bridgeFee: {
+      pct: BigNumber.from("1"),
+      total: BigNumber.from("100"),
+      token: mockToken,
+    },
+  };
+
+  const createQuote = (
+    hasOrigin: boolean,
+    hasDestination: boolean,
+    amount: string
+  ) => {
+    const quote = {
+      crossSwap: {
+        type: "exactInput" as const,
+        inputToken: mockToken,
+        outputToken: mockToken,
+        inputAmount: BigNumber.from("1000000"),
+        depositor: "0x1234567890123456789012345678901234567890",
+        recipient: "0x1234567890123456789012345678901234567890",
+        originChainId: 1,
+        destinationChainId: 10,
+        amount: BigNumber.from("1000000"),
+        slippageTolerance: "auto" as const,
+        refundOnOrigin: false,
+        embeddedActions: [],
+        strictTradeType: false,
+      },
+      bridgeQuote: {
+        provider: "across" as const,
+        inputAmount: BigNumber.from("1000000"),
+        outputAmount: BigNumber.from(amount),
+        minOutputAmount: BigNumber.from("900000"),
+        estimatedFillTimeSec: 60,
+        fees: mockFees,
+        suggestedFees: {},
+        inputToken: mockToken,
+        outputToken: mockToken,
+      },
+      originSwapQuote: hasOrigin
+        ? {
+            expectedAmountOut: BigNumber.from(amount),
+            expectedAmountIn: BigNumber.from("1000000"),
+          }
+        : undefined,
+      destinationSwapQuote: hasDestination
+        ? {
+            expectedAmountOut: BigNumber.from(amount),
+            expectedAmountIn: BigNumber.from("950000"),
+          }
+        : undefined,
+      contracts: {
+        depositEntryPoint: { name: "SpokePool" as const, address: "0x1" },
+      },
+    };
+    return quote as any;
+  };
+
+  it("should prefer A2B when within 90% threshold of B2A", async () => {
+    const a2b = createQuote(true, false, "920000"); // 92% of B2A
+    const b2a = createQuote(false, true, "1000000");
+
+    const result = await selectBestCrossSwapQuote(
+      [Promise.resolve(a2b), Promise.resolve(b2a)],
+      a2b.crossSwap
+    );
+
+    expect(result.originSwapQuote).toBeDefined();
+    expect(result.destinationSwapQuote).toBeUndefined();
+  });
+
+  it("should choose B2A when beyond 90% threshold", async () => {
+    const a2b = createQuote(true, false, "850000"); // 85% of B2A
+    const b2a = createQuote(false, true, "1000000");
+
+    const result = await selectBestCrossSwapQuote(
+      [Promise.resolve(a2b), Promise.resolve(b2a)],
+      a2b.crossSwap
+    );
+
+    expect(result.destinationSwapQuote).toBeDefined();
+    expect(result.originSwapQuote).toBeUndefined();
   });
 });

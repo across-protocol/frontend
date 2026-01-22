@@ -2,13 +2,13 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
-import { formatUnitsWithMaxFractions, Token } from "utils";
+import { formatUnitsWithMaxFractions, TokenInfo } from "utils";
 
 import { BaseCell } from "./BaseCell";
 
 type Props = {
   deposit: Deposit;
-  token: Token;
+  token: TokenInfo;
   width: number;
 };
 

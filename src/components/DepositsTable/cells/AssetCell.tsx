@@ -2,14 +2,15 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
-import { QUERIESV2, Token } from "utils";
+import { TokenImage } from "components/TokenImage";
+import { QUERIESV2, TokenInfo } from "utils";
 
 import { BaseCell } from "./BaseCell";
 
 type Props = {
-  inputToken: Token;
-  outputToken?: Token;
-  swapToken?: Token;
+  inputToken: TokenInfo;
+  outputToken?: TokenInfo;
+  swapToken?: TokenInfo;
   width: number;
 };
 
@@ -29,10 +30,13 @@ export function AssetCell({
     <TokenPairContainer>
       <IconPair
         LeftIcon={
-          <img src={leftToken.logoURI} alt={`${leftTokenSymbol} logo`} />
+          <TokenImage src={leftToken.logoURI} alt={`${leftTokenSymbol} logo`} />
         }
         RightIcon={
-          <img src={rightToken.logoURI} alt={`${rightTokenSymbol} logo`} />
+          <TokenImage
+            src={rightToken.logoURI}
+            alt={`${rightTokenSymbol} logo`}
+          />
         }
         iconSize={24}
       />
@@ -66,7 +70,7 @@ const StyledAssetCell = styled(BaseCell)`
   }
 `;
 
-const TokenIconImg = styled.img`
+const TokenIconImg = styled(TokenImage)`
   width: 32px;
   height: 32px;
 

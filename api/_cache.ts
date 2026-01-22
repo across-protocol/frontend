@@ -89,6 +89,26 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
 
 export const redisCache = new RedisCache();
 
+// For some reason, the upstash client seems to strip the quote characters from the value.
+// This is a workaround to add the quote characters back to the value so the provider responses won't fail to parse.
+export class ProviderRedisCache extends RedisCache {
+  async get<T>(key: string): Promise<T | null> {
+    const value = await super.get<T>(key);
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (typeof value === "string") {
+      return ('"' + value + '"') as T;
+    } else if (typeof value === "object") {
+      // Convert object back to JSON string for the provider to parse
+      return JSON.stringify(value) as T;
+    }
+    return value;
+  }
+}
+
+export const providerRedisCache = new ProviderRedisCache();
+
 export function buildCacheKey(
   prefix: string,
   ...args: (string | number)[]

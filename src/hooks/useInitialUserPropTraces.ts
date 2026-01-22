@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useConnection } from "hooks";
 import {
-  identifyUserWallet,
-  setUserId,
-  identifyWalletChainId,
   identifyReferrer,
+  identifyUserWallet,
+  identifyWalletChainId,
+  setUserId,
 } from "utils/amplitude";
 import { ampli } from "ampli";
+import { useFeatureFlagsContext } from "./feature-flags/useFeatureFlagsContext";
 
 export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
+  const { fetchFlags } = useFeatureFlagsContext();
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
@@ -47,6 +49,9 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       await identifyReferrer()?.promise;
 
       setAreInitialUserPropsSet(true);
+
+      // Fetch feature flags AFTER userId is set
+      await fetchFlags();
       setPrevTrackedAccount(account);
     })();
   }, [
@@ -56,6 +61,7 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
     prevTrackedAccount,
     chainId,
     connector,
+    fetchFlags,
   ]);
 
   useEffect(() => {

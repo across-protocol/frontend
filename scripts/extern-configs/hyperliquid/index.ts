@@ -10,4 +10,5 @@ export default {
   publicRpcUrl: "https://arbitrum.publicnode.com",
   intermediaryChain: CHAIN_IDs.ARBITRUM,
   tokens: ["USDC", "USDC.e", "USDC-BNB"],
+  restrictedOriginChains: [CHAIN_IDs.HYPEREVM, CHAIN_IDs.BSC, CHAIN_IDs.LISK],
 } as ExternalProjectConfig;

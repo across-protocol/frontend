@@ -79,12 +79,15 @@ export enum TransferType {
   Permit2Approval = 2,
 }
 
-export function getSpokePoolPeripheryAddress(chainId: number) {
+export function getSpokePoolPeripheryAddress(
+  chainId: number,
+  throwIfNotFound = true
+) {
   const address =
     ENABLED_ROUTES.spokePoolPeripheryAddresses[
       chainId as keyof typeof ENABLED_ROUTES.spokePoolPeripheryAddresses
     ];
-  if (!address) {
+  if (!address && throwIfNotFound) {
     throw new UnknownPeripheryOnChain(chainId);
   }
   return address;

@@ -144,7 +144,9 @@ const AnimatedLogoWrapper = styled.div<{ completed?: boolean }>`
   border-radius: 48px;
 
   position: relative;
-  overflow: clip;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(circle, white 100%, black 100%);
+  mask-image: radial-gradient(circle, white 100%, black 100%);
 
   background: ${({ completed }) =>
     completed

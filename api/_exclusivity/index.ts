@@ -9,6 +9,7 @@ const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS, CHAIN_IDs } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
 const REORG_CHAINS = [CHAIN_IDs.MAINNET, CHAIN_IDs.POLYGON, CHAIN_IDs.SCROLL];
+const DISABLED_ORIGIN_CHAINS = [CHAIN_IDs.MAINNET];
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -36,6 +37,10 @@ export async function selectExclusiveRelayer(
 ): Promise<ExclusiveRelayer> {
   let exclusiveRelayer = ZERO_ADDRESS;
   let exclusivityPeriod = 0;
+
+  if (DISABLED_ORIGIN_CHAINS.includes(originChainId)) {
+    return { exclusiveRelayer, exclusivityPeriod };
+  }
 
   const { name, selectorFn } = getStrategy(
     outputToken.symbol,

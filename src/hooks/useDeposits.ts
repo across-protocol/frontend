@@ -2,12 +2,13 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
-  depositsQueryKey,
-  userDepositsQueryKey,
   defaultRefetchInterval,
   indexerApiBaseUrl,
+  userDepositsQueryKey,
+  getConfig,
 } from "utils";
 import { DepositStatusFilter } from "views/Transactions/types";
+import { OFT_MESSENGERS } from "utils/oft";
 
 export type DepositStatus =
   | "pending"
@@ -91,6 +92,10 @@ export type Deposit = {
   swapTokenAmount?: string;
   swapTokenAddress?: string;
   depositRefundTxHash?: string;
+  swapOutputToken?: string; // destination swap output token
+  swapOutputTokenAmount?: string; // destination swap output amount
+  actionsTargetChainId?: number;
+  hideFeeTooLow?: boolean;
 };
 
 export type Pagination = {
@@ -102,6 +107,11 @@ export type Pagination = {
 export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
+};
+
+export type GetDepositResponse = {
+  pagination: Pagination;
+  deposit: Deposit;
 };
 
 export type IndexerDeposit = {
@@ -142,28 +152,32 @@ export type IndexerDeposit = {
   relayer: string;
   fillBlockTimestamp: string;
   fillTx: string;
+  swapOutputToken?: string;
+  swapOutputTokenAmount?: string;
   speedups: any[];
+  actionsTargetChainId?: number | string;
 };
 
 export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
-  status: DepositStatusFilter,
   limit: number,
-  offset: number = 0
+  offset: number = 0,
+  userAddress?: string
 ) {
   return useQuery({
-    queryKey: depositsQueryKey(status, limit, offset),
-    queryFn: () => {
-      return getDeposits({
-        status: status === "all" ? undefined : status,
+    queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
+    queryFn: async () => ({
+      deposits: await getDeposits({
+        address: userAddress,
+        // status: status === "all" ? undefined : status,
         limit,
         offset,
-        skipOldUnprofitable: true,
-      });
-    },
+      }),
+    }),
+    gcTime: 0,
     placeholderData: keepPreviousData,
-    refetchInterval: defaultRefetchInterval,
+    refetchInterval: Infinity,
   });
 }
 
@@ -225,5 +239,33 @@ async function getDeposits(
       },
     }
   );
+
+  // FIXME: Temporary fix to remap `inputToken` and `outputToken` to `USDT` addresses for OFT deposits.
+  // This will be removed once this is handled correctly in the indexer.
+  data.forEach((deposit) => {
+    const usdcOnOrigin = getConfig().getTokenInfoBySymbolSafe(
+      deposit.originChainId,
+      "USDT"
+    );
+    const usdcOnDestination = getConfig().getTokenInfoBySymbolSafe(
+      deposit.destinationChainId,
+      "USDT"
+    );
+    if (
+      deposit.inputToken.toLowerCase() ===
+        OFT_MESSENGERS.USDT[deposit.originChainId]?.toLowerCase() &&
+      usdcOnOrigin
+    ) {
+      deposit.inputToken = usdcOnOrigin?.address;
+    }
+    if (
+      deposit.outputToken.toLowerCase() ===
+        OFT_MESSENGERS.USDT[deposit.destinationChainId]?.toLowerCase() &&
+      usdcOnDestination
+    ) {
+      deposit.outputToken = usdcOnDestination?.address;
+    }
+  });
+
   return data;
 }

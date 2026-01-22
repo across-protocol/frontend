@@ -73,6 +73,7 @@ async function generateUiAssets() {
         nativeCurrencySymbol: "${chainConfig.nativeToken}",
         customRpcUrl: process.env.REACT_APP_CHAIN_${chainId}_CUSTOM_RPC_URL,
         pollingInterval: ${(chainConfig.blockTimeSeconds || 15) * 1000},
+        ${chainConfig.intermediaryChain ? `intermediaryChain: ${chainConfig.intermediaryChain},` : ""}
       };
     `);
     chainVarNames.push(chainVarName);

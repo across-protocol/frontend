@@ -27,6 +27,10 @@ import {
   parseL1TokenConfigSafe,
   getL1TokenConfigCache,
   ConvertDecimals,
+  computeUtilizationPostRelay,
+  PooledToken,
+  getLimitsSpanAttributes,
+  setLimitsSpanAttributes,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import {
@@ -44,9 +48,10 @@ import { parseRole, Role } from "./_auth";
 import { getEnvs } from "./_env";
 import { getDefaultRelayerAddress } from "./_relayer-address";
 import { getRequestId, setRequestSpanAttributes } from "./_request_utils";
-import { tracer } from "../instrumentation";
+import { tracer as defaultTracer } from "../instrumentation";
 import { sendResponse } from "./_response_utils";
 import { getDefaultRecipientAddress } from "./_recipient-address";
+import { Tracer } from "@opentelemetry/api";
 
 const { BigNumber } = ethers;
 
@@ -74,10 +79,12 @@ type SuggestedFeesBody = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
   request: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedFeesBody>,
-  response: VercelResponse
+  response: VercelResponse,
+  services?: { tracer: Tracer }
 ) => {
   const logger = getLogger();
   const requestId = getRequestId(request);
+  const tracer = services?.tracer || defaultTracer;
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
@@ -144,7 +151,8 @@ const handler = async (
           getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
         destinationChainId
       );
-      const depositWithMessage = sdk.utils.isDefined(message);
+      const depositWithMessage =
+        sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message);
 
       // If the destination or origin chain is an opt-in chain, we need to check if the role is OPT_IN_CHAINS.
       const isDestinationOptInChain = OPT_IN_CHAINS.includes(
@@ -231,11 +239,8 @@ const handler = async (
         },
         {
           contract: hubPool,
-          functionName: "liquidityUtilizationPostRelay",
-          args: [
-            l1Token.address,
-            ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount),
-          ],
+          functionName: "pooledTokens",
+          args: [l1Token.address],
         },
         {
           contract: hubPool,
@@ -249,10 +254,9 @@ const handler = async (
       ];
 
       const [
-        [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
+        [currentUt, pooledToken, _quoteTimestamp, rawL1TokenConfig],
         tokenPriceUsd,
         limits,
-        fillDeadline,
       ] = await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
         getCachedTokenPrice({
@@ -275,11 +279,37 @@ const handler = async (
           depositWithMessage ? message : undefined,
           allowUnmatchedDecimals
         ),
-        getFillDeadline(destinationChainId),
       ]);
+
+      setLimitsSpanAttributes(
+        getLimitsSpanAttributes(
+          {
+            maxDeposit: limits.maxDeposit,
+            maxDepositInstant: limits.maxDepositInstant,
+            minDeposit: limits.minDeposit,
+            maxDepositShortDelay: limits.recommendedDepositInstant,
+          },
+          {
+            ...inputToken,
+            chainId: Number(computedOriginChainId),
+          },
+          tokenPriceUsd,
+          destinationChainId
+        ),
+        span
+      );
+
+      const nextUt = computeUtilizationPostRelay(
+        pooledToken as unknown as PooledToken, // Cast is required because ethers response type is generic.
+        ConvertDecimals(inputToken.decimals, l1Token.decimals)(amount)
+      );
+
       const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
         limits;
+
       const quoteTimestamp = parseInt(_quoteTimestamp.toString());
+
+      const fillDeadline = getFillDeadline(destinationChainId, quoteTimestamp);
 
       const amountInUsd = amount
         .mul(parseUnits(tokenPriceUsd.toString(), 18))

@@ -63,7 +63,8 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
       });
     },
     enabled: !!params.swapTokenSymbol,
-    refetchInterval: 5_000,
+    retry: 3,
+    refetchInterval: 10_000,
   });
 }
 

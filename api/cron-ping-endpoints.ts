@@ -28,6 +28,11 @@ const endpoints = [
     },
     updateIntervalSec: 1,
   },
+  {
+    url: "https://app.across.to/api/available-routes",
+    params: {},
+    updateIntervalSec: 1,
+  },
 ];
 
 const maxDurationSec = 60;

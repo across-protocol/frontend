@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { forwardRef } from "react";
 
 import { COLORS, QUERIESV2 } from "utils";
 
@@ -21,12 +22,14 @@ export const colorMap = {
   },
 };
 
-export function Input({
-  validationLevel,
-  ...props
-}: IValidInput & React.InputHTMLAttributes<HTMLInputElement>) {
-  return <StyledInput validationLevel={validationLevel} {...props} />;
-}
+export const Input = forwardRef<
+  HTMLInputElement,
+  IValidInput & React.ComponentPropsWithoutRef<"input">
+>(({ validationLevel, ...props }, ref) => {
+  return <StyledInput ref={ref} validationLevel={validationLevel} {...props} />;
+});
+
+Input.displayName = "Input";
 
 export function InputGroup({
   validationLevel,
@@ -38,6 +41,7 @@ export function InputGroup({
 const StyledInput = styled.input<IValidInput>`
   font-weight: 400;
   font-size: 18px;
+  font-size: 16px;
   line-height: 26px;
   color: ${({ validationLevel }) => colorMap[validationLevel].text};
   background: none;
@@ -49,7 +53,6 @@ const StyledInput = styled.input<IValidInput>`
 
   &:focus {
     outline: 0;
-    font-size: 18px;
   }
 
   &::placeholder {
@@ -81,6 +84,14 @@ const InputGroupWrapper = styled.div<IValidInput>`
   height: 48px;
   gap: 8px;
   width: 100%;
+
+  &:has(:focus-visible) {
+    border-color: ${COLORS.aqua};
+  }
+
+  &:focus-within {
+    border-color: ${COLORS.aqua};
+  }
 
   @media ${QUERIESV2.sm.andDown} {
     padding: 6px 12px 6px 24px;

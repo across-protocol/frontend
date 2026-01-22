@@ -1,5 +1,8 @@
 {
   "devCommand": "yarn dev",
+  "env": {
+    "NODE_OPTIONS": "--experimental-require-module --experimental-vm-modules"
+  },
   "crons": [
     {
       "path": "/api/cron-cache-balances",
@@ -59,6 +62,16 @@
       "source": "/about",
       "destination": "https://across.to",
       "permanent": true
+    },
+    {
+      "source": "/bridge",
+      "destination": "/bridge-and-swap",
+      "permanent": false
+    },
+    {
+      "source": "/bridge/:txHash",
+      "destination": "/bridge-and-swap/:txHash",
+      "permanent": false
     }
   ],
   "headers": [

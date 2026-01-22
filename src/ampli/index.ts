@@ -17,14 +17,14 @@
  * [Full Setup Instructions](https://data.amplitude.com/risklabs/Risk%20Labs/implementation/web)
  */
 
-import * as amplitude from "@amplitude/analytics-browser";
+import * as amplitude from '@amplitude/analytics-browser';
 
-export type Environment = "production" | "development" | "testing";
+export type Environment = 'production' | 'development' | 'testing';
 
 export const ApiKey: Record<Environment, string> = {
-  production: "",
-  development: "",
-  testing: "",
+  production: '0e684c66717732a1957eb6550723e4f0',
+  development: '32c056c19a0937e1ebeae4bf9ad1910c',
+  testing: '6fcf4dda1bfe19a06ba13baee3674ae9'
 };
 
 /**
@@ -32,38 +32,26 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "51",
-    branch: "main",
-    source: "web",
-    versionId: "523bd72c-20c7-4820-bc98-aa0ff37ae9b4",
+    version: '51',
+    branch: 'main',
+    source: 'web',
+    versionId: '523bd72c-20c7-4820-bc98-aa0ff37ae9b4'
   },
   ...{
     ingestionMetadata: {
-      sourceName: "browser-typescript-ampli",
-      sourceVersion: "2.0.0",
-    },
-  },
+      sourceName: 'browser-typescript-ampli',
+      sourceVersion: '2.0.0'
+    }
+  }
 };
 
-export interface LoadOptionsBase {
-  disabled?: boolean;
-}
+export interface LoadOptionsBase { disabled?: boolean }
 
-export type LoadOptionsWithEnvironment = LoadOptionsBase & {
-  environment: Environment;
-  client?: { configuration?: BrowserOptions };
-};
-export type LoadOptionsWithApiKey = LoadOptionsBase & {
-  client: { apiKey: string; configuration?: BrowserOptions };
-};
-export type LoadOptionsWithClientInstance = LoadOptionsBase & {
-  client: { instance: BrowserClient };
-};
+export type LoadOptionsWithEnvironment = LoadOptionsBase & { environment: Environment; client?: { configuration?: BrowserOptions; }; };
+export type LoadOptionsWithApiKey = LoadOptionsBase & { client: { apiKey: string; configuration?: BrowserOptions; } };
+export type LoadOptionsWithClientInstance = LoadOptionsBase & { client: { instance: BrowserClient; } };
 
-export type LoadOptions =
-  | LoadOptionsWithEnvironment
-  | LoadOptionsWithApiKey
-  | LoadOptionsWithClientInstance;
+export type LoadOptions = LoadOptionsWithEnvironment | LoadOptionsWithApiKey | LoadOptionsWithClientInstance;
 
 export interface IdentifyProperties {
   AcxVolumeNative?: any;
@@ -177,6 +165,264 @@ export interface IdentifyProperties {
   WethVolumeUsd?: any;
 }
 
+export interface ChangeUnitsButtonClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage"
+    | "swapPage";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation"
+    | "marketingHero"
+    | "xShare";
+}
+
+export interface ClickedFollowOnXButtonProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage"
+    | "swapPage";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation"
+    | "marketingHero"
+    | "xShare";
+}
+
+export interface ClickedShareOnXButtonProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage"
+    | "swapPage";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation"
+    | "marketingHero"
+    | "xShare";
+}
+
+export interface ClickedShareOnXCopyOrDownloadButtonProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage"
+    | "swapPage";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation"
+    | "marketingHero"
+    | "xShare";
+}
+
+export interface ClickedShareOnXctaProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page"
+    | "marketingHomePage"
+    | "marketingBridgePage"
+    | "marketingAcrossPlusPage"
+    | "marketingSettlementPage"
+    | "depositStatusPage"
+    | "marketingBlogSpecificPage"
+    | "marketingBlogHomePage"
+    | "swapPage";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation"
+    | "marketingHero"
+    | "xShare";
+}
+
 export interface ConnectWalletButtonClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -189,7 +435,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -199,11 +445,12 @@ export interface ConnectWalletButtonClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -221,11 +468,12 @@ export interface ConnectWalletButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -241,14 +489,15 @@ export interface ConnectWalletButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface CtaButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -266,11 +515,12 @@ export interface CtaButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -286,7 +536,8 @@ export interface CtaButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface DepositNetworkMismatchProperties {
@@ -302,6 +553,39 @@ export interface DepositNetworkMismatchProperties {
   toChainId: string;
 }
 
+export interface DestinationChainSelectedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  chainId: string;
+}
+
+export interface DestinationTokenSelectedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  tokenAddress: string;
+  tokenChainId: string;
+  /**
+   * Symbol of bridge token
+   */
+  tokenSymbol: string;
+}
+
 export interface DisconnectWalletButtonClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -310,7 +594,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -320,11 +604,12 @@ export interface DisconnectWalletButtonClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -342,11 +627,12 @@ export interface DisconnectWalletButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -362,7 +648,8 @@ export interface DisconnectWalletButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface EarnByAddingLiquidityClickedProperties {
@@ -377,7 +664,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -387,11 +674,12 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -409,11 +697,12 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -429,7 +718,8 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface FromChainSelectedProperties {
@@ -447,6 +737,15 @@ export interface FromChainSelectedProperties {
   fromChainId: string;
 }
 
+export interface InputAmountPercentClickedProperties {
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | 25, 50, 75, 100 |
+   */
+  percent: "25" | "50" | "75" | "100";
+}
+
 export interface MaxTokenAmountClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -459,7 +758,7 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -469,12 +768,13 @@ export interface MaxTokenAmountClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   page: string;
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -490,7 +790,8 @@ export interface MaxTokenAmountClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface MonitorDepositProgressClickedProperties {
@@ -505,7 +806,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -515,7 +816,8 @@ export interface MonitorDepositProgressClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -534,7 +836,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -550,7 +852,41 @@ export interface MonitorDepositProgressClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
+}
+
+export interface OriginChainSelectedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  chainId: string;
+}
+
+export interface OriginTokenSelectedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  tokenAddress: string;
+  tokenChainId: string;
+  /**
+   * Symbol of bridge token
+   */
+  tokenSymbol: string;
 }
 
 export interface PageViewedProperties {
@@ -566,7 +902,7 @@ export interface PageViewedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -584,7 +920,8 @@ export interface PageViewedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   path: string;
   /**
    * Address of referee, null if no referral used
@@ -604,7 +941,7 @@ export interface PmfButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -622,7 +959,8 @@ export interface PmfButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
 }
 
 export interface QuickSwapButtonClickedProperties {
@@ -637,7 +975,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -647,11 +985,12 @@ export interface QuickSwapButtonClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page, marketingHomePage, marketingBridgePage, marketingAcrossPlusPage, marketingSettlementPage, depositStatusPage, marketingBlogSpecificPage, marketingBlogHomePage, swapPage |
    */
   page:
     | "splashPage"
@@ -669,11 +1008,12 @@ export interface QuickSwapButtonClickedProperties {
     | "marketingSettlementPage"
     | "depositStatusPage"
     | "marketingBlogSpecificPage"
-    | "marketingBlogHomePage";
+    | "marketingBlogHomePage"
+    | "swapPage";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -689,7 +1029,8 @@ export interface QuickSwapButtonClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface ToAccountChangedProperties {
@@ -751,7 +1092,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -761,7 +1102,8 @@ export interface TrackInExplorerClickedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -780,7 +1122,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, marketingHero, xShare |
    */
   section:
     | "navbar"
@@ -796,43 +1138,35 @@ export interface TrackInExplorerClickedProperties {
     | "claimReferralRewardsForm"
     | "stakeForm"
     | "depositConfirmation"
-    | "marketingHero";
+    | "marketingHero"
+    | "xShare";
 }
 
 export interface TransferDepositCompletedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
   depositCompleteTimestamp: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
   /**
-   * Expected fill time in minutes, as displayed in the UI for the asset and route selected
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
    * | Rule | Value |
    * |---|---|
-   * | Type | number |
+   * | Enum Values | amountTooLow, noLiquidity |
    */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -853,7 +1187,19 @@ export interface TransferDepositCompletedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   /**
    * Boolean if sender and recipient address are equal.
    */
@@ -863,20 +1209,13 @@ export interface TransferDepositCompletedProperties {
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  networkFeeNative: string;
-  networkFeeNativeToken: string;
-  networkFeeUsd: string;
-  /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * Timestamp the FE recieves quote (may be different from the event timestamp)
    */
@@ -894,10 +1233,6 @@ export interface TransferDepositCompletedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -905,10 +1240,6 @@ export interface TransferDepositCompletedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -930,6 +1261,12 @@ export interface TransferDepositCompletedProperties {
    */
   succeeded: boolean;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
+   */
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
+  /**
    * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
    */
   timeFromTransferSignedToTransferCompleteInMilliseconds: string;
@@ -949,66 +1286,48 @@ export interface TransferDepositCompletedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
+  toTokenSymbol?: string;
   /**
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  transferQuoteBlockNumber: string;
 }
 
-export interface TransferQuoteReceivedProperties {
+export interface TransferFillCompletedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  depositCompleteTimestamp: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
   /**
-   * Expected fill time in minutes, as displayed in the UI for the asset and route selected
-   */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
    * | Rule | Value |
    * |---|---|
-   * | Type | number |
+   * | Enum Values | amountTooLow, noLiquidity |
    */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
+  fillAmount: string;
+  fillAmountUsd: string;
+  fillCompleteTimestamp: string;
+  fillTimeInMs: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -1018,50 +1337,54 @@ export interface TransferQuoteReceivedProperties {
    */
   fromAmountUsd: string;
   /**
-   * From chain id
+   * Id of the fromChain
    */
   fromChainId: string;
   /**
    * From chain name
    */
   fromChainName: string;
-  isAmountTooLow: boolean;
   /**
-   * Boolean if sender and recipient address are equal.
+   * Token address of bridge token on from chain
    */
-  isSenderEqRecipient: boolean;
+  fromTokenAddress: string;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   /**
    * Lp fee percent, in decimals
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  /**
-   * Latency for FE to recieve quote in millisec
-   */
-  quoteLatencyMilliseconds: string;
-  /**
-   * Timestamp the FE recieves quote (may be different from the event timestamp)
-   */
-  quoteTimestamp: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * Recipient wallet address
    */
   recipient: string;
   /**
+   * Address of referee, null if no referral used
+   */
+  referralProgramAddress?: string;
+  /**
    * Relay fee percent, in decimals
    */
   relayFeePct: string;
-  /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
   /**
    * Relay fee in USD
    */
@@ -1070,10 +1393,6 @@ export interface TransferQuoteReceivedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1091,6 +1410,162 @@ export interface TransferQuoteReceivedProperties {
    */
   sender: string;
   /**
+   * Result of user signing or rejecting wallet connection
+   */
+  succeeded: boolean;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
+   */
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
+  /**
+   * To amount of bridge token, in decimals
+   */
+  toAmount: string;
+  /**
+   * To amount in USD
+   */
+  toAmountUsd: string;
+  /**
+   * Id of the toChain
+   */
+  toChainId: string;
+  /**
+   * Name of the toChain
+   */
+  toChainName: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
+  totalFilledAmount: string;
+  totalFilledAmountUsd: string;
+  /**
+   * Token address of bridge token on to chain
+   */
+  toTokenAddress: string;
+  toTokenSymbol?: string;
+  /**
+   * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
+   */
+  transactionHash: string;
+}
+
+export interface TransferQuoteReceivedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
+  /**
+   * Capital fee percent, in decimals
+   */
+  capitalFeePct: string;
+  /**
+   * Capital fee in USD
+   */
+  capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | amountTooLow, noLiquidity |
+   */
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
+  /**
+   * From amount in the bridge token, in decimals
+   */
+  fromAmount: string;
+  /**
+   * From amount in USD
+   */
+  fromAmountUsd: string;
+  /**
+   * From chain id
+   */
+  fromChainId: string;
+  /**
+   * From chain name
+   */
+  fromChainName: string;
+  /**
+   * Token address of bridge token on from chain
+   */
+  fromTokenAddress: string;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
+  /**
+   * Boolean if sender and recipient address are equal.
+   */
+  isSenderEqRecipient: boolean;
+  /**
+   * Lp fee percent, in decimals
+   */
+  lpFeePct: string;
+  /**
+   * Lp fee in USD
+   */
+  lpFeeTotalUsd: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
+  /**
+   * Timestamp the FE recieves quote (may be different from the event timestamp)
+   */
+  quoteTimestamp: string;
+  /**
+   * Recipient wallet address
+   */
+  recipient: string;
+  /**
+   * Relay fee percent, in decimals
+   */
+  relayFeePct: string;
+  /**
+   * Relay fee in USD
+   */
+  relayFeeTotalUsd: string;
+  /**
+   * Relayer gas fee percent, in decimals
+   */
+  relayGasFeePct: string;
+  /**
+   * Relayer fee in USD
+   */
+  relayGasFeeTotalUsd: string;
+  /**
+   * Route "{fromChainId}-{toChainId}"
+   */
+  routeChainIdFromTo: string;
+  /**
+   * Route "{fromChainName}-{toChainName}"
+   */
+  routeChainNameFromTo: string;
+  /**
+   * Sender wallet address
+   */
+  sender: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
+   */
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
+  /**
    * To amount of bridge token, in decimals
    */
   toAmount: string;
@@ -1107,25 +1582,17 @@ export interface TransferQuoteReceivedProperties {
    */
   toChainName: string;
   /**
-   * Symbol of bridge token
+   * Token address of bridge token on to chain
    */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
-  transferQuoteBlockNumber: string;
+  toTokenAddress: string;
+  toTokenSymbol?: string;
 }
 
 export interface TransferSignedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
@@ -1138,28 +1605,17 @@ export interface TransferSignedProperties {
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
-   * | Regex |  |
+   * | Enum Values | amountTooLow, noLiquidity |
    */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1186,7 +1642,19 @@ export interface TransferSignedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
@@ -1200,12 +1668,10 @@ export interface TransferSignedProperties {
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  quoteLatencyMilliseconds: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1225,10 +1691,6 @@ export interface TransferSignedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1236,10 +1698,6 @@ export interface TransferSignedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1256,6 +1714,12 @@ export interface TransferSignedProperties {
    * Sender wallet address
    */
   sender: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
+   */
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * Duration in milliseconds between TransferSubmitted event to the TransferSigned event
    */
@@ -1276,73 +1740,43 @@ export interface TransferSignedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
+  toTokenSymbol?: string;
   /**
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSubmittedProperties {
+  appFeePct?: string;
+  appFeeUsd?: string;
+  bridgeTokenAddress?: string;
+  bridgeTokenSymbol?: string;
   /**
    * Capital fee percent, in decimals
    */
   capitalFeePct: string;
   /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  destinationSwapFeePct: string;
+  destinationSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
-   * | Regex |  |
+   * | Enum Values | amountTooLow, noLiquidity |
    */
-  expectedFillTimeInMinutes: string;
-  /**
-   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesLowerBound?: number;
-  /**
-   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | number |
-   */
-  expectedFillTimeInMinutesUpperBound?: number;
+  error?: "amountTooLow" | "noLiquidity";
+  expectedFillTimeInSec: string;
+  expectedFillTimeInSecLowerBound: string;
+  expectedFillTimeInSecUpperBound: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1369,26 +1803,32 @@ export interface TransferSubmittedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: boolean;
+  fromTokenSymbol?: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | exactInput, exactOutput, minOutput |
+   */
+  inputType?: "exactInput" | "exactOutput" | "minOutput";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | token, usd |
+   */
+  inputUnits?: "token" | "usd";
   isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
   lpFeePct: string;
   /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Regex |  |
-   */
-  quoteLatencyMilliseconds: string;
+  originGasFeePct?: string;
+  originGasFeeUsd?: string;
+  originSwapFeePct?: string;
+  originSwapFeeUsd?: string;
   /**
    * | Rule | Value |
    * |---|---|
@@ -1408,10 +1848,6 @@ export interface TransferSubmittedProperties {
    */
   relayFeePct: string;
   /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
    * Relay fee in USD
    */
   relayFeeTotalUsd: string;
@@ -1419,10 +1855,6 @@ export interface TransferSubmittedProperties {
    * Relayer gas fee percent, in decimals
    */
   relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
   /**
    * Relayer fee in USD
    */
@@ -1439,6 +1871,12 @@ export interface TransferSubmittedProperties {
    * Sender wallet address
    */
   sender: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | anyToAny, bridgeableToBridgeable, anyToBridgeable, bridgeableToAny |
+   */
+  swapType?: "anyToAny" | "bridgeableToBridgeable" | "anyToBridgeable" | "bridgeableToAny";
   /**
    * Duration in milliseconds between first TransferQuoteRecieved event to the TransferSubmitted event
    */
@@ -1459,27 +1897,13 @@ export interface TransferSubmittedProperties {
    * Name of the toChain
    */
   toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
+  totalFeePct: string;
+  totalFeeUsd: string;
   /**
    * Token address of bridge token on to chain
    */
   toTokenAddress: string;
-  transferQuoteBlockNumber: string;
+  toTokenSymbol?: string;
   /**
    * Timestamp when send button was clicked
    */
@@ -1521,7 +1945,7 @@ export interface WalletSelectedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton, changeUnitsButton |
    */
   element:
     | "connectWalletButton"
@@ -1531,7 +1955,8 @@ export interface WalletSelectedProperties {
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
     | "earnByAddingLiquidityAndStakingLink"
-    | "disconnectWalletButton";
+    | "disconnectWalletButton"
+    | "changeUnitsButton";
   page: string;
   /**
    * Type of wallet attempted to connect
@@ -1549,205 +1974,357 @@ export interface WebVitalsProperties {
 export class Identify implements BaseEvent {
   event_type = amplitude.Types.SpecialEventType.IDENTIFY;
 
-  constructor(public event_properties?: IdentifyProperties) {
+  constructor(
+    public event_properties?: IdentifyProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ApplicationLoaded implements BaseEvent {
-  event_type = "ApplicationLoaded";
+  event_type = 'ApplicationLoaded';
+}
+
+export class ChangeUnitsButtonClicked implements BaseEvent {
+  event_type = 'ChangeUnitsButtonClicked';
+
+  constructor(
+    public event_properties: ChangeUnitsButtonClickedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class ClickedFollowOnXButton implements BaseEvent {
+  event_type = 'ClickedFollowOnXButton';
+
+  constructor(
+    public event_properties: ClickedFollowOnXButtonProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class ClickedShareOnXButton implements BaseEvent {
+  event_type = 'ClickedShareOnXButton';
+
+  constructor(
+    public event_properties: ClickedShareOnXButtonProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class ClickedShareOnXCopyOrDownloadButton implements BaseEvent {
+  event_type = 'ClickedShareOnXCopyOrDownloadButton';
+
+  constructor(
+    public event_properties: ClickedShareOnXCopyOrDownloadButtonProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class ClickedShareOnXcta implements BaseEvent {
+  event_type = 'ClickedShareOnXCTA';
+
+  constructor(
+    public event_properties: ClickedShareOnXctaProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
 }
 
 export class ConnectWalletButtonClicked implements BaseEvent {
-  event_type = "ConnectWalletButtonClicked";
+  event_type = 'ConnectWalletButtonClicked';
 
-  constructor(public event_properties: ConnectWalletButtonClickedProperties) {
+  constructor(
+    public event_properties: ConnectWalletButtonClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class CtaButtonClicked implements BaseEvent {
-  event_type = "CTAButtonClicked";
+  event_type = 'CTAButtonClicked';
 
-  constructor(public event_properties: CtaButtonClickedProperties) {
+  constructor(
+    public event_properties: CtaButtonClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class DepositNetworkMismatch implements BaseEvent {
-  event_type = "DepositNetworkMismatch";
+  event_type = 'DepositNetworkMismatch';
 
-  constructor(public event_properties: DepositNetworkMismatchProperties) {
+  constructor(
+    public event_properties: DepositNetworkMismatchProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class DestinationChainSelected implements BaseEvent {
+  event_type = 'DestinationChainSelected';
+
+  constructor(
+    public event_properties: DestinationChainSelectedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class DestinationTokenSelected implements BaseEvent {
+  event_type = 'DestinationTokenSelected';
+
+  constructor(
+    public event_properties: DestinationTokenSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class DisconnectWalletButtonClicked implements BaseEvent {
-  event_type = "DisconnectWalletButtonClicked";
+  event_type = 'DisconnectWalletButtonClicked';
 
   constructor(
-    public event_properties: DisconnectWalletButtonClickedProperties
+    public event_properties: DisconnectWalletButtonClickedProperties,
   ) {
     this.event_properties = event_properties;
   }
 }
 
 export class EarnByAddingLiquidityClicked implements BaseEvent {
-  event_type = "EarnByAddingLiquidityClicked";
+  event_type = 'EarnByAddingLiquidityClicked';
 
-  constructor(public event_properties: EarnByAddingLiquidityClickedProperties) {
+  constructor(
+    public event_properties: EarnByAddingLiquidityClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class FeesInfoExpanded implements BaseEvent {
-  event_type = "FeesInfoExpanded";
+  event_type = 'FeesInfoExpanded';
 }
 
 export class FromChainSelected implements BaseEvent {
-  event_type = "FromChainSelected";
+  event_type = 'FromChainSelected';
 
-  constructor(public event_properties: FromChainSelectedProperties) {
+  constructor(
+    public event_properties: FromChainSelectedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class InputAmountPercentClicked implements BaseEvent {
+  event_type = 'InputAmountPercentClicked';
+
+  constructor(
+    public event_properties: InputAmountPercentClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class MaxTokenAmountClicked implements BaseEvent {
-  event_type = "MaxTokenAmountClicked";
+  event_type = 'MaxTokenAmountClicked';
 
-  constructor(public event_properties: MaxTokenAmountClickedProperties) {
+  constructor(
+    public event_properties: MaxTokenAmountClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class MonitorDepositProgressClicked implements BaseEvent {
-  event_type = "MonitorDepositProgressClicked";
+  event_type = 'MonitorDepositProgressClicked';
 
   constructor(
-    public event_properties: MonitorDepositProgressClickedProperties
+    public event_properties: MonitorDepositProgressClickedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class OriginChainSelected implements BaseEvent {
+  event_type = 'OriginChainSelected';
+
+  constructor(
+    public event_properties: OriginChainSelectedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class OriginTokenSelected implements BaseEvent {
+  event_type = 'OriginTokenSelected';
+
+  constructor(
+    public event_properties: OriginTokenSelectedProperties,
   ) {
     this.event_properties = event_properties;
   }
 }
 
 export class PageViewed implements BaseEvent {
-  event_type = "PageViewed";
+  event_type = 'PageViewed';
 
-  constructor(public event_properties: PageViewedProperties) {
+  constructor(
+    public event_properties: PageViewedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class PmfButtonClicked implements BaseEvent {
-  event_type = "PMFButtonClicked";
+  event_type = 'PMFButtonClicked';
 
-  constructor(public event_properties: PmfButtonClickedProperties) {
+  constructor(
+    public event_properties: PmfButtonClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class QuickSwapButtonClicked implements BaseEvent {
-  event_type = "QuickSwapButtonClicked";
+  event_type = 'QuickSwapButtonClicked';
 
-  constructor(public event_properties: QuickSwapButtonClickedProperties) {
+  constructor(
+    public event_properties: QuickSwapButtonClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ToAccountChanged implements BaseEvent {
-  event_type = "ToAccountChanged";
+  event_type = 'ToAccountChanged';
 
-  constructor(public event_properties: ToAccountChangedProperties) {
+  constructor(
+    public event_properties: ToAccountChangedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ToChainSelected implements BaseEvent {
-  event_type = "ToChainSelected";
+  event_type = 'ToChainSelected';
 
-  constructor(public event_properties: ToChainSelectedProperties) {
+  constructor(
+    public event_properties: ToChainSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TokenSelected implements BaseEvent {
-  event_type = "TokenSelected";
+  event_type = 'TokenSelected';
 
-  constructor(public event_properties: TokenSelectedProperties) {
+  constructor(
+    public event_properties: TokenSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TrackInExplorerClicked implements BaseEvent {
-  event_type = "TrackInExplorerClicked";
+  event_type = 'TrackInExplorerClicked';
 
-  constructor(public event_properties: TrackInExplorerClickedProperties) {
+  constructor(
+    public event_properties: TrackInExplorerClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferDepositCompleted implements BaseEvent {
-  event_type = "TransferDepositCompleted";
+  event_type = 'TransferDepositCompleted';
 
-  constructor(public event_properties: TransferDepositCompletedProperties) {
+  constructor(
+    public event_properties: TransferDepositCompletedProperties,
+  ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class TransferFillCompleted implements BaseEvent {
+  event_type = 'TransferFillCompleted';
+
+  constructor(
+    public event_properties: TransferFillCompletedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferQuoteReceived implements BaseEvent {
-  event_type = "TransferQuoteReceived";
+  event_type = 'TransferQuoteReceived';
 
-  constructor(public event_properties: TransferQuoteReceivedProperties) {
+  constructor(
+    public event_properties: TransferQuoteReceivedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferSigned implements BaseEvent {
-  event_type = "TransferSigned";
+  event_type = 'TransferSigned';
 
-  constructor(public event_properties: TransferSignedProperties) {
+  constructor(
+    public event_properties: TransferSignedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferSubmitted implements BaseEvent {
-  event_type = "TransferSubmitted";
+  event_type = 'TransferSubmitted';
 
-  constructor(public event_properties: TransferSubmittedProperties) {
+  constructor(
+    public event_properties: TransferSubmittedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WalletConnectTransactionCompleted implements BaseEvent {
-  event_type = "WalletConnectTransactionCompleted";
+  event_type = 'WalletConnectTransactionCompleted';
 
   constructor(
-    public event_properties: WalletConnectTransactionCompletedProperties
+    public event_properties: WalletConnectTransactionCompletedProperties,
   ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WalletNetworkSelected implements BaseEvent {
-  event_type = "WalletNetworkSelected";
+  event_type = 'WalletNetworkSelected';
 
-  constructor(public event_properties: WalletNetworkSelectedProperties) {
+  constructor(
+    public event_properties: WalletNetworkSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WalletSelected implements BaseEvent {
-  event_type = "WalletSelected";
+  event_type = 'WalletSelected';
 
-  constructor(public event_properties: WalletSelectedProperties) {
+  constructor(
+    public event_properties: WalletSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WebVitals implements BaseEvent {
-  event_type = "WebVitals";
+  event_type = 'WebVitals';
 
-  constructor(public event_properties: WebVitalsProperties) {
+  constructor(
+    public event_properties: WebVitalsProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
@@ -1876,7 +2453,7 @@ export class Ampli {
    *
    * App is loaded
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param options Amplitude event options.
    */
@@ -1887,13 +2464,98 @@ export class Ampli {
   }
 
   /**
+   * ChangeUnitsButtonClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ChangeUnitsButtonClicked)
+   *
+   * Owner: Jorgen Hovind
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  changeUnitsButtonClicked(
+    properties: ChangeUnitsButtonClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ChangeUnitsButtonClicked(properties), options);
+  }
+
+  /**
+   * ClickedFollowOnXButton
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ClickedFollowOnXButton)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. page)
+   * @param options Amplitude event options.
+   */
+  clickedFollowOnXButton(
+    properties: ClickedFollowOnXButtonProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ClickedFollowOnXButton(properties), options);
+  }
+
+  /**
+   * ClickedShareOnXButton
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ClickedShareOnXButton)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. page)
+   * @param options Amplitude event options.
+   */
+  clickedShareOnXButton(
+    properties: ClickedShareOnXButtonProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ClickedShareOnXButton(properties), options);
+  }
+
+  /**
+   * ClickedShareOnXCopyOrDownloadButton
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ClickedShareOnXCopyOrDownloadButton)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. page)
+   * @param options Amplitude event options.
+   */
+  clickedShareOnXCopyOrDownloadButton(
+    properties: ClickedShareOnXCopyOrDownloadButtonProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ClickedShareOnXCopyOrDownloadButton(properties), options);
+  }
+
+  /**
+   * ClickedShareOnXCTA
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ClickedShareOnXCTA)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. page)
+   * @param options Amplitude event options.
+   */
+  clickedShareOnXcta(
+    properties: ClickedShareOnXctaProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ClickedShareOnXcta(properties), options);
+  }
+
+  /**
    * ConnectWalletButtonClicked
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/ConnectWalletButtonClicked)
    *
    * User clicks Connect Wallet
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. action)
    * @param options Amplitude event options.
@@ -1940,13 +2602,47 @@ export class Ampli {
   }
 
   /**
+   * DestinationChainSelected
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DestinationChainSelected)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  destinationChainSelected(
+    properties: DestinationChainSelectedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DestinationChainSelected(properties), options);
+  }
+
+  /**
+   * DestinationTokenSelected
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DestinationTokenSelected)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  destinationTokenSelected(
+    properties: DestinationTokenSelectedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DestinationTokenSelected(properties), options);
+  }
+
+  /**
    * DisconnectWalletButtonClicked
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DisconnectWalletButtonClicked)
    *
    * User disconnects wallet
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. action)
    * @param options Amplitude event options.
@@ -1982,7 +2678,7 @@ export class Ampli {
    *
    * User expands fees info
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param options Amplitude event options.
    */
@@ -1999,7 +2695,7 @@ export class Ampli {
    *
    * User selects from chain
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. chainName)
    * @param options Amplitude event options.
@@ -2012,13 +2708,30 @@ export class Ampli {
   }
 
   /**
+   * InputAmountPercentClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/InputAmountPercentClicked)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. percent)
+   * @param options Amplitude event options.
+   */
+  inputAmountPercentClicked(
+    properties: InputAmountPercentClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new InputAmountPercentClicked(properties), options);
+  }
+
+  /**
    * MaxTokenAmountClicked
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/MaxTokenAmountClicked)
    *
    * User clicks max amount
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. action)
    * @param options Amplitude event options.
@@ -2048,13 +2761,47 @@ export class Ampli {
   }
 
   /**
+   * OriginChainSelected
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/OriginChainSelected)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  originChainSelected(
+    properties: OriginChainSelectedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OriginChainSelected(properties), options);
+  }
+
+  /**
+   * OriginTokenSelected
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/OriginTokenSelected)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  originTokenSelected(
+    properties: OriginTokenSelectedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OriginTokenSelected(properties), options);
+  }
+
+  /**
    * PageViewed
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/PageViewed)
    *
    * User views page
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. gitCommitHash)
    * @param options Amplitude event options.
@@ -2088,7 +2835,7 @@ export class Ampli {
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/QuickSwapButtonClicked)
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. action)
    * @param options Amplitude event options.
@@ -2107,7 +2854,7 @@ export class Ampli {
    *
    * User changes recipient address
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. toWalletAddress)
    * @param options Amplitude event options.
@@ -2126,7 +2873,7 @@ export class Ampli {
    *
    * User selects from or to chain
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. chainName)
    * @param options Amplitude event options.
@@ -2145,7 +2892,7 @@ export class Ampli {
    *
    * User selects token
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. default)
    * @param options Amplitude event options.
@@ -2183,7 +2930,7 @@ export class Ampli {
    *
    * Owner: Dong-Ha Kim
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferDepositCompleted(
@@ -2191,6 +2938,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new TransferDepositCompleted(properties), options);
+  }
+
+  /**
+   * TransferFillCompleted
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferFillCompleted)
+   *
+   * Owner: Dong-Ha Kim
+   *
+   * @param properties The event's properties (e.g. appFeePct)
+   * @param options Amplitude event options.
+   */
+  transferFillCompleted(
+    properties: TransferFillCompletedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new TransferFillCompleted(properties), options);
   }
 
   /**
@@ -2202,7 +2966,7 @@ export class Ampli {
    *
    * Owner: Dong-Ha Kim
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferQuoteReceived(
@@ -2219,9 +2983,9 @@ export class Ampli {
    *
    * User signs wallet transaction
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferSigned(
@@ -2238,9 +3002,9 @@ export class Ampli {
    *
    * User clicks send button
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
-   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param properties The event's properties (e.g. appFeePct)
    * @param options Amplitude event options.
    */
   transferSubmitted(
@@ -2257,7 +3021,7 @@ export class Ampli {
    *
    * User rejects or approves wallet connection
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. isReconnect)
    * @param options Amplitude event options.
@@ -2293,7 +3057,7 @@ export class Ampli {
    *
    * User selects wallet to connect
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. action)
    * @param options Amplitude event options.
@@ -2312,7 +3076,7 @@ export class Ampli {
    *
    * Properties to track health of UI
    *
-   * Owner: James Morris
+   * Owner: james@umaproject.org
    *
    * @param properties The event's properties (e.g. cumulativeLayoutShift)
    * @param options Amplitude event options.

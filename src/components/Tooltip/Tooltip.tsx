@@ -1,13 +1,13 @@
 import React, { ReactNode } from "react";
 import { PlacesType } from "react-tooltip";
 import {
-  Wrapper,
-  TitleRow,
   Body,
   GreyRoundedCheckmark16,
-  TitleSecondary,
-  StyledTooltip,
   StyledAnchor,
+  StyledTooltip,
+  TitleRow,
+  TitleSecondary,
+  Wrapper,
 } from "./Tooltip.styles";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
@@ -39,6 +39,8 @@ export interface TooltipProps {
   offset?: number;
   anchorWidth?: string;
   children?: ReactNode;
+  paddingPx?: number;
+  tooltipAnchorHeight?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -52,6 +54,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   maxWidth,
   offset,
   anchorWidth,
+  paddingPx = 16,
+  tooltipAnchorHeight = "1em",
 }) => {
   const id = tooltipId || title;
 
@@ -65,11 +69,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
         data-tooltip-id={id}
         data-tooltip-place={placement}
         width={anchorWidth}
+        height={tooltipAnchorHeight}
       >
         {children}
       </StyledAnchor>
       <StyledTooltip id={id} noArrow opacity={1} offset={offset}>
-        <Wrapper maxWidth={maxWidth}>
+        <Wrapper maxWidth={maxWidth} paddingPx={paddingPx}>
           {title && (
             <TitleRow>
               {iconElement}

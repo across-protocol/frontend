@@ -108,6 +108,7 @@ const handler = async (
       amount: swapTokenAmount,
       slippageTolerance: parseFloat(swapSlippage),
       type: AMOUNT_TYPE.EXACT_INPUT,
+      originOrDestination: "origin",
     } as const;
 
     const quoteResults = await Promise.allSettled([

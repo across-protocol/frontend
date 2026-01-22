@@ -5,8 +5,6 @@ import {
   utils as ethersUtils,
 } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import { SpokePool } from "@across-protocol/contracts/dist/typechain";
-import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import {
@@ -19,6 +17,13 @@ import {
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
 import {
+  getEventEmitterAddress,
+  encodeSwapMetadata,
+  encodeEmitDataCalldata,
+  SwapType,
+  SwapSide,
+} from "../_event-emitter";
+import {
   CrossSwap,
   CrossSwapQuotes,
   OriginEntryPointContractName,
@@ -28,6 +33,7 @@ import {
   SwapQuote,
   Token,
   DexSources,
+  isEvmSwapTxn,
 } from "./types";
 import {
   isInputTokenBridgeable,
@@ -35,14 +41,21 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
   getSpokePoolAddress,
+  getWrappedNativeTokenAddress,
+  isContractCache,
 } from "../_utils";
+import { CHAIN_IDs } from "../_constants";
 import {
   getSpokePoolPeripheryAddress,
   TransferType,
   getSwapProxyAddress,
 } from "../_spoke-pool-periphery";
-import { getUniversalSwapAndBridgeAddress } from "../_swap-and-bridge";
+import { getFillDeadline } from "../_fill-deadline";
 import { encodeActionCalls } from "../swap/_utils";
+import { InvalidParamError } from "../_errors";
+import { isEvmAddress, isSvmAddress } from "../_address";
+import { isIndirectDestinationRouteSupported } from "./utils-b2bi";
+import { getQuoteTimestampArg } from "../_quote-timestamp";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -75,8 +88,8 @@ export type QuoteFetchPrioritizationMode =
  *
  * @example
  * {
- *   default: [getSwapRouter02Strategy("UniversalSwapAndBridge", "trading-api")],
- *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("UniversalSwapAndBridge", "sdk")],
+ *   default: [getSwapRouter02Strategy("SpokePoolPeriphery", "trading-api")],
+ *   [CHAIN_IDs.MAINNET]: [getSwapRouter02Strategy("SpokePoolPeriphery", "sdk")],
  * }
  */
 export type QuoteFetchStrategies = Partial<{
@@ -84,6 +97,15 @@ export type QuoteFetchStrategies = Partial<{
   default: QuoteFetchStrategy[];
   chains: {
     [chainId: number]: QuoteFetchStrategy[];
+  };
+  originChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
+  destinationChains: {
+    [chainId: number]: QuoteFetchStrategy[];
+  };
+  inputTokens: {
+    [inputTokenSymbol: string]: QuoteFetchStrategy[];
   };
   swapPairs: {
     [chainId: number]: {
@@ -94,6 +116,12 @@ export type QuoteFetchStrategies = Partial<{
   };
 }>;
 
+type Action = {
+  target: string;
+  callData: string;
+  value: string;
+};
+
 export const AMOUNT_TYPE = {
   EXACT_INPUT: "exactInput",
   EXACT_OUTPUT: "exactOutput",
@@ -102,6 +130,7 @@ export const AMOUNT_TYPE = {
 
 export const CROSS_SWAP_TYPE = {
   BRIDGEABLE_TO_BRIDGEABLE: "bridgeableToBridgeable",
+  BRIDGEABLE_TO_BRIDGEABLE_INDIRECT: "bridgeableToBridgeableIndirect",
   BRIDGEABLE_TO_ANY: "bridgeableToAny",
   ANY_TO_BRIDGEABLE: "anyToBridgeable",
   ANY_TO_ANY: "anyToAny",
@@ -113,7 +142,7 @@ export const PREFERRED_BRIDGE_TOKENS: {
     [toChainId: number]: string[];
   };
 } = {
-  default: ["USDC", "WETH", "USDT", "DAI"],
+  default: ["USDC", "USDT", "WETH", "DAI"],
   [CHAIN_IDs.MAINNET]: {
     [232]: ["WGHO", "WETH", "USDC"],
   },
@@ -127,7 +156,7 @@ export const defaultQuoteFetchStrategies: QuoteFetchStrategies = {
     mode: "priority-speed",
     priorityChunkSize: 1,
   },
-  default: [getSwapRouter02Strategy("UniversalSwapAndBridge")],
+  default: [getSwapRouter02Strategy("SpokePoolPeriphery")],
 };
 
 export function getPreferredBridgeTokens(
@@ -159,6 +188,10 @@ export function getCrossSwapTypes(params: {
     return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
   }
 
+  if (isIndirectDestinationRouteSupported(params)) {
+    return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT];
+  }
+
   const inputBridgeable = isInputTokenBridgeable(
     params.inputToken,
     params.originChainId,
@@ -188,9 +221,223 @@ export function getCrossSwapTypes(params: {
   return [CROSS_SWAP_TYPE.ANY_TO_ANY];
 }
 
+/**
+ * Determines if MultiCallHandler can be bypassed for a simple bridge.
+ *
+ * ## Prerequisites
+ *
+ * ALL of the following must be true:
+ * - No origin swap (origin swaps need MulticallHandler for metadata events)
+ * - No app fees
+ * - No embedded actions
+ *
+ * ## Output Token Rules
+ *
+ * If output is neither native nor wrapped native:
+ * - OK to bypass
+ *
+ * If destination is zkSync or Lens:
+ * - Needs message for native/wrapped native tokens
+ *
+ * For native output:
+ * - EOA recipient: OK to bypass (protocol sends native directly)
+ * - Contract recipient: Needs message (protocol needs instructions to unwrap)
+ *
+ * For wrapped native output:
+ * - EOA recipient: Needs message (protocol needs instructions to wrap)
+ * - Contract recipient: OK to bypass (protocol sends wrapped native directly)
+ *
+ * @see https://docs.across.to/introduction/technical-faq#what-is-the-behavior-of-eth-weth-in-transfers
+ * @returns `true` if MultiCallHandler can be bypassed, `false` otherwise
+ */
+async function shouldBypassMultiCallHandler(
+  crossSwap: CrossSwap,
+  hasOriginSwap: boolean
+): Promise<boolean> {
+  // Check if app fees are specified
+  const hasAppFees =
+    crossSwap.appFeePercent !== undefined &&
+    crossSwap.appFeePercent > 0 &&
+    crossSwap.appFeeRecipient !== undefined;
+
+  // Check if there are embedded actions
+  const hasEmbeddedActions =
+    crossSwap.embeddedActions && crossSwap.embeddedActions.length > 0;
+
+  // Early exit if basic conditions aren't met
+  if (hasOriginSwap || hasAppFees || hasEmbeddedActions) {
+    return false;
+  }
+
+  // Check if output token is native or wrapped native
+  const isOutputNative = crossSwap.isOutputNative;
+  const wrappedNativeTokenAddress = getWrappedNativeTokenAddress(
+    crossSwap.outputToken.chainId
+  );
+  const isOutputWrappedNative =
+    crossSwap.outputToken.address.toLowerCase() ===
+    wrappedNativeTokenAddress.toLowerCase();
+
+  // If output is neither native nor wrapped native, we can bypass
+  if (!isOutputNative && !isOutputWrappedNative) {
+    return true;
+  }
+
+  // zkSync and Lens always require messages for native/wrapped native tokens
+  const destinationChainId = crossSwap.outputToken.chainId;
+  if (
+    destinationChainId === CHAIN_IDs.ZK_SYNC ||
+    destinationChainId === CHAIN_IDs.LENS
+  ) {
+    return false;
+  }
+
+  // For native/wrapped native tokens, check if recipient is a contract or EOA
+  const recipientIsContract = await isContractCache(
+    destinationChainId,
+    crossSwap.recipient
+  ).get();
+
+  // NOTE: The isOutputNative flag takes precedence for determining intent since ETH and WETH use the same address
+  // and both isOutputNative and isOutputWrappedNative are true when isOutputNative is set.
+  if (isOutputNative) {
+    // Native output: bypass only if recipient is EOA. Otherwise, we need message with unwrap instructions.
+    return !recipientIsContract;
+  }
+
+  if (isOutputWrappedNative) {
+    // Wrapped native output: bypass only if recipient is contract. Otherwise, we need message with wrap instructions.
+    return recipientIsContract;
+  }
+
+  // All other cases need the message
+  return false;
+}
+
+/**
+ * Creates a placeholder origin swap quote for A2B flows to ensure accurate gas estimation.
+ * This is used when requesting a bridge quote but the actual origin swap quote hasn't been
+ * calculated yet. The placeholder has the correct structure so the message gas costs are accurate.
+ */
+export function createPlaceholderOriginSwapQuote(
+  crossSwap: CrossSwap,
+  bridgeableInputToken: Token
+): SwapQuote {
+  return {
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    maximumAmountIn: BigNumber.from("1000000"),
+    minAmountOut: BigNumber.from("1000000"),
+    expectedAmountIn: BigNumber.from("1000000"),
+    expectedAmountOut: BigNumber.from("1000000"),
+    slippageTolerance:
+      typeof crossSwap.slippageTolerance === "number"
+        ? crossSwap.slippageTolerance
+        : 0.5,
+    swapProvider: { name: "placeholder", sources: [] },
+    swapTxns: [],
+  };
+}
+
+export async function getBridgeQuoteRecipient(
+  crossSwap: CrossSwap,
+  hasOriginSwap: boolean = false
+) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to use MultiCallHandler
+    return crossSwap.recipient;
+  }
+
+  // For simple B2B transfers we can send funds directly to the recipient, bypassing MultiCallHandler.
+  // This only applies when:
+  // - amount type is exactInput or minOutput
+  // - no origin swap is needed
+  // - no app fees, native output, or embedded actions are present
+  if (await shouldBypassMultiCallHandler(crossSwap, hasOriginSwap)) {
+    return crossSwap.recipient;
+  }
+
+  return getMultiCallHandlerAddress(crossSwap.outputToken.chainId);
+}
+
+export async function getBridgeQuoteMessage(
+  crossSwap: CrossSwap,
+  appFee?: AppFee,
+  originSwapQuote?: SwapQuote
+) {
+  if (crossSwap.isDestinationSvm) {
+    // Until we support messages for SVM destinations, we don't need to build a message
+    return undefined;
+  }
+
+  // For simple B2B transfers we don't need to build a message
+  if (await shouldBypassMultiCallHandler(crossSwap, !!originSwapQuote)) {
+    return undefined;
+  }
+
+  const eventEmitterActions: Action[] = [];
+  if (originSwapQuote) {
+    const crossSwapType =
+      crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
+        ? SwapType.EXACT_INPUT
+        : crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT
+          ? SwapType.MIN_OUTPUT
+          : SwapType.EXACT_OUTPUT;
+    const eventEmitterAddress = getEventEmitterAddress(
+      crossSwap.outputToken.chainId
+    );
+    if (eventEmitterAddress) {
+      const originSwapMetadataParams = {
+        version: 1,
+        type: crossSwapType,
+        side: SwapSide.ORIGIN_SWAP,
+        address: crossSwap.inputToken.address,
+        maximumAmountIn: originSwapQuote.maximumAmountIn,
+        minAmountOut: originSwapQuote.minAmountOut,
+        expectedAmountOut: originSwapQuote.expectedAmountOut,
+        expectedAmountIn: originSwapQuote.expectedAmountIn,
+        swapProvider: originSwapQuote.swapProvider.name,
+        slippage: originSwapQuote.slippageTolerance,
+        autoSlippage: crossSwap.slippageTolerance === "auto",
+        recipient: crossSwap.recipient,
+        appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+      };
+      const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
+      eventEmitterActions.push({
+        target: eventEmitterAddress,
+        callData: encodeEmitDataCalldata(originSwapMetadata),
+        value: "0",
+      });
+    }
+  }
+
+  switch (crossSwap.type) {
+    case AMOUNT_TYPE.EXACT_INPUT:
+      return buildExactInputBridgeTokenMessage(
+        crossSwap,
+        appFee,
+        eventEmitterActions
+      );
+    case AMOUNT_TYPE.EXACT_OUTPUT:
+      return buildExactOutputBridgeTokenMessage(
+        crossSwap,
+        crossSwap.amount,
+        appFee,
+        eventEmitterActions
+      );
+    case AMOUNT_TYPE.MIN_OUTPUT:
+      return buildMinOutputBridgeTokenMessage(
+        crossSwap,
+        appFee,
+        eventEmitterActions
+      );
+  }
+}
+
 export function buildExactInputBridgeTokenMessage(
   crossSwap: CrossSwap,
-  appFee?: AppFee
+  appFee?: AppFee,
+  eventEmitterActions: Action[] = []
 ) {
   const multicallHandlerAddress = getMultiCallHandlerAddress(
     crossSwap.outputToken.chainId
@@ -230,7 +477,7 @@ export function buildExactInputBridgeTokenMessage(
     : [];
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -247,6 +494,8 @@ export function buildExactInputBridgeTokenMessage(
         ),
         value: "0",
       },
+      // emit swap metadata events
+      ...eventEmitterActions,
     ],
   });
 }
@@ -259,7 +508,8 @@ export function buildExactInputBridgeTokenMessage(
 export function buildExactOutputBridgeTokenMessage(
   crossSwap: CrossSwap,
   exactOutputAmount: BigNumber,
-  appFee?: AppFee
+  appFee?: AppFee,
+  eventEmitterActions: Action[] = []
 ) {
   const { feeActions: appFeeActions } = appFee || {
     feeAmount: BigNumber.from(0),
@@ -310,7 +560,7 @@ export function buildExactOutputBridgeTokenMessage(
     : [];
 
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -325,12 +575,51 @@ export function buildExactOutputBridgeTokenMessage(
           crossSwap.isOutputNative
             ? constants.AddressZero // ETH Transfer
             : crossSwap.outputToken.address, // ERC-20 Transfer
-          crossSwap.refundAddress ?? crossSwap.depositor
+          _getExactOutputDustRecipient(crossSwap)
         ),
         value: "0",
       },
+      // emit swap metadata events
+      ...eventEmitterActions,
     ],
   });
+}
+
+function _getExactOutputDustRecipient(crossSwap: CrossSwap) {
+  if (
+    crossSwap.isOriginSvm &&
+    crossSwap.strictTradeType &&
+    !crossSwap.refundAddress
+  ) {
+    throw new InvalidParamError({
+      param: "refundAddress,strictTradeType",
+      message:
+        "Param 'refundAddress' must be provided when 'strictTradeType' is true for transfers originating from SVM.",
+    });
+  }
+
+  const fallbackRecipient = crossSwap.isOriginSvm
+    ? crossSwap.recipient
+    : crossSwap.depositor;
+  const dustRecipient = crossSwap.refundAddress ?? fallbackRecipient;
+
+  if (crossSwap.isDestinationSvm) {
+    if (!isSvmAddress(dustRecipient)) {
+      throw new InvalidParamError({
+        param: "dustRecipient",
+        message: "Param 'dustRecipient' must be a valid SVM address.",
+      });
+    }
+  } else {
+    if (!isEvmAddress(dustRecipient)) {
+      throw new InvalidParamError({
+        param: "dustRecipient",
+        message: "Param 'dustRecipient' must be a valid EVM address.",
+      });
+    }
+  }
+
+  return dustRecipient;
 }
 
 /**
@@ -339,7 +628,8 @@ export function buildExactOutputBridgeTokenMessage(
  */
 export function buildMinOutputBridgeTokenMessage(
   crossSwap: CrossSwap,
-  appFee?: AppFee
+  appFee?: AppFee,
+  eventEmitterActions: Action[] = []
 ) {
   const multicallHandlerAddress = getMultiCallHandlerAddress(
     crossSwap.outputToken.chainId
@@ -377,7 +667,7 @@ export function buildMinOutputBridgeTokenMessage(
       )
     : [];
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(crossSwap),
     actions: [
       // unwrap weth if output token is native
       ...unwrapActions,
@@ -394,14 +684,31 @@ export function buildMinOutputBridgeTokenMessage(
         ),
         value: "0",
       },
+      // emit swap metadata events
+      ...eventEmitterActions,
     ],
   });
 }
 
-export function getFallbackRecipient(crossSwap: CrossSwap) {
+/**
+ * Gets the fallback recipient for Across bridge messages.
+ * When refundOnOrigin=true, returns AddressZero to signal the MultiCallHandler
+ * to refund deposits with unexecutable actions back to the origin chain.
+ */
+export function getAcrossFallbackRecipient(
+  crossSwap: CrossSwap,
+  destinationRecipient?: string
+) {
   return crossSwap.refundOnOrigin
     ? constants.AddressZero
-    : (crossSwap.refundAddress ?? crossSwap.depositor);
+    : (crossSwap.refundAddress ?? destinationRecipient ?? crossSwap.depositor);
+}
+
+export function getMintBurnRefundRecipient(
+  crossSwap: CrossSwap,
+  defaultRecipient?: string
+): string {
+  return crossSwap.refundAddress ?? defaultRecipient ?? crossSwap.depositor;
 }
 
 export async function extractDepositDataStruct(
@@ -411,9 +718,12 @@ export async function extractDepositDataStruct(
     recipient: string;
   }
 ) {
-  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
-  const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
-  const spokePool = getSpokePool(originChainId);
+  if (crossSwapQuotes.bridgeQuote.provider !== "across") {
+    throw new Error(
+      "Can not extract 'BaseDepositDataStruct' for non-Across bridge quotes"
+    );
+  }
+  const destinationChainId = crossSwapQuotes.bridgeQuote.outputToken.chainId;
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
@@ -432,8 +742,14 @@ export async function extractDepositDataStruct(
     destinationChainId,
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
-    quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    fillDeadline: await getFillDeadline(spokePool),
+    quoteTimestamp: getQuoteTimestampArg(
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+      crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
+    ),
+    fillDeadline: getFillDeadline(
+      destinationChainId,
+      crossSwapQuotes.bridgeQuote.suggestedFees.timestamp
+    ),
     exclusivityDeadline:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     exclusivityParameter:
@@ -481,7 +797,10 @@ export async function extractSwapAndDepositDataStruct(
     swapToken: originSwapQuote.tokenIn.address,
     swapTokenAmount: originSwapQuote.maximumAmountIn,
     minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-    routerCalldata: originSwapQuote.swapTxns[0].data,
+    routerCalldata:
+      originSwapQuote.swapTxns[0].ecosystem === "evm"
+        ? originSwapQuote.swapTxns[0].data
+        : "",
     exchange: originRouter.address,
     transferType,
     enableProportionalAdjustment: true,
@@ -490,26 +809,23 @@ export async function extractSwapAndDepositDataStruct(
   };
 }
 
-async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
-}
-
 export function getQuoteFetchStrategies(
   chainId: number,
   tokenInSymbol: string,
   tokenOutSymbol: string,
-  strategies: QuoteFetchStrategies
+  strategies: QuoteFetchStrategies,
+  swapSide: "origin" | "destination"
 ): QuoteFetchStrategy[] {
+  const strategiesForChain =
+    (swapSide === "origin"
+      ? strategies.originChains?.[chainId]
+      : strategies.destinationChains?.[chainId]) ||
+    strategies.chains?.[chainId];
+
   return (
     strategies.swapPairs?.[chainId]?.[tokenInSymbol]?.[tokenOutSymbol] ??
-    strategies.chains?.[chainId] ??
+    strategiesForChain ??
+    strategies.inputTokens?.[tokenInSymbol] ??
     strategies.default ??
     defaultQuoteFetchStrategies.default!
   );
@@ -521,6 +837,7 @@ export function buildDestinationSwapCrossChainMessage({
   bridgeableOutputToken,
   router,
   appFee,
+  originSwapQuote,
 }: {
   crossSwap: CrossSwap;
   bridgeableOutputToken: Token;
@@ -530,7 +847,15 @@ export function buildDestinationSwapCrossChainMessage({
     transferType?: TransferType;
   };
   appFee?: AppFee;
+  originSwapQuote?: SwapQuote;
 }) {
+  // Ensure all swapTxns are EVM ecosystem since this function handles only EVM messages
+  if (!destinationSwapQuote.swapTxns.every(isEvmSwapTxn)) {
+    throw new Error(
+      "buildDestinationSwapCrossChainMessage only supports EVM swap transactions"
+    );
+  }
+
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
   const multicallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId
@@ -539,12 +864,6 @@ export function buildDestinationSwapCrossChainMessage({
     (swapTxn) =>
       swapTxn.to === "0x0" && swapTxn.data === "0x0" && swapTxn.value === "0x0"
   );
-
-  type Action = {
-    target: string;
-    callData: string;
-    value: string;
-  };
 
   let transferActions: Action[] = [];
   let unwrapActions: Action[] = [];
@@ -558,6 +877,10 @@ export function buildDestinationSwapCrossChainMessage({
     crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
       ? crossSwap.amount.sub(appFeeAmount)
       : destinationSwapQuote.minAmountOut.sub(appFeeAmount);
+
+  const destinationRecipient = crossSwap.isOriginSvm
+    ? crossSwap.recipient
+    : crossSwap.depositor;
 
   // If output token is native, we need to unwrap WETH before sending it to the
   // recipient. This is because we only handle WETH in the destination swap.
@@ -628,7 +951,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           crossSwap.outputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -681,13 +1004,77 @@ export function buildDestinationSwapCrossChainMessage({
           target: bridgeableOutputToken.address,
           callData: encodeApproveCalldata(
             router.address,
-            destinationSwapQuote.maximumAmountIn
+            // Approve max to allow routers (e.g. 0x AllowanceHolder) to pull the full
+            // bridged balance when they size the swap using on-chain balance.
+            constants.MaxUint256
           ),
           value: "0",
         };
 
+  // Build event emitter actions for destination and origin swaps
+  const crossSwapType =
+    crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
+      ? SwapType.EXACT_INPUT
+      : crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT
+        ? SwapType.MIN_OUTPUT
+        : SwapType.EXACT_OUTPUT;
+  const eventEmitterActions: Action[] = [];
+  const eventEmitterAddress = getEventEmitterAddress(destinationSwapChainId);
+  if (!isIndicativeQuote && eventEmitterAddress) {
+    const destinationSwapMetadataParams = {
+      version: 1,
+      type: crossSwapType,
+      side: SwapSide.DESTINATION_SWAP,
+      address: crossSwap.outputToken.address,
+      maximumAmountIn: destinationSwapQuote.maximumAmountIn,
+      minAmountOut: destinationSwapQuote.minAmountOut,
+      expectedAmountOut: destinationSwapQuote.expectedAmountOut,
+      expectedAmountIn: destinationSwapQuote.expectedAmountIn,
+      swapProvider: destinationSwapQuote.swapProvider.name,
+      slippage: destinationSwapQuote.slippageTolerance,
+      autoSlippage: crossSwap.slippageTolerance === "auto",
+      recipient: crossSwap.recipient,
+      appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+    };
+    const destinationSwapMetadata = encodeSwapMetadata(
+      destinationSwapMetadataParams
+    );
+    eventEmitterActions.push({
+      target: eventEmitterAddress,
+      callData: encodeEmitDataCalldata(destinationSwapMetadata),
+      value: "0",
+    });
+
+    if (originSwapQuote) {
+      const originSwapMetadataParams = {
+        version: 1,
+        type: crossSwapType,
+        side: SwapSide.ORIGIN_SWAP,
+        address: crossSwap.inputToken.address,
+        maximumAmountIn: originSwapQuote.maximumAmountIn,
+        minAmountOut: originSwapQuote.minAmountOut,
+        expectedAmountOut: originSwapQuote.expectedAmountOut,
+        expectedAmountIn: originSwapQuote.expectedAmountIn,
+        swapProvider: originSwapQuote.swapProvider.name,
+        slippage: originSwapQuote.slippageTolerance,
+        autoSlippage: crossSwap.slippageTolerance === "auto",
+        recipient: crossSwap.recipient,
+        appFeeRecipient: crossSwap.appFeeRecipient || constants.AddressZero,
+      };
+      const originSwapMetadata = encodeSwapMetadata(originSwapMetadataParams);
+      eventEmitterActions.push({
+        target: eventEmitterAddress,
+        callData: encodeEmitDataCalldata(originSwapMetadata),
+        value: "0",
+      });
+    }
+  }
+
   return buildMulticallHandlerMessage({
-    fallbackRecipient: getFallbackRecipient(crossSwap),
+    fallbackRecipient: getAcrossFallbackRecipient(
+      crossSwap,
+      destinationRecipient
+    ),
     actions: [
       routerTransferAction,
       // swap bridgeable output token -> cross swap output token
@@ -703,7 +1090,7 @@ export function buildDestinationSwapCrossChainMessage({
         target: multicallHandlerAddress,
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
+          crossSwap.refundAddress ?? destinationRecipient
         ),
         value: "0",
       },
@@ -715,12 +1102,14 @@ export function buildDestinationSwapCrossChainMessage({
               target: multicallHandlerAddress,
               callData: encodeDrainCalldata(
                 crossSwap.outputToken.address,
-                crossSwap.refundAddress ?? crossSwap.depositor
+                crossSwap.refundAddress ?? destinationRecipient
               ),
               value: "0",
             },
           ]
         : []),
+      // emit swap metadata events
+      ...eventEmitterActions,
     ],
   });
 }
@@ -748,7 +1137,23 @@ export function getOriginSwapEntryPoints(
   chainId: number,
   dex: SupportedDex
 ): OriginEntryPoints {
-  if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+  if (utils.chainIsSvm(chainId)) {
+    return {
+      originSwapInitialRecipient: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+      },
+      swapAndBridge: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+        dex,
+      },
+      deposit: {
+        name: "SvmSpoke",
+        address: getSpokePoolAddress(chainId),
+      },
+    };
+  } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
     return {
       // The `SpokePoolPeriphery` contract is used to initiate an origin swap. It uses a
       // proxy-pattern for security reasons which requires us to use the `SwapProxy`
@@ -767,22 +1172,6 @@ export function getOriginSwapEntryPoints(
         address: getSpokePoolPeripheryAddress(chainId),
       },
     } as const;
-  } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
-    return {
-      originSwapInitialRecipient: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-      },
-      swapAndBridge: {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress(dex, chainId),
-        dex,
-      },
-      deposit: {
-        name: "SpokePool",
-        address: getSpokePoolAddress(chainId),
-      },
-    } as const;
   }
   throw new Error(
     `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
@@ -795,7 +1184,7 @@ export function isValidSource(
   sources: DexSources
 ) {
   const sourceToCheck = _source.toLowerCase();
-  return sources.sources[chainId].some((source) =>
+  return sources.sources[chainId]?.some((source) =>
     source.names.includes(sourceToCheck)
   );
 }
@@ -844,6 +1233,9 @@ export function makeGetSources(sources: DexSources) {
 }
 
 export function inferCrossSwapType(params: CrossSwapQuotes) {
+  if (params.indirectDestinationRoute) {
+    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE_INDIRECT;
+  }
   return params.originSwapQuote && params.destinationSwapQuote
     ? CROSS_SWAP_TYPE.ANY_TO_ANY
     : params.originSwapQuote && !params.destinationSwapQuote

@@ -2,7 +2,7 @@ import { TradeType } from "@uniswap/sdk-core";
 import { BigNumber } from "ethers";
 
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../_constants";
-import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
+import { QuoteFetchOpts, QuoteFetchStrategy, Swap, EvmSwapTxn } from "../types";
 import { getWghoContract, WGHO_ADDRESS } from "./utils/wgho";
 import { getSwapRouter02Strategy } from "../uniswap/swap-router-02";
 import { encodeApproveCalldata } from "../../_multicall-handler";
@@ -11,6 +11,7 @@ import {
   UPSTREAM_SWAP_PROVIDER_ERRORS,
   UpstreamSwapProviderError,
 } from "../../_errors";
+import { getSlippage } from "../../_slippage";
 
 const SWAP_PROVIDER_NAME = "wrapped-gho";
 
@@ -60,6 +61,14 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
 
     const { tokenIn, tokenOut, amount, chainId, recipient } = swap;
 
+    const slippageTolerance = getSlippage({
+      tokenIn: swap.tokenIn,
+      tokenOut: swap.tokenOut,
+      slippageTolerance: swap.slippageTolerance,
+      originOrDestination: swap.originOrDestination,
+      splitSlippage: opts?.splitSlippage,
+    });
+
     // Only support:
     // - L1 GHO -> L1 WGHO
     // - L1 WGHO -> L1 GHO
@@ -74,11 +83,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
     }
 
     const wgho = getWghoContract(chainId);
-    const swapTxns: {
-      data: string;
-      value: string;
-      to: string;
-    }[] = [];
+    const swapTxns: EvmSwapTxn[] = [];
 
     // Depending on the swap route, we need to encode different calldata
     // - L1 GHO -> L1 WGHO : encode `depositFor`
@@ -89,6 +94,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         ? wgho.interface.encodeFunctionData("depositFor", [recipient, amount])
         : wgho.interface.encodeFunctionData("withdrawTo", [recipient, amount]);
     swapTxns.push({
+      ecosystem: "evm" as const,
       data: swapTx1Calldata,
       value: "0",
       to: wgho.address,
@@ -103,7 +109,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
         minAmountOut: BigNumber.from(amount),
         expectedAmountOut: BigNumber.from(amount),
         expectedAmountIn: BigNumber.from(amount),
-        slippageTolerance: swap.slippageTolerance,
+        slippageTolerance,
         swapTxns,
         swapProvider: {
           name: SWAP_PROVIDER_NAME,
@@ -136,6 +142,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
     );
     // Encode approval calldata for the swap via `SwapRouter02`.
     swapTxns.push({
+      ecosystem: "evm" as const,
       data: encodeApproveCalldata(
         swapRouter02Strategy.getRouter(chainId).address,
         ghoSwapQuote.maximumAmountIn
@@ -150,10 +157,12 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       );
     }
     // Encode the swap calldata via `SwapRouter02`.
+    const swapTxn = ghoSwapQuote.swapTxns[0] as EvmSwapTxn;
     swapTxns.push({
-      data: ghoSwapQuote.swapTxns[0].data,
-      value: ghoSwapQuote.swapTxns[0].value,
-      to: ghoSwapQuote.swapTxns[0].to,
+      ecosystem: "evm" as const,
+      data: swapTxn.data,
+      value: swapTxn.value,
+      to: swapTxn.to,
     });
 
     return {
@@ -163,7 +172,7 @@ export function getWrappedGhoStrategy(): QuoteFetchStrategy {
       minAmountOut: ghoSwapQuote.minAmountOut,
       expectedAmountOut: ghoSwapQuote.expectedAmountOut,
       expectedAmountIn: ghoSwapQuote.expectedAmountIn,
-      slippageTolerance: swap.slippageTolerance,
+      slippageTolerance,
       swapTxns,
       swapProvider: {
         name: SWAP_PROVIDER_NAME,

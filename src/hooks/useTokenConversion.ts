@@ -3,13 +3,13 @@ import { BigNumber, BigNumberish, ethers } from "ethers";
 import { useCallback } from "react";
 import {
   fixedPointAdjustment,
-  getToken,
   TOKEN_SYMBOLS_MAP,
   isDefined,
   getConfig,
   hubPoolChainId,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
+import { useToken } from "./useToken";
 
 const config = getConfig();
 
@@ -18,27 +18,45 @@ export function useTokenConversion(
   baseCurrency: string,
   historicalDateISO?: string
 ) {
-  const token = getToken(symbol);
+  // Use the useToken hook to resolve token info
+  const token = useToken(symbol);
 
-  // If the token is OP, we need to use the address of the token on Optimism
-  const l1Token =
-    token.symbol === "OP"
+  // Check if we can use token.priceUsd directly (only for USD base currency and current price)
+  const canUseTokenPrice =
+    token?.priceUsd &&
+    token.priceUsd !== null &&
+    baseCurrency.toLowerCase() === "usd" &&
+    !historicalDateISO;
+
+  // Only resolve l1TokenAddress and use CoinGecko if we can't use token.priceUsd
+  const l1Token = canUseTokenPrice
+    ? undefined
+    : token?.symbol === "OP"
       ? TOKEN_SYMBOLS_MAP["OP"].addresses[10]
-      : token.mainnetAddress!;
+      : token?.mainnetAddress;
 
   const query = useCoingeckoPrice(
-    l1Token,
+    l1Token || "",
     baseCurrency,
     historicalDateISO,
-    isDefined(l1Token)
+    !canUseTokenPrice && isDefined(l1Token)
   );
+
+  // Convert token.priceUsd string to BigNumber (18 decimals) if available
+  const tokenPriceUsd =
+    canUseTokenPrice && token.priceUsd
+      ? ethers.utils.parseUnits(token.priceUsd, 18)
+      : undefined;
 
   const convertTokenToBaseCurrency = useCallback(
     (amount?: BigNumberish) => {
-      const price = query.data?.price;
+      // Use token.priceUsd if available, otherwise fall back to CoinGecko
+      const price = tokenPriceUsd || query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
@@ -47,15 +65,18 @@ export function useTokenConversion(
       const convertedAmount = ConvertDecimals(decimals, 18)(amount);
       return price.mul(convertedAmount).div(fixedPointAdjustment);
     },
-    [l1Token, token, query.data?.price]
+    [l1Token, token, tokenPriceUsd, query.data?.price]
   );
 
   const convertBaseCurrencyToToken = useCallback(
     (amount?: BigNumberish) => {
-      const price = query.data?.price;
+      // Use token.priceUsd if available, otherwise fall back to CoinGecko
+      const price = tokenPriceUsd || query.data?.price;
       const decimals =
         token?.decimals ??
-        config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals;
+        (l1Token
+          ? config.getTokenInfoByAddressSafe(hubPoolChainId, l1Token)?.decimals
+          : undefined);
 
       if (!isDefined(price) || !isDefined(amount) || !isDefined(decimals)) {
         return undefined;
@@ -73,7 +94,13 @@ export function useTokenConversion(
         .mul(ethers.utils.parseUnits("1", decimals))
         .div(exchangeRate);
     },
-    [query.data?.price, token, l1Token, convertTokenToBaseCurrency]
+    [
+      tokenPriceUsd,
+      query.data?.price,
+      token,
+      l1Token,
+      convertTokenToBaseCurrency,
+    ]
   );
 
   return {

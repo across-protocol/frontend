@@ -12,17 +12,20 @@ export const enabledMainnetChainConfigs = [
   chainConfigs.BLAST,
   chainConfigs.LISK,
   chainConfigs.SCROLL,
-  chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
-  chainConfigs.ALEPH_ZERO,
   chainConfigs.INK,
   chainConfigs.SONEIUM,
   chainConfigs.UNICHAIN,
   chainConfigs.LENS,
   chainConfigs.BSC,
   chainConfigs.SOLANA,
+  chainConfigs.HYPEREVM,
+  chainConfigs.PLASMA,
+  chainConfigs.MONAD,
 ];
+
+export const enabledIndirectMainnetChainConfigs = [chainConfigs.HYPERCORE];
 
 export const enabledSepoliaChainConfigs = [
   chainConfigs.SEPOLIA,
@@ -35,6 +38,7 @@ export const enabledSepoliaChainConfigs = [
   chainConfigs.LISK_SEPOLIA,
   chainConfigs.LENS_SEPOLIA,
   chainConfigs.UNICHAIN_SEPOLIA,
-  chainConfigs.TATARA,
   chainConfigs.SOLANA_DEVNET,
 ];
+
+export const enabledIndirectSepoliaChainConfigs = [];
