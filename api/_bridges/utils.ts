@@ -116,7 +116,7 @@ export async function getBridgeStrategyData({
 
     // Has fast standard fill time
     const standardFillTime =
-      CCTP_FILL_TIME_ESTIMATES.standard[outputToken.chainId];
+      CCTP_FILL_TIME_ESTIMATES.standard[inputToken.chainId];
     const hasFastStandardFill =
       standardFillTime !== undefined &&
       standardFillTime <= FAST_STANDARD_FILL_THRESHOLD;
