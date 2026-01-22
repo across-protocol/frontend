@@ -74,7 +74,6 @@ const mockLimitsResponse = (
 // Common test tokens
 const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
-const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
 const usdcLinea = createToken("USDC", CHAIN_IDs.LINEA);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
