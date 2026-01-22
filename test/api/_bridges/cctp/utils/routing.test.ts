@@ -60,7 +60,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isFastCctpEligible: false,
       isInThreshold: false,
       isUsdtToUsdt: false,
-
       isHyperCoreDestination: false,
       hasFastStandardFill: false,
       ...overrides,
