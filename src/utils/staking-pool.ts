@@ -70,6 +70,24 @@ export type PoolQueryData = {
   exchangeRateCurrent: string;
 };
 
+export function calculateElapsedDays(
+  userAmountOfLPStaked: BigNumber,
+  averageDepositTime: BigNumber
+): number {
+  if (userAmountOfLPStaked.eq(0)) {
+    return 0;
+  }
+
+  const days = Number(averageDepositTime) / secondsPerDay;
+
+  return Number(
+    new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2,
+      useGrouping: false,
+    }).format(days)
+  );
+}
+
 /**
  * Calls on-chain data & the Vercel API to resolve information about the AcceleratingDistributor Contract
  * @param tokenAddress The address of the ERC-20 token on the current chain
@@ -174,14 +192,10 @@ export async function fetchStakingPool(
     .mul(lpExchangeRateToToken)
     .div(fixedPointAdjustment);
 
-  // The Average Deposit Time retrieves the # seconds since the last
-  // deposit, weighted by all the deposits in a user's account. To calculate the
-  // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
-  const daysElapsed = userAmountOfLPStaked.eq(0)
-    ? 0
-    : new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 2,
-      }).format(Number(averageDepositTime) / secondsPerDay);
+  const daysElapsed = calculateElapsedDays(
+    userAmountOfLPStaked,
+    averageDepositTime
+  );
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
@@ -268,7 +282,7 @@ export async function fetchStakingPool(
     outstandingRewards,
     currentUserRewardMultiplier,
     availableLPTokenBalance,
-    elapsedTimeSinceAvgDeposit: Number(daysElapsed),
+    elapsedTimeSinceAvgDeposit: daysElapsed,
     lpTokenSymbolName,
     usersMultiplierPercentage,
     usersTotalLPTokens,
