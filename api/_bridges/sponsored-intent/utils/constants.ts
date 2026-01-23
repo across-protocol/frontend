@@ -1,9 +1,4 @@
-import {
-  TOKEN_SYMBOLS_MAP,
-  CCTP_NO_DOMAIN,
-  CHAINS,
-  CHAIN_IDs,
-} from "../../../_constants";
+import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../_constants";
 
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
@@ -15,6 +10,8 @@ export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
 export const SUPPORTED_INPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
   TOKEN_SYMBOLS_MAP["USDC-BNB"],
+  TOKEN_SYMBOLS_MAP["USDC.e"],
+  TOKEN_SYMBOLS_MAP["USDzC"],
 ];
 export const SUPPORTED_OUTPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDH,
@@ -22,12 +19,10 @@ export const SUPPORTED_OUTPUT_TOKENS = [
 ];
 export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
   (chainId) => {
-    // Only mark CCTP enabled origin chains as eligible for sponsored intents
-    const isCctpChain = CHAINS[Number(chainId)]?.cctpDomain !== CCTP_NO_DOMAIN;
-    if (isCctpChain) {
-      return Number(chainId);
-    }
-    return [];
+    const isSupportedInputToken = SUPPORTED_INPUT_TOKENS.some(
+      (token) => token.addresses[Number(chainId)]
+    );
+    return isSupportedInputToken ? [Number(chainId)] : [];
   }
 );
 export const SUPPORTED_DESTINATION_CHAINS = [
