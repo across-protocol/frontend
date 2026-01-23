@@ -20,12 +20,6 @@ export type RestrictedRoute = {
 const RESTRICTED_ROUTES: RestrictedRoute[] = [
   {
     fromChainId: "*",
-    fromSymbol: ["USDC.e"],
-    toChainId: [CHAIN_IDs.HYPERCORE],
-    toSymbol: ["USDH-SPOT"],
-  },
-  {
-    fromChainId: "*",
     fromSymbol: ["USDT*"],
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
