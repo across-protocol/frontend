@@ -2,7 +2,7 @@ import { BigNumber, utils, constants } from "ethers";
 
 import { AmountType, Token } from "./_dexes/types";
 import { getEnvs, parseJsonSafe } from "./_env";
-import { TOKEN_SYMBOLS_MAP } from "./_constants";
+import { TOKEN_EQUIVALENCE_REMAPPING, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { getSponsorshipsFromIndexer } from "./_indexer-api";
 import { getNormalizedSpotTokenSymbol } from "./_hypercore";
 import {
@@ -170,8 +170,11 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   recipient: string;
   amountType: AmountType;
 }) {
+  const normalizedInputSymbol =
+    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
+    params.inputToken.symbol;
   const inputAmountLimit =
-    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
+    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[normalizedInputSymbol]?.[
       params.outputToken.symbol
     ];
   const isWithinInputAmountLimit =
