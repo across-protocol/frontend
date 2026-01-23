@@ -27,9 +27,14 @@ vi.mock("../../api/_bridges/sponsored-intent/utils/common", () => ({
 vi.mock("../../api/_sponsorship-eligibility", () => ({
   getSponsorshipEligibilityPreChecks: vi.fn(() => ({
     isEligibleTokenPair: true,
+    isWithinInputAmountLimit: true,
     isWithinGlobalDailyLimit: true,
     isWithinUserDailyLimit: true,
     isWithinAccountCreationDailyLimit: true,
+    isCctpEnabledOriginChain: true,
+    isOftEnabledOriginChain: true,
+    isSponsoredIntentSupported: true,
+    isMintBurnThresholdMet: true,
   })),
 }));
 
@@ -48,12 +53,79 @@ const USDH_SPOT_ON_HYPERCORE = {
   decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
 };
 
+const mockEligibility = async (
+  overrides: Partial<{
+    isEligibleTokenPair: boolean;
+    isWithinInputAmountLimit: boolean;
+    isWithinGlobalDailyLimit: boolean;
+    isWithinUserDailyLimit: boolean;
+    isWithinAccountCreationDailyLimit: boolean;
+    isCctpEnabledOriginChain: boolean;
+    isOftEnabledOriginChain: boolean;
+    isSponsoredIntentSupported: boolean;
+    isMintBurnThresholdMet: boolean;
+  }> = {}
+) => {
+  const { getSponsorshipEligibilityPreChecks } = await import(
+    "../../api/_sponsorship-eligibility"
+  );
+  (
+    getSponsorshipEligibilityPreChecks as ReturnType<typeof vi.fn>
+  ).mockReturnValue({
+    isEligibleTokenPair: true,
+    isWithinInputAmountLimit: true,
+    isWithinGlobalDailyLimit: true,
+    isWithinUserDailyLimit: true,
+    isWithinAccountCreationDailyLimit: true,
+    isCctpEnabledOriginChain: true,
+    isOftEnabledOriginChain: true,
+    isSponsoredIntentSupported: true,
+    isMintBurnThresholdMet: true,
+    ...overrides,
+  });
+};
+
+describe("routeStrategyForSponsorship - USDT routing", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should route USDT to OFT strategy", async () => {
+    await mockEligibility({ isOftEnabledOriginChain: true });
+    const { isRouteSupported } = await import(
+      "../../api/_bridges/oft-sponsored/strategy"
+    );
+    (isRouteSupported as ReturnType<typeof vi.fn>).mockReturnValue(true);
+
+    const params = {
+      inputToken: {
+        address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.MAINNET],
+        chainId: CHAIN_IDs.MAINNET,
+        symbol: "USDT",
+        decimals: TOKEN_SYMBOLS_MAP.USDT.decimals,
+      },
+      outputToken: USDH_SPOT_ON_HYPERCORE,
+      amount: utils.parseUnits("1000", TOKEN_SYMBOLS_MAP.USDT.decimals),
+      amountType: "exactInput" as const,
+      recipient: "0x1234567890abcdef1234567890abcdef12345678",
+      depositor: "0x1234567890abcdef1234567890abcdef12345678",
+    };
+
+    const result = await routeStrategyForSponsorship(params);
+    expect(result).toEqual({ name: "oft-sponsored" });
+  });
+});
+
 describe("routeStrategyForSponsorship - non-CCTP routing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("should route non-CCTP chain (zkSync USDC.e) to intents regardless of amount", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: false,
+      isMintBurnThresholdMet: true,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP["USDC.e"].addresses[CHAIN_IDs.ZK_SYNC],
@@ -73,6 +145,10 @@ describe("routeStrategyForSponsorship - non-CCTP routing", () => {
   });
 
   it("should route non-CCTP chain (Zora USDzC) to intents regardless of amount", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: false,
+      isMintBurnThresholdMet: true,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP["USDzC"].addresses[CHAIN_IDs.ZORA],
@@ -92,6 +168,10 @@ describe("routeStrategyForSponsorship - non-CCTP routing", () => {
   });
 
   it("should route non-CCTP chain (BSC USDC-BNB) to intents regardless of amount", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: false,
+      isMintBurnThresholdMet: true,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP["USDC-BNB"].addresses[CHAIN_IDs.BSC],
@@ -111,6 +191,10 @@ describe("routeStrategyForSponsorship - non-CCTP routing", () => {
   });
 
   it("should route non-CCTP chain (Scroll native USDC) to intents regardless of amount", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: false,
+      isMintBurnThresholdMet: true,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.SCROLL],
@@ -130,6 +214,10 @@ describe("routeStrategyForSponsorship - non-CCTP routing", () => {
   });
 
   it("should route non-CCTP chain to intents even for small amounts", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: false,
+      isMintBurnThresholdMet: false,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP["USDC.e"].addresses[CHAIN_IDs.MODE],
@@ -155,6 +243,10 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
   });
 
   it("should route CCTP chain (Optimism USDC) to CCTP for amounts >= 10K", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: true,
+      isMintBurnThresholdMet: true,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
@@ -174,6 +266,10 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
   });
 
   it("should route CCTP chain (Optimism USDC) to intents for amounts < 10K", async () => {
+    await mockEligibility({
+      isCctpEnabledOriginChain: true,
+      isMintBurnThresholdMet: false,
+    });
     const params = {
       inputToken: {
         address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
@@ -193,6 +289,7 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
   });
 
   it("should return null for unsupported route", async () => {
+    await mockEligibility();
     const { isRouteSupported } = await import(
       "../../api/_bridges/sponsored-intent/utils/common"
     );

@@ -1,5 +1,3 @@
-import { utils } from "ethers";
-
 import {
   getSponsoredCctpBridgeStrategy,
   isRouteSupported as isCctpRouteSupported,
@@ -15,125 +13,82 @@ import {
   BridgeStrategyDataParams,
   RoutingRule,
 } from "./_bridges/types";
-import {
-  CHAINS,
-  CCTP_NO_DOMAIN,
-  TOKEN_EQUIVALENCE_REMAPPING,
-} from "./_constants";
+import { TOKEN_EQUIVALENCE_REMAPPING } from "./_constants";
 import {
   SponsorshipEligibilityPreChecks,
   getSponsorshipEligibilityPreChecks,
 } from "./_sponsorship-eligibility";
-import { getLogger, ConvertDecimals } from "./_utils";
+import { getLogger } from "./_utils";
 import { Token } from "./_dexes/types";
 
-type SponsorshipRoutingRule = RoutingRule<
-  NonNullable<SponsorshipEligibilityPreChecks>
->;
+type SponsorshipEligibilityData = NonNullable<SponsorshipEligibilityPreChecks>;
 
-// Amount threshold for routing USDC → USDH on HyperCore (in USD terms)
-// Amounts >= 10K USD use CCTP, amounts < 10K USD use intents
-// Note: Per-transaction limit of 1M USD is enforced in getSponsorshipEligibilityPreChecks
-const MIN_CCTP_AMOUNT_USD = 10000; // 10K USD
+type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 
-const makeRoutingRuleGetStrategyFn =
-  (isEligibleForSponsorship: boolean) =>
-  (params?: BridgeStrategyDataParams) => {
-    if (!params) {
-      return null;
-    }
-
-    const { inputToken, outputToken, amount, amountType } = params;
-
-    // USDT always uses OFT with the eligibility flag
-    if (inputToken.symbol?.includes("USDT")) {
-      return getOftSponsoredBridgeStrategy(isEligibleForSponsorship);
-    }
-
-    // USDC routing logic
-    const equivalentSymbol =
-      TOKEN_EQUIVALENCE_REMAPPING[inputToken.symbol] ?? inputToken.symbol;
-    if (equivalentSymbol?.includes("USDC")) {
-      // Check if this is a USDC → USDH-SPOT route on HyperCore
-      const isUsdcToUsdhSpot =
-        outputToken.symbol === "USDH-SPOT" &&
-        isSponsoredIntentSupported({ inputToken, outputToken });
-
-      // If eligible for sponsorship AND USDC → USDH-SPOT, route accordingly
-      if (isEligibleForSponsorship && isUsdcToUsdhSpot) {
-        // Non-CCTP chains always use intents (CCTP unavailable)
-        const isCctpChain =
-          CHAINS[inputToken.chainId]?.cctpDomain !== CCTP_NO_DOMAIN;
-        if (!isCctpChain) {
-          return getUsdhIntentsBridgeStrategy();
-        }
-
-        const inputAmount =
-          amountType === "exactInput"
-            ? amount
-            : ConvertDecimals(
-                outputToken.decimals,
-                inputToken.decimals
-              )(amount);
-        const minCctpAmount = utils.parseUnits(
-          MIN_CCTP_AMOUNT_USD.toString(),
-          inputToken.decimals
-        );
-
-        // Route based on amount:
-        // - amount >= 10K → Sponsored CCTP
-        // - amount < 10K → USDH intents
-        if (inputAmount.gte(minCctpAmount)) {
-          return getSponsoredCctpBridgeStrategy(true);
-        } else {
-          return getUsdhIntentsBridgeStrategy();
-        }
-      }
-
-      // Default USDC routing (not USDH-SPOT or not eligible)
-      return getSponsoredCctpBridgeStrategy(isEligibleForSponsorship);
-    }
-
-    return null;
-  };
-
-// Priority-ordered routing rules for sponsorship
-const SPONSORSHIP_ROUTING_RULES: SponsorshipRoutingRule[] = [
-  {
-    name: "is-eligible-token-pair",
-    shouldApply: (data) => !data.isEligibleTokenPair,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Not a sponsorship eligible token pair",
-  },
-  {
-    name: "global-limit-exceeded",
-    shouldApply: (data) => !data.isWithinGlobalDailyLimit,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Global daily sponsorship limit exceeded",
-  },
-  {
-    name: "user-limit-exceeded",
-    shouldApply: (data) => !data.isWithinUserDailyLimit,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "User daily sponsorship limit exceeded",
-  },
-  {
-    name: "account-creation-limit-exceeded",
-    shouldApply: (data) => !data.isWithinAccountCreationDailyLimit,
-    getStrategy: makeRoutingRuleGetStrategyFn(false),
-    reason: "Account creation daily limit exceeded",
-  },
-  {
-    name: "eligible-for-sponsorship",
-    shouldApply: (data) =>
-      data.isEligibleTokenPair &&
-      data.isWithinGlobalDailyLimit &&
-      data.isWithinUserDailyLimit &&
-      data.isWithinAccountCreationDailyLimit,
-    getStrategy: makeRoutingRuleGetStrategyFn(true),
-    reason: "All sponsorship eligibility criteria met",
-  },
-];
+// Priority-ordered routing rules for sponsorship by route key
+const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
+  "USDT:*": [
+    {
+      name: "usdt-ineligible",
+      reason: "Sponsorship limits not met for USDT route",
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isOftEnabledOriginChain,
+      getStrategy: () => getOftSponsoredBridgeStrategy(false),
+    },
+    {
+      name: "usdt-eligible",
+      reason: "Eligible USDT route",
+      shouldApply: (data) =>
+        isEligibleForSponsorship(data) && data.isOftEnabledOriginChain,
+      getStrategy: () => getOftSponsoredBridgeStrategy(true),
+    },
+  ],
+  "USDC:USDH-SPOT": [
+    {
+      name: "usdc-usdh-spot-non-cctp",
+      reason: "Eligible USDC → USDH-SPOT route on non-CCTP chain",
+      shouldApply: (data) =>
+        isEligibleForSponsorship(data) &&
+        data.isSponsoredIntentSupported &&
+        !data.isCctpEnabledOriginChain,
+      getStrategy: () => getUsdhIntentsBridgeStrategy(),
+    },
+    {
+      name: "usdc-usdh-spot-cctp-over-threshold",
+      reason: "Eligible USDC → USDH-SPOT route above mint/burn threshold",
+      shouldApply: (data) =>
+        isEligibleForSponsorship(data) &&
+        data.isSponsoredIntentSupported &&
+        data.isCctpEnabledOriginChain &&
+        data.isMintBurnThresholdMet,
+      getStrategy: () => getSponsoredCctpBridgeStrategy(true),
+    },
+    {
+      name: "usdc-usdh-spot-cctp-under-threshold",
+      reason: "Eligible USDC → USDH-SPOT route below mint/burn threshold",
+      shouldApply: (data) =>
+        isEligibleForSponsorship(data) &&
+        data.isSponsoredIntentSupported &&
+        data.isCctpEnabledOriginChain &&
+        !data.isMintBurnThresholdMet,
+      getStrategy: () => getUsdhIntentsBridgeStrategy(),
+    },
+  ],
+  "USDC:*": [
+    {
+      name: "usdc-ineligible",
+      reason: "Sponsorship limits not met for USDC route",
+      shouldApply: (data) => !isEligibleForSponsorship(data),
+      getStrategy: () => getSponsoredCctpBridgeStrategy(false),
+    },
+    {
+      name: "usdc-eligible-default",
+      reason: "Eligible USDC route",
+      shouldApply: (data) => isEligibleForSponsorship(data),
+      getStrategy: () => getSponsoredCctpBridgeStrategy(true),
+    },
+  ],
+};
 
 /**
  * Determines if a bridge transaction is eligible for sponsorship.
@@ -162,11 +117,23 @@ export async function routeStrategyForSponsorship(
     return null;
   }
 
-  const applicableRule = SPONSORSHIP_ROUTING_RULES.find((rule) =>
-    rule.shouldApply(eligibilityData)
-  );
+  let applicableRule: SponsorshipRoutingRule | null = null;
+  let strategy: BridgeStrategy | null = null;
+  const rules = getRouteRules(params) ?? [];
 
-  if (!applicableRule) {
+  for (const rule of rules) {
+    if (!rule.shouldApply(eligibilityData)) {
+      continue;
+    }
+    const applicableStrategy = rule.getStrategy();
+    if (applicableStrategy) {
+      applicableRule = rule;
+      strategy = applicableStrategy;
+      break;
+    }
+  }
+
+  if (!applicableRule || !strategy) {
     logger.warn({
       at: "routeStrategyForSponsorship",
       message:
@@ -175,8 +142,6 @@ export async function routeStrategyForSponsorship(
     });
     return null;
   }
-
-  const strategy = applicableRule.getStrategy(params);
 
   logger.debug({
     at: "routeStrategyForSponsorship",
@@ -201,5 +166,35 @@ export function isSponsoredRoute(params: {
     isCctpRouteSupported(params) ||
     isOftRouteSupported(params) ||
     isSponsoredIntentSupported(params)
+  );
+}
+
+const ROUTE_WILDCARD_SYMBOL = "*";
+
+function buildRouteKey(inputSymbol?: string, outputSymbol?: string) {
+  return inputSymbol
+    ? `${inputSymbol}:${outputSymbol ?? ROUTE_WILDCARD_SYMBOL}`
+    : null;
+}
+
+function getRouteRules(params: BridgeStrategyDataParams) {
+  const inputSymbol =
+    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
+    params.inputToken.symbol;
+  const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
+  const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
+  return (
+    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
+    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
+  );
+}
+
+function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
+  return (
+    data.isWithinInputAmountLimit &&
+    data.isWithinGlobalDailyLimit &&
+    data.isWithinUserDailyLimit &&
+    data.isWithinAccountCreationDailyLimit &&
+    data.isEligibleTokenPair
   );
 }
