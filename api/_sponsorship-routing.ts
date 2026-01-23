@@ -15,11 +15,6 @@ import {
 } from "./_bridges/types";
 import { TOKEN_EQUIVALENCE_REMAPPING } from "./_constants";
 import {
-  CHAINS,
-  CCTP_NO_DOMAIN,
-  TOKEN_EQUIVALENCE_REMAPPING,
-} from "./_constants";
-import {
   SponsorshipEligibilityPreChecks,
   getSponsorshipEligibilityPreChecks,
 } from "./_sponsorship-eligibility";
