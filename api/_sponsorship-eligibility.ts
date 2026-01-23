@@ -2,7 +2,7 @@ import { BigNumber, utils, constants } from "ethers";
 
 import { Token } from "./_dexes/types";
 import { getEnvs, parseJsonSafe } from "./_env";
-import { TOKEN_SYMBOLS_MAP } from "./_constants";
+import { TOKEN_EQUIVALENCE_REMAPPING, TOKEN_SYMBOLS_MAP } from "./_constants";
 import { getSponsorshipsFromIndexer } from "./_indexer-api";
 import { getNormalizedSpotTokenSymbol } from "./_hypercore";
 import {
@@ -159,8 +159,11 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   outputToken: Token;
   recipient: string;
 }) {
+  const normalizedInputSymbol =
+    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
+    params.inputToken.symbol;
   const inputAmountLimit =
-    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
+    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[normalizedInputSymbol]?.[
       params.outputToken.symbol
     ];
   // If input amount is greater than the limit, short-circuit with undefined.
@@ -171,7 +174,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
 
   const isEligibleTokenPair = SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
     (pair) =>
-      pair.inputToken === params.inputToken.symbol &&
+      pair.inputToken === normalizedInputSymbol &&
       pair.outputToken === params.outputToken.symbol
   );
   // If not eligible token pair, short-circuit with false values.
