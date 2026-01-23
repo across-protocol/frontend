@@ -164,27 +164,14 @@ export async function buildTxSvm(params: {
     tokenDecimals
   );
 
-  // Build final transaction
-  let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
-  tx = pipe(
-    tx,
-    // Add all deposit instructions
-    (tx) =>
-      depositIx.instructions.reduce(
-        (acc, instruction) =>
-          appendTransactionMessageInstruction(instruction, acc),
-        tx
-      ),
-    // Add integrator memo if provided and Swap API marker
-    (tx) =>
-      appendTransactionMessageInstruction(
-        getAddMemoInstruction({
-          memo: params.integratorId
-            ? utils.hexConcat([params.integratorId, SWAP_CALLDATA_MARKER])
-            : SWAP_CALLDATA_MARKER,
-        }),
-        tx
-      )
+  // Build final transaction - use depositIx as base and add memo
+  const tx = appendTransactionMessageInstruction(
+    getAddMemoInstruction({
+      memo: params.integratorId
+        ? utils.hexConcat([params.integratorId, SWAP_CALLDATA_MARKER])
+        : SWAP_CALLDATA_MARKER,
+    }),
+    depositIx
   );
 
   const compiledTx = compileTransaction(tx);

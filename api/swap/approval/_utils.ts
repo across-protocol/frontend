@@ -373,8 +373,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
     assertValidIntegratorId(integratorId);
   }
 
-  let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
-
   // Get swap instructions for A2B flows (if present)
   const swapTxn = originSwapQuote?.swapTxns[0];
   const swapIxs =
@@ -383,52 +381,60 @@ async function _buildDepositTxForAllowanceHolderSvm(
     swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.lookupTables : undefined;
   const swapProvider = originSwapQuote?.swapProvider.name;
 
-  tx = pipe(
-    tx,
-    // Add swap instructions if present
-    (tx) => {
-      if (!swapIxs) return tx;
-
-      switch (swapProvider) {
-        case "jupiter":
-          return appendJupiterIxs(tx, swapIxs as JupiterSwapIxs);
-        default:
-          throw new Error(`Unsupported SVM swap provider: ${swapProvider}`);
-      }
-    },
-    // Add all deposit instructions
-    (tx) =>
-      depositIx.instructions.reduce(
-        (acc, instruction) =>
-          appendTransactionMessageInstruction(instruction, acc),
-        tx
-      ),
-    // Add integrator memo if provided and Swap API marker
-    (tx) =>
-      appendTransactionMessageInstruction(
-        getAddMemoInstruction({
-          memo: integratorId
-            ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
-            : SWAP_CALLDATA_MARKER,
-        }),
-        tx
-      )
-  );
-
-  // Fetch address lookup tables if present to reduce txn size
-  const addressesByLookup: AddressesByLookupTableAddress = swapLookupTables
-    ? await fetchAddressesForLookupTables(swapLookupTables, rpcClient)
-    : {};
-
-  // Compile transaction with address lookup table compression
-  const hasLookupTables = Object.keys(addressesByLookup).length > 0;
-
+  // Build and compile transaction
   let compiledTx;
-  if (hasLookupTables) {
-    const compressedMessage =
-      compressTransactionMessageUsingAddressLookupTables(tx, addressesByLookup);
-    compiledTx = compileTransaction(compressedMessage);
+  if (swapIxs) {
+    // For swap flows: create base, add swaps, deposit instructions, and memo
+    const tx = pipe(
+      await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner),
+      (txMsg) => {
+        switch (swapProvider) {
+          case "jupiter":
+            return appendJupiterIxs(txMsg, swapIxs as JupiterSwapIxs);
+          default:
+            throw new Error(`Unsupported SVM swap provider: ${swapProvider}`);
+        }
+      },
+      (txMsg) => ({
+        ...txMsg,
+        instructions: [...txMsg.instructions, ...depositIx.instructions],
+      }),
+      (txMsg) =>
+        appendTransactionMessageInstruction(
+          getAddMemoInstruction({
+            memo: integratorId
+              ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
+              : SWAP_CALLDATA_MARKER,
+          }),
+          txMsg
+        )
+    );
+
+    // Compile with address lookup table compression if available
+    if (swapLookupTables) {
+      const addressesByLookup = await fetchAddressesForLookupTables(
+        swapLookupTables,
+        rpcClient
+      );
+      const compressedMessage =
+        compressTransactionMessageUsingAddressLookupTables(
+          tx,
+          addressesByLookup
+        );
+      compiledTx = compileTransaction(compressedMessage);
+    } else {
+      compiledTx = compileTransaction(tx);
+    }
   } else {
+    // For bridge-only flows: use depositIx, add memo, and compile
+    const tx = appendTransactionMessageInstruction(
+      getAddMemoInstruction({
+        memo: integratorId
+          ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
+          : SWAP_CALLDATA_MARKER,
+      }),
+      depositIx
+    );
     compiledTx = compileTransaction(tx);
   }
 
