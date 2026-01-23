@@ -376,7 +376,12 @@ export async function getBridgeQuoteMessage(
   }
 
   const eventEmitterActions: Action[] = [];
-  if (originSwapQuote) {
+  if (
+    originSwapQuote &&
+    // Skip encoding origin swap metadata for SVM origin swaps for now.
+    // This requires a different type of encoding where we encode addresses as bytes32.
+    !crossSwap.isOriginSvm
+  ) {
     const crossSwapType =
       crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
         ? SwapType.EXACT_INPUT
