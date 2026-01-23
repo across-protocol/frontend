@@ -16,6 +16,11 @@ import {
   RoutingRule,
 } from "./_bridges/types";
 import {
+  CHAINS,
+  CCTP_NO_DOMAIN,
+  TOKEN_EQUIVALENCE_REMAPPING,
+} from "./_constants";
+import {
   SponsorshipEligibilityPreChecks,
   getSponsorshipEligibilityPreChecks,
 } from "./_sponsorship-eligibility";
@@ -46,14 +51,23 @@ const makeRoutingRuleGetStrategyFn =
     }
 
     // USDC routing logic
-    if (inputToken.symbol?.includes("USDC")) {
+    const equivalentSymbol =
+      TOKEN_EQUIVALENCE_REMAPPING[inputToken.symbol] ?? inputToken.symbol;
+    if (equivalentSymbol?.includes("USDC")) {
       // Check if this is a USDC → USDH-SPOT route on HyperCore
       const isUsdcToUsdhSpot =
         outputToken.symbol === "USDH-SPOT" &&
         isSponsoredIntentSupported({ inputToken, outputToken });
 
-      // If eligible for sponsorship AND USDC → USDH-SPOT, check amount
+      // If eligible for sponsorship AND USDC → USDH-SPOT, route accordingly
       if (isEligibleForSponsorship && isUsdcToUsdhSpot) {
+        // Non-CCTP chains always use intents (CCTP unavailable)
+        const isCctpChain =
+          CHAINS[inputToken.chainId]?.cctpDomain !== CCTP_NO_DOMAIN;
+        if (!isCctpChain) {
+          return getUsdhIntentsBridgeStrategy();
+        }
+
         const inputAmount =
           amountType === "exactInput"
             ? amount

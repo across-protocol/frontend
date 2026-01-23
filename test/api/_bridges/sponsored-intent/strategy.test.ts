@@ -8,8 +8,16 @@ import {
 } from "../../../../api/_bridges/sponsored-intent/utils/tx-builder";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { Token } from "../../../../api/_dexes/types";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
-import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
+import { CHAIN_IDs } from "../../../../api/_constants";
+import {
+  USDC_ON_OPTIMISM,
+  USDC_ON_SCROLL,
+  USDC_ON_LENS,
+  USDCe_ON_ZKSYNC,
+  USDzC_ON_ZORA,
+  USDH_ON_HYPERCORE,
+  USDH_ON_HYPEREVM,
+} from "./utils";
 
 vi.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
 vi.mock("../../../../api/_bridges/sponsored-intent/utils/tx-builder");
@@ -61,22 +69,39 @@ describe("getUsdhIntentsBridgeStrategy", () => {
       expect(strategy.getCrossSwapTypes(params)).toEqual([]);
     });
 
-    it("should return empty array for non-CCTP origin chain", () => {
-      const nonCctpUsdcChains = [CHAIN_IDs.LENS, CHAIN_IDs.SCROLL];
-      const nonCctpUsdcChainsParams = nonCctpUsdcChains.map((chainId) => ({
+    it("should return BRIDGEABLE_TO_BRIDGEABLE for non-CCTP origin chains with supported USDC tokens", () => {
+      const nonCctpTokens = [
+        USDC_ON_SCROLL,
+        USDC_ON_LENS,
+        USDCe_ON_ZKSYNC,
+        USDzC_ON_ZORA,
+      ];
+      nonCctpTokens.forEach((inputToken) => {
+        const params = {
+          inputToken,
+          outputToken: USDH_ON_HYPERCORE,
+          isInputNative: false,
+          isOutputNative: false,
+        };
+        expect(strategy.getCrossSwapTypes(params)).toEqual([
+          CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
+        ]);
+      });
+    });
+
+    it("should return empty array for unsupported origin chain", () => {
+      const params = {
         inputToken: {
-          symbol: TOKEN_SYMBOLS_MAP.USDC.symbol,
-          decimals: TOKEN_SYMBOLS_MAP.USDC.decimals,
-          address: TOKEN_SYMBOLS_MAP.USDC.addresses[chainId],
-          chainId,
+          symbol: "USDC",
+          decimals: 6,
+          address: "0x1234567890abcdef1234567890abcdef12345678",
+          chainId: 999999, // Non-existent chain
         },
         outputToken: USDH_ON_HYPERCORE,
         isInputNative: false,
         isOutputNative: false,
-      }));
-      nonCctpUsdcChainsParams.forEach((params) => {
-        expect(strategy.getCrossSwapTypes(params)).toEqual([]);
-      });
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
     });
   });
 
