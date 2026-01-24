@@ -19,7 +19,7 @@ import {
   AppFee,
   assertMinOutputAmount,
   CROSS_SWAP_TYPE,
-  getFallbackRecipient,
+  getMintBurnRefundRecipient,
 } from "../../_dexes/utils";
 import { InvalidParamError } from "../../_errors";
 import {
@@ -445,7 +445,7 @@ async function buildTransaction(params: {
     inputAmount: bridgeQuote.inputAmount,
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
-    refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),
+    refundRecipient: getMintBurnRefundRecipient(crossSwap, crossSwap.recipient),
     maxBpsToSponsor: BigNumber.from(Math.ceil(maxBpsToSponsor)),
     maxUserSlippageBps,
   });

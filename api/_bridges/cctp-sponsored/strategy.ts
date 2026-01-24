@@ -22,7 +22,7 @@ import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
 import {
   AppFee,
   CROSS_SWAP_TYPE,
-  getFallbackRecipient,
+  getMintBurnRefundRecipient,
 } from "../../_dexes/utils";
 import { AmountTooLowError, InvalidParamError } from "../../_errors";
 import { ConvertDecimals } from "../../_utils";
@@ -573,7 +573,7 @@ export async function _prepareSponsoredTx(params: {
     outputAmount: bridgeQuote.outputAmount,
     recipient: crossSwap.recipient,
     depositor: crossSwap.depositor,
-    refundRecipient: getFallbackRecipient(crossSwap, crossSwap.recipient),
+    refundRecipient: getMintBurnRefundRecipient(crossSwap, crossSwap.recipient),
     maxBpsToSponsor: BigNumber.from(Math.ceil(maxBpsToSponsor)),
     maxUserSlippageBps,
     maxFee,

@@ -73,38 +73,6 @@ function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
     };
   }
 
-  if (data.isMonadTransfer) {
-    if (data.isWithinMonadLimit) {
-      return {
-        strategy: acrossStrategy,
-        rule: "monad-within-limit",
-        reason: "Monad routes within the lite limit use Across",
-      };
-    }
-
-    if (data.isUsdtToUsdt) {
-      return {
-        strategy: getOftBridgeStrategy(),
-        rule: "monad-usdt-route",
-        reason: "Monad USDT routes burn/mint via OFT",
-      };
-    }
-
-    if (data.isUsdcToUsdc) {
-      return {
-        strategy: getCctpBridgeStrategy(),
-        rule: "monad-usdc-route",
-        reason: "Monad USDC routes burn/mint via CCTP",
-      };
-    }
-
-    return {
-      strategy: acrossStrategy,
-      rule: "monad-default",
-      reason: "Fallback to Across for unsupported Monad pairs",
-    };
-  }
-
   if (data.isUtilizationHigh) {
     return {
       strategy: burnAndMintStrategy,
@@ -113,7 +81,7 @@ function decideBurnAndMintStrategy(data: NonNullable<BridgeStrategyData>): {
     };
   }
 
-  if (data.isFastCctpEligible) {
+  if (data.isFastCctpEligible || data.hasFastStandardFill) {
     if (data.isInThreshold || data.isLargeCctpDeposit) {
       return {
         strategy: acrossStrategy,

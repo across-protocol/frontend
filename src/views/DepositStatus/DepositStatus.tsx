@@ -37,7 +37,7 @@ export default function DepositStatus() {
   const fromChainId = Number(originChainId);
   const toChainId = Number(destinationChainId);
 
-  const { depositQuery, fillQuery } = useDepositTracking({
+  const { deposit, fill } = useDepositTracking({
     depositTxHash: depositTxHash ?? "",
     fromChainId,
     toChainId,
@@ -45,12 +45,13 @@ export default function DepositStatus() {
     fromBridgeAndSwapPagePayload: state.fromBridgeAndSwapPagePayload,
   });
 
-  const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
-  const fillTxCompletedTime = fillQuery.data?.fillTxTimestamp;
-  const { elapsedSeconds: fillTxElapsedSeconds } = useElapsedSeconds(
+  const depositTxCompletedTime = deposit?.depositTimestamp;
+  const fillTxCompletedTime = fill?.fillTxTimestamp;
+  const { elapsedSeconds } = useElapsedSeconds(
     depositTxCompletedTime,
     fillTxCompletedTime
   );
+  const fillTxElapsedSeconds = fillTxCompletedTime ? elapsedSeconds : undefined;
 
   if (
     !depositTxHash ||

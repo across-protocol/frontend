@@ -1,11 +1,13 @@
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { describe, expect, test, vi } from "vitest";
 
 import {
   CROSS_SWAP_TYPE,
+  getAcrossFallbackRecipient,
   getBridgeQuoteMessage,
   getBridgeQuoteRecipient,
   getCrossSwapTypes,
+  getMintBurnRefundRecipient,
   getQuoteFetchStrategies,
   QuoteFetchStrategies,
 } from "../../../api/_dexes/utils";
@@ -30,6 +32,31 @@ vi.mock("../../../api/_utils", async (importOriginal) => {
       };
     }),
   };
+});
+
+// Shared helper to create mock CrossSwap objects
+const createMockCrossSwap = (overrides?: Partial<CrossSwap>): CrossSwap => ({
+  amount: BigNumber.from("1000000"),
+  inputToken: {
+    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+    decimals: 6,
+    symbol: "USDC",
+    chainId: CHAIN_IDs.OPTIMISM,
+  },
+  outputToken: {
+    address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
+    decimals: 6,
+    symbol: "USDC",
+    chainId: CHAIN_IDs.ARBITRUM,
+  },
+  depositor: "0x1234567890123456789012345678901234567890",
+  recipient: "0x0987654321098765432109876543210987654321",
+  slippageTolerance: 0.5,
+  type: "exactInput",
+  refundOnOrigin: false,
+  embeddedActions: [],
+  strictTradeType: false,
+  ...overrides,
 });
 
 describe("_dexes/utils", () => {
@@ -93,32 +120,6 @@ describe("_dexes/utils", () => {
   });
 
   describe("#getBridgeQuoteRecipient() and #getBridgeQuoteMessage()", () => {
-    const createMockCrossSwap = (
-      overrides?: Partial<CrossSwap>
-    ): CrossSwap => ({
-      amount: BigNumber.from("1000000"),
-      inputToken: {
-        address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
-        decimals: 6,
-        symbol: "USDC",
-        chainId: CHAIN_IDs.OPTIMISM,
-      },
-      outputToken: {
-        address: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-        decimals: 6,
-        symbol: "USDC",
-        chainId: CHAIN_IDs.ARBITRUM,
-      },
-      depositor: "0x1234567890123456789012345678901234567890",
-      recipient: "0x0987654321098765432109876543210987654321",
-      slippageTolerance: 0.5,
-      type: "exactInput",
-      refundOnOrigin: false,
-      embeddedActions: [],
-      strictTradeType: false,
-      ...overrides,
-    });
-
     describe("Bypass MultiCallHandler conditions", () => {
       test("should bypass for simple B2B transfers with all tradeTypes", async () => {
         const tradeTypes = ["exactInput", "minOutput", "exactOutput"] as const;
@@ -535,7 +536,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.MAINNET,
         "GHO",
         "WGHO",
-        strategies
+        strategies,
+        "origin"
       );
 
       expect(result).toEqual([exactPairStrategy]);
@@ -563,7 +565,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.MAINNET,
         "WETH",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
 
       expect(result).toEqual([chainStrategy]);
@@ -588,7 +591,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.ARBITRUM,
         "DAI",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
 
       expect(result).toEqual([inputTokenStrategy]);
@@ -606,7 +610,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.ARBITRUM,
         "WETH",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
 
       expect(result).toEqual([defaultStrategy]);
@@ -634,7 +639,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.MAINNET,
         "GHO",
         "WGHO",
-        strategies
+        strategies,
+        "origin"
       );
       expect(exactPairResult).toEqual([exactPairStrategy]);
 
@@ -642,7 +648,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.MAINNET,
         "WETH",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
       expect(chainResult).toEqual([chainStrategy]);
 
@@ -650,7 +657,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.ARBITRUM,
         "GHO",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
       expect(inputTokenResult).toEqual([inputTokenStrategy]);
 
@@ -658,7 +666,8 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.ARBITRUM,
         "WETH",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
       expect(defaultResult).toEqual([defaultStrategy]);
     });
@@ -670,11 +679,107 @@ describe("_dexes/utils", () => {
         CHAIN_IDs.MAINNET,
         "WETH",
         "USDC",
-        strategies
+        strategies,
+        "origin"
       );
 
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("#getAcrossFallbackRecipient()", () => {
+    test("should return refundAddress when refundOnOrigin=false and refundAddress is set", () => {
+      const refundAddress = "0xRefundAddress00000000000000000000000000000";
+      const crossSwap = createMockCrossSwap({
+        refundOnOrigin: false,
+        refundAddress,
+      });
+      const result = getAcrossFallbackRecipient(crossSwap);
+      expect(result).toBe(refundAddress);
+    });
+
+    test("should fallback to destinationRecipient when refundOnOrigin=false and no refundAddress", () => {
+      const destinationRecipient =
+        "0xDestinationRecipient0000000000000000000000";
+      const crossSwap = createMockCrossSwap({
+        refundOnOrigin: false,
+        refundAddress: undefined,
+      });
+      const result = getAcrossFallbackRecipient(
+        crossSwap,
+        destinationRecipient
+      );
+      expect(result).toBe(destinationRecipient);
+    });
+
+    test("should fallback to depositor when refundOnOrigin=false and no refundAddress or destinationRecipient", () => {
+      const crossSwap = createMockCrossSwap({
+        refundOnOrigin: false,
+        refundAddress: undefined,
+      });
+      const result = getAcrossFallbackRecipient(crossSwap);
+      expect(result).toBe(crossSwap.depositor);
+    });
+
+    test("should prefer refundAddress over destinationRecipient when both are provided", () => {
+      const refundAddress = "0xRefundAddress00000000000000000000000000000";
+      const destinationRecipient =
+        "0xDestinationRecipient0000000000000000000000";
+      const crossSwap = createMockCrossSwap({
+        refundOnOrigin: false,
+        refundAddress,
+      });
+      const result = getAcrossFallbackRecipient(
+        crossSwap,
+        destinationRecipient
+      );
+      expect(result).toBe(refundAddress);
+    });
+
+    test("should always return AddressZero when refundOnOrigin=true, regardless of other params", () => {
+      const refundAddress = "0xRefundAddress00000000000000000000000000000";
+      const destinationRecipient =
+        "0xDestinationRecipient0000000000000000000000";
+      const crossSwap = createMockCrossSwap({
+        refundOnOrigin: true,
+        refundAddress,
+      });
+      const result = getAcrossFallbackRecipient(
+        crossSwap,
+        destinationRecipient
+      );
+      expect(result).toBe(constants.AddressZero);
+    });
+  });
+
+  describe("#getMintBurnRefundRecipient()", () => {
+    test("should return refundAddress when set", () => {
+      const refundAddress = "0xRefundAddress00000000000000000000000000000";
+      const crossSwap = createMockCrossSwap({ refundAddress });
+      const result = getMintBurnRefundRecipient(crossSwap);
+      expect(result).toBe(refundAddress);
+    });
+
+    test("should fallback to defaultRecipient when no refundAddress", () => {
+      const defaultRecipient = "0xDefaultRecipient0000000000000000000000000";
+      const crossSwap = createMockCrossSwap({ refundAddress: undefined });
+      const result = getMintBurnRefundRecipient(crossSwap, defaultRecipient);
+      expect(result).toBe(defaultRecipient);
+    });
+
+    test("should fallback to depositor when no refundAddress or defaultRecipient", () => {
+      const crossSwap = createMockCrossSwap({ refundAddress: undefined });
+      const result = getMintBurnRefundRecipient(crossSwap);
+      expect(result).toBe(crossSwap.depositor);
+    });
+
+    test("should prefer refundAddress over defaultRecipient when both are provided", () => {
+      const refundAddress = "0xRefundAddress00000000000000000000000000000";
+      const defaultRecipient = "0xDefaultRecipient0000000000000000000000000";
+      const crossSwap = createMockCrossSwap({ refundAddress });
+      const result = getMintBurnRefundRecipient(crossSwap, defaultRecipient);
+      expect(result).toBe(refundAddress);
     });
   });
 });

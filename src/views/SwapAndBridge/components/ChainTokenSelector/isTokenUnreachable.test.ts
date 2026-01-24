@@ -1,5 +1,6 @@
 import {
   isTokenUnreachable,
+  isReverseRouteRestricted,
   matchesGlob,
   matchesRestrictedRoute,
   RestrictedRoute,
@@ -7,6 +8,7 @@ import {
 } from "./isTokenUnreachable";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 import { CHAIN_IDs } from "../../../../utils/constants";
+import { describe, it, expect } from "vitest";
 
 describe("isTokenUnreachable", () => {
   describe("same chain check", () => {
@@ -329,5 +331,72 @@ describe("isTokenUnreachable", () => {
         expect(matchesGlob(pattern, value)).toBe(expected);
       }
     );
+  });
+});
+
+describe("isReverseRouteRestricted", () => {
+  it("should return false when either (or both) token is null", () => {
+    const definedToken = {
+      chainId: CHAIN_IDs.MAINNET,
+      symbol: "USDC",
+    } as EnrichedToken;
+
+    const originNull = isReverseRouteRestricted({
+      originToken: null,
+      destinationToken: definedToken,
+    });
+
+    const destinationNull = isReverseRouteRestricted({
+      originToken: definedToken,
+      destinationToken: null,
+    });
+
+    const bothNull = isReverseRouteRestricted({
+      originToken: null,
+      destinationToken: null,
+    });
+
+    expect(originNull).toBe(false);
+    expect(destinationNull).toBe(false);
+    expect(bothNull).toBe(false);
+  });
+
+  it("should return true when reverse route matches a restricted route pattern", () => {
+    // USDC Solana => WETH Base is restricted
+    const originToken = {
+      chainId: CHAIN_IDs.BASE,
+      symbol: "WETH",
+    } as EnrichedToken;
+
+    const destinationToken = {
+      chainId: CHAIN_IDs.SOLANA,
+      symbol: "USDC",
+    } as EnrichedToken;
+
+    const result = isReverseRouteRestricted({
+      originToken,
+      destinationToken,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it("should return false when reverse route is not restricted", () => {
+    const originToken = {
+      chainId: CHAIN_IDs.MAINNET,
+      symbol: "USDC",
+    } as EnrichedToken;
+
+    const destinationToken = {
+      chainId: CHAIN_IDs.ARBITRUM,
+      symbol: "USDT",
+    } as EnrichedToken;
+
+    const result = isReverseRouteRestricted({
+      originToken,
+      destinationToken,
+    });
+
+    expect(result).toBe(false);
   });
 });

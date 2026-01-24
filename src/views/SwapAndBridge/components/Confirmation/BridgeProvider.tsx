@@ -49,6 +49,6 @@ const ToolipContent = styled.div`
 const ProviderBadgeWrapper = styled.span<{ provider: BridgeProvider }>`
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   gap: 6px;
 `;
