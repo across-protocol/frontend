@@ -9,7 +9,6 @@ import {
   createNoopSigner,
   partiallySignTransaction,
   compileTransaction,
-  pipe,
 } from "@solana/kit";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
@@ -684,18 +683,22 @@ async function _buildCctpTxForAllowanceHolderSvm(params: {
 
   // Build the transaction message using SDK helper
   const rpcClient = getSVMRpc(originChainId);
-  const tx = pipe(
-    await sdk.arch.svm.createDefaultTransaction(rpcClient, depositorSigner),
-    (txMsg) => appendTransactionMessageInstruction(depositInstruction, txMsg),
-    (txMsg) =>
-      appendTransactionMessageInstruction(
-        getAddMemoInstruction({
-          memo: integratorId
-            ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
-            : SWAP_CALLDATA_MARKER,
-        }),
-        txMsg
-      )
+  let tx = await sdk.arch.svm.createDefaultTransaction(
+    rpcClient,
+    depositorSigner
+  );
+
+  // Add the deposit instruction
+  tx = appendTransactionMessageInstruction(depositInstruction, tx);
+
+  // Add integrator memo if provided and Swap API marker
+  tx = appendTransactionMessageInstruction(
+    getAddMemoInstruction({
+      memo: integratorId
+        ? utils.hexConcat([integratorId, SWAP_CALLDATA_MARKER])
+        : SWAP_CALLDATA_MARKER,
+    }),
+    tx
   );
 
   // Compile the transaction message

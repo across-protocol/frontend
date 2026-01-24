@@ -6,9 +6,8 @@ import {
   getBase64EncodedWireTransaction,
   partiallySignTransaction,
   fetchAddressesForLookupTables,
-  pipe,
+  compressTransactionMessageUsingAddressLookupTables,
 } from "@solana/kit";
-import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import * as sdk from "@across-protocol/sdk";
 import { getDepositForBurnInstructionAsync } from "@across-protocol/contracts/dist/src/svm/clients/SponsoredCctpSrcPeriphery";
@@ -407,21 +406,18 @@ export async function buildSvmTxForAllowanceHolder(params: {
   });
 
   // Add deposit ix and integrator memo to the transaction
-  const txWithInstructions = pipe(
-    await sdk.arch.svm.createDefaultTransaction(
-      rpcClient,
-      depositAccounts.signer
-    ),
-    (tx) => appendTransactionMessageInstruction(depositForBurnIx, tx),
-    (tx) =>
-      appendTransactionMessageInstruction(
-        getAddMemoInstruction({
-          memo: params.integratorId
-            ? utils.hexConcat([params.integratorId, SWAP_CALLDATA_MARKER])
-            : SWAP_CALLDATA_MARKER,
-        }),
-        tx
-      )
+  let tx = await sdk.arch.svm.createDefaultTransaction(
+    rpcClient,
+    depositAccounts.signer
+  );
+  tx = appendTransactionMessageInstruction(depositForBurnIx, tx);
+  tx = appendTransactionMessageInstruction(
+    getAddMemoInstruction({
+      memo: params.integratorId
+        ? utils.hexConcat([params.integratorId, SWAP_CALLDATA_MARKER])
+        : SWAP_CALLDATA_MARKER,
+    }),
+    tx
   );
 
   // Fetch ALT addresses to compress the transaction
@@ -430,7 +426,7 @@ export async function buildSvmTxForAllowanceHolder(params: {
     rpcClient
   );
   const compressedTx = compressTransactionMessageUsingAddressLookupTables(
-    txWithInstructions,
+    tx,
     addressesByLookup
   );
 
