@@ -3,10 +3,11 @@ import {
   sentryEnv,
   sentryDsn,
   isSentryEnabled,
+  isProductionBuild,
   currentGitCommitHash,
 } from "./constants";
 
-if (isSentryEnabled) {
+if (isSentryEnabled && isProductionBuild) {
   Sentry.init({
     environment: sentryEnv || "development",
     dsn: sentryDsn,
@@ -41,7 +42,7 @@ if (isSentryEnabled) {
 }
 
 export const setUserContext = (address: string | null) => {
-  if (!isSentryEnabled) return;
+  if (!isSentryEnabled || !isProductionBuild) return;
 
   if (address) {
     Sentry.setUser({
@@ -54,7 +55,7 @@ export const setUserContext = (address: string | null) => {
 };
 
 export const setChainContext = (chainId: number | undefined) => {
-  if (!isSentryEnabled) return;
+  if (!isSentryEnabled || !isProductionBuild) return;
 
   Sentry.setContext("chain", {
     chainId,
