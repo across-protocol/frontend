@@ -170,11 +170,8 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   recipient: string;
   amountType: AmountType;
 }) {
-  const normalizedInputSymbol =
-    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
-    params.inputToken.symbol;
   const inputAmountLimit =
-    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[normalizedInputSymbol]?.[
+    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
       params.outputToken.symbol
     ];
   const isWithinInputAmountLimit =
