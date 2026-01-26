@@ -170,11 +170,8 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   recipient: string;
   amountType: AmountType;
 }) {
-  const normalizedInputSymbol =
-    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
-    params.inputToken.symbol;
   const inputAmountLimit =
-    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[normalizedInputSymbol]?.[
+    INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
       params.outputToken.symbol
     ];
   const isWithinInputAmountLimit =
@@ -183,7 +180,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   const isCctpEnabledOriginChain = _isCctpEnabled(params.inputToken.chainId);
   const isOftEnabledOriginChain = _isOftEnabled(
     params.inputToken.chainId,
-    normalizedInputSymbol
+    params.inputToken.symbol
   );
   const isSponsoredIntentSupported = _isSponsoredIntentSupported(params);
   const amount =
@@ -258,7 +255,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     isMintBurnThresholdMet,
     isEligibleTokenPair: SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
       (pair) =>
-        pair.inputToken === normalizedInputSymbol &&
+        pair.inputToken === params.inputToken.symbol &&
         pair.outputToken === params.outputToken.symbol
     ),
   };
