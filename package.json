@@ -6,7 +6,6 @@
   "dependencies": {
     "@across-protocol/constants": "^3.1.97",
     "@across-protocol/contracts": "4.1.23-alpha.0",
-    "@across-protocol/contracts-v4.1.1": "npm:@across-protocol/contracts@4.1.1",
     "@across-protocol/sdk": "4.3.114-alpha.3",
     "@amplitude/analytics-browser": "^2.3.5",
     "@amplitude/experiment-js-client": "^1.19.0",

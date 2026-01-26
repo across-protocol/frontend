@@ -16,7 +16,7 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.95", "@across-protocol/constants@^3.1.97":
+"@across-protocol/constants@^3.1.97":
   version "3.1.97"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.97.tgz#a9df3ca45475863b809622cdac4d2a411e0d3450"
   integrity sha512-W2Q6bxcKNJ2QHtgIfOuCWOv/AmUyhPlXoJSiYZ9C3Ldk+fWupHkvbQ+4Ngg+1CCGD4HJLhyF1eLyxL3zg9tkUA==
@@ -58,10 +58,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk@4.3.114-alpha.2":
-  version "4.3.114-alpha.2"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.114-alpha.2.tgz#ff4f38e59c912305acf7cf897d245753fdf39fb5"
-  integrity sha512-cHi+YRQA1TuSp+mL5R6iF2QgmrRSqHnN0nwQDbmB1nkPOQowrwCPu6/l8wUGYgUPjjPbO3eFBwd0KnuF33XnUA==
+"@across-protocol/sdk@4.3.114-alpha.3":
+  version "4.3.114-alpha.3"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-4.3.114-alpha.3.tgz#72824304c22aaf7510c481c0c535168643d44715"
+  integrity sha512-exRXfJ5SXxbnLRNO4ViJpPYxBDJ1h39rlDhG3wrqIn3XVH9qXUkTukHdC8v254m5Y+ikMtx6f2ncsSc6MMbDlQ==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.97"
@@ -6544,19 +6544,6 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz#821f8442f4175d8f0467b9daf26e3a18e2d02af2"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
-"@solana-developers/helpers@^2.4.0":
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/@solana-developers/helpers/-/helpers-2.8.1.tgz#73618effb22073546e06c7a7875640d46c93a7fc"
-  integrity sha512-xvoOj+ewL18+h6fMrXp1vTss0WBLnhQHnBb6mMPfEQE32w0THlxm8OPXNUY8g4tREX7ugU5cDEP7c2teye1Z7A==
-  dependencies:
-    "@coral-xyz/anchor" "^0.30.1"
-    "@solana/spl-token" "^0.4.8"
-    "@solana/spl-token-metadata" "^0.1.4"
-    "@solana/web3.js" "^1.98.0"
-    bn.js "^5.2.1"
-    bs58 "^6.0.0"
-    dotenv "^16.4.5"
-
 "@solana-mobile/mobile-wallet-adapter-protocol-web3js@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@solana-mobile/mobile-wallet-adapter-protocol-web3js/-/mobile-wallet-adapter-protocol-web3js-2.2.0.tgz#6d7fa935fd80c00201465473343729f28671b7e9"
@@ -6607,11 +6594,6 @@
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@solana-program/address-lookup-table/-/address-lookup-table-0.10.0.tgz#a7e9dd0a37e9a960396ec608d756ef5d44e485c6"
   integrity sha512-lcp+IYwoFBODhg8vXsh5vpxweLxpSKqjAu8P1LyqQxgk2yqwYmJGA79YKa+lZvsQjP/c0rzIZYWIGxFMMes2zA==
-
-"@solana-program/address-lookup-table@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@solana-program/address-lookup-table/-/address-lookup-table-0.7.0.tgz#6651657308547fefb59ce2e20b1871270e93d48d"
-  integrity sha512-dzCeIO5LtiK3bIg0AwO+TPeGURjSG2BKt0c4FRx7105AgLy7uzTktpUzUj6NXAK9SzbirI8HyvHUvw1uvL8O9A==
 
 "@solana-program/compute-budget@^0.11.0":
   version "0.11.0"
@@ -7399,7 +7381,7 @@
   dependencies:
     "@solana/codecs" "2.0.0-rc.1"
 
-"@solana/spl-token-metadata@^0.1.4", "@solana/spl-token-metadata@^0.1.6":
+"@solana/spl-token-metadata@^0.1.6":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-metadata/-/spl-token-metadata-0.1.6.tgz#d240947aed6e7318d637238022a7b0981b32ae80"
   integrity sha512-7sMt1rsm/zQOQcUWllQX9mD2O6KhSAtY1hFR2hfFwgqfFWzSY9E9GDvFVNYUI1F0iQKcm6HmePU9QbKRXTEBiA==
@@ -7417,7 +7399,7 @@
     "@solana/spl-token-metadata" "^0.1.6"
     buffer "^6.0.3"
 
-"@solana/spl-token@^0.4.13", "@solana/spl-token@^0.4.6", "@solana/spl-token@^0.4.8":
+"@solana/spl-token@^0.4.13":
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/@solana/spl-token/-/spl-token-0.4.13.tgz#8f65c3c2b315e1a00a91b8d0f60922c6eb71de62"
   integrity sha512-cite/pYWQZZVvLbg5lsodSovbetK/eA24gaR0eeUeMuBAMNrT8XFCwaygKy0N2WSg3gSyjjNpIeAGBAKZaY/1w==
@@ -13016,7 +12998,7 @@ axios@^0.27.2:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
 
-axios@^1.5.1, axios@^1.6.1, axios@^1.7.4:
+axios@^1.5.1, axios@^1.6.1:
   version "1.7.8"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.8.tgz#1997b1496b394c21953e68c14aaa51b7b5de3d6e"
   integrity sha512-Uu0wb7KNqK2t5K+YQyVCLM76prD5sRFjKHbJYCP1J7JFGEQ6nN7HWn9+04LAeiJ3ji54lgS/gZCH1oxyrf1SPw==
