@@ -34,7 +34,7 @@
     "@solana-program/system": "^0.10.0",
     "@solana-program/token": "^0.9.0",
     "@solana-program/token-2022": "^0.6.1",
-    "@solana/kit": "^5.4.0",
+    "@solana/kit": "5.4.0",
     "@solana/spl-token": "^0.4.13",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
