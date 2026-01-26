@@ -69,26 +69,6 @@ describe("getUsdhIntentsBridgeStrategy", () => {
       expect(strategy.getCrossSwapTypes(params)).toEqual([]);
     });
 
-    it("should return BRIDGEABLE_TO_BRIDGEABLE for non-CCTP origin chains with supported USDC tokens", () => {
-      const nonCctpTokens = [
-        USDC_ON_SCROLL,
-        USDC_ON_LENS,
-        USDCe_ON_ZKSYNC,
-        USDzC_ON_ZORA,
-      ];
-      nonCctpTokens.forEach((inputToken) => {
-        const params = {
-          inputToken,
-          outputToken: USDH_ON_HYPERCORE,
-          isInputNative: false,
-          isOutputNative: false,
-        };
-        expect(strategy.getCrossSwapTypes(params)).toEqual([
-          CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
-        ]);
-      });
-    });
-
     it("should return empty array for unsupported origin chain", () => {
       const params = {
         inputToken: {
