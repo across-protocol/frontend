@@ -20,6 +20,12 @@ export type RestrictedRoute = {
 const RESTRICTED_ROUTES: RestrictedRoute[] = [
   {
     fromChainId: "*",
+    fromSymbol: ["USDC.e"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDH-SPOT"],
+  },
+  {
+    fromChainId: "*",
     fromSymbol: ["USDT*"],
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
@@ -35,6 +41,13 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     fromSymbol: ["USDT*"],
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDC-SPOT"],
+  },
+  // Only USDC can be bridged to USDH on HyperEVM
+  {
+    fromChainId: "*",
+    fromSymbol: ["!USDC"],
+    toChainId: [CHAIN_IDs.HYPEREVM],
+    toSymbol: ["USDH"],
   },
 ];
 
