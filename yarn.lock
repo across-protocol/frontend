@@ -16,46 +16,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.69":
-  version "3.1.90"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.90.tgz#73871be1ff9da23864e2c56f1532ca1a5826ea07"
-  integrity sha512-K9bNb5opVamCjyx5zgj4+LFNGMvQf3l9G3FHp2Xef2XAS43/WTIWaZwgP4zH8Qg89eX3bAKQ6u0ZGF2F8LKJGw==
-
 "@across-protocol/constants@^3.1.95", "@across-protocol/constants@^3.1.97":
   version "3.1.97"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.97.tgz#a9df3ca45475863b809622cdac4d2a411e0d3450"
   integrity sha512-W2Q6bxcKNJ2QHtgIfOuCWOv/AmUyhPlXoJSiYZ9C3Ldk+fWupHkvbQ+4Ngg+1CCGD4HJLhyF1eLyxL3zg9tkUA==
-
-"@across-protocol/contracts-v4.1.1@npm:@across-protocol/contracts@4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-4.1.1.tgz#91c8e0fc867911a17f21b2d79d586f95417cb912"
-  integrity sha512-APyBXkNrP7VAbN2KzoO3h4VvGUGCgbz1OWACVAQ2/SWm3jMWmzHMOOtLeIqfmPTW0be7pkTbxnfR8hANMcicXw==
-  dependencies:
-    "@across-protocol/constants" "^3.1.69"
-    "@coral-xyz/anchor" "^0.31.1"
-    "@defi-wonderland/smock" "^2.3.4"
-    "@eth-optimism/contracts" "^0.5.40"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.6"
-    "@openzeppelin/contracts-upgradeable" "4.9.6"
-    "@scroll-tech/contracts" "^0.1.0"
-    "@solana-developers/helpers" "^2.4.0"
-    "@solana-program/address-lookup-table" "^0.7.0"
-    "@solana-program/token" "^0.5.1"
-    "@solana/kit" "^2.1.0"
-    "@solana/spl-token" "^0.4.6"
-    "@solana/web3.js" "1.98.2"
-    "@types/yargs" "^17.0.33"
-    "@uma/common" "^2.37.3"
-    "@uma/contracts-node" "^0.4.17"
-    "@uma/core" "^2.61.0"
-    axios "^1.7.4"
-    bs58 "^6.0.0"
-    prettier-plugin-rust "^0.1.9"
-    yargs "^17.7.2"
-    zksync-web3 "^0.14.3"
 
 "@across-protocol/contracts@4.1.20":
   version "4.1.20"
@@ -1669,18 +1633,6 @@
     "@so-ric/colorspace" "^1.1.6"
     enabled "2.0.x"
     kuler "^2.0.0"
-
-"@defi-wonderland/smock@^2.3.4":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@defi-wonderland/smock/-/smock-2.4.0.tgz#a207ff0e6f2c9e7c723c12981d1b5d5bf05b5b54"
-  integrity sha512-eS5fuAa9MOVDvXsT7Qa4v9Tg0Pk5ypfY3JWyW93a5sqyY2E2nCuRRBC53IikM9z0tVB2YYA8C9bWK8Lc47mATw==
-  dependencies:
-    "@nomicfoundation/ethereumjs-util" "^9.0.4"
-    diff "^5.0.0"
-    lodash.isequal "^4.5.0"
-    lodash.isequalwith "^4.4.0"
-    rxjs "^7.2.0"
-    semver "^7.3.5"
 
 "@depay/solana-web3.js@^1.25.1":
   version "1.26.0"
@@ -4533,7 +4485,7 @@
     "@nomicfoundation/ethereumjs-util" "9.0.4"
     ethereum-cryptography "0.1.3"
 
-"@nomicfoundation/ethereumjs-util@9.0.4", "@nomicfoundation/ethereumjs-util@^9.0.4":
+"@nomicfoundation/ethereumjs-util@9.0.4":
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/@nomicfoundation/ethereumjs-util/-/ethereumjs-util-9.0.4.tgz#84c5274e82018b154244c877b76bc049a4ed7b38"
   integrity sha512-sLOzjnSrlx9Bb9EFNtHzK/FJFsfg2re6bsGqinFinH1gCqVfz9YYlXiMWwDM4C/L4ywuHFCYwfKTVr/QHQcU0Q==
@@ -5175,15 +5127,15 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.6.tgz#38b21708a719da647de4bb0e4802ee235a0d24df"
   integrity sha512-m4iHazOsOCv1DgM7eD7GupTJ+NFVujRZt1wzddDPSVGpWdKq1SKkla5htKG7+IS4d2XOCtzkUNwRZ7Vq5aEUMA==
 
-"@openzeppelin/contracts-upgradeable@4.9.6", "@openzeppelin/contracts-upgradeable@^4.8.1":
-  version "4.9.6"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.6.tgz#38b21708a719da647de4bb0e4802ee235a0d24df"
-  integrity sha512-m4iHazOsOCv1DgM7eD7GupTJ+NFVujRZt1wzddDPSVGpWdKq1SKkla5htKG7+IS4d2XOCtzkUNwRZ7Vq5aEUMA==
-
 "@openzeppelin/contracts-upgradeable@5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-5.5.0.tgz#e35b3ededa5ccc13205c2b42e2058cd5cb7d424a"
   integrity sha512-Va5hKG5oaK0EE5bXTVWugcGimMHazxL+SL523dH6WVbGiuLXwuWr9oxtLyPHQSVGtgmlIgtKNR5V+OUpCIUwFQ==
+
+"@openzeppelin/contracts-upgradeable@^4.8.1":
+  version "4.9.6"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.6.tgz#38b21708a719da647de4bb0e4802ee235a0d24df"
+  integrity sha512-m4iHazOsOCv1DgM7eD7GupTJ+NFVujRZt1wzddDPSVGpWdKq1SKkla5htKG7+IS4d2XOCtzkUNwRZ7Vq5aEUMA==
 
 "@openzeppelin/contracts-v4@npm:@openzeppelin/contracts@4.9.6":
   version "4.9.6"
@@ -6977,7 +6929,7 @@
     "@solana/errors" "2.3.0"
     "@solana/nominal-types" "2.3.0"
 
-"@solana/kit@^2.0.0", "@solana/kit@^2.1.0":
+"@solana/kit@^2.0.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@solana/kit/-/kit-2.1.0.tgz#57ed0fd74c4330e3b0e25e961ed1264e7f8a0c24"
   integrity sha512-vqaHROLKp89xdIbaKVG6BQ44uMN9E6/rSTeltkvquD2qdTObssafGDbAKVFjwZhlNO+sdzHDCLekGabn5VAL6A==
@@ -11020,7 +10972,7 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.4.26.tgz#2c967e10c41292eeaafeb6b458525138e06ea0d8"
   integrity sha512-o+wzScJB9xVavQwQWkAA8ZXBT9tCqyrhJOBdcyxaKmTTZmPPjAW52V5IVKwcmEOykFOliDjvRtFZIfWjwzUwcA==
 
-"@uma/core@^2.18.0", "@uma/core@^2.61.0":
+"@uma/core@^2.18.0":
   version "2.61.0"
   resolved "https://registry.yarnpkg.com/@uma/core/-/core-2.61.0.tgz#29580736349a47af8fb10beb4bb3b50bfcf912f5"
   integrity sha512-bnk+CWW+uWpRilrgUny/gDXHKomG+h1Ug84OXdx+AAvj1/BtlMDOCNNt1OX8LSAz+a0hkiN9s24/zgHclTC/sg==
@@ -15261,11 +15213,6 @@ diff@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
-
-diff@^5.0.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
-  integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
 
 diffie-hellman@^5.0.0, diffie-hellman@^5.0.3:
   version "5.0.3"
@@ -19671,11 +19618,6 @@ jest-worker@^29.7.0:
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
 
-jinx-rust@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/jinx-rust/-/jinx-rust-0.1.6.tgz#c7bce55d97bfbad76a9b930c01fe6a8629a170d7"
-  integrity sha512-qP+wtQL1PrDDFwtPKhNGtjWOmijCrKdfUHWTV2G/ikxfjrh+cjdvkQTmny9RAsVF0jiui9m+F0INWu4cuRcZeQ==
-
 jose@^4.9.3:
   version "4.9.3"
   resolved "https://registry.yarnpkg.com/jose/-/jose-4.9.3.tgz#890abd3f26725fe0f2aa720bc2f7835702b624db"
@@ -20376,15 +20318,10 @@ lodash.get@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==
 
-lodash.isequal@4.5.0, lodash.isequal@^4.5.0:
+lodash.isequal@4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
   integrity sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==
-
-lodash.isequalwith@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/lodash.isequalwith/-/lodash.isequalwith-4.4.0.tgz#266726ddd528f854f21f4ea98a065606e0fbc6b0"
-  integrity sha512-dcZON0IalGBpRmJBmMkaoV7d3I80R2O+FrzsZyHdNSFrANq/cgDqKQNmAHE8UEj4+QYWwwhkQOVdLHiAopzlsQ==
 
 lodash.merge@^4.6.2:
   version "4.6.2"
@@ -22762,15 +22699,7 @@ prepend-http@^2.0.0:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
   integrity sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==
 
-prettier-plugin-rust@^0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-rust/-/prettier-plugin-rust-0.1.9.tgz#1a93b035743fa02a006b4980a1035a260ea9e501"
-  integrity sha512-n1DTTJQaHMdnoG/+nKUvBm3EKsMVWsYES2UPCiOPiZdBrmuAO/pX++m7L3+Hz3uuhtddpH0HRKHB2F3jbtJBOQ==
-  dependencies:
-    jinx-rust "0.1.6"
-    prettier "^2.7.1"
-
-prettier@^2.7.1, prettier@^2.8.0:
+prettier@^2.8.0:
   version "2.8.8"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
@@ -24170,7 +24099,7 @@ rxjs@^6.6.3:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^7.2.0, rxjs@^7.5.4, rxjs@^7.5.5, rxjs@^7.8.0, rxjs@^7.8.1:
+rxjs@^7.5.4, rxjs@^7.5.5, rxjs@^7.8.0, rxjs@^7.8.1:
   version "7.8.2"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.2.tgz#955bc473ed8af11a002a2be52071bf475638607b"
   integrity sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==
