@@ -11,7 +11,7 @@ import { BigNumber } from "ethers";
 import {
   FundsDepositedEvent,
   FilledRelayEvent,
-} from "@across-protocol/contracts/dist/typechain/SpokePool";
+} from "@across-protocol/contracts/dist/typechain/contracts/SpokePool";
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
 import { Signature } from "@solana/kit";
