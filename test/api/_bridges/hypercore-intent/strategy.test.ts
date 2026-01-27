@@ -111,7 +111,7 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
         exactInputAmount: params.exactInputAmount,
         recipient: params.recipient,
       });
-      expect(result.bridgeQuote.provider).toBe("hypercore-intent");
+      expect(result.bridgeQuote.provider).toBe("sponsored-intent");
       expect(result.bridgeQuote.inputAmount).toEqual(mockQuote.inputAmount);
     });
   });
@@ -151,7 +151,7 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
         exactInputAmount: BigNumber.from("1000000"), // Converted from output decimals (8) to input decimals (6)
         recipient: params.recipient,
       });
-      expect(result.bridgeQuote.provider).toBe("hypercore-intent");
+      expect(result.bridgeQuote.provider).toBe("sponsored-intent");
       expect(result.bridgeQuote.inputAmount).toEqual(BigNumber.from("1000000"));
     });
   });

@@ -544,7 +544,7 @@ function getTotalFeeUsd(params: {
     outputAmountSansAppFeesUsd,
   } = params;
 
-  if (["hypercore-intent", "sponsored-cctp"].includes(bridgeProvider)) {
+  if (["sponsored-intent", "sponsored-cctp"].includes(bridgeProvider)) {
     return 0;
   }
 
