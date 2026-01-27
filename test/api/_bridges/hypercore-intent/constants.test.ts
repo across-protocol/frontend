@@ -16,13 +16,14 @@ describe("hypercore-intent constants", () => {
   });
 
   describe("SUPPORTED_ORIGIN_CHAINS", () => {
-    it("should only include CCTP-enabled chains", () => {
-      // Every chain in SUPPORTED_ORIGIN_CHAINS must have a valid CCTP domain
+    it("should derive chains from SUPPORTED_INPUT_TOKENS addresses", () => {
+      // Every chain in SUPPORTED_ORIGIN_CHAINS should have at least one
+      // supported input token with an address on that chain
       SUPPORTED_ORIGIN_CHAINS.forEach((chainId) => {
-        const chain = CHAINS[chainId];
-        const cctpDomain = chain?.cctpDomain;
-        expect(cctpDomain).toBeDefined();
-        expect(cctpDomain).not.toBe(CCTP_NO_DOMAIN);
+        const hasToken = SUPPORTED_INPUT_TOKENS.some(
+          (token) => token.addresses[chainId]
+        );
+        expect(hasToken).toBe(true);
       });
     });
   });
