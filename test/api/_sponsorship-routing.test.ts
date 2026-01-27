@@ -164,7 +164,7 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
     };
 
     const result = await routeStrategyForSponsorship(params);
-    expect(result).toEqual({ name: "hypercore-intent" });
+    expect(result).toEqual({ name: "sponsored-intent" });
   });
 
   it("should return null for unsupported route", async () => {
