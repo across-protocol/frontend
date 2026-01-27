@@ -379,7 +379,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhHyperEvm,
         });
 
-        expect(strategy.name).toBe("sponsored-intent");
+        expect(strategy.name).toBe("hypercore-intent");
       });
 
       test("should use hypercore strategy for HyperEVM to HyperCore transfers", async () => {
@@ -478,7 +478,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhSpotHyperCore,
         });
 
-        expect(strategy.name).toBe("sponsored-intent");
+        expect(strategy.name).toBe("hypercore-intent");
       });
 
       test("should use sponsored-cctp for amounts between 10K and 1M USDC", async () => {
