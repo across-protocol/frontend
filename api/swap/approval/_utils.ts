@@ -373,6 +373,8 @@ async function _buildDepositTxForAllowanceHolderSvm(
     assertValidIntegratorId(integratorId);
   }
 
+  let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
+
   // Get swap instructions for A2B flows (if present)
   const swapTxn = originSwapQuote?.swapTxns[0];
   const swapIxs =
@@ -380,9 +382,6 @@ async function _buildDepositTxForAllowanceHolderSvm(
   const swapLookupTables =
     swapTxn && isSvmSwapTxn(swapTxn) ? swapTxn.lookupTables : undefined;
   const swapProvider = originSwapQuote?.swapProvider.name;
-
-  // Build and compile transaction
-  let tx = await sdk.arch.svm.createDefaultTransaction(rpcClient, noopSigner);
 
   tx = pipe(
     tx,
