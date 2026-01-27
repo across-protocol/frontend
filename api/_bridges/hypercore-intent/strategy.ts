@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import {
   BridgeStrategy,
   GetExactInputBridgeQuoteParams,
@@ -16,7 +17,7 @@ import {
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals } from "../../_utils";
-import { BigNumber } from "ethers";
+import { getAcrossBridgeStrategy } from "../across/strategy";
 
 const name = "hypercore-intent" as const;
 const capabilities: BridgeCapabilities = {
@@ -128,7 +129,6 @@ export async function getQuoteForExactInput(
     fees = sponsoredQuote.fees;
   } else {
     // Unsponsored flow: delegate to Across strategy for fee calculation
-    const { getAcrossBridgeStrategy } = await import("../across/strategy");
     const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
     const depositRecipient = getDepositRecipient({ outputToken, recipient });
     const depositMessage = getDepositMessage({ outputToken, recipient });
@@ -198,7 +198,6 @@ export async function getQuoteForOutput(
     fees = sponsoredQuote.fees;
   } else {
     // Unsponsored flow: delegate to Across strategy for fee calculation
-    const { getAcrossBridgeStrategy } = await import("../across/strategy");
     const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
     const depositRecipient = getDepositRecipient({ outputToken, recipient });
     const depositMessage = getDepositMessage({ outputToken, recipient });
