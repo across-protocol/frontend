@@ -17,7 +17,7 @@ vi.mock("../../api/_bridges/oft-sponsored/strategy", () => ({
 }));
 
 vi.mock("../../api/_bridges/hypercore-intent/strategy", () => ({
-  getHyperCoreIntentBridgeStrategy: vi.fn(() => ({ name: "hypercore-intent" })),
+  getHyperCoreIntentBridgeStrategy: vi.fn(() => ({ name: "sponsored-intent" })),
 }));
 
 vi.mock("../../api/_bridges/hypercore-intent/utils/common", () => ({
@@ -164,7 +164,7 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
     };
 
     const result = await routeStrategyForSponsorship(params);
-    expect(result).toEqual({ name: "hypercore-intent" });
+    expect(result).toEqual({ name: "sponsored-intent" });
   });
 
   it("should return null for unsupported route", async () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
@@ -49,6 +49,7 @@ const mockBridgeStrategyData = (
   isInThreshold: false,
   isUsdtToUsdt: false,
   isHyperCoreDestination: false,
+  hasFastStandardFill: false,
   ...overrides,
 });
 
@@ -378,7 +379,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhHyperEvm,
         });
 
-        expect(strategy.name).toBe("hypercore-intent");
+        expect(strategy.name).toBe("sponsored-intent");
       });
 
       test("should use hypercore strategy for HyperEVM to HyperCore transfers", async () => {
@@ -477,7 +478,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhSpotHyperCore,
         });
 
-        expect(strategy.name).toBe("hypercore-intent");
+        expect(strategy.name).toBe("sponsored-intent");
       });
 
       test("should use sponsored-cctp for amounts between 10K and 1M USDC", async () => {

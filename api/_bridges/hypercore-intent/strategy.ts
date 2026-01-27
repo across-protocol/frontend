@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import {
   BridgeStrategy,
   GetExactInputBridgeQuoteParams,
@@ -19,7 +18,9 @@ import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
 
-const name = "hypercore-intent" as const;
+const SPONSORED_PROVIDER_NAME = "sponsored-intent" as const;
+const UNSPONSORED_PROVIDER_NAME = "across" as const;
+
 const capabilities: BridgeCapabilities = {
   ecosystems: ["evm", "svm"],
   supports: {
@@ -39,6 +40,9 @@ const capabilities: BridgeCapabilities = {
 export function getHyperCoreIntentBridgeStrategy(
   isEligibleForSponsorship: boolean
 ): BridgeStrategy {
+  const name = isEligibleForSponsorship
+    ? SPONSORED_PROVIDER_NAME
+    : UNSPONSORED_PROVIDER_NAME;
   return {
     name,
     capabilities,
@@ -103,16 +107,10 @@ export function getHyperCoreIntentBridgeStrategy(
  */
 export async function getQuoteForExactInput(
   params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
-) {
+): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, exactInputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
-
-  let inputAmount: BigNumber;
-  let outputAmount: BigNumber;
-  let minOutputAmount: BigNumber;
-  let estimatedFillTimeSec: number;
-  let fees: { amount: BigNumber; token: Token; pct: BigNumber };
 
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: use zero fees and 1:1 conversion
@@ -122,11 +120,19 @@ export async function getQuoteForExactInput(
       exactInputAmount,
       recipient,
     });
-    inputAmount = sponsoredQuote.inputAmount;
-    outputAmount = sponsoredQuote.outputAmount;
-    minOutputAmount = sponsoredQuote.minOutputAmount;
-    estimatedFillTimeSec = sponsoredQuote.estimatedFillTimeSec;
-    fees = sponsoredQuote.fees;
+
+    return {
+      bridgeQuote: {
+        inputToken,
+        outputToken,
+        inputAmount: sponsoredQuote.inputAmount,
+        outputAmount: sponsoredQuote.outputAmount,
+        minOutputAmount: sponsoredQuote.minOutputAmount,
+        estimatedFillTimeSec: sponsoredQuote.estimatedFillTimeSec,
+        provider: SPONSORED_PROVIDER_NAME,
+        fees: sponsoredQuote.fees,
+      },
+    };
   } else {
     // Unsponsored flow: delegate to Across strategy for fee calculation
     const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
@@ -141,25 +147,14 @@ export async function getQuoteForExactInput(
       message: depositMessage,
     });
 
-    inputAmount = acrossQuote.bridgeQuote.inputAmount;
-    outputAmount = acrossQuote.bridgeQuote.outputAmount;
-    minOutputAmount = acrossQuote.bridgeQuote.minOutputAmount;
-    estimatedFillTimeSec = acrossQuote.bridgeQuote.estimatedFillTimeSec;
-    fees = acrossQuote.bridgeQuote.fees;
+    return {
+      bridgeQuote: {
+        ...acrossQuote.bridgeQuote,
+        inputToken,
+        outputToken,
+      },
+    };
   }
-
-  return {
-    bridgeQuote: {
-      inputToken,
-      outputToken, // Return original output token (e.g., USDC-SPOT)
-      inputAmount,
-      outputAmount,
-      minOutputAmount,
-      estimatedFillTimeSec,
-      provider: name,
-      fees,
-    },
-  };
 }
 
 /**
@@ -168,19 +163,14 @@ export async function getQuoteForExactInput(
  */
 export async function getQuoteForOutput(
   params: GetOutputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
-) {
+): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, minOutputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
 
-  let inputAmount: BigNumber;
-  let outputAmount: BigNumber;
-  let estimatedFillTimeSec: number;
-  let fees: { amount: BigNumber; token: Token; pct: BigNumber };
-
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: convert output amount to input amount (1:1 conversion)
-    inputAmount = ConvertDecimals(
+    const inputAmount = ConvertDecimals(
       outputToken.decimals,
       inputToken.decimals
     )(minOutputAmount);
@@ -193,9 +183,18 @@ export async function getQuoteForOutput(
       recipient,
     });
 
-    outputAmount = sponsoredQuote.outputAmount;
-    estimatedFillTimeSec = sponsoredQuote.estimatedFillTimeSec;
-    fees = sponsoredQuote.fees;
+    return {
+      bridgeQuote: {
+        inputToken,
+        outputToken,
+        inputAmount,
+        outputAmount: sponsoredQuote.outputAmount,
+        minOutputAmount,
+        estimatedFillTimeSec: sponsoredQuote.estimatedFillTimeSec,
+        provider: SPONSORED_PROVIDER_NAME,
+        fees: sponsoredQuote.fees,
+      },
+    };
   } else {
     // Unsponsored flow: delegate to Across strategy for fee calculation
     const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
@@ -210,22 +209,12 @@ export async function getQuoteForOutput(
       message: depositMessage,
     });
 
-    inputAmount = acrossQuote.bridgeQuote.inputAmount;
-    outputAmount = acrossQuote.bridgeQuote.outputAmount;
-    estimatedFillTimeSec = acrossQuote.bridgeQuote.estimatedFillTimeSec;
-    fees = acrossQuote.bridgeQuote.fees;
+    return {
+      bridgeQuote: {
+        ...acrossQuote.bridgeQuote,
+        inputToken,
+        outputToken,
+      },
+    };
   }
-
-  return {
-    bridgeQuote: {
-      inputToken,
-      outputToken, // Return original output token (e.g., USDC-SPOT)
-      inputAmount,
-      outputAmount,
-      minOutputAmount,
-      estimatedFillTimeSec,
-      provider: name,
-      fees,
-    },
-  };
 }
