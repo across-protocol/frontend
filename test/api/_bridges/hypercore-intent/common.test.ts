@@ -6,7 +6,7 @@ import {
   getBridgeableOutputToken,
   getDepositRecipient,
   getDepositMessage,
-} from "../../../../api/_bridges/sponsored-intent/utils/common";
+} from "../../../../api/_bridges/hypercore-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
 import {
   getFullRelayers,
@@ -16,7 +16,7 @@ import { CHAIN_IDs } from "../../../../api/_constants";
 import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS,
-} from "../../../../api/_bridges/sponsored-intent/utils/constants";
+} from "../../../../api/_bridges/hypercore-intent/utils/constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
 
 vi.mock("../../../../api/_balance");
@@ -26,7 +26,7 @@ vi.mock("../../../../api/_hypercore", async (importOriginal) => ({
 }));
 vi.mock("../../../../api/_relayer-address");
 
-describe("api/_bridges/sponsored-intent/utils/common", () => {
+describe("api/_bridges/hypercore-intent/utils/common", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -44,9 +44,14 @@ describe("api/_bridges/sponsored-intent/utils/common", () => {
   });
 
   describe("getBridgeableOutputToken", () => {
-    it("should return bridgeable token for USDH", () => {
-      expect(getBridgeableOutputToken(USDH_ON_HYPERCORE)).toBe(
-        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN.USDH
+    it("should return bridgeable token for USDH with HyperEVM chain ID", () => {
+      const result = getBridgeableOutputToken(USDH_ON_HYPERCORE);
+      expect(result.symbol).toBe("USDH");
+      expect(result.chainId).toBe(CHAIN_IDs.HYPEREVM); // Should map to HyperEVM
+      expect(result.address).toBe(
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN.USDH.addresses[
+          CHAIN_IDs.HYPEREVM
+        ]
       );
     });
   });
