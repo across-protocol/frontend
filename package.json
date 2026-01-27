@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@across-protocol/constants": "^3.1.97",
-    "@across-protocol/contracts": "4.1.20",
+    "@across-protocol/contracts": "4.1.21",
     "@across-protocol/sdk": "^4.3.112",
     "@amplitude/analytics-browser": "^2.3.5",
     "@amplitude/experiment-js-client": "^1.19.0",
