@@ -27,8 +27,14 @@ export function getHyperEvmChainId(destinationChainId: number) {
     : CHAIN_IDs.HYPEREVM_TESTNET;
 }
 
-export function getBridgeableOutputToken(outputToken: Token) {
-  return BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
+export function getBridgeableOutputToken(outputToken: Token): Token {
+  const tokenDef = BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
+  const hyperEvmChainId = getHyperEvmChainId(outputToken.chainId);
+  return {
+    ...tokenDef,
+    address: tokenDef.addresses[hyperEvmChainId],
+    chainId: hyperEvmChainId,
+  };
 }
 
 export function getZeroBridgeFees(inputToken: Token) {
@@ -86,7 +92,7 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
       getCachedTokenBalance(
         hyperEvmChainId,
         relayer,
-        bridgeableOutputToken.addresses[hyperEvmChainId]
+        bridgeableOutputToken.address
       )
     )
   );

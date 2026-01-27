@@ -16,11 +16,11 @@ vi.mock("../../api/_bridges/oft-sponsored/strategy", () => ({
   isRouteSupported: vi.fn(() => false),
 }));
 
-vi.mock("../../api/_bridges/sponsored-intent/strategy", () => ({
-  getUsdhIntentsBridgeStrategy: vi.fn(() => ({ name: "sponsored-intent" })),
+vi.mock("../../api/_bridges/hypercore-intent/strategy", () => ({
+  getHyperCoreIntentBridgeStrategy: vi.fn(() => ({ name: "hypercore-intent" })),
 }));
 
-vi.mock("../../api/_bridges/sponsored-intent/utils/common", () => ({
+vi.mock("../../api/_bridges/hypercore-intent/utils/common", () => ({
   isRouteSupported: vi.fn(() => true),
 }));
 
@@ -33,7 +33,7 @@ vi.mock("../../api/_sponsorship-eligibility", () => ({
     isWithinAccountCreationDailyLimit: true,
     isCctpEnabledOriginChain: true,
     isOftEnabledOriginChain: true,
-    isSponsoredIntentSupported: true,
+    isHyperCoreIntentSupported: true,
     isMintBurnThresholdMet: true,
   })),
 }));
@@ -79,7 +79,7 @@ const mockEligibility = async (
     isWithinAccountCreationDailyLimit: true,
     isCctpEnabledOriginChain: true,
     isOftEnabledOriginChain: true,
-    isSponsoredIntentSupported: true,
+    isHyperCoreIntentSupported: true,
     isMintBurnThresholdMet: true,
     ...overrides,
   });
@@ -164,13 +164,13 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
     };
 
     const result = await routeStrategyForSponsorship(params);
-    expect(result).toEqual({ name: "sponsored-intent" });
+    expect(result).toEqual({ name: "hypercore-intent" });
   });
 
   it("should return null for unsupported route", async () => {
     await mockEligibility();
     const { isRouteSupported } = await import(
-      "../../api/_bridges/sponsored-intent/utils/common"
+      "../../api/_bridges/hypercore-intent/utils/common"
     );
     (isRouteSupported as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
