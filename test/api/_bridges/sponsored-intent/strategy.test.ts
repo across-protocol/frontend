@@ -9,15 +9,7 @@ import {
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
 import { Token } from "../../../../api/_dexes/types";
 import { CHAIN_IDs } from "../../../../api/_constants";
-import {
-  USDC_ON_OPTIMISM,
-  USDC_ON_SCROLL,
-  USDC_ON_LENS,
-  USDCe_ON_ZKSYNC,
-  USDzC_ON_ZORA,
-  USDH_ON_HYPERCORE,
-  USDH_ON_HYPEREVM,
-} from "./utils";
+import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
 
 vi.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
 vi.mock("../../../../api/_bridges/sponsored-intent/utils/tx-builder");
