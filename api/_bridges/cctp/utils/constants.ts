@@ -56,7 +56,7 @@ export const CCTP_FINALITY_THRESHOLDS = {
 
 // CCTP Across Finalizer address
 export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
-  "0x72adB07A487f38321b6665c02D289C413610B081";
+  "0x708704d33ace3daFbED28f150A56CE9D124B1eF8";
 
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
