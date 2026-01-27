@@ -9,6 +9,7 @@ import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton
 import { useMemo } from "react";
 import useSwapQuote from "./hooks/useSwapQuote";
 import { useDefaultRoute } from "./hooks/useDefaultRoute";
+import { isReverseRouteRestricted } from "./components/ChainTokenSelector/isTokenUnreachable";
 
 function SwapAndBridgeContent() {
   const { quoteRequest, setOriginToken, setDestinationToken } =
@@ -24,12 +25,18 @@ function SwapAndBridgeContent() {
     return swapQuote?.expectedOutputAmount;
   }, [swapQuote]);
 
+  const disableQuickSwap = isReverseRouteRestricted({
+    originToken: quoteRequest?.originToken,
+    destinationToken: quoteRequest?.destinationToken,
+  });
+
   return (
     <Wrapper>
       <InputForm
         expectedInputAmount={expectedInputAmount}
         expectedOutputAmount={expectedOutputAmount}
         isQuoteLoading={isQuoteLoading}
+        disableQuickSwap={disableQuickSwap}
       />
       <ConfirmationButton
         isQuoteLoading={isQuoteLoading}

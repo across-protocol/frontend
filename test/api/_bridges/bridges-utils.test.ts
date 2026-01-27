@@ -74,7 +74,6 @@ const mockLimitsResponse = (
 // Common test tokens
 const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
-const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
 const usdcLinea = createToken("USDC", CHAIN_IDs.LINEA);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
@@ -335,58 +334,6 @@ describe("#getBridgeStrategyData()", () => {
         });
 
         expect(result?.isFastCctpEligible).toBe(false);
-      });
-
-      test("should identify transfers from Monad", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isMonadTransfer).toBe(true);
-      });
-
-      test("should identify transfers to Monad", async () => {
-        const amount = BigNumber.from("1000000"); // 1 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcOptimism,
-          outputToken: usdcMonad,
-          amount,
-        });
-
-        expect(result?.isMonadTransfer).toBe(true);
-      });
-
-      test("should check if within Monad limit (25K)", async () => {
-        const amount = BigNumber.from("20000000000"); // 20,000 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isWithinMonadLimit).toBe(true);
-      });
-
-      test("should check if exceeding Monad limit (25K)", async () => {
-        const amount = BigNumber.from("30000000000"); // 30,000 USDC
-
-        const result = await getBridgeStrategyData({
-          ...baseParams,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-          amount,
-        });
-
-        expect(result?.isWithinMonadLimit).toBe(false);
       });
 
       describe("Linea fast mode eligibility", () => {

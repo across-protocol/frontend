@@ -134,7 +134,14 @@ export function get0xStrategy(
             buyToken: swap.tokenOut.address,
             sellAmount: swapAmount,
             taker: swap.recipient,
-            slippageBps: Math.round(slippageTolerance * 100), // needs to be an integer
+            slippageBps: Math.round(
+              (slippageTolerance +
+                (opts?.sellEntireBalance
+                  ? // We need to take the markup into account for the slippage when fetching a quote
+                    SELL_ENTIRE_BALANCE_AMOUNT_MARKUP * 100
+                  : 0)) *
+                100
+            ),
             sellEntireBalance: opts?.sellEntireBalance,
             ...sourcesParams,
           },
@@ -184,7 +191,7 @@ export function get0xStrategy(
       const minAmountOut = BigNumber.from(quote.minBuyAmount);
 
       // When using sellEntireBalance, the quote is based on the
-      // marked-up input amount (e.g., 105 ETH), but the expected output should reflect
+      // marked-up input amount (e.g., 105 ETH), but the expected and min. output amounts should reflect
       // the actual expected input amount (e.g., 100 ETH). Scale down accordingly.
       if (opts?.sellEntireBalance && !maximumAmountIn.isZero()) {
         expectedAmountOut = expectedAmountOut

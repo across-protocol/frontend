@@ -12,10 +12,12 @@ export const InputForm = ({
   isQuoteLoading,
   expectedOutputAmount,
   expectedInputAmount,
+  disableQuickSwap,
 }: {
   isQuoteLoading: boolean;
   expectedOutputAmount: BigNumber | undefined;
   expectedInputAmount: BigNumber | undefined;
+  disableQuickSwap: boolean;
 }) => {
   const { quickSwap } = useQuoteRequestContext();
   const [unit, setUnit] = useState<UnitType>("token");
@@ -28,7 +30,7 @@ export const InputForm = ({
         unit={unit}
         setUnit={setUnit}
       />
-      <QuickSwapButton onClick={quickSwap}>
+      <QuickSwapButton disabled={disableQuickSwap} onClick={quickSwap}>
         <ArrowDown width="20px" height="20px" />
       </QuickSwapButton>
       <DestinationTokenDisplay
@@ -65,6 +67,12 @@ const QuickSwapButton = styled.button`
   border-radius: 15px;
   z-index: 4;
   cursor: pointer;
+
+  &:disabled {
+    svg {
+      opacity: 0.5;
+    }
+  }
 
   & * {
     flex-shrink: 0;

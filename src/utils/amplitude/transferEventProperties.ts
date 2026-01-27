@@ -3,8 +3,8 @@ import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 type CoreTransferPropertiesParams = {
   quote: SwapApprovalQuote;
-  sender: string;
-  recipient: string;
+  sender: string | null | undefined;
+  recipient: string | null | undefined;
   tradeType: "exactInput" | "exactOutput" | "minOutput";
 };
 
@@ -18,6 +18,9 @@ export function buildCoreTransferProperties({
   const toChainInfo = getChainInfo(quote.outputToken.chainId);
   const bridgeStep = quote.steps.bridge;
   const bridgeFeeDetails = bridgeStep.fees.details;
+
+  const senderValue = sender ?? "";
+  const recipientValue = recipient ?? "";
 
   return {
     fromChainId: String(quote.inputToken.chainId),
@@ -34,9 +37,10 @@ export function buildCoreTransferProperties({
     fromAmountUsd: quote.fees?.total.details.swapImpact.amountUsd ?? "0",
     toAmount: quote.expectedOutputAmount.toString(),
     toAmountUsd: quote.fees?.total.amountUsd ?? "0",
-    sender,
-    recipient,
-    isSenderEqRecipient: sender.toLowerCase() === recipient.toLowerCase(),
+    sender: senderValue,
+    recipient: recipientValue,
+    isSenderEqRecipient:
+      senderValue.toLowerCase() === recipientValue.toLowerCase(),
     routeChainIdFromTo: `${quote.inputToken.chainId}-${quote.outputToken.chainId}`,
     routeChainNameFromTo: `${fromChainInfo.name}-${toChainInfo.name}`,
     expectedFillTimeInSec: String(quote.expectedFillTime),

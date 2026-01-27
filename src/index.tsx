@@ -14,6 +14,7 @@ import { ErrorProvider } from "hooks";
 import { ToastProvider } from "components/Toast/useToast";
 import { AmpliProvider } from "hooks/useAmplitude";
 import { SidebarProvider } from "providers/SidebarProvider";
+import { SentryProvider } from "providers/SentryProvider";
 import { enableReactQueryDevTools } from "utils";
 import Sentry from "utils/sentry";
 import { WalletProvider } from "providers/wallet/WalletProvider";
@@ -50,20 +51,22 @@ root.render(
     <GlobalStyles />
     <ErrorBoundary>
       <WalletProvider>
-        <QueryClientProvider client={client}>
-          <FeatureFlagsProvider>
-            <AmpliProvider>
-              <ErrorProvider>
-                <ToastProvider>
-                  <SidebarProvider>
-                    <App />
-                  </SidebarProvider>
-                </ToastProvider>
-              </ErrorProvider>
-              {enableReactQueryDevTools && <ReactQueryDevtools />}
-            </AmpliProvider>
-          </FeatureFlagsProvider>
-        </QueryClientProvider>
+        <SentryProvider>
+          <QueryClientProvider client={client}>
+            <FeatureFlagsProvider>
+              <AmpliProvider>
+                <ErrorProvider>
+                  <ToastProvider>
+                    <SidebarProvider>
+                      <App />
+                    </SidebarProvider>
+                  </ToastProvider>
+                </ErrorProvider>
+                {enableReactQueryDevTools && <ReactQueryDevtools />}
+              </AmpliProvider>
+            </FeatureFlagsProvider>
+          </QueryClientProvider>
+        </SentryProvider>
       </WalletProvider>
     </ErrorBoundary>
   </React.StrictMode>

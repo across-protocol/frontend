@@ -60,9 +60,8 @@ describe("api/_bridges/cctp/utils/routing", () => {
       isFastCctpEligible: false,
       isInThreshold: false,
       isUsdtToUsdt: false,
-      isMonadTransfer: false,
-      isWithinMonadLimit: false,
       isHyperCoreDestination: false,
+      hasFastStandardFill: false,
       ...overrides,
     });
 
@@ -77,48 +76,6 @@ describe("api/_bridges/cctp/utils/routing", () => {
       const result = await routeMintAndBurnStrategy(baseParams);
 
       expect(result?.name).toBe("across");
-    });
-
-    it("keeps Monad transfers within the lite limit on Across", async () => {
-      mockedGetBridgeStrategyData.mockResolvedValue(
-        buildStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: true,
-        })
-      );
-
-      const result = await routeMintAndBurnStrategy(baseParams);
-
-      expect(result?.name).toBe("across");
-    });
-
-    it("routes Monad USDT transfers over OFT", async () => {
-      mockedGetBridgeStrategyData.mockResolvedValue(
-        buildStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: false,
-          isUsdtToUsdt: true,
-        })
-      );
-
-      const result = await routeMintAndBurnStrategy(baseParams);
-
-      expect(result?.name).toBe("oft");
-    });
-
-    it("routes Monad USDC transfers over CCTP", async () => {
-      mockedGetBridgeStrategyData.mockResolvedValue(
-        buildStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: true,
-        })
-      );
-
-      const result = await routeMintAndBurnStrategy(baseParams);
-
-      expect(result?.name).toBe("cctp");
     });
 
     it("uses burn-and-mint routes when utilization is high", async () => {
@@ -137,6 +94,20 @@ describe("api/_bridges/cctp/utils/routing", () => {
       mockedGetBridgeStrategyData.mockResolvedValue(
         buildStrategyData({
           isFastCctpEligible: true,
+          isInThreshold: false,
+          isLargeCctpDeposit: false,
+        })
+      );
+
+      const result = await routeMintAndBurnStrategy(baseParams);
+
+      expect(result?.name).toBe("cctp");
+    });
+
+    it("uses burn-and-mint on fast standard CCTP chains for medium deposits", async () => {
+      mockedGetBridgeStrategyData.mockResolvedValue(
+        buildStrategyData({
+          hasFastStandardFill: true,
           isInThreshold: false,
           isLargeCctpDeposit: false,
         })

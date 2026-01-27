@@ -64,7 +64,7 @@ export function useTokenBalanceLocal(
     enabled:
       (isDefined(evmAccount) || isDefined(svmAccountString)) &&
       isDefined(token),
-    refetchInterval: 10_000, // 10 seconds
-    staleTime: 5_000, // 5 seconds
+    refetchInterval: 10_000,
+    staleTime: 5_000,
   });
 }

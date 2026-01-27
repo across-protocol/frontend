@@ -1,6 +1,4 @@
-import { SwapAndBridge__factory } from "@across-protocol/contracts-v4.1.1";
-
-import { ENABLED_ROUTES, getProvider } from "./_utils";
+import { ENABLED_ROUTES } from "./_utils";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -30,35 +28,19 @@ export class NoSwapRouteError extends Error {
   }
 }
 
-export const swapAndBridgeDexes = Object.keys(
-  ENABLED_ROUTES.swapAndBridgeAddresses
-);
-
 export function getSwapAndBridgeAddress(dex: string, chainId: number) {
-  if (!_isDexSupportedForSwapAndBridge(dex)) {
+  const addresses = ENABLED_ROUTES.swapAndBridgeAddresses as Record<
+    string,
+    Record<string, string>
+  >;
+
+  if (!(dex in addresses)) {
     throw new UnsupportedDex(dex);
   }
 
-  const address = (
-    ENABLED_ROUTES.swapAndBridgeAddresses[dex] as Record<string, string>
-  )?.[chainId];
+  const address = addresses[dex]?.[chainId];
   if (!address) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
   return address;
-}
-
-export function getSwapAndBridge(dex: string, chainId: number) {
-  const swapAndBridgeAddress = getSwapAndBridgeAddress(dex, chainId);
-
-  return SwapAndBridge__factory.connect(
-    swapAndBridgeAddress,
-    getProvider(chainId)
-  );
-}
-
-function _isDexSupportedForSwapAndBridge(
-  dex: string
-): dex is keyof typeof ENABLED_ROUTES.swapAndBridgeAddresses {
-  return swapAndBridgeDexes.includes(dex);
 }
