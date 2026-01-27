@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import {
   BridgeStrategy,
   GetExactInputBridgeQuoteParams,
