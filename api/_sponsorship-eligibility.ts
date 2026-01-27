@@ -2,7 +2,7 @@ import { BigNumber, utils, constants } from "ethers";
 
 import { AmountType, Token } from "./_dexes/types";
 import { getEnvs, parseJsonSafe } from "./_env";
-import { TOKEN_EQUIVALENCE_REMAPPING, TOKEN_SYMBOLS_MAP } from "./_constants";
+import { TOKEN_SYMBOLS_MAP } from "./_constants";
 import { getSponsorshipsFromIndexer } from "./_indexer-api";
 import { getNormalizedSpotTokenSymbol } from "./_hypercore";
 import {
