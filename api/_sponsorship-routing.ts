@@ -216,33 +216,3 @@ function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
     data.isEligibleTokenPair
   );
 }
-
-const ROUTE_WILDCARD_SYMBOL = "*";
-
-function buildRouteKey(inputSymbol?: string, outputSymbol?: string) {
-  return inputSymbol
-    ? `${inputSymbol}:${outputSymbol ?? ROUTE_WILDCARD_SYMBOL}`
-    : null;
-}
-
-function getRouteRules(params: BridgeStrategyDataParams) {
-  const inputSymbol =
-    TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
-    params.inputToken.symbol;
-  const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
-  const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
-  return (
-    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
-  );
-}
-
-function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
-  return (
-    data.isWithinInputAmountLimit &&
-    data.isWithinGlobalDailyLimit &&
-    data.isWithinUserDailyLimit &&
-    data.isWithinAccountCreationDailyLimit &&
-    data.isEligibleTokenPair
-  );
-}
