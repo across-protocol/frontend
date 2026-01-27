@@ -378,7 +378,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhHyperEvm,
         });
 
-        expect(strategy.name).toBe("sponsored-intent");
+        expect(strategy.name).toBe("hypercore-intent");
       });
 
       test("should use hypercore strategy for HyperEVM to HyperCore transfers", async () => {
@@ -467,7 +467,7 @@ describe("api/_bridges/index", () => {
         });
       });
 
-      test("should use sponsored-intent for amounts below 10K USDC", async () => {
+      test("should use hypercore-intent for amounts below 10K USDC", async () => {
         const strategy = await getBridgeStrategy({
           ...baseParams,
           amount: BigNumber.from("5000000000"), // 5K USDC (6 decimals)
@@ -477,7 +477,7 @@ describe("api/_bridges/index", () => {
           outputToken: usdhSpotHyperCore,
         });
 
-        expect(strategy.name).toBe("sponsored-intent");
+        expect(strategy.name).toBe("hypercore-intent");
       });
 
       test("should use sponsored-cctp for amounts between 10K and 1M USDC", async () => {

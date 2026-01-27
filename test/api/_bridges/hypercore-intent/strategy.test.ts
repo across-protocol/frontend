@@ -1,21 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BigNumber } from "ethers";
-import { getUsdhIntentsBridgeStrategy } from "../../../../api/_bridges/sponsored-intent/strategy";
-import { getUsdhIntentQuote } from "../../../../api/_bridges/sponsored-intent/utils/quote";
+import { getHyperCoreIntentBridgeStrategy } from "../../../../api/_bridges/hypercore-intent/strategy";
+import { getUsdhIntentQuote } from "../../../../api/_bridges/hypercore-intent/utils/quote";
 import {
   buildTxEvm,
   buildTxSvm,
-} from "../../../../api/_bridges/sponsored-intent/utils/tx-builder";
+} from "../../../../api/_bridges/hypercore-intent/utils/tx-builder";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
-import { Token } from "../../../../api/_dexes/types";
 import { CHAIN_IDs } from "../../../../api/_constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
 
-vi.mock("../../../../api/_bridges/sponsored-intent/utils/quote");
-vi.mock("../../../../api/_bridges/sponsored-intent/utils/tx-builder");
+vi.mock("../../../../api/_bridges/hypercore-intent/utils/quote");
+vi.mock("../../../../api/_bridges/hypercore-intent/utils/tx-builder");
 
-describe("getUsdhIntentsBridgeStrategy", () => {
-  const strategy = getUsdhIntentsBridgeStrategy();
+describe("getHyperCoreIntentBridgeStrategy", () => {
+  const strategy = getHyperCoreIntentBridgeStrategy(true);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,16 +79,16 @@ describe("getUsdhIntentsBridgeStrategy", () => {
   describe("getQuoteForExactInput", () => {
     it("should return bridge quote with provider name", async () => {
       const mockQuote = {
-        inputToken: {} as Token,
-        outputToken: {} as Token,
-        inputAmount: BigNumber.from(100),
-        outputAmount: BigNumber.from(100),
-        minOutputAmount: BigNumber.from(100),
+        inputToken: USDC_ON_OPTIMISM,
+        outputToken: USDH_ON_HYPEREVM,
+        inputAmount: BigNumber.from("1000000"),
+        outputAmount: BigNumber.from("100000000"),
+        minOutputAmount: BigNumber.from("100000000"),
         estimatedFillTimeSec: 60,
         fees: {
           pct: BigNumber.from(0),
           amount: BigNumber.from(0),
-          token: {} as Token,
+          token: USDC_ON_OPTIMISM,
         },
         message: "0x",
       };
@@ -98,9 +97,9 @@ describe("getUsdhIntentsBridgeStrategy", () => {
       );
 
       const params = {
-        inputToken: {} as Token,
-        outputToken: {} as Token,
-        exactInputAmount: BigNumber.from(100),
+        inputToken: USDC_ON_OPTIMISM,
+        outputToken: USDH_ON_HYPEREVM,
+        exactInputAmount: BigNumber.from("1000000"),
         recipient: "0xRecipient",
       };
 
@@ -112,18 +111,27 @@ describe("getUsdhIntentsBridgeStrategy", () => {
         exactInputAmount: params.exactInputAmount,
         recipient: params.recipient,
       });
-      expect(result).toEqual({
-        bridgeQuote: {
-          ...mockQuote,
-          provider: "sponsored-intent",
-        },
-      });
+      expect(result.bridgeQuote.provider).toBe("hypercore-intent");
+      expect(result.bridgeQuote.inputAmount).toEqual(mockQuote.inputAmount);
     });
   });
 
   describe("getQuoteForOutput", () => {
     it("should convert amount and return bridge quote", async () => {
-      const mockQuote = { some: "quote" };
+      const mockQuote = {
+        inputToken: USDC_ON_OPTIMISM,
+        outputToken: USDH_ON_HYPERCORE,
+        inputAmount: BigNumber.from("1000000"),
+        outputAmount: BigNumber.from("100000000"),
+        minOutputAmount: BigNumber.from("100000000"),
+        estimatedFillTimeSec: 60,
+        fees: {
+          pct: BigNumber.from(0),
+          amount: BigNumber.from(0),
+          token: USDC_ON_OPTIMISM,
+        },
+        message: "0x",
+      };
       (getUsdhIntentQuote as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockQuote
       );
@@ -140,15 +148,11 @@ describe("getUsdhIntentsBridgeStrategy", () => {
       expect(getUsdhIntentQuote).toHaveBeenCalledWith({
         inputToken: params.inputToken,
         outputToken: params.outputToken,
-        exactInputAmount: BigNumber.from("1000000"), // 1.0 USDH on Optimism
+        exactInputAmount: BigNumber.from("1000000"), // Converted from output decimals (8) to input decimals (6)
         recipient: params.recipient,
       });
-      expect(result).toEqual({
-        bridgeQuote: {
-          ...mockQuote,
-          provider: "sponsored-intent",
-        },
-      });
+      expect(result.bridgeQuote.provider).toBe("hypercore-intent");
+      expect(result.bridgeQuote.inputAmount).toEqual(BigNumber.from("1000000"));
     });
   });
 

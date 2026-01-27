@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import {
   buildTxEvm,
   buildTxSvm,
-} from "../../../../api/_bridges/sponsored-intent/utils/tx-builder";
+} from "../../../../api/_bridges/hypercore-intent/utils/tx-builder";
 import { getSpokePool } from "../../../../api/_spoke-pool";
 import { getSVMRpc } from "../../../../api/_providers";
 import { CHAIN_IDs } from "../../../../api/_constants";

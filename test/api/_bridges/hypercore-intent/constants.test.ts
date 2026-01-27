@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   SUPPORTED_INPUT_TOKENS,
   SUPPORTED_ORIGIN_CHAINS,
-} from "../../../../api/_bridges/sponsored-intent/utils/constants";
+} from "../../../../api/_bridges/hypercore-intent/utils/constants";
 
-describe("sponsored-intent constants", () => {
+describe("hypercore-intent constants", () => {
   describe("SUPPORTED_INPUT_TOKENS", () => {
     it("should include USDC, USDC-BNB, USDC.e, and USDzC", () => {
       const symbols = SUPPORTED_INPUT_TOKENS.map((t) => t.symbol);

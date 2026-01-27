@@ -6,8 +6,8 @@ import {
   getOftSponsoredBridgeStrategy,
   isRouteSupported as isOftRouteSupported,
 } from "./_bridges/oft-sponsored/strategy";
-import { getUsdhIntentsBridgeStrategy } from "./_bridges/sponsored-intent/strategy";
-import { isRouteSupported as isSponsoredIntentSupported } from "./_bridges/sponsored-intent/utils/common";
+import { getHyperCoreIntentBridgeStrategy } from "./_bridges/hypercore-intent/strategy";
+import { isRouteSupported as isHyperCoreIntentSupported } from "./_bridges/hypercore-intent/utils/common";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
@@ -49,16 +49,16 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
       reason: "Eligible USDC → USDH-SPOT route on non-CCTP chain",
       shouldApply: (data) =>
         isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
+        data.isHyperCoreIntentSupported &&
         !data.isCctpEnabledOriginChain,
-      getStrategy: () => getUsdhIntentsBridgeStrategy(),
+      getStrategy: () => getHyperCoreIntentBridgeStrategy(true),
     },
     {
       name: "usdc-usdh-spot-cctp-over-threshold",
       reason: "Eligible USDC → USDH-SPOT route above mint/burn threshold",
       shouldApply: (data) =>
         isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
+        data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         data.isMintBurnThresholdMet,
       getStrategy: () => getSponsoredCctpBridgeStrategy(true),
@@ -68,10 +68,10 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
       reason: "Eligible USDC → USDH-SPOT route below mint/burn threshold",
       shouldApply: (data) =>
         isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
+        data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         !data.isMintBurnThresholdMet,
-      getStrategy: () => getUsdhIntentsBridgeStrategy(),
+      getStrategy: () => getHyperCoreIntentBridgeStrategy(true),
     },
   ],
   "USDC:*": [
@@ -165,7 +165,7 @@ export function isSponsoredRoute(params: {
   return (
     isCctpRouteSupported(params) ||
     isOftRouteSupported(params) ||
-    isSponsoredIntentSupported(params)
+    isHyperCoreIntentSupported(params)
   );
 }
 
