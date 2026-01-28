@@ -159,10 +159,10 @@ export default function Transaction() {
         <BreadcrumbWrapper>
           <BreadcrumbContent>
             <BreadcrumbLink to="/transactions">
-              <BreadcrumbLinkText size="lg">Transactions</BreadcrumbLinkText>
+              <BreadcrumbLinkText size="lg">Transfers</BreadcrumbLinkText>
             </BreadcrumbLink>
             <StyledArrowIcon />
-            <CurrentPageText size="lg">Transaction Details</CurrentPageText>
+            <CurrentPageText size="lg">Transfer Details</CurrentPageText>
           </BreadcrumbContent>
           <BreadcrumbDivider />
         </BreadcrumbWrapper>

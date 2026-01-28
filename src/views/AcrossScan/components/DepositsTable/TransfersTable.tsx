@@ -9,7 +9,7 @@ import {
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
 
-export type DepositsTableProps = {
+export type TransfersTableProps = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
   deposits: Deposit[];
@@ -17,13 +17,13 @@ export type DepositsTableProps = {
   tooltips?: ColumnTooltipRecord;
 };
 
-export function DepositsTable({
+export function TransfersTable({
   disabledColumns = [],
   deposits,
   onClickSpeedUp,
   filterKey = "",
   tooltips,
-}: DepositsTableProps) {
+}: TransfersTableProps) {
   return (
     <Wrapper>
       <StyledTable>
