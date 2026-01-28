@@ -6,8 +6,8 @@ import {
   getBase64EncodedWireTransaction,
   partiallySignTransaction,
   fetchAddressesForLookupTables,
+  compressTransactionMessageUsingAddressLookupTables,
 } from "@solana/kit";
-import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import * as sdk from "@across-protocol/sdk";
 import { getDepositForBurnInstructionAsync } from "@across-protocol/contracts/dist/src/svm/clients/SponsoredCctpSrcPeriphery";

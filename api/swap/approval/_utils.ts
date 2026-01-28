@@ -9,11 +9,11 @@ import {
   appendTransactionMessageInstruction,
   fetchAddressesForLookupTables,
   AddressesByLookupTableAddress,
+  compressTransactionMessageUsingAddressLookupTables,
 } from "@solana/kit";
-import { compressTransactionMessageUsingAddressLookupTables } from "@solana/transaction-messages";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-import { CrossSwapQuotes, EvmSwapTxn, isSvmSwapTxn } from "../../_dexes/types";
+import { CrossSwapQuotes, isSvmSwapTxn } from "../../_dexes/types";
 import {
   assertValidIntegratorId,
   SWAP_CALLDATA_MARKER,
