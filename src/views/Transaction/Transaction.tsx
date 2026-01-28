@@ -1,7 +1,13 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { COLORS, getChainInfo, QUERIESV2 } from "utils";
+import {
+  COLORS,
+  getChainInfo,
+  getNativeTokenSymbol,
+  getToken,
+  QUERIESV2,
+} from "utils";
 import { Text } from "components/Text";
 import { LayoutV2 } from "components";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
@@ -15,6 +21,7 @@ import { shortenAddress } from "utils/format";
 import { TransactionSourceSection } from "./components/TransactionSourceSection";
 import { TransactionDestinationSection } from "./components/TransactionDestinationSection";
 import { TransactionFeeSection } from "./components/TransactionFeeSection";
+import { formatUnits } from "ethers/lib/utils";
 
 const LOADING_DELAY_MS = 400;
 
@@ -153,6 +160,22 @@ export default function Transaction() {
     deposit.fillBlockTimestamp
   );
 
+  const fillGasFeeScaled = (() => {
+    try {
+      return deposit.fillGasFee
+        ? formatUnits(
+            deposit.fillGasFee,
+            getToken(getNativeTokenSymbol(destinationChainId)).decimals
+          )
+        : null;
+    } catch (e) {
+      console.error(
+        `Failed to scale fill gas fee for tx ${deposit.depositTxnRef}`
+      );
+      return null;
+    }
+  })();
+
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
@@ -208,7 +231,7 @@ export default function Transaction() {
 
           <TransactionFeeSection
             bridgeFeeUsd={deposit.bridgeFeeUsd}
-            fillGasFee={deposit.fillGasFee}
+            fillGasFee={fillGasFeeScaled}
             fillGasFeeUsd={deposit.fillGasFeeUsd}
             swapFeeUsd={deposit.swapFeeUsd}
             formatUSDValue={formatUSDValue}

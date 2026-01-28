@@ -61,6 +61,10 @@ export const HeaderRight = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
+
+  span {
+    opacity: 0.5;
+  }
 `;
 
 export const ChainBadge = styled.div`
@@ -80,6 +84,7 @@ export const ExplorerLinkButton = styled.a`
   cursor: pointer;
   transition: all 0.2s ease;
   color: inherit;
+  opacity: 0.5;
 
   svg {
     width: 16px;
@@ -88,6 +93,7 @@ export const ExplorerLinkButton = styled.a`
   }
 
   &:hover {
+    opacity: 1;
     background: ${COLORS["grey-600"]};
     svg {
       color: ${COLORS.aqua};

@@ -71,7 +71,7 @@ export function TransactionSourceSection({
               <TokenIcon src={inputToken.logoURI} alt={inputToken.symbol} />
             )}
             <Text color="light-200" size="md">
-              {inputToken?.symbol ?? "asbkaj"}
+              {inputToken?.symbol}
             </Text>
           </TokenDisplay>
         </DetailRowItem>
