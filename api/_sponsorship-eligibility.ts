@@ -13,7 +13,7 @@ import { getCachedTokenBalance } from "./_balance";
 import { ConvertDecimals } from "./_utils";
 import { AcrossErrorCode, InputError } from "./_errors";
 import { isCctpEnabled as _isCctpEnabled } from "./_bridges/cctp/utils/constants";
-import { isRouteSupported as _isSponsoredIntentSupported } from "./_bridges/sponsored-intent/utils/common";
+import { isRouteSupported as _isHyperCoreIntentSupported } from "./_bridges/hypercore-intent/utils/common";
 import { isOftEnabled as _isOftEnabled } from "./_bridges/oft/utils/constants";
 
 export type SponsorshipEligibilityPreChecks = Awaited<
@@ -182,7 +182,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     params.inputToken.chainId,
     params.inputToken.symbol
   );
-  const isSponsoredIntentSupported = _isSponsoredIntentSupported(params);
+  const isHyperCoreIntentSupported = _isHyperCoreIntentSupported(params);
   const amount =
     params.amountType === "exactInput"
       ? params.amount
@@ -251,7 +251,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
       SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT,
     isCctpEnabledOriginChain,
     isOftEnabledOriginChain,
-    isSponsoredIntentSupported,
+    isHyperCoreIntentSupported,
     isMintBurnThresholdMet,
     isEligibleTokenPair: SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
       (pair) =>

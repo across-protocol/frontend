@@ -41,7 +41,7 @@ export async function getRelayerFeeDetailsOnHyperEvm(params: {
       destinationChainId: hyperEvmChainId,
       recipientAddress: params.recipient,
       inputToken: params.inputToken.address,
-      outputToken: bridgeableOutputToken.addresses[hyperEvmChainId],
+      outputToken: bridgeableOutputToken.address,
       amount: params.amount,
       message: params.message,
     },

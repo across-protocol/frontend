@@ -237,7 +237,7 @@ function _prepDepositTx(
     recipient: sdk.utils.toAddressType(depositRecipient, hyperEvmChainId),
     inputToken: sdk.utils.toAddressType(inputToken.address, inputToken.chainId),
     outputToken: sdk.utils.toAddressType(
-      bridgeableOutputToken.addresses[hyperEvmChainId],
+      bridgeableOutputToken.address,
       hyperEvmChainId
     ),
     inputAmount: bridgeQuote.inputAmount,

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BigNumber } from "ethers";
-import { getUsdhIntentQuote } from "../../../../api/_bridges/sponsored-intent/utils/quote";
+import { getUsdhIntentQuote } from "../../../../api/_bridges/hypercore-intent/utils/quote";
 import {
   getCachedTokenPrice,
   getRelayerFeeDetails,
@@ -21,7 +21,7 @@ vi.mock("../../../../api/_relayer-address", () => ({
   getDefaultRelayerAddress: vi.fn().mockReturnValue("0xRelayer"),
 }));
 
-describe("api/_bridges/sponsored-intent/utils/quote", () => {
+describe("api/_bridges/hypercore-intent/utils/quote", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

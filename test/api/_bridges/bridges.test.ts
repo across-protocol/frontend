@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
@@ -49,6 +49,7 @@ const mockBridgeStrategyData = (
   isInThreshold: false,
   isUsdtToUsdt: false,
   isHyperCoreDestination: false,
+  hasFastStandardFill: false,
   ...overrides,
 });
 
@@ -467,7 +468,7 @@ describe("api/_bridges/index", () => {
         });
       });
 
-      test("should use sponsored-intent for amounts below 10K USDC", async () => {
+      test("should use hypercore-intent for amounts below 10K USDC", async () => {
         const strategy = await getBridgeStrategy({
           ...baseParams,
           amount: BigNumber.from("5000000000"), // 5K USDC (6 decimals)
