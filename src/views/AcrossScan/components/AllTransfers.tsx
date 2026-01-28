@@ -8,16 +8,16 @@ import { COLORS } from "utils";
 import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";
 import { WalletAddressFilter } from "./WalletAddressFilter";
-import { useTransactions } from "../hooks/useTransactions";
+import { useTransfers } from "../hooks/useTransfers";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useLiveMode } from "../hooks/useLiveMode";
-import { PaginatedDepositsTable } from "./DepositsTable";
+import { PaginatedTransfersTable } from "./DepositsTable";
 
 const LIVE_REFETCH_INTERVAL = 1_000;
 
-export function AllTransactions() {
+export function AllTransfers() {
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
 
   const { account: accountEVM } = useConnectionEVM();
@@ -32,7 +32,7 @@ export function AllTransactions() {
     deposits,
     totalDeposits,
     depositsQuery,
-  } = useTransactions(walletAddressFilter.trim() || undefined);
+  } = useTransfers(walletAddressFilter.trim() || undefined);
 
   const queryClient = useQueryClient();
 
@@ -77,7 +77,7 @@ export function AllTransactions() {
           onClick={async () => {
             await queryClient.cancelQueries({ queryKey: ["deposits"] });
             await queryClient.resetQueries({ queryKey: ["deposits"] });
-            depositsQuery.refetch();
+            return depositsQuery.refetch();
           }}
         >
           Reload data
@@ -106,7 +106,7 @@ export function AllTransactions() {
           />
         </ControlsRow>
       </ControlsContainer>
-      <PaginatedDepositsTable
+      <PaginatedTransfersTable
         currentPage={currentPage}
         currentPageSize={pageSize}
         deposits={convertedDeposits}
@@ -128,8 +128,8 @@ export function AllTransactions() {
         <EmptyStateMessage>
           <Text size="lg">
             {isFiltering
-              ? "No transactions found for this address"
-              : "No transactions found"}
+              ? "No transfers found for this address"
+              : "No transfers found"}
           </Text>
           {isFiltering && (
             <Text size="sm" color="grey-400" style={{ marginTop: "8px" }}>
