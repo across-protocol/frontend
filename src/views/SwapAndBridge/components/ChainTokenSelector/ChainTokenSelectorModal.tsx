@@ -1292,6 +1292,7 @@ const TokenSymbol = styled.div`
   overflow: hidden;
   color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
+  white-space: nowrap;
   /* Body/X Small */
   font-family: Barlow;
   font-size: 12px;
