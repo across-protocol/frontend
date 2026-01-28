@@ -5,10 +5,13 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
+import { ReactComponent as DollarIcon } from "assets/icons/dollar.svg";
+
 import {
   DetailRowGroup,
   SectionCard,
   SectionHeader,
+  SectionHeaderCollapsible,
 } from "./TransactionSection.styles";
 
 type TransactionFeeSectionProps = {
@@ -21,7 +24,6 @@ type TransactionFeeSectionProps = {
 
 export function TransactionFeeSection({
   bridgeFeeUsd,
-  fillGasFee,
   fillGasFeeUsd,
   swapFeeUsd,
   formatUSDValue,
@@ -40,7 +42,8 @@ export function TransactionFeeSection({
     <FeeCard>
       <FeeHeader collapsible onClick={() => setIsExpanded(!isExpanded)}>
         <ToolTipWrapper>
-          <Text size="md" color="grey-400">
+          <DollarIcon width="24px" height="24px" />
+          <Text color="light-200" size="md" weight={600}>
             Total fees
           </Text>
           <Tooltip
@@ -139,13 +142,12 @@ const FeeItemValue = styled(Text)`
   margin-left: auto;
 `;
 
-const FeeHeader = styled(SectionHeader)<{ collapsible?: boolean }>`
+const FeeHeader = styled(SectionHeaderCollapsible)<{ collapsible?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   gap: 6px;
-  cursor: ${({ collapsible }) => (collapsible ? "pointer" : "default")};
   width: 100%;
 
   @media ${QUERIESV2.xs.andDown} {

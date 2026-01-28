@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { COLORS, QUERIESV2 } from "utils";
 
@@ -11,13 +12,21 @@ export const SectionCard = styled.div`
   overflow: hidden;
 `;
 
-export const SectionHeader = styled.div`
+const SectionHeaderStyles = css`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 12px var(--padding);
   background: ${COLORS["bright-gray-t-5"]};
+`;
+
+export const SectionHeader = styled.div`
+  ${SectionHeaderStyles}
+`;
+
+export const SectionHeaderCollapsible = styled.button`
+  ${SectionHeaderStyles}
 `;
 
 export const DetailRowGroup = styled.div`
@@ -118,4 +127,18 @@ export const TokenDisplay = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+`;
+
+export const DetailsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  width: 100%;
+  padding: 24px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 16px;
+  }
 `;
