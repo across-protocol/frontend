@@ -17,6 +17,10 @@ import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
+import {
+  assertAccountExistsOnHyperCore,
+  isToHyperCore,
+} from "../../_hypercore";
 
 const SPONSORED_PROVIDER_NAME = "sponsored-intent" as const;
 const UNSPONSORED_PROVIDER_NAME = "across" as const;
@@ -38,8 +42,15 @@ const capabilities: BridgeCapabilities = {
  * Supports both sponsored and unsponsored flows via isEligibleForSponsorship flag.
  */
 export function getHyperCoreIntentBridgeStrategy(
-  isEligibleForSponsorship: boolean
+  opt?: Partial<{
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }>
 ): BridgeStrategy {
+  const isEligibleForSponsorship = opt?.isEligibleForSponsorship ?? false;
+  const shouldSponsorAccountCreation =
+    opt?.shouldSponsorAccountCreation ?? false;
+
   const name = isEligibleForSponsorship
     ? SPONSORED_PROVIDER_NAME
     : UNSPONSORED_PROVIDER_NAME;
@@ -81,10 +92,18 @@ export function getHyperCoreIntentBridgeStrategy(
     },
 
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
-      getQuoteForExactInput({ ...params, isEligibleForSponsorship }),
+      getQuoteForExactInput({
+        ...params,
+        isEligibleForSponsorship,
+        shouldSponsorAccountCreation,
+      }),
 
     getQuoteForOutput: (params: GetOutputBridgeQuoteParams) =>
-      getQuoteForOutput({ ...params, isEligibleForSponsorship }),
+      getQuoteForOutput({
+        ...params,
+        isEligibleForSponsorship,
+        shouldSponsorAccountCreation,
+      }),
 
     buildTxForAllowanceHolder: async (params: {
       quotes: CrossSwapQuotes;
@@ -106,11 +125,25 @@ export function getHyperCoreIntentBridgeStrategy(
  * Routes between sponsored (zero fees) and unsponsored (Across fees) flows.
  */
 export async function getQuoteForExactInput(
-  params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+  params: GetExactInputBridgeQuoteParams & {
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }
 ): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, exactInputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
+
+  if (
+    isToHyperCore(outputToken.chainId) &&
+    !params.shouldSponsorAccountCreation
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
 
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: use zero fees and 1:1 conversion
@@ -171,11 +204,25 @@ export async function getQuoteForExactInput(
  * Routes between sponsored (zero fees) and unsponsored (Across fees) flows.
  */
 export async function getQuoteForOutput(
-  params: GetOutputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+  params: GetOutputBridgeQuoteParams & {
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }
 ): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, minOutputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
+
+  if (
+    isToHyperCore(outputToken.chainId) &&
+    !params.shouldSponsorAccountCreation
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
 
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: convert output amount to input amount (1:1 conversion)
