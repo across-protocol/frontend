@@ -152,6 +152,15 @@ export async function getQuoteForExactInput(
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        // Convert outputAmount from bridgeable token decimals to output token decimals
+        outputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.outputAmount),
+        minOutputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.minOutputAmount),
       },
     };
   }
@@ -214,6 +223,15 @@ export async function getQuoteForOutput(
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        // Convert outputAmount from bridgeable token decimals to output token decimals
+        outputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.outputAmount),
+        minOutputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.minOutputAmount),
       },
     };
   }
