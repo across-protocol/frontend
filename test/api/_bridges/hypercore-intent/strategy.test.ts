@@ -7,11 +7,22 @@ import {
   buildTxSvm,
 } from "../../../../api/_bridges/hypercore-intent/utils/tx-builder";
 import { CROSS_SWAP_TYPE } from "../../../../api/_dexes/utils";
-import { CHAIN_IDs } from "../../../../api/_constants";
-import { USDC_ON_OPTIMISM, USDH_ON_HYPERCORE, USDH_ON_HYPEREVM } from "./utils";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../../api/_constants";
+import {
+  USDC_ON_OPTIMISM,
+  USDH_ON_HYPERCORE,
+  USDH_ON_HYPEREVM,
+  USDT_ON_POLYGON,
+  USDT_SPOT_ON_HYPERCORE,
+} from "./utils";
+import { getAcrossBridgeStrategy } from "../../../../api/_bridges/across/strategy";
+import { FeeDetailsType } from "../../../../api/_dexes/types";
 
 vi.mock("../../../../api/_bridges/hypercore-intent/utils/quote");
 vi.mock("../../../../api/_bridges/hypercore-intent/utils/tx-builder");
+vi.mock("../../../../api/_bridges/across/strategy", () => ({
+  getAcrossBridgeStrategy: vi.fn(),
+}));
 
 describe("getHyperCoreIntentBridgeStrategy", () => {
   const strategy = getHyperCoreIntentBridgeStrategy(true);
@@ -183,6 +194,126 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
 
       expect(buildTxEvm).toHaveBeenCalledWith(params);
       expect(result).toBe("evm-tx");
+    });
+  });
+});
+
+describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
+  const unsponsoredStrategy = getHyperCoreIntentBridgeStrategy(false);
+  const USDT_ON_POLYGON_TOKEN = {
+    address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
+    chainId: CHAIN_IDs.POLYGON,
+    symbol: "USDT",
+    decimals: 6,
+  };
+
+  const createMockAcrossQuote = (overrides: {
+    inputAmount?: BigNumber;
+    outputAmount?: BigNumber;
+  }) => ({
+    bridgeQuote: {
+      inputToken: USDT_ON_POLYGON_TOKEN,
+      outputToken: USDT_ON_POLYGON_TOKEN, // Across returns USDT (6 decimals)
+      inputAmount: overrides.inputAmount || BigNumber.from("1000000"),
+      outputAmount: overrides.outputAmount || BigNumber.from("999990"),
+      minOutputAmount: overrides.outputAmount || BigNumber.from("999990"),
+      estimatedFillTimeSec: 120,
+      provider: "across",
+      fees: {
+        amount: BigNumber.from("877"),
+        pct: BigNumber.from("292666666666666"),
+        token: USDT_ON_POLYGON_TOKEN,
+        details: {
+          type: FeeDetailsType.ACROSS,
+          relayerCapital: {
+            amount: BigNumber.from("300"),
+            pct: BigNumber.from("100000000000000"),
+            token: USDT_ON_POLYGON_TOKEN,
+          },
+          destinationGas: {
+            amount: BigNumber.from("577"),
+            pct: BigNumber.from("192666666666666"),
+            token: USDT_ON_POLYGON_TOKEN,
+          },
+          lp: {
+            amount: BigNumber.from("0"),
+            pct: BigNumber.from("0"),
+            token: USDT_ON_POLYGON_TOKEN,
+          },
+        },
+      },
+    },
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("getQuoteForExactInput - unsponsored USDT → USDT-SPOT", () => {
+    it("should convert outputAmount from 6 decimals (USDT) to 8 decimals (USDT-SPOT)", async () => {
+      const inputAmount = BigNumber.from("1000000"); // 1 USDT (6 decimals)
+      const acrossOutputAmount = BigNumber.from("999999"); // Output in 6 decimals (after fees)
+
+      const mockAcrossQuote = createMockAcrossQuote({
+        inputAmount,
+        outputAmount: acrossOutputAmount,
+      });
+
+      (getAcrossBridgeStrategy as ReturnType<typeof vi.fn>).mockReturnValue({
+        getQuoteForExactInput: vi.fn().mockResolvedValue(mockAcrossQuote),
+      });
+
+      const params = {
+        inputToken: USDT_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        exactInputAmount: inputAmount,
+        recipient: "0x1234567890123456789012345678901234567890",
+      };
+
+      const result = await unsponsoredStrategy.getQuoteForExactInput(
+        params as any
+      );
+
+      // Output should be converted from 6 decimals to 8 decimals
+      const expectedOutputAmount = BigNumber.from("99999900");
+      expect(result.bridgeQuote.outputAmount).toEqual(expectedOutputAmount);
+      expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutputAmount);
+      expect(result.bridgeQuote.outputToken).toEqual(USDT_SPOT_ON_HYPERCORE);
+      expect(result.bridgeQuote.provider).toBe("across");
+    });
+  });
+
+  describe("getQuoteForOutput - unsponsored USDT → USDT-SPOT", () => {
+    it("should convert outputAmount from 6 decimals (USDT) to 8 decimals (USDT-SPOT)", async () => {
+      const inputAmount = BigNumber.from("1000000"); // 1 USDT (6 decimals)
+      const acrossOutputAmount = BigNumber.from("999999"); // Output in 6 decimals
+      const minOutputAmount = BigNumber.from("99999900"); // 1 USDT-SPOT (8 decimals)
+
+      const mockAcrossQuote = createMockAcrossQuote({
+        inputAmount,
+        outputAmount: acrossOutputAmount,
+      });
+
+      (getAcrossBridgeStrategy as ReturnType<typeof vi.fn>).mockReturnValue({
+        getQuoteForOutput: vi.fn().mockResolvedValue(mockAcrossQuote),
+      });
+
+      const params = {
+        inputToken: USDT_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        minOutputAmount,
+        recipient: "0x1234567890123456789012345678901234567890",
+      };
+
+      const result = await unsponsoredStrategy.getQuoteForOutput(params as any);
+
+      // Output should be converted from 6 decimals to 8 decimals
+      // 999,999 (6 decimals) → 99,999,900 (8 decimals)
+      const expectedOutputAmount = BigNumber.from("99999900");
+      expect(result.bridgeQuote.outputAmount).toEqual(expectedOutputAmount);
+      expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutputAmount);
+      expect(result.bridgeQuote.outputToken).toEqual(USDT_SPOT_ON_HYPERCORE);
+      expect(result.bridgeQuote.provider).toBe("across");
     });
   });
 });

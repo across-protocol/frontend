@@ -48,3 +48,17 @@ export const USDH_ON_HYPERCORE = {
   symbol: TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
   decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
 };
+
+export const USDT_ON_POLYGON = {
+  address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
+  chainId: CHAIN_IDs.POLYGON,
+  symbol: "USDT",
+  decimals: TOKEN_SYMBOLS_MAP.USDT.decimals,
+};
+
+export const USDT_SPOT_ON_HYPERCORE = {
+  address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  chainId: CHAIN_IDs.HYPERCORE,
+  symbol: TOKEN_SYMBOLS_MAP["USDT-SPOT"].symbol,
+  decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+};
