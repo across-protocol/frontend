@@ -45,15 +45,6 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   ],
   "USDC:USDH-SPOT": [
     {
-      name: "usdc-usdh-spot-non-cctp",
-      reason: "Eligible USDC → USDH-SPOT route on non-CCTP chain",
-      shouldApply: (data) =>
-        isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
-        !data.isCctpEnabledOriginChain,
-      getStrategy: () => getUsdhIntentsBridgeStrategy(),
-    },
-    {
       name: "usdc-usdh-spot-cctp-over-threshold",
       reason: "Eligible USDC → USDH-SPOT route above mint/burn threshold",
       shouldApply: (data) =>
