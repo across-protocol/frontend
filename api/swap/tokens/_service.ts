@@ -461,10 +461,7 @@ export async function fetchSwapTokensData(
   responseJson.push(...nativeTokens);
 
   // Add Jupiter tokens
-  const jupiterTokens = getJupiterTokens(
-    jupiterTokensResponse.data,
-    targetChainIds
-  );
+  const jupiterTokens = getJupiterTokens(jupiterTokensResponse, targetChainIds);
   responseJson.push(...jupiterTokens);
 
   // Deduplicate tokens (Across tokens take precedence)
