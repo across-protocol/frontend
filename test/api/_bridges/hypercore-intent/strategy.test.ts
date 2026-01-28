@@ -17,15 +17,27 @@ import {
 } from "./utils";
 import { getAcrossBridgeStrategy } from "../../../../api/_bridges/across/strategy";
 import { FeeDetailsType } from "../../../../api/_dexes/types";
+import { assertAccountExistsOnHyperCore } from "../../../../api/_hypercore";
 
 vi.mock("../../../../api/_bridges/hypercore-intent/utils/quote");
 vi.mock("../../../../api/_bridges/hypercore-intent/utils/tx-builder");
 vi.mock("../../../../api/_bridges/across/strategy", () => ({
   getAcrossBridgeStrategy: vi.fn(),
 }));
+vi.mock("../../../../api/_hypercore", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../../api/_hypercore")>();
+  return {
+    ...actual,
+    assertAccountExistsOnHyperCore: vi.fn(),
+  };
+});
 
 describe("getHyperCoreIntentBridgeStrategy", () => {
-  const strategy = getHyperCoreIntentBridgeStrategy(true);
+  const strategy = getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: true,
+    shouldSponsorAccountCreation: true,
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -199,7 +211,10 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
 });
 
 describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
-  const unsponsoredStrategy = getHyperCoreIntentBridgeStrategy(false);
+  const unsponsoredStrategy = getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: false,
+    shouldSponsorAccountCreation: false,
+  });
   const USDT_ON_POLYGON_TOKEN = {
     address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
     chainId: CHAIN_IDs.POLYGON,
@@ -315,5 +330,66 @@ describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
       expect(result.bridgeQuote.outputToken).toEqual(USDT_SPOT_ON_HYPERCORE);
       expect(result.bridgeQuote.provider).toBe("across");
     });
+
+    it("should throw error if account does not exist on HyperCore", async () => {
+      const error = new Error("Account is not initialized on HyperCore");
+      (
+        assertAccountExistsOnHyperCore as ReturnType<typeof vi.fn>
+      ).mockRejectedValue(error);
+
+      const params = {
+        inputToken: USDT_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        exactInputAmount: BigNumber.from("1000000"),
+        recipient: "0x1234567890123456789012345678901234567890",
+      };
+
+      await expect(
+        unsponsoredStrategy.getQuoteForExactInput(params as any)
+      ).rejects.toThrow("Account is not initialized on HyperCore");
+    });
+  });
+});
+
+describe("getHyperCoreIntentBridgeStrategy (sponsored)", () => {
+  const sponsoredStrategy = getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: true,
+    shouldSponsorAccountCreation: true,
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should not check account existence when shouldSponsorAccountCreation is true", async () => {
+    const mockQuote = {
+      inputToken: USDC_ON_OPTIMISM,
+      outputToken: USDH_ON_HYPERCORE,
+      inputAmount: BigNumber.from("1000000"),
+      outputAmount: BigNumber.from("100000000"),
+      minOutputAmount: BigNumber.from("100000000"),
+      estimatedFillTimeSec: 60,
+      fees: {
+        pct: BigNumber.from(0),
+        amount: BigNumber.from(0),
+        token: USDC_ON_OPTIMISM,
+      },
+      message: "0x",
+    };
+
+    (getUsdhIntentQuote as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockQuote
+    );
+
+    const params = {
+      inputToken: USDC_ON_OPTIMISM,
+      outputToken: USDH_ON_HYPERCORE,
+      exactInputAmount: BigNumber.from("1000000"),
+      recipient: "0x1234567890123456789012345678901234567890",
+    };
+
+    await sponsoredStrategy.getQuoteForExactInput(params as any);
+
+    expect(assertAccountExistsOnHyperCore).not.toHaveBeenCalled();
   });
 });
