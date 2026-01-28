@@ -190,7 +190,7 @@ export default function Transaction() {
           <HeaderBar>
             <StatusBadge status={deposit.status} />
             <FillTimeText>
-              <Text color="grey-400" size="sm">
+              <Text color="grey-400" size="md">
                 {fillDuration.isPending ? "Time Elapsed:" : "Fill Time:"}
               </Text>
               <Text
@@ -325,8 +325,8 @@ const HeaderBar = styled.div`
   flex-direction: row;
   align-items: center;
   width: 100%;
-  padding: 16px;
-  background: ${COLORS["black-800"]};
+  padding: 14px 16px;
+  background: transparent;
   border-radius: 16px;
   border: 1px solid ${COLORS["grey-600"]};
   gap: 16px;
