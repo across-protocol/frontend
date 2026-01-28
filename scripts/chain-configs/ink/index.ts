@@ -18,6 +18,6 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc-gel.inkonchain.com",
   blockTimeSeconds: 1,
-  tokens: ["WETH", "ETH", "USDC"],
+  tokens: ["WETH", "ETH", "USDC", "USDT"],
   enableCCTP: false,
 } as ChainConfig;
