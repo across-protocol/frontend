@@ -1,26 +1,30 @@
-import {
-  TOKEN_SYMBOLS_MAP,
-  CCTP_NO_DOMAIN,
-  CHAINS,
-  CHAIN_IDs,
-} from "../../../_constants";
+import { getDeployedAddress } from "@across-protocol/contracts";
+
+import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../_constants";
 
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
-// TODO: Pull from @across-protocol/contracts once `HyperliquidDepositHandler`
-// deployments are available upstream.
-export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
-  "0x861E127036B28D32f3777B4676F6bbb9e007d195";
+export function getHyperliquidDepositHandlerAddress(
+  chainId: number = CHAIN_IDs.HYPEREVM
+): string {
+  const address = getDeployedAddress("HyperliquidDepositHandler", chainId);
+  if (!address) {
+    throw new Error(`HyperliquidDepositHandler not found on chain ${chainId}`);
+  }
+  return address;
+}
 
 export const SUPPORTED_INPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
   TOKEN_SYMBOLS_MAP.USDT,
 ];
+
 export const SUPPORTED_OUTPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDH,
   TOKEN_SYMBOLS_MAP["USDH-SPOT"],
   TOKEN_SYMBOLS_MAP["USDT-SPOT"],
 ];
+
 export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
   (chainId) => {
     const isSupportedInputToken = SUPPORTED_INPUT_TOKENS.some(
@@ -29,6 +33,7 @@ export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
     return isSupportedInputToken ? [Number(chainId)] : [];
   }
 );
+
 export const SUPPORTED_DESTINATION_CHAINS = [
   CHAIN_IDs.HYPEREVM,
   CHAIN_IDs.HYPERCORE,

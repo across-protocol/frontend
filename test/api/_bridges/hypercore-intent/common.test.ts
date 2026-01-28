@@ -15,7 +15,7 @@ import {
 import { CHAIN_IDs } from "../../../../api/_constants";
 import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
-  HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS,
+  getHyperliquidDepositHandlerAddress,
 } from "../../../../api/_bridges/hypercore-intent/utils/constants";
 import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
 
@@ -101,11 +101,11 @@ describe("api/_bridges/hypercore-intent/utils/common", () => {
   });
 
   describe("getDepositRecipient", () => {
-    it("should return HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS if to HyperCore", () => {
+    it("should return HyperliquidDepositHandler address if to HyperCore", () => {
       const recipient = "0xUser";
       const outputToken = USDH_ON_HYPERCORE;
       const res = getDepositRecipient({ outputToken, recipient });
-      expect(res).toBe(HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS);
+      expect(res).toBe(getHyperliquidDepositHandlerAddress(CHAIN_IDs.HYPEREVM));
     });
 
     it("should return recipient if not to HyperCore", () => {
