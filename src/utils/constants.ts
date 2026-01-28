@@ -579,6 +579,76 @@ export const COLORS = {
   "white-100": "var(--tints-shades-white-100)",
   "white-200": "var(--tints-shades-white-200)",
 
+  // Base colors (from Figma)
+  "base-aqua": "var(--base-aqua)",
+  "base-bright-gray": "var(--base-bright-gray)",
+  "base-dark-gray": "var(--base-dark-gray)",
+
+  // Functional colors (from Figma)
+  "functional-blue": "var(--functional-blue)",
+  "functional-red": "var(--functional-red)",
+  "functional-yellow": "var(--functional-yellow)",
+
+  // Shades - Aqua (from Figma)
+  "shades-aqua-100": "var(--shades-aqua-aqua-100)",
+  "shades-aqua-200": "var(--shades-aqua-aqua-200)",
+  "shades-aqua-300": "var(--shades-aqua-aqua-300)",
+  "shades-aqua-400": "var(--shades-aqua-aqua-400)",
+  "shades-aqua-500": "var(--shades-aqua-aqua-500)",
+  "shades-aqua-600": "var(--shades-aqua-aqua-600)",
+  "shades-aqua-700": "var(--shades-aqua-aqua-700)",
+  "shades-aqua-800": "var(--shades-aqua-aqua-800)",
+  "shades-aqua-900": "var(--shades-aqua-aqua-900)",
+
+  // Shades - Neutrals (from Figma)
+  "neutral-000": "var(--shades-neutrals-neutral-000)",
+  "neutral-100": "var(--shades-neutrals-neutral-100)",
+  "neutral-200": "var(--shades-neutrals-neutral-200)",
+  "neutral-300": "var(--shades-neutrals-neutral-300)",
+  "neutral-400": "var(--shades-neutrals-neutral-400)",
+  "neutral-500": "var(--shades-neutrals-neutral-500)",
+  "neutral-600": "var(--shades-neutrals-neutral-600)",
+  "neutral-700": "var(--shades-neutrals-neutral-700)",
+  "neutral-800": "var(--shades-neutrals-neutral-800)",
+  "neutral-850": "var(--shades-neutrals-neutral-850)",
+  "neutral-900": "var(--shades-neutrals-neutral-900)",
+
+  // Transparency - Aqua (from Figma)
+  "aqua-t-5": "var(--transparency-aqua-aqua-5)",
+  "aqua-t-10": "var(--transparency-aqua-aqua-10)",
+  "aqua-t-20": "var(--transparency-aqua-aqua-20)",
+  "aqua-t-30": "var(--transparency-aqua-aqua-30)",
+  "aqua-t-40": "var(--transparency-aqua-aqua-40)",
+  "aqua-t-50": "var(--transparency-aqua-aqua-50)",
+  "aqua-t-60": "var(--transparency-aqua-aqua-60)",
+  "aqua-t-70": "var(--transparency-aqua-aqua-70)",
+  "aqua-t-80": "var(--transparency-aqua-aqua-80)",
+  "aqua-t-90": "var(--transparency-aqua-aqua-90)",
+
+  // Transparency - Bright Gray (from Figma)
+  "bright-gray-t-5": "var(--transparency-bright-gray-bright-gray-5)",
+  "bright-gray-t-10": "var(--transparency-bright-gray-bright-gray-10)",
+  "bright-gray-t-20": "var(--transparency-bright-gray-bright-gray-20)",
+  "bright-gray-t-30": "var(--transparency-bright-gray-bright-gray-30)",
+  "bright-gray-t-40": "var(--transparency-bright-gray-bright-gray-40)",
+  "bright-gray-t-50": "var(--transparency-bright-gray-bright-gray-50)",
+  "bright-gray-t-60": "var(--transparency-bright-gray-bright-gray-60)",
+  "bright-gray-t-70": "var(--transparency-bright-gray-bright-gray-70)",
+  "bright-gray-t-80": "var(--transparency-bright-gray-bright-gray-80)",
+  "bright-gray-t-90": "var(--transparency-bright-gray-bright-gray-90)",
+
+  // Transparency - Dark Gray (from Figma)
+  "dark-gray-t-5": "var(--transparency-dark-gray-dark-gray-5)",
+  "dark-gray-t-10": "var(--transparency-dark-gray-dark-gray-10)",
+  "dark-gray-t-20": "var(--transparency-dark-gray-dark-gray-20)",
+  "dark-gray-t-30": "var(--transparency-dark-gray-dark-gray-30)",
+  "dark-gray-t-40": "var(--transparency-dark-gray-dark-gray-40)",
+  "dark-gray-t-50": "var(--transparency-dark-gray-dark-gray-50)",
+  "dark-gray-t-60": "var(--transparency-dark-gray-dark-gray-60)",
+  "dark-gray-t-70": "var(--transparency-dark-gray-dark-gray-70)",
+  "dark-gray-t-80": "var(--transparency-dark-gray-dark-gray-80)",
+  "dark-gray-t-90": "var(--transparency-dark-gray-dark-gray-90)",
+
   // Aliases
   primary: "var(--color-interface-aqua)",
   brand: "var(--color-interface-aqua)",

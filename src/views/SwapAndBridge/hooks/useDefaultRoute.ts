@@ -129,7 +129,7 @@ export function useDefaultRoute(
       setDestinationToken(outputToken);
       setHasSetInitial(true);
     }
-  }, [selectTokens]);
+  }, [connectedChainId, selectTokens, setDestinationToken, setOriginToken]);
 
   const selectTokensOnWalletConnect = useCallback(() => {
     const { inputToken, outputToken } = selectTokens(
