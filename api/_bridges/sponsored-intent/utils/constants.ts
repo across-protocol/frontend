@@ -1,4 +1,9 @@
-import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../_constants";
+import {
+  TOKEN_SYMBOLS_MAP,
+  CCTP_NO_DOMAIN,
+  CHAINS,
+  CHAIN_IDs,
+} from "../../../_constants";
 
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
