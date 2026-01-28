@@ -12,6 +12,7 @@ import {
   getChainInfo,
   getFallbackTokenLogoURI,
 } from "../../_utils";
+import { getJupiterTokens as getJupiterTokensApi } from "../../_dexes/jupiter/utils/api";
 
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
 // Uses the same structure as mainnetChains since indirect chains share the same base schema.
@@ -411,7 +412,7 @@ export async function fetchSwapTokensData(
     await Promise.all([
       axios.get("https://tokens.uniswap.org"),
       axios.get("https://li.quest/v1/tokens"),
-      axios.get("https://lite-api.jup.ag/tokens/v2/toporganicscore/24h"),
+      getJupiterTokensApi(),
     ]);
 
   const pricesForLifiTokens = getPricesForLifiTokens(

@@ -4,6 +4,7 @@ import path from "path";
 import { getEnvs } from "../api/_env";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { writeFileWithChangeDetection } from "./utils/codegen-utils";
+import { getJupiterSwapProgramIdToLabel } from "../api/_dexes/jupiter/utils/api";
 
 const { API_KEY_0X } = getEnvs();
 
@@ -149,9 +150,7 @@ async function fetchJupiterSources(): Promise<DexSources> {
   };
 
   try {
-    const response = await axios.get<Record<string, string>>(
-      "https://lite-api.jup.ag/swap/v1/program-id-to-label"
-    );
+    const response = await getJupiterSwapProgramIdToLabel();
 
     const programLabels = response.data;
     const sourceNames = Object.values(programLabels);
