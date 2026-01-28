@@ -50,6 +50,11 @@ export async function getEvmBalance(
     | ethers.providers.FallbackProvider
 ): Promise<ethers.BigNumber> {
   provider ??= getProvider(chainId);
+
+  if (tokenAddress === ethers.constants.AddressZero) {
+    return getNativeBalance(chainId, account, blockNumber, provider);
+  }
+
   const contract = ERC20__factory.connect(tokenAddress, provider);
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
   return balance;
