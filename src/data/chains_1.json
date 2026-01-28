@@ -755,7 +755,7 @@
     "chainId": 324,
     "name": "zkSync",
     "publicRpcUrl": "https://mainnet.era.zksync.io",
-    "explorerUrl": "https://era.zksync.network",
+    "explorerUrl": "https://explorer.zksync.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zk-sync/assets/logo.svg",
     "spokePool": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
     "spokePoolBlock": 10352565,
@@ -1583,6 +1583,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ],
     "outputTokens": [
@@ -1599,6 +1606,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   },

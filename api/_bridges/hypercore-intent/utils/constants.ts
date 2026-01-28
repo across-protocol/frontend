@@ -1,4 +1,9 @@
-import { TOKEN_SYMBOLS_MAP, CHAIN_IDs } from "../../../_constants";
+import {
+  TOKEN_SYMBOLS_MAP,
+  CHAIN_IDs,
+  CHAINS,
+  CCTP_NO_DOMAIN,
+} from "../../../_constants";
 
 export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 
@@ -18,10 +23,12 @@ export const SUPPORTED_OUTPUT_TOKENS = [
 ];
 export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
   (chainId) => {
-    const isSupportedInputToken = SUPPORTED_INPUT_TOKENS.some(
-      (token) => token.addresses[Number(chainId)]
-    );
-    return isSupportedInputToken ? [Number(chainId)] : [];
+    // Sponsored intents are only supported on CCTP enabled origin chains
+    const chain = CHAINS[Number(chainId)];
+    const cctpDomain = chain?.cctpDomain;
+    const isCctpChain =
+      cctpDomain !== undefined && cctpDomain !== CCTP_NO_DOMAIN;
+    return isCctpChain ? Number(chainId) : [];
   }
 );
 export const SUPPORTED_DESTINATION_CHAINS = [

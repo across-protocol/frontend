@@ -94,6 +94,7 @@ export type Deposit = {
   depositRefundTxHash?: string;
   swapOutputToken?: string; // destination swap output token
   swapOutputTokenAmount?: string; // destination swap output amount
+  outputAmount?: string;
   actionsTargetChainId?: number;
   hideFeeTooLow?: boolean;
 };
