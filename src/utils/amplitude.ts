@@ -27,6 +27,7 @@ export const pageLookup: Record<
 > = {
   "/": "splashPage",
   "/bridge": "bridgePage",
+  "/bridge-and-swap": "bridgePage",
   "/pool": "poolPage",
   "/rewards": "rewardsPage",
   "/rewards/referrals": "referralPage",
