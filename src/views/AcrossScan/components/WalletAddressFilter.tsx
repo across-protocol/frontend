@@ -149,6 +149,7 @@ const SearchInput = styled.input`
 
 const SegmentedToggle = styled.div`
   display: flex;
+  gap: 4px;
   align-items: center;
   background: ${COLORS["grey-600"]};
   border-radius: 8px;

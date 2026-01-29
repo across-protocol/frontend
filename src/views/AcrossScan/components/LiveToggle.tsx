@@ -16,7 +16,7 @@ const getTooltipContent = (reason: DisabledReason) => {
   const messages = {
     filtering: {
       title: "Live updates disabled during filtering",
-      body: "Clear the wallet address filter to enable live updates",
+      body: "Clear the filters to enable live updates",
     },
     "not-first-page": {
       title: "Live updates only available on first page",
@@ -56,14 +56,16 @@ export function LiveToggle({
 
   if (disabled) {
     return (
-      <Tooltip
-        tooltipId="live-toggle-disabled"
-        title={tooltipContent.title}
-        body={<Text size="sm">{tooltipContent.body}</Text>}
-        placement="bottom"
-      >
-        <TooltipWrapper>{toggle}</TooltipWrapper>
-      </Tooltip>
+      <div>
+        <Tooltip
+          tooltipId="live-toggle-disabled"
+          title={tooltipContent.title}
+          body={<Text size="sm">{tooltipContent.body}</Text>}
+          placement="bottom"
+        >
+          <TooltipWrapper>{toggle}</TooltipWrapper>
+        </Tooltip>
+      </div>
     );
   }
 
