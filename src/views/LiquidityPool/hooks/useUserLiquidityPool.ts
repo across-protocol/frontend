@@ -34,7 +34,7 @@ async function fetchUserLiquidityPool(
   tokenSymbol?: string
 ) {
   if (!userAddress || !tokenSymbol) {
-    return;
+    return null;
   }
 
   const { logoURI, symbol, displaySymbol, l1TokenAddress, decimals } =
