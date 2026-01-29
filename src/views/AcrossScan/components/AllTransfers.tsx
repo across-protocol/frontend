@@ -131,6 +131,7 @@ export function AllTransfers() {
         ]}
         displayPageNumbers={false}
         hasNoResults={hasNoResults}
+        isLoading={depositsQuery.isFetching && !isLiveMode}
       />
       {hasNoResults && (
         <EmptyStateMessage>
