@@ -20,7 +20,10 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   tokenPairPerToChain: {
     [CHAIN_IDs.HYPEREVM]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy(true),
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
       },
     },
     // NOTE: Disable subset of HyperCore destination routes via mint/burn routes until we
@@ -65,7 +68,10 @@ export const routableBridgeStrategies = [
   // The actual eligibility is determined by routeStrategyForSponsorship
   getSponsoredCctpBridgeStrategy(true),
   getOftSponsoredBridgeStrategy(true),
-  getHyperCoreIntentBridgeStrategy(true),
+  getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: true,
+    shouldSponsorAccountCreation: true,
+  }),
 ];
 
 // Priority-ordered routing strategies

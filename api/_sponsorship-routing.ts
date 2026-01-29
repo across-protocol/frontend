@@ -27,6 +27,18 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 
 // Priority-ordered routing rules for sponsorship by route key
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
+  "USDT:USDT-SPOT": [
+    {
+      name: "usdt-usdt-spot-non-sponsored",
+      reason: "Non-sponsored USDT → USDT-SPOT route",
+      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
   "USDT:*": [
     {
       name: "usdt-ineligible",
@@ -62,7 +74,11 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         !data.isMintBurnThresholdMet,
-      getStrategy: () => getHyperCoreIntentBridgeStrategy(true),
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
     },
   ],
   "USDC:*": [
