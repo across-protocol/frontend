@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
-import { COLORS, getChainInfo, getConfig, QUERIESV2 } from "utils";
+import { COLORS, getChainInfo, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
+import { useTokenFromAddress } from "hooks/useToken";
 
 type TransactionDestinationSectionProps = {
   deposit: any;
@@ -21,11 +22,10 @@ export function TransactionDestinationSection({
   formatTimestamp,
   explorerLink,
 }: TransactionDestinationSectionProps) {
-  const config = getConfig();
   const destinationChain = getChainInfo(destinationChainId);
-  const outputToken = config.getTokenInfoByAddressSafe(
-    destinationChainId,
-    deposit.outputToken
+  const outputToken = useTokenFromAddress(
+    deposit.outputToken,
+    destinationChainId
   );
 
   return (

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Deposit, DepositStatus } from "hooks/useDeposits";
 
-type AnimationProps = {
-  initial?: Record<string, any>;
-  animate?: Record<string, any>;
-  exit?: Record<string, any>;
-  transition?: Record<string, any>;
-  layout?: boolean;
-};
+const STATUS_CHANGE_ANIMATION_DURATION_MS = 1200;
+
+type AnimationProps = Pick<
+  React.ComponentProps<typeof motion.div>,
+  "initial" | "animate" | "exit" | "transition" | "layout"
+>;
 
 type OverlayProps = {
   depositId: string;
@@ -32,7 +32,10 @@ export function useDepositRowAnimation(
 
     if (previousStatus !== null && previousStatus !== currentStatus) {
       setStatusJustChanged(true);
-      const timer = setTimeout(() => setStatusJustChanged(false), 1200);
+      const timer = setTimeout(
+        () => setStatusJustChanged(false),
+        STATUS_CHANGE_ANIMATION_DURATION_MS
+      );
       return () => clearTimeout(timer);
     }
 
@@ -63,7 +66,10 @@ export function useDepositRowAnimation(
     initial: { opacity: 0.3 },
     animate: { opacity: 0 },
     exit: { opacity: 0 },
-    transition: { duration: 1.2, ease: "easeOut" },
+    transition: {
+      duration: STATUS_CHANGE_ANIMATION_DURATION_MS / 1000,
+      ease: "easeOut",
+    },
   };
 
   return {

@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { COLORS } from "utils";
+import { shortenAddress } from "utils/format";
 import { CopyIconButton } from "./CopyIconButton";
 
 type Props = {
@@ -10,15 +11,12 @@ type Props = {
 };
 
 export function TxDetailSection({ label, txHash, explorerLink }: Props) {
-  const shortenHash = (hash: string) =>
-    hash.length <= 13 ? hash : `${hash.slice(0, 6)}...${hash.slice(-4)}`;
-
   return (
     <DetailSection>
       <SectionLabel>{label}</SectionLabel>
       <ValueRow>
         <TxLink href={explorerLink} target="_blank" rel="noreferrer">
-          <Text color="aqua">{shortenHash(txHash)}</Text>
+          <Text color="aqua">{shortenAddress(txHash, "...", 6)}</Text>
         </TxLink>
         <CopyIconButton textToCopy={txHash} />
       </ValueRow>
