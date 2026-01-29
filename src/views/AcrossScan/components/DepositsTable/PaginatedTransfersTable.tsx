@@ -11,6 +11,7 @@ type Props = TransfersTableProps & {
   pageSizes?: number[];
   displayPageNumbers?: boolean;
   hasNoResults: boolean;
+  isLoading?: boolean;
 };
 
 const DEFAULT_PAGE_SIZES = [10, 25, 50];
@@ -24,6 +25,7 @@ export function PaginatedTransfersTable({
   pageSizes = DEFAULT_PAGE_SIZES,
   displayPageNumbers = true,
   hasNoResults,
+  isLoading,
   ...transfersTableProps
 }: Props) {
   const paginateValues = paginate({
@@ -35,7 +37,7 @@ export function PaginatedTransfersTable({
 
   return (
     <>
-      <TransfersTable {...transfersTableProps} />
+      <TransfersTable {...transfersTableProps} isLoading={isLoading} />
       {!hasNoResults && (
         <div>
           <Pagination

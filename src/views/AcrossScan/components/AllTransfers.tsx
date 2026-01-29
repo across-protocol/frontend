@@ -5,8 +5,10 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components";
 import { COLORS } from "utils";
+import { DepositStatusFilter } from "utils/types";
 import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";
+import { StatusFilter } from "./StatusFilter";
 import { WalletAddressFilter } from "./WalletAddressFilter";
 import { useTransfers } from "../hooks/useTransfers";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
@@ -20,6 +22,7 @@ const LIVE_REFETCH_INTERVAL = 1_000;
 export function AllTransfers() {
   const [walletAddressInput, setWalletAddressInput] = useState<string>("");
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>("all");
 
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
@@ -37,12 +40,14 @@ export function AllTransfers() {
     deposits,
     totalDeposits,
     depositsQuery,
-  } = useTransfers(walletAddressFilter.trim() || undefined);
+  } = useTransfers(walletAddressFilter.trim() || undefined, statusFilter);
 
   const queryClient = useQueryClient();
 
   const isFirstPage = currentPage === 0;
-  const isFiltering = walletAddressFilter.trim().length > 0;
+  const isAddressFiltering = walletAddressFilter.trim().length > 0;
+  const isStatusFiltering = statusFilter !== "all";
+  const isFiltering = isAddressFiltering || isStatusFiltering;
 
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
@@ -104,12 +109,15 @@ export function AllTransfers() {
             evmAddress={accountEVM}
             svmAddress={accountSVM?.toString()}
           />
-          <LiveToggle
-            isLiveMode={isLiveMode}
-            onToggle={setIsLiveMode}
-            disabled={!isEnabled}
-            disabledReason={isFiltering ? "filtering" : "not-first-page"}
-          />
+          <RightControls>
+            <StatusFilter value={statusFilter} onChange={setStatusFilter} />
+            <LiveToggle
+              isLiveMode={isLiveMode}
+              onToggle={setIsLiveMode}
+              disabled={!isEnabled}
+              disabledReason={isFiltering ? "filtering" : "not-first-page"}
+            />
+          </RightControls>
         </ControlsRow>
       </ControlsContainer>
       <PaginatedTransfersTable
@@ -129,17 +137,18 @@ export function AllTransfers() {
         ]}
         displayPageNumbers={false}
         hasNoResults={hasNoResults}
+        isLoading={depositsQuery.isFetching && !isLiveMode}
       />
       {hasNoResults && (
         <EmptyStateMessage>
           <Text size="lg">
             {isFiltering
-              ? "No transfers found for this address"
+              ? "No transfers found matching your filters"
               : "No transfers found"}
           </Text>
           {isFiltering && (
             <Text size="sm" color="grey-400" style={{ marginTop: "8px" }}>
-              Try a different wallet address
+              Try adjusting your filters
             </Text>
           )}
         </EmptyStateMessage>
@@ -167,8 +176,8 @@ const ControlsContainer = styled.div`
 
 const ControlsRow = styled.div`
   display: flex;
-  align-items: flex-end;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 
@@ -176,5 +185,16 @@ const ControlsRow = styled.div`
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+`;
+
+const RightControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between;
   }
 `;
