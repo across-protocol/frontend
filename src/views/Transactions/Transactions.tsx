@@ -24,9 +24,9 @@ export function Transactions() {
     statusFilterOptions[0]
   );
 
-  const hasTransactionFlag = useFeatureFlag("transaction-page");
+  const hasTransferPageFlag = useFeatureFlag("transaction-page");
 
-  if (hasTransactionFlag) {
+  if (hasTransferPageFlag) {
     return <AcrossScan></AcrossScan>;
   }
 
