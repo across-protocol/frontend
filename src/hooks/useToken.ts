@@ -108,11 +108,9 @@ export function useTokenFromAddress(
     const normalizedAddress = address.toLowerCase();
 
     // First, try getConfig().getTokenInfoByAddressSafe if chainId is provided
+    // Use original address since config does exact matching (checksummed addresses)
     if (chainId !== undefined) {
-      const configToken = config.getTokenInfoByAddressSafe(
-        chainId,
-        normalizedAddress
-      );
+      const configToken = config.getTokenInfoByAddressSafe(chainId, address);
       if (configToken) {
         resolvedToken = configToken as TokenInfo;
       }
