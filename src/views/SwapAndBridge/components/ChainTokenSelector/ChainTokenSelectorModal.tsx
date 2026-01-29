@@ -281,7 +281,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, otherToken, isOriginToken]);
+  }, [chainSearch, crossChainRoutes, isOriginToken]);
 
   return isMobile ? (
     <MobileModal
