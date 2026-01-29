@@ -6,6 +6,7 @@ import { Text } from "components/Text";
 import { LayoutV2 } from "components";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
+import { useFeatureFlag } from "hooks";
 import { CenteredMessage } from "./components/CenteredMessage";
 import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
@@ -107,6 +108,8 @@ export default function Transaction() {
     isLoading,
     error,
   } = useDepositByTxHash(depositTxnRef);
+  const hasTransferPageFlag = useFeatureFlag("transaction-page");
+  const transfersRoute = hasTransferPageFlag ? "/transfers" : "/transactions";
 
   const [showLoading, setShowLoading] = useState(false);
 
@@ -158,7 +161,7 @@ export default function Transaction() {
       <Wrapper>
         <BreadcrumbWrapper>
           <BreadcrumbContent>
-            <BreadcrumbLink to="/transactions">
+            <BreadcrumbLink to={transfersRoute}>
               <BreadcrumbLinkText size="lg">Transfers</BreadcrumbLinkText>
             </BreadcrumbLink>
             <StyledArrowIcon />
