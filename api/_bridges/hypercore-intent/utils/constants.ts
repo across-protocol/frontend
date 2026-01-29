@@ -50,4 +50,11 @@ export const BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN: Record<
   "USDT-SPOT": TOKEN_SYMBOLS_MAP.USDT,
 };
 
+export const OUTPUT_TO_BRIDGEABLE_TOKEN_SYMBOL: Record<string, string> = {
+  USDH: "USDC",
+  "USDH-SPOT": "USDC",
+  "USDC-SPOT": "USDC",
+  "USDT-SPOT": "USDT",
+};
+
 export const ERROR_MESSAGE_PREFIX = "Sponsored Intent";

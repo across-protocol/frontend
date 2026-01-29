@@ -1,4 +1,4 @@
-import { BigNumber, constants, utils } from "ethers";
+import { constants, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import { appendTransactionMessageInstruction } from "@solana/transaction-messages";
@@ -11,20 +11,20 @@ import {
 } from "@solana/kit";
 
 import { CrossSwapQuotes } from "../../../_dexes/types";
-import { getSpokePool, getSpokePoolAddress } from "../../../_spoke-pool";
+import { getSpokePoolAddress } from "../../../_spoke-pool";
 import {
   assertValidIntegratorId,
   SWAP_CALLDATA_MARKER,
-  tagIntegratorId,
-  tagSwapApiMarker,
 } from "../../../_integrator-id";
 import {
   assertNoAppFee,
-  assertNoSwaps,
+  assertNoDestinationSwap,
   getHyperEvmChainId,
   getBridgeableOutputToken,
   getDepositRecipient,
 } from "./common";
+import { InvalidParamError } from "../../../_errors";
+import { buildCrossSwapTxForAllowanceHolder } from "../../../swap/approval/_utils";
 import { ERROR_MESSAGE_PREFIX } from "./constants";
 import { getFillDeadline } from "../../../_fill-deadline";
 import { getSVMRpc } from "../../../_providers";
@@ -35,40 +35,11 @@ export async function buildTxEvm(params: {
   integratorId?: string | undefined;
 }) {
   const { quotes } = params;
-  const { crossSwap } = quotes;
-  const { inputToken } = crossSwap;
 
-  const { deposit } = _prepDepositTx(quotes, params.integratorId);
+  // Validate deposit parameters before building transaction
+  _prepDepositTx(quotes, params.integratorId);
 
-  const spokePool = getSpokePool(inputToken.chainId);
-  const evmTx = await spokePool.populateTransaction.deposit(
-    deposit.depositor.toBytes32(),
-    deposit.recipient.toBytes32(),
-    deposit.inputToken.toBytes32(),
-    deposit.outputToken.toBytes32(),
-    deposit.inputAmount,
-    deposit.outputAmountHyperEvm,
-    deposit.destinationChainId,
-    deposit.exclusiveRelayer.toBytes32(),
-    deposit.quoteTimestamp,
-    deposit.fillDeadline,
-    deposit.exclusivityParameter,
-    deposit.message
-  );
-
-  const txDataWithIntegratorId = params.integratorId
-    ? tagIntegratorId(params.integratorId, evmTx.data!)
-    : evmTx.data!;
-  const txDataWithSwapApiMarker = tagSwapApiMarker(txDataWithIntegratorId);
-
-  return {
-    chainId: inputToken.chainId,
-    from: crossSwap.depositor,
-    to: spokePool.address,
-    data: txDataWithSwapApiMarker,
-    value: BigNumber.from(0),
-    ecosystem: "evm" as const,
-  };
+  return buildCrossSwapTxForAllowanceHolder(quotes, params.integratorId);
 }
 
 export async function buildTxSvm(params: {
@@ -213,11 +184,20 @@ function _prepDepositTx(
   const { inputToken, outputToken, depositor, recipient } = crossSwap;
 
   assertNoAppFee({ appFee, errorMessagePrefix: ERROR_MESSAGE_PREFIX });
-  assertNoSwaps({
-    originSwapQuote,
+
+  // Always reject destination swaps (not supported yet)
+  assertNoDestinationSwap({
     destinationSwapQuote,
     errorMessagePrefix: ERROR_MESSAGE_PREFIX,
   });
+
+  // Reject origin swaps for SVM origin (not supported yet)
+  if (originSwapQuote && crossSwap.isOriginSvm) {
+    throw new InvalidParamError({
+      message: `${ERROR_MESSAGE_PREFIX}: Origin swaps not supported for SVM origins`,
+      param: "inputToken",
+    });
+  }
 
   if (integratorId) {
     assertValidIntegratorId(integratorId);
