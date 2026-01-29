@@ -3,7 +3,7 @@ import { useDeposits } from "hooks/useDeposits";
 
 import { useCurrentPage, usePageSize } from "./usePagination";
 
-export function useTransactions(userAddress?: string) {
+export function useTransfers(userAddress?: string) {
   const { pageSize, handlePageSizeChange } = usePageSize();
 
   const {
@@ -12,7 +12,7 @@ export function useTransactions(userAddress?: string) {
     deposits,
     totalDeposits,
     depositsQuery,
-  } = usePaginatedDeposits(pageSize, userAddress);
+  } = usePaginatedTransfers(pageSize, userAddress);
 
   useEffect(() => {
     setCurrentPage(0);
@@ -29,7 +29,7 @@ export function useTransactions(userAddress?: string) {
   };
 }
 
-function usePaginatedDeposits(pageSize: number, userAddress?: string) {
+function usePaginatedTransfers(pageSize: number, userAddress?: string) {
   const { currentPage, setCurrentPage } = useCurrentPage();
   const depositsQuery = useDeposits(
     pageSize,
