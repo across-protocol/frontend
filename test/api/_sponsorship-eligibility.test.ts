@@ -124,20 +124,25 @@ describe("api/_sponsorship-eligibility", () => {
 
     beforeEach(() => {
       vi.clearAllMocks();
+      vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue(
+        mockSponsorshipsData
+      );
     });
 
-    test("should return undefined when input amount exceeds limit", async () => {
+    test("should return false for isWithinInputAmountLimit when input amount exceeds limit", async () => {
       const result = await getSponsorshipEligibilityPreChecks({
         inputToken: arbitrumUSDC,
         amount: utils.parseUnits("2000000", arbitrumUSDC.decimals), // 2M > 1M limit
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.isWithinInputAmountLimit).toBe(false);
     });
 
-    test("should return undefined when token pair has no limit defined", async () => {
+    test("should return falsey input amount limit when token pair has no limit defined", async () => {
       const arbitrumWETH: Token = {
         ...TOKEN_SYMBOLS_MAP.WETH,
         address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
@@ -149,12 +154,15 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("1", arbitrumWETH.decimals),
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.isWithinInputAmountLimit).toBeFalsy();
+      expect(result?.isEligibleTokenPair).toBe(false);
     });
 
-    test("should return all false when token pair is not eligible for sponsorship", async () => {
+    test("should return isEligibleTokenPair false for non-eligible token pair", async () => {
       const hyperCoreUSDCSpot: Token = {
         ...TOKEN_SYMBOLS_MAP["USDC-SPOT"],
         address: TOKEN_SYMBOLS_MAP["USDC-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
@@ -166,14 +174,12 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("100", arbitrumUSDC.decimals),
         outputToken: hyperCoreUSDCSpot, // USDC → USDC-SPOT is not in SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
-      expect(result).toEqual({
-        isEligibleTokenPair: false,
-        isWithinGlobalDailyLimit: false,
-        isWithinUserDailyLimit: false,
-        isWithinAccountCreationDailyLimit: false,
-      });
+      expect(result).toBeDefined();
+      expect(result?.isEligibleTokenPair).toBe(false);
+      expect(result?.isWithinInputAmountLimit).toBe(true);
     });
 
     test("should return all checks passing when within limits", async () => {
@@ -186,6 +192,7 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("100", arbitrumUSDC.decimals),
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
       expect(result).toBeDefined();
@@ -222,6 +229,7 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("100", arbitrumUSDC.decimals),
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
       expect(result).toBeDefined();
@@ -261,6 +269,7 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("100", arbitrumUSDC.decimals),
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
       expect(result).toBeDefined();
@@ -282,6 +291,7 @@ describe("api/_sponsorship-eligibility", () => {
         amount: utils.parseUnits("100", arbitrumUSDC.decimals),
         outputToken: hyperCoreUSDH,
         recipient: mockRecipient,
+        amountType: "exactInput",
       });
 
       expect(result).toBeDefined();

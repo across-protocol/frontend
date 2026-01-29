@@ -59,6 +59,39 @@ const chainSpecificPopularTokens: Record<number, string[]> = {
   [CHAIN_IDs.SOLANA]: [TOKEN_SYMBOLS_MAP.WSOL.symbol, "SOL"], // SOL is also included because the /token endpoint returns SOL instead of WSOL for wrapped sol
 };
 
+function sortTokensByBalanceAndSymbol<
+  T extends { balance: BigNumber; balanceUsd: number; symbol: string },
+>(tokens: T[]): T[] {
+  return [...tokens].sort((a, b) => {
+    const aHasTokenBalance = a.balance.gt(0);
+    const bHasTokenBalance = b.balance.gt(0);
+
+    if (aHasTokenBalance !== bHasTokenBalance) {
+      return aHasTokenBalance ? -1 : 1;
+    }
+
+    if (aHasTokenBalance && bHasTokenBalance) {
+      const aHasUsdBalance = a.balanceUsd > 0.01;
+      const bHasUsdBalance = b.balanceUsd > 0.01;
+
+      if (aHasUsdBalance && bHasUsdBalance) {
+        if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+          return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+        }
+        return b.balanceUsd - a.balanceUsd;
+      }
+
+      if (aHasUsdBalance !== bHasUsdBalance) {
+        return aHasUsdBalance ? -1 : 1;
+      }
+
+      return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+    }
+
+    return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+  });
+}
+
 type ChainData = ChainInfo & {
   isDisabled: boolean;
 };
@@ -172,47 +205,9 @@ export function ChainTokenSelectorModal({
       );
     });
 
-    // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
-    const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
-      return tokens.sort((a, b) => {
-        // Sort by token balance - tokens with balance go to top
-        const aHasTokenBalance = a.balance.gt(0);
-        const bHasTokenBalance = b.balance.gt(0);
-
-        if (aHasTokenBalance !== bHasTokenBalance) {
-          return aHasTokenBalance ? -1 : 1;
-        }
-
-        // If both have token balance, prioritize sorting by USD value if available
-        if (aHasTokenBalance && bHasTokenBalance) {
-          const aHasUsdBalance = a.balanceUsd > 0.01;
-          const bHasUsdBalance = b.balanceUsd > 0.01;
-
-          // Both have USD values - sort by USD
-          if (aHasUsdBalance && bHasUsdBalance) {
-            if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
-              return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-            }
-            return b.balanceUsd - a.balanceUsd;
-          }
-
-          // Only one has USD value - prioritize the one with USD
-          if (aHasUsdBalance !== bHasUsdBalance) {
-            return aHasUsdBalance ? -1 : 1;
-          }
-
-          // Neither has USD value - sort alphabetically
-          return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-        }
-
-        // If neither has balance, sort alphabetically
-        return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-      });
-    };
-
     // When "all chains" is selected, don't separate popular tokens
     if (selectedChain === null) {
-      const sortedAllTokens = sortTokens(filteredTokens);
+      const sortedAllTokens = sortTokensByBalanceAndSymbol(filteredTokens);
       return {
         popular: [], // No popular section for all chains
         all: sortedAllTokens,
@@ -234,8 +229,8 @@ export function ChainTokenSelectorModal({
     );
 
     // Sort both sections
-    const sortedPopularTokens = sortTokens(popularTokensList);
-    const sortedAllTokens = sortTokens(allTokensList);
+    const sortedPopularTokens = sortTokensByBalanceAndSymbol(popularTokensList);
+    const sortedAllTokens = sortTokensByBalanceAndSymbol(allTokensList);
 
     return {
       popular: sortedPopularTokens,
@@ -1302,6 +1297,7 @@ const TokenSymbol = styled.div`
   overflow: hidden;
   color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
+  white-space: nowrap;
   /* Body/X Small */
   font-family: Barlow;
   font-size: 12px;

@@ -49,6 +49,9 @@ export const getCctpDomainId = (chainId: number): number => {
   return chainInfo.cctpDomain;
 };
 
+export const isCctpEnabled = (chainId: number) =>
+  CCTP_SUPPORTED_CHAINS.includes(chainId);
+
 export const CCTP_FINALITY_THRESHOLDS = {
   fast: 1000,
   standard: 2000,

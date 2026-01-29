@@ -1,7 +1,7 @@
 import Pagination, { paginate } from "components/Pagination";
-import { DepositsTable, DepositsTableProps } from "./DepositsTable";
+import { TransfersTable, TransfersTableProps } from "./TransfersTable";
 
-type Props = DepositsTableProps & {
+type Props = TransfersTableProps & {
   currentPage: number;
   onPageChange: (newPage: number) => void;
   currentPageSize: number;
@@ -15,7 +15,7 @@ type Props = DepositsTableProps & {
 
 const DEFAULT_PAGE_SIZES = [10, 25, 50];
 
-export function PaginatedDepositsTable({
+export function PaginatedTransfersTable({
   currentPage,
   onPageChange,
   currentPageSize,
@@ -24,7 +24,7 @@ export function PaginatedDepositsTable({
   pageSizes = DEFAULT_PAGE_SIZES,
   displayPageNumbers = true,
   hasNoResults,
-  ...depositsTableProps
+  ...transfersTableProps
 }: Props) {
   const paginateValues = paginate({
     elementCount: totalCount,
@@ -35,7 +35,7 @@ export function PaginatedDepositsTable({
 
   return (
     <>
-      <DepositsTable {...depositsTableProps} />
+      <TransfersTable {...transfersTableProps} />
       {!hasNoResults && (
         <div>
           <Pagination
