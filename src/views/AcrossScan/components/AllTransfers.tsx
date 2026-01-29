@@ -18,11 +18,16 @@ import { PaginatedTransfersTable } from "./DepositsTable";
 const LIVE_REFETCH_INTERVAL = 1_000;
 
 export function AllTransfers() {
+  const [walletAddressInput, setWalletAddressInput] = useState<string>("");
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
 
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
   const account = accountEVM || accountSVM?.toString();
+
+  const handleSearch = (value: string) => {
+    setWalletAddressFilter(value.trim());
+  };
 
   const {
     currentPage,
@@ -93,8 +98,9 @@ export function AllTransfers() {
       <ControlsContainer>
         <ControlsRow>
           <WalletAddressFilter
-            value={walletAddressFilter}
-            onChange={setWalletAddressFilter}
+            inputValue={walletAddressInput}
+            onInputChange={setWalletAddressInput}
+            onSearch={handleSearch}
             evmAddress={accountEVM}
             svmAddress={accountSVM?.toString()}
           />
