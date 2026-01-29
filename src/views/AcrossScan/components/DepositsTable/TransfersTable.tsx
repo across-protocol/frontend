@@ -33,7 +33,7 @@ export function TransfersTable({
             <DataRow
               disabledColumns={disabledColumns}
               headerCells={headerCells}
-              key={`${filterKey}${deposit.sourceChainId}-${deposit.depositId}`}
+              key={`${filterKey}${deposit.depositTxHash}-${deposit.depositId}`}
               deposit={deposit}
               onClickSpeedUp={onClickSpeedUp}
             />
