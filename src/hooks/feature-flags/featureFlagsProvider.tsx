@@ -9,17 +9,19 @@ import { FeatureFlagsContext } from "./featureFlagsContext";
 
 const publicDeploymentKey = "client-jAXxBGw14klnGdfOPcGCrIpbvpvBXZqL";
 
+let experimentInitialized = false;
+
 export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   const [flags, setFlags] = useState<Variants>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(experimentInitialized);
   const experimentClientRef = useRef<ExperimentClient | null>(null);
 
   const initializeFeatureFlags = useCallback(() => {
-    if (experimentClientRef.current) {
-      console.warn("Experiment client already initialized");
+    if (experimentClientRef.current || experimentInitialized) {
       return;
     }
+    experimentInitialized = true;
     experimentClientRef.current = Experiment.initializeWithAmplitudeAnalytics(
       publicDeploymentKey,
       {

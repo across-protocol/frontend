@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as amplitude from "@amplitude/analytics-browser";
 
 import { ampli } from "ampli";
@@ -10,12 +10,16 @@ import {
 } from "utils";
 import { useFeatureFlagsContext } from "./feature-flags/useFeatureFlagsContext";
 
+let ampliInitialized = false;
+
 export function useLoadAmpli() {
-  const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
+  const [isAmpliLoaded, setIsAmpliLoaded] = useState(ampliInitialized);
   const { initializeFeatureFlags } = useFeatureFlagsContext();
+  const initializingRef = useRef(false);
 
   useEffect(() => {
-    if (amplitudeAPIKey && !isAmpliLoaded) {
+    if (amplitudeAPIKey && !ampliInitialized && !initializingRef.current) {
+      initializingRef.current = true;
       amplitude
         .init(amplitudeAPIKey, undefined, {
           serverUrl: amplitudeServerUrl,
@@ -43,10 +47,11 @@ export function useLoadAmpli() {
         )
         .then(() => {
           initializeFeatureFlags();
+          ampliInitialized = true;
           setIsAmpliLoaded(true);
         });
     }
-  }, [isAmpliLoaded, initializeFeatureFlags]);
+  }, [initializeFeatureFlags]);
 
   return { isAmpliLoaded };
 }
