@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
+import { isAddress as isEVMAddress } from "viem";
+import { isAddress as isSVMAddress } from "@solana/kit";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { COLORS } from "utils";
 import { isValidTxHash } from "utils/transactions";
@@ -7,25 +9,31 @@ import { isValidTxHash } from "utils/transactions";
 type FilterMode = "all" | "evm" | "svm";
 
 type WalletAddressFilterProps = {
-  value: string;
-  onChange: (value: string) => void;
+  inputValue: string;
+  onInputChange: (value: string) => void;
+  onSearch: (value: string) => void;
   evmAddress?: string;
   svmAddress?: string;
 };
 
 export function WalletAddressFilter({
-  value,
-  onChange,
+  inputValue,
+  onInputChange,
+  onSearch,
   evmAddress,
   svmAddress,
 }: WalletAddressFilterProps) {
   const history = useHistory();
   const hasMultipleWallets = Boolean(evmAddress && svmAddress);
-  const isTxHash = isValidTxHash(value.trim());
+  const trimmedInput = inputValue.trim();
+  const isTxHash = isValidTxHash(trimmedInput);
+  const isValidAddress =
+    isEVMAddress(trimmedInput) || isSVMAddress(trimmedInput);
+  const canSearch = isTxHash || isValidAddress || trimmedInput === "";
 
   const getFilterMode = (): FilterMode => {
-    if (evmAddress && value === evmAddress) return "evm";
-    if (svmAddress && value === svmAddress) return "svm";
+    if (evmAddress && inputValue === evmAddress) return "evm";
+    if (svmAddress && inputValue === svmAddress) return "svm";
     return "all";
   };
 
@@ -33,11 +41,28 @@ export function WalletAddressFilter({
 
   const handleModeChange = (mode: FilterMode) => {
     if (mode === "all") {
-      onChange("");
+      onInputChange("");
+      onSearch("");
     } else if (mode === "evm" && evmAddress) {
-      onChange(evmAddress);
+      onInputChange(evmAddress);
+      onSearch(evmAddress);
     } else if (mode === "svm" && svmAddress) {
-      onChange(svmAddress);
+      onInputChange(svmAddress);
+      onSearch(svmAddress);
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (isTxHash) {
+      history.push(`/transaction/${trimmedInput}`);
+    } else if (canSearch) {
+      onSearch(trimmedInput);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && canSearch) {
+      handleSearchClick();
     }
   };
 
@@ -51,17 +76,15 @@ export function WalletAddressFilter({
         <SearchInput
           type="text"
           placeholder="Search by wallet or tx hash"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
       </SearchInputWrapper>
-      {isTxHash ? (
-        <ViewTransactionButton
-          onClick={() => history.push(`/transaction/${value.trim()}`)}
-        >
-          View transaction
-        </ViewTransactionButton>
-      ) : (
+      <SearchButton onClick={handleSearchClick} disabled={!canSearch}>
+        {isTxHash ? "View" : "Search"}
+      </SearchButton>
+      {!isTxHash && (
         <SegmentedToggle>
           <ToggleButton
             isActive={filterMode === "all"}
@@ -89,7 +112,8 @@ export function WalletAddressFilter({
               isActive={filterMode !== "all"}
               onClick={() => {
                 if (singleWalletAddress) {
-                  onChange(singleWalletAddress);
+                  onInputChange(singleWalletAddress);
+                  onSearch(singleWalletAddress);
                 }
               }}
               disabled={!hasAnyWallet}
@@ -183,7 +207,7 @@ const ToggleButton = styled.button<{ isActive: boolean; disabled?: boolean }>`
   }
 `;
 
-const ViewTransactionButton = styled.button`
+const SearchButton = styled.button<{ disabled?: boolean }>`
   padding: 8px 16px;
   height: 40px;
   border: none;
@@ -191,13 +215,16 @@ const ViewTransactionButton = styled.button`
   font-size: 14px;
   font-family: Barlow, sans-serif;
   font-weight: 500;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s ease;
   white-space: nowrap;
-  background: ${COLORS.aqua};
-  color: ${COLORS["black-800"]};
+  background: ${({ disabled }) =>
+    disabled ? COLORS["grey-500"] : COLORS.aqua};
+  color: ${({ disabled }) =>
+    disabled ? COLORS["grey-400"] : COLORS["black-800"]};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.9;
   }
 `;
