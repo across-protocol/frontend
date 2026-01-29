@@ -10,7 +10,7 @@ import {
   CrossSwapQuotes,
   FeeDetailsType,
 } from "../_dexes/types";
-import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+import { Logger } from "@across-protocol/sdk/dist/types/src/relayFeeCalculator";
 import { getNativeTokenInfo } from "../_token-info";
 
 export type FeeComponent<

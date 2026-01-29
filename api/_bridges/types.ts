@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 
 import { CrossSwap, CrossSwapQuotes, SwapQuote, Token } from "../_dexes/types";
 import { AppFee, CrossSwapType } from "../_dexes/utils";
-import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+import { Logger } from "@across-protocol/sdk/dist/types/src/relayFeeCalculator";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
