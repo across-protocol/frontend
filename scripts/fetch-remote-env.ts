@@ -42,7 +42,7 @@ async function main() {
     console.log("All files downloaded.");
   } catch (error) {
     console.error("Error downloading files:", error);
-    // process.exit(1);
+    process.exit(1);
   }
 }
 
