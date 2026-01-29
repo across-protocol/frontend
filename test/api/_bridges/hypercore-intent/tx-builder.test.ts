@@ -89,13 +89,36 @@ describe("Tx Builder", () => {
           recipient: "0xRecipient",
         },
         bridgeQuote: {
+          inputToken: {
+            chainId: CHAIN_IDs.OPTIMISM,
+            address: "0xInput",
+            decimals: 6,
+            symbol: "USDC",
+          },
+          outputToken: {
+            chainId: CHAIN_IDs.HYPEREVM,
+            address: "0xOutput",
+            decimals: 6,
+            symbol: "USDH",
+          },
           inputAmount: BigNumber.from("100"),
           outputAmount: BigNumber.from("100"),
           message: "0x",
+          provider: "across",
+          suggestedFees: {
+            timestamp: 1234567890,
+            exclusivityDeadline: 0,
+          },
         },
         originSwapQuote: undefined,
         destinationSwapQuote: undefined,
         appFee: undefined,
+        contracts: {
+          depositEntryPoint: {
+            name: "SpokePool",
+            address: "0xSpokePool",
+          },
+        },
       } as unknown as CrossSwapQuotes;
 
       const result = await buildTxEvm({ quotes });
@@ -132,6 +155,11 @@ describe("Tx Builder", () => {
           inputAmount: BigNumber.from("100"),
           outputAmount: BigNumber.from("100"),
           message: "0x",
+          provider: "across",
+          suggestedFees: {
+            timestamp: 1234567890,
+            exclusivityDeadline: 0,
+          },
         },
         originSwapQuote: undefined,
         destinationSwapQuote: undefined,

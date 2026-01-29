@@ -68,10 +68,10 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
       ]);
     });
 
-    it("should return empty array for unsupported input token", () => {
+    it("should return ANY_TO_BRIDGEABLE for non-bridgeable input token (A2B flow)", () => {
       const params = {
         inputToken: {
-          address: "0x123", // Random address
+          address: "0x123", // Random address (not USDC/USDT)
           chainId: CHAIN_IDs.OPTIMISM,
           symbol: "RANDOM",
           decimals: 18,
@@ -80,7 +80,7 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
         isInputNative: false,
         isOutputNative: false,
       };
-      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+      expect(strategy.getCrossSwapTypes(params)).toEqual(["anyToBridgeable"]);
     });
 
     it("should return empty array for unsupported origin chain", () => {

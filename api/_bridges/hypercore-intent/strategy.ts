@@ -13,6 +13,7 @@ import {
   getDepositRecipient,
   assertSupportedRoute,
 } from "./utils/common";
+import { SUPPORTED_INPUT_TOKENS } from "./utils/constants";
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals } from "../../_utils";
@@ -29,7 +30,7 @@ const capabilities: BridgeCapabilities = {
   ecosystems: ["evm", "svm"],
   supports: {
     A2A: false,
-    A2B: false,
+    A2B: true, // Enable A2B flows for EVM origin chains
     B2A: false,
     B2B: true,
     B2BI: false,
@@ -67,14 +68,28 @@ export function getHyperCoreIntentBridgeStrategy(
       isOutputNative: boolean;
     }) => {
       if (
-        isRouteSupported({
+        !isRouteSupported({
           inputToken: params.inputToken,
           outputToken: params.outputToken,
         })
       ) {
+        return [];
+      }
+
+      // Check if input token is bridgeable (USDC/USDT)
+      const isBridgeableInput = SUPPORTED_INPUT_TOKENS.some(
+        (token) =>
+          token.addresses[params.inputToken.chainId]?.toLowerCase() ===
+          params.inputToken.address.toLowerCase()
+      );
+
+      // B2B flow: input is already bridgeable
+      if (isBridgeableInput) {
         return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
       }
-      return [];
+
+      // A2B flow: input needs to be swapped to bridgeable token
+      return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
     },
 
     getBridgeQuoteRecipient: async (

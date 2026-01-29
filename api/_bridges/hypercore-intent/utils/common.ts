@@ -10,7 +10,6 @@ import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   ERROR_MESSAGE_PREFIX,
   SUPPORTED_DESTINATION_CHAINS,
-  SUPPORTED_INPUT_TOKENS,
   SUPPORTED_ORIGIN_CHAINS,
   SUPPORTED_OUTPUT_TOKENS,
 } from "./constants";
@@ -124,18 +123,35 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
   }
 }
 
+export function assertNoOriginSwap(params: {
+  originSwapQuote?: SwapQuote;
+  errorMessagePrefix: string;
+}) {
+  if (params.originSwapQuote) {
+    throw new InvalidParamError({
+      message: `${params.errorMessagePrefix}: Can not build tx for origin swap`,
+    });
+  }
+}
+
+export function assertNoDestinationSwap(params: {
+  destinationSwapQuote?: SwapQuote;
+  errorMessagePrefix: string;
+}) {
+  if (params.destinationSwapQuote) {
+    throw new InvalidParamError({
+      message: `${params.errorMessagePrefix}: Can not build tx for destination swap`,
+    });
+  }
+}
+
 export function assertNoSwaps(params: {
   originSwapQuote?: SwapQuote;
   destinationSwapQuote?: SwapQuote;
   errorMessagePrefix: string;
 }) {
-  const { originSwapQuote, destinationSwapQuote, errorMessagePrefix } = params;
-
-  if (originSwapQuote || destinationSwapQuote) {
-    throw new InvalidParamError({
-      message: `${errorMessagePrefix}: Can not build tx for origin swap or destination swap`,
-    });
-  }
+  assertNoOriginSwap(params);
+  assertNoDestinationSwap(params);
 }
 
 export function assertNoAppFee(params: {
@@ -169,25 +185,29 @@ export function isRouteSupported(params: {
   inputToken: Token;
   outputToken: Token;
 }) {
+  // Validate origin chain is supported
   if (!SUPPORTED_ORIGIN_CHAINS.includes(params.inputToken.chainId)) {
     return false;
   }
 
-  if (SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
-    const supportedInputToken = SUPPORTED_INPUT_TOKENS.find(
-      (token) =>
-        token.addresses[params.inputToken.chainId]?.toLowerCase() ===
-        params.inputToken.address.toLowerCase()
-    );
-    const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
-      (token) =>
-        token.addresses[params.outputToken.chainId]?.toLowerCase() ===
-        params.outputToken.address.toLowerCase()
-    );
-    return Boolean(supportedInputToken && supportedOutputToken);
+  // Validate destination chain is supported
+  if (!SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
+    return false;
   }
 
-  return false;
+  // Validate output token is supported
+  const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
+    (token) =>
+      token.addresses[params.outputToken.chainId]?.toLowerCase() ===
+      params.outputToken.address.toLowerCase()
+  );
+  if (!supportedOutputToken) {
+    return false;
+  }
+
+  // A2B flow: for now, assume any token can be swapped to bridgeable token
+  // Actual validation happens when fetching swap quotes
+  return true;
 }
 
 export function assertSupportedRoute(params: {
