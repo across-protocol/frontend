@@ -1,7 +1,7 @@
 import type {
   DepositEventFromSignature,
   FillEventFromSignature,
-} from "@across-protocol/sdk/dist/esm/arch/svm";
+} from "@across-protocol/sdk/dist/esm/src/arch/svm";
 import { BigNumber } from "ethers";
 
 export type BridgeProvider =
