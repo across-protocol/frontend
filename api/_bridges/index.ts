@@ -12,7 +12,7 @@ import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
+import { getHyperCoreIntentBridgeStrategy } from "./hypercore-intent/strategy";
 import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
@@ -20,7 +20,7 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   tokenPairPerToChain: {
     [CHAIN_IDs.HYPEREVM]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy(true),
       },
     },
     // NOTE: Disable subset of HyperCore destination routes via mint/burn routes until we
@@ -65,7 +65,7 @@ export const routableBridgeStrategies = [
   // The actual eligibility is determined by routeStrategyForSponsorship
   getSponsoredCctpBridgeStrategy(true),
   getOftSponsoredBridgeStrategy(true),
-  getUsdhIntentsBridgeStrategy(),
+  getHyperCoreIntentBridgeStrategy(true),
 ];
 
 // Priority-ordered routing strategies
