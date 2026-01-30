@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
@@ -92,15 +92,17 @@ export default function SelectorButton({
           <ChevronDown />
         </ChevronStack>
       </Wrapper>
-      <ChainTokenSelectorModal
-        onSelect={setSelectedToken}
-        onSelectOtherToken={onSelectOtherToken}
-        displayModal={displayModal}
-        setDisplayModal={setDisplayModal}
-        isOriginToken={isOriginToken}
-        currentToken={selectedToken}
-        otherToken={otherToken}
-      />
+      <Suspense fallback={null}>
+        <ChainTokenSelectorModal
+          onSelect={setSelectedToken}
+          onSelectOtherToken={onSelectOtherToken}
+          displayModal={displayModal}
+          setDisplayModal={setDisplayModal}
+          isOriginToken={isOriginToken}
+          currentToken={selectedToken}
+          otherToken={otherToken}
+        />
+      </Suspense>
     </>
   );
 }
