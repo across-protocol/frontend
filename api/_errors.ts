@@ -53,6 +53,7 @@ export const AcrossErrorCode = {
   SPONSORED_DONATION_BOX_FUNDS_INSUFFICIENT:
     "SPONSORED_DONATION_BOX_FUNDS_INSUFFICIENT",
   HYPERCORE_ACCOUNT_NOT_INITIALIZED: "HYPERCORE_ACCOUNT_NOT_INITIALIZED",
+  FORBIDDEN_API_KEY: "FORBIDDEN_API_KEY",
 
   // Status: 50X
   UPSTREAM_RPC_ERROR: "UPSTREAM_RPC_ERROR",
@@ -114,6 +115,19 @@ export class UnauthorizedError extends AcrossApiError {
       {
         message: args?.message ?? "Unauthorized",
         status: HttpErrorToStatusCode.UNAUTHORIZED,
+      },
+      opts
+    );
+  }
+}
+
+export class ForbiddenError extends AcrossApiError {
+  constructor(args?: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args?.message ?? "Forbidden",
+        code: AcrossErrorCode.FORBIDDEN_API_KEY,
+        status: HttpErrorToStatusCode.FORBIDDEN,
       },
       opts
     );
