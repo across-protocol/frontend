@@ -2,12 +2,14 @@ import styled from "@emotion/styled";
 import { useCallback, useState } from "react";
 import { COLORS, getChainInfo } from "utils";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import {
-  ChainTokenSelectorModal,
-  EnrichedToken,
-} from "./ChainTokenSelectorModal";
+import { EnrichedToken } from "./ChainTokenSelectorModal";
 import { getTokenDisplaySymbol } from "hooks/useAvailableCrosschainRoutes";
 import { TokenAndChainLogo } from "./TokenAndChainLogo";
+import lazyWithRetry from "utils/lazy-with-retry";
+
+const ChainTokenSelectorModal = lazyWithRetry(
+  () => import("../ChainTokenSelector/ChainTokenSelectorModal")
+);
 
 type Props = {
   selectedToken: EnrichedToken | null;
