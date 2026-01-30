@@ -1,6 +1,7 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
 
-import { getConfig, toWeiSafe } from "utils";
+import { getConfig } from "./config";
+import { toWeiSafe } from "./weiMath";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
   process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",

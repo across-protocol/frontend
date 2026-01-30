@@ -1,5 +1,5 @@
 import { ContractTransaction } from "ethers";
-import { getProvider } from "utils";
+import { getProvider } from "./providers";
 
 /**
  * Calls and waits on the Notify API to resolve the status of a TX if the chain is supported by Onboard

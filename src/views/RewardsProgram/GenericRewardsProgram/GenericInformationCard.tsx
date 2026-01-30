@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import GenericCard from "./GenericCard";
-import { QUERIESV2, isDefined, rewardProgramTypes } from "utils";
-import { Text } from "components";
+import { QUERIESV2, rewardProgramTypes } from "utils/constants";
+import { isDefined } from "utils/sdk";
+import { Text } from "components/Text";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Tooltip } from "components/Tooltip";
 

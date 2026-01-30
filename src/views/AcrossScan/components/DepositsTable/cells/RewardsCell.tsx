@@ -4,11 +4,8 @@ import { Text } from "components/Text";
 import { TokenImage } from "components/TokenImage";
 import { Deposit } from "hooks/useDeposits";
 
-import {
-  formatMaxFracDigits,
-  formatUnitsWithMaxFractions,
-  getRewardToken,
-} from "utils";
+import { getRewardToken } from "utils/constants";
+import { formatMaxFracDigits, formatUnitsWithMaxFractions } from "utils/format";
 import { BaseCell } from "./BaseCell";
 
 type Props = {

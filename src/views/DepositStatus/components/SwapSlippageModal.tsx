@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 
-import { Alert, Modal, Text } from "components";
+import Alert from "components/Alert";
+import Modal from "components/Modal";
+import { Text } from "components/Text";
 import { UnstyledButton } from "components/Button";
 
 type Props = {

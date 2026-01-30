@@ -1,21 +1,18 @@
 import styled from "@emotion/styled";
-import {
-  isDefined,
-  COLORS,
-  QUERIES,
-  buildSearchParams,
-  vercelApiBaseUrl,
-} from "utils";
+import { COLORS, QUERIES, vercelApiBaseUrl } from "utils/constants";
+import { buildSearchParams } from "utils/url";
+import { isDefined } from "utils/sdk";
 import { useTwitter } from "hooks/useTwitter";
 import { DepositStatusLowerCardProps } from "views/DepositStatus/components/DepositStatusLowerCard";
 
-import { SecondaryButton, Text } from "components";
+import { SecondaryButton } from "components/Button";
+import { Text } from "components/Text";
 import { ReactComponent as ShareIcon } from "assets/icons/share.svg";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
 import { useEffect, useMemo, useState } from "react";
 import { TwitterShareModal } from "./TwitterShareModal";
 import axios from "axios";
-import { useAmplitude } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { ampli } from "ampli";
 
 const SHARE_THRESHOLD_SECONDS = 5; // only share if bridge is 5s or faster

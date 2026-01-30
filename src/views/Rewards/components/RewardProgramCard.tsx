@@ -1,15 +1,12 @@
 import styled from "@emotion/styled";
-import {
-  COLORS,
-  QUERIESV2,
-  formatUnitsWithMaxFractions,
-  rewardProgramTypes,
-} from "utils";
-import { Text, TokenImage } from "components";
+import { COLORS, QUERIESV2, rewardProgramTypes } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
+import { Text } from "components/Text";
+import { TokenImage } from "components/TokenImage";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Link } from "react-router-dom";
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 
 type RewardProgramCardProps = {
   program: rewardProgramTypes;

@@ -1,8 +1,9 @@
 import useReferrer from "hooks/useReferrer";
-import { useAmplitude } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { currentGitCommitHash, getPageValue } from "utils";
+import { currentGitCommitHash } from "utils/constants";
+import { getPageValue } from "utils/amplitude";
 import { ampli } from "ampli";
 
 export function useRouteTrace() {

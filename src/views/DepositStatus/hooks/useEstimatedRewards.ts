@@ -7,16 +7,15 @@ import {
   TokenInfo,
   chainIdToRewardsProgramName,
   fixedPointAdjustment,
-  formatUnitsWithMaxFractions,
   getToken,
-  isDefined,
-  min,
-  parseUnits,
-  parseUnitsWithExtendedDecimals,
   rewardProgramTypes,
   rewardPrograms,
   rewardProgramsAvailable,
-} from "utils";
+} from "utils/constants";
+import { parseUnitsWithExtendedDecimals } from "utils/format";
+import { formatUnitsWithMaxFractions, parseUnits } from "utils/format";
+import { isDefined } from "utils/sdk";
+import { min } from "utils/math";
 
 export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
 

@@ -2,7 +2,11 @@ import styled from "@emotion/styled";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 
 import RewardProgramCard from "./RewardProgramCard";
-import { QUERIESV2, rewardProgramsAvailable, rewardPrograms } from "utils";
+import {
+  QUERIESV2,
+  rewardProgramsAvailable,
+  rewardPrograms,
+} from "utils/constants";
 
 const DesktopRewardProgramSection = () => (
   <SectionWrapper title="Reward programs">

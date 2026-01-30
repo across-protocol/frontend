@@ -1,4 +1,4 @@
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ReactComponent as ArrowDown } from "assets/icons/arrow-down.svg";
