@@ -122,7 +122,7 @@ type Props = {
   setDisplayModal: (displayModal: boolean) => void;
 };
 
-export function ChainTokenSelectorModal({
+export default function ChainTokenSelectorModal({
   isOriginToken,
   displayModal,
   setDisplayModal,
