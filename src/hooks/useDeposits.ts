@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   defaultRefetchInterval,
+  depositsQueryKey,
   indexerApiBaseUrl,
   userDepositsQueryKey,
   getConfig,
@@ -94,6 +95,7 @@ export type Deposit = {
   depositRefundTxHash?: string;
   swapOutputToken?: string; // destination swap output token
   swapOutputTokenAmount?: string; // destination swap output amount
+  outputAmount?: string;
   actionsTargetChainId?: number;
   hideFeeTooLow?: boolean;
 };
@@ -163,14 +165,20 @@ export type GetIndexerDepositsResponse = IndexerDeposit[];
 export function useDeposits(
   limit: number,
   offset: number = 0,
-  userAddress?: string
+  userAddress?: string,
+  status: DepositStatusFilter = "all"
 ) {
+  const omitStatusFilter = status === "all";
+  const queryKey = userAddress
+    ? userDepositsQueryKey(userAddress, status, limit, offset)
+    : depositsQueryKey(status, limit, offset);
+
   return useQuery({
-    queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
+    queryKey,
     queryFn: async () => ({
       deposits: await getDeposits({
         address: userAddress,
-        // status: status === "all" ? undefined : status,
+        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       }),

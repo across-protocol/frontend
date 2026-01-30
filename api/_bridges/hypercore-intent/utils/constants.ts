@@ -12,22 +12,19 @@ export const USDH_FILL_DESTINATION_GAS_LIMIT_USD = 0.25; // 0.25 USD
 export const HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS =
   "0x861E127036B28D32f3777B4676F6bbb9e007d195";
 
-export const SUPPORTED_INPUT_TOKENS = [
-  TOKEN_SYMBOLS_MAP.USDC,
-  TOKEN_SYMBOLS_MAP["USDC-BNB"],
-];
+export const SUPPORTED_INPUT_TOKENS = [TOKEN_SYMBOLS_MAP.USDC];
 export const SUPPORTED_OUTPUT_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDH,
   TOKEN_SYMBOLS_MAP["USDH-SPOT"],
 ];
 export const SUPPORTED_ORIGIN_CHAINS = Object.values(CHAIN_IDs).flatMap(
   (chainId) => {
-    // Only mark CCTP enabled origin chains as eligible for sponsored intents
-    const isCctpChain = CHAINS[Number(chainId)]?.cctpDomain !== CCTP_NO_DOMAIN;
-    if (isCctpChain) {
-      return Number(chainId);
-    }
-    return [];
+    // Sponsored intents are only supported on CCTP enabled origin chains
+    const chain = CHAINS[Number(chainId)];
+    const cctpDomain = chain?.cctpDomain;
+    const isCctpChain =
+      cctpDomain !== undefined && cctpDomain !== CCTP_NO_DOMAIN;
+    return isCctpChain ? Number(chainId) : [];
   }
 );
 export const SUPPORTED_DESTINATION_CHAINS = [
