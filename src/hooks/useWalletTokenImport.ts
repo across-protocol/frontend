@@ -5,7 +5,7 @@ import { ERC20__factory } from "utils/typechain";
 
 import { useConnection } from "./useConnection";
 import { useIsWrongNetwork } from "./useIsWrongNetwork";
-import { ChainId } from "utils";
+import { ChainId } from "utils/constants";
 
 export function useWalletTokenImport(chainId?: ChainId) {
   const { signer } = useConnection();

@@ -6,8 +6,8 @@ import styled from "@emotion/styled";
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
 
-import { SecondaryButton } from "components";
-import { getConfig } from "utils";
+import { SecondaryButton } from "components/Button";
+import { getConfig } from "utils/config";
 import { EmptyTable } from "./EmptyTable";
 import { usePersonalTransactions } from "../hooks/usePersonalTransactions";
 import { DepositStatusFilter } from "../types";

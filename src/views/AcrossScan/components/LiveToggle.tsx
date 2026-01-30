@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type DisabledReason = "filtering" | "not-first-page";
 

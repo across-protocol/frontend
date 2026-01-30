@@ -9,14 +9,13 @@ import { Tooltip } from "components/Tooltip";
 import { Input, InputGroup } from "components/Input";
 import { TokenImage } from "components/TokenImage";
 import { useTokenConversion } from "hooks/useTokenConversion";
+import { QUERIESV2, getToken } from "utils/constants";
 import {
-  QUERIESV2,
   formatUSD,
   formatUnitsWithMaxFractions,
-  getToken,
   isNumberEthersParseable,
   parseUnits,
-} from "utils";
+} from "utils/format";
 
 export type Props = {
   balance?: BigNumber;

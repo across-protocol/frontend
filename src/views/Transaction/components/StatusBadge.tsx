@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { withOpacity } from "utils";
+import { withOpacity } from "utils/colors";
 
 type Props = {
   status: string;

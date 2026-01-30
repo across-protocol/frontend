@@ -16,7 +16,7 @@ import injectedIcon from "assets/wallet-logos/injected.svg";
 import {
   trackIfWalletSelected,
   trackWalletConnectTransactionCompleted,
-} from "utils";
+} from "utils/amplitude";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { useConnectSorted } from "hooks/useConnectSorted";
 import { useWalletsSorted } from "hooks/useWalletSorted";

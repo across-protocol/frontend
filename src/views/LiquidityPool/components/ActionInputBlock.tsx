@@ -2,10 +2,14 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
-import { QUERIESV2, trackMaxButtonClicked, getConfig } from "utils";
-import { useStakingPool, useAmplitude } from "hooks";
+import { QUERIESV2 } from "utils/constants";
+import { trackMaxButtonClicked } from "utils/amplitude";
+import { getConfig } from "utils/config";
+import { useStakingPool } from "hooks/useStakingPool";
+import { useAmplitude } from "hooks/useAmplitude";
 import { useBalance } from "hooks/useBalance";
-import { Text, AmountInput } from "components";
+import { Text } from "components/Text";
+import { AmountInput } from "components/AmountInput";
 
 import {
   useAddLiquidity,

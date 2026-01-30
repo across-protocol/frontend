@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 import BreadcrumbV2 from "components/BreadcrumbV2";
 import { Text } from "components/Text";
-import { shortenString } from "utils";
+import { shortenString } from "utils/format";
 
 type Props = {
   depositTxHash: string;

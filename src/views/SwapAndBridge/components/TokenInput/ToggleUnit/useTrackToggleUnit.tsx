@@ -1,4 +1,4 @@
-import { useAmplitude } from "../../../../../hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { ampli } from "../../../../../ampli";
 
 export function useTrackToggleUnit() {

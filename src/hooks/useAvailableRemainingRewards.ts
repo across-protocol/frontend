@@ -6,9 +6,9 @@ import {
   defaultRefetchInterval,
   rewardsApiUrl,
   getToken,
-  parseUnits,
-  isDefined,
-} from "utils";
+} from "utils/constants";
+import { parseUnits } from "utils/format";
+import { isDefined } from "utils/sdk";
 
 export function useAvailableRemainingRewards(program?: rewardProgramTypes) {
   const { data } = useQuery({

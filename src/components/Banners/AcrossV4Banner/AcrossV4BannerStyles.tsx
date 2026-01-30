@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { ExternalLink } from "components/ExternalLink";
-import { COLORS, QUERIES } from "utils";
+import { COLORS, QUERIES } from "utils/constants";
 import { ReactComponent as AcrossLogo } from "assets/icons/across-logo.svg";
 
 export const StyledWrapper = styled.div`

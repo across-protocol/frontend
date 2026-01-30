@@ -1,8 +1,8 @@
 import { BigNumber, ethers } from "ethers";
-import { ChainId } from "utils/constants";
+import { ChainId } from "../../constants";
 import { SuggestedApiFeeReturnType } from "../types";
-import { parseUnits } from "utils/format";
-import { getConfig } from "utils";
+import { parseUnits } from "../../format";
+import { getConfig } from "../../config";
 
 /**
  * Creates a mocked variant of the suggestedAPI Call

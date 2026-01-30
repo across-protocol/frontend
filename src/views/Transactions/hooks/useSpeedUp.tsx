@@ -2,16 +2,14 @@ import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 
-import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
-import {
-  getConfig,
-  getChainInfo,
-  Token,
-  waitOnTransaction,
-  fixedPointAdjustment,
-  getUpdateV3DepositTypedData,
-  toBytes32,
-} from "utils";
+import { useConnection } from "hooks/useConnection";
+import { useBridgeFees } from "hooks/useBridgeFees";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
+import { getChainInfo, fixedPointAdjustment } from "utils/constants";
+import type { Token } from "utils/config";
+import { waitOnTransaction } from "utils/notify";
+import { getUpdateV3DepositTypedData, toBytes32 } from "utils/sdk";
+import { getConfig } from "utils/config";
 
 import type { Deposit } from "hooks/useDeposits";
 

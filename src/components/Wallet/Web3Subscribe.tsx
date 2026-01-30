@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SubscribeButton } from "./Wallet.styles";
-import { useConnection } from "hooks";
-import { isDefined } from "utils";
+import { useConnection } from "hooks/useConnection";
+import { isDefined } from "utils/sdk";
 
 const Web3Subscribe = () => {
   const { connector } = useConnection();

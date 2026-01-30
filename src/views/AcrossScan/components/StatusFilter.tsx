@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useState, useRef, useEffect } from "react";
 
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import { DepositStatusFilter } from "utils/types";
 
 type StatusFilterProps = {

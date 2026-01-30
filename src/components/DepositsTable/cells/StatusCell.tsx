@@ -8,7 +8,8 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
-import { formatSeconds, COLORS } from "utils";
+import { COLORS } from "utils/constants";
+import { formatSeconds } from "utils/time";
 
 import { BaseCell } from "./BaseCell";
 import { useDepositStatus } from "../hooks/useDepositStatus";

@@ -5,7 +5,9 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-import { formatUnitsWithMaxFractions, getConfig, toAddressType } from "utils";
+import { formatUnitsWithMaxFractions } from "utils/format";
+import { getConfig } from "utils/config";
+import { toAddressType } from "utils/sdk";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 

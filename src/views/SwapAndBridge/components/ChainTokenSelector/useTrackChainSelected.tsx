@@ -1,4 +1,4 @@
-import { useAmplitude } from "../../../../hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { useCallback } from "react";
 import { ampli } from "../../../../ampli";
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
 
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 import { Text } from "components/Text";
 
 type Props = React.HTMLProps<HTMLInputElement> & {

@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { UnstyledButton } from "components/Button";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 
 export const Wrapper = styled.div`

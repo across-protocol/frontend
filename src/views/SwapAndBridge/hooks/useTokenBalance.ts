@@ -1,12 +1,9 @@
 import { BigNumber } from "ethers";
 import { useUserTokenBalances } from "hooks/useUserTokenBalances";
 import { useMemo } from "react";
-import {
-  chainIsSvm,
-  compareAddressesSimple,
-  getTokenBalance,
-  isDefined,
-} from "utils";
+import { compareAddressesSimple } from "utils/sdk";
+import { getTokenBalance } from "utils/token";
+import { chainIsSvm, isDefined } from "utils/sdk";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useQuery } from "@tanstack/react-query";
 import { useConnectionEVM } from "hooks/useConnectionEVM";

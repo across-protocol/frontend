@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { formatSeconds } from "utils";
+import { formatSeconds } from "utils/time";
 
 export function useElapsedSeconds(
   startDateTimestampInSeconds?: number,

@@ -1,4 +1,4 @@
-import { TokenImage } from "../../../../components";
+import { TokenImage } from "components/TokenImage";
 import React, { ReactElement } from "react";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as Circle } from "assets/extern-logos/circle.svg";

@@ -1,4 +1,5 @@
-import { COLORS, getChainInfo, getConfig } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
+import { getConfig } from "utils/config";
 import { Text } from "components/Text";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";

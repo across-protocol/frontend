@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { ReactComponent as Background } from "assets/bg-banners/overview-card-background.svg";
 import { ReactComponent as II } from "assets/icons/info.svg";
-import { Text } from "components";
+import { Text } from "components/Text";
 import { ReactNode } from "react";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 import { Tooltip } from "components/Tooltip";
 
 type GenericOverviewCardTitleProps = {

@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 
 import { FilterDropdown } from "./components/FilterDropdown";
 import { PersonalTransactions } from "./components/PersonalTransactions";
 import { DepositStatusFilter } from "./types";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import BreadcrumbV2 from "components/BreadcrumbV2";
-import { useFeatureFlag } from "../../hooks";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import { AcrossScan } from "../AcrossScan/AcrossScan";
 
 const statusFilterOptions: DepositStatusFilter[] = [

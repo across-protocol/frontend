@@ -1,15 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { getChainInfo, debug } from "utils/constants";
 import {
-  getChainInfo,
   NoFundsDepositedLogError,
   TransactionNotFoundError,
   TransactionFailedError,
   TransactionPendingError,
-  debug,
-  getEcosystem,
-} from "utils";
+} from "utils/deposits";
+import { getEcosystem } from "utils/network";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { createChainStrategies } from "utils/deposit-strategies";
 import {

@@ -3,7 +3,7 @@ import { Text, TextColor, TextSize } from "components/Text";
 import { CopyIconButton } from "./CopyIconButton";
 import { CSSProperties } from "react";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type Props = {
   textToCopy: string;

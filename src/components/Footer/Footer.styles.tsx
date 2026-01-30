@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as UmaLogo } from "assets/icons/powered-by-uma.svg";
 import { ReactComponent as TwitterLogo } from "assets/icons/x-white.svg";
-import { QUERIES } from "utils";
+import { QUERIES } from "utils/constants";
 
 export const Wrapper = styled.div`
   padding: 25px 16px;

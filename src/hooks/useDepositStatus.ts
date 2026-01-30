@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { indexerApiBaseUrl } from "utils";
+import { indexerApiBaseUrl } from "utils/constants";
 
 export type IndexerDeposit = {
   actionsSucceeded: boolean | null;

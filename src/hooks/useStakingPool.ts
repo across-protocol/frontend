@@ -5,7 +5,8 @@ import {
 } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
-import { getConfig, hubPoolChainId, defaultRefetchInterval } from "utils";
+import { hubPoolChainId, defaultRefetchInterval } from "utils/constants";
+import { getConfig } from "utils/config";
 import { useConnection } from "hooks/useConnection";
 import { fetchStakingPool } from "utils/staking-pool";
 

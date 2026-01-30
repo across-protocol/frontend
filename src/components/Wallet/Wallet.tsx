@@ -1,4 +1,5 @@
-import { getChainInfo, isSupportedChainId, shortenAddress } from "utils";
+import { getChainInfo, isSupportedChainId } from "utils/constants";
+import { shortenAddress } from "utils/format";
 
 import solanaLogo from "assets/wallet-logos/solana.svg";
 import Web3Subscribe from "./Web3Subscribe";

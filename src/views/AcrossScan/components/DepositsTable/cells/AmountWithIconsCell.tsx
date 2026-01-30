@@ -2,12 +2,8 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { TokenImage } from "components/TokenImage";
-import {
-  ChainInfo,
-  COLORS,
-  formatUnitsWithMaxFractions,
-  TokenInfo,
-} from "utils";
+import { ChainInfo, COLORS, TokenInfo } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 
 import { BaseCell } from "./BaseCell";
 

@@ -4,7 +4,7 @@ import { BaseHeadCell } from "components/Table";
 import { Link } from "react-router-dom";
 import { ReactComponent as II } from "assets/icons/info.svg";
 import { ReactComponent as ConnectorVector } from "assets/icons/connectors.svg";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 const Cell = styled(BaseHeadCell)<{ length: number }>`
   flex: 0 0 ${({ length }) => length}px;

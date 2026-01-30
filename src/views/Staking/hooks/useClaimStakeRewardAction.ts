@@ -1,7 +1,10 @@
 import { Signer } from "ethers";
-import { useConnection, useStakingPool } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useStakingPool } from "hooks/useStakingPool";
 import { useMutation } from "@tanstack/react-query";
-import { getConfig, hubPoolChainId, waitOnTransaction } from "utils";
+import { hubPoolChainId } from "utils/constants";
+import { waitOnTransaction } from "utils/notify";
+import { getConfig } from "utils/config";
 import { sendWithPaddedGas } from "utils/transactions";
 
 export function useClaimStakeRewardAction(tokenAddress?: string) {

@@ -1,16 +1,12 @@
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
 import { useMutation } from "@tanstack/react-query";
 import { BigNumberish } from "ethers";
 
-import {
-  hubPoolChainId,
-  MAX_APPROVAL_AMOUNT,
-  waitOnTransaction,
-  getConfig,
-  ChainId,
-} from "utils";
+import { hubPoolChainId, MAX_APPROVAL_AMOUNT, ChainId } from "utils/constants";
+import { waitOnTransaction } from "utils/notify";
+import { getConfig } from "utils/config";
 import { ERC20__factory } from "utils/typechain";
-import { useIsWrongNetwork } from "hooks";
 
 const config = getConfig();
 

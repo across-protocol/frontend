@@ -2,7 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
-import { COLORS, formatUnitsWithMaxFractions } from "utils";
+import { COLORS } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { useTrackBalanceSelectorClick } from "./useTrackBalanceSelectorClick";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 

@@ -5,7 +5,7 @@ import { ReactComponent as UnstyledArrowIcon } from "assets/icons/chevron-down.s
 import { ReactComponent as II } from "assets/icons/info.svg";
 import { Divider as ExternalDivider } from "../../Staking.styles";
 
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 export const Wrapper = styled.div`
   display: flex;

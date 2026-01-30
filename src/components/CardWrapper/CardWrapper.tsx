@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 const CardWrapper = ({ children }: { children: React.ReactNode }) => (
   <Card>{children}</Card>

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ChainId, getProvider, isDefined } from "utils";
+import { ChainId } from "utils/constants";
+import { getProvider } from "utils/providers";
+import { isDefined } from "utils/sdk";
 import { reverseResolveHyperliquid } from "./useNameResolver/resolvers/hyperliquid";
 
 export function useReverseNameResolver(address: string | undefined) {

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as HamburgerIcon } from "assets/icons/hamburger.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 interface MenuToggleProps {
   toggle: () => void;

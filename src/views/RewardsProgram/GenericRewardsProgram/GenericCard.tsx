@@ -1,5 +1,10 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2, rewardProgramTypes, rewardPrograms } from "utils";
+import {
+  COLORS,
+  QUERIESV2,
+  rewardProgramTypes,
+  rewardPrograms,
+} from "utils/constants";
 import DefaultBanner from "assets/bg-banners/default-banner.svg";
 
 type GenericCardProps = {

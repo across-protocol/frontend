@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 
 type QuickLink = {

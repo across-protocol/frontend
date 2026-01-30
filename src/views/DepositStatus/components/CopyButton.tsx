@@ -1,4 +1,4 @@
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import {
   SecondaryButton,
   SecondaryButtonProps,

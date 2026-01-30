@@ -1,5 +1,5 @@
 import { BigNumber, utils, BigNumberish } from "ethers";
-import { toWeiSafe } from "utils";
+import { toWeiSafe } from "utils/weiMath";
 
 export function appendPercentageSign(feeInput: string) {
   return feeInput.replaceAll("%", "") + "%";

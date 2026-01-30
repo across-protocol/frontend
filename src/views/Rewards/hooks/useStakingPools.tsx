@@ -1,4 +1,4 @@
-import { useAllStakingPools } from "hooks";
+import { useAllStakingPools } from "hooks/useStakingPool";
 
 export const useStakingPools = () => {
   const allStakingPoolsQueries = useAllStakingPools();

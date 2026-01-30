@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { ampli } from "../../../../ampli";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
-import { useAmplitude } from "../../../../hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 
 export function useTrackTokenSelected() {
   const { addToAmpliQueue } = useAmplitude();

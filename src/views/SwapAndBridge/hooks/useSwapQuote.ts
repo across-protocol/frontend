@@ -7,7 +7,7 @@ import {
 } from "utils/serverless-api/prod/swap-approval";
 import { useDebounce } from "@uidotdev/usehooks";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
-import { INTEGRATOR_ID_ACROSS } from "utils";
+import { INTEGRATOR_ID_ACROSS } from "utils/constants";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 import { useTrackTransferQuoteReceivedEffect } from "./useTrackTransferQuoteReceived";
 import { useRef } from "react";

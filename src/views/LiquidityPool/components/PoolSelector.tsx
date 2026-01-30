@@ -3,7 +3,8 @@ import styled, { StyledComponent } from "@emotion/styled";
 import { BigNumber } from "ethers";
 import { Theme } from "@emotion/react";
 
-import { Selector, Text } from "components";
+import Selector from "components/Selector";
+import { Text } from "components/Text";
 import { SelectorPropType } from "components/Selector/Selector";
 
 import { useLiquidityPool } from "../hooks/useLiquidityPool";

@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
-import { Alert } from "components";
+import Alert from "components/Alert";
 import { SecondaryButton } from "components/Button";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
-import { formatUnitsWithMaxFractions, QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import { Text } from "components/Text";

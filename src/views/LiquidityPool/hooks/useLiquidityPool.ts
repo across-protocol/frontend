@@ -4,7 +4,8 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
-import { getConfig, hubPoolChainId } from "utils";
+import { hubPoolChainId } from "utils/constants";
+import { getConfig } from "utils/config";
 import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();

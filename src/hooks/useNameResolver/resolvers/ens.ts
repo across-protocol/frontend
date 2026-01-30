@@ -1,4 +1,5 @@
-import { getProvider, ChainId } from "utils";
+import { getProvider } from "utils/providers";
+import { ChainId } from "utils/constants";
 import { NameResolver } from "./types";
 
 export const ensResolver: NameResolver = {

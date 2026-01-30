@@ -1,11 +1,9 @@
-import { useConnection, useRewardSummary } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useRewardSummary } from "hooks/useRewardSummary";
 import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
-import {
-  capitalizeFirstLetter,
-  formatUnitsWithMaxFractions,
-  getToken,
-  rewardPrograms,
-} from "utils";
+import { getToken, rewardPrograms } from "utils/constants";
+import { capitalizeFirstLetter } from "utils/format";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 import { useUnclaimedArbRewardsProofs } from "hooks/useUnclaimedProofs";

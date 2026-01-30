@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
+import { ChainId } from "utils/constants";
+import { bridgeLimitsQueryKey } from "utils/query-keys";
+import { getConfig } from "utils/config";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
 import { UniversalSwapQuote } from "./useUniversalSwapQuote";

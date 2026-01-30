@@ -7,8 +7,8 @@ import {
   suggestedFeesDeviationBufferMultiplier,
   fixedPointAdjustment,
   pendingStateTimeUntilDelayed,
-} from "utils";
-import { useBridgeLimits } from "hooks";
+} from "utils/constants";
+import { useBridgeLimits } from "hooks/useBridgeLimits";
 
 export function useDepositStatus(deposit: Deposit) {
   const { limits } = useBridgeLimits(

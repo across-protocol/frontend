@@ -3,7 +3,7 @@ import { NumericFormat } from "react-number-format";
 import { BigNumber, utils } from "ethers";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { TokenAmountInput, TokenAmountInputWrapper } from "./styles";
-import { convertUSDToToken } from "../../../../utils";
+import { convertUSDToToken } from "utils/token";
 import { UnitType } from "../../types";
 import { formatAmountFromUnit } from "./FormatAmountFromUnit";
 

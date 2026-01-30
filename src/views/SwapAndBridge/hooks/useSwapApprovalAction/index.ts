@@ -3,7 +3,7 @@ import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
-import { getEcosystem } from "utils";
+import { getEcosystem } from "utils/network";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { UseMutateAsyncFunction } from "@tanstack/react-query/build/modern/types";
 import { QuoteRequest } from "../useQuoteRequest/quoteRequestAction";

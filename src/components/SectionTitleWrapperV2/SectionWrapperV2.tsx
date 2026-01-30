@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-right.svg";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 import { Text } from "components/Text";
 
 type SectionWrapperType = {

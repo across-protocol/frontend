@@ -1,6 +1,6 @@
 import axios from "axios";
 import { RewardsApiInterface } from "../types";
-import { rewardsApiUrl } from "utils";
+import { rewardsApiUrl } from "../../constants";
 
 export default async function rewardsApiCall(
   address: string,

@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { ReactComponent as II } from "assets/icons/info.svg";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 export type HeaderCells = typeof headerCells;
 export type ColumnKey = keyof HeaderCells;

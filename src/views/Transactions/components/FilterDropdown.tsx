@@ -4,7 +4,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 import { ReactComponent as ArrowDownIcon } from "assets/icons/chevron-down.svg";
 import { Text } from "components/Text";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type Props = {
   filterLabel: string;

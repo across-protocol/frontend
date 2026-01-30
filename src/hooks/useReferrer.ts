@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { ethers, utils } from "ethers";
 import { useQueryParams } from "./useQueryParams";
-import { useConnection } from "hooks";
-import { isDefined } from "utils";
+import { useConnection } from "hooks/useConnection";
+import { isDefined } from "utils/sdk";
 
 export default function useReferrer() {
   const { provider } = useConnection();

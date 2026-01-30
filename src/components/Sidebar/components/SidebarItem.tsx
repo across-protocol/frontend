@@ -6,7 +6,7 @@ import closeIcon from "assets/icons/cross.svg";
 import { ReactComponent as ChevronDown } from "assets/icons/chevron-down.svg";
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { Link } from "react-router-dom";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 export const SidebarItem = {
   Header,

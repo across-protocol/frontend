@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 
 export const SectionCard = styled.div`
   --padding: 16px;

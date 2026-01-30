@@ -4,10 +4,10 @@ import { useCallback } from "react";
 import {
   fixedPointAdjustment,
   TOKEN_SYMBOLS_MAP,
-  isDefined,
-  getConfig,
   hubPoolChainId,
-} from "utils";
+} from "utils/constants";
+import { isDefined } from "utils/sdk";
+import { getConfig } from "utils/config";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useToken } from "./useToken";
 

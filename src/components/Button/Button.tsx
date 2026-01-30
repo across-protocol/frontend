@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { QUERIESV2, COLORS } from "utils";
+import { QUERIESV2, COLORS } from "utils/constants";
 
 type ButtonSize = "lg" | "md" | "sm";
 type ButtonColor = keyof typeof COLORS;

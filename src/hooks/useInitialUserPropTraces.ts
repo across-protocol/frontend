@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import {
   identifyReferrer,
   identifyUserWallet,

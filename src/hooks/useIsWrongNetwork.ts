@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { hubPoolChainId, chainInfoTable, getEcosystem } from "utils";
+import { hubPoolChainId, chainInfoTable } from "utils/constants";
+import { getEcosystem } from "utils/network";
 import { useConnectionEVM } from "./useConnectionEVM";
 import { useConnectionSVM } from "./useConnectionSVM";
 

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIESV2, COLORS } from "utils";
+import { QUERIESV2, COLORS } from "utils/constants";
 
 export const Wrapper = styled.div<{
   type?: "info" | "success";

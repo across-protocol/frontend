@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIES } from "utils";
+import { COLORS, QUERIES } from "utils/constants";
 import { ReactComponent as AcrossLogo } from "assets/token-logos/acx.svg";
 
 export const WalletWrapper = styled.div`

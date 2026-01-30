@@ -3,7 +3,7 @@ import useAvailableCrosschainRoutes, {
   LifiToken,
 } from "./useAvailableCrosschainRoutes";
 import { useUserTokenBalances } from "./useUserTokenBalances";
-import { compareAddressesSimple } from "utils";
+import { compareAddressesSimple } from "utils/sdk";
 import { BigNumber, utils } from "ethers";
 
 export function useEnrichedCrosschainBalances() {

@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import BreadcrumbV2 from "components/BreadcrumbV2";
 import { BigNumber } from "ethers";
 import { useQueryClient } from "@tanstack/react-query";
-import { QUERIESV2, rewardProgramTypes } from "utils";
+import { QUERIESV2, rewardProgramTypes } from "utils/constants";
 import GenericRewardClaimCard from "./GenericRewardClaimCard";
 import GenericInformationCard, {
   GenericRewardInformationRowType,

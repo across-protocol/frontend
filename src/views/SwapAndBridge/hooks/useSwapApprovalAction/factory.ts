@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { SwapApprovalActionStrategy } from "./strategies/types";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { useHistory } from "react-router-dom";
-import { buildSearchParams } from "utils";
+import { buildSearchParams } from "utils/url";
 import useReferrer from "hooks/useReferrer";
 import { createFromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";

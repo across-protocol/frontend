@@ -3,7 +3,8 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
 import { Deposit } from "hooks/useDeposits";
-import { ChainInfo, getChainInfo, isHyperLiquidBoundDeposit } from "utils";
+import { ChainInfo, getChainInfo } from "utils/constants";
+import { isHyperLiquidBoundDeposit } from "utils/hyperliquid";
 
 import { BaseCell } from "./BaseCell";
 import { externConfigs } from "constants/chains/configs";

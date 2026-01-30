@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/Tabs";
 import {
   formatNumberMaxFracDigits,
   formatUnitsWithMaxFractions,
   formatWeiPct,
-  getConfig,
-  max,
-} from "utils";
+} from "utils/format";
+import { getConfig } from "utils/config";
+import { max } from "utils/math";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import {
-  useConnection,
-  useIsWrongNetwork,
-  useQueryParams,
-  useStakingPool,
-} from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
+import { useQueryParams } from "hooks/useQueryParams";
+import { useStakingPool } from "hooks/useStakingPool";
 
 import Breadcrumb from "./components/Breadcrumb";
 import PoolSelector from "./components/PoolSelector";

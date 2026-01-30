@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
-import { SecondaryButton } from "components";
-import { COLORS } from "utils";
+import { SecondaryButton } from "components/Button";
+import { COLORS } from "utils/constants";
 import { DepositStatusFilter } from "utils/types";
 import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";

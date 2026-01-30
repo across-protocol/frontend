@@ -11,11 +11,11 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
 import {
   ChainId,
-  getProviderUrl,
   hubPoolChainId,
-  resolveWebsiteUrl,
   walletConnectProjectId,
-} from "utils";
+} from "utils/constants";
+import { getProviderUrl } from "utils/providers";
+import { resolveWebsiteUrl } from "utils/network";
 
 const isMainnet = hubPoolChainId === ChainId.MAINNET;
 const network = isMainnet

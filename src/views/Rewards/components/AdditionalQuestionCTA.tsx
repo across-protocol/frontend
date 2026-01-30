@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-up-right.svg";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 const LinkButton = ({ text, link }: { text: string; link: string }) => (
   <ButtonWrapper href={link}>

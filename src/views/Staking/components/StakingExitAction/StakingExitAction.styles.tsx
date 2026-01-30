@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 export const IconPairContainer = styled.div`
   padding-right: 4px;

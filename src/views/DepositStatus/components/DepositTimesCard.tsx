@@ -9,15 +9,12 @@ import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
-import { Text } from "components";
-import {
-  getChainInfo,
-  COLORS,
-  getBridgeUrlWithQueryParams,
-  isDefined,
-  formatUSD,
-} from "utils";
-import { useAmplitude } from "hooks";
+import { Text } from "components/Text";
+import { getChainInfo, COLORS } from "utils/constants";
+import { getBridgeUrlWithQueryParams } from "utils/url";
+import { formatUSD } from "utils/format";
+import { isDefined } from "utils/sdk";
+import { useAmplitude } from "hooks/useAmplitude";
 import { ampli } from "ampli";
 
 import { ElapsedTime } from "./ElapsedTime";

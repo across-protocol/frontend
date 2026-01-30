@@ -4,8 +4,8 @@ import {
   TOKEN_SYMBOLS_MAP,
   TokenInfo,
   applyChainSpecificTokenDisplay,
-  getConfig,
-} from "utils";
+} from "utils/constants";
+import { getConfig } from "utils/config";
 import { orderedTokenLogos } from "../constants/tokens";
 import { useSwapTokens } from "./useSwapTokens";
 import unknownLogo from "assets/icons/question-circle.svg";

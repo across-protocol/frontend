@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
 import { Deposit } from "hooks/useDeposits";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
@@ -18,7 +18,7 @@ import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
 import { useTokenFromAddress } from "hooks/useToken";
-import { useFeatureFlag } from "../../hooks";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import { useHistory } from "react-router-dom";
 
 type Props = {

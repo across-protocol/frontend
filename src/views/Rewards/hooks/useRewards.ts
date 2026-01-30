@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import { useMemo } from "react";
 import { useStakingPools } from "./useStakingPools";
 

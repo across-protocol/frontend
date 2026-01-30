@@ -1,7 +1,7 @@
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import { useRewards } from "hooks/useRewards";
 import { useEffect, useMemo, useState } from "react";
-import { rewardProgramTypes } from "utils";
+import { rewardProgramTypes } from "utils/constants";
 
 export function useGenericRewardProgram(program: rewardProgramTypes) {
   const { account, isConnected, connect } = useConnection();

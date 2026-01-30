@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { QUERIES } from "utils";
+import { QUERIES } from "utils/constants";
 
 type Size = "sm" | "md" | "lg";
 interface IWrapper {

@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
-import { TokenInfo, getConfig } from "utils";
+import { TokenInfo } from "utils/constants";
+import { getConfig } from "utils/config";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
 export enum AmountInputError {

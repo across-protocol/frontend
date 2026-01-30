@@ -1,17 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import {
   fetchIsClaimed,
   fetchAirdropProofs,
   fetchNextCreatedIndex,
 } from "utils/merkle-distributor";
-import {
-  getUnclaimedProofsQueryKey,
-  rewardProgramTypes,
-  mapAsync,
-} from "utils";
+import { rewardProgramTypes } from "utils/constants";
+import { getUnclaimedProofsQueryKey } from "utils/query-keys";
+import { mapAsync } from "utils/sdk";
 
 export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
   const { isConnected, account } = useConnection();

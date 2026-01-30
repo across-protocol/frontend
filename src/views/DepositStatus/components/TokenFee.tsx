@@ -4,13 +4,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
-import { LoadingSkeleton, TokenImage } from "components";
-import {
-  COLORS,
-  formatUnitsWithMaxFractions,
-  getExplorerLinkForToken,
-  TokenInfo,
-} from "utils";
+import { LoadingSkeleton } from "components/LoadingSkeleton";
+import { TokenImage } from "components/TokenImage";
+import { COLORS, TokenInfo } from "utils/constants";
+import { getExplorerLinkForToken } from "utils/token";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
 
 type TokenFeeProps = {

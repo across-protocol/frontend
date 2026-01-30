@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ethers } from "ethers";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "../../constants";
 
 export type CoingeckoApiCall = typeof coingeckoApiCall;
 

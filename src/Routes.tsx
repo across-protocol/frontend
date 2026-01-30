@@ -6,14 +6,17 @@ import {
   useHistory,
   useLocation,
 } from "react-router-dom";
-import { Header, Sidebar } from "components";
-import { useConnection, useError, useFeatureFlag } from "hooks";
+import Header from "components/Header";
+import Sidebar from "components/Sidebar";
+import { useConnection } from "hooks/useConnection";
+import { useError } from "hooks/useError";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import {
   chainEndpointToId,
   enableMigration,
-  getConfig,
   stringValueInArray,
-} from "utils";
+} from "utils/constants";
+import { getConfig } from "utils/config";
 import lazyWithRetry from "utils/lazy-with-retry";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";

@@ -7,7 +7,7 @@ import {
   amplitudeServerUrl,
   isAmplitudeLoggingEnabled,
   isProductionBuild,
-} from "utils";
+} from "utils/constants";
 import { useFeatureFlagsContext } from "./feature-flags/useFeatureFlagsContext";
 
 let ampliInitialized = false;

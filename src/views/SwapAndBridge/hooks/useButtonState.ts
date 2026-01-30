@@ -5,7 +5,7 @@ import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
 import type { ChainEcosystem } from "../../../constants/chains/types";
 import { BridgeButtonState } from "../components/Confirmation/ConfirmationButton";
 import { useMemo } from "react";
-import { getQuoteWarningMessage } from "../../../utils";
+import { getQuoteWarningMessage } from "utils/errors";
 
 const buttonLabels: Record<BridgeButtonState, string> = {
   notConnected: "Connect Wallet",

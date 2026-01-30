@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { Text } from "components/Text";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 import {
   SectionCard,

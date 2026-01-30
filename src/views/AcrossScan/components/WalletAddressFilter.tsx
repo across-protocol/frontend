@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { isAddress as isEVMAddress } from "viem";
 import { isAddress as isSVMAddress } from "@solana/kit";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import { isValidTxHash } from "utils/transactions";
 
 type FilterMode = "all" | "evm" | "svm";
