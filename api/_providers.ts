@@ -7,7 +7,7 @@ import { getEnvs } from "./_env";
 import { getLogger } from "./_logger";
 
 import rpcProvidersJson from "../src/data/rpc-providers.json";
-import { SVMProvider } from "@across-protocol/sdk/dist/esm/arch/svm";
+import { SVMProvider } from "@across-protocol/sdk/dist/esm/src/arch/svm";
 import { createSolanaRpc, MainnetUrl } from "@solana/kit";
 
 export type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
