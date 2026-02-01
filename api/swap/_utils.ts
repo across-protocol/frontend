@@ -59,6 +59,7 @@ import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
 import { getQuoteExpiryTimestamp } from "../_quote-timestamp";
 import { getNativeTokenInfo } from "../_token-info";
+import { GaslessTx } from "../_bridges/types";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -660,6 +661,7 @@ export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
 }
 
 export async function buildBaseSwapResponseJson(params: {
+  depositId?: string;
   amountType: AmountType;
   amount: BigNumber;
   inputTokenAddress: string;
@@ -694,7 +696,7 @@ export async function buildBaseSwapResponseJson(params: {
         data: string;
         to: string;
       };
-  permitSwapTx?: any; // TODO: Add type
+  permitSwapTx?: GaslessTx;
   appFeePercent?: number;
   appFee?: AppFee;
   inputTokenPriceUsd: number;
@@ -728,6 +730,7 @@ export async function buildBaseSwapResponseJson(params: {
   } = getAmounts(params);
 
   return stringifyBigNumProps({
+    depositId: params.depositId,
     crossSwapType: params.crossSwapType,
     amountType: params.amountType,
     checks: {
@@ -824,7 +827,6 @@ export async function buildBaseSwapResponseJson(params: {
     minOutputAmount: minOutputAmountSansAppFees,
     expectedFillTime: params.bridgeQuote.estimatedFillTimeSec,
     swapTx: getSwapTx(params),
-    eip712: params.permitSwapTx?.eip712,
     quoteExpiryTimestamp:
       params.bridgeQuote.provider === "across"
         ? getQuoteExpiryTimestamp(
@@ -939,6 +941,7 @@ export function getSwapTx(
 ) {
   if (params.approvalSwapTx?.ecosystem === "evm") {
     return {
+      ecosystem: "evm",
       simulationSuccess: !!params.approvalSwapTx.gas,
       chainId: params.originChainId,
       to: params.approvalSwapTx.to,
@@ -947,17 +950,28 @@ export function getSwapTx(
       gas: params.approvalSwapTx.gas,
       maxFeePerGas: params.approvalSwapTx.maxFeePerGas,
       maxPriorityFeePerGas: params.approvalSwapTx.maxPriorityFeePerGas,
-    };
+    } as const;
   }
 
   if (params.approvalSwapTx?.ecosystem === "svm") {
     return {
+      ecosystem: "svm",
       simulationSuccess: false, // TODO: Figure out if we should simulate the tx on SVM
       chainId: params.originChainId,
       to: params.approvalSwapTx.to,
       data: params.approvalSwapTx.data,
-    };
+    } as const;
   }
 
-  return params.permitSwapTx?.swapTx;
+  if (!params.permitSwapTx) {
+    throw new Error("Could not get tx for permit swap");
+  }
+
+  return {
+    ecosystem: "evm-gasless",
+    chainId: params.originChainId,
+    to: params.permitSwapTx!.to,
+    typedData: params.permitSwapTx!.data.permit,
+    data: params.permitSwapTx!.data,
+  } as const;
 }
