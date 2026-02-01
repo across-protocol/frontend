@@ -22,8 +22,8 @@ import {
   EXACT_INPUT_CASES,
   LENS_CASES,
   SOLANA_CASES,
-  USDT_OFT_COMPOSER_CASE,
 } from "./_swap-cases";
+import { SpokePoolPeriphery__factory } from "../../api/_typechain/factories/SpokePoolPeriphery.sol/SpokePoolPeriphery__factory";
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -163,7 +163,7 @@ export const argsFromCli = yargs(hideBin(process.argv))
     alias: "ft",
     description: "Flow type.",
     default: "approval",
-    choices: ["approval", "permit", "auth", "unified"],
+    choices: ["approval", "erc3009"],
   })
   .option("skipTxExecution", {
     alias: "ste",
@@ -202,9 +202,8 @@ export async function fetchSwapQuotes() {
   const flowType = argsFromCli.flowType;
   const includeDestinationAction =
     argsFromCli.includeDestinationAction || false;
-  const slug = flowType === "unified" ? undefined : flowType;
   const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
-  const url = `${baseUrl}/api/swap${slug ? `/${slug}` : ""}`;
+  const url = `${baseUrl}/api/swap/${flowType}`;
   console.log("\nFetching swap quotes from:", url);
 
   const swapQuotes: BaseSwapResponse[] = [];
@@ -298,45 +297,63 @@ export async function fetchSwapQuotes() {
 export async function signAndWaitPermitFlow(params: {
   wallet: Wallet;
   swapResponse: BaseSwapResponse;
+  depositViaApi?: boolean;
 }) {
-  if (!params.swapResponse.eip712) {
-    throw new Error("No EIP712 data for permit");
+  if (params.swapResponse.swapTx.ecosystem !== "evm-gasless") {
+    throw new Error("Expected EVM-gasless tx");
   }
+
+  const depositId = params.swapResponse.swapTx.data.depositId;
 
   // sign permit + deposit
   const permitSig = await params.wallet._signTypedData(
-    params.swapResponse.eip712.permit.domain,
-    params.swapResponse.eip712.permit.types,
-    params.swapResponse.eip712.permit.message
+    params.swapResponse.swapTx.typedData.domain,
+    params.swapResponse.swapTx.typedData.types,
+    params.swapResponse.swapTx.typedData.message
   );
   console.log("Signed permit:", permitSig);
 
-  const depositSig = await params.wallet._signTypedData(
-    params.swapResponse.eip712.deposit.domain,
-    params.swapResponse.eip712.deposit.types,
-    params.swapResponse.eip712.deposit.message
-  );
-  console.log("Signed deposit:", depositSig);
-
-  // relay
-  const relayResponse = await axios.post(`${SWAP_API_BASE_URL}/api/relay`, {
-    ...params.swapResponse.swapTx,
-    signatures: { permit: permitSig, deposit: depositSig },
-  });
-  console.log("Relay response:", relayResponse.data);
-
-  // track relay
-  while (true) {
-    const relayStatusResponse = await axios.get(
-      `${SWAP_API_BASE_URL}/api/relay/status?requestHash=${relayResponse.data.requestHash}`
+  // TODO
+  if (params.depositViaApi) {
+    const submitGaslessResponse = await axios.post(
+      `${SWAP_API_BASE_URL}/api/gasless/submit`,
+      {
+        gaslessTx: params.swapResponse.swapTx,
+        signatures: { permit: permitSig },
+      }
     );
-    console.log("Relay status response:", relayStatusResponse.data);
-
-    if (relayStatusResponse.data.status === "success") {
-      break;
+    console.log("Submit gasless response:", submitGaslessResponse.data);
+  } else {
+    // TODO: support `BridgeAndSwapWitness`
+    if (params.swapResponse.swapTx.data.witness.type !== "BridgeWitness") {
+      throw new Error("Expected BridgeWitness");
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    const depositCalldata =
+      SpokePoolPeriphery__factory.createInterface().encodeFunctionData(
+        "depositWithAuthorization",
+        [
+          params.swapResponse.swapTx.typedData.message.from,
+          params.swapResponse.swapTx.data.witness.data,
+          params.swapResponse.swapTx.data.permit.message.validAfter,
+          params.swapResponse.swapTx.data.permit.message.validBefore,
+          permitSig,
+        ]
+      );
+    const depositTx = await params.wallet.sendTransaction({
+      to: params.swapResponse.swapTx.to,
+      data: depositCalldata,
+      value: params.swapResponse.swapTx.value,
+    });
+    console.log("Deposit tx hash:", depositTx.hash);
+    await depositTx.wait();
+  }
+
+  const fillTxnRef = await trackFill(depositId);
+  if (fillTxnRef) {
+    console.log("Fill txn ref:", fillTxnRef);
+  } else {
+    console.log("Fill txn ref not found");
   }
 }
 
@@ -362,6 +379,10 @@ export async function signAndWaitAllowanceFlow(params: {
       console.log(`${stepLabel} Approval tx mined`);
       step++;
     }
+  }
+
+  if (params.swapResponse.swapTx.ecosystem !== "evm") {
+    throw new Error("Expected EVM tx");
   }
 
   try {
@@ -391,6 +412,10 @@ export async function signAndWaitAllowanceFlowSvm(params: {
   wallet: KeyPairSigner;
   swapResponse: BaseSwapResponse;
 }) {
+  if (params.swapResponse.swapTx.ecosystem !== "svm") {
+    throw new Error("Expected SVM tx");
+  }
+
   if (!params.swapResponse.swapTx || !("data" in params.swapResponse.swapTx)) {
     throw new Error("No swap tx for allowance flow");
   }
@@ -405,7 +430,7 @@ export async function signAndWaitAllowanceFlowSvm(params: {
     const sendTx = sendTransactionWithoutConfirmingFactory({
       rpc: getSVMRpc(params.swapResponse.swapTx.chainId),
     });
-    await sendTx(signedTx, { commitment: "confirmed" });
+    await sendTx(signedTx as any, { commitment: "confirmed" });
     console.log("Tx sent and confirmed");
     const fillTxnRef = await trackFill(signature.toString());
     if (fillTxnRef) {

@@ -25,6 +25,7 @@ import {
   AppFee,
 } from "../../_dexes/utils";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
+import { buildErc3009Tx } from "./utils/erc3009-tx-builder";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -172,6 +173,30 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         params.quotes,
         params.integratorId
       );
+      return tx;
+    },
+
+    buildGaslessTx: async (params: {
+      quotes: CrossSwapQuotes;
+      integratorId?: string | undefined;
+      permitParams: {
+        type: "erc3009";
+        validAfter: number;
+        validBefore: number;
+      };
+    }) => {
+      if (params.permitParams.type !== "erc3009") {
+        throw new Error(
+          `Can't build gasless tx for permit type '${params.permitParams.type}'`
+        );
+      }
+
+      const tx = await buildErc3009Tx({
+        quotes: params.quotes,
+        integratorId: params.integratorId,
+        validAfter: params.permitParams.validAfter,
+        validBefore: params.permitParams.validBefore,
+      });
       return tx;
     },
 
