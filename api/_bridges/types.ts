@@ -1,8 +1,10 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish, BytesLike } from "ethers";
 
 import { CrossSwap, CrossSwapQuotes, SwapQuote, Token } from "../_dexes/types";
 import { AppFee, CrossSwapType } from "../_dexes/utils";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+import { getReceiveWithAuthTypedData } from "../_transfer-with-auth";
+import type { SpokePoolPeripheryInterface } from "../_typechain/SpokePoolPeriphery.sol/SpokePoolPeriphery";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
@@ -52,8 +54,11 @@ export type BridgeContracts = {
   depositEntryPoint?: { name: string; address: string };
 };
 
-export type OriginTx =
+export type OriginTx = ApprovalTx | GaslessTx;
+
+export type ApprovalTx =
   | {
+      isGasless?: false;
       ecosystem: "evm";
       chainId: number;
       from: string;
@@ -62,11 +67,59 @@ export type OriginTx =
       value?: BigNumber;
     }
   | {
+      isGasless?: false;
       ecosystem: "svm";
       chainId: number;
       to: string;
       data: string;
     };
+
+export type GaslessTxArgsMethodAndWithoutSignatures =
+  | {
+      methodName: "depositWithAuthorization";
+      argsWithoutSignatures: {
+        signatureOwner: string;
+        depositData: SpokePoolPeripheryInterface.DepositDataStruct;
+        validAfter: BigNumberish;
+        validBefore: BigNumberish;
+        nonce: BytesLike;
+      };
+    }
+  | {
+      methodName: "swapAndBridgeWithAuthorization";
+      argsWithoutSignatures: {
+        signatureOwner: string;
+        swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct;
+        validAfter: BigNumberish;
+        validBefore: BigNumberish;
+        nonce: BytesLike;
+      };
+    };
+
+export type Witness =
+  | {
+      type: "BridgeWitness";
+      data: SpokePoolPeripheryInterface.DepositDataStruct;
+    }
+  | {
+      type: "BridgeAndSwapWitness";
+      data: SpokePoolPeripheryInterface.SwapAndDepositDataStruct;
+    };
+
+export type GaslessTx = {
+  ecosystem: "evm-gasless";
+  isGasless: true;
+  data: {
+    type: "erc3009";
+    integratorId?: string;
+    depositId: string;
+    witness: Witness;
+    permit: Awaited<ReturnType<typeof getReceiveWithAuthTypedData>>["eip712"];
+    domainSeparator: string;
+  };
+  chainId: number;
+  to: string;
+};
 
 export type GetBridgeQuoteParams = {
   inputToken: Token;
@@ -119,7 +172,17 @@ export type BridgeStrategy = {
   buildTxForAllowanceHolder: (params: {
     quotes: CrossSwapQuotes;
     integratorId?: string;
-  }) => Promise<OriginTx>;
+  }) => Promise<ApprovalTx>;
+
+  buildGaslessTx?: (params: {
+    quotes: CrossSwapQuotes;
+    integratorId?: string;
+    permitParams: {
+      type: "erc3009";
+      validAfter: number;
+      validBefore: number;
+    };
+  }) => Promise<GaslessTx>;
 
   isRouteSupported: (params: {
     inputToken: Token;

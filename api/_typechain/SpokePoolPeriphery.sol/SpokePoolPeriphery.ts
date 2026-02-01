@@ -165,17 +165,26 @@ export declare namespace IPermit2 {
 
 export interface SpokePoolPeripheryInterface extends utils.Interface {
   functions: {
+    "AUTHORIZATION_NONCE_IDENTIFIER()": FunctionFragment;
+    "BRIDGE_AND_SWAP_WITNESS_IDENTIFIER()": FunctionFragment;
+    "BRIDGE_WITNESS_IDENTIFIER()": FunctionFragment;
+    "DEPOSIT_NONCE_IDENTIFIER()": FunctionFragment;
+    "PERMIT2_NONCE_IDENTIFIER()": FunctionFragment;
+    "PERMIT_NONCE_IDENTIFIER()": FunctionFragment;
     "depositNative(address,bytes32,address,uint256,bytes32,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)": FunctionFragment;
-    "depositWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),uint256,uint256,bytes,bytes)": FunctionFragment;
+    "depositWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),uint256,uint256,bytes)": FunctionFragment;
     "depositWithPermit(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),uint256,bytes,bytes)": FunctionFragment;
     "depositWithPermit2(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
     "domainSeparator()": FunctionFragment;
     "eip712Domain()": FunctionFragment;
+    "getDepositId(address,address,bytes32,uint256,address)": FunctionFragment;
+    "getERC3009DepositWitness(((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),uint256,address,uint256))": FunctionFragment;
+    "getERC3009SwapAndBridgeWitness(((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256))": FunctionFragment;
     "multicall(bytes[])": FunctionFragment;
     "permit2()": FunctionFragment;
-    "permitNonces(address)": FunctionFragment;
+    "permitNonce(address)": FunctionFragment;
     "swapAndBridge(((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256))": FunctionFragment;
-    "swapAndBridgeWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),uint256,uint256,bytes,bytes)": FunctionFragment;
+    "swapAndBridgeWithAuthorization(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),uint256,uint256,bytes)": FunctionFragment;
     "swapAndBridgeWithPermit(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),uint256,bytes,bytes)": FunctionFragment;
     "swapAndBridgeWithPermit2(address,((uint256,address),(address,bytes32,uint256,address,bytes32,uint256,bytes32,uint32,uint32,uint32,bytes),address,address,uint8,uint256,uint256,bytes,bool,address,uint256),((address,uint256),uint256,uint256),bytes)": FunctionFragment;
     "swapProxy()": FunctionFragment;
@@ -183,15 +192,24 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "AUTHORIZATION_NONCE_IDENTIFIER"
+      | "BRIDGE_AND_SWAP_WITNESS_IDENTIFIER"
+      | "BRIDGE_WITNESS_IDENTIFIER"
+      | "DEPOSIT_NONCE_IDENTIFIER"
+      | "PERMIT2_NONCE_IDENTIFIER"
+      | "PERMIT_NONCE_IDENTIFIER"
       | "depositNative"
       | "depositWithAuthorization"
       | "depositWithPermit"
       | "depositWithPermit2"
       | "domainSeparator"
       | "eip712Domain"
+      | "getDepositId"
+      | "getERC3009DepositWitness"
+      | "getERC3009SwapAndBridgeWitness"
       | "multicall"
       | "permit2"
-      | "permitNonces"
+      | "permitNonce"
       | "swapAndBridge"
       | "swapAndBridgeWithAuthorization"
       | "swapAndBridgeWithPermit"
@@ -199,6 +217,30 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
       | "swapProxy"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "AUTHORIZATION_NONCE_IDENTIFIER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "BRIDGE_AND_SWAP_WITNESS_IDENTIFIER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "BRIDGE_WITNESS_IDENTIFIER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "DEPOSIT_NONCE_IDENTIFIER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PERMIT2_NONCE_IDENTIFIER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PERMIT_NONCE_IDENTIFIER",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "depositNative",
     values: [
@@ -223,7 +265,6 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
       SpokePoolPeripheryInterface.DepositDataStruct,
       BigNumberish,
       BigNumberish,
-      BytesLike,
       BytesLike,
     ]
   ): string;
@@ -255,14 +296,23 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getDepositId",
+    values: [string, string, BytesLike, BigNumberish, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getERC3009DepositWitness",
+    values: [SpokePoolPeripheryInterface.DepositDataStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getERC3009SwapAndBridgeWitness",
+    values: [SpokePoolPeripheryInterface.SwapAndDepositDataStruct]
+  ): string;
+  encodeFunctionData(
     functionFragment: "multicall",
     values: [BytesLike[]]
   ): string;
   encodeFunctionData(functionFragment: "permit2", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "permitNonces",
-    values: [string]
-  ): string;
+  encodeFunctionData(functionFragment: "permitNonce", values: [string]): string;
   encodeFunctionData(
     functionFragment: "swapAndBridge",
     values: [SpokePoolPeripheryInterface.SwapAndDepositDataStruct]
@@ -274,7 +324,6 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
       SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
       BigNumberish,
       BigNumberish,
-      BytesLike,
       BytesLike,
     ]
   ): string;
@@ -300,6 +349,30 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "swapProxy", values?: undefined): string;
 
   decodeFunctionResult(
+    functionFragment: "AUTHORIZATION_NONCE_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "BRIDGE_AND_SWAP_WITNESS_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "BRIDGE_WITNESS_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "DEPOSIT_NONCE_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PERMIT2_NONCE_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PERMIT_NONCE_IDENTIFIER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "depositNative",
     data: BytesLike
   ): Result;
@@ -323,10 +396,22 @@ export interface SpokePoolPeripheryInterface extends utils.Interface {
     functionFragment: "eip712Domain",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getDepositId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getERC3009DepositWitness",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getERC3009SwapAndBridgeWitness",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "permit2", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "permitNonces",
+    functionFragment: "permitNonce",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -410,6 +495,22 @@ export interface SpokePoolPeriphery extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    AUTHORIZATION_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    BRIDGE_AND_SWAP_WITNESS_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    BRIDGE_WITNESS_IDENTIFIER(overrides?: CallOverrides): Promise<[string]>;
+
+    DEPOSIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<[string]>;
+
+    PERMIT2_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<[string]>;
+
+    PERMIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<[string]>;
+
     depositNative(
       spokePool: string,
       recipient: BytesLike,
@@ -432,7 +533,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -467,6 +567,25 @@ export interface SpokePoolPeriphery extends BaseContract {
       }
     >;
 
+    getDepositId(
+      depositor: string,
+      authorizer: string,
+      nonceIdentifier: BytesLike,
+      nonce: BigNumberish,
+      spokePool: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getERC3009DepositWitness(
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    getERC3009SwapAndBridgeWitness(
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -474,7 +593,7 @@ export interface SpokePoolPeriphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<[string]>;
 
-    permitNonces(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    permitNonce(user: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     swapAndBridge(
       swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
@@ -487,7 +606,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -511,6 +629,20 @@ export interface SpokePoolPeriphery extends BaseContract {
     swapProxy(overrides?: CallOverrides): Promise<[string]>;
   };
 
+  AUTHORIZATION_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+  BRIDGE_AND_SWAP_WITNESS_IDENTIFIER(
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  BRIDGE_WITNESS_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+  DEPOSIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+  PERMIT2_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+  PERMIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
   depositNative(
     spokePool: string,
     recipient: BytesLike,
@@ -533,7 +665,6 @@ export interface SpokePoolPeriphery extends BaseContract {
     validAfter: BigNumberish,
     validBefore: BigNumberish,
     receiveWithAuthSignature: BytesLike,
-    depositDataSignature: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -568,6 +699,25 @@ export interface SpokePoolPeriphery extends BaseContract {
     }
   >;
 
+  getDepositId(
+    depositor: string,
+    authorizer: string,
+    nonceIdentifier: BytesLike,
+    nonce: BigNumberish,
+    spokePool: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getERC3009DepositWitness(
+    depositData: SpokePoolPeripheryInterface.DepositDataStruct,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getERC3009SwapAndBridgeWitness(
+    swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   multicall(
     data: BytesLike[],
     overrides?: Overrides & { from?: string }
@@ -575,7 +725,7 @@ export interface SpokePoolPeriphery extends BaseContract {
 
   permit2(overrides?: CallOverrides): Promise<string>;
 
-  permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  permitNonce(user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   swapAndBridge(
     swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
@@ -588,7 +738,6 @@ export interface SpokePoolPeriphery extends BaseContract {
     validAfter: BigNumberish,
     validBefore: BigNumberish,
     receiveWithAuthSignature: BytesLike,
-    swapAndDepositDataSignature: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -612,6 +761,20 @@ export interface SpokePoolPeriphery extends BaseContract {
   swapProxy(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
+    AUTHORIZATION_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+    BRIDGE_AND_SWAP_WITNESS_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    BRIDGE_WITNESS_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+    DEPOSIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+    PERMIT2_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
+    PERMIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<string>;
+
     depositNative(
       spokePool: string,
       recipient: BytesLike,
@@ -634,7 +797,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      depositDataSignature: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -669,11 +831,30 @@ export interface SpokePoolPeriphery extends BaseContract {
       }
     >;
 
+    getDepositId(
+      depositor: string,
+      authorizer: string,
+      nonceIdentifier: BytesLike,
+      nonce: BigNumberish,
+      spokePool: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getERC3009DepositWitness(
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getERC3009SwapAndBridgeWitness(
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     multicall(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
 
     permit2(overrides?: CallOverrides): Promise<string>;
 
-    permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    permitNonce(user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     swapAndBridge(
       swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
@@ -686,7 +867,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      swapAndDepositDataSignature: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -737,6 +917,22 @@ export interface SpokePoolPeriphery extends BaseContract {
   };
 
   estimateGas: {
+    AUTHORIZATION_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    BRIDGE_AND_SWAP_WITNESS_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    BRIDGE_WITNESS_IDENTIFIER(overrides?: CallOverrides): Promise<BigNumber>;
+
+    DEPOSIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PERMIT2_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PERMIT_NONCE_IDENTIFIER(overrides?: CallOverrides): Promise<BigNumber>;
+
     depositNative(
       spokePool: string,
       recipient: BytesLike,
@@ -759,7 +955,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -784,6 +979,25 @@ export interface SpokePoolPeriphery extends BaseContract {
 
     eip712Domain(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getDepositId(
+      depositor: string,
+      authorizer: string,
+      nonceIdentifier: BytesLike,
+      nonce: BigNumberish,
+      spokePool: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getERC3009DepositWitness(
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getERC3009SwapAndBridgeWitness(
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -791,7 +1005,7 @@ export interface SpokePoolPeriphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<BigNumber>;
 
-    permitNonces(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    permitNonce(user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     swapAndBridge(
       swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
@@ -804,7 +1018,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -829,6 +1042,30 @@ export interface SpokePoolPeriphery extends BaseContract {
   };
 
   populateTransaction: {
+    AUTHORIZATION_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    BRIDGE_AND_SWAP_WITNESS_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    BRIDGE_WITNESS_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    DEPOSIT_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    PERMIT2_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    PERMIT_NONCE_IDENTIFIER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     depositNative(
       spokePool: string,
       recipient: BytesLike,
@@ -851,7 +1088,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      depositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -876,6 +1112,25 @@ export interface SpokePoolPeriphery extends BaseContract {
 
     eip712Domain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    getDepositId(
+      depositor: string,
+      authorizer: string,
+      nonceIdentifier: BytesLike,
+      nonce: BigNumberish,
+      spokePool: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getERC3009DepositWitness(
+      depositData: SpokePoolPeripheryInterface.DepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getERC3009SwapAndBridgeWitness(
+      swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     multicall(
       data: BytesLike[],
       overrides?: Overrides & { from?: string }
@@ -883,8 +1138,8 @@ export interface SpokePoolPeriphery extends BaseContract {
 
     permit2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    permitNonces(
-      arg0: string,
+    permitNonce(
+      user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -899,7 +1154,6 @@ export interface SpokePoolPeriphery extends BaseContract {
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       receiveWithAuthSignature: BytesLike,
-      swapAndDepositDataSignature: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

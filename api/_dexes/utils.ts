@@ -43,6 +43,7 @@ import {
   getSpokePoolAddress,
   getWrappedNativeTokenAddress,
   isContractCache,
+  toAddressType,
 } from "../_utils";
 import { CHAIN_IDs } from "../_constants";
 import {
@@ -737,16 +738,24 @@ export async function extractDepositDataStruct(
     depositor: crossSwapQuotes.crossSwap.refundOnOrigin
       ? refundAddress
       : crossSwapQuotes.crossSwap.depositor,
-    recipient: utils.isMessageEmpty(message)
-      ? crossSwapQuotes.crossSwap.recipient
-      : getMultiCallHandlerAddress(destinationChainId),
+    recipient: toAddressType(
+      utils.isMessageEmpty(message)
+        ? crossSwapQuotes.crossSwap.recipient
+        : getMultiCallHandlerAddress(destinationChainId),
+      destinationChainId
+    ).toBytes32(),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
-    outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
+    outputToken: toAddressType(
+      crossSwapQuotes.bridgeQuote.outputToken.address,
+      destinationChainId
+    ).toBytes32(),
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
     outputAmount: crossSwapQuotes.bridgeQuote.outputAmount,
     destinationChainId,
-    exclusiveRelayer:
+    exclusiveRelayer: toAddressType(
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
+      destinationChainId
+    ).toBytes32(),
     quoteTimestamp: getQuoteTimestampArg(
       crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
       crossSwapQuotes.destinationSwapQuote?.tokenOut.chainId
