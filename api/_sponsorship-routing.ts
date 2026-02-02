@@ -137,7 +137,7 @@ export async function routeStrategyForSponsorship(
 
   let applicableRule: SponsorshipRoutingRule | null = null;
   let strategy: BridgeStrategy | null = null;
-  const rules = getRouteRules(params) ?? [];
+  const rules = getRouteRules(params);
 
   for (const rule of rules) {
     if (!rule.shouldApply(eligibilityData)) {
@@ -201,10 +201,13 @@ function getRouteRules(params: BridgeStrategyDataParams) {
     params.inputToken.symbol;
   const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
   const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
-  return (
-    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
-  );
+
+  const exactRules = exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : [];
+  const wildcardRules = wildcardKey
+    ? SPONSORSHIP_ROUTING_RULES[wildcardKey]
+    : [];
+
+  return [...exactRules, ...wildcardRules];
 }
 
 function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
