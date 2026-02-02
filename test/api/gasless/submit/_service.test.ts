@@ -8,8 +8,17 @@ vi.mock("../../../../api/_spoke-pool-periphery", () => ({
   getSpokePoolPeripheryAddress: vi.fn(() => MOCK_PERIPHERY_ADDRESS),
 }));
 
-vi.mock("../../../../api/_pubsub", () => ({
-  publishGaslessSubmission: vi.fn(() => Promise.resolve(MOCK_MESSAGE_ID)),
+vi.mock("../../../../api/gasless/submit/_publish-pubsub", () => ({
+  publishGaslessDepositMessage: vi.fn(() => Promise.resolve(MOCK_MESSAGE_ID)),
+}));
+
+vi.mock("../../../../api/_utils", () => ({
+  getLogger: vi.fn(() => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  })),
 }));
 
 vi.mock("../../../../api/_errors", () => ({
@@ -59,13 +68,12 @@ describe("handleGaslessSubmit", () => {
     vi.clearAllMocks();
   });
 
-  it("returns queued status with depositId and messageId", async () => {
+  it("returns depositId and messageId", async () => {
     const result = await handleGaslessSubmit(validBody, "req-123");
 
     expect(result).toEqual({
       depositId: "dep-123",
       messageId: MOCK_MESSAGE_ID,
-      status: "queued",
     });
   });
 
