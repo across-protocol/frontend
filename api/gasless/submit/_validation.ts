@@ -16,7 +16,7 @@ import { positiveInt, validEvmAddress, hexString } from "../../_utils";
 const EIP712DomainSchema = type({
   name: string(),
   version: string(),
-  chainId: positiveInt(),
+  chainId: positiveInt,
   verifyingContract: validEvmAddress(),
 });
 
@@ -49,9 +49,9 @@ const BaseDepositDataSchema = type({
   recipient: string(), // bytes32
   destinationChainId: string(),
   exclusiveRelayer: string(), // bytes32
-  quoteTimestamp: union([string(), positiveInt()]),
-  fillDeadline: union([string(), positiveInt()]),
-  exclusivityParameter: union([string(), positiveInt()]),
+  quoteTimestamp: union([string(), positiveInt]),
+  fillDeadline: union([string(), positiveInt]),
+  exclusivityParameter: union([string(), positiveInt]),
   message: string(), // bytes
 });
 
@@ -68,7 +68,7 @@ const SwapAndDepositDataSchema = type({
   depositData: BaseDepositDataSchema,
   swapToken: validEvmAddress(),
   exchange: validEvmAddress(),
-  transferType: union([string(), positiveInt()]),
+  transferType: union([string(), positiveInt]),
   swapTokenAmount: string(),
   minExpectedInputTokenAmount: string(),
   routerCalldata: string(), // bytes
@@ -106,7 +106,7 @@ const GaslessTxDataSchema = type({
 // Full GaslessTx schema
 export const GaslessTxSchema = type({
   ecosystem: literal("evm-gasless"),
-  chainId: positiveInt(),
+  chainId: positiveInt,
   to: validEvmAddress(),
   data: GaslessTxDataSchema,
 });
@@ -117,4 +117,22 @@ export const GaslessSubmitBodySchema = type({
   signature: hexString(),
 });
 
-export type GaslessSubmitBody = Infer<typeof GaslessSubmitBodySchema>;
+// Explicit type definition to avoid Infer issues with custom validators
+export type GaslessSubmitBody = {
+  swapTx: {
+    ecosystem: "evm-gasless";
+    chainId: number;
+    to: string;
+    data: {
+      type: "erc3009";
+      depositId: string;
+      witness:
+        | { type: "BridgeWitness"; data: Record<string, unknown> }
+        | { type: "BridgeAndSwapWitness"; data: Record<string, unknown> };
+      permit: Record<string, unknown>;
+      domainSeparator: string;
+      integratorId?: string;
+    };
+  };
+  signature: string;
+};

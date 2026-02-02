@@ -18,12 +18,16 @@ export async function handleGaslessSubmit(
   // Validate request body structure
   assert(body, GaslessSubmitBodySchema);
 
-  const { swapTx, signature } = body;
-  const { chainId, to: targetAddress } = swapTx;
-  const { depositId } = swapTx.data;
+  const swapTx = body.swapTx;
+  const signature = body.signature;
+  const chainId = swapTx.chainId;
+  const targetAddress = swapTx.to as string;
+  const depositId = swapTx.data.depositId;
 
   // Verify swapTx.to is a valid SpokePoolPeriphery for the given chainId
-  const peripheryAddress = getSpokePoolPeripheryAddress(chainId, false);
+  const peripheryAddress = getSpokePoolPeripheryAddress(chainId, false) as
+    | string
+    | undefined;
   if (
     !peripheryAddress ||
     peripheryAddress.toLowerCase() !== targetAddress.toLowerCase()
