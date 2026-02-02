@@ -3,12 +3,11 @@ import { assert } from "superstruct";
 import { GaslessSubmitBody, GaslessSubmitBodySchema } from "./_validation";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import { InvalidParamError } from "../../_errors";
-import { publishGaslessSubmission } from "../../_pubsub";
+import { publishGaslessDepositMessage } from "./_publish-pubsub";
 
 export type GaslessSubmitResponse = {
   depositId: string;
   messageId: string;
-  status: "queued";
 };
 
 export async function handleGaslessSubmit(
@@ -39,7 +38,7 @@ export async function handleGaslessSubmit(
   }
 
   // Publish to Pub/Sub
-  const messageId = await publishGaslessSubmission({
+  const messageId = await publishGaslessDepositMessage({
     swapTx,
     signature,
     submittedAt: new Date().toISOString(),
@@ -49,6 +48,5 @@ export async function handleGaslessSubmit(
   return {
     depositId,
     messageId,
-    status: "queued",
   };
 }

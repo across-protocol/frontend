@@ -5,14 +5,15 @@ import {
   literal,
   enums,
   union,
-  array,
-  record,
-  any,
-  Infer,
+  object,
 } from "superstruct";
-import { positiveInt, validEvmAddress, hexString } from "../../_utils";
+import {
+  positiveInt,
+  validEvmAddress,
+  hexString,
+  parsableBigNumberString,
+} from "../../_utils";
 
-// EIP712 Domain schema
 const EIP712DomainSchema = type({
   name: string(),
   version: string(),
@@ -20,18 +21,45 @@ const EIP712DomainSchema = type({
   verifyingContract: validEvmAddress(),
 });
 
-// EIP712 Type entry schema (e.g., { name: "from", type: "address" })
-const EIP712TypeEntrySchema = type({
-  name: string(),
-  type: string(),
-});
-
-// EIP712 full typed data schema
-const EIP712TypedDataSchema = type({
-  types: record(string(), array(EIP712TypeEntrySchema)),
+const ReceiveWithAuthorizationEIP712Schema = type({
+  types: object({
+    ReceiveWithAuthorization: object({
+      from: object({
+        name: literal("from"),
+        type: literal("address"),
+      }),
+      to: object({
+        name: literal("to"),
+        type: literal("address"),
+      }),
+      value: object({
+        name: literal("value"),
+        type: literal("uint256"),
+      }),
+      validAfter: object({
+        name: literal("validAfter"),
+        type: literal("uint256"),
+      }),
+      validBefore: object({
+        name: literal("validBefore"),
+        type: literal("uint256"),
+      }),
+      nonce: object({
+        name: literal("nonce"),
+        type: literal("bytes32"),
+      }),
+    }),
+  }),
   domain: EIP712DomainSchema,
-  primaryType: string(),
-  message: record(string(), any()),
+  primaryType: literal("ReceiveWithAuthorization"),
+  message: object({
+    from: validEvmAddress(),
+    to: validEvmAddress(),
+    value: parsableBigNumberString(),
+    validAfter: parsableBigNumberString(),
+    validBefore: parsableBigNumberString(),
+    nonce: hexString(),
+  }),
 });
 
 // Fees schema (matching SpokePoolPeriphery types)
@@ -98,7 +126,7 @@ const GaslessTxDataSchema = type({
   type: enums(["erc3009"]), // Extend: "permit", "permit2"
   depositId: string(),
   witness: WitnessSchema,
-  permit: EIP712TypedDataSchema,
+  permit: ReceiveWithAuthorizationEIP712Schema,
   domainSeparator: hexString(),
   integratorId: optional(string()),
 });
