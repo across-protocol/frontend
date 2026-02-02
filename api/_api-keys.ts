@@ -1,0 +1,58 @@
+import { createClient } from "@vercel/edge-config";
+
+export type Permission = "sponsored-gasless";
+
+export type ApiKeyRecord = {
+  name: string;
+  enabled: boolean;
+  permissions: Permission[];
+  rateLimit?: number;
+  createdAt: string;
+};
+
+export type ApiKeysStore = Record<string, ApiKeyRecord>;
+
+export type ValidateApiKeyResult = {
+  valid: boolean;
+  name?: string;
+  permissions?: Permission[];
+};
+
+let edgeConfigClient: ReturnType<typeof createClient> | undefined;
+
+function getEdgeConfigClient() {
+  if (!edgeConfigClient) {
+    const edgeConfigUrl = process.env.EDGE_CONFIG;
+    if (!edgeConfigUrl) {
+      return undefined;
+    }
+    edgeConfigClient = createClient(edgeConfigUrl);
+  }
+  return edgeConfigClient;
+}
+
+export async function validateApiKey(
+  apiKey: string | undefined
+): Promise<ValidateApiKeyResult> {
+  if (!apiKey) {
+    return { valid: false };
+  }
+
+  const client = getEdgeConfigClient();
+  if (!client) {
+    return { valid: false };
+  }
+
+  const keys = await client.get<ApiKeysStore>("api-keys");
+  const record = keys?.[apiKey];
+
+  if (!record || !record.enabled) {
+    return { valid: false };
+  }
+
+  return {
+    valid: true,
+    name: record.name,
+    permissions: record.permissions,
+  };
+}

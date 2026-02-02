@@ -1,5 +1,6 @@
 import { TypedVercelRequest } from "./_types";
 import { getEnvs } from "./_env";
+import { Permission, validateApiKey } from "./_api-keys";
 
 const { VERCEL_AUTOMATION_BYPASS_SECRET } = getEnvs();
 
@@ -18,4 +19,19 @@ export function parseRole(req: TypedVercelRequest<unknown, unknown>) {
   ) {
     return "opt-in-chains";
   }
+}
+
+export async function parseApiKeyPermissions(
+  req: TypedVercelRequest<unknown, unknown>
+): Promise<Permission[] | undefined> {
+  const apiKey = req.headers?.["x-api-key"] as string | undefined;
+  const { valid, permissions } = await validateApiKey(apiKey);
+  return valid ? permissions : undefined;
+}
+
+export function hasPermission(
+  permissions: Permission[] | undefined,
+  required: Permission
+): boolean {
+  return permissions?.includes(required) ?? false;
 }
