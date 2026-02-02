@@ -29,8 +29,8 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   "USDT:USDT-SPOT": [
     {
-      name: "usdt-usdt-spot-non-sponsored",
-      reason: "Non-sponsored USDT → USDT-SPOT route",
+      name: "usdt-usdt-spot-unsponsored-under-threshold",
+      reason: "Unsponsored USDT → USDT-SPOT route below mint/burn threshold",
       shouldApply: (data) =>
         data.isHyperCoreIntentSupported && !data.isMintBurnThresholdMet,
       getStrategy: () =>
@@ -38,6 +38,14 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
           isEligibleForSponsorship: false,
           shouldSponsorAccountCreation: false,
         }),
+    },
+    {
+      name: "usdt-usdt-spot-unsponsored-over-threshold",
+      reason:
+        "USDT → USDT-SPOT route above mint/burn threshold uses OFT (unsponsored)",
+      shouldApply: (data) =>
+        data.isOftEnabledOriginChain && data.isMintBurnThresholdMet,
+      getStrategy: () => getOftSponsoredBridgeStrategy(false),
     },
   ],
   "USDT:*": [
@@ -127,7 +135,7 @@ export async function routeStrategyForSponsorship(
 
   let applicableRule: SponsorshipRoutingRule | null = null;
   let strategy: BridgeStrategy | null = null;
-  const rules = getRouteRules(params);
+  const rules = getRouteRules(params) ?? [];
 
   for (const rule of rules) {
     if (!rule.shouldApply(eligibilityData)) {
@@ -191,13 +199,10 @@ function getRouteRules(params: BridgeStrategyDataParams) {
     params.inputToken.symbol;
   const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
   const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
-
-  const exactRules = exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : [];
-  const wildcardRules = wildcardKey
-    ? SPONSORSHIP_ROUTING_RULES[wildcardKey]
-    : [];
-
-  return [...exactRules, ...wildcardRules];
+  return (
+    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
+    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
+  );
 }
 
 function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
