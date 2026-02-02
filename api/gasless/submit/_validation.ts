@@ -37,8 +37,8 @@ const ReceiveWithAuthorizationEIP712Schema = type({
     from: validEvmAddress(),
     to: validEvmAddress(),
     value: parsableBigNumberString(),
-    validAfter: parsableBigNumberString(),
-    validBefore: parsableBigNumberString(),
+    validAfter: positiveInt,
+    validBefore: positiveInt,
     nonce: hexString(),
   }),
 });
@@ -56,12 +56,13 @@ const BaseDepositDataSchema = type({
   outputAmount: string(),
   depositor: validEvmAddress(),
   recipient: string(), // bytes32
-  destinationChainId: string(),
+  destinationChainId: positiveInt,
   exclusiveRelayer: string(), // bytes32
-  quoteTimestamp: union([string(), positiveInt]),
-  fillDeadline: union([string(), positiveInt]),
-  exclusivityParameter: union([string(), positiveInt]),
+  quoteTimestamp: positiveInt,
+  fillDeadline: positiveInt,
+  exclusivityParameter: positiveInt,
   message: string(), // bytes
+  exclusivityDeadline: optional(positiveInt),
 });
 
 // DepositData witness schema
@@ -69,6 +70,8 @@ const DepositDataSchema = type({
   submissionFees: FeesSchema,
   baseDepositData: BaseDepositDataSchema,
   inputAmount: string(),
+  spokePool: validEvmAddress(),
+  nonce: string(),
 });
 
 // SwapAndDepositData witness schema
