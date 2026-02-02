@@ -74,28 +74,6 @@ export type ApprovalTx =
       data: string;
     };
 
-export type GaslessTxArgsMethodAndWithoutSignatures =
-  | {
-      methodName: "depositWithAuthorization";
-      argsWithoutSignatures: {
-        signatureOwner: string;
-        depositData: SpokePoolPeripheryInterface.DepositDataStruct;
-        validAfter: BigNumberish;
-        validBefore: BigNumberish;
-        nonce: BytesLike;
-      };
-    }
-  | {
-      methodName: "swapAndBridgeWithAuthorization";
-      argsWithoutSignatures: {
-        signatureOwner: string;
-        swapAndDepositData: SpokePoolPeripheryInterface.SwapAndDepositDataStruct;
-        validAfter: BigNumberish;
-        validBefore: BigNumberish;
-        nonce: BytesLike;
-      };
-    };
-
 export type Witness =
   | {
       type: "BridgeWitness";
