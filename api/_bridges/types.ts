@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, BytesLike } from "ethers";
+import { BigNumber } from "ethers";
 
 import { CrossSwap, CrossSwapQuotes, SwapQuote, Token } from "../_dexes/types";
 import { AppFee, CrossSwapType } from "../_dexes/utils";
