@@ -302,12 +302,9 @@ export async function handleSwap<T, U>(params: {
   // @TODO: Allow for just enough approval amount to be set.
   const approvalAmount = ethers.constants.MaxUint256;
   if (params.flow === "approval") {
-    if (
-      (allowance ?? BigNumber.from(0)).lt(inputAmount) &&
-      originTx.ecosystem === "evm"
-    ) {
+    if (allowance.lt(inputAmount) && originTx.ecosystem === "evm") {
       approvalTxns = getApprovalTxns({
-        allowance: allowance ?? BigNumber.from(0),
+        allowance,
         token: crossSwapQuotes.crossSwap.inputToken,
         spender: originTx.to,
         amount: approvalAmount,
