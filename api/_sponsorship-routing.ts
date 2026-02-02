@@ -31,7 +31,8 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
     {
       name: "usdt-usdt-spot-non-sponsored",
       reason: "Non-sponsored USDT → USDT-SPOT route",
-      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      shouldApply: (data) =>
+        data.isHyperCoreIntentSupported && !data.isMintBurnThresholdMet,
       getStrategy: () =>
         getHyperCoreIntentBridgeStrategy({
           isEligibleForSponsorship: false,
