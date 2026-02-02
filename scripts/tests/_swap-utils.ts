@@ -318,8 +318,8 @@ export async function signAndWaitPermitFlow(params: {
     const submitGaslessResponse = await axios.post(
       `${SWAP_API_BASE_URL}/api/gasless/submit`,
       {
-        gaslessTx: params.swapResponse.swapTx,
-        signatures: { permit: permitSig },
+        swapTx: params.swapResponse.swapTx,
+        signature: permitSig,
       }
     );
     console.log("Submit gasless response:", submitGaslessResponse.data);
@@ -349,7 +349,10 @@ export async function signAndWaitPermitFlow(params: {
     await depositTx.wait();
   }
 
-  const fillTxnRef = await trackFill(depositId);
+  const fillTxnRef = await trackFill({
+    depositId,
+    originChainId: params.swapResponse.swapTx.chainId,
+  });
   if (fillTxnRef) {
     console.log("Fill txn ref:", fillTxnRef);
   } else {
@@ -397,7 +400,10 @@ export async function signAndWaitAllowanceFlow(params: {
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
     console.log("Tx mined");
-    const fillTxnRef = await trackFill(tx.hash);
+    const fillTxnRef = await trackFill({
+      depositTxnRef: tx.hash,
+      originChainId: params.swapResponse.swapTx.chainId,
+    });
     if (fillTxnRef) {
       console.log("Fill txn ref:", fillTxnRef);
     } else {
@@ -432,7 +438,10 @@ export async function signAndWaitAllowanceFlowSvm(params: {
     });
     await sendTx(signedTx as any, { commitment: "confirmed" });
     console.log("Tx sent and confirmed");
-    const fillTxnRef = await trackFill(signature.toString());
+    const fillTxnRef = await trackFill({
+      depositTxnRef: signature.toString(),
+      originChainId: params.swapResponse.swapTx.chainId,
+    });
     if (fillTxnRef) {
       console.log("Fill txn ref:", fillTxnRef);
     } else {
@@ -443,7 +452,18 @@ export async function signAndWaitAllowanceFlowSvm(params: {
   }
 }
 
-async function trackFill(txHash: string) {
+async function trackFill(params: {
+  depositTxnRef?: string;
+  depositId?: string | number;
+  originChainId: number;
+}) {
+  if (!params.depositTxnRef && !params.depositId) {
+    throw new Error("Either depositTxnRef or depositId must be provided");
+  }
+
+  const queryParams = params.depositTxnRef
+    ? { depositTxnRef: params.depositTxnRef }
+    : { depositId: params.depositId, originChainId: params.originChainId };
   const MAX_FILL_ATTEMPTS = 15;
   // Wait 2 seconds before starting polling
   await utils.delay(2);
@@ -452,7 +472,7 @@ async function trackFill(txHash: string) {
       const response = await axios.get(
         `${INDEXER_API_BASE_URL}/deposit/status`,
         {
-          params: { depositTxnRef: txHash },
+          params: queryParams,
         }
       );
       if (response.data.status === "filled") {

@@ -1,5 +1,4 @@
 import { Wallet } from "ethers";
-import { utils } from "@across-protocol/sdk";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 
 import { getProvider } from "../../api/_utils";
