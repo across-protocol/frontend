@@ -27,6 +27,19 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 
 // Priority-ordered routing rules for sponsorship by route key
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
+  "*:USDT-SPOT": [
+    {
+      name: "any-usdt-spot-non-sponsored",
+      reason:
+        "Non-sponsored route to USDT-SPOT (enables A2B flows like WETH → USDT-SPOT)",
+      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
   "USDT:USDT-SPOT": [
     {
       name: "usdt-usdt-spot-intent-unsponsored",
@@ -119,7 +132,16 @@ export async function routeStrategyForSponsorship(
 ): Promise<BridgeStrategy | null> {
   const logger = getLogger();
 
-  if (!isSponsoredRoute(params)) {
+  const isSponsoredRouteResult = isSponsoredRoute(params);
+  logger.debug({
+    at: "routeStrategyForSponsorship",
+    message: "Checking if route is sponsored",
+    inputToken: params.inputToken.symbol,
+    outputToken: params.outputToken.symbol,
+    isSponsoredRoute: isSponsoredRouteResult,
+  });
+
+  if (!isSponsoredRouteResult) {
     return null;
   }
 
@@ -200,10 +222,18 @@ function getRouteRules(params: BridgeStrategyDataParams) {
     TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
     params.inputToken.symbol;
   const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
-  const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
+  const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
+  const wildcardInputKey = buildRouteKey(
+    ROUTE_WILDCARD_SYMBOL,
+    params.outputToken.symbol
+  );
+
   return (
     (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
+    (wildcardOutputKey
+      ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
+      : undefined) ??
+    (wildcardInputKey ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey] : undefined)
   );
 }
 

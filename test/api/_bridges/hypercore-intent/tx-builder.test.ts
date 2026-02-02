@@ -5,11 +5,16 @@ import {
   buildTxSvm,
 } from "../../../../api/_bridges/hypercore-intent/utils/tx-builder";
 import { getSpokePool } from "../../../../api/_spoke-pool";
+import {
+  getSpokePoolPeriphery,
+  getSpokePoolPeripheryAddress,
+} from "../../../../api/_spoke-pool-periphery";
 import { getSVMRpc } from "../../../../api/_providers";
 import { CHAIN_IDs } from "../../../../api/_constants";
 import { CrossSwapQuotes } from "../../../../api/_dexes/types";
 
 vi.mock("../../../../api/_spoke-pool");
+vi.mock("../../../../api/_spoke-pool-periphery");
 vi.mock("../../../../api/_providers");
 
 vi.mock("@across-protocol/sdk", async (importOriginal) => {
@@ -37,6 +42,7 @@ vi.mock("@across-protocol/sdk", async (importOriginal) => {
         toBytes32: () => "0xBytes32",
         toBase58: () => addr,
         forceSvmAddress: () => addr,
+        toEvmAddress: () => addr,
       })),
     },
   };
@@ -142,6 +148,216 @@ describe("Tx Builder", () => {
 
       expect(result.data).toBe("encodedTx");
       expect(result.ecosystem).toBe("svm");
+    });
+  });
+
+  // Phase 3 tests
+  describe("Phase 3: Origin swap validation", () => {
+    describe("buildTxEvm with origin swap", () => {
+      it("should allow origin swap on EVM chains (trust cross-swap service)", async () => {
+        const spokePoolMock = {
+          address: "0xSpokePool",
+          populateTransaction: {
+            deposit: vi.fn().mockResolvedValue({ data: "0xdeadbeef" }),
+          },
+        };
+        const spokePoolPeripheryMock = {
+          address: "0xSpokePoolPeriphery",
+          populateTransaction: {
+            swapAndBridge: vi.fn().mockResolvedValue({ data: "0xdeadbeef" }),
+          },
+        };
+        (getSpokePool as ReturnType<typeof vi.fn>).mockReturnValue(
+          spokePoolMock
+        );
+        (getSpokePoolPeriphery as ReturnType<typeof vi.fn>).mockReturnValue(
+          spokePoolPeripheryMock
+        );
+        (
+          getSpokePoolPeripheryAddress as ReturnType<typeof vi.fn>
+        ).mockReturnValue("0xSpokePoolPeriphery");
+
+        const quotes = {
+          crossSwap: {
+            inputToken: {
+              chainId: CHAIN_IDs.POLYGON,
+              address: "0xDAI",
+              decimals: 18,
+              symbol: "DAI",
+            },
+            outputToken: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xUSDT-SPOT",
+              decimals: 8,
+              symbol: "USDT-SPOT",
+            },
+            depositor: "0xDepositor",
+            recipient: "0xRecipient",
+            isOriginSvm: false,
+            isInputNative: false,
+          },
+          bridgeQuote: {
+            inputToken: {
+              chainId: CHAIN_IDs.POLYGON,
+              address: "0xUSDT",
+              decimals: 6,
+              symbol: "USDT",
+            },
+            outputToken: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xUSDT-SPOT",
+              decimals: 8,
+              symbol: "USDT-SPOT",
+            },
+            inputAmount: BigNumber.from("1000000"),
+            outputAmount: BigNumber.from("100000000"),
+            message: "0xabcd",
+          },
+          originSwapQuote: {
+            tokenIn: {
+              chainId: CHAIN_IDs.POLYGON,
+              address: "0xDAI",
+              decimals: 18,
+              symbol: "DAI",
+            },
+            tokenOut: {
+              chainId: CHAIN_IDs.POLYGON,
+              address: "0xUSDT",
+              decimals: 6,
+              symbol: "USDT",
+            },
+            maximumAmountIn: BigNumber.from("1000000000000000000"),
+            minAmountOut: BigNumber.from("990000"),
+            expectedAmountOut: BigNumber.from("1000000"),
+            swapTxns: [
+              {
+                ecosystem: "evm",
+                data: "0xswapdata",
+              },
+            ],
+          },
+          contracts: {
+            originRouter: {
+              address: "0xDEXRouter",
+              name: "DEX Router",
+            },
+          },
+          destinationSwapQuote: undefined,
+          appFee: undefined,
+        } as unknown as CrossSwapQuotes;
+
+        // Now with origin swap, it should use swapAndBridge
+        const result = await buildTxEvm({ quotes });
+
+        expect(result.to).toBeDefined();
+        expect(result.data).toBeDefined();
+        // Should NOT call deposit, should use swapAndBridge instead
+        expect(
+          spokePoolMock.populateTransaction.deposit
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("buildTxEvm with destination swap", () => {
+      it("should reject destination swap", async () => {
+        const quotes = {
+          crossSwap: {
+            inputToken: {
+              chainId: CHAIN_IDs.POLYGON,
+              address: "0xUSDT",
+              decimals: 6,
+              symbol: "USDT",
+            },
+            outputToken: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xUSDT-SPOT",
+              decimals: 8,
+              symbol: "USDT-SPOT",
+            },
+            depositor: "0xDepositor",
+            recipient: "0xRecipient",
+            isOriginSvm: false,
+          },
+          bridgeQuote: {
+            inputAmount: BigNumber.from("1000000"),
+            outputAmount: BigNumber.from("100000000"),
+            message: "0x",
+          },
+          originSwapQuote: undefined,
+          destinationSwapQuote: {
+            tokenIn: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xUSDT",
+              decimals: 6,
+              symbol: "USDT",
+            },
+            tokenOut: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xDAI",
+              decimals: 18,
+              symbol: "DAI",
+            },
+            minAmountOut: BigNumber.from("1000000000000000000"),
+          },
+          appFee: undefined,
+        } as unknown as CrossSwapQuotes;
+
+        await expect(buildTxEvm({ quotes })).rejects.toThrow(
+          "Destination swap is not supported"
+        );
+      });
+    });
+
+    describe("buildTxSvm with origin swap", () => {
+      it("should reject origin swap on SVM chains", async () => {
+        (getSVMRpc as ReturnType<typeof vi.fn>).mockReturnValue({});
+
+        const quotes = {
+          crossSwap: {
+            inputToken: {
+              chainId: CHAIN_IDs.SOLANA,
+              address: "SolanaTokenSOL",
+              decimals: 9,
+              symbol: "SOL",
+            },
+            outputToken: {
+              chainId: CHAIN_IDs.HYPERCORE,
+              address: "0xUSDT-SPOT",
+              decimals: 8,
+              symbol: "USDT-SPOT",
+            },
+            depositor: "SolanaDepositor",
+            recipient: "0xRecipient",
+            isOriginSvm: true,
+          },
+          bridgeQuote: {
+            inputAmount: BigNumber.from("1000000000"),
+            outputAmount: BigNumber.from("100000000"),
+            message: "0x",
+          },
+          originSwapQuote: {
+            tokenIn: {
+              chainId: CHAIN_IDs.SOLANA,
+              address: "SolanaTokenSOL",
+              decimals: 9,
+              symbol: "SOL",
+            },
+            tokenOut: {
+              chainId: CHAIN_IDs.SOLANA,
+              address: "SolanaTokenUSDT",
+              decimals: 6,
+              symbol: "USDT",
+            },
+            minAmountOut: BigNumber.from("990000"),
+          },
+          destinationSwapQuote: undefined,
+          appFee: undefined,
+        } as unknown as CrossSwapQuotes;
+
+        await expect(buildTxSvm({ quotes })).rejects.toThrow(
+          "Origin swap is not supported"
+        );
+      });
     });
   });
 });

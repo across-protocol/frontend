@@ -11,6 +11,8 @@ import {
   addMarkupToAmount,
   ConvertDecimals,
   getSpokePoolAddress,
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP,
 } from "../_utils";
 import {
   calculateAppFee,
@@ -49,7 +51,6 @@ import {
 import { BridgeStrategy } from "../_bridges/types";
 import { getSpokePoolPeripheryAddress } from "../_spoke-pool-periphery";
 import { accountExistsOnHyperCore } from "../_hypercore";
-import { CHAIN_IDs } from "../_constants";
 import { validateDestinationSwapSlippage } from "../_slippage";
 
 const QUOTE_BUFFER = 0.005; // 0.5%
@@ -115,6 +116,15 @@ function getCrossSwapQuoteForAmountType(
     outputToken: crossSwap.outputToken,
     isInputNative: Boolean(crossSwap.isInputNative),
     isOutputNative: Boolean(crossSwap.isOutputNative),
+  });
+
+  logger.debug({
+    at: "getCrossSwapQuoteForAmountType",
+    message: "Cross-swap types determined",
+    bridgeName: bridge.name,
+    inputToken: `${crossSwap.inputToken.symbol} (${crossSwap.inputToken.chainId})`,
+    outputToken: `${crossSwap.outputToken.symbol} (${crossSwap.outputToken.chainId})`,
+    crossSwapTypes,
   });
 
   if (crossSwapTypes.length === 0) {
@@ -1018,10 +1028,57 @@ function _prepCrossSwapQuotesRetrievalA2B(
 ): CrossSwapQuotesRetrievalA2BResult[] {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
-  const bridgeRoute = getRouteByOutputTokenAndOriginChain(
+
+  // First, try to find a direct bridge route
+  let bridgeRoute = getRouteByOutputTokenAndOriginChain(
     crossSwap.outputToken.address,
     originSwapChainId
   );
+
+  // If no direct route exists, check for an indirect route (e.g., via HyperEVM for HyperCore destinations)
+  if (!bridgeRoute) {
+    logger.debug({
+      at: "_prepCrossSwapQuotesRetrievalA2B",
+      message: "No direct bridge route found, checking for indirect route",
+      originChainId: originSwapChainId,
+      destinationChainId,
+      inputToken: crossSwap.inputToken.address,
+      outputToken: crossSwap.outputToken.address,
+    });
+
+    const indirectRoute = getIndirectDestinationRoute({
+      originChainId: originSwapChainId,
+      destinationChainId,
+      inputToken: crossSwap.inputToken.address,
+      outputToken: crossSwap.outputToken.address,
+    });
+
+    logger.debug({
+      at: "_prepCrossSwapQuotesRetrievalA2B",
+      message: "Indirect route lookup result",
+      indirectRouteFound: !!indirectRoute,
+      intermediaryToken: indirectRoute?.intermediaryOutputToken.symbol,
+      intermediaryChain: indirectRoute?.intermediaryOutputToken.chainId,
+    });
+
+    if (indirectRoute) {
+      // Use the intermediary token as the bridge output token
+      // For example: Origin -> USDT on HyperEVM (intermediary) -> USDT-SPOT on HyperCore (final)
+      // The bridge strategy will handle the conversion to the intermediary chain internally
+      bridgeRoute = getRouteByOutputTokenAndOriginChain(
+        indirectRoute.intermediaryOutputToken.address,
+        originSwapChainId
+      );
+
+      logger.debug({
+        at: "_prepCrossSwapQuotesRetrievalA2B",
+        message: "Bridge route lookup with intermediary token",
+        intermediaryTokenAddress: indirectRoute.intermediaryOutputToken.address,
+        originChainId: originSwapChainId,
+        bridgeRouteFound: !!bridgeRoute,
+      });
+    }
+  }
 
   if (!bridgeRoute) {
     throw new Error(

@@ -68,21 +68,6 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
       ]);
     });
 
-    it("should return empty array for unsupported input token", () => {
-      const params = {
-        inputToken: {
-          address: "0x123", // Random address
-          chainId: CHAIN_IDs.OPTIMISM,
-          symbol: "RANDOM",
-          decimals: 18,
-        },
-        outputToken: USDH_ON_HYPEREVM,
-        isInputNative: false,
-        isOutputNative: false,
-      };
-      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
-    });
-
     it("should return empty array for unsupported origin chain", () => {
       const params = {
         inputToken: {
@@ -92,6 +77,99 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
           chainId: 999999, // Non-existent chain
         },
         outputToken: USDH_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+    });
+
+    // Phase 1 A2B tests
+    it("should return ANY_TO_BRIDGEABLE for A2B flow (DAI -> USDT-SPOT)", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return ANY_TO_BRIDGEABLE for A2B flow (WETH -> USDT-SPOT)", () => {
+      const WETH_ON_ARBITRUM = {
+        address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+        chainId: CHAIN_IDs.ARBITRUM,
+        symbol: "WETH",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: WETH_ON_ARBITRUM,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return BRIDGEABLE_TO_BRIDGEABLE for B2B flow (USDT -> USDT-SPOT)", () => {
+      const params = {
+        inputToken: USDT_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return empty array for unsupported output token", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const RANDOM_TOKEN = {
+        address: "0xabcdef1234567890",
+        chainId: CHAIN_IDs.HYPERCORE,
+        symbol: "RANDOM",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: RANDOM_TOKEN,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+    });
+
+    it("should return empty array for unsupported destination chain", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const TOKEN_ON_UNSUPPORTED_CHAIN = {
+        address: "0xabcdef1234567890",
+        chainId: 999999, // Unsupported destination chain
+        symbol: "USDT",
+        decimals: 6,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: TOKEN_ON_UNSUPPORTED_CHAIN,
         isInputNative: false,
         isOutputNative: false,
       };

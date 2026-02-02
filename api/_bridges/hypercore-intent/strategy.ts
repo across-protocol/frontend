@@ -4,7 +4,12 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
+import {
+  CrossSwap,
+  CrossSwapQuotes,
+  SwapQuote,
+  Token,
+} from "../../_dexes/types";
 import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import {
   getDepositMessage,
@@ -13,6 +18,12 @@ import {
   getDepositRecipient,
   assertSupportedRoute,
 } from "./utils/common";
+import {
+  SUPPORTED_DESTINATION_CHAINS,
+  SUPPORTED_INPUT_TOKENS,
+  SUPPORTED_ORIGIN_CHAINS,
+  SUPPORTED_OUTPUT_TOKENS,
+} from "./utils/constants";
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals } from "../../_utils";
@@ -29,7 +40,7 @@ const capabilities: BridgeCapabilities = {
   ecosystems: ["evm", "svm"],
   supports: {
     A2A: false,
-    A2B: false,
+    A2B: true,
     B2A: false,
     B2B: true,
     B2BI: false,
@@ -66,15 +77,45 @@ export function getHyperCoreIntentBridgeStrategy(
       isInputNative: boolean;
       isOutputNative: boolean;
     }) => {
-      if (
-        isRouteSupported({
-          inputToken: params.inputToken,
-          outputToken: params.outputToken,
-        })
-      ) {
-        return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
+      // Check if destination chain and output token are supported
+      if (!SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
+        return [];
       }
-      return [];
+
+      const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
+        (token) =>
+          token.addresses[params.outputToken.chainId]?.toLowerCase() ===
+          params.outputToken.address.toLowerCase()
+      );
+
+      if (!supportedOutputToken) {
+        return [];
+      }
+
+      // Check if origin chain is supported
+      if (!SUPPORTED_ORIGIN_CHAINS.includes(params.inputToken.chainId)) {
+        return [];
+      }
+
+      const crossSwapTypes: ReturnType<BridgeStrategy["getCrossSwapTypes"]> =
+        [];
+
+      // Check if input token is directly bridgeable (B2B flow)
+      const supportedInputToken = SUPPORTED_INPUT_TOKENS.find(
+        (token) =>
+          token.addresses[params.inputToken.chainId]?.toLowerCase() ===
+          params.inputToken.address.toLowerCase()
+      );
+
+      if (supportedInputToken) {
+        // Input token is USDC or USDT, can bridge directly
+        crossSwapTypes.push(CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE);
+      } else {
+        // Input token needs to be swapped first (A2B flow)
+        crossSwapTypes.push(CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE);
+      }
+
+      return crossSwapTypes;
     },
 
     getBridgeQuoteRecipient: async (
@@ -84,7 +125,11 @@ export function getHyperCoreIntentBridgeStrategy(
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: async (crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (
+      crossSwap: CrossSwap,
+      _appFee?: AppFee,
+      _originSwapQuote?: SwapQuote
+    ) => {
       return getDepositMessage({
         outputToken: crossSwap.outputToken,
         recipient: crossSwap.recipient,
