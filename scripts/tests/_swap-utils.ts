@@ -171,6 +171,12 @@ export const argsFromCli = yargs(hideBin(process.argv))
     type: "boolean",
     default: false,
   })
+  .option("depositViaApi", {
+    alias: "dva",
+    description: "Submit gasless deposit via API.",
+    type: "boolean",
+    default: false,
+  })
   .help()
   .parseSync();
 
@@ -313,7 +319,6 @@ export async function signAndWaitPermitFlow(params: {
   );
   console.log("Signed permit:", permitSig);
 
-  // TODO
   if (params.depositViaApi) {
     const submitGaslessResponse = await axios.post(
       `${SWAP_API_BASE_URL}/api/gasless/submit`,

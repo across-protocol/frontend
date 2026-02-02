@@ -50,7 +50,11 @@ async function swap() {
       // allowance-based flow and return the relevant EIP712 data.
       if (swapQuote.swapTx.ecosystem === "evm-gasless") {
         // sign permit + relay + track
-        await signAndWaitPermitFlow({ wallet, swapResponse: swapQuote });
+        await signAndWaitPermitFlow({
+          wallet,
+          swapResponse: swapQuote,
+          depositViaApi: argsFromCli.depositViaApi,
+        });
       }
       // if no permit-based flow is available, we can use the allowance-based flow
       else {
