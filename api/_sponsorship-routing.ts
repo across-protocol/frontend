@@ -29,10 +29,12 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   "USDT:USDT-SPOT": [
     {
-      name: "usdt-usdt-spot-unsponsored-under-threshold",
-      reason: "Unsponsored USDT → USDT-SPOT route below mint/burn threshold",
+      name: "usdt-usdt-spot-intent-unsponsored",
+      reason:
+        "Unsponsored USDT → USDT-SPOT route below mint/burn threshold or OFT not enabled)",
       shouldApply: (data) =>
-        data.isHyperCoreIntentSupported && !data.isMintBurnThresholdMet,
+        data.isHyperCoreIntentSupported &&
+        (!data.isMintBurnThresholdMet || !data.isOftEnabledOriginChain),
       getStrategy: () =>
         getHyperCoreIntentBridgeStrategy({
           isEligibleForSponsorship: false,
@@ -40,7 +42,7 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         }),
     },
     {
-      name: "usdt-usdt-spot-unsponsored-over-threshold",
+      name: "usdt-usdt-spot-oft-unsponsored",
       reason:
         "USDT → USDT-SPOT route above mint/burn threshold uses OFT (unsponsored)",
       shouldApply: (data) =>
