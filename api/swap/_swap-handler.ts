@@ -185,11 +185,18 @@ export async function handleSwap<T, U>(params: {
     return { allowance, balance };
   };
 
-  const estimateOriginTxGas = async () => {
+  const estimateOriginTxGas = async (checks: {
+    allowance: BigNumber;
+    balance: BigNumber;
+  }) => {
     if (
       originTx.ecosystem === "svm" ||
       originTx.isGasless ||
-      baseParams.skipOriginTxEstimation
+      baseParams.skipOriginTxEstimation ||
+      // Skip gas estimation if allowance or balance is insufficient, as the
+      // simulation will fail. This matches the previous behavior.
+      checks.allowance.lt(inputAmount) ||
+      checks.balance.lt(inputAmount)
     ) {
       return { originTxGas: BigNumber.from(0), originTxGasPrice: undefined };
     }
@@ -223,15 +230,16 @@ export async function handleSwap<T, U>(params: {
     crossSwapQuotes.bridgeQuote.inputToken.chainId
   );
 
+  // Run checks first to get allowance and balance
   const [
+    { allowance, balance },
     inputTokenPriceUsd,
     outputTokenPriceUsd,
     originNativePriceUsd,
     destinationNativePriceUsd,
     bridgeQuoteInputTokenPriceUsd,
-    { originTxGas, originTxGasPrice },
-    { allowance, balance },
   ] = await Promise.all([
+    executeChecks(),
     getCachedTokenPrice({
       symbol: baseParams.inputToken.symbol,
       tokenAddress: baseParams.inputToken.address,
@@ -288,9 +296,14 @@ export async function handleSwap<T, U>(params: {
           fallbackResolver: "lifi",
         })
       : 0,
-    estimateOriginTxGas(),
-    executeChecks(),
   ]);
+
+  // Estimate gas after checks complete, as we need allowance/balance to decide
+  // whether simulation would succeed
+  const { originTxGas, originTxGasPrice } = await estimateOriginTxGas({
+    allowance,
+    balance,
+  });
 
   let approvalTxns:
     | {
