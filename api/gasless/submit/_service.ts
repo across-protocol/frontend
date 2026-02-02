@@ -1,4 +1,5 @@
 import { assert } from "superstruct";
+import { utils } from "ethers";
 
 import { GaslessSubmitBody, GaslessSubmitBodySchema } from "./_validation";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
@@ -32,8 +33,58 @@ export async function handleGaslessSubmit(
     peripheryAddress.toLowerCase() !== targetAddress.toLowerCase()
   ) {
     throw new InvalidParamError({
-      message: `Invalid target address. Expected SpokePoolPeriphery at ${peripheryAddress} for chain ${chainId}, got ${targetAddress}`,
+      message: `Invalid target address. Expected SpokePoolPeriphery at ${
+        peripheryAddress
+      } for chain ${chainId}, got ${targetAddress}`,
       param: "swapTx.to",
+    });
+  }
+
+  // Verify signature matches permit.message.from
+  const permit = swapTx.data.permit;
+
+  let recoveredSigner: string;
+  try {
+    recoveredSigner = utils.verifyTypedData(
+      permit.domain,
+      permit.types,
+      permit.message,
+      signature
+    );
+  } catch {
+    throw new InvalidParamError({
+      message: "Invalid signature: unable to recover signer",
+      param: "signature",
+    });
+  }
+
+  if (recoveredSigner.toLowerCase() !== permit.message.from.toLowerCase()) {
+    throw new InvalidParamError({
+      message: `Signature mismatch. Expected ${permit.message.from}, got ${recoveredSigner}`,
+      param: "signature",
+    });
+  }
+
+  // Verify permit.message.from matches depositor
+  const witness = swapTx.data.witness as
+    | {
+        type: "BridgeWitness";
+        data: { baseDepositData: { depositor: string } };
+      }
+    | {
+        type: "BridgeAndSwapWitness";
+        data: { depositData: { depositor: string } };
+      };
+
+  const depositor =
+    witness.type === "BridgeWitness"
+      ? witness.data.baseDepositData.depositor
+      : witness.data.depositData.depositor;
+
+  if (permit.message.from.toLowerCase() !== depositor.toLowerCase()) {
+    throw new InvalidParamError({
+      message: `permit.message.from must match depositor`,
+      param: "swapTx.data.permit.message.from",
     });
   }
 

@@ -6,6 +6,7 @@ import {
   enums,
   union,
   object,
+  array,
 } from "superstruct";
 import {
   positiveInt,
@@ -23,32 +24,12 @@ const EIP712DomainSchema = type({
 
 const ReceiveWithAuthorizationEIP712Schema = type({
   types: object({
-    ReceiveWithAuthorization: object({
-      from: object({
-        name: literal("from"),
-        type: literal("address"),
-      }),
-      to: object({
-        name: literal("to"),
-        type: literal("address"),
-      }),
-      value: object({
-        name: literal("value"),
-        type: literal("uint256"),
-      }),
-      validAfter: object({
-        name: literal("validAfter"),
-        type: literal("uint256"),
-      }),
-      validBefore: object({
-        name: literal("validBefore"),
-        type: literal("uint256"),
-      }),
-      nonce: object({
-        name: literal("nonce"),
-        type: literal("bytes32"),
-      }),
-    }),
+    ReceiveWithAuthorization: array(
+      object({
+        name: string(),
+        type: string(),
+      })
+    ),
   }),
   domain: EIP712DomainSchema,
   primaryType: literal("ReceiveWithAuthorization"),

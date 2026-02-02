@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const MOCK_PERIPHERY_ADDRESS = "0x1234567890123456789012345678901234567890";
 const MOCK_MESSAGE_ID = "msg-123";
+const MOCK_SIGNER_ADDRESS = "0xAbCdEf1234567890AbCdEf1234567890AbCdEf12";
 
 // Mock all external dependencies
 vi.mock("../../../../api/_spoke-pool-periphery", () => ({
@@ -23,17 +24,17 @@ vi.mock("../../../../api/_utils", () => ({
 
 vi.mock("../../../../api/_errors", () => ({
   InvalidParamError: class InvalidParamError extends Error {
+    param?: string;
     constructor(args: { message: string; param?: string }) {
       super(args.message);
+      this.param = args.param;
     }
   },
 }));
 
 // Mock validation to skip superstruct chain
 vi.mock("../../../../api/gasless/submit/_validation", () => ({
-  GaslessSubmitBodySchema: {
-    // Dummy schema that passes validation
-  },
+  GaslessSubmitBodySchema: {},
   GaslessTxSchema: {},
 }));
 
@@ -42,34 +43,79 @@ vi.mock("superstruct", () => ({
   assert: vi.fn(),
 }));
 
+// Mock ethers utils.verifyTypedData
+const mockVerifyTypedData = vi.fn(() => MOCK_SIGNER_ADDRESS);
+vi.mock("ethers", () => ({
+  utils: {
+    verifyTypedData: () => mockVerifyTypedData(),
+  },
+}));
+
 // Import after mocks
 const { handleGaslessSubmit } = await import(
   "../../../../api/gasless/submit/_service"
 );
 
-const validBody = {
-  swapTx: {
-    ecosystem: "evm-gasless" as const,
-    chainId: 1,
-    to: MOCK_PERIPHERY_ADDRESS,
-    data: {
-      type: "erc3009" as const,
-      depositId: "dep-123",
-      domainSeparator: "0xabcd",
-      witness: { type: "BridgeWitness" as const, data: {} },
-      permit: { types: {}, domain: {}, primaryType: "Test", message: {} },
+const createValidBody = (
+  overrides: {
+    signerAddress?: string;
+    depositor?: string;
+    witnessType?: "BridgeWitness" | "BridgeAndSwapWitness";
+  } = {}
+) => {
+  const signerAddress = overrides.signerAddress ?? MOCK_SIGNER_ADDRESS;
+  const depositor = overrides.depositor ?? MOCK_SIGNER_ADDRESS;
+  const witnessType = overrides.witnessType ?? "BridgeWitness";
+
+  const witnessData =
+    witnessType === "BridgeWitness"
+      ? { baseDepositData: { depositor } }
+      : { depositData: { depositor } };
+
+  return {
+    swapTx: {
+      ecosystem: "evm-gasless" as const,
+      chainId: 1,
+      to: MOCK_PERIPHERY_ADDRESS,
+      data: {
+        type: "erc3009" as const,
+        depositId: "dep-123",
+        domainSeparator: "0xabcd",
+        witness: { type: witnessType, data: witnessData },
+        permit: {
+          types: [
+            {
+              ReceiveWithAuthorization: {
+                from: { name: "from", type: "address" },
+                to: { name: "to", type: "address" },
+                value: { name: "value", type: "uint256" },
+              },
+            },
+          ],
+          domain: {
+            name: "TestToken",
+            version: "1",
+            chainId: 1,
+            verifyingContract: "0x0000000000000000000000000000000000000001",
+          },
+          primaryType: "ReceiveWithAuthorization",
+          message: { from: signerAddress },
+        },
+      },
     },
-  },
-  signature: "0xabcd1234",
+    signature: "0xabcd1234",
+  };
 };
 
 describe("handleGaslessSubmit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockVerifyTypedData.mockReturnValue(MOCK_SIGNER_ADDRESS);
   });
 
-  it("returns depositId and messageId", async () => {
-    const result = await handleGaslessSubmit(validBody, "req-123");
+  it("returns depositId and messageId with valid signature", async () => {
+    const body = createValidBody();
+    const result = await handleGaslessSubmit(body, "req-123");
 
     expect(result).toEqual({
       depositId: "dep-123",
@@ -78,16 +124,57 @@ describe("handleGaslessSubmit", () => {
   });
 
   it("throws when swapTx.to does not match periphery address", async () => {
-    const invalidBody = {
-      ...validBody,
-      swapTx: {
-        ...validBody.swapTx,
-        to: "0x0000000000000000000000000000000000000001",
-      },
-    };
+    const body = createValidBody();
+    body.swapTx.to = "0x0000000000000000000000000000000000000001";
 
-    await expect(handleGaslessSubmit(invalidBody, "req-123")).rejects.toThrow(
+    await expect(handleGaslessSubmit(body, "req-123")).rejects.toThrow(
       /Invalid target address/
     );
+  });
+
+  it("throws when signature recovery fails", async () => {
+    mockVerifyTypedData.mockImplementation(() => {
+      throw new Error("Invalid signature");
+    });
+
+    const body = createValidBody();
+
+    await expect(handleGaslessSubmit(body, "req-123")).rejects.toThrow(
+      /Invalid signature: unable to recover signer/
+    );
+  });
+
+  it("throws when recovered signer does not match permit.message.from", async () => {
+    const wrongSigner = "0x9999999999999999999999999999999999999999";
+    mockVerifyTypedData.mockReturnValue(wrongSigner);
+
+    const body = createValidBody();
+
+    await expect(handleGaslessSubmit(body, "req-123")).rejects.toThrow(
+      /Signature mismatch/
+    );
+  });
+
+  it("throws when permit.message.from does not match depositor", async () => {
+    const differentDepositor = "0x8888888888888888888888888888888888888888";
+    const body = createValidBody({ depositor: differentDepositor });
+
+    await expect(handleGaslessSubmit(body, "req-123")).rejects.toThrow(
+      /permit.message.from must match depositor/
+    );
+  });
+
+  it("extracts depositor from BridgeWitness correctly", async () => {
+    const body = createValidBody({ witnessType: "BridgeWitness" });
+    const result = await handleGaslessSubmit(body, "req-123");
+
+    expect(result.depositId).toBe("dep-123");
+  });
+
+  it("extracts depositor from BridgeAndSwapWitness correctly", async () => {
+    const body = createValidBody({ witnessType: "BridgeAndSwapWitness" });
+    const result = await handleGaslessSubmit(body, "req-123");
+
+    expect(result.depositId).toBe("dep-123");
   });
 });
