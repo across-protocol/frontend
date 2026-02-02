@@ -1,5 +1,4 @@
 import { assert } from "superstruct";
-import { v1 } from "@google-cloud/pubsub";
 import { getLogger } from "../_utils";
 import { getGaslessPubSubConfig } from "./_config";
 import {
@@ -8,6 +7,7 @@ import {
   type PendingGaslessDeposit,
   type GaslessPendingResponse,
 } from "./_types";
+import { getSubscriberClient } from "../_pubsub";
 
 const logger = getLogger();
 
@@ -52,9 +52,7 @@ function isWithinTtl(
 
 export async function fetchPendingGaslessDeposits(): Promise<GaslessPendingResponse> {
   const config = getGaslessPubSubConfig();
-  const subClient = new v1.SubscriberClient(
-    config.credentials ? { credentials: config.credentials } : {}
-  );
+  const subClient = getSubscriberClient();
   const subscriptionPath = subClient.subscriptionPath(
     config.projectId,
     config.subscriptionName
