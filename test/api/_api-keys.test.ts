@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   validateApiKey,
-  hasPermission,
   type Permission,
   type ApiKeysStore,
 } from "../../api/_api-keys";
+import { hasPermission } from "../../api/_auth";
 
 // Mock the @vercel/edge-config module
 const mockGet = vi.fn();
