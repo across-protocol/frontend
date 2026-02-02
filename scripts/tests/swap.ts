@@ -1,5 +1,4 @@
 import { Wallet } from "ethers";
-import { utils } from "@across-protocol/sdk";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 
 import { getProvider } from "../../api/_utils";
@@ -29,14 +28,14 @@ async function swap() {
     }
 
     if (
-      utils.chainIsSvm(swapQuote.swapTx.chainId) &&
+      swapQuote.swapTx.ecosystem === "svm" &&
       process.env.DEV_WALLET_KEY_PAIR_SVM
     ) {
       const seed = getSvmSignerSeed();
       const wallet = await createKeyPairSignerFromBytes(seed);
       console.log("Executing tx on SVM using wallet:", wallet.address);
 
-      if (swapQuote.eip712) {
+      if (swapQuote.swapTx.typedData) {
         throw new Error("EIP712 not supported on SVM");
       } else {
         await signAndWaitAllowanceFlowSvm({ wallet, swapResponse: swapQuote });
@@ -49,7 +48,7 @@ async function swap() {
 
       // if a permit-based flow is available, the unified endpoint will prefer that over an
       // allowance-based flow and return the relevant EIP712 data.
-      if (swapQuote.eip712) {
+      if (swapQuote.swapTx.ecosystem === "evm-gasless") {
         // sign permit + relay + track
         await signAndWaitPermitFlow({ wallet, swapResponse: swapQuote });
       }
