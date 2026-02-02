@@ -5,8 +5,16 @@ import { SpokePoolPeripheryInterface } from "./_typechain/SpokePoolPeriphery.sol
 import { ENABLED_ROUTES, getProvider, toAddressType } from "./_utils";
 import { CHAIN_IDs } from "./_constants";
 
-const SPOKE_POOL_PERIPHERY_ADDRESS_OVERRIDES = {
-  [CHAIN_IDs.OPTIMISM]: "0xd9c11d43822cF15c8edce5C341b32Ed416cd0a89",
+// These addresses are currently in-audit. We use these addresses for testing purposes
+// until the audit is complete and official contracts are deployed.
+const SPOKE_POOL_PERIPHERY_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.OPTIMISM]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
+  [CHAIN_IDs.BASE]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
+};
+
+const SWAP_PROXY_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.OPTIMISM]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
+  [CHAIN_IDs.BASE]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
 };
 
 export class UnknownPeripheryOnChain extends Error {
@@ -46,6 +54,10 @@ export function getSpokePoolPeripheryAddress(
 }
 
 export function getSwapProxyAddress(chainId: number) {
+  const override = SWAP_PROXY_ADDRESS_OVERRIDES[chainId];
+  if (override) {
+    return override;
+  }
   const address =
     ENABLED_ROUTES.swapProxyAddresses[
       chainId as keyof typeof ENABLED_ROUTES.swapProxyAddresses
