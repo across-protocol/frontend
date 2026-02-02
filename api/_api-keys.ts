@@ -56,10 +56,3 @@ export async function validateApiKey(
     permissions: record.permissions,
   };
 }
-
-export function hasPermission(
-  permissions: Permission[] | undefined,
-  required: Permission
-): boolean {
-  return permissions?.includes(required) ?? false;
-}

@@ -28,3 +28,10 @@ export async function parseApiKeyPermissions(
   const { valid, permissions } = await validateApiKey(apiKey);
   return valid ? permissions : undefined;
 }
+
+export function hasPermission(
+  permissions: Permission[] | undefined,
+  required: Permission
+): boolean {
+  return permissions?.includes(required) ?? false;
+}
