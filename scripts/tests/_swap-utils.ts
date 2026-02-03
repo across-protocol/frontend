@@ -320,8 +320,9 @@ export async function signAndWaitPermitFlow(params: {
   console.log("Signed permit:", permitSig);
 
   if (params.depositViaApi) {
+    const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
     const submitGaslessResponse = await axios.post(
-      `${SWAP_API_BASE_URL}/api/gasless/submit`,
+      `${baseUrl}/api/gasless/submit`,
       {
         swapTx: params.swapResponse.swapTx,
         signature: permitSig,
