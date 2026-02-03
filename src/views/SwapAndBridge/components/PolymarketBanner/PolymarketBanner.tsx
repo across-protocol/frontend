@@ -1,19 +1,18 @@
 import { useState } from "react";
 
-import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import { useHasPolymarketAccount } from "./useHasPolymarketAccount";
 import { PolymarketAddressModal } from "./PolymarketAddressModal";
 import {
-  BannerWrapper,
-  BannerHeader,
-  LogoIcon,
-  PolymarketLogo,
   BannerBrandText,
   BannerContent,
+  BannerHeader,
+  BannerSubtitle,
+  BannerTitle,
+  BannerWrapper,
+  LogoIcon,
+  PolymarketLogo,
   SendIconContainer,
   TextContainer,
-  BannerTitle,
-  BannerSubtitle,
 } from "./PolymarketBanner.styles";
 
 function SendIcon() {
@@ -39,12 +38,9 @@ function SendIcon() {
 export function PolymarketBanner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const featureFlagEnabled = useFeatureFlag("polymarket-banner");
-  const { hasAccount, proxyWallet, isLoading } = useHasPolymarketAccount();
+  const { hasAccount, profile, isLoading } = useHasPolymarketAccount();
 
-  const shouldShow = featureFlagEnabled && hasAccount && !isLoading;
-
-  if (!shouldShow) {
+  if (!hasAccount || isLoading || !profile) {
     return null;
   }
 
@@ -71,7 +67,7 @@ export function PolymarketBanner() {
       <PolymarketAddressModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        defaultAddress={proxyWallet}
+        profile={profile}
       />
     </>
   );

@@ -1,61 +1,31 @@
-import { useEffect, useRef, useState } from "react";
-import { ethers } from "ethers";
 import { useHotkeys } from "react-hotkeys-hook";
+import styled from "@emotion/styled";
 
 import { Modal, Text } from "components";
 import { PrimaryButton } from "components/Button";
-import { Input, InputGroup } from "components/Input";
-import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
-import { useDisallowList } from "hooks/useDisallowList";
-import { CHAIN_IDs } from "utils";
+import { CHAIN_IDs, COLORS, shortenAddress } from "utils";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
+import { PolymarketProfile } from "./useHasPolymarketAccount";
 
-import {
-  ModalWrapper,
-  ModalInstruction,
-  ModalLink,
-  ButtonWrapper,
-} from "./PolymarketBanner.styles";
-import styled from "@emotion/styled";
+import { ModalWrapper, ButtonWrapper } from "./PolymarketBanner.styles";
 
 interface PolymarketAddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultAddress?: string | null;
+  profile: PolymarketProfile;
 }
 
 export function PolymarketAddressModal({
   isOpen,
   onClose,
-  defaultAddress,
+  profile,
 }: PolymarketAddressModalProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [userInput, setUserInput] = useState("");
-  const [validInput, setValidInput] = useState(false);
-
-  const { isBlocked, isLoading } = useDisallowList(userInput ?? "");
   const { setDestinationToken, setCustomDestinationAccount } =
     useQuoteRequestContext();
   const routeData = useEnrichedCrosschainBalances();
 
-  useEffect(() => {
-    if (isOpen) {
-      inputRef.current?.focus();
-      setUserInput(defaultAddress ?? "");
-    }
-  }, [isOpen, defaultAddress]);
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const isValidAddress = ethers.utils.isAddress(userInput) && !isBlocked;
-    setValidInput(isValidAddress);
-  }, [userInput, isBlocked, isLoading]);
-
   const handleConfirm = () => {
-    if (!validInput) return;
-
     const polygonUsdc = routeData[CHAIN_IDs.POLYGON]?.find(
       (token) => token.symbol.toUpperCase() === "USDC"
     );
@@ -66,23 +36,26 @@ export function PolymarketAddressModal({
 
     setCustomDestinationAccount({
       accountType: "evm",
-      address: userInput,
+      address: profile.proxyWallet,
     });
 
     onClose();
   };
 
-  const handleClear = () => {
-    setUserInput("");
-  };
-
-  const validationLevel = !validInput && !!userInput ? "error" : "valid";
-
   useHotkeys("esc", () => onClose(), { enableOnFormTags: true });
+
+  const createdDate = new Date(profile.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const hasCustomName =
+    profile.name && !profile.name.toLowerCase().startsWith("0x");
 
   return (
     <Modal
-      title="Polymarket Destination Address"
+      title="Polymarket Account"
       exitModalHandler={onClose}
       verticalLocation="middle"
       isOpen={isOpen}
@@ -91,39 +64,34 @@ export function PolymarketAddressModal({
       titleBorder
     >
       <ModalWrapper>
-        <ModalInstruction>
-          You can find the address by clicking the User icon and short
-          instruction{" "}
-          <ModalLink
-            href="https://polymarket.com/profile"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            here
-          </ModalLink>{" "}
-          to find correct address.
-        </ModalInstruction>
-
-        <InputGroup validationLevel={validationLevel}>
-          <Input
-            spellCheck={false}
-            ref={inputRef}
-            validationLevel={validationLevel}
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="0x..."
-          />
-          {userInput && (
-            <CrossIconWrapper onClick={handleClear}>
-              <StyledCrossIcon />
-            </CrossIconWrapper>
+        <ProfileSection>
+          {hasCustomName && (
+            <ProfileRow>
+              <ProfileLabel>Account Name</ProfileLabel>
+              <ProfileValue>{profile.name}</ProfileValue>
+            </ProfileRow>
           )}
-        </InputGroup>
+          <ProfileRow>
+            <ProfileLabel>Deposit Address</ProfileLabel>
+            <ProfileValue>
+              {shortenAddress(profile.proxyWallet, "...", 6)}
+            </ProfileValue>
+          </ProfileRow>
+          <ProfileRow>
+            <ProfileLabel>Account Created</ProfileLabel>
+            <ProfileValue>{createdDate}</ProfileValue>
+          </ProfileRow>
+        </ProfileSection>
+
+        <InfoText>
+          Confirming will set your destination to Polygon USDC with your
+          Polymarket deposit address as the recipient.
+        </InfoText>
 
         <ButtonWrapper>
-          <ConfirmButton disabled={!validInput} onClick={handleConfirm}>
+          <ConfirmButton onClick={handleConfirm}>
             <Text size="lg" weight={500} color="dark-grey">
-              Confirm address
+              Confirm
             </Text>
           </ConfirmButton>
         </ButtonWrapper>
@@ -132,24 +100,38 @@ export function PolymarketAddressModal({
   );
 }
 
-const CrossIconWrapper = styled.div`
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 32px;
+const ProfileSection = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  background: ${COLORS["black-700"]};
+  border-radius: 12px;
 `;
 
-const StyledCrossIcon = styled(CrossIcon)`
-  & svg * {
-    stroke: black;
-  }
-  height: 16px;
-  width: 16px;
-  flex-shrink: 0;
+const ProfileRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const ProfileLabel = styled.span`
+  font-size: 14px;
+  color: ${COLORS["grey-400"]};
+`;
+
+const ProfileValue = styled.span`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${COLORS["white-100"]};
+`;
+
+const InfoText = styled.p`
+  font-size: 14px;
+  color: ${COLORS["grey-400"]};
+  line-height: 1.5;
+  margin: 0;
 `;
 
 const ConfirmButton = styled(PrimaryButton)`

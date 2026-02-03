@@ -1,14 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 
-interface PolymarketProfile {
-  proxyWallet?: string;
+export interface PolymarketProfile {
+  proxyWallet: string;
+  createdAt: string;
+  name: string;
+  verifiedBadge: boolean;
 }
 
 async function fetchPolymarketProfile(
   address: string
 ): Promise<PolymarketProfile | null> {
-  const response = await fetch(`/api/polymarket-profile?address=${address}`);
+  const response = await fetch(
+    `https://app-frontend-v3-git-jorgen-fe-352-polymarket-banner-uma.vercel.app/api/polymarket-profile?address=${address}`
+  );
 
   if (response.status === 404) {
     return null;
@@ -35,7 +40,7 @@ export function useHasPolymarketAccount() {
 
   return {
     hasAccount: Boolean(data?.proxyWallet),
-    proxyWallet: data?.proxyWallet ?? null,
+    profile: data,
     isLoading,
   };
 }
