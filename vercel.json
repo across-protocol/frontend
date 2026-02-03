@@ -55,6 +55,10 @@
     {
       "source": "/api/deposits",
       "destination": "https://indexer.api.across.to/deposits"
+    },
+    {
+      "source": "/api/polymarket-profile",
+      "destination": "https://gamma-api.polymarket.com/public-profile"
     }
   ],
   "redirects": [
