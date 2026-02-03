@@ -5,9 +5,13 @@ import {
   GaslessDepositMessageSchema,
   type GaslessDepositMessage,
   type PendingGaslessDeposit,
-  type GaslessPendingResponse,
 } from "./_types";
 import { getSubscriberClient } from "../_pubsub";
+
+export type FetchPendingGaslessDepositsResult = {
+  deposits: PendingGaslessDeposit[];
+  cleanup: () => Promise<void>;
+};
 
 const logger = getLogger();
 
@@ -50,7 +54,7 @@ function isWithinTtl(
   return nowSeconds - publishSeconds <= ttlSeconds;
 }
 
-export async function fetchPendingGaslessDeposits(): Promise<GaslessPendingResponse> {
+export async function fetchPendingGaslessDeposits(): Promise<FetchPendingGaslessDepositsResult> {
   const config = getGaslessPubSubConfig();
   const subClient = getSubscriberClient();
   const subscriptionPath = subClient.subscriptionPath(
@@ -62,100 +66,100 @@ export async function fetchPendingGaslessDeposits(): Promise<GaslessPendingRespo
   const nackIds: string[] = [];
   const deposits: PendingGaslessDeposit[] = [];
 
-  try {
-    const [response] = await subClient.pull({
-      subscription: subscriptionPath,
-      maxMessages: config.maxMessagesPerPull,
-    });
+  const [response] = await subClient.pull({
+    subscription: subscriptionPath,
+    maxMessages: config.maxMessagesPerPull,
+  });
 
-    const receivedMessages = response.receivedMessages ?? [];
+  const receivedMessages = response.receivedMessages ?? [];
 
-    for (const rm of receivedMessages) {
-      const ackId = rm.ackId;
-      const message = rm.message;
-      if (!ackId || !message) {
-        logger.warn({
+  for (const rm of receivedMessages) {
+    const ackId = rm.ackId;
+    const message = rm.message;
+    if (!ackId || !message) {
+      logger.warn({
+        at: "gasless/_service",
+        message: "Received message missing ackId or message body",
+      });
+      continue;
+    }
+
+    try {
+      const data = message.data;
+      const decoded = data ? decodeMessageData(data as Uint8Array) : null;
+
+      if (!decoded) {
+        logger.debug({
           at: "gasless/_service",
-          message: "Received message missing ackId or message body",
+          message: "Invalid or unparseable message body, acking to remove",
         });
+        ackIds.push(ackId);
         continue;
       }
 
-      try {
-        const data = message.data;
-        const decoded = data ? decodeMessageData(data as Uint8Array) : null;
-
-        if (!decoded) {
-          logger.debug({
-            at: "gasless/_service",
-            message: "Invalid or unparseable message body, acking to remove",
-          });
-          ackIds.push(ackId);
-          continue;
-        }
-
-        if (!isWithinTtl(message.publishTime, config.messageTtlSeconds)) {
-          logger.debug({
-            at: "gasless/_service",
-            message: "Message TTL expired, acking to remove",
-            depositId: decoded.swapTx?.data?.depositId,
-          });
-          ackIds.push(ackId);
-          continue;
-        }
-
-        if (isDuplicateGaslessDeposit(decoded)) {
-          logger.debug({
-            at: "gasless/_service",
-            message: "Duplicate gasless deposit, acking to remove",
-            depositId: decoded.swapTx?.data?.depositId,
-          });
-          ackIds.push(ackId);
-          continue;
-        }
-
-        deposits.push({
-          ...decoded,
-          messageId: message.messageId?.toString(),
+      if (!isWithinTtl(message.publishTime, config.messageTtlSeconds)) {
+        logger.debug({
+          at: "gasless/_service",
+          message: "Message TTL expired, acking to remove",
+          depositId: decoded.swapTx?.data?.depositId,
         });
         ackIds.push(ackId);
-      } catch (error) {
-        logger.error({
-          at: "gasless/_service",
-          message: "Unexpected error processing message, nacking",
-          error,
-          ackId,
-        });
-        nackIds.push(ackId);
+        continue;
       }
-    }
 
-    if (ackIds.length > 0) {
-      await subClient.acknowledge({
-        subscription: subscriptionPath,
-        ackIds,
+      if (isDuplicateGaslessDeposit(decoded)) {
+        logger.debug({
+          at: "gasless/_service",
+          message: "Duplicate gasless deposit, acking to remove",
+          depositId: decoded.swapTx?.data?.depositId,
+        });
+        ackIds.push(ackId);
+        continue;
+      }
+
+      deposits.push({
+        ...decoded,
+        messageId: message.messageId?.toString(),
       });
+      ackIds.push(ackId);
+    } catch (error) {
+      logger.error({
+        at: "gasless/_service",
+        message: "Unexpected error processing message, nacking",
+        error,
+        ackId,
+      });
+      nackIds.push(ackId);
     }
-
-    for (const id of nackIds) {
-      try {
-        await subClient.modifyAckDeadline({
-          subscription: subscriptionPath,
-          ackIds: [id],
-          ackDeadlineSeconds: 0,
-        });
-      } catch (nackError) {
-        logger.error({
-          at: "gasless/_service",
-          message: "Failed to nack message",
-          ackId: id,
-          error: nackError,
-        });
-      }
-    }
-  } finally {
-    subClient.close();
   }
 
-  return { deposits };
+  const cleanup = async () => {
+    try {
+      if (ackIds.length > 0) {
+        await subClient.acknowledge({
+          subscription: subscriptionPath,
+          ackIds,
+        });
+      }
+      if (nackIds.length > 0) {
+        await subClient.modifyAckDeadline({
+          subscription: subscriptionPath,
+          ackIds: nackIds,
+          ackDeadlineSeconds: 0,
+        });
+      }
+    } catch (error) {
+      logger.error({
+        at: "gasless/_service",
+        message: "Failed to cleanup messages",
+        error,
+        ackIds,
+        nackIds,
+      });
+    } finally {
+      subClient.close();
+    }
+  };
+
+  return { deposits, cleanup };
 }

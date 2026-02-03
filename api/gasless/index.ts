@@ -1,4 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
+import { waitUntil } from "@vercel/functions";
 import { assert, Infer, literal, type } from "superstruct";
 import { getLogger, handleErrorCondition } from "../_utils";
 import { getRequestId, setRequestSpanAttributes } from "../_request_utils";
@@ -43,18 +44,20 @@ export default async function handler(
       const { query } = request;
       assert(query, GaslessQueryParamsSchema);
 
-      const result = await fetchPendingGaslessDeposits();
+      const { deposits, cleanup } = await fetchPendingGaslessDeposits();
 
       logger.debug({
         at: "gasless",
         message: "Response data",
         requestId,
-        depositCount: result.deposits.length,
+        depositCount: deposits.length,
       });
 
-      sendResponse({
+      waitUntil(cleanup());
+
+      return sendResponse({
         response,
-        body: result,
+        body: { deposits },
         statusCode: 200,
         requestId,
         cacheSeconds: 0,
