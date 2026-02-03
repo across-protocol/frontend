@@ -6,7 +6,7 @@ import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import { ForbiddenError, InvalidParamError } from "../../_errors";
 import { publishGaslessDepositMessage } from "./_publish-pubsub";
 import { Permission } from "../../_api-keys";
-import { getTokenInfo } from "../../_utils";
+import { getTokenInfo, toAddressType } from "../../_utils";
 import { getSponsoredGaslessRoute } from "../../_sponsored-gasless-config";
 
 export type GaslessSubmitResponse = {
@@ -95,11 +95,14 @@ export async function handleGaslessSubmit(params: {
   const [inputToken, outputToken] = await Promise.all([
     getTokenInfo({
       chainId,
-      address: witnessData.inputToken,
+      address: toAddressType(witnessData.inputToken, chainId).toNative(),
     }),
     getTokenInfo({
       chainId: Number(witnessData.destinationChainId),
-      address: witnessData.outputToken,
+      address: toAddressType(
+        witnessData.outputToken,
+        Number(witnessData.destinationChainId)
+      ).toNative(),
     }),
   ]);
   const sponsoredGaslessRoute = getSponsoredGaslessRoute({
