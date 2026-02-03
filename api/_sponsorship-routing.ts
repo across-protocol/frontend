@@ -27,6 +27,29 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 
 // Priority-ordered routing rules for sponsorship by route key
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
+  "USDT:USDT-SPOT": [
+    {
+      name: "usdt-usdt-spot-intent-unsponsored",
+      reason:
+        "Unsponsored USDT → USDT-SPOT route below mint/burn threshold or OFT not enabled)",
+      shouldApply: (data) =>
+        data.isHyperCoreIntentSupported &&
+        (!data.isMintBurnThresholdMet || !data.isOftEnabledOriginChain),
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+    {
+      name: "usdt-usdt-spot-oft-unsponsored",
+      reason:
+        "USDT → USDT-SPOT route above mint/burn threshold uses OFT (unsponsored)",
+      shouldApply: (data) =>
+        data.isOftEnabledOriginChain && data.isMintBurnThresholdMet,
+      getStrategy: () => getOftSponsoredBridgeStrategy(false),
+    },
+  ],
   "USDT:*": [
     {
       name: "usdt-ineligible",
@@ -62,7 +85,11 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         !data.isMintBurnThresholdMet,
-      getStrategy: () => getHyperCoreIntentBridgeStrategy(true),
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
     },
   ],
   "USDC:*": [
