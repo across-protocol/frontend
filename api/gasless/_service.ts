@@ -25,7 +25,7 @@ function decodeMessageData(
     const raw = Buffer.isBuffer(data) ? data : Buffer.from(data);
     const parsed = JSON.parse(raw.toString("utf8"));
     assert(parsed, GaslessDepositMessageSchema);
-    return parsed;
+    return parsed as GaslessDepositMessage;
   } catch {
     return null;
   }
@@ -98,7 +98,7 @@ export async function fetchPendingGaslessDeposits(): Promise<GaslessPendingRespo
           logger.debug({
             at: "gasless/_service",
             message: "Message TTL expired, acking to remove",
-            gaslessTx: decoded.gaslessTx,
+            depositId: decoded.swapTx?.data?.depositId,
           });
           ackIds.push(ackId);
           continue;
@@ -108,7 +108,7 @@ export async function fetchPendingGaslessDeposits(): Promise<GaslessPendingRespo
           logger.debug({
             at: "gasless/_service",
             message: "Duplicate gasless deposit, acking to remove",
-            gaslessTx: decoded.gaslessTx,
+            depositId: decoded.swapTx?.data?.depositId,
           });
           ackIds.push(ackId);
           continue;
