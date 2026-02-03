@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { useTrackTransferSubmitted } from "./useTrackTransferSubmitted";
 import { useTrackTransferSigned } from "./useTrackTransferSigned";
+import { trackGTMClickConfirmSwap } from "utils/gtm";
 
 export function useOnConfirm(
   quoteRequest: QuoteRequest,
@@ -71,6 +72,7 @@ export function useOnConfirm(
 
     // Track transfer submitted before executing
     trackTransferSubmitted();
+    trackGTMClickConfirmSwap();
     setTransferSubmittedTimestamp();
 
     // Proceed with the transaction
