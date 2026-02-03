@@ -132,16 +132,7 @@ export async function routeStrategyForSponsorship(
 ): Promise<BridgeStrategy | null> {
   const logger = getLogger();
 
-  const isSponsoredRouteResult = isSponsoredRoute(params);
-  logger.debug({
-    at: "routeStrategyForSponsorship",
-    message: "Checking if route is sponsored",
-    inputToken: params.inputToken.symbol,
-    outputToken: params.outputToken.symbol,
-    isSponsoredRoute: isSponsoredRouteResult,
-  });
-
-  if (!isSponsoredRouteResult) {
+  if (!isSponsoredRoute(params)) {
     return null;
   }
 
