@@ -7,7 +7,6 @@ export type ApiKeyRecord = {
   enabled: boolean;
   permissions: Permission[];
   rateLimit?: number;
-  createdAt: string;
 };
 
 export type ApiKeysStore = Record<string, ApiKeyRecord>;
@@ -34,6 +33,15 @@ function getEdgeConfigClient() {
 export async function validateApiKey(
   apiKey: string | undefined
 ): Promise<ValidateApiKeyResult> {
+  // Bypass API key validation in local dev
+  if (process.env.DISABLE_API_KEY_VALIDATION === "true") {
+    return {
+      valid: true,
+      name: "local-dev",
+      permissions: ["sponsored-gasless"],
+    };
+  }
+
   if (!apiKey) {
     return { valid: false };
   }

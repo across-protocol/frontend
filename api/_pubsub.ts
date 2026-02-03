@@ -17,7 +17,7 @@ export function getGcpCredentials(): GcpCredentials | undefined {
     const parsed = JSON.parse(serviceAccountKey);
     return {
       client_email: parsed.client_email,
-      private_key: parsed.private_key,
+      private_key: parsed.private_key.replace(/\\n/g, "\n"),
     };
   }
 

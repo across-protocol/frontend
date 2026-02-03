@@ -19,22 +19,17 @@ describe("_api-keys", () => {
     cb_prod_xxx123: {
       name: "coinbase",
       enabled: true,
-      permissions: ["sponsored-cctp", "sponsored-oft", "rate-limit-bypass"],
-      rateLimit: 1000,
-      createdAt: "2026-01-30T00:00:00Z",
+      permissions: ["sponsored-gasless"],
     },
     cb_prod_yyy456: {
       name: "coinbase-secondary",
       enabled: true,
-      permissions: ["sponsored-cctp"],
-      rateLimit: 100,
-      createdAt: "2026-01-30T00:00:00Z",
+      permissions: ["sponsored-gasless"],
     },
     cb_disabled_key: {
       name: "disabled-key",
       enabled: false,
-      permissions: ["sponsored-cctp"],
-      createdAt: "2026-01-30T00:00:00Z",
+      permissions: ["sponsored-gasless"],
     },
   };
 
@@ -82,18 +77,29 @@ describe("_api-keys", () => {
       expect(result).toEqual({
         valid: true,
         name: "coinbase",
-        permissions: ["sponsored-cctp", "sponsored-oft", "rate-limit-bypass"],
+        permissions: ["sponsored-gasless"],
       });
     });
 
-    it("should return valid=true for secondary key with limited permissions", async () => {
+    it("should return valid=true for secondary key", async () => {
       mockGet.mockResolvedValue(mockApiKeysStore);
       const result = await validateApiKey("cb_prod_yyy456");
       expect(result).toEqual({
         valid: true,
         name: "coinbase-secondary",
-        permissions: ["sponsored-cctp"],
+        permissions: ["sponsored-gasless"],
       });
+    });
+
+    it("should bypass validation when DISABLE_API_KEY_VALIDATION is set", async () => {
+      vi.stubEnv("DISABLE_API_KEY_VALIDATION", "true");
+      const result = await validateApiKey("any_key");
+      expect(result).toEqual({
+        valid: true,
+        name: "local-dev",
+        permissions: ["sponsored-gasless"],
+      });
+      expect(mockGet).not.toHaveBeenCalled();
     });
 
     it("should return valid=false when Edge Config returns null", async () => {
@@ -105,30 +111,23 @@ describe("_api-keys", () => {
 
   describe("hasPermission", () => {
     it("should return false for undefined permissions", () => {
-      const result = hasPermission(undefined, "sponsored-cctp");
+      const result = hasPermission(undefined, "sponsored-gasless");
       expect(result).toBe(false);
     });
 
     it("should return false for empty permissions array", () => {
-      const result = hasPermission([], "sponsored-cctp");
+      const result = hasPermission([], "sponsored-gasless");
       expect(result).toBe(false);
     });
 
     it("should return true when permission is included", () => {
-      const permissions: Permission[] = [
-        "sponsored-cctp",
-        "sponsored-oft",
-        "rate-limit-bypass",
-      ];
-      expect(hasPermission(permissions, "sponsored-cctp")).toBe(true);
-      expect(hasPermission(permissions, "sponsored-oft")).toBe(true);
-      expect(hasPermission(permissions, "rate-limit-bypass")).toBe(true);
+      const permissions: Permission[] = ["sponsored-gasless"];
+      expect(hasPermission(permissions, "sponsored-gasless")).toBe(true);
     });
 
     it("should return false when permission is not included", () => {
-      const permissions: Permission[] = ["sponsored-cctp"];
-      expect(hasPermission(permissions, "sponsored-oft")).toBe(false);
-      expect(hasPermission(permissions, "rate-limit-bypass")).toBe(false);
+      const permissions: Permission[] = [];
+      expect(hasPermission(permissions, "sponsored-gasless")).toBe(false);
     });
   });
 });
