@@ -260,9 +260,11 @@ export function DepositTimesCard({
                     showTokenLinkOnHover
                     textColor="light-100"
                   />
-                  <Text color="grey-400">
-                    (${formatUSD(bridgeOutputAmountUsd!)})
-                  </Text>
+                  {bridgeOutputAmountUsd !== undefined && (
+                    <Text color="grey-400">
+                      (${formatUSD(bridgeOutputAmountUsd)})
+                    </Text>
+                  )}
                 </>
               ) : (
                 outputTokenForDisplay && (

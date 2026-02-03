@@ -143,15 +143,16 @@ export function PersonalTransactions({ statusFilter }: Props) {
 function convertIndexerDepositToDeposit(
   indexerDeposit: IndexerDeposit
 ): Deposit {
+  const status =
+    indexerDeposit.status === "unfilled" ? "pending" : indexerDeposit.status;
   return {
     depositId: indexerDeposit.depositId,
     depositTime:
       new Date(indexerDeposit.depositBlockTimestamp).getTime() / 1000,
-    status:
-      indexerDeposit.status === "unfilled" ? "pending" : indexerDeposit.status,
+    status: status as Deposit["status"],
     filled: "0",
-    sourceChainId: indexerDeposit.originChainId,
-    destinationChainId: indexerDeposit.destinationChainId,
+    sourceChainId: Number(indexerDeposit.originChainId),
+    destinationChainId: Number(indexerDeposit.destinationChainId),
     assetAddr: indexerDeposit.inputToken,
     depositorAddr: indexerDeposit.depositor,
     recipientAddr: indexerDeposit.recipient,
@@ -160,11 +161,13 @@ function convertIndexerDepositToDeposit(
     depositTxHash:
       indexerDeposit.depositTransactionHash || indexerDeposit.depositTxHash,
     fillTx: indexerDeposit.fillTx,
-    speedUps: indexerDeposit.speedups,
+    speedUps: indexerDeposit.speedups ?? [],
     depositRelayerFeePct: "0",
     initialRelayerFeePct: "0",
     suggestedRelayerFeePct: "0",
-    fillTime: new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000,
+    fillTime: indexerDeposit.fillBlockTimestamp
+      ? new Date(indexerDeposit.fillBlockTimestamp).getTime() / 1000
+      : undefined,
     fillDeadline: indexerDeposit.fillDeadline,
     rewards: undefined,
     feeBreakdown: indexerDeposit.bridgeFeeUsd
@@ -185,7 +188,7 @@ function convertIndexerDepositToDeposit(
           totalBridgeFeePct: "0", // wei pct
           totalBridgeFeeAmount: "0",
           // swap fee
-          swapFeeUsd: indexerDeposit.swapFeeUsd,
+          swapFeeUsd: indexerDeposit.swapFeeUsd ?? undefined,
           swapFeePct: "0", // wei pct
           swapFeeAmount: "0",
         }
@@ -202,17 +205,19 @@ function convertIndexerDepositToDeposit(
       name: undefined,
       decimals: undefined,
     },
-    swapToken: {
-      address: indexerDeposit.swapToken,
-      symbol: undefined,
-      name: undefined,
-      decimals: undefined,
-    },
-    swapTokenAmount: indexerDeposit.swapTokenAmount,
-    swapTokenAddress: indexerDeposit.swapToken,
-    depositRefundTxHash: indexerDeposit.depositRefundTxHash,
-    swapOutputToken: indexerDeposit.swapOutputToken,
-    swapOutputTokenAmount: indexerDeposit.swapOutputTokenAmount,
+    swapToken: indexerDeposit.swapToken
+      ? {
+          address: indexerDeposit.swapToken,
+          symbol: undefined,
+          name: undefined,
+          decimals: undefined,
+        }
+      : undefined,
+    swapTokenAmount: indexerDeposit.swapTokenAmount ?? undefined,
+    swapTokenAddress: indexerDeposit.swapToken ?? undefined,
+    depositRefundTxHash: indexerDeposit.depositRefundTxHash ?? undefined,
+    swapOutputToken: indexerDeposit.swapOutputToken ?? undefined,
+    swapOutputTokenAmount: indexerDeposit.swapOutputTokenAmount ?? undefined,
     actionsTargetChainId: indexerDeposit.actionsTargetChainId
       ? Number(indexerDeposit.actionsTargetChainId)
       : undefined,

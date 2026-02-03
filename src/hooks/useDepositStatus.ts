@@ -4,17 +4,18 @@ import { indexerApiBaseUrl } from "utils";
 
 export type IndexerDeposit = {
   actionsSucceeded: boolean | null;
-  actionsTargetChainId: string | null;
+  actionsTargetChainId: string | number | null;
   bridgeFeeUsd: string;
   depositBlockNumber: number;
   depositBlockTimestamp: string;
   depositId: string;
   depositRefundTxHash: string | null;
-  depositRefundTxnRef: string | null;
+  depositRefundTxnRef?: string | null;
   depositTxHash: string;
-  depositTxnRef: string;
+  depositTxnRef?: string;
+  depositTransactionHash?: string; // Legacy field from /deposits endpoint
   depositor: string;
-  destinationChainId: string;
+  destinationChainId: string | number;
   exclusiveRelayer: string;
   exclusivityDeadline: string | null;
   fillBlockTimestamp: string | null;
@@ -29,7 +30,7 @@ export type IndexerDeposit = {
   inputToken: string;
   message: string;
   messageHash: string;
-  originChainId: string;
+  originChainId: string | number;
   outputAmount: string;
   outputPriceUsd: string;
   outputToken: string;
@@ -43,6 +44,9 @@ export type IndexerDeposit = {
   swapTokenAmount: string | null;
   swapTokenPriceUsd: string | null;
   swapTransactionHash: string | null;
+  swapOutputToken?: string | null;
+  swapOutputTokenAmount?: string | null;
+  speedups?: any[];
 };
 
 export type IndexerDepositResponse = {

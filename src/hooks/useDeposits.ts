@@ -11,6 +11,7 @@ import {
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
 import { IndexerDeposit } from "./useDepositStatus";
+export type { IndexerDeposit } from "./useDepositStatus";
 
 export type DepositStatus =
   | "pending"

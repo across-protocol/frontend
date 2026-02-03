@@ -68,13 +68,13 @@ export function DepositStatusUpperCard({
 
   const bridgeToken = useTokenFromAddress(
     indexerDeposit?.deposit.outputToken ?? "",
-    Number(indexerDeposit?.deposit.destinationChainId ?? 1)
+    Number(indexerDeposit?.deposit.destinationChainId ?? toChainId)
   );
 
-  const scaledOutputBridgedTokenAmount = formatUnits(
-    indexerDeposit?.deposit.outputAmount ?? "1000000000000000000",
-    bridgeToken?.decimals ?? 18
-  );
+  const scaledOutputBridgedTokenAmount =
+    indexerDeposit?.deposit.outputAmount && bridgeToken?.decimals
+      ? formatUnits(indexerDeposit.deposit.outputAmount, bridgeToken.decimals)
+      : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -117,11 +117,17 @@ export function DepositStatusUpperCard({
               Destination swap failed
             </Text>
             <Text size="md" color="grey-400">
-              Returned{" "}
-              <InlineText color="white">
-                {scaledOutputBridgedTokenAmount} {bridgeToken?.symbol}
-              </InlineText>{" "}
-              to your wallet (after bridge fees).{" "}
+              {scaledOutputBridgedTokenAmount && bridgeToken?.symbol ? (
+                <>
+                  Returned{" "}
+                  <InlineText color="white">
+                    {scaledOutputBridgedTokenAmount} {bridgeToken.symbol}
+                  </InlineText>{" "}
+                  to your wallet (after bridge fees).{" "}
+                </>
+              ) : (
+                <>Funds returned to your wallet (after bridge fees). </>
+              )}
               <InlineLink
                 target="_blank"
                 rel="noopener noreferrer"
