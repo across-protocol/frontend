@@ -86,7 +86,6 @@ export const DestinationTokenDisplay = ({
         {destinationToken && !customDestinationAccount ? (
           <BalanceSelector
             token={destinationToken}
-            disableHover={true}
             error={false}
             setAmount={setDestinationAmount}
           />

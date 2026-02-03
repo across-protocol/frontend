@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
 import { COLORS, formatUnitsWithMaxFractions } from "utils";
@@ -13,8 +12,8 @@ type BalanceSelectorProps = {
     decimals: number;
   };
   setAmount: (amount: BigNumber | null) => void;
-  disableHover?: boolean;
   error?: boolean;
+  isHovered?: boolean;
 };
 
 const percentages = ["25%", "50%", "75%", "MAX"] as const;
@@ -23,10 +22,9 @@ export type BalanceSelectorPercentage = (typeof percentages)[number];
 export function BalanceSelector({
   token,
   setAmount,
-  disableHover,
   error = false,
+  isHovered = false,
 }: BalanceSelectorProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const balance = useTokenBalance(token);
 
   const trackBalanceSelectorClick = useTrackBalanceSelectorClick();
@@ -46,10 +44,7 @@ export function BalanceSelector({
   const formattedBalance = formatUnitsWithMaxFractions(balance, token.decimals);
 
   return (
-    <BalanceWrapper
-      onMouseEnter={() => !disableHover && balance.gt(0) && setIsHovered(true)}
-      onMouseLeave={() => !disableHover && setIsHovered(false)}
-    >
+    <BalanceWrapper>
       <PillsContainer>
         <AnimatePresence>
           {isHovered &&
