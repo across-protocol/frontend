@@ -11084,6 +11084,13 @@
     xdg-app-paths "5.1.0"
     yauzl-promise "2.1.3"
 
+"@vercel/functions@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@vercel/functions/-/functions-3.4.0.tgz#231d608af16cd25a94346b2f5f6d36b53fd0eb0f"
+  integrity sha512-lKWDWEhFcpt/zL3ueWqII8W5BY73MC5WUuZyudditbbya6mP8jCLQEuXBxJetpEKgnEn+5xCyK962rw4v1RSVA==
+  dependencies:
+    "@vercel/oidc" "3.1.0"
+
 "@vercel/gatsby-plugin-vercel-analytics@1.0.11":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@vercel/gatsby-plugin-vercel-analytics/-/gatsby-plugin-vercel-analytics-1.0.11.tgz#07e6a02665c340ad31ad9d9d3b0df00a30a32aed"
@@ -11173,6 +11180,11 @@
     ts-node "10.9.1"
     typescript "4.9.5"
     undici "5.28.4"
+
+"@vercel/oidc@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.1.0.tgz#066caee449b84079f33c7445fc862464fe10ec32"
+  integrity sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==
 
 "@vercel/python@4.7.0":
   version "4.7.0"

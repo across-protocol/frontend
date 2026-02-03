@@ -51,13 +51,17 @@ vi.mock("../../../api/_request_utils", () => ({
   setRequestSpanAttributes: vi.fn(),
 }));
 
+vi.mock("@vercel/functions", () => ({
+  waitUntil: vi.fn(),
+}));
+
 describe("api/gasless handler", () => {
   let response: ReturnType<typeof getMockedResponse>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     response = getMockedResponse();
-    mockFetchPending.mockResolvedValue({ deposits: [] });
+    mockFetchPending.mockResolvedValue({ deposits: [], cleanup: vi.fn() });
   });
 
   it("GET with status=pending returns 200 and deposits from service", async () => {
@@ -83,7 +87,7 @@ describe("api/gasless handler", () => {
         messageId: "msg-1",
       },
     ];
-    mockFetchPending.mockResolvedValue({ deposits });
+    mockFetchPending.mockResolvedValue({ deposits, cleanup: vi.fn() });
 
     const request = {
       method: "GET",
