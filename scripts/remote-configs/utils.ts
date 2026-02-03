@@ -153,24 +153,36 @@ async function fetchRemoteConfigAndValidate<T>(
         )}`,
       }
     : undefined;
-  const res = await fetch(url, {
-    headers: {
-      ...headers,
-      "Content-Type": "application/json",
-    },
-  });
 
-  if (res.ok) {
-    data = await res.json();
-  } else if (res.status === 404 && fallbackData) {
-    console.warn(
-      `Failed to fetch remote config from ${url}, falling back to local data...`
-    );
-    data = fallbackData;
-  } else {
-    throw new Error(
-      `Failed to fetch file from ${url}, with error code %${res.status}`
-    );
+  try {
+    const res = await fetch(url, {
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (res.ok) {
+      data = await res.json();
+    } else if (fallbackData) {
+      console.warn(
+        `Failed to fetch remote config from ${url} (status ${res.status}), falling back to local data...`
+      );
+      data = fallbackData;
+    } else {
+      throw new Error(
+        `Failed to fetch file from ${url}, with error code %${res.status}`
+      );
+    }
+  } catch (error) {
+    if (fallbackData) {
+      console.warn(
+        `Failed to fetch remote config from ${url} (${error instanceof Error ? error.message : "unknown error"}), falling back to local data...`
+      );
+      data = fallbackData;
+    } else {
+      throw error;
+    }
   }
 
   assert(data, schema);

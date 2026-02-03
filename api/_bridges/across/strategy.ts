@@ -16,6 +16,7 @@ import {
   getBridgeQuoteForExactInput,
   getBridgeQuoteForOutput,
   getSuggestedFees,
+  ConvertDecimals,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "../../swap/approval/_utils";
 import {
@@ -26,6 +27,8 @@ import {
 } from "../../_dexes/utils";
 import { SwapAmountTooLowForBridgeFeesError } from "../../_errors";
 import { buildErc3009Tx } from "./utils/erc3009-tx-builder";
+import { getZeroBridgeFees } from "../utils";
+import { SponsoredGaslessRouteConfig } from "../../_sponsored-gasless-config";
 
 const name = "across";
 const capabilities: BridgeCapabilities = {
@@ -40,7 +43,11 @@ const capabilities: BridgeCapabilities = {
   },
 };
 
-export function getAcrossBridgeStrategy(): BridgeStrategy {
+export function getAcrossBridgeStrategy(options?: {
+  sponsoredGaslessRoute?: SponsoredGaslessRouteConfig;
+}): BridgeStrategy {
+  const sponsoredGaslessRoute = options?.sponsoredGaslessRoute ?? undefined;
+
   const extractFees = (
     feesFromApi: Awaited<ReturnType<typeof getSuggestedFees>>,
     bridgeFeesToken: Token
@@ -129,6 +136,46 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         });
       }
 
+      if (sponsoredGaslessRoute) {
+        const outputAmount = ConvertDecimals(
+          inputToken.decimals,
+          outputToken.decimals
+        )(exactInputAmount);
+        return {
+          bridgeQuote: {
+            ...bridgeQuote,
+            provider: name,
+            outputAmount,
+            minOutputAmount: outputAmount,
+            estimatedFillTimeSec:
+              bridgeQuote.suggestedFees.estimatedFillTimeSec,
+            fees: getZeroBridgeFees(inputToken),
+            suggestedFees: {
+              ...bridgeQuote.suggestedFees,
+              outputAmount: outputAmount.toString(),
+              totalRelayFee: {
+                pct: "0",
+                total: "0",
+              },
+              relayerCapitalFee: {
+                pct: "0",
+                total: "0",
+              },
+              relayerGasFee: {
+                pct: "0",
+                total: "0",
+              },
+              lpFee: {
+                pct: "0",
+                total: "0",
+              },
+              // Explicit override
+              exclusiveRelayer: sponsoredGaslessRoute.exclusiveRelayer,
+            },
+          },
+        };
+      }
+
       return {
         bridgeQuote: {
           ...bridgeQuote,
@@ -155,6 +202,48 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
         message,
         forceExactOutput,
       });
+
+      if (sponsoredGaslessRoute) {
+        const inputAmount = ConvertDecimals(
+          outputToken.decimals,
+          inputToken.decimals
+        )(minOutputAmount);
+        return {
+          bridgeQuote: {
+            ...bridgeQuote,
+            provider: name,
+            inputAmount,
+            minOutputAmount,
+            outputAmount: minOutputAmount,
+            estimatedFillTimeSec:
+              bridgeQuote.suggestedFees.estimatedFillTimeSec,
+            fees: getZeroBridgeFees(inputToken),
+            suggestedFees: {
+              ...bridgeQuote.suggestedFees,
+              inputAmount: inputAmount.toString(),
+              totalRelayFee: {
+                pct: "0",
+                total: "0",
+              },
+              relayerCapitalFee: {
+                pct: "0",
+                total: "0",
+              },
+              relayerGasFee: {
+                pct: "0",
+                total: "0",
+              },
+              lpFee: {
+                pct: "0",
+                total: "0",
+              },
+              // Explicit override
+              exclusiveRelayer: sponsoredGaslessRoute.exclusiveRelayer,
+            },
+          },
+        };
+      }
+
       return {
         bridgeQuote: {
           ...bridgeQuote,

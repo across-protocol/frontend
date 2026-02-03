@@ -28,8 +28,11 @@ import {
 } from "./_utils";
 import { AcrossErrorCode } from "../_errors";
 import { CHAIN_IDs } from "../_constants";
+import { Permission, validateApiKey } from "../_api-keys";
+import { extractBearerToken } from "../_auth";
 import type { CrossSwapQuotes } from "../_dexes/types";
 import type { OriginTx } from "../_bridges/types";
+import { getSponsoredGaslessRoute } from "../_sponsored-gasless-config";
 
 // Allows us to redirect the gas price cache chain ID to the mainnet chain ID for testnet chains
 const gasPriceCacheChainIdRedirects: Record<number, number> = {
@@ -84,6 +87,19 @@ export async function handleSwap<T, U>(params: {
 
   const recipient = baseParams.recipient || baseParams.depositor;
 
+  // Validate API key and build context for sponsored routes
+  const apiKey = extractBearerToken(params.request);
+  const apiKeyResult = await validateApiKey(apiKey);
+  const sponsoredGaslessRoute = getSponsoredGaslessRoute({
+    apiKeyName: apiKeyResult?.name,
+    apiKeyPermissions: apiKeyResult?.permissions as Permission[],
+    originChainId: baseParams.inputToken.chainId,
+    destinationChainId: baseParams.outputToken.chainId,
+    inputTokenSymbol: baseParams.inputToken.symbol,
+    outputTokenSymbol: baseParams.outputToken.symbol,
+    permitType: params.flow,
+  });
+
   const bridgeStrategy = await getBridgeStrategy({
     originChainId: baseParams.inputToken.chainId,
     destinationChainId: baseParams.outputToken.chainId,
@@ -96,6 +112,7 @@ export async function handleSwap<T, U>(params: {
     includesActions: actions.length > 0,
     includesAppFee: !!baseParams.appFeePercent && baseParams.appFeePercent > 0,
     routingPreference: baseParams.routingPreference,
+    sponsoredGaslessRoute,
   });
 
   const crossSwapQuotes = await getCrossSwapQuotes(

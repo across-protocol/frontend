@@ -1,6 +1,6 @@
 import { Wallet, ethers } from "ethers";
 import dotenv from "dotenv";
-import axios from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
@@ -177,6 +177,12 @@ export const argsFromCli = yargs(hideBin(process.argv))
     type: "boolean",
     default: false,
   })
+  .option("apiKey", {
+    alias: "ak",
+    description:
+      "API key for erc3009/gasless endpoints (sent as Bearer token).",
+    type: "string",
+  })
   .help()
   .parseSync();
 
@@ -202,6 +208,14 @@ export function filterTestCases(
     return matches.length === labelsToFilter.length;
   });
   return filteredTestCases;
+}
+
+function getAuthHeaders(): AxiosRequestHeaders {
+  const apiKey = argsFromCli.apiKey as string | undefined;
+  if (!apiKey) {
+    return {};
+  }
+  return { Authorization: `Bearer ${apiKey}` };
 }
 
 export async function fetchSwapQuotes() {
@@ -267,6 +281,7 @@ export async function fetchSwapQuotes() {
     const response = await axios.get(url, {
       params,
       paramsSerializer: buildSearchParams,
+      headers: getAuthHeaders(),
     });
     swapQuotes.push(response.data as BaseSwapResponse);
   } else {
@@ -292,7 +307,10 @@ export async function fetchSwapQuotes() {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
       console.log("Body:", JSON.stringify(body, null, 2));
-      const response = await axios.post(url, body, { params: testCase.params });
+      const response = await axios.post(url, body, {
+        params: testCase.params,
+        headers: getAuthHeaders(),
+      });
       swapQuotes.push(response.data as BaseSwapResponse);
     }
   }
@@ -326,7 +344,8 @@ export async function signAndWaitPermitFlow(params: {
       {
         swapTx: params.swapResponse.swapTx,
         signature: permitSig,
-      }
+      },
+      { headers: getAuthHeaders() }
     );
     console.log("Submit gasless response:", submitGaslessResponse.data);
   } else {

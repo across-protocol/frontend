@@ -7,6 +7,7 @@ import {
   union,
   object,
   array,
+  Infer,
 } from "superstruct";
 import {
   positiveInt,
@@ -138,9 +139,7 @@ export type GaslessSubmitBody = {
     data: {
       type: "erc3009";
       depositId: string;
-      witness:
-        | { type: "BridgeWitness"; data: Record<string, unknown> }
-        | { type: "BridgeAndSwapWitness"; data: Record<string, unknown> };
+      witness: Infer<typeof WitnessSchema>;
       permit: Record<string, unknown>;
       domainSeparator: string;
       integratorId?: string;

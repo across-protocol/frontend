@@ -5,6 +5,7 @@ import { AppFee, CrossSwapType } from "../_dexes/utils";
 import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
 import { getReceiveWithAuthTypedData } from "../_transfer-with-auth";
 import type { SpokePoolPeripheryInterface } from "../_typechain/SpokePoolPeriphery.sol/SpokePoolPeriphery";
+import { SponsoredGaslessRouteConfig } from "../_sponsored-gasless-config";
 
 export type BridgeStrategiesConfig = {
   default: BridgeStrategy;
@@ -194,10 +195,16 @@ export type BridgeStrategyDataParams = {
   logger?: Logger;
 };
 
+export type ApiKeyContext = {
+  name?: string;
+  permissions?: string[];
+};
+
 export type GetBridgeStrategyParams = {
   originChainId: number;
   destinationChainId: number;
   routingPreference?: string;
+  sponsoredGaslessRoute?: SponsoredGaslessRouteConfig;
 } & BridgeStrategyDataParams;
 
 export type RoutingRule<TEligibilityData> = {

@@ -7,7 +7,13 @@ import { handleGaslessSubmit } from "./_service";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
-import { AcrossApiError, HttpErrorToStatusCode } from "../../_errors";
+import {
+  AcrossApiError,
+  ForbiddenError,
+  HttpErrorToStatusCode,
+} from "../../_errors";
+import { validateApiKey } from "../../_api-keys";
+import { extractBearerToken } from "../../_auth";
 
 const handler = async (
   request: TypedVercelRequest<Record<string, never>, GaslessSubmitBody>,
@@ -41,7 +47,21 @@ const handler = async (
     try {
       setRequestSpanAttributes(request, span, requestId);
 
-      const responseJson = await handleGaslessSubmit(request.body, requestId);
+      const apiKey = extractBearerToken(request);
+      const apiKeyResult = await validateApiKey(apiKey);
+
+      if (!apiKeyResult?.valid) {
+        throw new ForbiddenError({
+          message: "Invalid API key",
+        });
+      }
+
+      const responseJson = await handleGaslessSubmit({
+        body: request.body,
+        requestId,
+        apiKeyName: apiKeyResult.name,
+        apiKeyPermissions: apiKeyResult.permissions,
+      });
 
       logger.debug({
         at: "Gasless/submit",

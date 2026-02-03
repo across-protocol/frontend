@@ -21,10 +21,20 @@ export function parseRole(req: TypedVercelRequest<unknown, unknown>) {
   }
 }
 
+export function extractBearerToken(
+  req: TypedVercelRequest<unknown, unknown>
+): string | undefined {
+  const authHeader = req.headers?.["authorization"] as string | undefined;
+  if (!authHeader?.toLowerCase().startsWith("bearer ")) {
+    return undefined;
+  }
+  return authHeader.slice(7);
+}
+
 export async function parseApiKeyPermissions(
   req: TypedVercelRequest<unknown, unknown>
 ): Promise<Permission[] | undefined> {
-  const apiKey = req.headers?.["x-api-key"] as string | undefined;
+  const apiKey = extractBearerToken(req);
   const { valid, permissions } = await validateApiKey(apiKey);
   return valid ? permissions : undefined;
 }

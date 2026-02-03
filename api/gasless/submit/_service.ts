@@ -3,18 +3,25 @@ import { utils } from "ethers";
 
 import { GaslessSubmitBody, GaslessSubmitBodySchema } from "./_validation";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
-import { InvalidParamError } from "../../_errors";
+import { ForbiddenError, InvalidParamError } from "../../_errors";
 import { publishGaslessDepositMessage } from "./_publish-pubsub";
+import { Permission } from "../../_api-keys";
+import { getTokenInfo } from "../../_utils";
+import { getSponsoredGaslessRoute } from "../../_sponsored-gasless-config";
 
 export type GaslessSubmitResponse = {
   depositId: string;
   messageId: string;
 };
 
-export async function handleGaslessSubmit(
-  body: GaslessSubmitBody,
-  requestId: string
-): Promise<GaslessSubmitResponse> {
+export async function handleGaslessSubmit(params: {
+  body: GaslessSubmitBody;
+  requestId: string;
+  apiKeyName?: string;
+  apiKeyPermissions?: Permission[];
+}): Promise<GaslessSubmitResponse> {
+  const { body, requestId, apiKeyName, apiKeyPermissions } = params;
+
   // Validate request body structure
   assert(body, GaslessSubmitBodySchema);
 
@@ -66,15 +73,7 @@ export async function handleGaslessSubmit(
   }
 
   // Verify permit.message.from matches depositor
-  const witness = swapTx.data.witness as
-    | {
-        type: "BridgeWitness";
-        data: { baseDepositData: { depositor: string } };
-      }
-    | {
-        type: "BridgeAndSwapWitness";
-        data: { depositData: { depositor: string } };
-      };
+  const witness = swapTx.data.witness;
 
   const depositor =
     witness.type === "BridgeWitness"
@@ -85,6 +84,36 @@ export async function handleGaslessSubmit(
     throw new InvalidParamError({
       message: `permit.message.from must match depositor`,
       param: "swapTx.data.permit.message.from",
+    });
+  }
+
+  // Is sponsored gasless route eligible?
+  const witnessData =
+    witness.type === "BridgeWitness"
+      ? witness.data.baseDepositData
+      : witness.data.depositData;
+  const [inputToken, outputToken] = await Promise.all([
+    getTokenInfo({
+      chainId,
+      address: witnessData.inputToken,
+    }),
+    getTokenInfo({
+      chainId: Number(witnessData.destinationChainId),
+      address: witnessData.outputToken,
+    }),
+  ]);
+  const sponsoredGaslessRoute = getSponsoredGaslessRoute({
+    apiKeyName,
+    apiKeyPermissions,
+    originChainId: chainId,
+    destinationChainId: Number(witnessData.destinationChainId),
+    inputTokenSymbol: inputToken.symbol,
+    outputTokenSymbol: outputToken.symbol,
+    permitType: swapTx.data.type,
+  });
+  if (!sponsoredGaslessRoute) {
+    throw new ForbiddenError({
+      message: "Sponsored gasless route not eligible for this API key",
     });
   }
 
