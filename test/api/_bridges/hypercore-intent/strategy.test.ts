@@ -386,8 +386,9 @@ describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
         outputAmount: acrossOutputAmount,
       });
 
+      const mockQuoteForOutputFn = vi.fn().mockResolvedValue(mockAcrossQuote);
       (getAcrossBridgeStrategy as ReturnType<typeof vi.fn>).mockReturnValue({
-        getQuoteForOutput: vi.fn().mockResolvedValue(mockAcrossQuote),
+        getQuoteForOutput: mockQuoteForOutputFn,
       });
 
       const params = {
@@ -406,6 +407,18 @@ describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
       expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutputAmount);
       expect(result.bridgeQuote.outputToken).toEqual(USDT_SPOT_ON_HYPERCORE);
       expect(result.bridgeQuote.provider).toBe("across");
+
+      // Verify Across was called with decimal-converted minOutputAmount
+      expect(mockQuoteForOutputFn).toHaveBeenCalledWith({
+        inputToken: USDT_ON_POLYGON,
+        outputToken: expect.objectContaining({
+          chainId: expect.any(Number),
+          address: expect.any(String),
+        }),
+        minOutputAmount: BigNumber.from("999999"), // Converted from 8 to 6 decimals
+        recipient: expect.any(String),
+        message: expect.any(String),
+      });
     });
 
     it("should throw error if account does not exist on HyperCore", async () => {

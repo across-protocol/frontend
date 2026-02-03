@@ -333,10 +333,16 @@ export async function getQuoteForOutput(
     const depositRecipient = getDepositRecipient({ outputToken, recipient });
     const depositMessage = getDepositMessage({ outputToken, recipient });
 
+    // Convert minOutputAmount from output token decimals to bridgeable token decimals
+    const minOutputAmountInBridgeableDecimals = ConvertDecimals(
+      outputToken.decimals,
+      bridgeableOutputToken.decimals
+    )(minOutputAmount);
+
     const acrossQuote = await getAcrossBridgeStrategy().getQuoteForOutput({
       inputToken,
       outputToken: bridgeableOutputToken,
-      minOutputAmount,
+      minOutputAmount: minOutputAmountInBridgeableDecimals,
       recipient: depositRecipient,
       message: depositMessage,
     });
