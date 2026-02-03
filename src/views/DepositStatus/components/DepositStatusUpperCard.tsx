@@ -6,7 +6,7 @@ import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text, Badge } from "components";
 
-import { COLORS, NoFundsDepositedLogError, getChainInfo } from "utils";
+import { COLORS, NoFundsDepositedLogError, getFillTxExplorerLink } from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -15,6 +15,9 @@ import { ElapsedTime } from "./ElapsedTime";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { BridgeProvider } from "../hooks/useDepositTracking/types";
+import { useTokenFromAddress } from "hooks/useToken";
+import { useDepositByTxHash } from "hooks/useDepositStatus";
+import { formatUnits } from "ethers/lib/utils";
 
 type Props = {
   depositTxHash: string;
@@ -44,7 +47,7 @@ export function DepositStatusUpperCard({
     bridgeProvider,
     fromBridgeAndSwapPagePayload,
   });
-
+  const { data: indexerDeposit } = useDepositByTxHash(deposit?.depositTxHash);
   const depositTxSentTime = fromBridgeAndSwapPagePayload?.timeSigned;
   const depositTxCompletedTime = deposit?.depositTimestamp;
   const fillTxCompletedTime = fill?.fillTxTimestamp;
@@ -60,6 +63,18 @@ export function DepositStatusUpperCard({
 
   const depositRevertMessage =
     deposit?.status === "deposit-reverted" ? deposit.formattedError : undefined;
+
+  const isSwapFailed = status === "filled" && fill?.actionsSucceeded === false;
+
+  const bridgeToken = useTokenFromAddress(
+    indexerDeposit?.deposit.outputToken ?? "",
+    Number(indexerDeposit?.deposit.destinationChainId ?? 1)
+  );
+
+  const scaledOutputBridgedTokenAmount = formatUnits(
+    indexerDeposit?.deposit.outputAmount ?? "1000000000000000000",
+    bridgeToken?.decimals ?? 18
+  );
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -79,11 +94,12 @@ export function DepositStatusUpperCard({
     <Wrapper>
       <DepositStatusAnimatedIcons
         status={status}
+        isSwapFailed={isSwapFailed}
         toChainId={toChainId}
         fromChainId={fromChainId}
         externalProjectId={externalProjectId}
       />
-      {status === "filled" ? (
+      {status === "filled" && !isSwapFailed ? (
         <AnimatedTopWrapperTitleWrapper>
           <ElapsedTime
             textSize="3xl"
@@ -94,6 +110,28 @@ export function DepositStatusUpperCard({
             Transfer successful!
           </Text>
         </AnimatedTopWrapperTitleWrapper>
+      ) : status === "filled" && isSwapFailed ? (
+        <AnimatedTopWrapperTitleWrapper>
+          <SwapFailedRow>
+            <Text size="2xl" color="functional-red">
+              Destination swap failed
+            </Text>
+            <Text size="md" color="grey-400">
+              Returned{" "}
+              <InlineText color="white">
+                {scaledOutputBridgedTokenAmount} {bridgeToken?.symbol}
+              </InlineText>{" "}
+              to your wallet (after bridge fees).{" "}
+              <InlineLink
+                target="_blank"
+                rel="noopener noreferrer"
+                href={getFillTxExplorerLink(toChainId, fill?.fillTxHash ?? "")}
+              >
+                View on Explorer
+              </InlineLink>
+            </Text>
+          </SwapFailedRow>
+        </AnimatedTopWrapperTitleWrapper>
       ) : status === "deposit-reverted" ? (
         <AnimatedTopWrapperTitleWrapper>
           <DepositRevertedRow>
@@ -101,9 +139,7 @@ export function DepositStatusUpperCard({
               {depositRevertMessage ?? "Deposit unsuccessful"}
             </Text>
             <a
-              href={`${
-                getChainInfo(fromChainId).explorerUrl
-              }/tx/${depositTxHash}`}
+              href={getFillTxExplorerLink(fromChainId, depositTxHash)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -149,11 +185,27 @@ export function DepositStatusUpperCard({
           inputTokenSymbol={inputTokenSymbol}
           outputTokenSymbol={outputTokenSymbol}
           fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
+          isSwapFailed={isSwapFailed}
+          bridgeOutputToken={fill?.outputToken}
         />
       </DepositTimeCardSocialSharedWrapper>
     </Wrapper>
   );
 }
+
+const InlineText = styled(Text)`
+  display: inline;
+`;
+
+const InlineLink = styled.a`
+  display: inline;
+  text-decoration: underline;
+  color: inherit;
+
+  &:hover {
+    color: var(--color-white);
+  }
+`;
 
 const Wrapper = styled.div`
   display: flex;
@@ -207,6 +259,9 @@ const AnimationFadeInBottom = keyframes`
 const AnimatedTopWrapperTitleWrapper = styled(TopWrapperTitleWrapper)`
   animation-name: ${AnimationFadeInBottom};
   animation-duration: 1s;
+  max-width: 350px;
+  text-align: center;
+  margin-inline: auto;
 `;
 
 const DepositRevertedRow = styled.div`
@@ -227,5 +282,16 @@ const DepositRevertedRow = styled.div`
     path {
       stroke: ${COLORS.warning};
     }
+  }
+`;
+
+const SwapFailedRow = styled(DepositRevertedRow)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  a {
+    display: inline;
   }
 `;

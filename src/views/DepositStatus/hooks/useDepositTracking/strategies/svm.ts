@@ -6,6 +6,7 @@ import {
   DepositedInfo,
   DepositStatusResponse,
   FilledInfo,
+  FillFromIndexerResult,
   IChainStrategy,
   FillMetadata,
 } from "../types";
@@ -91,22 +92,20 @@ export class SVMStrategy implements IChainStrategy {
     const { depositId } = depositInfo.depositLog;
     const fillChainId = this.chainId;
 
-    const fillTxSignature = await Promise.any([
-      this.getFillFromIndexer(depositInfo),
-      this.getFillFromRpc(depositInfo, bridgeProvider),
-    ]);
+    // Use indexer to get fill info with actionsSucceeded
+    const indexerResult = await this.getFillFromIndexer(depositInfo);
 
-    if (!fillTxSignature) {
+    if (!indexerResult.fillTxnRef) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
 
     const metadata = await this.getFillMetadata(
-      fillTxSignature,
+      indexerResult.fillTxnRef,
       bridgeProvider
     );
 
     if (!metadata) {
-      throw new FillMetadataParseError(fillTxSignature, fillChainId);
+      throw new FillMetadataParseError(indexerResult.fillTxnRef, fillChainId);
     }
 
     return {
@@ -115,15 +114,19 @@ export class SVMStrategy implements IChainStrategy {
       depositInfo,
       status: "filled",
       outputAmount: metadata.outputAmount || BigNumber.from(0),
+      actionsSucceeded: indexerResult.actionsSucceeded,
+      outputToken: indexerResult.outputToken,
     };
   }
 
   /**
    * Get fill information for a deposit from indexer
    * @param depositInfo Deposit information
-   * @returns Fill transaction hash (signature) or null
+   * @returns Fill info including fillTxnRef, actionsSucceeded, and outputToken
    */
-  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+  async getFillFromIndexer(
+    depositInfo: DepositedInfo
+  ): Promise<FillFromIndexerResult> {
     const { depositId } = depositInfo.depositLog;
 
     try {
@@ -141,7 +144,11 @@ export class SVMStrategy implements IChainStrategy {
         if (!isSignature(data.fillTxnRef)) {
           throw new FillMetadataParseError(data.fillTxnRef, this.chainId);
         }
-        return data.fillTxnRef;
+        return {
+          fillTxnRef: data.fillTxnRef,
+          actionsSucceeded: data.actionsSucceeded ?? null,
+          outputToken: data.outputToken,
+        };
       }
 
       throw new FillPendingError("Indexer response still pending");

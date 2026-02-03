@@ -12,9 +12,10 @@ import { EmptyTable } from "./EmptyTable";
 import { usePersonalTransactions } from "../hooks/usePersonalTransactions";
 import { DepositStatusFilter } from "../types";
 import { SpeedUpModal } from "./SpeedUpModal";
-import { Deposit, IndexerDeposit } from "hooks/useDeposits";
+import { Deposit } from "hooks/useDeposits";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
+import type { IndexerDeposit } from "hooks/useDepositStatus";
 
 type Props = {
   statusFilter: DepositStatusFilter;

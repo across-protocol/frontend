@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { BigNumber } from "ethers";
 
 import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
+import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
@@ -12,6 +13,7 @@ import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 import { Text } from "components";
 import {
   getChainInfo,
+  getFillTxExplorerLink,
   COLORS,
   getBridgeUrlWithQueryParams,
   isDefined,
@@ -26,7 +28,7 @@ import TokenFee from "./TokenFee";
 import EstimatedTable from "./EstimatedTable";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
-import { useToken } from "hooks/useToken";
+import { useToken, useTokenFromAddress } from "hooks/useToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { getIntermediaryTokenInfo } from "utils/token";
 
@@ -43,6 +45,8 @@ type Props = {
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  isSwapFailed?: boolean;
+  bridgeOutputToken?: string;
 };
 
 export function DepositTimesCard({
@@ -58,6 +62,8 @@ export function DepositTimesCard({
   inputTokenSymbol,
   outputTokenSymbol,
   fromBridgeAndSwapPagePayload,
+  isSwapFailed,
+  bridgeOutputToken,
 }: Props) {
   const {
     estimatedRewards,
@@ -111,6 +117,17 @@ export function DepositTimesCard({
 
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
     useTokenConversion(outputTokenSymbolForConversion, "usd");
+
+  // Resolve bridge output token for swap failure display
+  const bridgeOutputTokenInfo = useTokenFromAddress(
+    bridgeOutputToken ?? "",
+    toChainId
+  );
+  const { convertTokenToBaseCurrency: convertBridgeOutputTokenToUsd } =
+    useTokenConversion(bridgeOutputTokenInfo?.symbol ?? "", "usd");
+  const bridgeOutputAmountUsd = outputAmount
+    ? convertBridgeOutputTokenToUsd(outputAmount)
+    : undefined;
 
   // Convert outputAmount to USD
   const outputAmountUsdFromToken = outputAmount
@@ -175,9 +192,16 @@ export function DepositTimesCard({
         )}
       </Row>
       <Row>
-        <Text color="grey-400">Fill time</Text>
+        <Text color="grey-400">
+          {isSwapFailed ? "Destination swap" : "Fill time"}
+        </Text>
         {isDepositing || status === "deposit-reverted" ? (
           <Text>-</Text>
+        ) : isSwapFailed ? (
+          <SwapFailedWrapper>
+            <Text color="error">failed</Text>
+            <CrossIconExplorerLink txHash={fillTxHash} chainId={toChainId} />
+          </SwapFailedWrapper>
         ) : (
           <ElapsedTime
             elapsedSeconds={fillTxElapsedSeconds}
@@ -218,25 +242,50 @@ export function DepositTimesCard({
           </Row>
         )}
       {isDefined(outputAmount) &&
-        outputTokenForDisplay &&
-        isDefined(finalOutputAmountUsd) && (
+        (isSwapFailed
+          ? bridgeOutputTokenInfo && isDefined(bridgeOutputAmountUsd)
+          : outputTokenForDisplay && isDefined(finalOutputAmountUsd)) && (
           <Row>
-            <Text color="grey-400">Amount received</Text>
+            <Text color="grey-400">
+              {isSwapFailed ? "Amount returned" : "Amount received"}
+            </Text>
             <TokenWrapper>
-              <TokenFee
-                token={{
-                  ...outputTokenForDisplay,
-                  decimals:
-                    outputTokenForConversion?.decimals ??
-                    outputTokenForDisplay.decimals,
-                }}
-                amount={outputAmount}
-                tokenChainId={toChainId}
-                tokenFirst
-                showTokenLinkOnHover
-                textColor="light-100"
-              />
-              <Text color="grey-400">(${formatUSD(finalOutputAmountUsd)})</Text>
+              {isSwapFailed && bridgeOutputTokenInfo ? (
+                <>
+                  <TokenFee
+                    token={bridgeOutputTokenInfo}
+                    amount={outputAmount}
+                    tokenChainId={toChainId}
+                    tokenFirst
+                    showTokenLinkOnHover
+                    textColor="light-100"
+                  />
+                  <Text color="grey-400">
+                    (${formatUSD(bridgeOutputAmountUsd!)})
+                  </Text>
+                </>
+              ) : (
+                outputTokenForDisplay && (
+                  <>
+                    <TokenFee
+                      token={{
+                        ...outputTokenForDisplay,
+                        decimals:
+                          outputTokenForConversion?.decimals ??
+                          outputTokenForDisplay.decimals,
+                      }}
+                      amount={outputAmount}
+                      tokenChainId={toChainId}
+                      tokenFirst
+                      showTokenLinkOnHover
+                      textColor="light-100"
+                    />
+                    <Text color="grey-400">
+                      (${formatUSD(finalOutputAmountUsd!)})
+                    </Text>
+                  </>
+                )
+              )}
             </TokenWrapper>
           </Row>
         )}
@@ -296,20 +345,36 @@ function CheckIconExplorerLink({
   txHash?: string;
   chainId: number;
 }) {
-  const chainInfo = getChainInfo(chainId);
-
   if (!txHash) {
     return <CheckIcon />;
   }
 
-  const explorerUrl = chainInfo.intermediaryChain
-    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
-    : chainInfo.constructExplorerLink(txHash);
+  const explorerUrl = getFillTxExplorerLink(chainId, txHash);
 
   return (
     <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
+  );
+}
+
+function CrossIconExplorerLink({
+  txHash,
+  chainId,
+}: {
+  txHash?: string;
+  chainId: number;
+}) {
+  if (!txHash) {
+    return <StyledCrossIcon />;
+  }
+
+  const explorerUrl = getFillTxExplorerLink(chainId, txHash);
+
+  return (
+    <IconWrapper href={explorerUrl} target="_blank" rel="noreferrer">
+      <StyledCrossIcon />
+    </IconWrapper>
   );
 }
 
@@ -394,4 +459,21 @@ const TokenWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+`;
+
+const SwapFailedWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const IconWrapper = styled.a`
+  display: flex;
+  align-items: center;
+`;
+
+const StyledCrossIcon = styled(CrossIcon)`
+  cursor: pointer;
+  color: ${COLORS.error};
 `;

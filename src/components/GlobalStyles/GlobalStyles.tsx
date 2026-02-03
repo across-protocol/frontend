@@ -237,6 +237,10 @@ const globalStyles = css`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
   }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
   button {
     border: none;
     background: none;

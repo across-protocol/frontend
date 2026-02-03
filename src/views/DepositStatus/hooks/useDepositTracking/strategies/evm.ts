@@ -19,6 +19,7 @@ import {
   DepositedInfo,
   DepositStatusResponse,
   FilledInfo,
+  FillFromIndexerResult,
   IChainStrategy,
 } from "../types";
 import { BigNumber, ethers } from "ethers";
@@ -83,17 +84,15 @@ export class EVMStrategy implements IChainStrategy {
 
     const fillChainId = this.getFillChain();
 
-    const fillTxHash = await Promise.any([
-      this.getFillFromIndexer(depositInfo),
-      this.getFillFromRpc(depositInfo),
-    ]);
+    // Use indexer to get fill info with actionsSucceeded
+    const indexerResult = await this.getFillFromIndexer(depositInfo);
 
-    if (!fillTxHash) {
+    if (!indexerResult.fillTxnRef) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
 
     const metadata = await this.getFillMetadata({
-      fillTxHash,
+      fillTxHash: indexerResult.fillTxnRef,
       bridgeProvider,
       depositId,
       originChainId: depositInfo.depositLog.originChainId,
@@ -105,15 +104,19 @@ export class EVMStrategy implements IChainStrategy {
       depositInfo,
       outputAmount: metadata.outputAmount || BigNumber.from(0),
       status: "filled",
+      actionsSucceeded: indexerResult.actionsSucceeded,
+      outputToken: indexerResult.outputToken,
     };
   }
 
   /**
    * Get fill information for a deposit from indexer
    * @param depositInfo Deposit information
-   * @returns Fill transaction hash or null
+   * @returns Fill info including fillTxnRef, actionsSucceeded, and outputToken
    */
-  async getFillFromIndexer(depositInfo: DepositedInfo): Promise<string> {
+  async getFillFromIndexer(
+    depositInfo: DepositedInfo
+  ): Promise<FillFromIndexerResult> {
     const { originChainId } = depositInfo.depositLog;
 
     try {
@@ -128,7 +131,11 @@ export class EVMStrategy implements IChainStrategy {
       );
 
       if (data?.status === "filled" && data.fillTxnRef) {
-        return data.fillTxnRef;
+        return {
+          fillTxnRef: data.fillTxnRef,
+          actionsSucceeded: data.actionsSucceeded ?? null,
+          outputToken: data.outputToken,
+        };
       }
 
       throw new FillPendingError();
