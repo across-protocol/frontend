@@ -3,7 +3,8 @@ import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { getChainInfo, shortenString } from "utils";
+import { getChainInfo } from "utils/constants";
+import { shortenString } from "utils/format";
 
 type Props = {
   deposit: Deposit;

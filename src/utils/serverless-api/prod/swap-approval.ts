@@ -1,6 +1,6 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
-import { swapApiRoutingPreference, vercelApiBaseUrl } from "utils";
+import { swapApiRoutingPreference, vercelApiBaseUrl } from "../../constants";
 
 import { BridgeProvider } from "../../../views/SwapAndBridge/utils/bridgeProvider";
 

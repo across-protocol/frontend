@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { ReactComponent as ProductIcon } from "assets/icons/product.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import React from "react";
 
 type Props = {

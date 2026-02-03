@@ -1,6 +1,6 @@
 import { useConnectionEVM } from "./useConnectionEVM";
 import { useConnectionSVM } from "./useConnectionSVM";
-import { getEcosystemFromToken } from "../utils";
+import { getEcosystemFromToken } from "utils/network";
 import type { ChainEcosystem } from "../constants/chains/types";
 import type { EnrichedToken } from "../views/SwapAndBridge/components/ChainTokenSelector/ChainTokenSelectorModal";
 import type { QuoteAccount } from "../views/SwapAndBridge/hooks/useQuoteRequest/quoteRequestAction";

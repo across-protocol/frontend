@@ -1,4 +1,4 @@
-import { getChainInfo } from "utils";
+import { getChainInfo } from "utils/constants";
 import { Text } from "components/Text";
 import { shortenAddress } from "utils/format";
 import { CopyableText } from "./CopyableText";

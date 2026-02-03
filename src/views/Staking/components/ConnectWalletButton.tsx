@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "components/Button";
 import { Text } from "components/Text";
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 
 type ConnectWalletButtonParam = {
   reasonToConnect: "stake" | "unstake" | "claim rewards";

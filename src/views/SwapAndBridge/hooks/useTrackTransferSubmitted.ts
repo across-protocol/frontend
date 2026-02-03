@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { ampli, TransferSubmittedProperties } from "ampli";
-import { useAmplitude } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { buildCoreTransferProperties } from "utils/amplitude/transferEventProperties";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";

@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber, ethers } from "ethers";
+import { ChainId } from "utils/constants";
+import { bridgeFeesQueryKey } from "utils/query-keys";
 import {
-  bridgeFeesQueryKey,
   getBridgeFees,
-  ChainId,
   getBridgeFeesWithExternalProjectId,
-  chainIsSvm,
-} from "utils";
+} from "utils/bridge";
+import { chainIsSvm } from "utils/sdk";
 import { AxiosError } from "axios";
 import { UniversalSwapQuote } from "./useUniversalSwapQuote";
 

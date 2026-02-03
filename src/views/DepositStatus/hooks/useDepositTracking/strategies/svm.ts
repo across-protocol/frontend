@@ -10,20 +10,21 @@ import {
   FillMetadata,
 } from "../types";
 import {
-  findFillEvent,
   getDepositBySignatureSVM,
-  getSVMRpc,
-  isBigNumberish,
   NoFilledRelayLogError,
   FillPendingError,
   FillMetadataParseError,
   TransactionPendingError,
   TransactionNotFoundError,
+} from "utils/deposits";
+import { isBigNumberish, uint8ArrayToBigNumber } from "utils/bignumber";
+import {
+  findFillEvent,
   SVMBlockFinder,
   SvmCpiEventsClient,
   toAddressType,
-  uint8ArrayToBigNumber,
-} from "utils";
+} from "utils/sdk";
+import { getSVMRpc } from "utils/providers";
 import { isSignature } from "@solana/kit";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
 import { BigNumber } from "ethers";

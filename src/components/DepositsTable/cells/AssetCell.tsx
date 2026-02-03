@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
 import { TokenImage } from "components/TokenImage";
-import { QUERIESV2, TokenInfo } from "utils";
+import { QUERIESV2, TokenInfo } from "utils/constants";
 
 import { BaseCell } from "./BaseCell";
 

@@ -1,4 +1,4 @@
-import { LayoutV2 } from "../../components";
+import LayoutV2 from "components/LayoutV2";
 import { AllTransfers } from "./components/AllTransfers";
 
 export const AcrossScan = () => {
