@@ -1,16 +1,42 @@
-import { Infer, object, string } from "superstruct";
+import {
+  Infer,
+  type,
+  string,
+  optional,
+  union,
+  literal,
+  integer,
+} from "superstruct";
 
 /**
- * Schema for gasless deposit messages from GCP Pub/Sub (Avro GaslessDepositMessage).
+ * Schema for gasless deposit messages pulled from GCP Pub/Sub (Avro GaslessDepositMessage).
  */
-const GaslessDepositSignaturesSchema = object({
-  deposit: string(),
-  permit: string(),
-});
-
-export const GaslessDepositMessageSchema = object({
-  gaslessTx: string(),
-  signatures: GaslessDepositSignaturesSchema,
+export const GaslessDepositMessageSchema = type({
+  swapTx: type({
+    ecosystem: string(),
+    chainId: integer(),
+    to: string(),
+    typedData: optional(
+      union([
+        literal(null),
+        type({ TypedDataReceiveWithAuthorizationEIP712: type({}) }),
+      ])
+    ),
+    data: type({
+      type: string(),
+      depositId: string(),
+      witness: union([
+        type({ BridgeWitness: type({}) }),
+        type({ BridgeAndSwapWitness: type({}) }),
+      ]),
+      permit: type({}),
+      domainSeparator: string(),
+      integratorId: optional(union([literal(null), string()])),
+    }),
+  }),
+  signature: string(),
+  submittedAt: string(),
+  requestId: string(),
 });
 
 export type GaslessDepositMessage = Infer<typeof GaslessDepositMessageSchema>;
