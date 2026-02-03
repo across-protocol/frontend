@@ -36,6 +36,12 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDC-SPOT"],
   },
+  {
+    fromChainId: [CHAIN_IDs.SOLANA],
+    fromSymbol: ["USDC"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDT-SPOT"],
+  },
   // Only USDC can be bridged to USDH on HyperEVM
   {
     fromChainId: "*",
