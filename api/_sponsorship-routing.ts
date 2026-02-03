@@ -105,6 +105,31 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         }),
     },
   ],
+  "*:USDH-SPOT": [
+    {
+      name: "any-usdh-spot-non-sponsored",
+      reason:
+        "Non-sponsored route to USDH-SPOT (enables A2B flows like WETH → USDH-SPOT)",
+      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
+  "*:USDH": [
+    {
+      name: "any-usdh-unsponsored",
+      reason: "Unsponsored route to USDH (enables A2B flows with Across fees)",
+      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
   "USDC:*": [
     {
       name: "usdc-ineligible",

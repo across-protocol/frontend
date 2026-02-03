@@ -7,6 +7,7 @@ import { AppFee } from "../../../_dexes/utils";
 import { CHAIN_IDs } from "../../../_constants";
 import {
   getHyperliquidDepositHandlerAddress,
+  BRIDGEABLE_INPUT_TOKEN_PER_OUTPUT_TOKEN,
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   ERROR_MESSAGE_PREFIX,
   SUPPORTED_DESTINATION_CHAINS,
@@ -26,11 +27,29 @@ export function getHyperEvmChainId(destinationChainId: number) {
     : CHAIN_IDs.HYPEREVM_TESTNET;
 }
 
+export function getBridgeableInputToken(
+  originChainId: number,
+  outputToken: Token
+): Token | undefined {
+  const tokenDef = BRIDGEABLE_INPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
+  const address = tokenDef.addresses[originChainId];
+
+  if (!address) return undefined;
+
+  return {
+    symbol: tokenDef.symbol,
+    decimals: tokenDef.decimals,
+    address,
+    chainId: originChainId,
+  };
+}
+
 export function getBridgeableOutputToken(outputToken: Token): Token {
   const tokenDef = BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
   const hyperEvmChainId = getHyperEvmChainId(outputToken.chainId);
   return {
-    ...tokenDef,
+    symbol: tokenDef.symbol,
+    decimals: tokenDef.decimals,
     address: tokenDef.addresses[hyperEvmChainId],
     chainId: hyperEvmChainId,
   };

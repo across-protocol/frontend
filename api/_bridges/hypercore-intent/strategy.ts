@@ -12,18 +12,23 @@ import {
 } from "../../_dexes/types";
 import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import {
-  getDepositMessage,
-  isRouteSupported,
-  getBridgeableOutputToken,
-  getDepositRecipient,
   assertSupportedRoute,
+  getBridgeableInputToken,
+  getBridgeableOutputToken,
+  getDepositMessage,
+  getDepositRecipient,
+  isRouteSupported,
 } from "./utils/common";
 import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   INTERNALIZED_SWAP_PAIRS,
   SUPPORTED_OUTPUT_TOKENS,
 } from "./utils/constants";
-import { getUsdhIntentQuote } from "./utils/quote";
+import {
+  getUsdhIntentQuote,
+  getUsdhUnsponsoredQuote,
+  getUsdhUnsponsoredQuoteForOutput,
+} from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals, getTokenByAddress } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
@@ -173,25 +178,11 @@ export function getHyperCoreIntentBridgeStrategy(
 
       if (!outputTokenInfo) return undefined;
 
-      const bridgeableTokenInfo =
-        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
-          outputTokenInfo.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
-        ];
-
-      if (!bridgeableTokenInfo) return undefined;
-
-      const bridgeableTokenAddress =
-        bridgeableTokenInfo.addresses[params.inputToken.chainId];
-
-      if (!bridgeableTokenAddress) return undefined;
-
-      // Return the bridgeable token
-      return {
-        address: bridgeableTokenAddress,
-        decimals: bridgeableTokenInfo.decimals,
-        symbol: bridgeableTokenInfo.symbol,
-        chainId: params.inputToken.chainId,
-      };
+      const bridgeableInputToken = getBridgeableInputToken(
+        params.inputToken.chainId,
+        params.outputToken
+      );
+      return bridgeableInputToken;
     },
   };
 }
@@ -232,8 +223,8 @@ export async function getQuoteForExactInput(
 
     return {
       bridgeQuote: {
-        inputToken,
-        outputToken,
+        inputToken: sponsoredQuote.inputToken,
+        outputToken: sponsoredQuote.outputToken,
         inputAmount: sponsoredQuote.inputAmount,
         outputAmount: sponsoredQuote.outputAmount,
         minOutputAmount: sponsoredQuote.minOutputAmount,
@@ -243,35 +234,63 @@ export async function getQuoteForExactInput(
       },
     };
   } else {
-    // Unsponsored flow: delegate to Across strategy for fee calculation
-    const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
-    const depositRecipient = getDepositRecipient({ outputToken, recipient });
-    const depositMessage = getDepositMessage({ outputToken, recipient });
-
-    const acrossQuote = await getAcrossBridgeStrategy().getQuoteForExactInput({
-      inputToken,
-      outputToken: bridgeableOutputToken,
-      exactInputAmount,
-      recipient: depositRecipient,
-      message: depositMessage,
-    });
-
-    return {
-      bridgeQuote: {
-        ...acrossQuote.bridgeQuote,
+    // Unsponsored flow
+    // Check if this is a USDH or USDH-SPOT route
+    if (outputToken.symbol === "USDH" || outputToken.symbol === "USDH-SPOT") {
+      // Use manual fee calculation for USDH since route is not enabled in Across
+      const unsponsoredQuote = await getUsdhUnsponsoredQuote({
         inputToken,
         outputToken,
-        // Convert outputAmount from bridgeable token decimals to output token decimals
-        outputAmount: ConvertDecimals(
-          bridgeableOutputToken.decimals,
-          outputToken.decimals
-        )(acrossQuote.bridgeQuote.outputAmount),
-        minOutputAmount: ConvertDecimals(
-          bridgeableOutputToken.decimals,
-          outputToken.decimals
-        )(acrossQuote.bridgeQuote.minOutputAmount),
-      },
-    };
+        exactInputAmount,
+        recipient,
+      });
+
+      return {
+        bridgeQuote: {
+          inputToken: unsponsoredQuote.inputToken,
+          outputToken: unsponsoredQuote.outputToken,
+          inputAmount: unsponsoredQuote.inputAmount,
+          outputAmount: unsponsoredQuote.outputAmount,
+          minOutputAmount: unsponsoredQuote.minOutputAmount,
+          estimatedFillTimeSec: unsponsoredQuote.estimatedFillTimeSec,
+          provider: UNSPONSORED_PROVIDER_NAME,
+          fees: unsponsoredQuote.fees,
+          suggestedFees: unsponsoredQuote.suggestedFees,
+        },
+      };
+    } else {
+      // For other routes (e.g., USDT-SPOT), delegate to Across strategy
+      const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
+      const depositRecipient = getDepositRecipient({ outputToken, recipient });
+      const depositMessage = getDepositMessage({ outputToken, recipient });
+
+      const acrossQuote = await getAcrossBridgeStrategy().getQuoteForExactInput(
+        {
+          inputToken,
+          outputToken: bridgeableOutputToken,
+          exactInputAmount,
+          recipient: depositRecipient,
+          message: depositMessage,
+        }
+      );
+
+      return {
+        bridgeQuote: {
+          ...acrossQuote.bridgeQuote,
+          inputToken,
+          outputToken,
+          // Convert outputAmount from bridgeable token decimals to output token decimals
+          outputAmount: ConvertDecimals(
+            bridgeableOutputToken.decimals,
+            outputToken.decimals
+          )(acrossQuote.bridgeQuote.outputAmount),
+          minOutputAmount: ConvertDecimals(
+            bridgeableOutputToken.decimals,
+            outputToken.decimals
+          )(acrossQuote.bridgeQuote.minOutputAmount),
+        },
+      };
+    }
   }
 }
 
@@ -317,8 +336,8 @@ export async function getQuoteForOutput(
 
     return {
       bridgeQuote: {
-        inputToken,
-        outputToken,
+        inputToken: sponsoredQuote.inputToken,
+        outputToken: sponsoredQuote.outputToken,
         inputAmount,
         outputAmount: sponsoredQuote.outputAmount,
         minOutputAmount,
@@ -328,40 +347,67 @@ export async function getQuoteForOutput(
       },
     };
   } else {
-    // Unsponsored flow: delegate to Across strategy for fee calculation
-    const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
-    const depositRecipient = getDepositRecipient({ outputToken, recipient });
-    const depositMessage = getDepositMessage({ outputToken, recipient });
-
-    // Convert minOutputAmount from output token decimals to bridgeable token decimals
-    const minOutputAmountInBridgeableDecimals = ConvertDecimals(
-      outputToken.decimals,
-      bridgeableOutputToken.decimals
-    )(minOutputAmount);
-
-    const acrossQuote = await getAcrossBridgeStrategy().getQuoteForOutput({
-      inputToken,
-      outputToken: bridgeableOutputToken,
-      minOutputAmount: minOutputAmountInBridgeableDecimals,
-      recipient: depositRecipient,
-      message: depositMessage,
-    });
-
-    return {
-      bridgeQuote: {
-        ...acrossQuote.bridgeQuote,
+    // Unsponsored flow
+    // Check if this is a USDH or USDH-SPOT route
+    if (outputToken.symbol === "USDH" || outputToken.symbol === "USDH-SPOT") {
+      // Use manual fee calculation for USDH since route is not enabled in Across
+      const unsponsoredQuote = await getUsdhUnsponsoredQuoteForOutput({
         inputToken,
         outputToken,
-        // Convert outputAmount from bridgeable token decimals to output token decimals
-        outputAmount: ConvertDecimals(
-          bridgeableOutputToken.decimals,
-          outputToken.decimals
-        )(acrossQuote.bridgeQuote.outputAmount),
-        minOutputAmount: ConvertDecimals(
-          bridgeableOutputToken.decimals,
-          outputToken.decimals
-        )(acrossQuote.bridgeQuote.minOutputAmount),
-      },
-    };
+        minOutputAmount,
+        recipient,
+        forceExactOutput: params.forceExactOutput,
+      });
+
+      return {
+        bridgeQuote: {
+          inputToken: unsponsoredQuote.inputToken,
+          outputToken: unsponsoredQuote.outputToken,
+          inputAmount: unsponsoredQuote.inputAmount,
+          outputAmount: unsponsoredQuote.outputAmount,
+          minOutputAmount: unsponsoredQuote.minOutputAmount,
+          estimatedFillTimeSec: unsponsoredQuote.estimatedFillTimeSec,
+          provider: UNSPONSORED_PROVIDER_NAME,
+          fees: unsponsoredQuote.fees,
+          suggestedFees: unsponsoredQuote.suggestedFees,
+        },
+      };
+    } else {
+      // For other routes (e.g., USDT-SPOT), delegate to Across strategy
+      const bridgeableOutputToken = getBridgeableOutputToken(outputToken);
+      const depositRecipient = getDepositRecipient({ outputToken, recipient });
+      const depositMessage = getDepositMessage({ outputToken, recipient });
+
+      // Convert minOutputAmount from output token decimals to bridgeable token decimals
+      const minOutputAmountInBridgeableDecimals = ConvertDecimals(
+        outputToken.decimals,
+        bridgeableOutputToken.decimals
+      )(minOutputAmount);
+
+      const acrossQuote = await getAcrossBridgeStrategy().getQuoteForOutput({
+        inputToken,
+        outputToken: bridgeableOutputToken,
+        minOutputAmount: minOutputAmountInBridgeableDecimals,
+        recipient: depositRecipient,
+        message: depositMessage,
+      });
+
+      return {
+        bridgeQuote: {
+          ...acrossQuote.bridgeQuote,
+          inputToken,
+          outputToken,
+          // Convert outputAmount from bridgeable token decimals to output token decimals
+          outputAmount: ConvertDecimals(
+            bridgeableOutputToken.decimals,
+            outputToken.decimals
+          )(acrossQuote.bridgeQuote.outputAmount),
+          minOutputAmount: ConvertDecimals(
+            bridgeableOutputToken.decimals,
+            outputToken.decimals
+          )(acrossQuote.bridgeQuote.minOutputAmount),
+        },
+      };
+    }
   }
 }
