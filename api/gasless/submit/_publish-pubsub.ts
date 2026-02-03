@@ -44,7 +44,7 @@ function toPubSubPayload(
         witness: witnessToAvroUnion(data.witness),
         permit: data.permit,
         domainSeparator: data.domainSeparator,
-        integratorId: data.integratorId ?? null,
+        integratorId: data.integratorId || null,
       },
     },
     signature,

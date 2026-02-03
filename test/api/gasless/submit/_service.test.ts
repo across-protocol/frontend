@@ -25,6 +25,9 @@ vi.mock("../../../../api/_utils", () => ({
   getTokenInfo: vi.fn(() =>
     Promise.resolve({ symbol: "USDC", decimals: 6, address: MOCK_INPUT_TOKEN })
   ),
+  toAddressType: vi.fn((address: string) => ({
+    toNative: () => address,
+  })),
 }));
 
 vi.mock("../../../../api/_sponsored-gasless-config", () => ({
