@@ -367,7 +367,7 @@ function _prepSwapAndDepositData(
         ? originSwapQuote.swapTxns[0].data
         : "",
     exchange: contracts.originRouter.address,
-    transferType: TransferType.Approval,
+    transferType: contracts.originRouter.transferType ?? TransferType.Approval,
     enableProportionalAdjustment: true,
     spokePool: getSpokePool(inputToken.chainId).address,
     nonce: 0,
