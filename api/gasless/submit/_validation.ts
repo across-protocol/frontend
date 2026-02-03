@@ -136,14 +136,7 @@ export type GaslessSubmitBody = {
     ecosystem: "evm-gasless";
     chainId: number;
     to: string;
-    data: {
-      type: "erc3009";
-      depositId: string;
-      witness: Infer<typeof WitnessSchema>;
-      permit: Record<string, unknown>;
-      domainSeparator: string;
-      integratorId?: string;
-    };
+    data: Infer<typeof GaslessTxDataSchema>;
   };
   signature: string;
 };

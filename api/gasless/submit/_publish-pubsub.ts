@@ -27,17 +27,13 @@ function toPubSubPayload(
   const { swapTx, signature, submittedAt, requestId } = message;
   const data = swapTx.data;
 
-  const typedData =
-    "typedData" in swapTx && swapTx.typedData != null
-      ? { TypedDataReceiveWithAuthorizationEIP712: swapTx.typedData }
-      : null;
-
   return {
     swapTx: {
       ecosystem: "evm_gasless",
       chainId: swapTx.chainId,
       to: swapTx.to,
-      typedData,
+      // don't include typed data in the payload as it is redundant to `data.permit`
+      typedData: null,
       data: {
         type: data.type,
         depositId: data.depositId,
