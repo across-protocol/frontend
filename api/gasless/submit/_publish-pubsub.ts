@@ -12,6 +12,47 @@ export type GaslessDepositMessage = {
 
 const logger = getLogger();
 
+function witnessToAvroUnion(
+  witness: GaslessSubmitBody["swapTx"]["data"]["witness"]
+): Record<string, unknown> {
+  if (witness.type === "BridgeWitness") {
+    return { BridgeWitness: witness };
+  }
+  return { BridgeAndSwapWitness: witness };
+}
+
+function toPubSubPayload(
+  message: GaslessDepositMessage
+): Record<string, unknown> {
+  const { swapTx, signature, submittedAt, requestId } = message;
+  const data = swapTx.data;
+
+  const typedData =
+    "typedData" in swapTx && swapTx.typedData != null
+      ? { TypedDataReceiveWithAuthorizationEIP712: swapTx.typedData }
+      : null;
+
+  return {
+    swapTx: {
+      ecosystem: "evm_gasless",
+      chainId: swapTx.chainId,
+      to: swapTx.to,
+      typedData,
+      data: {
+        type: data.type,
+        depositId: data.depositId,
+        witness: witnessToAvroUnion(data.witness),
+        permit: data.permit,
+        domainSeparator: data.domainSeparator,
+        integratorId: data.integratorId ?? null,
+      },
+    },
+    signature,
+    submittedAt,
+    requestId,
+  };
+}
+
 export async function publishGaslessDepositMessage(
   data: GaslessDepositMessage
 ): Promise<string> {
@@ -20,8 +61,8 @@ export async function publishGaslessDepositMessage(
 
   try {
     const topic = client.topic(config.topicName);
-
-    const messageBuffer = Buffer.from(JSON.stringify(data));
+    const payload = toPubSubPayload(data);
+    const messageBuffer = Buffer.from(JSON.stringify(payload));
     const messageId = await topic.publishMessage({
       data: messageBuffer,
     });
