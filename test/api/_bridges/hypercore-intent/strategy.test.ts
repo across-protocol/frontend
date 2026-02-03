@@ -83,7 +83,6 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
       expect(strategy.getCrossSwapTypes(params)).toEqual([]);
     });
 
-    // Phase 1 A2B tests
     it("should return ANY_TO_BRIDGEABLE for A2B flow (DAI -> USDT-SPOT)", () => {
       const DAI_ON_POLYGON = {
         address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
@@ -469,5 +468,87 @@ describe("getHyperCoreIntentBridgeStrategy (sponsored)", () => {
     await sponsoredStrategy.getQuoteForExactInput(params as any);
 
     expect(assertAccountExistsOnHyperCore).not.toHaveBeenCalled();
+  });
+
+  describe("resolveOriginSwapTarget", () => {
+    it("should resolve USDT for USDT-SPOT output", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: CHAIN_IDs.ARBITRUM,
+          address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "USDT-SPOT",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address:
+            TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+          decimals: 6,
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result!.symbol).toBe("USDT");
+      expect(result!.chainId).toBe(CHAIN_IDs.ARBITRUM);
+      expect(result!.address).toBe(
+        TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM]
+      );
+      expect(result!.decimals).toBe(6);
+    });
+
+    it("should return undefined for unsupported output token", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: CHAIN_IDs.ARBITRUM,
+          address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "UNKNOWN",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address: "0xabcdef1234567890",
+          decimals: 18,
+        },
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined if bridgeable token not available on origin chain", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: 999999, // Unsupported chain
+          address: "0x1234567890abcdef",
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "USDT-SPOT",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address:
+            TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+          decimals: 6,
+        },
+      });
+
+      expect(result).toBeUndefined();
+    });
   });
 });

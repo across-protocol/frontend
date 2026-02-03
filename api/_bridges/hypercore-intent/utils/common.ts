@@ -197,7 +197,6 @@ export function isRouteSupported(params: {
   }
 
   if (SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
-    // Check if output token is supported
     const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
       (token) =>
         token.addresses[params.outputToken.chainId]?.toLowerCase() ===

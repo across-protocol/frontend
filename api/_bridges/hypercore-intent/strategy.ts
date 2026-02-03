@@ -19,14 +19,13 @@ import {
   assertSupportedRoute,
 } from "./utils/common";
 import {
-  SUPPORTED_DESTINATION_CHAINS,
-  SUPPORTED_INPUT_TOKENS,
-  SUPPORTED_ORIGIN_CHAINS,
+  BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
+  INTERNALIZED_SWAP_PAIRS,
   SUPPORTED_OUTPUT_TOKENS,
 } from "./utils/constants";
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
-import { ConvertDecimals } from "../../_utils";
+import { ConvertDecimals, getTokenByAddress } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
 import {
   assertAccountExistsOnHyperCore,
@@ -77,8 +76,12 @@ export function getHyperCoreIntentBridgeStrategy(
       isInputNative: boolean;
       isOutputNative: boolean;
     }) => {
-      // Check if destination chain and output token are supported
-      if (!SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
+      if (
+        !isRouteSupported({
+          inputToken: params.inputToken,
+          outputToken: params.outputToken,
+        })
+      ) {
         return [];
       }
 
@@ -86,36 +89,31 @@ export function getHyperCoreIntentBridgeStrategy(
         (token) =>
           token.addresses[params.outputToken.chainId]?.toLowerCase() ===
           params.outputToken.address.toLowerCase()
+      )!;
+
+      const requiredBridgeableToken =
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
+          supportedOutputToken.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
+        ]!;
+
+      // Check if input token matches the required bridgeable token
+      const inputMatchesBridgeableToken =
+        requiredBridgeableToken.addresses[
+          params.inputToken.chainId
+        ]?.toLowerCase() === params.inputToken.address.toLowerCase();
+
+      // Check if this is an internalized swap pair (e.g., USDC → USDH)
+      const isInternalizedSwapPair = INTERNALIZED_SWAP_PAIRS.some(
+        (pair) =>
+          pair.inputToken === params.inputToken.symbol &&
+          pair.outputToken === supportedOutputToken.symbol
       );
 
-      if (!supportedOutputToken) {
-        return [];
-      }
-
-      // Check if origin chain is supported
-      if (!SUPPORTED_ORIGIN_CHAINS.includes(params.inputToken.chainId)) {
-        return [];
-      }
-
-      const crossSwapTypes: ReturnType<BridgeStrategy["getCrossSwapTypes"]> =
-        [];
-
-      // Check if input token is directly bridgeable (B2B flow)
-      const supportedInputToken = SUPPORTED_INPUT_TOKENS.find(
-        (token) =>
-          token.addresses[params.inputToken.chainId]?.toLowerCase() ===
-          params.inputToken.address.toLowerCase()
-      );
-
-      if (supportedInputToken) {
-        // Input token is USDC or USDT, can bridge directly
-        crossSwapTypes.push(CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE);
+      if (inputMatchesBridgeableToken || isInternalizedSwapPair) {
+        return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
       } else {
-        // Input token needs to be swapped first (A2B flow)
-        crossSwapTypes.push(CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE);
+        return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
       }
-
-      return crossSwapTypes;
     },
 
     getBridgeQuoteRecipient: async (
@@ -162,6 +160,39 @@ export function getHyperCoreIntentBridgeStrategy(
     },
 
     isRouteSupported,
+
+    resolveOriginSwapTarget: (params: {
+      inputToken: Token;
+      outputToken: Token;
+    }) => {
+      // Get output token info
+      const outputTokenInfo = getTokenByAddress(
+        params.outputToken.address,
+        params.outputToken.chainId
+      );
+
+      if (!outputTokenInfo) return undefined;
+
+      const bridgeableTokenInfo =
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
+          outputTokenInfo.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
+        ];
+
+      if (!bridgeableTokenInfo) return undefined;
+
+      const bridgeableTokenAddress =
+        bridgeableTokenInfo.addresses[params.inputToken.chainId];
+
+      if (!bridgeableTokenAddress) return undefined;
+
+      // Return the bridgeable token
+      return {
+        address: bridgeableTokenAddress,
+        decimals: bridgeableTokenInfo.decimals,
+        symbol: bridgeableTokenInfo.symbol,
+        chainId: params.inputToken.chainId,
+      };
+    },
   };
 }
 

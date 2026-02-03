@@ -50,4 +50,12 @@ export const BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN: Record<
   "USDT-SPOT": TOKEN_SYMBOLS_MAP.USDT,
 };
 
+export const INTERNALIZED_SWAP_PAIRS: Array<{
+  inputToken: string;
+  outputToken: string;
+}> = [
+  { inputToken: "USDC", outputToken: "USDH" },
+  { inputToken: "USDC", outputToken: "USDH-SPOT" },
+];
+
 export const ERROR_MESSAGE_PREFIX = "Sponsored Intent";

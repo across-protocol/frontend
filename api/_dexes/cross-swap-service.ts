@@ -1,9 +1,9 @@
 import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 
+import { CHAIN_IDs } from "../_constants";
 import {
   getRouteByInputTokenAndDestinationChain,
-  getRouteByOutputTokenAndOriginChain,
   getRoutesByChainIds,
   getTokenByAddress,
   addTimeoutToPromise,
@@ -11,8 +11,6 @@ import {
   addMarkupToAmount,
   ConvertDecimals,
   getSpokePoolAddress,
-  CHAIN_IDs,
-  TOKEN_SYMBOLS_MAP,
 } from "../_utils";
 import {
   calculateAppFee,
@@ -116,15 +114,6 @@ function getCrossSwapQuoteForAmountType(
     outputToken: crossSwap.outputToken,
     isInputNative: Boolean(crossSwap.isInputNative),
     isOutputNative: Boolean(crossSwap.isOutputNative),
-  });
-
-  logger.debug({
-    at: "getCrossSwapQuoteForAmountType",
-    message: "Cross-swap types determined",
-    bridgeName: bridge.name,
-    inputToken: `${crossSwap.inputToken.symbol} (${crossSwap.inputToken.chainId})`,
-    outputToken: `${crossSwap.outputToken.symbol} (${crossSwap.outputToken.chainId})`,
-    crossSwapTypes,
   });
 
   if (crossSwapTypes.length === 0) {
@@ -802,7 +791,11 @@ export async function getCrossSwapQuotesForExactInputA2B(
   strategies: QuoteFetchStrategies,
   bridge: BridgeStrategy
 ) {
-  const results = _prepCrossSwapQuotesRetrievalA2B(crossSwap, strategies);
+  const results = _prepCrossSwapQuotesRetrievalA2B(
+    crossSwap,
+    strategies,
+    bridge
+  );
 
   const strategyFetches = results.map((result) => {
     const sources = result.originStrategy.getSources(
@@ -906,7 +899,8 @@ export async function getCrossSwapQuotesForOutputA2B(
   };
   const results = _prepCrossSwapQuotesRetrievalA2B(
     crossSwapWithAppFee,
-    strategies
+    strategies,
+    bridge
   );
 
   if (results.length === 0) {
@@ -1024,86 +1018,29 @@ export async function getCrossSwapQuotesForOutputA2B(
 
 function _prepCrossSwapQuotesRetrievalA2B(
   crossSwap: CrossSwap,
-  strategies: QuoteFetchStrategies
+  strategies: QuoteFetchStrategies,
+  bridge: BridgeStrategy
 ): CrossSwapQuotesRetrievalA2BResult[] {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
 
-  // First, try to find a direct bridge route
-  let bridgeRoute = getRouteByOutputTokenAndOriginChain(
-    crossSwap.outputToken.address,
-    originSwapChainId
-  );
-
-  // If no direct route exists, check for an indirect route (e.g., via HyperEVM for HyperCore destinations)
-  if (!bridgeRoute) {
-    logger.debug({
-      at: "_prepCrossSwapQuotesRetrievalA2B",
-      message: "No direct bridge route found, checking for indirect route",
-      originChainId: originSwapChainId,
-      destinationChainId,
-      inputToken: crossSwap.inputToken.address,
-      outputToken: crossSwap.outputToken.address,
-    });
-
-    const indirectRoute = getIndirectDestinationRoute({
-      originChainId: originSwapChainId,
-      destinationChainId,
-      inputToken: crossSwap.inputToken.address,
-      outputToken: crossSwap.outputToken.address,
-    });
-
-    logger.debug({
-      at: "_prepCrossSwapQuotesRetrievalA2B",
-      message: "Indirect route lookup result",
-      indirectRouteFound: !!indirectRoute,
-      intermediaryToken: indirectRoute?.intermediaryOutputToken.symbol,
-      intermediaryChain: indirectRoute?.intermediaryOutputToken.chainId,
-    });
-
-    if (indirectRoute) {
-      // Use the intermediary token as the bridge output token
-      // For example: Origin -> USDT on HyperEVM (intermediary) -> USDT-SPOT on HyperCore (final)
-      // The bridge strategy will handle the conversion to the intermediary chain internally
-      bridgeRoute = getRouteByOutputTokenAndOriginChain(
-        indirectRoute.intermediaryOutputToken.address,
-        originSwapChainId
-      );
-
-      logger.debug({
-        at: "_prepCrossSwapQuotesRetrievalA2B",
-        message: "Bridge route lookup with intermediary token",
-        intermediaryTokenAddress: indirectRoute.intermediaryOutputToken.address,
-        originChainId: originSwapChainId,
-        bridgeRouteFound: !!bridgeRoute,
-      });
-    }
+  if (!bridge.resolveOriginSwapTarget) {
+    throw new Error(
+      `Bridge strategy '${bridge.name}' does not support A2B flows.`
+    );
   }
 
-  if (!bridgeRoute) {
+  const bridgeableInputToken = bridge.resolveOriginSwapTarget({
+    inputToken: crossSwap.inputToken,
+    outputToken: crossSwap.outputToken,
+  });
+
+  if (!bridgeableInputToken) {
     throw new Error(
       `No bridge route found for output token ${crossSwap.outputToken.symbol} ` +
         `${originSwapChainId} -> ${crossSwap.outputToken.chainId}`
     );
   }
-
-  const _bridgeableInputToken = getTokenByAddress(
-    bridgeRoute.fromTokenAddress,
-    bridgeRoute.fromChain
-  );
-
-  if (!_bridgeableInputToken) {
-    throw new Error(
-      `No bridgeable input token found for ${bridgeRoute.toTokenAddress} on chain ${bridgeRoute.toChain}`
-    );
-  }
-
-  const bridgeableInputToken = {
-    address: bridgeRoute.fromTokenAddress,
-    decimals: _bridgeableInputToken.decimals,
-    symbol: _bridgeableInputToken.symbol,
-    chainId: bridgeRoute.fromChain,
-  };
 
   const originStrategies = getQuoteFetchStrategies(
     originSwapChainId,

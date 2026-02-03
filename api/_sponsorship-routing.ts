@@ -222,18 +222,20 @@ function getRouteRules(params: BridgeStrategyDataParams) {
     TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
     params.inputToken.symbol;
   const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
-  const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
   const wildcardInputKey = buildRouteKey(
     ROUTE_WILDCARD_SYMBOL,
     params.outputToken.symbol
   );
+  const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
 
   return (
     (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
+    (wildcardInputKey
+      ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey]
+      : undefined) ??
     (wildcardOutputKey
       ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
-      : undefined) ??
-    (wildcardInputKey ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey] : undefined)
+      : undefined)
   );
 }
 

@@ -44,7 +44,6 @@ export async function buildTxEvm(params: {
   const { crossSwap, originSwapQuote } = quotes;
   const { inputToken } = crossSwap;
 
-  // Branch: A2B flow (origin swap exists) or B2B flow (no origin swap)
   if (originSwapQuote) {
     // A2B flow: Build swapAndBridge transaction
     const { swapAndDepositData, swapValue } = _prepSwapAndDepositData(
@@ -334,7 +333,7 @@ function _prepSwapAndDepositData(
   const quoteTimestamp = sdk.utils.getCurrentTime() - 60;
   const fillDeadline = getFillDeadline(hyperEvmChainId, quoteTimestamp);
 
-  // Build the base deposit data (similar to _prepDepositTx but for swapAndBridge)
+  // Build the base deposit data
   const depositData = {
     depositor,
     recipient: depositRecipient,
@@ -376,7 +375,9 @@ function _prepSwapAndDepositData(
 
   return {
     swapAndDepositData,
-    swapValue: crossSwap.isInputNative ? originSwapQuote.maximumAmountIn : 0,
+    swapValue: crossSwap.isInputNative
+      ? originSwapQuote.maximumAmountIn
+      : BigNumber.from(0),
   };
 }
 
@@ -404,7 +405,6 @@ function _prepDepositTx(
     });
   } else {
     // For EVM origin chains, only reject destination swaps
-    // Origin swaps are allowed (trust cross-swap service)
     assertNoDestinationSwap({
       destinationSwapQuote,
       errorMessagePrefix: ERROR_MESSAGE_PREFIX,
