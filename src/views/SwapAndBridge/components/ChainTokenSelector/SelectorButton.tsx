@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Suspense, useCallback, useState } from "react";
-import { COLORS, getChainInfo } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 import { getTokenDisplaySymbol } from "hooks/useAvailableCrosschainRoutes";

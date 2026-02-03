@@ -15,7 +15,9 @@ import {
 import { getMessageHash, toAddressType } from "./sdk";
 import { parseDepositForBurnLog } from "./cctp";
 import { Signature } from "@solana/kit";
-import { getSVMRpc, shortenAddress, SvmCpiEventsClient } from "utils";
+import { SvmCpiEventsClient } from "./sdk";
+import { getSVMRpc } from "./providers";
+import { shortenAddress } from "./format";
 import { parseOftSentLog } from "./oft";
 
 export class NoFundsDepositedLogError extends Error {

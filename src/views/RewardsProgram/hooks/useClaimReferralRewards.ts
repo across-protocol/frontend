@@ -1,14 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { getConfig } from "utils/config";
-import { useConnection, useIsWrongNetwork } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
 import { sendWithPaddedGas } from "utils/transactions";
-import {
-  ChainId,
-  hubPoolChainId,
-  rewardProgramTypes,
-  waitOnTransaction,
-} from "utils";
+import { ChainId, hubPoolChainId, rewardProgramTypes } from "utils/constants";
+import { waitOnTransaction } from "utils/notify";
 import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 
 const config = getConfig();

@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { BigNumber, utils } from "ethers";
 
-import { useConnection, useStakingPool } from "hooks";
-import { estimateGasForAddEthLiquidity, max } from "utils";
+import { useConnection } from "hooks/useConnection";
+import { useStakingPool } from "hooks/useStakingPool";
+import { estimateGasForAddEthLiquidity } from "utils/pool";
+import { max } from "utils/math";
 
 import { useUserLiquidityPool } from "./useUserLiquidityPool";
 

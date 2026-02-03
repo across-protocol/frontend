@@ -1,7 +1,8 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { isAddress as isEVMAddress } from "viem";
 import { isAddress as isSVMAddress } from "@solana/kit";
-import { chainIsSvm, getCode, isProgram, noContractCode } from "utils";
+import { chainIsSvm } from "utils/sdk";
+import { getCode, isProgram, noContractCode } from "utils/address";
 
 export const AddressTypes = {
   contract: "contract",

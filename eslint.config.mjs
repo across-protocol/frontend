@@ -37,6 +37,39 @@ export default tseslint.config(
           argsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "utils",
+              message: "Import directly from utils/<module> instead of barrel file.",
+            },
+            {
+              name: "components",
+              message: "Import directly from components/<Component> instead of barrel file.",
+            },
+            {
+              name: "hooks",
+              message: "Import directly from hooks/<hookName> instead of barrel file.",
+            },
+          ],
+          patterns: [
+            {
+              group: ["**/utils/index", "**/utils/index.ts"],
+              message: "Import directly from utils/<module> instead of barrel file.",
+            },
+            {
+              group: ["**/components/index", "**/components/index.ts"],
+              message: "Import directly from components/<Component> instead of barrel file.",
+            },
+            {
+              group: ["**/hooks/index", "**/hooks/index.ts"],
+              message: "Import directly from hooks/<hookName> instead of barrel file.",
+            },
+          ],
+        },
+      ],
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "react/no-children-prop": "off",

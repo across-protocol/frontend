@@ -1,12 +1,10 @@
 import { useQuery, useQueries, UseQueryOptions } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 import { Balance, BalanceStrategy } from "./strategies/types";
-import {
-  getEcosystem,
-  balanceQueryKey,
-  TOKEN_SYMBOLS_MAP,
-  getNativeTokenSymbol,
-} from "utils";
+import { TOKEN_SYMBOLS_MAP } from "utils/constants";
+import { getEcosystem } from "utils/network";
+import { balanceQueryKey } from "utils/query-keys";
+import { getNativeTokenSymbol } from "utils/sdk";
 import { zeroBalance } from "./utils";
 type StrategyPerEcosystem = {
   evm: BalanceStrategy;

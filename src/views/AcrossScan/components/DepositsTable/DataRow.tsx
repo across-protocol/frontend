@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
 import { Deposit } from "hooks/useDeposits";
-import { COLORS, getChainInfo } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
 
 import { ColumnKey, HeaderCells } from "./HeadRow";
 import { AmountWithIconsCell } from "./cells/AmountWithIconsCell";

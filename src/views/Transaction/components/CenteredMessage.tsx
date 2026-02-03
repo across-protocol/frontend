@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 
 type Props = {
   title: string;

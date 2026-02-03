@@ -15,7 +15,7 @@ import { useEnsQuery } from "./useEns";
 import {
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
-} from "utils";
+} from "utils/amplitude";
 import {
   ampli,
   ConnectWalletButtonClickedProperties,

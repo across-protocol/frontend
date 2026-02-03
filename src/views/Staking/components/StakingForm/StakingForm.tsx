@@ -21,7 +21,7 @@ import { Tab, Tabs } from "components/Tabs";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { formatWeiPct, formatNumberMaxFracDigits } from "utils";
+import { formatWeiPct, formatNumberMaxFracDigits } from "utils/format";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { Text } from "components/Text";
 import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";

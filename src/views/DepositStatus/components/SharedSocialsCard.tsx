@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
-import { Text } from "components";
+import { Text } from "components/Text";
 import { BigNumber } from "ethers";
-import { formatUnitsWithMaxFractions, getChainInfo, QUERIESV2 } from "utils";
+import { getChainInfo, QUERIESV2 } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { useToken } from "hooks/useToken";
 import SocialShareButton from "./SocialShareButton";
 

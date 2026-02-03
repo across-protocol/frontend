@@ -1,11 +1,8 @@
 import { Balance, BalanceStrategy } from "./types";
-import {
-  getEvmBalance,
-  getNativeBalance,
-  getConfig,
-  getProvider,
-  formatUnitsWithMaxFractions,
-} from "utils";
+import { getEvmBalance, getNativeBalance } from "utils/token";
+import { getConfig } from "utils/config";
+import { getProvider } from "utils/providers";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 

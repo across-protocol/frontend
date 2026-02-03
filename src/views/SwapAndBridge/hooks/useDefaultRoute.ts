@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
-import { CHAIN_IDs, chainEndpointToId, TOKEN_SYMBOLS_MAP } from "utils";
+import {
+  CHAIN_IDs,
+  chainEndpointToId,
+  TOKEN_SYMBOLS_MAP,
+} from "utils/constants";
 import { EnrichedToken } from "../components/ChainTokenSelector/ChainTokenSelectorModal";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 

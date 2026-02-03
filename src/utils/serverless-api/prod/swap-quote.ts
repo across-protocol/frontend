@@ -1,6 +1,6 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "../../constants";
 
 export type SwapQuoteApiCall = typeof swapQuoteApiCall;
 

@@ -5,7 +5,7 @@ import { ReactComponent as LoadingIcon } from "assets/icons/loading-2.svg";
 import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 import styled from "@emotion/styled";
-import { COLORS } from "../../../../utils";
+import { COLORS } from "utils/constants";
 
 export const CoreConfirmationButton: React.FC<{
   label: React.ReactNode;

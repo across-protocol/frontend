@@ -5,8 +5,9 @@ import { ReactComponent as ArrowStarRingIcon } from "assets/icons/arrow-star-rin
 import { Text } from "components/Text";
 import { SecondaryButton } from "components/Button";
 import { useStakingPool } from "hooks/useStakingPool";
-import { useAmplitude } from "hooks";
-import { formatWeiPct, BRIDGED_USDC_SYMBOLS } from "utils";
+import { useAmplitude } from "hooks/useAmplitude";
+import { BRIDGED_USDC_SYMBOLS } from "utils/sdk";
+import { formatWeiPct } from "utils/format";
 import { ampli } from "ampli";
 
 import { EarnActionCard } from "./EarnActionCard";

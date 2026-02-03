@@ -1,7 +1,10 @@
 import { useParams } from "react-router-dom";
 
-import { useConnection, useIsWrongNetwork, useStakingPool } from "hooks";
-import { getConfig, hubPoolChainId } from "utils";
+import { useConnection } from "hooks/useConnection";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
+import { useStakingPool } from "hooks/useStakingPool";
+import { hubPoolChainId } from "utils/constants";
+import { getConfig } from "utils/config";
 import { DEFAULT_STAKING_POOL_DATA } from "utils/staking-pool";
 
 import { useStakeAction, useUnstakeAction } from "./useStakingAction";

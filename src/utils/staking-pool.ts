@@ -1,17 +1,19 @@
 import {
   fixedPointAdjustment,
-  formattedBigNumberToNumber,
-  formatUnitsWithMaxFractionsFnBuilder,
-  getConfig,
   hubPoolChainId,
-  parseEtherLike,
-  toWeiSafe,
-  providersTable,
-  getBaseRewardsApr,
   secondsPerDay,
   secondsPerYear,
   externalLPsForStaking,
-} from "utils";
+} from "./constants";
+import {
+  formattedBigNumberToNumber,
+  formatUnitsWithMaxFractionsFnBuilder,
+  parseEtherLike,
+} from "./format";
+import { toWeiSafe } from "./weiMath";
+import { getConfig } from "./config";
+import { providersTable } from "./providers";
+import { getBaseRewardsApr } from "./rewards";
 import { BigNumber, BigNumberish } from "ethers";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";

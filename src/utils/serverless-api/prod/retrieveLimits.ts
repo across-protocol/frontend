@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChainId, vercelApiBaseUrl } from "utils";
+import { ChainId, vercelApiBaseUrl } from "../../constants";
 import { BridgeLimitInterface } from "../types";
 import { BigNumber, utils } from "ethers";
 
