@@ -17,6 +17,7 @@ import {
   trackIfWalletSelected,
   trackWalletConnectTransactionCompleted,
 } from "utils";
+import { trackGTMConnectWallet } from "utils/gtm";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { useConnectSorted } from "hooks/useConnectSorted";
 import { useWalletsSorted } from "hooks/useWalletSorted";
@@ -57,6 +58,7 @@ function EVMWalletContent() {
               false
             );
             trackIfWalletSelected(connector.name);
+            trackGTMConnectWallet(connector.name);
             closeSidebar();
           },
         }
@@ -94,14 +96,15 @@ function SVMWalletContent() {
   const { sortedWallets, select, connecting, disconnect, connected } =
     useWalletsSorted();
   const { closeSidebar } = useSidebarContext();
-  const { connected: isSolanaConnected } = useWallet();
+  const { connected: isSolanaConnected, wallet } = useWallet();
   const prevConnected = usePrevious(isSolanaConnected);
 
   useEffect(() => {
     if (!prevConnected && isSolanaConnected) {
+      trackGTMConnectWallet(wallet?.adapter.name);
       closeSidebar();
     }
-  }, [prevConnected, isSolanaConnected, closeSidebar]);
+  }, [prevConnected, isSolanaConnected, closeSidebar, wallet?.adapter.name]);
 
   const handleClickSvmWallet = useCallback(
     async (walletAdapter: WalletAdapter) => {
