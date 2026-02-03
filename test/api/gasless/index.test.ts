@@ -63,8 +63,23 @@ describe("api/gasless handler", () => {
   it("GET with status=pending returns 200 and deposits from service", async () => {
     const deposits = [
       {
-        gaslessTx: "0xabc",
-        signatures: { deposit: "0xd", permit: "0xp" },
+        swapTx: {
+          ecosystem: "evm_gasless",
+          chainId: 10,
+          to: "0x1234567890123456789012345678901234567890",
+          typedData: null,
+          data: {
+            type: "erc3009",
+            depositId: "123",
+            witness: { BridgeWitness: { type: "BridgeWitness", data: {} } },
+            permit: {},
+            domainSeparator: "0x",
+            integratorId: null,
+          },
+        },
+        signature: "0xabc",
+        submittedAt: "2026-02-03T01:00:00.000Z",
+        requestId: "test-request-id",
         messageId: "msg-1",
       },
     ];
