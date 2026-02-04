@@ -21,7 +21,7 @@ function witnessToAvroUnion(
   return { BridgeAndSwapWitness: witness };
 }
 
-function toPubSubPayload(
+export function toPubSubPayload(
   message: GaslessDepositMessage
 ): Record<string, unknown> {
   const { swapTx, signature, submittedAt, requestId } = message;

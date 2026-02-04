@@ -1,5 +1,11 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { getEnvs } from "./_env";
+
+export type DepositStatusResponse = {
+  status: "pending" | "filled" | "expired";
+  fillTxHash?: string;
+  fillTimestamp?: number;
+};
 
 export type SponsorshipsFromIndexerResponse = {
   totalSponsorships: {
@@ -40,4 +46,32 @@ export async function getSponsorshipsFromIndexer() {
     userSponsorships,
     accountActivations,
   };
+}
+
+/**
+ * Check deposit status from indexer.
+ * Returns null if deposit not found (404), throws on other errors.
+ */
+export async function getDepositStatus(params: {
+  originChainId: number;
+  depositId: string;
+}): Promise<DepositStatusResponse | null> {
+  try {
+    const response = await axios.get<DepositStatusResponse>(
+      `${indexerApiBaseUrl}/deposit/status`,
+      {
+        params: {
+          originChainId: params.originChainId,
+          depositId: params.depositId,
+        },
+        timeout: 5000,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 }
