@@ -52,10 +52,15 @@ export function getPubSubClient(): PubSub {
   return client;
 }
 
+let cachedSubscriberClient: v1.SubscriberClient | null = null;
+
 export function getSubscriberClient(): v1.SubscriberClient {
-  const projectId = getGcpProjectId();
-  const credentials = getGcpCredentials();
-  return new v1.SubscriberClient(
-    credentials ? { projectId, credentials } : { projectId }
-  );
+  if (!cachedSubscriberClient) {
+    const projectId = getGcpProjectId();
+    const credentials = getGcpCredentials();
+    cachedSubscriberClient = new v1.SubscriberClient(
+      credentials ? { projectId, credentials } : { projectId }
+    );
+  }
+  return cachedSubscriberClient;
 }

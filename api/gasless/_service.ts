@@ -13,6 +13,12 @@ export type FetchPendingGaslessDepositsResult = {
   cleanup: () => Promise<void>;
 };
 
+/** Pub/Sub message publish time. */
+interface PublishTimestamp {
+  seconds?: string | number | { toNumber(): number } | null;
+  nanos?: number | null;
+}
+
 const logger = getLogger();
 
 /** TODO: Replace with real deduplication logic. */
@@ -33,12 +39,6 @@ function decodeMessageData(
   } catch {
     return null;
   }
-}
-
-/** Pub/Sub message publish time. */
-interface PublishTimestamp {
-  seconds?: string | number | { toNumber(): number } | null;
-  nanos?: number | null;
 }
 
 /** Returns true if the message is still within TTL (not expired). */
@@ -156,8 +156,6 @@ export async function fetchPendingGaslessDeposits(): Promise<FetchPendingGasless
         ackIds,
         nackIds,
       });
-    } finally {
-      subClient.close();
     }
   };
 
