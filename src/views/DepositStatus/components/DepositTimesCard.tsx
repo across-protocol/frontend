@@ -47,6 +47,10 @@ type Props = {
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
   isSwapFailed?: boolean;
   bridgeOutputToken?: string;
+  bridgeOutputAmount?: BigNumber;
+  // Fallback input data from indexer (when session storage is not available)
+  indexerInputToken?: string;
+  indexerInputAmount?: BigNumber;
 };
 
 export function DepositTimesCard({
@@ -64,6 +68,9 @@ export function DepositTimesCard({
   fromBridgeAndSwapPagePayload,
   isSwapFailed,
   bridgeOutputToken,
+  bridgeOutputAmount,
+  indexerInputToken,
+  indexerInputAmount,
 }: Props) {
   const {
     estimatedRewards,
@@ -125,8 +132,21 @@ export function DepositTimesCard({
   );
   const { convertTokenToBaseCurrency: convertBridgeOutputTokenToUsd } =
     useTokenConversion(bridgeOutputTokenInfo?.symbol ?? "", "usd");
-  const bridgeOutputAmountUsd = outputAmount
-    ? convertBridgeOutputTokenToUsd(outputAmount)
+  // Use bridgeOutputAmount (from indexer) for swap failed case, fallback to outputAmount
+  const amountForBridgeOutput = bridgeOutputAmount ?? outputAmount;
+  const bridgeOutputAmountUsd = amountForBridgeOutput
+    ? convertBridgeOutputTokenToUsd(amountForBridgeOutput)
+    : undefined;
+
+  // Resolve fallback input token from indexer (for when session storage is not available)
+  const indexerInputTokenInfo = useTokenFromAddress(
+    indexerInputToken ?? "",
+    fromChainId
+  );
+  const { convertTokenToBaseCurrency: convertIndexerInputTokenToUsd } =
+    useTokenConversion(indexerInputTokenInfo?.symbol ?? "", "usd");
+  const indexerInputAmountUsd = indexerInputAmount
+    ? convertIndexerInputTokenToUsd(indexerInputAmount)
     : undefined;
 
   // Convert outputAmount to USD
@@ -219,29 +239,55 @@ export function DepositTimesCard({
           />
         )}
       </Row>
-      {(netFee || amountSentBaseCurrency) && <Divider />}
+      {(netFee ||
+        amountSentBaseCurrency ||
+        (indexerInputTokenInfo && isDefined(indexerInputAmountUsd))) && (
+        <Divider />
+      )}
 
+      {/* Amount sent - use session storage data if available, otherwise fallback to indexer */}
       {isDefined(fromBridgeAndSwapPagePayload?.swapQuote?.inputAmount) &&
-        inputToken &&
-        isDefined(amountSentBaseCurrency) && (
+      inputToken &&
+      isDefined(amountSentBaseCurrency) ? (
+        <Row>
+          <Text color="grey-400">Amount sent</Text>
+          <TokenWrapper>
+            <TokenFee
+              token={inputToken}
+              amount={fromBridgeAndSwapPagePayload.swapQuote.inputAmount}
+              tokenChainId={fromChainId}
+              tokenFirst
+              showTokenLinkOnHover
+              textColor="light-100"
+            />
+            <Text color="grey-400">(${formatUSD(amountSentBaseCurrency)})</Text>
+          </TokenWrapper>
+        </Row>
+      ) : (
+        indexerInputTokenInfo &&
+        indexerInputAmount &&
+        isDefined(indexerInputAmountUsd) && (
           <Row>
             <Text color="grey-400">Amount sent</Text>
             <TokenWrapper>
               <TokenFee
-                token={inputToken}
-                amount={fromBridgeAndSwapPagePayload.swapQuote.inputAmount}
+                token={indexerInputTokenInfo}
+                amount={indexerInputAmount}
                 tokenChainId={fromChainId}
                 tokenFirst
                 showTokenLinkOnHover
                 textColor="light-100"
               />
               <Text color="grey-400">
-                (${formatUSD(amountSentBaseCurrency)})
+                (${formatUSD(indexerInputAmountUsd)})
               </Text>
             </TokenWrapper>
           </Row>
-        )}
-      {isDefined(outputAmount) &&
+        )
+      )}
+      {(isSwapFailed
+        ? isDefined(amountForBridgeOutput)
+        : isDefined(outputAmount)) &&
         (isSwapFailed
           ? bridgeOutputTokenInfo && isDefined(bridgeOutputAmountUsd)
           : outputTokenForDisplay && isDefined(finalOutputAmountUsd)) && (
@@ -250,11 +296,13 @@ export function DepositTimesCard({
               {isSwapFailed ? "Amount returned" : "Amount received"}
             </Text>
             <TokenWrapper>
-              {isSwapFailed && bridgeOutputTokenInfo ? (
+              {isSwapFailed &&
+              bridgeOutputTokenInfo &&
+              amountForBridgeOutput ? (
                 <>
                   <TokenFee
                     token={bridgeOutputTokenInfo}
-                    amount={outputAmount}
+                    amount={amountForBridgeOutput}
                     tokenChainId={toChainId}
                     tokenFirst
                     showTokenLinkOnHover
@@ -267,7 +315,8 @@ export function DepositTimesCard({
                   )}
                 </>
               ) : (
-                outputTokenForDisplay && (
+                outputTokenForDisplay &&
+                outputAmount && (
                   <>
                     <TokenFee
                       token={{

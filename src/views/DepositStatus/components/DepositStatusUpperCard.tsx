@@ -18,6 +18,7 @@ import { BridgeProvider } from "../hooks/useDepositTracking/types";
 import { useTokenFromAddress } from "hooks/useToken";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { formatUnits } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
 
 type Props = {
   depositTxHash: string;
@@ -75,6 +76,16 @@ export function DepositStatusUpperCard({
     indexerDeposit?.deposit.outputAmount && bridgeToken?.decimals
       ? formatUnits(indexerDeposit.deposit.outputAmount, bridgeToken.decimals)
       : undefined;
+
+  // BigNumber version for DepositTimesCard
+  const bridgeOutputAmount = indexerDeposit?.deposit.outputAmount
+    ? BigNumber.from(indexerDeposit.deposit.outputAmount)
+    : undefined;
+
+  // Fallback input token data from indexer (for when session storage is not available)
+  const indexerInputAmount = indexerDeposit?.deposit.inputAmount
+    ? BigNumber.from(indexerDeposit.deposit.inputAmount)
+    : undefined;
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -192,7 +203,12 @@ export function DepositStatusUpperCard({
           outputTokenSymbol={outputTokenSymbol}
           fromBridgeAndSwapPagePayload={fromBridgeAndSwapPagePayload}
           isSwapFailed={isSwapFailed}
-          bridgeOutputToken={fill?.outputToken}
+          bridgeOutputToken={
+            indexerDeposit?.deposit.outputToken ?? fill?.outputToken
+          }
+          bridgeOutputAmount={bridgeOutputAmount}
+          indexerInputToken={indexerDeposit?.deposit.inputToken}
+          indexerInputAmount={indexerInputAmount}
         />
       </DepositTimeCardSocialSharedWrapper>
     </Wrapper>
