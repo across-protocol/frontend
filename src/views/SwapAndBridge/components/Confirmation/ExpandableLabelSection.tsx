@@ -6,10 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BridgeButtonState, FreeTag } from "./ConfirmationButton";
 import styled from "@emotion/styled";
 import { COLORS } from "utils/constants";
-import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
-import { ReactComponent as Shield } from "assets/icons/shield.svg";
+import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
+import { ReactComponent as Gas } from "assets/icons/gas.svg";
+import { ReactComponent as Shield } from "assets/icons/shield.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
 import {
@@ -28,6 +29,7 @@ export const ExpandableLabelSection: React.FC<
     hasQuote: boolean;
     priceImpact?: PriceImpact;
     provider: BridgeProvider;
+    networkFee: string;
   }>
 > = ({
   fee,
@@ -38,6 +40,7 @@ export const ExpandableLabelSection: React.FC<
   children,
   hasQuote,
   provider,
+  networkFee,
 }) => {
   // Render state-specific content
   let content: React.ReactNode;
@@ -92,6 +95,13 @@ export const ExpandableLabelSection: React.FC<
                 </>
               )}
             </FeeTimeItem>
+            {networkFee && (
+              <>
+                <Divider />
+                <Gas width="16" height="16" />
+                {networkFee}
+              </>
+            )}
             <Divider />
             <FeeTimeItem>
               <Time width="16" height="16" />
