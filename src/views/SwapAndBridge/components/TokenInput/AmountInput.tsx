@@ -35,13 +35,13 @@ export const AmountInput = ({
   inputRef,
 }: AmountInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [userInput, setUserInput] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<string | null>(null);
 
   const displayValue = formatAmountFromUnit(amount, token, unit);
 
   useEffect(() => {
     if (shouldUpdate) {
-      setUserInput(null);
+      setEditingValue(null);
     }
   }, [shouldUpdate]);
 
@@ -81,16 +81,21 @@ export const AmountInput = ({
         inputMode="decimal"
         placeholder="0.00"
         value={
-          isFocused && !shouldUpdate ? undefined : (userInput ?? displayValue)
+          isFocused && !shouldUpdate
+            ? undefined
+            : (editingValue ?? displayValue)
         }
         onValueChange={(values, sourceInfo) => {
           if (sourceInfo.source === "event" && isFocused) {
             handleValueChange(values.floatValue);
-            setUserInput(values.value);
+            setEditingValue(values.value);
           }
         }}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onBlur={() => {
+          setIsFocused(false);
+          setEditingValue(null);
+        }}
         thousandSeparator=","
         decimalSeparator="."
         allowedDecimalSeparators={[",", "."]}
