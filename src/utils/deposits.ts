@@ -230,6 +230,12 @@ export async function getDepositByTxHash(
 
   const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
 
+  if (!block) {
+    throw new Error(
+      `Could not fetch block ${depositTxReceipt.blockNumber} for transaction ${depositTxHash} on chain ${fromChainId}`
+    );
+  }
+
   if (depositTxReceipt.status === 0) {
     // Tx Receipt exists but tx failed
     const revertReason = await getSpokepoolRevertReason(
