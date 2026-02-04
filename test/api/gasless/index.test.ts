@@ -13,7 +13,7 @@ const getMockedResponse = () => {
 const mockFetchPending = vi.fn();
 
 vi.mock("../../../api/gasless/_service", () => ({
-  fetchPendingGaslessDeposits: (...args: unknown[]) =>
+  fetchPendingGaslessDepositsFromCache: (...args: unknown[]) =>
     mockFetchPending(...args),
 }));
 
