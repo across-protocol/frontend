@@ -3,16 +3,16 @@ import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 import {
   COLORS,
   QUERIESV2,
-  formatUSD,
-  formatUnitsWithMaxFractions,
   getToken,
-  isDefined,
   rewardProgramTypes,
   rewardProgramsAvailable,
-} from "utils";
+} from "utils/constants";
+import { formatUSD, formatUnitsWithMaxFractions } from "utils/format";
+import { isDefined } from "utils/sdk";
 import GenericOverviewCard from "./GenericOverviewCard";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
-import { Text, TokenImage } from "components";
+import { Text } from "components/Text";
+import { TokenImage } from "components/TokenImage";
 import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
 import ChainLogoOverlap from "./ChainLogoOverlap";

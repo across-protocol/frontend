@@ -4,11 +4,12 @@ import { keyframes } from "@emotion/react";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { Text, Badge } from "components";
+import { Text } from "components/Text";
+import { Badge } from "components/Badge";
 
-import { COLORS, NoFundsDepositedLogError, getFillTxExplorerLink } from "utils";
+import { COLORS, getFillTxExplorerLink } from "utils/constants";
+import { NoFundsDepositedLogError } from "utils/deposits";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
-
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";

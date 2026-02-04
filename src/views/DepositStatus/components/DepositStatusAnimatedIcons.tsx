@@ -1,4 +1,4 @@
-import { COLORS, getChainInfo } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
 import { DepositStatus } from "../types";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckStarPending } from "assets/icons/check-star-ring-opaque-pending.svg";

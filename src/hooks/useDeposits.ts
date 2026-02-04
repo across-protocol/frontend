@@ -1,13 +1,9 @@
 import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import {
-  defaultRefetchInterval,
-  depositsQueryKey,
-  indexerApiBaseUrl,
-  userDepositsQueryKey,
-  getConfig,
-} from "utils";
+import { defaultRefetchInterval, indexerApiBaseUrl } from "utils/constants";
+import { depositsQueryKey, userDepositsQueryKey } from "utils/query-keys";
+import { getConfig } from "utils/config";
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
 import { IndexerDeposit } from "./useDepositStatus";

@@ -1,4 +1,4 @@
-import { getChainInfo } from "utils";
+import { getChainInfo } from "../constants";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 type CoreTransferPropertiesParams = {

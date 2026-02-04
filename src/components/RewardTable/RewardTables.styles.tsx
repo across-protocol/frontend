@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { ReactComponent as AcrossPlusIcon } from "assets/icons/plus-circle.svg";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as RightUpArrow } from "assets/icons/arrow-up-right.svg";

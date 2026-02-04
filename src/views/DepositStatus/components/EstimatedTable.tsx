@@ -11,13 +11,13 @@ import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 
 import {
   COLORS,
-  formatWeiPct,
   getChainInfo,
   getToken,
-  isBridgedUsdc,
   QUERIESV2,
   TokenInfo,
-} from "utils";
+} from "utils/constants";
+import { isBridgedUsdc } from "utils/sdk";
+import { formatWeiPct } from "utils/format";
 
 import TokenFee from "./TokenFee";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
@@ -25,7 +25,7 @@ import { AmountInputError } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
-import { LoadingSkeleton } from "components";
+import { LoadingSkeleton } from "components/LoadingSkeleton";
 import { FreeTag } from "../../SwapAndBridge/components/Confirmation/ConfirmationButton";
 import { formatFeeUsd } from "../../SwapAndBridge/utils/fees";
 import { isQuoteSponsored } from "../../SwapAndBridge/utils/bridgeProvider";
