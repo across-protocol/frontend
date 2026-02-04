@@ -100,10 +100,10 @@ export async function fetchPendingGaslessDeposits(): Promise<FetchPendingGasless
       if (!isWithinTtl(message.publishTime, config.messageTtlSeconds)) {
         logger.debug({
           at: "gasless/_service",
-          message: "Message TTL expired, acking to remove",
+          message: "Message TTL expired, nacking",
           depositId: decoded.swapTx?.data?.depositId,
         });
-        ackIds.push(ackId);
+        nackIds.push(ackId);
         continue;
       }
 
