@@ -68,21 +68,6 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
       ]);
     });
 
-    it("should return empty array for unsupported input token", () => {
-      const params = {
-        inputToken: {
-          address: "0x123", // Random address
-          chainId: CHAIN_IDs.OPTIMISM,
-          symbol: "RANDOM",
-          decimals: 18,
-        },
-        outputToken: USDH_ON_HYPEREVM,
-        isInputNative: false,
-        isOutputNative: false,
-      };
-      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
-    });
-
     it("should return empty array for unsupported origin chain", () => {
       const params = {
         inputToken: {
@@ -92,6 +77,98 @@ describe("getHyperCoreIntentBridgeStrategy", () => {
           chainId: 999999, // Non-existent chain
         },
         outputToken: USDH_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+    });
+
+    it("should return ANY_TO_BRIDGEABLE for A2B flow (DAI -> USDT-SPOT)", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return ANY_TO_BRIDGEABLE for A2B flow (WETH -> USDT-SPOT)", () => {
+      const WETH_ON_ARBITRUM = {
+        address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+        chainId: CHAIN_IDs.ARBITRUM,
+        symbol: "WETH",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: WETH_ON_ARBITRUM,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return BRIDGEABLE_TO_BRIDGEABLE for B2B flow (USDT -> USDT-SPOT)", () => {
+      const params = {
+        inputToken: USDT_ON_POLYGON,
+        outputToken: USDT_SPOT_ON_HYPERCORE,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([
+        CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE,
+      ]);
+    });
+
+    it("should return empty array for unsupported output token", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const RANDOM_TOKEN = {
+        address: "0xabcdef1234567890",
+        chainId: CHAIN_IDs.HYPERCORE,
+        symbol: "RANDOM",
+        decimals: 18,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: RANDOM_TOKEN,
+        isInputNative: false,
+        isOutputNative: false,
+      };
+      expect(strategy.getCrossSwapTypes(params)).toEqual([]);
+    });
+
+    it("should return empty array for unsupported destination chain", () => {
+      const DAI_ON_POLYGON = {
+        address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+        chainId: CHAIN_IDs.POLYGON,
+        symbol: "DAI",
+        decimals: 18,
+      };
+      const TOKEN_ON_UNSUPPORTED_CHAIN = {
+        address: "0xabcdef1234567890",
+        chainId: 999999, // Unsupported destination chain
+        symbol: "USDT",
+        decimals: 6,
+      };
+      const params = {
+        inputToken: DAI_ON_POLYGON,
+        outputToken: TOKEN_ON_UNSUPPORTED_CHAIN,
         isInputNative: false,
         isOutputNative: false,
       };
@@ -309,8 +386,9 @@ describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
         outputAmount: acrossOutputAmount,
       });
 
+      const mockQuoteForOutputFn = vi.fn().mockResolvedValue(mockAcrossQuote);
       (getAcrossBridgeStrategy as ReturnType<typeof vi.fn>).mockReturnValue({
-        getQuoteForOutput: vi.fn().mockResolvedValue(mockAcrossQuote),
+        getQuoteForOutput: mockQuoteForOutputFn,
       });
 
       const params = {
@@ -329,6 +407,18 @@ describe("getHyperCoreIntentBridgeStrategy (unsponsored)", () => {
       expect(result.bridgeQuote.minOutputAmount).toEqual(expectedOutputAmount);
       expect(result.bridgeQuote.outputToken).toEqual(USDT_SPOT_ON_HYPERCORE);
       expect(result.bridgeQuote.provider).toBe("across");
+
+      // Verify Across was called with decimal-converted minOutputAmount
+      expect(mockQuoteForOutputFn).toHaveBeenCalledWith({
+        inputToken: USDT_ON_POLYGON,
+        outputToken: expect.objectContaining({
+          chainId: expect.any(Number),
+          address: expect.any(String),
+        }),
+        minOutputAmount: BigNumber.from("999999"), // Converted from 8 to 6 decimals
+        recipient: expect.any(String),
+        message: expect.any(String),
+      });
     });
 
     it("should throw error if account does not exist on HyperCore", async () => {
@@ -391,5 +481,87 @@ describe("getHyperCoreIntentBridgeStrategy (sponsored)", () => {
     await sponsoredStrategy.getQuoteForExactInput(params as any);
 
     expect(assertAccountExistsOnHyperCore).not.toHaveBeenCalled();
+  });
+
+  describe("resolveOriginSwapTarget", () => {
+    it("should resolve USDT for USDT-SPOT output", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: CHAIN_IDs.ARBITRUM,
+          address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "USDT-SPOT",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address:
+            TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+          decimals: 6,
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result!.symbol).toBe("USDT");
+      expect(result!.chainId).toBe(CHAIN_IDs.ARBITRUM);
+      expect(result!.address).toBe(
+        TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM]
+      );
+      expect(result!.decimals).toBe(6);
+    });
+
+    it("should return undefined for unsupported output token", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: CHAIN_IDs.ARBITRUM,
+          address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "UNKNOWN",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address: "0xabcdef1234567890",
+          decimals: 18,
+        },
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined if bridgeable token not available on origin chain", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: 999999, // Unsupported chain
+          address: "0x1234567890abcdef",
+          decimals: 18,
+        },
+        outputToken: {
+          symbol: "USDT-SPOT",
+          chainId: CHAIN_IDs.HYPERCORE,
+          address:
+            TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+          decimals: 6,
+        },
+      });
+
+      expect(result).toBeUndefined();
+    });
   });
 });

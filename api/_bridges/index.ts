@@ -26,18 +26,6 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
         }),
       },
     },
-    // NOTE: Disable subset of HyperCore destination routes via mint/burn routes until we
-    // fully support them. We force return the Across bridge strategy here to avoid
-    // routing to via our algorithm. TODO until we can enable these routes:
-    // - https://linear.app/uma/issue/ACX-4895/api-return-swap-fees-for-unsponsored-flows
-    [CHAIN_IDs.HYPERCORE]: {
-      [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDT-SPOT"].symbol]: getAcrossBridgeStrategy(),
-      },
-      [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDC-SPOT"].symbol]: getAcrossBridgeStrategy(),
-      },
-    },
   },
   fromToChains: {
     [CHAIN_IDs.HYPEREVM]: {

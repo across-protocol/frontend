@@ -10,7 +10,6 @@ import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   ERROR_MESSAGE_PREFIX,
   SUPPORTED_DESTINATION_CHAINS,
-  SUPPORTED_INPUT_TOKENS,
   SUPPORTED_ORIGIN_CHAINS,
   SUPPORTED_OUTPUT_TOKENS,
 } from "./constants";
@@ -124,6 +123,32 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
   }
 }
 
+export function assertNoOriginSwap(params: {
+  originSwapQuote?: SwapQuote;
+  errorMessagePrefix: string;
+}) {
+  const { originSwapQuote, errorMessagePrefix } = params;
+
+  if (originSwapQuote) {
+    throw new InvalidParamError({
+      message: `${errorMessagePrefix}: Origin swap is not supported`,
+    });
+  }
+}
+
+export function assertNoDestinationSwap(params: {
+  destinationSwapQuote?: SwapQuote;
+  errorMessagePrefix: string;
+}) {
+  const { destinationSwapQuote, errorMessagePrefix } = params;
+
+  if (destinationSwapQuote) {
+    throw new InvalidParamError({
+      message: `${errorMessagePrefix}: Destination swap is not supported`,
+    });
+  }
+}
+
 export function assertNoSwaps(params: {
   originSwapQuote?: SwapQuote;
   destinationSwapQuote?: SwapQuote;
@@ -131,11 +156,8 @@ export function assertNoSwaps(params: {
 }) {
   const { originSwapQuote, destinationSwapQuote, errorMessagePrefix } = params;
 
-  if (originSwapQuote || destinationSwapQuote) {
-    throw new InvalidParamError({
-      message: `${errorMessagePrefix}: Can not build tx for origin swap or destination swap`,
-    });
-  }
+  assertNoOriginSwap({ originSwapQuote, errorMessagePrefix });
+  assertNoDestinationSwap({ destinationSwapQuote, errorMessagePrefix });
 }
 
 export function assertNoAppFee(params: {
@@ -174,17 +196,20 @@ export function isRouteSupported(params: {
   }
 
   if (SUPPORTED_DESTINATION_CHAINS.includes(params.outputToken.chainId)) {
-    const supportedInputToken = SUPPORTED_INPUT_TOKENS.find(
-      (token) =>
-        token.addresses[params.inputToken.chainId]?.toLowerCase() ===
-        params.inputToken.address.toLowerCase()
-    );
     const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
       (token) =>
         token.addresses[params.outputToken.chainId]?.toLowerCase() ===
         params.outputToken.address.toLowerCase()
     );
-    return Boolean(supportedInputToken && supportedOutputToken);
+
+    if (!supportedOutputToken) {
+      return false;
+    }
+
+    // For A2B flows: any input token is allowed as long as output token is supported
+    // For B2B flows: input token must also be in the supported list
+    // We support both, so as long as the output token is supported, the route is valid
+    return true;
   }
 
   return false;

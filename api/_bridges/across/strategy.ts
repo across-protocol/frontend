@@ -15,7 +15,9 @@ import {
 import {
   getBridgeQuoteForExactInput,
   getBridgeQuoteForOutput,
+  getRouteByOutputTokenAndOriginChain,
   getSuggestedFees,
+  getTokenByAddress,
 } from "../../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "../../swap/approval/_utils";
 import {
@@ -177,6 +179,32 @@ export function getAcrossBridgeStrategy(): BridgeStrategy {
 
     isRouteSupported: () => {
       return true;
+    },
+
+    resolveOriginSwapTarget: (params: {
+      inputToken: Token;
+      outputToken: Token;
+    }) => {
+      const bridgeRoute = getRouteByOutputTokenAndOriginChain(
+        params.outputToken.address,
+        params.inputToken.chainId
+      );
+
+      if (!bridgeRoute) return undefined;
+
+      const bridgeableToken = getTokenByAddress(
+        bridgeRoute.fromTokenAddress,
+        bridgeRoute.fromChain
+      );
+
+      if (!bridgeableToken) return undefined;
+
+      return {
+        address: bridgeRoute.fromTokenAddress,
+        decimals: bridgeableToken.decimals,
+        symbol: bridgeableToken.symbol,
+        chainId: bridgeRoute.fromChain,
+      };
     },
   };
 }
