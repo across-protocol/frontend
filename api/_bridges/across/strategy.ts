@@ -170,6 +170,9 @@ export function getAcrossBridgeStrategy(options?: {
                 total: "0",
               },
               // Explicit override
+              exclusivityDeadline:
+                sponsoredGaslessRoute.exclusivityDeadline ??
+                bridgeQuote.suggestedFees.exclusivityDeadline,
               exclusiveRelayer: sponsoredGaslessRoute.exclusiveRelayer,
             },
           },

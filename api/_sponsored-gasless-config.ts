@@ -10,6 +10,7 @@ export type SponsoredGaslessRouteConfig = {
   allowedOutputTokenSymbols: string[];
   exclusiveRelayer: string;
   permitTypes: string[];
+  exclusivityDeadline?: number;
 };
 
 export const SPONSORED_GASLESS_ROUTES: SponsoredGaslessRouteConfig[] = [
@@ -32,8 +33,10 @@ export const SPONSORED_GASLESS_ROUTES: SponsoredGaslessRouteConfig[] = [
     ],
     allowedInputTokenSymbols: ["USDC"],
     allowedOutputTokenSymbols: ["USDC"],
-    exclusiveRelayer: "0x0000000000000000000000000000000000000000", // TODO: replace with our relayer
     permitTypes: ["erc3009"],
+    // TODO: set correct values
+    exclusiveRelayer: "0x0000000000000000000000000000000000000000",
+    exclusivityDeadline: 0,
   },
   {
     name: "local-dev",
@@ -54,8 +57,9 @@ export const SPONSORED_GASLESS_ROUTES: SponsoredGaslessRouteConfig[] = [
     ],
     allowedInputTokenSymbols: ["USDC"],
     allowedOutputTokenSymbols: ["USDC"],
-    exclusiveRelayer: "0x0000000000000000000000000000000000000000",
     permitTypes: ["erc3009"],
+    exclusiveRelayer: "0x0000000000000000000000000000000000000000",
+    exclusivityDeadline: 0,
   },
 ];
 
