@@ -1,5 +1,6 @@
-import { useConnection, useRewardSummary } from "hooks";
-import { getToken, rewardProgramTypes, rewardPrograms } from "utils";
+import { useConnection } from "hooks/useConnection";
+import { useRewardSummary } from "hooks/useRewardSummary";
+import { getToken, rewardProgramTypes, rewardPrograms } from "utils/constants";
 import { BigNumber } from "ethers";
 
 export function useRewardProgramCard(programName: rewardProgramTypes) {

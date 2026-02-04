@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import { ReactComponent as WarningTriangle } from "assets/icons/warning_triangle_filled.svg";
 
 type QuoteWarningProps = {

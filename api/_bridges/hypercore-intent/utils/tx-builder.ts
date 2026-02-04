@@ -1,9 +1,9 @@
 import { BigNumber, constants, utils } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { getAddMemoInstruction } from "@solana-program/memo";
-import { appendTransactionMessageInstruction } from "@solana/transaction-messages";
 import {
   address,
+  appendTransactionMessageInstruction,
   compileTransaction,
   createNoopSigner,
   getBase64EncodedWireTransaction,
@@ -237,7 +237,7 @@ function _prepDepositTx(
     recipient: sdk.utils.toAddressType(depositRecipient, hyperEvmChainId),
     inputToken: sdk.utils.toAddressType(inputToken.address, inputToken.chainId),
     outputToken: sdk.utils.toAddressType(
-      bridgeableOutputToken.addresses[hyperEvmChainId],
+      bridgeableOutputToken.address,
       hyperEvmChainId
     ),
     inputAmount: bridgeQuote.inputAmount,

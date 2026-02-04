@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { ChainId } from "utils";
+import { ChainId } from "../../constants";
 import { BridgeLimitInterface } from "../types";
 
 export async function retrieveLimitsMocked(

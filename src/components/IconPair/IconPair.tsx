@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import React from "react";
 
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type BorderColor = keyof typeof COLORS;
 

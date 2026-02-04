@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { forwardRef } from "react";
 
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 
 export interface IValidInput {
   validationLevel: "valid" | "error" | "warning";

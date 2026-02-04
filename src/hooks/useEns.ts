@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ChainId, getProvider, isDefined } from "utils";
+import { ChainId } from "utils/constants";
+import { getProvider } from "utils/providers";
+import { isDefined } from "utils/sdk";
+import { isEvmAddress } from "utils/address";
 
 export function useEnsQuery(address?: string) {
   const result = useQuery({
@@ -15,7 +18,7 @@ export function useEnsQuery(address?: string) {
       return { ensName, avatar };
     },
     staleTime: Infinity,
-    enabled: isDefined(address),
+    enabled: isDefined(address) && isEvmAddress(address),
   });
 
   const resolvedData = isDefined(result.data)

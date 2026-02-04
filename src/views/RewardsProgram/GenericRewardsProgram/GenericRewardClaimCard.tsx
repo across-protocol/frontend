@@ -1,8 +1,10 @@
 import styled from "@emotion/styled";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { PrimaryButton, Text } from "components";
+import { PrimaryButton } from "components/Button";
+import { Text } from "components/Text";
 import { useState } from "react";
-import { COLORS, capitalizeFirstLetter, rewardProgramTypes } from "utils";
+import { COLORS, rewardProgramTypes } from "utils/constants";
+import { capitalizeFirstLetter } from "utils/format";
 import { useGenericRewardClaimCard } from "../hooks/useGenericRewardClaimCard";
 import { ClaimRewardsModal } from "./ClaimRewardsModal";
 import GenericCard from "./GenericCard";

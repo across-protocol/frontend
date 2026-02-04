@@ -1,8 +1,12 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { Text } from "components/Text";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS } from "utils/constants";
 import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
+import {
+  SectionCard,
+  SectionHeaderCollapsible,
+} from "./TransactionSection.styles";
 
 type Props = {
   title: string;
@@ -20,7 +24,9 @@ export function CollapsibleSection({
   return (
     <Wrapper>
       <HeaderButton onClick={() => setIsOpen(!isOpen)}>
-        <Title>{title}</Title>
+        <Text color="light-200" size="md" weight={600}>
+          {title}
+        </Text>
         <StyledChevronIcon isOpen={isOpen} />
       </HeaderButton>
       {isOpen && <ContentWrapper>{children}</ContentWrapper>}
@@ -28,39 +34,17 @@ export function CollapsibleSection({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled(SectionCard)`
+  --padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px;
-  gap: 16px;
+  gap: var(--padding);
   width: 100%;
 `;
 
-const HeaderButton = styled.button`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0px 16px;
+const HeaderButton = styled(SectionHeaderCollapsible)`
   width: 100%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 0px 12px;
-  }
-`;
-
-const Title = styled(Text)`
-  color: #9daab2;
-  text-align: left;
 `;
 
 const StyledChevronIcon = styled(ChevronIcon)<{ isOpen: boolean }>`

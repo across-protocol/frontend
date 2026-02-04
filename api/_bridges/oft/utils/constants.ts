@@ -116,6 +116,9 @@ export const getOftEndpointId = (chainId: number): number => {
   return chainInfo.oftEid;
 };
 
+export const isOftEnabled = (chainId: number, tokenSymbol: string) =>
+  Boolean(OFT_MESSENGERS[tokenSymbol]?.[chainId]);
+
 // OFT ABI (minimal - only methods we need)
 export const OFT_ABI = [
   {

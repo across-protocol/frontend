@@ -1,11 +1,11 @@
 import { BigNumber, utils } from "ethers";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { UnitType } from "../../types";
+import { convertTokenToUSD } from "utils/token";
 import {
-  convertTokenToUSD,
   formatNumberTwoFracDigits,
   formatUnitsWithMaxFractions,
-} from "../../../../utils";
+} from "utils/format";
 
 export function formatAmountFromUnit(
   amount: BigNumber | null | undefined,

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 export type BadgeColor = keyof typeof COLORS;
 

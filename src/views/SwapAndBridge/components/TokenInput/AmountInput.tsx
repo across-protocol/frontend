@@ -3,7 +3,7 @@ import { NumericFormat } from "react-number-format";
 import { BigNumber, utils } from "ethers";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
 import { TokenAmountInput, TokenAmountInputWrapper } from "./styles";
-import { convertUSDToToken } from "../../../../utils";
+import { convertUSDToToken } from "utils/token";
 import { UnitType } from "../../types";
 import { formatAmountFromUnit } from "./FormatAmountFromUnit";
 
@@ -93,6 +93,7 @@ export const AmountInput = ({
         onBlur={() => setIsFocused(false)}
         thousandSeparator=","
         decimalSeparator="."
+        allowedDecimalSeparators={[",", "."]}
         allowNegative={false}
         disabled={disabled}
         error={error}

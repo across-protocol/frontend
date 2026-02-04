@@ -4,7 +4,8 @@ import { BigNumber } from "ethers";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
-import { formatUnitsWithMaxFractions, formatWeiPct, getToken } from "utils";
+import { getToken } from "utils/constants";
+import { formatUnitsWithMaxFractions, formatWeiPct } from "utils/format";
 import { ReactComponent as ExternalLink16 } from "assets/icons/chevron-right.svg";
 import {
   ButtonCell,

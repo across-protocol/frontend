@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 import { Text, TextColor, TextSize } from "components/Text";
 
-import { formatSeconds } from "utils";
+import { formatSeconds } from "utils/time";
 
 type Props = {
   elapsedSeconds?: number;

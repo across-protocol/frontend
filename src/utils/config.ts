@@ -19,10 +19,7 @@ import {
   AcceleratingDistributor__factory,
   ClaimAndStake,
   ClaimAndStake__factory,
-  SwapAndBridge,
-  SwapAndBridge__factory,
 } from "utils/typechain";
-import { SupportedDex } from "./serverless-api/prod/swap-quote";
 import { PublicKey } from "@solana/web3.js";
 
 export type Token = constants.TokenInfo & {
@@ -166,26 +163,6 @@ export class ConfigClient {
 
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePoolVerifier__factory.connect(address, provider);
-  }
-  getSwapAndBridgeAddress(
-    chainId: constants.ChainId,
-    dexKey: SupportedDex
-  ): string | undefined {
-    return this.swapAndBridgeAddresses[dexKey]?.[chainId];
-  }
-  getSwapAndBridge(
-    chainId: constants.ChainId,
-    dexKey: SupportedDex,
-    signer?: Signer
-  ): SwapAndBridge | undefined {
-    const address = this.getSwapAndBridgeAddress(chainId, dexKey);
-
-    if (!address) {
-      return undefined;
-    }
-
-    const provider = signer ?? providerUtils.getProvider(chainId);
-    return SwapAndBridge__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;

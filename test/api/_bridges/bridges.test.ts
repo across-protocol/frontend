@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
@@ -48,21 +48,18 @@ const mockBridgeStrategyData = (
   isFastCctpEligible: false,
   isInThreshold: false,
   isUsdtToUsdt: false,
-  isMonadTransfer: false,
-  isWithinMonadLimit: false,
   isHyperCoreDestination: false,
+  hasFastStandardFill: false,
   ...overrides,
 });
 
 // Common test tokens
 const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
-const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
 const usdcBase = createToken("USDC", CHAIN_IDs.BASE);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
-const usdtMonad = createToken("USDT", CHAIN_IDs.MONAD);
 const wethOptimism = createToken("WETH", CHAIN_IDs.OPTIMISM);
 const wethArbitrum = createToken("WETH", CHAIN_IDs.ARBITRUM);
 const wethHyperEvm = createToken("WETH", CHAIN_IDs.HYPEREVM);
@@ -176,93 +173,6 @@ describe("api/_bridges/index", () => {
 
     afterAll(() => {
       vi.clearAllMocks();
-    });
-
-    describe("Monad transfer routing", () => {
-      test("should use Across for Monad transfers within 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: true,
-          isUsdcToUsdc: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
-
-      test("should use OFT for Monad USDT transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdtToUsdt: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdtMonad,
-          outputToken: usdtArbitrum,
-        });
-
-        expect(strategy.name).toBe("oft");
-      });
-
-      test("should use Fast CCTP for Monad USDC transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: true,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("cctp");
-      });
-
-      test("should use Across for Monad other token transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: false,
-          isUsdtToUsdt: false,
-        });
-        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
-          mockData
-        );
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.OPTIMISM,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: wethOptimism,
-          outputToken: wethArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
     });
 
     describe("High utilization routing", () => {
@@ -558,7 +468,7 @@ describe("api/_bridges/index", () => {
         });
       });
 
-      test("should use sponsored-intent for amounts below 10K USDC", async () => {
+      test("should use hypercore-intent for amounts below 10K USDC", async () => {
         const strategy = await getBridgeStrategy({
           ...baseParams,
           amount: BigNumber.from("5000000000"), // 5K USDC (6 decimals)

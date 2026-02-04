@@ -2,10 +2,10 @@ import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   rewardsApiUrl,
-  rewardsQueryKey,
   rewardProgramTypes,
   defaultRefetchInterval,
-} from "utils";
+} from "utils/constants";
+import { rewardsQueryKey } from "utils/query-keys";
 import { Deposit } from "./useDeposits";
 
 export interface Pagination {

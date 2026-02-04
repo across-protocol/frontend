@@ -1,13 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { BigNumber, Signer } from "ethers";
 
-import { useConnection, useStakingPool } from "hooks";
-import {
-  getConfig,
-  hubPoolChainId,
-  MAX_APPROVAL_AMOUNT,
-  waitOnTransaction,
-} from "utils";
+import { useConnection } from "hooks/useConnection";
+import { useStakingPool } from "hooks/useStakingPool";
+import { hubPoolChainId, MAX_APPROVAL_AMOUNT } from "utils/constants";
+import { waitOnTransaction } from "utils/notify";
+import { getConfig } from "utils/config";
 import { sendWithPaddedGas } from "utils/transactions";
 import { ERC20__factory } from "utils/typechain";
 

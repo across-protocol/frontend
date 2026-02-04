@@ -1,7 +1,8 @@
 import { useQueries } from "@tanstack/react-query";
 import axios from "axios";
 import { BigNumber } from "ethers";
-import { indexerApiBaseUrl, isDefined } from "utils";
+import { indexerApiBaseUrl } from "utils/constants";
+import { isDefined } from "utils/sdk";
 
 /**
  * A hook used to track the statuses of multiple deposits via the indexer API

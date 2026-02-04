@@ -6,13 +6,13 @@ import { isToHyperCore } from "../../../_hypercore";
 import { AppFee } from "../../../_dexes/utils";
 import { CHAIN_IDs } from "../../../_constants";
 import {
+  getHyperliquidDepositHandlerAddress,
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
-  HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS,
   ERROR_MESSAGE_PREFIX,
-  SUPPORTED_OUTPUT_TOKENS,
-  SUPPORTED_INPUT_TOKENS,
   SUPPORTED_DESTINATION_CHAINS,
+  SUPPORTED_INPUT_TOKENS,
   SUPPORTED_ORIGIN_CHAINS,
+  SUPPORTED_OUTPUT_TOKENS,
 } from "./constants";
 import { ConvertDecimals, maxBN, minBN } from "../../../_utils";
 import { getCachedTokenBalance } from "../../../_balance";
@@ -27,8 +27,14 @@ export function getHyperEvmChainId(destinationChainId: number) {
     : CHAIN_IDs.HYPEREVM_TESTNET;
 }
 
-export function getBridgeableOutputToken(outputToken: Token) {
-  return BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
+export function getBridgeableOutputToken(outputToken: Token): Token {
+  const tokenDef = BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
+  const hyperEvmChainId = getHyperEvmChainId(outputToken.chainId);
+  return {
+    ...tokenDef,
+    address: tokenDef.addresses[hyperEvmChainId],
+    chainId: hyperEvmChainId,
+  };
 }
 
 export function getZeroBridgeFees(inputToken: Token) {
@@ -48,7 +54,8 @@ export function getDepositRecipient(params: {
 
   // If to HyperCore, the recipient is our custom handler contract on HyperEVM.
   if (isToHyperCore(outputToken.chainId)) {
-    return HYPERLIQUID_DEPOSIT_HANDLER_ADDRESS;
+    const hyperEvmChainId = getHyperEvmChainId(outputToken.chainId);
+    return getHyperliquidDepositHandlerAddress(hyperEvmChainId);
   }
   // Otherwise, the recipient is the normal EOA on HyperEVM.
   return recipient;
@@ -86,7 +93,7 @@ export async function assertSufficientBalanceOnHyperEvm(params: {
       getCachedTokenBalance(
         hyperEvmChainId,
         relayer,
-        bridgeableOutputToken.addresses[hyperEvmChainId]
+        bridgeableOutputToken.address
       )
     )
   );

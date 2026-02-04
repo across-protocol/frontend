@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { COLORS, withOpacity } from "utils";
+import { COLORS } from "utils/constants";
+import { withOpacity } from "utils/colors";
 
 export function LegalDisclaimer() {
   return (

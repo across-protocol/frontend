@@ -5,7 +5,7 @@ import { ProviderBadge } from "./BridgeProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { BridgeButtonState, FreeTag } from "./ConfirmationButton";
 import styled from "@emotion/styled";
-import { COLORS } from "../../../../utils";
+import { COLORS } from "utils/constants";
 import { ReactComponent as Across } from "assets/token-logos/acx.svg";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";

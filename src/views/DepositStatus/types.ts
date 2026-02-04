@@ -9,7 +9,7 @@ import { GetBridgeFeesResult } from "utils/bridge";
 import { UniversalSwapQuote } from "hooks/useUniversalSwapQuote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { TransferQuoteReceivedProperties } from "ampli";
-import { Route, SwapRoute, UniversalSwapRoute } from "utils";
+import { Route, SwapRoute, UniversalSwapRoute } from "utils/constants";
 
 export type SelectedRoute =
   | (Route & {
