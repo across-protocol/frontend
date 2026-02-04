@@ -92,7 +92,13 @@ export async function getBridgeStrategy({
   includesActions,
   includesAppFee,
   routingPreference = "default",
+  sponsoredGaslessRoute,
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
+  // Check for sponsored gasless eligibility (before other routing)
+  if (sponsoredGaslessRoute) {
+    return getAcrossBridgeStrategy({ sponsoredGaslessRoute });
+  }
+
   const tokenPairPerRouteOverride =
     bridgeStrategies.tokenPairPerRoute?.[originChainId]?.[destinationChainId]?.[
       inputToken.symbol

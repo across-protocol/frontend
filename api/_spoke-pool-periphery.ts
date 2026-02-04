@@ -1,64 +1,20 @@
+import { utils } from "ethers";
+
 import { SpokePoolPeriphery__factory } from "./_typechain/factories/SpokePoolPeriphery.sol/SpokePoolPeriphery__factory";
 import { SpokePoolPeripheryInterface } from "./_typechain/SpokePoolPeriphery.sol/SpokePoolPeriphery";
-import { ENABLED_ROUTES, getProvider } from "./_utils";
+import { ENABLED_ROUTES, getProvider, toAddressType } from "./_utils";
+import { CHAIN_IDs } from "./_constants";
 
-const sharedEIP712Types = {
-  Fees: [
-    {
-      name: "amount",
-      type: "uint256",
-    },
-    {
-      name: "recipient",
-      type: "address",
-    },
-  ],
-  BaseDepositData: [
-    {
-      name: "inputToken",
-      type: "address",
-    },
-    {
-      name: "outputToken",
-      type: "bytes32",
-    },
-    {
-      name: "outputAmount",
-      type: "uint256",
-    },
-    {
-      name: "depositor",
-      type: "address",
-    },
-    {
-      name: "recipient",
-      type: "bytes32",
-    },
-    {
-      name: "destinationChainId",
-      type: "uint256",
-    },
-    {
-      name: "exclusiveRelayer",
-      type: "bytes32",
-    },
-    {
-      name: "quoteTimestamp",
-      type: "uint32",
-    },
-    {
-      name: "fillDeadline",
-      type: "uint32",
-    },
-    {
-      name: "exclusivityParameter",
-      type: "uint32",
-    },
-    {
-      name: "message",
-      type: "bytes",
-    },
-  ],
+// These addresses are currently in-audit. We use these addresses for testing purposes
+// until the audit is complete and official contracts are deployed.
+const SPOKE_POOL_PERIPHERY_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.OPTIMISM]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
+  [CHAIN_IDs.BASE]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
+};
+
+const SWAP_PROXY_ADDRESS_OVERRIDES: Record<number, string> = {
+  [CHAIN_IDs.OPTIMISM]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
+  [CHAIN_IDs.BASE]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
 };
 
 export class UnknownPeripheryOnChain extends Error {
@@ -83,6 +39,10 @@ export function getSpokePoolPeripheryAddress(
   chainId: number,
   throwIfNotFound = true
 ) {
+  const override = SPOKE_POOL_PERIPHERY_ADDRESS_OVERRIDES[chainId];
+  if (override) {
+    return override;
+  }
   const address =
     ENABLED_ROUTES.spokePoolPeripheryAddresses[
       chainId as keyof typeof ENABLED_ROUTES.spokePoolPeripheryAddresses
@@ -94,6 +54,10 @@ export function getSpokePoolPeripheryAddress(
 }
 
 export function getSwapProxyAddress(chainId: number) {
+  const override = SWAP_PROXY_ADDRESS_OVERRIDES[chainId];
+  if (override) {
+    return override;
+  }
   const address =
     ENABLED_ROUTES.swapProxyAddresses[
       chainId as keyof typeof ENABLED_ROUTES.swapProxyAddresses
@@ -107,6 +71,53 @@ export function getSwapProxyAddress(chainId: number) {
 export function getSpokePoolPeriphery(address: string, chainId: number) {
   return SpokePoolPeriphery__factory.connect(address, getProvider(chainId));
 }
+
+type Eip712Types = Record<string, Array<{ name: string; type: string }>>;
+
+const structNameByParamName: Record<string, string> = {
+  submissionFees: "Fees",
+  baseDepositData: "BaseDepositData",
+  depositData: "BaseDepositData",
+};
+
+const spokePoolPeripheryInterface =
+  SpokePoolPeriphery__factory.createInterface();
+
+function buildEip712Types(param: utils.ParamType, typeName: string) {
+  if (param.baseType !== "tuple") {
+    throw new Error(`Expected tuple param for ${typeName}`);
+  }
+
+  const types: Eip712Types = {};
+  const visit = (tupleParam: utils.ParamType, tupleTypeName: string) => {
+    types[tupleTypeName] = (tupleParam.components ?? []).map((component) => {
+      if (component.baseType === "tuple") {
+        const nestedTypeName = structNameByParamName[component.name];
+        if (!nestedTypeName) {
+          throw new Error(
+            `Unknown struct name for tuple field '${component.name}'`
+          );
+        }
+        visit(component, nestedTypeName);
+        return { name: component.name, type: nestedTypeName };
+      }
+      return { name: component.name, type: component.type };
+    });
+  };
+
+  visit(param, typeName);
+  return types;
+}
+
+const depositTypedDataTypes = buildEip712Types(
+  spokePoolPeripheryInterface.getFunction("depositWithAuthorization").inputs[1],
+  "DepositData"
+);
+const swapAndDepositTypedDataTypes = buildEip712Types(
+  spokePoolPeripheryInterface.getFunction("swapAndBridgeWithAuthorization")
+    .inputs[1],
+  "SwapAndDepositData"
+);
 
 export async function getDepositTypedData(params: {
   depositData: SpokePoolPeripheryInterface.DepositDataStruct;
@@ -124,23 +135,7 @@ export async function getDepositTypedData(params: {
   return {
     domainSeparator: domainSeparatorHash,
     eip712: {
-      types: {
-        ...sharedEIP712Types,
-        DepositData: [
-          {
-            name: "submissionFees",
-            type: "Fees",
-          },
-          {
-            name: "baseDepositData",
-            type: "BaseDepositData",
-          },
-          {
-            name: "inputAmount",
-            type: "uint256",
-          },
-        ],
-      },
+      types: depositTypedDataTypes,
       primaryType: "DepositData",
       domain: {
         name: eip712Domain.name,
@@ -148,7 +143,30 @@ export async function getDepositTypedData(params: {
         chainId: params.chainId,
         verifyingContract: eip712Domain.verifyingContract,
       },
-      message: params.depositData,
+      message: {
+        ...params.depositData,
+        baseDepositData: {
+          ...params.depositData.baseDepositData,
+          recipient: toAddressType(
+            params.depositData.baseDepositData.recipient.toString(),
+            Number(
+              params.depositData.baseDepositData.destinationChainId.toString()
+            )
+          ).toBytes32(),
+          outputToken: toAddressType(
+            params.depositData.baseDepositData.outputToken.toString(),
+            Number(
+              params.depositData.baseDepositData.destinationChainId.toString()
+            )
+          ).toBytes32(),
+          exclusiveRelayer: toAddressType(
+            params.depositData.baseDepositData.exclusiveRelayer.toString(),
+            Number(
+              params.depositData.baseDepositData.destinationChainId.toString()
+            )
+          ).toBytes32(),
+        },
+      },
     },
   };
 }
@@ -169,55 +187,7 @@ export async function getSwapAndDepositTypedData(params: {
   return {
     domainSeparator: domainSeparatorHash,
     eip712: {
-      types: {
-        ...sharedEIP712Types,
-        SwapAndDepositData: [
-          {
-            name: "submissionFees",
-            type: "Fees",
-          },
-          {
-            name: "depositData",
-            type: "BaseDepositData",
-          },
-          {
-            name: "swapToken",
-            type: "address",
-          },
-          {
-            name: "exchange",
-            type: "address",
-          },
-          {
-            name: "transferType",
-            type: "uint8",
-          },
-          {
-            name: "swapTokenAmount",
-            type: "uint256",
-          },
-          {
-            name: "minExpectedInputTokenAmount",
-            type: "uint256",
-          },
-          {
-            name: "routerCalldata",
-            type: "bytes",
-          },
-          {
-            name: "enableProportionalAdjustment",
-            type: "bool",
-          },
-          {
-            name: "spokePool",
-            type: "address",
-          },
-          {
-            name: "nonce",
-            type: "uint256",
-          },
-        ],
-      },
+      types: swapAndDepositTypedDataTypes,
       primaryType: "SwapAndDepositData",
       domain: {
         name: eip712Domain.name,

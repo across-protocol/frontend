@@ -1,6 +1,6 @@
 import { Wallet, ethers } from "ethers";
 import dotenv from "dotenv";
-import axios from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { CHAIN_IDs } from "@across-protocol/constants";
@@ -22,8 +22,8 @@ import {
   EXACT_INPUT_CASES,
   LENS_CASES,
   SOLANA_CASES,
-  USDT_OFT_COMPOSER_CASE,
 } from "./_swap-cases";
+import { SpokePoolPeriphery__factory } from "../../api/_typechain/factories/SpokePoolPeriphery.sol/SpokePoolPeriphery__factory";
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -163,13 +163,25 @@ export const argsFromCli = yargs(hideBin(process.argv))
     alias: "ft",
     description: "Flow type.",
     default: "approval",
-    choices: ["approval", "permit", "auth", "unified"],
+    choices: ["approval", "erc3009"],
   })
   .option("skipTxExecution", {
     alias: "ste",
     description: "Skip tx execution.",
     type: "boolean",
     default: false,
+  })
+  .option("depositViaApi", {
+    alias: "dva",
+    description: "Submit gasless deposit via API.",
+    type: "boolean",
+    default: false,
+  })
+  .option("apiKey", {
+    alias: "ak",
+    description:
+      "API key for erc3009/gasless endpoints (sent as Bearer token).",
+    type: "string",
   })
   .help()
   .parseSync();
@@ -198,13 +210,20 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
+function getAuthHeaders(): AxiosRequestHeaders {
+  const apiKey = argsFromCli.apiKey as string | undefined;
+  if (!apiKey) {
+    return {};
+  }
+  return { Authorization: `Bearer ${apiKey}` };
+}
+
 export async function fetchSwapQuotes() {
   const flowType = argsFromCli.flowType;
   const includeDestinationAction =
     argsFromCli.includeDestinationAction || false;
-  const slug = flowType === "unified" ? undefined : flowType;
   const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
-  const url = `${baseUrl}/api/swap${slug ? `/${slug}` : ""}`;
+  const url = `${baseUrl}/api/swap/${flowType}`;
   console.log("\nFetching swap quotes from:", url);
 
   const swapQuotes: BaseSwapResponse[] = [];
@@ -262,6 +281,7 @@ export async function fetchSwapQuotes() {
     const response = await axios.get(url, {
       params,
       paramsSerializer: buildSearchParams,
+      headers: getAuthHeaders(),
     });
     swapQuotes.push(response.data as BaseSwapResponse);
   } else {
@@ -287,7 +307,10 @@ export async function fetchSwapQuotes() {
       console.log("Test case:", testCase.labels.join(" "));
       console.log("Params:", testCase.params);
       console.log("Body:", JSON.stringify(body, null, 2));
-      const response = await axios.post(url, body, { params: testCase.params });
+      const response = await axios.post(url, body, {
+        params: testCase.params,
+        headers: getAuthHeaders(),
+      });
       swapQuotes.push(response.data as BaseSwapResponse);
     }
   }
@@ -298,45 +321,67 @@ export async function fetchSwapQuotes() {
 export async function signAndWaitPermitFlow(params: {
   wallet: Wallet;
   swapResponse: BaseSwapResponse;
+  depositViaApi?: boolean;
 }) {
-  if (!params.swapResponse.eip712) {
-    throw new Error("No EIP712 data for permit");
+  if (params.swapResponse.swapTx.ecosystem !== "evm-gasless") {
+    throw new Error("Expected EVM-gasless tx");
   }
+
+  const depositId = params.swapResponse.swapTx.data.depositId;
 
   // sign permit + deposit
   const permitSig = await params.wallet._signTypedData(
-    params.swapResponse.eip712.permit.domain,
-    params.swapResponse.eip712.permit.types,
-    params.swapResponse.eip712.permit.message
+    params.swapResponse.swapTx.typedData.domain,
+    params.swapResponse.swapTx.typedData.types,
+    params.swapResponse.swapTx.typedData.message
   );
   console.log("Signed permit:", permitSig);
 
-  const depositSig = await params.wallet._signTypedData(
-    params.swapResponse.eip712.deposit.domain,
-    params.swapResponse.eip712.deposit.types,
-    params.swapResponse.eip712.deposit.message
-  );
-  console.log("Signed deposit:", depositSig);
-
-  // relay
-  const relayResponse = await axios.post(`${SWAP_API_BASE_URL}/api/relay`, {
-    ...params.swapResponse.swapTx,
-    signatures: { permit: permitSig, deposit: depositSig },
-  });
-  console.log("Relay response:", relayResponse.data);
-
-  // track relay
-  while (true) {
-    const relayStatusResponse = await axios.get(
-      `${SWAP_API_BASE_URL}/api/relay/status?requestHash=${relayResponse.data.requestHash}`
+  if (params.depositViaApi) {
+    const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
+    const submitGaslessResponse = await axios.post(
+      `${baseUrl}/api/gasless/submit`,
+      {
+        swapTx: params.swapResponse.swapTx,
+        signature: permitSig,
+      },
+      { headers: getAuthHeaders() }
     );
-    console.log("Relay status response:", relayStatusResponse.data);
-
-    if (relayStatusResponse.data.status === "success") {
-      break;
+    console.log("Submit gasless response:", submitGaslessResponse.data);
+  } else {
+    // TODO: support `BridgeAndSwapWitness`
+    if (params.swapResponse.swapTx.data.witness.type !== "BridgeWitness") {
+      throw new Error("Expected BridgeWitness");
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    const depositCalldata =
+      SpokePoolPeriphery__factory.createInterface().encodeFunctionData(
+        "depositWithAuthorization",
+        [
+          params.swapResponse.swapTx.typedData.message.from,
+          params.swapResponse.swapTx.data.witness.data,
+          params.swapResponse.swapTx.data.permit.message.validAfter,
+          params.swapResponse.swapTx.data.permit.message.validBefore,
+          permitSig,
+        ]
+      );
+    const depositTx = await params.wallet.sendTransaction({
+      to: params.swapResponse.swapTx.to,
+      data: depositCalldata,
+      value: params.swapResponse.swapTx.value,
+    });
+    console.log("Deposit tx hash:", depositTx.hash);
+    await depositTx.wait();
+  }
+
+  const fillTxnRef = await trackFill({
+    depositId,
+    originChainId: params.swapResponse.swapTx.chainId,
+  });
+  if (fillTxnRef) {
+    console.log("Fill txn ref:", fillTxnRef);
+  } else {
+    console.log("Fill txn ref not found");
   }
 }
 
@@ -364,6 +409,10 @@ export async function signAndWaitAllowanceFlow(params: {
     }
   }
 
+  if (params.swapResponse.swapTx.ecosystem !== "evm") {
+    throw new Error("Expected EVM tx");
+  }
+
   try {
     const tx = await params.wallet.sendTransaction({
       to: params.swapResponse.swapTx.to,
@@ -376,7 +425,10 @@ export async function signAndWaitAllowanceFlow(params: {
     console.log("Tx hash: ", tx.hash);
     await tx.wait();
     console.log("Tx mined");
-    const fillTxnRef = await trackFill(tx.hash);
+    const fillTxnRef = await trackFill({
+      depositTxnRef: tx.hash,
+      originChainId: params.swapResponse.swapTx.chainId,
+    });
     if (fillTxnRef) {
       console.log("Fill txn ref:", fillTxnRef);
     } else {
@@ -391,6 +443,10 @@ export async function signAndWaitAllowanceFlowSvm(params: {
   wallet: KeyPairSigner;
   swapResponse: BaseSwapResponse;
 }) {
+  if (params.swapResponse.swapTx.ecosystem !== "svm") {
+    throw new Error("Expected SVM tx");
+  }
+
   if (!params.swapResponse.swapTx || !("data" in params.swapResponse.swapTx)) {
     throw new Error("No swap tx for allowance flow");
   }
@@ -405,9 +461,12 @@ export async function signAndWaitAllowanceFlowSvm(params: {
     const sendTx = sendTransactionWithoutConfirmingFactory({
       rpc: getSVMRpc(params.swapResponse.swapTx.chainId),
     });
-    await sendTx(signedTx, { commitment: "confirmed" });
+    await sendTx(signedTx as any, { commitment: "confirmed" });
     console.log("Tx sent and confirmed");
-    const fillTxnRef = await trackFill(signature.toString());
+    const fillTxnRef = await trackFill({
+      depositTxnRef: signature.toString(),
+      originChainId: params.swapResponse.swapTx.chainId,
+    });
     if (fillTxnRef) {
       console.log("Fill txn ref:", fillTxnRef);
     } else {
@@ -418,7 +477,18 @@ export async function signAndWaitAllowanceFlowSvm(params: {
   }
 }
 
-async function trackFill(txHash: string) {
+async function trackFill(params: {
+  depositTxnRef?: string;
+  depositId?: string | number;
+  originChainId: number;
+}) {
+  if (!params.depositTxnRef && !params.depositId) {
+    throw new Error("Either depositTxnRef or depositId must be provided");
+  }
+
+  const queryParams = params.depositTxnRef
+    ? { depositTxnRef: params.depositTxnRef }
+    : { depositId: params.depositId, originChainId: params.originChainId };
   const MAX_FILL_ATTEMPTS = 15;
   // Wait 2 seconds before starting polling
   await utils.delay(2);
@@ -427,7 +497,7 @@ async function trackFill(txHash: string) {
       const response = await axios.get(
         `${INDEXER_API_BASE_URL}/deposit/status`,
         {
-          params: { depositTxnRef: txHash },
+          params: queryParams,
         }
       );
       if (response.data.status === "filled") {
