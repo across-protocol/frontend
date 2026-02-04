@@ -13,7 +13,7 @@ import {
   ArrowIcon,
 } from "./Pagination.styles";
 import { useRef, useState } from "react";
-import useClickOutsideModal from "hooks/useClickOutsideModal";
+import useClickOutside from "hooks/useClickOutside";
 import { Text } from "components/Text";
 
 interface PageSizeProps {
@@ -26,7 +26,7 @@ export const PageSizeSelect: React.FC<PageSizeProps> = (props) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useClickOutsideModal(ref, () => {
+  useClickOutside(ref, () => {
     setShowDropdown(false);
   });
 
