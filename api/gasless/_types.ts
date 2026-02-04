@@ -48,3 +48,19 @@ export type PendingGaslessDeposit = GaslessDepositMessage & {
 export interface GaslessPendingResponse {
   deposits: PendingGaslessDeposit[];
 }
+
+/**
+ * Schema for Pub/Sub push subscription message envelope.
+ * https://cloud.google.com/pubsub/docs/push#receive_push
+ */
+export const PubSubPushMessageSchema = type({
+  message: type({
+    data: string(), // base64-encoded
+    messageId: string(),
+    publishTime: string(), // ISO 8601
+    attributes: optional(type({})),
+  }),
+  subscription: string(),
+});
+
+export type PubSubPushMessage = Infer<typeof PubSubPushMessageSchema>;

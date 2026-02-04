@@ -64,3 +64,16 @@ export function getSubscriberClient(): v1.SubscriberClient {
   }
   return cachedSubscriberClient;
 }
+
+export async function publishToDlt(params: {
+  client: PubSub;
+  dltName: string;
+  rawData: Buffer;
+}): Promise<void> {
+  const topic = params.client.topic(params.dltName);
+  const [exists] = await topic.exists();
+  if (!exists) {
+    throw new Error(`DLT topic ${params.dltName} does not exist`);
+  }
+  await topic.publishMessage({ data: params.rawData });
+}

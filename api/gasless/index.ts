@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { waitUntil } from "@vercel/functions";
 import { assert, Infer, literal, type } from "superstruct";
 import { getLogger, handleErrorCondition } from "../_utils";
@@ -6,7 +6,7 @@ import { getRequestId, setRequestSpanAttributes } from "../_request_utils";
 import { sendResponse } from "../_response_utils";
 import { tracer, processor } from "../../instrumentation";
 import { TypedVercelRequest } from "../_types";
-import { fetchPendingGaslessDeposits } from "./_service";
+import { fetchPendingGaslessDepositsFromCache } from "./_service";
 
 const GaslessQueryParamsSchema = type({
   status: literal("pending"),
@@ -44,13 +44,15 @@ export default async function handler(
       const { query } = request;
       assert(query, GaslessQueryParamsSchema);
 
-      const { deposits, cleanup } = await fetchPendingGaslessDeposits();
+      const { deposits, cleanup } =
+        await fetchPendingGaslessDepositsFromCache();
 
       logger.debug({
         at: "gasless",
         message: "Response data",
         requestId,
         depositCount: deposits.length,
+        source: "cache",
       });
 
       waitUntil(cleanup());

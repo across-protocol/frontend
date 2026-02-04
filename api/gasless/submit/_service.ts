@@ -4,10 +4,15 @@ import { utils } from "ethers";
 import { GaslessSubmitBody, GaslessSubmitBodySchema } from "./_validation";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import { ForbiddenError, InvalidParamError } from "../../_errors";
-import { publishGaslessDepositMessage } from "./_publish-pubsub";
+import {
+  publishGaslessDepositMessage,
+  toPubSubPayload,
+} from "./_publish-pubsub";
 import { Permission } from "../../_api-keys";
-import { getTokenInfo, toAddressType } from "../../_utils";
+import { getLogger, getTokenInfo, toAddressType } from "../../_utils";
 import { getSponsoredGaslessRoute } from "../../_sponsored-gasless-config";
+import { redisCache } from "../../_cache";
+import { GASLESS_REDIS_KEYS, GASLESS_DEPOSIT_TTL_SECONDS } from "../_config";
 
 export type GaslessSubmitResponse = {
   depositId: string;
@@ -120,13 +125,36 @@ export async function handleGaslessSubmit(params: {
     });
   }
 
-  // Publish to Pub/Sub
+  const submittedAt = new Date().toISOString();
+
+  // Publish to Pub/Sub (for durability and downstream processing)
   const messageId = await publishGaslessDepositMessage({
     swapTx,
     signature,
-    submittedAt: new Date().toISOString(),
+    submittedAt,
     requestId,
   });
+
+  // Write directly to Redis for fast reads
+  try {
+    const depositKey = GASLESS_REDIS_KEYS.deposit(depositId);
+    const pendingSetKey = GASLESS_REDIS_KEYS.pendingSet();
+    const depositData = {
+      ...toPubSubPayload({ swapTx, signature, submittedAt, requestId }),
+      messageId,
+    };
+
+    await redisCache.set(depositKey, depositData, GASLESS_DEPOSIT_TTL_SECONDS);
+    await redisCache.sadd(pendingSetKey, depositId);
+  } catch (error) {
+    // Non-fatal: Pub/Sub is the source of truth, Redis is for fast reads
+    getLogger().warn({
+      at: "gasless/submit/_service",
+      message: "Failed to write deposit to Redis cache",
+      depositId,
+      error,
+    });
+  }
 
   return {
     depositId,

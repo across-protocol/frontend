@@ -1,23 +1,19 @@
 import { assert } from "superstruct";
 import { getLogger } from "../_utils";
-import { getGaslessPubSubConfig } from "./_config";
+import { getGaslessPubSubConfig, GASLESS_REDIS_KEYS } from "./_config";
 import {
   GaslessDepositMessageSchema,
   type GaslessDepositMessage,
   type PendingGaslessDeposit,
 } from "./_types";
 import { getSubscriberClient } from "../_pubsub";
+import { redisCache } from "../_cache";
+import { isWithinTtl } from "./_utils";
 
 export type FetchPendingGaslessDepositsResult = {
   deposits: PendingGaslessDeposit[];
   cleanup: () => Promise<void>;
 };
-
-/** Pub/Sub message publish time. */
-interface PublishTimestamp {
-  seconds?: string | number | { toNumber(): number } | null;
-  nanos?: number | null;
-}
 
 const logger = getLogger();
 
@@ -39,19 +35,6 @@ function decodeMessageData(
   } catch {
     return null;
   }
-}
-
-/** Returns true if the message is still within TTL (not expired). */
-function isWithinTtl(
-  publishTime: PublishTimestamp | null | undefined,
-  ttlSeconds: number
-): boolean {
-  if (!publishTime || publishTime.seconds == null) return false;
-  const seconds = Number(publishTime.seconds);
-  const nanos = publishTime.nanos ?? 0;
-  const publishSeconds = seconds + nanos / 1e9;
-  const nowSeconds = Date.now() / 1000;
-  return nowSeconds - publishSeconds <= ttlSeconds;
 }
 
 export async function fetchPendingGaslessDeposits(): Promise<FetchPendingGaslessDepositsResult> {
@@ -156,6 +139,64 @@ export async function fetchPendingGaslessDeposits(): Promise<FetchPendingGasless
         ackIds,
         nackIds,
       });
+    }
+  };
+
+  return { deposits, cleanup };
+}
+
+/**
+ * Fetch pending gasless deposits from Redis (push-based).
+ * Uses SMEMBERS to get pending IDs, then MGET to batch-fetch deposit data.
+ * Expired keys (TTL) are lazily cleaned from the pending set.
+ */
+export async function fetchPendingGaslessDepositsFromCache(): Promise<FetchPendingGaslessDepositsResult> {
+  const pendingSetKey = GASLESS_REDIS_KEYS.pendingSet();
+
+  // Get all pending deposit IDs
+  const depositIds = await redisCache.smembers(pendingSetKey);
+
+  if (depositIds.length === 0) {
+    return { deposits: [], cleanup: async () => {} };
+  }
+
+  // Batch-fetch all deposit data
+  const depositKeys = depositIds.map((id) => GASLESS_REDIS_KEYS.deposit(id));
+  const depositDataList = await redisCache.mget<PendingGaslessDeposit>(
+    ...depositKeys
+  );
+
+  const deposits: PendingGaslessDeposit[] = [];
+  const expiredIds: string[] = [];
+
+  for (let i = 0; i < depositIds.length; i++) {
+    const depositData = depositDataList[i];
+    if (depositData) {
+      deposits.push(depositData);
+    } else {
+      // Key expired (TTL), mark for cleanup from set
+      expiredIds.push(depositIds[i]);
+    }
+  }
+
+  // Lazy cleanup: remove expired IDs from pending set
+  const cleanup = async () => {
+    if (expiredIds.length > 0) {
+      try {
+        await redisCache.srem(pendingSetKey, ...expiredIds);
+        logger.debug({
+          at: "gasless/_service",
+          message: "Cleaned up expired deposit IDs from pending set",
+          expiredCount: expiredIds.length,
+        });
+      } catch (error) {
+        logger.error({
+          at: "gasless/_service",
+          message: "Failed to cleanup expired deposit IDs",
+          error,
+          expiredIds,
+        });
+      }
     }
   };
 

@@ -68,11 +68,11 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     }
   }
 
-  async del(key: string) {
+  async del(...keys: string[]) {
     if (!this.client) {
       return;
     }
-    await this.client.del(key);
+    await this.client.del(...keys);
   }
 
   pub(_channel: string, _message: string): Promise<number> {
@@ -84,6 +84,70 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
     _listener: (message: string, channel: string) => void
   ): Promise<number> {
     throw new Error("sub: not supported");
+  }
+
+  /**
+   * Add members to a set.
+   * @returns Number of members added (not already in set), or null if client unavailable
+   */
+  async sadd(key: string, ...members: string[]): Promise<number | null> {
+    if (!this.client || members.length === 0) {
+      return null;
+    }
+    try {
+      return await this.client.sadd(key, ...members);
+    } catch (error) {
+      console.error("[RedisCache] Error while calling sadd:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all members of a set.
+   * @returns Array of members, or empty array if client unavailable
+   */
+  async smembers(key: string): Promise<string[]> {
+    if (!this.client) {
+      return [];
+    }
+    try {
+      return await this.client.smembers(key);
+    } catch (error) {
+      console.error("[RedisCache] Error while calling smembers:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove members from a set.
+   * @returns Number of members removed, or null if client unavailable
+   */
+  async srem(key: string, ...members: string[]): Promise<number | null> {
+    if (!this.client || members.length === 0) {
+      return null;
+    }
+    try {
+      return await this.client.srem(key, ...members);
+    } catch (error) {
+      console.error("[RedisCache] Error while calling srem:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get multiple keys at once.
+   * @returns Array of values (null for missing keys), or empty array if client unavailable
+   */
+  async mget<T>(...keys: string[]): Promise<(T | null)[]> {
+    if (!this.client || keys.length === 0) {
+      return [];
+    }
+    try {
+      return await this.client.mget<(T | null)[]>(...keys);
+    } catch (error) {
+      console.error("[RedisCache] Error while calling mget:", error);
+      throw error;
+    }
   }
 }
 
