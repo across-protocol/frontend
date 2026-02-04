@@ -104,6 +104,7 @@ export function getPublicProvider(
     return new ethers.providers.StaticJsonRpcProvider({
       url: chain.publicRPC,
       headers,
+      timeout: 180000,
     });
   } else {
     return undefined;
@@ -124,7 +125,10 @@ function getProviderFromConfigJson(
   const headers = getProviderHeaders(chainId);
   const providerConstructorParams: ConstructorParameters<
     typeof sdk.providers.RetryProvider
-  >[0] = urls.map((url) => [{ url, headers, errorPassThrough: true }, chainId]);
+  >[0] = urls.map((url) => [
+    { url, headers, errorPassThrough: true, timeout: 180000 },
+    chainId,
+  ]);
 
   const pctRpcCallsLogged = 0; // disable RPC calls logging
 
