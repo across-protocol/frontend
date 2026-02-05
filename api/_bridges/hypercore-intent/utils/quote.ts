@@ -25,6 +25,33 @@ import {
 import { InvalidParamError } from "../../../_errors";
 import { resolveTiming } from "../../../_timings";
 
+/**
+ * Calculate estimated fill time for a bridge to HyperEVM.
+ */
+export async function getEstimatedFillTimeToHyperEvm(params: {
+  inputToken: Token;
+  outputToken: Token;
+  inputAmount: BigNumber;
+}): Promise<number> {
+  const hyperEvmChainId = getHyperEvmChainId(params.outputToken.chainId);
+
+  const inputTokenPriceUsd = await getCachedTokenPrice({
+    symbol: params.inputToken.symbol,
+    baseCurrency: "usd",
+  });
+
+  const inputAmountUsd = params.inputAmount
+    .mul(utils.parseUnits(inputTokenPriceUsd.toString()))
+    .div(utils.parseUnits("1", params.inputToken.decimals));
+
+  return resolveTiming(
+    String(params.inputToken.chainId),
+    String(hyperEvmChainId),
+    params.inputToken.symbol,
+    inputAmountUsd
+  );
+}
+
 export async function getRelayerFeeDetailsOnHyperEvm(params: {
   inputToken: Token;
   amount: BigNumber;
@@ -70,23 +97,29 @@ export async function getUsdhIntentQuote({
     outputToken.decimals
   )(exactInputAmount);
 
-  const [outputTokenPriceNative, inputTokenPriceUsd] = await Promise.all([
-    getCachedTokenPrice({
-      symbol: bridgeableOutputToken.symbol,
-      baseCurrency: sdk.utils
-        .getNativeTokenSymbol(hyperEvmChainId)
-        .toLowerCase(),
-    }),
-    getCachedTokenPrice({
-      symbol: inputToken.symbol,
-      baseCurrency: "usd",
-    }),
-    assertSufficientBalanceOnHyperEvm({
-      amountHyperEvm: outputAmountHyperEvm,
-      inputToken,
-      outputToken,
-    }),
-  ]);
+  const [outputTokenPriceNative, inputTokenPriceUsd, estimatedFillTimeSec] =
+    await Promise.all([
+      getCachedTokenPrice({
+        symbol: bridgeableOutputToken.symbol,
+        baseCurrency: sdk.utils
+          .getNativeTokenSymbol(hyperEvmChainId)
+          .toLowerCase(),
+      }),
+      getCachedTokenPrice({
+        symbol: inputToken.symbol,
+        baseCurrency: "usd",
+      }),
+      getEstimatedFillTimeToHyperEvm({
+        inputToken,
+        outputToken,
+        inputAmount: exactInputAmount,
+      }),
+      assertSufficientBalanceOnHyperEvm({
+        amountHyperEvm: outputAmountHyperEvm,
+        inputToken,
+        outputToken,
+      }),
+    ]);
 
   const depositRecipient = getDepositRecipient({
     outputToken,
@@ -125,22 +158,13 @@ export async function getUsdhIntentQuote({
     });
   }
 
-  const inputAmountUsd = exactInputAmount
-    .mul(utils.parseUnits(inputTokenPriceUsd.toString()))
-    .div(utils.parseUnits("1", inputToken.decimals));
-
   return {
     inputToken,
     outputToken,
     inputAmount: exactInputAmount,
     outputAmount,
     minOutputAmount: outputAmount,
-    estimatedFillTimeSec: resolveTiming(
-      String(inputToken.chainId),
-      String(hyperEvmChainId),
-      inputToken.symbol,
-      inputAmountUsd
-    ),
+    estimatedFillTimeSec,
     fees: getZeroBridgeFees(inputToken),
     message: depositMessage,
   };

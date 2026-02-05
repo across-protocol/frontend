@@ -24,7 +24,10 @@ import {
   INTERNALIZED_SWAP_PAIRS,
   SUPPORTED_OUTPUT_TOKENS,
 } from "./utils/constants";
-import { getUsdhIntentQuote } from "./utils/quote";
+import {
+  getUsdhIntentQuote,
+  getEstimatedFillTimeToHyperEvm,
+} from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
 import { ConvertDecimals, getTokenByAddress } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
@@ -236,19 +239,27 @@ export async function getQuoteForExactInput(
     const depositRecipient = getDepositRecipient({ outputToken, recipient });
     const depositMessage = getDepositMessage({ outputToken, recipient });
 
-    const acrossQuote = await getAcrossBridgeStrategy().getQuoteForExactInput({
-      inputToken,
-      outputToken: bridgeableOutputToken,
-      exactInputAmount,
-      recipient: depositRecipient,
-      message: depositMessage,
-    });
+    const [acrossQuote, estimatedFillTimeSec] = await Promise.all([
+      getAcrossBridgeStrategy().getQuoteForExactInput({
+        inputToken,
+        outputToken: bridgeableOutputToken,
+        exactInputAmount,
+        recipient: depositRecipient,
+        message: depositMessage,
+      }),
+      getEstimatedFillTimeToHyperEvm({
+        inputToken,
+        outputToken,
+        inputAmount: exactInputAmount,
+      }),
+    ]);
 
     return {
       bridgeQuote: {
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        estimatedFillTimeSec,
         // Convert outputAmount from bridgeable token decimals to output token decimals
         outputAmount: ConvertDecimals(
           bridgeableOutputToken.decimals,
@@ -327,19 +338,31 @@ export async function getQuoteForOutput(
       bridgeableOutputToken.decimals
     )(minOutputAmount);
 
-    const acrossQuote = await getAcrossBridgeStrategy().getQuoteForOutput({
-      inputToken,
-      outputToken: bridgeableOutputToken,
-      minOutputAmount: minOutputAmountInBridgeableDecimals,
-      recipient: depositRecipient,
-      message: depositMessage,
-    });
+    const [acrossQuote, estimatedFillTimeSec] = await Promise.all([
+      getAcrossBridgeStrategy().getQuoteForOutput({
+        inputToken,
+        outputToken: bridgeableOutputToken,
+        minOutputAmount: minOutputAmountInBridgeableDecimals,
+        recipient: depositRecipient,
+        message: depositMessage,
+      }),
+      getEstimatedFillTimeToHyperEvm({
+        inputToken,
+        outputToken,
+        // Use minOutputAmount converted to input token decimals as an approximation
+        inputAmount: ConvertDecimals(
+          outputToken.decimals,
+          inputToken.decimals
+        )(minOutputAmount),
+      }),
+    ]);
 
     return {
       bridgeQuote: {
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        estimatedFillTimeSec,
         // Convert outputAmount from bridgeable token decimals to output token decimals
         outputAmount: ConvertDecimals(
           bridgeableOutputToken.decimals,
