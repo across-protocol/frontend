@@ -12,6 +12,7 @@ import {
   USDC_ON_OPTIMISM,
   USDH_ON_HYPERCORE,
   USDH_ON_HYPEREVM,
+  USDH_SPOT_ON_HYPERCORE,
   USDT_ON_POLYGON,
   USDT_SPOT_ON_HYPERCORE,
 } from "./utils";
@@ -497,13 +498,7 @@ describe("getHyperCoreIntentBridgeStrategy (sponsored)", () => {
           address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
           decimals: 18,
         },
-        outputToken: {
-          symbol: "USDT-SPOT",
-          chainId: CHAIN_IDs.HYPERCORE,
-          address:
-            TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
-          decimals: 6,
-        },
+        outputToken: USDT_SPOT_ON_HYPERCORE,
       });
 
       expect(result).toBeDefined();
@@ -511,6 +506,31 @@ describe("getHyperCoreIntentBridgeStrategy (sponsored)", () => {
       expect(result!.chainId).toBe(CHAIN_IDs.ARBITRUM);
       expect(result!.address).toBe(
         TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.ARBITRUM]
+      );
+      expect(result!.decimals).toBe(6);
+    });
+
+    it("should resolve USDC for USDH-SPOT output", () => {
+      const strategy = getHyperCoreIntentBridgeStrategy({
+        isEligibleForSponsorship: false,
+        shouldSponsorAccountCreation: false,
+      });
+
+      const result = strategy.resolveOriginSwapTarget!({
+        inputToken: {
+          symbol: "WETH",
+          chainId: CHAIN_IDs.MAINNET,
+          address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+          decimals: 18,
+        },
+        outputToken: USDH_SPOT_ON_HYPERCORE,
+      });
+
+      expect(result).toBeDefined();
+      expect(result!.symbol).toBe("USDC");
+      expect(result!.chainId).toBe(CHAIN_IDs.MAINNET);
+      expect(result!.address).toBe(
+        TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET]
       );
       expect(result!.decimals).toBe(6);
     });

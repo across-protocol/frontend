@@ -3,6 +3,7 @@ import { BigNumber, utils } from "ethers";
 
 import { routeStrategyForSponsorship } from "../../api/_sponsorship-routing";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
+import { USDH_SPOT_ON_HYPERCORE } from "./_bridges/hypercore-intent/utils";
 
 vi.mock("../../api/_bridges/cctp-sponsored/strategy", () => ({
   getSponsoredCctpBridgeStrategy: vi.fn((isEligible: boolean) => ({
@@ -17,7 +18,11 @@ vi.mock("../../api/_bridges/oft-sponsored/strategy", () => ({
 }));
 
 vi.mock("../../api/_bridges/hypercore-intent/strategy", () => ({
-  getHyperCoreIntentBridgeStrategy: vi.fn(() => ({ name: "sponsored-intent" })),
+  getHyperCoreIntentBridgeStrategy: vi.fn(
+    (params: { isEligibleForSponsorship: boolean }) => ({
+      name: params.isEligibleForSponsorship ? "sponsored-intent" : "across",
+    })
+  ),
 }));
 
 vi.mock("../../api/_bridges/hypercore-intent/utils/common", () => ({
@@ -46,13 +51,6 @@ vi.mock("../../api/_utils", () => ({
   ),
 }));
 
-const USDH_SPOT_ON_HYPERCORE = {
-  address: TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
-  chainId: CHAIN_IDs.HYPERCORE,
-  symbol: "USDH-SPOT",
-  decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
-};
-
 const mockEligibility = async (
   overrides: Partial<{
     isEligibleTokenPair: boolean;
@@ -62,7 +60,7 @@ const mockEligibility = async (
     isWithinAccountCreationDailyLimit: boolean;
     isCctpEnabledOriginChain: boolean;
     isOftEnabledOriginChain: boolean;
-    isSponsoredIntentSupported: boolean;
+    isHyperCoreIntentSupported: boolean;
     isMintBurnThresholdMet: boolean;
   }> = {}
 ) => {
@@ -91,7 +89,10 @@ describe("routeStrategyForSponsorship - USDT routing", () => {
   });
 
   it("should route USDT to OFT strategy", async () => {
-    await mockEligibility({ isOftEnabledOriginChain: true });
+    await mockEligibility({
+      isOftEnabledOriginChain: true,
+      isMintBurnThresholdMet: true,
+    });
     const { isRouteSupported } = await import(
       "../../api/_bridges/oft-sponsored/strategy"
     );
@@ -105,7 +106,7 @@ describe("routeStrategyForSponsorship - USDT routing", () => {
         decimals: TOKEN_SYMBOLS_MAP.USDT.decimals,
       },
       outputToken: USDH_SPOT_ON_HYPERCORE,
-      amount: utils.parseUnits("1000", TOKEN_SYMBOLS_MAP.USDT.decimals),
+      amount: utils.parseUnits("100000", TOKEN_SYMBOLS_MAP.USDT.decimals),
       amountType: "exactInput" as const,
       recipient: "0x1234567890abcdef1234567890abcdef12345678",
       depositor: "0x1234567890abcdef1234567890abcdef12345678",
@@ -166,23 +167,56 @@ describe("routeStrategyForSponsorship - CCTP chain amount threshold preserved", 
     const result = await routeStrategyForSponsorship(params);
     expect(result).toEqual({ name: "sponsored-intent" });
   });
+});
 
-  it("should return null for unsupported route", async () => {
-    await mockEligibility();
-    const { isRouteSupported } = await import(
-      "../../api/_bridges/hypercore-intent/utils/common"
-    );
-    (isRouteSupported as ReturnType<typeof vi.fn>).mockReturnValue(false);
+describe("routeStrategyForSponsorship - ANY to USDH-SPOT routing", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should route WETH -> USDH-SPOT to intents", async () => {
+    await mockEligibility({
+      isEligibleTokenPair: false,
+      isHyperCoreIntentSupported: true,
+    });
 
     const params = {
       inputToken: {
-        address: "0x1234567890abcdef1234567890abcdef12345678",
-        chainId: 999999,
-        symbol: "UNKNOWN",
-        decimals: 6,
+        address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+        chainId: CHAIN_IDs.MAINNET,
+        symbol: "WETH",
+        decimals: 18,
       },
       outputToken: USDH_SPOT_ON_HYPERCORE,
-      amount: utils.parseUnits("1000", 6),
+      amount: utils.parseUnits("1", 18),
+      amountType: "exactInput" as const,
+      recipient: "0x1234567890abcdef1234567890abcdef12345678",
+      depositor: "0x1234567890abcdef1234567890abcdef12345678",
+    };
+
+    const result = await routeStrategyForSponsorship(params);
+    expect(result).toEqual({ name: "across" });
+  });
+
+  it("should return null when hypercore intent not supported", async () => {
+    await mockEligibility({
+      isHyperCoreIntentSupported: false,
+    });
+
+    const params = {
+      inputToken: {
+        address: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+        chainId: CHAIN_IDs.MAINNET,
+        symbol: "WETH",
+        decimals: 18,
+      },
+      outputToken: {
+        symbol: "UNKNOWN",
+        chainId: CHAIN_IDs.HYPERCORE,
+        address: "0x1234567890abcdef1234567890abcdef12345678",
+        decimals: 8,
+      },
+      amount: utils.parseUnits("1", 18),
       amountType: "exactInput" as const,
       recipient: "0x1234567890abcdef1234567890abcdef12345678",
       depositor: "0x1234567890abcdef1234567890abcdef12345678",

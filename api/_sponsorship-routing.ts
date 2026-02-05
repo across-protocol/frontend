@@ -40,6 +40,20 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         }),
     },
   ],
+  "*:USDH-SPOT": [
+    {
+      name: "any-usdh-spot-unsponsored",
+      reason:
+        "Unsponsored route to USDH-SPOT via intents, enables A2B flows when mint/burn not available or threshold not met",
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
   "USDT:USDT-SPOT": [
     {
       name: "usdt-usdt-spot-intent-unsponsored",
@@ -108,8 +122,10 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   "USDC:*": [
     {
       name: "usdc-ineligible",
-      reason: "Sponsorship limits not met for USDC route",
-      shouldApply: (data) => !isEligibleForSponsorship(data),
+      reason:
+        "USDC route within mint burn threshold but not eligible for sponsorship",
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isWithinInputAmountLimit,
       getStrategy: () => getSponsoredCctpBridgeStrategy(false),
     },
     {
@@ -219,15 +235,25 @@ function getRouteRules(params: BridgeStrategyDataParams) {
   );
   const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
 
-  return (
-    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardInputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey]
-      : undefined) ??
-    (wildcardOutputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
-      : undefined)
-  );
+  // Collect all matching rule sets in priority order
+  const allRules: SponsorshipRoutingRule[] = [];
+
+  // Priority 1: Exact match (e.g., USDT:USDH-SPOT)
+  if (exactKey && SPONSORSHIP_ROUTING_RULES[exactKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[exactKey]);
+  }
+
+  // Priority 2: Wildcard input (e.g., *:USDH-SPOT)
+  if (wildcardInputKey && SPONSORSHIP_ROUTING_RULES[wildcardInputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardInputKey]);
+  }
+
+  // Priority 3: Wildcard output (e.g., USDT:*)
+  if (wildcardOutputKey && SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]);
+  }
+
+  return allRules.length > 0 ? allRules : undefined;
 }
 
 function isEligibleForSponsorship(data: SponsorshipEligibilityData) {

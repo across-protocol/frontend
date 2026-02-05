@@ -49,6 +49,13 @@ export const USDH_ON_HYPERCORE = {
   decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
 };
 
+export const USDH_SPOT_ON_HYPERCORE = {
+  address: TOKEN_SYMBOLS_MAP["USDH-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  chainId: CHAIN_IDs.HYPERCORE,
+  symbol: TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
+  decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
+};
+
 export const USDT_ON_POLYGON = {
   address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
   chainId: CHAIN_IDs.POLYGON,
