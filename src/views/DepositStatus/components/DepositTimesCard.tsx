@@ -328,7 +328,7 @@ export function DepositTimesCard({
                       textColor="light-100"
                     />
                     <Text color="grey-400">
-                      (${formatUSD(finalOutputAmountUsd!)})
+                      (${formatUSD(finalOutputAmountUsd ?? 0)})
                     </Text>
                   </>
                 )
@@ -336,7 +336,7 @@ export function DepositTimesCard({
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputTokenSymbol) && outputTokenForDisplay && (
+      {isDefined(outputTokenSymbol) && outputTokenForDisplay && inputToken && (
         <EstimatedTable
           {...estimatedRewards}
           // Override USD amounts with values from swapQuote.fees (source of truth)
