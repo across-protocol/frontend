@@ -54,9 +54,15 @@ export async function getEvmBalance(
     return getNativeBalance(chainId, account, blockNumber, provider);
   }
 
-  const contract = ERC20__factory.connect(tokenAddress, provider);
-  const balance = await contract.balanceOf(account, { blockTag: blockNumber });
-  return balance;
+  try {
+    const contract = ERC20__factory.connect(tokenAddress, provider);
+    const balance = await contract.balanceOf(account, {
+      blockTag: blockNumber,
+    });
+    return balance;
+  } catch {
+    return BigNumber.from(0);
+  }
 }
 
 export function toSolanaKitAddress(address: Address) {
