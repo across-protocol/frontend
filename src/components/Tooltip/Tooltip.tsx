@@ -75,7 +75,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
         {children}
       </StyledAnchor>
       {createPortal(
-        <StyledTooltip id={id} noArrow opacity={1} offset={offset}>
+        <StyledTooltip
+          id={id}
+          noArrow
+          opacity={1}
+          offset={offset}
+          disableStyleInjection
+        >
           <Wrapper maxWidth={maxWidth} paddingPx={paddingPx}>
             {title && (
               <TitleRow>

@@ -66,7 +66,7 @@
     "react-number-format": "^5.4.4",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "v5",
-    "react-tooltip": "^5.18.0",
+    "react-tooltip": "^5.30.0",
     "superstruct": "^0.15.4",
     "typescript": "^5.7.3",
     "viem": "2.x",
