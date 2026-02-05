@@ -1,7 +1,11 @@
 import { getChainInfo } from "utils/constants";
 import { getConfig } from "utils/config";
 import { Text } from "components/Text";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import {
+  calculateUsdValue,
+  formatUnitsWithMaxFractions,
+  shortenAddress,
+} from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
@@ -98,7 +102,15 @@ export function TransactionDestinationSection({
             </Text>
             <Text color="grey-400" size="sm">
               {" "}
-              {formatUSDValue(deposit.outputPriceUsd)}
+              {formatUSDValue(
+                outputToken
+                  ? calculateUsdValue(
+                      deposit.outputAmount,
+                      outputToken.decimals,
+                      deposit.outputPriceUsd
+                    )
+                  : null
+              )}
             </Text>
           </div>
         </DetailRowItem>

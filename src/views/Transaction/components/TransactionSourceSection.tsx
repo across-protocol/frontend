@@ -1,7 +1,11 @@
 import { COLORS, getChainInfo } from "utils/constants";
 import { getConfig } from "utils/config";
 import { Text } from "components/Text";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import {
+  calculateUsdValue,
+  formatUnitsWithMaxFractions,
+  shortenAddress,
+} from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
@@ -93,7 +97,15 @@ export function TransactionSourceSection({
             </Text>
             <Text color="grey-400" size="sm">
               {" "}
-              {formatUSDValue(deposit.inputPriceUsd)}
+              {formatUSDValue(
+                inputToken
+                  ? calculateUsdValue(
+                      deposit.inputAmount,
+                      inputToken.decimals,
+                      deposit.inputPriceUsd
+                    )
+                  : null
+              )}
             </Text>
           </div>
         </DetailRowItem>
