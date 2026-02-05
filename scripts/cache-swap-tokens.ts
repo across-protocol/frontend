@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { fetchSwapTokensData, SwapToken } from "../api/swap/tokens/_service";
+import { ENABLED_ROUTES } from "../api/_utils";
 
 export interface SwapTokensCache {
   tokens: SwapToken[];
@@ -10,8 +11,11 @@ export interface SwapTokensCache {
 
 async function main() {
   try {
-    console.log("Fetching swap tokens data...");
-    const tokens = await fetchSwapTokensData();
+    const chainIds = new Set(
+      ENABLED_ROUTES.routes.map((route) => route.fromChain)
+    );
+    console.log("Fetching swap tokens data for chains:", Array.from(chainIds));
+    const tokens = await fetchSwapTokensData(Array.from(chainIds));
 
     // Create cache directory if it doesn't exist
     const cacheDir = join(process.cwd(), "src", "data");
