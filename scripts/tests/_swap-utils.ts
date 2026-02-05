@@ -278,11 +278,13 @@ export async function fetchSwapQuotes() {
     };
     console.log("Params:", params);
 
+    console.time("fetchSwapQuotes");
     const response = await axios.get(url, {
       params,
       paramsSerializer: buildSearchParams,
       headers: getAuthHeaders(),
     });
+    console.timeEnd("fetchSwapQuotes");
     swapQuotes.push(response.data as BaseSwapResponse);
   } else {
     // Args are provided via test case filter
@@ -339,6 +341,7 @@ export async function signAndWaitPermitFlow(params: {
 
   if (params.depositViaApi) {
     const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
+    console.time("submitGasless");
     const submitGaslessResponse = await axios.post(
       `${baseUrl}/api/gasless/submit`,
       {
@@ -347,6 +350,7 @@ export async function signAndWaitPermitFlow(params: {
       },
       { headers: getAuthHeaders() }
     );
+    console.timeEnd("submitGasless");
     console.log("Submit gasless response:", submitGaslessResponse.data);
   } else {
     // TODO: support `BridgeAndSwapWitness`
@@ -500,9 +504,13 @@ async function trackFill(params: {
           params: queryParams,
         }
       );
-      if (response.data.status === "filled") {
+      if (response.data?.status === "filled") {
         return response.data.fillTxnRef;
       }
+      console.log(
+        `deposit status from indexer (attempt ${i + 1}/${MAX_FILL_ATTEMPTS}):`,
+        response.data?.status
+      );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         // Deposit not found yet, continue trying
@@ -511,7 +519,7 @@ async function trackFill(params: {
         throw error;
       }
     }
-    await utils.delay(1);
+    await utils.delay(2);
   }
 }
 
