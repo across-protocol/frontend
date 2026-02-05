@@ -1,12 +1,9 @@
 import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import {
-  defaultRefetchInterval,
-  indexerApiBaseUrl,
-  userDepositsQueryKey,
-  getConfig,
-} from "utils";
+import { defaultRefetchInterval, indexerApiBaseUrl } from "utils/constants";
+import { depositsQueryKey, userDepositsQueryKey } from "utils/query-keys";
+import { getConfig } from "utils/config";
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
 
@@ -164,14 +161,20 @@ export type GetIndexerDepositsResponse = IndexerDeposit[];
 export function useDeposits(
   limit: number,
   offset: number = 0,
-  userAddress?: string
+  userAddress?: string,
+  status: DepositStatusFilter = "all"
 ) {
+  const omitStatusFilter = status === "all";
+  const queryKey = userAddress
+    ? userDepositsQueryKey(userAddress, status, limit, offset)
+    : depositsQueryKey(status, limit, offset);
+
   return useQuery({
-    queryKey: userDepositsQueryKey(userAddress!, "all", limit, offset),
+    queryKey,
     queryFn: async () => ({
       deposits: await getDeposits({
         address: userAddress,
-        // status: status === "all" ? undefined : status,
+        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       }),

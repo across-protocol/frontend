@@ -1,20 +1,20 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { COLORS, getChainInfo, QUERIESV2 } from "utils";
+import { COLORS, getChainInfo, getToken, QUERIESV2 } from "utils/constants";
+import { getNativeTokenSymbol } from "utils/sdk";
 import { Text } from "components/Text";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import { CenteredMessage } from "./components/CenteredMessage";
-import { DetailSection } from "./components/DetailSection";
 import { StatusBadge } from "./components/StatusBadge";
-import { CopyableText } from "./components/CopyableText";
-import { CollapsibleSection } from "./components/CollapsibleSection";
-import { shortenAddress } from "utils/format";
 import { TransactionSourceSection } from "./components/TransactionSourceSection";
 import { TransactionDestinationSection } from "./components/TransactionDestinationSection";
 import { TransactionFeeSection } from "./components/TransactionFeeSection";
+import { TransactionAdvancedSection } from "./components/TransactionAdvancedSection";
+import { formatUnits } from "ethers/lib/utils";
 
 const LOADING_DELAY_MS = 400;
 
@@ -107,6 +107,8 @@ export default function Transaction() {
     isLoading,
     error,
   } = useDepositByTxHash(depositTxnRef);
+  const hasTransferPageFlag = useFeatureFlag("transaction-page");
+  const transfersRoute = hasTransferPageFlag ? "/transfers" : "/transactions";
 
   const [showLoading, setShowLoading] = useState(false);
 
@@ -153,12 +155,28 @@ export default function Transaction() {
     deposit.fillBlockTimestamp
   );
 
+  const fillGasFeeScaled = (() => {
+    try {
+      return deposit.fillGasFee
+        ? formatUnits(
+            deposit.fillGasFee,
+            getToken(getNativeTokenSymbol(destinationChainId)).decimals
+          )
+        : null;
+    } catch (e) {
+      console.error(
+        `Failed to scale fill gas fee for tx ${deposit.depositTxnRef}`
+      );
+      return null;
+    }
+  })();
+
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
         <BreadcrumbWrapper>
           <BreadcrumbContent>
-            <BreadcrumbLink to="/transactions">
+            <BreadcrumbLink to={transfersRoute}>
               <BreadcrumbLinkText size="lg">Transfers</BreadcrumbLinkText>
             </BreadcrumbLink>
             <StyledArrowIcon />
@@ -170,7 +188,7 @@ export default function Transaction() {
           <HeaderBar>
             <StatusBadge status={deposit.status} />
             <FillTimeText>
-              <Text color="grey-400" size="sm">
+              <Text color="grey-400" size="md">
                 {fillDuration.isPending ? "Time Elapsed:" : "Fill Time:"}
               </Text>
               <Text
@@ -208,130 +226,18 @@ export default function Transaction() {
 
           <TransactionFeeSection
             bridgeFeeUsd={deposit.bridgeFeeUsd}
-            fillGasFee={deposit.fillGasFee}
+            fillGasFee={fillGasFeeScaled}
             fillGasFeeUsd={deposit.fillGasFeeUsd}
             swapFeeUsd={deposit.swapFeeUsd}
             formatUSDValue={formatUSDValue}
           />
 
-          <CollapsibleSection title="Advanced Details" defaultOpen={false}>
-            <DetailsGrid>
-              <DetailSection label="Deposit Block">
-                <Text color="light-200">{deposit.depositBlockNumber}</Text>
-              </DetailSection>
-
-              <DetailSection label="Fill Deadline">
-                <Text color="light-200">
-                  {formatTimestamp(deposit.fillDeadline)}
-                </Text>
-              </DetailSection>
-
-              {deposit.exclusivityDeadline && (
-                <DetailSection label="Exclusivity Deadline">
-                  <Text color="light-200">
-                    {formatTimestamp(deposit.exclusivityDeadline)}
-                  </Text>
-                </DetailSection>
-              )}
-
-              <DetailSection label="Relay Hash">
-                <CopyableText
-                  color="light-200"
-                  textToCopy={deposit.relayHash}
-                  style={{ wordBreak: "break-all" }}
-                >
-                  {deposit.relayHash}
-                </CopyableText>
-              </DetailSection>
-
-              <DetailSection label="Message Hash">
-                <CopyableText
-                  color="light-200"
-                  textToCopy={deposit.messageHash}
-                  style={{ wordBreak: "break-all" }}
-                >
-                  {deposit.messageHash}
-                </CopyableText>
-              </DetailSection>
-
-              {deposit.message && deposit.message !== "0x" && (
-                <DetailSection label="Message">
-                  <CopyableText
-                    color="light-200"
-                    textToCopy={deposit.message}
-                    style={{ wordBreak: "break-all" }}
-                  >
-                    {deposit.message}
-                  </CopyableText>
-                </DetailSection>
-              )}
-
-              {deposit.actionsTargetChainId && (
-                <>
-                  <DetailSection label="Actions Target Chain">
-                    <Text color="light-200">
-                      {
-                        getChainInfo(parseInt(deposit.actionsTargetChainId))
-                          .name
-                      }
-                    </Text>
-                  </DetailSection>
-
-                  <DetailSection label="Actions Succeeded">
-                    <Text color="light-200">
-                      {deposit.actionsSucceeded === null
-                        ? "Pending"
-                        : deposit.actionsSucceeded
-                          ? "Yes"
-                          : "No"}
-                    </Text>
-                  </DetailSection>
-                </>
-              )}
-
-              {deposit.swapToken && (
-                <>
-                  <DetailSection label="Swap Token">
-                    <CopyableText
-                      color="light-200"
-                      textToCopy={deposit.swapToken}
-                      explorerLink={`${destinationChain.explorerUrl}/address/${deposit.swapToken}`}
-                    >
-                      {shortenAddress(deposit.swapToken, "...", 6)}
-                    </CopyableText>
-                  </DetailSection>
-
-                  {deposit.swapTokenAmount && (
-                    <DetailSection label="Swap Token Amount">
-                      <Text color="light-200">
-                        {deposit.swapTokenAmount}{" "}
-                        <Text color="grey-400" size="sm">
-                          (
-                          {formatUSDValue(
-                            deposit.swapTokenPriceUsd && deposit.swapTokenAmount
-                              ? String(
-                                  parseFloat(deposit.swapTokenPriceUsd) *
-                                    parseFloat(deposit.swapTokenAmount)
-                                )
-                              : null
-                          )}
-                          )
-                        </Text>
-                      </Text>
-                    </DetailSection>
-                  )}
-                </>
-              )}
-
-              {deposit.fillGasTokenPriceUsd && (
-                <DetailSection label="Gas Token Price (USD)">
-                  <Text color="light-200">
-                    {formatUSDValue(deposit.fillGasTokenPriceUsd)}
-                  </Text>
-                </DetailSection>
-              )}
-            </DetailsGrid>
-          </CollapsibleSection>
+          <TransactionAdvancedSection
+            deposit={deposit}
+            destinationChainId={destinationChainId}
+            formatUSDValue={formatUSDValue}
+            formatTimestamp={formatTimestamp}
+          />
         </InnerSectionWrapper>
       </Wrapper>
     </LayoutV2>
@@ -412,30 +318,13 @@ const StyledArrowIcon = styled(ArrowIcon)`
   rotate: -90deg;
 `;
 
-const DetailsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  width: 100%;
-  padding: 24px;
-  background: ${COLORS["grey-600"]};
-  border-radius: 12px;
-  border: 1px solid ${COLORS["grey-500"]};
-
-  @media ${QUERIESV2.sm.andDown} {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 16px;
-  }
-`;
-
 const HeaderBar = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
   width: 100%;
-  padding: 16px;
-  background: ${COLORS["black-800"]};
+  padding: 14px 16px;
+  background: transparent;
   border-radius: 16px;
   border: 1px solid ${COLORS["grey-600"]};
   gap: 16px;

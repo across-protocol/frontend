@@ -1,5 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Header, Sidebar } from "components";
+import Header from "components/Header";
+import Sidebar from "components/Sidebar";
 import { SidebarProvider } from "providers/SidebarProvider";
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export

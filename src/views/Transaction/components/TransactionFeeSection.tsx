@@ -1,10 +1,18 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
+import { ReactComponent as DollarIcon } from "assets/icons/dollar.svg";
+
+import {
+  DetailRowGroup,
+  SectionCard,
+  SectionHeader,
+  SectionHeaderCollapsible,
+} from "./TransactionSection.styles";
 
 type TransactionFeeSectionProps = {
   bridgeFeeUsd: string | null;
@@ -16,7 +24,6 @@ type TransactionFeeSectionProps = {
 
 export function TransactionFeeSection({
   bridgeFeeUsd,
-  fillGasFee,
   fillGasFeeUsd,
   swapFeeUsd,
   formatUSDValue,
@@ -33,9 +40,10 @@ export function TransactionFeeSection({
 
   return (
     <FeeCard>
-      <Row collapsible onClick={() => setIsExpanded(!isExpanded)}>
+      <FeeHeader collapsible onClick={() => setIsExpanded(!isExpanded)}>
         <ToolTipWrapper>
-          <Text size="md" color="grey-400">
+          <DollarIcon width="24px" height="24px" />
+          <Text color="light-200" size="md" weight={600}>
             Total fees
           </Text>
           <Tooltip
@@ -54,22 +62,62 @@ export function TransactionFeeSection({
           </Text>
           <ChevronIconStyled isExpanded={isExpanded} />
         </ChevronIconWrapper>
-      </Row>
+      </FeeHeader>
 
       {isExpanded && (
-        <>
-          <Divider />
-          <InnerWrapper>
-            <VectorVertical />
+        <FeeItemWrapper>
+          <InnerRow>
+            <FeeItemVector />
+            <ToolTipWrapper>
+              <Text size="md" color="grey-400">
+                Bridge fee
+              </Text>
+              <Tooltip
+                title="Bridge fee"
+                body="Fee paid to Across Liquidity Providers and Relayers."
+                placement="bottom-start"
+              >
+                <InfoIconWrapper>
+                  <InfoIcon />
+                </InfoIconWrapper>
+              </Tooltip>
+            </ToolTipWrapper>
+            <FeeItemValue color="grey-400" size="md">
+              {formatUSDValue(bridgeFeeUsd)}
+            </FeeItemValue>
+          </InnerRow>
+
+          <InnerRow>
+            <FeeItemVector />
+            <ToolTipWrapper>
+              <Text size="md" color="grey-400">
+                Destination gas fee
+              </Text>
+              <Tooltip
+                title="Destination gas fee"
+                body="Fee to cover gas for destination chain fill transaction."
+                placement="bottom-start"
+              >
+                <InfoIconWrapper>
+                  <InfoIcon />
+                </InfoIconWrapper>
+              </Tooltip>
+            </ToolTipWrapper>
+            <FeeItemValue color="grey-400" size="md">
+              {formatUSDValue(fillGasFeeUsd)}
+            </FeeItemValue>
+          </InnerRow>
+
+          {swapFeeUsd && (
             <InnerRow>
-              <VectorHorizontal />
+              <FeeItemVector />
               <ToolTipWrapper>
                 <Text size="md" color="grey-400">
-                  Bridge fee
+                  Swap fee
                 </Text>
                 <Tooltip
-                  title="Bridge fee"
-                  body="Fee paid to Across Liquidity Providers and Relayers."
+                  title="Swap fee"
+                  body="Fee for token swap on destination chain."
                   placement="bottom-start"
                 >
                   <InfoIconWrapper>
@@ -77,79 +125,29 @@ export function TransactionFeeSection({
                   </InfoIconWrapper>
                 </Tooltip>
               </ToolTipWrapper>
-              <Text color="grey-400" size="md">
-                {formatUSDValue(bridgeFeeUsd)}
-              </Text>
+              <FeeItemValue color="grey-400" size="md">
+                {formatUSDValue(swapFeeUsd)}
+              </FeeItemValue>
             </InnerRow>
-
-            <InnerRow>
-              <VectorHorizontal />
-              <ToolTipWrapper>
-                <Text size="md" color="grey-400">
-                  Destination gas fee
-                </Text>
-                <Tooltip
-                  title="Destination gas fee"
-                  body="Fee to cover gas for destination chain fill transaction."
-                  placement="bottom-start"
-                >
-                  <InfoIconWrapper>
-                    <InfoIcon />
-                  </InfoIconWrapper>
-                </Tooltip>
-              </ToolTipWrapper>
-              <Text color="grey-400" size="md">
-                {fillGasFee} {formatUSDValue(fillGasFeeUsd)}
-              </Text>
-            </InnerRow>
-
-            {swapFeeUsd && (
-              <InnerRow>
-                <ToolTipWrapper>
-                  <Text size="md" color="grey-400">
-                    Swap fee
-                  </Text>
-                  <Tooltip
-                    title="Swap fee"
-                    body="Fee for token swap on destination chain."
-                    placement="bottom-start"
-                  >
-                    <InfoIconWrapper>
-                      <InfoIcon />
-                    </InfoIconWrapper>
-                  </Tooltip>
-                </ToolTipWrapper>
-                <Text color="grey-400" size="md">
-                  {formatUSDValue(swapFeeUsd)}
-                </Text>
-              </InnerRow>
-            )}
-          </InnerWrapper>
-        </>
+          )}
+        </FeeItemWrapper>
       )}
     </FeeCard>
   );
 }
 
-const FeeCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-  background: ${COLORS["black-800"]};
-  border-radius: 16px;
-  border: 1px solid ${COLORS["grey-600"]};
-  width: 100%;
+const FeeCard = styled(SectionCard)``;
+
+const FeeItemValue = styled(Text)`
+  margin-left: auto;
 `;
 
-const Row = styled.div<{ collapsible?: boolean }>`
+const FeeHeader = styled(SectionHeaderCollapsible)<{ collapsible?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0px;
   gap: 6px;
-  cursor: ${({ collapsible }) => (collapsible ? "pointer" : "default")};
   width: 100%;
 
   @media ${QUERIESV2.xs.andDown} {
@@ -159,40 +157,33 @@ const Row = styled.div<{ collapsible?: boolean }>`
   }
 `;
 
-const InnerWrapper = styled.div`
+const FeeItemVector = styled.span`
+  position: relative;
+  height: 14px;
+  width: 14px;
+  display: inline-block;
+  border-left: 1px solid ${COLORS["grey-400"]};
+  border-bottom: 1px solid ${COLORS["grey-400"]};
+  border-radius: 0 0 0 7px;
+  background: transparent;
+  top: -6px;
+`;
+
+const FeeItemWrapper = styled.div`
+  width: 100%;
+  padding: var(--padding);
+  border-top: 1px solid ${COLORS["base-dark-gray"]};
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0px;
-  gap: 16px;
-  padding-left: 32px;
-  padding-top: 8px;
-  position: relative;
-  width: 100%;
+  gap: 12px;
 `;
 
-const InnerRow = styled(Row)`
-  position: relative;
-`;
-
-const VectorVertical = styled.div`
-  width: 14px;
-  border-left: 2px ${COLORS["grey-500"]} solid;
-  border-bottom: 2px ${COLORS["grey-500"]} solid;
-  border-bottom-left-radius: 10px;
-  position: absolute;
-  top: 0;
-  height: calc(100% - 8px);
-  left: 8px;
-`;
-
-const VectorHorizontal = styled.div`
-  position: absolute;
-  top: 50%;
-  left: -24px;
-  width: 16px;
-  height: 2px;
-  background-color: ${COLORS["grey-500"]};
+const InnerRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
 `;
 
 const ToolTipWrapper = styled.div`
@@ -210,18 +201,6 @@ const InfoIconWrapper = styled.div`
   align-items: center;
   height: 16px;
   width: 16px;
-`;
-
-const Divider = styled.div`
-  height: 1px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-  background: ${COLORS["grey-600"]};
-  width: 100%;
 `;
 
 const ChevronIconWrapper = styled.div`

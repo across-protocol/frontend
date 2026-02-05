@@ -1,14 +1,11 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
-import { Modal } from "components";
+import Modal from "components/Modal";
 import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
-import {
-  formatUnitsWithMaxFractions,
-  QUERIESV2,
-  rewardProgramTypes,
-} from "utils";
+import { QUERIESV2, rewardProgramTypes } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 
 import { useClaimModal } from "../hooks/useClaimModal";
 

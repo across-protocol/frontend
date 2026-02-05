@@ -1,7 +1,7 @@
 import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 
 const Staking = () => {
   const {

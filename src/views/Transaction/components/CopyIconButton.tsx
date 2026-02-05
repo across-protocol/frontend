@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { useCopyToClipboard } from "hooks/useCopyToClipboard";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import { ReactComponent as CopyIcon } from "assets/icons/copy-document.svg";
 
 type Props = {

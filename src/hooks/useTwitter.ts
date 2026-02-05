@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import useCurrentBreakpoint from "./useCurrentBreakpoint";
-import { twitterShareContestActive } from "utils";
+import { twitterShareContestActive } from "utils/constants";
 
 const contestActiveParams = {
   cardTitle: "Win 1,000 ACX!",

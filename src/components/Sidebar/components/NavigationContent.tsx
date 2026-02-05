@@ -1,11 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { AccountContent } from "./AccountContent";
 import { SidebarItem } from "./SidebarItem";
 import { LegalDisclaimer } from "./LegalDisclaimer";
-import { NAVIGATION_LINKS } from "Routes";
+import { useNavigationLinks } from "Routes";
 
 type NavigationLInk = {
   href: string;
@@ -13,16 +13,6 @@ type NavigationLInk = {
   isExternalLink?: boolean;
   rightIcon?: React.ReactNode;
 };
-
-const sidebarNavigationLinks: NavigationLInk[] = [
-  ...NAVIGATION_LINKS,
-  {
-    href: "https://docs.across.to/",
-    name: "Docs",
-    isExternalLink: true,
-    rightIcon: <ExternalLinkIcon />,
-  },
-];
 
 const sidebarAboutLinks = [
   {
@@ -64,6 +54,20 @@ const sidebarAboutLinks = [
 
 export function NavigationContent() {
   const { closeSidebar } = useSidebarContext();
+  const navigationLinks = useNavigationLinks();
+
+  const sidebarNavigationLinks: NavigationLInk[] = useMemo(
+    () => [
+      ...navigationLinks,
+      {
+        href: "https://docs.across.to/",
+        name: "Docs",
+        isExternalLink: true,
+        rightIcon: <ExternalLinkIcon />,
+      },
+    ],
+    [navigationLinks]
+  );
 
   const handleClickNavLink = useCallback(() => {
     closeSidebar();

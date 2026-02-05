@@ -1,6 +1,6 @@
 import { decodeJwt } from "jose";
 import { useCallback, useEffect, useState } from "react";
-import { discordClientId } from "utils";
+import { discordClientId } from "utils/constants";
 import { useQueryParams } from "./useQueryParams";
 
 const STORAGE_KEY = "backend_JWT";

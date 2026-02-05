@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { AnimatePresence, motion } from "framer-motion";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type AnimationProps = Pick<
   React.ComponentProps<typeof motion.div>,

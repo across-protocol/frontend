@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
 import { TokenImage } from "components/TokenImage";
-import { COLORS, getChainInfo, rewardProgramTypes } from "utils";
+import { COLORS, getChainInfo, rewardProgramTypes } from "utils/constants";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 
 const ChainLogoOverlap = ({ program }: { program: rewardProgramTypes }) => {

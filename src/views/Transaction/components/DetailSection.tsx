@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 type Props = {
   label: string;

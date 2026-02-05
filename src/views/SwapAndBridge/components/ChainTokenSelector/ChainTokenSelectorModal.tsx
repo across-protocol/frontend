@@ -10,16 +10,18 @@ import {
   CHAIN_IDs,
   ChainInfo,
   COLORS,
+  getChainInfo,
+  INDIRECT_CHAINS,
+  QUERIES,
+  TOKEN_SYMBOLS_MAP,
+} from "utils/constants";
+import { getTokenExplorerLinkFromAddress } from "utils/token";
+import {
   formatUnitsWithMaxFractions,
   formatUSD,
-  getChainInfo,
-  getTokenExplorerLinkFromAddress,
-  INDIRECT_CHAINS,
   parseUnits,
-  QUERIES,
   shortenAddress,
-  TOKEN_SYMBOLS_MAP,
-} from "utils";
+} from "utils/format";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
@@ -30,7 +32,8 @@ import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
-import { Text, TokenImage } from "components";
+import { Text } from "components/Text";
+import { TokenImage } from "components/TokenImage";
 import { useHotkeys } from "react-hotkeys-hook";
 import { isTokenUnreachable } from "./isTokenUnreachable";
 import { useTrackChainSelected } from "./useTrackChainSelected";
@@ -281,7 +284,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, otherToken, isOriginToken]);
+  }, [chainSearch, crossChainRoutes, isOriginToken]);
 
   return isMobile ? (
     <MobileModal

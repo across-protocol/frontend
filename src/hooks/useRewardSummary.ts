@@ -1,10 +1,7 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import {
-  rewardsApiUrl,
-  rewardSummaryQueryKey,
-  rewardProgramTypes,
-} from "utils";
+import { rewardsApiUrl, rewardProgramTypes } from "utils/constants";
+import { rewardSummaryQueryKey } from "utils/query-keys";
 
 export type RebateSummary = {
   depositsCount: number;

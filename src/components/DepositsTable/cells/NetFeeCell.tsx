@@ -7,7 +7,7 @@ import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { COLORS, getRewardToken } from "utils";
+import { COLORS, getRewardToken } from "utils/constants";
 import { formatFeeUsd } from "views/SwapAndBridge/utils/fees";
 
 type Props = {

@@ -48,3 +48,38 @@ export const USDH_ON_HYPERCORE = {
   symbol: TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol,
   decimals: TOKEN_SYMBOLS_MAP["USDH-SPOT"].decimals,
 };
+
+export const USDT_ON_POLYGON = {
+  address: TOKEN_SYMBOLS_MAP.USDT.addresses[CHAIN_IDs.POLYGON],
+  chainId: CHAIN_IDs.POLYGON,
+  symbol: "USDT",
+  decimals: TOKEN_SYMBOLS_MAP.USDT.decimals,
+};
+
+export const USDT_SPOT_ON_HYPERCORE = {
+  address: TOKEN_SYMBOLS_MAP["USDT-SPOT"].addresses[CHAIN_IDs.HYPERCORE],
+  chainId: CHAIN_IDs.HYPERCORE,
+  symbol: TOKEN_SYMBOLS_MAP["USDT-SPOT"].symbol,
+  decimals: TOKEN_SYMBOLS_MAP["USDT-SPOT"].decimals,
+};
+
+export const DAI_ON_POLYGON = {
+  address: TOKEN_SYMBOLS_MAP.DAI.addresses[CHAIN_IDs.POLYGON],
+  chainId: CHAIN_IDs.POLYGON,
+  symbol: "DAI",
+  decimals: TOKEN_SYMBOLS_MAP.DAI.decimals,
+};
+
+export const USDC_ON_SOLANA = {
+  address: "SolanaTokenUSDC",
+  chainId: CHAIN_IDs.SOLANA,
+  symbol: "USDC",
+  decimals: 6,
+};
+
+export const SOL_ON_SOLANA = {
+  address: "SolanaTokenSOL",
+  chainId: CHAIN_IDs.SOLANA,
+  symbol: "SOL",
+  decimals: 9,
+};

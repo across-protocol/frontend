@@ -1,14 +1,16 @@
 import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
-import { Banner, SuperHeader, Text } from "components";
+import Banner from "components/Banners/Banner";
+import SuperHeader from "components/SuperHeader";
+import { Text } from "components/Text";
 import {
   generalMaintenanceMessage,
-  WrongNetworkError,
   disableDeposits,
   rewardsBannerWarning,
   showV4LaunchBanner,
-} from "utils";
+} from "utils/constants";
+import { WrongNetworkError } from "utils/errors";
 import AcrossV4Banner from "components/Banners/AcrossV4Banner";
 import RewardsWarningBanner from "components/Banners/RewardsWarningBanner";
 

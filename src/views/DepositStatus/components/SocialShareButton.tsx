@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
-import { Text } from "components";
+import { Text } from "components/Text";
 import { ReactComponent as TwitterLogo } from "assets/icons/x-grey.svg";
 import { ReactComponent as FarcasterLogo } from "assets/icons/farcaster.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 const SOCIAL_LOOKUP = {
   x: {

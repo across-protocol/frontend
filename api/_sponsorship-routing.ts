@@ -6,8 +6,8 @@ import {
   getOftSponsoredBridgeStrategy,
   isRouteSupported as isOftRouteSupported,
 } from "./_bridges/oft-sponsored/strategy";
-import { getUsdhIntentsBridgeStrategy } from "./_bridges/sponsored-intent/strategy";
-import { isRouteSupported as isSponsoredIntentSupported } from "./_bridges/sponsored-intent/utils/common";
+import { getHyperCoreIntentBridgeStrategy } from "./_bridges/hypercore-intent/strategy";
+import { isRouteSupported as isHyperCoreIntentSupported } from "./_bridges/hypercore-intent/utils/common";
 import {
   BridgeStrategy,
   BridgeStrategyDataParams,
@@ -27,6 +27,42 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 
 // Priority-ordered routing rules for sponsorship by route key
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
+  "*:USDT-SPOT": [
+    {
+      name: "any-usdt-spot-non-sponsored",
+      reason:
+        "Non-sponsored route to USDT-SPOT (enables A2B flows like WETH → USDT-SPOT)",
+      shouldApply: (data) => data.isHyperCoreIntentSupported,
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+  ],
+  "USDT:USDT-SPOT": [
+    {
+      name: "usdt-usdt-spot-intent-unsponsored",
+      reason:
+        "Unsponsored USDT → USDT-SPOT route below mint/burn threshold or OFT not enabled)",
+      shouldApply: (data) =>
+        data.isHyperCoreIntentSupported &&
+        (!data.isMintBurnThresholdMet || !data.isOftEnabledOriginChain),
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: false,
+          shouldSponsorAccountCreation: false,
+        }),
+    },
+    {
+      name: "usdt-usdt-spot-oft-unsponsored",
+      reason:
+        "USDT → USDT-SPOT route above mint/burn threshold uses OFT (unsponsored)",
+      shouldApply: (data) =>
+        data.isOftEnabledOriginChain && data.isMintBurnThresholdMet,
+      getStrategy: () => getOftSponsoredBridgeStrategy(false),
+    },
+  ],
   "USDT:*": [
     {
       name: "usdt-ineligible",
@@ -49,7 +85,7 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
       reason: "Eligible USDC → USDH-SPOT route above mint/burn threshold",
       shouldApply: (data) =>
         isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
+        data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         data.isMintBurnThresholdMet,
       getStrategy: () => getSponsoredCctpBridgeStrategy(true),
@@ -59,10 +95,14 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
       reason: "Eligible USDC → USDH-SPOT route below mint/burn threshold",
       shouldApply: (data) =>
         isEligibleForSponsorship(data) &&
-        data.isSponsoredIntentSupported &&
+        data.isHyperCoreIntentSupported &&
         data.isCctpEnabledOriginChain &&
         !data.isMintBurnThresholdMet,
-      getStrategy: () => getUsdhIntentsBridgeStrategy(),
+      getStrategy: () =>
+        getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
     },
   ],
   "USDC:*": [
@@ -156,7 +196,7 @@ export function isSponsoredRoute(params: {
   return (
     isCctpRouteSupported(params) ||
     isOftRouteSupported(params) ||
-    isSponsoredIntentSupported(params)
+    isHyperCoreIntentSupported(params)
   );
 }
 
@@ -173,10 +213,20 @@ function getRouteRules(params: BridgeStrategyDataParams) {
     TOKEN_EQUIVALENCE_REMAPPING[params.inputToken.symbol] ??
     params.inputToken.symbol;
   const exactKey = buildRouteKey(inputSymbol, params.outputToken.symbol);
-  const wildcardKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
+  const wildcardInputKey = buildRouteKey(
+    ROUTE_WILDCARD_SYMBOL,
+    params.outputToken.symbol
+  );
+  const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
+
   return (
     (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardKey ? SPONSORSHIP_ROUTING_RULES[wildcardKey] : undefined)
+    (wildcardInputKey
+      ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey]
+      : undefined) ??
+    (wildcardOutputKey
+      ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
+      : undefined)
   );
 }
 

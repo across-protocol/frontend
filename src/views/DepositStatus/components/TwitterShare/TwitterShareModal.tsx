@@ -1,8 +1,10 @@
 import styled from "@emotion/styled";
-import { LoadingSkeleton, SecondaryButton, Text } from "components";
+import { LoadingSkeleton } from "components/LoadingSkeleton";
+import { SecondaryButton } from "components/Button";
+import { Text } from "components/Text";
 import Modal from "components/Modal";
 import { ModalProps } from "components/Modal/Modal";
-import { COLORS, QUERIES, twitterShareContestActive } from "utils";
+import { COLORS, QUERIES, twitterShareContestActive } from "utils/constants";
 import { useTwitter } from "hooks/useTwitter";
 import { ReactComponent as X } from "assets/icons/x-white.svg";
 import { ReactComponent as Download } from "assets/icons/arrow-inbox.svg";
@@ -11,7 +13,7 @@ import { useCopyToClipboard } from "hooks/useCopyToClipboard";
 import { CopyButton } from "../CopyButton";
 import { css } from "@emotion/react";
 import { useDownload } from "hooks/useDownload";
-import { useAmplitude } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { ampli } from "ampli";
 
 type TwitterShareModalProps = ModalProps & {

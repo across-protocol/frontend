@@ -5,8 +5,9 @@ import {
   getToken,
   rewardProgramTypes,
   rewardPrograms,
-} from "utils";
-import { PrimaryButton, Text } from "components";
+} from "utils/constants";
+import { PrimaryButton } from "components/Button";
+import { Text } from "components/Text";
 import { useHistory } from "react-router-dom";
 import { useAvailableRemainingRewards } from "hooks/useAvailableRemainingRewards";
 
