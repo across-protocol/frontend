@@ -5,16 +5,23 @@ import { SpokePoolPeripheryInterface } from "./_typechain/SpokePoolPeriphery.sol
 import { ENABLED_ROUTES, getProvider, toAddressType } from "./_utils";
 import { CHAIN_IDs } from "./_constants";
 
-// These addresses are currently in-audit. We use these addresses for testing purposes
-// until the audit is complete and official contracts are deployed.
+// We will replace these overrides with the official contracts package release
+// when the final audit report is ready and https://github.com/across-protocol/contracts/pull/1275
+// is merged.
 const SPOKE_POOL_PERIPHERY_ADDRESS_OVERRIDES: Record<number, string> = {
-  [CHAIN_IDs.OPTIMISM]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
-  [CHAIN_IDs.BASE]: "0x3374C3693761D37e3CEf13471Ecf75Ce37844250",
+  [CHAIN_IDs.ARBITRUM]: "0x767e4c20F521a829dE4Ffc40C25176676878147f",
+  [CHAIN_IDs.BASE]: "0x767e4c20F521a829dE4Ffc40C25176676878147f",
+  [CHAIN_IDs.BLAST]: "0x767e4c20F521a829dE4Ffc40C25176676878147f",
+  [CHAIN_IDs.OPTIMISM]: "0x767e4c20F521a829dE4Ffc40C25176676878147f",
+  [CHAIN_IDs.POLYGON]: "0x767e4c20F521a829dE4Ffc40C25176676878147f",
 };
 
 const SWAP_PROXY_ADDRESS_OVERRIDES: Record<number, string> = {
-  [CHAIN_IDs.OPTIMISM]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
-  [CHAIN_IDs.BASE]: "0xE8Af48e58542e25AcCb67AeBf0657232B0066F5E",
+  [CHAIN_IDs.ARBITRUM]: "0x5f66BE37a25B0EEd89c2C66d69d934dD63Ae1981",
+  [CHAIN_IDs.BASE]: "0x5f66BE37a25B0EEd89c2C66d69d934dD63Ae1981",
+  [CHAIN_IDs.BLAST]: "0x5f66BE37a25B0EEd89c2C66d69d934dD63Ae1981",
+  [CHAIN_IDs.OPTIMISM]: "0x5f66BE37a25B0EEd89c2C66d69d934dD63Ae1981",
+  [CHAIN_IDs.POLYGON]: "0x5f66BE37a25B0EEd89c2C66d69d934dD63Ae1981",
 };
 
 export class UnknownPeripheryOnChain extends Error {
