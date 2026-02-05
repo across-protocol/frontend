@@ -74,7 +74,9 @@ const handler = async (
           disabledChains.includes(String(chainId))
         ) &&
         !DISABLED_TOKENS_FOR_AVAILABLE_ROUTES.some(
-          (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
+          (s) =>
+            s.toUpperCase() === route.fromTokenSymbol.toUpperCase() ||
+            s.toUpperCase() === route.toTokenSymbol.toUpperCase()
         ) &&
         (!originToken ||
           originToken.toLowerCase() === route.originToken.toLowerCase()) &&
