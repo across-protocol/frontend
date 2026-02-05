@@ -1,36 +1,41 @@
-import { getConfig } from "utils/config";
 import axios from "axios";
 import { indexerApiBaseUrl } from "utils/constants";
 import {
-  IChainStrategy,
-  DepositInfo,
-  FillInfo,
-  DepositedInfo,
-  FilledInfo,
-  DepositData,
-  DepositStatusResponse,
   BridgeProvider,
+  DepositData,
+  DepositedInfo,
+  DepositStatusResponse,
+  FilledInfo,
+  IChainStrategy,
+  FillMetadata,
 } from "../types";
 import {
-  getSVMRpc,
-  NoFilledRelayLogError,
-  SvmCpiEventsClient,
-  SVMBlockFinder,
-  toAddressType,
-  findFillEvent,
-  isBigNumberish,
-  uint8ArrayToBigNumber,
   getDepositBySignatureSVM,
-} from "utils";
+  NoFilledRelayLogError,
+  FillPendingError,
+  FillMetadataParseError,
+  TransactionPendingError,
+  TransactionNotFoundError,
+} from "utils/deposits";
+import { isBigNumberish, uint8ArrayToBigNumber } from "utils/bignumber";
+import {
+  findFillEvent,
+  SVMBlockFinder,
+  SvmCpiEventsClient,
+  toAddressType,
+} from "utils/sdk";
+import { getSVMRpc } from "utils/providers";
 import { isSignature } from "@solana/kit";
-import { FromBridgePagePayload } from "../../../types";
-import { Deposit } from "hooks/useDeposits";
 import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
 import { BigNumber } from "ethers";
 import { SvmSpokeClient } from "@across-protocol/contracts";
 import { hexlify } from "ethers/lib/utils";
 import { isHex } from "viem";
-import { getDepositForBurnBySignatureSVM } from "utils/cctp";
+import {
+  getDepositForBurnBySignatureSVM,
+  getMintAndBurnBySignatureSVM,
+} from "utils/cctp";
+import { getFillTxBySignature } from "utils/fills";
 
 /**
  * Strategy for handling Solana (SVM) chain operations
@@ -41,80 +46,77 @@ export class SVMStrategy implements IChainStrategy {
   /**
    * Get deposit information from a Solana transaction signature
    * @param txSignature Solana transaction signature
+   * @param bridgeProvider across intents, cctp, oft etc.
    * @returns Deposit information
    */
   async getDeposit(
     txSignature: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo> {
-    try {
-      if (!isSignature(txSignature)) {
-        throw new Error(`Invalid signature: ${txSignature}`);
-      }
-
-      const tx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
-        ? await getDepositForBurnBySignatureSVM({
-            signature: txSignature,
-            chainId: this.chainId,
-          })
-        : await getDepositBySignatureSVM({
-            signature: txSignature,
-            chainId: this.chainId,
-          });
-
-      if (!tx) {
-        return {
-          depositTxHash: undefined,
-          depositTimestamp: undefined,
-          status: "depositing",
-          depositLog: undefined,
-        };
-      }
-
-      return {
-        depositTxHash: txSignature,
-        depositTimestamp: tx.depositTimestamp,
-        status: "deposited",
-        depositLog: tx satisfies DepositData,
-      };
-    } catch (error) {
-      console.error("Error fetching Solana deposit:", error);
-      throw error;
+  ): Promise<DepositedInfo> {
+    if (!isSignature(txSignature)) {
+      throw new TransactionNotFoundError(txSignature, this.chainId);
     }
+
+    const tx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+      ? await getDepositForBurnBySignatureSVM({
+          signature: txSignature,
+          chainId: this.chainId,
+        })
+      : await getDepositBySignatureSVM({
+          signature: txSignature,
+          chainId: this.chainId,
+        });
+
+    if (!tx) {
+      throw new TransactionPendingError(txSignature, this.chainId);
+    }
+
+    return {
+      depositTxHash: txSignature,
+      depositTimestamp: tx.depositTimestamp,
+      status: "deposited",
+      depositLog: tx satisfies DepositData,
+    };
   }
 
   /**
    * Get fill information for a deposit by checking both indexer and RPC
    * @param depositInfo Deposit information
+   * @param bridgeProvider across intents, cctp, oft etc.
    * @returns Fill information
    */
-  async getFill(depositInfo: DepositedInfo): Promise<FillInfo> {
+  async getFill(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider = "across"
+  ): Promise<FilledInfo> {
     const { depositId } = depositInfo.depositLog;
     const fillChainId = this.chainId;
 
-    try {
-      const fillTxSignature = await Promise.any([
-        this.getFillFromIndexer(depositInfo),
-        this.getFillFromRpc(depositInfo),
-      ]);
+    const fillTxSignature = await Promise.any([
+      this.getFillFromIndexer(depositInfo),
+      this.getFillFromRpc(depositInfo, bridgeProvider),
+    ]);
 
-      if (!fillTxSignature) {
-        throw new NoFilledRelayLogError(Number(depositId), fillChainId);
-      }
-
-      const metadata = await this.getFillMetadata(fillTxSignature);
-
-      return {
-        fillTxHash: metadata.fillTxHash,
-        fillTxTimestamp: metadata.fillTxTimestamp,
-        depositInfo,
-        status: "filled",
-        outputAmount: metadata.outputAmount || BigNumber.from(0),
-      };
-    } catch (error) {
-      // Both rejected - throw error so we can retry
+    if (!fillTxSignature) {
       throw new NoFilledRelayLogError(Number(depositId), fillChainId);
     }
+
+    const metadata = await this.getFillMetadata(
+      fillTxSignature,
+      bridgeProvider
+    );
+
+    if (!metadata) {
+      throw new FillMetadataParseError(fillTxSignature, fillChainId);
+    }
+
+    return {
+      fillTxHash: metadata.fillTxHash,
+      fillTxTimestamp: metadata.fillTxTimestamp,
+      depositInfo,
+      status: "filled",
+      outputAmount: metadata.outputAmount || BigNumber.from(0),
+    };
   }
 
   /**
@@ -138,14 +140,12 @@ export class SVMStrategy implements IChainStrategy {
 
       if (data?.status === "filled" && data.fillTxnRef) {
         if (!isSignature(data.fillTxnRef)) {
-          throw new Error(
-            `Invalid Signature: ${data.fillTxnRef}. \nChain ${this.chainId} is likely not an svm chain.`
-          );
+          throw new FillMetadataParseError(data.fillTxnRef, this.chainId);
         }
         return data.fillTxnRef;
       }
 
-      throw new Error("Indexer response still pending");
+      throw new FillPendingError("Indexer response still pending");
     } catch (error) {
       console.warn("Error fetching fill from indexer:", error);
       throw error;
@@ -157,7 +157,10 @@ export class SVMStrategy implements IChainStrategy {
    * @param depositInfo Deposit information
    * @returns Fill transaction hash (signature)
    */
-  async getFillFromRpc(depositInfo: DepositedInfo): Promise<string> {
+  async getFillFromRpc(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<string> {
     const { depositId } = depositInfo.depositLog;
 
     try {
@@ -170,20 +173,28 @@ export class SVMStrategy implements IChainStrategy {
         )
       )?.number;
 
-      const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
+      let fillEventTxRef = "";
 
-      const fillEvent = await findFillEvent(
-        formattedRelayData,
-        this.chainId,
-        eventsClient,
-        fromSlot
-      );
-
-      if (!fillEvent) {
+      if (bridgeProvider === "cctp") {
+        // noop
         throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+      } else {
+        const formattedRelayData = this.formatRelayData(depositInfo.depositLog);
+
+        const fillEvent = await findFillEvent(
+          formattedRelayData,
+          this.chainId,
+          eventsClient,
+          fromSlot
+        );
+
+        if (!fillEvent) {
+          throw new NoFilledRelayLogError(Number(depositId), this.chainId);
+        }
+        fillEventTxRef = fillEvent.txnRef;
       }
 
-      return fillEvent.txnRef;
+      return fillEventTxRef;
     } catch (error) {
       console.error("Error fetching Solana fill from RPC:", error);
       throw error;
@@ -195,34 +206,32 @@ export class SVMStrategy implements IChainStrategy {
    * @param fillTxHash Fill transaction hash (signature)
    * @returns Fill metadata
    */
-  async getFillMetadata(fillTxHash: string): Promise<{
-    fillTxHash: string;
-    fillTxTimestamp: number;
-    outputAmount: BigNumber | undefined;
-  }> {
+  async getFillMetadata(
+    fillTxHash: string,
+    bridgeProvider: BridgeProvider
+  ): Promise<FillMetadata | undefined> {
     try {
       if (!isSignature(fillTxHash)) {
-        throw new Error(`Invalid tx signature: ${fillTxHash}`);
+        throw new FillMetadataParseError(fillTxHash, this.chainId);
       }
-      const rpc = getSVMRpc(this.chainId);
-      const eventsClient = await SvmCpiEventsClient.create(rpc);
-      // We skip fetching swap metadata on Solana, since we don't support destination chain swaps yet
-      const fillTx = await eventsClient.getFillEventsFromSignature(
-        this.chainId,
-        fillTxHash
-      );
+      const fillTx = ["cctp", "sponsored-cctp"].includes(bridgeProvider)
+        ? await getMintAndBurnBySignatureSVM({
+            signature: fillTxHash,
+            chainId: this.chainId,
+          })
+        : await getFillTxBySignature({
+            signature: fillTxHash,
+            chainId: this.chainId,
+          });
 
-      const fillTxDetails = fillTx?.[0];
-      if (!fillTxDetails) {
-        throw new Error(
-          `Unable to find fill with signature ${fillTxHash} on chain ${this.chainId}`
-        );
+      if (!fillTx) {
+        throw new FillMetadataParseError(fillTxHash, this.chainId);
       }
 
       return {
         fillTxHash,
-        fillTxTimestamp: Number(fillTxDetails.fillTimestamp),
-        outputAmount: BigNumber.from(fillTxDetails.outputAmount),
+        fillTxTimestamp: Number(fillTx.fillTxTimestamp),
+        outputAmount: BigNumber.from(fillTx.outputAmount),
       };
     } catch (error) {
       console.error(
@@ -231,147 +240,6 @@ export class SVMStrategy implements IChainStrategy {
       );
       throw error;
     }
-  }
-
-  /**
-   * Convert deposit information to local storage format for EVM chains
-   * @param depositInfo Deposit information
-   * @param bridgePayload Bridge page payload
-   * @returns Local deposit format for storage
-   */
-
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } =
-      fromBridgePagePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
-
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "pending" as const,
-      filled: "0",
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBytes32(),
-      recipientAddr: recipient.toBytes32(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: depositInfo.depositTxHash,
-      fillTx: "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
-  }
-
-  /**
-   * Convert fill information to local storage format for EVM chains
-   * @param fillInfo Fill information
-   * @param bridgePayload Bridge page payload
-   * @returns Local deposit format with fill information
-   */
-
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit {
-    const config = getConfig();
-    const { selectedRoute, depositArgs, quoteForAnalytics } = bridgePayload;
-    const { depositId, depositor, recipient, message, inputAmount } =
-      fillInfo.depositInfo.depositLog;
-    const inputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenSymbol
-    );
-    const outputToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.toChain,
-      selectedRoute.toTokenSymbol
-    );
-    const swapToken = config.getTokenInfoBySymbolSafe(
-      selectedRoute.fromChain,
-      selectedRoute.type === "swap" ? selectedRoute.swapTokenSymbol : ""
-    );
-
-    return {
-      depositId: depositId.toString(),
-      depositTime:
-        fillInfo.depositInfo.depositTimestamp || Math.floor(Date.now() / 1000),
-      status: "filled" as const,
-      filled: inputAmount.toString(),
-      sourceChainId: selectedRoute.fromChain,
-      destinationChainId: selectedRoute.toChain,
-      assetAddr:
-        selectedRoute.type === "swap"
-          ? selectedRoute.swapTokenAddress
-          : selectedRoute.fromTokenAddress,
-      depositorAddr: depositor.toBytes32(),
-      recipientAddr: recipient.toBytes32(),
-      message: message || "0x",
-      amount: inputAmount.toString(),
-      depositTxHash: fillInfo.depositInfo.depositTxHash,
-      fillTx: fillInfo.fillTxHash || "",
-      speedUps: [],
-      depositRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      initialRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      suggestedRelayerFeePct: depositArgs.relayerFeePct.toString(),
-      feeBreakdown: {
-        lpFeeUsd: quoteForAnalytics.lpFeeTotalUsd,
-        lpFeePct: quoteForAnalytics.lpFeePct,
-        lpFeeAmount: quoteForAnalytics.lpFeeTotal,
-        relayCapitalFeeUsd: quoteForAnalytics.capitalFeeTotalUsd,
-        relayCapitalFeePct: quoteForAnalytics.capitalFeePct,
-        relayCapitalFeeAmount: quoteForAnalytics.capitalFeeTotal,
-        relayGasFeeUsd: quoteForAnalytics.relayGasFeeTotalUsd,
-        relayGasFeePct: quoteForAnalytics.relayGasFeePct,
-        relayGasFeeAmount: quoteForAnalytics.relayFeeTotal,
-        totalBridgeFeeUsd: quoteForAnalytics.totalBridgeFeeUsd,
-        totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
-        totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
-      },
-      token: inputToken,
-      outputToken,
-      swapToken,
-    };
   }
 
   // deposit could be from svm or evm

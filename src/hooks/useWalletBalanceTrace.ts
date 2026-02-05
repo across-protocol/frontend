@@ -1,17 +1,18 @@
 import { BigNumber, utils } from "ethers";
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import {
   ChainId,
   fixedPointAdjustment,
-  getBalance,
-  getConfig,
-  getNativeBalance,
   getRoutes,
   getToken,
+} from "utils/constants";
+import { getEvmBalance, getNativeBalance } from "utils/token";
+import { getConfig } from "utils/config";
+import {
   reportTokenBalance,
   reportTotalWalletUsdBalance,
   setUserId,
-} from "utils";
+} from "utils/amplitude";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
 import { useQuery } from "@tanstack/react-query";
@@ -85,7 +86,7 @@ const calculateUsdBalances = async (account: string) => {
             fromChainId: Number(chainId),
             fromTokenSymbol,
             fromTokenAddress,
-            balance: await getBalance(
+            balance: await getEvmBalance(
               Number(chainId),
               account,
               fromTokenAddress

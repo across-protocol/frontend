@@ -1,4 +1,8 @@
-import { CHAIN_IDs, INDIRECT_CHAINS } from "../../../../utils/constants";
+import {
+  CHAIN_IDs,
+  INDIRECT_CHAINS,
+  interchangeableTokensMap,
+} from "../../../../utils/constants";
 import { EnrichedToken } from "./ChainTokenSelectorModal";
 
 export type RouteParams = {
@@ -26,12 +30,24 @@ const RESTRICTED_ROUTES: RestrictedRoute[] = [
     toChainId: [CHAIN_IDs.HYPERCORE],
     toSymbol: ["USDH-SPOT"],
   },
-  // only allow bridegable output to SOlana
   {
     fromChainId: "*",
-    fromSymbol: ["*"],
-    toChainId: [CHAIN_IDs.SOLANA],
-    toSymbol: ["!USDC"],
+    fromSymbol: ["USDT*"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDC-SPOT"],
+  },
+  {
+    fromChainId: [CHAIN_IDs.SOLANA],
+    fromSymbol: ["USDC"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDT-SPOT"],
+  },
+  // Only USDC can be bridged to USDH on HyperEVM
+  {
+    fromChainId: "*",
+    fromSymbol: ["!USDC"],
+    toChainId: [CHAIN_IDs.HYPEREVM],
+    toSymbol: ["USDH"],
   },
 ];
 
@@ -100,6 +116,45 @@ function getRestrictedOriginChainsUnreachable(
 }
 
 /**
+ * Checks if a token should be marked unreachable when Solana is involved.
+ * When Solana is either origin or destination chain, only bridgeable tokens
+ * should be allowed as output tokens.
+ */
+function isNonBridgeableSvmTokenUnreachable(
+  token: EnrichedToken,
+  isOriginToken: boolean,
+  otherToken: EnrichedToken | null | undefined
+): boolean {
+  // Only apply this check when selecting destination tokens (output tokens)
+  if (isOriginToken) return false;
+
+  // Check if Solana is either origin or destination chain
+  const isSolanaOrigin = otherToken?.chainId === CHAIN_IDs.SOLANA;
+  const isSolanaDestination = token.chainId === CHAIN_IDs.SOLANA;
+
+  // If Solana is not involved, don't mark as unreachable
+  if (!(isSolanaOrigin || isSolanaDestination)) return false;
+
+  // If Solana is involved, check if token is bridgeable
+  const bridgeableSvmTokenSymbols = [
+    "USDC",
+    "USDH",
+    "USDH-SPOT",
+    "USDC-SPOT",
+    "USDT-SPOT",
+  ];
+
+  const isBridgeable =
+    bridgeableSvmTokenSymbols.includes(token.symbol) ||
+    bridgeableSvmTokenSymbols.some((symbol) =>
+      interchangeableTokensMap[token.symbol]?.includes(symbol)
+    );
+
+  // Mark as unreachable if not bridgeable
+  return !isBridgeable;
+}
+
+/**
  * Determines if a token is unreachable based on various criteria.
  *
  * @param token - The token to check for unreachability
@@ -131,6 +186,25 @@ export function isTokenUnreachable(
       })
     : false;
 
+  // Check if token should be unreachable due to Solana bridgeable token restrictions
+  const isNonBridgeableSvm = isNonBridgeableSvmTokenUnreachable(
+    token,
+    isOriginToken,
+    otherToken
+  );
+
   // Combine all unreachability checks
-  return isSameChain || isRestrictedOrigin || isRestrictedRoute;
+  return (
+    isSameChain || isRestrictedOrigin || isRestrictedRoute || isNonBridgeableSvm
+  );
+}
+
+export function isReverseRouteRestricted(params: {
+  originToken: EnrichedToken | null;
+  destinationToken: EnrichedToken | null;
+}): boolean {
+  const originToken = params.destinationToken;
+  const destinationToken = params.originToken;
+  if (!originToken || !destinationToken) return false;
+  return isTokenUnreachable(destinationToken, false, originToken);
 }

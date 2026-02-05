@@ -1,26 +1,27 @@
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { BigNumber } from "ethers";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../../api/_constants";
 import {
-  getSupportedBridgeStrategies,
   getBridgeStrategy,
+  getSupportedBridgeStrategies,
 } from "../../../api/_bridges/index";
 import * as bridgeUtils from "../../../api/_bridges/utils";
 import { BridgeStrategyData } from "../../../api/_bridges/types";
 import { Token } from "../../../api/_dexes/types";
 import * as indexerApi from "../../../api/_indexer-api";
 
-jest.mock("../../../api/_logger", () => ({
-  getLogger: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+vi.mock("../../../api/_logger", () => ({
+  getLogger: vi.fn().mockReturnValue({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   }),
 }));
 
-jest.mock("../../../api/_indexer-api", () => ({
-  ...jest.requireActual("../../../api/_indexer-api"),
-  getSponsorshipsFromIndexer: jest.fn().mockResolvedValue({
+vi.mock("../../../api/_indexer-api", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getSponsorshipsFromIndexer: vi.fn().mockResolvedValue({
     totalSponsorships: [],
     userSponsorships: [],
     accountActivations: [],
@@ -47,21 +48,18 @@ const mockBridgeStrategyData = (
   isFastCctpEligible: false,
   isInThreshold: false,
   isUsdtToUsdt: false,
-  isMonadTransfer: false,
-  isWithinMonadLimit: false,
   isHyperCoreDestination: false,
+  hasFastStandardFill: false,
   ...overrides,
 });
 
 // Common test tokens
 const usdcOptimism = createToken("USDC", CHAIN_IDs.OPTIMISM);
 const usdcArbitrum = createToken("USDC", CHAIN_IDs.ARBITRUM);
-const usdcMonad = createToken("USDC", CHAIN_IDs.MONAD);
 const usdcPolygon = createToken("USDC", CHAIN_IDs.POLYGON);
 const usdcBase = createToken("USDC", CHAIN_IDs.BASE);
 const usdtMainnet = createToken("USDT", CHAIN_IDs.MAINNET);
 const usdtArbitrum = createToken("USDT", CHAIN_IDs.ARBITRUM);
-const usdtMonad = createToken("USDT", CHAIN_IDs.MONAD);
 const wethOptimism = createToken("WETH", CHAIN_IDs.OPTIMISM);
 const wethArbitrum = createToken("WETH", CHAIN_IDs.ARBITRUM);
 const wethHyperEvm = createToken("WETH", CHAIN_IDs.HYPEREVM);
@@ -150,9 +148,9 @@ describe("api/_bridges/index", () => {
       });
 
       test("should fallback to Across when getBridgeStrategyData returns undefined", async () => {
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(undefined);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          undefined
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -168,100 +166,13 @@ describe("api/_bridges/index", () => {
   });
 
   describe("#getBridgeStrategy()", () => {
-    jest.mock("../../../api/_utils", () => ({
-      ...jest.requireActual("../../../api/_utils"),
-      getCachedLimits: jest.fn(),
+    vi.mock("../../../api/_utils", async (importOriginal) => ({
+      ...(await importOriginal()),
+      getCachedLimits: vi.fn(),
     }));
 
     afterAll(() => {
-      jest.clearAllMocks();
-    });
-
-    describe("Monad transfer routing", () => {
-      test("should use Across for Monad transfers within 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: true,
-          isUsdcToUsdc: true,
-        });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
-
-      test("should use OFT for Monad USDT transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdtToUsdt: true,
-        });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdtMonad,
-          outputToken: usdtArbitrum,
-        });
-
-        expect(strategy.name).toBe("oft");
-      });
-
-      test("should use Fast CCTP for Monad USDC transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: true,
-        });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.MONAD,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: usdcMonad,
-          outputToken: usdcArbitrum,
-        });
-
-        expect(strategy.name).toBe("cctp");
-      });
-
-      test("should use Across for Monad other token transfers exceeding 25K USD limit", async () => {
-        const mockData = mockBridgeStrategyData({
-          isMonadTransfer: true,
-          isWithinMonadLimit: false,
-          isUsdcToUsdc: false,
-          isUsdtToUsdt: false,
-        });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
-
-        const strategy = await getBridgeStrategy({
-          ...baseParams,
-          originChainId: CHAIN_IDs.OPTIMISM,
-          destinationChainId: CHAIN_IDs.ARBITRUM,
-          inputToken: wethOptimism,
-          outputToken: wethArbitrum,
-        });
-
-        expect(strategy.name).toBe("across");
-      });
+      vi.clearAllMocks();
     });
 
     describe("High utilization routing", () => {
@@ -270,9 +181,9 @@ describe("api/_bridges/index", () => {
           isUtilizationHigh: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -290,9 +201,9 @@ describe("api/_bridges/index", () => {
           isUtilizationHigh: true,
           isUsdtToUsdt: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -311,9 +222,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: false,
           isUsdtToUsdt: false,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -334,9 +245,9 @@ describe("api/_bridges/index", () => {
           isInThreshold: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -356,9 +267,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -378,9 +289,9 @@ describe("api/_bridges/index", () => {
           canFillInstantly: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -399,9 +310,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: true,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -421,9 +332,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: false,
           isUsdtToUsdt: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -442,9 +353,9 @@ describe("api/_bridges/index", () => {
           isLargeCctpDeposit: false,
           isUsdcToUsdc: true,
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -499,7 +410,7 @@ describe("api/_bridges/index", () => {
     describe("Sponsored USDC → USDH-SPOT amount-based routing", () => {
       beforeEach(() => {
         // Mock sponsorship eligibility to pass all checks for both USDH (HyperEVM) and USDH-SPOT (HyperCore)
-        jest.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
+        vi.spyOn(indexerApi, "getSponsorshipsFromIndexer").mockResolvedValue({
           totalSponsorships: [
             {
               chainId: CHAIN_IDs.HYPEREVM,
@@ -557,7 +468,7 @@ describe("api/_bridges/index", () => {
         });
       });
 
-      test("should use sponsored-intent for amounts below 10K USDC", async () => {
+      test("should use hypercore-intent for amounts below 10K USDC", async () => {
         const strategy = await getBridgeStrategy({
           ...baseParams,
           amount: BigNumber.from("5000000000"), // 5K USDC (6 decimals)
@@ -604,9 +515,9 @@ describe("api/_bridges/index", () => {
           isUsdcToUsdc: true,
           isUtilizationHigh: true, // Even with high utilization
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -625,9 +536,9 @@ describe("api/_bridges/index", () => {
           isUsdtToUsdt: true,
           isUtilizationHigh: true, // Even with high utilization
         });
-        jest
-          .spyOn(bridgeUtils, "getBridgeStrategyData")
-          .mockResolvedValue(mockData);
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
 
         const strategy = await getBridgeStrategy({
           ...baseParams,
@@ -636,6 +547,50 @@ describe("api/_bridges/index", () => {
           inputToken: usdtMainnet,
           outputToken: usdtArbitrum,
           includesActions: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+    });
+
+    describe("App fee routing", () => {
+      test("should use Across when app fees are present for USDC transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdcToUsdc: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.OPTIMISM,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdcOptimism,
+          outputToken: usdcArbitrum,
+          includesAppFee: true,
+        });
+
+        expect(strategy.name).toBe("across");
+      });
+
+      test("should use Across when app fees are present for USDT transfers", async () => {
+        const mockData = mockBridgeStrategyData({
+          isUsdtToUsdt: true,
+          isUtilizationHigh: true, // Even with high utilization
+        });
+        vi.spyOn(bridgeUtils, "getBridgeStrategyData").mockResolvedValue(
+          mockData
+        );
+
+        const strategy = await getBridgeStrategy({
+          ...baseParams,
+          originChainId: CHAIN_IDs.MAINNET,
+          destinationChainId: CHAIN_IDs.ARBITRUM,
+          inputToken: usdtMainnet,
+          outputToken: usdtArbitrum,
+          includesAppFee: true,
         });
 
         expect(strategy.name).toBe("across");

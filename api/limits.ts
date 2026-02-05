@@ -129,7 +129,7 @@ const handler = async (
       );
       const relayer = sdk.utils.toAddressType(
         _relayer ||
-          getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+          getDefaultRelayerAddress(destinationChainId, outputToken.symbol),
         destinationChainId
       );
 

@@ -7,7 +7,6 @@ import {
   StyledTwitterIcon,
 } from "./Footer.styles";
 import { ReactComponent as DiscordLogo } from "assets/icons/discord.svg";
-import { useFeatureFlag } from "../../hooks";
 
 export const NAV_LINKS = [
   {
@@ -34,16 +33,24 @@ export const NAV_LINKS = [
     url: "https://twitter.com/AcrossProtocol",
     icon: StyledTwitterIcon,
   },
+];
+
+const LEGAL_LINKS = [
   {
     key: "terms_of_service",
     name: "Terms of Service",
     url: "https://across.to/terms-of-service",
     icon: undefined,
   },
+  {
+    key: "privacy_policy",
+    name: "Privacy Policy",
+    url: "https://across.to/privacy-policy",
+    icon: undefined,
+  },
 ];
 
 const Footer = () => {
-  const hasDemoFlag = useFeatureFlag("demo-flag");
   return (
     <Wrapper>
       <LinksContainer>
@@ -59,13 +66,25 @@ const Footer = () => {
           </Link>
         ))}
       </LinksContainer>
+
+      <LinksContainer>
+        {LEGAL_LINKS.map((link) => (
+          <Link
+            key={link.key}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {link.name}
+          </Link>
+        ))}
+      </LinksContainer>
       <AccentLink
         href="https://umaproject.org"
         target="_blank"
         rel="noopener noreferrer"
       >
         <FooterLogo />
-        {hasDemoFlag && <p> - Demo feature flag active</p>}
       </AccentLink>
     </Wrapper>
   );

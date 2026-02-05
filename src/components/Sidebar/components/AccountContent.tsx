@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { useEffect } from "react";
 
-import { getChainInfo, isSupportedChainId, shortenAddress } from "utils";
+import { getChainInfo, isSupportedChainId } from "utils/constants";
+import { shortenAddress } from "utils/format";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { ReactComponent as LogoutIcon } from "assets/icons/logout.svg";

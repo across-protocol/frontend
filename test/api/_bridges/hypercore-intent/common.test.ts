@@ -1,0 +1,132 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BigNumber } from "ethers";
+import {
+  assertSufficientBalanceOnHyperEvm,
+  getHyperEvmChainId,
+  getBridgeableOutputToken,
+  getDepositRecipient,
+  getDepositMessage,
+} from "../../../../api/_bridges/hypercore-intent/utils/common";
+import { getCachedTokenBalance } from "../../../../api/_balance";
+import {
+  getFullRelayers,
+  getTransferRestrictedRelayers,
+} from "../../../../api/_relayer-address";
+import { CHAIN_IDs } from "../../../../api/_constants";
+import {
+  BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
+  getHyperliquidDepositHandlerAddress,
+} from "../../../../api/_bridges/hypercore-intent/utils/constants";
+import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
+
+vi.mock("../../../../api/_balance");
+vi.mock("../../../../api/_hypercore", async (importOriginal) => ({
+  ...(await importOriginal()),
+  accountExistsOnHyperCore: vi.fn(),
+}));
+vi.mock("../../../../api/_relayer-address");
+
+describe("api/_bridges/hypercore-intent/utils/common", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("getHyperEvmChainId", () => {
+    it("should return HYPEREVM for HYPEREVM destination", () => {
+      expect(getHyperEvmChainId(CHAIN_IDs.HYPEREVM)).toBe(CHAIN_IDs.HYPEREVM);
+    });
+    it("should return HYPEREVM for HYPERCORE destination", () => {
+      expect(getHyperEvmChainId(CHAIN_IDs.HYPERCORE)).toBe(CHAIN_IDs.HYPEREVM);
+    });
+    it("should return HYPEREVM_TESTNET for other destinations (assuming testnet)", () => {
+      expect(getHyperEvmChainId(123)).toBe(CHAIN_IDs.HYPEREVM_TESTNET);
+    });
+  });
+
+  describe("getBridgeableOutputToken", () => {
+    it("should return bridgeable token for USDH with HyperEVM chain ID", () => {
+      const result = getBridgeableOutputToken(USDH_ON_HYPERCORE);
+      expect(result.symbol).toBe("USDH");
+      expect(result.chainId).toBe(CHAIN_IDs.HYPEREVM); // Should map to HyperEVM
+      expect(result.address).toBe(
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN.USDH.addresses[
+          CHAIN_IDs.HYPEREVM
+        ]
+      );
+    });
+  });
+
+  describe("assertSufficientBalanceOnHyperEvm", () => {
+    const inputToken = USDC_ON_OPTIMISM;
+    const outputToken = USDH_ON_HYPEREVM;
+
+    beforeEach(() => {
+      (getFullRelayers as ReturnType<typeof vi.fn>).mockReturnValue([
+        "0xRelayer1",
+      ]);
+      (
+        getTransferRestrictedRelayers as ReturnType<typeof vi.fn>
+      ).mockReturnValue(["0xRelayer2"]);
+    });
+
+    it("should resolve if balance is sufficient", async () => {
+      // Max balance on relayer: 1000. Input amount: 500.
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
+        BigNumber.from("1000000000")
+      );
+
+      await expect(
+        assertSufficientBalanceOnHyperEvm({
+          amountHyperEvm: BigNumber.from("500000000"),
+          inputToken,
+          outputToken,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it("should throw if balance is insufficient", async () => {
+      // Max balance: 100. Input: 500.
+      (getCachedTokenBalance as ReturnType<typeof vi.fn>).mockResolvedValue(
+        BigNumber.from("100000000")
+      );
+
+      await expect(
+        assertSufficientBalanceOnHyperEvm({
+          amountHyperEvm: BigNumber.from("500000000"),
+          inputToken,
+          outputToken,
+        })
+      ).rejects.toThrow("Amount exceeds max. deposit limit");
+    });
+  });
+
+  describe("getDepositRecipient", () => {
+    it("should return HyperliquidDepositHandler address if to HyperCore", () => {
+      const recipient = "0xUser";
+      const outputToken = USDH_ON_HYPERCORE;
+      const res = getDepositRecipient({ outputToken, recipient });
+      expect(res).toBe(getHyperliquidDepositHandlerAddress(CHAIN_IDs.HYPEREVM));
+    });
+
+    it("should return recipient if not to HyperCore", () => {
+      const recipient = "0xUser";
+      const outputToken = USDH_ON_HYPEREVM;
+      expect(getDepositRecipient({ outputToken, recipient })).toBe(recipient);
+    });
+  });
+
+  describe("getDepositMessage", () => {
+    it("should return encoded address if to HyperCore", () => {
+      const recipient = "0x0000000000000000000000000000000000000123";
+      const outputToken = USDH_ON_HYPERCORE;
+      const res = getDepositMessage({ outputToken, recipient });
+      expect(res).toContain(recipient.slice(2).toLowerCase());
+    });
+
+    it("should return '0x' if not to HyperCore", () => {
+      const recipient = "0xUser";
+      const outputToken = USDH_ON_HYPEREVM;
+      expect(getDepositMessage({ outputToken, recipient })).toBe("0x");
+    });
+  });
+});

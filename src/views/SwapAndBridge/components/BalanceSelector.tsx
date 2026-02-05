@@ -1,13 +1,10 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
-import {
-  COLORS,
-  formatUnitsWithMaxFractions,
-  compareAddressesSimple,
-} from "utils";
-import { useUserTokenBalances } from "hooks/useUserTokenBalances";
+import { COLORS } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
+import { useTrackBalanceSelectorClick } from "./useTrackBalanceSelectorClick";
+import { useTokenBalance } from "../hooks/useTokenBalance";
 
 type BalanceSelectorProps = {
   token: {
@@ -16,45 +13,26 @@ type BalanceSelectorProps = {
     decimals: number;
   };
   setAmount: (amount: BigNumber | null) => void;
-  disableHover?: boolean;
   error?: boolean;
+  isHovered?: boolean;
 };
+
+const percentages = ["25%", "50%", "75%", "MAX"] as const;
+export type BalanceSelectorPercentage = (typeof percentages)[number];
 
 export function BalanceSelector({
   token,
   setAmount,
-  disableHover,
   error = false,
+  isHovered = false,
 }: BalanceSelectorProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const tokenBalances = useUserTokenBalances();
+  const balance = useTokenBalance(token);
 
-  // Derive the balance from the latest token balances
-  const balance = useMemo(() => {
-    if (!tokenBalances.data?.balances) {
-      return BigNumber.from(0);
-    }
+  const trackBalanceSelectorClick = useTrackBalanceSelectorClick();
 
-    const chainBalances = tokenBalances.data.balances.find(
-      (cb) => cb.chainId === String(token.chainId)
-    );
+  const handlePillClick = (percentage: BalanceSelectorPercentage) => {
+    trackBalanceSelectorClick(percentage);
 
-    if (!chainBalances) {
-      return BigNumber.from(0);
-    }
-
-    const tokenBalance = chainBalances.balances.find((b) =>
-      compareAddressesSimple(b.address, token.address)
-    );
-
-    return tokenBalance?.balance
-      ? BigNumber.from(tokenBalance.balance)
-      : BigNumber.from(0);
-  }, [tokenBalances.data, token.chainId, token.address]);
-
-  const percentages = ["25%", "50%", "75%", "MAX"];
-
-  const handlePillClick = (percentage: string) => {
     if (percentage === "MAX") {
       setAmount(balance);
     } else {
@@ -67,10 +45,7 @@ export function BalanceSelector({
   const formattedBalance = formatUnitsWithMaxFractions(balance, token.decimals);
 
   return (
-    <BalanceWrapper
-      onMouseEnter={() => !disableHover && balance.gt(0) && setIsHovered(true)}
-      onMouseLeave={() => !disableHover && setIsHovered(false)}
-    >
+    <BalanceWrapper>
       <PillsContainer>
         <AnimatePresence>
           {isHovered &&

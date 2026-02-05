@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Info, Zap, X } from "react-feather";
 import { BigNumber } from "ethers";
 
-import { formatWeiPct, getChainInfo } from "utils";
+import { getChainInfo } from "utils/constants";
+import { formatWeiPct } from "utils/format";
 import { maxRelayFee, minRelayFee } from "utils/constants";
 import { Text } from "components/Text";
 

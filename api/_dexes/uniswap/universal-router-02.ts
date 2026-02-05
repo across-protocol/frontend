@@ -1,22 +1,18 @@
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
-import { Protocol } from "@uniswap/router-sdk";
 import { SwapRouter, RouterTradeAdapter } from "@uniswap/universal-router-sdk";
 
 import { getLogger, addMarkupToAmount } from "../../_utils";
 import { QuoteFetchOpts, QuoteFetchStrategy, Swap } from "../types";
 import {
   getUniswapClassicQuoteFromApi,
+  UNISWAP_API_INTEGRATOR_ID,
   UniswapClassicQuoteFromApi,
 } from "./utils/trading-api";
 import { floatToPercent } from "./utils/conversion";
 import { getOriginSwapEntryPoints, makeGetSources } from "../utils";
 import { parseUniswapError } from "./swap-router-02";
-import {
-  compactAxiosError,
-  UPSTREAM_SWAP_PROVIDER_ERRORS,
-  UpstreamSwapProviderError,
-} from "../../_errors";
+import { compactAxiosError } from "../../_errors";
 import { UNIVERSAL_ROUTER_02_ADDRESS } from "./utils/addresses";
 import { TransferType } from "../../_spoke-pool-periphery";
 import { SOURCES } from "./utils/sources";
@@ -150,7 +146,7 @@ export function buildUniversalRouterSwapTx(
   swap: Swap,
   tradeType: TradeType,
   quote: UniswapClassicQuoteFromApi,
-  opts?: QuoteFetchOpts
+  _opts?: QuoteFetchOpts
 ) {
   const routerTrade = RouterTradeAdapter.fromClassicQuote({
     tokenIn: quote.input.token,
@@ -159,27 +155,21 @@ export function buildUniversalRouterSwapTx(
     route: quote.route,
   });
 
-  // NOTE: V4 only swaps behave differently when using `useRouterBalance: true`.
-  // TODO: Investigate if this is a problem and if we can fix it.
-  const isV4Only = routerTrade.swaps.every(
-    (swap) => swap.route.protocol === Protocol.V4
-  );
-  if (opts?.sellEntireBalance && isV4Only) {
-    throw new UpstreamSwapProviderError({
-      message: `Option 'sellEntireBalance' is not supported by ${STRATEGY_NAME}`,
-      code: UPSTREAM_SWAP_PROVIDER_ERRORS.SELL_ENTIRE_BALANCE_UNSUPPORTED,
-      swapProvider: STRATEGY_NAME,
-    });
-  }
-
   const { calldata, value } = SwapRouter.swapCallParameters(routerTrade, {
     recipient: swap.recipient,
     slippageTolerance: floatToPercent(quote.slippage),
     useRouterBalance: true,
   });
+
+  // Append integrator ID issued by Uniswap to calldata to allow for tracking of swaps
+  // issued by our API.
+  const taggedCalldata = utils.hexlify(
+    utils.concat([calldata, UNISWAP_API_INTEGRATOR_ID])
+  );
+
   return {
     ecosystem: "evm" as const,
-    data: calldata,
+    data: taggedCalldata,
     value,
     to: UNIVERSAL_ROUTER_02_ADDRESS[swap.chainId],
   };

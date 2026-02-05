@@ -2,23 +2,27 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
   swapApprovalApiCall,
-  SwapApprovalApiCallReturnType,
+  SwapApprovalQuote,
   SwapApprovalApiQueryParams,
 } from "utils/serverless-api/prod/swap-approval";
 import { useDebounce } from "@uidotdev/usehooks";
 import { QuoteRequest } from "./useQuoteRequest/quoteRequestAction";
-import { INTEGRATOR_ID_ACROSS } from "utils";
+import { INTEGRATOR_ID_ACROSS } from "utils/constants";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";
+import { useTrackTransferQuoteReceivedEffect } from "./useTrackTransferQuoteReceived";
+import { useRef } from "react";
 
 export type SwapQuote = ReturnType<typeof useSwapQuote>["swapQuote"];
 
-const useSwapQuote = ({
-  amount,
-  customDestinationAccount,
-  destinationToken,
-  originToken,
-  tradeType,
-}: QuoteRequest) => {
+const useSwapQuote = (quoteRequest: QuoteRequest) => {
+  const {
+    amount,
+    customDestinationAccount,
+    destinationToken,
+    originToken,
+    tradeType,
+  } = quoteRequest;
+
   const { depositor, depositorOrPlaceholder, recipientOrPlaceholder } =
     useEcosystemAccounts({
       originToken,
@@ -27,10 +31,11 @@ const useSwapQuote = ({
     });
 
   const debouncedAmount = useDebounce(amount, 300);
-
   const skipOriginTxEstimation = !depositor;
 
-  const { data, isLoading, error } = useQuery({
+  const quoteStartTimeRef = useRef<number>(0);
+
+  const { data, isLoading, error, dataUpdatedAt } = useQuery({
     queryKey: [
       "swap-quote",
       debouncedAmount,
@@ -45,7 +50,9 @@ const useSwapQuote = ({
       recipientOrPlaceholder,
       skipOriginTxEstimation,
     ],
-    queryFn: (): Promise<SwapApprovalApiCallReturnType | undefined> => {
+    queryFn: (): Promise<SwapApprovalQuote | undefined> => {
+      quoteStartTimeRef.current = Date.now();
+
       if (Number(debouncedAmount) <= 0) {
         return Promise.resolve(undefined);
       }
@@ -86,6 +93,16 @@ const useSwapQuote = ({
     },
     refetchInterval: (query) =>
       query.state.status === "success" ? 10_000 : false,
+  });
+
+  useTrackTransferQuoteReceivedEffect({
+    quote: data,
+    quoteRequest,
+    dataUpdatedAt,
+    depositorOrPlaceholder,
+    recipientOrPlaceholder,
+    customDestinationAddress: customDestinationAccount?.address,
+    quoteStartTimeRef,
   });
 
   return { swapQuote: data, isQuoteLoading: isLoading, quoteError: error };

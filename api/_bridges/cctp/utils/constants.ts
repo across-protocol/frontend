@@ -11,6 +11,7 @@ export const CCTP_SUPPORTED_CHAINS = [
   CHAIN_IDs.BASE,
   CHAIN_IDs.HYPERCORE,
   CHAIN_IDs.HYPEREVM,
+  CHAIN_IDs.LIGHTER,
   CHAIN_IDs.LINEA,
   CHAIN_IDs.MONAD,
   CHAIN_IDs.OPTIMISM,
@@ -34,6 +35,8 @@ export const CCTP_SUPPORTED_CHAINS = [
 export const CCTP_SUPPORTED_TOKENS = [
   TOKEN_SYMBOLS_MAP.USDC,
   TOKEN_SYMBOLS_MAP["USDC-SPOT"],
+  TOKEN_SYMBOLS_MAP["USDC-SPOT-LIGHTER"],
+  TOKEN_SYMBOLS_MAP["USDC-PERPS-LIGHTER"],
 ];
 
 export const getCctpDomainId = (chainId: number): number => {
@@ -46,6 +49,9 @@ export const getCctpDomainId = (chainId: number): number => {
   return chainInfo.cctpDomain;
 };
 
+export const isCctpEnabled = (chainId: number) =>
+  CCTP_SUPPORTED_CHAINS.includes(chainId);
+
 export const CCTP_FINALITY_THRESHOLDS = {
   fast: 1000,
   standard: 2000,
@@ -53,7 +59,7 @@ export const CCTP_FINALITY_THRESHOLDS = {
 
 // CCTP Across Finalizer address
 export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
-  "0x72adB07A487f38321b6665c02D289C413610B081";
+  "0x708704d33ace3daFbED28f150A56CE9D124B1eF8";
 
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts

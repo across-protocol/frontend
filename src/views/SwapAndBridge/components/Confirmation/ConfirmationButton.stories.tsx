@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { BigNumber } from "ethers";
 import { ConfirmationButton } from "./ConfirmationButton";
 import { EnrichedToken } from "../ChainTokenSelector/ChainTokenSelectorModal";
-import { SwapApprovalApiCallReturnType } from "../../../../utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "../../../../utils/serverless-api/prod/swap-approval";
 import { QuoteRequestProvider } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { QuoteRequest } from "../../hooks/useQuoteRequest/quoteRequestAction";
 import { BridgeProvider } from "../../utils/bridgeProvider";
@@ -51,8 +51,8 @@ const mockOutputApiToken = {
   symbol: "USDC",
 };
 
-const mockSwapQuote: SwapApprovalApiCallReturnType = {
-  crossSwapType: "bridgeOnly",
+const mockSwapQuote: SwapApprovalQuote = {
+  crossSwapType: "bridgeableToBridgeable",
   amountType: "exactInput",
   approvalTxns: undefined,
   eip712: undefined,
@@ -194,7 +194,7 @@ const mockQuoteRequest: QuoteRequest = {
 
 const createQuoteWithProvider = (
   provider: BridgeProvider
-): SwapApprovalApiCallReturnType => ({
+): SwapApprovalQuote => ({
   ...mockSwapQuote,
   steps: {
     ...mockSwapQuote.steps,
@@ -207,7 +207,7 @@ const createQuoteWithProvider = (
 
 const meta: Meta<typeof ConfirmationButton> = {
   component: ConfirmationButton,
-  title: "Stories/ConfirmationButton",
+  title: "Bridge/ConfirmationButton",
   argTypes: {
     isQuoteLoading: {
       control: { type: "boolean" },
@@ -283,7 +283,7 @@ export const Expanded: Story = {
   },
 };
 
-const highPriceImpactQuote: SwapApprovalApiCallReturnType = {
+const highPriceImpactQuote: SwapApprovalQuote = {
   ...mockSwapQuote,
   fees: {
     ...mockSwapQuote.fees!,

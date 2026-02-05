@@ -7,7 +7,7 @@ import {
   TitleLogo,
   IconPairContainer,
 } from "./StakingExitAction.styles";
-import { isDefined } from "utils";
+import { isDefined } from "utils/sdk";
 
 type StakingExitActionAttributes = {
   poolName: string;

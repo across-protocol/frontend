@@ -1,11 +1,8 @@
 import { Balance, BalanceStrategy } from "./types";
-import {
-  getBalance,
-  getNativeBalance,
-  getConfig,
-  getProvider,
-  formatUnitsWithMaxFractions,
-} from "utils";
+import { getEvmBalance, getNativeBalance } from "utils/token";
+import { getConfig } from "utils/config";
+import { getProvider } from "utils/providers";
+import { formatUnitsWithMaxFractions } from "utils/format";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 
@@ -61,7 +58,7 @@ export class EVMBalanceStrategy implements BalanceStrategy {
 
     const balance = tokenInfo?.isNative
       ? await getNativeBalance(chainId, account, "latest", provider)
-      : await getBalance(chainId, account, tokenAddress, "latest", provider);
+      : await getEvmBalance(chainId, account, tokenAddress, "latest", provider);
     const balanceDecimals = tokenInfo?.decimals ?? 18;
     return {
       balance,

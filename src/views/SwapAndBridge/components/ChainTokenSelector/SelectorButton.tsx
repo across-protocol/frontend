@@ -1,13 +1,13 @@
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useState } from "react";
-import { COLORS, getChainInfo } from "utils";
+import { useCallback, useState } from "react";
+import { COLORS, getChainInfo } from "utils/constants";
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { TokenImage } from "components/TokenImage";
 import {
   ChainTokenSelectorModal,
   EnrichedToken,
 } from "./ChainTokenSelectorModal";
 import { getTokenDisplaySymbol } from "hooks/useAvailableCrosschainRoutes";
+import { TokenAndChainLogo } from "./TokenAndChainLogo";
 
 type Props = {
   selectedToken: EnrichedToken | null;
@@ -28,13 +28,6 @@ export default function SelectorButton({
   className,
 }: Props) {
   const [displayModal, setDisplayModal] = useState(false);
-
-  useEffect(() => {
-    if (selectedToken) {
-      onSelect?.(selectedToken);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedToken]);
 
   const setSelectedToken = useCallback(
     (token: EnrichedToken) => {
@@ -82,10 +75,11 @@ export default function SelectorButton({
         className={className}
         onClick={() => setDisplayModal(true)}
       >
-        <TokenStack>
-          <TokenImg src={selectedToken.logoURI} alt={selectedToken.symbol} />
-          <ChainImg src={chain.logoURI} alt={chain.name} />
-        </TokenStack>
+        <TokenAndChainLogo
+          src={selectedToken.logoURI}
+          alt={selectedToken.symbol}
+          chain={chain}
+        />
         <VerticalDivider />
         <NamesStack>
           <TokenName>{getTokenDisplaySymbol(selectedToken)}</TokenName>
@@ -178,36 +172,6 @@ const ChainName = styled.div`
   line-height: 100%;
   color: var(--base-bright-gray, #e0f3ff);
   opacity: 0.5;
-`;
-
-const TokenStack = styled.div`
-  height: 100%;
-  width: var(--height);
-  padding-inline: var(--padding);
-  position: relative;
-  flex-grow: 0;
-`;
-
-const TokenImg = styled(TokenImage)`
-  border-radius: 50%;
-  position: absolute;
-  top: var(--padding);
-  left: var(--padding);
-  width: calc(var(--height) * 0.66);
-  height: calc(var(--height) * 0.66);
-  z-index: 1;
-`;
-
-const ChainImg = styled(TokenImage)`
-  border-radius: 50%;
-  border: 1px solid transparent;
-  background: ${COLORS["grey-600"]};
-  position: absolute;
-  bottom: calc(var(--padding) / 2);
-  right: calc(var(--padding) / 2);
-  width: 30%;
-  height: 30%;
-  z-index: 2;
 `;
 
 const ChevronDown = styled(ChevronDownIcon)`

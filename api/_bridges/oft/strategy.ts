@@ -12,6 +12,7 @@ import {
   AppFee,
   assertMinOutputAmount,
   CROSS_SWAP_TYPE,
+  getMintBurnRefundRecipient,
 } from "../../_dexes/utils";
 import { InvalidParamError } from "../../_errors";
 import { ConvertDecimals, getProvider } from "../../_utils";
@@ -146,7 +147,7 @@ export async function buildOftTx(params: {
   const callData = iface.encodeFunctionData("send", [
     sendParam,
     messagingFee, // MessagingFee struct
-    crossSwap.refundAddress ?? crossSwap.depositor, // refundAddress
+    getMintBurnRefundRecipient(crossSwap), // refundAddress
   ]);
 
   // Handle integrator ID and swap API marker tagging
@@ -396,13 +397,13 @@ export function getOftBridgeStrategy(): BridgeStrategy {
     capabilities,
     originTxNeedsAllowance: true,
     getCrossSwapTypes: getOftCrossSwapTypes,
-    getBridgeQuoteRecipient: (
+    getBridgeQuoteRecipient: async (
       crossSwap: CrossSwap,
       _hasOriginSwap?: boolean
     ) => {
       return crossSwap.recipient;
     },
-    getBridgeQuoteMessage: (_crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (_crossSwap: CrossSwap, _appFee?: AppFee) => {
       return "0x";
     },
     getQuoteForExactInput: getOftQuoteForExactInput,

@@ -2,11 +2,11 @@ import { useCallback } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 
 import { useSidebarContext } from "./useSidebarContext";
+import { hubPoolChainId } from "utils/constants";
 import {
-  hubPoolChainId,
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
-} from "utils";
+} from "utils/amplitude";
 import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,

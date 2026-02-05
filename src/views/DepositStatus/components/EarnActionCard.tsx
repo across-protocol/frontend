@@ -5,7 +5,7 @@ import { ReactComponent as A } from "assets/bg-banners/action-card-banner-a.svg"
 import { ReactComponent as B } from "assets/bg-banners/action-card-banner-b.svg";
 import { ReactComponent as C } from "assets/bg-banners/action-card-banner-c.svg";
 import { Text } from "components/Text";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 const BG_VARIANTS = {
   a: A,

@@ -5,7 +5,7 @@ import { getProvider, getSVMRpc } from "./providers";
 import { address as solanaAddress } from "@solana/kit";
 import { chainIsSvm } from "./sdk";
 
-export function isValidAddress(address: string) {
+export function isEvmAddress(address: string) {
   return utils.isAddress(address);
 }
 

@@ -1,13 +1,9 @@
 import axios from "axios";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import {
-  depositsQueryKey,
-  userDepositsQueryKey,
-  defaultRefetchInterval,
-  indexerApiBaseUrl,
-  getConfig,
-} from "utils";
+import { defaultRefetchInterval, indexerApiBaseUrl } from "utils/constants";
+import { depositsQueryKey, userDepositsQueryKey } from "utils/query-keys";
+import { getConfig } from "utils/config";
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
 
@@ -95,7 +91,9 @@ export type Deposit = {
   depositRefundTxHash?: string;
   swapOutputToken?: string; // destination swap output token
   swapOutputTokenAmount?: string; // destination swap output amount
+  outputAmount?: string;
   actionsTargetChainId?: number;
+  hideFeeTooLow?: boolean;
 };
 
 export type Pagination = {
@@ -107,6 +105,11 @@ export type Pagination = {
 export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
+};
+
+export type GetDepositResponse = {
+  pagination: Pagination;
+  deposit: Deposit;
 };
 
 export type IndexerDeposit = {
@@ -156,22 +159,29 @@ export type IndexerDeposit = {
 export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
-  status: DepositStatusFilter,
   limit: number,
-  offset: number = 0
+  offset: number = 0,
+  userAddress?: string,
+  status: DepositStatusFilter = "all"
 ) {
+  const omitStatusFilter = status === "all";
+  const queryKey = userAddress
+    ? userDepositsQueryKey(userAddress, status, limit, offset)
+    : depositsQueryKey(status, limit, offset);
+
   return useQuery({
-    queryKey: depositsQueryKey(status, limit, offset),
-    queryFn: () => {
-      return getDeposits({
-        status: status === "all" ? undefined : status,
+    queryKey,
+    queryFn: async () => ({
+      deposits: await getDeposits({
+        address: userAddress,
+        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
-        skipOldUnprofitable: true,
-      });
-    },
+      }),
+    }),
+    gcTime: 0,
     placeholderData: keepPreviousData,
-    refetchInterval: defaultRefetchInterval,
+    refetchInterval: Infinity,
   });
 }
 

@@ -10,15 +10,18 @@ import {
   CHAIN_IDs,
   ChainInfo,
   COLORS,
-  formatUnitsWithMaxFractions,
-  formatUSD,
   getChainInfo,
-  getTokenExplorerLinkFromAddress,
   INDIRECT_CHAINS,
-  parseUnits,
   QUERIES,
   TOKEN_SYMBOLS_MAP,
-} from "utils";
+} from "utils/constants";
+import { getTokenExplorerLinkFromAddress } from "utils/token";
+import {
+  formatUnitsWithMaxFractions,
+  formatUSD,
+  parseUnits,
+  shortenAddress,
+} from "utils/format";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactComponent as CheckmarkCircleFilled } from "assets/icons/checkmark-circle-filled.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
@@ -29,10 +32,12 @@ import AllChainsIcon from "assets/chain-logos/all-swap-chain.png";
 import { useEnrichedCrosschainBalances } from "hooks/useEnrichedCrosschainBalances";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { BigNumber } from "ethers";
-import { Text, TokenImage } from "components";
+import { Text } from "components/Text";
+import { TokenImage } from "components/TokenImage";
 import { useHotkeys } from "react-hotkeys-hook";
-import { getBridgeableSvmTokenFilterPredicate } from "./getBridgeableSvmTokenFilterPredicate";
 import { isTokenUnreachable } from "./isTokenUnreachable";
+import { useTrackChainSelected } from "./useTrackChainSelected";
+import { useTrackTokenSelected } from "./useTrackTokenSelected";
 
 const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
 
@@ -52,6 +57,39 @@ const popularTokens = [
   TOKEN_SYMBOLS_MAP.WBTC.symbol,
   "USDT0", // hardcoded symbol while we wait for support in @across-protocol/constants
 ];
+
+function sortTokensByBalanceAndSymbol<
+  T extends { balance: BigNumber; balanceUsd: number; symbol: string },
+>(tokens: T[]): T[] {
+  return [...tokens].sort((a, b) => {
+    const aHasTokenBalance = a.balance.gt(0);
+    const bHasTokenBalance = b.balance.gt(0);
+
+    if (aHasTokenBalance !== bHasTokenBalance) {
+      return aHasTokenBalance ? -1 : 1;
+    }
+
+    if (aHasTokenBalance && bHasTokenBalance) {
+      const aHasUsdBalance = a.balanceUsd > 0.01;
+      const bHasUsdBalance = b.balanceUsd > 0.01;
+
+      if (aHasUsdBalance && bHasUsdBalance) {
+        if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
+          return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+        }
+        return b.balanceUsd - a.balanceUsd;
+      }
+
+      if (aHasUsdBalance !== bHasUsdBalance) {
+        return aHasUsdBalance ? -1 : 1;
+      }
+
+      return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+    }
+
+    return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
+  });
+}
 
 type ChainData = ChainInfo & {
   isDisabled: boolean;
@@ -107,6 +145,9 @@ export function ChainTokenSelectorModal({
   const [tokenSearch, setTokenSearch] = useState("");
   const [chainSearch, setChainSearch] = useState("");
 
+  const trackChainSelected = useTrackChainSelected();
+  const trackTokenSelected = useTrackTokenSelected();
+
   // Reset mobile step when modal opens/closes
   useEffect(() => {
     setMobileStep("chain");
@@ -143,69 +184,29 @@ export function ChainTokenSelectorModal({
     });
 
     // Filter by search first
-    const filteredTokens = enrichedTokens
-      .filter((t) => {
-        // First filter by selected chain
-        if (selectedChain !== null && t.chainId !== selectedChain) {
-          return false;
-        }
+    const filteredTokens = enrichedTokens.filter((t) => {
+      // First filter by selected chain
+      if (selectedChain !== null && t.chainId !== selectedChain) {
+        return false;
+      }
 
-        if (tokenSearch === "") {
-          return true;
-        }
+      if (tokenSearch === "") {
+        return true;
+      }
 
-        const keywords = [
-          t.symbol.toLowerCase().replaceAll(" ", ""),
-          t.name.toLowerCase().replaceAll(" ", ""),
-          t.address.toLowerCase().replaceAll(" ", ""),
-        ];
-        return keywords.some((keyword) =>
-          keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
-        );
-      })
-      .filter(getBridgeableSvmTokenFilterPredicate(isOriginToken, otherToken));
-
-    // Sort function that prioritizes tokens with balance, then by balance amount, then alphabetically
-    const sortTokens = (tokens: EnrichedTokenWithReachability[]) => {
-      return tokens.sort((a, b) => {
-        // Sort by token balance - tokens with balance go to top
-        const aHasTokenBalance = a.balance.gt(0);
-        const bHasTokenBalance = b.balance.gt(0);
-
-        if (aHasTokenBalance !== bHasTokenBalance) {
-          return aHasTokenBalance ? -1 : 1;
-        }
-
-        // If both have token balance, prioritize sorting by USD value if available
-        if (aHasTokenBalance && bHasTokenBalance) {
-          const aHasUsdBalance = a.balanceUsd > 0.01;
-          const bHasUsdBalance = b.balanceUsd > 0.01;
-
-          // Both have USD values - sort by USD
-          if (aHasUsdBalance && bHasUsdBalance) {
-            if (Math.abs(b.balanceUsd - a.balanceUsd) < 0.0001) {
-              return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-            }
-            return b.balanceUsd - a.balanceUsd;
-          }
-
-          // Only one has USD value - prioritize the one with USD
-          if (aHasUsdBalance !== bHasUsdBalance) {
-            return aHasUsdBalance ? -1 : 1;
-          }
-
-          // Neither has USD value - sort alphabetically
-          return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-        }
-
-        // If neither has balance, sort alphabetically
-        return a.symbol.toLocaleLowerCase().localeCompare(b.symbol);
-      });
-    };
+      const keywords = [
+        t.symbol.toLowerCase().replaceAll(" ", ""),
+        t.name.toLowerCase().replaceAll(" ", ""),
+        t.address.toLowerCase().replaceAll(" ", ""),
+      ];
+      return keywords.some((keyword) =>
+        keyword.includes(tokenSearch.toLowerCase().replaceAll(" ", ""))
+      );
+    });
 
     // When "all chains" is selected, don't separate popular tokens
     if (selectedChain === null) {
-      const sortedAllTokens = sortTokens(filteredTokens);
+      const sortedAllTokens = sortTokensByBalanceAndSymbol(filteredTokens);
       return {
         popular: [], // No popular section for all chains
         all: sortedAllTokens,
@@ -221,8 +222,8 @@ export function ChainTokenSelectorModal({
     );
 
     // Sort both sections
-    const sortedPopularTokens = sortTokens(popularTokensList);
-    const sortedAllTokens = sortTokens(allTokensList);
+    const sortedPopularTokens = sortTokensByBalanceAndSymbol(popularTokensList);
+    const sortedAllTokens = sortTokensByBalanceAndSymbol(allTokensList);
 
     return {
       popular: sortedPopularTokens,
@@ -283,7 +284,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, otherToken, isOriginToken]);
+  }, [chainSearch, crossChainRoutes, isOriginToken]);
 
   return isMobile ? (
     <MobileModal
@@ -300,10 +301,14 @@ export function ChainTokenSelectorModal({
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
       onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
         setSelectedChain(chainId);
         setMobileStep("token");
       }}
-      onTokenSelect={onSelect}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   ) : (
@@ -318,8 +323,14 @@ export function ChainTokenSelectorModal({
       setTokenSearch={setTokenSearch}
       displayedChains={displayedChains}
       displayedTokens={displayedTokens}
-      onChainSelect={setSelectedChain}
-      onTokenSelect={onSelect}
+      onChainSelect={(chainId) => {
+        trackChainSelected(chainId, isOriginToken);
+        setSelectedChain(chainId);
+      }}
+      onTokenSelect={(token) => {
+        trackTokenSelected(token, isOriginToken);
+        onSelect(token);
+      }}
       onSelectOtherToken={onSelectOtherToken}
     />
   );
@@ -475,7 +486,6 @@ const DesktopModal = ({
 
 // Mobile Layout Component - 2-step process
 const MobileLayout = ({
-  isOriginToken,
   mobileStep,
   selectedChain,
   chainSearch,
@@ -588,6 +598,7 @@ const MobileLayout = ({
                 <SectionHeader>Popular Tokens</SectionHeader>
                 {displayedTokens.popular.map((token) => (
                   <TokenEntry
+                    isMobile={true}
                     key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
@@ -611,6 +622,7 @@ const MobileLayout = ({
                 <SectionHeader>All Tokens</SectionHeader>
                 {displayedTokens.all.map((token) => (
                   <TokenEntry
+                    isMobile={true}
                     key={token.address + token.chainId + token.symbol}
                     token={token}
                     isSelected={false}
@@ -872,11 +884,13 @@ const TokenEntry = ({
   onClick,
   tabIndex,
   warningMessage,
+  isMobile = false,
 }: {
   token: EnrichedTokenWithReachability;
   isSelected: boolean;
   onClick: () => void;
   warningMessage: string;
+  isMobile?: boolean;
   tabIndex?: number;
 }) => {
   const [symbolHover, setSymbolHover] = useState(false);
@@ -902,7 +916,7 @@ const TokenEntry = ({
               {getTokenDisplaySymbol(token)}
             </TokenDispalySymbol>
             <TokenLink
-              visible={symbolHover}
+              visible={symbolHover && !isMobile}
               href={getTokenExplorerLinkFromAddress(
                 token.chainId,
                 token.address
@@ -914,7 +928,15 @@ const TokenEntry = ({
               <LinkExternalIcon />
             </TokenLink>
           </TokenName>
-          <TokenSymbol>{getChainInfo(token.chainId).name}</TokenSymbol>
+          <TokenSymbol>
+            {getChainInfo(token.chainId).name}{" "}
+            {isMobile && (
+              <TokenAddress>
+                {" "}
+                {shortenAddress(token.address, "...", 4)}
+              </TokenAddress>
+            )}
+          </TokenSymbol>
         </TokenNameSymbolWrapper>
       </TokenInfoWrapper>
 
@@ -1268,6 +1290,7 @@ const TokenSymbol = styled.div`
   overflow: hidden;
   color: var(--base-bright-gray, #e0f3ff);
   text-overflow: ellipsis;
+  white-space: nowrap;
   /* Body/X Small */
   font-family: Barlow;
   font-size: 12px;
@@ -1275,6 +1298,10 @@ const TokenSymbol = styled.div`
   font-weight: 400;
   line-height: 130%; /* 15.6px */
 
+  opacity: 0.5;
+`;
+
+const TokenAddress = styled.span`
   opacity: 0.5;
 `;
 

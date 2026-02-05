@@ -1,6 +1,6 @@
 import { BigNumber, utils, constants } from "ethers";
 
-import { Token } from "./_dexes/types";
+import { AmountType, Token } from "./_dexes/types";
 import { getEnvs, parseJsonSafe } from "./_env";
 import { TOKEN_SYMBOLS_MAP } from "./_constants";
 import { getSponsorshipsFromIndexer } from "./_indexer-api";
@@ -12,6 +12,9 @@ import {
 import { getCachedTokenBalance } from "./_balance";
 import { ConvertDecimals } from "./_utils";
 import { AcrossErrorCode, InputError } from "./_errors";
+import { isCctpEnabled as _isCctpEnabled } from "./_bridges/cctp/utils/constants";
+import { isRouteSupported as _isHyperCoreIntentSupported } from "./_bridges/hypercore-intent/utils/common";
+import { isOftEnabled as _isOftEnabled } from "./_bridges/oft/utils/constants";
 
 export type SponsorshipEligibilityPreChecks = Awaited<
   ReturnType<typeof getSponsorshipEligibilityPreChecks>
@@ -25,6 +28,7 @@ const {
   SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT:
     _SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT,
   SPONSORED_SWAP_SLIPPAGE_TOLERANCE: _SPONSORED_SWAP_SLIPPAGE_TOLERANCE,
+  MAX_BPS_TO_SPONSOR_LIMIT: _MAX_BPS_TO_SPONSOR_LIMIT,
 } = getEnvs();
 
 /**
@@ -67,6 +71,13 @@ export const SPONSORED_SWAP_SLIPPAGE_TOLERANCE =
     : 1;
 
 /**
+ * Maximum bps to sponsor limit for sponsored mint/burn transactions.
+ */
+export const MAX_BPS_TO_SPONSOR_LIMIT = _MAX_BPS_TO_SPONSOR_LIMIT
+  ? Number(_MAX_BPS_TO_SPONSOR_LIMIT)
+  : 5;
+
+/**
  * List of token pairs that are eligible for sponsorship.
  */
 export const SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS = [
@@ -88,6 +99,8 @@ export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
     "USDH-SPOT": utils.parseUnits("1000000", 6), // 1M USDC
     "USDT-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
     "USDC-SPOT": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-SPOT-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
+    "USDC-PERPS-LIGHTER": utils.parseUnits("10000000", 6), // 10M USDC
   },
   USDT: {
     "USDC-SPOT": utils.parseUnits("1000000", 6), // 1M USDT
@@ -95,12 +108,28 @@ export const INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR: {
   },
 };
 
+// Amount threshold for routing USDC/USDT → USDH/USDC on HyperCore (in USD terms)
+// Amounts >= 10K USD use CCTP/OFT, amounts < 10K USD use intents
+export const MIN_MINT_BURN_AMOUNT_USD = 10000; // 10K USD
+
 export class SponsoredSwapSlippageTooHighError extends InputError {
   constructor(args: { message: string }, opts?: ErrorOptions) {
     super(
       {
         message: args.message,
         code: AcrossErrorCode.SPONSORED_SWAP_SLIPPAGE_TOO_HIGH,
+      },
+      opts
+    );
+  }
+}
+
+export class MaxBpsToSponsorTooHighError extends InputError {
+  constructor(args: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args.message,
+        code: AcrossErrorCode.MAX_BPS_TO_SPONSOR_TOO_HIGH,
       },
       opts
     );
@@ -120,13 +149,16 @@ export class SponsoredDonationBoxFundsInsufficientError extends InputError {
 }
 
 /**
- * Pre-checks if a mint/burn transaction is eligible for sponsorship _before_ calculating the
+ * Pre-checks if a transaction is eligible for sponsorship _before_ calculating the
  * sponsorship amounts.
  *
  * Validates:
+ * - Input amount limit
  * - Global daily limit
  * - Per-user daily limit
  * - Account creation daily limit
+ * - CCTP/OFT eligibility
+ * - Sponsored intent eligibility
  *
  * @param params - Parameters for eligibility check
  * @returns Eligibility pre-checks or undefined if check fails
@@ -136,32 +168,34 @@ export async function getSponsorshipEligibilityPreChecks(params: {
   amount: BigNumber;
   outputToken: Token;
   recipient: string;
+  amountType: AmountType;
 }) {
   const inputAmountLimit =
     INPUT_AMOUNT_LIMITS_PER_TOKEN_PAIR[params.inputToken.symbol]?.[
       params.outputToken.symbol
     ];
-  // If input amount is greater than the limit, short-circuit with undefined.
-  // This will prevent routing via our sponsorship periphery contracts.
-  if (!inputAmountLimit || params.amount.gt(inputAmountLimit)) {
-    return undefined;
-  }
+  const isWithinInputAmountLimit =
+    inputAmountLimit && params.amount.lte(inputAmountLimit);
 
-  const isEligibleTokenPair = SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
-    (pair) =>
-      pair.inputToken === params.inputToken.symbol &&
-      pair.outputToken === params.outputToken.symbol
+  const isCctpEnabledOriginChain = _isCctpEnabled(params.inputToken.chainId);
+  const isOftEnabledOriginChain = _isOftEnabled(
+    params.inputToken.chainId,
+    params.inputToken.symbol
   );
-  // If not eligible token pair, short-circuit with false values.
-  // This will route through the unsponsored flows via our sponsorship periphery contracts.
-  if (!isEligibleTokenPair) {
-    return {
-      isEligibleTokenPair: false,
-      isWithinGlobalDailyLimit: false,
-      isWithinUserDailyLimit: false,
-      isWithinAccountCreationDailyLimit: false,
-    };
-  }
+  const isHyperCoreIntentSupported = _isHyperCoreIntentSupported(params);
+  const amount =
+    params.amountType === "exactInput"
+      ? params.amount
+      : ConvertDecimals(
+          params.outputToken.decimals,
+          params.inputToken.decimals
+        )(params.amount);
+  const isMintBurnThresholdMet = amount.gte(
+    utils.parseUnits(
+      MIN_MINT_BURN_AMOUNT_USD.toString(),
+      params.inputToken.decimals
+    )
+  );
 
   const { totalSponsorships, userSponsorships, accountActivations } =
     await getSponsorshipsFromIndexer();
@@ -205,7 +239,7 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     BigNumber.from(0);
 
   return {
-    isEligibleTokenPair,
+    isWithinInputAmountLimit,
     isWithinGlobalDailyLimit: BigNumber.from(
       totalSponsorshipsForSponsoredChain.evmAmountSponsored
     ).lt(globalDailyLimit),
@@ -215,6 +249,15 @@ export async function getSponsorshipEligibilityPreChecks(params: {
     isWithinAccountCreationDailyLimit:
       accountActivationsForSponsoredChain <
       SPONSORED_ACCOUNT_CREATION_DAILY_LIMIT,
+    isCctpEnabledOriginChain,
+    isOftEnabledOriginChain,
+    isHyperCoreIntentSupported,
+    isMintBurnThresholdMet,
+    isEligibleTokenPair: SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS.some(
+      (pair) =>
+        pair.inputToken === params.inputToken.symbol &&
+        pair.outputToken === params.outputToken.symbol
+    ),
   };
 }
 
@@ -230,11 +273,17 @@ export async function assertSponsoredAmountCanBeCovered(params: {
   swapSlippageBps: number;
   inputAmount: BigNumber;
 }) {
-  const { swapSlippageBps } = params;
+  const { swapSlippageBps, maxBpsToSponsor } = params;
 
   if (!isSponsoredSwapSlippageTolerable(swapSlippageBps)) {
     throw new SponsoredSwapSlippageTooHighError({
       message: `Sponsored swap slippage is too high: ${swapSlippageBps} bps`,
+    });
+  }
+
+  if (!isMaxBpsToSponsorTolerable(maxBpsToSponsor)) {
+    throw new MaxBpsToSponsorTooHighError({
+      message: `Max bps to sponsor is too high: ${maxBpsToSponsor} bps`,
     });
   }
 
@@ -256,6 +305,16 @@ export async function assertSponsoredAmountCanBeCovered(params: {
 export function isSponsoredSwapSlippageTolerable(swapSlippageBps: number) {
   const swapSlippage = swapSlippageBps / 100;
   return swapSlippage <= SPONSORED_SWAP_SLIPPAGE_TOLERANCE;
+}
+
+/**
+ * Checks if maxBpsToSponsor is within the acceptable range. Checked after the
+ * sponsorship amounts are calculated.
+ * @param maxBpsToSponsor - The calculated maxBpsToSponsor in bps.
+ * @returns True if the maxBpsToSponsor is within the acceptable range, false otherwise.
+ */
+export function isMaxBpsToSponsorTolerable(maxBpsToSponsor: number) {
+  return maxBpsToSponsor <= MAX_BPS_TO_SPONSOR_LIMIT;
 }
 
 /**

@@ -27,11 +27,27 @@ const endpoints = [
       refundOnOrigin: true,
     },
     updateIntervalSec: 1,
+    expectedStatus: 200,
+  },
+  // Preview endpoints for gasless flows. Ping to keep warm.
+  {
+    url: "https://preview.across.to/api/swap/erc3009",
+    params: {
+      amount: ethers.utils.parseUnits("0.1", 6).toString(),
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.OPTIMISM],
+      originChainId: CHAIN_IDs.OPTIMISM,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
+      destinationChainId: CHAIN_IDs.BASE,
+      depositor: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+    },
+    updateIntervalSec: 1,
+    expectedStatus: 200,
   },
   {
-    url: "https://app.across.to/api/available-routes",
+    url: "https://preview.across.to/api/gasless/submit",
     params: {},
     updateIntervalSec: 1,
+    expectedStatus: 405, // Method Not Allowed
   },
 ];
 
@@ -60,15 +76,29 @@ const handler = async (
     const functionStart = Date.now();
 
     const requestPromises = endpoints.map(
-      async ({ updateIntervalSec, url, params }) => {
+      async ({ updateIntervalSec, url, params, expectedStatus }) => {
         while (true) {
           const diff = Date.now() - functionStart;
           // Stop after `maxDurationSec` seconds
           if (diff >= maxDurationSec * 1000) {
             break;
           }
-          await axios.get(url, { params });
-          await utils.delay(updateIntervalSec);
+          try {
+            await axios.get(url, { params });
+          } catch (error) {
+            if (
+              axios.isAxiosError(error) &&
+              error.response?.status !== expectedStatus
+            ) {
+              logger.warn({
+                at: "CronPingEndpoints#requestPromises",
+                message: `Failed to ping endpoint ${url}`,
+                error,
+              });
+            }
+          } finally {
+            await utils.delay(updateIntervalSec);
+          }
         }
       }
     );

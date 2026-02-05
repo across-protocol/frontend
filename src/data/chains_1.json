@@ -755,7 +755,7 @@
     "chainId": 324,
     "name": "zkSync",
     "publicRpcUrl": "https://mainnet.era.zksync.io",
-    "explorerUrl": "https://era.zksync.network",
+    "explorerUrl": "https://explorer.zksync.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zk-sync/assets/logo.svg",
     "spokePool": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
     "spokePoolBlock": 10352565,
@@ -1410,47 +1410,6 @@
     ]
   },
   {
-    "chainId": 690,
-    "name": "Redstone",
-    "publicRpcUrl": "https://rpc.redstonechain.com",
-    "explorerUrl": "https://explorer.redstone.xyz",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/redstone/assets/logo.svg",
-    "spokePool": "0x13fDac9F9b4777705db45291bbFF3c972c6d1d97",
-    "spokePoolBlock": 5512122,
-    "inputTokens": [
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      }
-    ],
-    "outputTokens": [
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "WETH",
-        "name": "Wrapped Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
-      },
-      {
-        "address": "0x4200000000000000000000000000000000000006",
-        "symbol": "ETH",
-        "name": "Ether",
-        "decimals": 18,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
-      }
-    ]
-  },
-  {
     "chainId": 7777777,
     "name": "Zora",
     "publicRpcUrl": "https://rpc.zora.energy",
@@ -1624,6 +1583,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ],
     "outputTokens": [
@@ -1640,6 +1606,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   },
@@ -1949,6 +1922,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x111111a1a0667d36bD57c0A9f569b98057111111",
+        "symbol": "USDH",
+        "name": "USDH",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdh.svg"
       },
       {
         "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",

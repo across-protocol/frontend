@@ -12,27 +12,18 @@ import { getOftSponsoredBridgeStrategy } from "./oft-sponsored/strategy";
 import { getAcrossBridgeStrategy } from "./across/strategy";
 import { getOftBridgeStrategy } from "./oft/strategy";
 import { getHyperCoreBridgeStrategy } from "./hypercore/strategy";
-import { getUsdhIntentsBridgeStrategy } from "./sponsored-intent/strategy";
+import { getHyperCoreIntentBridgeStrategy } from "./hypercore-intent/strategy";
 import { routeMintAndBurnStrategy } from "./routing";
 
 export const bridgeStrategies: BridgeStrategiesConfig = {
   default: getAcrossBridgeStrategy(),
-  tokenPairPerRoute: {
-    // TODO: remove once we support Solana origin routes
-    [CHAIN_IDs.SOLANA]: {
-      [CHAIN_IDs.HYPERCORE]: {
-        [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-          [TOKEN_SYMBOLS_MAP["USDH-SPOT"].symbol]:
-            getUsdhIntentsBridgeStrategy(),
-          [TOKEN_SYMBOLS_MAP["USDC-SPOT"].symbol]: getAcrossBridgeStrategy(),
-        },
-      },
-    },
-  },
   tokenPairPerToChain: {
     [CHAIN_IDs.HYPEREVM]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getUsdhIntentsBridgeStrategy(),
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
       },
     },
   },
@@ -65,7 +56,10 @@ export const routableBridgeStrategies = [
   // The actual eligibility is determined by routeStrategyForSponsorship
   getSponsoredCctpBridgeStrategy(true),
   getOftSponsoredBridgeStrategy(true),
-  getUsdhIntentsBridgeStrategy(),
+  getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: true,
+    shouldSponsorAccountCreation: true,
+  }),
 ];
 
 // Priority-ordered routing strategies
@@ -84,6 +78,7 @@ export async function getBridgeStrategy({
   recipient,
   depositor,
   includesActions,
+  includesAppFee,
   routingPreference = "default",
 }: GetBridgeStrategyParams): Promise<BridgeStrategy> {
   const tokenPairPerRouteOverride =
@@ -116,8 +111,8 @@ export async function getBridgeStrategy({
     return fromToChainOverride;
   }
 
-  // Always use Across when actions are present
-  if (includesActions) {
+  // Always use Across when actions or app fees are present
+  if (includesActions || includesAppFee) {
     return getAcrossBridgeStrategy();
   }
 

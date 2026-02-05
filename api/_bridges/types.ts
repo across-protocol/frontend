@@ -100,13 +100,13 @@ export type BridgeStrategy = {
   getBridgeQuoteRecipient: (
     crossSwap: CrossSwap,
     hasOriginSwap?: boolean
-  ) => string;
+  ) => Promise<string>;
 
   getBridgeQuoteMessage: (
     crossSwap: CrossSwap,
     appFee?: AppFee,
     originSwapQuote?: SwapQuote
-  ) => string | undefined;
+  ) => Promise<string | undefined>;
 
   getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) => Promise<{
     bridgeQuote: CrossSwapQuotes["bridgeQuote"];
@@ -125,6 +125,16 @@ export type BridgeStrategy = {
     inputToken: Token;
     outputToken: Token;
   }) => boolean;
+
+  /**
+   * OPTIONAL: For A2B flows, determines what token to swap to on origin chain.
+   * Only implement this if the strategy supports ANY_TO_BRIDGEABLE cross-swap type.
+   * @returns The token to swap to on origin chain, or undefined if cannot determine
+   */
+  resolveOriginSwapTarget?: (params: {
+    inputToken: Token;
+    outputToken: Token;
+  }) => Token | undefined;
 };
 
 export type BridgeStrategyData =
@@ -136,9 +146,8 @@ export type BridgeStrategyData =
       isFastCctpEligible: boolean;
       isInThreshold: boolean;
       isUsdtToUsdt: boolean;
-      isMonadTransfer: boolean;
-      isWithinMonadLimit: boolean;
       isHyperCoreDestination: boolean;
+      hasFastStandardFill: boolean;
     }
   | undefined;
 
@@ -148,6 +157,7 @@ export type BridgeStrategyDataParams = {
   amount: BigNumber;
   amountType: "exactInput" | "exactOutput" | "minOutput";
   includesActions?: boolean;
+  includesAppFee?: boolean;
   recipient: string;
   depositor: string;
   logger?: Logger;

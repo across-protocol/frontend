@@ -3,17 +3,18 @@ import React, { ButtonHTMLAttributes, useEffect } from "react";
 import { ReactComponent as Info } from "assets/icons/info.svg";
 import { ReactComponent as Route } from "assets/icons/route.svg";
 import { ReactComponent as Dollar } from "assets/icons/dollar.svg";
+import { ReactComponent as Gas } from "assets/icons/gas.svg";
 import { ReactComponent as Time } from "assets/icons/time.svg";
 import { ReactComponent as Warning } from "assets/icons/warning_triangle_filled.svg";
-import { COLORS, isDefined } from "utils";
+import { COLORS } from "utils/constants";
+import { isDefined } from "utils/sdk";
 import styled from "@emotion/styled";
 import { Tooltip } from "components/Tooltip";
-import { SwapApprovalApiCallReturnType } from "utils/serverless-api/prod/swap-approval";
+import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { getPriceImpact, getSwapQuoteFees } from "../../utils/fees";
 import { ProviderBadge } from "./BridgeProvider";
 import { useQuoteRequestContext } from "../../hooks/useQuoteRequest/QuoteRequestContext";
 import { useButtonState } from "../../hooks/useButtonState";
-import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 import { useOnConfirm } from "../../hooks/useOnConfirm";
 import { useValidateSwapAndBridge } from "../../hooks/useValidateSwapAndBridge";
 import { useEcosystemAccounts } from "../../../../hooks/useEcosystemAccounts";
@@ -23,6 +24,7 @@ import {
   getProviderFromQuote,
   isBridgeProviderSponsored,
 } from "../../utils/bridgeProvider";
+import { useSwapApprovalAction } from "../../hooks/useSwapApprovalAction";
 
 export type BridgeButtonState =
   | "notConnected"
@@ -35,7 +37,7 @@ export type BridgeButtonState =
 
 interface ConfirmationButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
-  swapQuote: SwapApprovalApiCallReturnType | undefined;
+  swapQuote: SwapApprovalQuote | undefined;
   isQuoteLoading: boolean;
   quoteError: Error | null;
   onConfirm?: () => Promise<void>;
@@ -56,12 +58,9 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
     customDestinationAccount: quoteRequest.customDestinationAccount,
   });
 
-  const approvalAction = useSwapApprovalAction(
-    quoteRequest.originToken?.chainId || 0,
-    swapQuote
-  );
+  const approvalAction = useSwapApprovalAction(quoteRequest, swapQuote);
 
-  const onConfirm = useOnConfirm(quoteRequest, approvalAction);
+  const onConfirm = useOnConfirm(quoteRequest, approvalAction, swapQuote);
 
   const validation = useValidateSwapAndBridge(
     quoteRequest.amount,
@@ -101,6 +100,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         route: "Across V4",
         estimatedTime: "-",
         totalFee: "-",
+        networkFee: "-",
       };
     }
 
@@ -109,6 +109,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       bridgeFeeFormatted,
       swapImpactFormatted,
       swapImpactUsd,
+      originGasFormatted,
     } = getSwapQuoteFees(swapQuote);
 
     const totalSeconds = Math.max(0, Number(swapQuote.expectedFillTime || 0));
@@ -127,6 +128,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
       bridgeFee: bridgeFeeFormatted,
       swapImpact: showSwapImpact ? swapImpactFormatted : undefined,
       estimatedTime: time,
+      networkFee: originGasFormatted,
     };
   }, [swapQuote, originToken, destinationToken, priceImpact?.priceImpact]);
 
@@ -154,6 +156,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
         state={buttonStatus}
         hasQuote={!!swapQuote}
         priceImpact={priceImpact}
+        networkFee={displayValues.networkFee}
         provider={provider}
       >
         <ExpandedDetails>
@@ -176,10 +179,10 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
           <DetailRow>
             <DetailLeft>
               <Dollar width="16px" height="16px" />
-              <span>Total Fee</span>
+              <span>Net Cost</span>
               <Tooltip
-                tooltipId="ConfirmationButton - total fee"
-                body="Sum of bridge and swap fees"
+                tooltipId="ConfirmationButton - net cost"
+                body="Sum of bridge and swap fees."
               >
                 <Info color="inherit" width="16px" height="16px" />
               </Tooltip>
@@ -215,7 +218,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                 <span>Bridge Fee</span>
                 <Tooltip
                   tooltipId="ConfirmationButton - bridge fee"
-                  body="Includes destination gas, relayer fees, and LP fees"
+                  body="Fee charged by the selected route."
                 >
                   <Info color="inherit" width="16px" height="16px" />
                 </Tooltip>
@@ -231,7 +234,7 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
                   <span>Swap Impact</span>
                   <Tooltip
                     tooltipId="ConfirmationButton - Swap impact"
-                    body="Estimated price difference from pool depth and trade size"
+                    body="Change in price caused by liquidity and trade size."
                   >
                     <Info color="inherit" width="16px" height="16px" />
                   </Tooltip>
@@ -243,6 +246,19 @@ export const ConfirmationButton: React.FC<ConfirmationButtonProps> = ({
               </FeeBreakdownRow>
             )}
           </FeeBreakdown>
+          <DetailRow>
+            <DetailLeft>
+              <Gas width="16px" height="16px" />
+              <span>Network Fee</span>
+              <Tooltip
+                tooltipId="ConfirmationButton - network fee"
+                body="Cost includes origin chain gas and, on some routes, a network-level cost."
+              >
+                <Info color="inherit" width="16px" height="16px" />
+              </Tooltip>
+            </DetailLeft>
+            <DetailRight>{displayValues.networkFee}</DetailRight>
+          </DetailRow>
         </ExpandedDetails>
       </ExpandableLabelSection>
       <CoreConfirmationButton

@@ -1,30 +1,29 @@
-import { shortenAddress, isSupportedChainId, getChainInfo } from "utils";
+import { getChainInfo, isSupportedChainId } from "utils/constants";
+import { shortenAddress } from "utils/format";
 
 import solanaLogo from "assets/wallet-logos/solana.svg";
 import Web3Subscribe from "./Web3Subscribe";
 import { Text } from "components/Text";
 
-import { useEnsQuery } from "hooks/useEns";
+import { useReverseNameResolver } from "hooks/useReverseNameResolver";
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
 
 import {
-  ConnectButton,
   BalanceButton,
-  Separator,
-  WalletWrapper,
+  ConnectButton,
   ConnectedAccountChainLogoContainer,
   ConnectedAccountContainer,
+  Separator,
+  WalletWrapper,
 } from "./Wallet.styles";
 
 const Wallet = () => {
   const evmConnection = useConnectionEVM();
   const svmConnection = useConnectionSVM();
 
-  const {
-    data: { ensName },
-  } = useEnsQuery(evmConnection.account);
+  const { ensName, hlName } = useReverseNameResolver(evmConnection.account);
   const { openSidebar } = useSidebarContext();
 
   const evmChainInfo = isSupportedChainId(evmConnection.chainId)
@@ -57,6 +56,7 @@ const Wallet = () => {
             chainName={evmChainInfo.name}
             address={evmConnection.account}
             ensName={ensName}
+            hlName={hlName}
           />
         )}
         {evmConnection.isConnected && svmConnection.isConnected && (
@@ -74,22 +74,43 @@ const Wallet = () => {
   );
 };
 
-const ConnectedAccount = (props: {
+export const ConnectedAccount = (props: {
   chainLogoUrl: string;
   chainName: string;
   address: string;
   ensName?: string | null;
+  hlName?: string | null;
 }) => {
+  const displayName = formatDisplayName(
+    props.address,
+    props.ensName,
+    props.hlName
+  );
+
   return (
     <ConnectedAccountContainer>
       <ConnectedAccountChainLogoContainer>
         <img src={props.chainLogoUrl} alt={props.chainName} />
       </ConnectedAccountChainLogoContainer>
       <Text data-cy="wallet-address" color="grey-400" weight={500}>
-        {props.ensName ?? shortenAddress(props.address, "...", 4)}
+        {displayName}
       </Text>
     </ConnectedAccountContainer>
   );
 };
+
+function formatDisplayName(
+  address: string,
+  ensName: string | null | undefined,
+  hlName: string | null | undefined
+): string {
+  if (hlName) {
+    return hlName;
+  }
+  if (ensName) {
+    return ensName;
+  }
+  return shortenAddress(address, "...", 4);
+}
 
 export default Wallet;

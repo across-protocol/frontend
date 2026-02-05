@@ -1,4 +1,4 @@
-import { COLORS, getChainInfo } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
 import { DepositStatus } from "../types";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckStarPending } from "assets/icons/check-star-ring-opaque-pending.svg";
@@ -144,7 +144,9 @@ const AnimatedLogoWrapper = styled.div<{ completed?: boolean }>`
   border-radius: 48px;
 
   position: relative;
-  overflow: clip;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(circle, white 100%, black 100%);
+  mask-image: radial-gradient(circle, white 100%, black 100%);
 
   background: ${({ completed }) =>
     completed

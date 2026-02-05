@@ -51,6 +51,7 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
     swapImpactUsd: showSwapImpact
       ? swapQuote?.fees?.total.details.swapImpact.amountUsd || "0"
       : "0",
+    originGasUsd: swapQuote?.fees?.originGas?.amountUsd || "0",
   };
 
   return {
@@ -58,10 +59,12 @@ export function getSwapQuoteFees(swapQuote?: SwapApprovalQuote) {
     bridgeFeesUsd: rawValues.bridgeFeesUsd,
     appFeesUsd: rawValues.appFeesUsd,
     swapImpactUsd: rawValues.swapImpactUsd,
+    originGasUsd: rawValues.originGasUsd,
     totalFeeFormatted: formatFeeUsd(rawValues.totalFeeUsd),
     bridgeFeeFormatted: formatFeeUsd(rawValues.bridgeFeesUsd),
     appFeeFormatted: formatFeeUsd(rawValues.appFeesUsd),
     swapImpactFormatted: formatFeeUsd(rawValues.swapImpactUsd),
+    originGasFormatted: formatFeeUsd(rawValues.originGasUsd),
   };
 }
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "../../constants";
 
 export type PoolsApiCall = typeof poolsApiCall;
 

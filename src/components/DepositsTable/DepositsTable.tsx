@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 
 import {
-  HeadRow,
-  headerCells,
   ColumnKey,
   ColumnTooltipRecord,
+  headerCells,
+  HeadRow,
 } from "./HeadRow";
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
@@ -33,7 +33,7 @@ export function DepositsTable({
             <DataRow
               disabledColumns={disabledColumns}
               headerCells={headerCells}
-              key={`${filterKey}${deposit.sourceChainId}-${deposit.depositId}`}
+              key={`${filterKey}${deposit.depositTxHash}-${deposit.depositId}`}
               deposit={deposit}
               onClickSpeedUp={onClickSpeedUp}
             />

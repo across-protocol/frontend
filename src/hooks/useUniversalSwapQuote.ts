@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { AddressZero } from "@ethersproject/constants";
 import axios from "axios";
 
+import { getChainInfo } from "utils/constants";
+import { getConfig } from "utils/config";
 import {
-  getChainInfo,
-  getConfig,
   universalSwapQuoteQueryKey,
   UniversalSwapQuoteQueryKeyParams,
-} from "utils";
+} from "utils/query-keys";
 import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();

@@ -1,7 +1,9 @@
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import { useQuery } from "@tanstack/react-query";
 
-import { getConfig, getBalance, getNativeBalance, hubPoolChainId } from "utils";
+import { hubPoolChainId } from "utils/constants";
+import { getEvmBalance, getNativeBalance } from "utils/token";
+import { getConfig } from "utils/config";
 import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();
@@ -29,7 +31,7 @@ async function fetchUserLiquidityPool(
   tokenSymbol?: string
 ) {
   if (!userAddress || !tokenSymbol) {
-    return;
+    return null;
   }
 
   const { logoURI, symbol, displaySymbol, l1TokenAddress, decimals } =
@@ -38,7 +40,7 @@ async function fetchUserLiquidityPool(
   const [l1Balance, poolStateOfUser] = await Promise.all([
     tokenSymbol === "ETH"
       ? getNativeBalance(hubPoolChainId, userAddress)
-      : getBalance(hubPoolChainId, userAddress, l1TokenAddress),
+      : getEvmBalance(hubPoolChainId, userAddress, l1TokenAddress),
     getApiEndpoint().poolsUser(l1TokenAddress, userAddress),
   ]);
   return {

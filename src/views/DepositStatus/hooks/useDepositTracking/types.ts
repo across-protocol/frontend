@@ -4,9 +4,6 @@ import type {
 } from "@across-protocol/sdk/dist/esm/arch/svm";
 import { BigNumber } from "ethers";
 
-import { Deposit } from "hooks/useDeposits";
-import { FromBridgePagePayload } from "../../types";
-
 export type BridgeProvider =
   | "across"
   | "cctp"
@@ -32,7 +29,7 @@ export type DepositInfo =
     }
   | {
       depositTxHash: string;
-      depositTimestamp: number;
+      depositTimestamp: number | undefined;
       status: "deposit-reverted";
       depositLog: undefined;
       error?: string | undefined;
@@ -62,14 +59,19 @@ export type FillInfo =
       fillTxHash: string;
       fillTxTimestamp: number;
       depositInfo: DepositedInfo;
-      status: "filled" | "fill-reverted";
+      status: "filled";
+      outputAmount: BigNumber;
+    }
+  | {
+      fillTxHash: string;
+      fillTxTimestamp: number;
+      depositInfo: DepositedInfo;
+      status: "fill-reverted";
       outputAmount: BigNumber;
     };
 
-export type FilledInfo = Extract<
-  FillInfo,
-  { status: "filled" | "fill-reverted" }
->;
+export type FilledInfo = Extract<FillInfo, { status: "filled" }>;
+
 // partial taken from https://docs.across.to/reference/api-reference#get-deposit-status
 export type DepositStatusResponse =
   | {
@@ -97,6 +99,18 @@ export type DepositForBurnEvent = {
   mintRecipient: string; // base58 account (20 byte evm address)
 };
 
+export type MintAndWithdrawEvent = {
+  mintRecipient: string;
+  amount: bigint;
+  mintToken: string;
+};
+
+export type FillMetadata = {
+  fillTxHash: string;
+  fillTxTimestamp: number;
+  outputAmount: BigNumber | undefined;
+};
+
 /**
  * Common chain strategy interface
  * Each chain implementation adapts its native types to these normalized interfaces
@@ -106,17 +120,23 @@ export interface IChainStrategy {
    * Get deposit information from a transaction
    * @param txIdOrSignature Transaction hash or signature
    * @param bridgeProvider Bridge provider
-   * @returns Normalized deposit information
+   * @returns Success case deposit information, or throws an error for non-success states
    */
   getDeposit(
     txIdOrSignature: string,
     bridgeProvider: BridgeProvider
-  ): Promise<DepositInfo>;
+  ): Promise<DepositedInfo>;
 
+  /**
+   * Get fill information for a deposit
+   * @param depositInfo Deposit information
+   * @param bridgeProvider Bridge provider
+   * @returns Success case fill information, or throws an error for non-success states
+   */
   getFill(
     depositInfo: DepositedInfo,
     bridgeProvider: BridgeProvider
-  ): Promise<FillInfo>;
+  ): Promise<FilledInfo>;
 
   /**
    * Get fill information for a deposit
@@ -124,7 +144,10 @@ export interface IChainStrategy {
    * @param bridgeProvider Bridge provider
    * @returns Normalized fill information
    */
-  getFillFromRpc(depositInfo: DepositedInfo): Promise<string>;
+  getFillFromRpc(
+    depositInfo: DepositedInfo,
+    bridgeProvider: BridgeProvider
+  ): Promise<string>;
 
   /**
    * Get fill information for a deposit
@@ -133,28 +156,6 @@ export interface IChainStrategy {
    * @returns Normalized fill information
    */
   getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
-
-  /**
-   * Convert deposit information to local storage format
-   * @param depositInfo Normalized deposit information
-   * @param fromBridgePagePayload Bridge page payload containing route and quote details
-   * @returns Local deposit format for storage
-   */
-  convertForDepositQuery(
-    depositInfo: DepositedInfo,
-    fromBridgePagePayload: FromBridgePagePayload
-  ): Deposit;
-
-  /**
-   * Convert fill information to local storage format
-   * @param fillInfo Normalized fill information
-   * @param bridgePayload Bridge payload information
-   * @returns Local deposit format with fill information
-   */
-  convertForFillQuery(
-    fillInfo: FilledInfo,
-    bridgePayload: FromBridgePagePayload
-  ): Deposit;
 
   /**
    * The chain ID this strategy handles

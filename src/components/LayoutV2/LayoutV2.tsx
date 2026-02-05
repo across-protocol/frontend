@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import Footer from "components/Footer";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 type LayoutProp = {
   maxWidth?: number;

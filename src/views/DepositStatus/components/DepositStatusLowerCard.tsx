@@ -2,10 +2,8 @@ import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
 import { SecondaryButton } from "components/Button";
-import {
-  chainIdToRewardsProgramName,
-  getBridgeUrlWithQueryParams,
-} from "utils";
+import { chainIdToRewardsProgramName } from "utils/constants";
+import { getBridgeUrlWithQueryParams } from "utils/url";
 import RewardsProgramCTA from "./RewardsProgramCTA";
 import { TwitterShareCard } from "./TwitterShare/TwitterShareCard";
 
