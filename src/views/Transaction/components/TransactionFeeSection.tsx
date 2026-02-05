@@ -8,9 +8,7 @@ import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as DollarIcon } from "assets/icons/dollar.svg";
 
 import {
-  DetailRowGroup,
   SectionCard,
-  SectionHeader,
   SectionHeaderCollapsible,
 } from "./TransactionSection.styles";
 
