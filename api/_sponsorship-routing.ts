@@ -150,7 +150,7 @@ export async function routeStrategyForSponsorship(
 
   let applicableRule: SponsorshipRoutingRule | null = null;
   let strategy: BridgeStrategy | null = null;
-  const rules = getRouteRules(params) ?? [];
+  const rules = getRouteRules(params);
 
   for (const rule of rules) {
     if (!rule.shouldApply(eligibilityData)) {
@@ -219,15 +219,22 @@ function getRouteRules(params: BridgeStrategyDataParams) {
   );
   const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
 
-  return (
-    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardInputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey]
-      : undefined) ??
-    (wildcardOutputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
-      : undefined)
-  );
+  // Collect all matching rule sets in priority order
+  const allRules: SponsorshipRoutingRule[] = [];
+
+  if (exactKey && SPONSORSHIP_ROUTING_RULES[exactKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[exactKey]);
+  }
+
+  if (wildcardInputKey && SPONSORSHIP_ROUTING_RULES[wildcardInputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardInputKey]);
+  }
+
+  if (wildcardOutputKey && SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]);
+  }
+
+  return allRules;
 }
 
 function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
