@@ -52,7 +52,7 @@ export function AllTransfers() {
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
     refetchInterval: LIVE_REFETCH_INTERVAL,
-    enabled: isFirstPage && !isFiltering,
+    enabled: isFirstPage,
     isLoading: depositsQuery.isLoading,
     isFetching: depositsQuery.isFetching,
   });
@@ -115,7 +115,6 @@ export function AllTransfers() {
               isLiveMode={isLiveMode}
               onToggle={setIsLiveMode}
               disabled={!isEnabled}
-              disabledReason={isFiltering ? "filtering" : "not-first-page"}
             />
           </RightControls>
         </ControlsRow>
