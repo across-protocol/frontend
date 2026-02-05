@@ -1,6 +1,7 @@
 import { createSwapApprovalActionHook } from "./factory";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
+import { useFeatureFlag } from "hooks";
 import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
@@ -23,9 +24,10 @@ export const useSwapApprovalAction = (
 ): SwapApproval => {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
+  const useApiGasParams = useFeatureFlag("api-gas-params");
 
   const evmHook = createSwapApprovalActionHook(
-    new EVMSwapApprovalActionStrategy(connectionEVM)
+    new EVMSwapApprovalActionStrategy(connectionEVM, useApiGasParams)
   );
   const svmHook = createSwapApprovalActionHook(
     new SVMSwapApprovalActionStrategy(connectionSVM, connectionEVM)

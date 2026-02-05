@@ -3,8 +3,14 @@ import { useConnectionEVM } from "hooks/useConnectionEVM";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 
 export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStrategy {
-  constructor(evmConnection: ReturnType<typeof useConnectionEVM>) {
+  private useApiGasParams: boolean;
+
+  constructor(
+    evmConnection: ReturnType<typeof useConnectionEVM>,
+    useApiGasParams: boolean
+  ) {
     super(evmConnection);
+    this.useApiGasParams = useApiGasParams;
   }
 
   private getSigner() {
@@ -56,9 +62,11 @@ export class EVMSwapApprovalActionStrategy extends AbstractSwapApprovalActionStr
       data: swapTx.data,
       value: swapTx.value,
       chainId: swapTx.chainId,
-      gasLimit: swapTx.gas,
-      maxFeePerGas: swapTx.maxFeePerGas,
-      maxPriorityFeePerGas: swapTx.maxPriorityFeePerGas,
+      ...(this.useApiGasParams && {
+        gasLimit: swapTx.gas,
+        maxFeePerGas: swapTx.maxFeePerGas,
+        maxPriorityFeePerGas: swapTx.maxPriorityFeePerGas,
+      }),
     });
     return hash;
   }
