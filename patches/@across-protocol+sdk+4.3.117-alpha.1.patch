@@ -1,7 +1,7 @@
-diff --git a/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js b/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
+diff --git a/node_modules/@across-protocol/sdk/dist/cjs/src/utils/index.js b/node_modules/@across-protocol/sdk/dist/cjs/src/utils/index.js
 index c68d54f..e748391 100644
---- a/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
-+++ b/node_modules/@across-protocol/sdk/dist/cjs/utils/index.js
+--- a/node_modules/@across-protocol/sdk/dist/cjs/src/utils/index.js
++++ b/node_modules/@across-protocol/sdk/dist/cjs/src/utils/index.js
 @@ -31,5 +31,5 @@ tslib_1.__exportStar(require("./ValidatorUtils"), exports);
  tslib_1.__exportStar(require("./AddressUtils"), exports);
  tslib_1.__exportStar(require("./SpokeUtils"), exports);
@@ -10,10 +10,10 @@ index c68d54f..e748391 100644
 +// tslib_1.__exportStar(require("./HyperLiquidUtils"), exports);
  //# sourceMappingURL=index.js.map
 \ No newline at end of file
-diff --git a/node_modules/@across-protocol/sdk/dist/esm/utils/index.js b/node_modules/@across-protocol/sdk/dist/esm/utils/index.js
+diff --git a/node_modules/@across-protocol/sdk/dist/esm/src/utils/index.js b/node_modules/@across-protocol/sdk/dist/esm/src/utils/index.js
 index 7b82231..024903f 100644
---- a/node_modules/@across-protocol/sdk/dist/esm/utils/index.js
-+++ b/node_modules/@across-protocol/sdk/dist/esm/utils/index.js
+--- a/node_modules/@across-protocol/sdk/dist/esm/src/utils/index.js
++++ b/node_modules/@across-protocol/sdk/dist/esm/src/utils/index.js
 @@ -28,5 +28,5 @@ export * from "./ValidatorUtils";
  export * from "./AddressUtils";
  export * from "./SpokeUtils";
