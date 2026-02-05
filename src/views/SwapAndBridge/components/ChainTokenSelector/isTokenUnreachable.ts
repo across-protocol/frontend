@@ -18,6 +18,19 @@ export type RestrictedRoute = {
 
 // hardcoded restricted routes
 const RESTRICTED_ROUTES: RestrictedRoute[] = [
+  // Restrict routes to USDH on HyperCore from chains when there's no USDC to USDH route
+  {
+    fromChainId: [
+      CHAIN_IDs.BLAST,
+      CHAIN_IDs.MODE,
+      CHAIN_IDs.SONEIUM,
+      CHAIN_IDs.ZK_SYNC,
+      CHAIN_IDs.ZORA,
+    ],
+    fromSymbol: ["USDC.e", "USDzC", "USDB"],
+    toChainId: [CHAIN_IDs.HYPERCORE],
+    toSymbol: ["USDH-SPOT"],
+  },
   {
     fromChainId: "*",
     fromSymbol: ["USDT*"],
