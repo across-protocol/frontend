@@ -40,6 +40,20 @@ export function TransactionAdvancedSection({
           </DetailSection>
         )}
 
+        {deposit.exclusiveRelayer &&
+          deposit.exclusiveRelayer !==
+            "0x0000000000000000000000000000000000000000" && (
+            <DetailSection label="Nominated Relayer">
+              <CopyableText
+                color="light-200"
+                textToCopy={deposit.exclusiveRelayer}
+                explorerLink={`${destinationChain.explorerUrl}/address/${deposit.exclusiveRelayer}`}
+              >
+                {shortenAddress(deposit.exclusiveRelayer, "...", 6)}
+              </CopyableText>
+            </DetailSection>
+          )}
+
         <DetailSection label="Relay Hash">
           <CopyableText
             color="light-200"

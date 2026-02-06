@@ -128,21 +128,6 @@ export function TransactionDestinationSection({
           </DetailRowItem>
         )}
 
-        {deposit.exclusiveRelayer &&
-          deposit.exclusiveRelayer !==
-            "0x0000000000000000000000000000000000000000" && (
-            <DetailRowItem>
-              <Text color="grey-400" size="md">
-                Exclusive Relayer
-              </Text>
-              <CopyableAddress
-                color="light-200"
-                address={deposit.exclusiveRelayer}
-                explorerLink={`${destinationChain.explorerUrl}/address/${deposit.exclusiveRelayer}`}
-              />
-            </DetailRowItem>
-          )}
-
         {deposit.fillTx && (
           <DetailRowItem>
             <Text color="grey-400" size="md">
