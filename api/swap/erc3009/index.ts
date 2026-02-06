@@ -7,6 +7,9 @@ import { handleErc3009Swap } from "./_service";
 import { getRequestId, setRequestSpanAttributes } from "../../_request_utils";
 import { sendResponse } from "../../_response_utils";
 import { tracer, processor } from "../../../instrumentation";
+import { ForbiddenError } from "../../_errors";
+import { validateApiKey } from "../../_api-keys";
+import { extractBearerToken } from "../../_auth";
 
 const handler = async (
   request: TypedVercelRequest<BaseSwapQueryParams, SwapBody>,
@@ -24,6 +27,12 @@ const handler = async (
   return tracer.startActiveSpan("swap/erc3009", async (span) => {
     try {
       setRequestSpanAttributes(request, span, requestId);
+
+      const apiKey = extractBearerToken(request);
+      const apiKeyResult = await validateApiKey(apiKey);
+      if (!apiKeyResult?.valid) {
+        throw new ForbiddenError({ message: "Invalid or missing API key" });
+      }
 
       const responseJson = await handleErc3009Swap(request, span);
 
