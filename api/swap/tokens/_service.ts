@@ -13,6 +13,10 @@ import {
   getFallbackTokenLogoURI,
 } from "../../_utils";
 
+const COWSWAP_TOKEN_LIST_URL = "https://files.cow.fi/tokens/CowSwap.json";
+
+const normalizeAddress = (addr: string) => addr?.toLowerCase?.() ?? addr;
+
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json is empty.
 // Uses the same structure as mainnetChains since indirect chains share the same base schema.
 const indirectChains = indirectChainsImport as Array<
@@ -55,7 +59,10 @@ function getUniswapTokens(
         symbol: token.symbol,
         decimals: token.decimals,
         logoUrl: token.logoURI,
-        priceUsd: pricesForLifiTokens[token.chainId]?.[token.address] || null,
+        priceUsd:
+          pricesForLifiTokens[token.chainId]?.[
+            normalizeAddress(token.address)
+          ] || null,
       });
     }
     return acc;
@@ -79,7 +86,10 @@ function getNativeTokensFromLifiTokens(
         symbol: nativeToken.symbol,
         decimals: nativeToken.decimals,
         logoUrl: nativeToken.logoURI,
-        priceUsd: pricesForLifiTokens[chainId]?.[nativeToken.address] || null,
+        priceUsd:
+          pricesForLifiTokens[chainId]?.[
+            normalizeAddress(nativeToken.address)
+          ] || null,
       });
     }
     return acc;
@@ -97,7 +107,7 @@ function getPricesForLifiTokens(lifiTokensResponse: any, chainIds: number[]) {
         if (!acc[chainId]) {
           acc[chainId] = {};
         }
-        acc[chainId][token.address] = token.priceUSD;
+        acc[chainId][normalizeAddress(token.address)] = token.priceUSD;
       });
       return acc;
     },
@@ -125,6 +135,34 @@ function getJupiterTokens(
         priceUsd: token.usdPrice?.toString() || null,
       });
     }
+    return acc;
+  }, []);
+}
+
+function getCowSwapTokens(
+  cowSwapResponse: any,
+  chainIds: number[],
+  pricesForLifiTokens: Record<number, Record<string, string>>
+): SwapToken[] {
+  const tokens = cowSwapResponse?.tokens || [];
+  return tokens.reduce((acc: SwapToken[], token: any) => {
+    if (!chainIds.includes(token.chainId)) {
+      return acc;
+    }
+    const addressNorm = normalizeAddress(token.address);
+    acc.push({
+      chainId: token.chainId,
+      address: token.address,
+      name: token.name,
+      symbol: token.symbol,
+      decimals: token.decimals,
+      logoUrl: token.logoURI,
+      priceUsd:
+        pricesForLifiTokens[token.chainId]?.[addressNorm] ??
+        token.priceUsd ??
+        token.priceUSD ??
+        null,
+    });
     return acc;
   }, []);
 }
@@ -176,13 +214,15 @@ function getIndirectChainTokens(
         const l1Address = tokenInfo.addresses[CHAIN_IDs.MAINNET];
         if (l1Address) {
           priceUsd =
-            pricesForLifiTokens[CHAIN_IDs.MAINNET]?.[l1Address] || null;
+            pricesForLifiTokens[CHAIN_IDs.MAINNET]?.[
+              normalizeAddress(l1Address)
+            ] || null;
         } else {
           const intermediaryAddress =
             tokenInfo.addresses[chain.intermediaryChain];
           priceUsd =
             pricesForLifiTokens[chain.intermediaryChain]?.[
-              intermediaryAddress
+              normalizeAddress(intermediaryAddress)
             ] || null;
         }
       }
@@ -226,7 +266,10 @@ function getSponsoredIntentOutputTokens(
       symbol: usdhToken.symbol,
       decimals: usdhToken.decimals,
       logoUrl: USDH_LOGO_URL,
-      priceUsd: pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[usdhAddress] || "1",
+      priceUsd:
+        pricesForLifiTokens[CHAIN_IDs.HYPEREVM]?.[
+          normalizeAddress(usdhAddress)
+        ] || "1",
     },
   ];
 }
@@ -287,7 +330,9 @@ function getTokensFromEnabledRoutes(
         symbol: displaySymbol,
         decimals: tokenInfo.decimals,
         logoUrl: displayLogoUrl,
-        priceUsd: pricesForLifiTokens[chainId]?.[finalAddress] || null,
+        priceUsd:
+          pricesForLifiTokens[chainId]?.[normalizeAddress(finalAddress)] ||
+          null,
       });
     }
   };
@@ -379,7 +424,9 @@ function replaceUsdtOnNonAcrossChains(
         decimals: 6,
         logoUrl: USDT0_LOGO_URL,
         priceUsd:
-          pricesForLifiTokens[CHAIN_IDs.UNICHAIN]?.[token.address] || null,
+          pricesForLifiTokens[CHAIN_IDs.UNICHAIN]?.[
+            normalizeAddress(token.address)
+          ] || null,
       };
     }
     return token;
@@ -407,12 +454,17 @@ export async function fetchSwapTokensData(
 ): Promise<SwapToken[]> {
   const targetChainIds = filteredChainIds || chainIds;
 
-  const [uniswapTokensResponse, lifiTokensResponse, jupiterTokensResponse] =
-    await Promise.all([
-      axios.get("https://tokens.uniswap.org"),
-      axios.get("https://li.quest/v1/tokens"),
-      axios.get("https://lite-api.jup.ag/tokens/v2/toporganicscore/24h"),
-    ]);
+  const [
+    uniswapTokensResponse,
+    lifiTokensResponse,
+    jupiterTokensResponse,
+    cowSwapTokensResponse,
+  ] = await Promise.all([
+    axios.get("https://tokens.uniswap.org"),
+    axios.get("https://li.quest/v1/tokens"),
+    axios.get("https://lite-api.jup.ag/tokens/v2/toporganicscore/24h"),
+    axios.get(COWSWAP_TOKEN_LIST_URL),
+  ]);
 
   const pricesForLifiTokens = getPricesForLifiTokens(
     lifiTokensResponse.data,
@@ -442,6 +494,14 @@ export async function fetchSwapTokensData(
     pricesForLifiTokens
   );
   responseJson.push(...sponsoredIntentOutputTokens);
+
+  // Add CowSwap curated tokens, priced via LiFi map when available
+  const cowSwapTokens = getCowSwapTokens(
+    cowSwapTokensResponse.data,
+    targetChainIds,
+    pricesForLifiTokens
+  );
+  responseJson.push(...cowSwapTokens);
 
   // Add Uniswap tokens
   const uniswapTokens = getUniswapTokens(
