@@ -3,6 +3,7 @@ import { DepositStatus } from "../types";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckStarPending } from "assets/icons/check-star-ring-opaque-pending.svg";
 import { ReactComponent as CheckStarCompleted } from "assets/icons/check-star-ring-opaque-completed.svg";
+import { ReactComponent as CheckStarFailed } from "assets/icons/check-star-ring-opaque-failed.svg";
 import { externConfigs } from "constants/chains/configs";
 
 const BlurLoadingAnimation = () => (
@@ -17,6 +18,7 @@ type DepositStatusAnimatedIconsParams = {
   fromChainId: number;
   toChainId: number;
   externalProjectId?: string;
+  isSwapFailed?: boolean;
 };
 
 const DepositStatusAnimatedIcons = ({
@@ -24,23 +26,26 @@ const DepositStatusAnimatedIcons = ({
   fromChainId,
   toChainId,
   externalProjectId,
+  isSwapFailed,
 }: DepositStatusAnimatedIconsParams) => {
   const GrayscaleLogoFromChain = getChainInfo(fromChainId).grayscaleLogoSvg;
   const GrayscaleLogoToChain = externalProjectId
     ? externConfigs[externalProjectId].grayscaleLogoSvg
     : getChainInfo(toChainId).grayscaleLogoSvg;
 
+  const isCompleted = status === "filled" && !isSwapFailed;
+
   return (
     <>
       <SVGGradientDefs />
       <TopWrapperAnimationWrapper>
-        <AnimatedLogoWrapper completed={status === "filled"}>
+        <AnimatedLogoWrapper completed={isCompleted}>
           {status === "depositing" && <BlurLoadingAnimation />}
           <LogoWrapper
             status={
-              status === "filled"
+              isCompleted
                 ? "completed"
-                : status === "deposit-reverted"
+                : status === "deposit-reverted" || isSwapFailed
                   ? "pending"
                   : "active"
             }
@@ -49,15 +54,21 @@ const DepositStatusAnimatedIcons = ({
           </LogoWrapper>
         </AnimatedLogoWrapper>
         <Divider />
-        {status === "filled" ? <CheckStarCompleted /> : <CheckStarPending />}
+        {isCompleted ? (
+          <CheckStarCompleted />
+        ) : isSwapFailed ? (
+          <CheckStarFailed />
+        ) : (
+          <CheckStarPending />
+        )}
         <Divider />
-        <AnimatedLogoWrapper completed={status === "filled"}>
+        <AnimatedLogoWrapper completed={isCompleted}>
           {status === "filling" && <BlurLoadingAnimation />}
           <LogoWrapper
             status={
               status === "filling"
                 ? "active"
-                : status === "filled"
+                : isCompleted
                   ? "completed"
                   : "pending"
             }

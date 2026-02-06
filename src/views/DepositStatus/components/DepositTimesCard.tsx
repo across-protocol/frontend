@@ -5,12 +5,13 @@ import { Link } from "react-router-dom";
 import { BigNumber } from "ethers";
 
 import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
+import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
 import { Text } from "components/Text";
-import { getChainInfo, COLORS } from "utils/constants";
+import { getChainInfo, COLORS, getFillTxExplorerLink } from "utils/constants";
 import { getBridgeUrlWithQueryParams } from "utils/url";
 import { formatUSD } from "utils/format";
 import { isDefined } from "utils/sdk";
@@ -23,7 +24,7 @@ import TokenFee from "./TokenFee";
 import EstimatedTable from "./EstimatedTable";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { useResolveFromBridgeAndSwapPagePayload } from "../hooks/useResolveFromBridgeAndSwapPagePayload";
-import { useToken } from "hooks/useToken";
+import { useToken, useTokenFromAddress } from "hooks/useToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { getIntermediaryTokenInfo } from "utils/token";
 
@@ -40,6 +41,12 @@ type Props = {
   inputTokenSymbol: string;
   outputTokenSymbol?: string;
   fromBridgeAndSwapPagePayload?: FromBridgeAndSwapPagePayload;
+  isSwapFailed?: boolean;
+  bridgeOutputToken?: string;
+  bridgeOutputAmount?: BigNumber;
+  // Fallback input data from indexer (when session storage is not available)
+  indexerInputToken?: string;
+  indexerInputAmount?: BigNumber;
 };
 
 export function DepositTimesCard({
@@ -55,6 +62,11 @@ export function DepositTimesCard({
   inputTokenSymbol,
   outputTokenSymbol,
   fromBridgeAndSwapPagePayload,
+  isSwapFailed,
+  bridgeOutputToken,
+  bridgeOutputAmount,
+  indexerInputToken,
+  indexerInputAmount,
 }: Props) {
   const {
     estimatedRewards,
@@ -108,6 +120,30 @@ export function DepositTimesCard({
 
   const { convertTokenToBaseCurrency: convertOutputTokenToUsd } =
     useTokenConversion(outputTokenSymbolForConversion, "usd");
+
+  // Resolve bridge output token for swap failure display
+  const bridgeOutputTokenInfo = useTokenFromAddress(
+    bridgeOutputToken ?? "",
+    toChainId
+  );
+  const { convertTokenToBaseCurrency: convertBridgeOutputTokenToUsd } =
+    useTokenConversion(bridgeOutputTokenInfo?.symbol ?? "", "usd");
+  // Use bridgeOutputAmount (from indexer) for swap failed case, fallback to outputAmount
+  const amountForBridgeOutput = bridgeOutputAmount ?? outputAmount;
+  const bridgeOutputAmountUsd = amountForBridgeOutput
+    ? convertBridgeOutputTokenToUsd(amountForBridgeOutput)
+    : undefined;
+
+  // Resolve fallback input token from indexer (for when session storage is not available)
+  const indexerInputTokenInfo = useTokenFromAddress(
+    indexerInputToken ?? "",
+    fromChainId
+  );
+  const { convertTokenToBaseCurrency: convertIndexerInputTokenToUsd } =
+    useTokenConversion(indexerInputTokenInfo?.symbol ?? "", "usd");
+  const indexerInputAmountUsd = indexerInputAmount
+    ? convertIndexerInputTokenToUsd(indexerInputAmount)
+    : undefined;
 
   // Convert outputAmount to USD
   const outputAmountUsdFromToken = outputAmount
@@ -172,9 +208,16 @@ export function DepositTimesCard({
         )}
       </Row>
       <Row>
-        <Text color="grey-400">Fill time</Text>
+        <Text color="grey-400">
+          {isSwapFailed ? "Destination swap" : "Fill time"}
+        </Text>
         {isDepositing || status === "deposit-reverted" ? (
           <Text>-</Text>
+        ) : isSwapFailed ? (
+          <SwapFailedWrapper>
+            <Text color="error">failed</Text>
+            <CrossIconExplorerLink txHash={fillTxHash} chainId={toChainId} />
+          </SwapFailedWrapper>
         ) : (
           <ElapsedTime
             elapsedSeconds={fillTxElapsedSeconds}
@@ -192,52 +235,108 @@ export function DepositTimesCard({
           />
         )}
       </Row>
-      {(netFee || amountSentBaseCurrency) && <Divider />}
+      {(netFee ||
+        amountSentBaseCurrency ||
+        (indexerInputTokenInfo && isDefined(indexerInputAmountUsd))) && (
+        <Divider />
+      )}
 
+      {/* Amount sent - use session storage data if available, otherwise fallback to indexer */}
       {isDefined(fromBridgeAndSwapPagePayload?.swapQuote?.inputAmount) &&
-        inputToken &&
-        isDefined(amountSentBaseCurrency) && (
+      inputToken &&
+      isDefined(amountSentBaseCurrency) ? (
+        <Row>
+          <Text color="grey-400">Amount sent</Text>
+          <TokenWrapper>
+            <TokenFee
+              token={inputToken}
+              amount={fromBridgeAndSwapPagePayload.swapQuote.inputAmount}
+              tokenChainId={fromChainId}
+              tokenFirst
+              showTokenLinkOnHover
+              textColor="light-100"
+            />
+            <Text color="grey-400">(${formatUSD(amountSentBaseCurrency)})</Text>
+          </TokenWrapper>
+        </Row>
+      ) : (
+        indexerInputTokenInfo &&
+        indexerInputAmount &&
+        isDefined(indexerInputAmountUsd) && (
           <Row>
             <Text color="grey-400">Amount sent</Text>
             <TokenWrapper>
               <TokenFee
-                token={inputToken}
-                amount={fromBridgeAndSwapPagePayload.swapQuote.inputAmount}
+                token={indexerInputTokenInfo}
+                amount={indexerInputAmount}
                 tokenChainId={fromChainId}
                 tokenFirst
                 showTokenLinkOnHover
                 textColor="light-100"
               />
               <Text color="grey-400">
-                (${formatUSD(amountSentBaseCurrency)})
+                (${formatUSD(indexerInputAmountUsd)})
               </Text>
             </TokenWrapper>
           </Row>
-        )}
-      {isDefined(outputAmount) &&
-        outputTokenForDisplay &&
-        isDefined(finalOutputAmountUsd) && (
+        )
+      )}
+      {(isSwapFailed
+        ? isDefined(amountForBridgeOutput)
+        : isDefined(outputAmount)) &&
+        (isSwapFailed
+          ? bridgeOutputTokenInfo && isDefined(bridgeOutputAmountUsd)
+          : outputTokenForDisplay && isDefined(finalOutputAmountUsd)) && (
           <Row>
-            <Text color="grey-400">Amount received</Text>
+            <Text color="grey-400">
+              {isSwapFailed ? "Amount returned" : "Amount received"}
+            </Text>
             <TokenWrapper>
-              <TokenFee
-                token={{
-                  ...outputTokenForDisplay,
-                  decimals:
-                    outputTokenForConversion?.decimals ??
-                    outputTokenForDisplay.decimals,
-                }}
-                amount={outputAmount}
-                tokenChainId={toChainId}
-                tokenFirst
-                showTokenLinkOnHover
-                textColor="light-100"
-              />
-              <Text color="grey-400">(${formatUSD(finalOutputAmountUsd)})</Text>
+              {isSwapFailed &&
+              bridgeOutputTokenInfo &&
+              amountForBridgeOutput ? (
+                <>
+                  <TokenFee
+                    token={bridgeOutputTokenInfo}
+                    amount={amountForBridgeOutput}
+                    tokenChainId={toChainId}
+                    tokenFirst
+                    showTokenLinkOnHover
+                    textColor="light-100"
+                  />
+                  {bridgeOutputAmountUsd !== undefined && (
+                    <Text color="grey-400">
+                      (${formatUSD(bridgeOutputAmountUsd)})
+                    </Text>
+                  )}
+                </>
+              ) : (
+                outputTokenForDisplay &&
+                outputAmount && (
+                  <>
+                    <TokenFee
+                      token={{
+                        ...outputTokenForDisplay,
+                        decimals:
+                          outputTokenForConversion?.decimals ??
+                          outputTokenForDisplay.decimals,
+                      }}
+                      amount={outputAmount}
+                      tokenChainId={toChainId}
+                      tokenFirst
+                      showTokenLinkOnHover
+                      textColor="light-100"
+                    />
+                    <Text color="grey-400">
+                      (${formatUSD(finalOutputAmountUsd ?? 0)})
+                    </Text>
+                  </>
+                )
+              )}
             </TokenWrapper>
           </Row>
         )}
-      {isDefined(outputTokenSymbol) && outputTokenForDisplay && (
+      {isDefined(outputTokenSymbol) && outputTokenForDisplay && inputToken && (
         <EstimatedTable
           {...estimatedRewards}
           // Override USD amounts with values from swapQuote.fees (source of truth)
@@ -293,20 +392,36 @@ function CheckIconExplorerLink({
   txHash?: string;
   chainId: number;
 }) {
-  const chainInfo = getChainInfo(chainId);
-
   if (!txHash) {
     return <CheckIcon />;
   }
 
-  const explorerUrl = chainInfo.intermediaryChain
-    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
-    : chainInfo.constructExplorerLink(txHash);
+  const explorerUrl = getFillTxExplorerLink(chainId, txHash);
 
   return (
     <a href={explorerUrl} target="_blank" rel="noreferrer">
       <CheckIcon />
     </a>
+  );
+}
+
+function CrossIconExplorerLink({
+  txHash,
+  chainId,
+}: {
+  txHash?: string;
+  chainId: number;
+}) {
+  if (!txHash) {
+    return <StyledCrossIcon />;
+  }
+
+  const explorerUrl = getFillTxExplorerLink(chainId, txHash);
+
+  return (
+    <IconWrapper href={explorerUrl} target="_blank" rel="noreferrer">
+      <StyledCrossIcon />
+    </IconWrapper>
   );
 }
 
@@ -391,4 +506,21 @@ const TokenWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+`;
+
+const SwapFailedWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const IconWrapper = styled.a`
+  display: flex;
+  align-items: center;
+`;
+
+const StyledCrossIcon = styled(CrossIcon)`
+  cursor: pointer;
+  color: ${COLORS.error};
 `;

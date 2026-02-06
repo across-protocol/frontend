@@ -145,8 +145,8 @@ export default function Transaction() {
 
   const deposit = depositData.deposit;
 
-  const sourceChainId = parseInt(deposit.originChainId);
-  const destinationChainId = parseInt(deposit.destinationChainId);
+  const sourceChainId = Number(deposit.originChainId);
+  const destinationChainId = Number(deposit.destinationChainId);
   const sourceChain = getChainInfo(sourceChainId);
   const destinationChain = getChainInfo(destinationChainId);
 
@@ -208,7 +208,7 @@ export default function Transaction() {
               formatUSDValue={formatUSDValue}
               formatTimestamp={formatTimestamp}
               explorerLink={sourceChain.constructExplorerLink(
-                deposit.depositTxnRef
+                deposit.depositTxnRef ?? deposit.depositTxHash
               )}
             />
             <TransactionDestinationSection

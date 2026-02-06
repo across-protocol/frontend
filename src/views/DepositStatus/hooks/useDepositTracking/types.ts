@@ -54,6 +54,8 @@ export type FillInfo =
       depositInfo: DepositedInfo;
       status: "filling";
       outputAmount: undefined;
+      actionsSucceeded: undefined;
+      outputToken: undefined;
     }
   | {
       fillTxHash: string;
@@ -61,6 +63,8 @@ export type FillInfo =
       depositInfo: DepositedInfo;
       status: "filled";
       outputAmount: BigNumber;
+      actionsSucceeded: boolean | null;
+      outputToken: string | undefined;
     }
   | {
       fillTxHash: string;
@@ -68,6 +72,8 @@ export type FillInfo =
       depositInfo: DepositedInfo;
       status: "fill-reverted";
       outputAmount: BigNumber;
+      actionsSucceeded: boolean | null;
+      outputToken: string | undefined;
     };
 
 export type FilledInfo = Extract<FillInfo, { status: "filled" }>;
@@ -79,13 +85,24 @@ export type DepositStatusResponse =
       fillTxnRef: null;
       swapOutputToken: string | undefined;
       swapOutputAmount: string | undefined;
+      actionsSucceeded: boolean | null;
+      outputToken: string | undefined;
     }
   | {
       status: "filled";
       fillTxnRef: string;
       swapOutputToken: string | undefined;
       swapOutputAmount: string | undefined;
+      actionsSucceeded: boolean | null;
+      outputToken: string | undefined;
     };
+
+// Return type for getFillFromIndexer
+export type FillFromIndexerResult = {
+  fillTxnRef: string;
+  actionsSucceeded: boolean | null;
+  outputToken: string | undefined;
+};
 
 export type DepositForBurnEvent = {
   amount: bigint;
@@ -153,9 +170,11 @@ export interface IChainStrategy {
    * Get fill information for a deposit
    * @param depositInfo Deposit information
    * @param toChainId Destination chain ID
-   * @returns Normalized fill information
+   * @returns Fill info including fillTxnRef, actionsSucceeded, and outputToken
    */
-  getFillFromIndexer(depositInfo: DepositedInfo): Promise<string>;
+  getFillFromIndexer(
+    depositInfo: DepositedInfo
+  ): Promise<FillFromIndexerResult>;
 
   /**
    * The chain ID this strategy handles

@@ -71,7 +71,7 @@ const useSwapQuote = (quoteRequest: QuoteRequest) => {
           ? customDestinationAccount.address
           : recipientOrPlaceholder,
         amount: debouncedAmount.toString(),
-        refundOnOrigin: true,
+        refundOnOrigin: originToken.symbol === destinationToken.symbol,
         skipOriginTxEstimation,
         integratorId: INTEGRATOR_ID_ACROSS,
       };

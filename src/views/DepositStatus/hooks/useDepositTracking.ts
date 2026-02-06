@@ -214,6 +214,8 @@ export function useDepositTracking({
       depositInfo: depositData,
       status: "filling",
       outputAmount: undefined,
+      actionsSucceeded: undefined,
+      outputToken: undefined,
     };
   }, [fillQuery.data, depositQuery.data]);
 

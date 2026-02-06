@@ -826,3 +826,10 @@ export const chainMaxBlockLookback = mergeConfig(
 );
 
 export const INTEGRATOR_ID_ACROSS = "0x007f";
+
+export function getFillTxExplorerLink(chainId: number, txHash: string): string {
+  const chainInfo = getChainInfo(chainId);
+  return chainInfo.intermediaryChain
+    ? getChainInfo(chainInfo.intermediaryChain).constructExplorerLink(txHash)
+    : chainInfo.constructExplorerLink(txHash);
+}

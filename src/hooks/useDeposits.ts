@@ -6,6 +6,8 @@ import { depositsQueryKey, userDepositsQueryKey } from "utils/query-keys";
 import { getConfig } from "utils/config";
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
+import { IndexerDeposit } from "./useDepositStatus";
+export type { IndexerDeposit } from "./useDepositStatus";
 
 export type DepositStatus =
   | "pending"
@@ -112,50 +114,6 @@ export type GetDepositResponse = {
   deposit: Deposit;
 };
 
-export type IndexerDeposit = {
-  id: number;
-  relayHash: string;
-  depositId: string;
-  originChainId: number;
-  destinationChainId: number;
-  depositor: string;
-  recipient: string;
-  inputToken: string;
-  inputAmount: string;
-  outputToken: string;
-  outputAmount: string;
-  message: string;
-  messageHash: string;
-  exclusiveRelayer: string;
-  exclusivityDeadline: string;
-  fillDeadline: string;
-  quoteTimestamp: string;
-  depositTransactionHash: string;
-  depositTxHash: string;
-  depositBlockNumber: number;
-  depositBlockTimestamp: string;
-  status: "unfilled" | "filled";
-  depositRefundTxHash: string;
-  swapTokenPriceUsd: string;
-  swapFeeUsd: string;
-  bridgeFeeUsd: string;
-  inputPriceUsd: string;
-  outputPriceUsd: string;
-  fillGasFee: string;
-  fillGasFeeUsd: string;
-  fillGasTokenPriceUsd: string;
-  swapTransactionHash: string;
-  swapToken: string;
-  swapTokenAmount: string;
-  relayer: string;
-  fillBlockTimestamp: string;
-  fillTx: string;
-  swapOutputToken?: string;
-  swapOutputTokenAmount?: string;
-  speedups: any[];
-  actionsTargetChainId?: number | string;
-};
-
 export type GetIndexerDepositsResponse = IndexerDeposit[];
 
 export function useDeposits(
@@ -248,23 +206,25 @@ async function getDeposits(
   // This will be removed once this is handled correctly in the indexer.
   data.forEach((deposit) => {
     const usdcOnOrigin = getConfig().getTokenInfoBySymbolSafe(
-      deposit.originChainId,
+      Number(deposit.originChainId),
       "USDT"
     );
     const usdcOnDestination = getConfig().getTokenInfoBySymbolSafe(
-      deposit.destinationChainId,
+      Number(deposit.destinationChainId),
       "USDT"
     );
     if (
       deposit.inputToken.toLowerCase() ===
-        OFT_MESSENGERS.USDT[deposit.originChainId]?.toLowerCase() &&
+        OFT_MESSENGERS.USDT[Number(deposit.originChainId)]?.toLowerCase() &&
       usdcOnOrigin
     ) {
       deposit.inputToken = usdcOnOrigin?.address;
     }
     if (
       deposit.outputToken.toLowerCase() ===
-        OFT_MESSENGERS.USDT[deposit.destinationChainId]?.toLowerCase() &&
+        OFT_MESSENGERS.USDT[
+          Number(deposit.destinationChainId)
+        ]?.toLowerCase() &&
       usdcOnDestination
     ) {
       deposit.outputToken = usdcOnDestination?.address;
