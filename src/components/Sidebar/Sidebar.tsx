@@ -3,7 +3,7 @@ import { Sidebar as ReactProSidebar, sidebarClasses } from "react-pro-sidebar";
 import { useSidebarContext } from "hooks/useSidebarContext";
 import { NavigationContent } from "./components/NavigationContent";
 import { WalletContent } from "./components/WalletContent";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 const sidebarWidth = "484px";
 

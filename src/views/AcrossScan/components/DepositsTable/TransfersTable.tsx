@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 import {
   ColumnKey,
   ColumnTooltipRecord,

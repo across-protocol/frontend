@@ -1,6 +1,6 @@
 import { useContext, createContext, ReactNode } from "react";
 
-import { amplitudeAPIKey } from "utils";
+import { amplitudeAPIKey } from "utils/constants";
 
 import { useLoadAmpli } from "./useLoadAmpli";
 import { useInitialUserPropTraces } from "./useInitialUserPropTraces";

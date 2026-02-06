@@ -1,21 +1,26 @@
-import { getChainInfo, getConfig } from "utils";
 import { Text } from "components/Text";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import {
+  calculateUsdValue,
+  formatUnitsWithMaxFractions,
+  shortenAddress,
+} from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
+import { useTokenFromAddress } from "hooks/useToken";
 import {
-  SectionCard,
-  SectionHeader,
   ChainBadge,
   ChainIcon,
-  HeaderRight,
-  ExplorerLinkButton,
   DetailRowGroup,
   DetailRowItem,
+  ExplorerLinkButton,
+  HeaderRight,
+  SectionCard,
+  SectionHeader,
   TokenDisplay,
   TokenIcon,
 } from "./TransactionSection.styles";
+import { getChainInfo } from "utils/constants";
 
 type TransactionDestinationSectionProps = {
   deposit: any;
@@ -32,11 +37,10 @@ export function TransactionDestinationSection({
   formatTimestamp,
   explorerLink,
 }: TransactionDestinationSectionProps) {
-  const config = getConfig();
   const destinationChain = getChainInfo(destinationChainId);
-  const outputToken = config.getTokenInfoByAddressSafe(
-    destinationChainId,
-    deposit.outputToken
+  const outputToken = useTokenFromAddress(
+    deposit.outputToken,
+    destinationChainId
   );
 
   return (
@@ -97,7 +101,15 @@ export function TransactionDestinationSection({
             </Text>
             <Text color="grey-400" size="sm">
               {" "}
-              {formatUSDValue(deposit.outputPriceUsd)}
+              {formatUSDValue(
+                outputToken
+                  ? calculateUsdValue(
+                      deposit.outputAmount,
+                      outputToken.decimals,
+                      deposit.outputPriceUsd
+                    )
+                  : null
+              )}
             </Text>
           </div>
         </DetailRowItem>
@@ -127,21 +139,6 @@ export function TransactionDestinationSection({
             />
           </DetailRowItem>
         )}
-
-        {deposit.exclusiveRelayer &&
-          deposit.exclusiveRelayer !==
-            "0x0000000000000000000000000000000000000000" && (
-            <DetailRowItem>
-              <Text color="grey-400" size="md">
-                Exclusive Relayer
-              </Text>
-              <CopyableAddress
-                color="light-200"
-                address={deposit.exclusiveRelayer}
-                explorerLink={`${destinationChain.explorerUrl}/address/${deposit.exclusiveRelayer}`}
-              />
-            </DetailRowItem>
-          )}
 
         {deposit.fillTx && (
           <DetailRowItem>

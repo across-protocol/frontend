@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS } from "utils";
+import { COLORS } from "utils/constants";
 
 export const TokenInputWrapper = styled.div`
   display: flex;

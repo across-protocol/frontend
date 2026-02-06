@@ -1,15 +1,17 @@
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useIsWrongNetwork } from "hooks/useIsWrongNetwork";
+import { useApprove } from "hooks/useApprove";
+import { useStakingPool } from "hooks/useStakingPool";
 import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
 import {
-  getConfig,
   hubPoolChainId,
   hubPoolAddress,
-  waitOnTransaction,
   fixedPointAdjustment,
-} from "utils";
-import { useIsWrongNetwork, useApprove, useStakingPool } from "hooks";
+} from "utils/constants";
+import { waitOnTransaction } from "utils/notify";
+import { getConfig } from "utils/config";
 
 import { useUserLiquidityPool } from "./useUserLiquidityPool";
 import { useLiquidityPool } from "./useLiquidityPool";

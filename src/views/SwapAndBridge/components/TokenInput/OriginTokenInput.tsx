@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SelectorButton from "../ChainTokenSelector/SelectorButton";
 import { BalanceSelector } from "../BalanceSelector";
 import {
@@ -51,6 +51,8 @@ export const OriginTokenInput = ({
     balance
   );
 
+  const [isWrapperHovered, setIsWrapperHovered] = useState(false);
+
   useEffect(() => {
     if (
       !inputDisabled &&
@@ -65,7 +67,10 @@ export const OriginTokenInput = ({
   const displayAmount = shouldUpdate ? expectedAmount : quoteRequest.amount;
 
   return (
-    <TokenInputWrapper>
+    <TokenInputWrapper
+      onMouseEnter={() => setIsWrapperHovered(true)}
+      onMouseLeave={() => setIsWrapperHovered(false)}
+    >
       <TokenAmountStack>
         <TokenAmountInputTitle>From</TokenAmountInputTitle>
         <AmountInput
@@ -100,9 +105,9 @@ export const OriginTokenInput = ({
         {originToken ? (
           <BalanceSelector
             token={originToken}
-            disableHover={false}
             error={insufficientBalance}
             setAmount={setOriginAmount}
+            isHovered={isWrapperHovered}
           />
         ) : (
           <BalancePlaceholder />

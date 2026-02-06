@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "components/Button";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 export const Container = styled.div`
   background-color: transparent;

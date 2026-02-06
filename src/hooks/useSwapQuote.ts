@@ -1,7 +1,8 @@
 import { BigNumber } from "ethers";
 import { useQuery } from "@tanstack/react-query";
 
-import { getConfig, swapQuoteQueryKey, SwapQuoteQueryKeyParams } from "utils";
+import { getConfig } from "utils/config";
+import { swapQuoteQueryKey, SwapQuoteQueryKeyParams } from "utils/query-keys";
 import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();

@@ -2,7 +2,8 @@ import styled from "@emotion/styled";
 import { BigNumberish, utils } from "ethers";
 
 import { Text } from "components/Text";
-import { COLORS, formatWeiPct, getChainInfo } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
+import { formatWeiPct } from "utils/format";
 
 import {
   appendPercentageSign,

@@ -1,40 +1,20 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
-import { COLORS } from "utils";
-
-type DisabledReason = "filtering" | "not-first-page";
+import { COLORS } from "utils/constants";
 
 type Props = {
   isLiveMode: boolean;
   onToggle: (value: boolean) => void;
   disabled: boolean;
-  disabledReason?: DisabledReason;
 };
 
-const getTooltipContent = (reason: DisabledReason) => {
-  const messages = {
-    filtering: {
-      title: "Live updates disabled during filtering",
-      body: "Clear the filters to enable live updates",
-    },
-    "not-first-page": {
-      title: "Live updates only available on first page",
-      body: "Navigate to the first page to enable live updates",
-    },
-  };
-
-  return messages[reason];
+const tooltipContent = {
+  title: "Live updates only available on first page",
+  body: "Navigate to the first page to enable live updates",
 };
 
-export function LiveToggle({
-  isLiveMode,
-  onToggle,
-  disabled,
-  disabledReason = "not-first-page",
-}: Props) {
-  const tooltipContent = getTooltipContent(disabledReason);
-
+export function LiveToggle({ isLiveMode, onToggle, disabled }: Props) {
   const toggle = (
     <ToggleContainer disabled={disabled}>
       <LiveIndicator isActive={isLiveMode && !disabled} />

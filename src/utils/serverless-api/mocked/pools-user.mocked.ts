@@ -1,6 +1,7 @@
 import { PoolsUserQueryData } from "../prod/pools-user";
-import { parseUnits } from "utils/format";
-import { getConfig, hubPoolChainId } from "utils";
+import { parseUnits } from "../../format";
+import { getConfig } from "../../config";
+import { hubPoolChainId } from "../../constants";
 
 export async function poolsUserApiCall(
   l1Token: string,

@@ -1,15 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import {
-  COLORS,
-  getChainInfo,
-  getNativeTokenSymbol,
-  getToken,
-  QUERIESV2,
-} from "utils";
+import { COLORS, getChainInfo, getToken, QUERIESV2 } from "utils/constants";
+import { getNativeTokenSymbol } from "utils/sdk";
 import { Text } from "components/Text";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
 import { CenteredMessage } from "./components/CenteredMessage";

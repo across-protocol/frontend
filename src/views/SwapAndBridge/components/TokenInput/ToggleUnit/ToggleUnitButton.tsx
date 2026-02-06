@@ -1,13 +1,9 @@
 import { useCallback, useMemo } from "react";
 import { BigNumber } from "ethers";
 import { EnrichedToken } from "../../ChainTokenSelector/ChainTokenSelectorModal";
-import {
-  convertTokenToUSD,
-  convertUSDToToken,
-  formatUnitsWithMaxFractions,
-  formatUSD,
-  withOpacity,
-} from "../../../../../utils";
+import { convertTokenToUSD, convertUSDToToken } from "utils/token";
+import { formatUnitsWithMaxFractions, formatUSD } from "utils/format";
+import { withOpacity } from "utils/colors";
 import { formatUnits } from "ethers/lib/utils";
 import styled from "@emotion/styled";
 import { useTrackToggleUnit } from "./useTrackToggleUnit";

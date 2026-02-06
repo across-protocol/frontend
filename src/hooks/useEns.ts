@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ChainId, getProvider, isDefined, isEvmAddress } from "utils";
+import { ChainId } from "utils/constants";
+import { getProvider } from "utils/providers";
+import { isDefined } from "utils/sdk";
+import { isEvmAddress } from "utils/address";
 
 export function useEnsQuery(address?: string) {
   const result = useQuery({

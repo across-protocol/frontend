@@ -1,18 +1,23 @@
-import { COLORS, getChainInfo, getConfig } from "utils";
+import { COLORS, getChainInfo } from "utils/constants";
 import { Text } from "components/Text";
-import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
+import {
+  calculateUsdValue,
+  formatUnitsWithMaxFractions,
+  shortenAddress,
+} from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
+import { useTokenFromAddress } from "hooks/useToken";
 import {
-  SectionCard,
-  SectionHeader,
   ChainBadge,
   ChainIcon,
-  HeaderRight,
-  ExplorerLinkButton,
   DetailRowGroup,
   DetailRowItem,
+  ExplorerLinkButton,
+  HeaderRight,
+  SectionCard,
+  SectionHeader,
   TokenDisplay,
   TokenIcon,
 } from "./TransactionSection.styles";
@@ -32,12 +37,8 @@ export function TransactionSourceSection({
   formatTimestamp,
   explorerLink,
 }: TransactionSourceSectionProps) {
-  const config = getConfig();
   const sourceChain = getChainInfo(sourceChainId);
-  const inputToken = config.getTokenInfoByAddressSafe(
-    sourceChainId,
-    deposit.inputToken
-  );
+  const inputToken = useTokenFromAddress(deposit.inputToken, sourceChainId);
 
   return (
     <SectionCard>
@@ -92,7 +93,15 @@ export function TransactionSourceSection({
             </Text>
             <Text color="grey-400" size="sm">
               {" "}
-              {formatUSDValue(deposit.inputPriceUsd)}
+              {formatUSDValue(
+                inputToken
+                  ? calculateUsdValue(
+                      deposit.inputAmount,
+                      inputToken.decimals,
+                      deposit.inputPriceUsd
+                    )
+                  : null
+              )}
             </Text>
           </div>
         </DetailRowItem>

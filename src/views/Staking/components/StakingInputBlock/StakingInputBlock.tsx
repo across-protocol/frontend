@@ -4,8 +4,8 @@ import {
   Wrapper,
   StakeButtonContentWrapper,
 } from "./StakingInputBlock.styles";
-import { trackMaxButtonClicked } from "utils";
-import { useAmplitude } from "hooks";
+import { trackMaxButtonClicked } from "utils/amplitude";
+import { useAmplitude } from "hooks/useAmplitude";
 import { AmountInput } from "components/AmountInput";
 
 interface Props {

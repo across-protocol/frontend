@@ -1,12 +1,9 @@
 import { BigNumber } from "ethers";
-import { useConnection, useRewardSummary } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useRewardSummary } from "hooks/useRewardSummary";
 import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
-import {
-  formatUnitsWithMaxFractionsFnBuilder,
-  getToken,
-  rewardProgramTypes,
-  rewardPrograms,
-} from "utils";
+import { getToken, rewardProgramTypes, rewardPrograms } from "utils/constants";
+import { formatUnitsWithMaxFractionsFnBuilder } from "utils/format";
 
 export type GenericRewardClaimCardDisconnectedStateProps = {
   title: string;

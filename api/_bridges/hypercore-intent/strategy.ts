@@ -4,7 +4,12 @@ import {
   BridgeCapabilities,
   GetOutputBridgeQuoteParams,
 } from "../types";
-import { CrossSwap, CrossSwapQuotes, Token } from "../../_dexes/types";
+import {
+  CrossSwap,
+  CrossSwapQuotes,
+  SwapQuote,
+  Token,
+} from "../../_dexes/types";
 import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import {
   getDepositMessage,
@@ -13,10 +18,19 @@ import {
   getDepositRecipient,
   assertSupportedRoute,
 } from "./utils/common";
+import {
+  BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
+  INTERNALIZED_SWAP_PAIRS,
+  SUPPORTED_OUTPUT_TOKENS,
+} from "./utils/constants";
 import { getUsdhIntentQuote } from "./utils/quote";
 import { buildTxEvm, buildTxSvm } from "./utils/tx-builder";
-import { ConvertDecimals } from "../../_utils";
+import { ConvertDecimals, getTokenByAddress } from "../../_utils";
 import { getAcrossBridgeStrategy } from "../across/strategy";
+import {
+  assertAccountExistsOnHyperCore,
+  isToHyperCore,
+} from "../../_hypercore";
 
 const SPONSORED_PROVIDER_NAME = "sponsored-intent" as const;
 const UNSPONSORED_PROVIDER_NAME = "across" as const;
@@ -25,7 +39,7 @@ const capabilities: BridgeCapabilities = {
   ecosystems: ["evm", "svm"],
   supports: {
     A2A: false,
-    A2B: false,
+    A2B: true,
     B2A: false,
     B2B: true,
     B2BI: false,
@@ -38,8 +52,15 @@ const capabilities: BridgeCapabilities = {
  * Supports both sponsored and unsponsored flows via isEligibleForSponsorship flag.
  */
 export function getHyperCoreIntentBridgeStrategy(
-  isEligibleForSponsorship: boolean
+  opt?: Partial<{
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }>
 ): BridgeStrategy {
+  const isEligibleForSponsorship = opt?.isEligibleForSponsorship ?? false;
+  const shouldSponsorAccountCreation =
+    opt?.shouldSponsorAccountCreation ?? false;
+
   const name = isEligibleForSponsorship
     ? SPONSORED_PROVIDER_NAME
     : UNSPONSORED_PROVIDER_NAME;
@@ -56,14 +77,43 @@ export function getHyperCoreIntentBridgeStrategy(
       isOutputNative: boolean;
     }) => {
       if (
-        isRouteSupported({
+        !isRouteSupported({
           inputToken: params.inputToken,
           outputToken: params.outputToken,
         })
       ) {
-        return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
+        return [];
       }
-      return [];
+
+      const supportedOutputToken = SUPPORTED_OUTPUT_TOKENS.find(
+        (token) =>
+          token.addresses[params.outputToken.chainId]?.toLowerCase() ===
+          params.outputToken.address.toLowerCase()
+      )!;
+
+      const requiredBridgeableToken =
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
+          supportedOutputToken.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
+        ]!;
+
+      // Check if input token matches the required bridgeable token
+      const inputMatchesBridgeableToken =
+        requiredBridgeableToken.addresses[
+          params.inputToken.chainId
+        ]?.toLowerCase() === params.inputToken.address.toLowerCase();
+
+      // Check if this is an internalized swap pair (e.g., USDC → USDH)
+      const isInternalizedSwapPair = INTERNALIZED_SWAP_PAIRS.some(
+        (pair) =>
+          pair.inputToken === params.inputToken.symbol &&
+          pair.outputToken === supportedOutputToken.symbol
+      );
+
+      if (inputMatchesBridgeableToken || isInternalizedSwapPair) {
+        return [CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE];
+      } else {
+        return [CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE];
+      }
     },
 
     getBridgeQuoteRecipient: async (
@@ -73,7 +123,11 @@ export function getHyperCoreIntentBridgeStrategy(
       return crossSwap.recipient;
     },
 
-    getBridgeQuoteMessage: async (crossSwap: CrossSwap, _appFee?: AppFee) => {
+    getBridgeQuoteMessage: async (
+      crossSwap: CrossSwap,
+      _appFee?: AppFee,
+      _originSwapQuote?: SwapQuote
+    ) => {
       return getDepositMessage({
         outputToken: crossSwap.outputToken,
         recipient: crossSwap.recipient,
@@ -81,10 +135,18 @@ export function getHyperCoreIntentBridgeStrategy(
     },
 
     getQuoteForExactInput: (params: GetExactInputBridgeQuoteParams) =>
-      getQuoteForExactInput({ ...params, isEligibleForSponsorship }),
+      getQuoteForExactInput({
+        ...params,
+        isEligibleForSponsorship,
+        shouldSponsorAccountCreation,
+      }),
 
     getQuoteForOutput: (params: GetOutputBridgeQuoteParams) =>
-      getQuoteForOutput({ ...params, isEligibleForSponsorship }),
+      getQuoteForOutput({
+        ...params,
+        isEligibleForSponsorship,
+        shouldSponsorAccountCreation,
+      }),
 
     buildTxForAllowanceHolder: async (params: {
       quotes: CrossSwapQuotes;
@@ -98,6 +160,39 @@ export function getHyperCoreIntentBridgeStrategy(
     },
 
     isRouteSupported,
+
+    resolveOriginSwapTarget: (params: {
+      inputToken: Token;
+      outputToken: Token;
+    }) => {
+      // Get output token info
+      const outputTokenInfo = getTokenByAddress(
+        params.outputToken.address,
+        params.outputToken.chainId
+      );
+
+      if (!outputTokenInfo) return undefined;
+
+      const bridgeableTokenInfo =
+        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
+          outputTokenInfo.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
+        ];
+
+      if (!bridgeableTokenInfo) return undefined;
+
+      const bridgeableTokenAddress =
+        bridgeableTokenInfo.addresses[params.inputToken.chainId];
+
+      if (!bridgeableTokenAddress) return undefined;
+
+      // Return the bridgeable token
+      return {
+        address: bridgeableTokenAddress,
+        decimals: bridgeableTokenInfo.decimals,
+        symbol: bridgeableTokenInfo.symbol,
+        chainId: params.inputToken.chainId,
+      };
+    },
   };
 }
 
@@ -106,11 +201,25 @@ export function getHyperCoreIntentBridgeStrategy(
  * Routes between sponsored (zero fees) and unsponsored (Across fees) flows.
  */
 export async function getQuoteForExactInput(
-  params: GetExactInputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+  params: GetExactInputBridgeQuoteParams & {
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }
 ): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, exactInputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
+
+  if (
+    isToHyperCore(outputToken.chainId) &&
+    !params.shouldSponsorAccountCreation
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
 
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: use zero fees and 1:1 conversion
@@ -152,6 +261,15 @@ export async function getQuoteForExactInput(
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        // Convert outputAmount from bridgeable token decimals to output token decimals
+        outputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.outputAmount),
+        minOutputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.minOutputAmount),
       },
     };
   }
@@ -162,11 +280,25 @@ export async function getQuoteForExactInput(
  * Routes between sponsored (zero fees) and unsponsored (Across fees) flows.
  */
 export async function getQuoteForOutput(
-  params: GetOutputBridgeQuoteParams & { isEligibleForSponsorship: boolean }
+  params: GetOutputBridgeQuoteParams & {
+    isEligibleForSponsorship: boolean;
+    shouldSponsorAccountCreation: boolean;
+  }
 ): Promise<{ bridgeQuote: CrossSwapQuotes["bridgeQuote"] }> {
   const { inputToken, outputToken, minOutputAmount, recipient } = params;
 
   assertSupportedRoute({ inputToken, outputToken });
+
+  if (
+    isToHyperCore(outputToken.chainId) &&
+    !params.shouldSponsorAccountCreation
+  ) {
+    await assertAccountExistsOnHyperCore({
+      account: recipient,
+      chainId: outputToken.chainId,
+      paramName: "recipient",
+    });
+  }
 
   if (params.isEligibleForSponsorship) {
     // Sponsored flow: convert output amount to input amount (1:1 conversion)
@@ -201,10 +333,16 @@ export async function getQuoteForOutput(
     const depositRecipient = getDepositRecipient({ outputToken, recipient });
     const depositMessage = getDepositMessage({ outputToken, recipient });
 
+    // Convert minOutputAmount from output token decimals to bridgeable token decimals
+    const minOutputAmountInBridgeableDecimals = ConvertDecimals(
+      outputToken.decimals,
+      bridgeableOutputToken.decimals
+    )(minOutputAmount);
+
     const acrossQuote = await getAcrossBridgeStrategy().getQuoteForOutput({
       inputToken,
       outputToken: bridgeableOutputToken,
-      minOutputAmount,
+      minOutputAmount: minOutputAmountInBridgeableDecimals,
       recipient: depositRecipient,
       message: depositMessage,
     });
@@ -214,6 +352,15 @@ export async function getQuoteForOutput(
         ...acrossQuote.bridgeQuote,
         inputToken,
         outputToken,
+        // Convert outputAmount from bridgeable token decimals to output token decimals
+        outputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.outputAmount),
+        minOutputAmount: ConvertDecimals(
+          bridgeableOutputToken.decimals,
+          outputToken.decimals
+        )(acrossQuote.bridgeQuote.minOutputAmount),
       },
     };
   }

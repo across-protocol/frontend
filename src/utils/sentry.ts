@@ -17,6 +17,14 @@ if (isSentryEnabled && isProductionBuild) {
       "Internal JSON-RPC error",
       "JsonRpcEngine",
       "Non-Error promise rejection captured with keys: code",
+      /user rejected/i,
+      /user denied/i,
+      /user disapproved/i,
+      /rejected the request/i,
+      /transaction canceled/i,
+      /request expired/i,
+      /proposal expired/i,
+      /approval denied/i,
     ],
 
     denyUrls: [

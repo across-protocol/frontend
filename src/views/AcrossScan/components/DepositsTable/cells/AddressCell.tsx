@@ -4,7 +4,7 @@ import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { shortenAddress } from "utils";
+import { shortenAddress } from "utils/format";
 import { useEnsQuery } from "hooks/useEns";
 
 type Props = {

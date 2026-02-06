@@ -1,8 +1,9 @@
 import styled from "@emotion/styled";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 import { ReactComponent as ChevronDownIcon } from "assets/icons/chevron-down.svg";
-import { COLORS } from "utils";
+import useClickOutside from "hooks/useClickOutside";
+import { COLORS } from "utils/constants";
 import { DepositStatusFilter } from "utils/types";
 
 type StatusFilterProps = {
@@ -25,19 +26,7 @@ export function StatusFilter({ value, onChange }: StatusFilterProps) {
 
   const selectedOption = STATUS_OPTIONS.find((opt) => opt.value === value);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(containerRef, () => setIsOpen(false));
 
   return (
     <FilterContainer ref={containerRef}>

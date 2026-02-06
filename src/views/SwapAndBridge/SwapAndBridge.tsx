@@ -1,4 +1,4 @@
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import styled from "@emotion/styled";
 import { InputForm } from "./components/InputForm";
 import {

@@ -1,8 +1,9 @@
 import styled from "@emotion/styled";
 
 import BackgroundUrl from "assets/bg-banners/transparent-banner.svg";
-import { COLORS } from "utils";
-import { SecondaryButton, Text } from "components";
+import { COLORS } from "utils/constants";
+import { SecondaryButton } from "components/Button";
+import { Text } from "components/Text";
 
 type GenericEmptyTableProps = {
   programName: string;

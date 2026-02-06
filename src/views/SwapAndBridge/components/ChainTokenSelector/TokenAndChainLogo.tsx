@@ -1,7 +1,7 @@
 import { ChainInfo } from "../../../../constants/chains";
 import styled from "@emotion/styled";
-import { TokenImage } from "../../../../components";
-import { COLORS } from "../../../../utils";
+import { TokenImage } from "components/TokenImage";
+import { COLORS } from "utils/constants";
 
 export function TokenAndChainLogo(props: {
   src: string;

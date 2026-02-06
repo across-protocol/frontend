@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS, QUERIESV2 } from "utils/constants";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
@@ -8,9 +8,7 @@ import { ReactComponent as ChevronIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as DollarIcon } from "assets/icons/dollar.svg";
 
 import {
-  DetailRowGroup,
   SectionCard,
-  SectionHeader,
   SectionHeaderCollapsible,
 } from "./TransactionSection.styles";
 

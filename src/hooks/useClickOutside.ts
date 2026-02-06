@@ -1,6 +1,6 @@
 import { MutableRefObject, useEffect } from "react";
 
-export default function useClickOutsideModal(
+export default function useClickOutside(
   ref: MutableRefObject<any>,
   callback: () => void
 ) {

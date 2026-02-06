@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 
-import { trackWalletConnectTransactionCompleted, chainInfoTable } from "utils";
+import { trackWalletConnectTransactionCompleted } from "utils/amplitude";
+import { chainInfoTable } from "utils/constants";
 import { ampli } from "ampli";
-import { useConnection, useAmplitude } from "hooks";
+import { useConnection } from "hooks/useConnection";
+import { useAmplitude } from "hooks/useAmplitude";
 
 export function useWalletTrace() {
   useWalletNetworkTrace();

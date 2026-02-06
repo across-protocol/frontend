@@ -20,19 +20,10 @@ export const bridgeStrategies: BridgeStrategiesConfig = {
   tokenPairPerToChain: {
     [CHAIN_IDs.HYPEREVM]: {
       [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy(true),
-      },
-    },
-    // NOTE: Disable subset of HyperCore destination routes via mint/burn routes until we
-    // fully support them. We force return the Across bridge strategy here to avoid
-    // routing to via our algorithm. TODO until we can enable these routes:
-    // - https://linear.app/uma/issue/ACX-4895/api-return-swap-fees-for-unsponsored-flows
-    [CHAIN_IDs.HYPERCORE]: {
-      [TOKEN_SYMBOLS_MAP.USDC.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDT-SPOT"].symbol]: getAcrossBridgeStrategy(),
-      },
-      [TOKEN_SYMBOLS_MAP.USDT.symbol]: {
-        [TOKEN_SYMBOLS_MAP["USDC-SPOT"].symbol]: getAcrossBridgeStrategy(),
+        [TOKEN_SYMBOLS_MAP.USDH.symbol]: getHyperCoreIntentBridgeStrategy({
+          isEligibleForSponsorship: true,
+          shouldSponsorAccountCreation: true,
+        }),
       },
     },
   },
@@ -65,7 +56,10 @@ export const routableBridgeStrategies = [
   // The actual eligibility is determined by routeStrategyForSponsorship
   getSponsoredCctpBridgeStrategy(true),
   getOftSponsoredBridgeStrategy(true),
-  getHyperCoreIntentBridgeStrategy(true),
+  getHyperCoreIntentBridgeStrategy({
+    isEligibleForSponsorship: true,
+    shouldSponsorAccountCreation: true,
+  }),
 ];
 
 // Priority-ordered routing strategies

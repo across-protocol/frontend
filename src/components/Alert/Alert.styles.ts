@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { AlertStatusType } from "./Alert";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as QuestionIcon } from "assets/icons/question-circle.svg";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils/constants";
 
 const AlertColors: Record<
   AlertStatusType,
