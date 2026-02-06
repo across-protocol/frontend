@@ -29,10 +29,11 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   "*:USDT-SPOT": [
     {
-      name: "any-usdt-spot-non-sponsored",
+      name: "intents-any-usdt-spot-non-sponsored",
       reason:
-        "Non-sponsored route to USDT-SPOT (enables A2B flows like WETH → USDT-SPOT)",
-      shouldApply: (data) => data.isHyperCoreIntentSupported,
+        "Non-sponsored route to USDT-SPOT via intents (enables A2B flows like WETH → USDT-SPOT)",
+      shouldApply: (data) =>
+        data.isHyperCoreIntentSupported && !data.isMintBurnThresholdMet,
       getStrategy: () =>
         getHyperCoreIntentBridgeStrategy({
           isEligibleForSponsorship: false,
@@ -109,7 +110,8 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
     {
       name: "usdc-ineligible",
       reason: "Sponsorship limits not met for USDC route",
-      shouldApply: (data) => !isEligibleForSponsorship(data),
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isWithinInputAmountLimit,
       getStrategy: () => getSponsoredCctpBridgeStrategy(false),
     },
     {
@@ -150,7 +152,7 @@ export async function routeStrategyForSponsorship(
 
   let applicableRule: SponsorshipRoutingRule | null = null;
   let strategy: BridgeStrategy | null = null;
-  const rules = getRouteRules(params) ?? [];
+  const rules = getRouteRules(params);
 
   for (const rule of rules) {
     if (!rule.shouldApply(eligibilityData)) {
@@ -219,15 +221,22 @@ function getRouteRules(params: BridgeStrategyDataParams) {
   );
   const wildcardOutputKey = buildRouteKey(inputSymbol, ROUTE_WILDCARD_SYMBOL);
 
-  return (
-    (exactKey ? SPONSORSHIP_ROUTING_RULES[exactKey] : undefined) ??
-    (wildcardInputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardInputKey]
-      : undefined) ??
-    (wildcardOutputKey
-      ? SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]
-      : undefined)
-  );
+  // Collect all matching rule sets in priority order
+  const allRules: SponsorshipRoutingRule[] = [];
+
+  if (exactKey && SPONSORSHIP_ROUTING_RULES[exactKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[exactKey]);
+  }
+
+  if (wildcardInputKey && SPONSORSHIP_ROUTING_RULES[wildcardInputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardInputKey]);
+  }
+
+  if (wildcardOutputKey && SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]) {
+    allRules.push(...SPONSORSHIP_ROUTING_RULES[wildcardOutputKey]);
+  }
+
+  return allRules;
 }
 
 function isEligibleForSponsorship(data: SponsorshipEligibilityData) {
