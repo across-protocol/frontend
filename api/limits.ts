@@ -107,7 +107,7 @@ const handler = async (
       const fullRelayersL1 = getFullRelayers();
       const fullRelayersDestinationChain = getFullRelayers(destinationChainId);
       const transferRestrictedRelayersDestinationChain =
-        getTransferRestrictedRelayers(destinationChainId, l1Token.symbol);
+        getTransferRestrictedRelayers(destinationChainId, outputToken.symbol);
 
       // Optional parameters that caller can use to specify specific deposit details with which
       // to compute limits.
