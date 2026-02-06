@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 import useClickOutside from "hooks/useClickOutside";
-import { DepositStatusFilter } from "utils/types";
+import { DepositType } from "../../types";
 
 import {
   FilterContainer,
@@ -9,41 +9,44 @@ import {
   StyledChevronIcon,
   DropdownMenu,
   DropdownItem,
-} from "./filters/shared";
+} from "./shared";
 
-type StatusFilterProps = {
-  value: DepositStatusFilter;
-  onChange: (value: DepositStatusFilter) => void;
+type DepositTypeFilterProps = {
+  value: DepositType | undefined;
+  onChange: (value: DepositType | undefined) => void;
 };
 
-const STATUS_OPTIONS: { value: DepositStatusFilter; label: string }[] = [
-  { value: "all", label: "All statuses" },
-  { value: "pending", label: "Pending" },
-  { value: "filled", label: "Filled" },
-  { value: "refunded", label: "Refunded" },
-  { value: "expired", label: "Expired" },
-  { value: "slowFillRequested", label: "Slow Fill Requested" },
+const DEPOSIT_TYPE_OPTIONS: {
+  value: DepositType | undefined;
+  label: string;
+}[] = [
+  { value: undefined, label: "All types" },
+  { value: "across", label: "Across" },
+  { value: "cctp", label: "CCTP" },
+  { value: "oft", label: "OFT" },
 ];
 
-export function StatusFilter({ value, onChange }: StatusFilterProps) {
+export function DepositTypeFilter({ value, onChange }: DepositTypeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = STATUS_OPTIONS.find((opt) => opt.value === value);
+  const selectedOption =
+    DEPOSIT_TYPE_OPTIONS.find((opt) => opt.value === value) ??
+    DEPOSIT_TYPE_OPTIONS[0];
 
   useClickOutside(containerRef, () => setIsOpen(false));
 
   return (
     <FilterContainer ref={containerRef}>
       <FilterButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
-        <span>Status: {selectedOption?.label}</span>
+        <span>Type: {selectedOption.label}</span>
         <StyledChevronIcon isOpen={isOpen} />
       </FilterButton>
       {isOpen && (
         <DropdownMenu>
-          {STATUS_OPTIONS.map((option) => (
+          {DEPOSIT_TYPE_OPTIONS.map((option) => (
             <DropdownItem
-              key={option.value}
+              key={option.value ?? "all"}
               isSelected={value === option.value}
               onClick={() => {
                 onChange(option.value);

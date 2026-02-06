@@ -105,18 +105,20 @@ export function rewardSummaryQueryKey(
 export function depositsQueryKey(
   status: DepositStatusFilter,
   limit: number,
-  offset: number
+  offset: number,
+  filters?: Record<string, unknown>
 ) {
-  return ["deposits", status, limit, offset];
+  return ["deposits", status, limit, offset, filters];
 }
 
 export function userDepositsQueryKey(
   userAddress: string,
   status: DepositStatusFilter,
   limit: number,
-  offset: number
+  offset: number,
+  filters?: Record<string, unknown>
 ) {
-  return ["deposits", "user", userAddress, status, limit, offset];
+  return ["deposits", "user", userAddress, status, limit, offset, filters];
 }
 
 export function prelaunchDataQueryKey(address?: string, jwt?: string) {

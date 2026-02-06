@@ -1,15 +1,22 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { SecondaryButton } from "components/Button";
 import { COLORS } from "utils/constants";
 import { DepositStatusFilter } from "utils/types";
+import { DepositsFilters } from "../types";
 import { EmptyTable } from "./EmptyTable";
 import { LiveToggle } from "./LiveToggle";
 import { StatusFilter } from "./StatusFilter";
 import { WalletAddressFilter } from "./WalletAddressFilter";
+import {
+  ChainFilter,
+  DepositTypeFilter,
+  TextInputFilter,
+  NumberRangeFilter,
+} from "./filters";
 import { useTransfers } from "../hooks/useTransfers";
 import { convertIndexerDepositToDeposit } from "../utils/convertDeposit";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
@@ -23,6 +30,7 @@ export function AllTransfers() {
   const [walletAddressInput, setWalletAddressInput] = useState<string>("");
   const [walletAddressFilter, setWalletAddressFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<DepositStatusFilter>("all");
+  const [filters, setFilters] = useState<DepositsFilters>({});
 
   const { account: accountEVM } = useConnectionEVM();
   const { account: accountSVM } = useConnectionSVM();
@@ -32,6 +40,33 @@ export function AllTransfers() {
     setWalletAddressFilter(value.trim());
   };
 
+  const updateFilter = useCallback(
+    <K extends keyof DepositsFilters>(key: K, value: DepositsFilters[K]) => {
+      setFilters((prev) => {
+        const next = { ...prev };
+        if (value === undefined) {
+          delete next[key];
+        } else {
+          next[key] = value;
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const clearFilters = useCallback(() => {
+    setFilters({});
+    setStatusFilter("all");
+    setWalletAddressInput("");
+    setWalletAddressFilter("");
+  }, []);
+
+  const hasActiveFilters =
+    Object.keys(filters).length > 0 ||
+    statusFilter !== "all" ||
+    walletAddressFilter.trim().length > 0;
+
   const {
     currentPage,
     pageSize,
@@ -40,14 +75,19 @@ export function AllTransfers() {
     deposits,
     totalDeposits,
     depositsQuery,
-  } = useTransfers(walletAddressFilter.trim() || undefined, statusFilter);
+  } = useTransfers(
+    walletAddressFilter.trim() || undefined,
+    statusFilter,
+    filters
+  );
 
   const queryClient = useQueryClient();
 
   const isFirstPage = currentPage === 0;
   const isAddressFiltering = walletAddressFilter.trim().length > 0;
   const isStatusFiltering = statusFilter !== "all";
-  const isFiltering = isAddressFiltering || isStatusFiltering;
+  const isFiltering =
+    isAddressFiltering || isStatusFiltering || hasActiveFilters;
 
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
@@ -61,7 +101,6 @@ export function AllTransfers() {
     () =>
       deposits.map((deposit) => {
         const converted = convertIndexerDepositToDeposit(deposit);
-        // Show "processing" instead of "fee too low" on all transactions page
         return {
           ...converted,
           hideFeeTooLow: !(account === walletAddressFilter),
@@ -109,15 +148,76 @@ export function AllTransfers() {
             evmAddress={accountEVM}
             svmAddress={accountSVM?.toString()}
           />
-          <RightControls>
-            <StatusFilter value={statusFilter} onChange={setStatusFilter} />
-            <LiveToggle
-              isLiveMode={isLiveMode}
-              onToggle={setIsLiveMode}
-              disabled={!isEnabled}
-            />
-          </RightControls>
+          <LiveToggle
+            isLiveMode={isLiveMode}
+            onToggle={setIsLiveMode}
+            disabled={!isEnabled}
+          />
         </ControlsRow>
+        <FiltersRow>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
+          <ChainFilter
+            label="Origin"
+            value={filters.originChainId}
+            onChange={(v) => updateFilter("originChainId", v)}
+          />
+          <ChainFilter
+            label="Destination"
+            value={filters.destinationChainId}
+            onChange={(v) => updateFilter("destinationChainId", v)}
+          />
+          <DepositTypeFilter
+            value={filters.depositType}
+            onChange={(v) => updateFilter("depositType", v)}
+          />
+          <TextInputFilter
+            label="Depositor"
+            value={filters.depositor}
+            onChange={(v) => updateFilter("depositor", v)}
+            placeholder="0x..."
+          />
+          <TextInputFilter
+            label="Recipient"
+            value={filters.recipient}
+            onChange={(v) => updateFilter("recipient", v)}
+            placeholder="0x..."
+          />
+          <TextInputFilter
+            label="Input Token"
+            value={filters.inputToken}
+            onChange={(v) => updateFilter("inputToken", v)}
+            placeholder="Token address..."
+          />
+          <TextInputFilter
+            label="Output Token"
+            value={filters.outputToken}
+            onChange={(v) => updateFilter("outputToken", v)}
+            placeholder="Token address..."
+          />
+          <TextInputFilter
+            label="Integrator"
+            value={filters.integratorId}
+            onChange={(v) => updateFilter("integratorId", v)}
+            placeholder="Integrator ID..."
+          />
+          <NumberRangeFilter
+            label="Deposit Blocks"
+            startValue={filters.startBlock}
+            endValue={filters.endBlock}
+            onStartChange={(v) => updateFilter("startBlock", v)}
+            onEndChange={(v) => updateFilter("endBlock", v)}
+          />
+          <NumberRangeFilter
+            label="Fill Blocks"
+            startValue={filters.startFillBlock}
+            endValue={filters.endFillBlock}
+            onStartChange={(v) => updateFilter("startFillBlock", v)}
+            onEndChange={(v) => updateFilter("endFillBlock", v)}
+          />
+          {hasActiveFilters && (
+            <ClearButton onClick={clearFilters}>Clear filters</ClearButton>
+          )}
+        </FiltersRow>
       </ControlsContainer>
       <PaginatedTransfersTable
         currentPage={currentPage}
@@ -187,13 +287,30 @@ const ControlsRow = styled.div`
   }
 `;
 
-const RightControls = styled.div`
+const FiltersRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+`;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: space-between;
+const ClearButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  height: 40px;
+  background: ${COLORS.aqua};
+  border-radius: 8px;
+  border: none;
+  color: ${COLORS["black-900"]};
+  font-size: 14px;
+  font-family: Barlow, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
   }
 `;

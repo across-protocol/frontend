@@ -6,8 +6,6 @@ import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
 import { COLORS } from "utils/constants";
 import { isValidTxHash } from "utils/transactions";
 
-type FilterMode = "all" | "evm" | "svm";
-
 type WalletAddressFilterProps = {
   inputValue: string;
   onInputChange: (value: string) => void;
@@ -31,25 +29,12 @@ export function WalletAddressFilter({
     isEVMAddress(trimmedInput) || isSVMAddress(trimmedInput);
   const canSearch = isTxHash || isValidAddress || trimmedInput === "";
 
-  const getFilterMode = (): FilterMode => {
-    if (evmAddress && inputValue === evmAddress) return "evm";
-    if (svmAddress && inputValue === svmAddress) return "svm";
-    return "all";
-  };
+  const isEvmActive = Boolean(evmAddress && inputValue === evmAddress);
+  const isSvmActive = Boolean(svmAddress && inputValue === svmAddress);
 
-  const filterMode = getFilterMode();
-
-  const handleModeChange = (mode: FilterMode) => {
-    if (mode === "all") {
-      onInputChange("");
-      onSearch("");
-    } else if (mode === "evm" && evmAddress) {
-      onInputChange(evmAddress);
-      onSearch(evmAddress);
-    } else if (mode === "svm" && svmAddress) {
-      onInputChange(svmAddress);
-      onSearch(svmAddress);
-    }
+  const handleWalletFilter = (address: string) => {
+    onInputChange(address);
+    onSearch(address);
   };
 
   const handleSearchClick = () => {
@@ -84,45 +69,29 @@ export function WalletAddressFilter({
       <SearchButton onClick={handleSearchClick} disabled={!canSearch}>
         {isTxHash ? "View" : "Search"}
       </SearchButton>
-      {!isTxHash && (
-        <SegmentedToggle>
-          <ToggleButton
-            isActive={filterMode === "all"}
-            onClick={() => handleModeChange("all")}
+      {!isTxHash && hasMultipleWallets ? (
+        <>
+          <WalletButton
+            isActive={isEvmActive}
+            onClick={() => handleWalletFilter(evmAddress!)}
           >
-            Show All
-          </ToggleButton>
-          {hasMultipleWallets ? (
-            <>
-              <ToggleButton
-                isActive={filterMode === "evm"}
-                onClick={() => handleModeChange("evm")}
-              >
-                EVM Wallet
-              </ToggleButton>
-              <ToggleButton
-                isActive={filterMode === "svm"}
-                onClick={() => handleModeChange("svm")}
-              >
-                SVM Wallet
-              </ToggleButton>
-            </>
-          ) : (
-            <ToggleButton
-              isActive={filterMode !== "all"}
-              onClick={() => {
-                if (singleWalletAddress) {
-                  onInputChange(singleWalletAddress);
-                  onSearch(singleWalletAddress);
-                }
-              }}
-              disabled={!hasAnyWallet}
-            >
-              My Wallet
-            </ToggleButton>
-          )}
-        </SegmentedToggle>
-      )}
+            Filter my EVM wallet
+          </WalletButton>
+          <WalletButton
+            isActive={isSvmActive}
+            onClick={() => handleWalletFilter(svmAddress!)}
+          >
+            Filter my SVM wallet
+          </WalletButton>
+        </>
+      ) : !isTxHash && hasAnyWallet ? (
+        <WalletButton
+          isActive={isEvmActive || isSvmActive}
+          onClick={() => handleWalletFilter(singleWalletAddress!)}
+        >
+          Filter my {evmAddress ? "EVM" : "SVM"} wallet
+        </WalletButton>
+      ) : null}
     </FilterContainer>
   );
 }
@@ -171,40 +140,23 @@ const SearchInput = styled.input`
   }
 `;
 
-const SegmentedToggle = styled.div`
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  background: ${COLORS["grey-600"]};
+const WalletButton = styled.button<{ isActive: boolean }>`
+  padding: 0 14px;
+  height: 40px;
+  border: 1px solid
+    ${({ isActive }) => (isActive ? COLORS["grey-400"] : "transparent")};
   border-radius: 8px;
-  padding: 4px;
-`;
-
-const ToggleButton = styled.button<{ isActive: boolean; disabled?: boolean }>`
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
   font-size: 14px;
   font-family: Barlow, sans-serif;
   font-weight: 500;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  background: ${COLORS["grey-600"]};
+  color: ${({ isActive }) => (isActive ? COLORS.white : COLORS["grey-400"])};
 
-  background: ${({ isActive }) =>
-    isActive ? COLORS["grey-500"] : "transparent"};
-  color: ${({ isActive, disabled }) =>
-    disabled
-      ? COLORS["grey-400"] + "80"
-      : isActive
-        ? COLORS.white
-        : COLORS["grey-400"]};
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-
-  &:hover:not(:disabled) {
-    color: ${({ isActive }) => (isActive ? COLORS.white : COLORS["grey-400"])};
-    background: ${({ isActive }) =>
-      isActive ? COLORS["grey-500"] : "rgba(255, 255, 255, 0.05)"};
+  &:hover {
+    border-color: ${COLORS["grey-400"]};
   }
 `;
 

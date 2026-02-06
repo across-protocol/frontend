@@ -6,6 +6,7 @@ import { depositsQueryKey, userDepositsQueryKey } from "utils/query-keys";
 import { getConfig } from "utils/config";
 import { DepositStatusFilter } from "views/Transactions/types";
 import { OFT_MESSENGERS } from "utils/oft";
+import { DepositsFilters } from "views/AcrossScan/types";
 
 export type DepositStatus =
   | "pending"
@@ -162,12 +163,13 @@ export function useDeposits(
   limit: number,
   offset: number = 0,
   userAddress?: string,
-  status: DepositStatusFilter = "all"
+  status: DepositStatusFilter = "all",
+  filters: DepositsFilters = {}
 ) {
   const omitStatusFilter = status === "all";
   const queryKey = userAddress
-    ? userDepositsQueryKey(userAddress, status, limit, offset)
-    : depositsQueryKey(status, limit, offset);
+    ? userDepositsQueryKey(userAddress, status, limit, offset, filters)
+    : depositsQueryKey(status, limit, offset, filters);
 
   return useQuery({
     queryKey,
@@ -177,6 +179,7 @@ export function useDeposits(
         status: omitStatusFilter ? undefined : status,
         limit,
         offset,
+        ...filters,
       }),
     }),
     gcTime: 0,
@@ -230,6 +233,18 @@ async function getDeposits(
     status: DepositStatus;
     limit: number;
     offset: number;
+    originChainId: number;
+    destinationChainId: number;
+    depositType: string;
+    depositor: string;
+    recipient: string;
+    inputToken: string;
+    outputToken: string;
+    integratorId: string;
+    startBlock: number;
+    endBlock: number;
+    startFillBlock: number;
+    endFillBlock: number;
   }> = {}
 ) {
   const { data } = await axios.get<GetIndexerDepositsResponse>(
@@ -240,6 +255,18 @@ async function getDeposits(
         limit: params.limit,
         skip: params.offset,
         address: params.address,
+        originChainId: params.originChainId,
+        destinationChainId: params.destinationChainId,
+        depositType: params.depositType,
+        depositor: params.depositor,
+        recipient: params.recipient,
+        inputToken: params.inputToken,
+        outputToken: params.outputToken,
+        integratorId: params.integratorId,
+        startBlock: params.startBlock,
+        endBlock: params.endBlock,
+        startFillBlock: params.startFillBlock,
+        endFillBlock: params.endFillBlock,
       },
     }
   );
