@@ -1,13 +1,13 @@
 import { createSwapApprovalActionHook } from "./factory";
 import { useConnectionSVM } from "hooks/useConnectionSVM";
 import { useConnectionEVM } from "hooks/useConnectionEVM";
-import { useFeatureFlag } from "hooks";
 import { EVMSwapApprovalActionStrategy } from "./strategies/evm";
 import { SVMSwapApprovalActionStrategy } from "./strategies/svm";
 import { getEcosystem } from "utils";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { UseMutateAsyncFunction } from "@tanstack/react-query/build/modern/types";
 import { QuoteRequest } from "../useQuoteRequest/quoteRequestAction";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 
 export interface SwapApproval {
   isConnected: boolean;
