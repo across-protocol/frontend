@@ -88,7 +88,11 @@ export function isValidTxHashEvm(txHash: string): txHash is Hash {
 }
 
 export function isValidTxHashSvm(txHash: string): txHash is Signature {
-  return isSignature(txHash);
+  try {
+    return isSignature(txHash);
+  } catch {
+    return false;
+  }
 }
 
 export function isValidTxHash(txHash: string) {

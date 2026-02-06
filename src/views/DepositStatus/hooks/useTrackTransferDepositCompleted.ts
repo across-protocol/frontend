@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { ampli, TransferDepositCompletedProperties } from "ampli";
-import { useAmplitude } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
 import { FromBridgeAndSwapPagePayload } from "utils/local-deposits";
 import { buildCoreTransferProperties } from "utils/amplitude/transferEventProperties";
 

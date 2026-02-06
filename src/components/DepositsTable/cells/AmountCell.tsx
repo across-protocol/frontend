@@ -2,7 +2,8 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
-import { formatUnitsWithMaxFractions, TokenInfo } from "utils";
+import { TokenInfo } from "utils/constants";
+import { formatUnitsWithMaxFractions } from "utils/format";
 
 import { BaseCell } from "./BaseCell";
 

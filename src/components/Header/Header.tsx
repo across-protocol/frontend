@@ -16,9 +16,7 @@ import MenuToggle from "./MenuToggle";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
 import { useSidebarContext } from "hooks/useSidebarContext";
-import { NAVIGATION_LINKS } from "Routes";
-
-export const LINKS = NAVIGATION_LINKS;
+import { useNavigationLinks } from "Routes";
 
 interface Props {
   transparentHeader?: boolean;
@@ -28,6 +26,7 @@ const Header: React.FC<Props> = ({ transparentHeader }) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
   const { isOpen, openSidebar, closeSidebar } = useSidebarContext();
+  const navigationLinks = useNavigationLinks();
 
   const toggleMenu = () => {
     isOpen ? closeSidebar() : openSidebar();
@@ -47,7 +46,7 @@ const Header: React.FC<Props> = ({ transparentHeader }) => {
       </UnstyledLink>
       <Navigation>
         <List>
-          {LINKS.map(({ href, name }) => (
+          {navigationLinks.map(({ href, name }) => (
             <Item
               key={href}
               aria-selected={isChildPath(location.pathname, href)}

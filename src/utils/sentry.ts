@@ -3,10 +3,11 @@ import {
   sentryEnv,
   sentryDsn,
   isSentryEnabled,
+  isProductionBuild,
   currentGitCommitHash,
 } from "./constants";
 
-if (isSentryEnabled) {
+if (isSentryEnabled && isProductionBuild) {
   Sentry.init({
     environment: sentryEnv || "development",
     dsn: sentryDsn,
@@ -16,6 +17,14 @@ if (isSentryEnabled) {
       "Internal JSON-RPC error",
       "JsonRpcEngine",
       "Non-Error promise rejection captured with keys: code",
+      /user rejected/i,
+      /user denied/i,
+      /user disapproved/i,
+      /rejected the request/i,
+      /transaction canceled/i,
+      /request expired/i,
+      /proposal expired/i,
+      /approval denied/i,
     ],
 
     denyUrls: [
@@ -41,7 +50,7 @@ if (isSentryEnabled) {
 }
 
 export const setUserContext = (address: string | null) => {
-  if (!isSentryEnabled) return;
+  if (!isSentryEnabled || !isProductionBuild) return;
 
   if (address) {
     Sentry.setUser({
@@ -54,7 +63,7 @@ export const setUserContext = (address: string | null) => {
 };
 
 export const setChainContext = (chainId: number | undefined) => {
-  if (!isSentryEnabled) return;
+  if (!isSentryEnabled || !isProductionBuild) return;
 
   Sentry.setContext("chain", {
     chainId,

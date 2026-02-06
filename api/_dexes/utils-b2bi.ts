@@ -25,13 +25,7 @@ import { CrossSwap, IndirectDestinationRoute } from "./types";
 const ENABLED_INDIRECT_TOKEN_PAIRS: {
   inputToken: string;
   outputToken: string;
-}[] = [
-  // TODO: Enable this once we replace MulticallHandler on HyperEVM with HyperliquidDepositHandler
-  // {
-  //   inputToken: "USDT",
-  //   outputToken: "USDT-SPOT",
-  // },
-];
+}[] = [];
 
 // Type cast to avoid TypeScript inferring never[] when indirect_chains_1.json or any of its nested arrays are empty.
 // Extends mainnetChains type with intermediaryChain property specific to indirect chains.

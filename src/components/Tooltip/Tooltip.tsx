@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { PlacesType } from "react-tooltip";
 import {
   Body,
@@ -73,20 +74,29 @@ export const Tooltip: React.FC<TooltipProps> = ({
       >
         {children}
       </StyledAnchor>
-      <StyledTooltip id={id} noArrow opacity={1} offset={offset}>
-        <Wrapper maxWidth={maxWidth} paddingPx={paddingPx}>
-          {title && (
-            <TitleRow>
-              {iconElement}
-              {title}
-              {titleSecondary && (
-                <TitleSecondary>{titleSecondary}</TitleSecondary>
-              )}
-            </TitleRow>
-          )}
-          <Body>{body}</Body>
-        </Wrapper>
-      </StyledTooltip>
+      {createPortal(
+        <StyledTooltip
+          id={id}
+          noArrow
+          opacity={1}
+          offset={offset}
+          disableStyleInjection
+        >
+          <Wrapper maxWidth={maxWidth} paddingPx={paddingPx}>
+            {title && (
+              <TitleRow>
+                {iconElement}
+                {title}
+                {titleSecondary && (
+                  <TitleSecondary>{titleSecondary}</TitleSecondary>
+                )}
+              </TitleRow>
+            )}
+            <Body>{body}</Body>
+          </Wrapper>
+        </StyledTooltip>,
+        document.body
+      )}
     </>
   );
 };

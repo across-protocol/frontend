@@ -3,16 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { isAddress as isSvmAddress } from "@solana/kit";
 
-import { Modal, Text } from "components";
+import Modal from "components/Modal";
+import { Text } from "components/Text";
 import { PrimaryButton } from "components/Button";
 import { Input, InputGroup } from "components/Input";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { ReactComponent as PencilIcon } from "assets/icons/pencil.svg";
 
 import { ampli } from "ampli";
-import { useAmplitude, useNameResolver } from "hooks";
+import { useAmplitude } from "hooks/useAmplitude";
+import { useNameResolver } from "hooks/useNameResolver";
 import { useDisallowList } from "hooks/useDisallowList";
-import { COLORS, shortenAddress } from "utils";
+import { COLORS } from "utils/constants";
+import { shortenAddress } from "utils/format";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useQuoteRequestContext } from "../hooks/useQuoteRequest/QuoteRequestContext";
 import { useEcosystemAccounts } from "../../../hooks/useEcosystemAccounts";

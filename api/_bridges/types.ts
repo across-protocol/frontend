@@ -125,6 +125,16 @@ export type BridgeStrategy = {
     inputToken: Token;
     outputToken: Token;
   }) => boolean;
+
+  /**
+   * OPTIONAL: For A2B flows, determines what token to swap to on origin chain.
+   * Only implement this if the strategy supports ANY_TO_BRIDGEABLE cross-swap type.
+   * @returns The token to swap to on origin chain, or undefined if cannot determine
+   */
+  resolveOriginSwapTarget?: (params: {
+    inputToken: Token;
+    outputToken: Token;
+  }) => Token | undefined;
 };
 
 export type BridgeStrategyData =

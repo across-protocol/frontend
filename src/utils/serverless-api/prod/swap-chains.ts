@@ -1,5 +1,5 @@
 import axios from "axios";
-import { vercelApiBaseUrl } from "utils";
+import { vercelApiBaseUrl } from "../../constants";
 import { SwapChain } from "../types";
 
 export type SwapChainsApiCall = typeof swapChainsApiCall;

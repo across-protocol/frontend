@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { shortenString, resolveWebsiteUrl } from "utils";
+import { shortenString } from "utils/format";
+import { resolveWebsiteUrl } from "utils/network";
 import { useConnection } from "./useConnection";
 
 export function useReferralLink() {

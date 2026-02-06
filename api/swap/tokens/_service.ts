@@ -202,7 +202,7 @@ function getIndirectChainTokens(
 
 /**
  * Returns USDH on HyperEVM as a destination token
- * for the sponsored-intent flow (USDC to USDH)
+ * for the hypercore-intent flow (USDC to USDH)
  */
 function getSponsoredIntentOutputTokens(
   chainIds: number[],

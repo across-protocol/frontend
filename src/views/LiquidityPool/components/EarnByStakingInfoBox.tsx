@@ -5,9 +5,10 @@ import { Link } from "react-router-dom";
 import { ReactComponent as XStarRing } from "assets/icons/x-star-ring.svg";
 
 import { Text } from "components/Text";
-import { useStakingPool, useConnection } from "hooks";
+import { useStakingPool } from "hooks/useStakingPool";
+import { useConnection } from "hooks/useConnection";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { formatWeiPct } from "utils";
+import { formatWeiPct } from "utils/format";
 
 type Props = {
   selectedToken: {

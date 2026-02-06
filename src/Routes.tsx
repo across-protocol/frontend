@@ -6,14 +6,17 @@ import {
   useHistory,
   useLocation,
 } from "react-router-dom";
-import { Header, Sidebar } from "components";
-import { useConnection, useError } from "hooks";
+import Header from "components/Header";
+import Sidebar from "components/Sidebar";
+import { useConnection } from "hooks/useConnection";
+import { useError } from "hooks/useError";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import {
   chainEndpointToId,
   enableMigration,
-  getConfig,
   stringValueInArray,
-} from "utils";
+} from "utils/constants";
+import { getConfig } from "utils/config";
 import lazyWithRetry from "utils/lazy-with-retry";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
@@ -22,14 +25,23 @@ import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
 import Banners from "components/Banners";
 
-export const NAVIGATION_LINKS = !enableMigration
-  ? [
-      { href: "/bridge-and-swap", name: "Bridge & Swap" },
-      { href: "/pool", name: "Pool" },
-      { href: "/rewards", name: "Rewards" },
-      { href: "/transactions", name: "Transactions" },
-    ]
-  : [];
+export function useNavigationLinks() {
+  const hasTransferPageFlag = useFeatureFlag("transaction-page");
+
+  if (enableMigration) {
+    return [];
+  }
+
+  return [
+    { href: "/bridge-and-swap", name: "Bridge & Swap" },
+    { href: "/pool", name: "Pool" },
+    { href: "/rewards", name: "Rewards" },
+    {
+      href: hasTransferPageFlag ? "/transfers" : "/transactions",
+      name: hasTransferPageFlag ? "Transfers" : "Transactions",
+    },
+  ];
+}
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -120,6 +132,12 @@ const Routes: React.FC = () => {
       <ScrollToTop />
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
+          <Route exact path="/transfers" component={Transactions} />
+          <Route
+            exact
+            path="/transfer/:depositTxnRef"
+            component={Transaction}
+          />
           <Route exact path="/transactions" component={Transactions} />
           <Route
             exact

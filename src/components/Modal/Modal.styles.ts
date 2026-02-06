@@ -1,6 +1,6 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { COLORS, QUERIES, QUERIESV2 } from "utils";
+import { COLORS, QUERIES, QUERIESV2 } from "utils/constants";
 import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`

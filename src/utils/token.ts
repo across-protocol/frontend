@@ -1,19 +1,18 @@
 import { BigNumber, ethers } from "ethers";
 import { LifiToken } from "hooks/useAvailableCrosschainRoutes";
 
+import { ChainId, getChainInfo } from "./constants";
+import { getConfig } from "./config";
+import { parseUnits } from "./format";
+import { getProvider } from "./providers";
 import {
-  getProvider,
-  ChainId,
-  getConfig,
-  getChainInfo,
-  parseUnits,
-  getSVMRpc,
   toAddressType,
   toAddress,
   Address,
   getAssociatedTokenAddress,
   chainIsSvm,
-} from "utils";
+} from "./sdk";
+import { getSVMRpc } from "./providers";
 import { ERC20__factory } from "utils/typechain";
 import { SwapToken } from "utils/serverless-api/types";
 import { TokenInfo } from "constants/tokens";
@@ -50,9 +49,20 @@ export async function getEvmBalance(
     | ethers.providers.FallbackProvider
 ): Promise<ethers.BigNumber> {
   provider ??= getProvider(chainId);
-  const contract = ERC20__factory.connect(tokenAddress, provider);
-  const balance = await contract.balanceOf(account, { blockTag: blockNumber });
-  return balance;
+
+  if (tokenAddress === ethers.constants.AddressZero) {
+    return getNativeBalance(chainId, account, blockNumber, provider);
+  }
+
+  try {
+    const contract = ERC20__factory.connect(tokenAddress, provider);
+    const balance = await contract.balanceOf(account, {
+      blockTag: blockNumber,
+    });
+    return balance;
+  } catch {
+    return BigNumber.from(0);
+  }
 }
 
 export function toSolanaKitAddress(address: Address) {

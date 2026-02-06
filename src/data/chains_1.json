@@ -1631,6 +1631,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ],
     "outputTokens": [
@@ -1647,6 +1654,13 @@
         "name": "Ether",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0x2D270e6886d130D724215A266106e6832161EAEd",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   },
@@ -1956,6 +1970,13 @@
         "name": "USD Coin",
         "decimals": 6,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
+      },
+      {
+        "address": "0x111111a1a0667d36bD57c0A9f569b98057111111",
+        "symbol": "USDH",
+        "name": "USDH",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdh.svg"
       },
       {
         "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",

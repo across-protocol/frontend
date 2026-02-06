@@ -3,7 +3,7 @@ import SectionWrapper from "../../components/SectionTitleWrapperV2/SectionWrappe
 import { useRewards } from "./hooks/useRewards";
 import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
 import GenericStakingPoolTable from "./components/GenericStakingPoolTable/GenericStakingPoolTable";
-import { LayoutV2 } from "components";
+import LayoutV2 from "components/LayoutV2";
 import useScrollElementByHashIntoView from "hooks/useScrollElementByHashIntoView";
 import AdditionalQuestionCTA from "./components/AdditionalQuestionCTA";
 import OverviewSection from "./components/OverviewSection";

@@ -4,8 +4,8 @@ import {
   TOKEN_SYMBOLS_MAP,
   TokenInfo,
   applyChainSpecificTokenDisplay,
-  getConfig,
-} from "utils";
+} from "utils/constants";
+import { getConfig } from "utils/config";
 import { orderedTokenLogos } from "../constants/tokens";
 import { useSwapTokens } from "./useSwapTokens";
 import unknownLogo from "assets/icons/question-circle.svg";
@@ -108,11 +108,9 @@ export function useTokenFromAddress(
     const normalizedAddress = address.toLowerCase();
 
     // First, try getConfig().getTokenInfoByAddressSafe if chainId is provided
+    // Use original address since config does exact matching (checksummed addresses)
     if (chainId !== undefined) {
-      const configToken = config.getTokenInfoByAddressSafe(
-        chainId,
-        normalizedAddress
-      );
+      const configToken = config.getTokenInfoByAddressSafe(chainId, address);
       if (configToken) {
         resolvedToken = configToken as TokenInfo;
       }
