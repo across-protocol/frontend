@@ -58,6 +58,10 @@ const popularTokens = [
   "USDT0", // hardcoded symbol while we wait for support in @across-protocol/constants
 ];
 
+const chainSpecificPopularTokens: Record<number, string[]> = {
+  [CHAIN_IDs.SOLANA]: [TOKEN_SYMBOLS_MAP.WSOL.symbol, "SOL"], // SOL is also included because the /token endpoint returns SOL instead of WSOL for wrapped sol
+};
+
 function sortTokensByBalanceAndSymbol<
   T extends { balance: BigNumber; balanceUsd: number; symbol: string },
 >(tokens: T[]): T[] {
@@ -214,11 +218,17 @@ export default function ChainTokenSelectorModal({
     }
 
     // When a specific chain is selected, separate popular tokens from all tokens
+    const chainPopularTokens = selectedChain
+      ? (chainSpecificPopularTokens[selectedChain] ?? [])
+      : [];
+    const isPopularToken = (symbol: string) =>
+      popularTokens.includes(symbol) || chainPopularTokens.includes(symbol);
+
     const popularTokensList = filteredTokens.filter((token) =>
-      popularTokens.includes(token.symbol)
+      isPopularToken(token.symbol)
     );
     const allTokensList = filteredTokens.filter(
-      (token) => !popularTokens.includes(token.symbol)
+      (token) => !isPopularToken(token.symbol)
     );
 
     // Sort both sections
