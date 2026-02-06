@@ -110,7 +110,8 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
     {
       name: "usdc-ineligible",
       reason: "Sponsorship limits not met for USDC route",
-      shouldApply: (data) => !isEligibleForSponsorship(data),
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isWithinInputAmountLimit,
       getStrategy: () => getSponsoredCctpBridgeStrategy(false),
     },
     {
