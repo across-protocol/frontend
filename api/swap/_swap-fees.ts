@@ -548,15 +548,7 @@ function getTotalFeeUsd(params: {
     return 0;
   }
 
-  if (
-    [
-      "oft",
-      "cctp",
-      // NOTE: "sponsored-oft" is a special case because the bridge fees are paid in
-      // native tokens, so we need to return it.
-      "sponsored-oft",
-    ].includes(bridgeProvider)
-  ) {
+  if (["sponsored-oft"].includes(bridgeProvider)) {
     return bridgeFeesUsd;
   }
 
