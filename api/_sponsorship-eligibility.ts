@@ -85,6 +85,10 @@ export const SPONSORSHIP_ELIGIBLE_TOKEN_PAIRS = [
     inputToken: "USDC",
     outputToken: "USDH-SPOT",
   },
+  {
+    inputToken: "USDT",
+    outputToken: "USDC-SPOT",
+  },
 ];
 
 /**

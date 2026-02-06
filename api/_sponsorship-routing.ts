@@ -41,6 +41,22 @@ const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
         }),
     },
   ],
+  "USDT:USDC-SPOT": [
+    {
+      name: "usdt-usdc-spot-oft-sponsored",
+      reason: "Sponsored USDT → USDC-SPOT route via OFT mint/burn",
+      shouldApply: (data) =>
+        isEligibleForSponsorship(data) && data.isOftEnabledOriginChain,
+      getStrategy: () => getOftSponsoredBridgeStrategy(true),
+    },
+    {
+      name: "usdt-usdc-spot-oft-unsponsored",
+      reason: "Unsponsored USDT → USDC-SPOT fallback",
+      shouldApply: (data) =>
+        !isEligibleForSponsorship(data) && data.isOftEnabledOriginChain,
+      getStrategy: () => getOftSponsoredBridgeStrategy(false),
+    },
+  ],
   "USDT:USDT-SPOT": [
     {
       name: "usdt-usdt-spot-intent-unsponsored",
