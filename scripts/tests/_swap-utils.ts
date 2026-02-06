@@ -331,21 +331,34 @@ export async function signAndWaitPermitFlow(params: {
 
   const depositId = params.swapResponse.swapTx.data.depositId;
 
-  // sign permit + deposit
+  // Strip EIP712Domain from types before signing (ethers rejects it; same hash).
+  const permit = params.swapResponse.swapTx.data.permit;
+  const { EIP712Domain: _, ...typesForSigning } = permit.types as Record<
+    string,
+    Array<{ name: string; type: string }>
+  >;
   const permitSig = await params.wallet._signTypedData(
-    params.swapResponse.swapTx.typedData.domain,
-    params.swapResponse.swapTx.typedData.types,
-    params.swapResponse.swapTx.typedData.message
+    permit.domain,
+    typesForSigning,
+    permit.message
   );
   console.log("Signed permit:", permitSig);
 
   if (params.depositViaApi) {
     const baseUrl = argsFromCli.host || SWAP_API_BASE_URL;
+    // Send swapTx with data.permit.types stripped so backend verifyTypedData matches our signed hash.
+    const swapTxForSubmit = {
+      ...params.swapResponse.swapTx,
+      data: {
+        ...params.swapResponse.swapTx.data,
+        permit: { ...permit, types: typesForSigning },
+      },
+    };
     console.time("submitGasless");
     const submitGaslessResponse = await axios.post(
       `${baseUrl}/api/gasless/submit`,
       {
-        swapTx: params.swapResponse.swapTx,
+        swapTx: swapTxForSubmit,
         signature: permitSig,
       },
       { headers: getAuthHeaders() }
