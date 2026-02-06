@@ -314,6 +314,25 @@ export function formatUSDString(value: string, decimals = 2): string {
 }
 
 /**
+ * Calculates the total USD value from a raw token amount and price per unit
+ * @param rawAmount The raw token amount (in wei/smallest unit)
+ * @param decimals The token's decimal places
+ * @param pricePerUnitUsd The USD price per single token unit (as a string)
+ * @returns The total USD value as a string, or null if inputs are invalid
+ */
+export function calculateUsdValue(
+  rawAmount: ethers.BigNumberish,
+  decimals: number,
+  pricePerUnitUsd: string | null | undefined
+): string | null {
+  if (!pricePerUnitUsd) return null;
+  const formattedAmount = Number(ethers.utils.formatUnits(rawAmount, decimals));
+  const price = Number(pricePerUnitUsd);
+  if (isNaN(formattedAmount) || isNaN(price)) return null;
+  return String(formattedAmount * price);
+}
+
+/**
  * Rounds a number to a specific number of decimal places with a specified direction.
  * @param value The number to round
  * @param decimalPlaces The number of decimal places to round to
