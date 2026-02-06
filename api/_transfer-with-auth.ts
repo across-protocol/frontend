@@ -40,6 +40,12 @@ export async function getReceiveWithAuthTypedData(params: {
     domainSeparator,
     eip712: {
       types: {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" },
+        ],
         ReceiveWithAuthorization: [
           { name: "from", type: "address" },
           { name: "to", type: "address" },
