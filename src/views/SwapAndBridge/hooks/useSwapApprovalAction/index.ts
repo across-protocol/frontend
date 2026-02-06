@@ -7,6 +7,7 @@ import { getEcosystem } from "utils/network";
 import { SwapApprovalQuote } from "utils/serverless-api/prod/swap-approval";
 import { UseMutateAsyncFunction } from "@tanstack/react-query/build/modern/types";
 import { QuoteRequest } from "../useQuoteRequest/quoteRequestAction";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 
 export interface SwapApproval {
   isConnected: boolean;
@@ -23,9 +24,10 @@ export const useSwapApprovalAction = (
 ): SwapApproval => {
   const connectionEVM = useConnectionEVM();
   const connectionSVM = useConnectionSVM();
+  const useApiGasParams = useFeatureFlag("api-gas-params");
 
   const evmHook = createSwapApprovalActionHook(
-    new EVMSwapApprovalActionStrategy(connectionEVM)
+    new EVMSwapApprovalActionStrategy(connectionEVM, useApiGasParams)
   );
   const svmHook = createSwapApprovalActionHook(
     new SVMSwapApprovalActionStrategy(connectionSVM, connectionEVM)

@@ -7,7 +7,6 @@ import { Text } from "components/Text";
 import LayoutV2 from "components/LayoutV2";
 import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import { useDepositByTxHash } from "hooks/useDepositStatus";
-import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 import { CenteredMessage } from "./components/CenteredMessage";
 import { StatusBadge } from "./components/StatusBadge";
 import { TransactionSourceSection } from "./components/TransactionSourceSection";
@@ -15,6 +14,7 @@ import { TransactionDestinationSection } from "./components/TransactionDestinati
 import { TransactionFeeSection } from "./components/TransactionFeeSection";
 import { TransactionAdvancedSection } from "./components/TransactionAdvancedSection";
 import { formatUnits } from "ethers/lib/utils";
+import { useFeatureFlag } from "hooks/feature-flags/useFeatureFlag";
 
 const LOADING_DELAY_MS = 400;
 
