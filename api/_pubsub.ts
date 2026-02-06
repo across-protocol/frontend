@@ -71,9 +71,5 @@ export async function publishToDlt(params: {
   rawData: Buffer;
 }): Promise<void> {
   const topic = params.client.topic(params.dltName);
-  const [exists] = await topic.exists();
-  if (!exists) {
-    throw new Error(`DLT topic ${params.dltName} does not exist`);
-  }
   await topic.publishMessage({ data: params.rawData });
 }
