@@ -1,0 +1,1 @@
+export { PolymarketBanner } from "./PolymarketBanner";

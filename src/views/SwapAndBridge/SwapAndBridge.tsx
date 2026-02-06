@@ -6,6 +6,7 @@ import {
   useQuoteRequestContext,
 } from "./hooks/useQuoteRequest/QuoteRequestContext";
 import { ConfirmationButton } from "./components/Confirmation/ConfirmationButton";
+import { PolymarketBanner } from "./components/PolymarketBanner";
 import { useMemo } from "react";
 import useSwapQuote from "./hooks/useSwapQuote";
 import { useDefaultRoute } from "./hooks/useDefaultRoute";
@@ -43,6 +44,7 @@ function SwapAndBridgeContent() {
         quoteError={quoteError}
         swapQuote={swapQuote}
       />
+      <PolymarketBanner />
     </Wrapper>
   );
 }

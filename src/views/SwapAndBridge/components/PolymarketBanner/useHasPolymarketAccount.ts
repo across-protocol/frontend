@@ -1,0 +1,46 @@
+import { useQuery } from "@tanstack/react-query";
+import { useConnectionEVM } from "hooks/useConnectionEVM";
+
+export interface PolymarketProfile {
+  proxyWallet: string;
+  createdAt: string;
+  name: string;
+  verifiedBadge: boolean;
+}
+
+async function fetchPolymarketProfile(
+  address: string
+): Promise<PolymarketProfile | null> {
+  const response = await fetch(
+    `https://app-frontend-v3-git-jorgen-fe-352-polymarket-banner-uma.vercel.app/api/polymarket-profile?address=${address}`
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Polymarket profile: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export function useHasPolymarketAccount() {
+  const { account } = useConnectionEVM();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["polymarket-profile", account],
+    queryFn: () => fetchPolymarketProfile(account!),
+    enabled: Boolean(account),
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 1,
+  });
+
+  return {
+    hasAccount: Boolean(data?.proxyWallet),
+    profile: data,
+    isLoading,
+  };
+}
