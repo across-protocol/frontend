@@ -23,6 +23,13 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
       },
       {
+        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
         "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         "symbol": "USDC",
         "name": "USD Coin",
@@ -63,13 +70,6 @@
         "name": "Across Protocol Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
-      },
-      {
-        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       },
       {
         "address": "0x163f8C2467924be0ae7B5347228CABF260318753",
@@ -122,6 +122,13 @@
       }
     ],
     "outputTokens": [
+      {
+        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
       {
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "symbol": "WETH",
@@ -179,13 +186,6 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/acx.svg"
       },
       {
-        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        "symbol": "USDT",
-        "name": "Tether USD",
-        "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
-      },
-      {
         "address": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
         "symbol": "SNX",
         "name": "Synthetix",
@@ -233,6 +233,54 @@
         "name": "PancakeSwap Token",
         "decimals": 18,
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/cake.svg"
+      }
+    ]
+  },
+  {
+    "chainId": 4326,
+    "name": "MegaETH",
+    "publicRpcUrl": "https://mainnet.megaeth.com/rpc",
+    "explorerUrl": "https://megaeth.blockscout.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/megaeth/assets/logo.svg",
+    "spokePool": "0x3db06da8f0a24a525f314eec954fc5c6a973d40e",
+    "spokePoolBlock": 5450616,
+    "inputTokens": [
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      },
+      {
+        "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
       }
     ]
   },
