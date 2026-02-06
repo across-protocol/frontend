@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 import { CCTP_NO_DOMAIN } from "@across-protocol/constants";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP, CHAINS } from "../../../_constants";
 import { InvalidParamError } from "../../../_errors";
@@ -57,9 +58,17 @@ export const CCTP_FINALITY_THRESHOLDS = {
   standard: 2000,
 };
 
-// CCTP Across Finalizer address
-export const DEFAULT_CCTP_ACROSS_FINALIZER_ADDRESS =
+// CCTP Across Finalizer addresses
+const CCTP_ACROSS_FINALIZER_ADDRESS_EVM =
   "0x708704d33ace3daFbED28f150A56CE9D124B1eF8";
+const CCTP_ACROSS_FINALIZER_ADDRESS_SVM =
+  "Edyca9eoBbceGU6UUHxC78o8W3cLEZyuYaA8wYnXxmgP";
+
+export const getCctpFinalizerAddress = (chainId: number): string => {
+  return sdk.utils.chainIsSvm(chainId)
+    ? CCTP_ACROSS_FINALIZER_ADDRESS_SVM
+    : CCTP_ACROSS_FINALIZER_ADDRESS_EVM;
+};
 
 // CCTP TokenMessenger contract addresses
 // Source: https://developers.circle.com/cctp/evm-smart-contracts
