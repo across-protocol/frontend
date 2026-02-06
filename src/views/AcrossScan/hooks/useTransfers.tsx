@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useDeposits } from "hooks/useDeposits";
 import { DepositStatusFilter } from "utils/types";
 
+import { DepositsFilters } from "../types";
 import { useCurrentPage, usePageSize } from "./usePagination";
 
 export function useTransfers(
   userAddress?: string,
-  statusFilter: DepositStatusFilter = "all"
+  statusFilter: DepositStatusFilter = "all",
+  filters: DepositsFilters = {}
 ) {
   const { pageSize, handlePageSizeChange } = usePageSize();
 
@@ -16,11 +18,13 @@ export function useTransfers(
     deposits,
     totalDeposits,
     depositsQuery,
-  } = usePaginatedTransfers(pageSize, userAddress, statusFilter);
+  } = usePaginatedTransfers(pageSize, userAddress, statusFilter, filters);
+
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [userAddress, statusFilter, setCurrentPage]);
+  }, [userAddress, statusFilter, filtersKey, setCurrentPage]);
 
   return {
     currentPage,
@@ -36,14 +40,16 @@ export function useTransfers(
 function usePaginatedTransfers(
   pageSize: number,
   userAddress?: string,
-  statusFilter: DepositStatusFilter = "all"
+  statusFilter: DepositStatusFilter = "all",
+  filters: DepositsFilters = {}
 ) {
   const { currentPage, setCurrentPage } = useCurrentPage();
   const depositsQuery = useDeposits(
     pageSize,
     currentPage * pageSize,
     userAddress,
-    statusFilter
+    statusFilter,
+    filters
   );
   const end = depositsQuery.data
     ? depositsQuery.data.deposits.length < pageSize
