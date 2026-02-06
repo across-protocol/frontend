@@ -6,6 +6,7 @@ import {
   getBridgeableOutputToken,
   getDepositRecipient,
   getDepositMessage,
+  getBridgeableInputToken,
 } from "../../../../api/_bridges/hypercore-intent/utils/common";
 import { getCachedTokenBalance } from "../../../../api/_balance";
 import {
@@ -17,7 +18,13 @@ import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
   getHyperliquidDepositHandlerAddress,
 } from "../../../../api/_bridges/hypercore-intent/utils/constants";
-import { USDC_ON_OPTIMISM, USDH_ON_HYPEREVM, USDH_ON_HYPERCORE } from "./utils";
+import {
+  USDC_ON_OPTIMISM,
+  USDH_ON_HYPEREVM,
+  USDH_ON_HYPERCORE,
+  USDH_SPOT_ON_HYPERCORE,
+  USDT_SPOT_ON_HYPERCORE,
+} from "./utils";
 
 vi.mock("../../../../api/_balance");
 vi.mock("../../../../api/_hypercore", async (importOriginal) => ({
@@ -127,6 +134,40 @@ describe("api/_bridges/hypercore-intent/utils/common", () => {
       const recipient = "0xUser";
       const outputToken = USDH_ON_HYPEREVM;
       expect(getDepositMessage({ outputToken, recipient })).toBe("0x");
+    });
+  });
+
+  describe("getBridgeableInputToken", () => {
+    it("should return USDC as bridgeable input for USDH-SPOT output on Mainnet", () => {
+      const result = getBridgeableInputToken(
+        CHAIN_IDs.MAINNET,
+        USDH_SPOT_ON_HYPERCORE
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.symbol).toBe("USDC");
+      expect(result?.chainId).toBe(CHAIN_IDs.MAINNET);
+      expect(result?.decimals).toBe(6);
+    });
+
+    it("should return USDT as bridgeable input for USDT-SPOT output", () => {
+      const result = getBridgeableInputToken(
+        CHAIN_IDs.OPTIMISM,
+        USDT_SPOT_ON_HYPERCORE
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.symbol).toBe("USDT");
+      expect(result?.chainId).toBe(CHAIN_IDs.OPTIMISM);
+    });
+
+    it("should return undefined for unsupported origin chain", () => {
+      const result = getBridgeableInputToken(
+        999999, // Unsupported chain
+        USDH_SPOT_ON_HYPERCORE
+      );
+
+      expect(result).toBeUndefined();
     });
   });
 });

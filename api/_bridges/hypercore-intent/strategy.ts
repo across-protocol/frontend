@@ -12,11 +12,12 @@ import {
 } from "../../_dexes/types";
 import { CROSS_SWAP_TYPE, AppFee } from "../../_dexes/utils";
 import {
-  getDepositMessage,
-  isRouteSupported,
-  getBridgeableOutputToken,
-  getDepositRecipient,
   assertSupportedRoute,
+  getBridgeableInputToken,
+  getBridgeableOutputToken,
+  getDepositMessage,
+  getDepositRecipient,
+  isRouteSupported,
 } from "./utils/common";
 import {
   BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN,
@@ -173,25 +174,12 @@ export function getHyperCoreIntentBridgeStrategy(
 
       if (!outputTokenInfo) return undefined;
 
-      const bridgeableTokenInfo =
-        BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN[
-          outputTokenInfo.symbol as keyof typeof BRIDGEABLE_OUTPUT_TOKEN_PER_OUTPUT_TOKEN
-        ];
+      const bridgeableInputToken = getBridgeableInputToken(
+        params.inputToken.chainId,
+        params.outputToken
+      );
 
-      if (!bridgeableTokenInfo) return undefined;
-
-      const bridgeableTokenAddress =
-        bridgeableTokenInfo.addresses[params.inputToken.chainId];
-
-      if (!bridgeableTokenAddress) return undefined;
-
-      // Return the bridgeable token
-      return {
-        address: bridgeableTokenAddress,
-        decimals: bridgeableTokenInfo.decimals,
-        symbol: bridgeableTokenInfo.symbol,
-        chainId: params.inputToken.chainId,
-      };
+      return bridgeableInputToken;
     },
   };
 }
