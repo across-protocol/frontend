@@ -52,7 +52,7 @@ export const ExpandableLabelSection: React.FC<
         <FastSecureText>Fast & Secure</FastSecureText>
       </ExpandableLabelLeft>
       <ExpandableLabelRightAccent>
-        Across V4. More Chains Faster. <Across width="16" height="16" />
+        Across V4 <Across width="16" height="16" />
       </ExpandableLabelRightAccent>
     </>
   );
