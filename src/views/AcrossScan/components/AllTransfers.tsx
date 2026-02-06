@@ -57,9 +57,15 @@ export function AllTransfers() {
 
   const clearFilters = useCallback(() => {
     setFilters({});
+    setStatusFilter("all");
+    setWalletAddressInput("");
+    setWalletAddressFilter("");
   }, []);
 
-  const hasActiveFilters = Object.keys(filters).length > 0;
+  const hasActiveFilters =
+    Object.keys(filters).length > 0 ||
+    statusFilter !== "all" ||
+    walletAddressFilter.trim().length > 0;
 
   const {
     currentPage,
@@ -86,7 +92,7 @@ export function AllTransfers() {
   const { isLiveMode, setIsLiveMode, isEnabled } = useLiveMode({
     refetchFn: depositsQuery.refetch,
     refetchInterval: LIVE_REFETCH_INTERVAL,
-    enabled: isFirstPage && !isFiltering,
+    enabled: isFirstPage,
     isLoading: depositsQuery.isLoading,
     isFetching: depositsQuery.isFetching,
   });
@@ -142,16 +148,14 @@ export function AllTransfers() {
             evmAddress={accountEVM}
             svmAddress={accountSVM?.toString()}
           />
-          <RightControls>
-            <StatusFilter value={statusFilter} onChange={setStatusFilter} />
-            <LiveToggle
-              isLiveMode={isLiveMode}
-              onToggle={setIsLiveMode}
-              disabled={!isEnabled}
-            />
-          </RightControls>
+          <LiveToggle
+            isLiveMode={isLiveMode}
+            onToggle={setIsLiveMode}
+            disabled={!isEnabled}
+          />
         </ControlsRow>
         <FiltersRow>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           <ChainFilter
             label="Origin"
             value={filters.originChainId}
@@ -283,17 +287,6 @@ const ControlsRow = styled.div`
   }
 `;
 
-const RightControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: space-between;
-  }
-`;
-
 const FiltersRow = styled.div`
   display: flex;
   align-items: center;
@@ -307,17 +300,17 @@ const ClearButton = styled.button`
   align-items: center;
   padding: 0 14px;
   height: 40px;
-  background: transparent;
+  background: ${COLORS.aqua};
   border-radius: 8px;
-  border: 1px solid ${COLORS["grey-400"]};
-  color: ${COLORS["grey-400"]};
+  border: none;
+  color: ${COLORS["black-900"]};
   font-size: 14px;
   font-family: Barlow, sans-serif;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 
   &:hover {
-    color: ${COLORS.white};
-    border-color: ${COLORS.white};
+    opacity: 0.9;
   }
 `;
