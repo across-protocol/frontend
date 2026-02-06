@@ -7,7 +7,6 @@ import {
   LifiToken,
 } from "hooks/useAvailableCrosschainRoutes";
 import {
-  CHAIN_IDs,
   ChainInfo,
   COLORS,
   getChainInfo,
@@ -38,16 +37,9 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { isTokenUnreachable } from "./isTokenUnreachable";
 import { useTrackChainSelected } from "./useTrackChainSelected";
 import { useTrackTokenSelected } from "./useTrackTokenSelected";
+import { usePopularChains } from "hooks/usePopularChains";
 
 const destinationOnlyChainIds = Object.keys(INDIRECT_CHAINS).map(Number);
-
-const popularChains = [
-  CHAIN_IDs.MAINNET,
-  CHAIN_IDs.BASE,
-  CHAIN_IDs.UNICHAIN,
-  CHAIN_IDs.ARBITRUM,
-  CHAIN_IDs.SOLANA,
-];
 
 const popularTokens = [
   TOKEN_SYMBOLS_MAP.USDC.symbol,
@@ -136,6 +128,7 @@ export function ChainTokenSelectorModal({
 }: Props) {
   const crossChainRoutes = useEnrichedCrosschainBalances();
   const { isMobile } = useCurrentBreakpoint();
+  const popularChains = usePopularChains();
 
   const [selectedChain, setSelectedChain] = useState<number | null>(
     currentToken?.chainId ?? popularChains[0]
@@ -284,7 +277,7 @@ export function ChainTokenSelectorModal({
       popular: popularChainsData,
       all: allChainsData,
     } as DisplayedChains;
-  }, [chainSearch, crossChainRoutes, isOriginToken]);
+  }, [chainSearch, crossChainRoutes, isOriginToken, popularChains]);
 
   return isMobile ? (
     <MobileModal
