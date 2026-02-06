@@ -1,22 +1,22 @@
-import { getChainInfo } from "utils/constants";
-import { getConfig } from "utils/config";
 import { Text } from "components/Text";
 import { formatUnitsWithMaxFractions, shortenAddress } from "utils/format";
 import { CopyableAddress } from "./CopyableAddress";
 import { CopyableText } from "./CopyableText";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
+import { useTokenFromAddress } from "hooks/useToken";
 import {
-  SectionCard,
-  SectionHeader,
   ChainBadge,
   ChainIcon,
-  HeaderRight,
-  ExplorerLinkButton,
   DetailRowGroup,
   DetailRowItem,
+  ExplorerLinkButton,
+  HeaderRight,
+  SectionCard,
+  SectionHeader,
   TokenDisplay,
   TokenIcon,
 } from "./TransactionSection.styles";
+import { getChainInfo } from "utils/constants";
 
 type TransactionDestinationSectionProps = {
   deposit: any;
@@ -33,11 +33,10 @@ export function TransactionDestinationSection({
   formatTimestamp,
   explorerLink,
 }: TransactionDestinationSectionProps) {
-  const config = getConfig();
   const destinationChain = getChainInfo(destinationChainId);
-  const outputToken = config.getTokenInfoByAddressSafe(
-    destinationChainId,
-    deposit.outputToken
+  const outputToken = useTokenFromAddress(
+    deposit.outputToken,
+    destinationChainId
   );
 
   return (

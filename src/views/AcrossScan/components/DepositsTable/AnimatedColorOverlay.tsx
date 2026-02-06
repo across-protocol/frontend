@@ -2,12 +2,10 @@ import styled from "@emotion/styled";
 import { AnimatePresence, motion } from "framer-motion";
 import { COLORS } from "utils/constants";
 
-type AnimationProps = {
-  initial?: Record<string, any>;
-  animate?: Record<string, any>;
-  exit?: Record<string, any>;
-  transition?: Record<string, any>;
-};
+type AnimationProps = Pick<
+  React.ComponentProps<typeof motion.div>,
+  "initial" | "animate" | "exit" | "transition"
+>;
 
 type OverlayConfig = {
   depositId: string;
