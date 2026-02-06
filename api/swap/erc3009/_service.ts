@@ -77,11 +77,16 @@ export async function handleErc3009Swap(
       const { authStart: _authStart, authDeadline: _authDeadline } =
         context.extendedParams ?? {};
 
-      const authStart = _authStart ?? sdk.utils.getCurrentTime();
-      const authDeadline =
-        (_authDeadline ?? _authStart)
-          ? authStart + DEFAULT_AUTH_DEADLINE_OFFSET
-          : sdk.utils.getCurrentTime() + DEFAULT_AUTH_DEADLINE_OFFSET;
+      const now = sdk.utils.getCurrentTime();
+      const authStart = _authStart ?? now;
+
+      // Use current time when authStart is 0 so we never calculate a relative duration.
+      const userSuppliedAuth = (_authDeadline ?? _authStart) !== undefined;
+      const deadlineBase =
+        userSuppliedAuth && authStart !== 0 ? authStart : now;
+      const authDeadline = userSuppliedAuth
+        ? deadlineBase + DEFAULT_AUTH_DEADLINE_OFFSET
+        : now + DEFAULT_AUTH_DEADLINE_OFFSET;
 
       return bridgeStrategy.buildGaslessTx({
         quotes: context.crossSwapQuotes,
