@@ -26,7 +26,7 @@ import {
 } from "utils/sdk";
 import { getSVMRpc } from "utils/providers";
 import { isSignature } from "@solana/kit";
-import { RelayData } from "@across-protocol/sdk/dist/esm/interfaces";
+import { RelayData } from "@across-protocol/sdk/dist/esm/src/interfaces";
 import { BigNumber } from "ethers";
 import { SvmSpokeClient } from "@across-protocol/contracts";
 import { hexlify } from "ethers/lib/utils";

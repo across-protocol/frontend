@@ -53,7 +53,7 @@ import {
   encodeMakeCallWithBalanceCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
-import { Logger } from "@across-protocol/sdk/dist/types/relayFeeCalculator";
+import { Logger } from "@across-protocol/sdk/dist/types/src/relayFeeCalculator";
 import { calculateSwapFees } from "./_swap-fees";
 import { KNOWN_CHAIN_IDS, CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../_constants";
 import { assertValidAddressChainCombination } from "./_validations";
