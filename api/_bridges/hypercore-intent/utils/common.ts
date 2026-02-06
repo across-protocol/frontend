@@ -32,7 +32,7 @@ export function getBridgeableInputToken(
   outputToken: Token
 ): Token | undefined {
   const tokenDef = BRIDGEABLE_INPUT_TOKEN_PER_OUTPUT_TOKEN[outputToken.symbol];
-  const address = tokenDef.addresses[originChainId];
+  const address = tokenDef?.addresses[originChainId];
 
   if (!address) return undefined;
 
