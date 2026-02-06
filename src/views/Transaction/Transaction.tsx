@@ -127,13 +127,21 @@ export default function Transaction() {
   }, [isLoading]);
 
   if (showLoading) return <CenteredMessage title="Loading transaction..." />;
-  if (error)
+  if (error) {
+    const is404 =
+      "response" in error &&
+      (error as { response?: { status?: number } }).response?.status === 404;
     return (
       <CenteredMessage
-        title="Error loading transaction"
-        error={String(error)}
+        title={is404 ? "Transaction not found" : "Error loading transaction"}
+        error={
+          is404
+            ? "This transaction has not been found within the Across ecosystem"
+            : String(error)
+        }
       />
     );
+  }
   if (!depositData) {
     // If we have no data and not loading, it means the transaction wasn't found
     if (!isLoading) {
