@@ -29,10 +29,11 @@ type SponsorshipRoutingRule = RoutingRule<SponsorshipEligibilityData>;
 const SPONSORSHIP_ROUTING_RULES: Record<string, SponsorshipRoutingRule[]> = {
   "*:USDT-SPOT": [
     {
-      name: "any-usdt-spot-non-sponsored",
+      name: "intents-any-usdt-spot-non-sponsored",
       reason:
-        "Non-sponsored route to USDT-SPOT (enables A2B flows like WETH → USDT-SPOT)",
-      shouldApply: (data) => data.isHyperCoreIntentSupported,
+        "Non-sponsored route to USDT-SPOT via intents (enables A2B flows like WETH → USDT-SPOT)",
+      shouldApply: (data) =>
+        data.isHyperCoreIntentSupported && !data.isMintBurnThresholdMet,
       getStrategy: () =>
         getHyperCoreIntentBridgeStrategy({
           isEligibleForSponsorship: false,
