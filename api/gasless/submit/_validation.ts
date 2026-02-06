@@ -23,14 +23,15 @@ const EIP712DomainSchema = type({
   verifyingContract: validEvmAddress(),
 });
 
+const EIP712TypeMemberSchema = object({
+  name: string(),
+  type: string(),
+});
+
 const ReceiveWithAuthorizationEIP712Schema = type({
   types: object({
-    ReceiveWithAuthorization: array(
-      object({
-        name: string(),
-        type: string(),
-      })
-    ),
+    EIP712Domain: optional(array(EIP712TypeMemberSchema)),
+    ReceiveWithAuthorization: array(EIP712TypeMemberSchema),
   }),
   domain: EIP712DomainSchema,
   primaryType: literal("ReceiveWithAuthorization"),
